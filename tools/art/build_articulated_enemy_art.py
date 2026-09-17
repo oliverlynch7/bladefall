@@ -123,7 +123,7 @@ def humanoid(name):
   if name!='warden':
    ico((-.34,-.09,.53),(.155,.048,.235),0,'armL')
    box((-.34,-.146,.53),(.03,.022,.31),3,'armL')
-  blade(big=name in {'warden','siegeknight'})
+  blade(big=name in {'warden','siegeknight'},b='weapon' if name=='warden' else 'armR')
   if name=='warden':cape('853d42',.32)
  elif name in {'grunt','revenant','goblin','bones'}:
   blade(x=.28,z=.29)
@@ -140,8 +140,8 @@ def humanoid(name):
    cone((s*.09,0,.93),(s*.20,.015,1.16),.045,.025,0,'head')
    spike((s*.18,.015,1.10),(s*.29,-.02,1.19),.026,2)
    spike((s*.22,0,.76),(s*.37,.04,.93),.08,0,('upperL' if s<0 else 'upperR') if articulated else ('armL' if s<0 else 'armR'))
-  cone((.33,-.05,.23),(.33,-.05,.80),.035,.025,0,'armR')
-  ico((.33,-.05,.82),(.19,.13,.12),1,'armR')
+  cone((.33,-.05,.23),(.33,-.05,.80),.035,.025,0,'weapon')
+  ico((.33,-.05,.82),(.19,.13,.12),1,'weapon')
   for x in [-.12,0,.12]:ico((x,.12,.7),(.10,.05,.09),3)
  elif name in {'colossus','marblecolossus'}:
   ico((0,-.15,.60),(.12,.06,.14),0); ico((0,-.207,.60),(.062,.016,.09),3)
@@ -161,9 +161,18 @@ def humanoid(name):
    ring((0,.12,.76),.34,3,'body')
  elif name=='archer':
   cape(0); spike((0,-.10,.84),(0,-.28,.79),.07,2)
-  for a,c in [((-.33,-.03,.07),(-.45,-.03,.25)),((-.45,-.03,.25),(-.46,-.03,.53)),((-.46,-.03,.53),(-.33,-.03,.72))]:cone(a,c,.022,.018,2,'armL')
-  cone((-.33,-.03,.07),(-.33,-.03,.72),.004,.004,3,'armL',4)
-  cone((-.33,-.07,.36),(.29,-.07,.36),.01,.01,2,'armR',4)
+  x=-.265
+  for a,c in [((x,-.04,.06),(x,-.15,.21)),((x,-.15,.21),(x,-.15,.51)),((x,-.15,.51),(x,-.04,.66))]:cone(a,c,.022,.018,2,'bow')
+  # Each string half has one end fixed to the bow and one following the nock.
+  nock=(.265,-.04,.36)
+  for tip in [(x,-.04,.06),(x,-.04,.66)]:
+   o=cone(tip,nock,.003,.003,3,'bow',4)
+   pull=o.vertex_groups.new(name='nock')
+   for v in o.data.vertices:
+    if (v.co-Vector(nock)).length<(v.co-Vector(tip)).length:
+     o.vertex_groups['bow'].remove([v.index]);pull.add([v.index],1,'REPLACE')
+  cone(nock,(.265,-.55,.36),.008,.008,2,'nock',4)
+  spike((.265,-.55,.36),(.265,-.62,.36),.023,2,'nock')
  elif name in {'emberling','frostling','toxling','blinkstalker'}:
   for s in [-1,1]:spike((s*.09,0,.94),(s*.17,.025,1.1),.07,3)
   for s,b in [(-1,'armL'),(1,'armR')]:
@@ -296,10 +305,13 @@ def rig_and_export(name):
    origins['arm'+side]=(sign*(w+.035),0,.68)
    origins['forearm'+side]=(sign*(w+.06),-.0175,.53)
    origins['shin'+side]=(sign*.105,0,.245)
+ if name in {'brute','warden'}:origins['weapon']=(.33,-.05 if name=='brute' else -.09,.36)
+ if name=='archer':
+  origins['bow']=(-.265,-.04,.36);origins['nock']=(.265,-.04,.36)
  if name=='mimic':origins['head']=(0,.15,.41)
  for n,p in origins.items():
   b=arm.edit_bones.new(n);b.head=p;b.tail=Vector(p)+Vector((0,0,.1))
-  if n!='root':b.parent=arm.edit_bones[('arm'+n[-1]) if n.startswith('forearm') else ('leg'+n[-1]) if n.startswith('shin') else 'root' if n=='body' else 'body']
+  if n!='root':b.parent=arm.edit_bones['forearmL' if n=='bow' else 'forearmR' if n in {'nock','weapon'} else ('arm'+n[-1]) if n.startswith('forearm') else ('leg'+n[-1]) if n.startswith('shin') else 'root' if n=='body' else 'body']
  bpy.ops.object.mode_set(mode='OBJECT')
  mesh.parent=obj;mod=mesh.modifiers.new('Skin','ARMATURE');mod.object=obj
  obj.animation_data_create();bpy.context.scene.render.fps=24
@@ -349,10 +361,10 @@ def rig_and_export(name):
  for b in obj.pose.bones:b.rotation_euler=(0,0,0);b.location=(0,0,0);b.scale=(1,1,1)
  bpy.context.scene.frame_set(1);bpy.context.view_layer.update()
  bpy.ops.object.select_all(action='DESELECT');obj.select_set(True);mesh.select_set(True)
- path=OUT/(name+'.glb')
+ path=OUT/((name+'-v1980' if name in {'archer','brute','warden'} else name)+'.glb')
  bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=True,export_frame_range=False,export_nla_strips_merged_animation_name='Animation',export_optimize_animation_size=True,export_materials='EXPORT',export_yup=True)
  tris=sum(len(p.vertices)-2 for p in mesh.data.polygons)
- return {'type':name,'theme':THEME[name],'triangles':tris,'bytes':path.stat().st_size,'bones':len(origins),'clips':list(durations),'label':ROSTER[name].get('label',name.replace('colossus',' Colossus').replace('frost','Frost ').title())}
+ return {'type':name,'file':path.name,'theme':THEME[name],'triangles':tris,'bytes':path.stat().st_size,'bones':len(origins),'clips':list(durations),'label':ROSTER[name].get('label',name.replace('colossus',' Colossus').replace('frost','Frost ').title())}
 def build(name):
  global parts,palette,articulated
  bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)

@@ -1662,3 +1662,8 @@ Immediate red death flash and full-duration corpse fade, also visible in animati
 ## [Codex | 2026-09-16] v1.979.0-articulated-rigs
 
 22 humanoid enemies now have elbow/knee joints, segmented limbs and forearm-bound equipment. 14 bones and +160 triangles per appearance. Added knee lift during movement and joint bends for attack phases, plus boss posture adjustments. Original assets remain available in animation QA via rig selector. Weights, sampled deformation, browser roster, gameplay phase and pre-change save tests pass. Death cues preserved. Next: user QA and attack choreography refinement.
+
+
+## [Codex | 2026-09-17] v1.980.0-weapon-choreography
+
+Marksman bow draw now uses bow/nock attachments and a deforming string. Brute and Fallen have separate weapon orientation with supporting hands constrained to handles during strike poses. Clips are baked once per source and shared with animation QA. Contact/alignment, rig deformation, roster browser, live asset routes and previous-save checks pass. Next: QA and remaining enemy-specific choreography.

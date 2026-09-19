@@ -136,3 +136,8 @@
 - Abyss: banish 20 Shadelings, gather 5 Void Splinters, find the Rift Anchor
 - Palace: shatter 18 Marble Sentinels, find the Throne Antechamber, gather 5 Gilded Relics
 - Castle: (tower-clear kill quests + find the throne)
+
+
+## [Codex | 2026-09-19] Superseded story authority
+
+Oliver’s master canonical lore brief supersedes conflicting claims in this historical document. Read [STORY_CANON.md](STORY_CANON.md) before using or editing story content. In particular, Ian died naturally, his name is public knowledge, the King began as a mortal lord, and the old brother/fallen-Ian/cyclical-imprisonment story is no longer authoritative. Original text is retained for historical reference.

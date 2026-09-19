@@ -78,3 +78,8 @@ This reframes the whole first half: you're not exploring a dungeon, you're **wal
 2. **Boss lines** — one line each on the health bar, or do you want a fuller "boss appears" card?
 3. **The Warden twist** — I think it's the best thing in here, but it does make one of your existing bosses a story character. Good?
 4. Zone cards: on every visit, or only the first time you enter a zone?
+
+
+## [Codex | 2026-09-19] Superseded story authority
+
+Oliver’s master canonical lore brief supersedes conflicting claims in this historical document. Read [STORY_CANON.md](STORY_CANON.md) before using or editing story content. In particular, Ian died naturally, his name is public knowledge, the King began as a mortal lord, and the old brother/fallen-Ian/cyclical-imprisonment story is no longer authoritative. Original text is retained for historical reference.

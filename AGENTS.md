@@ -67,3 +67,7 @@ Deferred (needs Oliver): weapon 3D rebuild, `docs/ICON_ART_GPT_PROMPT.md` menu i
   call `playerAttack()`, pump ~20 steps, read hp delta. Overlays (loot/level-up/subclass) pause
   combat — dismiss them or the bot stalls. Filter enemies `!dead && hp>0 && !dummy && !practice`.
 - `docs/` holds all work orders + design docs. `UPDATE_ROADMAP.md` is the shipped-history.
+
+
+## Story authority (2026-09-19)
+Before story, quest, dialogue, faction or ending work, read docs/STORY_CANON.md and docs/STORY_CANON_MIGRATION.md. Oliver’s master lore brief overrides conflicting older story bibles and old directions above. Keep unresolved canon open. All player-facing writing must use clear, middle-school-readable language.

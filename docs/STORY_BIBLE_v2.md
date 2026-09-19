@@ -218,3 +218,8 @@ You carry them up with you, in the only way the living ever can.
 - **Ian's name is sacred.** It appears exactly once before the ending sequence: never. Guard it.
 - **Hope is earned and quiet.** The ending is a mercy, not a parade. One waystone catching light,
   not fireworks.
+
+
+## [Codex | 2026-09-19] Superseded story authority
+
+Oliver’s master canonical lore brief supersedes conflicting claims in this historical document. Read [STORY_CANON.md](STORY_CANON.md) before using or editing story content. In particular, Ian died naturally, his name is public knowledge, the King began as a mortal lord, and the old brother/fallen-Ian/cyclical-imprisonment story is no longer authoritative. Original text is retained for historical reference.

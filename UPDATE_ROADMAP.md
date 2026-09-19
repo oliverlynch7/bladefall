@@ -1667,3 +1667,10 @@ Immediate red death flash and full-duration corpse fade, also visible in animati
 ## [Codex | 2026-09-17] v1.980.0-weapon-choreography
 
 Marksman bow draw now uses bow/nock attachments and a deforming string. Brute and Fallen have separate weapon orientation with supporting hands constrained to handles during strike poses. Clips are baked once per source and shared with animation QA. Contact/alignment, rig deformation, roster browser, live asset routes and previous-save checks pass. Next: QA and remaining enemy-specific choreography.
+
+
+## [Codex | 2026-09-19] v1.981.0 — Approved update queue
+
+Implemented the approved companion/summon, save-resume, elemental projectile, paladin palette, skill-identity, mirror, NPC, class-equipment, trial-starter, weapon-palette, transparent-icon, loading, moving-attack, dash-echo, HUD and New Game+ updates. Existing player models and weapon fitting remain. Raise the Dead carries the actual slain non-boss enemy silhouette into allied combat. Golden Smite strikes from above. Twenty cleaned icons ship at 256px; orb rendering is bounded and instanced.
+
+Verified in muted real-browser WebGL: pre-change save retention and paused autosave; all 16 starter families; class swap/inventory preservation and off-class bag blocking; raised goblin attacks and expiry; five NPCs; mirror/paladin screenshots; 128 effect-profile geometry coverage and visual spot checks; 24 leg animation tracks; dash appearance refresh; delayed loading with frozen simulation; NG+ preservation and reload. See docs/APPROVED_QUEUE_2026-09-17.md for evidence and limits, and tools/qa for repeatable checks.

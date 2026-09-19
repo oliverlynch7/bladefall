@@ -1,3 +1,6 @@
+import {syncNpcs} from './npc3d.js?v=1981s';
+import {syncProjectiles} from './projectile3d.js?v=1981s';
+import {syncCompanions} from './companion3d.js?v=1981s';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 
@@ -22,9 +25,9 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=1980';
-import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=1980';
-import { PROP3D, syncProps } from './prop3d.js?v=1980';
+import { WORLD3D, syncWorld } from './world3d.js?v=1981s';
+import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=1981s';
+import { PROP3D, syncProps } from './prop3d.js?v=1981s';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated
 
@@ -261,7 +264,7 @@ const CLASS_SKINS = {
   reaper:       { id:'c_reaper',       metal:'#7a2028', leather:'#1a1418', lift:1.22 },
   ninja:        { id:'c_ninja',        metal:'#454e60', leather:'#16181f', lift:1.24 },
   // Cleric body
-  paladin:      { id:'c_paladin',      metal:'#e8c86a', leather:'#4a4032', lift:1.36 },
+  paladin:      { id:'c_paladin',      metal:'#eee4c9', leather:'#a18550', cloth:'#344d68', lift:1.08 },
   // Monk body
   monk:         { id:'c_monk',         metal:'#d8792a', leather:'#6a4a2c', lift:1.32 },
   // Ranger body
@@ -908,7 +911,9 @@ function clearWeapon(actor){
      never accumulate again. Cheap — it is a handful of nodes. */
   const strays = [];
   actor.root.traverse(o => { if(o.userData && o.userData._weap) strays.push(o); });
-  for(const o of strays){ if(o.parent) o.parent.remove(o); }
+  const paintMaterials=new Set();
+  for(const o of strays){for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m?.userData?._weaponPaint)paintMaterials.add(m);if(o.parent)o.parent.remove(o);}
+  for(const m of paintMaterials)m.dispose();
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
@@ -1164,6 +1169,24 @@ function equipForClass(opts){
   });
 }
 
+const weaponPaletteCache=new Map();
+function colorWeapon(holder,w){
+ if(!holder?._weap||!w)return;
+ const tint=({fire:'#e77f45',ice:'#a2dce8',poison:'#91bc61',arcane:'#ad88d2',holy:'#e4c16b',void:'#8971b4'})[w.el]||w.blade||'#d8dce0',key=w.art+'|'+tint;
+ if(holder._paintNode===holder._weap&&holder._paintKey===key)return;holder._paintNode=holder._weap;holder._paintKey=key;
+ holder._weap.traverse(o=>{if(!o.isMesh)return;const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=m.userData._weaponPaint?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
+ if(src?.image?.width){const k=src.uuid+'|'+tint;let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint);for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if(h[2]>.35&&(h[1]<.28||h[0]>65)){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
+}
+function movingCombatLegs(p,A,dt){
+ if(A.local)HERO3D.locomotionOverlay=null;
+ if(!p.onGround||p.dead||p.dodgeTimer>0||Math.hypot(p.vx||0,p.vz||0)<20||!(p.atkTimer>0||p.combatPose?.remaining>0))return;
+ const clip=clips.Run||clips.Walk;if(!clip||!A.mixer)return;
+ if(A.legRoot!==A.mixer.getRoot()){A.legRoot=A.mixer.getRoot();A.legTime=0;A.legTracks=clip.tracks.filter(t=>/UpperLeg|LowerLeg|Foot|PoleTarget/.test(t.name)).map(t=>({binding:THREE.PropertyBinding.create(A.legRoot,t.name),sample:t.createInterpolant()}));}
+ A.legTime=(A.legTime+dt*Math.max(.5,Math.hypot(p.vx||0,p.vz||0)/200))%clip.duration;
+ for(const t of A.legTracks)t.binding.setValue(t.sample.evaluate(A.legTime),0);
+ if(A.local)HERO3D.locomotionOverlay={clip:clip.name,tracks:A.legTracks.length};
+}
+
 let _lastW = 0, _lastH = 0;
 let _loaded = {}, _classNow = null;
 
@@ -1215,14 +1238,14 @@ function repaintTexture(srcTex, skin){
   for(let i=0;i<px.length;i+=4){
     if(px[i+3] < 8) continue;
     const hsv = rgb2hsv(px[i],px[i+1],px[i+2]);
-    const lum = Math.min(1.9, (0.35 + hsv[2]*1.25) * lift);
+    const lum = skin.id==='c_paladin' ? .16+hsv[2]*.84 : Math.min(1.9, (0.35 + hsv[2]*1.25) * lift);
     /* SKIN GUARD - see the matching note in the slice. Skin is a warm mid-value hue that collides
        with both the low-saturation "metal" test and the warm-dark "leather" test, so faces and
        hands were being repainted with the outfit. Excluded explicitly; only brightness passes. */
     if(hsv[0]>=8 && hsv[0]<=54 && hsv[1]>=0.12 && hsv[1]<=0.62 && hsv[2]>=0.45){
       px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift;
     }
-    else if(hsv[1] < 0.20) tintPixel(px,i,metal,lum);
+    else if(hsv[1] < 0.20) tintPixel(px,i,skin.id==='c_paladin'&&hsv[2]<.62?hexRGB(skin.cloth):metal,lum);
     else if(hsv[0] >= 12 && hsv[0] <= 52 && hsv[2] < 0.52) tintPixel(px,i,leather,lum);
     /* SATURATED GARMENT REMAP. Without this, three Rogue classes all stayed the same red and the
        Wizard classes all stayed the same blue: the old rules only replaced LOW-saturation pixels
@@ -1232,7 +1255,7 @@ function repaintTexture(srcTex, skin){
        Saturated non-skin pixels now take the palette's HUE while keeping their own shading, so
        folds, trim and painted detail survive the recolour instead of flattening to one flat fill. */
     else {
-      const tgt = rgb2hsv(...(hsv[2] < 0.42 ? leather : metal));
+      const tgt = rgb2hsv(...(skin.cloth ? hexRGB(skin.cloth) : hsv[2] < 0.42 ? leather : metal));
       const nv = Math.min(1, hsv[2] * lift);
       const ns = Math.min(1, hsv[1] * 0.45 + tgt[1] * 0.6);
       const out = hsv2rgb(tgt[0], ns, nv);
@@ -1259,12 +1282,14 @@ function applyClassSkin(){
   if(!actor) return null;
   let cls = 'warrior';
   try { const m = window.__BF_META && window.__BF_META(); if(m && m.classId) cls = m.classId; } catch(e){}
-  const wantBase = (HERO3D.skinId || 'base') === 'base';
+  const wantBase = (HERO3D.skinId || 'base') === 'base' && cls!=='paladin';
   const skin = CLASS_SKINS[cls];
   if(!wantBase && !skin) return null;
   let painted = 0;
   actor.traverse(o => {
     if(!o.isMesh || o.userData._eye || o.userData._weap) return;
+    if(cls==='paladin'&&/^Head(?:_|$)/.test(o.name))return;
+    if(cls==='paladin'&&!o.userData._paletteIndependent){o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();o.userData._paletteIndependent=true;}
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     for(const mm of mats){
       if(!mm) continue;
@@ -1751,6 +1776,9 @@ export function drawHero3D(p, t){
       syncWorld(scene);
       syncCombatArt(scene,cam);
       syncMobs(scene, dt);
+      syncCompanions(scene,dt);
+      syncNpcs(scene,dt);
+  syncProjectiles(scene);
       syncProps(scene, dt);           // chests and the other objects you interact with
       syncClass();                    // respec or a different save changes the body
       reapRigs(peerCap());
@@ -1780,6 +1808,9 @@ export function drawHero3D(p, t){
 
     playFor(p, anim);
     if(anim.mixer) anim.mixer.update(dt);
+    movingCombatLegs(p,anim,dt);
+    if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
+    else if(rec)colorWeapon(rec.holder,p.weapon);
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
        shared context its internal state cache is reset every frame, so being explicit removes a
        variable while diagnosing the missing skinned body. */
@@ -1798,7 +1829,9 @@ export function drawHero3D(p, t){
     if(window.__KEEP_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__KEEP_SHADOW_DIRTY=false;}
     if(window.__HOLLOW_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HOLLOW_SHADOW_DIRTY=false;}
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
-    renderer.render(scene, cam);
+    const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
+    if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
+    try{renderer.render(scene, cam);}finally{for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;
@@ -1943,13 +1976,15 @@ window.__hero3dAt = (key, o) => {
   if(!scene || !actor || !HERO3D.ready) return false;
   try {
     let rec = _poses.get(key);
+    const appearance=actor.uuid+'|'+(HERO3D.skin?.skinId||'')+'|'+(localWeaponHolder()?._paintKey||'')+'|'+(localWeaponHolder()?._weap?.uuid||'');
+    if(rec&&rec.appearance!==appearance){rec.node.removeFromParent();if(rec.mats)for(const m of rec.mats)m.dispose();rec.node.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.dispose();});_poses.delete(key);rec=null;}
     if(!o){ if(rec) rec.node.visible = false; return false; }
     if(!rec){
       const node = SkeletonUtils.clone(actor);
       node.name = '__heroPose:' + key;
       node.traverse(n => { if(n.isMesh){ n.frustumCulled = false; n.castShadow = false; } });
       scene.add(node);
-      rec = { node, ghosted: false };
+      rec = { node, ghosted: false, appearance };
       _poses.set(key, rec);
     }
     /* GHOST MODE - the afterimage trail.
@@ -1967,7 +2002,7 @@ window.__hero3dAt = (key, o) => {
           c.transparent = true; c.depthWrite = false;
           /* Emissive rather than plain alpha: a flat translucent copy reads as a rendering fault,
              a glowing one reads as an afterimage. */
-          if(c.emissive) c.emissive.setHex(0x6aa8ff);
+          // Preserve the avatar's own material colors in its afterimage.
           return c;
         });
         n.material = Array.isArray(n.material) ? cl : cl[0];
@@ -1981,6 +2016,7 @@ window.__hero3dAt = (key, o) => {
         if(m.emissiveIntensity != null) m.emissiveIntensity = 0.35 + a * 0.9;
       }
     }
+    actor.traverse(n=>{if(n.isBone){const b=rec.node.getObjectByName(n.name);if(b){b.position.copy(n.position);b.quaternion.copy(n.quaternion);b.scale.copy(n.scale);}}});
     rec.node.visible = true;
     const sc = HERO3D.scale * (o.scale != null ? o.scale : 1);
     rec.node.scale.setScalar(sc);

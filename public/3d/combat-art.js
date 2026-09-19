@@ -73,7 +73,8 @@ function render(g,d){
   const pr=e.profile,theme=themes[pr.cls],kind=theme[2],hot=theme[1],col=({fire:'#ff8845',ice:'#87ddff',arcane:'#cd9bff',poison:'#a9df69',void:'#b48be8',holy:'#ffe6a1'})[pr.element]||theme[0],ultimate=pr.slot===3,scale=ultimate?1.35:1,r=e.radius?(12+v*(e.radius-12)):(24+v*48)*scale;
   pushM();mv(e.x,e.y+4,e.z);rotY(e.yaw);
   const f=pr.form;
-  if(['slash','cross','spiral','execute','claw','flurry'].includes(f)){
+  const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot});
+  if(custom){}else if(['slash','cross','spiral','execute','claw','flurry'].includes(f)){
    const count=f==='flurry'?5:f==='cross'?2:f==='spiral'?3:1;
    for(let j=0;j<count;j++){
     pushM(); if(f==='cross')rotX(j?-.6:.6); else if(f==='execute')rotX(Math.PI/2);
@@ -109,7 +110,7 @@ function render(g,d){
    for(let j=0;j<6;j++)motif(kind,r,12+(f==='storm'?60*(1-v):v*18),j*Math.PI/3+q,hot,a*.8);
   }
   // Class signatures have distinct silhouettes, not just different tint values.
-  if(!pr.weapon && (ultimate || ['ward','summon','vortex','storm','crown'].includes(f))){
+  if(!custom&&!pr.weapon && (ultimate || ['ward','summon','vortex','storm','crown'].includes(f))){
    const R=Math.min(r*.7,90),h=18+v*25;
    if(kind==='clock'){
     arc(R,8,0,Math.PI*2,col,a*.7,1,32);
@@ -146,7 +147,7 @@ function render(g,d){
     for(let j=0;j<6;j++)motif(kind,R,h,j*Math.PI/3,hot,a);
    }
   }
-  if(ultimate)for(let j=0;j<8;j++)motif(kind,25+v*65,14+Math.sin(q*Math.PI)*30,j*Math.PI/4,hot,a*.7);
+  if(ultimate&&!custom)for(let j=0;j<8;j++)motif(kind,25+v*65,14+Math.sin(q*Math.PI)*30,j*Math.PI/4,hot,a*.7);
   popM();
  }
  // Projectile trails follow velocity and height; they are never collision volumes.

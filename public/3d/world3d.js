@@ -42,10 +42,10 @@ import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hol
 /* Same specifier hero3d uses. Importing 'three' via the importmap could resolve to a
    SECOND module instance, and two THREE copies break every instanceof check silently. */
 import * as THREE from './three.module.js';
-import { clearMobs } from './mob3d.js?v=1980';
-import { clearProps } from './prop3d.js?v=1980';
+import { clearMobs } from './mob3d.js?v=1981s';
+import { clearProps } from './prop3d.js?v=1981s';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { loadModelAnyExt } from './loadmodel.js';
+import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
 export const WORLD3D = {
   /* ON by default, same reasoning as HERO3D. A build fault sets this back to false and logs, so
@@ -2000,6 +2000,7 @@ export function syncWorld(scene){
   if(!world || !world.deco) return false;
   const sig = signature(world);
   if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
+  WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
   const customDeep=!customPortal&&wantsDeep(world);

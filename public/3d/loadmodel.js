@@ -28,7 +28,7 @@ const _load = url => new Promise((res, rej) => _loader.load(url, res, undefined,
 
 /* Keyed on the LAST folder segment ('village/'), not the full path. An earlier attempt seeded
    'village/' while deriving '../slice3d/assets/village/', so the seed never matched a lookup. */
-const _extMemo = new Map([['village/', '.gltf'], ['qprops/', '.gltf']]);
+const _extMemo = new Map([['village/', '.gltf'], ['qprops/', '.gltf'], ['chars/', '.gltf']]);
 
 export function modelExtFor(base){
   const cut = base.lastIndexOf('/');

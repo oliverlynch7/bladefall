@@ -884,17 +884,17 @@
   .hudportrait{display:none}
   #pethud{display:none;position:absolute;z-index:5;pointer-events:none}
   @media (min-width:900px) and (pointer:fine){
-    #hud{left:18px;top:18px;padding:0;width:560px;filter:drop-shadow(0 15px 20px #000a)}
+    #hud{left:18px;top:18px;padding:0;width:min(680px,calc(100vw - 36px));filter:drop-shadow(0 15px 20px #000a)}
     .hudpanel{min-height:178px;padding:22px 24px 18px 126px;border:1px solid #9b6c2c;border-radius:4px 18px 18px 4px;overflow:visible;clip-path:polygon(0 7%,6% 0,94% 0,100% 18%,100% 82%,94% 100%,7% 100%,0 90%);background:radial-gradient(circle at 20% 18%,rgba(115,57,177,.17),transparent 31%),linear-gradient(145deg,rgba(20,18,21,.8),rgba(4,5,8,.82));box-shadow:inset 0 0 0 2px #090a0e,inset 0 0 0 3px #513817,inset 0 0 34px #000b,0 14px 38px #000b}
     .hudpanel::before{left:8%;right:7%;height:3px;background:linear-gradient(90deg,transparent,#69451b,#e6ad4d,#fff0a6,#8c5b20,transparent);box-shadow:0 0 12px #d8953d66}
     .hudpanel::after{inset:7px;border:1px solid #c8944338;border-radius:2px 12px 12px 2px;clip-path:polygon(0 8%,5% 0,95% 0,100% 18%,100% 82%,95% 100%,5% 100%,0 92%)}
     .hudportrait{display:block;position:absolute;left:-8px;top:-8px;width:116px;height:116px;border-radius:50%;background:radial-gradient(circle,#241f2f 15%,#090a0d 58%,#020305 72%);border:2px solid #b07b32;box-shadow:0 0 0 4px #08090c,0 0 0 6px #53391a,0 7px 20px #000,0 0 22px #723eb144;z-index:3}
     /* (removed the rotated gold/purple diamond filigree — it overlapped the name text) */
     .hudportrait img{position:absolute;inset:13px;width:90px;height:90px;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 5px #000)}
-    #hud .meta{display:grid;grid-template-columns:minmax(0,1fr) 164px;gap:18px;margin:0 0 15px;min-height:38px;align-items:start}
+    #hud .meta{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:24px;margin:0 0 15px;min-height:38px;align-items:start}
     #hud .left{display:grid;gap:2px;align-items:start}
-    #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}.hudplayername{font-size:15px}
-    #weapontag{display:block;max-width:235px;font-family:Georgia,serif;font-size:10px;line-height:1.3;letter-spacing:.055em;text-transform:uppercase;white-space:normal}
+    #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}.hudplayername{font-size:15px;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    #weapontag{display:block;max-width:330px;font-family:Georgia,serif;font-size:10px;line-height:1.3;letter-spacing:.055em;text-transform:uppercase;white-space:normal}
     #armortag{position:static;left:auto;top:auto;font-family:Georgia,serif;font-size:12px;color:#cbd3de;white-space:nowrap}
     #stagetag{position:absolute;left:auto;right:0;top:23px;max-width:164px;color:#d6b06c;font-family:Georgia,serif;font-size:8px;letter-spacing:.1em;white-space:nowrap;text-shadow:0 2px 5px #000}
     #goldtag{font-family:Georgia,serif;font-size:12px!important}
@@ -1017,7 +1017,9 @@
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./combat-art.js?v=1978"></script>
+<script src="./loading.js?v=1981s"></script>
+<script src="./skill-identity.js?v=1981s"></script>
+<script src="./combat-art.js?v=1981s"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script>
@@ -1030,7 +1032,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.980.0-weapon-choreography';
+const VERSION3D='1.981.0-approved-updates';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1045,7 +1047,8 @@ const MKEY=m=>'bladefall3d_'+SLOTPFX+m;
 function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
   let g={}; try{ g=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+'global')||'{}'); }catch(e){}
   let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
-    if(mv.hero||mv.gold||mv.zoneMax){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
+    if(mv.hero||mv.gold||mv.zoneMax||mv.run?.p){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
+  if(best?.run?.p) best={...best,hero:best.run.p};
   const cls=(best&&best.classId)||g.classId, has=best||cls||(g.achievements&&Object.keys(g.achievements).length);
   return has?{empty:false,cls,lvl:best&&best.hero?best.hero.level:1,name:(best&&best.heroName)||'Unnamed Warden',gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal,
     hero:(best&&best.hero)||null,skin:(best&&best.hero&&best.hero.skin)||g.selectedSkin||'knight',rank:(best&&best.classes&&cls&&best.classes[cls]&&best.classes[cls].rank)||1}:{empty:true};
@@ -1064,7 +1067,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -1105,11 +1108,12 @@ if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
 function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
 function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
-  persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }
+  persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv)); window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){ window.__saveStatus={ok:false,error:e.name,at:Date.now(),mode:MODE}; console.error('[save] Progress could not be stored',e); } } }
 // Continuous autosave: keep meta.run in sync with the live dive so a reload/auto-update NEVER loses progress.
 // Only snapshots normal dives (not hub/arena/trial/side); death still clears meta.run so roguelite rollback is intact.
 function autosaveRun(){ try{
-    if(typeof mode!=='undefined' && mode==='play' && G && G.p && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
+    if(typeof mode!=='undefined' && ['play','pause'].includes(mode) && G?.hub && G.p && !IN_ARENA) meta.hero=snapOf(G.p);
+    if(typeof mode!=='undefined' && ['play','pause','upgrade'].includes(mode) && G && G.p && !G.p.dead && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
       meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
       if(G.campaignLayout&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive)meta.run.campaign={zone:G.zone,area:G.area,qs:{...G.qs},revision:G.campaignLayout.revision,outskirtsNests:G.outskirtsNests||[]};
     }
@@ -1121,6 +1125,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!meta.arcadeOwned && (mv.arcadeOwned||mv.arcadeUnlocked||(mv.hubUpgrades&&mv.hubUpgrades.arcade))){
     meta.arcadeOwned=true; persistGlobal();
   }
+  meta.campaignNgHp=mv.campaignNgHp||1;meta.campaignNgDmg=mv.campaignNgDmg||1;
   meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
   meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
   meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{}; meta.perkV2=!!mv.perkV2;
@@ -1909,7 +1914,7 @@ const CLASSES={
     skills:[
       {id:'pal_bash',n:'Shield Bash',icon:skillIcon('paladin-shield-bash'),cd:6,rank:1,d:'Drive forward: damage + stun the first foe'},
       {id:'pal_taunt',n:'Taunt',icon:skillIcon('paladin-taunt'),cd:9,rank:2,d:'Pull nearby foes to you behind a shield'},
-      {id:'pal_guard',n:'Guard Up',icon:skillIcon('paladin-guard-up'),cd:14,rank:4,d:'Raise a holy shield that absorbs damage'},
+      {id:'pal_guard',n:'Guard Up',icon:skillIcon('paladin-guard-up'),cd:14,rank:4,d:'Raise a holy shield that absorbs damage. Briefly plant your feet (0.3s); dodge to cancel the stance.'},
       {id:'pal_laststand',n:'Last Stand',icon:skillIcon('paladin-last-stand'),cd:24,rank:7,d:'Stand firm: take almost no damage and heal'}]},
   necromancer:{disp:'Necromancer',icon:classIcon('necromancer'),attackStyle:'mage',earned:true,family:['staff','wand'],
     subs:[{id:'summoner',disp:'Summoner',blurb:'Command the dead — more and stronger minions.'},
@@ -1917,8 +1922,8 @@ const CLASSES={
     skills:[
       {id:'necro_summon',n:'Summon Skeletons',icon:skillIcon('necro-summon-skeletons'),cd:9,rank:1,d:'Raise a pack of skeletons to fight for you'},
       {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('necro-raise-the-dead'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
-      {id:'necro_wall',n:'Bone Wall',icon:skillIcon('necro-bone-wall'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
-      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('necro-army-of-the-dead'),cd:24,rank:7,d:'Call up a whole undead host at once'}]},
+      {id:'necro_wall',n:'Bone Wall',icon:skillIcon('necro-bone-wall'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage. Briefly plant your feet (0.3s); dodge to cancel the stance.'},
+      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('necro-army-of-the-dead'),cd:24,rank:7,d:'Call up a whole undead host at once. Briefly plant your feet (0.3s); dodge to cancel the stance.'}]},
   ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['dagger','sword','cross'],
     subs:[{id:'shadow',disp:'Shadow',blurb:'Evasion and stealth — strike unseen, slip away.'},
           {id:'bladefury',disp:'Blade Fury',blurb:'Speed and crits — a whirlwind of steel.'}],
@@ -1940,7 +1945,7 @@ const CLASSES={
      gets, so the fix costs nothing in character.
      NO FLINTLOCK: the pistol is class equipment now, always in his off hand, so listing it as loot
      would mean finding something you already have. That is what C4 was groping toward. */
-  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['sword','cross','javelin','axe'],
+  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['sword','cross','javelin','axe','flintlock'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
       {id:'pir_pierce',n:'Aimed Shot',icon:skillIcon('pirate-aimed-shot'),cd:5,rank:1,d:'A precise, piercing shot'},
@@ -2098,7 +2103,7 @@ const CLASS2={
     r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'The first hit of every fight deals no damage at all.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Judgement',d:'Your Sworn target takes double damage from your skills.'}},
     r4:{kind:'skill',slot:1, a:{id:'pal_taunt',n:'Taunt',cd:9,role:'Control',fx:'pal_taunt',d:'Pull nearby foes to you and brace behind a shield.'}, b:{id:'pal_ground',n:'Holy Ground',cd:10,role:'Group Damage',fx:'pal_ground',d:'Scorch every foe around you with holy light for 2.2x damage.'}},
     r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Spread',d:'Killing your Sworn target sets every enemy near it alight.'}},
-    r6:{kind:'skill',slot:2, a:{id:'pal_guard',n:'Guard Up',cd:14,role:'Defense',fx:'pal_guard',d:'Raise a holy shield that absorbs up to 50% of your max HP.'}, b:{id:'pal_burst',n:'Light Burst',cd:9,role:'Control',fx:'pal_burst',d:'A radiant burst: damage and slow every nearby foe.'}},
+    r6:{kind:'skill',slot:2, a:{id:'pal_guard',n:'Guard Up',cd:14,role:'Defense',fx:'pal_guard',d:'Raise a holy shield that absorbs up to 50% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.'}, b:{id:'pal_burst',n:'Light Burst',cd:9,role:'Control',fx:'pal_burst',d:'A radiant burst: damage and slow every nearby foe.'}},
     r7:{kind:'passive', a:{id:'pal_bounce',n:'Bounce Back',role:'Defense',d:'Damage you block is returned to whoever dealt it.'}, b:{id:'pal_heal',n:'Healing Light',role:'Sustain',d:'Every skill you cast heals the ally nearest you, or you if alone.'}},
     r8:{kind:'skill',slot:3, a:{id:'pal_laststand',n:'Last Stand',cd:24,role:'Defense',fx:'pal_laststand',d:'For 4s take almost no damage and heal each second.'}, b:{id:'pal_sky',n:'Sky Hammer',cd:22,role:'Burst',fx:'pal_sky',d:'Call a pillar of light down: heavy damage and knockback all around you.'}},
     r9:{kind:'passive', a:{id:'pal_will',n:"Guardian's Will",role:'Defense',d:'Take 15% less damage while below half HP.'}, b:{id:'pal_blessed',n:'Blessed Blade',role:'Reach',d:'Your oath can be sworn at any range — mark without closing.'}}
@@ -2108,11 +2113,11 @@ const CLASS2={
     cap:{name:'Lich', d:'+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once.'},
     r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'necro_bolt',n:'Plague Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'necro_bolt',d:'Rapid-fire bolts of necrotic plague (~2s, softer each).'}},
     r3:{kind:'passive', a:{id:'necro_legion',n:'Bone Legion',role:'Minions',d:'Summon one extra skeleton and your minions hit 20% harder.'}, b:{id:'necro_wither',n:'Withering',role:'Decay',d:'Enemies standing on a corpse cannot heal and rot slowly.'}},
-    r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Turn the nearest fresh corpse into a stronger risen fighter.'}, b:{id:'necro_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'necro_nova',d:'Detonate a burst of bone shards that slows nearby enemies.'}},
+    r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Raise your most recently slain nearby enemy as an undead ally.'}, b:{id:'necro_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'necro_nova',d:'Detonate a burst of bone shards that slows nearby enemies.'}},
     r5:{kind:'passive', a:{id:'necro_bond',n:'Grave Bond',role:'Sustain',d:'Each hit your minions land heals you a little.'}, b:{id:'necro_plague',n:'Plague',role:'Spread',d:'An enemy that dies while rotting infects everything near it.'}},
-    r6:{kind:'skill',slot:2, a:{id:'necro_wall',n:'Bone Wall',cd:14,role:'Defense',fx:'necro_wall',d:'Raise a shield of bone that absorbs up to 35% of your max HP.'}, b:{id:'necro_grip',n:'Death Grip',cd:13,role:'Control',fx:'necro_grip',d:'A skeletal grip implodes enemies inward and deals damage.'}},
+    r6:{kind:'skill',slot:2, a:{id:'necro_wall',n:'Bone Wall',cd:14,role:'Defense',fx:'necro_wall',d:'Raise a shield of bone that absorbs up to 35% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.'}, b:{id:'necro_grip',n:'Death Grip',cd:13,role:'Control',fx:'necro_grip',d:'A skeletal grip implodes enemies inward and deals damage.'}},
     r7:{kind:'passive', a:{id:'necro_undying',n:'Undying',role:'Defense',d:'A killing blow instead consumes a minion, if you have one.'}, b:{id:'necro_harvest',n:'Soul Harvest',role:'Sustain',d:'Kills restore an extra 8% of your max mana.'}},
-    r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field.'}, b:{id:'necro_storm',n:'Death Storm',cd:22,role:'Group Damage',fx:'necro_storm',d:'A storm of decay rages around you for 4s.'}},
+    r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance.'}, b:{id:'necro_storm',n:'Death Storm',cd:22,role:'Group Damage',fx:'necro_storm',d:'A storm of decay rages around you for 4s.'}},
     r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:'Keep more minions at once and they hit even harder.'}, b:{id:'necro_pest',n:'Pestilence',role:'Swarm',d:'Your minions leave a rotting trail wherever they walk.'}}
   },
   ninja:{ disp:'Ninja', icon:classIcon('ninja'),
@@ -2316,7 +2321,7 @@ let queueSubclass=false;
 function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
   if(fresh) cs=meta.classes[id]={xp:0,rank:1,sub:null,v2:1};
   if(cs.rank==null||cs.rank<1) cs.rank=1;
-  if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // legacy pre-v2 save: one-time reset (keeps rank 1)
+  if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.ch=cs.ch||{}; cs.sub=null; }   // migrate choices without erasing earned rank or XP
   return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
 /* ── C1/C2: OFF-CLASS WEAPONS ARE BLOCKED, AND THE BLOCK TEACHES ────────────
@@ -2476,7 +2481,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=11; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['axe','Notched Axe'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade'],beastmaster:['bow','Weathered Hunting Bow']};
 function fistsWeapon(){ const a=ARCHES.fist;   // the Monk's Bare Fists — a fixed, RARITY-LESS weapon (never rolled/scaled)
   return {arche:'fist',art:'fist',cls:'melee',sch:'phys',el:null,rarity:'none',fist:true,chg:null,anyClass:false,reaper:false,ians:false,
     name:'Bare Fists',dmg:a.dmg,cd:a.cd,kb:a.kb,range:a.range,lifesteal:0,color:'#9aa4ad',blade:'#e8d3b8'}; }
@@ -4032,10 +4037,10 @@ function openBag(back){
   let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
     const sub=w?(w.dmg+' dmg · '+weapInfoLine(w)):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
     const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${w?'':slotIcon(o.slot)}${_lc}s</div>`):'';
-    const lock=!canWield(o);
+    const off=!!w&&(!classFamilyOk(normWeapon(w))||monkBlocksWeapons(w)), lock=!canWield(o)||off;
     return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
-      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${lock?'Lv '+rarityReq(o.rarity):actionIcon('equip')+'Equip'}</button>
+      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${off?'Off-class':lock?'Lv '+rarityReq(o.rarity):actionIcon('equip')+'Equip'}</button>
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">${actionIcon('sell')}+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
   const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
@@ -4057,6 +4062,7 @@ function openBag(back){
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
+    if(it.weapon&&(!classFamilyOk(normWeapon(it.weapon))||monkBlocksWeapons(it.weapon))){toast('This weapon belongs to another class. Switch class at the Drillmaster.');return;}
     const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
     if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
     else { const g=it.armor||it.trinket, isT=TRINKETIDS.includes(g.slot); const old=HR.gear[g.slot]; HR.gear[g.slot]=g; meta.stash.splice(i,1); if(old) meta.stash.push(isT?{trinket:old}:{armor:old}); }
@@ -4233,7 +4239,7 @@ function enterZone(zi){
   meta.autoKeep=false; meta.autoBag=false; persistGlobal();   // loot mode DEFAULTS to OFF each level — the player opts into auto-sell/bag with Q
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
-  G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
+  G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
   if(MP.active && !MP.isHost && MP.rseed) G.runSeed=MP.rseed;   // co-op: adopt the host's run seed so we build the SAME dungeon + mobs (matching mids)
   meta.run=null; persist(); checkAchievements();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast(); questUpdate();
@@ -4550,7 +4556,7 @@ function nextArea(){
 }
 function zoneClear(){
   const Z=curZone();
-  meta.hero=snapOf(G.p); meta.bank=null;                       // everything banks — new save point
+  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;        // everything banks — new save point
   meta.zoneDone[Z.id]=true;
   meta.zoneMax=Math.max(meta.zoneMax||0, Math.min(ZONES.length-1, G.zone+1));
   meta.bestStage=Math.max(meta.bestStage||0,G.stageIndex);
@@ -7688,7 +7694,7 @@ function applyEditsNow(){
 }
 function loadStageRaw(i){
   const s=STAGES[i]; G.stageIndex=i;
-  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
@@ -8000,7 +8006,7 @@ function startBonus(){
 }
 function loadBonus(returnIdx,forcedSeed){
   const s=STAGES[G.stageIndex];
-  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
@@ -10776,7 +10782,7 @@ SKILL_FX.pal_smite=function(p,ok,am){ const w=p.weapon, R=560;
   if(!tgt){ toast&&toast('No target in sight'); return 'refund'; }
   const tx=tgt.x, tz=tgt.z, ty=tgt.y||0, dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);   // was 3.4 — playtest: near-instakill, overpowered
   // descending bolt: a bright holy column crashing down + a flash ring at impact
-  for(let k=0;k<12;k++){ (G.particles=G.particles||[]).push({x:tx+(Math.random()-0.5)*12,y:ty+70+k*34,z:tz+(Math.random()-0.5)*12,vx:0,vy:-520,vz:0,life:0.2,color:k%2?'#fff6c8':'#ffe08a',sz:6-k*0.25}); }
+  // The continuous golden sky-bolt is rendered by skill-identity; no cube column.
   skillRing(tx,tz,'#fff0a6','#e6c060',150); burst(tx,ty+18,tz,'#fff6c8',30); G.shake=Math.min(G.shake+8,14);
   hitEnemy(tgt,dmg,p,220,effLifesteal(p),ok?(w&&w.el):null);
   for(const e of combatTargets()){ if(e===tgt||e.dead||!e.active||e.dummy) continue; if(dXZ(e.x,e.z,tx,tz)<130) hitEnemy(e,dmg*0.4,p,150,0,ok?(w&&w.el):null); }   // holy splash
@@ -11555,7 +11561,7 @@ function killEnemy(e,weaponKill){
     burst(e.x,e.y+10,e.z,'#ff8a3a',18);
   }
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
-  if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5}); if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
+  if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5,sourceType:e.type==='colossus'&&__BF_WORLD().theme==='marble'?'marblecolossus':e.type,sourceH:e.h,ranged:['archer','caster','frostlobber','sunpriest','royalarcanist','cragspitter','voidtether'].includes(e.type)}); G.lastSlainEnemy=G.corpses[G.corpses.length-1]; if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
   if(weaponKill) gainMana(G.p,12,true);
   if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p,e);   // class kill riders receive the defeated target for conditional capstones
@@ -11726,7 +11732,7 @@ function gainXp(n){
     if(unlocked) storyToast('Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.','item-key');
     else if(p.level%5===0) storyToast('▲ Level '+p.level+' — markedly stronger.');
     else toast('Level '+p.level+' · +HP +Power',null,'event-level-up'); }
-  checkAchievements(); hudUpdate();
+  checkAchievements(); hudUpdate(); autosaveRun();
 }
 function checkStageClear(){
   // normal courses: the portal exists from the start — reaching the end IS the goal.
@@ -12022,7 +12028,7 @@ const CLASS_BASIC = {
          `added 1, survived 0, risen 2` before and `1 / 1 / 1` after, against a corpse from a KILL
          that raised correctly in both. Nothing is invented - 3.5 is this same feature's own corpse
          lifetime, from the kill path at 11024. */
-      try { (G.corpses = G.corpses || []).push({ x:e.x, z:e.z, y:e.y||0, t:3.5, raised:false }); } catch(err){}
+      try { (G.corpses = G.corpses || []).push({ x:e.x, z:e.z, y:e.y||0, t:3.5, raised:false,sourceType:e.type,sourceH:e.h }); } catch(err){}
       addText(e.x, e.y + e.h + 18, e.z, 'CORPSE', '#b06bff');
     }
   },
@@ -12383,7 +12389,7 @@ function petAttack(pet,P,e){
 function spawnMinion(x,z,o){ o=o||{}; if(!G) return; G.minions=G.minions||[];
   const cap=o.cap||14; if(G.minions.length>=cap) G.minions.shift();
   const p=G.p, jit=()=>(Math.random()-0.5)*44;
-  G.minions.push({id:'gravewraith',x:x+jit(),y:p?p.y:0,z:z+jit(),yaw:p?p.yaw:0,bob:0,t:Math.random()*3,atkT:0.15+Math.random()*0.3,
+  G.minions.push({id:'gravewraith',summon:true,sourceType:o.sourceType||null,sourceH:o.sourceH||34,x:x+jit(),y:p?p.y:0,z:z+jit(),yaw:p?p.yaw:0,bob:0,t:Math.random()*3,atkT:0.15+Math.random()*0.3,
     dmg:o.dmg||8,life:(o.life===null?null:(o.life||12)),ranged:!!o.ranged,hp:1,maxHp:1}); }
 function minionUpdate(dt){
   if(G.corpses&&G.corpses.length){ for(const c of G.corpses) c.t-=dt; G.corpses=G.corpses.filter(c=>c.t>0); }
@@ -12424,7 +12430,7 @@ function necroMinCap(){ return 14+(c2Passive('necro_master')?6:0)+(necroCap()?6:
 SKILL_FX.necro_summon=function(p,ok,am){ const legion=meta.classId==='necromancer'&&c2Passive('necro_legion'); const master=c2Passive('necro_master');
   const n=(legion?4:3), dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*(legion?0.85:0.65)*(master?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:12, cap=necroMinCap();
   for(let i=0;i<n;i++) spawnMinion(p.x-Math.sin(p.yaw)*30,p.z-Math.cos(p.yaw)*30,{dmg,life,ranged:false,cap}); skillRing(p.x,p.z,'#8be0a0','#3f7d55',120); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+70,p.z,'RISE','#8be0a0',true); };
-SKILL_FX.necro_raise=function(p,ok,am){ let best=null,bd=320; if(G.corpses) for(const c of G.corpses){ const d=dXZ(c.x,c.z,p.x,p.z); if(d<bd){bd=d;best=c;} }
+SKILL_FX.necro_raise=function(p,ok,am){ let best=G.lastSlainEnemy&&dXZ(G.lastSlainEnemy.x,G.lastSlainEnemy.z,p.x,p.z)<320?G.lastSlainEnemy:null; if(!best&&G.corpses)for(let i=G.corpses.length-1;i>=0;i--){const c=G.corpses[i];if(dXZ(c.x,c.z,p.x,p.z)<320){best=c;break;}}
   const base=(p.weapon?p.weapon.dmg:10)*effMagPower(p)*(ok?1:OFFCLASS_MUL);
   /* BONE LEGION and MASTER OF DEATH reach this skill too, 2026-08-13. Both cards say "your MINIONS"
      — "your minions hit 20% harder" (r3 a) and "keep more minions at once and they hit even harder"
@@ -12443,7 +12449,7 @@ SKILL_FX.necro_raise=function(p,ok,am){ let best=null,bd=320; if(G.corpses) for(
      Legion says x1.20. Removing it is a balance change with no card number behind it and stays
      Oliver's. This implements a promise; it removes nothing. */
   const mm=(meta.classId==='necromancer'&&c2Passive('necro_legion')?1.2:1)*(c2Passive('necro_master')?1.25:1), mcap=necroMinCap();
-  if(best){ G.corpses=G.corpses.filter(c=>c!==best); spawnMinion(best.x,best.z,{dmg:Math.round(base*1.4*mm),life:16,ranged:false,cap:mcap}); skillRing(best.x,best.z,'#b28bff','#5a3f8f',110); addText(best.x,best.y+40,best.z,'RAISED','#b28bff',true); }
+  if(best){ if(G.lastSlainEnemy===best)G.lastSlainEnemy=null;G.corpses=(G.corpses||[]).filter(c=>c!==best); spawnMinion(best.x,best.z,{dmg:Math.round(base*1.4*mm),life:16,ranged:!!best.ranged,cap:mcap,sourceType:best.sourceType||'bones',sourceH:best.sourceH}); skillRing(best.x,best.z,'#b28bff','#5a3f8f',110); addText(best.x,best.y+40,best.z,'RAISED','#b28bff',true); }
   else { for(let i=0;i<2;i++) spawnMinion(p.x,p.z,{dmg:Math.round(base*0.7*mm),life:10,cap:mcap}); addText(p.x,p.y+70,p.z,'RAISE','#b28bff',true); }
   SFX.magic&&SFX.magic('arcane'); };
 /* Bone Legion reaches this one too, and for the same reason as necro_raise above: its card says
@@ -12452,6 +12458,7 @@ SKILL_FX.necro_raise=function(p,ok,am){ let best=null,bd=320; if(G.corpses) for(
 SKILL_FX.necro_army=function(p,ok,am){ const dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*0.9*(meta.classId==='necromancer'&&c2Passive('necro_legion')?1.2:1)*(c2Passive('necro_master')?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:16, cap=necroMinCap();
   for(let i=0;i<6;i++) spawnMinion(p.x,p.z,{dmg,life,ranged:i%2===0,cap}); skillRing(p.x,p.z,'#b28bff','#5a3f8f',200); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+80,p.z,'ARMY OF THE DEAD','#b28bff',true); };
 function drawPet3(pet,t){
+  if(three3DLive()&&window.__companion3dDrawn?.(pet))return;
   const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');
   const _vl=voxLod(pet.x,pet.z);
   if(grounded) drawShadow(pet.x,pet.z,13,0.28); else drawShadow(pet.x,pet.z,11,0.16);
@@ -13712,6 +13719,8 @@ function update(dt){
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
   if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt; if(p._slipT>0) p._slipT-=dt;   // _slipT: Slippery's shove — see CLASS_BASIC.pirate
   let moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();   // `let`: the Thornwild hazard scales it below
+  p.castPlantT=Math.max(0,(p.castPlantT||0)-dt);
+  if(p.castPlantT>0&&p.dodgeTimer<=0){mx=0;mz=0;p.vx=0;p.vz=0;}
   if(p.downed){ mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false; input.attack=false; p.charging=false; p.attackHeld=false;   // co-op: a downed player is locked out until revived
     if(Math.floor(G.time*1.5)%2===0) addText(p.x,p.y+70,p.z,'DOWNED','#ff5e54'); }
   if(p.recoverT>0){ p.recoverT-=dt; mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false;   // regain your feet first
@@ -14611,6 +14620,7 @@ function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.as
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon(); else normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
   p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
+function resumeSavedAdventure(){ if(meta.run?.p?.gear) continueRun(); else openHub(); }
 function continueRun(){
   if(!meta.run) return; initAudio(); queueLevelUp=0;
   // Stage-only legacy saves could resume a palace enemy set in the Outskirts map.
@@ -15165,7 +15175,7 @@ function loadEndlessArena(n){
   G.endSpawned=0; G.endSpawnT=0.5; G.floorCleared=false;
   meta.endlessBest=Math.max(meta.endlessBest||0,n); persistGlobal();   // deepest floor REACHED is the personal best
   // ---- reset scene arrays (mirrors loadStage) ----
-  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
@@ -15551,7 +15561,7 @@ function openTitleOptions(){
 function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
   initAudio();
   const open=Object.keys(DIFFS).filter(diffOpen);
-  if(open.length<2){ meta.diff='normal'; loadMode('rl'); openHub(); return; }
+  if(open.length<2){ meta.diff='normal'; loadMode('rl'); resumeSavedAdventure(); return; }
   openDiffSelect();
 }
 function openDiffSelect(){
@@ -15570,7 +15580,7 @@ function openDiffSelect(){
   showOverlayHTML(`<div class="card"><h2 class="ovh">Choose Your Difficulty</h2><p class="ovsub">Each difficulty keeps its own save.</p>
     <div class="navgrid three">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
   document.querySelectorAll('.navcard[data-d]').forEach(b=>b.onclick=()=>{ initAudio();
-    meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); openHub(); });
+    meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); resumeSavedAdventure(); });
   document.getElementById('backBtn').onclick=titleScreen;
 }
 /* ============================================================
@@ -15584,6 +15594,7 @@ function openHub(){
     meta.introSeen=true; persistGlobal();
     playStory(STORY.intro, openHub); return;
   }
+  ensureClassWeapon(meta.hero);persist();
   enterWaystation();
 }
 /* Phase 20: the hub gets its OWN look — a warm golden-hour home, NOT the grey/grassy
@@ -16043,7 +16054,7 @@ function openMirror(back){
   initAudio();
   menuTip('tip_mirror','the <b>Mirror</b>. Inspect your Warden up close — every stat, your full loadout, and your appearance in detail. A read-only look at exactly how strong you are.');
   if(document.pointerLockElement && document.exitPointerLock){ try{ document.exitPointerLock(); }catch(e){} }
-  const h=meta.hero, p=freshPlayer();
+  const h=G?.p&&!G.p.dead?snapOf(G.p):meta.hero, p=h?freshFromSnapshot(h):freshPlayer();
   p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
   p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.invuln=0;
   p.level=(h&&h.level)||1; recomputeArmor(p); p.hp=effMaxHp(p);
@@ -16076,6 +16087,7 @@ function mirrorUpdate(dt){ if(!mirror) return; mirror.t+=dt; if(G) G.time+=dt;
   const p=mirror.p; if(p.hurtFlash>0) p.hurtFlash-=dt;
 }
 function renderMirror(t){
+  bindSceneVA();
   hpBars=[]; statPips=[]; drawHpBars();
   gl.clearColor(0.055,0.05,0.07,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   setFlatLights();
@@ -16089,15 +16101,15 @@ function renderMirror(t){
   // pedestal + mirror base
   bx(0,-8,-70, 300,16,60,'#171922');
   bx(0,-8,0, 220,16,180,'#181b24'); bx(0,2,0, 130,6,130,'#242a36'); bx(0,6,0, 100,3,100,'#2c3340');
-  const p=mirror.p; p.yaw=Math.PI;   // hero faces the camera-front consistently; the CAMERA orbits
+  const p=mirror.p; p.yaw=0;   // hero faces the camera-front consistently; the CAMERA orbits
   drawShadow(0,0,17,0.34);
-  if(!behind){ p.z=-168; p.yaw=0; drawHero3(p,t,false); if(mirror.pet){const mp=mirror.pet,oz=mp.z,oy=mp.y,oyaw=mp.yaw;mp.z=-145;mp.y=16;mp.yaw=0;drawPet3(mp,t);mp.z=oz;mp.y=oy;mp.yaw=oyaw;} p.z=0; p.yaw=Math.PI; }   // reflected hero and companion
+  if(!behind){ p.z=-168; p.yaw=Math.PI; if(window.__hero3dAt?.('mirrorInspect',{x:0,y:0,z:-168,yaw:Math.PI})){_poseKeep.push('mirrorInspect');}else drawHero3({...p},t,false); if(mirror.pet){const mp=mirror.pet,oz=mp.z,oy=mp.y,oyaw=mp.yaw;mp.z=-145;mp.y=16;mp.yaw=0;drawPet3(mp,t);mp.z=oz;mp.y=oy;mp.yaw=oyaw;} p.z=0; p.yaw=0; }   // reflected hero and companion
   if(behind){ gl.depthMask(false);   // phantom frame from the far side — never blocks the view
     bx(0,90,-84, 150,190,10,'#2a2f3d',null,0.07); bx(0,188,-84, 168,14,14,'#3a4152',null,0.07);
     gl.depthMask(true);
   } else { gl.depthMask(false);      // smoked translucent glass OVER the double = it reads as a reflection
     bx(0,90,-84, 150,190,10,'#10141f',null,0.5);
-    bx(0,90,-79, 122,168,4,'#0f1622','#7fb0e0',0.14);
+    bx(0,90,-79, 122,168,4,'#0f1622',null,0.14);
     gl.depthMask(true);
     bx(0,188,-84, 168,14,14,'#3a4152');
   }
@@ -16697,12 +16709,24 @@ function openRespecTree(cid,back){
   }
   render();
 }
+function ensureClassWeapon(p){
+  if(!p)return;
+  const fits=w=>w&&!monkBlocksWeapons(w)&&classFamilyOk(normWeapon(w));
+  if(fits(p.weapon))return;
+  const old=p.weapon;let index=-1;
+  for(let i=0;i<meta.stash.length;i++){const w=meta.stash[i].weapon;if(fits(w)&&(p.level||1)>=rarityReq(w.rarity)&&(index<0||w.dmg>meta.stash[index].weapon.dmg))index=i;}
+  if(index>=0)p.weapon=normWeapon(meta.stash.splice(index,1)[0].weapon);
+  else {p.weapon=classStartWeapon(meta.classId);if(!p.weapon.fist){p.weapon.dmg=+(p.weapon.dmg*.70).toFixed(1);p.weapon.starter=true;}}
+  // A full bag must never destroy the weapon displaced by an automatic class switch.
+  if(old&&!old.fist&&!old.starter)meta.stash.push({weapon:old});
+}
 function trainerEquipClass(cid){
   if(!CLASSES[cid]||!meta.classUnlocked[cid]) return false;
   // The live Waystation player is authoritative. Bank that exact loadout before
   // changing class so wsResume cannot restore an older weapon/armor snapshot.
   if(G&&G.hub&&G.p) meta.hero=snapOf(G.p);
   meta.classId=cid;
+  const equipped=G?.p||meta.hero;ensureClassWeapon(equipped);if(G?.hub&&equipped)meta.hero=snapOf(equipped);
   persist();
   if(G&&G.p){ skillbarUpdate(); hudUpdate(); }
   return true;
@@ -16816,6 +16840,19 @@ function openWardrobe(back){
   document.getElementById('skinBtn2').onclick=()=>openSkins(()=>openWardrobe(back));
   document.getElementById('backBtn').onclick=back;
 }
+function canNewGamePlus(){return !!meta.zoneDone?.[ZONES[ZONES.length-1].id];}
+function startNewGamePlus(){
+ if(!G?.hub||!canNewGamePlus()||MP.active)return false;
+ meta.hero=snapOf(G.p);meta.ngPlus=(meta.ngPlus||0)+1;
+ const strength=powerScore(G.p),toughness=(effMaxHp(G.p)/100)/(1-defenseR(G.p));
+ meta.campaignNgHp=Math.max(Math.pow(1.65,meta.ngPlus),strength*.7);
+ meta.campaignNgDmg=Math.max(Math.pow(1.25,meta.ngPlus),Math.sqrt(toughness)*.8);
+ meta.zoneMax=0;meta.zoneDone={};meta.run=null;meta.bank=null;persist();openHub();return true;
+}
+function openNewGamePlus(back){
+ mode='menu';showOverlayHTML(`<div class="card narrow"><p class="ovkicker">New Game + ${(meta.ngPlus||0)+1}</p><h2 class="ovh">Walk the road again</h2><p class="ovsub">Restart the main campaign from the Outskirts. Later campaign gates lock again, with stronger enemies scaled for your next journey.</p><p class="ovsub">Keep your character level, all class ranks and unlocks, gold, equipment, bag, companions and upgrades. Optional-mode progress stays with you.</p><button class="bigbtn" id="ngConfirm" ${MP.active?'disabled':''}>Begin New Game +</button>${MP.active?'<p class="hint">Leave your party before starting a new campaign cycle.</p>':''}<button class="bigbtn ghost" id="ngBack">Keep this campaign</button></div>`);
+ document.getElementById('ngConfirm').onclick=startNewGamePlus;document.getElementById('ngBack').onclick=back;
+}
 function openQuestBoard(back){
   mode='menu';
   menuTip('tip_quests','the <b>Postings</b>. These are your objectives for the current zone. Clearing them opens the way forward — the zone\'s boss waits past them. Your active quest also shows on the HUD as you play.');
@@ -16829,7 +16866,8 @@ function openQuestBoard(back){
         <div class="gd" style="margin-top:3px">Final: slay <b>${Z.boss.name}</b></div></div></div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Postings</p><h2 class="ovh">Quest Board</h2>
     <p class="ovsub">Complete a zone's main quests to open its boss room.</p>
-    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <div class="achlist">${rows}</div>${canNewGamePlus()?'<button class="bigbtn" id="ngOpen">Begin New Game +</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  if(document.getElementById('ngOpen'))document.getElementById('ngOpen').onclick=()=>openNewGamePlus(()=>openQuestBoard(back));
   document.getElementById('backBtn').onclick=back;
 }
 /* ---------------- The Beastkeeper: buy / sell / train / equip / name your pet ----------------
@@ -17204,7 +17242,7 @@ function studioSetWeapon(arche){ if(!studio) return; studio.arche=arche;
   document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',b.dataset.a===arche));
   const card=document.getElementById('wsIconCard'), img=document.getElementById('wsIconImg'), cap=document.getElementById('wsIconCap');
   const ic=studioIconFor(w);
-  if(card&&img){ if(ic){ img.src='weapon-icons/'+ic+'.png'; if(cap) cap.textContent=ARCHES[arche]?ARCHES[arche].disp:arche; card.classList.remove('hide'); } else { card.classList.add('hide'); } }
+  if(card&&img){ if(ic){ img.src='icons/items/weapons/'+ic+'.png?v='+VERSION3D; if(cap) cap.textContent=ARCHES[arche]?ARCHES[arche].disp:arche; card.classList.remove('hide'); } else { card.classList.add('hide'); } }
 }
 function studioSwing(){ if(!studio) return; const p=studio.p; if(p.atkTimer>0) return; p.swingId=(p.swingId||0)+1;
   const w=p.weapon;
@@ -17498,7 +17536,7 @@ function openPauseSettingsV2(){
   bindAudioSettings();
 }
 function openPauseV2(){
-  pauseGameAudio(true); mode='pause';
+  autosaveRun(); pauseGameAudio(true); mode='pause';
   showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <section class="pausegroup pausegameplay"><div class="pausegrouplabel">In-Game</div><div class="navgrid">
         ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
@@ -18396,6 +18434,7 @@ const HUB_UPGRADES=[
 // ===== Approved hub-NPC voxel models (distinct silhouette + signature prop + palette per the reference art) =====
 // Drawn in a frame already translated to the NPC's feet and rotated to face; +y up, +z toward the viewer.
 function hubNpcModel(n,t){
+  if(three3DLive()&&window.__npc3dDrawn?.(n.id))return;
   const sw=Math.sin(t*1.4+(n.x||0))*0.06, id=n.id;
   const _vl=voxLod(n.x||0,n.z||0);
   const face=(y,z,sk,skD)=>{ bx(-2.4,y+1,z, 1.5,1.5,1,'#2a2018'); bx(2.4,y+1,z, 1.5,1.5,1,'#2a2018');   // shared face helper: eyes, brows, nose, mouth
@@ -18465,6 +18504,7 @@ function hubNpcModel(n,t){
 // the Warden's Shade: one shared silhouette with eight zone-specific palettes + relics.
 // Draw-only identity; no AI, collision, dialogue, trial, or persistence state changes.
 function drawShadeModel(t,zoneId){
+  if(three3DLive()&&window.__npc3dDrawn?.('shade'))return;
   const id=zoneId||'outskirts', V={
     outskirts:{cloth:'#322d2a',armor:'#594f46',edge:'#d49a45',glow:'#ffbd58'},
     hollow:{cloth:'#26333b',armor:'#445968',edge:'#62b9c8',glow:'#8feaff'},
@@ -20022,6 +20062,7 @@ function G0BACKDROP(s0,t){
   if(!_tb) drawHero3(fake,t,true);
 }
 function drawProjectile3(pr,t){
+  if(three3DLive()&&window.__projectile3dDrawn?.(pr))return;
   drawShadow(pr.x,pr.z,pr.size*0.7,0.16);
   const yaw=Math.atan2(pr.vx,pr.vz), pitch=Math.atan2(-(pr.vy||0),Math.hypot(pr.vx,pr.vz));
   pushM(); mv(pr.x,pr.y,pr.z); rotY(yaw); rotX(pitch);
@@ -20241,7 +20282,8 @@ function frame(ts){
   const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
-  acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }
+  window.BF_LOADING?.tick(G,mode);
+  if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
   PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
   render((G?G.time:ts/1000));
   deferOff();                         // belt and braces: an early return inside render must never leave the batch globals swapped
@@ -20734,10 +20776,12 @@ if(window.BF_COMBAT_ART){
       if(root&&result!=='refund'){
         let targets=marks.filter(([e,m,w])=>e.markT!==m||e.warBurstT!==w).map(([e])=>e);
         if(!targets.length&&['claw','execute','siphon','tether'].includes(art.profiles[id].form))targets=capture.hits;
+        if(id==='pal_smite'&&capture.hits.length)targets=[capture.hits[0]];
         if(targets.length)for(const e of targets.slice(0,8))art.emit(G,id,{x:e.x,y:e.y||0,z:e.z,yaw:p.yaw},origin);
         else if(capture.rings.length)for(const ring of capture.rings.slice(0,6))art.emit(G,id,{x:ring.x,y:Number.isFinite(surfaceHeightAt(ring.x,ring.z))?surfaceHeightAt(ring.x,ring.z):p.y||0,z:ring.z,yaw:p.yaw},origin,ring.r);
         else art.emit(G,id,p,origin);
         art.pose(p,id);
+        if(['necro_army','necro_wall','pal_guard'].includes(id))p.castPlantT=.3;
       }
       return result;
     };
@@ -20748,7 +20792,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={ snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
@@ -20874,7 +20918,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1980"></script>
+<script type="module" src="./hero3d.js?v=1981s"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

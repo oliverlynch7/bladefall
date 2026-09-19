@@ -3,7 +3,7 @@ import { deathPresentation } from './death-presentation.js?v=1978';
 import { revisedClips, articulatedTypes } from './enemy-motion.js?v=1980';
 import { enemyActionState } from './enemy-action-state.js?v=1974';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
-import { loadModelAnyExt } from './loadmodel.js';
+import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
 // Original Blender roster: one vertex-colored skinned mesh and ten bones per appearance.
 // The renderer mirrors gameplay objects and never changes combat state. Props still use

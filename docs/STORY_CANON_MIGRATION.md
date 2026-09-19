@@ -18,7 +18,7 @@ Status: inspected and documented only. Live story, quests, saves and boss logic 
 | STORY ending | Player spends all inherited power, fallen family rests; no universal restoration | Implement King defeat, Void collapse, Ian, temporary Blade, final cut and restoration in order |
 | STORY npc / warden lore | All Shades and Fallen described through old doomed lineage cycle | Preserve names and functions; review identities individually without silently making new ancestry canon |
 | Story text fallback | Unnamed player called “the last Bladeborn” | Replace spoiler label with a neutral player reference in future text migration |
-| ZONES abyss / castle | king at stage 12; tyrant at stage 16, separated by Palace/Castle progression | User decision needed on earlier encounter; final two-phase fight must occur at Duskmoor |
+| ZONES abyss / castle | king at stage 12; tyrant at stage 16, separated by Palace/Castle progression | Approved: replace earlier encounter with a Legion commander; keep final two-phase King fight at Duskmoor |
 | Ian’s Blade mechanics | Existing five blade fragments, level-100 / 250k forge and 1M shop path | Preserve identifiers and earned progress; separate from new per-level Rift Shards; no campaign-completion free permanent award |
 | Existing monster roster | Mixed wildlife, elemental and undead enemies | Assign affiliations individually, never blanket Hollowing |
 
@@ -32,12 +32,14 @@ Status: inspected and documented only. Live story, quests, saves and boss logic 
 6. Migrate final encounter and ending as a separate tested sequence, including temporary equipment restoration, retry behavior and multiplayer synchronization.
 7. Validate old saves, every required quest path, adverse dialogue choices, subtitle/voice timing, recording revisions, main-path accessibility, and the inability to soft-lock progression.
 
-## Clarifications to request
+## Clarifications received
 
-- Is a shared ancestor / collateral family branch acceptable for the player’s connection to infertile Ian, or should this remain unanswered for now?
-- The earlier stage-12 Abyss King encounter needs a role compatible with a single final two-phase confrontation. Do not silently create an illusion, proxy or escaped King.
-- Clarify ordinary Hollowing passage versus the final physical plunge into the Void; do not imply ordinary recruits could escape the soul prison.
-- Set retry and accessible input behavior for the timed final charge. A hard challenge must not silently become permanent save loss or force replay of the whole campaign.
+- Recessive inheritance and awakening through intense circumstances plus a sincere wish to protect are Oliver’s proposed direction. The exact family connection to Ian remains open; do not turn the older direct-descendant or brother claim into canon.
+- The earlier King encounter will become a Legion commander. Boss and arena redesign is explicitly authorized for gameplay and story improvements.
+- Ordinary Hollowing is a door-like crossing with immediate bodily emergence. The King alone barely escapes the Void by fighting its forces using energy already gained through partial infusion. No invented alternate portal passage is required.
+- Final charge uses repeated Space presses. Retry the charge alone after failure; show a skip option after five consecutive failures. Continue the successful story ending when skipped. Input tuning and co-op handling remain implementation design work.
+
+Documentation records these decisions; the boss replacement and charge sequence are not yet implemented.
 
 ## Guard-route design constraints
 

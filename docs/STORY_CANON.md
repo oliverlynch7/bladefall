@@ -30,7 +30,7 @@ Hollow Court, Shadowed Legion, Shadowed, Shadowing, Shadow Gates, Riftbound, and
 
 Aerth’s exact classification as world, realm or continent is not fixed. Ian was famous throughout Aerth, protected it successfully through a long life, and died naturally of old age. He was not murdered, defeated, lost in the Abyss, responsible for creating the King, or a failed guardian. His name is public history, not a secret reveal. Monuments, stories and ordinary references should establish his legacy early.
 
-Ian was infertile and unable to naturally produce a Bladeborn descendant. This brief leaves the player’s exact family connection open; do not carry forward the older brother/direct-descendant claim. Bladeborn power is hereditary, but not every descendant manifests it. A bloodline can remain dormant for generations and very rarely awaken. Do not fix its biological or magical trigger. Bladeborn can overcome threats beyond ordinary armies and kingdoms.
+Ian was infertile and unable to naturally produce a Bladeborn descendant. This brief leaves the player’s exact family connection open; do not carry forward the older brother/direct-descendant claim. Bladeborn power is hereditary, but not every descendant manifests it. A bloodline can remain dormant for generations and very rarely awaken. Proposed direction from Oliver: inheritance may be recessive, with dormant power awakening under intense circumstances when the person has a pure heart and a sincere wish to serve and protect. This remains a suggested explanation, not a fully specified genetic or moral test. Do not imply every good person awakens, every carrier must awaken, or suffering proves a lack of goodness. Bladeborn can overcome threats beyond ordinary armies and kingdoms.
 
 ## Origin and rise of the Abyss King
 
@@ -78,12 +78,12 @@ Approved addition: quests obtain a disguise armor set. The player wears it and u
 
 1. Shortly before the final confrontation, the King discovers how to channel trapped souls’ energy through part of his body placed inside a Gate while physically anchored outside. Souls are exploited, not consumed or destroyed.
 2. Phase one: half his body is Void-infused. The player survives and injures him. His confidence gives way to recognition, disbelief, fear and desperation: the player is Bladeborn.
-3. He fully enters the Void despite the believed risk of permanent imprisonment. His unusual mastery, power and connection let him return. Ordinary beings cannot do this safely. This is distinct from merely walking through the ordinary Hollowing passage; exact presentation needs clarification.
+3. He fully enters the Void despite the believed risk of permanent imprisonment. His unusual mastery, power and connection let him return. Ordinary beings cannot do this safely. Ordinary people walk through as if through a door: the body immediately comes out the other side, apparently unchanged except for Hollowing, while the soul is torn away. The King is an exception: he uses the soul energy already gained from partial infusion to fight the intense forces of the Void and barely escape. Do not invent a separate controllable side passage or teach this as a repeatable escape technique.
 4. Phase two: fully Void-infused Abyss King, naturally using the existing Awakened identity. Show impossible darkness, violet energy and impressions of souls while keeping attacks readable.
 5. The player defeats him. His death removes the controlling soul-anchor, but DOES NOT free the souls by itself.
 6. The destabilized binding and uncontrolled energy open a huge Void rift, pulling the player and battlefield into the Abyssal Void.
 7. Ian appears as a spirit, not bodily resurrected. He affirms the player and entrusts Ian’s Blade for the final act. The emotional handoff honors Ian’s successful life and the player’s earned courage.
-8. The player charges an enormous cut under time pressure by rapidly pressing attack. Failure handling, accessible input alternatives and multiplayer charging rules need design; do not silently choose irreversible failure behavior.
+8. The player charges an enormous cut under time pressure by rapidly pressing Space on keyboard. Failure retries only this charge, never the boss fight. After five consecutive failed attempts, offer an explicit skip option that continues into the successful final cut and restoration. Do not skip automatically or punish use of the option. Provide clear touch/controller equivalents; exact tuning and multiplayer charging rules still need design. A hold-button alternative has not been explicitly approved.
 9. The awakened player, wielding Ian’s Blade inside the Void while the binding is unstable, cuts the binding at its source.
 10. Every trapped soul is freed. Living Hollowed become whole. Destroyed bodies are revived/reconstructed in a healthy pre-Gate condition; even enemies killed during the game can be saved. Agelessness ends, free will returns, the enslaved Legion ends, and the player escapes through the tear.
 11. Aerth is saved in a hopeful, restorative ending. The player saves the Legion’s victims rather than merely defeating them. How much restored people remember remains unresolved.
@@ -95,9 +95,9 @@ Preserve its massive black-iron sword, tarnished-gold sacred guard and ember-lik
 ## Open canon — no silent answers
 
 - King’s former personal name and noble title.
-- Exact awakening process and player’s family connection (including consistency with Ian’s infertility).
+- Precise awakening mechanics beyond the proposed recessive/protective-intent direction, and the player’s exact family connection (including consistency with Ian’s infertility).
 - Method used to glimpse the imprisoned souls before the finale.
-- Full metaphysics of the Void, including how its dangerous full entry is presented distinctly from Hollowing passage.
+- Full metaphysics of the Void beyond the approved ordinary door-like passage and the King’s exceptional energy-assisted escape.
 - Restored people’s memories.
 - Why the temporary Ian’s Blade is not retained.
 - Aerth’s geographic classification.
@@ -113,3 +113,7 @@ Keep established locations, including Outskirts, Hollow Pass, Ruined Keep, Frost
 Private Voice Studio: Oliver is the sole account holder; his wife records using his setup. Character/scene grouping, context notes, editable lines, record/listen/retake and Approve & use are approved. Unrecorded lines have optional device speech or silence. Recorded/voiced lines must follow canon and delayed reveals.
 
 Existing approved campaign features remain: two-half checkpoint banking, five Rift Shards per level, linked co-op world/dialogue state with individual environmental pickups, shared quest rewards, journal, plain-language UI, meaningful optional dialogue, improved NPCs, puzzles, parkour and expanded varied routes. These mechanics must support this story rather than redefine it.
+
+## Approved boss-design scope — latest clarification
+
+Replace the earlier Abyss King encounter in the Abyss with a Legion commander. Keep the Abyss King’s two-phase confrontation together at the final castle. Oliver authorizes changing existing bosses and arenas when it improves play, challenge or story fit. No permanent commander name, exact moveset or arena design has been chosen yet. Preserve old save/achievement identifiers through explicit migration rather than silently reinterpreting past King defeats as new commander accomplishments.

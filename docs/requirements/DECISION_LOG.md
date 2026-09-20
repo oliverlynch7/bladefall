@@ -63,3 +63,7 @@ Approved requirement MUSIC-02: when integrating music, copy the supplied music f
 ## 2026-09-20 | Class palette and Pirate grip batch | IMPLEMENTATION-RESUME-02 / U115
 
 Resumed approved queue. Release 1.983.0 implements 16 class palettes and Pirate palm grips, same-body/mirror gear refresh and peer presentation fixes. Evidence and limits: ../CLASS_PALETTES_AND_GRIPS_2026-09-20.md. ART-CLASS-01 implemented for current 16 classes with screenshots; future Pyromancer still pending. EQ-03 representative grip/motion verified; exhaustive all-item fitting remains open. Next: completed-half save checkpoint foundation, then campaign systems.
+
+## 2026-09-20 | Completed-half checkpoint foundation | SAVE-01–04
+
+Release 1.984.0 replaces live provisional campaign autosaves with committed half-entry snapshots. All save-local fields captured, so class XP, gear, gold, optional rewards and character progress roll back together. Normal deaths retry the current half; reload/title/disconnect retain completed halves. Per-player co-op checkpoints and host transition/retry/completion messages; explicit permadeath and secondary-mode rules preserved. Evidence: ../IMPLEMENTATION_CHECKPOINTS_2026-09-20.md. Tests cover real browser save writes/reloads/death UI and controlled two-browser messages; no claim of live WebRTC reliability. New five-shard/dialogue/world content still pending.

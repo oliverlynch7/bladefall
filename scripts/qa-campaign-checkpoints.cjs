@@ -1,0 +1,33 @@
+async page => {
+ if(!["localhost","127.0.0.1"].includes(new URL(page.url()).hostname))throw Error("Checkpoint QA only runs against a local test save.");
+ const checks=[],check=(name,v)=>{if(!v)throw Error(name);checks.push(name);};
+ await page.reload();await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+ await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classUnlocked.warrior=true;b.meta.classId='warrior';b.openHub();b.meta.gold=1000;b.meta.classes.warrior={rank:2,xp:10};b.meta.optionalDone={};b.meta.optionalProgress={};b.meta.sideFound={};b.meta.iansShards=[];b.meta.stash=[];b.G.p.level=5;b.G.p.xp=20;b.meta.hero=b.snapOf(b.G.p);b.persist();b.enterZone(0);b.openPause();});
+ check('new campaign checkpoint',await page.evaluate(()=>__BF3.campaignCheckpoint()?.version===1));
+ const mutate=()=>{const b=__BF3;b.meta.gold+=90;b.G.p.level+=1;b.G.p.xp+=70;b.meta.classes.warrior.rank+=1;b.meta.stash.push({weapon:b.makeWeapon('axe','rare')});b.meta.optionalDone.qa=true;b.meta.optionalProgress.qa=3;b.G.qs.qa=9;(b.G.outskirtsNests||=[]).push('qa');b.meta.hero=b.snapOf(b.G.p);b.persist();b.autosaveRun();};
+ await page.evaluate(mutate);
+ check('ordinary persist cannot leak unfinished rewards',await page.evaluate(()=>{const b=__BF3,s=JSON.parse(localStorage.getItem(b.MKEY('rl')));return s.gold===1000&&s.hero.level===5&&s.classes.warrior.rank===2&&!s.optionalDone.qa&&s.stash.length===0;}));
+ await page.reload();await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.continueRun();__BF3.openPause();});
+ check('reload resets first half',await page.evaluate(()=>{const b=__BF3;return b.G.area===0&&b.G.p.level===5&&b.G.p.xp===20&&b.meta.gold===1000&&b.meta.classes.warrior.rank===2&&!b.G.qs.qa&&!b.G.outskirtsNests.includes('qa');}));
+ await page.evaluate(mutate);
+ await page.evaluate(()=>{const b=__BF3;b.G.pendingSecret={id:'qa-rift',name:'QA Rift'};b.nextArea();b.openPause();});
+ check('half completion banks growth and claimed secret',await page.evaluate(()=>{const b=__BF3,c=b.campaignCheckpoint();return b.G.area===1&&c.state.hero.level===6&&c.state.gold===1090&&c.state.classes.warrior.rank===3&&c.state.sideFound['qa-rift']&&c.state.stash.length===1;}));
+ await page.evaluate(()=>{const b=__BF3;b.meta.gold+=300;b.G.p.level=12;b.meta.classes.warrior.rank=8;b.meta.optionalDone.second=true;b.G.qs.second=2;b.G.outskirtsNests.push('second');b.persist();b.die();});
+ await page.getByRole('button',{name:'Retry this part',exact:true}).waitFor();
+ await page.screenshot({path:'output/playwright/checkpoint-death.png'});
+ await page.getByRole('button',{name:'Retry this part',exact:true}).click();
+ check('death retries second half and rolls back only that half',await page.evaluate(()=>{const b=__BF3;return b.G.area===1&&!b.G.p.dead&&b.G.p.level===6&&b.meta.gold===1090&&b.meta.classes.warrior.rank===3&&!b.meta.optionalDone.second&&!b.G.qs.second&&!b.G.outskirtsNests.includes('second')&&b.meta.sideFound['qa-rift'];}));
+ await page.evaluate(()=>{const b=__BF3;b.meta.gold+=70;b.G.p.level=7;b.nextArea();b.openPause();b.meta.gold+=200;b.G.p.level=10;b.autosaveRun();});
+ await page.reload();await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.continueRun();__BF3.openPause();});
+ check('boss reload retains both completed halves',await page.evaluate(()=>{const b=__BF3;return b.G.area===-1&&b.G.p.level===7&&b.meta.gold===1160;}));
+ check('repeat retries do not mutate checkpoint',await page.evaluate(()=>{const b=__BF3,old=JSON.stringify(b.meta.run);b.restartCampaignCheckpoint();b.restartCampaignCheckpoint();return old===JSON.stringify(b.meta.run)&&b.meta.gold===1160;}));
+ await page.evaluate(()=>{const b=__BF3;b.meta.gold+=100;b.openHub();b.meta.gold-=60;b.G.p.level=8;b.autosaveRun();});
+ await page.reload();
+ check('hub rollback and subsequent spending/growth persist',await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');return !b.meta.run&&b.meta.gold===1100&&b.meta.hero.level===8;}));
+ check('legacy resume upgrades format without deleting gains',await page.evaluate(()=>{const b=__BF3;b.openHub();b.enterZone(1);delete b.meta.run.checkpoint;b.meta.run.p.level=9;b.meta.gold=1234;b.continueRun();b.openPause();return b.G.zone===1&&b.G.p.level===9&&b.meta.gold===1234&&b.campaignCheckpoint()?.version===1;}));
+ await page.evaluate(()=>{const b=__BF3;b.openHub();b.startTrial('mage',0);});
+ check('trial does not acquire campaign checkpoint',await page.evaluate(()=>!__BF3.campaignCheckpoint()&&!__BF3.isCampaignAdventure()));
+ await page.evaluate(()=>__BF3.abandonTrial());
+ check('trial abandonment restores original class',await page.evaluate(()=>__BF3.meta.classId==='warrior'&&__BF3.G.hub));
+ return checks;
+}

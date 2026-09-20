@@ -218,3 +218,7 @@ Commit and push copies of soundtrack audio files into the Bladefall Git reposito
 ### Visual correction evidence — 1.983.0
 
 ART-CLASS-01 verified for the 16 existing classes through browser palette checks and screenshots. EQ-03 Pirate grip/pose corrections and peer state implemented; broader GOV-05 all-weapon fit coverage remains open. See CLASS_PALETTES_AND_GRIPS_2026-09-20.md for tests and limits.
+
+### Checkpoint evidence — 1.984.0
+
+SAVE-03/04 implemented for existing normal campaign with browser reload/death/route tests; SAVE-01 checkpoint consistency verified for player/class growth, inventory and hub transactions tested. SAVE-02 foundation banks existing secret pickup at half boundaries; new five-shard collection remains pending. Co-op individual state/transition/retry tested through controlled two-browser message relay; live WebRTC and future quest/dialogue synchronization still open. See IMPLEMENTATION_CHECKPOINTS_2026-09-20.md.

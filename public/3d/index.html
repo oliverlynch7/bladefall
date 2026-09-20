@@ -1033,7 +1033,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.983.0-class-palettes-grips';
+const VERSION3D='1.984.0-campaign-checkpoints';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1109,11 +1109,12 @@ if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
 function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
 function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
-  persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv)); window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){ window.__saveStatus={ok:false,error:e.name,at:Date.now(),mode:MODE}; console.error('[save] Progress could not be stored',e); } } }
-// Continuous autosave: keep meta.run in sync with the live dive so a reload/auto-update NEVER loses progress.
-// Only snapshots normal dives (not hub/arena/trial/side); death still clears meta.run so roguelite rollback is intact.
+  persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); const cp=campaignCheckpoint(); if(cp) Object.assign(mv,checkpointClone(cp.state)); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv)); window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){ window.__saveStatus={ok:false,error:e.name,at:Date.now(),mode:MODE}; console.error('[save] Progress could not be stored',e); } } }
+// Campaign writes the committed half-entry checkpoint, never unfinished-half gains.
+// Secondary modes retain their own save contracts.
 function autosaveRun(){ try{
     if(typeof mode!=='undefined' && ['play','pause'].includes(mode) && G?.hub && G.p && !IN_ARENA) meta.hero=snapOf(G.p);
+    if(campaignCheckpoint()){ persist(); return; }
     if(typeof mode!=='undefined' && ['play','pause','upgrade'].includes(mode) && G && G.p && !G.p.dead && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
       meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
       if(G.campaignLayout&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive)meta.run.campaign={zone:G.zone,area:G.area,qs:{...G.qs},revision:G.campaignLayout.revision,outskirtsNests:G.outskirtsNests||[]};
@@ -2762,7 +2763,7 @@ const DIFFS={
      as easy as Normal, which is the brief. Its own save (mode 'cs') like every other difficulty, so
      a casual run can never quietly overwrite a Normal one. */
   casual:{id:'casual',name:'Casual',icon:'🌿',blurb:'For the story and the exploring. Enemies hit softer and fall faster.'},
-  normal:{id:'normal',name:'Normal',icon:'⚔',blurb:'The hub is your save point. Die and you lose only that attempt.'},
+  normal:{id:'normal',name:'Normal',icon:'⚔',blurb:'Each completed part saves your progress. Die or quit, and restart the unfinished part.'},
   hardcore:{id:'hardcore',name:'Hardcore',icon:'☠',blurb:'One life for the whole chain. Death erases everything.',needs:'beatNormal'},
   hitless:{id:'hitless',name:'Hitless',icon:'👁',blurb:'One hit — or one fall — and it is over. Everything resets.',needs:'beatHardcore'}
 };
@@ -3882,7 +3883,7 @@ function beginRun(ngPlus,carrySnap,scales){
   loadStage(0); mode='play'; showOverlay(false); showGameUI(true); hudUpdate();
 }
 function startRun(ngPlus){ enterZone(0); }
-/* ---- Zone flow (Phase 2): hub is the save point; a zone attempt is provisional ---- */
+/* ---- Zone flow: hub transactions save immediately; each completed half advances the checkpoint. ---- */
 /* `classId` is escrowed with everything else, and that is the fix for A2.
    startTrial sets meta.classId to the class you are attempting, because you play the trial AS it.
    Every exit that is not COMPLETION has to put the old class back - and none of them did. It was
@@ -3892,10 +3893,42 @@ function startRun(ngPlus){ enterZone(0); }
    sat equipped - the unlock flag and the equip state disagreeing because only one was restored.
    Putting it in the bank fixes all three exits at once (abandon, death, and the hub's stale-bank
    sweep) instead of patching each one and missing the next. */
+// A checkpoint owns only save-local progress, not account settings or lifetime records.
+function checkpointClone(value){ return JSON.parse(JSON.stringify(value)); }
+function campaignCheckpoint(){
+  const r=meta.run,c=r?.checkpoint;
+  return c?.version===1&&c.state?.hero?.gear&&r.p?.gear&&ZONES[r.campaign?.zone]&&
+    (r.campaign.area===-1||ZONES[r.campaign.zone].areas[r.campaign.area])?c:null;
+}
+function isCampaignAdventure(){ return !!(G&&!G.hub&&!G.side&&!G.trial&&!G.arena&&!IN_ARENA&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive&&ZONES[G.zone]); }
+function captureCampaignCheckpoint(){
+  if(!isCampaignAdventure())return false;
+  meta.hero=snapOf(G.p);
+  const state={};for(const f of MODE_FIELDS)if(f!=='run'&&f!=='bank'&&meta[f]!==undefined)state[f]=checkpointClone(meta[f]);
+  const route={zone:G.zone,area:G.area,qs:checkpointClone(G.qs||{}),outskirtsNests:checkpointClone(G.outskirtsNests||[]),revision:G.campaignLayout?.revision};
+  meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:checkpointClone(meta.hero),base:checkpointClone(G.baseLoadout||meta.hero),runSeed:G.runSeed,campaign:route,checkpoint:{version:1,state}};
+  // Keep the existing escrow API usable by hub exits and older tooling.
+  meta.bank={gold:meta.gold||0,hero:checkpointClone(meta.hero),classes:checkpointClone(meta.classes||{}),stash:checkpointClone(meta.stash||[]),classId:meta.classId};
+  persist();return true;
+}
+function restoreCampaignState(){
+  const cp=campaignCheckpoint();if(!cp)return false;
+  Object.assign(meta,checkpointClone(cp.state));migrateClassEquipment();refreshBagCap();return true;
+}
+function restartCampaignCheckpoint(remote=false){
+  if(!campaignCheckpoint())return false;
+  if(MP.active&&!MP.isHost&&!remote){
+    MP.hostConn?.send({t:'campaignRetry',zone:G.zone,area:G.area});toast('Waiting for the host to restart this part.');return true;
+  }
+  document.getElementById('deathfade')?.remove();
+  continueRun();MP._wiped=false;MP._killed={};MP.kills=[];MP._gotEn=false;
+  if(MP.active&&MP.isHost&&!remote)MP.onEnter(G.zone,true);
+  return true;
+}
 function bankNow(){ meta.bank={gold:meta.gold||0, hero:meta.hero?JSON.parse(JSON.stringify(meta.hero)):null,
   classes:JSON.parse(JSON.stringify(meta.classes||{})), stash:JSON.parse(JSON.stringify(meta.stash||[])),
   classId:meta.classId||null}; persist(); }
-function restoreBank(){ if(!meta.bank) return false;
+function restoreBank(){ if(campaignCheckpoint()){restoreCampaignState();meta.run=null;meta.bank=null;persist();return true;} if(!meta.bank) return false;
   meta.gold=meta.bank.gold||0; meta.hero=meta.bank.hero||null; meta.classes=meta.bank.classes||{};
   meta.stash=meta.bank.stash||[];                          // items stashed during a failed attempt are lost with it
   /* Only when the banked class is still legitimately yours. A bank written before an unlock (or
@@ -4274,7 +4307,7 @@ function enterZone(zi){
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
   if(MP.active && !MP.isHost && MP.rseed) G.runSeed=MP.rseed;   // co-op: adopt the host's run seed so we build the SAME dungeon + mobs (matching mids)
   meta.run=null; persist(); checkAchievements();
-  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast(); questUpdate();
+  loadArea(); captureCampaignCheckpoint(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast(); questUpdate();
   if(MP.active) MP.onEnter(zi);                                 // co-op: host tells guests which zone to load (opt-in)
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
@@ -4568,14 +4601,18 @@ function skipTrial(){
   toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
 }
 function abandonTrial(){ restoreBank(); openHub(); }
+function securePendingSecret(){
+  // A claimed secret becomes permanent when its half is completed alive.
+  if(G.pendingSecret){ const ps=G.pendingSecret; G.pendingSecret=null;
+    if(!meta.sideFound[ps.id]){ meta.sideFound[ps.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; grantIansShard(ps.id); checkCosmetics(); persist();
+      toast('✦ '+ps.name+' secured — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
+}
 function nextArea(){
   if(G.endless){ endlessDescend(); return; }                  // Endless: the portal drops you a floor deeper
   if(G.delve){ delveDescend(); return; }                      // The Endless Dungeon: the exit is the way DOWN
   if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
-  // Commit a CLAIMED rift now that the level's been cleared alive (dying returns you to the hub, so reaching the exit == survived).
-  if(G.pendingSecret){ const ps=G.pendingSecret; G.pendingSecret=null;
-    if(!meta.sideFound[ps.id]){ meta.sideFound[ps.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; grantIansShard(ps.id); checkCosmetics(); persist();
-      toast('✦ '+ps.name+' secured — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
+  if(MP.active&&!MP.isHost&&isCampaignAdventure()){MP.hostConn?.send({t:'campaignAdvance',zone:G.zone,area:G.area});return;}
+  securePendingSecret();
   if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
   if(G.trial){ trialComplete(); return; }
   if(G.side){ sideClear(); return; }
@@ -4583,10 +4620,13 @@ function nextArea(){
   const Z=curZone(), na=G.area+1;
   if(na>=Z.areas.length){ G.area=-1; toast('⚔ '+Z.boss.name+' awaits'); }
   else G.area=na;
-  loadArea(); musicForScene(); SFX.pickup();
+  loadArea(); captureCampaignCheckpoint(); musicForScene(); SFX.pickup();
+  toast(G.area<0?'Progress saved — '+Z.boss.name+' awaits.':'Part complete — progress saved.');
   if(MP.active) MP.onEnter(G.zone);                           // co-op: synchronize the exact district, including area -1 (boss room)
 }
 function zoneClear(){
+  if(G._checkpointCleared)return;G._checkpointCleared=true;
+  if(MP.active&&MP.isHost)for(const c of MP.conns)try{c.send({t:'campaignClear',zone:G.zone,rseed:G.runSeed});}catch(e){}
   const Z=curZone();
   meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;        // everything banks — new save point
   meta.zoneDone[Z.id]=true;
@@ -8033,7 +8073,7 @@ function loadStageRaw(i){
 function startBonus(){
   G.sprintFun=false; G.sprintReturnHub=false;   // an in-zone sprint keeps its loot + returns to the zone
   const ret=G.stageIndex+1;
-  meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
+  if(!campaignCheckpoint())meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
   loadBonus(ret);
 }
 function loadBonus(returnIdx,forcedSeed){
@@ -12810,6 +12850,8 @@ const MP={
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
       else if(d.t==='mark'){ this.recvMark(d,c); }          // a guest's world ping — draw + relay to the rest of the party
+      else if(d.t==='campaignAdvance'&&isCampaignAdventure()&&G.portal&&d.zone===G.zone&&d.area===G.area){nextArea();}
+      else if(d.t==='campaignRetry'&&isCampaignAdventure()&&d.zone===G.zone&&d.area===G.area&&(mode==='dead'||mode==='dying'||this._wiped)){restartCampaignCheckpoint();}
       else if(d.t==='specialAdvance'&&d.kind==='endless'&&G&&G.endless&&G.floorCleared){ endlessDescend(); }
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
       else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); }
@@ -12846,6 +12888,7 @@ const MP={
   onGuestData(d){
     if(d.t==='zone'||d.t==='arena'||d.t==='special') this.ensureGuestReady();
     if(d.t==='special'){ this.applySpecial(d); }
+    else if(d.t==='campaignClear'){if(isCampaignAdventure()&&G.zone===d.zone&&G.runSeed===d.rseed){securePendingSecret();zoneClear();}}
     else if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
       else { this.zone=d.zone;
@@ -12857,17 +12900,19 @@ const MP={
            to 0, so both clients report a healthy agreeing session with the guest in a different
            level. The area-rebuild branch below cannot save it either, since area 0 === area 0.
            The line directly above already distinguishes the hub this exact way. */
-        const entering=!(mode==='play'&&G&&!G.hub&&G.zone===d.zone);
-        if(entering){ try{ enterZone(d.zone); }catch(e){} }
+        if(d.restart&&campaignCheckpoint()&&G?.zone===d.zone&&G.area===d.area&&G.runSeed===d.rseed){restartCampaignCheckpoint(true);return;}
+        const entering=!(isCampaignAdventure()&&G.zone===d.zone&&(d.rseed==null||G.runSeed===d.rseed));
+        if(entering){ try{ if(campaignCheckpoint())restoreBank();enterZone(d.zone); }catch(e){} }
         // A zone contains several authored districts plus area -1 (its boss arena). Older
         // packets carried only the zone, so a guest already inside that zone never rebuilt
         // when the host crossed a portal. That left the guest rendering the old room while
         // receiving the host's boss snapshot — commonly a black/empty view. Preserve the
         // guest's current hero state, but rebuild the exact room the host entered.
         if(G&&G.zone===d.zone&&typeof d.area==='number'&&G.area!==d.area){
-          G.area=d.area;
+          securePendingSecret();G.area=d.area;
+          if(d.qs)G.qs=checkpointClone(d.qs);
           if(d.rseed!=null) G.runSeed=d.rseed;
-          try{ loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); }
+          try{ loadArea(); captureCampaignCheckpoint();this.onEnter(d.zone); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); }
           catch(e){ console.error('co-op room sync failed',e); }
         } } }
     else if(d.t==='arena'){ this.arenaMsg=d; this.zone=this.ARENA; this.pvp=true; this.teams=!!d.teams;   // follow the host into the shared Arena
@@ -12888,8 +12933,8 @@ const MP={
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
-  onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
-    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0});}catch(e){}}); },
+  onEnter(zi,restart=false){ this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined});}catch(e){}}); },
   specialMsg(kind){
     if(!G) return null;
     kind=kind||(G.endless?'endless':G.sprintFun&&G.bonusActive?'sprint':G.bossRush?'gauntlet':null);
@@ -13135,6 +13180,7 @@ const MP={
     const a=Math.random()*6.28; p.x=Math.cos(a)*260; p.z=Math.sin(a)*260; p.y=0; p.vx=0; p.vy=0; p.vz=0; p.invuln=2;
     try{ burst(p.x,p.y+30,p.z,'#7de08a',16); hudUpdate(); }catch(e){} },
   leave(msg){
+    const rollback=this.active&&!!campaignCheckpoint()&&isCampaignAdventure();this.active=false;
     try{ mpHideBanner(); }catch(e){}
     try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
@@ -13143,7 +13189,8 @@ const MP={
     try{ syncPingBtn(); }catch(e){}      // tick() stops running when the party ends, so hide it here
     this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={}; this.arenaMsg=null;
     if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
-    if(msg){ try{ toast(msg); }catch(e){} } }
+    if(rollback)restartCampaignCheckpoint(true);
+    if(msg){ try{ toast(msg+(rollback?' Unfinished progress reset to this part’s start.':'')); }catch(e){} } }
 };
 // A persistent room-code banner so a PvP host can share the code from inside the arena lobby.
 function mpRoomBanner(code){ let el=document.getElementById('mpbanner');
@@ -14670,21 +14717,23 @@ function nextStage(){ warpTo(nextArea); }    // the portal now advances the ZONE
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=classStartWeapon(meta.classId); else p.weapon=normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
-  p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
+  p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=G.lastSafe?.y||0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
 function resumeSavedAdventure(){ if(meta.run?.p?.gear) continueRun(); else openHub(); }
 function continueRun(){
-  if(!meta.run) return; initAudio(); queueLevelUp=0;
+  if(!meta.run) return; initAudio(); queueLevelUp=0; queueSubclass=false;
+  const checkpoint=campaignCheckpoint();if(checkpoint)restoreCampaignState();
   // Stage-only legacy saves could resume a palace enemy set in the Outskirts map.
   // New saves carry exact campaign identity; old shared-stage areas restart at the
   // first matching area, because the older format never stored that distinction.
-  const saved=meta.run;let route=saved.campaign;
+  const saved=checkpointClone(meta.run);let route=saved.campaign;
   if(!route){for(let zi=0;zi<ZONES.length;zi++){const z=ZONES[zi];if(z.boss.stage===saved.stageIndex){route={zone:zi,area:-1};break;}const ai=z.areas.findIndex(a=>a.stage===saved.stageIndex);if(ai>=0){route={zone:zi,area:ai};break;}}}
   if(route&&ZONES[route.zone]&&(route.area===-1||ZONES[route.zone].areas[route.area])){
     if(route.zone===0&&route.area===0&&route.revision!==2){route={...route,qs:{...(route.qs||{}),ok1:(route.qs?.ok1||0)>=12?2:0}};}
     if(route.zone===1&&route.area===0&&route.revision!==3){route={...route,qs:{...(route.qs||{}),hp1:(route.qs?.hp1||0)>=12?1:0,hp4:(route.qs?.hp4||0)>=3?1:0}};}
     G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
     restorePlayer(saved.p);loadArea();restorePlayer(saved.p);if(G.area>=0&&areaClear())openWay();if(!G.baseLoadout)G.baseLoadout=snapOf(G.p);
-    mode='play';showOverlay(false);showGameUI(true);hudUpdate();return;
+    if(!checkpoint)captureCampaignCheckpoint(); // one compatibility resume for pre-checkpoint saves
+    mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();questUpdate();hudUpdate();return;
   }
   G={p:freshPlayer(),stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
      shake:0,ngPlus:meta.run.ngPlus,ngHp:meta.run.ngHp||1,ngDmg:meta.run.ngDmg||1,baseLoadout:meta.run.base||null,
@@ -14858,8 +14907,9 @@ function reviveAtStart(){   // playtesting aid: shrug off the death and respawn 
   toast('↻ Revived at the start — test mode');
 }
 function showDeathScreen(){
+  if(mode!=='dying'&&mode!=='dead')return;
   mode='dead';
-  const Z=curZone(), perma=isPermadeath(), hitless=isHitless();
+  const Z=curZone(), perma=isPermadeath(), hitless=isHitless(), checkpoint=!perma&&isCampaignAdventure()&&!!campaignCheckpoint();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
   const cb=G.lastHitBy;
   const cause = cb ? `Slain by <b style="color:#ff8a82">${cb.name}</b>${cb.attack?` <span style="opacity:.82">— ${cb.attack}</span>`:''}.`
@@ -14868,14 +14918,16 @@ function showDeathScreen(){
     ? `<b style="color:var(--danger)">Hitless — one hit ends the run.</b><br>This save is wiped. You begin again from the very start.`
     : perma
     ? `<b style="color:var(--danger)">Hardcore — death is final.</b><br>This save is wiped. You begin again from the very start.`
+    : checkpoint ? `Restart at the beginning of this part. Completed parts are safe. Gold, XP, gear and quest progress gained in this unfinished part will be reset.`
     : `You wake at the Waystation with everything you'd banked there. You lose only <b style="color:var(--danger)">${lostGold}g + the gear found this run</b>; all other progress is safe.`;
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
     <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
     <p class="ovsub" style="margin:8px auto 4px;max-width:520px;font-size:16px">${cause}</p>
     <div class="statgrid" style="margin-top:10px"><div class="vsrow" style="display:block;text-align:center;line-height:1.55"><span>${next}</span></div></div>
-    ${playtestReviveOn()?`<button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest aid, not a game mechanic</span></button>`:''}
+    ${checkpoint?`<button class="bigbtn" id="checkpointRetry" style="margin-top:14px">Retry this part</button>`:''}
+    ${!checkpoint&&playtestReviveOn()?`<button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest aid, not a game mechanic</span></button>`:''}
     <button class="bigbtn" id="hubBtn" style="margin-top:8px">${hubBtnLabel()}</button></div>`);
-  { const rb=document.getElementById('reviveBtn'); if(rb) rb.onclick=reviveAtStart; }
+  { const rb=document.getElementById('reviveBtn'); if(rb) rb.onclick=reviveAtStart; const cp=document.getElementById('checkpointRetry');if(cp)cp.onclick=()=>restartCampaignCheckpoint(); }
   document.getElementById('hubBtn').onclick=()=>{ if(perma) wipeMode(MODE); else restoreBank(); persist();   // commit the loss only when you accept it
     const fd=document.getElementById('deathfade'); if(fd) fd.remove(); openHub(); };
 }
@@ -20838,7 +20890,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={ snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

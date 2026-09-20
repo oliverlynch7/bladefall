@@ -1682,3 +1682,7 @@ Broad weapon families, intrinsic Pirate/Monk/Reaper rank-scaled weapons capped a
 
 ## [Codex | 2026-09-20] 1.983.0 class palettes and grips
 Distinct colors for 16 existing classes, same-body/mirror equipment refresh, Pirate palm-local pistol/saber and off-hand motion, peer palette isolation/signature sync, readable weapon metals. Browser checks and mobile gallery: /3d/art-previews/classes/. See docs/CLASS_PALETTES_AND_GRIPS_2026-09-20.md for scope and remaining fit audit.
+
+
+## [Codex | 2026-09-20] 1.984.0 campaign checkpoints
+Normal campaign death/reload retries current half. Completed halves bank player/class XP, gold, equipment and local quest rewards together. Individual co-op checkpoints, shared retry/transition/completion events, legacy compatibility and safe spawn height. 24 route checkpoints and transaction/co-op browser checks passed; live WebRTC and future five-shard/dialogue systems remain pending. See docs/IMPLEMENTATION_CHECKPOINTS_2026-09-20.md.

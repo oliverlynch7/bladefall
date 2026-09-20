@@ -53,3 +53,12 @@ when you do the step to apply the music into the game, make sure ot keep copies 
 ## 2026-09-20 | Resume main implementation | IMPLEMENTATION-RESUME-02
 
 alright please get back to the main implemetnation work
+
+## VISUAL-REVIEW-02 | 2026-09-20 | Exact user follow-up
+
+they all look good except paladin should be gold themed light gold holy lgiht. and the pirates pistol is being held compete ywrong and same with his saber. be caregful to make sure it looks like hjowa real person would handle those weapons. hes poniting the the wrong direction. and then agyer that, cotionue with the rest of implementation
+
+
+## VISUAL-REVIEW-03 — all weapon handles
+
+alsobe careful that the weapon handles for all handles arent clippiung into tht ehand of the charceter it looks bad, we should have it be inside the charcater hand, for all poses and adniamtions

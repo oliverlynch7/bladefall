@@ -222,3 +222,12 @@ ART-CLASS-01 verified for the 16 existing classes through browser palette checks
 ### Checkpoint evidence — 1.984.0
 
 SAVE-03/04 implemented for existing normal campaign with browser reload/death/route tests; SAVE-01 checkpoint consistency verified for player/class growth, inventory and hub transactions tested. SAVE-02 foundation banks existing secret pickup at half boundaries; new five-shard collection remains pending. Co-op individual state/transition/retry tested through controlled two-browser message relay; live WebRTC and future quest/dialogue synchronization still open. See IMPLEMENTATION_CHECKPOINTS_2026-09-20.md.
+
+### VISUAL-REVIEW-02 correction
+
+Paladin palette must be light gold/holy light. All other class colors accepted. Pirate handling still OPEN: user rejects pistol and saber direction; measure forward muzzle axis and anatomical cross-palm grip, not attachment distance alone.
+
+
+## September 20 — VISUAL-REVIEW-03
+
+GOV-05 / EQ-03 expanded acceptance: all supported weapon/body fits require an anatomical grip throughout animations. Parent-distance and forward-axis checks alone are insufficient. Source VISUAL-REVIEW-03; pending comprehensive visual audit.

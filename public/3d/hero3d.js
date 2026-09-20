@@ -263,7 +263,7 @@ const CLASS_SKINS = {
   reaper:       { id:'c_reaper',       metal:'#7a2028', leather:'#1a1418', lift:1.22 },
   ninja:        { id:'c_ninja',        metal:'#454e60', leather:'#16181f', lift:1.24 },
   // Cleric body
-  paladin:      { id:'c_paladin',      metal:'#eee4c9', leather:'#a18550', cloth:'#344d68', lift:1.08 },
+  paladin:      { id:'c_paladin',      metal:'#f5d889', leather:'#aa7c36', cloth:'#eee3bc', lift:1.32 },
   // Monk body
   monk:         { id:'c_monk',         metal:'#d8792a', leather:'#6a4a2c', lift:1.32 },
   // Ranger body
@@ -1003,15 +1003,21 @@ async function equipWeapon(actor, opts){
     const makePart=(group,geometry,color,x,y,z)=>{const m=new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({color}));m.position.set(x,y,z);m.castShadow=true;m.userData._weap=true;m.userData.signaturePart=true;group.add(m);return m;};
     // These grips are authored at the palm origin, in rig metres. Never inherit a sword mesh's offset or scale.
     const gun=new THREE.Group();gun.name='PirateFlintlock';gun.userData._weap=true;rig.bone.add(gun);
+    // Barrel follows the fingers/forearm (+Y); grip crosses the fist (-X), like the artist's sword handle.
+    gun.rotation.z=Math.PI/2;
+    // WeaponR is above the palm. Center the handle inside the skinned fist, not at that socket.
+    gun.position.set(-.085,.024,-.045);
     makePart(gun,new THREE.BoxGeometry(.12,.24,.12),'#65432c',0,0,0).rotation.z=-.18;
-    makePart(gun,new THREE.BoxGeometry(.43,.095,.115),'#805333',.17,-.14,0);
-    makePart(gun,new THREE.CylinderGeometry(.047,.058,.49,12),'#687581',.20,-.20,0).rotation.z=-Math.PI/2;
-    makePart(gun,new THREE.TorusGeometry(.052,.013,5,12),'#be9b52',.445,-.20,0).rotation.y=Math.PI/2;
-    makePart(gun,new THREE.CylinderGeometry(.037,.037,.007,12),'#161c23',.451,-.20,0).rotation.z=-Math.PI/2;
+    makePart(gun,new THREE.BoxGeometry(.43,.095,.115),'#805333',.17,.14,0);
+    makePart(gun,new THREE.CylinderGeometry(.047,.058,.49,12),'#687581',.20,.20,0).rotation.z=-Math.PI/2;
+    makePart(gun,new THREE.TorusGeometry(.052,.013,5,12),'#be9b52',.445,.20,0).rotation.y=Math.PI/2;
+    const muzzle=makePart(gun,new THREE.CylinderGeometry(.037,.037,.007,12),'#161c23',.451,.20,0);muzzle.rotation.z=-Math.PI/2;muzzle.name='PirateMuzzle';
     makePart(gun,new THREE.TorusGeometry(.064,.012,5,10),'#be9b52',.105,-.01,0);
-    makePart(gun,new THREE.BoxGeometry(.035,.08,.035),'#be9b52',-.065,-.245,0).rotation.z=-.4;
+    makePart(gun,new THREE.BoxGeometry(.035,.08,.035),'#be9b52',-.065,.245,0).rotation.z=-.4;
     const saber=new THREE.Group();saber.name='PirateSaber';saber.userData._weap=true;saber.userData.pirateSaber=true;
-    saber.position.copy(rig.bone.position);saber.position.x*=-1;hand.add(saber);
+    // The left fist has its own origin; mirroring WeaponR puts the handle against its outside face.
+    saber.position.set(.03,.057,-.005);hand.add(saber);
+    saber.rotation.z=-Math.PI/2; // left-hand mirror: blade exits at the thumb (+X), not along the fingers
     makePart(saber,new THREE.CylinderGeometry(.044,.05,.22,8),'#382c26',0,0,0);
     makePart(saber,new THREE.SphereGeometry(.061,8,5),'#bc984e',0,-.14,0);
     const guard=makePart(saber,new THREE.TorusGeometry(.105,.018,5,12,Math.PI),'#c2a15d',0,0,0);guard.rotation.z=Math.PI/2;
@@ -1019,7 +1025,6 @@ async function equipWeapon(actor, opts){
     const blade=new THREE.Shape();blade.moveTo(-.047,.14);blade.lineTo(.06,.14);blade.lineTo(.09,.60);blade.quadraticCurveTo(.10,.87,.015,1.05);blade.lineTo(-.015,.80);blade.lineTo(-.047,.14);
     const bladeMesh=makePart(saber,new THREE.ExtrudeGeometry(blade,{depth:.025,bevelEnabled:false,curveSegments:5}),'#c1d2de',0,0,-.0125);
     bladeMesh.material.emissive.set('#111820');
-    saber.userData.restRotation=saber.rotation.clone();
     if(rig.stock)rig.stock.visible=false;
     actor._weap=gun;actor._weapGrip=null;
     return {name:'Flintlock & Saber',intrinsic:'pirate',paired:true,grip:'palm-local'};
@@ -1318,7 +1323,13 @@ function paintClassBody(root,cls,packOriginal=false){
     for(const m of (Array.isArray(o.material)?o.material:[o.material])){
       if(!('_srcMap' in m.userData))m.userData._srcMap=m.map||null;
       if(!m.userData._srcMap)continue;
-      m.map=packOriginal?m.userData._srcMap:repaintTexture(m.userData._srcMap,skin);m.needsUpdate=true;painted++;
+      m.map=packOriginal?m.userData._srcMap:repaintTexture(m.userData._srcMap,skin);
+      if(m.emissive){
+        if(!m.userData._paletteEmissive)m.userData._paletteEmissive={color:m.emissive.clone(),intensity:m.emissiveIntensity};
+        if(cls==='paladin'&&!packOriginal){m.emissive.set('#d9ac48');m.emissiveIntensity=.12;}
+        else{m.emissive.copy(m.userData._paletteEmissive.color);m.emissiveIntensity=m.userData._paletteEmissive.intensity;}
+      }
+      m.needsUpdate=true;painted++;
     }
   });return painted;
 }
@@ -1489,6 +1500,35 @@ async function boot(){
   }
 }
 
+// Two-bone right-arm aim. The pistol is rigid in the fist; the arm aims it instead of rotating it through the palm.
+function pirateWeaponPose(p,wrap,A,dt){
+  if(p.weapon?.intrinsic!=='pirate'){A.pirateAim=0;return;}
+  const aiming=p.atkTimer>0&&!(p.saberSwingT>0)&&!p.dead&&!p.combatPose?.remaining;
+  A.pirateAim=THREE.MathUtils.damp(A.pirateAim||0,aiming?1:0,aiming?32:16,dt);
+  const weight=A.pirateAim;if(weight<.002)return;
+  if(A.pirateRoot!==wrap){A.pirateRoot=wrap;A.pirateBones=['UpperArmR','LowerArmR','FistR','Fist1R'].map(n=>wrap.getObjectByName(n));}
+  const [upper,lower,wrist,fingers]=A.pirateBones;if(!upper||!lower||!wrist)return;
+  wrap.updateMatrixWorld(true);
+  const pos=b=>b.getWorldPosition(new THREE.Vector3()),s=pos(upper),e=pos(lower),w=pos(wrist);
+  const target=wrap.localToWorld(new THREE.Vector3(-.40,1.50,.72));
+  const hint=wrap.localToWorld(new THREE.Vector3(-.82,1.20,.25));
+  const l1=s.distanceTo(e),l2=e.distanceTo(w),delta=target.clone().sub(s),dist=Math.min(delta.length(),(l1+l2)*.995),dir=delta.normalize();
+  const along=(l1*l1+dist*dist-l2*l2)/(2*Math.max(.001,dist));
+  const bend=hint.sub(s);bend.addScaledVector(dir,-bend.dot(dir)).normalize();
+  const elbow=s.clone().addScaledVector(dir,along).addScaledVector(bend,Math.sqrt(Math.max(0,l1*l1-along*along)));
+  const aimBone=(bone,to)=>{
+    const q=bone.getWorldQuaternion(new THREE.Quaternion()),axis=new THREE.Vector3(0,1,0).applyQuaternion(q);
+    const desired=new THREE.Quaternion().setFromUnitVectors(axis,to.clone().sub(pos(bone)).normalize()).multiply(q);
+    desired.premultiply(bone.parent.getWorldQuaternion(new THREE.Quaternion()).invert());
+    bone.quaternion.slerp(desired,weight);bone.updateMatrixWorld(true);
+  };
+  aimBone(upper,elbow);aimBone(lower,target);
+  const frame=new THREE.Matrix4().makeBasis(new THREE.Vector3(0,-1,0),new THREE.Vector3(0,0,1),new THREE.Vector3(-1,0,0));
+  const aim=wrap.getWorldQuaternion(new THREE.Quaternion()).multiply(new THREE.Quaternion().setFromRotationMatrix(frame));
+  aim.premultiply(wrist.parent.getWorldQuaternion(new THREE.Quaternion()).invert());wrist.quaternion.slerp(aim,weight);
+  if(fingers)fingers.quaternion.slerp(new THREE.Quaternion(),weight);
+  wrap.updateMatrixWorld(true);
+}
 function playFor(p, A){
   // pick a clip from the game's own player state, so the 3D hero animates off real gameplay
   const moving = Math.hypot(p.vx || 0, p.vz || 0) > 20 && p.onGround;
@@ -1522,7 +1562,7 @@ function playFor(p, A){
     staff:      'Staff_Attack',
     wand:       pick('Spell1', 'Spell2'),
     bow:        'Bow_Shoot',
-    flintlock:  p.weapon?.intrinsic==='pirate'?'Spell1':'Bow_Shoot',
+    flintlock:  p.weapon?.intrinsic==='pirate'?'Idle':'Bow_Shoot',
     cross:      'Bow_Shoot',
     javelin:    'Staff_Attack',
     fist:       'Punch',
@@ -1835,9 +1875,25 @@ export function drawHero3D(p, t){
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
 
+    // Undo last frame's procedural arm layer before sampling the next clip. Some clips
+    // omit finger/shoulder tracks, so otherwise aiming or mirrored swings accumulate.
+    if(anim.piratePoseApplied){
+      for(const [bone,q] of anim.piratePoseBase||[])bone.quaternion.copy(q);
+      anim.piratePoseApplied=false;
+    }
     playFor(p, anim);
     if(anim.mixer) anim.mixer.update(dt);
     movingCombatLegs(p,anim,dt);
+    if(p.weapon?.intrinsic==='pirate'){
+      if(anim.piratePoseRoot!==wrap){
+        anim.piratePoseRoot=wrap;anim.piratePoseBase=[];
+        for(const part of ['Shoulder','UpperArm','LowerArm','Fist','Fist1','Fist2'])for(const side of ['L','R']){
+          const bone=wrap.getObjectByName(part+side);if(bone)anim.piratePoseBase.push([bone,bone.quaternion.clone()]);
+        }
+      }
+      for(const [bone,q] of anim.piratePoseBase)q.copy(bone.quaternion);
+      anim.piratePoseApplied=true;
+    }
     if(p.saberSwingT>0&&p.weapon?.intrinsic==='pirate'){
       // The stock sword clip is right-handed. Mirror its arm pose for the off-hand saber.
       for(const part of ['Shoulder','UpperArm','LowerArm','Fist','Fist1','Fist2']){
@@ -1845,7 +1901,7 @@ export function drawHero3D(p, t){
         const q=l.quaternion.clone();l.quaternion.set(r.quaternion.x,-r.quaternion.y,-r.quaternion.z,r.quaternion.w);r.quaternion.set(q.x,-q.y,-q.z,q.w);
       }
     }
-    wrap.traverse(o=>{if(o.userData.pirateSaber&&o.userData.restRotation){o.rotation.copy(o.userData.restRotation);if(p.saberSwingT>0)o.rotation.z+=Math.sin((1-p.saberSwingT/.42)*Math.PI)*1.8;}});
+    pirateWeaponPose(p,wrap,anim,dt);
     if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a

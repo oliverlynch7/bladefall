@@ -1686,3 +1686,7 @@ Distinct colors for 16 existing classes, same-body/mirror equipment refresh, Pir
 
 ## [Codex | 2026-09-20] 1.984.0 campaign checkpoints
 Normal campaign death/reload retries current half. Completed halves bank player/class XP, gold, equipment and local quest rewards together. Individual co-op checkpoints, shared retry/transition/completion events, legacy compatibility and safe spawn height. 24 route checkpoints and transaction/co-op browser checks passed; live WebRTC and future five-shard/dialogue systems remain pending. See docs/IMPLEMENTATION_CHECKPOINTS_2026-09-20.md.
+
+
+## 2026-09-20 - 1.985.0 Holy gold and Pirate grip correction
+Paladin ivory/light gold with restrained warm light. Pirate barrel and saber corrected to anatomical hand axes, handles centered inside fists, forward arm aim and non-accumulating procedural poses. Browser checked seven pose states and multi-angle screenshots. Full all-weapon/body visual audit remains open under VISUAL-REVIEW-03.

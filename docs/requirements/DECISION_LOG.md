@@ -67,3 +67,12 @@ Resumed approved queue. Release 1.983.0 implements 16 class palettes and Pirate 
 ## 2026-09-20 | Completed-half checkpoint foundation | SAVE-01–04
 
 Release 1.984.0 replaces live provisional campaign autosaves with committed half-entry snapshots. All save-local fields captured, so class XP, gear, gold, optional rewards and character progress roll back together. Normal deaths retry the current half; reload/title/disconnect retain completed halves. Per-player co-op checkpoints and host transition/retry/completion messages; explicit permadeath and secondary-mode rules preserved. Evidence: ../IMPLEMENTATION_CHECKPOINTS_2026-09-20.md. Tests cover real browser save writes/reloads/death UI and controlled two-browser messages; no claim of live WebRTC reliability. New five-shard/dialogue/world content still pending.
+
+## 2026-09-20 | Paladin gold and Pirate orientation correction | VISUAL-REVIEW-02
+
+Other class looks accepted. Paladin must be light gold / holy light, replacing navy cloth. Pirate grips explicitly rejected again: stable attachment distance did not prove correct direction or human handling. Measured right WeaponR local +X points backward; left saber +Y follows fingers rather than the stock grip cross-axis. Correct anatomical grip axes and forward aiming pose, inspect multiple angles and test muzzle direction relative to character facing. Continue main dialogue/quest implementation after correction. Prior visual sign-off is superseded for Pirate and Paladin.
+
+
+## September 20 — VISUAL-REVIEW-03
+
+All weapon grips must sit inside the closed hand, without handles visibly cutting through the outside of the fist or guards/blades/barrels intersecting it. Check every supported body/weapon fit in idle, movement, basic and charged attacks. Do not replace hand-adjusted fits globally without inspecting them. Full visual audit remains open.

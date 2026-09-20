@@ -1698,3 +1698,8 @@ Measured handles and closed-fist attachment across all active body/weapon varian
 
 ## [Codex | 2026-09-20] Custom SFX production planning
 Added /3d/audio-planning/ with 1,296 sound briefs, 128 class-skill signatures, 30 starter auditions, copyable ElevenLabs prompts/settings, local progress export/import, and full downloadable guide/catalog/coverage audit. No SFX generated/replaced and no gameplay changed. Source: docs/audio; user request AUDIO-SFX-01.
+
+
+## [Codex | 2026-09-20] 1.987 story/journal foundation
+
+Current-level journal (N or HUD), checkpointed notes/items/dialogue state, authored atomic story reducer and Thomas/Mara mobile dialogue preview. Validated reducer, 13 browser checks and 11 checkpoint regression checks. In-world NPC/world/co-op integration remains next; no full level overhaul claimed. SFX documents emailed at user request.

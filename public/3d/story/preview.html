@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Briar Town · dialogue workshop</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101713;color:#eee9d9;font:17px/1.6 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:28px 20px}h1{font-size:clamp(28px,5vw,45px);line-height:1.2}h2{margin:0 0 8px}small,.hint{color:#b7c2b7}button{font:inherit;color:inherit;background:#273c30;border:1px solid #728466;border-radius:8px;padding:11px 16px;cursor:pointer;text-align:left}button:disabled{opacity:.4;cursor:default}button:focus-visible{outline:3px solid #ffcf72}nav,.choices{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.panel{background:#19241e;border:1px solid #435545;border-radius:14px;padding:24px;margin:20px 0}.choices{flex-direction:column}.said{font-size:14px;color:#d3bc81;min-height:22px}.line{min-height:120px;font-size:21px}.top{display:flex;justify-content:space-between;gap:12px}#dialogue[hidden]{display:none}li{margin:10px 0}#status{color:#d3bc81}a{color:#e6cc94}details{margin:24px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:650px){.grid{grid-template-columns:1fr}.panel{padding:18px}.line{font-size:18px}button{min-height:48px}}
+</style><main>
+<small>BLADEFALL · STORY FOUNDATION PREVIEW</small><h1>Before you leave home</h1>
+<p>Try Thomas and Mara’s opening conversations. This is a writing and quest-state preview, not the rebuilt level. NPC models, camera shots, voices and shared co-op conversations come next.</p>
+<nav><button id="thomas">Talk to Thomas</button><button id="mara">Talk to Mara</button><button id="reset">Restart preview</button></nav>
+<p id="status" role="status"></p>
+<section id="dialogue" class="panel" hidden aria-label="Conversation"><div class="top"><div><h2 id="name"></h2><small id="role"></small></div><button id="leave">Leave · Esc</button></div><p class="said" id="said"></p><p class="line" id="line" aria-live="off"></p><button id="reveal">Show full line</button><div id="choices" class="choices"></div></section>
+<details><summary>Preview world actions</summary><p class="hint">These buttons stand in for the future garden and store interactions. Find supplies after accepting Mara’s request.</p><nav id="world"></nav><button id="bank">Complete this half · save checkpoint</button><button id="retry">Retry this half</button></details>
+<div class="grid"><section class="panel"><h2>Journal</h2><ul id="notes"></ul></section><section class="panel"><h2>Quest items</h2><p class="hint">Separate from equipment. Nothing here can be sold.</p><ul id="items"></ul><h2>World changes</h2><p id="changes">Healing station closed.</p></section></div>
+<p class="hint">Your place is saved in this browser for this preview only. Main-game saves are not touched. Reload acts like retrying the unfinished half. A completed-half checkpoint keeps its notes and supplies.</p>
+</main><script src="../story-state.js"></script><script>
+(async()=>{
+const book=await(await fetch('briar-foundation.json')).json(),engine=BFStoryState,key='bf-briar-story-preview-v1';
+let saved;try{saved=JSON.parse(localStorage.getItem(key)||'null')}catch(_){}
+let baseline=engine.restore(saved?.baseline),state=engine.restore(baseline),timer=null,armTimer=null,ready=false,openLine=null;
+const $=id=>document.getElementById(id),safeSave=()=>{try{localStorage.setItem(key,JSON.stringify({baseline}))}catch(_){$('status').textContent='Browser storage is unavailable. This preview will not survive a reload.'}};
+function send(type,fields={}){const r=engine.transact(state,book,{type,id:crypto.randomUUID(),revision:state.revision,...fields});if(!r.changed)return false;state=r.state;render();return true}
+function reveal(){clearInterval(timer);const v=engine.view(state,book);if(!v)return;$('line').textContent=v.text;ready=false;$('reveal').hidden=true;clearTimeout(armTimer);armTimer=setTimeout(()=>{if(engine.view(state,book)?.lineId!==v.lineId)return;ready=true;for(const b of $('choices').children)b.disabled=false;},300);}
+function render(){
+ clearInterval(timer);clearTimeout(armTimer);const v=engine.view(state,book);$('dialogue').hidden=!v;
+ $('thomas').disabled=!!v;$('mara').disabled=!!v||!state.flags['thomas.ready'];
+ $('notes').replaceChildren();for(const n of Object.values(state.notes)){const li=document.createElement('li'),b=document.createElement('strong');b.textContent=n.title;li.append(b,document.createElement('br'),n.text);$('notes').append(li)}
+ if(!$('notes').children.length)$('notes').textContent='Talk to Thomas to find out who needs help.';
+ $('items').replaceChildren();for(const [id,n]of Object.entries(state.items))if(n>0){const li=document.createElement('li');li.textContent=({tangle_root:'Tangle roots',dressings:'Clean dressings'}[id]||id)+' × '+n;$('items').append(li)}
+ if(!$('items').children.length)$('items').textContent='No quest items.';
+ $('changes').textContent=state.flags['mara.healing']?'Mara’s large healing pad is open. Unlimited healing.':'Healing station closed.';
+ for(const b of $('world').children)b.disabled=!!v||state.quests['briar.supplies']!=='active'||!!state.flags['event.'+b.dataset.key];
+ if(!v){openLine=null;return}
+ $('name').textContent=book.npcs[v.npc].name;$('role').textContent=book.npcs[v.npc].role;$('said').textContent=v.lastChoice?'You: “'+v.lastChoice+'”':'';
+ $('choices').replaceChildren();ready=false;$('line').textContent='';$('reveal').hidden=false;openLine=v.lineId;
+ for(const c of v.choices){const b=document.createElement('button');b.textContent=c.text;b.disabled=true;b.onclick=()=>{if(ready&&openLine===v.lineId)send('choose',{line:v.lineId,choice:c.id})};$('choices').append(b)}
+ let i=0;const chars=Array.from(v.text);timer=setInterval(()=>{i+=2;$('line').textContent=chars.slice(0,i).join('');if(i>=chars.length)reveal()},28);
+}
+$('thomas').onclick=()=>send('open',{npc:'thomas'});$('mara').onclick=()=>send('open',{npc:'mara'});$('leave').onclick=()=>send('close');$('reveal').onclick=reveal;
+addEventListener('keydown',e=>{if(e.code==='Escape'&&state.conversation){e.preventDefault();send('close')}});
+for(const id of Object.keys(book.events)){const b=document.createElement('button');b.dataset.key=id;b.textContent=id.includes('root')?'Collect garden root '+id.slice(-1):'Collect store dressings';b.onclick=()=>send('world',{key:id});$('world').append(b)}
+$('bank').onclick=()=>{if(state.conversation)send('close');baseline=engine.restore(state);safeSave();$('status').textContent='Preview checkpoint saved. Retry keeps everything earned before this point.'};
+$('retry').onclick=()=>{state=engine.restore(baseline);$('status').textContent='Unfinished-half progress reset.';render()};
+$('reset').onclick=()=>{state=engine.create();baseline=engine.create();safeSave();$('status').textContent='Fresh preview started.';render()};
+window.__storyPreview={get state(){return state},book,send};render();
+})().catch(e=>{document.getElementById('status').textContent='Could not load the preview. Please reload.';console.error(e)});
+</script></html>

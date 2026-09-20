@@ -1000,6 +1000,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep" title="Q: cycle loot mode"><span class="togkey">Q</span><span class="ico ico-action ico-action-auto-sell-bag"></span>SELL</button>
   <button class="btn tog" id="bBag" title="Q: cycle loot mode"><span class="togkey">Q</span><span class="ico ico-action ico-action-auto-sell-bag"></span>BAG</button>
+  <button class="btn" id="bJournal" title="Open Journal">Journal</button>
   <button class="btn tog hide" id="bPing" title="Mark a spot for your party">PING</button>
   <div id="wstudio" class="hide"></div>
   <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
@@ -1019,6 +1020,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./loading.js?v=1981s"></script>
+<script src="./story-state.js?v=1987"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./combat-art.js?v=1981s"></script>
 <script src="./hostile-art.js?v=1978"></script>
@@ -1033,7 +1035,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.986.0-anatomical-weapon-grips';
+const VERSION3D='1.987.0-story-journal-foundation';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2844,6 +2846,33 @@ function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
 function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
+// Relevant current-region notes and quest items are checkpointed with the route.
+// J remains Attack for existing players; Journal defaults to remappable N.
+function adventureStoryState(){ if(!G)return null;return G.storyState||(G.storyState=BFStoryState.create()); }
+function addJournalNote(id,title,text){
+  if(!isCampaignAdventure()||typeof id!=='string'||!id||['__proto__','constructor','prototype'].includes(id))return false;
+  const state=adventureStoryState();state.notes[id]={region:curZone().id,title:String(title),text:String(text)};return true;
+}
+const journalEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let _journalFrom='play';
+function closeJournal(){if(mode!=='journal')return;if(_journalFrom==='pause')openPause();else resumePlay();}
+function openJournal(){
+  if(!G||!['play','pause'].includes(mode))return;
+  _journalFrom=mode;mode='journal';showGameUI(false);document.getElementById('toast')?.classList.remove('show');for(const k in input)if(typeof input[k]==='boolean')input[k]=false;
+  if(document.pointerLockElement)document.exitPointerLock();
+  const region=curZone(),campaign=isCampaignAdventure(),state=adventureStoryState(),esc=journalEscape;
+  const task=(title,progress,done)=>`<li style="padding:12px 0;border-bottom:1px solid #ffffff18"><span style="color:${done?'#9fc69c':'#e9c98b'}">${done?'✓':'○'}</span> ${esc(title)}${progress?` <small style="color:#c3ccb9">${esc(progress)}</small>`:''}</li>`;
+  const main=campaign?(G.area<0?[task('Defeat '+region.boss.name,'',!!G.boss?.dead)]:areaQuests().map(q=>task(q.d,questProgressText(q),questDone(q)))):[];
+  const optional=(G.optionalMissions||[]).filter(m=>m.discovered).map(m=>task(m.name,`${m.progress}/${m.total}`,m.done));
+  const notes=Object.values(state.notes).filter(n=>n.region===region.id);
+  const items=Object.entries(state.items).filter(([,n])=>n>0);
+  const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
+  const itemNames={tangle_root:'Tangle roots',dressings:'Clean dressings'};
+  showOverlayHTML(`<div class="card" style="max-width:760px;text-align:left"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(region.name):'Your notes'}</h2><p style="color:#b8c6b7">${campaign?esc(G.areaName||'Current part')+' · Progress is saved when you finish this part.':'Enter a campaign level to follow its tasks and clues.'}</p><div style="max-height:55vh;overflow:auto;padding-right:12px"><h3>What to do next</h3><ul style="list-style:none;padding:0">${main.join('')||'<li>No campaign task here.</li>'}</ul>${optional.length?'<h3>Optional tasks you found</h3><ul style="list-style:none;padding:0">'+optional.join('')+'</ul>':''}<h3>Clues and reminders</h3>${notes.map(n=>`<p><strong>${esc(n.title)}</strong><br>${esc(n.text)}</p>`).join('')||'<p style="color:#b8c6b7">No clues recorded for this region yet.</p>'}<h3>Quest items</h3><p style="font-size:13px;color:#b8c6b7">These do not use bag space and cannot be sold.</p><ul>${items.concat(fetchItems).map(([id,n])=>'<li>'+esc(itemNames[id]||id)+' × '+esc(n)+'</li>').join('')||'<li>No quest items.</li>'}</ul></div><button class="bigbtn ghost" id="journalClose" style="margin-top:18px">Close journal</button></div>`);
+  document.getElementById('journalClose').onclick=closeJournal;
+  document.getElementById('journalClose').focus({preventScroll:true});
+}
+document.getElementById('bJournal').addEventListener('click',openJournal);
 function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
 /* What the tracker shows on the right of a row. The five new verbs need their own progress read:
    a hold objective counting 0/1 tells you nothing while you are standing in it. */
@@ -3905,7 +3934,7 @@ function captureCampaignCheckpoint(){
   if(!isCampaignAdventure())return false;
   meta.hero=snapOf(G.p);
   const state={};for(const f of MODE_FIELDS)if(f!=='run'&&f!=='bank'&&meta[f]!==undefined)state[f]=checkpointClone(meta[f]);
-  const route={zone:G.zone,area:G.area,qs:checkpointClone(G.qs||{}),outskirtsNests:checkpointClone(G.outskirtsNests||[]),revision:G.campaignLayout?.revision};
+  const route={zone:G.zone,area:G.area,qs:checkpointClone(G.qs||{}),outskirtsNests:checkpointClone(G.outskirtsNests||[]),storyState:checkpointClone(G.storyState||BFStoryState.create()),revision:G.campaignLayout?.revision};
   meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:checkpointClone(meta.hero),base:checkpointClone(G.baseLoadout||meta.hero),runSeed:G.runSeed,campaign:route,checkpoint:{version:1,state}};
   // Keep the existing escrow API usable by hub exits and older tooling.
   meta.bank={gold:meta.gold||0,hero:checkpointClone(meta.hero),classes:checkpointClone(meta.classes||{}),stash:checkpointClone(meta.stash||[]),classId:meta.classId};
@@ -8314,6 +8343,7 @@ const KEYACTIONS=[
   /* ensureKeybinds() fills any newly-added action into an existing save, so this arrives on old
      profiles without touching a binding anyone has customised. */
   {id:'ping',    label:'Ping the World',    def:['KeyG']},
+  {id:'journal', label:'Open Journal', def:['KeyN']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
@@ -8343,6 +8373,7 @@ window.addEventListener('keydown',e=>{
     for(const k in input) if(MOVE_ACTS[k]) input[k]=false;
     return;
   }
+  if(mode==='journal'){ if(e.code==='Escape'||keyAction(e.code)==='journal'){e.preventDefault();if(!e.repeat)closeJournal();}return;}
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
     if(mode==='studio'){ exitStudio(); return; }
@@ -8370,6 +8401,7 @@ window.addEventListener('keydown',e=>{
       return; }
   }
   const act=keyAction(e.code); if(!act) return;
+  if(act==='journal'){if(!e.repeat&&(mode==='play'||mode==='pause')){e.preventDefault();openJournal();}return;}
   if(MOVE_ACTS[act]){ e.preventDefault(); initAudio();
     if(act==='jump'&&!input.jump) input.jumpEdge=true; if(act==='dodge'&&!input.dodge) input.dodgeEdge=true; input[act]=true; return; }
   if(/^skill[1-4]$/.test(act)){ if(mode==='play'&&!e.repeat){ e.preventDefault(); useSkill(+act.slice(5)-1); } return; }
@@ -14731,7 +14763,7 @@ function continueRun(){
   if(route&&ZONES[route.zone]&&(route.area===-1||ZONES[route.zone].areas[route.area])){
     if(route.zone===0&&route.area===0&&route.revision!==2){route={...route,qs:{...(route.qs||{}),ok1:(route.qs?.ok1||0)>=12?2:0}};}
     if(route.zone===1&&route.area===0&&route.revision!==3){route={...route,qs:{...(route.qs||{}),hp1:(route.qs?.hp1||0)>=12?1:0,hp4:(route.qs?.hp4||0)>=3?1:0}};}
-    G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
+    G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],storyState:BFStoryState.restore(route.storyState),zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
     restorePlayer(saved.p);loadArea();restorePlayer(saved.p);if(G.area>=0&&areaClear())openWay();if(!G.baseLoadout)G.baseLoadout=snapOf(G.p);
     if(!checkpoint)captureCampaignCheckpoint(); // one compatibility resume for pre-checkpoint saves
     mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();questUpdate();hudUpdate();return;
@@ -20142,7 +20174,7 @@ function render(t){
   const jw=document.getElementById('jetwrap'), jf=document.getElementById('jetfill');
   if(jw){ if(jetpackUnlocked()&&meta.jetpack!==false){ jw.classList.remove('hide'); if(jf) jf.style.width=Math.round((G.p.jetFuel==null?1:G.p.jetFuel)*100)+'%'; jw.style.opacity=G.p.jets?1:0.7; } else jw.classList.add('hide'); }
   // stage banner via toast-style DOM (first 2.6s)
-  if(G.stageBanner>0 && !render._bannered){ render._bannered=s.name;   // banner reflects the real 7-zone world, not the retired 14-stage list
+  if(mode==='play' && G.stageBanner>0 && !render._bannered){ render._bannered=s.name;   // banner reflects the real 7-zone world, not the retired 14-stage list
     const nm=(G.areaName||s.name).toUpperCase(), sub=G.endless?('  ·  FLOOR '+(G.floor||1)):((G.hub||G.trial||G.side)?'':('  ·  ZONE '+((G.zone||0)+1)+'/'+ZONES.length));
     toast(nm+sub); }
   if(G.stageBanner<=0) render._bannered=null;
@@ -20906,6 +20938,7 @@ window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheck
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
+  openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,

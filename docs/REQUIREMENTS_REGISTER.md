@@ -257,3 +257,8 @@ Status: OPEN / QUEUED. Source: VISUAL-COSMETICS-01.
 - Verify equipped cosmetics across supported character models, idle, running, turns, jumps, dash, basic/charged attacks and skills; include peer appearance where applicable. Trails should follow actual motion and suit the equipped character/cosmetic. These checks operationalize the visual request rather than add new cosmetic systems.
 - Integrate a z-fighting inspection and correction into EVERY level redesign, both halves and boss arenas. Inspect overlapping floors, terrain, trims, decals, platforms and transparent effects from moving/near/far camera views; fix duplicate/coplanar surfaces at source rather than simply hiding symptoms.
 - Capture before/after visual evidence and compare browser performance. Do not mark complete based only on static images or numerical attachment checks.
+
+
+## [Codex | 2026-09-20] Journal and story-state foundation evidence
+
+UI-01 current-level journal implemented (N default, HUD button, remappable; J attack preserved). UI-05 quest-item state kept outside equipment bag. SAVE-05 route snapshot now includes story notes/items/cursors/flags/reward ledger; completed-half preservation and unfinished-half rollback tested. DLG-02/08 reducer and readable/reveal-safe dialogue UI implemented in /3d/story/preview.html only; cinematic NPC camera, voice/mouth timing, world placement and shared multiplayer dialogue remain OPEN. Thomas/Mara authored chain has main-path-safe father replies, gated supply delivery and once-only reward state. Not completion of the full Briar slice.

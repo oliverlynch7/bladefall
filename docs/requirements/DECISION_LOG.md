@@ -96,3 +96,10 @@ User requests comprehensive sound-effect inventory and copy-ready ElevenLabs gen
 ## [Codex | 2026-09-20] VISUAL-COSMETICS-01 — queued cape, trail and level surface overhaul
 
 User approved a major visual overhaul of equipped cape and trail cosmetics: realistic cape-like physical motion, richer detail, colors that fit the character, and prevention of persistent character-model clipping. User also reports remaining level z-fighting and requires inspection/correction during the new level upgrades. This is queued work, not implemented or verified. Source: VISUAL-COSMETICS-01 in USER_SOURCE_2026-09-20_IMPLEMENTATION.md. Preserve browser performance and existing art direction.
+
+
+## [Codex | 2026-09-20] Email delivery and implementation resumed
+
+User authorized sending SFX instructions/docs to their specified recipient, then resuming implementation. Gmail send returned SENT; production guide, all-prompts document and coverage audit attached, plus production-desk link and starter instructions. Recipient and delivery details remain in the private session record.
+
+Candidate 1.987.0 adds the current-region journal, route-checkpoint story state, deterministic authored dialogue reducer and Thomas/Mara interactive foundation preview. Default N preserves J attack; journal binding is remappable. Approved NPC/world/co-op expansion remains open; preview authoring is not a completed in-world quest. See IMPLEMENTATION_STORY_FOUNDATION_2026-09-20.md.

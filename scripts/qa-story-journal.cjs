@@ -1,0 +1,34 @@
+async page=>{
+ if(!/^http:\/\/(127\.0\.0\.1|localhost):/.test(page.url()))throw Error('Local test save only');
+ const checks=[],ok=(name,test)=>{if(!test)throw Error(name);checks.push(name)};
+ await page.reload();await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+ await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');b.meta.introSeen=true;b.meta.run=null;b.meta.bank=null;b.meta.classId='warrior';b.openHub();b.enterZone(0);});
+ await page.keyboard.press('n');ok('N opens journal',await page.evaluate(()=>__BF3.mode==='journal'));
+ const time=await page.evaluate(()=>__BF3.G.time);await page.evaluate(()=>__BF3.update(.5));ok('journal pauses local gameplay',await page.evaluate(t=>__BF3.G.time===t,time));
+ await page.keyboard.press('Escape');ok('Escape resumes gameplay',await page.evaluate(()=>__BF3.mode==='play'));
+ await page.evaluate(()=>{const b=__BF3;b.addJournalNote('qa.note','A useful clue','Follow the marked beams.');b.adventureStoryState().items.test_item=2;b.adventureStoryState().cursors.thomas={node:'briar.thomas.ready',lastChoice:'Help me get ready.'};b.openJournal()});
+ ok('current note visible',(await page.locator('#journalClose').evaluate(el=>el.closest('.card').textContent)).includes('Follow the marked beams.'));
+ ok('quest item visible',await page.getByText('test_item × 2',{exact:true}).count()===1);
+ await page.evaluate(()=>{const b=__BF3;b.closeJournal();b.nextArea();b.openPause();b.addJournalNote('qa.lose','Lose this','Unfinished second-half clue.');b.adventureStoryState().items.test_item=7;b.persist()});
+ await page.reload();await page.waitForFunction(()=>window.__BF3);await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.continueRun();__BF3.openJournal()});
+ ok('banked notes/items/cursor survive reload; unfinished changes discarded',await page.evaluate(()=>{const b=__BF3,s=b.adventureStoryState();return b.G.area===1&&!!s.notes['qa.note']&&!s.notes['qa.lose']&&s.items.test_item===2&&s.cursors.thomas.node==='briar.thomas.ready'}));
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'output/playwright/journal-mobile.png'});
+ ok('journal has no horizontal overflow',await page.locator('#journalClose').evaluate(el=>el.closest('.card').scrollWidth<=el.closest('.card').clientWidth+1));
+ await page.evaluate(()=>{const b=__BF3;b.closeJournal();b.openHub();b.enterZone(1);b.openJournal()});
+ ok('fresh region does not leak previous notes/items',await page.evaluate(()=>Object.keys(__BF3.adventureStoryState().notes).length===0));
+ await page.goto('http://127.0.0.1:4331/3d/story/preview.html');await page.waitForFunction(()=>window.__storyPreview);await page.getByRole('button',{name:'Restart preview',exact:true}).click();
+ await page.getByRole('button',{name:'Talk to Thomas',exact:true}).click();
+ ok('choices disabled during text reveal',await page.getByRole('button',{name:'Someone has to keep them away from home.',exact:true}).isDisabled());
+ await page.getByRole('button',{name:'Show full line',exact:true}).click();await page.getByRole('button',{name:'Someone has to keep them away from home.',exact:true}).click();
+ ok('chosen player reply remains visible',await page.locator('#said').innerText()==='You: “Someone has to keep them away from home.”');
+ await page.keyboard.press('Escape');await page.getByRole('button',{name:'Talk to Thomas',exact:true}).click();
+ ok('leave/reopen preserves line',await page.evaluate(()=>__storyPreview.state.conversation.node==='briar.thomas.protect'));
+ await page.getByRole('button',{name:'Show full line',exact:true}).click();await page.getByRole('button',{name:'Help me get ready.',exact:true}).click();await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'Talk to Mara',exact:true}).click();await page.getByRole('button',{name:'Show full line',exact:true}).click();await page.getByRole('button',{name:'Tell me where to look.',exact:true}).click();await page.getByRole('button',{name:'Show full line',exact:true}).click();await page.getByRole('button',{name:"I'll bring them here.",exact:true}).click();await page.keyboard.press('Escape');
+ await page.locator('summary').click();for(let i=1;i<=3;i++)await page.getByRole('button',{name:'Collect garden root '+i,exact:true}).click();await page.getByRole('button',{name:'Collect store dressings',exact:true}).click();
+ await page.getByRole('button',{name:'Talk to Mara',exact:true}).click();await page.getByRole('button',{name:'Show full line',exact:true}).click();await page.getByRole('button',{name:'Here are the roots and dressings.',exact:true}).click();await page.getByRole('button',{name:'Show full line',exact:true}).click();
+ ok('Mara turn-in consumes supplies and enables healing state once',await page.evaluate(()=>{const s=__storyPreview.state;return s.items.tangle_root===0&&s.items.dressings===0&&s.flags['mara.healing']&&Object.keys(s.rewards).length===1}));
+ await page.screenshot({path:'output/playwright/briar-dialogue-mobile.png'});
+ ok('preview no horizontal overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ return checks;
+}

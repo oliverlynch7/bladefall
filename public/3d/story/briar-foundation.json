@@ -1,0 +1,382 @@
+{
+  "version": 1,
+  "region": "outskirts",
+  "status": "Authored foundation preview; world placement and co-op dialogue pending",
+  "npcs": {
+    "thomas": {
+      "name": "Thomas",
+      "role": "Your father",
+      "start": "briar.thomas.first"
+    },
+    "mara": {
+      "name": "Mara",
+      "role": "Village medic",
+      "start": "briar.mara.first",
+      "when": [
+        {
+          "flag": "thomas.ready",
+          "is": true
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "briar.thomas.first": {
+      "text": "I know that look. You think you're going out there. The Legion is at our fields, and half the village is holding tools instead of weapons.",
+      "choices": [
+        {
+          "id": "protect",
+          "text": "Someone has to keep them away from home.",
+          "next": "briar.thomas.protect",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "afraid",
+          "text": "I'm scared too. But hiding won't stop them.",
+          "next": "briar.thomas.afraid",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "joke",
+          "text": "Then I'd better look dangerous from a distance.",
+          "next": "briar.thomas.joke",
+          "effects": [],
+          "when": []
+        }
+      ]
+    },
+    "briar.thomas.protect": {
+      "text": "I know. I just wish that someone didn't have to be you. Come here. That strap won't last a minute.",
+      "choices": [
+        {
+          "id": "prepare",
+          "text": "Help me get ready.",
+          "next": "briar.thomas.ready",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "thomas.ready"
+            },
+            {
+              "type": "quest",
+              "id": "briar.wounded",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.mara",
+              "region": "outskirts",
+              "title": "Make room for the wounded",
+              "text": "Mara needs help treating our neighbors. Find her near the village beds."
+            }
+          ],
+          "when": []
+        }
+      ]
+    },
+    "briar.thomas.afraid": {
+      "text": "Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
+      "choices": [
+        {
+          "id": "prepare",
+          "text": "I promise. What's the first thing I can do?",
+          "next": "briar.thomas.ready",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "thomas.ready"
+            },
+            {
+              "type": "quest",
+              "id": "briar.wounded",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.mara",
+              "region": "outskirts",
+              "title": "Make room for the wounded",
+              "text": "Mara needs help treating our neighbors. Find her near the village beds."
+            }
+          ],
+          "when": []
+        }
+      ]
+    },
+    "briar.thomas.joke": {
+      "text": "Try standing behind the fence. Makes you look taller. Hold still while I fix this strap.",
+      "choices": [
+        {
+          "id": "prepare",
+          "text": "Thanks, Dad. Who needs help first?",
+          "next": "briar.thomas.ready",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "thomas.ready"
+            },
+            {
+              "type": "quest",
+              "id": "briar.wounded",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.mara",
+              "region": "outskirts",
+              "title": "Make room for the wounded",
+              "text": "Mara needs help treating our neighbors. Find her near the village beds."
+            }
+          ],
+          "when": []
+        }
+      ]
+    },
+    "briar.thomas.ready": {
+      "text": "Go to Mara. She has wounded people arriving and barely enough supplies for the ones already there. I'll help the neighbors pack. We're not leaving anyone behind.",
+      "choices": []
+    },
+    "briar.mara.first": {
+      "text": "Good. Someone still on their feet. I need tangle roots to bring down the fevers and clean dressings for the wounds. We can't move these people safely yet.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Tell me where to look.",
+          "next": "briar.mara.supplies",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "why",
+          "text": "Will this help us hold the village?",
+          "next": "briar.mara.why",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "joke",
+          "text": "I'm better at finding trouble. Will that do?",
+          "next": "briar.mara.joke",
+          "effects": [],
+          "when": []
+        }
+      ]
+    },
+    "briar.mara.why": {
+      "text": "These are our neighbors. Some can help hold the lane once they're treated. The rest need to be well enough to leave it. Both matter.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "All right. What do you need?",
+          "next": "briar.mara.supplies",
+          "effects": [],
+          "when": []
+        }
+      ]
+    },
+    "briar.mara.joke": {
+      "text": "Only if it comes wrapped in clean cloth. And please don't bring it inside.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Roots and dressings. Where are they?",
+          "next": "briar.mara.supplies",
+          "effects": [],
+          "when": []
+        }
+      ]
+    },
+    "briar.mara.supplies": {
+      "text": "Three tangle roots from the overgrown garden, and a bundle of clean dressings from the shuttered store. The front is blocked. Look around the back for a way inside.",
+      "choices": [
+        {
+          "id": "accept",
+          "text": "I'll bring them here.",
+          "next": "briar.mara.wait",
+          "effects": [
+            {
+              "type": "quest",
+              "id": "briar.supplies",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.supplies",
+              "region": "outskirts",
+              "title": "Mara’s supplies",
+              "text": "Find 3 tangle roots in the overgrown garden and clean dressings in the shuttered store. Check the back of the store. Bring both to Mara."
+            }
+          ],
+          "when": []
+        }
+      ]
+    },
+    "briar.mara.wait": {
+      "text": "Roots from the garden. Dressings from the store. And if you're thinking of tasting a root, I'd rather not find you a bed.",
+      "choices": [
+        {
+          "id": "deliver",
+          "text": "Here are the roots and dressings.",
+          "next": "briar.mara.heal",
+          "effects": [
+            {
+              "type": "item",
+              "id": "tangle_root",
+              "amount": -3
+            },
+            {
+              "type": "item",
+              "id": "dressings",
+              "amount": -1
+            },
+            {
+              "type": "quest",
+              "id": "briar.supplies",
+              "value": "complete"
+            },
+            {
+              "type": "quest",
+              "id": "briar.wounded",
+              "value": "complete"
+            },
+            {
+              "type": "flag",
+              "id": "mara.healing"
+            },
+            {
+              "type": "reward",
+              "id": "briar.mara.supplies",
+              "kind": "gold",
+              "amount": 65
+            },
+            {
+              "type": "note",
+              "id": "briar.supplies",
+              "region": "outskirts",
+              "title": "Mara’s supplies delivered",
+              "text": "Mara has treated the wounded and reopened the large healing pad."
+            },
+            {
+              "type": "note",
+              "id": "briar.healing",
+              "region": "outskirts",
+              "title": "Healing pads",
+              "text": "Mara’s large pad heals you fully and never runs out. Small pads have limited healing. Save them for when you need them."
+            }
+          ],
+          "when": [
+            {
+              "item": "tangle_root",
+              "count": 3
+            },
+            {
+              "item": "dressings",
+              "count": 1
+            },
+            {
+              "quest": "briar.supplies",
+              "is": "active"
+            }
+          ]
+        }
+      ]
+    },
+    "briar.mara.heal": {
+      "text": "That's enough. Give me a moment... There. The large healing pad is working again. Stand on it whenever you need to heal. It won't run out. The small pads you'll find out there only hold a little healing, so use them wisely.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "What should I do next?",
+          "next": "briar.mara.next",
+          "effects": [
+            {
+              "type": "quest",
+              "id": "briar.escape",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.escape",
+              "region": "outskirts",
+              "title": "Open the way out",
+              "text": "The mill crossing is stuck. Find what is jamming the wheel so the villagers can reach the escape lane."
+            }
+          ],
+          "when": []
+        }
+      ]
+    },
+    "briar.mara.next": {
+      "text": "The mill crossing is stuck. Gus was checking the wheel. See what's caught in it, and make a way through. I'll get these people ready to move.",
+      "choices": []
+    }
+  },
+  "events": {
+    "briar.root.1": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.supplies",
+          "is": "active"
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "tangle_root",
+          "amount": 1
+        }
+      ]
+    },
+    "briar.root.2": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.supplies",
+          "is": "active"
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "tangle_root",
+          "amount": 1
+        }
+      ]
+    },
+    "briar.root.3": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.supplies",
+          "is": "active"
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "tangle_root",
+          "amount": 1
+        }
+      ]
+    },
+    "briar.dressings": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.supplies",
+          "is": "active"
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "dressings",
+          "amount": 1
+        }
+      ]
+    }
+  }
+}

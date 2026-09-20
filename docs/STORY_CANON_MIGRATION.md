@@ -1,5 +1,9 @@
 # Canon migration audit — 2026-09-19
 
+> Historical audit. REQUIREMENTS_REGISTER.md supersedes multiple Gate/construction-site
+> assumptions and the interim early-boss commander proposal: one castle Gate, Storm Coast
+> and merciful hydra are now approved. Review current source decisions before code migration.
+
 Status: inspected and documented only. Live story, quests, saves and boss logic are not rewritten in this change.
 
 ## Inspected sources

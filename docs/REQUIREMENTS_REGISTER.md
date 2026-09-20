@@ -1,0 +1,189 @@
+# Bladefall — reconciled requirements register
+
+Baseline: September 19, 2026 (America/Los_Angeles). Owner: Oliver. Source range: U002–U099 in [the verbatim source record](requirements/USER_SOURCE_2026-09-19.md). This is the primary implementation checklist, not a claim that the features are shipped.
+
+## Authority and status
+
+Oliver's latest explicit instruction wins. This register reconciles the available conversation; the verbatim messages remain authoritative if a paraphrase omits detail. Read the full 100-section lore brief in U079 for story work. Do not promote an assistant suggestion into approval just because it appeared in a table. Read [the continuity workflow](requirements/CONTINUITY.md) before editing.
+
+Decision labels: **A** approved requirement; **P** proposal/preference awaiting a precise design decision; **O** unresolved; **S** superseded. Implementation status for every requirement below is **UNVERIFIED** unless a later evidence entry explicitly proves otherwise. Some earlier work was reported shipped; that is not a substitute for checking current code and testing. Planning documents alone never count as implementation.
+
+## Preservation and scope
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| GOV-01 | A | Preserve original user wording, source IDs, corrections and rejected ideas. Maintain one current register plus append-only decisions and verification evidence. No silent deletion of requirements. | U098–U099 |
+| GOV-02 | A | Every main level gets a substantial redesign, not just Briar Town or a visual pass: both halves, landscape, routes, people, quests, puzzles, secrets, interactables and encounters. Discuss level/NPC purpose outlines before building all content in one pass. | U069–U070,U097 |
+| GOV-03 | A | Core campaign comes before secondary portal modes such as Abyssal Descent; retain those modes as later scope rather than forgetting them. | U025 |
+| GOV-04 | A | Browser performance is a hard constraint. Keep the icon-inspired voxel/low-poly direction, distinctive level palettes and silhouettes; do not pursue realism or excessive polygons. | U004–U005,U009,U039,U079 §74 |
+| GOV-05 | A | Preserve preferred existing player models, animations, weapon models and hand-adjusted fitting; fix fit and equipped-model selection. Experimental Warrior replacement was preview-only and not adopted. | U036,U059–U061 |
+| GOV-06 | A | Provide mobile-viewable screenshots of worlds/enemies and animation previews for QA. Explain completed work and what comes next. Main production target is bladefall.pages.dev; earlier autopilot preview was an earlier target. | U008,U012–U013,U029,U035,U051,U054 |
+
+## Equipment, classes and progression
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| EQ-01 | A | Class access should use broad weapon families rather than narrowly restricting individual weapon types. Keep distinct models/basic/charge behavior. Hybrid access counts toward each family. Paladin = Mage + Warrior; Ninja = Ranger + Warrior; Reaper its own category. | U091–U094 |
+| EQ-02 | A | Daggers belong to Ranged access: fast short-reach normal strikes and a charged ranged throw. Javelins have slower, longer-reach normal attacks and a charged throw. | U093 |
+| EQ-03 | A | Guns are Pirate-exclusive; Pirate can equip other Ranged weapons. Empty Pirate weapon slot activates flintlock plus off-hand saber. Auto fires high-damage cannonball-like projectile at moderate speed; charge is strong saber swing. Combo is intrinsic, not a bag/rarity item. | U093 |
+| EQ-04 | A | Monk fists are intrinsic Monk equipment, not general loot; use the same power-progression principle as Pirate. Do not remove Monk now: possible future removal is undecided. | U093 |
+| EQ-05 | A | Reaper scythe is intrinsic, not a regular drop/rarity upgrade. Remove existing inventory/equipped scythe loot safely and use intrinsic scythe for Reaper. No compensation necessary. Preserve unrelated save state; no corruption. | U094–U095 |
+| EQ-06 | A | Intrinsic class-weapon upgrades cap at class rank 10. Player level continues globally increasing stats and damage across all classes and combat through multiplicative scaling. Audit derived hits/summons/status effects to avoid missing or double-applied scaling. Exact curves come from playtesting. | U094,U097 |
+| EQ-07 | A | Grant All Weapons cheat reflects current valid bag weapons; excludes intrinsic Pirate combo, Monk fists, Reaper scythes and retired entries. Include new valid dagger behavior. | U095 |
+| EQ-08 | A | Bag groups weapon types and armor/equipment types into neat collapsible sections, all collapsed whenever the bag is newly opened. | U093 |
+| EQ-09 | A | Prevent off-class equips; class change equips a compatible owned weapon or a compatible fallback. Regular-class fallbacks are considerably weaker than most loot; intrinsic Pirate/Monk/Reaper equipment follows later progression rules instead. Fix trials labeling their own defaults off-class. | U061,U093–U094 |
+| EQ-10 | A | Match weapon appearance/color to item icon and element, retain fitted attachments and show the selected weapon rather than always the class default. Remove white icon backgrounds. | U036,U061 |
+| EQ-11 | A | Player/class level-up have distinct triumphant audio and visible celebrations. Player level-up shows stat increases and newly available gear explicitly. Prevent attack-clicks accidentally choosing skill/passive upgrades. | U084 |
+| EQ-12 | P | Upgrade-choice confirmation and/or brief input-safe entrance animation are proposed solutions. Preserve deliberate selection without arbitrary extra friction. Armor rarity becomes available too early relative to weapons: tune closer together after XP/expanded-level tests. | U084 |
+| EQ-13 | A | Add cheat to lower player level, minimum zero. Hub state/cheat changes save reliably. | U073 |
+| EQ-14 | A | NG+ resets main-campaign level locks/progression and scales difficulty while keeping money, player/class levels, classes and items. Older NG+ removal instruction is superseded. New shard/quest reset details need explicit treatment. | U061 |
+| EQ-15 | A | Pyromancer is the approved Emberdeep class name. Reject Firebinder. | U090–U092 |
+| EQ-16 | P | Pyromancer Magic + Ranged hybrid direction is supported by the discussion, but its exact four skills, subclasses, heat system and numerical tuning are not approved designs. Do not copy an assistant kit as locked content. | U092 |
+
+## Campaign structure and exploration
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| LV-01 | A | Expand every level substantially, roughly five times as an ambition rather than a uniform quota. No repeated filler structures, tedious empty walks or identical layouts. Both halves must feel full and varied. | U039,U069–U072,U097 |
+| LV-02 | A | Distinct colors, obstacles, assets, hazards, mechanics and navigation per level. Fit verticality to theme; use parkour, alternate routes, shortcuts and rewarding exploration. Provide enough healing for long routes. Difficulty can be tuned later. | U039,U069–U070 |
+| LV-03 | A | Secret areas may use hidden tunnels, convincing false walls, mazes, side portals with entry animation and return access, and routes opened through dialogue/puzzles. Mix approaches rather than repeat one template. | U072 |
+| LV-04 | A | Main quests, bosses and named leaders serve the central struggle; optional quests may be personal side stories. NPC objectives must have understandable purpose, not arbitrary checkboxes. | U077,U082,U084 |
+| LV-05 | A | Vary quests: meaningful fetch/delivery with return; NPC-assigned missions completed in the field without return; player-initiated objectives discovered in the world. Quest chains reveal progressively rather than all unlocked at entry. | U071,U098 |
+| LV-06 | A | Preserve the successful hold-the-breach concept and reuse sparingly. Add genuinely different quest mechanics rather than making every objective a timed defense. | U069 |
+| LV-07 | A | Some puzzles gate required main passages; most are optional for side quests, valuable distinctive gear, shards and secrets. Hints only sometimes from NPCs; harder puzzles can rely on environment alone. Cryptic but actionable, never useless poetry or automatic answers. | U071,U078,U098 |
+| LV-08 | A | Chest tiers common through legendary bias drops toward their tier with occasional lower/higher results. Some chests require three-digit codes inferred from puzzles/counting/environmental clues. | U078 |
+| LV-09 | A | Big healing pads are exceptionally rare, grander and unlimited to full health. Small pads are limited and may be scattered along routes. Mara's early quest restores a big pad and teaches this distinction. | U078,U085 |
+
+### Region-by-region decisions (all implementation UNVERIFIED)
+
+| ID / region | Approved anchor | Proposed details still needing a level outline |
+|---|---|---|
+| MAP-01 Briar Town (replaces Outskirts) | Home threatened by approaching Legion; ordinary farmers, local people, Mara, scrappy spear defenders, adoptive father. Father reluctantly helps because player will not back down. Berserker fits emotional response. Sources U084–U085,U090,U098. | Homefields / Black Woods naming pair; injured scout/local defender roles and exact quests. |
+| MAP-02 Hollow Pass | Maintain distinct terrain and purposeful story progression; Ninja trial remains working mapping. Sources U084–U085,U097. | Winding Cliffs / Lost Canyon; prisoner transport interception; escaped prisoner, climber and officer encounter. |
+| MAP-03 Ruined Keep | Reaper trial belongs here; shard collection should be especially challenging because class is powerful. Sources U090. | Broken Walls / The Dungeons; prisoner escape, locksmith, captive guard and old passages; harder optional puzzles/fights rather than obscure random placements. |
+| MAP-04 Frostfell | First half mountain climb, second ice cave exploration; keep elemental variety. Source U085. | Snowbound Peaks / Deep Ice Caves; rescuing former Gate researcher, guide, link to Emberdeep; Chronomancer mapping retained pending full outline. |
+| MAP-05 Emberdeep | Legion weapon production; shut it down to limit arms. Pyromancer unlock. Sources U085,U090,U092. | Iron Halls / The Great Furnace; captive smith/workers, machinery routes and escape plan. Not Gate-frame production. |
+| MAP-06 Storm Coast | Replaces old Abyss level. Shipwreck Shore / Thunder Cliffs accepted. Seek remote Sunspire and its rumored orb: boat crossing to island, climb cliffs to palace. Pirate trial. Build ship from supplies, steer playable obstacle/combat crossing at end of first half. Sources U088–U089. | Boatbuilder, sailor, cliff resident; exact supply encounters, sailing controls and duration. Co-op rotates steering/fighting if sequence has room, never force bloat. U097. |
+| MAP-07 Sunspire Palace | Beautiful elevated marble palace/library of sacred wisdom, seized by Legion for knowledge. Retake it and access formerly restricted magical orb allowed one question; seek King's location/how to reach and stop him. Paladin unlock. Sources U086–U087,U090. | Palace Courtyard / The Sky Library; caretaker/record keeper/defender; exact single-question wording and answer scope. Do not silently promise multiple omniscient answers or reveal player early. |
+| MAP-08 Castle Duskmoor | Hidden distant castle, revealed through Sunspire. Disguise set quest and guard dialogue can avoid extremely hard horde. Single central Hollow Gate visible from final arena. Necromancer unlock after castle. Sources U079,U085,U090. | Castle Gates / Long Ascent; servant/armor maker, exact infiltration clues. Trial available after ending was a proposed default broadly accepted during planning, not yet implemented. |
+
+Names marked proposed are not newly locked by this register. Exact NPC names, numbers, biographies and dialogue must be reviewed by level. Do not give every region equal NPC counts. Unknown creators, relatives, magic rules and connections stay open.
+
+## Boss and combat presentation overhaul
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| BOSS-01 | A | Major redesign of every boss and arena is authorized. Bosses obstruct objectives, not arbitrary end-of-level decorations. Person-like leaders generally Hollowed; independent beasts or controlled animals allowed. | U080,U084–U085,U097 |
+| BOSS-02 | A | Vary size, number, grounded/flying styles, solo/add fights, interior/exterior, large/small arena, flat/vertical/horizontal parkour and environmental tools. Not every arena a flat square circle-strafe fight; not every arena needs hazards. | U084–U085 |
+| BOSS-03 | A | Storm Coast massive multi-headed hydra blocks ascent. It is chained, provoked, defending itself; victory attacks neck restraints and frees it mercifully rather than killing it. | U088–U089 |
+| BOSS-04 | P | Working lineup: Brute town defenses; Marksman canyon cover; Fallen compact indoor duel; three Frost officers on cavern elevations; enormous Ember Colossus forge machinery; Marble Colossus environmental openings. User approved varied direction, not every exact mechanic/name/phase. | U084–U085,U097 |
+| BOSS-05 | A | Remove early Abyss King fight. Earlier commander replacement was superseded in that region by Storm Coast/hydra. Keep partial and fully infused King together at final castle. | U080,U088–U089 |
+| FX-01 | A | Audit all class 1–4 skills, all weapons' basic/charged attacks, all enemy/boss attacks and body animations. Unique satisfying effects that clearly communicate attack/defense/utility; not recolored shared AOEs or shield cubes. Paladin Smite golden lightning from sky. | U041,U044,U046,U054,U061 |
+| FX-02 | A | Every damaging enemy/boss attack readable and skill-dodgeable. Death spore burst needs warning/delay for melee escape. Redesign green translucent square hazards, use sparingly in sensible locations. Fix overlapping-asset flicker globally. | U042 |
+| FX-03 | A | Strong obvious deaths: immediate fade and possible red hit flash; approved death look should be preserved. Particle-off setting must work. | U055–U056 |
+| FX-04 | A | Rounded higher-definition elemental/spiritual projectiles. Paladin natural fitting recolor. Better detailed NPC/companion models without losing browser performance. | U061 |
+| FX-05 | A | Keep walking while attacking/casting when player moves. Select short rooted casts only where intuitive and useful for balance. Dash trail matches current character. Loading screen hides old art and reduces initial stutter. | U061 |
+
+## Rift Shards and trial lore
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| RIFT-01 | A | Five unique shards per region, distributed across both halves; optional hidden boss-room corner sometimes. Mix physical secrets, puzzles, NPC reward and clue-led discoveries. Possible to earn all five in one successful playthrough; choices may close optional shard access for that run. | U071–U072 |
+| RIFT-02 | A | Strong purple crystalline presentation and upgraded pickup assets. First Briar shard intentionally easy; animation/audio explains what it is, five needed, purpose and where to use them. Never confuse with huge black Hollow Gate. | U073,U084–U087 |
+| RIFT-03 | A | Separate Rift Hall room declutters hub. Each region clearly labeled with permanently collected X/5; complete frame brightly lights and opens its class trial. Hub NPC assembles shards. | U072,U085 |
+| RIFT-04 | A | Rifts are themselves crystalline magical portal structures, not crystals holding separate portals. Palace scholar deliberately threw them out during takeover to preserve fighting knowledge; fall shattered/scattered them. Creators remain unresolved. | U086–U087 |
+| RIFT-05 | A | Unique class-specific mentor in each trial teaches discipline after player proves worthy. Remove repeated campaign Shade role; repurpose ethereal guide in Rift Hall explaining lore and shards. New guide name not locked. | U085–U087 |
+| RIFT-06 | A | Final mapping: Briar Berserker; Hollow Pass Ninja; Keep Reaper (harder shards); Frostfell Chronomancer; Emberdeep Pyromancer; Storm Coast Pirate; Sunspire Paladin; Duskmoor Necromancer. Do not use older Paladin/Ember or Necromancer/Palace mapping. | U088–U092, retained existing Ninja/Chronomancer assignments |
+
+## Saving, co-op and state
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| SAVE-01 | A | Verify player levels, class ranks and all character state persist correctly. Hub auto-saves gains, spending, cheats and mode rewards continuously at meaningful transactions. | U061,U073 |
+| SAVE-02 | A | Collected shards only become permanent on completing their half. First-half completion banks those even if second half/boss later fails. Second-half entry to boss banks second-half shards. Unbanked shards lost on failed half; banked duplicates gray out or award gold. | U073 |
+| SAVE-03 | A | Death restarts beginning of the current half and undoes that half's progress, not the entire level. Keep earlier banked half. | U075 |
+| SAVE-04 | A/O | Quit/disconnect must preserve pre-entry character/XP/gold and discard uncommitted run gains. U073 explicitly said original level-entry state; subsequent U075 explicitly changed death to half restart, not expressly quit. Assistant later generalized half snapshots to quits. Do NOT silently canonize that: decide whether quitting half two keeps half-one non-shard gains and resume position. Banked shard survival is explicit. | U073,U075 |
+| SAVE-05 | A/O | Dialogue/world progress resets for replay/restart, while leaving an NPC conversation alone resumes at the same point that run. Hub first introductions once per save. Exact checkpoint snapshot/reset treatment for shared world and optional rewards needs tests and a defined contract. | U072,U075,U078 |
+| MP-01 | A | Shared campaign quests, dialogue, puzzles, unlocks/environment changes, enemies and enemy health synchronized. NPC interaction pauses all players and frames same NPC/dialogue for everyone. | U072,U075–U076 |
+| MP-02 | A | Environmental shards require each player to physically collect them. NPC quest progress and rewards apply together without making every player repeat conversation or turn-in. | U075–U076 |
+| MP-03 | A/P | Conversation initiator chooses by default. Optional voting proposed: majority wins, tie random among tied options; both see same resolved line. Exact timeout/disconnect handling remains design work. | U073 |
+| MP-04 | A | Teammates show actual current class/full model, character name, health bar and small class label; subtle and toggleable. | U075 |
+| MP-05 | A | Sailing has steering/combat roles; swap if there is enough meaningful room in the sequence. Solo must remain playable. Do not stretch crossing just for a swap. | U089,U097 |
+
+## Dialogue, journal, clues, UI and voice studio
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| DLG-01 | A | ALL game wording middle-school-readable, including menus, lore and directions. Cleverness and depth welcome; avoid obscure vocabulary, unclear poetic instructions and exposition overload. Voice-typed Earth/Erith means Aerth. | U071,U077–U079,U087 |
+| DLG-02 | A | Conversations zoom neatly to centered NPC, side menu for quests/options, pause fighting, exit anytime, resume at same position this run. NPC text reveals progressively; selected player response remains in smaller text during answer. | U071–U073 |
+| DLG-03 | A | Meaningful choices affect assistance, access, quests/rewards or reactions. Humor, surprise, emotion, serious characters and mixed personalities. Can upset NPC/close optional opportunity, but never required campaign softlock. Hinted natural ways to repair relationships, not blunt arbitrary chore demands. | U071–U072,U078 |
+| DLG-04 | A | Manage branching and recording workload: choices should feel real without exponential options or overwhelming fear of missing paths. Discovered NPCs need not be marked main objectives. Vary count across regions. | U071,U078 |
+| DLG-05 | A | All hub NPCs introduce themselves and services once per new save, never repeatedly. Campaign milestones add visible new dialogue, clues, side quests and return trips with newly appearing objectives. Separate shopping from optional What changed? dialogue. | U077–U078 |
+| DLG-06 | A | Visible world consequences: restored pads, moved/open routes, assistance, spawns and useful NPC overhead state markers. No purely invisible completion. Marker icon vocabulary still design work. | U078 |
+| UI-01 | A | Simple journal of relevant current-level tasks/clues, not every remark. Keyboard shortcut (J proposed). Bag shortcut B approved. | U078 |
+| UI-02 | A | Optional directional objective arrows; subtle horizontal rotating cardinal compass. | U071 |
+| UI-03 | A | Rebuild buggy E prompts with smart target selection/readable interaction. Widen upper-left HUD to avoid overlap; unique main-menu icons; logically organized settings. | U061,U078 |
+| UI-04 | A | Fix the hub mirror regression and verify appearance changes, preview and return to gameplay remain functional. | U061 |
+| VO-01 | A | Device TTS optional in settings; simple mouth motion only while speech plays. No precise lip sync required. Unrecorded lines may use optional TTS or silence. Player-response voice unresolved; do not force it. | U072–U073,U079 |
+| VO-02 | A | Private voice studio subpage, Oliver only account, usable phone and desktop. Wife records at his setup. Prefer fewer female roles due available performers, not zero female characters. | U077–U079 |
+| VO-03 | A | Organize by character/scene/order. Show script plus scene context, emotional direction and notes; record, playback, retake, edit wording, and explicitly Approve/Save as official line. Distinct contexts for recurring NPC conversations. | U077–U079 |
+| VO-04 | P | Stable line IDs, approved-take preservation, text-change/stale-audio tracking and backup/export are implementation safeguards; exact storage/auth provider undecided. | U077–U079 |
+
+## Companions and additional rewards
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| COMP-01 | A | Improve companion and standard Necromancer summon models. Reviving latest killed foe produces an undead version of that actual enemy as fighting ally. Make companions' combat impact visible and meaningful. | U061,U072 |
+| COMP-02 | A | Optional adventures can unlock stronger secret companions, hidden from Beastmaster selection until discovered. Also appearance rewards, useful shortcuts, home/refuge upgrades and small adventures. | U072–U073 |
+| COMP-03 | A/P | Later major quest can reward ground mount or small rideable dragon with strong but limited flight. Same input mounts/dismounts; companion fights when dismounted and does not independently attack while ridden. Rider weapon/skill use while mounted undecided. | U072–U073 |
+| COMP-04 | P | Rare class-specific NPC quests/rewards, gear or changes to skill behavior are desired possibilities, not a finalized item/skill list. | U072 |
+| COMP-05 | A/O | Some optional quests grant specified weapons/rarities rather than purely random loot. Permanent companion/cosmetic reward banking should follow the agreed checkpoint contract; precise handling of every non-shard reward still needs definition rather than an assumed universal rule. | U071–U073 |
+
+## Narrative canon — detailed source remains mandatory
+
+The entire 100-section brief is preserved verbatim in U079, including open questions and every negative constraint. The following are the reconciled narrative checks, not permission to ignore that source.
+
+| ID | Decision | Requirement / acceptance condition | Source |
+|---|---|---|---|
+| STORY-01 | A | Aerth; Bladeborn; Ian; Abyss King; Eternal Gate propaganda / Hollow Gate truth; Hollowing; Hollowed; Hollowed Legion; Abyssal Void; Ian's Blade. No Hollow Court/Hollowborne/Shadowing replacements. Exact Aerth geographic scale open. | U079 §§1,77–78,97 |
+| STORY-02 | A | Ian famous successful protector, long life, natural old-age death, infertile. Not murdered, defeated, secretly failed, creator of King or a death conspiracy. | U079 §§3,68–69,94 |
+| STORY-03 | A/P | Bladeborn hereditary dormant potential; proposed recessive awakening through intense protective intent/pure heart, not fixed scientific formula. Player orphan raised unknowingly by adoptive father; Ian may reveal adoption at ending. Exact ancestry/connection to Ian unresolved, no infertile direct-descendant invention. Father reluctantly prepares player. | U079 §§2,38,70,100;U080,U085,U098 |
+| STORY-04 | A | Dead Bladeborn are eternal spirits together in their own spiritual realm, learning/teaching and preserving legacy; Ian describes eventual joining. Do not equate their realm with imprisonment of Hollowed souls or bodily resurrect Ian. | U087 |
+| STORY-05 | A | King's understandable immortality research precedes surprise control discovery, then recognition of Ian's absence, covert recruitment, militarization and conquest. He did not plan enslavement from day one. Original name/title unresolved. | U079 §§4–10,16–34,65–66,92–94 |
+| STORY-06 | A | ONE central imposing black Hollow Gate at Castle Duskmoor, created with mages/ritual/rare resources and King's soul anchor. Later one-Gate choice supersedes original network/multiple construction sites. Purple training rifts remain entirely separate. | U079 §§6–11;U084–U085 |
+| STORY-07 | A | Crossing strips living soul to timeless Void; body immediately exits door-like, ageless but destructible, complex retained skills/memory/social imitation, no free will, follows standing orders. Empty eyes may be subtle. Soul unaware of body's actions, identity/sanity fading. Not ordinary necromancy. | U079 §§12–20,27–31,71–73;U080 |
+| STORY-08 | A | Victims' hopes/families exploited, recruitment by familiar Hollowed loved ones. Later forced enter-or-die. Legion organized under King, scouts track player. Not all creatures are Legion or Hollowed; recognizable beasts and people, not universal zombies/skeletons. | U079 §§25–36,79–80,91 |
+| STORY-09 | A | Unknown local nobody fights for home before certainty, growing impossible victories gradually draw King's dismissal/curiosity/anger/fear. Hints grow; explicit Bladeborn reveal only final fight, Ian confirmation in Void. | U079 §§37–45,67,87–89 |
+| STORY-10 | A/O | Show credible imprisoned-soul evidence before finale; exact device/encounter remains open. Historical ads, letters, testimony, ruins and environment reveal story, not only NPC lectures. | U079 §§22,86–88 |
+| STORY-11 | A | Sunspire orb provides one question; its answer enables reaching hidden castle. Disguise and guard deception optional entrance, failure difficult winnable horde. Hollowed guard deception exploits standing orders, not free-willed betrayal. | U079 addition;U086–U087 |
+| STORY-12 | A | Final phase one half Void-infused King channels souls without destroying them; realizes Bladeborn, plunges fully, uses already harnessed energy to barely escape forces, returns fully infused for phase two. Exception unavailable to ordinary people. | U079 §§42–48,83–84;U080 |
+| STORY-13 | A | King's death removes anchor but does NOT rescue souls alone. Binding destabilizes, huge rift consumes player/battlefield, Ian spirit meets/affirms/gives temporary Blade; charged cut severs binding, frees all souls, reconstructs killed bodies healthy pre-Gate, restores free will/mortality, player escapes and saves Aerth. | U079 §§49–63,85,90,96 |
+| STORY-14 | A | Timed difficult final charge uses repeated Space presses. Failure retries charge only; five consecutive failures unlock optional skip to successful ending. No automatic boss replay. Exact multiplayer/touch/controller behavior open. | U079 §56;U080 |
+| STORY-15 | A | Ian's Blade massive black iron, tarnished gold sacred guard, ember holy core; strongest relic. TEMPORARY ending use, no free permanent completion award. Permanent version remains substantial existing endgame/shop grind. Why temporary version not retained open. | U079 §§54–55,82,95 |
+| STORY-16 | O | King's original name/title; exact awakening; family tree; soul-viewing method; Void's full metaphysics; restored memories; temporary Blade explanation; Aerth scale; Waystone/Gate relationship. No silent canon answers. | U079 §100 plus later changes |
+
+## Supersessions and rejected directions
+
+- Multiple Hollow Gates, regional Gate-frame factories and Gate-building quests -> one castle Gate; Emberdeep manufactures weapons. U085 overrides U079 network opportunity.
+- Old Abyss region / early King / interim commander -> Storm Coast, crossing and merciful hydra. True Abyssal Void retained for ending.
+- Paladin at Emberdeep -> Sunspire. Necromancer at Palace -> after Duskmoor. Pirate at Keep -> Storm Coast. Reaper old Abyss -> Keep. Warlock-at-castle assistant idea not adopted.
+- Firebinder rejected -> Pyromancer. Reaper scythe 'maybe intrinsic' -> committed intrinsic; compensation proposal -> delete old scythes safely, no compensation.
+- Earlier each-player NPC turn-in -> shared NPC progression/reward. Physical environmental shards remain individual.
+- Original whole-level death reset -> current-half restart. Quit/disconnect scope still explicitly flagged SAVE-04.
+- Trial portals as crystals containing portals / clumsy accidental Legion destruction -> crystalline rifts themselves deliberately thrown by scholar to save disciplines.
+- Direct Ian descendant/brother/failed Ian/secret Ian name/ancient dream King in old drafts -> current canonical story. Adoption does not cause genetics.
+- Reject confusing names: Dry Wash, Rime Shelf, Caravan Trail, Prison Below, Black Scar, Broken Lands, King's Vaults, Colonnade, Weapon Forge, Silent City. Avoid 'sluice' in player directions. U071,U085–U087.
+- Old AGENTS no art work/NG+ removal/unobtainable-only Ian teaser are superseded by later art, NG+ and earnable endgame Blade requirements.
+- Full player model replacement not approved after preview. Existing preferred player/weapon assets remain baseline.
+
+## Required implementation and verification sequence
+
+1. Preserve/reconcile sources and decision register (this documentation task). Resolve only ambiguities needed for the next batch; do not stall unrelated approved work.
+2. Equipment/progression: family mapping, intrinsic weapons, safe removal, cheat, bag, scaling. Test representative saves, every class-family pair and weapon basic/charge behavior. No double scaling.
+3. Adventure foundations: persistence/half snapshots, shared state, quests/dialogue/journal/compass, shards, inventory rewards, prompts, settings. Establish stable voice IDs now. Test death, quit, refresh, disconnect, duplicate rewards, replay and co-op ordering.
+4. Review Briar people/quest outline, implement full two-half slice, verify all main routes and optional choice branches, inspect visuals/performance. User QA before repeating architecture everywhere.
+5. Review then redesign EVERY remaining region, both halves and every boss/arena, with dialogue, environmental puzzles, discoveries and five distinct shard routes. Include sailing, hydra mercy, palace orb, infiltration, King phases and restorative ending.
+6. Rift Hall/mentors/Pyromancer/Necromancer gate alongside their dependency regions, not forgotten until after level content. Companion/mount and return-visit side content scheduled explicitly.
+7. Voice studio, recordings, hub intros and reactions, final polish, progression playtesting, browser/phone-preview/co-op QA. Secondary modes remain later backlog.
+
+No row may be marked implemented merely because a predecessor was shipped. Add evidence links, code revision, test result and limitations to the decision/evidence log. This baseline does not deploy gameplay changes.

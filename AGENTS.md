@@ -1,5 +1,16 @@
 # BLADEFALL — Agent Guide (READ THIS FIRST, every session)
 
+## Current requirements authority — September 19, 2026
+
+Read `docs/REQUIREMENTS_REGISTER.md`, `docs/requirements/DECISION_LOG.md` and
+`docs/requirements/CONTINUITY.md` before planning or changing gameplay. Preserve exact
+new user decisions and update the register before implementing dependent work. Later
+explicit user instructions and the reconciled register supersede conflicting historical
+directions below (including NG+ removal, deferred art and unobtainable-only Ian's Blade).
+Source messages, including the full lore brief, are preserved in
+`docs/requirements/USER_SOURCE_2026-09-19.md`. Do not treat superseded drafts or assistant
+proposals as current approval. Raw session archives stay private outside this repository.
+
 Any AI agent (Codex, Claude, or otherwise) working on BLADEFALL reads this before touching
 anything. It exists so different agents produce ONE coherent game. Oliver is the sole owner
 and the only source of new direction.

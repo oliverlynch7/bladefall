@@ -1,5 +1,15 @@
 # BLADEFALL — Authoritative story canon
 
+> September 19 reconciliation: the later decisions in REQUIREMENTS_REGISTER.md take
+> precedence over this earlier reference. The complete original brief is preserved verbatim
+> as U079 in requirements/USER_SOURCE_2026-09-19.md, followed by all later corrections.
+> In particular: ONE Hollow Gate at Castle Duskmoor (no regional Gate-building network);
+> Storm Coast replaces the old Abyss campaign slot and its commander proposal with the
+> chained hydra; Sunspire has the knowledge orb and preserved crystalline training rifts;
+> the orphan player has an adoptive father; deceased Bladeborn share an eternal spiritual
+> realm. See STORY-01–16, MAP-01–08 and RIFT-01–06 for current requirements. Historical
+> passages below are retained for audit, not authority where they conflict.
+
 Authority: Oliver’s 100-section master canonical lore brief supplied on 2026-09-19, plus his accompanying Castle Duskmoor disguise-quest instruction. This reference supersedes conflicting older story documents and speculative assistant proposals. The full user brief remains authoritative if a detail here is incomplete. This document records canon, not implemented gameplay.
 
 ## Writing and change rules

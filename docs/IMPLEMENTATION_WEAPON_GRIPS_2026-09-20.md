@@ -30,3 +30,8 @@ These are sampled pose/contact tests, not a guarantee that every mesh surface av
 /3d/art-previews/classes/ - class palettes and refreshed Pirate motion sheet.
 
 Next main implementation remains canonical NPC dialogue/quest/journal, followed by Thomas/Mara and the expanded Briar campaign slice. The overall campaign overhaul is not complete.
+
+
+## Production verification - September 20
+
+50340a3 pushed to main. Cloudflare Pages deployment 476b3758-d7e6-417f-88d7-ba21577223eb succeeded. Production browser confirmed 1.986.0-anatomical-weapon-grips, renderer ready, no renderer error; weapon gallery returns HTTP 200 with Build 1.986. Private decision archive decision-archive/2026-09-20-weapon-grips contains 123 user-role messages, zero unparsed lines and valid source references.

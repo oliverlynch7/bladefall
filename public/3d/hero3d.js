@@ -40,8 +40,7 @@ export const HERO3D = {
      degrades to the voxel hero rather than to a missing character (see drawHero3D's catch), so
      defaulting to on cannot cost more than the character looking like it used to. */
   on: true,
-  /* Which skin the hero wears. 'base' is the texture the RPG pack shipped with and is the
-     default; any CLASS_SKINS id is an unlockable recolour. Set via ?skin= or __hero3dSetSkin. */
+  /* Class colors are the default. ?skin=pack-original is an explicit art comparison. */
   skinId: 'base',
   /* 15 matched the VOXEL hero's ~45 units exactly, which is why it looked right in isolation and
      too short to Oliver in the actual world - the voxel hero was always a bit stumpy next to the
@@ -256,9 +255,9 @@ const _mouthTex = {};
    repaintTexture classifies pixels by saturation and hue. */
 const CLASS_SKINS = {
   // Warrior body
-  warrior:      { id:'c_warrior',      metal:'#c9a05a', leather:'#3a2a16', lift:1.30 },
+  warrior:      { id:'c_warrior',      metal:'#8999a7', leather:'#513b2d', cloth:'#743b33', lift:1.12 },
   berserker:    { id:'c_berserker',    metal:'#8e2a24', leather:'#241c1e', lift:1.24 },
-  pirate:       { id:'c_pirate',       metal:'#c9a24a', leather:'#2c5f63', lift:1.30 },
+  pirate:       { id:'c_pirate',       metal:'#a7acaa', leather:'#44322a', cloth:'#245358', lift:1.12 },
   // Rogue body
   bladedancer:  { id:'c_bladedancer',  metal:'#9fc4c8', leather:'#2f5f66', lift:1.32 },
   reaper:       { id:'c_reaper',       metal:'#7a2028', leather:'#1a1418', lift:1.22 },
@@ -272,11 +271,12 @@ const CLASS_SKINS = {
   beastmaster:  { id:'c_beastmaster',  metal:'#cfc2a4', leather:'#5e452c', lift:1.28 },
   skylancer:    { id:'c_skylancer',    metal:'#c8d4e4', leather:'#2f5f9e', lift:1.34 },
   // Wizard body
-  mage:         { id:'c_mage',         metal:'#5a7fc8', leather:'#1e2436', lift:1.30 },
-  stormcaller:  { id:'c_stormcaller',  metal:'#b9a8e8', leather:'#4a3a9e', lift:1.32 },
-  warlock:      { id:'c_warlock',      metal:'#8a4fb0', leather:'#241338', lift:1.24 },
-  necromancer:  { id:'c_necromancer',  metal:'#d8d6c0', leather:'#44503e', lift:1.30 },
-  chronomancer: { id:'c_chronomancer', metal:'#d0a94a', leather:'#1f5a5e', lift:1.32 },
+  mage:         { id:'c_mage',         metal:'#b5c7e5', leather:'#202d51', cloth:'#395eb2', lift:1.15 },
+  stormcaller:  { id:'c_stormcaller',  metal:'#dce8f4', leather:'#283449', cloth:'#788cb4', lift:1.20 },
+  warlock:      { id:'c_warlock',      metal:'#b788c6', leather:'#271b30', cloth:'#722e82', lift:1.15 },
+  necromancer:  { id:'c_necromancer',  metal:'#dbd7b9', leather:'#25372c', cloth:'#55734c', lift:1.15 },
+  chronomancer: { id:'c_chronomancer', metal:'#d0a94a', leather:'#183d3b', cloth:'#227068', lift:1.15 },
+  pyromancer: {id:'c_pyromancer',metal:'#d8a35c',leather:'#412328',cloth:'#b74c2c',lift:1.15},
 };
 
 const CLASS_TO_MODEL = {
@@ -888,6 +888,12 @@ function relight(m){
   lit.name = m.name;
   return lit;
 }
+function relightWeapon(m){
+  m=relight(m);
+  // Imported metal-only materials have no reflection map in the browser scene and render black.
+  if(m?.isMeshStandardMaterial&&!m.envMap&&!m.metalnessMap){m.metalness=Math.min(m.metalness,.25);m.roughness=Math.max(m.roughness,.55);}
+  return m;
+}
 
 const _lenOf = obj => {
   const b = new THREE.Box3().setFromObject(obj), sz = b.getSize(new THREE.Vector3());
@@ -904,7 +910,7 @@ function weaponRig(actor){
 }
 
 
-function clearWeapon(actor){
+function clearWeapon(actor,dispose=true){
   if(!actor) return;
   /* Sweep the WHOLE actor, not just the weapon bone. Belt and braces: if any future path
      ever parents a weapon somewhere unexpected, this still finds it, so a stray copy can
@@ -913,8 +919,8 @@ function clearWeapon(actor){
   actor.root.traverse(o => { if(o.userData && o.userData._weap) strays.push(o); });
   const paintMaterials=new Set();
   for(const o of strays){for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m?.userData?._weaponPaint)paintMaterials.add(m);if(o.parent)o.parent.remove(o);}
-  for(const m of paintMaterials)m.dispose();
-  for(const o of strays){if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
+  if(dispose)for(const m of paintMaterials)m.dispose();
+  if(dispose)for(const o of strays){if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
@@ -966,7 +972,7 @@ async function loadStockWeapon(key){
   src.updateWorldMatrix(true, false);
   src.traverse(o => {
     if(!o.isMesh) return;
-    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    const m = new THREE.Mesh(o.geometry, relightWeapon(o.material.clone()));
     m.castShadow = true; m.userData._weap = true;
     o.updateWorldMatrix(true, false);
     m.applyMatrix4(new THREE.Matrix4().copy(src.matrixWorld).invert().multiply(o.matrixWorld));
@@ -991,38 +997,32 @@ async function equipWeapon(actor, opts){
   const pw = (opts && 'weapon' in opts) ? opts.weapon
     : window.__BF3?.G?.p?.weapon;
   if(pw?.intrinsic==='pirate'){
-    // Reuse the fitted sword for the saber; keep all existing per-avatar fit presets.
-    const arming=equipWeapon(actor,{model:BODY,weapon:{art:'sword',rarity:'common'},name:'Sword'});
-    const saberSeq=actor._weapSeq;
-    await arming;
-    if(actor._weapSeq!==saberSeq)return null;
     const rig=weaponRig(actor);if(!rig)return null;
-    let left=null;actor.root.traverse(o=>{if(o.isBone&&/^weaponl$/i.test(o.name.replace(/[^a-z]/gi,'')))left=o;});
-    if(!left){
-      let hand=null;const counterpart=rig.bone.parent.name.replace(/r$/i,'L');
-      actor.root.traverse(o=>{if(o.isBone&&o.name===counterpart)hand=o;});
-      if(hand){left=new THREE.Group();left.name='PirateSaberGrip';left.userData._weap=true;left.position.copy(rig.bone.position);left.position.x*=-1;left.quaternion.copy(rig.bone.quaternion);hand.add(left);}
-    }
-    if(!left)actor.root.traverse(o=>{if(!left&&o.isBone&&/^(handl|lefthand)$/i.test(o.name.replace(/[^a-z]/gi,'')))left=o;});
-    const saber=actor._weap;
-    if(left&&saber){
-      if(left.name==='PirateSaberGrip')left.rotation.set(0,Math.PI,-Math.PI/2);
-      saber.scale.multiplyScalar(.72);
-      left.add(saber);saber.userData.pirateSaber=true;saber.userData.restRotation=saber.rotation.clone();
-      saber.traverse(o=>{if(!o.isMesh)return;const old=Array.isArray(o.material)?o.material:[o.material];o.material=new THREE.MeshLambertMaterial({color:'#b8c7d7',emissive:'#1a2028'});o.material.userData._weaponPaint=true;for(const m of old)m.dispose();});
-    }
-    const gun=new THREE.Group();gun.userData._weap=true;
-    const part=(geometry,color,x,y,z)=>{const m=new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({color}));m.position.set(x,y,z);m.castShadow=true;m.userData._weap=true;m.userData.signaturePart=true;gun.add(m);return m;};
-    part(new THREE.BoxGeometry(.12,.27,.13),'#62422d',0,-.08,0).rotation.x=-.25;
-    const barrel=part(new THREE.CylinderGeometry(.045,.055,.42,10),'#4b515b',0,.10,.15);barrel.rotation.x=Math.PI/2;
-    part(new THREE.BoxGeometry(.10,.10,.26),'#8a5932',0,.06,.10);
-    part(new THREE.TorusGeometry(.07,.014,5,10),'#c1a35c',0,-.04,.10).rotation.y=Math.PI/2;
-    part(new THREE.BoxGeometry(.04,.09,.04),'#c1a35c',.065,.14,0);
-    if(rig.stock){gun.position.copy(rig.stock.position);gun.quaternion.copy(rig.stock.quaternion);gun.scale.copy(rig.stock.scale);rig.stock.visible=false;}
-    rig.bone.add(gun);actor.root.updateMatrixWorld(true);
-    const want=(saber?_lenOf(saber):.8)*.32,got=_lenOf(gun);if(got>1e-5)gun.scale.multiplyScalar(want/got);
+    let hand=null;actor.root.traverse(o=>{if(o.isBone&&o.name===rig.bone.parent.name.replace(/r$/i,'L'))hand=o;});
+    if(!hand)return null;
+    const makePart=(group,geometry,color,x,y,z)=>{const m=new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({color}));m.position.set(x,y,z);m.castShadow=true;m.userData._weap=true;m.userData.signaturePart=true;group.add(m);return m;};
+    // These grips are authored at the palm origin, in rig metres. Never inherit a sword mesh's offset or scale.
+    const gun=new THREE.Group();gun.name='PirateFlintlock';gun.userData._weap=true;rig.bone.add(gun);
+    makePart(gun,new THREE.BoxGeometry(.12,.24,.12),'#65432c',0,0,0).rotation.z=-.18;
+    makePart(gun,new THREE.BoxGeometry(.43,.095,.115),'#805333',.17,-.14,0);
+    makePart(gun,new THREE.CylinderGeometry(.047,.058,.49,12),'#687581',.20,-.20,0).rotation.z=-Math.PI/2;
+    makePart(gun,new THREE.TorusGeometry(.052,.013,5,12),'#be9b52',.445,-.20,0).rotation.y=Math.PI/2;
+    makePart(gun,new THREE.CylinderGeometry(.037,.037,.007,12),'#161c23',.451,-.20,0).rotation.z=-Math.PI/2;
+    makePart(gun,new THREE.TorusGeometry(.064,.012,5,10),'#be9b52',.105,-.01,0);
+    makePart(gun,new THREE.BoxGeometry(.035,.08,.035),'#be9b52',-.065,-.245,0).rotation.z=-.4;
+    const saber=new THREE.Group();saber.name='PirateSaber';saber.userData._weap=true;saber.userData.pirateSaber=true;
+    saber.position.copy(rig.bone.position);saber.position.x*=-1;hand.add(saber);
+    makePart(saber,new THREE.CylinderGeometry(.044,.05,.22,8),'#382c26',0,0,0);
+    makePart(saber,new THREE.SphereGeometry(.061,8,5),'#bc984e',0,-.14,0);
+    const guard=makePart(saber,new THREE.TorusGeometry(.105,.018,5,12,Math.PI),'#c2a15d',0,0,0);guard.rotation.z=Math.PI/2;
+    makePart(saber,new THREE.BoxGeometry(.25,.035,.07),'#c2a15d',0,.125,0);
+    const blade=new THREE.Shape();blade.moveTo(-.047,.14);blade.lineTo(.06,.14);blade.lineTo(.09,.60);blade.quadraticCurveTo(.10,.87,.015,1.05);blade.lineTo(-.015,.80);blade.lineTo(-.047,.14);
+    const bladeMesh=makePart(saber,new THREE.ExtrudeGeometry(blade,{depth:.025,bevelEnabled:false,curveSegments:5}),'#c1d2de',0,0,-.0125);
+    bladeMesh.material.emissive.set('#111820');
+    saber.userData.restRotation=saber.rotation.clone();
+    if(rig.stock)rig.stock.visible=false;
     actor._weap=gun;actor._weapGrip=null;
-    return {name:'Flintlock & Saber',intrinsic:'pirate',paired:!!left};
+    return {name:'Flintlock & Saber',intrinsic:'pirate',paired:true,grip:'palm-local'};
   }
   const name = opts?.name || modelForWeapon(pw) || (pw?.art === 'fist' ? null : DEFAULT_WEAPON[BODY]);
   if(!name){
@@ -1090,7 +1090,7 @@ async function equipWeapon(actor, opts){
   const wmats = [];
   g.scene.traverse(o => {
     if(!o.isMesh) return;
-    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    const m = new THREE.Mesh(o.geometry, relightWeapon(o.material.clone()));
     m.castShadow = true; m.userData._weap = true;
     o.updateWorldMatrix(true, false); m.applyMatrix4(o.matrixWorld);
     (Array.isArray(m.material) ? m.material : [m.material]).forEach(mm => mm && wmats.push(mm));
@@ -1273,12 +1273,12 @@ function repaintTexture(srcTex, skin){
   for(let i=0;i<px.length;i+=4){
     if(px[i+3] < 8) continue;
     const hsv = rgb2hsv(px[i],px[i+1],px[i+2]);
-    const lum = skin.id==='c_paladin' ? .16+hsv[2]*.84 : Math.min(1.9, (0.35 + hsv[2]*1.25) * lift);
+    const lum = Math.min(1.15,(.16+hsv[2]*.84)*lift);
     /* SKIN GUARD - see the matching note in the slice. Skin is a warm mid-value hue that collides
        with both the low-saturation "metal" test and the warm-dark "leather" test, so faces and
        hands were being repainted with the outfit. Excluded explicitly; only brightness passes. */
     if(hsv[0]>=8 && hsv[0]<=54 && hsv[1]>=0.12 && hsv[1]<=0.62 && hsv[2]>=0.45){
-      px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift;
+      continue; // Skin remains the original tone.
     }
     else if(hsv[1] < 0.20) tintPixel(px,i,skin.id==='c_paladin'&&hsv[2]<.62?hexRGB(skin.cloth):metal,lum);
     else if(hsv[0] >= 12 && hsv[0] <= 52 && hsv[2] < 0.52) tintPixel(px,i,leather,lum);
@@ -1305,40 +1305,29 @@ function repaintTexture(srcTex, skin){
   _skinCache.set(key, tex);
   return tex;
 }
-/* Applied to the BODY material only. The added eye/mouth meshes are excluded by their _eye flag
-   so a repaint can never disturb the face, and the weapon is excluded by _weap.
-
-   HERO3D.skinId selects which skin is worn, and it defaults to 'base' — the texture the RPG pack
-   shipped with (Oliver, 2026-07-29). This used to apply CLASS_SKINS unconditionally, so a class
-   could never show the artwork its model was designed around. The recolours are still here as
-   unlockables; they are just no longer the default. Restoring the base means putting back the
-   ORIGINAL map, which is why _srcMap is captured before the first repaint and never overwritten. */
-function applyClassSkin(){
-  if(!actor) return null;
-  let cls = 'warrior';
-  try { const m = window.__BF_META && window.__BF_META(); if(m && m.classId) cls = m.classId; } catch(e){}
-  const wantBase = (HERO3D.skinId || 'base') === 'base' && cls!=='paladin';
-  const skin = CLASS_SKINS[cls];
-  if(!wantBase && !skin) return null;
-  let painted = 0;
-  actor.traverse(o => {
-    if(!o.isMesh || o.userData._eye || o.userData._weap) return;
-    if(cls==='paladin'&&/^Head(?:_|$)/.test(o.name))return;
-    if(cls==='paladin'&&!o.userData._paletteIndependent){o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();o.userData._paletteIndependent=true;}
-    const mats = Array.isArray(o.material) ? o.material : [o.material];
-    for(const mm of mats){
-      if(!mm) continue;
-      if(!mm.userData._srcMap) mm.userData._srcMap = mm.map || null;
-      const src = mm.userData._srcMap;
-      if(!src) continue;
-      mm.map = wantBase ? src : repaintTexture(src, skin);
-      mm.needsUpdate = true;
-      painted++;
+/* Class palettes apply to body/clothing by default. Natural faces remain original;
+   Ranger/Rogue hoods are recolored with their clothing. Each cloned rig owns its materials. */
+function paintClassBody(root,cls,packOriginal=false){
+  const skin=CLASS_SKINS[cls];if(!root||!skin)return 0;
+  let painted=0;
+  root.traverse(o=>{
+    const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls]);
+    if(!o.isMesh||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
+    // Skeleton clones share source materials. Always isolate before touching a palette.
+    if(o.userData._paletteOwner!==o.uuid){o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();o.userData._paletteOwner=o.uuid;}
+    for(const m of (Array.isArray(o.material)?o.material:[o.material])){
+      if(!('_srcMap' in m.userData))m.userData._srcMap=m.map||null;
+      if(!m.userData._srcMap)continue;
+      m.map=packOriginal?m.userData._srcMap:repaintTexture(m.userData._srcMap,skin);m.needsUpdate=true;painted++;
     }
-  });
-  HERO3D.skin = { classId: cls, skinId: wantBase ? 'base' : skin.id,
-                  metal: wantBase ? 'pack original' : skin.metal, painted };
-  return HERO3D.skin;
+  });return painted;
+}
+function applyClassSkin(){
+  if(!actor)return null;
+  const cls=window.__BF_META?.()?.classId||'warrior',skin=CLASS_SKINS[cls];if(!skin)return null;
+  const packOriginal=HERO3D.skinId==='pack-original';
+  const painted=paintClassBody(actor,cls,packOriginal);
+  HERO3D.skin={classId:cls,skinId:packOriginal?'pack-original':skin.id,metal:skin.metal,painted};return HERO3D.skin;
 }
 
 /* The player's class, from the game's own state. */
@@ -1368,7 +1357,7 @@ function buildFace(){
    the body while bone-parented props keep drawing. That bug cost a session in the slice. */
 function syncClass(){
   const want = modelForClass();
-  if(want === _classNow) return;
+  if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId)applyClassSkin();syncLocalEquipment();return;}
   const g = _loaded[want];
   if(!g) return;
   _classNow = want;
@@ -1533,7 +1522,7 @@ function playFor(p, A){
     staff:      'Staff_Attack',
     wand:       pick('Spell1', 'Spell2'),
     bow:        'Bow_Shoot',
-    flintlock:  'Bow_Shoot',
+    flintlock:  p.weapon?.intrinsic==='pirate'?'Spell1':'Bow_Shoot',
     cross:      'Bow_Shoot',
     javelin:    'Staff_Attack',
     fist:       'Punch',
@@ -1685,7 +1674,7 @@ function peerModelFor(p){
 function disposeRig(rec){
   if(!rec) return;
   if(rec.mixer) try { rec.mixer.stopAllAction(); rec.mixer.uncacheRoot(rec.node); } catch(e){}
-  if(rec.node && rec.node.parent) rec.node.parent.remove(rec.node);
+  if(rec.node){clearWeapon(rec.holder);rec.node.traverse(o=>{if(o.userData._paletteOwner===o.uuid)for(const m of (Array.isArray(o.material)?o.material:[o.material]))m?.dispose();});if(rec.node.parent)rec.node.parent.remove(rec.node);}
 }
 
 /* Least-recently-drawn wins the argument. Never reaps a rig drawn this frame. */
@@ -1719,7 +1708,7 @@ function peerRig(p, key){
        exactly this job: it sweeps the _weap strays the clone inherited AND puts the character's own
        stock weapon back on, which is what a same-class ally should be holding until their real one
        loads. */
-    clearWeapon({ root: node });
+    clearWeapon({ root: node },false);
     const wrap = new THREE.Group();
     wrap.add(node);
     scene.add(wrap);
@@ -1729,6 +1718,7 @@ function peerRig(p, key){
             art: undefined, rar: undefined, arming: false, seen: _frameNo };
     _peerRigs.set(key, rec);
   }
+  if(rec.palette!==p.cid){paintClassBody(rec.node,p.cid||'warrior');rec.palette=p.cid;}
   rec.seen = _frameNo;
   return rec;
 }
@@ -1738,8 +1728,9 @@ function peerRig(p, key){
    which is the same guard the local hero has always used. */
 function armPeer(rec, p){
   const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
-  if(rec.arming || (a === rec.art && r === rec.rar)) return;
-  rec.art = a; rec.rar = r; rec.arming = true;
+  const key=[a,r,w?.intrinsic,w?.arche].join('|');
+  if(rec.arming || key===rec.weaponKey) return;
+  rec.art = a; rec.rar = r; rec.weaponKey=key; rec.arming = true;
   queueEquip(() => equipWeapon(rec.holder, { model: rec.model, weapon: w || null }))
     .then(() => { rec.arming = false; }, () => { rec.arming = false; });
 }
@@ -1757,6 +1748,13 @@ function showOnly(node){
    its voxel path; returns false whenever anything is not ready, so a failure here degrades
    to the original renderer rather than to a missing character. */
 let _lastArt = null, _lastRar = null, _reArming = false, _frameDt = 1 / 60, _syncedFrame = -1;
+let _lastWeaponKey=null;
+function syncLocalEquipment(){
+  const w=window.__BF3?.G?.p?.weapon,key=[HERO3D.model,w?.art,w?.rarity,w?.intrinsic,w?.arche].join('|');
+  if(!actor||!HERO3D.ready||_reArming||key===_lastWeaponKey)return;
+  _lastWeaponKey=key;_lastArt=w?.art;_lastRar=w?.rarity;_reArming=true;
+  equipForClass().finally(()=>{_reArming=false;});
+}
 export function drawHero3D(p, t){
   /* Swap the model when the weapon changes. equipWeapon runs only on load and on class change, so
      without this the right model appeared only if you happened to spawn holding it - picking up a
@@ -1774,11 +1772,7 @@ export function drawHero3D(p, t){
   const _isLocal = !!(window.__BF3 && window.__BF3.G && p === window.__BF3.G.p);
   try {
     const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
-    if(_isLocal && actor && HERO3D.ready && !_reArming && (a !== _lastArt || r !== _lastRar)){
-      _lastArt = a; _lastRar = r;
-      _reArming = true;
-      equipForClass().finally(() => { _reArming = false; });
-    }
+    if(_isLocal)syncLocalEquipment();
   } catch(err){}
   if(!HERO3D.on || !HERO3D.ready || !renderer || !p) return false;
   if(!syncCamera()) return false;
@@ -1844,6 +1838,13 @@ export function drawHero3D(p, t){
     playFor(p, anim);
     if(anim.mixer) anim.mixer.update(dt);
     movingCombatLegs(p,anim,dt);
+    if(p.saberSwingT>0&&p.weapon?.intrinsic==='pirate'){
+      // The stock sword clip is right-handed. Mirror its arm pose for the off-hand saber.
+      for(const part of ['Shoulder','UpperArm','LowerArm','Fist','Fist1','Fist2']){
+        const l=wrap.getObjectByName(part+'L'),r=wrap.getObjectByName(part+'R');if(!l||!r)continue;
+        const q=l.quaternion.clone();l.quaternion.set(r.quaternion.x,-r.quaternion.y,-r.quaternion.z,r.quaternion.w);r.quaternion.set(q.x,-q.y,-q.z,q.w);
+      }
+    }
     wrap.traverse(o=>{if(o.userData.pirateSaber&&o.userData.restRotation){o.rotation.copy(o.userData.restRotation);if(p.saberSwingT>0)o.rotation.z+=Math.sin((1-p.saberSwingT/.42)*Math.PI)*1.8;}});
     if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
@@ -1898,7 +1899,7 @@ window.__hero3dRigs = () => {
     local: { model: HERO3D.model, clip: _localAnim.cur, wrap: !!HERO3D._wrap,
              visible: !!(HERO3D._wrap && HERO3D._wrap.visible), weapon: HERO3D.weapon || null },
     peers: [..._peerRigs.entries()].map(([id, r]) => ({
-      id, model: r.model, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
+      id, model: r.model, classPalette:r.palette, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
       armed: wof(r.node), seen: r.seen, visible: !!r.wrap.visible,
       at: { x: Math.round(r.wrap.position.x), z: Math.round(r.wrap.position.z) },
     })),
@@ -1977,6 +1978,8 @@ window.__hero3dPreview = (canvas, opts) => {
       _pv.cam.position.set(0, 0.15, 3.1);
       _pv.cam.lookAt(0, 0.05, 0);
     }
+    const previewClass=opts.classId||window.__BF_META?.()?.classId||'warrior';
+    if(_pv.palette!==previewClass||_pv.paletteNode!==_pv.wrap.children[0]){paintClassBody(_pv.wrap,previewClass);_pv.palette=previewClass;_pv.paletteNode=_pv.wrap.children[0];}
     if(opts.yaw != null) _pv.yaw = opts.yaw;
     _pv.wrap.rotation.y = _pv.yaw;
     const w = canvas.clientWidth || 220, hh = canvas.clientHeight || 260;

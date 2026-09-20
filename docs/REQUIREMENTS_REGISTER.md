@@ -214,3 +214,7 @@ Inventory supplied Desktop/BladeFall Music tracks, propose each placement and re
 ### MUSIC-02 | Approved, pending implementation | MUSIC-SOURCE-02
 
 Commit and push copies of soundtrack audio files into the Bladefall Git repository when integrating the music. Preserve supplied originals and any needed browser derivatives, with no desktop-path dependency. Verify tracked files and remote commit, not only local file existence. Desktop originals remain untouched.
+
+### Visual correction evidence — 1.983.0
+
+ART-CLASS-01 verified for the 16 existing classes through browser palette checks and screenshots. EQ-03 Pirate grip/pose corrections and peer state implemented; broader GOV-05 all-weapon fit coverage remains open. See CLASS_PALETTES_AND_GRIPS_2026-09-20.md for tests and limits.

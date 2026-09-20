@@ -1678,3 +1678,7 @@ Verified in muted real-browser WebGL: pre-change save retention and paused autos
 
 ## [Codex | 2026-09-20] Equipment foundations 1.982.0
 Broad weapon families, intrinsic Pirate/Monk/Reaper rank-scaled weapons capped at rank 10, dagger tap/charge separation, old scythe migration, valid cheat/shop stock and collapsed bag sections. Pirate paired weapon rig. Browser equipment/save/UI checks and syntax passed. Full overhaul and damage scaling audit remain in progress; see docs/IMPLEMENTATION_EQUIPMENT_2026-09-20.md.
+
+
+## [Codex | 2026-09-20] 1.983.0 class palettes and grips
+Distinct colors for 16 existing classes, same-body/mirror equipment refresh, Pirate palm-local pistol/saber and off-hand motion, peer palette isolation/signature sync, readable weapon metals. Browser checks and mobile gallery: /3d/art-previews/classes/. See docs/CLASS_PALETTES_AND_GRIPS_2026-09-20.md for scope and remaining fit audit.

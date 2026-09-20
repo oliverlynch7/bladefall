@@ -59,3 +59,7 @@ User supplies 21 desktop songs, tentative placement ideas, requests coverage/gap
 ## 2026-09-20 | Preserve soundtrack files in Git | MUSIC-SOURCE-02
 
 Approved requirement MUSIC-02: when integrating music, copy the supplied music files into the Bladefall repository and commit/push the actual audio assets, not merely paths or a manifest. Preserve original supplied files; keep browser-ready derivatives alongside appropriate source assets if editing is needed. Leave the desktop originals intact. A clean repository checkout must contain the soundtrack without depending on the desktop folder. This is a recorded future integration requirement; no music files have been copied or deployed by this documentation update.
+
+## 2026-09-20 | Class palette and Pirate grip batch | IMPLEMENTATION-RESUME-02 / U115
+
+Resumed approved queue. Release 1.983.0 implements 16 class palettes and Pirate palm grips, same-body/mirror gear refresh and peer presentation fixes. Evidence and limits: ../CLASS_PALETTES_AND_GRIPS_2026-09-20.md. ART-CLASS-01 implemented for current 16 classes with screenshots; future Pyromancer still pending. EQ-03 representative grip/motion verified; exhaustive all-item fitting remains open. Next: completed-half save checkpoint foundation, then campaign systems.

@@ -1,5 +1,5 @@
 async page => {
- if(!["localhost","127.0.0.1"].includes(new URL(page.url()).hostname))throw Error("Checkpoint QA only runs against a local test save.");
+ if(!/^http:\/\/(127\.0\.0\.1|localhost):/.test(page.url()))throw Error("Checkpoint QA only runs against a local test save.");
  const checks=[],check=(name,v)=>{if(!v)throw Error(name);checks.push(name);};
  await page.reload();await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
  await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classUnlocked.warrior=true;b.meta.classId='warrior';b.openHub();b.meta.gold=1000;b.meta.classes.warrior={rank:2,xp:10};b.meta.optionalDone={};b.meta.optionalProgress={};b.meta.sideFound={};b.meta.iansShards=[];b.meta.stash=[];b.G.p.level=5;b.G.p.xp=20;b.meta.hero=b.snapOf(b.G.p);b.persist();b.enterZone(0);b.openPause();});

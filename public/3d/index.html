@@ -1022,8 +1022,9 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./loading.js?v=1981s"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=1989">
 <script src="./voice-content.js?v=1989"></script>
-<script src="./hub-dialogue.js?v=1989"></script>
+<script src="./hub-dialogue.js?v=1990"></script>
 <script src="./story-state.js?v=1987"></script>
+<script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./combat-art.js?v=1981s"></script>
 <script src="./hostile-art.js?v=1978"></script>
@@ -1038,7 +1039,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.989.0-hub-conversations';
+const VERSION3D='1.990.0-briar-opening';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1205,7 +1206,7 @@ const STORY={
     "Down is the only direction left. Go."
   ],
   zone:{   // first-visit card, by zone id
-    outskirts:"The road ends here. Everything past it is already dreaming.",
+    outskirts:"The Hollowed Legion has reached Briar Town. Your neighbors are still here. So are you.",
     hollow:"The wind comes up the canyon like it's trying to leave.",
     keep:"One of your blood held this place once. Then it held him.",
     frost:"Cold this deep isn't weather. It's something refusing to move.",
@@ -2707,8 +2708,8 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    the layout) gated by main quests, then a boss room. Clearing the boss completes the
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
-  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:'bramble',mus:'outskirts',blurb:'Where the road ends and the wild begins.',
-    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok4',k:'reach',n:1,d:'Survey the valley from the Watchpost'},{id:'ok1',k:'purge',mob:'thornboar',n:2,d:'Break the thorn nests in the cornlands and orchard'},{id:'ok2',k:'find',requires:['ok4','ok1'],d:'Reawaken the Old Waystone'}]},
+  {id:'outskirts',name:'Briar Town',icon:'🌾',tier:1,haz:'bramble',mus:'outskirts',blurb:'Defend your home and help your neighbors escape.',
+    areas:[{stage:0,name:'Homefields',quests:[{id:'ok4',k:'reach',n:1,d:'Survey the valley from the Watchpost'},{id:'ok1',k:'purge',mob:'thornboar',n:2,d:'Break the thorn nests in the cornlands and orchard'},{id:'ok2',k:'find',requires:['ok4','ok1'],d:'Reawaken the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,trial:'berserker',blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
@@ -2850,10 +2851,149 @@ function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
 function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
 function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
-function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
+function areaQuests(ai){ if(inBriar()&&(ai==null||ai===0))return briarQuest(); if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 // Relevant current-region notes and quest items are checkpointed with the route.
 // J remains Attack for existing players; Journal defaults to remappable N.
+// Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
+let briarBook=null,briarPending=null,briarSequence=0;
+const briarReady=fetch('./story/briar-foundation.json?v=1990').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
+function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
+function briarId(){return MP.active?MP.myId:'solo';}
+function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
+function briarPacket(){return isCampaignAdventure()?{epoch:briarEpoch(),zone:G.zone,area:G.area,run:G.runSeed,state:adventureStoryState(),checkpointStory:meta.run?.campaign?.storyState,guards:inBriar()?G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length:0}:null;}
+function briarQuest(){
+ const s=G?.storyState||BFStoryState.create(),f=s.flags,i=s.items;
+ let d=!f['thomas.ready']?'Speak to Thomas near your home':s.quests['briar.supplies']!=='active'&&!f['mara.healing']?'Speak to Mara by the village beds':!f['mara.healing']?((i.tangle_root||0)<3||(i.dressings||0)<1?`Gather tangle roots (${i.tangle_root||0}/3) and clean dressings (${i.dressings||0}/1)`:'Bring the supplies back to Mara'):s.quests['briar.escape']!=='active'&&!f['briar.depart']?'Ask Mara what needs doing next':!f['briar.water']?'Stop the water beside the mill':!f['briar.jam']?'Remove the timber caught in the mill wheel':!f['briar.bridge']?'Lower the mill crossing with the bridge handle':!f['briar.depart']?'Clear the guards at the old bridge, then open the wagon gate':'Follow the neighbors into the Black Woods';
+ return [{id:'briar.opening',k:'story',d,n:1}];
+}
+function briarObjects(){
+ if(!inBriar())return [];
+ const f=adventureStoryState().flags;
+ return (G.storyObjects||[]).map(o=>({...o,available:!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
+}
+function briarReceive(request,actor,position){
+ if(!inBriar()||!briarBook||(MP.active&&!MP.isHost))return false;
+ const s=adventureStoryState(),party=MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];
+ if(!party.includes(actor))return false;
+ const r=BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:mode==='play',npcs:G.storyNpcs||[],objects:briarObjects(),party});
+ if(r.changed){G.storyState=r.state;briarSync();}
+ // Send a response even for duplicate or stale requests so a lost reply can recover.
+ if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket(),ack:request?.event?.id});}catch(e){}
+ return r.changed;
+}
+function briarRequest(type,fields={}){
+ if(!briarBook){toast('The conversation is still loading. Try again in a moment.');return;}
+ const event={id:briarId()+':'+(++briarSequence)+':'+Date.now(),revision:type==='world'?undefined:adventureStoryState().revision,type,...fields},request={epoch:briarEpoch(),event};
+ if(MP.active&&!MP.isHost){briarPending={request,sent:0};briarSendPending();}
+ else briarReceive(request,briarId(),G.p);
+}
+function briarSendPending(){if(!briarPending||!MP.active||MP.isHost)return;try{MP.hostConn?.send({t:'storyRequest',request:briarPending.request});briarPending.sent=performance.now();}catch(e){}}
+function briarApply(packet,place=false,ack){
+ if(!packet||!isCampaignAdventure()||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
+ if(!place&&(G._storyEpoch!==packet.epoch||packet.state.revision<(G.storyState?.revision||0)))return;
+ G._storyEpoch=packet.epoch;G._briarGuards=packet.guards;G.storyState=checkpointClone(packet.state);
+ if(briarPending&&(ack===briarPending.request.event.id||packet.state.events[briarPending.request.event.id]||packet.state.revision>briarPending.request.event.revision))briarPending=null;
+ briarSync();
+}
+function briarSync(){
+ if(!isCampaignAdventure())return;
+ const s=adventureStoryState();G.storyClaims=G.storyClaims||{};
+ for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
+  G.storyClaims[id]=true;if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast('Mara thanks you · +'+gold+' gold');}
+ }
+ if(!inBriar())return;
+ const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
+ if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
+ if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
+ const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
+ if(n){
+  const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
+  BFHubDialogue.present(n,{meta,eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
+   enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
+   leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>briarRequest('close'),choose:(line,choice)=>briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
+ }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
+ questUpdate();hudUpdate();
+}
+function briarDisconnect(actor){if(inBriar()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
+function briarInteract(){
+ if(!inBriar())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
+ const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65)return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={x:o.x,z:o.z,y:(o.y||0)+62,label,act};}};
+ for(const n of G.storyNpcs||[])if(!s.flags['briar.depart']&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
+ if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&BFStoryState.matches(s,briarBook.events[o.key]?.when))consider(o,o.available?o.label:'Clear the bridge guards first',()=>o.available?briarRequest('world',{key:o.key}):toast('The wagons cannot pass while the bridge guards are still here.'));
+ return best;
+}
+function buildBriarOpening(){
+ G.areaName='Briar Town · Homefields';G.npc=null;G.qmarks=[];G.dens=[];
+ G.optionalMissions=(G.optionalMissions||[]).filter(m=>!['outCaravan','outMill'].includes(m.id));
+ G.pickups=G.pickups.filter(p=>!['outCaravan','outMill'].includes(p.localItem?.id));
+ G.storyNpcs=[{id:'thomas',name:'Thomas',x:0,z:350,y:0},{id:'mara',name:'Mara',x:-190,z:160,y:0}];
+ G.storyObjects=[
+  {key:'briar.root.1',label:'Gather tangle root',x:-410,z:-130,y:0,kind:'root'},
+  {key:'briar.root.2',label:'Gather tangle root',x:-505,z:-245,y:0,kind:'root'},
+  {key:'briar.root.3',label:'Gather tangle root',x:-370,z:-335,y:0,kind:'root'},
+  {key:'briar.dressings',label:'Take the clean dressings',x:440,z:-255,y:22,kind:'dressings',range:70,bounds:{minX:370,maxX:510,minZ:-294,maxZ:-145}},
+  {key:'briar.water',label:'Close the water feed',x:475,z:-1635,y:0,kind:'water'},
+  {key:'briar.jam',label:'Pull the timber from the wheel',x:300,z:-1700,y:0,kind:'jam'},
+  {key:'briar.bridge',label:'Lower the mill crossing',x:310,z:-2030,y:0,kind:'handle'},
+  {key:'briar.depart',label:'Open the wagon gate',x:-210,z:-4240,y:160,kind:'gate'}];
+ // Make authored interaction pockets free of legacy clutter; keep surrounding landmarks.
+ for(const q of [...G.storyNpcs,...G.storyObjects.slice(0,4),{x:-210,z:15}]){
+  G.obstacles=G.obstacles.filter(o=>Math.abs(o.x-q.x)>130+(o.w||0)/2||Math.abs(o.z-q.z)>130+(o.d||0)/2);
+  G.deco=G.deco.filter(o=>Math.abs(o.x-q.x)>115+(o.w||0)/2||Math.abs(o.z-q.z)>115+(o.d||0)/2);
+ }
+ vseg(-220,-180,650,630,{meadow:true});vseg(390,-195,400,400,{meadow:true});
+ // Overgrown garden: irregular planting beds and a broken fence, with open walking lanes.
+ for(const [x,z,w,d]of [[-430,-135,210,75],[-470,-285,280,90]]){
+  G.deco.push({x,z,y0:3,w,h:3,d,c:'#564533',nocol:true});
+  for(let j=0;j<7;j++)G.deco.push({x:x-w/2+18+j*w/7,z:z+18,y0:7,w:10,h:13+(j%3)*4,d:10,c:j%2?'#67884a':'#91a456',kind:'flower',nocol:true});
+ }
+ for(const z of [-85,-375])G.deco.push({x:-435,z,y0:0,w:290,h:32,d:9,kind:'fence',lead:true,c:'#795735',nocol:true});
+ // Shuttered store: blocked front, open rear window and two small climbable crates.
+ const storeStart=G.deco.length;
+ const wall=(x,z,w,h,d)=>vsolid(x,z,0,w,h,d,'#886440');
+ wall(347,-220,15,115,180);wall(533,-220,15,115,180);wall(440,-130,200,115,15);
+ wall(376,-310,73,115,15);wall(504,-310,73,115,15);wall(440,-310,55,28,15);
+ G.deco.push({x:440,z:-310,y0:91,w:55,h:24,d:15,c:'#886440',nocol:true});vplat(440,-344,18,68,48,{checkpoint:true});vplat(440,-308,28,55,22,{checkpoint:true});
+ G.deco.push({x:440,z:-220,y0:116,w:220,h:18,d:200,c:'#62482f',nocol:true});
+ for(const x of [418,458])G.deco.push({x,z:-119,y0:20,w:16,h:80,d:8,c:'#b39b73',nocol:true});
+ vsolid(440,-255,0,68,20,44,'#70573a');
+ G.storyStore=G.deco.splice(storeStart);
+ // Timber framing and a lintel make the rear entrance readable; walls fade only while inside.
+ for(const x of [347,533])for(const z of [-130,-310])G.storyStore.push({x,z,y0:0,w:13,h:118,d:13,c:'#4d3827'});
+ for(const z of [-128,-312])for(const y0 of [12,64,107])G.storyStore.push({x:440,z,y0,w:196,h:6,d:4,c:'#b29262'});
+ G.storyStore.push({x:440,z:-314,y0:84,w:62,h:8,d:9,c:'#d0b478'});
+ // Two modest cloth beds beside Mara; the restored pad has a distinct large footprint.
+ for(const x of [-265,-330]){vsolid(x,225,0,44,13,90,'#78563b');G.deco.push({x,z:225,y0:14,w:40,h:5,d:78,c:'#bdb99b',nocol:true});}
+ G.healpads.push({storyPad:true,infinite:true,locked:!adventureStoryState().flags['mara.healing'],x:-210,z:15,y:0,r:77,charge:1,_acc:0});
+ G.briarBridge={x:395,z:-2150,closed:!adventureStoryState().flags['briar.bridge']};
+ if(G.briarBridge.closed)G.walls.push({x:395,z:-2150,w:190,d:190,h:112,invisible:true,storyBridge:true});
+ // The final bridge guards are named world targets, not an arbitrary species kill quota.
+ for(const e of G.enemies)if(Math.hypot(e.x-230,e.z+3490)<420)e.briarGuard=true;
+ G.campaignLayout.experience={title:'Briar Town: Homefields',objectives:['Help Mara treat the neighbors','Repair the mill crossing','Open a route out of Briar'],revision:3};
+ G.rooms[0].name='Briar Homes';G.rooms[1].name='Overrun Fields';G.rooms.at(-1).name='Wagon Gate';
+ G.portal=null;briarPending=null;briarEpoch();briarSync();
+}
+function drawBriarStory(t){
+ if(!inBriar())return;const s=adventureStoryState(),f=s.flags;
+ const inside=G.p.x>335&&G.p.x<545&&G.p.z>-320&&G.p.z<-120;
+ for(const part of G.storyStore||[])bx(part.x,(part.y0||0)+part.h/2,part.z,part.w,part.h,part.d,part.c,null,inside?.16:1);
+ for(const n of G.storyNpcs||[]){
+  if(!window.__npc3dDrawn?.(n.id)){pushM();mv(n.x,n.y,n.z);bx(0,27,0,22,34,14,n.id==='mara'?'#b4c0ad':'#886b49');bx(0,51,0,16,16,16,'#d1ad88');popM();}
+  const available=n.id==='thomas'?!f['thomas.ready']:f['thomas.ready']&&!f['briar.depart'];
+  if(available&&mode==='play'){const ready=n.id==='mara'&&(s.items.tangle_root||0)>=3&&(s.items.dressings||0)>=1;bx(n.x,82+Math.sin(t*2)*2,n.z,5,12,5,ready?'#9be4b0':'#e4c674');bx(n.x,72+Math.sin(t*2)*2,n.z,5,4,5,ready?'#9be4b0':'#e4c674');}
+ }
+ for(const o of G.storyObjects||[]){if(f['event.'+o.key])continue;
+  if(o.kind==='root'){for(let k=0;k<3;k++){bx(o.x+(k-1)*8,8,o.z,8,12+k*3,9,'#b4935a');bx(o.x+(k-1)*9,19+k*3,o.z,16,5,8,'#829d50');}}
+  if(o.kind==='dressings'){bx(o.x,o.y+6,o.z,29,10,20,'#e0ddc4');bx(o.x,o.y+12,o.z,7,2,21,'#8d4d44');}
+  if(o.kind==='water'||o.kind==='handle'){bx(o.x,18,o.z,18,36,18,'#78674e');bx(o.x,43,o.z,55,7,9,'#c2a669');}
+  if(o.kind==='jam'){pushM();mv(o.x,28,o.z);rotY(.45);bx(0,0,0,85,16,18,'#6f4b2f');popM();}
+  if(o.kind==='gate'){for(const x of [-75,75])bx(o.x+x,o.y+42,o.z,12,84,12,'#80623e');bx(o.x,o.y+40,o.z,160,12,10,'#bd995c');}
+ }
+ const b=G.briarBridge;if(b){const raised=b.closed;for(let j=0;j<11;j++)bx(b.x,b.closed?12+j*10:7,b.z-100+j*20,190,8,18,'#aa8758');}
+ if(f['briar.depart']){const goal=G.portalPos;for(let j=0;j<3;j++){const x=goal.x-65+j*65,z=goal.z+110;bx(x,goal.y+21,z,16,30,12,j===1?'#a59b73':'#8b775c');bx(x,goal.y+43,z,12,12,12,'#cba581');}}
+}
+
 function adventureStoryState(){ if(!G)return null;return G.storyState||(G.storyState=BFStoryState.create()); }
 function addJournalNote(id,title,text){
   if(!isCampaignAdventure()||typeof id!=='string'||!id||['__proto__','constructor','prototype'].includes(id))return false;
@@ -2892,7 +3032,7 @@ function questProgressText(q){
   }
   if(q.k==='hunt') return have>=need ? '1/1' : 'at large';
   return have+'/'+need; }
-function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
+function areaClear(){ if(inBriar())return !!G.storyState?.flags['briar.depart'];return G.area<0 || areaQuests().every(questDone); }
 function questBump(id,by){
   const q=areaQuests().find(x=>x.id===id); if(!q||questDone(q)) return;
   G.qs[id]=(G.qs[id]||0)+(by||1);
@@ -2956,7 +3096,7 @@ function questHuntKill(e){
   addText(e.x, e.y + (e.h||40) + 20, e.z, 'QUARRY SLAIN', 'var(--amber)', true);
   if(G.qmarks) for(const m of G.qmarks) if(m.q === e.huntQ) m.done = true; }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
-function openWay(){ if(G.portal||!G.portalPos) return;
+function openWay(){ if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
   if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
@@ -3019,7 +3159,7 @@ function questUpdate(){
       return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
     if(areaClear()&&G.portal) rows+=qrow(false,eventIcon('event-secret-rift'),'The way opens — take the portal',null);
     rows+=secretRow;
-    sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed')+(secret?'|secret':''); }
+    sig='z'+Z.id+G.area+'|'+(inBriar()?(G.storyState?.revision||0):'')+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed')+(secret?'|secret':''); }
   const oq=(G.optionalMissions||[]).filter(m=>m.discovered);
   if(oq.length){ rows+=oq.map(m=>qrow(m.done,m.done?'☑':'◇','<b>Optional</b> · '+m.name,`${m.progress}/${m.total}`)).join(''); sig+='|optional:'+oq.map(m=>m.id+':'+m.progress+'/'+m.total).join(','); }
   applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
@@ -3940,7 +4080,7 @@ function captureCampaignCheckpoint(){
   if(!isCampaignAdventure())return false;
   meta.hero=snapOf(G.p);
   const state={};for(const f of MODE_FIELDS)if(f!=='run'&&f!=='bank'&&meta[f]!==undefined)state[f]=checkpointClone(meta[f]);
-  const route={zone:G.zone,area:G.area,qs:checkpointClone(G.qs||{}),outskirtsNests:checkpointClone(G.outskirtsNests||[]),storyState:checkpointClone(G.storyState||BFStoryState.create()),revision:G.campaignLayout?.revision};
+  const route={zone:G.zone,area:G.area,qs:checkpointClone(G.qs||{}),outskirtsNests:checkpointClone(G.outskirtsNests||[]),storyState:checkpointClone(G.storyState||BFStoryState.create()),storyClaims:checkpointClone(G.storyClaims||{}),revision:G.campaignLayout?.revision};
   meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:checkpointClone(meta.hero),base:checkpointClone(G.baseLoadout||meta.hero),runSeed:G.runSeed,campaign:route,checkpoint:{version:1,state}};
   // Keep the existing escrow API usable by hub exits and older tooling.
   meta.bank={gold:meta.gold||0,hero:checkpointClone(meta.hero),classes:checkpointClone(meta.classes||{}),stash:checkpointClone(meta.stash||[]),classId:meta.classId};
@@ -4364,6 +4504,7 @@ function loadArea(){
   if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
+  if(inBriar())buildBriarOpening();else{G.storyNpcs=[];G.storyObjects=[];}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -6775,7 +6916,7 @@ function buildCampaignRoute(ctx){
   // Place authored reach goals on distinct balconies, rather than two adjacent stair treads.
   const watches=rooms.filter(r=>r.role==='watch');let wi=0;
   for(const mark of G.qmarks)if(mark.k==='reach'&&watches.length){const r=watches[wi++%watches.length];Object.assign(mark,{x:r.x,z:r.z,y:r.y});}
-  if(plan.adventure) placeOutskirtsObjectives(ctx,rooms);
+  if(plan.adventure&&!inBriar()) placeOutskirtsObjectives(ctx,rooms);
   // Fixed objective positions belong to the named districts. No late scatter/topology pass.
   snapWorldInteractables();return true;
 }
@@ -6813,7 +6954,7 @@ function dressOutskirtsAdventure(ctx,rooms,paths){
   };
   // The first fight is legible and small. Threats build through farm and river spaces;
   // the entry, watchpost, mill commons and final shrine are breathing spaces.
-  for(const [i,types] of [[1,['thornboar','thornboar']],[5,['thornboar','thornboar','sporeback']],[6,['sporeback','thornboar','flyer']],[7,['grunt','thornboar','sporeback']],[9,['sporeback','flyer']],[10,['thornboar','sporeback','grunt']],[11,['thornboar','sporeback']]]){
+  for(const [i,types] of [[1,['grunt','grunt']],[5,['thornboar','thornboar','sporeback']],[6,['sporeback','thornboar','flyer']],[7,['grunt','thornboar','sporeback']],[9,['sporeback','flyer']],[10,['grunt','grunt','grunt']],[11,['thornboar','sporeback']]]){
     const r=rooms[i];for(const [j,type]of types.entries()){
       const a=j/types.length*Math.PI*2,m=mkMonster(type,r.x+Math.cos(a)*130,r.z+Math.sin(a)*110,r);
       m.y=r.y;m.sx=m.x;m.sz=m.z;
@@ -12879,10 +13020,12 @@ const MP={
   wireGuest(c){ c.on('open',()=>{ this.conns.push(c);
     { const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} }
     c.on('data',d=>{
+      if((d.t==='hello'||d.t==='pos')&&(!d.p?.id||d.p.id===this.myId||(c._pid&&c._pid!==d.p.id)||this.conns.some(other=>other!==c&&other._pid===d.p.id)))return;
       if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} if(IN_ARENA && this.teams) this.assignTeams();
         try{ mpHideBanner(); toast('⚔️ '+(d.p.name||'Your friend')+' joined the arena!','#7de08a'); }catch(e){} }
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d); }
+      else if(d.t==='storyRequest'){const q=this.peers[c._pid];briarReceive(d.request,c._pid,q?{...q,x:q.tx,y:q.ty,z:q.tz}:null);}
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
       else if(d.t==='petdmg'){ this.routePetPvp(d); }      // owner-authoritative companion damage
@@ -12895,11 +13038,12 @@ const MP={
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
       else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); }
     });
-    c.on('close',()=>{ this.conns=this.conns.filter(x=>x!==c); }); }); },
+    c.on('close',()=>{ this.conns=this.conns.filter(x=>x!==c);briarDisconnect(c._pid); }); }); },
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
-    const msg={t:'state',players:all, en:this.enemySnap(), ek}; this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
+    const msg={t:'state',players:all, en:this.enemySnap(), ek};
+    const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
     code=(code||'').trim().toUpperCase(); if(!code){ cb&&cb(false,'no code'); return; }
@@ -12926,7 +13070,8 @@ const MP={
     } },
   onGuestData(d){
     if(d.t==='zone'||d.t==='arena'||d.t==='special') this.ensureGuestReady();
-    if(d.t==='special'){ this.applySpecial(d); }
+    if(d.t==='story'){briarApply(d.story,false,d.ack);}
+    else if(d.t==='special'){ this.applySpecial(d); }
     else if(d.t==='campaignClear'){if(isCampaignAdventure()&&G.zone===d.zone&&G.runSeed===d.rseed){securePendingSecret();zoneClear();}}
     else if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
@@ -12939,7 +13084,7 @@ const MP={
            to 0, so both clients report a healthy agreeing session with the guest in a different
            level. The area-rebuild branch below cannot save it either, since area 0 === area 0.
            The line directly above already distinguishes the hub this exact way. */
-        if(d.restart&&campaignCheckpoint()&&G?.zone===d.zone&&G.area===d.area&&G.runSeed===d.rseed){restartCampaignCheckpoint(true);return;}
+        if(d.restart&&campaignCheckpoint()&&G?.zone===d.zone&&G.area===d.area&&G.runSeed===d.rseed){if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);restartCampaignCheckpoint(true);if(d.story)briarApply(d.story,true);return;}
         const entering=!(isCampaignAdventure()&&G.zone===d.zone&&(d.rseed==null||G.runSeed===d.rseed));
         if(entering){ try{ if(campaignCheckpoint())restoreBank();enterZone(d.zone); }catch(e){} }
         // A zone contains several authored districts plus area -1 (its boss arena). Older
@@ -12948,12 +13093,12 @@ const MP={
         // receiving the host's boss snapshot — commonly a black/empty view. Preserve the
         // guest's current hero state, but rebuild the exact room the host entered.
         if(G&&G.zone===d.zone&&typeof d.area==='number'&&G.area!==d.area){
-          securePendingSecret();G.area=d.area;
+          securePendingSecret();if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);G.area=d.area;
           if(d.qs)G.qs=checkpointClone(d.qs);
           if(d.rseed!=null) G.runSeed=d.rseed;
-          try{ loadArea(); captureCampaignCheckpoint();this.onEnter(d.zone); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); }
+          try{ loadArea();if(d.story)briarApply(d.story,true);captureCampaignCheckpoint();if(entering&&d.story?.checkpointStory){meta.run.campaign.storyState=checkpointClone(d.story.checkpointStory);persist();}this.onEnter(d.zone); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); }
           catch(e){ console.error('co-op room sync failed',e); }
-        } } }
+        }else if(d.story){briarApply(d.story,true);if(entering&&d.story.checkpointStory&&meta.run?.campaign){meta.run.campaign.storyState=checkpointClone(d.story.checkpointStory);persist();}} } }
     else if(d.t==='arena'){ this.arenaMsg=d; this.zone=this.ARENA; this.pvp=true; this.teams=!!d.teams;   // follow the host into the shared Arena
       ARENA_LOADOUT.map=d.map||'flat'; if(d.fair && d.ld){ Object.assign(ARENA_LOADOUT,d.ld); ARENA_LOADOUT.fair=true; }
       if(!IN_ARENA){ try{ enterArena(); }catch(e){} } }
@@ -12961,7 +13106,7 @@ const MP={
     else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
-      if(d.en) this.applyEnemies(d.en, d.ek); }
+      if(d.en&&!G?.storyState?.conversation) this.applyEnemies(d.en, d.ek);if(d.story)briarApply(d.story); }
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
@@ -12973,7 +13118,7 @@ const MP={
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
   onEnter(zi,restart=false){ this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
-    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined});}catch(e){}}); },
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()});}catch(e){}}); },
   specialMsg(kind){
     if(!G) return null;
     kind=kind||(G.endless?'endless':G.sprintFun&&G.bonusActive?'sprint':G.bossRush?'gauntlet':null);
@@ -13011,7 +13156,7 @@ const MP={
   teamOf(id){ return this.teamMap[id]||0; },
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
-  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0}; return null; },
+  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
@@ -13037,13 +13182,14 @@ const MP={
     addMark(d.x,d.z,d.y||0,d.by,(d.n||'Ally').slice(0,14),(d.mid==null?null:d.mid));
     try{ SFX.pickup(); }catch(e){}
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
-  recvCombat(d,fromConn){ if(!G) return;
+  recvCombat(d,fromConn){ if(!G||G.storyState?.conversation) return;
     if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0}); }
     if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0}); }
     // host relays a guest's combat FX to the OTHER guests so everyone sees it
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
+    if(G?.storyState?.conversation){this._sendT+=dt;if(this._sendT>=.07){this._sendT=0;if(this.isHost)this.broadcast();else try{this.hostConn?.send({t:'pos',p:this.selfState()});}catch(e){}}return;}
     try{ syncPingBtn(); }catch(e){}      // the ping button is co-op only; this is the only place that knows
     for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
       if(q.last>3){ delete this.peers[id]; continue; }
@@ -13069,7 +13215,7 @@ const MP={
       else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send({t:'pos',p:this.selfState()});}catch(e){}
         this._pingT+=0.07; if(this._pingT>=1){ this._pingT=0; try{this.hostConn.send({t:'ping',ts:performance.now()});}catch(e){} } } } },
   // ---- render remote players in the same zone (simple safe voxel avatar) ----
-  drawPeers(t){ if(!G) return;
+  drawPeers(t){ if(!G||BFHubDialogue.active?.external) return;
     for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue; this.drawPeer(q,t); } },
   drawPeer(q,t){
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
@@ -13122,7 +13268,7 @@ const MP={
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
-  hostApplyHit(d){ if(!this.host_()||!G) return; const e=this.byMid(d.m); if(!e||e.dead) return;   // apply a guest's relayed hit authoritatively
+  hostApplyHit(d){ if(!this.host_()||!G||G.storyState?.conversation) return; const e=this.byMid(d.m); if(!e||e.dead) return;   // apply a guest's relayed hit authoritatively
     const src={x:d.sx||e.x,z:d.sz||e.z,_guest:true};
     try{ hitEnemy(e, d.d||1, src, d.kb||0, 0, d.el||null); }catch(err){} },
   sendHit(mid,dmg,kb,el,sx,sz){ if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'hit',m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0)}); }catch(e){} } },
@@ -13220,6 +13366,7 @@ const MP={
     const a=Math.random()*6.28; p.x=Math.cos(a)*260; p.z=Math.sin(a)*260; p.y=0; p.vx=0; p.vy=0; p.vz=0; p.invuln=2;
     try{ burst(p.x,p.y+30,p.z,'#7de08a',16); hudUpdate(); }catch(e){} },
   leave(msg){
+    briarPending=null;if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
     const rollback=this.active&&!!campaignCheckpoint()&&isCampaignAdventure();this.active=false;
     try{ mpHideBanner(); }catch(e){}
     try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
@@ -13768,6 +13915,8 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arBack').onclick=back||titleScreen;
 }
 function update(dt){
+  if(briarPending&&performance.now()-briarPending.sent>650)briarSendPending();
+  if(mode==='npc'&&G?.storyState?.conversation){if(MP.active)MP.tick(dt);return;}
   pollGamepad(dt);   // controller input (auto-detected; feeds the same input channels as touch/keyboard)
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
@@ -14067,12 +14216,12 @@ function update(dt){
   // jump pads launch you
   if(p.onGround) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
   // HEALING PADS: stand on one to slowly recover HP (a lifeline for no-lifesteal/regen builds). Limited charge per pad.
-  if(G.healpads) for(const hp of G.healpads){ if(hp.charge<=0) continue;
+  if(G.healpads) for(const hp of G.healpads){ if(hp.locked||(!hp.infinite&&hp.charge<=0)) continue;
     if(Math.abs(p.y-(hp.y||0))<30 && dXZ(p.x,p.z,hp.x,hp.z)<hp.r+p.r*0.6){ const mx=effMaxHp(p);
-      if(p.hp<mx){ const budget=mx*0.40, heal=Math.min((budget/1.2)*dt, hp.charge*budget, mx-p.hp);
-        if(heal>0.02){ p.hp+=heal; hp.charge=Math.max(0,hp.charge-heal/budget); hp._acc=(hp._acc||0)+heal;
+      if(p.hp<mx){ const budget=mx*0.40, heal=Math.min((budget/1.2)*dt, (hp.infinite?Infinity:hp.charge*budget), mx-p.hp);
+        if(heal>0.02){ p.hp+=heal;if(!hp.infinite)hp.charge=Math.max(0,hp.charge-heal/budget); hp._acc=(hp._acc||0)+heal;
           if(hp._acc>=8){ addText(hp.x,(hp.y||0)+36,hp.z,'+'+Math.round(hp._acc),'#8fe8a0'); hp._acc=0; }
-          if(Math.random()<0.5) G.particles.push({x:hp.x+(Math.random()-0.5)*46,y:(hp.y||0)+4,z:hp.z+(Math.random()-0.5)*46,vx:0,vy:56+Math.random()*40,vz:0,life:0.6,color:'#8fe8a0',sz:2.6});
+          if(meta.particles!==false&&Math.random()<0.5) G.particles.push({x:hp.x+(Math.random()-0.5)*46,y:(hp.y||0)+4,z:hp.z+(Math.random()-0.5)*46,vx:0,vy:56+Math.random()*40,vz:0,life:0.6,color:'#8fe8a0',sz:2.6});
           if(!hp._sfxT||(G.time-hp._sfxT)>0.45){ hp._sfxT=G.time; try{SFX.pickup&&SFX.pickup();}catch(e){} }
           hudUpdate(); } } } }
   // checkpoint: last solid ground you stood on (not a moving platform).
@@ -14770,7 +14919,7 @@ function continueRun(){
   if(route&&ZONES[route.zone]&&(route.area===-1||ZONES[route.zone].areas[route.area])){
     if(route.zone===0&&route.area===0&&route.revision!==2){route={...route,qs:{...(route.qs||{}),ok1:(route.qs?.ok1||0)>=12?2:0}};}
     if(route.zone===1&&route.area===0&&route.revision!==3){route={...route,qs:{...(route.qs||{}),hp1:(route.qs?.hp1||0)>=12?1:0,hp4:(route.qs?.hp4||0)>=3?1:0}};}
-    G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],storyState:BFStoryState.restore(route.storyState),zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
+    G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],storyState:BFStoryState.restore(route.storyState),storyClaims:checkpointClone(route.storyClaims||{}),zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
     restorePlayer(saved.p);loadArea();restorePlayer(saved.p);if(G.area>=0&&areaClear())openWay();if(!G.baseLoadout)G.baseLoadout=snapOf(G.p);
     if(!checkpoint)captureCampaignCheckpoint(); // one compatibility resume for pre-checkpoint saves
     mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();questUpdate();hudUpdate();return;
@@ -16420,6 +16569,7 @@ function updateInteract(){
   }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   if(!it && G.dashSign){ const s=G.dashSign, d=dXZ(s.x,s.z,p.x,p.z); if(d<100) it={x:s.x,z:s.z,y:74,label:'📖 Read the sign · How to cross the gap',act:()=>openDashTutorial()}; }   // re-read the mid-air-dash lesson anytime
+  const storyInteraction=briarInteract();if(storyInteraction)it=storyInteraction;
   const windbreak=canyonWindInteract();if(windbreak)it=windbreak;
   G.interact=it; updateInteractPrompt();
 }
@@ -17823,11 +17973,13 @@ function drawCourse(s,t){
     bx(pd.x,py+2.6,pd.z, pd.r*1.5,1.8,pd.r*1.5,'#ffd24a','#ffd24a',0.65+0.3*Math.sin(t*5));
   }
   // Healing is a compact circular shrine with a clear medical cross, never a green square.
-  if(G.healpads)for(const hp of G.healpads){const py=hp.y||0,spent=hp.charge<=0;
+  if(G.healpads)for(const hp of G.healpads){const py=hp.y||0,spent=hp.locked||(!hp.infinite&&hp.charge<=0);
     dangerRing(hp.x,py,hp.z,hp.r,spent?'#53645a':'#72caa0',spent?.3:.75);
     for(let k=0;k<6;k++){const a=k*Math.PI/3;bx(hp.x+Math.cos(a)*(hp.r+5),py+3,hp.z+Math.sin(a)*(hp.r+5),8,6,8,'#686d5e');}
+    if(hp.infinite){dangerRing(hp.x,py+4,hp.z,hp.r+13,spent?'#786f5b':'#dbd6a0',.65);for(const side of [-1,1]){bx(hp.x+side*(hp.r+20),py+23,hp.z,14,46,14,'#9a927c');bx(hp.x+side*(hp.r+20),py+49,hp.z,18,6,18,spent?'#665d49':'#b6f3c5');}}
     if(!spent){bx(hp.x,py+12,hp.z,5,2,19,'#d9ffe6','#72caa0',.9);bx(hp.x,py+12,hp.z,19,2,5,'#d9ffe6','#72caa0',.9);}
   }
+  drawBriarStory(t);
   // crumbling stepping stones (shake, drop, respawn)
   /* Deferring a crumble was necessary and NOT sufficient, which is the second half of the finding.
      The voxel slab's visible face spans y 0..1.4; world3d parks its floor tiles at y=1.45 ("just
@@ -20928,6 +21080,7 @@ window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheck
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
+  briarReady, briarRequest, briarReceive, briarApply, briarPacket, briarSync, briarObjects, briarInteract, buildBriarOpening,
   openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
@@ -21040,7 +21193,7 @@ window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheck
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1989"></script>
+<script type="module" src="./hero3d.js?v=1990"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

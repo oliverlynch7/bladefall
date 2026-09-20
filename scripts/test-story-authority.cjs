@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');const engine=require('../public/3d/story-state.js');const authority=require('../public/3d/story-authority.js');const book=require('../public/3d/story/briar-foundation.json');
+const context={epoch:'run',actor:'guest',alive:true,canInteract:true,position:{x:0,z:0},npcs:[{id:'thomas',x:0,z:0}],objects:[],party:['host','guest']};let s=engine.create(),seq=0;
+const request=(type,fields={})=>({epoch:'run',event:{id:'event'+(++seq),revision:s.revision,type,...fields}});
+const open=request('open',{npc:'thomas'});assert(!authority.apply(s,book,{...open,epoch:'old'},context).changed);assert(!authority.apply(s,book,open,{...context,position:{x:400,z:0}}).changed);assert(!authority.apply(s,book,open,{...context,alive:false}).changed);
+s=authority.apply(s,book,open,context).state;assert.equal(s.conversation.owner,'guest');assert(!authority.apply(s,book,open,context).changed);
+const pick=request('choose',{line:s.conversation.node,choice:'protect'});assert(!authority.apply(s,book,pick,{...context,actor:'host'}).changed);s=authority.apply(s,book,pick,context).state;assert.equal(s.conversation.node,'briar.thomas.protect');
+assert(!authority.apply(s,book,request('world',{key:'briar.root.1'}),context).changed);s=authority.apply(s,book,request('close'),{...context,actor:'host'}).state;assert(!s.conversation);assert.equal(s.cursors.thomas.node,'briar.thomas.protect');
+s=engine.create();s.flags['thomas.ready']=true;s.quests['briar.supplies']='active';s.items={tangle_root:3,dressings:1};s.conversation={npc:'mara',node:'briar.mara.wait',owner:'guest'};
+s=authority.apply(s,book,request('choose',{line:'briar.mara.wait',choice:'deliver'}),context).state;assert.deepEqual(s.rewards['briar.mara.supplies'].recipients,['host','guest']);assert.equal(s.items.tangle_root,0);
+console.log('Story authority passed: run/revision/proximity/alive guards, owner-only decisions, paused world actions, shared exit, once-only party reward eligibility.');

@@ -1,5 +1,5 @@
 async page => {
- if(!["localhost","127.0.0.1"].includes(new URL(page.url()).hostname))throw Error("Checkpoint QA only runs against a local test save.");
+ if(!/^http:\/\/(127\.0\.0\.1|localhost):/.test(page.url()))throw Error("Checkpoint QA only runs against a local test save.");
  await page.reload();
  return await page.evaluate(()=>{
   const b=__BF3,checks=[];b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classUnlocked.reaper=true;b.meta.classId='reaper';b.openHub();

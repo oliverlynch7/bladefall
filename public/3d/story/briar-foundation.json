@@ -1,7 +1,7 @@
 {
   "version": 1,
   "region": "outskirts",
-  "status": "Authored foundation preview; world placement and co-op dialogue pending",
+  "status": "live-briar-opening",
   "npcs": {
     "thomas": {
       "name": "Thomas",
@@ -471,6 +471,103 @@
           "type": "item",
           "id": "dressings",
           "amount": 1
+        }
+      ]
+    },
+    "briar.water": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.escape",
+          "is": "active"
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "briar.water",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "briar.mill",
+          "region": "outskirts",
+          "title": "The mill crossing",
+          "text": "The water is stopped. Look for the timber caught in the wheel beside the mill."
+        }
+      ]
+    },
+    "briar.jam": {
+      "once": true,
+      "when": [
+        {
+          "flag": "briar.water",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "briar.jam",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "briar.mill",
+          "region": "outskirts",
+          "title": "The mill crossing",
+          "text": "The wheel is clear. Use the bridge handle beside the stream to lower the crossing."
+        }
+      ]
+    },
+    "briar.bridge": {
+      "once": true,
+      "when": [
+        {
+          "flag": "briar.jam",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "briar.bridge",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "briar.escape",
+          "region": "outskirts",
+          "title": "A way out",
+          "text": "The crossing is down. Clear the Legion guards at the old stone bridge, then open the wagon gate on the far rise. Thomas will lead the neighbors out."
+        }
+      ]
+    },
+    "briar.depart": {
+      "once": true,
+      "when": [
+        {
+          "flag": "briar.bridge",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "briar.depart",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "briar.escape",
+          "value": "complete"
+        },
+        {
+          "type": "note",
+          "id": "briar.escape",
+          "region": "outskirts",
+          "title": "The neighbors are safe",
+          "text": "Thomas has led the neighbors out. Follow the path into the Black Woods to find where the Legion is coming from."
         }
       ]
     }

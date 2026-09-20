@@ -8,7 +8,7 @@ assert(act('open',{npc:'thomas'}));assert(choose('afraid'));assert(choose('prepa
 assert(act('open',{npc:'mara'}));assert(choose('why'));assert(choose('help'));assert(choose('accept'));
 const waiting=state.conversation.node;assert.equal(choose('deliver'),false,'no turn-in without supplies');assert(act('close'));assert(act('open',{npc:'mara'}));assert.equal(state.conversation.node,waiting,'exit resumes');assert(act('close'));
 const baseline=engine.restore(state);
-for(const key of Object.keys(book.events)){assert(act('world',{key}));assert.equal(act('world',{key}),false,'same pickup with new event ID still deduped')}
+for(const key of Object.keys(book.events).filter(k=>k.startsWith('briar.root.')||k==='briar.dressings')){assert(act('world',{key}));assert.equal(act('world',{key}),false,'same pickup with new event ID still deduped')}
 assert.equal(state.items.tangle_root,3);assert(act('open',{npc:'mara'}));assert(choose('deliver'));assert(state.flags['mara.healing']);assert.equal(state.items.tangle_root,0);assert.equal(Object.keys(state.rewards).length,1);assert(choose('next'));assert(act('close'));
 assert.equal(engine.restore(baseline).flags['mara.healing'],undefined,'rollback removes unfinished reward');
 assert.equal(engine.restore(state).quests['briar.escape'],'active','completed checkpoint preserves progression');

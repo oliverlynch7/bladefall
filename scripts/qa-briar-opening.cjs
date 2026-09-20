@@ -1,0 +1,35 @@
+async page=>{
+ if(!/^http:\/\/(127\.0\.0\.1|localhost):/.test(page.url()))throw Error('Local test save only');
+ const checks=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n)};
+ await page.route('**/voice-api/game',r=>r.fulfill({json:{lines:{}}}));
+ await page.reload();await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+ await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.classUnlocked.warrior=true;b.meta.classId='warrior';b.meta.introSeen=true;b.meta.gold=1000;b.openHub();b.enterZone(0);});
+ const open=async id=>{await page.evaluate(id=>{const b=__BF3,n=b.G.storyNpcs.find(n=>n.id===id);Object.assign(b.G.p,{x:n.x+50,z:n.z+45,y:n.y});b.briarRequest('open',{npc:id});},id);await page.waitForSelector('#hubReveal')};
+ const choice=async id=>{await page.locator('#hubReveal').click();await page.waitForTimeout(300);await page.evaluate(id=>{const b=__BF3;b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice:id});},id)};
+ const world=async key=>{await page.evaluate(key=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key===key);Object.assign(b.G.p,{x:o.x,y:o.y,z:o.z});b.briarRequest('world',{key});},key)};
+ ok('two campaign NPCs and no legacy Shade',await page.evaluate(()=>__BF3.G.storyNpcs.length===2&&!__BF3.G.npc));
+ await page.evaluate(()=>__BF3.briarRequest('world',{key:'briar.dressings'}));ok('cannot collect supplies before quest or from afar',await page.evaluate(()=>!__BF3.G.storyState.items.dressings));
+ await open('thomas');const time=await page.evaluate(()=>__BF3.G.time);await page.evaluate(()=>__BF3.update(.5));ok('conversation pauses world',await page.evaluate(t=>__BF3.G.time===t,time));
+ await choice('protect');await page.keyboard.press('Escape');await open('thomas');ok('leaving resumes same line',await page.evaluate(()=>__BF3.G.storyState.conversation.node==='briar.thomas.protect'));await choice('prepare');await page.keyboard.press('Escape');
+ await open('mara');await choice('help');await choice('accept');await page.keyboard.press('Escape');
+ const before=await page.evaluate(()=>__BF3.meta.gold);
+ for(const key of ['briar.root.1','briar.root.2','briar.root.3','briar.dressings'])await world(key);
+ await world('briar.root.1');ok('physical supplies are once only',await page.evaluate(()=>__BF3.G.storyState.items.tangle_root===3&&__BF3.G.storyState.items.dressings===1));
+ await open('mara');await choice('deliver');ok('delivery restores pad and pays once',await page.evaluate(n=>__BF3.meta.gold>n&&!__BF3.G.healpads.find(p=>p.storyPad).locked&&__BF3.G.storyClaims['briar.mara.supplies'],before));
+ const earned=await page.evaluate(()=>__BF3.meta.gold);await page.evaluate(()=>{__BF3.briarSync();__BF3.briarSync()});ok('repeated snapshots cannot duplicate reward',await page.evaluate(n=>__BF3.meta.gold===n,earned));
+ await page.locator('#hubReveal').click();await page.waitForTimeout(300);await page.screenshot({path:'output/playwright/briar-mara-restoration.png'});
+ await page.evaluate(()=>{const b=__BF3;b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice:'next'})});await page.keyboard.press('Escape');
+ await page.evaluate(()=>{const b=__BF3,pad=b.G.healpads.find(p=>p.storyPad);Object.assign(b.G.p,{x:pad.x,y:0,z:pad.z,hp:1});for(let i=0;i<220;i++)b.update(.016);});
+ ok('large pad replenishes to full without losing charge',await page.evaluate(()=>__BF3.G.p.hp>=__BF3.effMaxHp(__BF3.G.p)-1&&__BF3.G.healpads.find(p=>p.storyPad).charge===1));
+ await world('briar.jam');ok('mill repair respects order',await page.evaluate(()=>!__BF3.G.storyState.flags['briar.jam']));
+ for(const key of ['briar.water','briar.jam','briar.bridge'])await world(key);
+ ok('lowered crossing removes its collision wall',await page.evaluate(()=>__BF3.G.storyState.flags['briar.bridge']&&!__BF3.G.walls.some(w=>w.storyBridge)));
+ await world('briar.depart');ok('living bridge guards block evacuation',await page.evaluate(()=>!__BF3.G.storyState.flags['briar.depart']));
+ await page.evaluate(()=>{for(const e of __BF3.G.enemies)if(e.briarGuard){e.dead=true;e.hp=0;}});await world('briar.depart');
+ ok('departure opens exit',await page.evaluate(()=>!!__BF3.G.portal&&__BF3.G.storyState.quests['briar.escape']==='complete'));
+ await page.evaluate(()=>{__BF3.nextArea();__BF3.openPause();});await page.reload();await page.waitForFunction(()=>window.__BF3);await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.continueRun();__BF3.openPause()});
+ ok('completed-half story and personal reward receipt survive reload',await page.evaluate(()=>__BF3.G.area===1&&__BF3.G.storyState.flags['mara.healing']&&__BF3.G.storyClaims['briar.mara.supplies']));
+ await page.evaluate(()=>{__BF3.openHub();__BF3.enterZone(0)});await open('thomas');await choice('afraid');await page.keyboard.press('Escape');await page.reload();await page.waitForFunction(()=>window.__BF3);await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.continueRun();__BF3.openPause()});
+ ok('unfinished-half dialogue rolls back on reload',await page.evaluate(()=>!__BF3.G.storyState.cursors.thomas&&!__BF3.G.storyState.flags['mara.healing']));
+ return checks;
+}

@@ -1,5 +1,5 @@
 async page => {
- if(!["localhost","127.0.0.1"].includes(new URL(page.url()).hostname))throw Error("Checkpoint QA only runs against a local test save.");
+ if(!/^http:\/\/(127\.0\.0\.1|localhost):/.test(page.url()))throw Error("Checkpoint QA only runs against a local test save.");
  const checks=[],check=(name,v)=>{if(!v)throw Error(name);checks.push(name);};
  const context=await page.context().browser().newContext();const guest=await context.newPage();
  try{

@@ -1,5 +1,5 @@
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
-import {syncNpcs} from './npc3d.js?v=1989';
+import {syncNpcs} from './npc3d.js?v=1990';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions} from './companion3d.js?v=1981s';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1341,7 +1341,10 @@ function paintClassBody(root,cls,packOriginal=false){
     const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls]);
     if(!o.isMesh||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
     // Skeleton clones share source materials. Always isolate before touching a palette.
-    if(o.userData._paletteOwner!==o.uuid){o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();o.userData._paletteOwner=o.uuid;}
+    if(o.userData._paletteOwner!==o.uuid){
+      // Material.clone JSON-copies userData. Preserve the real source Texture for same-body allies.
+      const isolate=m=>{const c=m.clone();c.userData._srcMap=m.userData._srcMap?.isTexture?m.userData._srcMap:m.map||null;return c;};
+      o.material=Array.isArray(o.material)?o.material.map(isolate):isolate(o.material);o.userData._paletteOwner=o.uuid;}
     for(const m of (Array.isArray(o.material)?o.material:[o.material])){
       if(!('_srcMap' in m.userData))m.userData._srcMap=m.map||null;
       if(!m.userData._srcMap)continue;

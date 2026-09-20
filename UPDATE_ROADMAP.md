@@ -1713,3 +1713,8 @@ Current-level journal (N or HUD), checkpointed notes/items/dialogue state, autho
 ## [Codex | 2026-09-20] 1.989.0 — Hub conversations and voice batch
 
 Five hub service NPCs now have one-time introductions, direct services after introduction, personal questions, optional victory news markers, saved interrupted lines, camera framing, progressive text, optional device speech and approved Voice Studio recordings. Fitted NPC faces and simple speech-linked mouth movement; hide local hero from dialogue framing.20 new recordable lines,32 total. Browser/state/API verification in docs/IMPLEMENTATION_HUB_DIALOGUE_2026-09-20.md. Shared campaign dialogue and Briar NPC placement remain next.
+
+
+## [Codex | 2026-09-20] 1.990 Briar opening
+
+Thomas/Mara live quest, physical supplies, restored unlimited healing pad, ordered mill crossing repair and village departure. Shared campaign dialogue authority, camera and per-player rewards with half-checkpoint rollback; same-body peer material fix. See docs/IMPLEMENTATION_BRIAR_LIVE_2026-09-20.md. Wider campaign expansion remains in progress.

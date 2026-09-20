@@ -1,0 +1,5 @@
+# Class palettes and weapon grip correction
+
+U115 takes priority before checkpoint work. Inspect: palettes already defined but applyClassSkin bypasses them for every class except Paladin; peers clone shared materials and have no class paint call. Pirate meshes inherit sword offsets and stock transforms, so paired attachment does not imply actual hand alignment.
+
+Implement: class palettes on body meshes by default, retain natural face/skin and shared art; independent materials for each rig, cached palette textures, correct palette after same-body class changes and in previews. Distinct blue Mage, green/bone Necromancer, teal/gold Chronomancer, storm cyan, violet Warlock, ember Pyromancer palette reserved for new class. All other current classes covered. Correct Pirate grip in bone-local coordinates using hand contact point, with own saber and pistol axes, rather than recycling sword wrap offsets. Preserve tuned existing weapon fits. Verify hand distance/orientation idle/run/attack and screenshots, peer rendering palette isolation and no weapon duplicates on swapping. Publish only after checks.

@@ -202,3 +202,11 @@ No row may be marked implemented merely because a predecessor was shipped. Add e
 ## Implementation evidence — September 20, 2026
 
 Equipment foundation batch 1.982.0: see [scope, checks and limitations](IMPLEMENTATION_EQUIPMENT_2026-09-20.md). EQ-02/04/05/07/08 implemented with browser checks. EQ-01/03/09 implemented with representative coverage; full class/skin/co-op integration remains open. EQ-06 partial: rank-cap scaling and Necromancer level factor, full damage audit still pending. Every other requirement retains its previous status. U113 authorizes main implementation; U114 requests continuation.
+
+### U115 correction — required before visual sign-off
+
+EQ-03/GOV-05 grip fit remains OPEN: user rejected screenshot holding positions. Add ART-CLASS-01: distinct class-specific recolor for every model/class combination, including all shared mage models; retain existing geometry and natural faces. Default pack colors do not satisfy this.
+
+### MUSIC-01 | A/P | U116–U117
+
+Inventory supplied Desktop/BladeFall Music tracks, propose each placement and remaining music coverage, with coherent theme directions/copy-ready ElevenLabs briefs. Planning deliverables: SOUNDTRACK_PLAN_2026-09-20.md and ELEVENLABS_MUSIC_BRIEFS_2026-09-20.md. Placement recommendations remain proposals, no runtime routing/audio publication yet. Reserved recommendations: Crown phase one/Iron Oath phase two; Watchful Greenwood restoration; distinct music for both halves and ship/hydra/orb/Ian/final-cut states.

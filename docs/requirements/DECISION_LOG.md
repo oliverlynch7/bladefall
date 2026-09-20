@@ -47,3 +47,11 @@ Approved orb question: How can we stop the Abyss King? Orb must not reveal final
 User explicitly authorizes implementation and publishing to main, latest decisions taking precedence, with no minor requirements dropped. Continue approved batches without another broad approval. Exact source preserved in USER_SOURCE_2026-09-20_IMPLEMENTATION.md. Private archive now contains 114 user-role messages, zero unparsed records and valid source references.
 
 First batch: equipment foundations EQ-01–EQ-09. Evidence and remaining limits in ../IMPLEMENTATION_EQUIPMENT_2026-09-20.md. Campaign, checkpoint, dialogue, voice studio, boss and remaining UI requirements stay open; this is not completion of the overhaul.
+
+## 2026-09-20 | Weapon fit rejected; all-class recolors requested | U115
+
+User reports screenshot weapons held incorrectly. Do not mark attachment alone as correct grip; validate hand placement and orientation in motion. Each class needs a distinct model recolor, particularly shared Wizard bodies. Preserve existing model geometry and natural skin/face colors. This supersedes older pack-base-by-default coloring. Prioritize this correction before checkpoint implementation.
+
+## 2026-09-20 | Soundtrack inventory and proposed placements | U116–U117
+
+User supplies 21 desktop songs, tentative placement ideas, requests coverage/gaps for campaign halves, bosses, hub and scenes, and thematic recommendations for ElevenLabs prompts. Originals preserved. Files inventoried at Desktop/BladeFall Music (21 MP3, 99 MB, 150–240 seconds). SOUNDTRACK_PLAN_2026-09-20.md maps every song and all 16 campaign halves/eight boss slots (King has two tracks). ELEVENLABS_MUSIC_BRIEFS_2026-09-20.md contains 11 composition briefs, with the final suite split into three cue prompts. These are assistant recommendations pending listening/approval, NOT newly locked music assignments. No audio audition or music deployment claimed. Music task steers the current work; pending weapon/palette corrections and larger implementation queue remain open.

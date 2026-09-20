@@ -1718,3 +1718,8 @@ Five hub service NPCs now have one-time introductions, direct services after int
 ## [Codex | 2026-09-20] 1.990 Briar opening
 
 Thomas/Mara live quest, physical supplies, restored unlimited healing pad, ordered mill crossing repair and village departure. Shared campaign dialogue authority, camera and per-player rewards with half-checkpoint rollback; same-body peer material fix. See docs/IMPLEMENTATION_BRIAR_LIVE_2026-09-20.md. Wider campaign expansion remains in progress.
+
+
+## [Codex | 2026-09-20] Gus recording-ready optional quest
+
+Continued approved DLG-03/04 and VO-PRIORITY-01: ten new stable Gus lines in the private Voice Studio (42 total), with performance notes. Separate rehearsal supports tool delivery, once-only BR-02 reward/shortcut, insult, sign-repair apology, final refusal, leave/resume and retry. No new user design decisions. All original Thomas/Mara/hub lines unchanged. Gus remains rehearsal-only: live placement, physical five-shard collection/banking and Rift Hall integration remain OPEN, alongside Black Woods, remaining regions/bosses and the broader requirements register. See IMPLEMENTATION_GUS_VOICE_2026-09-20.md.

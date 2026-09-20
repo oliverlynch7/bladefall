@@ -1,0 +1,9 @@
+async page=>{
+await page.goto('http://127.0.0.1:4331/3d/story/preview.html');await page.waitForFunction(()=>!!window.__storyPreview);
+await page.locator('#reset').click();await page.locator('#thomas').click();
+async function choose(text){await page.locator('#reveal').click();await page.waitForTimeout(350);await page.getByRole('button',{name:text,exact:true}).click()}
+await choose('Someone has to keep them away from home.');await choose('Help me get ready.');await page.locator('#leave').click();await page.locator('#gus').click();await choose('Scared of your own ladder?');await choose("I'm sorry. That was unfair.");await page.locator('#leave').click();await page.locator('summary').click();await page.getByRole('button',{name:'Stand the village sign back up',exact:true}).click();await page.locator('#gus').click();await choose('I stood the sign back up.');await choose('Tell me where they are.');await choose("I'll bring your tools back.");await page.locator('#leave').click();await page.getByRole('button',{name:'Collect Gus’s tool roll from the loft',exact:true}).click();await page.locator('#gus').click();await choose('Your tools. All of them.');
+const state=await page.evaluate(()=>window.__storyPreview.state);if(!state.flags['gus.shortcut']||state.rewards['briar.gus.BR-02']?.kind!=='rift_shard')throw Error('Reward failed');
+await page.locator('#reveal').click();await page.waitForTimeout(350);await page.setViewportSize({width:390,height:844});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Phone overflow');await page.screenshot({path:'output/playwright/gus-rehearsal-phone.png',fullPage:true});await page.setViewportSize({width:1280,height:900});return {passed:true,checks:'Thomas unlock, insult, apology, sign repair, resume, tools delivery, shard, shortcut, phone fit'};
+}
+

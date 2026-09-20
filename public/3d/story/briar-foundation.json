@@ -18,6 +18,18 @@
           "is": true
         }
       ]
+    },
+    "gus": {
+      "name": "Gus",
+      "role": "Village carpenter",
+      "start": "briar.gus.first",
+      "when": [
+        {
+          "flag": "thomas.ready",
+          "is": true
+        }
+      ],
+      "availability": "rehearsal-only"
     }
   },
   "nodes": {
@@ -407,6 +419,326 @@
         "direction": "Focused encouragement. You are staying with the wounded while the player clears the escape route.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
+    },
+    "briar.gus.first": {
+      "text": "I put my best tools in the loft. Safe from thieves, damp, and apparently me. Now the Legion is outside and I can't make my legs climb the ladder.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "What do you need?",
+          "next": "briar.gus.request",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "why",
+          "text": "Why stay here?",
+          "next": "briar.gus.home",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "mock",
+          "text": "Scared of your own ladder?",
+          "next": "briar.gus.hurt",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gus.upset"
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Dry humor covering real fear. The joke is on yourself, not the people in danger.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.home": {
+      "text": "I built half these doors. Fixed the other half after Thomas tried. These are my neighbors. I'm not leaving them with nowhere to hide.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Then let's give them somewhere safe.",
+          "next": "briar.gus.request",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "mock",
+          "text": "You're not helping much down here.",
+          "next": "briar.gus.hurt",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gus.upset"
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Warm pride, then embarrassment. Thomas is a familiar friend; tease him kindly.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.request": {
+      "text": "My tool roll is upstairs, by the little window. Bring it down and I can unstick the workshop's back door. There's a narrow way through to the other side. I've got something purple you can have, too. Found it in the roof. Nearly broke my saw.",
+      "choices": [
+        {
+          "id": "accept",
+          "text": "I'll bring your tools back.",
+          "next": "briar.gus.waiting",
+          "effects": [
+            {
+              "type": "quest",
+              "id": "briar.gus.tools",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.gus.tools",
+              "region": "outskirts",
+              "title": "Gus's good tools",
+              "text": "Gus left his tool roll in the workshop loft. Bring it back so he can open a safer way through the workshop."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Practical, relieved to have a plan. Curious about the purple piece, with no knowledge of its origin.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.waiting": {
+      "text": "The roll by the loft window. Please bring the whole thing. Last time someone borrowed my hammer, I got a spoon back.",
+      "choices": [
+        {
+          "id": "deliver",
+          "text": "Your tools. All of them.",
+          "next": "briar.gus.thanks",
+          "effects": [
+            {
+              "type": "item",
+              "id": "gus_tools",
+              "amount": -1
+            },
+            {
+              "type": "quest",
+              "id": "briar.gus.tools",
+              "value": "complete"
+            },
+            {
+              "type": "flag",
+              "id": "gus.shortcut"
+            },
+            {
+              "type": "reward",
+              "id": "briar.gus.BR-02",
+              "kind": "rift_shard",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "briar.gus.tools",
+              "region": "outskirts",
+              "title": "A safer way through",
+              "text": "Gus opened the workshop shortcut and gave us a Rift Shard. The shortcut is optional; the mill crossing still leads out of town."
+            }
+          ],
+          "when": [
+            {
+              "item": "gus_tools",
+              "count": 1
+            },
+            {
+              "quest": "briar.gus.tools",
+              "is": "active"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "A little lighter now someone has offered help. Let the spoon joke land without exaggerating it.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.thanks": {
+      "text": "Still got all ten fingers? Good. Better than my first week. Here, take the purple piece. I'll get this door open. If the street gets rough, come through my workshop.",
+      "choices": [
+        {
+          "id": "care",
+          "text": "Keep yourself safe, Gus.",
+          "next": "briar.gus.done",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 5,
+        "status": "recording-ready",
+        "direction": "Genuine gratitude with a small joke. Tools restored; he can contribute again.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.done": {
+      "text": "Door's open. Watch the low beam. It has won every argument I've had with it.",
+      "choices": [],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 6,
+        "status": "recording-ready",
+        "direction": "Warm farewell. Quietly proud to be useful.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.hurt": {
+      "text": "Yes. I'm scared. That sign outside has had our village name on it since I was little. They knocked it into the mud. I couldn't even stand it back up. You don't need to make me feel smaller.",
+      "choices": [
+        {
+          "id": "repair",
+          "text": "The sign is standing again. I should have helped.",
+          "next": "briar.gus.repair",
+          "effects": [],
+          "when": [
+            {
+              "flag": "gus.sign_fixed",
+              "is": true
+            },
+            {
+              "flag": "gus.closed",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "sorry",
+          "text": "I'm sorry. That was unfair.",
+          "next": "briar.gus.sorry",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "cruel",
+          "text": "Maybe hiding is all you're good for.",
+          "next": "briar.gus.closed",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gus.closed"
+            },
+            {
+              "type": "quest",
+              "id": "briar.gus.tools",
+              "value": "closed"
+            },
+            {
+              "type": "note",
+              "id": "briar.gus.tools",
+              "region": "outskirts",
+              "title": "Gus wants to be left alone",
+              "text": "I pushed Gus too far. He will not offer his tools job this time. The mill crossing is still open to us once it is repaired."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 7,
+        "status": "recording-ready",
+        "direction": "No comic delivery. Hurt and ashamed, with affection for the village sign. This is the clue to a possible repair.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.sorry": {
+      "text": "All right. I heard you. Just... give me a minute. I hate looking out there and seeing our name in the dirt.",
+      "choices": [
+        {
+          "id": "repair",
+          "text": "I stood the sign back up.",
+          "next": "briar.gus.repair",
+          "effects": [],
+          "when": [
+            {
+              "flag": "gus.sign_fixed",
+              "is": true
+            },
+            {
+              "flag": "gus.closed",
+              "is": false
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 8,
+        "status": "recording-ready",
+        "direction": "Apology acknowledged, still bruised. The sign matters to him; do not sound like a quest checklist.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.repair": {
+      "text": "You put it back. Even with all this going on. Thank you. Maybe my legs will remember their job if my hands get to work. Could you fetch those tools?",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Tell me where they are.",
+          "next": "briar.gus.request",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gus.upset",
+              "value": false
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 9,
+        "status": "recording-ready",
+        "direction": "Surprised warmth. The player acted with care, and his trust begins to return.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
+    },
+    "briar.gus.closed": {
+      "text": "Go. I'll find someone else to help. I've got enough trouble outside my door.",
+      "choices": [],
+      "voice": {
+        "speaker": "gus",
+        "scene": "Gus's Good Tools",
+        "order": 10,
+        "status": "recording-ready",
+        "direction": "Curt, controlled hurt. Final refusal for this attempt, not a melodramatic threat.",
+        "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
+      }
     }
   },
   "events": {
@@ -568,6 +900,45 @@
           "region": "outskirts",
           "title": "The neighbors are safe",
           "text": "Thomas has led the neighbors out. Follow the path into the Black Woods to find where the Legion is coming from."
+        }
+      ]
+    },
+    "briar.gus.tools": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.gus.tools",
+          "is": "active"
+        },
+        {
+          "flag": "gus.closed",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "gus_tools",
+          "amount": 1
+        }
+      ]
+    },
+    "briar.gus.sign": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gus.upset",
+          "is": true
+        },
+        {
+          "flag": "gus.closed",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gus.sign_fixed"
         }
       ]
     }

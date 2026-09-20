@@ -23,7 +23,7 @@ assert.equal((await call('catalog')).status,401);
 assert.equal((await call('login',{body:{key},origin:'https://evil.example'})).status,403);
 assert.equal((await call('login',{body:{key:'bad'}})).status,401);
 const login=await call('login',{body:{key}});assert.equal(login.status,200);assert.match(login.headers.get('Set-Cookie'),/HttpOnly; Secure; SameSite=Strict/);cookie=login.headers.get('Set-Cookie').split(';')[0];
-let {lines}=await(await call('catalog')).json();assert.equal(lines.length,32);let line=lines[0];
+let {lines}=await(await call('catalog')).json();assert.equal(lines.length,Object.keys(book.nodes).length);assert.equal(lines.filter(l=>l.id.startsWith('briar.gus.')).length,10);let line=lines[0];
 const wav=new Uint8Array(100);wav.set(new TextEncoder().encode('RIFF'));const take='test-take-123456';
 function form(){const f=new FormData();f.set('metadata',JSON.stringify({id:line.id,take,text:line.text,revision:line.revision,duration:1}));f.set('audio',new Blob([wav],{type:'audio/wav'}),'take.wav');return f}
 let r=await call('take',{body:form()});assert.equal(r.status,200);line=(await r.json()).line;

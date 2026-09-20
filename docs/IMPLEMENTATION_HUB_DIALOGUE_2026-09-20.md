@@ -21,3 +21,8 @@ Acceptance: all five service paths; once-only introductions and interrupted resu
 Hub scripts intentionally avoid unimplemented reward promises, personal-name changes, early Bladeborn reveals, multiple Hollow Gates or permanent Ian's Blade claims. Optional first-victory lines describe encouragement only. First introductions are shared across modes within a save slot, like other hub onboarding, but never across separate slots.
 
 Remaining: actual campaign NPC placement and co-op synchronized conversations; broader NPC redesign; per-region reactions/side quests; richer facial animation. The hooded Quartermaster's mouth remains covered. No claim that the whole campaign overhaul is done.
+
+
+## Production verification - September 20
+
+42d280c pushed to main; Cloudflare Pages deployment 55261125-5d9d-400d-adc0-4ba55c71872e succeeded. Live browser verified version 1.989.0-hub-conversations, 20 new hub lines, six screenshot images and private catalog rejecting unauthenticated reads (401). All original Thomas/Mara IDs remain intact.

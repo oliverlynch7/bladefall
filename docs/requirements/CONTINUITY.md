@@ -89,3 +89,8 @@ Candidate 1.988.0-voice-studio. Studio /3d/voice-studio/, API functions/voice-ap
 ## [Codex | 2026-09-20] Hub dialogue 1.989
 
 Prior Voice Studio 7264206 deployed and production owner login verified (12 lines, zero test uploads, signout401). Current batch adds story/hub-dialogue.json, hub-dialogue.js/css and server book merge (32total lines). Five existing human service NPCs have in-world camera/subtitles/speech, save-slot intro/cursor persistence, optional victory news and fitted eyes/mouth. Source scripts serve game and Studio. Tests:17 hub browser checks,5 voice/mouth checks,13 studio recording/recovery checks, existing reducer/API suites. Check docs/IMPLEMENTATION_HUB_DIALOGUE_2026-09-20.md. Next: Thomas/Mara in-world Briar placement, supplies/restored healing pad and host-authoritative campaign dialogue; campaign expansion, bosses, shards and visual backlog remain open. Hub service chats intentionally remain personal, not shared campaign choices. Do not equate this hub batch with all-campaign completion.
+
+
+## Production verification - September 20
+
+42d280c pushed to main; Cloudflare Pages deployment 55261125-5d9d-400d-adc0-4ba55c71872e succeeded. Live browser verified version 1.989.0-hub-conversations, 20 new hub lines, six screenshot images and private catalog rejecting unauthenticated reads (401). All original Thomas/Mara IDs remain intact.

@@ -1033,7 +1033,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.985.0-holy-gold-pirate-grips';
+const VERSION3D='1.986.0-anatomical-weapon-grips';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10294,7 +10294,7 @@ function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
 const THROWN_CHARGES=['hurl','javelin','scythethrow'];
 function thrownWeaponHidden(p,w){ return !!(p&&w&&p.throwHideT>0&&p.throwHideArche===w.arche&&THROWN_CHARGES.includes(w.chg)); }
 function beginThrownWeapon(p,w,returns){
-  p.throwToken=(p.throwToken||0)+1; p.throwHideArche=w.arche; p.throwHideReturn=!!returns;
+  p.swingId=(p.swingId||0)+1; p.throwToken=(p.throwToken||0)+1; p.throwHideArche=w.arche; p.throwHideReturn=!!returns;
   p.throwHideT=returns?2.25:0.36; return p.throwToken;
 }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
@@ -12796,7 +12796,7 @@ const MP={
     s.onerror=()=>{ this._lib=false; const q=this._loading; this._loading=null; q.forEach(r=>r(false)); };
     document.head.appendChild(s); }); },
   // compact weapon snapshot — just what weaponMesh() + the hero arm-poses need to render it in-hand
-  wsnap(w){ if(!w) return null; return { art:w.art, cls:w.cls, sch:w.sch, blade:w.blade, color:w.color, el:w.el, rarity:w.rarity, fist:!!w.fist, intrinsic:w.intrinsic||null }; },
+  wsnap(w){ if(!w) return null; return { art:w.art, arche:w.arche, chg:w.chg, cls:w.cls, sch:w.sch, blade:w.blade, color:w.color, el:w.el, rarity:w.rarity, fist:!!w.fist, intrinsic:w.intrinsic||null }; },
   // reconstruct render-only minion objects from a synced [x,z,y,yaw] snapshot (drawPet3 uses the Grave Wraith model)
   _mnRender(raw){ if(!raw||!raw.length) return []; const out=[]; for(let i=0;i<raw.length;i++){ const a=raw[i]; out.push({id:'gravewraith',x:a[0],z:a[1],y:a[2]||0,yaw:a[3]||0,bob:0,t:0}); } return out; },
   _petRender(raw,old){ if(!raw||!raw.length)return null; const p=old&&old.id===raw[0]?old:{id:raw[0],x:raw[1],z:raw[2],y:raw[3]||0,yaw:raw[4]||0,bob:0,t:0};
@@ -12811,15 +12811,15 @@ const MP={
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
     w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0,
-    at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
+    at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
   mkPeer(s){ return {id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
-    at:s.at||0, sc:s.sc||0, sb:s.sb||0, dodge:!!s.dg,
+    at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,cls:q.cls,cid:q.cid,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,cls:q.cls,cid:q.cid,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -13015,6 +13015,7 @@ const MP={
         let py=pt.tyaw-pt.yaw;while(py>Math.PI)py-=2*Math.PI;while(py<-Math.PI)py+=2*Math.PI;pt.yaw+=py*k; }
       if(q.at>0) q.at=Math.max(0,q.at-dt);
       if(q.sb>0) q.sb=Math.max(0,q.sb-dt);
+      if(q.th>0)q.th=Math.max(0,q.th-dt);
       if(q.markT>0)q.markT=Math.max(0,q.markT-dt);
       if(q.warCurseT>0)q.warCurseT=Math.max(0,q.warCurseT-dt);
       if(q.beastMarkT>0)q.beastMarkT=Math.max(0,q.beastMarkT-dt);
@@ -13049,7 +13050,7 @@ const MP={
          anonymous plain object and the only rig available was yours. */
       const pp={ peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:mv2>0.2?60:0, vz:0, onGround:true,
         skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
-        dead:false, swingCombo:q.sc||0, saberSwingT:q.sb||0, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
+        dead:false, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,'#6f86c9'); bx(0,38,0,12,12,12,'#d9b08c'); popM(); }
       // team/id beacon so allies stay distinguishable at a glance
@@ -21016,7 +21017,7 @@ window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheck
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1985p"></script>
+<script type="module" src="./hero3d.js?v=1986g"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

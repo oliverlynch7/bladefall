@@ -76,3 +76,13 @@ Other class looks accepted. Paladin must be light gold / holy light, replacing n
 ## September 20 — VISUAL-REVIEW-03
 
 All weapon grips must sit inside the closed hand, without handles visibly cutting through the outside of the fist or guards/blades/barrels intersecting it. Check every supported body/weapon fit in idle, movement, basic and charged attacks. Do not replace hand-adjusted fits globally without inspecting them. Full visual audit remains open.
+
+
+## September 20 — VISUAL-REVIEW-04
+
+User explicitly prioritizes all classes and weapon types: handles within fist, sensible up/forward carry for hammers/scythes rather than sideways, hand-relative anatomical logic throughout motion. Current audit found 31 supported body/art pairs. Replace faulty inherited placement with authored grip anchors and weapon-specific ready poses; retain original tuning as reference, not as a reason to keep visibly incorrect fits. Check every runtime asset variant and all supported classes, motion and peer rendering. Full pass not yet complete.
+
+
+## September 20 — VISUAL-REVIEW-05
+
+Javelin must seat in both hands correctly, not just add a nearby support arm. Validate each palm against a distinct shaft grip through idle, movement, thrust/charge and release; throw support hand should release rather than be pinned to the airborne shaft. Current left-hand IK needs precise orientation and offset correction before ship.

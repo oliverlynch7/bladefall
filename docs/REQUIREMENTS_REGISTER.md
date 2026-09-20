@@ -231,3 +231,13 @@ Paladin palette must be light gold/holy light. All other class colors accepted. 
 ## September 20 — VISUAL-REVIEW-03
 
 GOV-05 / EQ-03 expanded acceptance: all supported weapon/body fits require an anatomical grip throughout animations. Parent-distance and forward-axis checks alone are insufficient. Source VISUAL-REVIEW-03; pending comprehensive visual audit.
+
+
+## September 20 — VISUAL-REVIEW-04
+
+User explicitly prioritizes all classes and weapon types: handles within fist, sensible up/forward carry for hammers/scythes rather than sideways, hand-relative anatomical logic throughout motion. Current audit found 31 supported body/art pairs. Replace faulty inherited placement with authored grip anchors and weapon-specific ready poses; retain original tuning as reference, not as a reason to keep visibly incorrect fits. Check every runtime asset variant and all supported classes, motion and peer rendering. Full pass not yet complete.
+
+
+## September 20 - VISUAL-REVIEW-05 and grip verification
+
+Javelin must sit correctly in BOTH hands, including basic thrust and charge; release hands on throw. Implemented with the broader VISUAL-REVIEW-03/04 pass. EQ-03 sampled visual/pose acceptance verified across 64 active asset/body fits and 16 classes; source model variants, support reach, closed fingers, forward carry, moving attacks and charge checked. Evidence: IMPLEMENTATION_WEAPON_GRIPS_2026-09-20.md. Real-world playtesting remains valuable; this does not certify every possible animation frame.

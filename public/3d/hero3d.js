@@ -1,3 +1,4 @@
+import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
 import {syncNpcs} from './npc3d.js?v=1981s';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions} from './companion3d.js?v=1981s';
@@ -1016,7 +1017,7 @@ async function equipWeapon(actor, opts){
     makePart(gun,new THREE.BoxGeometry(.035,.08,.035),'#be9b52',-.065,.245,0).rotation.z=-.4;
     const saber=new THREE.Group();saber.name='PirateSaber';saber.userData._weap=true;saber.userData.pirateSaber=true;
     // The left fist has its own origin; mirroring WeaponR puts the handle against its outside face.
-    saber.position.set(.03,.057,-.005);hand.add(saber);
+    saber.position.set(.065,.006,-.045);hand.add(saber);
     saber.rotation.z=-Math.PI/2; // left-hand mirror: blade exits at the thumb (+X), not along the fingers
     makePart(saber,new THREE.CylinderGeometry(.044,.05,.22,8),'#382c26',0,0,0);
     makePart(saber,new THREE.SphereGeometry(.061,8,5),'#bc984e',0,-.14,0);
@@ -1041,6 +1042,27 @@ async function equipWeapon(actor, opts){
   actor.fit = WEAP;
   const rig = weaponRig(actor);
   if(!rig) return null;
+
+  if(WEAPON_GRIPS[name]){
+    let content;
+    if(STOCK_WEAPONS[name]){
+      const source=await loadStockWeapon(name);if(!source||seq!==actor._weapSeq)return null;
+      content=source.holder;
+    }else{
+      const source=await load(`assets/weapons/${name}.glb`).catch(()=>null);if(!source||seq!==actor._weapSeq)return null;
+      content=new THREE.Group();source.scene.updateMatrixWorld(true);
+      source.scene.traverse(o=>{
+        if(!o.isMesh)return;
+        const materials=(Array.isArray(o.material)?o.material:[o.material]).map(m=>relightWeapon(m.clone()));
+        const mesh=new THREE.Mesh(o.geometry,Array.isArray(o.material)?materials:materials[0]);
+        mesh.name=o.name;mesh.applyMatrix4(o.matrixWorld);mesh.castShadow=true;mesh.userData._weap=true;content.add(mesh);
+      });
+    }
+    if(seq!==actor._weapSeq)return null;
+    let peak=0;content.traverse(o=>{if(o.isMesh)for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m.color)peak=Math.max(peak,m.color.r,m.color.g,m.color.b);});
+    if(peak>1e-3&&peak<.72)content.traverse(o=>{if(o.isMesh)for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m.color)m.color.multiplyScalar(.72/peak);});
+    return attachGrip(actor,rig,BODY,name,content);
+  }
 
   /* Stock weapons take a different path: they arrive with the transform the artist gave
      them, which is by definition correct for this rig, so they skip the measure-and-scale
@@ -1503,6 +1525,10 @@ async function boot(){
 // Two-bone right-arm aim. The pistol is rigid in the fist; the arm aims it instead of rotating it through the palm.
 function pirateWeaponPose(p,wrap,A,dt){
   if(p.weapon?.intrinsic!=='pirate'){A.pirateAim=0;return;}
+  if(!p.dead){
+    wrap.getObjectByName('Fist2R')?.quaternion.set(-.740597,-.032689,.058509,.668599).normalize();
+    wrap.getObjectByName('Fist2L')?.quaternion.set(-.740597,.032689,-.058509,.668599).normalize();
+  }
   const aiming=p.atkTimer>0&&!(p.saberSwingT>0)&&!p.dead&&!p.combatPose?.remaining;
   A.pirateAim=THREE.MathUtils.damp(A.pirateAim||0,aiming?1:0,aiming?32:16,dt);
   const weight=A.pirateAim;if(weight<.002)return;
@@ -1564,7 +1590,7 @@ function playFor(p, A){
     bow:        'Bow_Shoot',
     flintlock:  p.weapon?.intrinsic==='pirate'?'Idle':'Bow_Shoot',
     cross:      'Bow_Shoot',
-    javelin:    'Staff_Attack',
+    javelin:    p.throwHideT>0?'Staff_Attack':'Idle',
     fist:       'Punch',
   };
   /* Charging: a bow draws, everything else winds up into the attacking idle rather than snapping
@@ -1619,7 +1645,8 @@ function playFor(p, A){
      useful jump, played once and clamped - which guarantees the character is upright on landing
      however brief the hop was. */
   const airRoll = !rolling && airborne && name === 'Roll';
-  const attacking = !p.dead && !charging && p.atkTimer > 0 && name === (ATK[art] || 'Sword_Attack');
+  // Procedural thrust/aim rides a looping Idle; never clamp that carrier after a shot.
+  const attacking = !p.dead && !charging && p.atkTimer > 0 && name !== 'Idle' && name === (ATK[art] || 'Sword_Attack');
   const casting = cast && name === p.combatPose.clip && !p.dead;
   const castRestart = casting && A.castSerial !== p.combatPose.serial;
   if(casting)A.castSerial=p.combatPose.serial;
@@ -1875,25 +1902,11 @@ export function drawHero3D(p, t){
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
 
-    // Undo last frame's procedural arm layer before sampling the next clip. Some clips
-    // omit finger/shoulder tracks, so otherwise aiming or mirrored swings accumulate.
-    if(anim.piratePoseApplied){
-      for(const [bone,q] of anim.piratePoseBase||[])bone.quaternion.copy(q);
-      anim.piratePoseApplied=false;
-    }
+    restoreGripPose(anim);
     playFor(p, anim);
     if(anim.mixer) anim.mixer.update(dt);
     movingCombatLegs(p,anim,dt);
-    if(p.weapon?.intrinsic==='pirate'){
-      if(anim.piratePoseRoot!==wrap){
-        anim.piratePoseRoot=wrap;anim.piratePoseBase=[];
-        for(const part of ['Shoulder','UpperArm','LowerArm','Fist','Fist1','Fist2'])for(const side of ['L','R']){
-          const bone=wrap.getObjectByName(part+side);if(bone)anim.piratePoseBase.push([bone,bone.quaternion.clone()]);
-        }
-      }
-      for(const [bone,q] of anim.piratePoseBase)q.copy(bone.quaternion);
-      anim.piratePoseApplied=true;
-    }
+    captureGripPose(wrap,anim);
     if(p.saberSwingT>0&&p.weapon?.intrinsic==='pirate'){
       // The stock sword clip is right-handed. Mirror its arm pose for the off-hand saber.
       for(const part of ['Shoulder','UpperArm','LowerArm','Fist','Fist1','Fist2']){
@@ -1902,6 +1915,7 @@ export function drawHero3D(p, t){
       }
     }
     pirateWeaponPose(p,wrap,anim,dt);
+    poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
@@ -1931,7 +1945,7 @@ export function drawHero3D(p, t){
   } catch(e){
     HERO3D.err = String(e && e.message || e);
     HERO3D.on = false;             // never let a 3D fault take the game down
-    console.warn('[hero3d] draw failed, falling back to voxels:', HERO3D.err);
+    console.warn('[hero3d] draw failed, falling back to voxels:', e.stack || HERO3D.err);
     return false;
   }
 }

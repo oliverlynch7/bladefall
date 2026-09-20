@@ -16,26 +16,26 @@ Those screenshots show the weapons being held incorrectly so please make sure yo
 
 ok i have a folder on my desktop  called baldefall music, and here is my propsed ideas on where to use each siong&#x20;
 
-iron oath could be final boss music
-iron juggernaut could be boss music for almost any boss
-iron gavel descent could be part 1 music for emberdeep or other levels maybe
-hearthfire in the4 frost could be part 1 for frostfell
-glazciated court of glass should be used for a positive moment in a cutscene
-forge of the molten colossus could be boss music for a variety of boss options
-crossharis over open ground could be part 1 or part 2 music for a few potential levels
-cross hairs in the dark could be boss music for hollow marksman
-chamber of uinverted gravity could be music for part 1 of the abyss kind final level
-canyon updrafts should be probably part 1 for hollow canyon&#x20;
-a crown of ashes could for maybe phase 1 of the final boss and maybe iron oath is for phase 2&#x20;
-midnight field could either be music f or part 2 of the first level as a sad realization hits the character that the hollow legion is bigger and stronger than the player coudlve thought and is challenging their belief of whether victory is possible. or used fror a sad depressing cutscene elseweher in the story
-paradox void assault could be  boss music for a few different options
-sentence of the shield wsarden could be part 2 level music for a variety of levels
-stony whispers of the keep could be cutscene music as the character is being revelead knowledge about the abyss king or his next challenging adventure.&#x20;
-the black procession could be cutscene music or part 1 music for a darker level
-the eternal furnace could be emerbdeep part 1 music
-the iron causeway could be level music for a darker level
-the obsidian dfoundry could be opart 2 music for emebrdeep
-the sorcerers hall of mirrors could be part 2 music for frostfell
+iron oath could be final boss music
+iron juggernaut could be boss music for almost any boss
+iron gavel descent could be part 1 music for emberdeep or other levels maybe
+hearthfire in the4 frost could be part 1 for frostfell
+glazciated court of glass should be used for a positive moment in a cutscene
+forge of the molten colossus could be boss music for a variety of boss options
+crossharis over open ground could be part 1 or part 2 music for a few potential levels
+cross hairs in the dark could be boss music for hollow marksman
+chamber of uinverted gravity could be music for part 1 of the abyss kind final level
+canyon updrafts should be probably part 1 for hollow canyon&#x20;
+a crown of ashes could for maybe phase 1 of the final boss and maybe iron oath is for phase 2&#x20;
+midnight field could either be music f or part 2 of the first level as a sad realization hits the character that the hollow legion is bigger and stronger than the player coudlve thought and is challenging their belief of whether victory is possible. or used fror a sad depressing cutscene elseweher in the story
+paradox void assault could be  boss music for a few different options
+sentence of the shield wsarden could be part 2 level music for a variety of levels
+stony whispers of the keep could be cutscene music as the character is being revelead knowledge about the abyss king or his next challenging adventure.&#x20;
+the black procession could be cutscene music or part 1 music for a darker level
+the eternal furnace could be emerbdeep part 1 music
+the iron causeway could be level music for a darker level
+the obsidian dfoundry could be opart 2 music for emebrdeep
+the sorcerers hall of mirrors could be part 2 music for frostfell
 watchful greenwood could be used in a final cutscene when the hopeful future is being expressed after you defeat the abyss king and restore peace to the lands
 
 help me figure out where to use each of these songs and which level, parts 1 or 2, boss fights,  hubs worlds, general story cutscene moments, and whatevetr else we still need msuci for, i will create wiht elevne labs. just need to know which hoels still ened filling
@@ -62,3 +62,13 @@ they all look good except paladin should be gold themed light gold holy lgiht. a
 ## VISUAL-REVIEW-03 — all weapon handles
 
 alsobe careful that the weapon handles for all handles arent clippiung into tht ehand of the charceter it looks bad, we should have it be inside the charcater hand, for all poses and adniamtions
+
+
+## VISUAL-REVIEW-04 — all classes and weapon types
+
+im also still seeing a lot fo weapons held incorrectly on a lot fo different charcater models. apply that same reasoning and do a check of all classes and weapon types, im seeing a lot fo weapons clipping thoruhg hands or not being held in them, a lot fo weapons pointing out to the side when they should be poiitnting up and forward (scythes, hammers, etc.) can you use common sense logic on how weapons are  meant to be held and base it on the direction of the handsso that they all make sense and follwo real world logic?
+
+
+## VISUAL-REVIEW-05 — javelin support hand
+
+also im noticing that the javelin animation is wrong since you added in the other hand, it neeeds to sit in both hands prorpely

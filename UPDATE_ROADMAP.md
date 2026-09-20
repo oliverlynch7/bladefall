@@ -1690,3 +1690,7 @@ Normal campaign death/reload retries current half. Completed halves bank player/
 
 ## 2026-09-20 - 1.985.0 Holy gold and Pirate grip correction
 Paladin ivory/light gold with restrained warm light. Pirate barrel and saber corrected to anatomical hand axes, handles centered inside fists, forward arm aim and non-accumulating procedural poses. Browser checked seven pose states and multi-angle screenshots. Full all-weapon/body visual audit remains open under VISUAL-REVIEW-03.
+
+
+## [Codex | 2026-09-20] Anatomical weapon grips - v1.986
+Measured handles and closed-fist attachment across all active body/weapon variants; two-handed javelin thrust/release and heavy supports; bow draw string; peer charge/throw visuals. 448 fit poses, 112 class hand checks, 84 final bow checks, three actual javelin throw cases passed. Phone previews: /3d/art-previews/weapons/. See docs/IMPLEMENTATION_WEAPON_GRIPS_2026-09-20.md.

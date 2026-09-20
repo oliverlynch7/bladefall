@@ -1,5 +1,9 @@
 # Append-only decision and evidence log
 
+## 2026-09-19 | Final pre-implementation clarifications | U109–U110
+
+U109 asks if planning remains. U110 settles Ellis capture at secret ice-cave laboratory before transport for Hollowing; conscious orb provides visual imprisoned-soul evidence and identifies linked soul as target; Ian's Blade only in interactive ending cutscene, never equipped/retained. Added STORY-18–20. Original messages preserved in USER_SOURCE_2026-09-19_FINALE.md. Orb wording needs careful reconciliation: necessary King death versus established sufficient final cut, without silently deleting finale. The one-question orb remains. No gameplay implemented in this update.
+
 ## 2026-09-19 | Baseline reconciliation | U002–U099
 
 Created REQUIREMENTS_REGISTER.md and frozen USER_SOURCE_2026-09-19.md from actual session records. Raw archive contains 99 user-role records; repo source contains 85 after excluding 14 context-only environment/plugin records. Original full session retained privately with SHA-256 checksum. This is not proof of completeness beyond the available session record.

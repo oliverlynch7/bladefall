@@ -96,3 +96,5 @@ Every available substantive record is preserved verbatim. This index maps decisi
 | U106 | GOV-01 reaffirmed; preservation check, not approval of all draft content |
 | U107 | Narrative progression explanation requested; MAP-08 epic spiral tower ascent approved; researcher plot remains a proposal |
 | U108 | Secret writings lead to Sunspire; rescued allies provide connections; Sunspire soul knowledge; Ellis captive/pursued remains open |
+| U109 | Planning readiness question; no new gameplay rule |
+| U110 | STORY-18–20: laboratory capture, conscious orb vision/anchor information, cutscene-only Ian's Blade |

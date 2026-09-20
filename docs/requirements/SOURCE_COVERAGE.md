@@ -95,3 +95,4 @@ Every available substantive record is preserved verbatim. This index maps decisi
 | U105 | SAVE-04 resolved; GOV-07 plans all levels then back-to-back implementation |
 | U106 | GOV-01 reaffirmed; preservation check, not approval of all draft content |
 | U107 | Narrative progression explanation requested; MAP-08 epic spiral tower ascent approved; researcher plot remains a proposal |
+| U108 | Secret writings lead to Sunspire; rescued allies provide connections; Sunspire soul knowledge; Ellis captive/pursued remains open |

@@ -4,6 +4,8 @@ September 19, 2026. Requested by U105; names and personalities accepted in U103,
 
 ## Campaign shape and shared rules
 
+Latest story refinement (U108): Ellis captive versus pursued is not settled. Proposed authored rescue timing below must not imply a random cave full of enemies: Legion is specifically hunting/holding him. Confiscated secret writings at Emberdeep, not worker rumors, reveal Sunspire and its orb. Rescued allies contribute practical route knowledge and contacts to reach Storm Coast, forming a growing support network. A King's-forge-visit origin for the papers is a possible explanation, not locked history. Sunspire texts explain soul imprisonment and possible release; distinguish ancient binding principles from King's recent Gate application. Exact witnessing mechanism remains open.
+
 Defend Briar -> follow prisoner movements through Hollow Pass -> free Ruined Keep and learn a researcher fled north -> find the researcher in Frostfell -> stop the weapon industry at Emberdeep -> seek passage at Storm Coast -> reclaim Sunspire and consult its one-question orb -> find and infiltrate Castle Duskmoor -> defeat King and perform restoration ending.
 
 Every region has two substantial halves and a distinct boss space. Each half has a changing main route, optional branches, at least one meaningful discovery without an NPC assignment, authored encounters and a shortcut back to a useful junction. Size comes from varied connected spaces, not uniformly scaling all distances. Stage presentation names below are working labels; accepted region names and Storm Coast half names remain fixed.
@@ -161,7 +163,7 @@ Optional **Flint's Own Work**, delivery: recover a confiscated blade blank and r
 
 **Five Pyromancer shards:** ED-01 half1 side casting mold reached when line stops; ED-02 half1 Flint optional work reward (separate from sword, same completed branch); ED-03 half2 difficult overhead pressure route; ED-04 half2 fixed cooling-pattern puzzle with gauges/shapes; ED-05 boss area hidden service pocket behind a cooled pipe, accessible after victory. Not randomly sprinkled in lava.
 
-**Healing/story:** limited pads at worker break room and boss approach. Freed workers restore a service lift. Martin's recovered cargo papers mention confiscated Sunspire writings; Flint remembers sailors talking about its question-answering orb. This establishes a hopeful rumor and coastal route, not an early oracle answer. King's orders now single out the troublesome fighter, without confirming ancestry.
+**Healing/story:** limited pads at worker break room and boss approach. Freed workers restore a service lift. Confiscated Sunspire writings secured in the forge's command office reveal the secret one-question orb and clues to the palace approach. Martin and Flint help interpret the practical route and connect player to sailors at Storm Coast; they do not already know the ancient orb secret. Paper provenance from King's involvement in setting up the forge is proposed, not confirmed. King's orders now single out the troublesome fighter, without confirming ancestry.
 
 ## 6. Storm Coast — Shipwreck Shore / Thunder Cliffs
 

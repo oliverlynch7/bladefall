@@ -167,6 +167,7 @@ The entire 100-section brief is preserved verbatim in U079, including open quest
 | STORY-14 | A | Timed difficult final charge uses repeated Space presses. Failure retries charge only; five consecutive failures unlock optional skip to successful ending. No automatic boss replay. Exact multiplayer/touch/controller behavior open. | U079 §56;U080 |
 | STORY-15 | A | Ian's Blade massive black iron, tarnished gold sacred guard, ember holy core; strongest relic. TEMPORARY ending use, no free permanent completion award. Permanent version remains substantial existing endgame/shop grind. Why temporary version not retained open. | U079 §§54–55,82,95 |
 | STORY-16 | O | King's original name/title; exact awakening; family tree; soul-viewing method; Void's full metaphysics; restored memories; temporary Blade explanation; Aerth scale; Waystone/Gate relationship. No silent canon answers. | U079 §100 plus later changes |
+| STORY-17 | A/P | Secret confiscated writings at Emberdeep reveal Sunspire/orb; rescued people supply practical directions and contacts, forming a growing support network. Papers left during King's forge setup is a proposed provenance. Sunspire books explain soul imprisonment and possibility of release; exact witnessing method stays open. Ellis captive versus found just before hunters remains open. | U108 |
 
 ## Supersessions and rejected directions
 

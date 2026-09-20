@@ -1,5 +1,7 @@
 # Campaign through the player's eyes — explanation draft
 
+U108 refinement overrides older rumor phrasing below: confiscated Emberdeep writings reveal the secret Sunspire/orb knowledge. Rescued people interpret routes/provide contacts, not secret ancient knowledge. Ellis may be captive or found shortly before hunters arrive; final choice pending. Sunspire records explain the binding and possibility of freeing souls without revealing the entire ending solution.
+
 Responds to U107. This explains and strengthens the proposed connective plot; it does not turn every connecting event into approved canon. The researcher was an assistant proposal for giving Frostfell a meaningful mission, subsequently named Professor Ellis in the approved cast. Name/personality approval is not blanket approval of every plot function.
 
 | Region | Player's intended objective on entry | Discovery during play | Mindset and reason to continue |

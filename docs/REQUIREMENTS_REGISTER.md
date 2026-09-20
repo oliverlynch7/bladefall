@@ -241,3 +241,8 @@ User explicitly prioritizes all classes and weapon types: handles within fist, s
 ## September 20 - VISUAL-REVIEW-05 and grip verification
 
 Javelin must sit correctly in BOTH hands, including basic thrust and charge; release hands on throw. Implemented with the broader VISUAL-REVIEW-03/04 pass. EQ-03 sampled visual/pose acceptance verified across 64 active asset/body fits and 16 classes; source model variants, support reach, closed fingers, forward carry, moving attacks and charge checked. Evidence: IMPLEMENTATION_WEAPON_GRIPS_2026-09-20.md. Real-world playtesting remains valuable; this does not certify every possible animation frame.
+
+
+## September 20 — AUDIO-SFX-01
+
+Approved: complete context-specific custom SFX plan with ElevenLabs-ready prompts; current free assets may be replaced. Planning delivered in docs/audio/SFX_PRODUCTION_GUIDE.md, SFX_CATALOG.json, ELEVENLABS_SFX_ALL_PROMPTS.md and SFX_COVERAGE.md. Catalog covers 128 current selectable skills, all current enemy registry entries including nonattacking targets, weapon families/actual charges, new campaign and later modes. Implementation, generation, auditioning and replacing old audio remain OPEN. Unresolved Pyromancer/boss details remain labeled rather than silently approved.

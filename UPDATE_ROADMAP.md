@@ -1694,3 +1694,7 @@ Paladin ivory/light gold with restrained warm light. Pirate barrel and saber cor
 
 ## [Codex | 2026-09-20] Anatomical weapon grips - v1.986
 Measured handles and closed-fist attachment across all active body/weapon variants; two-handed javelin thrust/release and heavy supports; bow draw string; peer charge/throw visuals. 448 fit poses, 112 class hand checks, 84 final bow checks, three actual javelin throw cases passed. Phone previews: /3d/art-previews/weapons/. See docs/IMPLEMENTATION_WEAPON_GRIPS_2026-09-20.md.
+
+
+## [Codex | 2026-09-20] Custom SFX production planning
+Added /3d/audio-planning/ with 1,296 sound briefs, 128 class-skill signatures, 30 starter auditions, copyable ElevenLabs prompts/settings, local progress export/import, and full downloadable guide/catalog/coverage audit. No SFX generated/replaced and no gameplay changed. Source: docs/audio; user request AUDIO-SFX-01.

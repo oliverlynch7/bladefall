@@ -86,3 +86,8 @@ User explicitly prioritizes all classes and weapon types: handles within fist, s
 ## September 20 — VISUAL-REVIEW-05
 
 Javelin must seat in both hands correctly, not just add a nearby support arm. Validate each palm against a distinct shaft grip through idle, movement, thrust/charge and release; throw support hand should release rather than be pinned to the airborne shaft. Current left-hand IK needs precise orientation and offset correction before ship.
+
+
+## September 20 — AUDIO-SFX-01
+
+User requests comprehensive sound-effect inventory and copy-ready ElevenLabs generation prompts across all game actions, classes/skills, weapons, enemy attacks/damage/deaths, bosses/arenas, world/NPC interactions, environments and rewards. Existing free SFX may be replaced; preserving them is not a design constraint. This turn authors the production list, not paid generations or audio replacement. Cover current code plus approved future campaign, label conditional ideas, keep human dialogue in its separate voice-recording workflow. Research official sound-generation guidance and game-audio implementation principles. Stored outputs: docs/audio and /3d/audio-planning/.

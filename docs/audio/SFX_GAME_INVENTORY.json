@@ -1,0 +1,4019 @@
+{
+  "classes": {
+    "warrior": {
+      "disp": "Warrior",
+      "icon": "warrior",
+      "innate": {
+        "name": "Battle Ready",
+        "d": "Basic attacks deal +8% damage and gain +15% interrupt resistance while attacking."
+      },
+      "cap": {
+        "name": "Unbroken Champion",
+        "d": "Gain +10% damage, +10% attack speed, and 15% damage reduction. Skill hits restore 2% max HP."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "w_cleave",
+          "n": "Cleave",
+          "cd": 2,
+          "am": 0.45,
+          "role": "Rapid · Group",
+          "fx": "w_cleave",
+          "d": "A fast, spammable sweep (~2s, softer per hit) — weave it between basic attacks."
+        },
+        "b": {
+          "id": "w_bash",
+          "n": "Shield Bash",
+          "cd": 6,
+          "role": "Control",
+          "fx": "w_bash",
+          "d": "Drive forward for 1.7x damage, stun the first target, and briefly brace."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "w_heavy",
+          "n": "Heavy Hand",
+          "role": "Commitment",
+          "d": "Your basic attacks cannot be interrupted — and you cannot cancel them either."
+        },
+        "b": {
+          "id": "w_swift",
+          "n": "Swift Steel",
+          "role": "Rhythm",
+          "d": "Every fourth basic attack is free and instant, ignoring your attack timer."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "w_charge",
+          "n": "Charge",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "w_charge",
+          "d": "Rush through enemies for 1.6x damage and stun them."
+        },
+        "b": {
+          "id": "w_whirl",
+          "n": "Whirlwind",
+          "cd": 10,
+          "role": "Group Damage",
+          "fx": "w_whirl",
+          "d": "Spin through a full circle twice, dealing 1.1x damage per sweep."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "w_second",
+          "n": "Second Wind",
+          "role": "Sustain",
+          "d": "Dropping below 35% HP restores 12% max HP once every 30s."
+        },
+        "b": {
+          "id": "w_unyield",
+          "n": "Unyielding",
+          "role": "Defense",
+          "d": "You cannot be staggered, knocked back, or moved by anything."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "w_guard",
+          "n": "Iron Guard",
+          "cd": 13,
+          "role": "Defense",
+          "fx": "w_guard",
+          "d": "Brace for 3s, reducing incoming damage by 60%."
+        },
+        "b": {
+          "id": "w_stomp",
+          "n": "Shockwave Stomp",
+          "cd": 12,
+          "role": "Control",
+          "fx": "w_stomp",
+          "d": "Slam the ground for 1.5x damage and heavy knockback all around."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "w_bloodlust",
+          "n": "Bloodlust",
+          "role": "Offense",
+          "d": "A kill keeps your Momentum stacks instead of resetting them."
+        },
+        "b": {
+          "id": "w_tactical",
+          "n": "Tactical Guard",
+          "role": "Defense",
+          "d": "After dodging, gain 20% damage reduction for 2s."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "w_berserk",
+          "n": "Warcry",
+          "cd": 22,
+          "role": "Offense",
+          "fx": "w_berserk",
+          "d": "+35% damage and +30% attack speed for 6s."
+        },
+        "b": {
+          "id": "w_execute",
+          "n": "Execution",
+          "cd": 20,
+          "role": "Finisher",
+          "fx": "w_execute",
+          "d": "A crushing 4x strike that executes normal enemies below 20% HP."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "w_master",
+          "n": "Weapon Master",
+          "role": "Damage",
+          "d": "Warrior-family weapons deal +10% damage and skills cost 10% less mana."
+        },
+        "b": {
+          "id": "w_juggernaut",
+          "n": "Juggernaut",
+          "role": "Defense",
+          "d": "+15% knockback resistance and +8% damage reduction while moving."
+        }
+      }
+    },
+    "ranger": {
+      "disp": "Ranger",
+      "icon": "ranger",
+      "innate": {
+        "name": "Clear Aim",
+        "d": "After 3s without taking direct damage: +10% damage and +10% ability range. A hit disables it until you avoid damage for 3s again."
+      },
+      "cap": {
+        "name": "Perfect Hunt",
+        "d": "Clear Aim becomes Perfect Aim: +3% more damage, survives a 0.75s grace after a hit, and a kill while active cuts skill cooldowns by 0.5s."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "r_volley",
+          "n": "Volley",
+          "cd": 5,
+          "role": "Group Damage",
+          "fx": "r_volley",
+          "d": "Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each."
+        },
+        "b": {
+          "id": "r_pierce",
+          "n": "Piercing Shot",
+          "cd": 5,
+          "role": "Boss Damage",
+          "fx": "r_pierce",
+          "d": "One shot through a line — 2.2x first (−10% its armor), 1.5x rest."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "r_longshot",
+          "n": "Longshot",
+          "role": "Range",
+          "d": "+8% damage to enemies 7m+ away."
+        },
+        "b": {
+          "id": "r_closeq",
+          "n": "Close-Quarters Archer",
+          "role": "Reversal",
+          "d": "Enemies within 4m are knocked back by every shot."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "r_tumble",
+          "n": "Tumble",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "r_tumble",
+          "d": "Roll back ~5m with brief i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim."
+        },
+        "b": {
+          "id": "r_shadow",
+          "n": "Shadowstrike",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "r_shadow",
+          "d": "Dash through a target (2.0x) and appear behind it; tap again within 1s to return."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "r_escape",
+          "n": "Escape Artist",
+          "role": "Defense",
+          "d": "After Tumble/Shadowstrike: −15% damage taken & −30% slows for 1.5s."
+        },
+        "b": {
+          "id": "r_ambush",
+          "n": "Ambusher",
+          "role": "Damage",
+          "d": "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "r_spike",
+          "n": "Spike Trap",
+          "cd": 10,
+          "role": "Control",
+          "fx": "r_spike",
+          "d": "A 4m spike field for 5s: −35% slow, 0.25x/s (max 1.25x). Element once on entry."
+        },
+        "b": {
+          "id": "r_smoke",
+          "n": "Smoke Bomb",
+          "cd": 11,
+          "role": "Support",
+          "fx": "r_smoke",
+          "d": "Smoke cloud: breaks targeting, −30% enemy accuracy, +20% your move speed."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "r_patient",
+          "n": "Patient Hunter",
+          "role": "Damage",
+          "d": "Clear Aim 10%→14% damage, but needs 3.5s without a hit."
+        },
+        "b": {
+          "id": "r_quick",
+          "n": "Quickdraw",
+          "role": "Uptime",
+          "d": "Clear Aim activates after 2s instead of 3s."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "r_mark",
+          "n": "Hunter's Mark",
+          "cd": 12,
+          "role": "Boss Damage",
+          "fx": "r_mark",
+          "d": "Mark one enemy: you deal +18% and +10% crit to it for 8s."
+        },
+        "b": {
+          "id": "r_deathmark",
+          "n": "Death Mark",
+          "cd": 14,
+          "role": "Farming",
+          "fx": "r_deathmark",
+          "d": "Mark up to 5 enemies — they explode for 1.8x on death."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "r_elem",
+          "n": "Elemental Archer",
+          "role": "Elements",
+          "d": "Your arrows carry the element of the ground they fly over."
+        },
+        "b": {
+          "id": "r_bounty",
+          "n": "Bounty Hunter",
+          "role": "Sustain",
+          "d": "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold."
+        }
+      }
+    },
+    "mage": {
+      "disp": "Mage",
+      "icon": "mage",
+      "innate": {
+        "name": "Arcane Attunement",
+        "d": "Magic weapons deal +8% damage and restore 2 mana whenever a basic attack hits."
+      },
+      "cap": {
+        "name": "Archmage",
+        "d": "+12% magic damage, +10% cooldown reduction, and every third skill refunds half its mana cost."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "m_bolt",
+          "n": "Elemental Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "m_bolt",
+          "d": "Rapid-fire elemental bolts (~2s, softer each) — a steady casting rhythm."
+        },
+        "b": {
+          "id": "m_beam",
+          "n": "Elemental Beam",
+          "cd": 6,
+          "role": "Piercing Damage",
+          "fx": "m_beam",
+          "d": "Fire a piercing elemental lance for 2x damage through every target."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "m_potent",
+          "n": "Potent Weave",
+          "role": "Power",
+          "d": "Overcharge costs double mana and hits twice as hard."
+        },
+        "b": {
+          "id": "m_efficient",
+          "n": "Efficient Casting",
+          "role": "Economy",
+          "d": "Skills cost 15% less mana."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "m_blink",
+          "n": "Blink",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "m_blink",
+          "d": "Teleport forward and become untouchable during the displacement."
+        },
+        "b": {
+          "id": "m_nova",
+          "n": "Nova",
+          "cd": 9,
+          "role": "Control",
+          "fx": "m_nova",
+          "d": "Detonate a 1.4x freezing burst that slows nearby enemies."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "m_glass",
+          "n": "Glass Cannon",
+          "role": "Gamble",
+          "d": "Below a quarter health your skills cost no mana at all."
+        },
+        "b": {
+          "id": "m_ward",
+          "n": "Arcane Ward",
+          "role": "Defense",
+          "d": "Casting a skill grants a shield equal to 4% max HP for 3s."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "m_gravity",
+          "n": "Gravity Well",
+          "cd": 13,
+          "role": "Control",
+          "fx": "m_gravity",
+          "d": "Create an implosion that pulls enemies inward and deals 1.3x damage."
+        },
+        "b": {
+          "id": "m_barrier",
+          "n": "Rune Barrier",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "m_barrier",
+          "d": "Create a shield that absorbs 35% of max HP."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "m_savant",
+          "n": "Elemental Savant",
+          "role": "Elements",
+          "d": "Overcharged attacks apply your weapon’s element instantly."
+        },
+        "b": {
+          "id": "m_temporal",
+          "n": "Temporal Focus",
+          "role": "Uptime",
+          "d": "Standing still for 1.5s grants 15% cooldown recovery until you move."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "m_tempest",
+          "n": "Attunement",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "m_tempest",
+          "d": "A 4s storm repeatedly damages enemies around you."
+        },
+        "b": {
+          "id": "m_overload",
+          "n": "Elemental Overload",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "m_overload",
+          "d": "Release a massive 3.4x elemental explosion around your target."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "m_echo",
+          "n": "Spell Echo",
+          "role": "Burst",
+          "d": "Every fourth skill repeats at 35% power without extra mana."
+        },
+        "b": {
+          "id": "m_manafont",
+          "n": "Manafont",
+          "role": "Sustain",
+          "d": "+30% mana regeneration and +10 maximum mana."
+        }
+      }
+    },
+    "reaper": {
+      "disp": "Reaper",
+      "icon": "reaper",
+      "innate": {
+        "name": "Soul Hunger",
+        "d": "Scythe damage heals 3% of damage dealt and slain enemies restore 2 mana."
+      },
+      "cap": {
+        "name": "Avatar of Death",
+        "d": "+12% damage and lifesteal. Killing a marked or corrupted enemy reduces every cooldown by 0.75s."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "x_reap",
+          "n": "Reap",
+          "cd": 2,
+          "am": 0.45,
+          "role": "Rapid · Sustain",
+          "fx": "x_reap",
+          "d": "Quick, spammable scythe arcs (~2s, softer each) with strong lifesteal — steady drain."
+        },
+        "b": {
+          "id": "x_cleave",
+          "n": "Soul Cleave",
+          "cd": 6,
+          "role": "Ranged Damage",
+          "fx": "x_cleave",
+          "d": "Send a spectral scythe wave outward for 2.1x damage."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "x_strength",
+          "n": "Harvested Strength",
+          "role": "Harvest",
+          "d": "Souls you collect are spent on your next skill, making it free."
+        },
+        "b": {
+          "id": "x_doom",
+          "n": "Lingering Doom",
+          "role": "Doom",
+          "d": "Marked enemies that die spread their mark to the nearest foe."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "x_step",
+          "n": "Shadow Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "x_step",
+          "d": "Dash through shadow and become briefly untouchable."
+        },
+        "b": {
+          "id": "x_wraith",
+          "n": "Wraith Form",
+          "cd": 10,
+          "role": "Defense",
+          "fx": "x_wraith",
+          "d": "Become spectral for 3s: faster movement and 65% damage reduction."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "x_armor",
+          "n": "Soul Armor",
+          "role": "Defense",
+          "d": "Collecting a kill grants a 3% max-HP shield for 5s."
+        },
+        "b": {
+          "id": "x_wraithwalk",
+          "n": "Wraithwalk",
+          "role": "Movement",
+          "d": "After using mobility, gain +18% move speed for 2.5s."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "x_pull",
+          "n": "Void Pull",
+          "cd": 12,
+          "role": "Control",
+          "fx": "x_pull",
+          "d": "Implode nearby enemies toward a central point and stagger them."
+        },
+        "b": {
+          "id": "x_bind",
+          "n": "Soul Tether",
+          "cd": 12,
+          "role": "Linkage",
+          "fx": "x_bind",
+          "d": "Bind enemies in front of you, rooting them for 2.5s."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "x_crimson",
+          "n": "Crimson Harvest",
+          "role": "Sustain",
+          "d": "Below half health, every soul you collect heals you outright."
+        },
+        "b": {
+          "id": "x_chill",
+          "n": "Grave Chill",
+          "role": "Control",
+          "d": "Corrupted enemies cannot flee — they walk toward you instead."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "x_siphon",
+          "n": "Soul Siphon",
+          "cd": 18,
+          "role": "Sustain",
+          "fx": "x_siphon",
+          "d": "Drain nearby enemies for 4s, damaging them and restoring health."
+        },
+        "b": {
+          "id": "x_vortex",
+          "n": "Death Vortex",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "x_vortex",
+          "d": "Create a persistent soul storm that damages and corrupts enemies."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "x_corrupt",
+          "n": "Corruption Mastery",
+          "role": "Rupture",
+          "d": "Rupturing a corrupted enemy corrupts everything near it."
+        },
+        "b": {
+          "id": "x_favor",
+          "n": "Death's Favor",
+          "role": "Sustain",
+          "d": "Elite and boss hits restore 1 mana; elite kills restore 8% HP."
+        }
+      }
+    },
+    "paladin": {
+      "disp": "Paladin",
+      "icon": "paladin",
+      "innate": {
+        "name": "Holy Warrior",
+        "d": "While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal."
+      },
+      "cap": {
+        "name": "Avatar of Light",
+        "d": "Take 18% less damage and deal +10% damage. Holy weapons heal you for an extra 1% of the damage you deal."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "pal_bash",
+          "n": "Shield Bash",
+          "cd": 6,
+          "role": "Control",
+          "fx": "pal_bash",
+          "d": "Drive forward for 1.7x damage, stun the first foe, and brace behind your shield."
+        },
+        "b": {
+          "id": "pal_smite",
+          "n": "Smite",
+          "cd": 8,
+          "role": "Holy Damage",
+          "fx": "pal_smite",
+          "d": "Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_thick",
+          "n": "Thick Armor",
+          "role": "Defense",
+          "d": "The first hit of every fight deals no damage at all."
+        },
+        "b": {
+          "id": "pal_holypow",
+          "n": "Holy Power",
+          "role": "Judgement",
+          "d": "Your Sworn target takes double damage from your skills."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "pal_taunt",
+          "n": "Taunt",
+          "cd": 9,
+          "role": "Control",
+          "fx": "pal_taunt",
+          "d": "Pull nearby foes to you and brace behind a shield."
+        },
+        "b": {
+          "id": "pal_ground",
+          "n": "Holy Ground",
+          "cd": 10,
+          "role": "Group Damage",
+          "fx": "pal_ground",
+          "d": "Scorch every foe around you with holy light for 2.2x damage."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_second",
+          "n": "Second Wind",
+          "role": "Sustain",
+          "d": "Dropping below 35% HP heals you for 12% max HP (every 30s)."
+        },
+        "b": {
+          "id": "pal_burn",
+          "n": "Burning Light",
+          "role": "Spread",
+          "d": "Killing your Sworn target sets every enemy near it alight."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "pal_guard",
+          "n": "Guard Up",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "pal_guard",
+          "d": "Raise a holy shield that absorbs up to 50% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance."
+        },
+        "b": {
+          "id": "pal_burst",
+          "n": "Light Burst",
+          "cd": 9,
+          "role": "Control",
+          "fx": "pal_burst",
+          "d": "A radiant burst: damage and slow every nearby foe."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_bounce",
+          "n": "Bounce Back",
+          "role": "Defense",
+          "d": "Damage you block is returned to whoever dealt it."
+        },
+        "b": {
+          "id": "pal_heal",
+          "n": "Healing Light",
+          "role": "Sustain",
+          "d": "Every skill you cast heals the ally nearest you, or you if alone."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "pal_laststand",
+          "n": "Last Stand",
+          "cd": 24,
+          "role": "Defense",
+          "fx": "pal_laststand",
+          "d": "For 4s take almost no damage and heal each second."
+        },
+        "b": {
+          "id": "pal_sky",
+          "n": "Sky Hammer",
+          "cd": 22,
+          "role": "Burst",
+          "fx": "pal_sky",
+          "d": "Call a pillar of light down: heavy damage and knockback all around you."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_will",
+          "n": "Guardian's Will",
+          "role": "Defense",
+          "d": "Take 15% less damage while below half HP."
+        },
+        "b": {
+          "id": "pal_blessed",
+          "n": "Blessed Blade",
+          "role": "Reach",
+          "d": "Your oath can be sworn at any range — mark without closing."
+        }
+      }
+    },
+    "necromancer": {
+      "disp": "Necromancer",
+      "icon": "necromancer",
+      "innate": {
+        "name": "Death's Embrace",
+        "d": "Magic weapons deal +8% damage, and every kill restores 3 mana and leaves a corpse you can raise."
+      },
+      "cap": {
+        "name": "Lich",
+        "d": "+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "necro_summon",
+          "n": "Summon Skeletons",
+          "cd": 9,
+          "role": "Minions",
+          "fx": "necro_summon",
+          "d": "Raise a pack of skeletons that hunt down nearby enemies."
+        },
+        "b": {
+          "id": "necro_bolt",
+          "n": "Plague Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "necro_bolt",
+          "d": "Rapid-fire bolts of necrotic plague (~2s, softer each)."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_legion",
+          "n": "Bone Legion",
+          "role": "Minions",
+          "d": "Summon one extra skeleton and your minions hit 20% harder."
+        },
+        "b": {
+          "id": "necro_wither",
+          "n": "Withering",
+          "role": "Decay",
+          "d": "Enemies standing on a corpse cannot heal and rot slowly."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "necro_raise",
+          "n": "Raise the Dead",
+          "cd": 12,
+          "role": "Minions",
+          "fx": "necro_raise",
+          "d": "Raise your most recently slain nearby enemy as an undead ally."
+        },
+        "b": {
+          "id": "necro_nova",
+          "n": "Corpse Nova",
+          "cd": 9,
+          "role": "Control",
+          "fx": "necro_nova",
+          "d": "Detonate a burst of bone shards that slows nearby enemies."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_bond",
+          "n": "Grave Bond",
+          "role": "Sustain",
+          "d": "Each hit your minions land heals you a little."
+        },
+        "b": {
+          "id": "necro_plague",
+          "n": "Plague",
+          "role": "Spread",
+          "d": "An enemy that dies while rotting infects everything near it."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "necro_wall",
+          "n": "Bone Wall",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "necro_wall",
+          "d": "Raise a shield of bone that absorbs up to 35% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance."
+        },
+        "b": {
+          "id": "necro_grip",
+          "n": "Death Grip",
+          "cd": 13,
+          "role": "Control",
+          "fx": "necro_grip",
+          "d": "A skeletal grip implodes enemies inward and deals damage."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_undying",
+          "n": "Undying",
+          "role": "Defense",
+          "d": "A killing blow instead consumes a minion, if you have one."
+        },
+        "b": {
+          "id": "necro_harvest",
+          "n": "Soul Harvest",
+          "role": "Sustain",
+          "d": "Kills restore an extra 8% of your max mana."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "necro_army",
+          "n": "Army of the Dead",
+          "cd": 24,
+          "role": "Minions",
+          "fx": "necro_army",
+          "d": "Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance."
+        },
+        "b": {
+          "id": "necro_storm",
+          "n": "Death Storm",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "necro_storm",
+          "d": "A storm of decay rages around you for 4s."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_master",
+          "n": "Master of Death",
+          "role": "Minions",
+          "d": "Keep more minions at once and they hit even harder."
+        },
+        "b": {
+          "id": "necro_pest",
+          "n": "Pestilence",
+          "role": "Swarm",
+          "d": "Your minions leave a rotting trail wherever they walk."
+        }
+      }
+    },
+    "ninja": {
+      "disp": "Ninja",
+      "icon": "ninja",
+      "innate": {
+        "name": "Killer Instinct",
+        "d": "Daggers and swords deal +8% damage and you move 8% faster. You can EVADE attacks entirely (they MISS) — and every dodge stacks +9% damage (up to 5), fading if you stop dodging."
+      },
+      "cap": {
+        "name": "Phantom",
+        "d": "+12% damage, +10% attack speed, take 12% less damage, and evade even more often."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "nin_strike",
+          "n": "Shadow Strike",
+          "cd": 8,
+          "role": "Burst",
+          "fx": "nin_strike",
+          "d": "Blink to the nearest enemy and strike for heavy damage."
+        },
+        "b": {
+          "id": "nin_barrage",
+          "n": "Shuriken Barrage",
+          "cd": 8,
+          "role": "Group Damage",
+          "fx": "nin_barrage",
+          "d": "Fire three back-to-back shotgun bursts of stars — shreds packs of enemies."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_swift",
+          "n": "Swift",
+          "role": "Speed",
+          "d": "Unseen rearms in half the time — strike from behind twice as often."
+        },
+        "b": {
+          "id": "nin_deadly",
+          "n": "Deadly Precision",
+          "role": "Execution",
+          "d": "An Unseen strike on an enemy below a third HP kills it outright."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "nin_step",
+          "n": "Shadow Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "nin_step",
+          "d": "Dash through shadow and become briefly untouchable."
+        },
+        "b": {
+          "id": "nin_smoke",
+          "n": "Smoke Bomb",
+          "cd": 14,
+          "role": "Escape",
+          "fx": "nin_smoke",
+          "d": "Vanish in smoke (briefly invulnerable) and slow nearby foes."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_evasive",
+          "n": "Evasion",
+          "role": "Defense",
+          "d": "+12% chance to dodge attacks entirely (MISS), and take 10% less damage. Each dodge also stacks your damage."
+        },
+        "b": {
+          "id": "nin_combo",
+          "n": "Combo Edge",
+          "role": "Chain",
+          "d": "Killing with Unseen instantly rearms it — chain from body to body."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "nin_mark",
+          "n": "Death Mark",
+          "cd": 14,
+          "role": "Damage",
+          "fx": "nin_mark",
+          "d": "Mark a target: it takes extra damage from you."
+        },
+        "b": {
+          "id": "nin_pierce",
+          "n": "Piercing Star",
+          "cd": 9,
+          "role": "Single Target",
+          "fx": "nin_pierce",
+          "d": "Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_ghost",
+          "n": "Ghostwalk",
+          "role": "Defense",
+          "d": "+8% dodge chance and take 10% less damage — slip through crowds."
+        },
+        "b": {
+          "id": "nin_bleed",
+          "n": "Bleeding Edge",
+          "role": "Damage",
+          "d": "+10% damage — your cuts run deep."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "nin_fury",
+          "n": "Blade Fury",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "nin_fury",
+          "d": "+35% damage and attack speed for 6s."
+        },
+        "b": {
+          "id": "nin_storm",
+          "n": "Vanish",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "nin_storm",
+          "d": "A spinning storm of steel that cuts everything around you."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_shadowform",
+          "n": "Shadow Form",
+          "role": "Defense",
+          "d": "Take 12% less damage while below half HP."
+        },
+        "b": {
+          "id": "nin_assassin",
+          "n": "Assassinate",
+          "role": "Damage",
+          "d": "+12% damage."
+        }
+      }
+    },
+    "berserker": {
+      "disp": "Berserker",
+      "icon": "berserker",
+      "innate": {
+        "name": "Bloodrage",
+        "d": "Deal +8% damage, and +15% more while below half HP."
+      },
+      "cap": {
+        "name": "Undying Rage",
+        "d": "+12% damage, +10% attack speed, and +8% lifesteal."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "bsk_cleave",
+          "n": "Cleave",
+          "cd": 5,
+          "role": "Group Damage",
+          "fx": "bsk_cleave",
+          "d": "A broad 2.2x blade sweep."
+        },
+        "b": {
+          "id": "bsk_bash",
+          "n": "Headbutt",
+          "cd": 6,
+          "role": "Control",
+          "fx": "bsk_bash",
+          "d": "Drive forward for 1.7x damage and stun."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_heavy",
+          "n": "Heavy Hands",
+          "role": "Commitment",
+          "d": "You cannot dodge — but nothing can knock you back or stagger you."
+        },
+        "b": {
+          "id": "bsk_reckless",
+          "n": "Reckless",
+          "role": "Sacrifice",
+          "d": "Every swing costs you a sliver of health, hit or miss."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "bsk_charge",
+          "n": "Charge",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "bsk_charge",
+          "d": "Rush forward, damaging and stunning in your path."
+        },
+        "b": {
+          "id": "bsk_stomp",
+          "n": "Shockwave",
+          "cd": 10,
+          "role": "Control",
+          "fx": "bsk_stomp",
+          "d": "Slam the ground for damage and heavy knockback."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_thick",
+          "n": "Thick Hide",
+          "role": "Defense",
+          "d": "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight."
+        },
+        "b": {
+          "id": "bsk_blood",
+          "n": "Bloodthirst",
+          "role": "Sustain",
+          "d": "Kills heal you — but only while you are below half health."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "bsk_whirl",
+          "n": "Whirlwind",
+          "cd": 12,
+          "role": "Group Damage",
+          "fx": "bsk_whirl",
+          "d": "Spin, cutting everything around you for 2.2x."
+        },
+        "b": {
+          "id": "bsk_execute",
+          "n": "Execute",
+          "cd": 14,
+          "role": "Finisher",
+          "fx": "bsk_execute",
+          "d": "A brutal strike that finishes low-HP foes."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_rage",
+          "n": "Rage",
+          "role": "Fury",
+          "d": "Below a quarter health you cannot be healed, and your damage doubles."
+        },
+        "b": {
+          "id": "bsk_frenzy",
+          "n": "Frenzy",
+          "role": "Speed",
+          "d": "Your attack speed rises as your health falls, to double at a sliver."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "bsk_berserk",
+          "n": "Berserk",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "bsk_berserk",
+          "d": "+35% damage and attack speed for 6s."
+        },
+        "b": {
+          "id": "bsk_guard",
+          "n": "Bloodguard",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "bsk_guard",
+          "d": "Raise a guard: heavy damage reduction and pull foes in."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_tough",
+          "n": "Unbreakable",
+          "role": "Defense",
+          "d": "While below half health you cannot be stunned, slowed or feared."
+        },
+        "b": {
+          "id": "bsk_brutal",
+          "n": "Brutal",
+          "role": "Execution",
+          "d": "Enemies below a quarter health die to any hit you land."
+        }
+      }
+    },
+    "pirate": {
+      "disp": "Pirate",
+      "icon": "pirate",
+      "innate": {
+        "name": "Plunder",
+        "d": "Deal +8% damage and find more gold."
+      },
+      "cap": {
+        "name": "Dread Captain",
+        "d": "+12% damage and +10% move speed."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "pir_pierce",
+          "n": "Aimed Shot",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "pir_pierce",
+          "d": "Rapid piercing pistol shots (~2s, softer each) — a gunslinger's rhythm."
+        },
+        "b": {
+          "id": "pir_volley",
+          "n": "Broadside",
+          "cd": 6,
+          "role": "Group Damage",
+          "fx": "pir_volley",
+          "d": "A spread of shots across your front."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_deadly",
+          "n": "Dead Aim",
+          "role": "Powder",
+          "d": "The pistol pierces every enemy in a line."
+        },
+        "b": {
+          "id": "pir_swift",
+          "n": "Quick Hands",
+          "role": "Reload",
+          "d": "Opening a chest reloads your pistol."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "pir_shadow",
+          "n": "Boarding Strike",
+          "cd": 8,
+          "role": "Burst",
+          "fx": "pir_shadow",
+          "d": "Dash to a foe and strike hard."
+        },
+        "b": {
+          "id": "pir_tumble",
+          "n": "Roll",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "pir_tumble",
+          "d": "Roll back with a parting shot and snare."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_tough",
+          "n": "Sea Legs",
+          "role": "Footing",
+          "d": "You cannot be knocked off ledges or moving platforms."
+        },
+        "b": {
+          "id": "pir_swagger",
+          "n": "Swagger",
+          "role": "Nerve",
+          "d": "While your pistol is loaded you move noticeably faster."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "pir_smoke",
+          "n": "Powder Smoke",
+          "cd": 14,
+          "role": "Escape",
+          "fx": "pir_smoke",
+          "d": "Vanish in smoke and slow nearby foes."
+        },
+        "b": {
+          "id": "pir_goldrush",
+          "n": "Gold Rush",
+          "cd": 20,
+          "role": "Gold Farming",
+          "fx": "pir_goldrush",
+          "d": "For 12s, every kill drops gold straight into your purse — and a killstreak stacks the payout higher and higher. The pirate's farming tool."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_evasive",
+          "n": "Slippery",
+          "role": "Escape",
+          "d": "Firing the pistol pushes you back out of melee range."
+        },
+        "b": {
+          "id": "pir_luck",
+          "n": "Lucky",
+          "role": "Fortune",
+          "d": "A pistol kill sometimes drops gold on the spot."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "pir_deathmark",
+          "n": "Cannonade",
+          "cd": 24,
+          "role": "Farming",
+          "fx": "pir_deathmark",
+          "d": "Mark foes — they explode on death."
+        },
+        "b": {
+          "id": "pir_spike",
+          "n": "Powder Keg",
+          "cd": 18,
+          "role": "Control",
+          "fx": "pir_spike",
+          "d": "Drop a trap that damages and snares."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_brutal",
+          "n": "Cutthroat",
+          "role": "Steel",
+          "d": "Your sword hits harder while the pistol is spent."
+        },
+        "b": {
+          "id": "pir_greed",
+          "n": "Greed",
+          "role": "Plunder",
+          "d": "Every 500 gold you carry sharpens your blade a little further."
+        }
+      }
+    },
+    "chronomancer": {
+      "disp": "Chronomancer",
+      "icon": "chronomancer",
+      "innate": {
+        "name": "Time Attunement",
+        "d": "Magic weapons deal +8% damage, cooldowns recover 5% faster, and each kill loops a little mana back."
+      },
+      "cap": {
+        "name": "Timelord",
+        "d": "+12% damage and +10% cooldown reduction."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "chr_bolt",
+          "n": "Time Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "chr_bolt",
+          "d": "Rapid-fire bolts of temporal energy (~2s, softer each)."
+        },
+        "b": {
+          "id": "chr_beam",
+          "n": "Time Lance",
+          "cd": 6,
+          "role": "Piercing Damage",
+          "fx": "chr_beam",
+          "d": "A piercing lance through every foe."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_potent",
+          "n": "Potent",
+          "role": "Echo",
+          "d": "Rewinding also restores the mana you had three seconds ago."
+        },
+        "b": {
+          "id": "chr_haste",
+          "n": "Haste",
+          "role": "Cooldowns",
+          "d": "Rewinding resets every skill cooldown."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "chr_nova",
+          "n": "Slow Field",
+          "cd": 8,
+          "role": "Control",
+          "fx": "chr_nova",
+          "d": "A burst that slows nearby foes."
+        },
+        "b": {
+          "id": "chr_blink",
+          "n": "Rewind",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "chr_blink",
+          "d": "Blink through time, briefly untouchable."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_ward",
+          "n": "Time Ward",
+          "role": "Defense",
+          "d": "For three seconds after a Rewind you cannot be harmed."
+        },
+        "b": {
+          "id": "chr_glass",
+          "n": "Focus",
+          "role": "Recall",
+          "d": "You may Rewind twice per area instead of once."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "chr_gravity",
+          "n": "Time Warp",
+          "cd": 13,
+          "role": "Control",
+          "fx": "chr_gravity",
+          "d": "Implode foes inward and deal damage."
+        },
+        "b": {
+          "id": "chr_barrier",
+          "n": "Aegis",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "chr_barrier",
+          "d": "A shield that absorbs up to 35% of your max HP."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_temporal",
+          "n": "Temporal Flow",
+          "role": "Stillness",
+          "d": "Standing still rewinds your cooldowns rather than merely pausing them."
+        },
+        "b": {
+          "id": "chr_slow",
+          "n": "Entropy",
+          "role": "Decay",
+          "d": "Enemies you slow keep aging — they weaken the longer they are held."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "chr_tempest",
+          "n": "Time Storm",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "chr_tempest",
+          "d": "A storm of decaying time around you."
+        },
+        "b": {
+          "id": "chr_overload",
+          "n": "Singularity",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "chr_overload",
+          "d": "A massive temporal explosion."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_echo",
+          "n": "Echo",
+          "role": "Repeat",
+          "d": "Your last skill fires again, by itself, three seconds later."
+        },
+        "b": {
+          "id": "chr_freeze",
+          "n": "Deep Freeze",
+          "role": "Control",
+          "d": "A frozen enemy shatters instantly if you strike it from behind."
+        }
+      }
+    },
+    "monk": {
+      "disp": "Monk",
+      "icon": "monk",
+      "innate": {
+        "name": "Focus",
+        "d": "Fists are your true weapon: +15% damage and faster strikes bare-handed. Every hit you land builds a Focus stack (up to 5) — each adds +6% damage — fading if you stop attacking."
+      },
+      "cap": {
+        "name": "Grandmaster",
+        "d": "+12% damage, +10% attack speed, and your Focus stacks hit harder and linger longer."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "mon_flurry",
+          "n": "Flurry",
+          "cd": 2,
+          "am": 0.42,
+          "role": "Rapid · Focused",
+          "fx": "mon_flurry",
+          "d": "A blur of rapid strikes (~2s, softer each) — builds Focus fast."
+        },
+        "b": {
+          "id": "mon_palm",
+          "n": "Palm Strike",
+          "cd": 6,
+          "role": "Burst",
+          "fx": "mon_palm",
+          "d": "Dash in with a heavy palm that staggers the first foe."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_iron",
+          "n": "Iron Body",
+          "role": "Defense",
+          "d": "While your dodge is ready, you cannot be stunned or knocked back."
+        },
+        "b": {
+          "id": "mon_fire",
+          "n": "Inner Fire",
+          "role": "Flow",
+          "d": "Dodging refunds mana instead of spending your rhythm."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "mon_deflect",
+          "n": "Deflect",
+          "cd": 10,
+          "role": "Defense",
+          "fx": "mon_deflect",
+          "d": "A parry stance: for a moment take almost nothing and throw blows straight back."
+        },
+        "b": {
+          "id": "mon_roll",
+          "n": "Roll",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "mon_roll",
+          "d": "Roll aside with brief i-frames and a parting strike."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_flow",
+          "n": "Flow",
+          "role": "Rhythm",
+          "d": "Each hit shortens your dodge twice as much."
+        },
+        "b": {
+          "id": "mon_focused",
+          "n": "Focused Mind",
+          "role": "Damage",
+          "d": "Focus stacks build faster and your Focus damage is stronger."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "mon_whirl",
+          "n": "Whirl Kick",
+          "cd": 12,
+          "role": "Group Damage",
+          "fx": "mon_whirl",
+          "d": "A spinning kick that strikes everything around you."
+        },
+        "b": {
+          "id": "mon_stun",
+          "n": "Stunning Palm",
+          "cd": 12,
+          "role": "Control",
+          "fx": "mon_stun",
+          "d": "A shockwave palm that dazes and slows nearby foes."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_med",
+          "n": "Meditation",
+          "role": "Sustain",
+          "d": "Slowly heal while you fight — a calm center."
+        },
+        "b": {
+          "id": "mon_killer",
+          "n": "Killer Focus",
+          "role": "Burst",
+          "d": "The first strike after a dodge hits for triple."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "mon_thousand",
+          "n": "Thousand Fists",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "mon_thousand",
+          "d": "A blinding assault: +35% damage and attack speed for 6s."
+        },
+        "b": {
+          "id": "mon_dragon",
+          "n": "Dragon Kick",
+          "cd": 20,
+          "role": "Finisher",
+          "fx": "mon_dragon",
+          "d": "A soaring kick that erupts on impact, blasting everything around."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_still",
+          "n": "Still Water",
+          "role": "Calm",
+          "d": "Standing still for a moment restores health, and quickly."
+        },
+        "b": {
+          "id": "mon_master",
+          "n": "Master Striker",
+          "role": "Chain",
+          "d": "Every fourth unbroken strike hits everything around you."
+        }
+      }
+    },
+    "stormcaller": {
+      "disp": "Stormcaller",
+      "icon": "stormcaller",
+      "innate": {
+        "name": "Static Charge",
+        "d": "Magic weapons deal +8% damage. Every hit you land builds a Static stack (up to 5) — each one makes you strike and move faster — fading if you stop attacking. The longer you fight, the faster the storm."
+      },
+      "cap": {
+        "name": "Storm Lord",
+        "d": "+12% damage, +10% cooldown reduction, and your lightning arcs to more enemies."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "st_bolt",
+          "n": "Chain Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Chain",
+          "fx": "st_bolt",
+          "d": "Rapid bolts that leap to a nearby foe (~2s, softer each) — builds Static fast."
+        },
+        "b": {
+          "id": "st_lance",
+          "n": "Lightning Lance",
+          "cd": 6,
+          "role": "Piercing Damage",
+          "fx": "st_lance",
+          "d": "A piercing bolt through every foe in a line."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "st_conductor",
+          "n": "Conductor",
+          "role": "Conduct",
+          "d": "Wet, frozen or shocked enemies chain to everything near them."
+        },
+        "b": {
+          "id": "st_overcharge",
+          "n": "Overcharge",
+          "role": "Chain",
+          "d": "Your lightning arcs to a third enemy as well as a second."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "st_step",
+          "n": "Thunder Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "st_step",
+          "d": "Blink in a crack of lightning, briefly untouchable."
+        },
+        "b": {
+          "id": "st_nova",
+          "n": "Static Field",
+          "cd": 8,
+          "role": "Control",
+          "fx": "st_nova",
+          "d": "A shock burst that slows nearby foes."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "st_momentum",
+          "n": "Momentum",
+          "role": "Speed",
+          "d": "Static stacks give even more attack and move speed."
+        },
+        "b": {
+          "id": "st_ward",
+          "n": "Storm Ward",
+          "role": "Defense",
+          "d": "Casting a skill grants a shield equal to 4% max HP."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "st_orb",
+          "n": "Ball Lightning",
+          "cd": 13,
+          "role": "Control",
+          "fx": "st_orb",
+          "d": "A crackling orb that pulls foes in and zaps them."
+        },
+        "b": {
+          "id": "st_barrier",
+          "n": "Storm Barrier",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "st_barrier",
+          "d": "A shield that absorbs up to 35% of your max HP."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "st_charged",
+          "n": "Charged",
+          "role": "Reach",
+          "d": "Your chain jumps twice as far between targets."
+        },
+        "b": {
+          "id": "st_amped",
+          "n": "Amped",
+          "role": "Power",
+          "d": "Each jump in a chain hits harder than the last, not weaker."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "st_storm",
+          "n": "Thunderstorm",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "st_storm",
+          "d": "A storm of lightning rages around you for 4s."
+        },
+        "b": {
+          "id": "st_overload",
+          "n": "Chain Reaction",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "st_overload",
+          "d": "A massive electric explosion around your target."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "st_master",
+          "n": "Static Master",
+          "role": "Control",
+          "d": "A chained enemy is briefly stunned by the jolt."
+        },
+        "b": {
+          "id": "st_galvanize",
+          "n": "Galvanize",
+          "role": "Return",
+          "d": "Chains that find no second target strike the first one twice."
+        }
+      }
+    },
+    "warlock": {
+      "disp": "Warlock",
+      "icon": "warlock",
+      "innate": {
+        "name": "Dark Bargain",
+        "d": "Magic weapons deal +12% damage. Every skill sacrifices 3% max HP, but the sacrifice can never defeat you. Power always has a price."
+      },
+      "cap": {
+        "name": "Dark Ascension",
+        "d": "+12% damage. Dark Bargain costs only 1.5% max HP, and defeating a cursed foe cuts every skill cooldown by 1 second."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "war_bolt",
+          "n": "Shadow Bolt",
+          "cd": 2.5,
+          "am": 0.62,
+          "role": "Rapid Damage",
+          "fx": "war_bolt",
+          "d": "Fire a fast void bolt that pierces one extra foe."
+        },
+        "b": {
+          "id": "war_lance",
+          "n": "Blood Lance",
+          "cd": 6,
+          "role": "Boss Damage",
+          "fx": "war_lance",
+          "d": "Hurl a heavy crimson lance through every foe in a line."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "war_frail",
+          "n": "Frail Power",
+          "role": "Damage",
+          "d": "+15% damage, but -10% maximum HP."
+        },
+        "b": {
+          "id": "war_shield",
+          "n": "Soul Shield",
+          "role": "Defense",
+          "d": "Casting a skill grants a shield equal to 4% max HP."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "war_curse",
+          "n": "Curse Circle",
+          "cd": 9,
+          "role": "Control",
+          "fx": "war_curse",
+          "d": "Mark nearby foes for 7 seconds. Your damage against them is increased."
+        },
+        "b": {
+          "id": "war_drain",
+          "n": "Life Drain",
+          "cd": 10,
+          "role": "Sustain",
+          "fx": "war_drain",
+          "d": "Rip health from the strongest nearby foe and heal yourself."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "war_deep",
+          "n": "Deep Curse",
+          "role": "Damage",
+          "d": "Deal 15% more damage to cursed enemies."
+        },
+        "b": {
+          "id": "war_swift",
+          "n": "Dark Step",
+          "role": "Movement",
+          "d": "Casting a skill grants +12% move speed for 2.5 seconds."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "war_step",
+          "n": "Rift Step",
+          "cd": 11,
+          "role": "Movement",
+          "fx": "war_step",
+          "d": "Blink forward and detonate shadow at your starting point and destination."
+        },
+        "b": {
+          "id": "war_orb",
+          "n": "Doom Orb",
+          "cd": 14,
+          "role": "Group Damage",
+          "fx": "war_orb",
+          "d": "Collapse a slow void orb on your target, damaging and pulling nearby foes."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "war_pact",
+          "n": "Blood Pact",
+          "role": "Damage",
+          "d": "Deal +18% damage while below half HP."
+        },
+        "b": {
+          "id": "war_safe",
+          "n": "Careful Casting",
+          "role": "Sustain",
+          "d": "Dark Bargain sacrifices 35% less health."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "war_storm",
+          "n": "Dark Storm",
+          "cd": 23,
+          "role": "Group Damage",
+          "fx": "war_storm",
+          "d": "A moving void storm tears at nearby foes for 5 seconds."
+        },
+        "b": {
+          "id": "war_final",
+          "n": "Final Curse",
+          "cd": 24,
+          "role": "Boss Damage",
+          "fx": "war_final",
+          "d": "Condemn the strongest nearby foe with a massive delayed shadow blast."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "war_feast",
+          "n": "Soul Feast",
+          "role": "Sustain",
+          "d": "Defeating a cursed foe restores 5% max HP and 6 mana."
+        },
+        "b": {
+          "id": "war_last",
+          "n": "Last Breath",
+          "role": "Defense",
+          "d": "Below 30% HP, gain 15% damage reduction."
+        }
+      }
+    },
+    "skylancer": {
+      "disp": "Skylancer",
+      "icon": "skylancer",
+      "innate": {
+        "name": "Born to Fly",
+        "d": "Ranged weapons deal +10% damage. While airborne, you fall 20% slower and deal 10% more damage."
+      },
+      "cap": {
+        "name": "Sky Master",
+        "d": "+12% damage. Using a skill in the air renews one air jump and briefly holds you aloft."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "sky_rise",
+          "n": "Rising Spear",
+          "cd": 7,
+          "role": "Movement",
+          "fx": "sky_rise",
+          "d": "Sweep nearby enemies and launch high into the air."
+        },
+        "b": {
+          "id": "sky_gale",
+          "n": "Gale Shot",
+          "cd": 5,
+          "role": "Rapid Damage",
+          "fx": "sky_gale",
+          "d": "Fire a fast wind spear that grows stronger while airborne."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_high",
+          "n": "High Ground",
+          "role": "Height",
+          "d": "The higher you are when you strike, the harder you land it."
+        },
+        "b": {
+          "id": "sky_soft",
+          "n": "Soft Landing",
+          "role": "Defense",
+          "d": "Take 15% less damage in the air and for 2 seconds after landing."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "sky_dive",
+          "n": "Dive Strike",
+          "cd": 10,
+          "role": "Burst",
+          "fx": "sky_dive",
+          "d": "Dive forward. Your next landing damages nearby enemies."
+        },
+        "b": {
+          "id": "sky_lift",
+          "n": "Wind Lift",
+          "cd": 12,
+          "role": "Control",
+          "fx": "sky_lift",
+          "d": "Create a rising wind that damages foes and launches you upward."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_tail",
+          "n": "Tailwind",
+          "role": "Movement",
+          "d": "Landing grants +15% move speed for 3 seconds."
+        },
+        "b": {
+          "id": "sky_guard",
+          "n": "Cloud Guard",
+          "role": "Defense",
+          "d": "Using a skill in the air grants a shield equal to 6% max HP."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "sky_dash",
+          "n": "Sky Dash",
+          "cd": 11,
+          "role": "Movement",
+          "fx": "sky_dash",
+          "d": "Dash through the air, damaging every enemy in your path."
+        },
+        "b": {
+          "id": "sky_rain",
+          "n": "Spear Rain",
+          "cd": 15,
+          "role": "Group Damage",
+          "fx": "sky_rain",
+          "d": "Call down five wind spears around your target."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_float",
+          "n": "Long Flight",
+          "role": "Movement",
+          "d": "Fall 25% slower and gain more control in the air."
+        },
+        "b": {
+          "id": "sky_eye",
+          "n": "Hunter’s Eye",
+          "role": "Dive",
+          "d": "Attacking while falling drives you down onto the target."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "sky_crash",
+          "n": "Thunder Dive",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "sky_crash",
+          "d": "Drop like lightning. Your next landing creates a large shockwave."
+        },
+        "b": {
+          "id": "sky_cyclone",
+          "n": "Updraft",
+          "cd": 21,
+          "role": "Air Control",
+          "fx": "sky_cyclone",
+          "d": "Spin in place and fire a ring of wind blades."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_reset",
+          "n": "Second Wind",
+          "role": "Movement",
+          "d": "Defeating an enemy in the air renews your air jump and trims dodge cooldown."
+        },
+        "b": {
+          "id": "sky_armor",
+          "n": "Sky Armor",
+          "role": "Defense",
+          "d": "Nothing can hit you in the first moment after a jump."
+        }
+      }
+    },
+    "bladedancer": {
+      "disp": "Bladedancer",
+      "icon": "bladedancer",
+      "innate": {
+        "name": "Perfect Timing",
+        "d": "Blade weapons deal +10% damage. A successful parry stores one Riposte charge for your counterattacks."
+      },
+      "cap": {
+        "name": "Endless Dance",
+        "d": "+12% damage. A successful parry refreshes your second skill and grants one second of speed and damage protection."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "bd_counter",
+          "n": "Counter Stance",
+          "cd": 8,
+          "role": "Defense",
+          "fx": "bd_counter",
+          "d": "Open a short parry window. A hit during it deals no damage and stores a Riposte."
+        },
+        "b": {
+          "id": "bd_twin",
+          "n": "Twin Cut",
+          "cd": 5,
+          "role": "Rapid Damage",
+          "fx": "bd_twin",
+          "d": "Cut twice in a wide arc. The second cut pushes enemies back."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_sharp",
+          "n": "Sharp Counter",
+          "role": "Damage",
+          "d": "A stored Riposte deals 35% more damage."
+        },
+        "b": {
+          "id": "bd_feet",
+          "n": "Light Feet",
+          "role": "Footwork",
+          "d": "Dodging through an enemy parries their next attack automatically."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "bd_riposte",
+          "n": "Riposte",
+          "cd": 9,
+          "role": "Boss Damage",
+          "fx": "bd_riposte",
+          "d": "Lunge and slash. A stored Riposte greatly increases its damage and reach."
+        },
+        "b": {
+          "id": "bd_step",
+          "n": "Dance Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "bd_step",
+          "d": "Dash through enemies and turn to face them for your next attack."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_patient",
+          "n": "Patient Guard",
+          "role": "Defense",
+          "d": "Parry windows last 0.2 seconds longer."
+        },
+        "b": {
+          "id": "bd_fast",
+          "n": "Fast Hands",
+          "role": "Tempo",
+          "d": "A parry refunds the time your attack would have taken."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "bd_mirror",
+          "n": "Mirror Guard",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "bd_mirror",
+          "d": "Open a parry window that releases a shockwave when it catches an attack."
+        },
+        "b": {
+          "id": "bd_cross",
+          "n": "Cross Slash",
+          "cd": 12,
+          "role": "Group Damage",
+          "fx": "bd_cross",
+          "d": "Cut an X ahead of you and leave enemies briefly stunned."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_heal",
+          "n": "Healing Counter",
+          "role": "Sustain",
+          "d": "A successful parry restores 5% max HP."
+        },
+        "b": {
+          "id": "bd_flow",
+          "n": "Keep Moving",
+          "role": "Momentum",
+          "d": "You cannot be hit while moving between two parries."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "bd_steel",
+          "n": "Dance of Steel",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "bd_steel",
+          "d": "Flash between nearby enemies with a rapid series of six cuts."
+        },
+        "b": {
+          "id": "bd_perfect",
+          "n": "Perfect Counter",
+          "cd": 24,
+          "role": "Boss Damage",
+          "fx": "bd_perfect",
+          "d": "Hold a long parry stance. Catching a hit unleashes a massive counterattack."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_last",
+          "n": "Last Step",
+          "role": "Movement",
+          "d": "Below 35% HP, dodge cooldown is 20% shorter."
+        },
+        "b": {
+          "id": "bd_guard",
+          "n": "Duelist Guard",
+          "role": "Defense",
+          "d": "Take 10% less damage from nearby enemies."
+        }
+      }
+    },
+    "beastmaster": {
+      "disp": "Beastmaster",
+      "icon": "beastmaster",
+      "innate": {
+        "name": "Bonded Companion",
+        "d": "Your companion gains +25% max HP and +15% damage or healing, and catches up quickly across climbs. Without an equipped pet, a spectral wolf answers your commands."
+      },
+      "cap": {
+        "name": "One Pack",
+        "d": "+10% damage for you and your companion. Once per level, a lethal hit leaves your companion at 1 HP, briefly untargetable and shielded. Commands empower your next basic attack; basic attacks empower your companion."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "bst_sic",
+          "n": "Sic 'Em",
+          "cd": 5,
+          "role": "Control",
+          "fx": "bst_sic",
+          "d": "Your companion lunges for 1.6x damage and briefly stuns."
+        },
+        "b": {
+          "id": "bst_coordinated",
+          "n": "Coordinated Strike",
+          "cd": 6,
+          "role": "Boss Damage",
+          "fx": "bst_coordinated",
+          "d": "You and your companion strike together; the target is marked for increased companion damage."
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_heavy",
+          "n": "Heavy Collar",
+          "role": "Power",
+          "d": "+25% companion HP and +15% damage, but 10% slower attacks."
+        },
+        "b": {
+          "id": "bst_swift",
+          "n": "Swift Paws",
+          "role": "Speed",
+          "d": "+18% companion attack and movement speed; commands recover 12% faster."
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "bst_guardian",
+          "n": "Guardian Bond",
+          "cd": 12,
+          "role": "Defense",
+          "fx": "bst_guardian",
+          "d": "For 4s your companion intercepts part of incoming damage and gains a shield."
+        },
+        "b": {
+          "id": "bst_step",
+          "n": "Pack Step",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "bst_step",
+          "d": "You and your companion dash to opposite sides of the target with brief dodge protection."
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_vitality",
+          "n": "Shared Vitality",
+          "role": "Sustain",
+          "d": "Healing either partner also heals the other for 30% of that amount."
+        },
+        "b": {
+          "id": "bst_rhythm",
+          "n": "Predator's Rhythm",
+          "role": "Uptime",
+          "d": "Basic attacks reduce all Beastmaster command cooldowns by 0.25s."
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "bst_mend",
+          "n": "Mend the Pack",
+          "cd": 14,
+          "role": "Sustain",
+          "fx": "bst_mend",
+          "d": "Restore 30% companion HP and 10% player HP over time."
+        },
+        "b": {
+          "id": "bst_roar",
+          "n": "Alpha Roar",
+          "cd": 13,
+          "role": "Control",
+          "fx": "bst_roar",
+          "d": "A damaging roar slows nearby foes and turns their attention toward your companion."
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_scent",
+          "n": "Blood Scent",
+          "role": "Damage",
+          "d": "+20% companion damage against marked, elite, boss, or wounded targets."
+        },
+        "b": {
+          "id": "bst_wildkeeper",
+          "n": "Wildkeeper",
+          "role": "Defense",
+          "d": "+20% companion healing and 12% damage reduction while it is below half HP."
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "bst_stampede",
+          "n": "Stampede",
+          "cd": 24,
+          "role": "Group Damage",
+          "fx": "bst_stampede",
+          "d": "Call a spectral herd through a wide lane, striking and knocking enemies aside."
+        },
+        "b": {
+          "id": "bst_apex",
+          "n": "Apex Unleashed",
+          "cd": 22,
+          "role": "Companion",
+          "fx": "bst_apex",
+          "d": "For 8s your companion gains +35% damage/healing, +30% speed, and relentless pursuit."
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_authority",
+          "n": "Alpha's Authority",
+          "role": "Damage",
+          "d": "Companion attacks gain occasional splash damage and commands are 15% stronger."
+        },
+        "b": {
+          "id": "bst_handler",
+          "n": "Master Handler",
+          "role": "Economy",
+          "d": "Commands cost 15% less mana, recover 12% faster, and briefly speed you up."
+        }
+      }
+    }
+  },
+  "enemies": {
+    "grunt": {
+      "hp": 22,
+      "dmg": 8,
+      "speed": 62,
+      "r": 15,
+      "h": 38,
+      "xp": 13,
+      "color": "#7ec46a",
+      "kind": "walk",
+      "look": "soldier"
+    },
+    "flyer": {
+      "hp": 16,
+      "dmg": 7,
+      "speed": 52,
+      "r": 15,
+      "h": 26,
+      "xp": 15,
+      "color": "#d07ad0",
+      "kind": "fly",
+      "look": "batwing"
+    },
+    "emberling": {
+      "hp": 24,
+      "dmg": 9,
+      "speed": 58,
+      "r": 15,
+      "h": 38,
+      "xp": 17,
+      "color": "#ff7a3a",
+      "kind": "walk",
+      "element": "fire",
+      "look": "emberimp",
+      "spec": "ignite"
+    },
+    "frostling": {
+      "hp": 28,
+      "dmg": 8,
+      "speed": 50,
+      "r": 15,
+      "h": 38,
+      "xp": 17,
+      "color": "#7fd6ff",
+      "kind": "walk",
+      "element": "ice",
+      "look": "frostbeast",
+      "spec": "chillaura"
+    },
+    "toxling": {
+      "hp": 24,
+      "dmg": 8,
+      "speed": 56,
+      "r": 15,
+      "h": 38,
+      "xp": 17,
+      "color": "#9fd84a",
+      "kind": "walk",
+      "element": "poison",
+      "look": "toxbeast",
+      "spec": "volatile"
+    },
+    "shadeling": {
+      "hp": 27,
+      "dmg": 9,
+      "speed": 56,
+      "r": 15,
+      "h": 38,
+      "xp": 19,
+      "color": "#b06bff",
+      "kind": "walk",
+      "element": "void",
+      "look": "shadewraith",
+      "spec": "fade"
+    },
+    "sparkling": {
+      "hp": 18,
+      "dmg": 8,
+      "speed": 50,
+      "r": 15,
+      "h": 26,
+      "xp": 19,
+      "color": "#9fe0ff",
+      "kind": "fly",
+      "element": "arcane",
+      "look": "sparkstar"
+    },
+    "goblin": {
+      "hp": 26,
+      "dmg": 0,
+      "speed": 100,
+      "r": 13,
+      "h": 30,
+      "xp": 40,
+      "color": "#ffd24a",
+      "kind": "goblin"
+    },
+    "bones": {
+      "hp": 18,
+      "dmg": 9,
+      "speed": 84,
+      "r": 13,
+      "h": 40,
+      "xp": 16,
+      "color": "#e8e4d8",
+      "kind": "walk",
+      "look": "bones",
+      "spec": "rise"
+    },
+    "slime": {
+      "hp": 32,
+      "dmg": 7,
+      "speed": 38,
+      "r": 16,
+      "h": 24,
+      "xp": 18,
+      "color": "#6ee0a8",
+      "kind": "walk",
+      "look": "slime"
+    },
+    "slimelet": {
+      "hp": 8,
+      "dmg": 4,
+      "speed": 72,
+      "r": 9,
+      "h": 14,
+      "xp": 5,
+      "color": "#8ef0bc",
+      "kind": "walk",
+      "look": "slime",
+      "noSplit": true
+    },
+    "caster": {
+      "hp": 20,
+      "dmg": 10,
+      "speed": 52,
+      "r": 13,
+      "h": 42,
+      "xp": 22,
+      "color": "#8a6ab0",
+      "kind": "caster",
+      "shot": {
+        "count": 1,
+        "spread": 0,
+        "speed": 430,
+        "size": 7,
+        "color": "#c47bff",
+        "shape": "orb",
+        "el": "arcane",
+        "glow": 1
+      },
+      "shootCd": 2.5
+    },
+    "charger": {
+      "hp": 34,
+      "dmg": 12,
+      "speed": 58,
+      "r": 17,
+      "h": 30,
+      "xp": 20,
+      "color": "#a84a2a",
+      "kind": "charger"
+    },
+    "mimic": {
+      "hp": 70,
+      "dmg": 16,
+      "speed": 74,
+      "r": 16,
+      "h": 30,
+      "xp": 60,
+      "color": "#6b4a2a",
+      "kind": "charger",
+      "look": "mimic",
+      "noSplit": true
+    },
+    "dustjackal": {
+      "hp": 24,
+      "dmg": 11,
+      "speed": 82,
+      "r": 14,
+      "h": 26,
+      "xp": 19,
+      "color": "#caa46a",
+      "kind": "charger",
+      "look": "jackal"
+    },
+    "cragspitter": {
+      "hp": 46,
+      "dmg": 13,
+      "speed": 26,
+      "r": 18,
+      "h": 42,
+      "xp": 28,
+      "color": "#9a8a6a",
+      "kind": "caster",
+      "look": "spitter",
+      "shot": {
+        "count": 1,
+        "spread": 0,
+        "speed": 300,
+        "size": 10,
+        "color": "#b0946a",
+        "shape": "rock",
+        "gravity": 540,
+        "glow": 0
+      },
+      "shootCd": 2.9
+    },
+    "galewisp": {
+      "hp": 20,
+      "dmg": 9,
+      "speed": 66,
+      "r": 14,
+      "h": 24,
+      "xp": 21,
+      "color": "#cfe6ec",
+      "kind": "fly",
+      "look": "wraith",
+      "element": "arcane",
+      "dive": true
+    },
+    "thornboar": {
+      "hp": 34,
+      "dmg": 11,
+      "speed": 60,
+      "r": 18,
+      "h": 32,
+      "xp": 22,
+      "color": "#7a5a3a",
+      "kind": "charger",
+      "look": "boar"
+    },
+    "sporeback": {
+      "hp": 34,
+      "dmg": 9,
+      "speed": 40,
+      "r": 16,
+      "h": 34,
+      "xp": 21,
+      "color": "#8fb35a",
+      "kind": "walk",
+      "element": "poison",
+      "look": "spore",
+      "deathpuff": true,
+      "spec": "spores"
+    },
+    "sentinel": {
+      "hp": 54,
+      "dmg": 12,
+      "speed": 34,
+      "r": 17,
+      "h": 44,
+      "xp": 27,
+      "color": "#6a7488",
+      "kind": "walk",
+      "look": "sentinel",
+      "spec": "watch"
+    },
+    "revenant": {
+      "hp": 26,
+      "dmg": 11,
+      "speed": 80,
+      "r": 14,
+      "h": 40,
+      "xp": 20,
+      "color": "#9aa0a8",
+      "kind": "charger",
+      "look": "revenant"
+    },
+    "dummy": {
+      "hp": 400,
+      "dmg": 0,
+      "speed": 0,
+      "r": 14,
+      "h": 54,
+      "xp": 0,
+      "color": "#c9b37e",
+      "kind": "walk",
+      "look": "dummy"
+    },
+    "bosscrystal": {
+      "hp": 100,
+      "dmg": 0,
+      "speed": 0,
+      "r": 15,
+      "h": 56,
+      "xp": 6,
+      "color": "#7fd6ff",
+      "kind": "walk",
+      "look": "bosscrystal",
+      "noSplit": true
+    },
+    "frostshell": {
+      "hp": 64,
+      "dmg": 11,
+      "speed": 30,
+      "r": 18,
+      "h": 40,
+      "xp": 30,
+      "color": "#8fb8d8",
+      "kind": "walk",
+      "element": "ice",
+      "look": "frostshell",
+      "spec": "shell"
+    },
+    "frostlobber": {
+      "hp": 30,
+      "dmg": 11,
+      "speed": 32,
+      "r": 15,
+      "h": 40,
+      "xp": 26,
+      "color": "#bfe6ff",
+      "kind": "caster",
+      "element": "ice",
+      "look": "lobber",
+      "shot": {
+        "count": 1,
+        "spread": 0,
+        "speed": 300,
+        "size": 9,
+        "color": "#bfe6ff",
+        "shape": "shard",
+        "gravity": 520,
+        "el": "ice",
+        "glow": 1
+      },
+      "shootCd": 2.7
+    },
+    "magmaskit": {
+      "hp": 26,
+      "dmg": 10,
+      "speed": 98,
+      "r": 13,
+      "h": 22,
+      "xp": 24,
+      "color": "#ff6a2a",
+      "kind": "charger",
+      "element": "fire",
+      "look": "skitter",
+      "spec": "trail"
+    },
+    "embertotem": {
+      "hp": 74,
+      "dmg": 0,
+      "speed": 0,
+      "r": 16,
+      "h": 48,
+      "xp": 34,
+      "color": "#3a1a12",
+      "kind": "walk",
+      "element": "fire",
+      "look": "totem",
+      "spec": "totem"
+    },
+    "blinkstalker": {
+      "hp": 34,
+      "dmg": 14,
+      "speed": 58,
+      "r": 14,
+      "h": 40,
+      "xp": 30,
+      "color": "#6a3fa0",
+      "kind": "walk",
+      "element": "void",
+      "look": "stalker",
+      "spec": "blink"
+    },
+    "voidtether": {
+      "hp": 44,
+      "dmg": 8,
+      "speed": 38,
+      "r": 14,
+      "h": 42,
+      "xp": 36,
+      "color": "#8f52d6",
+      "kind": "walk",
+      "element": "void",
+      "look": "tether",
+      "spec": "tether"
+    },
+    "sunpriest": {
+      "hp": 36,
+      "dmg": 11,
+      "speed": 36,
+      "r": 14,
+      "h": 44,
+      "xp": 34,
+      "color": "#ffe9a8",
+      "kind": "caster",
+      "element": "holy",
+      "look": "priest",
+      "shot": {
+        "count": 1,
+        "spread": 0,
+        "speed": 520,
+        "size": 8,
+        "color": "#ffe9a8",
+        "shape": "light",
+        "el": "holy",
+        "glow": 1
+      },
+      "shootCd": 2.5,
+      "spec": "sunpriest"
+    },
+    "marblestatue": {
+      "hp": 96,
+      "dmg": 14,
+      "speed": 22,
+      "r": 19,
+      "h": 48,
+      "xp": 40,
+      "color": "#9aa0b0",
+      "kind": "walk",
+      "look": "statue",
+      "spec": "shell"
+    },
+    "siegeknight": {
+      "hp": 84,
+      "dmg": 16,
+      "speed": 36,
+      "r": 17,
+      "h": 46,
+      "xp": 42,
+      "color": "#3c4048",
+      "kind": "walk",
+      "look": "knight",
+      "spec": "knightslam"
+    },
+    "royalarcanist": {
+      "hp": 46,
+      "dmg": 12,
+      "speed": 32,
+      "r": 14,
+      "h": 46,
+      "xp": 42,
+      "color": "#c47bff",
+      "kind": "caster",
+      "element": "arcane",
+      "look": "arcanist",
+      "shot": {
+        "count": 3,
+        "spread": 0.18,
+        "speed": 440,
+        "size": 7,
+        "color": "#c47bff",
+        "shape": "orb",
+        "el": "arcane",
+        "glow": 1
+      },
+      "shootCd": 2.3
+    }
+  },
+  "bosses": {
+    "brute": {
+      "hp": 190,
+      "dmg": 18,
+      "speed": 46,
+      "r": 30,
+      "h": 74,
+      "xp": 140,
+      "color": "#e0794a",
+      "kind": "boss",
+      "boss": true,
+      "label": "THE BRUTE"
+    },
+    "warden": {
+      "hp": 270,
+      "dmg": 22,
+      "speed": 58,
+      "r": 27,
+      "h": 80,
+      "xp": 200,
+      "color": "#c060c8",
+      "kind": "boss",
+      "boss": true,
+      "label": "THE FALLEN"
+    },
+    "archer": {
+      "hp": 300,
+      "dmg": 16,
+      "speed": 54,
+      "r": 27,
+      "h": 80,
+      "xp": 230,
+      "color": "#a7b06a",
+      "kind": "boss",
+      "boss": true,
+      "ranged": true,
+      "kite": true,
+      "label": "HOLLOW MARKSMAN",
+      "shot": {
+        "count": 3,
+        "spread": 0.1,
+        "speed": 560,
+        "size": 5,
+        "color": "#e6d28a",
+        "shape": "arrow"
+      },
+      "shootCd": 2
+    },
+    "sorcerer": {
+      "hp": 330,
+      "dmg": 18,
+      "speed": 62,
+      "r": 27,
+      "h": 80,
+      "xp": 250,
+      "color": "#6aa0d0",
+      "kind": "boss",
+      "boss": true,
+      "ranged": true,
+      "kite": true,
+      "label": "FROST SORCERER",
+      "shot": {
+        "count": 3,
+        "spread": 0.2,
+        "speed": 430,
+        "size": 8,
+        "color": "#7fd6ff",
+        "shape": "orb",
+        "el": "ice",
+        "glow": 1
+      },
+      "shootCd": 2.1
+    },
+    "colossus": {
+      "hp": 560,
+      "dmg": 24,
+      "speed": 40,
+      "r": 39,
+      "h": 104,
+      "xp": 380,
+      "color": "#d06a3a",
+      "kind": "boss",
+      "boss": true,
+      "ranged": true,
+      "label": "EMBER COLOSSUS",
+      "shot": {
+        "count": 1,
+        "spread": 0,
+        "speed": 380,
+        "size": 13,
+        "color": "#ff7a3a",
+        "shape": "orb",
+        "el": "fire",
+        "glow": 1,
+        "gravity": 430
+      },
+      "shootCd": 2.6
+    },
+    "king": {
+      "hp": 680,
+      "dmg": 26,
+      "speed": 50,
+      "r": 39,
+      "h": 104,
+      "xp": 600,
+      "color": "#b06bff",
+      "kind": "boss",
+      "boss": true,
+      "label": "ABYSS KING"
+    },
+    "tyrant": {
+      "hp": 900,
+      "dmg": 28,
+      "speed": 52,
+      "r": 39,
+      "h": 104,
+      "xp": 800,
+      "color": "#8a4fd0",
+      "kind": "boss",
+      "boss": true,
+      "ranged": true,
+      "label": "THE ABYSS KING, AWAKENED",
+      "shot": {
+        "count": 5,
+        "spread": 0.16,
+        "speed": 420,
+        "size": 8,
+        "color": "#c47bff",
+        "shape": "orb",
+        "el": "void",
+        "glow": 1
+      },
+      "shootCd": 2.4
+    }
+  },
+  "pets": {
+    "emberpup": {
+      "name": "Ember Pup",
+      "arch": "attacker",
+      "style": "melee",
+      "rarity": "common",
+      "price": 220,
+      "dmg": 5,
+      "cd": 1.8,
+      "range": 240,
+      "body": "#e0794a",
+      "accent": "#ffb060",
+      "flavor": "A stray from the Emberdeep. Bites what bites you."
+    },
+    "spiritwolf": {
+      "name": "Spirit Wolf",
+      "arch": "attacker",
+      "style": "melee",
+      "rarity": "epic",
+      "hidden": true,
+      "dmg": 8,
+      "cd": 1.5,
+      "range": 260,
+      "body": "#6f8ec6",
+      "accent": "#bfe6ff",
+      "flavor": "The bond made flesh — a lupine spirit that answers the Beastmaster alone."
+    },
+    "stonewhelp": {
+      "name": "Stone Whelp",
+      "arch": "attacker",
+      "style": "melee",
+      "rarity": "common",
+      "price": 260,
+      "dmg": 8,
+      "cd": 2.3,
+      "range": 210,
+      "body": "#8a8f9e",
+      "accent": "#c7ccd6",
+      "flavor": "Slow, heavy, loyal. Headbutts like a landslide."
+    },
+    "wisp": {
+      "name": "Pale Wisp",
+      "arch": "attacker",
+      "style": "ranged",
+      "rarity": "uncommon",
+      "price": 620,
+      "dmg": 5,
+      "cd": 1.5,
+      "range": 520,
+      "body": "#9fe0ff",
+      "accent": "#e6faff",
+      "flavor": "A fallen Bladeborn's lantern-light, still on watch."
+    },
+    "mender": {
+      "name": "Mending Sprite",
+      "arch": "healer",
+      "rarity": "uncommon",
+      "price": 760,
+      "heal": 4,
+      "cd": 3.4,
+      "body": "#7de08a",
+      "accent": "#c8ffd4",
+      "flavor": "It cannot fight. It only refuses to let you fall."
+    },
+    "coinsprite": {
+      "name": "Coin Sprite",
+      "arch": "utility",
+      "rarity": "rare",
+      "price": 940,
+      "pull": 220,
+      "body": "#ffd24a",
+      "accent": "#fff2b0",
+      "flavor": "Greedy, but it shares. Drags the gold to you."
+    },
+    "gravewraith": {
+      "name": "Grave Wraith",
+      "arch": "attacker",
+      "style": "ranged",
+      "rarity": "rare",
+      "price": 1500,
+      "dmg": 11,
+      "cd": 1.7,
+      "range": 560,
+      "body": "#b06bff",
+      "accent": "#e0b0ff",
+      "flavor": "It hungers with you. Its bolts find the throat."
+    }
+  },
+  "fx": {
+    "quest": {
+      "f": "fanfare-announcement-arrival",
+      "v": 0.55
+    },
+    "levelcheer": {
+      "f": "fanfare-celebration",
+      "v": 0.6
+    },
+    "footstep": {
+      "f": "footsteps-pair-soft-loopable",
+      "v": 0.3,
+      "loop": true
+    },
+    "mobknock": {
+      "f": "bamboo-knock-loopable",
+      "v": 0.32
+    },
+    "forgeopen": {
+      "f": "blade-sharpening-loopable",
+      "v": 0.5
+    },
+    "bookflip": {
+      "f": "book-flip-page",
+      "v": 0.4
+    },
+    "chestopen": {
+      "f": "box-open",
+      "v": 0.52
+    },
+    "wallbreak": {
+      "f": "break-object-small",
+      "v": 0.5
+    },
+    "click": {
+      "f": "button-press",
+      "v": 0.4
+    },
+    "equip": {
+      "f": "cape-and-hood-drawn",
+      "v": 0.46
+    },
+    "shopopen": {
+      "f": "cash-register-open-till",
+      "v": 0.46
+    },
+    "wallslide": {
+      "f": "chair-pull-up-2",
+      "v": 0.44
+    },
+    "bigreveal": {
+      "f": "clanging-pipes-loopable",
+      "v": 0.6
+    },
+    "forgespin": {
+      "f": "coin-double-flip",
+      "v": 0.44
+    },
+    "dice": {
+      "f": "dice-rolling",
+      "v": 0.46
+    },
+    "doorslam": {
+      "f": "door-slam-heavy",
+      "v": 0.5
+    },
+    "dooropen": {
+      "f": "doorknock-heavy",
+      "v": 0.44
+    },
+    "drink": {
+      "f": "drink-2",
+      "v": 0.48
+    },
+    "electric": {
+      "f": "fence-electric-hum-loopable",
+      "v": 0.34,
+      "loop": true
+    },
+    "fireshot": {
+      "f": "fire-ignition-combustible-powder",
+      "v": 0.46
+    },
+    "firecharge": {
+      "f": "fire-launch-jet",
+      "v": 0.46
+    },
+    "fireball": {
+      "f": "fireball-launched",
+      "v": 0.5
+    },
+    "heartbeat": {
+      "f": "heartbeat-rapid",
+      "v": 0.4,
+      "loop": true
+    },
+    "frostclink": {
+      "f": "ice-clinking-in-glass",
+      "v": 0.4
+    },
+    "bigland": {
+      "f": "jump-soft-landing",
+      "v": 0.44
+    },
+    "train": {
+      "f": "lifting-double-weight",
+      "v": 0.5
+    },
+    "bag": {
+      "f": "pickpocket-snatch-soft",
+      "v": 0.42
+    },
+    "rain": {
+      "f": "rain-with-trickle-loopable",
+      "v": 0.3,
+      "loop": true
+    },
+    "bonesdie": {
+      "f": "rocks-cliff-face-collapse",
+      "v": 0.5
+    },
+    "frostdie": {
+      "f": "snowball-hitting-surface-and-falling",
+      "v": 0.5
+    },
+    "lever": {
+      "f": "switch-push",
+      "v": 0.46
+    },
+    "axeswing": {
+      "f": "axeswing",
+      "v": 0.44
+    },
+    "swordswing": {
+      "f": "swordswing",
+      "v": 0.42
+    },
+    "spearswing": {
+      "f": "spearswing",
+      "v": 0.42
+    },
+    "gruntdie": {
+      "f": "gruntdie",
+      "v": 0.48
+    },
+    "forgedone": {
+      "f": "forgedone",
+      "v": 0.52
+    },
+    "warskill1": {
+      "f": "warskill1",
+      "v": 0.5
+    },
+    "warcharge": {
+      "f": "warcharge",
+      "v": 0.4
+    },
+    "rustyhit": {
+      "f": "rustyhit",
+      "v": 0.44
+    },
+    "portalopen": {
+      "f": "portalopen",
+      "v": 0.6
+    },
+    "stabkill": {
+      "f": "stabkill",
+      "v": 0.5
+    },
+    "heavyhit": {
+      "f": "heavyhit",
+      "v": 0.46
+    },
+    "arcaneskill": {
+      "f": "arcaneskill",
+      "v": 0.5
+    },
+    "secretget": {
+      "f": "secretget",
+      "v": 0.6
+    },
+    "wandcharge": {
+      "f": "wandcharge",
+      "v": 0.44
+    },
+    "wandfire": {
+      "f": "wandfire",
+      "v": 0.42
+    },
+    "sell": {
+      "f": "sell",
+      "v": 0.48
+    },
+    "lootpickup": {
+      "f": "lootpickup",
+      "v": 0.48
+    },
+    "buy": {
+      "f": "buy",
+      "v": 0.46
+    },
+    "mobvoice1": {
+      "f": "mobvoice1",
+      "v": 0.44
+    },
+    "mobvoice2": {
+      "f": "mobvoice2",
+      "v": 0.44
+    },
+    "bossroar1": {
+      "f": "bossroar1",
+      "v": 0.62
+    },
+    "bossroar2": {
+      "f": "bossroar2",
+      "v": 0.62
+    },
+    "bossroar3": {
+      "f": "bossroar3",
+      "v": 0.62
+    },
+    "bossdie": {
+      "f": "bossdie",
+      "v": 0.6
+    },
+    "m_axe": {
+      "f": "m_axe",
+      "v": 0.5
+    },
+    "m_gsmetal": {
+      "f": "m_gsmetal",
+      "v": 0.5
+    },
+    "m_gsplate": {
+      "f": "m_gsplate",
+      "v": 0.5
+    },
+    "m_gspunch": {
+      "f": "m_gspunch",
+      "v": 0.52
+    },
+    "m_scythe": {
+      "f": "m_scythe",
+      "v": 0.46
+    },
+    "m_knives": {
+      "f": "m_knives",
+      "v": 0.44
+    },
+    "xbowclick": {
+      "f": "xbowclick",
+      "v": 0.42
+    },
+    "xbowlatch": {
+      "f": "xbowlatch",
+      "v": 0.42
+    },
+    "cast1": {
+      "f": "cast1",
+      "v": 0.4
+    },
+    "cast2": {
+      "f": "cast2",
+      "v": 0.4
+    },
+    "cast3": {
+      "f": "cast3",
+      "v": 0.4
+    },
+    "cast4": {
+      "f": "cast4",
+      "v": 0.4
+    },
+    "cast5": {
+      "f": "cast5",
+      "v": 0.42
+    },
+    "cast6": {
+      "f": "cast6",
+      "v": 0.4
+    },
+    "cast7": {
+      "f": "cast7",
+      "v": 0.42
+    },
+    "die1": {
+      "f": "die1",
+      "v": 0.5
+    },
+    "die2": {
+      "f": "die2",
+      "v": 0.5
+    },
+    "die3": {
+      "f": "die3",
+      "v": 0.5
+    },
+    "die4": {
+      "f": "die4",
+      "v": 0.5
+    },
+    "hurt1": {
+      "f": "hurt1",
+      "v": 0.44
+    },
+    "hurt2": {
+      "f": "hurt2",
+      "v": 0.44
+    },
+    "shatter": {
+      "f": "shatter",
+      "v": 0.5
+    },
+    "v_boargrunt": {
+      "f": "v_boargrunt",
+      "v": 0.44
+    },
+    "v_boarroar": {
+      "f": "v_boarroar",
+      "v": 0.5
+    },
+    "v_jackalbark": {
+      "f": "v_jackalbark",
+      "v": 0.44
+    },
+    "v_jackalhowl": {
+      "f": "v_jackalhowl",
+      "v": 0.48
+    },
+    "v_slime1": {
+      "f": "v_slime1",
+      "v": 0.42
+    },
+    "v_slime2": {
+      "f": "v_slime2",
+      "v": 0.42
+    },
+    "v_spit": {
+      "f": "v_spit",
+      "v": 0.44
+    },
+    "v_burble": {
+      "f": "v_burble",
+      "v": 0.46
+    },
+    "v_ghost1": {
+      "f": "v_ghost1",
+      "v": 0.44
+    },
+    "v_ghost2": {
+      "f": "v_ghost2",
+      "v": 0.44
+    },
+    "v_breath": {
+      "f": "v_breath",
+      "v": 0.42
+    },
+    "v_undead1": {
+      "f": "v_undead1",
+      "v": 0.46
+    },
+    "v_undead2": {
+      "f": "v_undead2",
+      "v": 0.46
+    },
+    "v_goblin": {
+      "f": "v_goblin",
+      "v": 0.44
+    },
+    "v_troll": {
+      "f": "v_troll",
+      "v": 0.5
+    },
+    "v_small1": {
+      "f": "v_small1",
+      "v": 0.42
+    },
+    "v_small2": {
+      "f": "v_small2",
+      "v": 0.42
+    },
+    "v_deep": {
+      "f": "v_deep",
+      "v": 0.5
+    },
+    "v_bossroar1": {
+      "f": "v_bossroar1",
+      "v": 0.62
+    },
+    "v_bossroar2": {
+      "f": "v_bossroar2",
+      "v": 0.6
+    },
+    "v_clank": {
+      "f": "v_clank",
+      "v": 0.46
+    },
+    "v_stone": {
+      "f": "v_stone",
+      "v": 0.5
+    },
+    "atk1": {
+      "f": "atk1",
+      "v": 0.4
+    },
+    "atk2": {
+      "f": "atk2",
+      "v": 0.4
+    },
+    "ma_stomp": {
+      "f": "ma_stomp",
+      "v": 0.5
+    },
+    "mimicroar": {
+      "f": "mimicroar",
+      "v": 0.58
+    },
+    "chestthunk": {
+      "f": "chestthunk",
+      "v": 0.5
+    },
+    "gamblecoins": {
+      "f": "gamblecoins",
+      "v": 0.48
+    }
+  },
+  "weapons": {
+    "sword": {
+      "disp": "Sword",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 12,
+      "cd": 0.38,
+      "kb": 260,
+      "range": 84,
+      "art": "sword"
+    },
+    "saber": {
+      "disp": "Saber",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 12,
+      "cd": 0.33,
+      "kb": 200,
+      "range": 74,
+      "art": "sword"
+    },
+    "dagger": {
+      "disp": "Daggers",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 8,
+      "cd": 0.18,
+      "kb": 120,
+      "range": 56,
+      "art": "dagger"
+    },
+    "axe": {
+      "disp": "Battle Axe",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 18,
+      "cd": 0.54,
+      "kb": 300,
+      "range": 76,
+      "art": "axe",
+      "chg": "hurl"
+    },
+    "great": {
+      "disp": "Greatsword",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 20,
+      "cd": 0.68,
+      "kb": 340,
+      "range": 84,
+      "art": "great",
+      "chg": "spin"
+    },
+    "hammer": {
+      "disp": "Warhammer",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 26,
+      "cd": 0.8,
+      "kb": 460,
+      "range": 80,
+      "art": "hammer",
+      "chg": "quake"
+    },
+    "scythe": {
+      "disp": "Scythe",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 17,
+      "cd": 0.56,
+      "kb": 260,
+      "range": 90,
+      "art": "scythe",
+      "chg": "scythethrow"
+    },
+    "fist": {
+      "disp": "Bare Fists",
+      "cls": "melee",
+      "sch": "phys",
+      "dmg": 24,
+      "cd": 0.26,
+      "kb": 110,
+      "range": 58,
+      "art": "fist",
+      "fist": true
+    },
+    "flameblade": {
+      "disp": "Flameblade",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 15,
+      "cd": 0.4,
+      "kb": 200,
+      "range": 74,
+      "art": "spellblade",
+      "el": "fire",
+      "chg": "spellsweep"
+    },
+    "frostbrand": {
+      "disp": "Frostbrand",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 13,
+      "cd": 0.38,
+      "kb": 200,
+      "range": 74,
+      "art": "spellblade",
+      "el": "ice",
+      "chg": "spellsweep"
+    },
+    "runeblade": {
+      "disp": "Runeblade",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 20,
+      "cd": 0.6,
+      "kb": 300,
+      "range": 84,
+      "art": "spellblade",
+      "el": "arcane",
+      "chg": "spellsweep"
+    },
+    "venomedge": {
+      "disp": "Venom Edge",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 14,
+      "cd": 0.38,
+      "kb": 200,
+      "range": 74,
+      "art": "spellblade",
+      "el": "poison",
+      "chg": "spellsweep"
+    },
+    "umbrablade": {
+      "disp": "Shadow Edge",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 17,
+      "cd": 0.46,
+      "kb": 230,
+      "range": 64,
+      "art": "spellblade",
+      "el": "void",
+      "chg": "spellsweep"
+    },
+    "sunblade": {
+      "disp": "Sunblade",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 12,
+      "cd": 0.32,
+      "kb": 180,
+      "range": 58,
+      "art": "spellblade",
+      "el": "holy",
+      "chg": "spellsweep"
+    },
+    "lightbringer": {
+      "disp": "Lightbringer",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 22,
+      "cd": 0.5,
+      "kb": 340,
+      "range": 80,
+      "art": "spellblade",
+      "el": "holy",
+      "chg": "spellsweep"
+    },
+    "voidscythe": {
+      "disp": "Void Scythe",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 20,
+      "cd": 0.52,
+      "kb": 280,
+      "range": 90,
+      "art": "scythe",
+      "el": "void",
+      "lifesteal": 0.12,
+      "reaper": true,
+      "chg": "scythethrow"
+    },
+    "iansblade": {
+      "disp": "Ian's Blade",
+      "cls": "melee",
+      "sch": "mag",
+      "dmg": 58,
+      "cd": 0.32,
+      "kb": 430,
+      "range": 102,
+      "art": "sword",
+      "el": "holy",
+      "anyClass": true,
+      "ians": true
+    },
+    "bow": {
+      "disp": "Longbow",
+      "cls": "ranged",
+      "sch": "phys",
+      "dmg": 9,
+      "cd": 0.3,
+      "kb": 110,
+      "art": "bow",
+      "chg": "powershot",
+      "proj": {
+        "speed": 680,
+        "size": 5,
+        "pierce": 0,
+        "range": 1150,
+        "color": "#d8c27a",
+        "shape": "arrow"
+      }
+    },
+    "crossbow": {
+      "disp": "Crossbow",
+      "cls": "ranged",
+      "sch": "phys",
+      "dmg": 7,
+      "cd": 0.53,
+      "kb": 150,
+      "art": "cross",
+      "proj": {
+        "speed": 760,
+        "size": 6,
+        "pierce": 1,
+        "range": 820,
+        "count": 3,
+        "spread": 0.15,
+        "color": "#cfd6df",
+        "shape": "arrow"
+      }
+    },
+    "knives": {
+      "disp": "Daggers",
+      "cls": "ranged",
+      "sch": "phys",
+      "dmg": 8,
+      "cd": 0.18,
+      "kb": 70,
+      "art": "dagger",
+      "chg": "daggerthrow",
+      "proj": {
+        "speed": 660,
+        "size": 4,
+        "pierce": 0,
+        "range": 420,
+        "count": 1,
+        "spread": 0,
+        "color": "#9fe6c8",
+        "shape": "arrow"
+      }
+    },
+    "javelin": {
+      "disp": "Javelins",
+      "cls": "ranged",
+      "sch": "phys",
+      "dmg": 17,
+      "cd": 0.5,
+      "kb": 210,
+      "art": "javelin",
+      "chg": "javelin",
+      "proj": {
+        "speed": 600,
+        "size": 6,
+        "pierce": 1,
+        "gravity": 300,
+        "range": 680,
+        "color": "#d8c27a",
+        "shape": "arrow"
+      }
+    },
+    "flintlock": {
+      "disp": "Flintlock Pistol",
+      "cls": "ranged",
+      "sch": "phys",
+      "dmg": 88,
+      "cd": 1.55,
+      "kb": 360,
+      "art": "flintlock",
+      "proj": {
+        "speed": 900,
+        "size": 7,
+        "pierce": 2,
+        "range": 800,
+        "color": "#33363c",
+        "shape": "cannonball"
+      }
+    },
+    "firestaff": {
+      "disp": "Fire Staff",
+      "cls": "ranged",
+      "sch": "mag",
+      "dmg": 20,
+      "cd": 0.54,
+      "kb": 150,
+      "art": "staff",
+      "el": "fire",
+      "chg": "bolt",
+      "proj": {
+        "speed": 470,
+        "size": 9,
+        "pierce": 0,
+        "range": 360,
+        "color": "#ff7a3a",
+        "shape": "fireball",
+        "glow": 1
+      }
+    },
+    "frostwand": {
+      "disp": "Frost Wand",
+      "cls": "ranged",
+      "sch": "mag",
+      "dmg": 9,
+      "cd": 0.2,
+      "kb": 90,
+      "art": "wand",
+      "el": "ice",
+      "proj": {
+        "speed": 620,
+        "size": 4,
+        "pierce": 0,
+        "range": 520,
+        "color": "#7fd6ff",
+        "shape": "shard",
+        "glow": 1
+      }
+    },
+    "arcaneorb": {
+      "disp": "Demon Eye Scepter",
+      "cls": "ranged",
+      "sch": "mag",
+      "dmg": 25,
+      "cd": 0.6,
+      "kb": 170,
+      "art": "wand",
+      "el": "arcane",
+      "proj": {
+        "speed": 430,
+        "size": 11,
+        "pierce": 2,
+        "range": 460,
+        "color": "#c47bff",
+        "shape": "orb",
+        "glow": 1,
+        "seek": true
+      }
+    },
+    "stormrod": {
+      "disp": "Arcane Wand",
+      "cls": "ranged",
+      "sch": "mag",
+      "dmg": 12,
+      "cd": 0.24,
+      "kb": 110,
+      "art": "wand",
+      "el": "arcane",
+      "proj": {
+        "speed": 820,
+        "size": 4,
+        "pierce": 1,
+        "range": 780,
+        "color": "#c47bff",
+        "shape": "spark",
+        "glow": 1
+      }
+    },
+    "plaguestaff": {
+      "disp": "Plague Staff",
+      "cls": "ranged",
+      "sch": "mag",
+      "dmg": 19,
+      "cd": 0.52,
+      "kb": 130,
+      "art": "staff",
+      "el": "poison",
+      "chg": "bolt",
+      "proj": {
+        "speed": 470,
+        "size": 8,
+        "pierce": 0,
+        "range": 380,
+        "color": "#86e05a",
+        "shape": "glob",
+        "glow": 1
+      }
+    },
+    "holyscepter": {
+      "disp": "Holy Scepter",
+      "cls": "ranged",
+      "sch": "mag",
+      "dmg": 22,
+      "cd": 0.56,
+      "kb": 160,
+      "art": "wand",
+      "el": "holy",
+      "proj": {
+        "speed": 560,
+        "size": 9,
+        "pierce": 1,
+        "range": 560,
+        "color": "#ffe9a8",
+        "shape": "light",
+        "glow": 1,
+        "seek": true
+      }
+    }
+  },
+  "literalFileCalls": [
+    "arcaneskill",
+    "bag",
+    "bigland",
+    "bigreveal",
+    "bossdie",
+    "buy",
+    "chestopen",
+    "chestthunk",
+    "click",
+    "dice",
+    "equip",
+    "firecharge",
+    "fireshot",
+    "firewhoosh",
+    "forgedone",
+    "forgeopen",
+    "forgespin",
+    "frostclink",
+    "gamblecoins",
+    "heavyhit",
+    "levelcheer",
+    "lever",
+    "loot",
+    "lootpickup",
+    "mimicroar",
+    "mobvoice1",
+    "portalopen",
+    "quest",
+    "rustyhit",
+    "secretget",
+    "sell",
+    "shoot",
+    "shopopen",
+    "stabkill",
+    "wallbreak",
+    "wallslide",
+    "wandcharge",
+    "warcharge",
+    "warskill1",
+    "xbowclick"
+  ],
+  "proceduralCalls": [
+    "achieve",
+    "boss",
+    "classup",
+    "dodge",
+    "drop",
+    "enemyDie",
+    "god",
+    "growl",
+    "hit",
+    "hurt",
+    "jump",
+    "land",
+    "levelup",
+    "magic",
+    "pickup",
+    "shoot",
+    "slash",
+    "wand",
+    "win"
+  ]
+}

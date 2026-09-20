@@ -25,3 +25,7 @@ Documentation verification passed: eight region sections, sixteen half sections,
 ## 2026-09-19 | Ongoing preservation confirmed | U106
 
 User reaffirms that original replies and resulting decisions must be stored for implementation. Continues GOV-01; no new gameplay decision and no blanket approval of the newly drafted campaign details. Checked U100–U105 decisions already recorded: approved cast, interaction/puzzle defaults, checkpoint quit/disconnect resolution and plan-first sequence. Preserve proposals separately from approvals. U106 original wording stored in USER_SOURCE_2026-09-19_STORAGE_CHECK.md.
+
+## 2026-09-19 | Progression explanation and tower ascent | U107
+
+User asks for objectives, player mindset/knowledge, planned versus discovered leads; researcher is questioned for explanation, not rejected or explicitly approved as a complete plot. Professor Ellis was an assistant-proposed bridge for Frostfell. New approved requirement: Duskmoor part two is a massive, intense, epic spiral staircase ascent to the tower peak where the Abyss King resides. Supersedes the draft's avoidance of a primary staircase. Vary landings and side spaces without losing the continuous spiral identity. Final Gate remains at the summit arena.

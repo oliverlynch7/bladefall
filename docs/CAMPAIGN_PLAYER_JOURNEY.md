@@ -1,0 +1,22 @@
+# Campaign through the player's eyes — explanation draft
+
+Responds to U107. This explains and strengthens the proposed connective plot; it does not turn every connecting event into approved canon. The researcher was an assistant proposal for giving Frostfell a meaningful mission, subsequently named Professor Ellis in the approved cast. Name/personality approval is not blanket approval of every plot function.
+
+| Region | Player's intended objective on entry | Discovery during play | Mindset and reason to continue |
+|---|---|---|---|
+| Briar | Protect family and town; help Mara and neighbors survive | Legion is taking people away through the Pass; defending one attack will not end the danger | I can help these people. Follow captives, not a destiny or known plan to kill King |
+| Hollow Pass | Catch prisoner transport and rescue captives | Some have already been moved to Ruined Keep; army has organized supply/holding procedures | Saving those here is not enough while others remain imprisoned |
+| Ruined Keep | Break out remaining prisoners | Testimony and pursuit orders point to escaped former researcher Ellis in Frostfell, wanted alive for knowledge of early Gate work | We cannot fight blindly forever. Find someone who knows how this began |
+| Frostfell | Find Ellis before the pursuing officers | He helped early immortality research and can describe motive/control discovery; current local orders identify Emberdeep's arms operation | The King built this through people and resources. His army can be weakened |
+| Emberdeep | Stop weapons feeding attacks on settlements and free captive workers | Through rescued people's accounts/confiscated writing, learn specific rumor of Sunspire's one-question orb and coastal approach | We now need the King's location. Seek knowledge rather than wander until castle appears |
+| Storm Coast | Obtain passage to remote Sunspire island and ascend cliffs | Ship damage demands construction; chained hydra is an abused obstacle that can be freed | Getting there takes ingenuity and mercy, not only stronger attacks |
+| Sunspire | Reclaim access to the orb and ask how to reach King | Rifts' history; credible soul imprisonment evidence through separately proposed method; orb reveals hidden castle and route | This can be more than revenge: the victims may still be saved, though exact solution remains unknown |
+| Duskmoor | Enter castle and confront King | Prepared defenses and partial infusion; King recognizes player during battle; aftermath exposes remaining binding | Stop him, then discover that defeating him is not the final act of rescue |
+
+Ellis need not know the hidden castle's current location: proposed explanation is that his work was early and limited, before the later secret stronghold arrangements. Do not make him an all-knowing co-creator who inexplicably withholds the answer. His particular role, escape timing and guilt are authoring details to resolve in his scenes. Use him for first-hand historical knowledge, Sunspire for present location and later proof; avoid two redundant exposition stops.
+
+To strengthen Frostfell -> Emberdeep, combine Ellis's knowledge with current officer orders showing forge weapons being sent toward the settlements just rescued. Shutting down arms is an immediate protective act, not an arbitrary scholar errand. To strengthen Emberdeep -> Coast, introduce the orb rumor in a specific rescued worker/cargo document and a sailor's route, not a convenient unexplained quest marker. Those are proposals, not new locked events.
+
+Reveal limits: no early certainty that player is Bladeborn; no early knowledge of exact final cut; no claims all enemies are Hollowed; only one Hollow Gate. King notices player gradually. Final castle remains at tower summit. Ian confirms inheritance only in Void, exact ancestry still open. Player learns enough for the next deliberate choice without seeing the entire campaign itinerary at the start.
+
+Approved tower revision: part two is a massive continuous spiral ascent. Proposed pacing: lower occupied landings, escalating attacks and side rooms; middle damaged stairs and exposed exterior crossing; upper fast, intense push with visible summit; short quiet threshold, then the King and the huge black Gate. Service shortcuts and limited recovery keep it epic rather than repetitive. Detailed fall rules/camera spacing/encounters await layout implementation.

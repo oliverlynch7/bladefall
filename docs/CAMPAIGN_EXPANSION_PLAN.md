@@ -218,7 +218,7 @@ Optional **Simon's Restricted Shelf**: rotating shelves and moving walkway form 
 
 ## 8. Castle Duskmoor — Castle Gates / Long Ascent
 
-**Purpose and feel:** get inside prepared enemy headquarters and end the King's rule. Imposing stone/black iron exterior, narrow living service spaces, then increasingly grand upper rooms. A stacked fortress with routes that reconnect, not one endless stair. The only Hollow Gate is beyond the final approach.
+**Purpose and feel:** get inside prepared enemy headquarters and end the King's rule. Imposing stone/black iron exterior, narrow living service spaces, then a massive spiral staircase rising through an immense tower to the King's summit arena. U107 explicitly approves an intense, large, epic ascent. Broad combat landings, damaged stair sections, side chambers and short exterior detours vary the climb while repeatedly returning to the same unmistakable spiral. Show the height above and distance climbed below; do not replace its central identity with unrelated rooms. The only Hollow Gate stands at the summit final arena.
 
 ### Part one: Castle Gates
 
@@ -232,7 +232,7 @@ Optional **The Armor He Kept**: Roland wants an old personal piece recovered fro
 ### Part two: Long Ascent
 
 1. **Below Their Notice — Miles, optional discovery.** Find living servant hiding in service rooms. A safe route exists without him; helping move trapped workers opens a dumbwaiter shortcut and a side vault. His humor is brief relief: "They don't sleep. Somehow they still need bedrooms cleaned."
-2. **Open the Upper Hall — field.** Choose guarded central stair or roof/drain route. A required door mechanism uses two latching controls reachable sequentially solo; co-op can split naturally. Opening it connects back to lower interior, reducing retraversal.
+2. **Climb the Tower — field.** Ascend the massive central spiral through defended landings, a broken stretch requiring a short exterior crossing, and a final exposed upper climb. Side routes rejoin rather than bypass the entire staircase. A required door mechanism uses two latching controls reachable sequentially solo; co-op can split naturally. Unlock a service lift back to a useful lower landing to shorten optional backtracking. Maintain intensity with authored fight/traversal escalation and brief safe recovery pockets, not uninterrupted enemy spam or repeated identical flights.
 3. **The King's Preparations — environmental story.** Observe equipment and commands about soul-energy infusion. A black view of the central Gate appears near top, not friendly purple glow. Do not reveal full second phase or player's ancestry in a convenient diary.
 4. **No One Left Below — optional field.** Free remaining living captives before entering throne approach. Miles can comment in person if helped; otherwise environmental signs support discovering it. Reward a strong refuge upgrade and an optional shard branch, without making all five depend on his survival as an escort.
 

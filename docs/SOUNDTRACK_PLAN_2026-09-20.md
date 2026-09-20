@@ -81,3 +81,7 @@ Current musicForScene reads Z.mus for both halves, a boss key, hub, side and gen
 Co-op host broadcasts scene/phase music events with encounter/dialogue state so both players hear the same story transition. Personal volume/mute remains local. Dialogue lowers music rather than burying voices; menus do not stack duplicate loops. Skip/retry must stop orphaned cues. Charge retry restarts only its own cue, not Ian's scene or the boss soundtrack.
 
 Do not preload 99 MB at boot. Keep originals intact and stream only needed browser assets; current 193-kbps files are already compressed, so no automatic lossy re-encode is warranted. Audition loop seams/intro length, measure playback level/peaks and test low-volume intelligibility before choosing trims. Check on headphones and phone speakers. Verify all eight regions' two halves, every boss phase, death/retry, mute toggles, speech/music transitions, hub return, co-op scenes and restoration. Music should follow real state changes, not player proximity jitter.
+
+## Required asset preservation — user follow-up September 20
+
+At soundtrack integration, copy the supplied music into the Bladefall Git repository and commit/push the actual audio files. Preserve original supplied audio, and retain browser derivatives separately if trims or other edits become necessary. Do not rely on Desktop/BladeFall Music paths or an untracked local folder. Leave desktop originals intact. Verify the soundtrack is tracked and available from the remote repository before claiming it is saved. Source: MUSIC-SOURCE-02; requirement MUSIC-02.

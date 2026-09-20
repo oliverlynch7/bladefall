@@ -210,3 +210,7 @@ EQ-03/GOV-05 grip fit remains OPEN: user rejected screenshot holding positions. 
 ### MUSIC-01 | A/P | U116–U117
 
 Inventory supplied Desktop/BladeFall Music tracks, propose each placement and remaining music coverage, with coherent theme directions/copy-ready ElevenLabs briefs. Planning deliverables: SOUNDTRACK_PLAN_2026-09-20.md and ELEVENLABS_MUSIC_BRIEFS_2026-09-20.md. Placement recommendations remain proposals, no runtime routing/audio publication yet. Reserved recommendations: Crown phase one/Iron Oath phase two; Watchful Greenwood restoration; distinct music for both halves and ship/hydra/orb/Ian/final-cut states.
+
+### MUSIC-02 | Approved, pending implementation | MUSIC-SOURCE-02
+
+Commit and push copies of soundtrack audio files into the Bladefall Git repository when integrating the music. Preserve supplied originals and any needed browser derivatives, with no desktop-path dependency. Verify tracked files and remote commit, not only local file existence. Desktop originals remain untouched.

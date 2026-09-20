@@ -45,3 +45,7 @@ help me figure out where to use each of these songs and which level, parts 1 or 
 
 make sure to give theme reccomendations for the remaining elvels so eveyrthing fits for prompting eleven labs ai creation tools
 
+
+## MUSIC-SOURCE-02 | 2026-09-20 | Follow-up captured directly from current user message
+
+when you do the step to apply the music into the game, make sure ot keep copies of the music files into the baldefall git repo  so everythign is saved

@@ -55,3 +55,7 @@ User reports screenshot weapons held incorrectly. Do not mark attachment alone a
 ## 2026-09-20 | Soundtrack inventory and proposed placements | U116–U117
 
 User supplies 21 desktop songs, tentative placement ideas, requests coverage/gaps for campaign halves, bosses, hub and scenes, and thematic recommendations for ElevenLabs prompts. Originals preserved. Files inventoried at Desktop/BladeFall Music (21 MP3, 99 MB, 150–240 seconds). SOUNDTRACK_PLAN_2026-09-20.md maps every song and all 16 campaign halves/eight boss slots (King has two tracks). ELEVENLABS_MUSIC_BRIEFS_2026-09-20.md contains 11 composition briefs, with the final suite split into three cue prompts. These are assistant recommendations pending listening/approval, NOT newly locked music assignments. No audio audition or music deployment claimed. Music task steers the current work; pending weapon/palette corrections and larger implementation queue remain open.
+
+## 2026-09-20 | Preserve soundtrack files in Git | MUSIC-SOURCE-02
+
+Approved requirement MUSIC-02: when integrating music, copy the supplied music files into the Bladefall repository and commit/push the actual audio assets, not merely paths or a manifest. Preserve original supplied files; keep browser-ready derivatives alongside appropriate source assets if editing is needed. Leave the desktop originals intact. A clean repository checkout must contain the soundtrack without depending on the desktop folder. This is a recorded future integration requirement; no music files have been copied or deployed by this documentation update.

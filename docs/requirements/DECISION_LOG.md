@@ -41,3 +41,9 @@ Ellis captivity versus pursuit remains a choice: user suggests either captive or
 ## 2026-09-19 | Orb secrecy and overloaded finale | U111
 
 Approved orb question: How can we stop the Abyss King? Orb must not reveal final cut, Ian/Blade solution or impending portal collapse. User describes overwhelming combined player/King power and both falling into portal after King defeat. Preserve that cause rather than attributing the entire physical collapse solely to anchor failure. Exact staging of fall/overload should not create a new pre-fight revelation. King death breaks control; final cut still releases souls. User requests ordered implementation plan and reasons, not new broad design brainstorming.
+
+## 2026-09-20 | Begin implementation on main | U113–U114
+
+User explicitly authorizes implementation and publishing to main, latest decisions taking precedence, with no minor requirements dropped. Continue approved batches without another broad approval. Exact source preserved in USER_SOURCE_2026-09-20_IMPLEMENTATION.md. Private archive now contains 114 user-role messages, zero unparsed records and valid source references.
+
+First batch: equipment foundations EQ-01–EQ-09. Evidence and remaining limits in ../IMPLEMENTATION_EQUIPMENT_2026-09-20.md. Campaign, checkpoint, dialogue, voice studio, boss and remaining UI requirements stay open; this is not completion of the overhaul.

@@ -1,0 +1,14 @@
+# Equipment implementation batch
+
+Authorized: implement and publish to main; latest user decisions override older plans.
+Scope: EQ-01 through EQ-08 equipment behaviors, intrinsic progression, cheat filtering and grouped bag. Keep all other requirements active; do not claim full campaign implemented.
+
+Inspected: CLASSES.family feeds loadouts and compatibility; classFamilyOk gates equip and abilities; retired archetypes define drops but cheat bypasses them; classStartWeapon/ensureClassWeapon currently make inventory defaults; loadMode/freshFromSnapshot/banked snapshots must agree on migration. Bag currently sorts flat rows; playerAttack throws knives on tap; Pirate lacks saber charge. autoLevelGrow already multiplies player power, but effMagPower used by summons misses that growth.
+
+Plan: shared family mapping, exclusive intrinsic descriptors with clamped rank scaling; sanitize old intrinsic inventory and snapshots idempotently; keep actual character models/fits. Dagger tap/throw, Pirate shot/saber charge and visible paired weapons. Group bag into closed details sections, preserve open state during internal refresh. Filter cheat/drop/shop paths. Test class matrix, ranks 1/10/overcap, serialization/migration, attacks, bag interaction, live browser and production version. Final numerical balance remains later work.
+
+## Verification and release — 1.982.0-equipment-foundations
+
+Real Chromium at localhost:4331: 35 equipment assertions passed covering family acceptance/rejection, intrinsic ranks 1/10/20 and serialized rehydration, idempotent removal of old scythes while preserving armor/bow, valid cheat inventory, Pirate cannonball/saber state, dagger basic versus charged projectile, bag category creation/default collapse. Seven subsequent checks passed: sale gold, real UI equip updating live/banked weapon, class/rank/gold/inventory after reload, live rank damage after reload, Kit Out intrinsic preservation, retired shop scythe absence, fresh bag collapsed. Also clicked a level-locked equipment button and verified weapon unchanged; automatic class switch selected owned bow then Reaper fallback. Pirate mirror reports paired weapons attached; screenshot inspected and attachment/material/size corrected. No runtime errors in browser console. Inline script and hero3d module syntax pass Node checks.
+
+EQ-02/04/05/07/08 implemented and checked for this batch. EQ-01/03/09 implemented with representative checks; all-class/all-skin combat and multiplayer animation inspection remain part of broader integration QA. EQ-06 PARTIAL: intrinsic rank cap implemented, existing player stat multipliers retained, missing level factor added to Necromancer summons. Full derived-hit/status/companion scaling audit and balance playtesting remain open. Existing per-avatar weapon fit data preserved. No claim of complete save/checkpoint redesign or new campaign content.

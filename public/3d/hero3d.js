@@ -914,6 +914,7 @@ function clearWeapon(actor){
   const paintMaterials=new Set();
   for(const o of strays){for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m?.userData?._weaponPaint)paintMaterials.add(m);if(o.parent)o.parent.remove(o);}
   for(const m of paintMaterials)m.dispose();
+  for(const o of strays){if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
@@ -989,6 +990,40 @@ async function equipWeapon(actor, opts){
   clearWeapon(actor);
   const pw = (opts && 'weapon' in opts) ? opts.weapon
     : window.__BF3?.G?.p?.weapon;
+  if(pw?.intrinsic==='pirate'){
+    // Reuse the fitted sword for the saber; keep all existing per-avatar fit presets.
+    const arming=equipWeapon(actor,{model:BODY,weapon:{art:'sword',rarity:'common'},name:'Sword'});
+    const saberSeq=actor._weapSeq;
+    await arming;
+    if(actor._weapSeq!==saberSeq)return null;
+    const rig=weaponRig(actor);if(!rig)return null;
+    let left=null;actor.root.traverse(o=>{if(o.isBone&&/^weaponl$/i.test(o.name.replace(/[^a-z]/gi,'')))left=o;});
+    if(!left){
+      let hand=null;const counterpart=rig.bone.parent.name.replace(/r$/i,'L');
+      actor.root.traverse(o=>{if(o.isBone&&o.name===counterpart)hand=o;});
+      if(hand){left=new THREE.Group();left.name='PirateSaberGrip';left.userData._weap=true;left.position.copy(rig.bone.position);left.position.x*=-1;left.quaternion.copy(rig.bone.quaternion);hand.add(left);}
+    }
+    if(!left)actor.root.traverse(o=>{if(!left&&o.isBone&&/^(handl|lefthand)$/i.test(o.name.replace(/[^a-z]/gi,'')))left=o;});
+    const saber=actor._weap;
+    if(left&&saber){
+      if(left.name==='PirateSaberGrip')left.rotation.set(0,Math.PI,-Math.PI/2);
+      saber.scale.multiplyScalar(.72);
+      left.add(saber);saber.userData.pirateSaber=true;saber.userData.restRotation=saber.rotation.clone();
+      saber.traverse(o=>{if(!o.isMesh)return;const old=Array.isArray(o.material)?o.material:[o.material];o.material=new THREE.MeshLambertMaterial({color:'#b8c7d7',emissive:'#1a2028'});o.material.userData._weaponPaint=true;for(const m of old)m.dispose();});
+    }
+    const gun=new THREE.Group();gun.userData._weap=true;
+    const part=(geometry,color,x,y,z)=>{const m=new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({color}));m.position.set(x,y,z);m.castShadow=true;m.userData._weap=true;m.userData.signaturePart=true;gun.add(m);return m;};
+    part(new THREE.BoxGeometry(.12,.27,.13),'#62422d',0,-.08,0).rotation.x=-.25;
+    const barrel=part(new THREE.CylinderGeometry(.045,.055,.42,10),'#4b515b',0,.10,.15);barrel.rotation.x=Math.PI/2;
+    part(new THREE.BoxGeometry(.10,.10,.26),'#8a5932',0,.06,.10);
+    part(new THREE.TorusGeometry(.07,.014,5,10),'#c1a35c',0,-.04,.10).rotation.y=Math.PI/2;
+    part(new THREE.BoxGeometry(.04,.09,.04),'#c1a35c',.065,.14,0);
+    if(rig.stock){gun.position.copy(rig.stock.position);gun.quaternion.copy(rig.stock.quaternion);gun.scale.copy(rig.stock.scale);rig.stock.visible=false;}
+    rig.bone.add(gun);actor.root.updateMatrixWorld(true);
+    const want=(saber?_lenOf(saber):.8)*.32,got=_lenOf(gun);if(got>1e-5)gun.scale.multiplyScalar(want/got);
+    actor._weap=gun;actor._weapGrip=null;
+    return {name:'Flintlock & Saber',intrinsic:'pirate',paired:!!left};
+  }
   const name = opts?.name || modelForWeapon(pw) || (pw?.art === 'fist' ? null : DEFAULT_WEAPON[BODY]);
   if(!name){
     const rig = weaponRig(actor);
@@ -1171,7 +1206,7 @@ function equipForClass(opts){
 
 const weaponPaletteCache=new Map();
 function colorWeapon(holder,w){
- if(!holder?._weap||!w)return;
+ if(!holder?._weap||!w||w.intrinsic==='pirate')return;
  const tint=({fire:'#e77f45',ice:'#a2dce8',poison:'#91bc61',arcane:'#ad88d2',holy:'#e4c16b',void:'#8971b4'})[w.el]||w.blade||'#d8dce0',key=w.art+'|'+tint;
  if(holder._paintNode===holder._weap&&holder._paintKey===key)return;holder._paintNode=holder._weap;holder._paintKey=key;
  holder._weap.traverse(o=>{if(!o.isMesh)return;const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=m.userData._weaponPaint?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
@@ -1483,7 +1518,7 @@ function playFor(p, A){
      Charging had no state here at all, so holding a heavy weapon at full charge looked identical to
      standing still - the one moment the animation most needs to say something.
      Alternating the two swings per swingId is what stops a combo reading as one frame repeated. */
-  const art = (p.weapon && p.weapon.art) || 'sword';
+  const art = p.saberSwingT>0?'saber':((p.weapon && p.weapon.art) || 'sword');
   const alt = ((p.swingId || 0) % 2) === 1;
   const pick = function(a, b){ return (b && alt && clips[b]) ? b : a; };
   const ATK = {
@@ -1809,6 +1844,7 @@ export function drawHero3D(p, t){
     playFor(p, anim);
     if(anim.mixer) anim.mixer.update(dt);
     movingCombatLegs(p,anim,dt);
+    wrap.traverse(o=>{if(o.userData.pirateSaber&&o.userData.restRotation){o.rotation.copy(o.userData.restRotation);if(p.saberSwingT>0)o.rotation.z+=Math.sin((1-p.saberSwingT/.42)*Math.PI)*1.8;}});
     if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a

@@ -965,6 +965,7 @@
   @media (min-width:900px) and (max-height:800px) and (pointer:fine){
     #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:36px}.progbox{height:52px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:22px}#skillframe{bottom:8px;height:104px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
+details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
 </style>
 </head>
 <body>
@@ -1032,7 +1033,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.981.0-approved-updates';
+const VERSION3D='1.982.0-equipment-foundations';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1155,6 +1156,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
+  migrateClassEquipment();
 }
 function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
@@ -1821,7 +1823,7 @@ const ARCHES={
   iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:58,cd:.32,kb:430,range:102,art:'sword',el:'holy',anyClass:true,ians:true}, // THE god-sword: highest DPS in the game, radiant execute + Soulfire splash + wielder grace (lifesteal/CDR/speed), full power for every class
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
-  knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
+  knives:{disp:'Daggers',cls:'ranged',sch:'phys',dmg:8,cd:.18,kb:70,art:'dagger',chg:'daggerthrow',proj:{speed:660,size:4,pierce:0,range:420,count:1,spread:0,color:'#9fe6c8',shape:'arrow'}}, // tap = short fast strike; charge = ranged throw
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
   /* B4: "fire rate too slow, damage per shot too low. Should hit significantly harder per shot."
      52 -> 88 damage and 2.40 -> 1.55s reload. Deliberately still the slowest gun in the game by a
@@ -1843,7 +1845,7 @@ const ARCHEIDS=Object.keys(ARCHES);
    have been unusable by everybody - dead weight in a chest. The archetype itself stays, because the
    Pirate's own pistol is built from it. Retiring rather than deleting is the existing mechanism for
    exactly this. */
-const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger','fist','flintlock'];   // 'fist' is Monk-only, granted not dropped
+const RETIRED_ARCHES=['scythe','voidscythe','iansblade','saber','dagger','fist','flintlock'];   // 'fist' is Monk-only, granted not dropped
 const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
@@ -2008,6 +2010,11 @@ const CLASSES={
       {id:'bst_mend',n:'Mend the Pack',icon:skillIcon('beastmaster-mend-the-pack'),cd:14,rank:6,d:'Restore your companion and yourself over time'},
       {id:'bst_apex',n:'Apex Unleashed',icon:skillIcon('beastmaster-apex-unleashed'),cd:22,rank:8,d:'Unleash your companion at peak strength'}]}
 };
+// Broad access families; attack geometry remains specific to each weapon.
+const WEAPON_GROUPS={martial:['sword','great','axe','hammer'],ranged:['bow','cross','dagger','javelin'],magic:['staff','wand','spellblade']};
+const CLASS_GROUPS={warrior:['martial'],berserker:['martial'],paladin:['martial','magic'],ninja:['martial','ranged'],ranger:['ranged'],pirate:['martial','ranged'],mage:['magic'],necromancer:['magic'],chronomancer:['magic'],stormcaller:['magic'],warlock:['magic'],skylancer:['ranged'],bladedancer:['martial','ranged'],beastmaster:['ranged'],monk:[],reaper:[]};
+for(const [id,C] of Object.entries(CLASSES)) C.family=[...new Set((CLASS_GROUPS[id]||[]).flatMap(g=>WEAPON_GROUPS[g]))];
+CLASSES.monk.family=['fist']; CLASSES.reaper.family=['scythe']; CLASSES.pirate.family.push('flintlock');
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
 /* HOW THE THREE STARTERS ACTUALLY PLAY.
@@ -2384,7 +2391,7 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
   persist(); }
 const LEGACY_ART={orb:'wand',rod:'wand',scepter:'wand',spear:'sword'};   // retired arts fold into a surviving family art
 const LEGACY_ARCHE={spear:'sword',saber:'sword',dagger:'knives'};        // retired archetypes -> their surviving family (saber->sword, daggers->throwing knives)
-function normWeapon(w){ if(!w) return w;
+function normWeapon(w){ if(!w) return w; if(w.intrinsic) return intrinsicWeapon(w.intrinsic);
   if(LEGACY_ARCHE[w.arche]){ w.arche=LEGACY_ARCHE[w.arche]; }
   if(w.el){ w.el=normEl(w.el); }                                    // retired affinities (storm) migrate onto a surviving one
   const a=ARCHES[w.arche];
@@ -2482,11 +2489,27 @@ function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dm
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
 const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['axe','Notched Axe'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade'],beastmaster:['bow','Weathered Hunting Bow']};
-function fistsWeapon(){ const a=ARCHES.fist;   // the Monk's Bare Fists — a fixed, RARITY-LESS weapon (never rolled/scaled)
-  return {arche:'fist',art:'fist',cls:'melee',sch:'phys',el:null,rarity:'none',fist:true,chg:null,anyClass:false,reaper:false,ians:false,
-    name:'Bare Fists',dmg:a.dmg,cd:a.cd,kb:a.kb,range:a.range,lifesteal:0,color:'#9aa4ad',blade:'#e8d3b8'}; }
+function isIntrinsicLoot(w){ return !!(w&&(w.intrinsic||['scythe','fist','flintlock'].includes(w.art)||['scythe','voidscythe','fist','flintlock'].includes(w.arche))); }
+function intrinsicWeapon(cid){
+  const spec={monk:['fist','Bare Fists'],reaper:['scythe',"Reaper’s Scythe"],pirate:['flintlock','Flintlock & Saber']}[cid];
+  if(!spec)return null;
+  const w=makeWeapon(spec[0],'common',spec[1]);
+  w.intrinsic=cid;w.rarity='none';w.color='#c9b986';w.fist=cid==='monk';w.chg=cid==='pirate'?'sabersweep':w.chg;
+  w.cd=cid==='pirate'?.78:w.cd;
+  const base=cid==='pirate'?40:ARCHES[spec[0]].dmg;
+  // Derived, never compounded into saves or rarity upgrades. Enumerable for snapshots/network.
+  Object.defineProperty(w,'dmg',{enumerable:true,configurable:true,get(){const rank=Math.max(1,Math.min(10,Number(meta.classes?.[cid]?.rank)||1));return +(base*(1+.12*(rank-1))).toFixed(2);}});
+  return w;
+}
+function fistsWeapon(){ return intrinsicWeapon('monk'); }
+function migrateClassEquipment(){
+  meta.stash=(meta.stash||[]).filter(it=>!isIntrinsicLoot(it.weapon));
+  const fix=(p,cid)=>{if(!p||!p.weapon)return;if(isIntrinsicLoot(p.weapon))p.weapon=intrinsicWeapon(cid)||classStartWeapon(cid);else normWeapon(p.weapon);};
+  fix(meta.hero,meta.classId);fix(meta.run?.p,meta.classId);fix(meta.run?.base,meta.classId);
+  if(meta.bank){fix(meta.bank.hero,meta.bank.classId||meta.classId);if(meta.bank.stash)meta.bank.stash=meta.bank.stash.filter(it=>!isIntrinsicLoot(it.weapon));}
+}
 function classStartWeapon(cid){
-  if(cid==='monk') return fistsWeapon();
+  if(['monk','reaper','pirate'].includes(cid)) return intrinsicWeapon(cid);
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
   /* 0.62 was the real starter number, not the 9 in startWeapon() above - THIS is the function every
@@ -2498,7 +2521,7 @@ function classStartWeapon(cid){
 }
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
    Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
-const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe',pirate:'flintlock'};   // archetype ids, not arts
+const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',pirate:'bow',ninja:'knives',paladin:'sword',berserker:'axe',necromancer:'firestaff',chronomancer:'firestaff',stormcaller:'firestaff',warlock:'firestaff',skylancer:'javelin',bladedancer:'sword',beastmaster:'bow'};   // archetype ids, not arts
 const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Reliable'};
 function shopWeapon(cid,rid){
   const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
@@ -3711,7 +3734,7 @@ const CLASS_MANA={
 };
 function classManaCfg(){ return CLASS_MANA[meta.classId]||{pool:1,regen:1,cost:1}; }
 function classMaxMana(){ return Math.round(100*classManaCfg().pool); }
-function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
+function effMagPower(p,includeLevel=false){ return (p.stats.magPower||1)*(includeLevel?Math.pow(1.045,Math.max(0,(p.level||1)-1)):1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
   let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(meta.classId==='warlock'&&c2Passive('war_frail'))v*=.90; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
@@ -3837,7 +3860,7 @@ function snapOf(p){ return {hp:p.hp,maxHp:p.maxHp,mana:p.mana,maxMana:p.maxMana,
 function freshFromSnapshot(snap){
   const p=freshPlayer();
   p.stats=Object.assign(p.stats,snap.stats);
-  p.weapon=snap.weapon?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):startWeapon();
+  p.weapon=snap.weapon&&!isIntrinsicLoot(snap.weapon)?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):classStartWeapon(meta.classId);
   p.gear=cloneGear(snap.gear);
   p.maxHp=snap.maxHp||100; p.maxMana=snap.maxMana||100;
   p.mana=Math.max(0,Math.min(p.maxMana,snap.mana==null?p.maxMana:snap.mana));
@@ -3880,7 +3903,7 @@ function restoreBank(){ if(!meta.bank) return false;
      would be this same bug pointing the other way. */
   const back=meta.bank.classId;
   if(back!==undefined) meta.classId=(back&&meta.classUnlocked&&meta.classUnlocked[back])?back:null;
-  meta.bank=null; persist(); return true; }
+  meta.bank=null; migrateClassEquipment(); persist(); return true; }
 /* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
 let STASH_CAP=30;   // base; +5 per Magic Pack bought in the shop (meta.bagSlots) — refreshed in loadMode + on purchase
 function hudBagUpdate(){
@@ -3897,12 +3920,13 @@ const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^P
 function bagReplaced(old,isWeapon){
   // Only the free STARTER weapons are discarded when replaced; every real drop you had equipped
   // (including plain commons) is auto-sent to the bag so you never lose gear on an equip.
-  if(!old || /^(Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe)$/.test(old.name||'')) return;
+  if(!old || (isWeapon&&isIntrinsicLoot(old)) || /^(Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe)$/.test(old.name||'')) return;
   if(!Array.isArray(meta.stash)) meta.stash=[];
   if(meta.stash.length>=STASH_CAP){ toast('Bag full — '+old.name+' left behind'); return; }
   meta.stash.push(isWeapon?{weapon:old}:{armor:old}); persist();
 }
 function stashItem(it){
+  if(isIntrinsicLoot(it.weapon))return false;
   if(!Array.isArray(meta.stash)) meta.stash=[];
   if(meta.stash.length>=STASH_CAP){ return false; }   // caller shows the bag-full prompt
   meta.stash.push(it); persist(); SFX.pickup(); playFx('bag'); return true;
@@ -4021,7 +4045,9 @@ function bagDollRender(){
     ctx.putImageData(id,0,0);
   }catch(e){}
 }
-function openBag(back){
+function openBag(back,keepOpen=false){
+  const expanded=keepOpen?new Set([...document.querySelectorAll('details.baggroup[open]')].map(e=>e.dataset.group)):new Set();
+  migrateClassEquipment();
   mode='menu';
   menuTip('tip_bag','your <b>Pack</b>. Spare gear lives here. Sort it, toggle <b>Auto-sell</b> or <b>Auto-bag</b> to handle future drops automatically, and buy more slots from the Quartermaster when it fills up.');
   const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
@@ -4033,8 +4059,8 @@ function openBag(back){
   if(_bagSort==='rarity') order.sort((a,b)=>(RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier)||b.i-a.i);
   else if(_bagSort==='recency') order.sort((a,b)=>b.i-a.i);
   else order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; return RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier; });
-  const showHdr=(_bagSort==='type');
-  let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
+  const showHdr=false;
+  let _lc=''; const itemRows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
     const sub=w?(w.dmg+' dmg · '+weapInfoLine(w)):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
     const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${w?'':slotIcon(o.slot)}${_lc}s</div>`):'';
     const off=!!w&&(!classFamilyOk(normWeapon(w))||monkBlocksWeapons(w)), lock=!canWield(o)||off;
@@ -4043,6 +4069,12 @@ function openBag(back){
       <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${off?'Off-class':lock?'Lv '+rarityReq(o.rarity):actionIcon('equip')+'Equip'}</button>
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">${actionIcon('sell')}+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
+  const groups=new Map();
+  const rowNodes=new DOMParser().parseFromString('<div>'+itemRows+'</div>','text/html').querySelectorAll('.gearrow');
+  order.forEach((x,i)=>{const o=oOf(x),key=x.it.weapon?'weapon-'+o.art:x.it.armor?'armor-'+o.slot:'trinket-'+o.slot;
+    if(!groups.has(key))groups.set(key,{name:x.it.weapon?weapFamily(o):slotLabel(o.slot),rows:[]});
+    if(rowNodes[i])groups.get(key).rows.push(rowNodes[i].outerHTML);});
+  const rows=order.length?[...groups].map(([key,g])=>`<details class="baggroup" data-group="${key}" ${expanded.has(key)?'open':''} style="border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:8px"><summary style="cursor:pointer;font-weight:800;padding:5px">${g.name} <span style="color:var(--muted)">(${g.rows.length})</span></summary>${g.rows.join('')}</details>`).join(''):itemRows;
   const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
   const eq=HR||{weapon:null,gear:{}};
   const slotRow=(id,label,item)=>{ const col=item&&item.rarity?RARITY[item.rarity].color:'#6e778b', fallback=id==='weapon'?`<span class="ico ico-damage ico-damage-physical"></span>`:slotIcon(id);
@@ -4057,14 +4089,14 @@ function openBag(back){
     <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
       <div class="achlist">${rows}</div></section>
       <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
-    <div class="bagfoot">${(HR&&HR.weapon&&HR.weapon.art!=='fist')?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">✊ Fight Unarmed</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+    <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
   setupBagDoll(HR);
-  document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
+  document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back,true); };
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
     if(it.weapon&&(!classFamilyOk(normWeapon(it.weapon))||monkBlocksWeapons(it.weapon))){toast('This weapon belongs to another class. Switch class at the Drillmaster.');return;}
     const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
-    if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
+    if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
     else { const g=it.armor||it.trinket, isT=TRINKETIDS.includes(g.slot); const old=HR.gear[g.slot]; HR.gear[g.slot]=g; meta.stash.splice(i,1); if(old) meta.stash.push(isT?{trinket:old}:{armor:old}); }
     if(G&&G.hub&&HR===meta.hero){
       // The Pause-menu bag edits the banked snapshot. Mirror that change into the live hub
@@ -4073,16 +4105,16 @@ function openBag(back){
       G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon)));
       G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p));
     } else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
-    persist(); SFX.pickup(); hudUpdate(); openBag(back); });
+    persist(); SFX.pickup(); hudUpdate(); openBag(back,true); });
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
-    const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
+    const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back,true); });
   { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(!HR) return;
       const old=HR.weapon;
-      if(old&&old.art!=='fist'&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
-      HR.weapon=fistsWeapon();
+      if(old&&!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
+      HR.weapon=classStartWeapon(meta.classId);
       if(G&&G.hub&&HR===meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
       else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
-      persist(); SFX.pickup(); hudUpdate(); toast(meta.classId==='monk'?'✊ Fists ready — your true weapon':'✊ Unarmed — weak unless you\'re a Monk'); openBag(back); }; }
+      persist(); SFX.pickup(); hudUpdate(); toast('Class default ready'); openBag(back,true); }; }
   document.getElementById('backBtn').onclick=back;
   document.getElementById('gearInspect').onclick=()=>openMirror(()=>openBag(back));
 }
@@ -4090,7 +4122,7 @@ function openBag(back){
    or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */
 function weapCat(w){ return w.sch==='mag'?'magic':(w.cls==='melee'?'melee':'ranged'); }
 // finalized weapon FAMILY (by art) + owning class, for tooltips
-const ART_FAMILY={sword:'Sword',great:'Greatsword',axe:'Battle Axe',hammer:'Warhammer',scythe:'Scythe',spellblade:'Spellblade',bow:'Longbow',cross:'Crossbow',dagger:'Throwing Knives',javelin:'Javelins',flintlock:'Flintlock',staff:'Staff',wand:'Wand'};
+const ART_FAMILY={sword:'Sword',great:'Greatsword',axe:'Battle Axe',hammer:'Warhammer',scythe:'Scythe',spellblade:'Spellblade',bow:'Longbow',cross:'Crossbow',dagger:'Daggers',javelin:'Javelins',flintlock:'Flintlock',staff:'Staff',wand:'Wand'};
 function weapFamily(w){ return (w&&ART_FAMILY[w.art])||'Weapon'; }
 function weapClassName(w){ if(!w) return ''; for(const c of CLASSIDS){ if(CLASSES[c].family.includes(w.art)) return CLASSES[c].disp; } return ''; }
 function damageTypeId(w){ return w&&w.sch==='mag'?'magic':(w&&w.cls==='ranged'?'ranged':'physical'); }
@@ -10145,7 +10177,8 @@ function projectileAimTarget(p,maxDist){
 // is there an enemy actually worth auto-attacking? (in weapon range + LOS + roughly ahead) — gates auto-attack so it never swings/shoots at nothing behind you
 function autoAtkTarget(p,w){
   let reach;
-  if(w.cls==='ranged'){ reach=((w.proj&&w.proj.range)||760); }
+  if(['knives','javelin'].includes(w.arche)){reach=w.arche==='knives'?54:82;}
+  else if(w.cls==='ranged'){ reach=((w.proj&&w.proj.range)||760); }
   else { const M=MELEE[w.art]||MELEE.sword; reach=(M.shape==='slam')?((M.offset||40)+M.radius):M.reach; }
   const t=aimTarget(p,w,reach+34);                              // +34 ~ enemy radius margin
   if(!t) return null;
@@ -10187,7 +10220,7 @@ function playerAttack(cdMul){
   // weapon-specific tap identities — own-class ONLY (off-class falls through to the plain base attack)
   if(w.cls==='ranged' && classFamilyOk(w)){
     if(w.arche==='javelin'){ stabHit(p,w,82,1.25); return; }                                              // javelin tap = a short spear stab (hold = the thrown lance)
-    if(w.arche==='knives' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+42 && vOverlap(t,p)){ stabHit(p,w,54,1.9); return; }  // knives point-blank = a fast bonus stab, else the double-throw below
+    if(w.arche==='knives'){ stabHit(p,w,54,1); return; }  // dagger tap always remains a short melee strike
   }
   // Ranger is a MIXED-STYLE attacker: with a ranged weapon and an enemy in your face,
   // the basic attack becomes a knife swipe (weaker than a Warrior's blade) instead of a shot.
@@ -10234,6 +10267,8 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
     case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
     case 'quake': chargeQuake(p,w,amt); break;         // hammer: radial shockwave + stun
     case 'spin': spinCleave(p,w,amt); break;           // greatsword: spinning cleave
+    case 'daggerthrow': throwDagger(p,w,amt); break;
+    case 'sabersweep': pirateSaberSweep(p,w,amt); break;
     case 'javelin': throwJavelin(p,w,amt); break;      // javelin: heavy thrown lance
     case 'scythethrow': throwScythe(p,w,amt); break;   // scythe: hurl the spinning scythe (ranged), it boomerangs back
     case 'powershot': fireChargedBow(p,w,amt); break;  // longbow: a piercing power arrow
@@ -10241,6 +10276,19 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
     default: fireCharged(p,w,amt);                      // fallback elemental blast
   }
   G._desig=false;
+}
+function throwDagger(p,w,amt){
+  const range=260+amt*160,t=projectileAimTarget(p,range),sp=700,oy=p.y+24;if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const flight=t?Math.max(.1,dXZ(p.x,p.z,t.x,t.z)/sp):range/sp;
+  G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vz:Math.cos(p.yaw)*sp,vy:t?(t.y+t.h*.5-oy)/flight:0,gravity:0,size:4,color:w.blade||'#d8dce0',shape:'arrow',dmg:w.dmg*effPower(p)*(1.5+amt*2)*offclassMul(p)*classStyleMul(p),kb:w.kb,pierce:0,el:w.el,life:range/sp,hitSet:[]});
+  p.atkTimer=.22;SFX.shoot();
+}
+function pirateSaberSweep(p,w,amt){
+  p.atkTimer=.42;p.swingId++;p.saberSwingT=.42;SFX.slash();
+  const dmg=w.dmg*effPower(p)*(1.6+amt*1.6)*offclassMul(p);
+  const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);
+  for(const e of combatTargets()){if(e.dead||!vOverlap(e,p))continue;const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);if(d>125+e.r||dx*fx+dz*fz<d*.15||losBlocked(p.x,p.z,e.x,e.z))continue;hitEnemy(e,dmg,p,360,effLifesteal(p),null);}
+  skillRing(p.x+fx*55,p.z+fz*55,'#f3d798','#665034',95);
 }
 // the scythe's RANGED attack: fling it spinning, it pierces everything and curves back to you
 function throwScythe(p,w,amt){ const t=projectileAimTarget(p,820); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
@@ -11896,6 +11944,7 @@ const CLASS_BASIC = {
      Here in the basic hook it fires when the pistol is set to BASIC; the CHARGE configuration is
      handled by chargeRelease. */
   pirate(p, e, dmg){
+    if(p.weapon?.intrinsic==='pirate')return; // signature already has its full shot damage; no hidden reload multiplier
     if((meta.pirateSlot||'basic') !== 'basic') return;
     if(!p._loaded && p._loaded !== undefined){
       return c2Passive('pir_brutal') ? dmg * 1.45 : undefined;   // Cutthroat: steel bites while reloading
@@ -12428,10 +12477,10 @@ function minionUpdate(dt){
 function necroCap(){ return meta.classId==='necromancer'&&classState('necromancer').rank>=10; }
 function necroMinCap(){ return 14+(c2Passive('necro_master')?6:0)+(necroCap()?6:0); }
 SKILL_FX.necro_summon=function(p,ok,am){ const legion=meta.classId==='necromancer'&&c2Passive('necro_legion'); const master=c2Passive('necro_master');
-  const n=(legion?4:3), dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*(legion?0.85:0.65)*(master?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:12, cap=necroMinCap();
+  const n=(legion?4:3), dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p,true)*(legion?0.85:0.65)*(master?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:12, cap=necroMinCap();
   for(let i=0;i<n;i++) spawnMinion(p.x-Math.sin(p.yaw)*30,p.z-Math.cos(p.yaw)*30,{dmg,life,ranged:false,cap}); skillRing(p.x,p.z,'#8be0a0','#3f7d55',120); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+70,p.z,'RISE','#8be0a0',true); };
 SKILL_FX.necro_raise=function(p,ok,am){ let best=G.lastSlainEnemy&&dXZ(G.lastSlainEnemy.x,G.lastSlainEnemy.z,p.x,p.z)<320?G.lastSlainEnemy:null; if(!best&&G.corpses)for(let i=G.corpses.length-1;i>=0;i--){const c=G.corpses[i];if(dXZ(c.x,c.z,p.x,p.z)<320){best=c;break;}}
-  const base=(p.weapon?p.weapon.dmg:10)*effMagPower(p)*(ok?1:OFFCLASS_MUL);
+  const base=(p.weapon?p.weapon.dmg:10)*effMagPower(p,true)*(ok?1:OFFCLASS_MUL);
   /* BONE LEGION and MASTER OF DEATH reach this skill too, 2026-08-13. Both cards say "your MINIONS"
      — "your minions hit 20% harder" (r3 a) and "keep more minions at once and they hit even harder"
      (r9 a) — and a risen fighter is a minion. Before this line it was the one of the necromancer's
@@ -12455,7 +12504,7 @@ SKILL_FX.necro_raise=function(p,ok,am){ let best=G.lastSlainEnemy&&dXZ(G.lastSla
 /* Bone Legion reaches this one too, and for the same reason as necro_raise above: its card says
    "your minions", of which these are six. Master of Death's x1.25 was already here; Bone Legion's
    x1.20 is its own +20% and is the only thing added. */
-SKILL_FX.necro_army=function(p,ok,am){ const dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*0.9*(meta.classId==='necromancer'&&c2Passive('necro_legion')?1.2:1)*(c2Passive('necro_master')?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:16, cap=necroMinCap();
+SKILL_FX.necro_army=function(p,ok,am){ const dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p,true)*0.9*(meta.classId==='necromancer'&&c2Passive('necro_legion')?1.2:1)*(c2Passive('necro_master')?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:16, cap=necroMinCap();
   for(let i=0;i<6;i++) spawnMinion(p.x,p.z,{dmg,life,ranged:i%2===0,cap}); skillRing(p.x,p.z,'#b28bff','#5a3f8f',200); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+80,p.z,'ARMY OF THE DEAD','#b28bff',true); };
 function drawPet3(pet,t){
   if(three3DLive()&&window.__companion3dDrawn?.(pet))return;
@@ -13635,6 +13684,7 @@ function update(dt){
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
+  if(G?.p?.saberSwingT>0)G.p.saberSwingT=Math.max(0,G.p.saberSwingT-dt);
   /* THE WORLD HOLDS STILL WHILE YOU EDIT. Oliver: "time should freeze so that I don't get attacked
      or my character doesn't move around while I'm editing." Editing a room while its occupants
      chase you is the obvious problem; the quieter one is that a moving hero drifts the whole time
@@ -14617,7 +14667,7 @@ function warpTo(fn){ if(warpTo._busy) return; warpTo._busy=true;
 }
 function nextStage(){ warpTo(nextArea); }    // the portal now advances the ZONE's area chain, with a warp transition
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
-  if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon(); else normWeapon(p.weapon);
+  if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=classStartWeapon(meta.classId); else p.weapon=normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
   p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
 function resumeSavedAdventure(){ if(meta.run?.p?.gear) continueRun(); else openHub(); }
@@ -16332,11 +16382,11 @@ function cheatBank(){ if(G&&G.p){ meta.hero=snapOf(G.p); } persist(); }
 function cheatLevels(n){ const p=G.p; for(let i=0;i<n;i++){ p.xp=(p.xpNext||50)+1; gainXp(0.0001); } cheatBank(); hudUpdate(); SFX.levelup(); playFx('levelcheer'); toast('▲ +'+n+' level'+(n>1?'s':'')+' — now Level '+p.level); }
 function cheatGold(n){ meta.gold=(meta.gold||0)+n; persist(); SFX.god(); playFx('buy'); toast('💰 +'+n+'g — '+STASH_LINES[(goldStash._n=((goldStash._n||0)+1)%STASH_LINES.length)].split('— ')[1]); hudUpdate(); }
 function cheatBagRoom(){ meta.bagSlots=Math.max(meta.bagSlots||0,120); refreshBagCap(); }
-function cheatGiveWeapons(){ cheatBagRoom(); let n=0; for(const a of ARCHEIDS){ if(a==='saber'||a==='dagger') continue; meta.stash.push({weapon:makeWeapon(a,_cheatRar)}); n++; } persist(); SFX.achieve(); playFx('lootpickup'); toast('⚔ Bagged all '+n+' weapons ('+RARITY[_cheatRar].name+')'); }
+function cheatGiveWeapons(){ migrateClassEquipment(); cheatBagRoom(); let n=0; for(const a of DROP_ARCHES){ meta.stash.push({weapon:makeWeapon(a,_cheatRar)}); n++; } persist(); SFX.achieve(); playFx('lootpickup'); toast('⚔ Bagged all '+n+' weapons ('+RARITY[_cheatRar].name+')'); }
 function cheatGiveArmor(){ cheatBagRoom(); let n=0; for(const t of ARMOR_TYPE_IDS){ for(const s of SLOTIDS){ meta.stash.push({armor:makeArmor(_cheatRar,s,t)}); n++; } for(const s of TRINKETIDS){ meta.stash.push({trinket:makeTrinket(_cheatRar,s,t)}); n++; } } persist(); SFX.achieve(); playFx('lootpickup'); toast('🛡 Bagged all '+n+' armor + trinket pieces ('+RARITY[_cheatRar].name+')'); }
 function cheatKitOut(){ const p=G.p; const fam=curClass().family[0]||'sword';
   const aid=ARCHEIDS.find(a=>ARCHES[a].art===fam&&ARCHES[a].sch!=='mag')||ARCHEIDS.find(a=>ARCHES[a].art===fam)||'sword';
-  p.weapon=makeWeapon(aid,'legendary'); for(const s of GEARSLOTS) p.gear[s]=('amulet'==s||'ring'==s)?makeTrinket('legendary',s):makeArmor('legendary',s);
+  p.weapon=intrinsicWeapon(meta.classId)||makeWeapon(aid,'legendary'); for(const s of GEARSLOTS) p.gear[s]=('amulet'==s||'ring'==s)?makeTrinket('legendary',s):makeArmor('legendary',s);
   recomputeArmor(p); p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.god(); playFx('equip'); toast('✦ Kitted out — full Legendary '+curClass().disp+' loadout equipped'); }
 function cheatUnlockClasses(){ CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; classState(c); }); persist(); SFX.achieve(); toast('⚔️ All classes unlocked — swap at the Drillmaster'); }
 function cheatRank10All(){ CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; const cs=classState(c); cs.rank=10;
@@ -16711,14 +16761,15 @@ function openRespecTree(cid,back){
 }
 function ensureClassWeapon(p){
   if(!p)return;
+  if(p.weapon&&p.weapon.intrinsic===meta.classId){p.weapon=intrinsicWeapon(meta.classId);return;}
   const fits=w=>w&&!monkBlocksWeapons(w)&&classFamilyOk(normWeapon(w));
   if(fits(p.weapon))return;
   const old=p.weapon;let index=-1;
   for(let i=0;i<meta.stash.length;i++){const w=meta.stash[i].weapon;if(fits(w)&&(p.level||1)>=rarityReq(w.rarity)&&(index<0||w.dmg>meta.stash[index].weapon.dmg))index=i;}
   if(index>=0)p.weapon=normWeapon(meta.stash.splice(index,1)[0].weapon);
-  else {p.weapon=classStartWeapon(meta.classId);if(!p.weapon.fist){p.weapon.dmg=+(p.weapon.dmg*.70).toFixed(1);p.weapon.starter=true;}}
+  else {p.weapon=classStartWeapon(meta.classId);if(!p.weapon.intrinsic){p.weapon.dmg=+(p.weapon.dmg*.70).toFixed(1);p.weapon.starter=true;}}
   // A full bag must never destroy the weapon displaced by an automatic class switch.
-  if(old&&!old.fist&&!old.starter)meta.stash.push({weapon:old});
+  if(old&&!isIntrinsicLoot(old)&&!old.starter)meta.stash.push({weapon:old});
 }
 function trainerEquipClass(cid){
   if(!CLASSES[cid]||!meta.classUnlocked[cid]) return false;
@@ -16948,19 +16999,13 @@ function openShop(back){
       <div style="flex:1;min-width:0"><div class="gn">${P.name} <span style="color:${maxed?'#ffd24a':'var(--muted)'}">Lv ${Math.min(lv,P.max)}/${P.max}${maxed?' · MAX':''}</span></div>
         <div class="gd">Current: <b style="color:var(--good)">${P.unit(cur)}</b>${maxed?'':` · Next: ${P.unit(next)}`}<br><span style="color:#ffd24a">Rank 10 capstone: ${cap}</span></div></div>
       <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:9px 14px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');  const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
-  const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
+  const wrows=(['monk','reaper'].includes(cid)?[]:['common','uncommon','rare','epic']).map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
     const lock=!canWieldRid(rid);
     return `<div class="gearrow" style="--spine:${RARITY[rid].color}${lock?';opacity:.55':''}"><img class="bagav" src="${itemAv(w)}" alt="">
       <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name}${rpip(rid)}${lock?` <span style="color:#ff8a82;font-size:11px">🔒 Lv ${rarityReq(rid)}</span>`:` <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span>`}</div>
         <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
       <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford&&!lock?'':'opacity:.5'}">${actionIcon('buy')}${cost}g</button></div>`; }).join('');
-  // Void Scythe — Reaper's signature, sold here ONLY once the Reaper is unlocked; the only way to get it (never drops)
-  const vs=makeWeapon('voidscythe','epic'), vsCost=2200, vsAfford=meta.gold>=vsCost;
-  const vsRow=meta.classUnlocked&&meta.classUnlocked.reaper?`<div class="gearrow" style="--spine:${elementColor('void')}"><img class="bagav" src="${itemAv(vs)}" alt="">
-      <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
-        <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
-      <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${actionIcon('buy')}${vsCost}g</button></div>`:'';
   // Ian's Blade — the last Bladeborn's relic, revealed only after Castle Duskmoor falls.
   const ib=makeWeapon('iansblade','legendary'), ibCost=1000000, ibAfford=meta.gold>=ibCost;
   const ibRow=meta.zoneDone&&meta.zoneDone.castle?`<div class="gearrow" style="--spine:#ffd24a;background:linear-gradient(90deg,#33270f88,#171923)"><img class="bagav" src="${itemAv(ib)}" alt="">
@@ -16997,7 +17042,7 @@ function openShop(back){
       <div class="gd">${meta.arcadeOwned?'<b style="color:var(--good)">Owned</b> · installed in the activity annex':'A permanent arcade cabinet for the Waystation · shared by every save'}</div></div>
       ${meta.arcadeOwned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button>':`<button class="bigbtn arcadebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${arcadeAfford?'':'opacity:.5'}">${arcadeCost.toLocaleString()}g</button>`}</div>`:'';
   // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
-  const goal = meta.zoneDone&&meta.zoneDone.castle&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='iansblade') ? {name:"Ian's Blade",cost:ibCost} : !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
+  const goal = meta.zoneDone&&meta.zoneDone.castle&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='iansblade') ? {name:"Ian's Blade",cost:ibCost} : !meta.socks ? {name:'Magic Socks',cost:1200} : {name:'a Magic Pack (+5 bag)',cost:packCost};
   const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
   const northStar=`<div style="margin:2px 0 8px"><div class="gd" style="text-align:left;margin-bottom:3px"><b style="color:#ffd24a">${meta.gold}</b> / ${goal.cost} to <b>${goal.name}</b></div>
     <div style="height:7px;border-radius:5px;background:#1b1e26;overflow:hidden"><div style="height:100%;width:${gpct}%;background:linear-gradient(90deg,#ffd24a,#ff9a3a)"></div></div></div>`;
@@ -17009,7 +17054,7 @@ function openShop(back){
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
     <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}${arcadeRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}${arcadeRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
     ${perkRefundTotal()>0?`<button class="bigbtn ghost" id="refundPerks" style="margin:6px 0 0;padding:9px 14px;font-size:13px;color:#ffd24a;border-color:#5a4a20">↩ Refund all perks — get back <b>${perkRefundTotal()}g</b> &amp; reset every stat</button>`:''}
@@ -17023,12 +17068,12 @@ function openShop(back){
   { const rb=document.getElementById('refundPerks'); if(rb) rb.onclick=()=>{
       if(rb.dataset.armed!=='1'){ rb.dataset.armed='1'; rb.innerHTML='↩ Tap again to confirm — refund <b>'+perkRefundTotal()+'g</b> &amp; reset all perks'; rb.style.borderColor='#c0392b'; rb.style.color='#ff9a82'; return; }
       const back2=perkRefundTotal(); const got=refundAllPerks(); SFX.pickup(); toast('Refunded '+got+'g — all perks reset.'); openShop(back); }; }
-  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', isIan=rid==='iansblade', cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid));
-    const gateR=isIan?'legendary':(isVS?'epic':rid); if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
+  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isIan=rid==='iansblade', cost=isIan?ibCost:shopWeapCost(rid);
+    const gateR=isIan?'legendary':rid; if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost;
     if(isIan){ SFX.god(); playFx('bigreveal'); persist(); claimIansBlade(back); return; }   // the shortcut: buy it whole, name + reveal fire
-    const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
+    const w=shopWeapon(meta.classId,rid);
     if(!meta.hero){ const p=freshPlayer(); meta.hero=snapOf(p); }   // ensure a hero exists (keeps its own starter weapon)
     if(stashItem({weapon:w})){ SFX.levelup(); persist(); toast('🎒 '+w.name+' sent to your bag'); openShop(back); }   // buy -> bag, never auto-equip
     else { meta.gold+=cost; toast('Bag full — free up space first'); openShop(back); } });
@@ -17041,8 +17086,8 @@ function openShop(back){
       const lines=IANS_SHARDS.map((s,i)=>(meta.iansShards&&meta.iansShards.includes(i))?`<p style="margin:0 0 15px;font-style:italic;color:#e8dcc0">${s.frag}</p>`:`<p style="margin:0 0 15px;opacity:.32">— a fragment still in the dark —</p>`).join('');
       showOverlayHTML(`<div class="card"><p class="ovkicker">The Last One's Blade</p><h2 class="ovh">🗡 Fragments Recovered</h2><p class="ovsub">${iansShardCount()}/${IANS_SHARDS.length} — merge them at the forge</p><div style="text-align:left;font-size:15px;line-height:1.7;margin:14px 2px">${lines}</div><button class="bigbtn ghost" id="fragBack">Back</button></div>`);
       document.getElementById('fragBack').onclick=()=>openShop(back); }; }
-  document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe', isIan=rid==='iansblade';
-    const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid)), cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid)); shopCompare(w,cost,back); });
+  document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isIan=rid==='iansblade';
+    const w=isIan?makeWeapon('iansblade','legendary'):shopWeapon(meta.classId,rid), cost=isIan?ibCost:shopWeapCost(rid); shopCompare(w,cost,back); });
   const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
     meta.gold-=socksCost; meta.socks=true; if(G&&G.p) G.p.maxJumps=Math.max(G.p.maxJumps,2); if(meta.hero) meta.hero.maxJumps=Math.max(meta.hero.maxJumps||1,2);
     SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
@@ -20848,7 +20893,7 @@ window.__BF3={ snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClass
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
-  TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterZone, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
+  TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterZone, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND, intrinsicWeapon, migrateClassEquipment, isIntrinsicLoot, CLASS_GROUPS, WEAPON_GROUPS, classFamilyOk, classStartWeapon, ensureClassWeapon, cheatGiveWeapons,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
@@ -20918,7 +20963,7 @@ window.__BF3={ snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClass
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1981s"></script>
+<script type="module" src="./hero3d.js?v=1982e"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

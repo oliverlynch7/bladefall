@@ -198,3 +198,7 @@ The entire 100-section brief is preserved verbatim in U079, including open quest
 7. Voice studio, recordings, hub intros and reactions, final polish, progression playtesting, browser/phone-preview/co-op QA. Secondary modes remain later backlog.
 
 No row may be marked implemented merely because a predecessor was shipped. Add evidence links, code revision, test result and limitations to the decision/evidence log. This baseline does not deploy gameplay changes.
+
+## Implementation evidence — September 20, 2026
+
+Equipment foundation batch 1.982.0: see [scope, checks and limitations](IMPLEMENTATION_EQUIPMENT_2026-09-20.md). EQ-02/04/05/07/08 implemented with browser checks. EQ-01/03/09 implemented with representative coverage; full class/skin/co-op integration remains open. EQ-06 partial: rank-cap scaling and Necromancer level factor, full damage audit still pending. Every other requirement retains its previous status. U113 authorizes main implementation; U114 requests continuation.

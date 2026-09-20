@@ -1674,3 +1674,7 @@ Marksman bow draw now uses bow/nock attachments and a deforming string. Brute an
 Implemented the approved companion/summon, save-resume, elemental projectile, paladin palette, skill-identity, mirror, NPC, class-equipment, trial-starter, weapon-palette, transparent-icon, loading, moving-attack, dash-echo, HUD and New Game+ updates. Existing player models and weapon fitting remain. Raise the Dead carries the actual slain non-boss enemy silhouette into allied combat. Golden Smite strikes from above. Twenty cleaned icons ship at 256px; orb rendering is bounded and instanced.
 
 Verified in muted real-browser WebGL: pre-change save retention and paused autosave; all 16 starter families; class swap/inventory preservation and off-class bag blocking; raised goblin attacks and expiry; five NPCs; mirror/paladin screenshots; 128 effect-profile geometry coverage and visual spot checks; 24 leg animation tracks; dash appearance refresh; delayed loading with frozen simulation; NG+ preservation and reload. See docs/APPROVED_QUEUE_2026-09-17.md for evidence and limits, and tools/qa for repeatable checks.
+
+
+## [Codex | 2026-09-20] Equipment foundations 1.982.0
+Broad weapon families, intrinsic Pirate/Monk/Reaper rank-scaled weapons capped at rank 10, dagger tap/charge separation, old scythe migration, valid cheat/shop stock and collapsed bag sections. Pirate paired weapon rig. Browser equipment/save/UI checks and syntax passed. Full overhaul and damage scaling audit remain in progress; see docs/IMPLEMENTATION_EQUIPMENT_2026-09-20.md.

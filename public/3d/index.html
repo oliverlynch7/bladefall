@@ -1020,6 +1020,9 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./loading.js?v=1981s"></script>
+<link rel="stylesheet" href="./hub-dialogue.css?v=1989">
+<script src="./voice-content.js?v=1989"></script>
+<script src="./hub-dialogue.js?v=1989"></script>
 <script src="./story-state.js?v=1987"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./combat-art.js?v=1981s"></script>
@@ -1035,7 +1038,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.988.0-voice-studio';
+const VERSION3D='1.989.0-hub-conversations';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1066,7 +1069,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['hubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -1460,9 +1463,12 @@ function audioSettingsHTML(){
     <div class="setrow"><label><span><span class="ico ico-menu ico-music"></span>Music</span><b id="musVal">${mv}%</b></label>
       <input id="musSlider" type="range" min="0" max="100" step="5" value="${mv}"></div>
     <div class="setrow"><label><span><span id="sfxIcon" class="ico ico-menu ico-sound-${sv?'on':'off'}"></span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
-      <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>`;
+      <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>
+    <div class="setrow"><label><span>Recorded NPC voices</span><input id="dialogueVoice" type="checkbox" ${meta.dialogueVoice!==false?'checked':''}></label></div>
+    <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS?'checked':''}></label><small>Optional. Uses your device’s speech voice. Both follow sound-effects volume.</small></div>`;
 }
 function bindAudioSettings(){
+  for(const id of ['dialogueVoice','dialogueTTS']){const e=document.getElementById(id);if(e)e.onchange=()=>{meta[id]=e.checked;persistGlobal();};}
   const ms=document.getElementById('musSlider'), ss=document.getElementById('sfxSlider');
   if(ms) ms.addEventListener('input',()=>{ initAudio(); setMusicVol((+ms.value)/100); const v=document.getElementById('musVal'); if(v) v.textContent=ms.value+'%'; });
   if(ss) ss.addEventListener('input',()=>{ initAudio(); setSfxVol((+ss.value)/100); const v=document.getElementById('sfxVal'), i=document.getElementById('sfxIcon'); if(v) v.textContent=ss.value+'%'; if(i){ i.classList.toggle('ico-sound-on',+ss.value>0); i.classList.toggle('ico-sound-off',+ss.value===0); } SFX.pickup(); });   // hear the new level as you drag
@@ -8373,6 +8379,7 @@ window.addEventListener('keydown',e=>{
     for(const k in input) if(MOVE_ACTS[k]) input[k]=false;
     return;
   }
+  if(mode==='npc')return;
   if(mode==='journal'){ if(e.code==='Escape'||keyAction(e.code)==='journal'){e.preventDefault();if(!e.repeat)closeJournal();}return;}
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
@@ -16143,42 +16150,14 @@ function enterWaystation(){
   if(meta._iansBladeNotify){ meta._iansBladeNotify=false; meta._iansBladeAnnounced=true; persist(); storyToast("Ian's Blade now waits in the Shop."); }
   if(!meta.hubTutDone && Object.keys(meta.trialsDone||{}).length){ meta.hubTutDone=true; persistGlobal(); hubTutorial(); }   // one-time hub onboarding after the first trial
 }
-/* Each keeper's voice — grim + terse. E opens this; a button drops you into what they do. */
-const NPCVOICE={
-  quartermaster:{cta:'Browse wares',lines:["Steel, leather, charms — I sell what keeps you breathing.","Bring gold, I bring the goods. Nothing here is charity. Nothing here will fail you either."]},
-  drillmaster:{cta:'Train & trials',lines:["You swing like no one ever taught you. I can change that.","Pick a discipline. Or step into a trial and earn a new one. The dead won't wait while you practise."]},
-  keeper:{cta:'Open wardrobe',lines:["Cloaks. Marks. The colors of those who fell before you.","They sharpen nothing. They only decide how the dark remembers you."]},
-  board:{cta:'Read the postings',lines:["The dead left their work unfinished. It's all here, if you can read it.","Take what you can carry. Come back alive to be paid."]},
-  chest:{cta:'Open your bag',lines:["Everything you've dragged out of the deep. Sort it.","Feed the forge, sell the chaff. Carry nothing you'd weep to lose."]},
-  anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]},
-  beastkeeper:{cta:'Open the Pet Yard',lines:["The deep breaks most things. A few, it makes loyal.","Take one down with you. It won't win your fights — but it'll be there when the dark closes in."]}
-};
-// Phase 12: a keeper's line that reacts to YOUR progress (gold, class/rank, gates cleared, last run)
-function npcReact(n){
-  const cs=classState(meta.classId), lv=(meta.hero&&meta.hero.level)||1, cleared=Object.keys(meta.zoneDone||{}).length, kills=meta.bossKills||0;
-  const R={
-    quartermaster:[ meta.gold>=2500?`${meta.gold} gold on you — you can afford to be choosy now.`:`${meta.gold} gold. Come back when it's heavier.`, meta.socks?`Those Magic Socks carry you well.`:null ],
-    drillmaster:[ `${curClass().disp}, rank ${cs.rank}. ${cs.rank>=7?'The dead should be afraid.':'Keep drilling.'}`, `Level ${lv} — ${lv>=15?'seasoned':'still green'}.`, Object.keys(meta.classUnlocked||{}).length>1?`Three disciplines under one roof. Greedy.`:null ],
-    keeper:[ cleared>=6?`Six gates gone dark behind you. The colors remember them.`:`${cleared} cleared. The dark keeps its own count.` ],
-    board:[ cleared>=ZONES.length-2?`Little left unfinished down there now.`:`Work still waits below. It always does.` ],
-    chest:[ (meta.stash&&meta.stash.length>=STASH_CAP)?`That bag is full — feed the forge or sell the chaff.`:null ],
-    anvil:[ kills>=6?`You've felled enough. Bring me their leavings and I'll better them.`:null ]
-  };
-  const arr=(R[n.id]||[]).filter(Boolean); return arr.length?arr[Math.floor((G&&G.time||0)/4)%arr.length]:null;
-}
-function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
-  mode='menu'; SFX.pickup();
-  document.getElementById('toast').classList.remove('show');
-  const react=npcReact(n);
-  showOverlayHTML(`<div class="card npcchat" style="--npc-accent:${n.c2||'#e8a33d'}"><div class="npctalkbody"><div class="npctalkcopy"><div class="npcintro">${npcPortrait(n.id)}
-    <div class="npcidentity"><p class="ovsub">WAYSTATION KEEPER</p><h2 class="ovh">${n.name}</h2><p class="npcrole">${n.role||''}</p><p class="npcline">“${v.lines[0]}”</p></div></div>
-    <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
-      ${v.lines.slice(NPC_PORTRAIT_POS[n.id]?1:0).map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
-      ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div></div>
-    ${navCard('npcGo',NPC_MENU_ART[n.id]||'icons/event-quest-marker.png',v.cta,n.role||'','npcaction')}</div>
-    <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);
-  document.getElementById('npcGo').onclick=()=>n.open();
-  document.getElementById('npcLeave').onclick=resumePlay;
+// Hub services use the same authored, recordable lines as the Voice Studio.
+function openNpcTalk(n){
+ if(!['quartermaster','anvil','keeper','drillmaster','beastkeeper'].includes(n.id)){n.open();return;}
+ BFHubDialogue.open(n,{
+  meta,save:persistGlobal,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,
+  enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
+  leave:service=>{if(service){mode='menu';showGameUI(false);}else resumePlay();}
+ });
 }
 // Phase 12: the Mirror — inspect your own character (live gear/cosmetics), invaluable in first-person
 /* ============================================================
@@ -19726,6 +19705,8 @@ function updateHubTags(){
     `<div class="htag"><span class="hi">${n.ic}</span><span class="hn">${n.name}</span><span class="hr">${n.role}</span></div>`).join(''); }
   const tags=box.children;
   G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
+    const mark=window.BFHubDialogue?.known(n.id)?(!meta.hubDialogue?.[n.id]?.introduced?' · !':BFHubDialogue.hasNews(n,{meta})?' · ◆':''):'';
+    const nameTag=tg.querySelector('.hn');if(nameTag&&nameTag.textContent!==n.name+mark)nameTag.textContent=n.name+mark;
     const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
     if(dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
     const a=hubTagAnchor(n), sp=project(a.x,a.y,a.z);
@@ -19921,6 +19902,15 @@ function render(t){
     const near = meta.camMode==='fps'?3:meta.camMode==='shoulder'?18:45;
     PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 4600);   // tighter far + bigger near = far better depth precision across the big hub (no z-fighting)
     gl.uniform2f(U.uFogNF, 3000, 6500);
+  }
+  const talkFocus=window.BFHubDialogue?.focus();
+  if(talkFocus){
+    const f=talkFocus,by=f.y,dist=125,desired={x:f.x+f.dx*dist,y:by+62,z:f.z+f.dz*dist};
+    const u=f.blend*f.blend*(3-2*f.blend),origin=f.from||desired;
+    const eye={x:origin.x+(desired.x-origin.x)*u,y:origin.y+(desired.y-origin.y)*u,z:origin.z+(desired.z-origin.z)*u};
+    PROJ=mPersp(44*Math.PI/180,VW/VH,3,4600);
+    if(innerWidth>650){const panel=document.querySelector('#hubDialogue .hub-dialogue-panel');PROJ[8]=((panel?.getBoundingClientRect().width||430)+48)/innerWidth*u;}else PROJ[9]=-.52*u;
+    VIEW=mLookAt([eye.x,eye.y,eye.z],[f.x,by+37,f.z],[0,1,0]);G.eye=eye;
   }
   // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
   // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and
@@ -20126,7 +20116,7 @@ function render(t){
       for(let i=0;i<3;i++) bx(e.x+(i-1)*7, ey+(i===1?3:0), e.z, 4,(i===1?9:6),4, '#ffd24a','#ffb020',ef);
       bx(e.x, ey-4, e.z, 20,3,4, '#ffd24a','#ffb020',ef*0.9); } }
   drawShadow(p.x,p.z,13);
-  if(meta.camMode!=='fps'){                            // cosmetic cape: hangs off the shoulders, swings with your speed
+  if(meta.camMode!=='fps'&&!talkFocus){                            // cosmetic cape: hangs off the shoulders, swings with your speed
     const cp=cosEquipped('cape');
     if(cp && !SIL){ const spd=Math.min(1,Math.hypot(p.vx,p.vz)/240), sway=Math.sin(t*6)*3*spd, lift=spd*4;
       pushM(); mv(p.x,p.y,p.z); rotY(p.yaw);
@@ -20136,7 +20126,7 @@ function render(t){
       bx(sway*0.4,25,-11-lift, 18,22,2.4, C, C, 0.9);                   // upper drape
       bx(sway*0.7,11,-13-lift*1.6, 14,18,2.2, C, C, 0.78);             // lower taper, kicks out when running
       popM(); } }
-  if(meta.camMode!=='fps') drawHero3(p,t,false);
+  if(meta.camMode!=='fps'||talkFocus) drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
   if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
   if(G.arena){ drawArenaProps(t); drawArenaPickups(t); }        // arena master + door, then powerup orbs
@@ -20938,7 +20928,7 @@ window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheck
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
-  openJournal, closeJournal, addJournalNote, adventureStoryState,
+  openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
@@ -21050,7 +21040,7 @@ window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheck
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1986g"></script>
+<script type="module" src="./hero3d.js?v=1989"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

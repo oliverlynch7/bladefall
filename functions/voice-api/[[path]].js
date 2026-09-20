@@ -1,4 +1,6 @@
-import book from '../../public/3d/story/briar-foundation.json';
+import briar from '../../public/3d/story/briar-foundation.json';
+import hub from '../../public/3d/story/hub-dialogue.json';
+const book={npcs:{...briar.npcs,...hub.npcs},nodes:{...briar.nodes,...hub.nodes}};
 
 const encoder=new TextEncoder(),MAX_AUDIO=12*1024*1024,COOKIE='__Host-bf_voice';
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};

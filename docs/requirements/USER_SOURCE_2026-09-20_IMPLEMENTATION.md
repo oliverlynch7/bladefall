@@ -87,3 +87,10 @@ also another update to queue is to make a massive visual upgrade to the capes an
 ## [Codex | 2026-09-20] VO-PRIORITY-01 — early independent voice production
 
 id also like you to prioritize the npc  and diallogue and voice studio work so that i can start doing VO stuff in between produciton sessions, i upgraedd to pro so i have a lot more usage now, but im sure i will run out of usage well before this entire production is coded and deployed, and i want ot be able to work on the game in my off time without usage and thats one way to do it, of course dont do this at the cost of the implemenation phases if it were to hur thte process of developing eveyrhitng coherently and with ultiamte quality in mind.
+
+
+## [Codex | 2026-09-20] IMPLEMENTATION-CONTINUE-HUB
+
+continue on the next steps of the implementation
+
+Classification: continuation of the approved implementation queue; no new design decision.

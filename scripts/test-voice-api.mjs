@@ -1,7 +1,9 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
-const book=JSON.parse(await fs.readFile('public/3d/story/briar-foundation.json','utf8'));
-let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace("import book from '../../public/3d/story/briar-foundation.json';",'const book='+JSON.stringify(book)+';');
+const briar=JSON.parse(await fs.readFile('public/3d/story/briar-foundation.json','utf8'));
+const hub=JSON.parse(await fs.readFile('public/3d/story/hub-dialogue.json','utf8'));
+const book={npcs:{...briar.npcs,...hub.npcs},nodes:{...briar.nodes,...hub.nodes}};
+let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
 const {handle,digest}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 class Bucket{
  data=new Map();seq=0;
@@ -21,7 +23,7 @@ assert.equal((await call('catalog')).status,401);
 assert.equal((await call('login',{body:{key},origin:'https://evil.example'})).status,403);
 assert.equal((await call('login',{body:{key:'bad'}})).status,401);
 const login=await call('login',{body:{key}});assert.equal(login.status,200);assert.match(login.headers.get('Set-Cookie'),/HttpOnly; Secure; SameSite=Strict/);cookie=login.headers.get('Set-Cookie').split(';')[0];
-let {lines}=await(await call('catalog')).json();assert.equal(lines.length,12);let line=lines[0];
+let {lines}=await(await call('catalog')).json();assert.equal(lines.length,32);let line=lines[0];
 const wav=new Uint8Array(100);wav.set(new TextEncoder().encode('RIFF'));const take='test-take-123456';
 function form(){const f=new FormData();f.set('metadata',JSON.stringify({id:line.id,take,text:line.text,revision:line.revision,duration:1}));f.set('audio',new Blob([wav],{type:'audio/wav'}),'take.wav');return f}
 let r=await call('take',{body:form()});assert.equal(r.status,200);line=(await r.json()).line;

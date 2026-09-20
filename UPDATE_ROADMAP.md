@@ -1708,3 +1708,8 @@ Current-level journal (N or HUD), checkpointed notes/items/dialogue state, autho
 ## [Codex | 2026-09-20] Early Voice Studio implementation
 
 1.988.0 Voice Studio: private recording library, first12 Thomas/Mara lines, editable wording, take playback/retakes/approval, R2 persistence, recovery and backups; approved audio/text reaches dialogue preview. Existing game unchanged except version. Full in-world NPC integration remains next.
+
+
+## [Codex | 2026-09-20] 1.989.0 — Hub conversations and voice batch
+
+Five hub service NPCs now have one-time introductions, direct services after introduction, personal questions, optional victory news markers, saved interrupted lines, camera framing, progressive text, optional device speech and approved Voice Studio recordings. Fitted NPC faces and simple speech-linked mouth movement; hide local hero from dialogue framing.20 new recordable lines,32 total. Browser/state/API verification in docs/IMPLEMENTATION_HUB_DIALOGUE_2026-09-20.md. Shared campaign dialogue and Briar NPC placement remain next.

@@ -1,0 +1,354 @@
+{
+  "version": 1,
+  "region": "hub",
+  "status": "Recording-ready service conversations; no campaign quest unlocks",
+  "npcs": {
+    "quartermaster": {
+      "name": "Quartermaster",
+      "role": "Supplies and equipment",
+      "start": "hub.quartermaster.intro",
+      "service": "Browse wares",
+      "about": "hub.quartermaster.about",
+      "news": "hub.quartermaster.news",
+      "newsAfterCompletedRegions": 1
+    },
+    "anvil": {
+      "name": "The Smith",
+      "role": "Combine matching gear",
+      "start": "hub.anvil.intro",
+      "service": "Use the forge",
+      "about": "hub.anvil.about",
+      "news": "hub.anvil.news",
+      "newsAfterCompletedRegions": 1
+    },
+    "keeper": {
+      "name": "The Stylist",
+      "role": "Appearance and cosmetics",
+      "start": "hub.keeper.intro",
+      "service": "Open wardrobe",
+      "about": "hub.keeper.about",
+      "news": "hub.keeper.news",
+      "newsAfterCompletedRegions": 1
+    },
+    "drillmaster": {
+      "name": "Drillmaster",
+      "role": "Classes and training",
+      "start": "hub.drillmaster.intro",
+      "service": "Train and view classes",
+      "about": "hub.drillmaster.about",
+      "news": "hub.drillmaster.news",
+      "newsAfterCompletedRegions": 1
+    },
+    "beastkeeper": {
+      "name": "Beastkeeper",
+      "role": "Companions and training",
+      "start": "hub.beastkeeper.intro",
+      "service": "Visit the Pet Yard",
+      "about": "hub.beastkeeper.about",
+      "news": "hub.beastkeeper.news",
+      "newsAfterCompletedRegions": 1
+    }
+  },
+  "nodes": {
+    "hub.quartermaster.intro": {
+      "text": "Quartermaster. I keep the shelves stocked and the prices where I can still afford to restock them. If you're heading out to face the Legion, let's make sure you come back.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "How can you help me?",
+          "next": "hub.quartermaster.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "First meeting",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Businesslike, dry humor, decent underneath. Speak clearly, never sneering at a poor player.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.quartermaster.guide": {
+      "text": "Browse my wares, check what your class can use, and compare it with what you're carrying. You can sell spare gear too. Keep a useful spare before you sell the lot. I've had that conversation before.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "First meeting",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Businesslike, dry humor, decent underneath. Speak clearly, never sneering at a poor player.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.quartermaster.about": {
+      "text": "People arrive with a cart, a sack, or nothing at all. I find room for what they bring. Can't swing a sword for everyone. Can make sure someone has one.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "Thanks. Show me what you do.",
+          "next": "hub.quartermaster.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Getting to know you",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Businesslike, dry humor, decent underneath. Speak clearly, never sneering at a poor player.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.quartermaster.news": {
+      "text": "You've cleared a way where people were afraid to go. That's worth more than a pile of gold. Don't tell my suppliers I said that.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "After a victory",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Businesslike, dry humor, decent underneath. Speak clearly, never sneering at a poor player.",
+        "context": "The player has completed at least one campaign region and returned alive. Encourage them without claiming a specific rescue, death, or new shop stock."
+      }
+    },
+    "hub.anvil.intro": {
+      "text": "Most people call me the Smith. Saves time. You bring the gear; I do the hammering. We'll give the Legion something worth worrying about.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "How can you help me?",
+          "next": "hub.anvil.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "First meeting",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Plain-spoken craftsman. Warmth hidden beneath few words. Let the hinges joke land quietly.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.anvil.guide": {
+      "text": "Bring two matching pieces of the same rarity. The forge shows what I can combine and what you'll get before you commit. Check both pieces first. Once they're one, you don't get the old pair back.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "First meeting",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Plain-spoken craftsman. Warmth hidden beneath few words. Let the hinges joke land quietly.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.anvil.about": {
+      "text": "A good hammer doesn't ask who's holding it. Used to make hinges, mostly. Looking forward to making hinges again.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "Thanks. Show me what you do.",
+          "next": "hub.anvil.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Getting to know you",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Plain-spoken craftsman. Warmth hidden beneath few words. Let the hinges joke land quietly.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.anvil.news": {
+      "text": "Heard you made it through. Good. People need a reason to mend their doors instead of board them shut. Keep giving them one.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "After a victory",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Plain-spoken craftsman. Warmth hidden beneath few words. Let the hinges joke land quietly.",
+        "context": "The player has completed at least one campaign region and returned alive. Encourage them without claiming a specific rescue, death, or new shop stock."
+      }
+    },
+    "hub.keeper.intro": {
+      "text": "Welcome. I'm the Stylist. You look like you've had enough people telling you what you ought to be. In here, you get to decide how you look.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "How can you help me?",
+          "next": "hub.keeper.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "First meeting",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Poised, observant, lightly playful. Sincere when speaking about home; no mystical riddles.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.keeper.guide": {
+      "text": "Open the wardrobe to choose from your unlocked looks and cosmetics. These choices change your appearance, not your strength. Dress for yourself. The Legion isn't giving out marks for neatness.",
+      "choices": [],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "First meeting",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Poised, observant, lightly playful. Sincere when speaking about home; no mystical riddles.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.keeper.about": {
+      "text": "People save the strangest things when they leave home. A coat. A ribbon. Their father's old boots. Sometimes looking like yourself helps you feel like yourself again.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "Thanks. Show me what you do.",
+          "next": "hub.keeper.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "Getting to know you",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Poised, observant, lightly playful. Sincere when speaking about home; no mystical riddles.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.keeper.news": {
+      "text": "People are standing a little taller since you came back. You can see it before they say a word. Hope suits them.",
+      "choices": [],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "After a victory",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Poised, observant, lightly playful. Sincere when speaking about home; no mystical riddles.",
+        "context": "The player has completed at least one campaign region and returned alive. Encourage them without claiming a specific rescue, death, or new shop stock."
+      }
+    },
+    "hub.drillmaster.intro": {
+      "text": "I'm the Drillmaster. You don't need a grand name to train here. You need to listen, keep your feet under you, and try again when you get knocked down.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "How can you help me?",
+          "next": "hub.drillmaster.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "First meeting",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Steady veteran instructor. Firm without bullying. More protective than impressed.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.drillmaster.guide": {
+      "text": "Use the class menu to choose an unlocked class and check its skills. Some disciplines need a trial before you can use them. The Sparring Room lets you practise without risking your journey.",
+      "choices": [],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "First meeting",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Steady veteran instructor. Firm without bullying. More protective than impressed.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.drillmaster.about": {
+      "text": "I can't promise training will make you fearless. Fearless people miss warning signs. I want you scared enough to pay attention and ready enough to act.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "Thanks. Show me what you do.",
+          "next": "hub.drillmaster.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "Getting to know you",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Steady veteran instructor. Firm without bullying. More protective than impressed.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.drillmaster.news": {
+      "text": "You've won a real fight. Now comes the hard part: not assuming the next one will be the same. Different ground. Different enemy. Keep learning.",
+      "choices": [],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "After a victory",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Steady veteran instructor. Firm without bullying. More protective than impressed.",
+        "context": "The player has completed at least one campaign region and returned alive. Encourage them without claiming a specific rescue, death, or new shop stock."
+      }
+    },
+    "hub.beastkeeper.intro": {
+      "text": "I'm the Beastkeeper. Mind where you put your fingers. Everyone here is friendly, but a few of them think friendly means chewing your sleeve.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "How can you help me?",
+          "next": "hub.beastkeeper.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "First meeting",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Easygoing caretaker with amused affection. Treat the animals as capable partners, not toys.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.beastkeeper.guide": {
+      "text": "In the Pet Yard, choose a companion you own to travel with you. You can check what each one does, give it a name, and train it. Pick a partner that helps the way you fight.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "First meeting",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Easygoing caretaker with amused affection. Treat the animals as capable partners, not toys.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.beastkeeper.about": {
+      "text": "They notice things we miss. A step in the brush. Someone hurt behind a wall. Give them a chance to help. And don't judge the little ones by their size.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "Thanks. Show me what you do.",
+          "next": "hub.beastkeeper.guide"
+        }
+      ],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "Getting to know you",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Easygoing caretaker with amused affection. Treat the animals as capable partners, not toys.",
+        "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal."
+      }
+    },
+    "hub.beastkeeper.news": {
+      "text": "You came back, and the animals knew before I did. They were all watching the path. Next time, try not to keep your welcoming party waiting.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "After a victory",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Easygoing caretaker with amused affection. Treat the animals as capable partners, not toys.",
+        "context": "The player has completed at least one campaign region and returned alive. Encourage them without claiming a specific rescue, death, or new shop stock."
+      }
+    }
+  }
+}

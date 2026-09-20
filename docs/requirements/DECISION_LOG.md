@@ -113,3 +113,8 @@ User explicitly raises NPC/dialogue/Voice Studio priority to enable independent 
 ## [Codex | 2026-09-20] Early Voice Studio implementation
 
 Implemented early Voice Studio batch per VO-PRIORITY-01. Chosen infrastructure: existing Cloudflare Pages + isolated private R2, single-owner high-entropy key and signed secure cookie. No email provider or public sign-up added. Stable existing line IDs expanded with voice metadata; approved recordings accessible to preview, unpublished takes private. Retakes additive, text changes preserve older takes. This does not claim the full campaign or in-world dialogue is complete.
+
+
+## [Codex | 2026-09-20] Hub dialogue batch 1.989
+
+IMPLEMENTATION-CONTINUE-HUB resumes VO-PRIORITY-01. Five existing human hub keepers receive shared recorded scripts, once-per-save-slot introductions, interrupted-line persistence, service access, personal questions and a one-time optional reaction after a campaign victory. Optional news does not block or get consumed by shopping. 20 additional lines; Voice Studio total32. Added camera framing, optional device speech, basic mouth motion and existing fitted faces to NPC clones. These service chats are personal; shared campaign dialogue, quest rewards and Thomas/Mara world placement remain open. Evidence: ../IMPLEMENTATION_HUB_DIALOGUE_2026-09-20.md.

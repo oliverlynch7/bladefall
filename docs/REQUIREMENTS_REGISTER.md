@@ -272,3 +272,8 @@ VO-05 / GOV-08 — APPROVED priority change. Deliver the private, independently 
 ## [Codex | 2026-09-20] Early Voice Studio implementation
 
 VO-02/03/04/05 first implementation: private owner-key studio, twelve Thomas/Mara recording-ready lines sourced from the shared graph, context/direction, recording/upload, listen/retake, text edits, explicit approval, private R2 take retention, local pending recovery, per-line backup/restore. Approved current-wording audio consumed by dialogue preview. Full game NPC playback/mouth animation, TTS fallback, hub/campaign script expansion still OPEN. Real-device microphone QA remains. See IMPLEMENTATION_VOICE_STUDIO_2026-09-20.md.
+
+
+## Implementation evidence — Hub conversations 1.989
+
+DLG-05 partial: first introductions, service instructions, optional personal questions and one campaign-victory reaction for five existing human hub service keepers. Persists per save slot; objects such as boards open directly. DLG-02/08 and VO-01/03 implemented for these hub conversations: camera/subtitles/leave/resume/input guard, matching approved voice playback, optional device speech and basic mouth motion. The five service NPCs retain existing body assets with fitted eyes/mouth added. This is not the complete new NPC art/campaign/quest/co-op overhaul. See IMPLEMENTATION_HUB_DIALOGUE_2026-09-20.md for tests and limits.

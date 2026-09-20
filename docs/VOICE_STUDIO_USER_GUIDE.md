@@ -4,12 +4,12 @@ Open https://bladefall.pages.dev/3d/voice-studio/ and sign in with the owner key
 
 ## Record a scene
 
-1. Choose Thomas or Mara. Read the scene context and performance direction. Player responses are context, not lines you need to record.
+1. Choose Thomas, Mara, or one of the five Waystation service keepers. Read the scene context and performance direction. Player responses are context, not lines you need to record.
 2. Read the line once. If you change wording, press **Save wording** before recording.
 3. Press **Record a take**, allow microphone access, speak, then **Stop & save**. Wait for **Take saved online**.
 4. Play the selected take. Record again if needed; older takes remain in the list.
 5. Press **Approve & use this take** when happy. That exact take is official and available to the dialogue preview. Full in-world NPC playback comes with the NPC integration batch.
-6. Use **Next line**. Thomas has five lines; Mara has seven. Some lines are alternate responses, so you will not hear all of them in one playthrough.
+6. Use **Next line**. Thomas has five lines; Mara has seven; each hub keeper has four. Some lines are alternate responses, so you will not hear all of them in one playthrough.
 
 The microphone is requested only when you press Record. Browser recording format varies (WebM/Opus or MP4 where supported). Original files are preserved; the studio does not pretend these recordings are uncompressed WAV masters. You may upload a recording made elsewhere instead. Maximum upload size is 12 MB per take; recording stops after three minutes.
 
@@ -23,4 +23,4 @@ Changing wording retains older takes but removes mismatched audio from game play
 
 ## First release limits
 
-The first batch contains twelve Thomas/Mara lines. More hub and campaign scenes will be added using the same IDs and workflow. The in-world NPC models, camera moves, mouth movement and co-op dialogue are not complete in this release. Browser tests used generated test audio; please check your actual microphone and phone before a long recording session. Try one short take, play it back, then open it on your other device.
+The library contains 32 lines: twelve Thomas/Mara lines and twenty lines for the Quartermaster, Smith, Stylist, Drillmaster and Beastkeeper. Approved hub lines now play in actual hub conversations, with camera framing and subtitles. Thomas/Mara remain in the dialogue preview pending their campaign placement. Hub NPCs now have simple speaking mouth motion (the Quartermaster keeps his scarf). Shared co-op campaign conversations remain unfinished. More campaign scenes will be added using the same IDs and workflow. Browser tests used generated test audio; please check your actual microphone and phone before a long recording session. Try one short take, play it back, then open it on your other device.

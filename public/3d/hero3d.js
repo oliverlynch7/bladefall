@@ -1,5 +1,5 @@
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
-import {syncNpcs} from './npc3d.js?v=1981s';
+import {syncNpcs} from './npc3d.js?v=1989';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions} from './companion3d.js?v=1981s';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -448,7 +448,7 @@ function findHeadBone(actor){
 /* Frames are DATA here, always. The slice falls back to measuring for an unknown model; in the
    game every model has a frozen frame, so measurement is never reached and a face cannot drift. */
 function headMetrics(actor){
-  const f = storedFrame(eyeModel());
+  const f = storedFrame(actor.model || eyeModel());
   if(!f) return null;
   const head = findHeadBone(actor);
   return head ? frameToMetrics(f, head) : null;
@@ -533,7 +533,7 @@ function mouthTexture(shape, color){
 function addEyes(actor, useSaved){
   if(!actor) return null;
   clearEyes(actor);
-  if(useSaved !== false) eyeLoadFor(eyeModel());
+  if(useSaved !== false) eyeLoadFor(actor.model || eyeModel());
   if(!EYE.on) return null;
   const M = headMetrics(actor);
   if(!M) return null;
@@ -570,7 +570,7 @@ function addEyes(actor, useSaved){
        as hairstyle, but worth wiring up rather than removing - it is the only cosmetic choice left
        once hair goes, and now it is visible on your actual face. */
     const _pick = (function(){ try { const m = window.__BF_META && window.__BF_META(); return m && m.eyeColor; } catch(e){ return null; } })();
-    const ir = mk(new THREE.CircleGeometry(1, 20), _pick || EYE.iris);
+    const ir = mk(new THREE.CircleGeometry(1, 20), actor.eyeColor || _pick || EYE.iris);
     ir.scale.setScalar(irR);
     ir.position.z = frontZ * 0.995;
     ir.material.depthWrite = false; ir.renderOrder = (EYE.onTop ? 999 : 3) + 1;
@@ -599,7 +599,7 @@ function addEyes(actor, useSaved){
 function addMouth(actor, useSaved){
   if(!actor) return null;
   clearMouth(actor);
-  if(useSaved !== false) mouthLoadFor(eyeModel());
+  if(useSaved !== false) mouthLoadFor(actor.model || eyeModel());
   if(!MOUTH.on) return null;
   const M = headMetrics(actor);
   if(!M) return null;
@@ -1385,6 +1385,16 @@ function buildFace(){
   return HERO3D.face;
 }
 
+/* Reuse the fitted face frames for service NPCs without changing the player's presets. */
+window.__npcBuildFace=(root,model,eyeColor)=>{
+ const savedEye={...EYE},savedMouth={...MOUTH},holder={root,model,eyeColor};
+ try{addEyes(holder,true);addMouth(holder,true);}finally{Object.assign(EYE,savedEye);Object.assign(MOUTH,savedMouth);}
+ const mouth=holder._mouth,base=mouth?.scale.y||1;
+ return {tick(t,talking){if(mouth)mouth.scale.y=base*(talking ? .7+Math.abs(Math.sin(t*14))*1.8 : 1);},
+  dispose(){for(const node of [...(holder._eyes||[]),...(mouth?[mouth]:[])]){node.removeFromParent();node.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();}});}},
+  get state(){return {eyes:!!holder._eyes,mouth:!!mouth,scale:mouth?.scale.y,neutral:base};}};
+};
+
 /* Swap body when the class changes — respec, or a different save. Re-loads rather than clones,
    because cloning a glTF binds the copy's SkinnedMesh to the ORIGINAL skeleton, which collapses
    the body while bone-parented props keep drawing. That bug cost a session in the slice. */
@@ -1901,6 +1911,7 @@ export function drawHero3D(p, t){
     wrap.rotation.y = (p.yaw || 0) + HERO3D.yawOff;
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
+    if(_isLocal&&window.BFHubDialogue?.active)wrap.visible=false;
 
     restoreGripPose(anim);
     playFor(p, anim);

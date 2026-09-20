@@ -98,3 +98,4 @@ Every available substantive record is preserved verbatim. This index maps decisi
 | U108 | Secret writings lead to Sunspire; rescued allies provide connections; Sunspire soul knowledge; Ellis captive/pursued remains open |
 | U109 | Planning readiness question; no new gameplay rule |
 | U110 | STORY-18–20: laboratory capture, conscious orb vision/anchor information, cutscene-only Ian's Blade |
+| U111 | STORY-21: approved orb question, no finale spoilers, combined-power overload and both falling; implementation sequence requested |

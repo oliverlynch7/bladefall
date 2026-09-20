@@ -82,3 +82,8 @@ please give me an extensive list of all sfx needed for all use cases in the game
 ## [Codex | 2026-09-20] VISUAL-COSMETICS-01 — queued cape, trail and level surface overhaul
 
 also another update to queue is to make a massive visual upgrade to the capes and trails cosmetic equips, they looks terrible. i want them to have physics like a real cpae, have more and better detyails, be colored in a way that fits the charceters, and look good and dont constatnly clip the character model. also i think there is still a lot of z fighting going on in the graphical designs of some levels so please check for that while you do the new level upgrade upadte too
+
+
+## [Codex | 2026-09-20] VO-PRIORITY-01 — early independent voice production
+
+id also like you to prioritize the npc  and diallogue and voice studio work so that i can start doing VO stuff in between produciton sessions, i upgraedd to pro so i have a lot more usage now, but im sure i will run out of usage well before this entire production is coded and deployed, and i want ot be able to work on the game in my off time without usage and thats one way to do it, of course dont do this at the cost of the implemenation phases if it were to hur thte process of developing eveyrhitng coherently and with ultiamte quality in mind.

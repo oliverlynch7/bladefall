@@ -103,3 +103,8 @@ User approved a major visual overhaul of equipped cape and trail cosmetics: real
 User authorized sending SFX instructions/docs to their specified recipient, then resuming implementation. Gmail send returned SENT; production guide, all-prompts document and coverage audit attached, plus production-desk link and starter instructions. Recipient and delivery details remain in the private session record.
 
 Candidate 1.987.0 adds the current-region journal, route-checkpoint story state, deterministic authored dialogue reducer and Thomas/Mara interactive foundation preview. Default N preserves J attack; journal binding is remappable. Approved NPC/world/co-op expansion remains open; preview authoring is not a completed in-world quest. See IMPLEMENTATION_STORY_FOUNDATION_2026-09-20.md.
+
+
+## [Codex | 2026-09-20] VO-PRIORITY-01 — early independent voice production
+
+User explicitly raises NPC/dialogue/Voice Studio priority to enable independent recording between production sessions, including while Codex usage is unavailable. Preserve coherent development and quality; this does not authorize disconnected duplicate scripts, premature recording of unstable scenes, or public access to the private studio. Move minimum usable private studio immediately after the stable dialogue/line-version foundation, before completion of all campaign levels. Incremental recording-ready scene batches are the implementation approach. No studio is currently deployed.

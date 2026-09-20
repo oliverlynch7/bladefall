@@ -267,3 +267,8 @@ UI-01 current-level journal implemented (N default, HUD button, remappable; J at
 ## [Codex | 2026-09-20] VO-PRIORITY-01 — early independent voice production
 
 VO-05 / GOV-08 — APPROVED priority change. Deliver the private, independently usable recording workflow early enough for Oliver to record during gaps in Codex availability. NPC/dialogue/Voice Studio work now precedes the full remaining-level rollout once stable dialogue IDs, text versions and safe storage are ready. This supersedes the older step 7 placing Voice Studio near final polish. Maintain one authoritative script source and all prior VO-01–04 privacy, editing, playback, retake, approval, cross-device and fallback requirements. Recording-ready content should arrive in coherent batches; later story/gameplay work continues using the same data. Status: QUEUED, not operational.
+
+
+## [Codex | 2026-09-20] Early Voice Studio implementation
+
+VO-02/03/04/05 first implementation: private owner-key studio, twelve Thomas/Mara recording-ready lines sourced from the shared graph, context/direction, recording/upload, listen/retake, text edits, explicit approval, private R2 take retention, local pending recovery, per-line backup/restore. Approved current-wording audio consumed by dialogue preview. Full game NPC playback/mouth animation, TTS fallback, hub/campaign script expansion still OPEN. Real-device microphone QA remains. See IMPLEMENTATION_VOICE_STUDIO_2026-09-20.md.

@@ -1,0 +1,14 @@
+# Existing Pages settings, with an isolated private Voice Studio bucket.
+# Secrets stay in the Pages dashboard/secret store, never this file.
+name = "bladefall"
+pages_build_output_dir = "public"
+compatibility_date = "2026-07-10"
+
+[[r2_buckets]]
+binding = "VOICE_BUCKET"
+bucket_name = "bladefall-voice-private"
+
+[env.production]
+[[env.production.r2_buckets]]
+binding = "VOICE_BUCKET"
+bucket_name = "bladefall-voice-private"

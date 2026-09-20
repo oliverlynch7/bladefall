@@ -1703,3 +1703,8 @@ Added /3d/audio-planning/ with 1,296 sound briefs, 128 class-skill signatures, 3
 ## [Codex | 2026-09-20] 1.987 story/journal foundation
 
 Current-level journal (N or HUD), checkpointed notes/items/dialogue state, authored atomic story reducer and Thomas/Mara mobile dialogue preview. Validated reducer, 13 browser checks and 11 checkpoint regression checks. In-world NPC/world/co-op integration remains next; no full level overhaul claimed. SFX documents emailed at user request.
+
+
+## [Codex | 2026-09-20] Early Voice Studio implementation
+
+1.988.0 Voice Studio: private recording library, first12 Thomas/Mara lines, editable wording, take playback/retakes/approval, R2 persistence, recovery and backups; approved audio/text reaches dialogue preview. Existing game unchanged except version. Full in-world NPC integration remains next.

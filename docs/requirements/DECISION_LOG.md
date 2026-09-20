@@ -108,3 +108,8 @@ Candidate 1.987.0 adds the current-region journal, route-checkpoint story state,
 ## [Codex | 2026-09-20] VO-PRIORITY-01 — early independent voice production
 
 User explicitly raises NPC/dialogue/Voice Studio priority to enable independent recording between production sessions, including while Codex usage is unavailable. Preserve coherent development and quality; this does not authorize disconnected duplicate scripts, premature recording of unstable scenes, or public access to the private studio. Move minimum usable private studio immediately after the stable dialogue/line-version foundation, before completion of all campaign levels. Incremental recording-ready scene batches are the implementation approach. No studio is currently deployed.
+
+
+## [Codex | 2026-09-20] Early Voice Studio implementation
+
+Implemented early Voice Studio batch per VO-PRIORITY-01. Chosen infrastructure: existing Cloudflare Pages + isolated private R2, single-owner high-entropy key and signed secure cookie. No email provider or public sign-up added. Stable existing line IDs expanded with voice metadata; approved recordings accessible to preview, unpublished takes private. Retakes additive, text changes preserve older takes. This does not claim the full campaign or in-world dialogue is complete.

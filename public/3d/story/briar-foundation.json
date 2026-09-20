@@ -45,7 +45,15 @@
           "effects": [],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "Before You Go",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Trying to sound firm while quietly frightened for your child. Practical, familiar warmth. No hint about adoption.",
+        "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
+      }
     },
     "briar.thomas.protect": {
       "text": "I know. I just wish that someone didn't have to be you. Come here. That strap won't last a minute.",
@@ -74,7 +82,15 @@
           ],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "Before You Go",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "You understand the need to fight. The pause before asking them closer is a father swallowing his worry.",
+        "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
+      }
     },
     "briar.thomas.afraid": {
       "text": "Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
@@ -103,7 +119,15 @@
           ],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "Before You Go",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Reassuring rather than grand. Fear is sensible. The promise matters deeply to you.",
+        "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
+      }
     },
     "briar.thomas.joke": {
       "text": "Try standing behind the fence. Makes you look taller. Hold still while I fix this strap.",
@@ -132,11 +156,27 @@
           ],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "Before You Go",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "A small familiar dad joke to hide worry. Return to practical care at the strap.",
+        "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
+      }
     },
     "briar.thomas.ready": {
       "text": "Go to Mara. She has wounded people arriving and barely enough supplies for the ones already there. I'll help the neighbors pack. We're not leaving anyone behind.",
-      "choices": []
+      "choices": [],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "Before You Go",
+        "order": 5,
+        "status": "recording-ready",
+        "direction": "You have accepted they will go. Give clear, useful directions, then steady resolve about the neighbors.",
+        "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
+      }
     },
     "briar.mara.first": {
       "text": "Good. Someone still on their feet. I need tangle roots to bring down the fevers and clean dressings for the wounds. We can't move these people safely yet.",
@@ -162,7 +202,15 @@
           "effects": [],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 6,
+        "status": "recording-ready",
+        "direction": "Tired but capable. Busy treating neighbors; glad to see someone who can help. Dry warmth, not despair.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     },
     "briar.mara.why": {
       "text": "These are our neighbors. Some can help hold the lane once they're treated. The rest need to be well enough to leave it. Both matter.",
@@ -174,7 +222,15 @@
           "effects": [],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 7,
+        "status": "recording-ready",
+        "direction": "Explain why caring for ordinary neighbors matters. Compassionate and direct, not a speech.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     },
     "briar.mara.joke": {
       "text": "Only if it comes wrapped in clean cloth. And please don't bring it inside.",
@@ -186,7 +242,15 @@
           "effects": [],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 8,
+        "status": "recording-ready",
+        "direction": "A dry joke, delivered while working. A little smile at the end; no slapstick.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     },
     "briar.mara.supplies": {
       "text": "Three tangle roots from the overgrown garden, and a bundle of clean dressings from the shuttered store. The front is blocked. Look around the back for a way inside.",
@@ -211,7 +275,15 @@
           ],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 9,
+        "status": "recording-ready",
+        "direction": "Clear directions with natural breathing between each location. This is the player’s first delivery request.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     },
     "briar.mara.wait": {
       "text": "Roots from the garden. Dressings from the store. And if you're thinking of tasting a root, I'd rather not find you a bed.",
@@ -281,7 +353,15 @@
             }
           ]
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 10,
+        "status": "recording-ready",
+        "direction": "A useful reminder followed by gentle teasing. Do not sound irritated when the player returns early.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     },
     "briar.mara.heal": {
       "text": "That's enough. Give me a moment... There. The large healing pad is working again. Stand on it whenever you need to heal. It won't run out. The small pads you'll find out there only hold a little healing, so use them wisely.",
@@ -306,11 +386,27 @@
           ],
           "when": []
         }
-      ]
+      ],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 11,
+        "status": "recording-ready",
+        "direction": "Relief at receiving supplies. Brief working pause at “Give me a moment.” Then explain both healing-pad types clearly.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     },
     "briar.mara.next": {
       "text": "The mill crossing is stuck. Gus was checking the wheel. See what's caught in it, and make a way through. I'll get these people ready to move.",
-      "choices": []
+      "choices": [],
+      "voice": {
+        "speaker": "mara",
+        "scene": "Room for the Wounded",
+        "order": 12,
+        "status": "recording-ready",
+        "direction": "Focused encouragement. You are staying with the wounded while the player clears the escape route.",
+        "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
+      }
     }
   },
   "events": {

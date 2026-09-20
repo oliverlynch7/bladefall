@@ -91,3 +91,8 @@ Javelin must seat in both hands correctly, not just add a nearby support arm. Va
 ## September 20 — AUDIO-SFX-01
 
 User requests comprehensive sound-effect inventory and copy-ready ElevenLabs generation prompts across all game actions, classes/skills, weapons, enemy attacks/damage/deaths, bosses/arenas, world/NPC interactions, environments and rewards. Existing free SFX may be replaced; preserving them is not a design constraint. This turn authors the production list, not paid generations or audio replacement. Cover current code plus approved future campaign, label conditional ideas, keep human dialogue in its separate voice-recording workflow. Research official sound-generation guidance and game-audio implementation principles. Stored outputs: docs/audio and /3d/audio-planning/.
+
+
+## [Codex | 2026-09-20] VISUAL-COSMETICS-01 — queued cape, trail and level surface overhaul
+
+User approved a major visual overhaul of equipped cape and trail cosmetics: realistic cape-like physical motion, richer detail, colors that fit the character, and prevention of persistent character-model clipping. User also reports remaining level z-fighting and requires inspection/correction during the new level upgrades. This is queued work, not implemented or verified. Source: VISUAL-COSMETICS-01 in USER_SOURCE_2026-09-20_IMPLEMENTATION.md. Preserve browser performance and existing art direction.

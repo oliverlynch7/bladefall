@@ -246,3 +246,14 @@ Javelin must sit correctly in BOTH hands, including basic thrust and charge; rel
 ## September 20 — AUDIO-SFX-01
 
 Approved: complete context-specific custom SFX plan with ElevenLabs-ready prompts; current free assets may be replaced. Planning delivered in docs/audio/SFX_PRODUCTION_GUIDE.md, SFX_CATALOG.json, ELEVENLABS_SFX_ALL_PROMPTS.md and SFX_COVERAGE.md. Catalog covers 128 current selectable skills, all current enemy registry entries including nonattacking targets, weapon families/actual charges, new campaign and later modes. Implementation, generation, auditioning and replacing old audio remain OPEN. Unresolved Pyromancer/boss details remain labeled rather than silently approved.
+
+
+## [Codex | 2026-09-20] VISUAL-COSMETICS-01 — queued cape, trail and level surface overhaul
+
+Status: OPEN / QUEUED. Source: VISUAL-COSMETICS-01.
+
+- Massively improve cape and trail cosmetic assets, detail, materials and character-compatible coloration.
+- Capes need convincing cloth-like motion and body-aware collision/clearance, avoiding persistent clipping. Implementation approach is not prescribed; maintain browser performance.
+- Verify equipped cosmetics across supported character models, idle, running, turns, jumps, dash, basic/charged attacks and skills; include peer appearance where applicable. Trails should follow actual motion and suit the equipped character/cosmetic. These checks operationalize the visual request rather than add new cosmetic systems.
+- Integrate a z-fighting inspection and correction into EVERY level redesign, both halves and boss arenas. Inspect overlapping floors, terrain, trims, decals, platforms and transparent effects from moving/near/far camera views; fix duplicate/coplanar surfaces at source rather than simply hiding symptoms.
+- Capture before/after visual evidence and compare browser performance. Do not mark complete based only on static images or numerical attachment checks.

@@ -77,3 +77,8 @@ also im noticing that the javelin animation is wrong since you added in the othe
 ## AUDIO-SFX-01 — comprehensive custom ElevenLabs sound-effects production list
 
 please give me an extensive list of all sfx needed for all use cases in the game, im happy to overwrite any currently used sfx since they were free and not necessarily the best. we will create custom sfx with 11 labs so that we own them and they are acutalyl high quality and really fit well based on the context of the e sounds. i iwll need you to write out an extensive list and format prompt for 11 labs to be able tyo cerate all of these sfx accrodingly. frmo enemy sfx for all their attacks, dmg sounds, death sounds, sfx for interacting with world based assets, character sfx for all actions, npc interactions and actions sfx, environmental sfx, sfx for bsosses, and boss arena effects, sfx for all weapons, skills, lvl ups, chest open ups, etc, etc. im sure there are countless sfx needed i can think of right now that i will have you cover comprheesively on my behalf. feel free to consult the web for sfx design for video games to make sure were covering eveyrhtin and doing so smartly.
+
+
+## [Codex | 2026-09-20] VISUAL-COSMETICS-01 — queued cape, trail and level surface overhaul
+
+also another update to queue is to make a massive visual upgrade to the capes and trails cosmetic equips, they looks terrible. i want them to have physics like a real cpae, have more and better detyails, be colored in a way that fits the charceters, and look good and dont constatnly clip the character model. also i think there is still a lot of z fighting going on in the graphical designs of some levels so please check for that while you do the new level upgrade upadte too

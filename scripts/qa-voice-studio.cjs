@@ -2,7 +2,7 @@ async page=>{
  if(!page.url().startsWith('http://127.0.0.1:4333/'))throw Error('Local Voice Studio only');
  const checks=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n)};
  await page.goto('http://127.0.0.1:4333/3d/voice-studio/');await page.waitForFunction(()=>document.getElementById('status').textContent.length>0);
- if(await page.locator('#login').isVisible()){await page.locator('#ownerKey').fill('local-voice-test-key-012345678901234567890');await page.getByRole('button',{name:'Open studio',exact:true}).click()}
+ ok('no password form',await page.locator('#ownerKey').count()===0);
  await page.locator('#text').waitFor({state:'visible'});ok('42 shared-script lines',await page.locator('#lines button').count()===42);
  await page.evaluate(()=>{
   navigator.mediaDevices.getUserMedia=async()=>{const ctx=new AudioContext(),osc=ctx.createOscillator(),dest=ctx.createMediaStreamDestination();osc.frequency.value=180;osc.connect(dest);osc.start();await ctx.resume();return dest.stream};
@@ -25,6 +25,6 @@ async page=>{
  await page.reload();await page.locator('#text').waitFor({state:'visible'});await page.getByRole('button',{name:'Retry upload',exact:true}).first().click();await page.waitForFunction(()=>document.getElementById('status').textContent==='Recording saved online.');ok('pending take survives reload and retry',await page.locator('#recovery').isHidden());
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'output/playwright/voice-studio-mobile.png'});ok('phone layout no horizontal overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await page.setViewportSize({width:1280,height:900});await page.screenshot({path:'output/playwright/voice-studio-desktop.png'});
- await page.locator('#logout').click();await page.locator('#login').waitFor({state:'visible'});ok('logout hides private library',await page.locator('#studio').isHidden());
+ await page.context().clearCookies();await page.reload();await page.locator('#text').waitFor({state:'visible'});ok('fresh session opens without key',true);
  return checks;
 }

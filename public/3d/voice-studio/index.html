@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Bladefall · Voice Studio</title><link rel="stylesheet" href="studio.css"></head><body>
-<header><div><small>BLADEFALL · PRIVATE PRODUCTION</small><h1>Voice Studio</h1></div><button id="logout" hidden>Sign out</button></header>
+<header><div><small>BLADEFALL · PRODUCTION</small><h1>Voice Studio</h1></div></header>
 <main>
-<section id="login" class="panel"><h2>Your recording room</h2><p>Sign in with your private owner key. Your recordings and drafts are private; only a take you approve for the current wording becomes available to the game.</p><form id="loginForm"><label>Owner key<input id="ownerKey" type="password" autocomplete="current-password" required minlength="32"></label><button type="submit">Open studio</button></form><p class="muted">The key is kept in your private access file, not in the game repository. The studio works independently of Codex.</p></section>
+<section class="panel"><h2>Your recording room</h2><p>No sign-in needed. Anyone with this link can work on lines and recordings. Only a take approved for the current wording is used in the game.</p></section>
 <p id="status" role="status" aria-live="polite"></p>
 <div id="studio" hidden><p><a href="#editor">Jump to the selected recording line ↓</a></p>
 <section id="recovery" class="panel" hidden><h2>Recordings waiting to upload</h2><p>Your browser kept these takes. Retry when your connection is working. They are not backed up online until the upload succeeds.</p><div id="pending"></div></section>

@@ -4,7 +4,7 @@ const say=text=>{$('status').textContent=text;};
 const hash=async text=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),b=>b.toString(16).padStart(2,'0')).join('');
 async function api(path,options={}){
  const r=await fetch(API+path,{credentials:'same-origin',cache:'no-store',...options});let data;try{data=await r.json()}catch(_){throw Error('The server could not be reached. Your pending recording is still kept locally.')}
- if(!r.ok){if(r.status===401){$('login').hidden=false;$('studio').hidden=true;$('logout').hidden=true}throw Error(data.error||'Request failed.')}return data;
+ if(!r.ok)throw Error(data.error||'Request failed.');return data;
 }
 const post=(path,body)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 function db(){return new Promise((resolve,reject)=>{const r=indexedDB.open('bladefall-voice-recovery',1);r.onupgradeneeded=()=>r.result.createObjectStore('pending',{keyPath:'take'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
@@ -54,7 +54,7 @@ async function saveRecording(blob,line,duration,takeId){
 }
 async function work(fn){if(busy||recording)return;busy=true;lock();try{await fn()}catch(e){say(e.message)}finally{busy=false;lock()}}
 function lock(){
- for(const id of ['record','saveText','text','speaker','search','unfinished','refresh','restore','upload','next','backup','logout'])$(id).disabled=busy||!!recording;
+ for(const id of ['record','saveText','text','speaker','search','unfinished','refresh','restore','upload','next','backup'])$(id).disabled=busy||!!recording;
  $('stop').disabled=!recording||recording.state!=='recording';$('approve').disabled=busy||!!recording||!selected?.takes.some(t=>t.id===$('takes').value&&t.revision===selected.revision);
  $('takes').disabled=busy||!!recording;for(const b of $('lines').children)b.disabled=busy||!!recording;
 }
@@ -76,7 +76,7 @@ async function startRecording(){
   recording.start(1000);tick=setInterval(()=>{const sec=Math.floor((Date.now()-started)/1000);$('clock').textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec>=180&&recording?.state==='recording')recording.stop()},250);say('Recording. Stop when you finish the line.');
  }catch(e){for(const t of stream?.getTracks()||[])t.stop();stream=null;recording=null;say(e.name==='NotAllowedError'?'Microphone access was denied. Allow it in your browser settings, then try again.':e.message)}finally{busy=false;lock()}
 }
-async function audioBlob(t){const r=await fetch(API+'audio/'+t.id,{cache:'no-store'});if(!r.ok)throw Error('Could not download this take. Sign in again if needed.');return r.blob()}
+async function audioBlob(t){const r=await fetch(API+'audio/'+t.id,{cache:'no-store'});if(!r.ok)throw Error('Could not download this take. Check your connection and retry.');return r.blob()}
 const base64=buffer=>{let text='';const a=new Uint8Array(buffer);for(let i=0;i<a.length;i+=8192)text+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(text)};
 async function backup(){
  const line=structuredClone(selected);if(line.takes.reduce((n,t)=>n+t.bytes,0)>48*1024*1024)throw Error('This line has over 48 MB of takes. Download the originals individually before continuing.');
@@ -89,9 +89,7 @@ async function restoreBackup(file){
  for(const t of b.takes){if(typeof t.data!=='string'||t.data.length>17*1024*1024||typeof t.text!=='string'||await hash(t.text)!==t.revision)throw Error('Backup text check failed.');const bytes=Uint8Array.from(atob(t.data),c=>c.charCodeAt(0));const sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');if(sha!==t.sha)throw Error('Backup audio check failed.');const row={id:b.line.id,take:t.id,text:t.text,revision:t.revision,duration:t.duration,blob:new Blob([bytes],{type:t.mime}),created:Date.now()};await pendingStore('put',row);await uploadPending(row)}
  await refresh();say('Backup takes restored. Current wording and official selection were kept. To use older wording, copy it from the take details, save it, then approve that take.');await recovery();
 }
-$('loginForm').onsubmit=e=>{e.preventDefault();work(async()=>{await post('login',{key:$('ownerKey').value.trim()});$('ownerKey').value='';await enter()})};
-async function enter(){await refresh(false);$('login').hidden=true;$('studio').hidden=false;$('logout').hidden=false;await recovery();say('Signed in. Select a line to begin.');}
-$('logout').onclick=()=>work(async()=>{await post('logout',{});$('player').pause();catalog=[];selected=null;$('studio').hidden=true;$('login').hidden=false;$('logout').hidden=true;say('Signed out. Unsynced local takes remain on this device.')});
+async function enter(){await refresh(false);$('studio').hidden=false;await recovery();say('Select a line to begin.');}
 for(const id of ['speaker','search','unfinished'])$(id).oninput=refreshList;
 $('refresh').onclick=()=>work(async()=>{if(selected&&$('text').value!==selected.text&&!confirm('Refresh and discard unsaved wording?'))return;await refresh();await recovery();say('Library refreshed.')});
 $('saveText').onclick=()=>work(async()=>{await post('line',{id:selected.id,version:selected.version,text:$('text').value});await refresh();say('Wording saved. Older takes are preserved; only matching wording can be approved.')});

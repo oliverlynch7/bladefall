@@ -1023,6 +1023,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <link rel="stylesheet" href="./hub-dialogue.css?v=1989">
 <script src="./voice-content.js?v=1989"></script>
 <script src="./hub-dialogue.js?v=1990"></script>
+<script src="./rift-shards.js?v=1992"></script>
 <script src="./story-state.js?v=1987"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
@@ -1039,7 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.991.0-gus-rehearsal';
+const VERSION3D='1.992.0-open-studio';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1074,7 +1075,7 @@ const GLOBAL_FIELDS=['hubDialogue','dialogueVoice','dialogueTTS','unlockedSkins'
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -1088,7 +1089,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},arcadeOwned:false,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
+  riftShards:[],hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 // One-time: over-the-shoulder is the new default camera. Flip saves still on the old 'far' default
@@ -1146,6 +1147,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
   meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
   meta.trialsDone=mv.trialsDone&&typeof mv.trialsDone==='object'?mv.trialsDone:{};
+  meta.riftShards=BFRiftShards.normalize(mv.riftShards);
   meta.sideFound=mv.sideFound&&typeof mv.sideFound==='object'?mv.sideFound:{};
   meta.sideDone=mv.sideDone&&typeof mv.sideDone==='object'?mv.sideDone:{};
   // pets (migrates old saves cleanly — no pet fields => an empty Pet Yard)
@@ -2900,7 +2902,8 @@ function briarSync(){
  if(!isCampaignAdventure())return;
  const s=adventureStoryState();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
-  G.storyClaims[id]=true;if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast('Mara thanks you · +'+gold+' gold');}
+  if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast('Mara thanks you · +'+gold+' gold');G.storyClaims[id]=true;}
+  else if(reward.kind==='rift_shard'&&id==='briar.gus.BR-02'){const outcome=collectRiftShard('BR-02');if(outcome!=='invalid')G.storyClaims[id]=true;}
  }
  if(!inBriar())return;
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
@@ -4777,7 +4780,24 @@ function skipTrial(){
   toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
 }
 function abandonTrial(){ restoreBank(); openHub(); }
+// Authored placements are enabled region-by-region with their complete five-shard routes.
+// Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
+function collectRiftShard(id){
+ if(!isCampaignAdventure()||!G.p||G.p.dead)return 'invalid';
+ const result=BFRiftShards.collect(meta.riftShards,G.pendingRiftShards,id);
+ G.pendingRiftShards=result.pending;
+ if(result.outcome==='found'){playFx('secretget');toast('Rift Shard found — finish this part to keep it.','#c47bff','event-secret-rift');}
+ else if(result.outcome==='echo'){const gold=awardGold(120);toast('A shard you already saved — +'+gold+' gold.','#c9b6ff','event-secret-rift');}
+ return result.outcome;
+}
+function secureRiftShards(){
+ if(!isCampaignAdventure())return;
+ meta.riftShards=BFRiftShards.bank(meta.riftShards,G.pendingRiftShards);
+ G.pendingRiftShards=BFRiftShards.pending();
+}
 function securePendingSecret(){
+  // Both host and guest call this boundary with their own collected shards.
+  secureRiftShards();
   // A claimed secret becomes permanent when its half is completed alive.
   if(G.pendingSecret){ const ps=G.pendingSecret; G.pendingSecret=null;
     if(!meta.sideFound[ps.id]){ meta.sideFound[ps.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; grantIansShard(ps.id); checkCosmetics(); persist();
@@ -21065,7 +21085,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={ campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={ collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

@@ -11,23 +11,21 @@ class Bucket{
  async get(key){const r=this.data.get(key);return r?{...r,json:async()=>JSON.parse(new TextDecoder().decode(r.bytes)),body:r.bytes}:null}
  async head(key){return this.data.get(key)||null}
 }
-const key='test-owner-key-012345678901234567890123456789';
-const env={VOICE_BUCKET:new Bucket(),VOICE_OWNER_KEY_SHA256:await digest(key),VOICE_SESSION_SECRET:'test-session-secret-012345678901234567890'};
+const env={VOICE_BUCKET:new Bucket()};
 let cookie='';
 async function call(path,{body,method=body?'POST':'GET',origin='https://bladefall.pages.dev',auth=true}={}){
  const headers={};if(auth&&cookie)headers.Cookie=cookie;if(method==='POST')headers.Origin=origin;let payload;
  if(body instanceof FormData)payload=body;else if(body){headers['Content-Type']='application/json';payload=JSON.stringify(body)}
  return handle(new Request('https://bladefall.pages.dev/voice-api/'+path,{method,headers,body:payload}),env);
 }
-assert.equal((await call('catalog')).status,401);
-assert.equal((await call('login',{body:{key},origin:'https://evil.example'})).status,403);
-assert.equal((await call('login',{body:{key:'bad'}})).status,401);
-const login=await call('login',{body:{key}});assert.equal(login.status,200);assert.match(login.headers.get('Set-Cookie'),/HttpOnly; Secure; SameSite=Strict/);cookie=login.headers.get('Set-Cookie').split(';')[0];
+assert.equal((await call('catalog',{auth:false})).status,200);
+assert.equal((await call('line',{body:{},origin:'https://evil.example'})).status,403);
+assert.equal((await handle(new Request('https://bladefall.pages.dev/voice-api/status'),{VOICE_BUCKET:env.VOICE_BUCKET})).status,200,'no secret config required');
 let {lines}=await(await call('catalog')).json();assert.equal(lines.length,Object.keys(book.nodes).length);assert.equal(lines.filter(l=>l.id.startsWith('briar.gus.')).length,10);let line=lines[0];
 const wav=new Uint8Array(100);wav.set(new TextEncoder().encode('RIFF'));const take='test-take-123456';
 function form(){const f=new FormData();f.set('metadata',JSON.stringify({id:line.id,take,text:line.text,revision:line.revision,duration:1}));f.set('audio',new Blob([wav],{type:'audio/wav'}),'take.wav');return f}
 let r=await call('take',{body:form()});assert.equal(r.status,200);line=(await r.json()).line;
-assert.equal((await call('audio/'+take,{auth:false})).status,401);
+assert.equal((await call('audio/'+take,{auth:false})).status,200);
 assert.equal((await call('published/'+line.id+'/'+take,{auth:false})).status,404);
 r=await call('take',{body:form()});assert.equal((await r.json()).line.takes.length,1,'retries dedupe takes');
 r=await call('approve',{body:{id:line.id,take,version:line.version}});assert.equal(r.status,200);line=(await r.json()).line;
@@ -37,9 +35,9 @@ const staleVersion=line.version;r=await call('line',{body:{id:line.id,text:'A ne
 assert.equal((await call('published/'+line.id+'/'+take,{auth:false})).status,404,'edited wording withdraws stale audio');
 assert.equal((await call('approve',{body:{id:line.id,take,version:line.version}})).status,400,'stale take cannot be approved');
 assert.equal((await call('line',{body:{id:line.id,text:'overwrite',version:staleVersion}})).status,409);
-assert.equal((await call('audio/'+take)).status,200,'older take remains private and recoverable');
-cookie+='x';assert.equal((await call('catalog')).status,401,'forged cookie rejected');
-console.log('Voice API passed: private reads, origin checks, owner login/cookie, immutable upload/deduplication, exact approval, stale-audio withdrawal, old-take retention, conflicting edits, forged session.');
+assert.equal((await call('audio/'+take)).status,200,'older take remains recoverable');
+cookie='obsolete-cookie';assert.equal((await call('catalog')).status,200,'old cookies do not block access');
+console.log('Voice API passed: password-free reads/writes, origin checks, no secret config, immutable upload/deduplication, exact approval, stale-audio withdrawal, old-take retention, conflicting edits, old-cookie compatibility.');
 
 if(process.argv[2]){
  const backup=JSON.parse(await fs.readFile(process.argv[2],'utf8'));env.VOICE_BUCKET=new Bucket();cookie=cookie.slice(0,-1);

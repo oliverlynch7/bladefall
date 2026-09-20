@@ -20,3 +20,8 @@ Existing regressions: 17 hub dialogue checks, five voice/mouth timing checks, 13
 Screenshots: /3d/art-previews/briar-story/. Stable 12 Thomas/Mara lines and their voice metadata/recording IDs are unchanged; the Studio still has 32 total lines. No fake recordings uploaded. Existing characters, weapon fits and equipment progression preserved.
 
 Remaining: complete Briar optional cast/branch consequences, five individual Rift Shards, broader village art/layout expansion, Black Woods and unique boss; then other planned regions. Other regions still contain legacy story/layout content and must not be described as canon-migrated. Cape/trail overhaul and per-level z-fighting audit remain queued. Existing missing glow-gauntlet icon request observed during old-save hub QA is unrelated and remains open.
+
+
+## Production verification — September 20
+
+5b9537c gameplay and ffa367e evidence pushed to main. Cloudflare Pages deployment a208c4ef-3610-49bf-be77-f49e6b6306af succeeded. Production browser confirmed 1.990.0-briar-opening, story authority loaded, 12 unchanged Briar dialogue lines and eight world events, private catalog rejects unauthenticated reads (401), and all four gallery screenshots load at 390px without horizontal overflow. Production save state was not modified for quest testing. First production check reached the preceding deployment while the build was in progress; refreshed after confirmed success and passed.

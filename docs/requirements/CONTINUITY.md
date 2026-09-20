@@ -109,3 +109,8 @@ Continued approved implementation; no new design decision. MAP-01, DLG-02/06/07/
 ## [Codex | 2026-09-20] Gus recording-ready optional quest
 
 Continued approved DLG-03/04 and VO-PRIORITY-01: ten new stable Gus lines in the private Voice Studio (42 total), with performance notes. Separate rehearsal supports tool delivery, once-only BR-02 reward/shortcut, insult, sign-repair apology, final refusal, leave/resume and retry. No new user design decisions. All original Thomas/Mara/hub lines unchanged. Gus remains rehearsal-only: live placement, physical five-shard collection/banking and Rift Hall integration remain OPEN, alongside Black Woods, remaining regions/bosses and the broader requirements register. See IMPLEMENTATION_GUS_VOICE_2026-09-20.md.
+
+## Production verification — Gus recording batch
+
+f148585 deployed successfully through Cloudflare Pages (4d1e497c-f6ab-4150-9405-1bd614fb4e5e). Private decision archive 2026-09-20-gus-voice contains 132 user-role messages, zero unparsed lines and valid requirement source references. The initial production check reached the old deployment while the build was still running; verify again after success. Live Gus placement remains intentionally pending the five-shard integration.
+After deployment success, the production browser confirmed all ten Gus lines, the rehearsal-only notice and unauthenticated catalog rejection (401).

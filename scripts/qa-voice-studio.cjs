@@ -28,4 +28,3 @@ async page=>{
  await page.locator('#logout').click();await page.locator('#login').waitFor({state:'visible'});ok('logout hides private library',await page.locator('#studio').isHidden());
  return checks;
 }
-

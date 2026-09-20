@@ -93,3 +93,4 @@ Every available substantive record is preserved verbatim. This index maps decisi
 | U103 | DLG-07, STORY-03: revised cast approved, Thomas for dad |
 | U104 | LV-10/11, DLG-08, UI-05: all recommended defaults approved; fixed major and limited changing code puzzles |
 | U105 | SAVE-04 resolved; GOV-07 plans all levels then back-to-back implementation |
+| U106 | GOV-01 reaffirmed; preservation check, not approval of all draft content |

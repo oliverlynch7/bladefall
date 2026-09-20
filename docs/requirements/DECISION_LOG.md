@@ -21,3 +21,7 @@ SAVE-04 ambiguity is now resolved, superseding earlier log's open status. GOV-07
 Created CAMPAIGN_EXPANSION_PLAN.md: all eight levels, sixteen halves, NPC purpose and main/optional/discovery quest beats, five identified shard routes per region, eight distinct boss/arena plans, healing/shortcuts, story transitions, hub return content, implementation dependencies and validation gates. Newly authored details remain proposals; unresolved major canon is labeled. No gameplay changed.
 
 Documentation verification passed: eight region sections, sixteen half sections, forty unique region shard IDs (five each), all thirty-two approved cast entries, source references and relative document links. Fresh private raw archive contains 105 user-role records and zero unparsed lines. These structural checks do not validate unimplemented gameplay, difficulty or narrative quality.
+
+## 2026-09-19 | Ongoing preservation confirmed | U106
+
+User reaffirms that original replies and resulting decisions must be stored for implementation. Continues GOV-01; no new gameplay decision and no blanket approval of the newly drafted campaign details. Checked U100–U105 decisions already recorded: approved cast, interaction/puzzle defaults, checkpoint quit/disconnect resolution and plan-first sequence. Preserve proposals separately from approvals. U106 original wording stored in USER_SOURCE_2026-09-19_STORAGE_CHECK.md.

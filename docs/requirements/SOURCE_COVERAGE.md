@@ -87,3 +87,9 @@ Every available substantive record is preserved verbatim. This index maps decisi
 | U097 | GOV-02, MP-05, BOSS-01–04, LV-01 |
 | U098 | LV-05/07, MAP-01, STORY-03, GOV-01 |
 | U099 | GOV-01 |
+| U100 | Preservation status question; no gameplay requirement |
+| U101 | Requested two-half cast planning, developed in campaign plan |
+| U102 | DLG-07: readable distinctive personality-fitting names |
+| U103 | DLG-07, STORY-03: revised cast approved, Thomas for dad |
+| U104 | LV-10/11, DLG-08, UI-05: all recommended defaults approved; fixed major and limited changing code puzzles |
+| U105 | SAVE-04 resolved; GOV-07 plans all levels then back-to-back implementation |

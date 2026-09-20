@@ -1,6 +1,7 @@
 # Campaign story outline — first authored pass
 
 > SUPERSEDED HISTORICAL DRAFT — September 19 reconciliation: use REQUIREMENTS_REGISTER.md.
+> Current proposed replacement: CAMPAIGN_EXPANSION_PLAN.md (eight regions, both halves).
 > This draft predates one castle Hollow Gate, Storm Coast/hydra, updated class mappings,
 > Sunspire's knowledge orb, adoption and spirit lore. Do not implement its Gate-building
 > quests, Abyss region, old names or NPC inventions as approved content. Dialogue files in

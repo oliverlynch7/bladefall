@@ -44,7 +44,8 @@ def main():
                 'files': hashes}
     (destination / 'manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
     register = (repo / 'docs/REQUIREMENTS_REGISTER.md').read_text(encoding='utf-8')
-    originals = (repo / 'docs/requirements/USER_SOURCE_2026-09-19.md').read_text(encoding='utf-8')
+    originals = '\n'.join(p.read_text(encoding='utf-8') for p in
+                          sorted((repo / 'docs/requirements').glob('USER_SOURCE_*.md')))
     refs = set(re.findall(r'\bU\d{3}\b', register))
     known = set(re.findall(r'^## (U\d{3})', originals, re.M))
     missing = sorted(refs - known)

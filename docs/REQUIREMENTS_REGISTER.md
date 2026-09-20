@@ -1,6 +1,6 @@
 # Bladefall — reconciled requirements register
 
-Baseline: September 19, 2026 (America/Los_Angeles). Owner: Oliver. Source range: U002–U099 in [the verbatim source record](requirements/USER_SOURCE_2026-09-19.md). This is the primary implementation checklist, not a claim that the features are shipped.
+Baseline: September 19, 2026 (America/Los_Angeles). Owner: Oliver. Source range: U002–U105 in [the original source record](requirements/USER_SOURCE_2026-09-19.md) and [its continuation](requirements/USER_SOURCE_2026-09-19_CONTINUED.md). Current creative draft: [complete campaign expansion plan](CAMPAIGN_EXPANSION_PLAN.md). This is the primary implementation checklist, not a claim that the features are shipped.
 
 ## Authority and status
 
@@ -18,6 +18,7 @@ Decision labels: **A** approved requirement; **P** proposal/preference awaiting 
 | GOV-04 | A | Browser performance is a hard constraint. Keep the icon-inspired voxel/low-poly direction, distinctive level palettes and silhouettes; do not pursue realism or excessive polygons. | U004–U005,U009,U039,U079 §74 |
 | GOV-05 | A | Preserve preferred existing player models, animations, weapon models and hand-adjusted fitting; fix fit and equipped-model selection. Experimental Warrior replacement was preview-only and not adopted. | U036,U059–U061 |
 | GOV-06 | A | Provide mobile-viewable screenshots of worlds/enemies and animation previews for QA. Explain completed work and what comes next. Main production target is bladefall.pages.dev; earlier autopilot preview was an earlier target. | U008,U012–U013,U029,U035,U051,U054 |
+| GOV-07 | A | Draft all remaining campaign levels before the back-to-back implementation run. Do not require a fresh broad design approval between every level once plans are settled. Continue validation per batch; user review may steer work without requiring a stop after Briar. | U105 |
 
 ## Equipment, classes and progression
 
@@ -53,6 +54,8 @@ Decision labels: **A** approved requirement; **P** proposal/preference awaiting 
 | LV-07 | A | Some puzzles gate required main passages; most are optional for side quests, valuable distinctive gear, shards and secrets. Hints only sometimes from NPCs; harder puzzles can rely on environment alone. Cryptic but actionable, never useless poetry or automatic answers. | U071,U078,U098 |
 | LV-08 | A | Chest tiers common through legendary bias drops toward their tier with occasional lower/higher results. Some chests require three-digit codes inferred from puzzles/counting/environmental clues. | U078 |
 | LV-09 | A | Big healing pads are exceptionally rare, grander and unlimited to full health. Small pads are limited and may be scattered along routes. Mara's early quest restores a big pad and teaches this distinction. | U078,U085 |
+| LV-10 | A | Fixed major puzzles plus a small number of changing optional code puzzles. Clues and generated answer always agree. Required puzzles test understanding, not obscure guessing; no required clue depends only on color or audio. | U104, approved defaults preserved in continuation |
+| LV-11 | A | Environmental interactions have consistent readable cues; puzzle progress visibly changes mechanisms/routes. All co-op puzzles are solo-solvable; extra players can improve coordination without being required. | U104 |
 
 ### Region-by-region decisions (all implementation UNVERIFIED)
 
@@ -67,7 +70,7 @@ Decision labels: **A** approved requirement; **P** proposal/preference awaiting 
 | MAP-07 Sunspire Palace | Beautiful elevated marble palace/library of sacred wisdom, seized by Legion for knowledge. Retake it and access formerly restricted magical orb allowed one question; seek King's location/how to reach and stop him. Paladin unlock. Sources U086–U087,U090. | Palace Courtyard / The Sky Library; caretaker/record keeper/defender; exact single-question wording and answer scope. Do not silently promise multiple omniscient answers or reveal player early. |
 | MAP-08 Castle Duskmoor | Hidden distant castle, revealed through Sunspire. Disguise set quest and guard dialogue can avoid extremely hard horde. Single central Hollow Gate visible from final arena. Necromancer unlock after castle. Sources U079,U085,U090. | Castle Gates / Long Ascent; servant/armor maker, exact infiltration clues. Trial available after ending was a proposed default broadly accepted during planning, not yet implemented. |
 
-Names marked proposed are not newly locked by this register. Exact NPC names, numbers, biographies and dialogue must be reviewed by level. Do not give every region equal NPC counts. Unknown creators, relatives, magic rules and connections stay open.
+Working half names remain proposals where not explicitly accepted. U103 approves the revised NPC names and broad personalities: Thomas/Mara/Gus/Lewis/Beth; Caleb/Skip/Captain Ward/Ruth; Grant/Felix/Walter/Sly; Heath/Professor Ellis/Hugo; Flint/Jack/Foreman Pike/Martin; Otto/Captain Rose/Abe/Dash; Sister Grace/Sergeant Victor/Master Hugh/Simon; Roland/Gate Captain Cross/Miles/Abyss King. Thomas is dad. See the preserved assistant naming proposal referenced by U103 and CAMPAIGN_EXPANSION_PLAN.md for roles. Do not give every region equal NPC counts. Unknown creators, relatives, magic rules and connections stay open.
 
 ## Boss and combat presentation overhaul
 
@@ -102,7 +105,7 @@ Names marked proposed are not newly locked by this register. Exact NPC names, nu
 | SAVE-01 | A | Verify player levels, class ranks and all character state persist correctly. Hub auto-saves gains, spending, cheats and mode rewards continuously at meaningful transactions. | U061,U073 |
 | SAVE-02 | A | Collected shards only become permanent on completing their half. First-half completion banks those even if second half/boss later fails. Second-half entry to boss banks second-half shards. Unbanked shards lost on failed half; banked duplicates gray out or award gold. | U073 |
 | SAVE-03 | A | Death restarts beginning of the current half and undoes that half's progress, not the entire level. Keep earlier banked half. | U075 |
-| SAVE-04 | A/O | Quit/disconnect must preserve pre-entry character/XP/gold and discard uncommitted run gains. U073 explicitly said original level-entry state; subsequent U075 explicitly changed death to half restart, not expressly quit. Assistant later generalized half snapshots to quits. Do NOT silently canonize that: decide whether quitting half two keeps half-one non-shard gains and resume position. Banked shard survival is explicit. | U073,U075 |
+| SAVE-04 | A | RESOLVED: quit/disconnect keeps completed halves and their banked progress, discards unfinished-half gains, resumes at current half's beginning, matching death checkpoints. Preserve completed-half character state, XP/gold and shards; hub auto-save remains. This supersedes original whole-level quit rollback. | U073,U075,U105 |
 | SAVE-05 | A/O | Dialogue/world progress resets for replay/restart, while leaving an NPC conversation alone resumes at the same point that run. Hub first introductions once per save. Exact checkpoint snapshot/reset treatment for shared world and optional rewards needs tests and a defined contract. | U072,U075,U078 |
 | MP-01 | A | Shared campaign quests, dialogue, puzzles, unlocks/environment changes, enemies and enemy health synchronized. NPC interaction pauses all players and frames same NPC/dialogue for everyone. | U072,U075–U076 |
 | MP-02 | A | Environmental shards require each player to physically collect them. NPC quest progress and rewards apply together without making every player repeat conversation or turn-in. | U075–U076 |
@@ -120,10 +123,13 @@ Names marked proposed are not newly locked by this register. Exact NPC names, nu
 | DLG-04 | A | Manage branching and recording workload: choices should feel real without exponential options or overwhelming fear of missing paths. Discovered NPCs need not be marked main objectives. Vary count across regions. | U071,U078 |
 | DLG-05 | A | All hub NPCs introduce themselves and services once per new save, never repeatedly. Campaign milestones add visible new dialogue, clues, side quests and return trips with newly appearing objectives. Separate shopping from optional What changed? dialogue. | U077–U078 |
 | DLG-06 | A | Visible world consequences: restored pads, moved/open routes, assistance, spawns and useful NPC overhead state markers. No purely invisible completion. Marker icon vocabulary still design work. | U078 |
+| DLG-07 | A | Names familiar, distinct across whole cast, suited to personality/role. Avoid tongue-twisting fantasy names and similar names such as Pell/Nell except intentional relatives. Revised cast approved, Thomas for father. | U102–U103 |
+| DLG-08 | A | Choices accurately convey player's intended speech; no good/bad labels or surprise harsher wording. Leaving never selects an option; resume position retained during visit. Skipping text reveal cannot accidentally select next response. | U104 |
 | UI-01 | A | Simple journal of relevant current-level tasks/clues, not every remark. Keyboard shortcut (J proposed). Bag shortcut B approved. | U078 |
 | UI-02 | A | Optional directional objective arrows; subtle horizontal rotating cardinal compass. | U071 |
 | UI-03 | A | Rebuild buggy E prompts with smart target selection/readable interaction. Widen upper-left HUD to avoid overlap; unique main-menu icons; logically organized settings. | U061,U078 |
 | UI-04 | A | Fix the hub mirror regression and verify appearance changes, preview and return to gameplay remain functional. | U061 |
+| UI-05 | A | Quest items are tracked in a small journal section, outside gear bag capacity, and required items cannot be accidentally sold. | U104 |
 | VO-01 | A | Device TTS optional in settings; simple mouth motion only while speech plays. No precise lip sync required. Unrecorded lines may use optional TTS or silence. Player-response voice unresolved; do not force it. | U072–U073,U079 |
 | VO-02 | A | Private voice studio subpage, Oliver only account, usable phone and desktop. Wife records at his setup. Prefer fewer female roles due available performers, not zero female characters. | U077–U079 |
 | VO-03 | A | Organize by character/scene/order. Show script plus scene context, emotional direction and notes; record, playback, retake, edit wording, and explicitly Approve/Save as official line. Distinct contexts for recurring NPC conversations. | U077–U079 |
@@ -169,7 +175,7 @@ The entire 100-section brief is preserved verbatim in U079, including open quest
 - Paladin at Emberdeep -> Sunspire. Necromancer at Palace -> after Duskmoor. Pirate at Keep -> Storm Coast. Reaper old Abyss -> Keep. Warlock-at-castle assistant idea not adopted.
 - Firebinder rejected -> Pyromancer. Reaper scythe 'maybe intrinsic' -> committed intrinsic; compensation proposal -> delete old scythes safely, no compensation.
 - Earlier each-player NPC turn-in -> shared NPC progression/reward. Physical environmental shards remain individual.
-- Original whole-level death reset -> current-half restart. Quit/disconnect scope still explicitly flagged SAVE-04.
+- Original whole-level death/quit rollback -> current-half restart; U105 explicitly settles quit/disconnect to match completed-half banking.
 - Trial portals as crystals containing portals / clumsy accidental Legion destruction -> crystalline rifts themselves deliberately thrown by scholar to save disciplines.
 - Direct Ian descendant/brother/failed Ian/secret Ian name/ancient dream King in old drafts -> current canonical story. Adoption does not cause genetics.
 - Reject confusing names: Dry Wash, Rime Shelf, Caravan Trail, Prison Below, Black Scar, Broken Lands, King's Vaults, Colonnade, Weapon Forge, Silent City. Avoid 'sluice' in player directions. U071,U085–U087.
@@ -181,8 +187,8 @@ The entire 100-section brief is preserved verbatim in U079, including open quest
 1. Preserve/reconcile sources and decision register (this documentation task). Resolve only ambiguities needed for the next batch; do not stall unrelated approved work.
 2. Equipment/progression: family mapping, intrinsic weapons, safe removal, cheat, bag, scaling. Test representative saves, every class-family pair and weapon basic/charge behavior. No double scaling.
 3. Adventure foundations: persistence/half snapshots, shared state, quests/dialogue/journal/compass, shards, inventory rewards, prompts, settings. Establish stable voice IDs now. Test death, quit, refresh, disconnect, duplicate rewards, replay and co-op ordering.
-4. Review Briar people/quest outline, implement full two-half slice, verify all main routes and optional choice branches, inspect visuals/performance. User QA before repeating architecture everywhere.
-5. Review then redesign EVERY remaining region, both halves and every boss/arena, with dialogue, environmental puzzles, discoveries and five distinct shard routes. Include sailing, hydra mercy, palace orb, infiltration, King phases and restorative ending.
+4. Draft the whole campaign before the back-to-back implementation run (U105); then implement Briar full two-half slice and verify main routes, optional choices, visuals and performance before extending its shared systems.
+5. Implement EVERY remaining planned region, both halves and every boss/arena, with dialogue, environmental puzzles, discoveries and five distinct shard routes. Include sailing, hydra mercy, palace orb, infiltration, King phases and restorative ending. Do not impose mandatory user QA pauses between every level; keep previews and progress available.
 6. Rift Hall/mentors/Pyromancer/Necromancer gate alongside their dependency regions, not forgotten until after level content. Companion/mount and return-visit side content scheduled explicitly.
 7. Voice studio, recordings, hub intros and reactions, final polish, progression playtesting, browser/phone-preview/co-op QA. Secondary modes remain later backlog.
 

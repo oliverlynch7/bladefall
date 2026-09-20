@@ -941,6 +941,102 @@
           "id": "gus.sign_fixed"
         }
       ]
+    },
+    "home.bell.clue": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "home.bells",
+          "region": "outskirts",
+          "title": "The farm bells",
+          "text": "The tower stone reads: First the sun wakes us. Then water feeds the fields. Last, wheat fills our tables. Three bells carry those marks."
+        }
+      ]
+    },
+    "home.bell.sun": {
+      "when": [
+        {
+          "flag": "home.bells.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "home.bells",
+          "value": "sun",
+          "solution": [
+            "sun",
+            "water",
+            "wheat"
+          ]
+        }
+      ]
+    },
+    "home.bell.water": {
+      "when": [
+        {
+          "flag": "home.bells.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "home.bells",
+          "value": "water",
+          "solution": [
+            "sun",
+            "water",
+            "wheat"
+          ]
+        }
+      ]
+    },
+    "home.bell.wheat": {
+      "when": [
+        {
+          "flag": "home.bells.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "home.bells",
+          "value": "wheat",
+          "solution": [
+            "sun",
+            "water",
+            "wheat"
+          ]
+        }
+      ]
+    },
+    "home.bell.cache": {
+      "once": true,
+      "when": [
+        {
+          "flag": "home.bells.open",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "reward",
+          "id": "home.bells.cache",
+          "kind": "gold",
+          "amount": 180
+        },
+        {
+          "type": "note",
+          "id": "home.bells",
+          "region": "outskirts",
+          "title": "The farm bells",
+          "text": "The bells opened the old tower chest. We recovered the coins inside."
+        }
+      ]
     }
   }
 }

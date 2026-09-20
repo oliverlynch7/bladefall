@@ -30,6 +30,14 @@
           if(!Number.isSafeInteger(e.amount))throw Error('Invalid item amount');
           const count=(s.items[e.id]||0)+e.amount;if(count<0)throw Error('Missing quest items');s.items[e.id]=count;break;
         }
+        case 'sequence':{
+          if(!Array.isArray(e.solution)||!e.solution.length||!e.solution.includes(e.value))throw Error('Invalid sequence');
+          if(s.flags[e.id+'.open'])break;
+          const at=Number(s.items[e.id]||0);
+          s.items[e.id]=e.value===e.solution[at]?at+1:(e.value===e.solution[0]?1:0);
+          if(s.items[e.id]===e.solution.length)s.flags[e.id+'.open']=true;
+          break;
+        }
         case 'quest':if(!['active','complete','closed'].includes(e.value))throw Error('Invalid quest state');s.quests[e.id]=e.value;break;
         case 'note':s.notes[e.id]={region:e.region,title:e.title,text:e.text};break;
         case 'reward':if(!own(s.rewards,e.id))s.rewards[e.id]={kind:e.kind,amount:e.amount,claimed:false};break;

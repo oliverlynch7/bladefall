@@ -292,3 +292,13 @@ Continued approved DLG-03/04 and VO-PRIORITY-01: ten new stable Gus lines in the
 ## [Codex | 2026-09-20] Explicit access change
 
 User: “You can remove the password protection for the voice studio for now. No need. And then continue building”. Supersedes the earlier owner-only Voice Studio requirement for now. Studio reads, edits, recordings and approvals are available without login. Keep take preservation, version checks and same-origin write protections. No secrets are published.
+
+
+## [Codex | 2026-09-20] Landscape-first scope reinforced
+
+User approves beginning substantial Homefields expansion with discoverable puzzles and abundant engaging content. Terrain, branches, topography and playability should precede final location-dependent NPC scripts. Each level should feel like entering a unique open world, with optional navigation assistance that does not reveal secrets. Longer levels are welcome; avoid empty length or repeated structures. This reinforces GOV-02/MAP requirements, not a reduction to NPC and shard placement.
+
+
+## [Codex | 2026-09-20] Ground-up layout permission
+
+User explicitly permits replacing any existing level layout from the ground up. Preserve established assets/theming where useful, and author new assets/details as needed for coherent, beautiful environments. This applies to all levels. Existing footprint is not a constraint; current Homefields wings are a first playable terrain iteration, not approval to retain the old core permanently.

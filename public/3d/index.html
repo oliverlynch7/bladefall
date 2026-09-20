@@ -1040,7 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.992.0-open-studio';
+const VERSION3D='1.993.0-homefields-exploration';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2902,13 +2902,14 @@ function briarSync(){
  if(!isCampaignAdventure())return;
  const s=adventureStoryState();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
-  if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast('Mara thanks you · +'+gold+' gold');G.storyClaims[id]=true;}
+  if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast((id==='home.bells.cache'?'Tower chest opened':'Quest complete')+' · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='rift_shard'&&id==='briar.gus.BR-02'){const outcome=collectRiftShard('BR-02');if(outcome!=='invalid')G.storyClaims[id]=true;}
  }
  if(!inBriar())return;
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
+ if(G.homefieldsExploration){const count=s.items['home.bells']||0;if(G._bellProgress!==undefined&&G._bellProgress!==count){playFx('lever');toast(friendlyBellText(count,s.flags['home.bells.open']));}G._bellProgress=count;}
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
@@ -2975,7 +2976,55 @@ function buildBriarOpening(){
  for(const e of G.enemies)if(Math.hypot(e.x-230,e.z+3490)<420)e.briarGuard=true;
  G.campaignLayout.experience={title:'Briar Town: Homefields',objectives:['Help Mara treat the neighbors','Repair the mill crossing','Open a route out of Briar'],revision:3};
  G.rooms[0].name='Briar Homes';G.rooms[1].name='Overrun Fields';G.rooms.at(-1).name='Wagon Gate';
+ buildHomefieldsExploration();
  G.portal=null;briarPending=null;briarEpoch();briarSync();
+}
+function friendlyBellText(n,open){return open?'The tower chest clicks open.':n?'A clear note rings out.':'The notes fade. Try the bells again.';}
+function buildHomefieldsExploration(){
+ // Broad connected wings preserve the main northward evacuation spine.
+ const districts=[{name:'West Farm Valley',x:-2300,z:-850,w:1200,d:1100,y:0},{name:'Orchard Lookout',x:-2380,z:-1760,w:900,d:700,y:0},{name:'East Pastures',x:2030,z:-760,w:1050,d:1050,y:0},{name:'Bell Tower Ridge',x:2220,z:-1740,w:900,d:800,y:0}];
+ const paths=[[[-550,-400],[-1400,-550],[-2300,-850]],[[-2300,-850],[-2380,-1760],[-1700,-1820],[-900,-1710]],[[440,-410],[1150,-480],[2030,-760]],[[2030,-760],[2220,-1740],[1640,-1850],[1110,-1840]]];
+ const tiles=[];
+ for(const path of paths)for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/140);for(let j=0;j<=n;j++){const t=j/n;tiles.push({x:a[0]+(b[0]-a[0])*t,z:a[1]+(b[1]-a[1])*t,w:350,d:350});}}
+ const clear=o=>Math.abs(o.x)<650||!tiles.some(t=>Math.abs(o.x-t.x)<t.w/2+(o.w||0)/2+30&&Math.abs(o.z-t.z)<t.d/2+(o.d||0)/2+30);
+ G.obstacles=G.obstacles.filter(clear);G.deco=G.deco.filter(clear);
+ for(const t of tiles)vseg(t.x,t.z,t.w,t.d,{meadow:true});
+ for(const r of districts){vseg(r.x,r.z,r.w,r.d,{meadow:true});G.rooms.push({...r,monsters:[],encounter:false,cleared:true});}
+ // Valley terraces: low dry-stone retaining walls, open lanes, tall hay shelters.
+ for(let k=0;k<4;k++){
+  const x=-2650+k*205;vplat(x,-1100,12+k*10,170,260,{terrain:true});
+  for(let j=0;j<5;j++)G.deco.push({x:x-55+j*27,z:-1140,y0:13+k*10,w:6,h:32,d:6,c:'#c7a24d',kind:'corn',nocol:true});
+ }
+ for(const x of [-2720,-1870]){vsolid(x,-680,0,110,75,110,'#a88d50');G.deco.push({x,z:-680,y0:76,w:135,h:20,d:130,c:'#725235',nocol:true});}
+ // Orchard climb has a broad ground route beneath it and recovery shelves.
+ const steps=[[-2700,-1490,24],[-2700,-1610,52],[-2700,-1730,80],[-2620,-1840,108],[-2490,-1840,136],[-2360,-1840,164]];
+ for(const [x,z,y]of steps)vplat(x,z,y,150,150,{terrace:true,checkpoint:true});
+ vplat(-2210,-1840,164,230,240,{terrace:true,checkpoint:true});
+ G.chests.push({x:-2210,z:-1840,y:164,opened:false,bob:0});
+ for(const [x,z]of [[-2750,-2000],[-2520,-2030],[-1950,-1900],[-1950,-1540]]){G.deco.push({x,z,y0:0,w:34,h:145,d:34,c:'#66503b',nocol:true});G.deco.push({x,z,y0:115,w:145,h:85,d:150,c:'#708449',nocol:true});}
+ // Ridge approach rises in short reachable steps to a roofless bell tower.
+ for(let k=0;k<7;k++)vplat(2350,-1080-k*100,24+k*24,200,140,{terrace:true,checkpoint:true});
+ vplat(2350,-1810,168,540,430,{terrace:true,checkpoint:true});
+ for(const x of [2120,2580])for(const z of [-1970,-1660])vsolid(x,z,168,35,170,35,'#8a8875');
+ // Broken stone arches, layered footings and worn paving give the ruin a readable silhouette.
+ for(const x of [2120,2580])for(const z of [-1970,-1660]){
+  for(const y of [168,220,276,330])G.deco.push({x,z,y0:y,w:49,h:10,d:49,c:y===168?'#646e60':'#a7a48d',nocol:true});
+  G.deco.push({x,z,y0:342,w:60,h:14,d:60,c:'#777d68',nocol:true});
+ }
+ for(const x of [2160,2200,2240,2500,2540])G.deco.push({x,z:-1970,y0:330-Math.abs(x-2350)*.08,w:42,h:24,d:38,c:'#9a9984',nocol:true});
+ for(let k=0;k<10;k++)G.deco.push({x:2145+k*45,z:-1625,y0:169,w:38,h:3,d:35,c:k%2?'#7d8370':'#959781',nocol:true});
+ for(const [x,z]of [[2130,-1910],[2560,-1700],[2150,-1700]])for(let j=0;j<4;j++)G.deco.push({x:x+j*15,z:z+j%2*18,y0:169,w:18,h:10+j*4,d:20,c:'#737d5e',nocol:true});
+ for(const x of [2150,2550])G.deco.push({x,z:-1950,y0:168,w:90,h:65,d:35,c:'#747564',nocol:true});
+ G.storyObjects.push({key:'home.bell.clue',label:'Read the worn tower stone',x:2350,z:-1680,y:168,kind:'bellstone'},
+ {key:'home.bell.sun',label:'Ring the sun bell',x:2200,z:-1830,y:168,kind:'bell'},
+ {key:'home.bell.water',label:'Ring the water bell',x:2500,z:-1830,y:168,kind:'bell'},
+ {key:'home.bell.wheat',label:'Ring the wheat bell',x:2350,z:-1940,y:168,kind:'bell'},
+ {key:'home.bell.cache',label:'Open the tower chest',x:2350,z:-1810,y:168,kind:'bellcache'});
+ G.healpads.push({x:-2300,z:-1350,y:0,r:32,charge:1,_acc:0});
+ // Small separate engagements: melee among hay shelters; mixed patrol in open pasture.
+ for(const [type,x,z]of [['grunt',-2430,-800],['grunt',-2190,-930],['grunt',-2040,-700],['grunt',1910,-740],['grunt',2130,-860],['flyer',2060,-550]]){const e=spawnEnemy(type,x,z,false);if(e)e.homefieldsWing=true;}
+ G.bounds.minX=Math.min(G.bounds.minX,-3030);G.bounds.maxX=Math.max(G.bounds.maxX,2850);
+ G.homefieldsExploration={districts,paths,orchardSteps:steps,revision:1};
 }
 function drawBriarStory(t){
  if(!inBriar())return;const s=adventureStoryState(),f=s.flags;
@@ -2986,7 +3035,17 @@ function drawBriarStory(t){
   const available=n.id==='thomas'?!f['thomas.ready']:f['thomas.ready']&&!f['briar.depart'];
   if(available&&mode==='play'){const ready=n.id==='mara'&&(s.items.tangle_root||0)>=3&&(s.items.dressings||0)>=1;bx(n.x,82+Math.sin(t*2)*2,n.z,5,12,5,ready?'#9be4b0':'#e4c674');bx(n.x,72+Math.sin(t*2)*2,n.z,5,4,5,ready?'#9be4b0':'#e4c674');}
  }
- for(const o of G.storyObjects||[]){if(f['event.'+o.key])continue;
+ for(const o of G.storyObjects||[]){if(f['event.'+o.key]&&o.kind!=='bellstone')continue;
+  if(o.kind==='bellstone'){bx(o.x,o.y+5,o.z,86,10,34,'#737661');bx(o.x,o.y+25,o.z,70,34,24,'#aaa48c');for(let k=0;k<3;k++)bx(o.x,o.y+17+k*8,o.z+13,48-k*6,2,2,'#565d50');}
+  if(o.kind==='bell'){
+   for(const dx of [-26,26])bx(o.x+dx,o.y+43,o.z,7,86,9,'#67543b');bx(o.x,o.y+88,o.z,67,9,14,'#8c7551');
+   bx(o.x,o.y+74,o.z,6,18,6,'#413e34');for(let k=0;k<4;k++)bx(o.x,o.y+65-k*6,o.z,14+k*6,7,14+k*6,k===3?'#d6b46c':'#ae8a45');bx(o.x,o.y+39,o.z,6,9,6,'#52432e');
+   bx(o.x,o.y+20,o.z+12,26,24,5,'#564630');
+   if(o.key.endsWith('sun')){bx(o.x,o.y+20,o.z+16,9,9,3,'#ecd88b');for(const d of [-9,9]){bx(o.x+d,o.y+20,o.z+16,4,3,3,'#ecd88b');bx(o.x,o.y+20+d,o.z+16,3,4,3,'#ecd88b');}}
+   if(o.key.endsWith('water'))for(let k=0;k<3;k++)bx(o.x,o.y+14+k*6,o.z+16,18-k*3,3,3,'#a6c9c3');
+   if(o.key.endsWith('wheat')){bx(o.x,o.y+20,o.z+16,3,19,3,'#e3c882');for(let k=0;k<3;k++)for(const d of [-1,1])bx(o.x+d*5,o.y+16+k*5,o.z+16,7,3,3,'#e3c882');}
+  }
+  if(o.kind==='bellcache'){bx(o.x,o.y+18,o.z,58,36,38,f['home.bells.open']?'#c4a963':'#6e624c');for(let k=0;k<3;k++)bx(o.x-18+k*18,o.y+40,o.z,8,6,8,(s.items['home.bells']||0)>k?'#ecd78f':'#484a41');}
   if(o.kind==='root'){for(let k=0;k<3;k++){bx(o.x+(k-1)*8,8,o.z,8,12+k*3,9,'#b4935a');bx(o.x+(k-1)*9,19+k*3,o.z,16,5,8,'#829d50');}}
   if(o.kind==='dressings'){bx(o.x,o.y+6,o.z,29,10,20,'#e0ddc4');bx(o.x,o.y+12,o.z,7,2,21,'#8d4d44');}
   if(o.kind==='water'||o.kind==='handle'){bx(o.x,18,o.z,18,36,18,'#78674e');bx(o.x,43,o.z,55,7,9,'#c2a669');}

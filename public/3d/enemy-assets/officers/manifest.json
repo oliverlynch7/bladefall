@@ -1,0 +1,38 @@
+[
+  {
+    "type": "officer-shield",
+    "file": "shield.glb",
+    "theme": "ice",
+    "triangles": 674,
+    "bytes": 160908,
+    "bones": 15,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Sentinel",
+    "role": "shield"
+  },
+  {
+    "type": "officer-spear",
+    "file": "spear.glb",
+    "theme": "ice",
+    "triangles": 682,
+    "bytes": 160196,
+    "bones": 15,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Sentinel",
+    "role": "spear"
+  }
+]

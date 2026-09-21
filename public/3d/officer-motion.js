@@ -1,0 +1,10 @@
+import * as T from './three.module.js';
+// Bake hand-parented equipment into each clip; shaft orientation is independent of elbow bend.
+export function officerClips(root,role,clips){const bones={};root.traverse(o=>{if(o.isBone)bones[o.name]=o;});if(!bones.weapon)return clips;
+ const bind=Object.fromEntries(Object.entries(bones).map(([k,b])=>[k,b.quaternion.clone()]));
+ for(const clip of clips){if(!['Windup','Attack','Idle','Move'].includes(clip.name))continue;const tracks=[];for(const key of ['body','armR','forearmR','armL','forearmL','weapon']){const times=[],values=[];for(let i=0;i<=24;i++){const u=i/24,wind=clip.name==='Windup',hit=clip.name==='Attack',k=wind?u*u*(3-2*u):hit?Math.max(0,1-u):0,thrust=hit?Math.sin(Math.PI*Math.min(1,u*2)):0;let q=bind[key]?.clone();if(!q)continue;
+  const angles=key==='body'?[role==='spear'?.12*thrust:.18*k,0,0]:key==='armR'?[-.3-.8*k-.2*thrust,0,.1]:key==='forearmR'?[.15+.25*k,0,0]:key==='armL'?[-.6-.4*k,0,-.15]:key==='forearmL'?[.35,0,0]:[0,0,0];
+  if(key!=='weapon')q.multiply(new T.Quaternion().setFromEuler(new T.Euler(...angles)));else{for(const [name,b]of Object.entries(bones))b.quaternion.copy(bind[name]);bones.body.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(role==='spear'?.12*thrust:.18*k,0,0)));bones.armR.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(-.3-.8*k-.2*thrust,0,.1)));bones.forearmR.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(.15+.25*k,0,0)));root.updateMatrixWorld(true);q=bones.weapon.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(bones.body.getWorldQuaternion(new T.Quaternion())).multiply(new T.Quaternion().setFromEuler(new T.Euler(role==='spear'?(Math.PI/2-.32+.32*k):-.2+1.4*thrust,0,0)));}
+  times.push(u*clip.duration);values.push(...q.toArray());}tracks.push(new T.QuaternionKeyframeTrack(key+'.quaternion',times,values));}clip.tracks=clip.tracks.filter(t=>!tracks.some(n=>n.name===t.name)).concat(tracks);}
+ for(const [name,b]of Object.entries(bones))b.quaternion.copy(bind[name]);root.updateMatrixWorld(true);return clips;
+}

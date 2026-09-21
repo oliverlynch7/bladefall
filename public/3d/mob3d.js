@@ -1,7 +1,8 @@
+import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
 import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2007';
-import { enemyActionState } from './enemy-action-state.js?v=2007';
+import { enemyActionState } from './enemy-action-state.js?v=2010';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -9,6 +10,7 @@ import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 // The renderer mirrors gameplay objects and never changes combat state. Props still use
 // the shared kit loader below; unknown enemies retain the legacy rendering fallback.
 const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+(['archer','brute','warden'].includes(type)?type+'-v1980':type)}]));
+MOB_CAST['officer-shield']={file:'enemy-assets/officers/shield'};MOB_CAST['officer-spear']={file:'enemy-assets/officers/spear'};
 const ASSETS_DIR = '../slice3d/assets/';
 const MOBS_DIR = ASSETS_DIR + 'monsters/';
 const _mobModels = new Map();
@@ -100,7 +102,7 @@ export async function loadKitModel(file){
 export function kitModel(file){ return _mobModels.get(file); }
 
 // Actor identity survives list reordering; skinned clones share immutable geometry/materials.
-function appearance(e, w){return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
+function appearance(e, w){if(e.frostOfficer&&e.frostOfficer!=='caster')return 'officer-'+e.frostOfficer;return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
 function requestModel(file){
   if(!_mobModels.has(file) && !_pending.has(file)){
     const p=loadKitModel(file);_pending.set(file,p);p.finally(()=>_pending.delete(file));
@@ -116,7 +118,7 @@ function acquireMob(type,e){
       o.material=o.material.clone();o.material.transparent=true;o.material.forceSinglePass=true;materials.push(o.material);
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
-    const clips=src._revisedAnimations||(src._revisedAnimations=revisedClips(root,type,src.animations));
+    const clips=src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
     for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||['Attack','Hit','Death','Windup','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }

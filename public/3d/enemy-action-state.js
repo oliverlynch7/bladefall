@@ -1,5 +1,6 @@
 // Read-only animation phase selection from authoritative gameplay timers.
 export function enemyActionState(e){
+ if(e.frostOfficer){if(e.offState==='wind')return {phase:'Windup',key:'officer:'+e.frostOfficer,remaining:e.offClock};if(e.offState==='strike')return {phase:'Attack',key:'officer:'+e.frostOfficer,remaining:e.offClock};return {phase:null,key:null,remaining:0};}
  if(e.fallenDuel){if(['thrust','sweep','feint'].includes(e.fallState))return {phase:'Windup',key:e.fallState,remaining:e.fallClock};if(e.fallAttack>0)return {phase:'Attack',key:'fallenStrike',remaining:e.fallAttack};return {phase:null,key:null,remaining:0};}
  if(e.marksmanCrossing&&e.markState==='aim')return {phase:'Windup',key:'markClock',remaining:e.markClock};
  if(e.marksmanCrossing&&e.markAttack>0)return {phase:'Attack',key:'markAttack',remaining:e.markAttack};

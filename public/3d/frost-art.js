@@ -23,13 +23,13 @@ export function buildFrost(scene,w){
     const install=(name,geo)=>{const col=new Float32Array(geo.attributes.position.count*3);col.fill(1);geo.setAttribute('color',new THREE.BufferAttribute(col,3));kit.set(name,{geo,mean:new THREE.Color(1,1,1),tri:(geo.index?.count||geo.attributes.position.count)/3});};
     install('drift',new THREE.IcosahedronGeometry(.5,0));install('barrel',new THREE.CylinderGeometry(.45,.4,1,10));install('peakRock',new THREE.CylinderGeometry(.43,.64,1,7,1));install('pine',new THREE.ConeGeometry(.5,1,7));install('trunk',new THREE.CylinderGeometry(.07,.10,1,6));
   }
-  const root=new THREE.Group();root.name=outdoor?'Frostfell · Snowbound Peaks':authored?'Frostfell · Deep Ice Caves':'Frostfell · The Crystal Labyrinth';
+  const root=new THREE.Group();root.name=outdoor?'Frostfell · Snowbound Peaks':w.frostScene==='officers'?'Frostfell · Officers’ Cavern':authored?'Frostfell · Deep Ice Caves':'Frostfell · The Crystal Labyrinth';
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),roofs=new Map(),fade=[],glows=[],bodies=new Set();let floors=0,target=null,source=null;
   function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,obstacle=null){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,obstacle:obstacle||source});}
   function cap(o,top,isWall){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
     for(const p of pieces){const x=(p.a+p.b)/2,z=(p.c+p.d)/2,ww=p.b-p.a,dd=p.d-p.c;
-      add('snow',x,top+.55,z,ww,1.2,dd,isWall?'#d7e8ed':outdoor?'#e1e6df':['#91bdd1','#a1cadb','#b3d5e2','#9ac4d7'][Math.floor(hash(x,z)*4)],0,isWall?o:null);floors++;laid.push(p);
+      add('snow',x,top+.55,z,ww,1.2,dd,isWall?'#d7e8ed':w.frostScene==='officers'?'#91b5c4':outdoor?'#e1e6df':['#91bdd1','#a1cadb','#b3d5e2','#9ac4d7'][Math.floor(hash(x,z)*4)],0,isWall?o:null);floors++;laid.push(p);
       if(!outdoor&&!isWall&&ww>65&&dd>65&&hash(x,z)<.22)add('snow',x,top+1.3,z,Math.min(ww,dd)*.68,.3,1.1,'#6c9bb4',hash(z,x)*1.5);
     }
   }
@@ -51,6 +51,7 @@ export function buildFrost(scene,w){
   }source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;surface({...o,caveWall:true},o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
   for(const d of w.deco||[]){source=authored?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+    if(d.kind==='officerBanner'){add('trunk',d.x,y+hh*.5,d.z,130,hh,130,'#515b61');add('slab',d.x,y+hh*.7,d.z+9,ww,hh*.5,5,'#263e4e');add('slab',d.x,y+hh*.7,d.z+13,12,hh*.42,3,'#a8b8bd');for(const dx of [-ww*.47,ww*.47])add('slab',d.x+dx,y+hh*.7,d.z+13,5,hh*.5,3,'#899aa3');continue;}
     if(d.kind==='iceResearch'){
       add('slab',d.x,y+hh-6,d.z,ww,12,dd,'#8a775c');for(const dx of [-ww*.4,ww*.4])for(const dz of [-dd*.35,dd*.35])add('slab',d.x+dx,y+hh*.45,d.z+dz,9,hh*.9,9,'#665844');
       if(hh>90){for(let j=0;j<3;j++){add('slab',d.x,y+30+j*32,d.z,ww,5,dd,'#937b59');for(let k=0;k<5;k++)add('slab',d.x-ww*.35+k*ww*.16,y+42+j*32,d.z,ww*.11,20,dd*.6,k%2?'#837855':'#586f7b');}}

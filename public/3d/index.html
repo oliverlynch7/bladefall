@@ -966,6 +966,9 @@
     #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:36px}.progbox{height:52px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:22px}#skillframe{bottom:8px;height:104px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
 details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
+
+#bosshpwrap.officer-team{top:calc(env(safe-area-inset-top) + 294px);width:min(580px,82vw)}
+@media(min-width:840px) and (pointer:fine){#bosshpwrap.officer-team{top:202px}}
 </style>
 </head>
 <body>
@@ -1035,6 +1038,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./snowbound-peaks.js?v=2008"></script>
 <script src="./deep-ice-caves.js?v=2009"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
+<script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./combat-art.js?v=1981s"></script>
@@ -1050,7 +1054,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.009.0-deep-ice-caves';
+const VERSION3D='2.010.0-frost-officers';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2741,7 +2745,7 @@ const ZONES=[
     areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:9,d:'Crack 9 Frost-Shells'},{id:'ff4',k:'kindle',n:4,d:'Kindle 4 wayfires'}]},
            {stage:7,name:'Deep Ice Caves',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
     side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,trial:'chronomancer',blurb:'Frozen solid, and full of what the ice kept.'},
-    boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
+    boss:{stage:8,name:'The Hollowed Officers',mus:'boss_sorcerer'}},
   {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
     areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'magmaskit',n:11,d:'Snuff 11 Magma Skitters'},{id:'ed2',k:'find',d:'Find the Ash Altar'},{id:'ed4',k:'hunt',mob:'embertotem',n:1,d:'Slay the Cinder-Warden'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
@@ -3582,7 +3586,8 @@ function questUpdate(){
     if(done) rows+=qrow(false,eventIcon('event-secret-rift'),'Take the opened gate',null);
     applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name} · Trial Chamber`,rows,`side${Z.side.id}|${done?'done':'hunt'}`,done); return; }
   let rows,sig;
-  if(G.area<0){const left=G.bruteArena?G.enemies.filter(e=>!e.dead&&!e.boss&&e.hp>0).length:0,down=G.bruteArena&&G.boss?.dead;rows=qrow(!!down,eventIcon('event-boss-skull'),down?'The Brute defeated':`Slay <b>${Z.boss.name}</b>`,null);if(down)rows+=qrow(false,'☐',left?'Defeat the remaining handlers':'Take the opened portal',left?String(left):null);sig='boss'+Z.id+'|'+down+'|'+left; }
+  if(G.area<0&&G.frostOfficers){const left=G.enemies.filter(e=>e.frostOfficer&&!e.dead&&e.hp>0).length;rows=qrow(!left,eventIcon('event-boss-skull'),left?'Defeat the three Hollowed officers':'Take the path to Emberdeep',left?left+' remaining':null);sig='officers'+left;}
+  else if(G.area<0){const left=G.bruteArena?G.enemies.filter(e=>!e.dead&&!e.boss&&e.hp>0).length:0,down=G.bruteArena&&G.boss?.dead;rows=qrow(!!down,eventIcon('event-boss-skull'),down?'The Brute defeated':`Slay <b>${Z.boss.name}</b>`,null);if(down)rows+=qrow(false,'☐',left?'Defeat the remaining handlers':'Take the opened portal',left?String(left):null);sig='boss'+Z.id+'|'+down+'|'+left; }
   else { const qs=areaQuests();
     const secret=(G.secret && !G.secret.spent && Z.side && !meta.sideFound[Z.side.id]) ? G.secret : null;   // an unfound purple secret hides in this area
     const secretRow=secret ? qrow(false,eventIcon('event-secret-rift'),`Find the hidden <b>purple rift</b> — ${Z.side.name}`,null) : '';
@@ -3715,7 +3720,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {frostScene:inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -7573,6 +7578,11 @@ function updateOrchardBrute(e,dt,p,eff){
   handlers:wave=>{const side=wave===1?-1:1;for(let i=0;i<2;i++){const h=spawnEnemy(wave===2&&i===1?'caster':'grunt',side*1000,-120+i*150,true);h.orchardHandler=true;h.active=true;h.dropT=0;h.y=16;h.sx=h.x;h.sz=h.z;h.shootT=1.2;}toast(wave===1?'Handlers have entered the barn!':'Handlers are coming through the orchard!');}
  });
 }
+function updateFrostOfficer(e,dt,p,eff){
+ updateBossBar(e);if(!G.frostOfficers.intro){G.frostOfficers.intro=true;toast('Three officers block the exit. Leave the marked circles, jump the shield wave, and dodge the spear line. Ramps reach both shelves.');}
+ if(!MP.guest()){let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;if(target)BFFrostOfficers.step(e,dt,target,{enemies:G.enemies,arena:G.frostOfficers,speed:eff,cue:kind=>playFx(kind==='wind'?'atk2':'heavyhit',.55)});}
+ if(BFFrostOfficers.inAttack(e,p)&&e._offHit!==e.offSeq){e._offHit=e.offSeq;hurtPlayer(e.dmg,e.offX,e.offZ,foeHit(e,{caster:'a marked ice burst',shield:'a shield wave',spear:'a locked spear thrust'}[e.frostOfficer]));}
+}
 function updateFallenDuel(e,dt,p,eff){
  updateBossBar(e);
  if(!MP.guest()){
@@ -7622,7 +7632,7 @@ function drawBruteOrchard(t){
 }
 
 function buildCampaignArena(ctx){
-  const zone=curZone().id;if(zone==='keep'){BFFallen.build({G,seg:vseg,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Fallen · The Release Hall';return true;}if(zone==='outskirts')return buildBruteOrchard(ctx);if(zone==='hollow'){BFMarksman.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='Hollow Marksman · The Last Crossing';return true;}
+  const zone=curZone().id;if(zone==='frost'){BFFrostOfficers.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Hollowed Officers';return true;}if(zone==='keep'){BFFallen.build({G,seg:vseg,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Fallen · The Release Hall';return true;}if(zone==='outskirts')return buildBruteOrchard(ctx);if(zone==='hollow'){BFMarksman.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='Hollow Marksman · The Last Crossing';return true;}
   const specs={
     outskirts:{name:'Trampled Orchard',rows:[[0,0,1080,600],[0,-360,840,180],[0,360,840,180]],cover:[[-330,-200,32,32,120],[370,180,32,32,110]],color:'#725a38'},
     hollow:{name:'The Crossfire Bowl',rows:[[0,0,1180,620],[0,-400,900,220],[0,400,900,220]],cover:[[-240,100,62,100,125],[240,-110,62,100,125],[-360,-300,58,80,110],[360,310,58,80,110]],color:'#987749'},
@@ -8524,7 +8534,7 @@ const BOSS_ARENAS={
    than called at each `return` inside loadStage: that function has three early exits today and a
    fourth would silently skip the edits, which would look like the editor losing his work. */
 function loadStage(i){
-  G.bruteArena=null; G.marksmanArena=null; G.fallenArena=null; loadStageRaw(i); applyEditsNow(); }
+  G.bruteArena=null; G.marksmanArena=null; G.fallenArena=null; G.frostOfficers=null;document.getElementById('bosshpwrap').classList.remove('officer-team'); loadStageRaw(i); applyEditsNow(); }
 function applyEditsNow(){
   try {
     if(!window.__bfEditor || !window.__bfEditor.applyLayer) return;
@@ -12458,7 +12468,7 @@ function killEnemy(e,weaponKill){
   const _bounty=(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&(e.markT||0)>0)?1.1:1;
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))*_bounty); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
-  if(e.boss){
+  if(e.boss&&(!e.frostOfficer||!G.enemies.some(q=>q.frostOfficer&&!q.dead&&q.hp>0))){
     if(e._crystals) for(const c of e._crystals){ if(c&&!c.dead){ c.dead=true; burst(c.x,c.y+c.h*0.5,c.z,'#7fd6ff',8); } }   // the ward's crystals fall with their master
     SFX.win(); playFx('bossdie'); document.getElementById('bosshpwrap').classList.remove('on');
     meta.bossKills=(meta.bossKills||0)+1; const w=G.p.weapon;
@@ -12490,7 +12500,7 @@ function killEnemy(e,weaponKill){
     // FEWER, MEANINGFUL drops: even elites are no longer guaranteed loot, so long runs cannot flood the bag.
     // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
     // Bosses, chests, mimics, and goblins remain the reliable gear sources.
-    if(Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
+    if(!e.frostOfficer&&Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
     if(e.look==='slime' && !e.noSplit && !(MP.active&&!MP.isHost)){ // slimes split into two slimelets (host-authoritative in co-op)
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
@@ -12602,14 +12612,15 @@ function checkStageClear(){
   // normal courses: the portal exists from the start — reaching the end IS the goal.
   // boss stages: the portal opens when the boss falls.
   if(G.portal) return;
-  if(G.portalPos && G.boss && G.boss.dead && (!(G.bruteArena||G.marksmanArena)||!G.enemies.some(e=>!e.dead&&e.hp>0))){
+  if(G.portalPos && G.boss && G.boss.dead && (!(G.bruteArena||G.marksmanArena||G.frostOfficers)||!G.enemies.some(e=>!e.dead&&e.hp>0))){
+    if(G.frostOfficers){toast('The officers have fallen. The way to Emberdeep is open.');adventureStoryState().notes['frost.ember']={region:'frost',title:'Stop the weapon supply',text:'Ellis’s notes name Emberdeep as the Legion’s arms source. The officers can no longer block our way there.'};}
     if(G.fallenArena){toast('The release hall is open. The prisoners can leave.');adventureStoryState().notes['keep.north']={region:'keep',title:'The trail north',text:'The prison papers say Professor Ellis escaped toward Frostfell. He knows about the King’s early work. The Legion is searching for him.'};}
     if(G.marksmanArena){toast('The crossing is safe. The holding records point to Ruined Keep.');adventureStoryState().notes['hp.keep']={region:'hollow',title:'The next prison',text:'The crossing records name Ruined Keep as the next holding site. Ruth can lead the freed prisoners out of the canyon.'};}
     snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if(!e) return 'an unseen foe';
+function foeName(e){ if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -13863,7 +13874,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):null]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -13885,7 +13896,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
-    for(const a of en)if(a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -14990,7 +15001,7 @@ function update(dt){
        MP.guest(), not MP.active: a host must never correct itself against its own snapshot. Arena
        bots continue out of this loop above, so they are excluded by construction. */
     if(MP.guest() && e.mx != null){ const mk = Math.min(1, dt*12); e.x += (e.mx-e.x)*mk; e.z += (e.mz-e.z)*mk; }
-    if(e.kind!=='fly'&&e.kind!=='goblin'&&!e.marksmanCrossing){
+    if(e.kind!=='fly'&&e.kind!=='goblin'&&!e.marksmanCrossing&&!e.frostOfficer){
       resolveObstacles(e,e.r,null,ECLIMB);            // columns/walls block them; platforms are climbable
       const sup=enemySupport(e);                      // ground/mover/platform under them
       if(sup<-1e8){                                   // edge-aware: never walk (or get shoved) into the hazard
@@ -15189,7 +15200,7 @@ function onBossActivate(e){ SFX.boss();if(e.fallenDuel)toast('Watch the blade. T
   playFx({brute:'bossroar1',warden:'bossroar1',archer:'bossroar2',sorcerer:'bossroar2',colossus:'bossroar3',king:'bossroar3',tyrant:'bossroar3'}[e.type]||'bossroar1');   // batch-2 boss-reveal roar, varied across the roster
   { const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); bn.textContent=e.label; } document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
   if(G&&!G.trial&&!G.side){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
-function updateBossBar(e){ document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
+function updateBossBar(e){ if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
   const n=Math.max(8,Math.ceil(28*arc/Math.PI)),base=Math.atan2(dz,dx),step=arc*2/n;
   if(arc<Math.PI)for(const side of [-1,1])for(let k=1;k<=8;k++){const a=base+arc*side;bx(x+Math.cos(a)*r*k/8,y+4,z+Math.sin(a)*r*k/8,4,2,4,color,color,alpha);}
@@ -15390,7 +15401,7 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
   }
 }
 // ===== Boss v2: multi-phase "miniature raid" — a shield/healing-crystal interrupt + a weak-point stagger + a phase-3 enrage =====
-function bossRaid(e){ return e.boss && !e.fallenDuel && e.type!=='brute' && e.type!=='archer'; }   // the two earliest bosses stay a straight fight; the rest get the raid mechanic
+function bossRaid(e){ return e.boss && !e.frostOfficer && !e.fallenDuel && e.type!=='brute' && e.type!=='archer'; }   // the two earliest bosses stay a straight fight; the rest get the raid mechanic
 function spawnBossCrystals(e){
   e._crystals=[]; const n=3, hx=(e.home?e.home.x:0), hz=(e.home?e.home.z:0), hw=(e.home?e.home.hw:300), hd=(e.home?e.home.hd:300);
   if(!(MP.active&&!MP.isHost)) for(let i=0;i<n;i++){ const a=(i/n)*6.283+0.6;   // co-op: host spawns the ward crystals; guests mirror them
@@ -15403,6 +15414,7 @@ function bossEnterShield(e){ if(!bossRaid(e)) return;
   G.shake=Math.min(G.shake+8,16); SFX.boss(); addText(e.x,e.h+30,e.z,'WARDED','#7fd6ff',true);
   toast('🔮 The '+ (e.label||'boss') +' is shielded — shatter the healing crystals!'); playFx('portalopen'); }
 function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
+  if(e.frostOfficer){updateFrostOfficer(e,dt,p,eff);return;}
   if(e.fallenDuel){updateFallenDuel(e,dt,p,eff);return;}
   if(e.marksmanCrossing){updateCrossingMarksman(e,dt,p);return;}
   if(e.bruteOrchard){updateOrchardBrute(e,dt,p,eff);return;}
@@ -18677,6 +18689,7 @@ function drawCourse(s,t){
   drawBruteOrchard(t);
   if(G.marksmanArena)BFMarksman.draw({G,bx},t);
   if(G.fallenArena)BFFallen.draw({G,bx},t);
+  if(G.frostOfficers)BFFrostOfficers.draw({G,bx,ring:dangerRing},t);
   drawRiftShardDiscovery(t);
   // crumbling stepping stones (shake, drop, respawn)
   /* Deferring a crumble was necessary and NOT sufficient, which is the second half of the finding.
@@ -20531,7 +20544,7 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
 }
 function drawHpBar3(e){
   if(e.dead) return;
-  if(!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+14,e.z); if(s) hpBars.push({x:s[0],y:s[1],f:e.hp/e.maxHp}); }
+  if((e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+14,e.z); if(s) hpBars.push({x:s[0],y:s[1],f:e.hp/e.maxHp}); }
   // elemental status pips (shown even at full HP + on bosses)
   if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
     if(keys.length){ const sp=project(e.x,e.y+e.h+(e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
@@ -21893,7 +21906,7 @@ window.__BF3={ trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syn
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2009"></script>
+<script type="module" src="./hero3d.js?v=2010"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -22,7 +22,7 @@ export function loadDeep(w){
 }
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildDeep(scene,w){
-  const abyss=w.zone==='abyss',regal=['palace','castle'].includes(w.zone),cfg={...profiles[w.zone],...w.portalProfile},kit=kits.get(w.zone),root=new THREE.Group();root.name=cfg.name;
+  const abyss=w.zone==='abyss',regal=['palace','castle'].includes(w.zone),cfg={...profiles[w.zone],...w.portalProfile},kit=kits.get(w.zone),root=new THREE.Group();root.name=w.ironScene?'Emberdeep · Iron Halls':cfg.name;
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),fade=[],glows=[],bodies=new Set();let floors=0;
   const material=new THREE.MeshLambertMaterial({vertexColors:true,emissive:cfg.emissive}),glowMaterial=new THREE.MeshBasicMaterial({vertexColors:true});
   const palette=cfg.palette;
@@ -30,7 +30,7 @@ export function buildDeep(scene,w){
   function cap(o,top,source=null){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
     for(const p of pieces){const step=w.portalMode&&w.portalMode!=='sprint'&&top===0?65:115,nx=Math.max(1,Math.ceil((p.b-p.a)/step)),nz=Math.max(1,Math.ceil((p.d-p.c)/step)),tw=(p.b-p.a)/nx,td=(p.d-p.c)/nz;
-      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*tw,z=p.c+(iz+.5)*td;let color=palette[Math.floor(hash(x,z)*4)];
+      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*tw,z=p.c+(iz+.5)*td;let color=w.ironScene?'#6b6054':palette[Math.floor(hash(x,z)*4)];
         if(w.portalMode&&w.portalMode!=='sprint'&&top===0){const r=Math.hypot(x,z),spoke=Math.abs(Math.sin(Math.atan2(z,x)*4));if(Math.abs(r-285)<28||r<55||(r>70&&r<260&&spoke<.13))color=cfg.body;}
         add('cap',x,top+.55,z,Math.max(.1,tw-.7),1.1,Math.max(.1,td-.7),color,0,source);floors++;}laid.push(p);
     }
@@ -69,6 +69,14 @@ export function buildDeep(scene,w){
     }
   }
   for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+    if(d.kind==='forgeFrame'){for(const dx of [-ww*.5,ww*.5]){add('stone',d.x+dx,y+hh*.5,d.z,48,hh,dd,'#30383b');for(let j=1;j<4;j++)add('stone',d.x+dx,y+hh*j/4,d.z,58,12,dd+8,'#9c7951');}add('stone',d.x,y+hh,d.z,ww+70,52,dd+12,'#4a5050');for(let j=0;j<5;j++)add('stone',d.x-ww*.36+j*ww*.18,y+hh-34,d.z,12,30,dd+4,'#9c7951');continue;}
+    if(d.kind==='forgeCrates'){for(const dx of [-ww*.3,ww*.3]){add('stone',d.x+dx,y+hh*.35,d.z,ww*.55,hh*.7,dd,'#68533c');for(const dz of [-dd*.4,dd*.4])add('stone',d.x+dx,y+hh*.35,d.z+dz,ww*.58,hh*.76,7,'#363c3d');}add('stone',d.x,y+hh*.86,d.z,ww*.6,hh*.3,dd*.7,'#80704d');continue;}
+    if(d.kind==='forgeLamp'){add('stone',d.x,y+hh*.5,d.z,12,hh,12,'#484c49');add('stone',d.x,y+hh,d.z,45,45,45,'#5e533f');add('glow',d.x,y+hh,d.z+24,25,29,2,'#ffc780');add('stone',d.x,y+hh+28,d.z,55,8,55,'#393f3e');glows.push(new THREE.Vector3(d.x,y+hh,d.z+35));continue;}
+    if(d.kind==='forgeBench'||d.kind==='forgeRack'){
+      add('stone',d.x,y+hh-6,d.z,ww,12,dd,'#5f5142');for(const dx of [-ww*.4,ww*.4])for(const dz of [-dd*.35,dd*.35])add('stone',d.x+dx,y+hh*.45,d.z+dz,9,hh*.9,9,'#393b3b');
+      if(d.kind==='forgeRack'){for(let i=0;i<5;i++){const x=d.x-ww*.35+i*ww*.17;add('stone',x,y+hh*.56,d.z,8,hh*.7,6,'#afb1a3');add('stone',x,y+hh*.32,d.z,24,7,8,'#8d7250');}}else{add('stone',d.x,y+hh+13,d.z,ww*.38,26,dd*.55,'#565d5d');add('stone',d.x,y+hh+30,d.z,ww*.6,9,dd*.6,'#858b81');}continue;
+    }
+    if(d.kind==='forgePipe'){add('stone',d.x,y+hh,d.z,ww,ww,dd,'#4f5758');for(let j=0;j<4;j++)add('stone',d.x,y+hh,d.z-dd*.4+j*dd*.27,ww+8,ww+8,12,'#a18b63');for(const dz of [-dd*.35,dd*.35])add('stone',d.x,y+hh*.5,d.z+dz,ww*.4,hh,ww*.4,'#404646');continue;}
     if(d.portalPart){add(d.portalPart,d.x,y,d.z,ww,hh,dd,d.c||null,0,d.portalObstacle||null);if(d.portalPart==='glow')glows.push(new THREE.Vector3(d.x,y,d.z));continue;}
     if(solids.some(o=>o.x===d.x&&o.z===d.z&&o.w===ww&&o.d===dd&&Math.abs(o.h-y-hh)<3))continue;
     if(regal&&d.kind==='column'){if(d.lead===false)continue;add('pillar',d.x,y-(d.pillarH||0),d.z,ww,hh+(d.pillarH||0),dd);continue;}

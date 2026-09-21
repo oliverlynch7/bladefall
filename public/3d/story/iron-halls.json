@@ -1,0 +1,758 @@
+{
+  "version": 1,
+  "region": "ember",
+  "status": "Iron Halls recording-ready. Great Furnace follows separately.",
+  "npcs": {
+    "flint": {
+      "name": "Flint",
+      "role": "A captive smith who refuses to waste good work or good people",
+      "start": "ih.flint.first"
+    },
+    "jack": {
+      "name": "Jack",
+      "role": "A furnace worker keeping his crew alive with practical repairs",
+      "start": "ih.jack.first"
+    }
+  },
+  "nodes": {
+    "ih.flint.first": {
+      "text": "Those blades are headed for villages like yours. Ours, too. We make them because the guards count our families before they count the weapons. If you came to stop this place, start with the people beside the hammer. Get them clear before you touch a valve.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Show me how to get them out.",
+          "next": "ih.flint.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.met"
+            },
+            {
+              "type": "note",
+              "id": "ih.main",
+              "region": "ember",
+              "title": "Stop the weapon line",
+              "text": "Flint says the workers must leave their station before the machines stop. Clear the guards at the station ahead, then open the western shelter. Jack works farther north beside the broken service cart."
+            }
+          ]
+        },
+        {
+          "id": "smash",
+          "text": "I was going to break the machines.",
+          "next": "ih.flint.careful"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "First meeting in the receiving yard",
+        "order": 1,
+        "emotion": "Low, steady male voice. Exhausted, protective, with a dry edge.",
+        "direction": "Low, steady male voice. Exhausted, protective, with a dry edge.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. First meeting in the receiving yard"
+      }
+    },
+    "ih.flint.careful": {
+      "text": "Good instinct. Bad first step. Cut a belt under pressure and the men standing beside it pay for your enthusiasm. Clear their guards. Open the shelter. Then we can break things properly.",
+      "choices": [
+        {
+          "id": "agree",
+          "text": "All right. People first.",
+          "next": "ih.flint.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.met"
+            },
+            {
+              "type": "note",
+              "id": "ih.main",
+              "region": "ember",
+              "title": "Stop the weapon line",
+              "text": "Flint says the workers must leave their station before the machines stop. Clear the guards at the station ahead, then open the western shelter. Jack works farther north beside the broken service cart."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Flint redirects a reckless plan",
+        "order": 2,
+        "emotion": "Firm, not insulting. The final sentence has a little bite of humor.",
+        "direction": "Firm, not insulting. The final sentence has a little bite of humor.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Flint redirects a reckless plan"
+      }
+    },
+    "ih.flint.plan": {
+      "text": "The shelter door is west of their station. Jack is by the service cart beyond it. He knows how to reach the controls. There’s a floor route past the patrols, or the high walkway past the presses. Pick whichever looks less likely to flatten you.",
+      "choices": [
+        {
+          "id": "work",
+          "text": "Anything else worth saving?",
+          "next": "ih.flint.work",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.work"
+            }
+          ]
+        },
+        {
+          "id": "ready",
+          "text": "I’ll get them clear.",
+          "next": "ih.flint.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Directions after agreeing to protect workers",
+        "order": 3,
+        "emotion": "Practical and specific. A tiny smile at the last line.",
+        "direction": "Practical and specific. A tiny smile at the last line.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Directions after agreeing to protect workers"
+      }
+    },
+    "ih.flint.work": {
+      "text": "One blade blank. Mine. The officers took it to the raised store east of the presses. I made it for a guard who stayed behind to help people flee. Never got to finish it. Bring it back and I’ll put it to work for someone still standing.",
+      "choices": [
+        {
+          "id": "promise",
+          "text": "I’ll look for it.",
+          "next": "ih.flint.wait"
+        },
+        {
+          "id": "prize",
+          "text": "What would you give me for it?",
+          "next": "ih.flint.price"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Optional blade recovery",
+        "order": 4,
+        "emotion": "Personal pride, a brief quiet sadness. No melodrama.",
+        "direction": "Personal pride, a brief quiet sadness. No melodrama.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Optional blade recovery"
+      }
+    },
+    "ih.flint.price": {
+      "text": "A weapon worth carrying. Or armor, if you’re fond of the one you have. I’m not paying you to be kind. I’m asking you to save something they meant to turn against us.",
+      "choices": [
+        {
+          "id": "deal",
+          "text": "Fair enough.",
+          "next": "ih.flint.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "An openly practical bargain",
+        "order": 5,
+        "emotion": "Blunt, calm. Respect a practical player rather than shame them.",
+        "direction": "Blunt, calm. Respect a practical player rather than shame them.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. An openly practical bargain"
+      }
+    },
+    "ih.flint.wait": {
+      "text": "You know where to find me. If anyone asks, I’m working very hard on this exact same dent.",
+      "choices": [
+        {
+          "id": "blank",
+          "text": "I found your blade blank.",
+          "next": "ih.flint.return",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.returned"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.blank",
+              "is": true
+            },
+            {
+              "flag": "ih.flint.reward",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "optional",
+          "text": "Tell me about your own work.",
+          "next": "ih.flint.work",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.work"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.flint.reward",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "directions",
+          "text": "Remind me how to stop the line.",
+          "next": "ih.flint.remind"
+        },
+        {
+          "id": "done",
+          "text": "The line has stopped.",
+          "next": "ih.flint.stopped",
+          "when": [
+            {
+              "flag": "ih.line.open",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Flint waits at his bench",
+        "order": 6,
+        "emotion": "Understated joke. He is pretending to obey his orders.",
+        "direction": "Understated joke. He is pretending to obey his orders.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Flint waits at his bench"
+      }
+    },
+    "ih.flint.remind": {
+      "text": "Shelter first. Jack next. He needs handles from the western stores for his cart. At the controls, follow the machine plate. Stop the feed, let the pressure out, then stop the hammer. The safety vent will catch a mistake, but don’t make a hobby of it.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Got it.",
+          "next": "ih.flint.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Useful reminder",
+        "order": 7,
+        "emotion": "Patient, with a dry final warning.",
+        "direction": "Patient, with a dry final warning.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Useful reminder"
+      }
+    },
+    "ih.flint.return": {
+      "text": "Still straight. Better luck than most of us. I found a purple piece caught in the scrap they brought with it. Take that too. As for the metal—tell me what you need.",
+      "choices": [
+        {
+          "id": "sword",
+          "text": "A sword.",
+          "next": "ih.flint.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.reward"
+            },
+            {
+              "type": "reward",
+              "id": "ih.forgeguard",
+              "kind": "forgeguard_sword"
+            },
+            {
+              "type": "reward",
+              "id": "ih.flint.ED-02",
+              "kind": "rift_shard"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.flint.reward",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "ranged",
+          "text": "Something for throwing.",
+          "next": "ih.flint.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.reward"
+            },
+            {
+              "type": "reward",
+              "id": "ih.forgeguard",
+              "kind": "forgeguard_javelin"
+            },
+            {
+              "type": "reward",
+              "id": "ih.flint.ED-02",
+              "kind": "rift_shard"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.flint.reward",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "magic",
+          "text": "A focus for magic.",
+          "next": "ih.flint.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.reward"
+            },
+            {
+              "type": "reward",
+              "id": "ih.forgeguard",
+              "kind": "forgeguard_wand"
+            },
+            {
+              "type": "reward",
+              "id": "ih.flint.ED-02",
+              "kind": "rift_shard"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.flint.reward",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "armor",
+          "text": "Armor. I have my weapon.",
+          "next": "ih.flint.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.flint.reward"
+            },
+            {
+              "type": "reward",
+              "id": "ih.forgeguard",
+              "kind": "forgeguard_armor"
+            },
+            {
+              "type": "reward",
+              "id": "ih.flint.ED-02",
+              "kind": "rift_shard"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.flint.reward",
+              "is": false
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Choose the fixed rare reward",
+        "order": 8,
+        "emotion": "A craftsman happy to do his own work again. The shard is a found object, not new lore.",
+        "direction": "A craftsman happy to do his own work again. The shard is a found object, not new lore.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Choose the fixed rare reward"
+      }
+    },
+    "ih.flint.reward": {
+      "text": "Forgeguard. A decent name, even if the forge doesn’t deserve guarding anymore. Finish your way through these halls before you count it safe. And if you find a quiet town that needs a smith, remember me.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I’ll remember.",
+          "next": "ih.flint.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "Reward handover",
+        "order": 9,
+        "emotion": "Warm, restrained hope. Do not promise an implemented hub shop upgrade.",
+        "direction": "Warm, restrained hope. Do not promise an implemented hub shop upgrade.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Reward handover"
+      }
+    },
+    "ih.flint.stopped": {
+      "text": "Hear that? Me neither. I’d forgotten how good that could sound. The big furnace still feeds the rest of the works. Martin is in there with another crew. Find him before the officers decide who to blame.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I’ll find Martin.",
+          "next": "ih.flint.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "flint",
+        "scene": "After the line falls silent",
+        "order": 10,
+        "emotion": "Relief turns into concern for the next crew.",
+        "direction": "Relief turns into concern for the next crew.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. After the line falls silent"
+      }
+    },
+    "ih.jack.first": {
+      "text": "Don’t step on the cart. Unless you’ve always wanted to arrive downstairs in pieces. The brake handles cracked from the heat. There are insulated spares in the western stores. Bring them here and I can lock the whole cart across that gap.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I’ll get the handles.",
+          "next": "ih.jack.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.jack.met"
+            },
+            {
+              "type": "note",
+              "id": "ih.cart",
+              "region": "ember",
+              "title": "A cart that stays put",
+              "text": "Recover insulated handles from the western stores, then return to Jack beside the cart. He can lock its deck across the gap to the Great Furnace."
+            }
+          ]
+        },
+        {
+          "id": "joke",
+          "text": "So it’s more of a falling machine?",
+          "next": "ih.jack.joke"
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "Meeting beside the broken cart",
+        "order": 11,
+        "emotion": "Fast practical male voice, good humor under pressure.",
+        "direction": "Fast practical male voice, good humor under pressure.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Meeting beside the broken cart"
+      }
+    },
+    "ih.jack.joke": {
+      "text": "Exactly. Very reliable at that part. I’m trying to expand its range.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Let’s make it a bridge. Where are the handles?",
+          "next": "ih.jack.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.jack.met"
+            },
+            {
+              "type": "note",
+              "id": "ih.cart",
+              "region": "ember",
+              "title": "A cart that stays put",
+              "text": "Get insulated handles from the western stores and return them to Jack."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "A brief joke about the cart",
+        "order": 12,
+        "emotion": "Deadpan, then a little shared amusement.",
+        "direction": "Deadpan, then a little shared amusement.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. A brief joke about the cart"
+      }
+    },
+    "ih.jack.wait": {
+      "text": "Western stores. Thick wrapped grips, not bare metal. There’s a reason most of us only make that mistake once.",
+      "choices": [
+        {
+          "id": "return",
+          "text": "Here are the insulated handles.",
+          "next": "ih.jack.fixed",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ih.cart"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ih.handles",
+              "is": true
+            },
+            {
+              "flag": "ih.cart",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "route",
+          "text": "What is on the high walkway?",
+          "next": "ih.jack.route"
+        },
+        {
+          "id": "next",
+          "text": "How do I shut the line down?",
+          "next": "ih.jack.controls"
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "Waiting for the handles",
+        "order": 13,
+        "emotion": "Friendly reminder, no impatience.",
+        "direction": "Friendly reminder, no impatience.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Waiting for the handles"
+      }
+    },
+    "ih.jack.route": {
+      "text": "Two stamping presses. The floor lights up before they drop. Wait beside them, then cross after the strike. Or stay low and deal with the patrols. Nobody gets a prize for being the tallest fool in the building.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I’ll watch the lights.",
+          "next": "ih.jack.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "Explaining the two approaches",
+        "order": 14,
+        "emotion": "Clear hazard explanation. Light joke without dismissing the danger.",
+        "direction": "Clear hazard explanation. Light joke without dismissing the danger.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Explaining the two approaches"
+      }
+    },
+    "ih.jack.controls": {
+      "text": "The plate by the controls shows the order. Feed first, pressure next, hammer last. Get the workers into shelter before you start. If you get it wrong, the safety vent resets the line. Loud, but better than a funeral.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I’ll follow the plate.",
+          "next": "ih.jack.wait"
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "Shutdown instructions",
+        "order": 15,
+        "emotion": "Confident technical knowledge in simple language.",
+        "direction": "Confident technical knowledge in simple language.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Shutdown instructions"
+      }
+    },
+    "ih.jack.fixed": {
+      "text": "That’s it. Brakes set, deck locked. It’s a bridge now, which is a promotion. Shut the weapon line down before you cross. Once it stops, those molds in the western casting room should be cool enough to open.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "Nice work, Jack.",
+          "next": "ih.jack.after"
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "The cart becomes a crossing",
+        "order": 16,
+        "emotion": "Audible relief and a little pride.",
+        "direction": "Audible relief and a little pride.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. The cart becomes a crossing"
+      }
+    },
+    "ih.jack.after": {
+      "text": "I’ll keep this way clear. You handle the big furnace. Between us, perhaps tomorrow we can make something that isn’t a sword.",
+      "choices": [
+        {
+          "id": "controls",
+          "text": "Remind me about the controls.",
+          "next": "ih.jack.controls"
+        }
+      ],
+      "voice": {
+        "speaker": "jack",
+        "scene": "After the repair",
+        "order": 17,
+        "emotion": "Hopeful, tired. Leave space around the last sentence.",
+        "direction": "Hopeful, tired. Leave space around the last sentence.",
+        "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. After the repair"
+      }
+    }
+  },
+  "events": {
+    "ih.workers": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.workers.safe"
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.flint.met",
+          "is": true
+        }
+      ]
+    },
+    "ih.handles": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.handles"
+        }
+      ]
+    },
+    "ih.blank": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.blank"
+        }
+      ]
+    },
+    "ih.plate": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.plate"
+        },
+        {
+          "type": "note",
+          "id": "ih.order",
+          "region": "ember",
+          "title": "Stop the weapon line",
+          "text": "The arrows lead from metal feed to pressure tank to hammer. Cut the feed, release pressure, stop the hammer. First move the workers into shelter."
+        }
+      ]
+    },
+    "ih.return": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.return"
+        }
+      ]
+    },
+    "ih.mold": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.mold"
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.line.open",
+          "is": true
+        }
+      ]
+    },
+    "ih.line.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "ih.attempts",
+          "amount": 1
+        },
+        {
+          "type": "sequence",
+          "id": "ih.line",
+          "value": 1,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.workers.safe",
+          "is": true
+        },
+        {
+          "flag": "ih.plate",
+          "is": true
+        },
+        {
+          "flag": "ih.line.open",
+          "is": false
+        }
+      ]
+    },
+    "ih.line.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "ih.attempts",
+          "amount": 1
+        },
+        {
+          "type": "sequence",
+          "id": "ih.line",
+          "value": 2,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.workers.safe",
+          "is": true
+        },
+        {
+          "flag": "ih.plate",
+          "is": true
+        },
+        {
+          "flag": "ih.line.open",
+          "is": false
+        }
+      ]
+    },
+    "ih.line.3": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "ih.attempts",
+          "amount": 1
+        },
+        {
+          "type": "sequence",
+          "id": "ih.line",
+          "value": 3,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.workers.safe",
+          "is": true
+        },
+        {
+          "flag": "ih.plate",
+          "is": true
+        },
+        {
+          "flag": "ih.line.open",
+          "is": false
+        }
+      ]
+    }
+  }
+}

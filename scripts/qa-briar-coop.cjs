@@ -4,7 +4,7 @@ async page=>{
  const context=await page.context().browser().newContext(),guest=await context.newPage();
  try{
   await page.goto('http://127.0.0.1:4331/3d/?mute=1');await page.waitForFunction(()=>window.__BF3);await guest.goto('http://127.0.0.1:4331/3d/?mute=1');
-  const setup=async()=>{await __BF3.briarReady;const b=__BF3;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classUnlocked.warrior=true;b.meta.classId='warrior';b.openHub();b.meta.gold=1000;b.persist();window.qaPackets=[];};
+  const setup=async()=>{await __BF3.briarReady;const b=__BF3;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classUnlocked.warrior=true;b.meta.classId='warrior';b.openHub();b.meta.gold=1000;b.meta.riftShards=[];b.persist();window.qaPackets=[];};
   await page.evaluate(setup);await guest.evaluate(setup);
   await page.evaluate(()=>{const b=__BF3,m=b.MP;m.active=true;m.isHost=true;m.myId='h';m.conns=[];window.qaListeners={};const c={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>qaListeners[k]=f};m.wireGuest(c);qaListeners.open();b.enterZone(0);});
   await guest.evaluate(()=>{const m=__BF3.MP;m.active=true;m.isHost=false;m.myId='g';m.hostConn={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d)))};});
@@ -36,6 +36,14 @@ async page=>{
   await grain(guest,'weight.1');await grain(page,'weight.0');
   ok('shared scale latch removes both door collisions',await page.evaluate(()=>__BF3.G.granary.open&&!__BF3.G.walls.some(w=>w.grainDoor))&&await guest.evaluate(()=>__BF3.G.granary.open&&!__BF3.G.walls.some(w=>w.grainDoor)));
   await grain(guest,'cache');ok('granary rewards both eligible players',await page.evaluate(n=>__BF3.meta.gold>n&&__BF3.G.storyClaims['home.grain.cache'],goldHost)&&await guest.evaluate(n=>__BF3.meta.gold>n&&__BF3.G.storyClaims['home.grain.cache'],goldGuest));
+  const gusOpen=async()=>{await guest.evaluate(()=>{const b=__BF3,n=b.G.storyNpcs.find(n=>n.id==='gus');Object.assign(b.G.p,{x:n.x,z:n.z,y:0});b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('open',{npc:'gus'});});await flush()};
+  await gusOpen();await choose('help');await choose('accept');await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();
+  await guest.evaluate(()=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='briar.gus.tools');Object.assign(b.G.p,{x:o.x,z:o.z,y:o.y});b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key:o.key});});await flush();await gusOpen();await choose('deliver');
+  ok('Gus turn-in gives both players their own pending shard',await page.evaluate(()=>__BF3.G.pendingRiftShards.found.includes('BR-02'))&&await guest.evaluate(()=>__BF3.G.pendingRiftShards.found.includes('BR-02')));
+  ok('Gus shortcut collision opens for both peers',await page.evaluate(()=>!__BF3.G.walls.some(w=>w.gusDoor))&&await guest.evaluate(()=>!__BF3.G.walls.some(w=>w.gusDoor)));
+  const gusPacket=await page.evaluate(()=>__BF3.briarPacket());await guest.evaluate(p=>{__BF3.briarApply(p);__BF3.briarApply(p)},gusPacket);
+  ok('replayed Gus packets do not repeat shard reward',await guest.evaluate(()=>__BF3.G.pendingRiftShards.found.filter(id=>id==='BR-02').length===1));
+  await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();
   await page.evaluate(()=>{__BF3.restartCampaignCheckpoint();});await flush();ok('shared retry rolls back quest and rewards on both clients',await page.evaluate(()=>!__BF3.G.storyState.flags['mara.healing']&&__BF3.meta.gold===1000)&&await guest.evaluate(()=>!__BF3.G.storyState.flags['mara.healing']&&__BF3.meta.gold===1000));
   await guest.evaluate(()=>{const b=__BF3,n=b.G.storyNpcs[0];Object.assign(b.G.p,{x:n.x+40,z:n.z+40,y:0});b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('open',{npc:'thomas'});});await flush();ok('new epoch accepts new requests after retry',await page.evaluate(()=>__BF3.G.storyState.conversation?.owner==='g'));
   await page.evaluate(()=>qaListeners.close());ok('departing conversation owner releases host',await page.evaluate(()=>__BF3.mode==='play'&&!__BF3.G.storyState.conversation));

@@ -1040,7 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.994.0-village-granary';
+const VERSION3D='1.995.0-gus-workshop';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2859,7 +2859,7 @@ function areaQuests(ai){ if(inBriar()&&(ai==null||ai===0))return briarQuest(); i
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=fetch('./story/briar-foundation.json?v=1994').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
+const briarReady=fetch('./story/briar-foundation.json?v=1995').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
 function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
 function briarId(){return MP.active?MP.myId:'solo';}
 function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
@@ -2910,6 +2910,7 @@ function briarSync(){
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
  syncHomefieldsGranary(s);
+ if(s.flags['gus.shortcut'])G.walls=G.walls.filter(w=>!w.gusDoor);
  if(G.homefieldsExploration){const count=s.items['home.bells']||0;if(G._bellProgress!==undefined&&G._bellProgress!==count){playFx('lever');toast(friendlyBellText(count,s.flags['home.bells.open']));}G._bellProgress=count;}
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
@@ -2924,7 +2925,7 @@ function briarDisconnect(actor){if(inBriar()&&G.storyState?.conversation?.owner=
 function briarInteract(){
  if(!inBriar())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65)return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={x:o.x,z:o.z,y:(o.y||0)+62,label,act};}};
- for(const n of G.storyNpcs||[])if(!s.flags['briar.depart']&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
+ for(const n of G.storyNpcs||[])if((n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
  if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&BFStoryState.matches(s,briarBook.events[o.key]?.when))consider(o,o.available?o.label:'Clear the bridge guards first',()=>o.available?briarRequest('world',{key:o.key}):toast('The wagons cannot pass while the bridge guards are still here.'));
  return best;
 }
@@ -2979,6 +2980,7 @@ function buildBriarOpening(){
  G.campaignLayout.experience={title:'Briar Town: Homefields',objectives:['Help Mara treat the neighbors','Repair the mill crossing','Open a route out of Briar'],revision:3};
  G.rooms[0].name='Briar Homes';G.rooms[1].name='Overrun Fields';G.rooms.at(-1).name='Wagon Gate';
  buildHomefieldsExploration();
+ buildGusWorkshop();
  buildHomefieldsGranary();
  G.portal=null;briarPending=null;briarEpoch();briarSync();
 }
@@ -3125,15 +3127,62 @@ function buildHomefieldsExploration(){
  G.bounds.minX=Math.min(G.bounds.minX,-3030);G.bounds.maxX=Math.max(G.bounds.maxX,2850);
  G.homefieldsExploration={districts,paths,orchardSteps:steps,revision:1};
 }
+function buildGusWorkshop(){
+ // A real optional destination between the village approach and orchard return path.
+ const clear=o=>Math.abs(o.x+1500)>300+(o.w||0)/2||Math.abs(o.z+1120)>330+(o.d||0)/2;
+ G.obstacles=G.obstacles.filter(clear);G.deco=G.deco.filter(clear);
+ vseg(-1500,-1120,650,720,{meadow:true});
+ for(let k=0;k<6;k++)vseg(-1500-k*40,-1430-k*70,220,240,{meadow:true});
+ G.storyNpcs.push({id:'gus',name:'Gus',x:-1460,z:-790,y:0});
+ const wall=(x,z,w,h,d)=>vsolid(x,z,0,w,h,d,'#806342');
+ wall(-1740,-1110,20,175,480);wall(-1260,-1110,20,175,480);
+ for(const z of [-870,-1350])for(const x of [-1660,-1340])wall(x,z,170,175,20);
+ for(const x of [-1730,-1270])for(const z of [-870,-1110,-1350])G.deco.push({x,z,y0:0,w:18,h:191,d:24,c:'#4b3b2e',nocol:true});
+ // Board courses, stone feet and door lintels break up the timber facade.
+ for(const z of [-858,-1362])for(const x of [-1660,-1340]){
+  G.deco.push({x,z,y0:0,w:176,h:18,d:24,c:'#77705b',nocol:true});
+  for(let k=0;k<6;k++)G.deco.push({x,z,y0:24+k*25,w:167,h:20,d:5,c:k%2?'#9f7c4e':'#b18b58',nocol:true});
+  for(const dx of [-76,76])G.deco.push({x:x+dx,z:z+(z>-1000?4:-4),y0:18,w:11,h:161,d:10,c:'#51402d',nocol:true});
+ }
+ for(const z of [-870,-1350])G.deco.push({x:-1500,z,y0:166,w:170,h:18,d:35,c:'#5e4931',nocol:true});
+ // A rack of spare planks and a low bench read as a working carpenter's yard.
+ for(let k=0;k<4;k++)G.deco.push({x:-1710+k*28,z:-785,y0:0,w:21,h:28+k*7,d:95,c:'#a98a5d',nocol:true});
+ G.deco.push({x:-1340,z:-780,y0:26,w:120,h:9,d:48,c:'#bc965e',nocol:true});
+ for(const x of [-1380,-1300])G.deco.push({x,z:-780,y0:0,w:12,h:26,d:38,c:'#604b33',nocol:true});
+ // Open roof beams keep the climb readable from the gameplay camera.
+ for(const z of [-885,-1100,-1335])G.deco.push({x:-1500,z,y0:181,w:500,h:14,d:18,c:'#5d4630',nocol:true});
+ for(const x of [-1710,-1290])G.deco.push({x,z:-1110,y0:192,w:72,h:18,d:505,c:'#657459',nocol:true});
+ const steps=[[-1660,-960,26],[-1660,-1040,52],[-1660,-1120,78],[-1660,-1200,104]];
+ for(const [x,z,y]of steps)vplat(x,z,y,135,120,{checkpoint:true});
+ vplat(-1460,-1260,104,340,145,{slab:12,checkpoint:true});
+ // Small window faces the tool roll; its opening is above the back wall.
+ for(const x of [-1540,-1420])G.deco.push({x,z:-1350,y0:176,w:12,h:82,d:18,c:'#493829',nocol:true});
+ G.deco.push({x:-1480,z:-1350,y0:255,w:135,h:12,d:24,c:'#bb9458',nocol:true});
+ G.deco.push({x:-1310,z:-1010,y0:0,w:80,h:40,d:130,c:'#775339',nocol:true});
+ for(let k=0;k<5;k++)G.deco.push({x:-1305,z:-1150-k*28,y0:0,w:55,h:18+k%2*9,d:20,c:'#b49768',nocol:true});
+ G.storyObjects.push({key:'briar.gus.tools',label:'Take Gus’s tool roll',x:-1460,z:-1270,y:104,kind:'tools',range:65,bounds:{minX:-1580,maxX:-1340,minZ:-1330,maxZ:-1190}},
+ {key:'briar.gus.sign',label:'Repair the village sign',x:-1170,z:-750,y:0,kind:'villagesign'});
+ if(!adventureStoryState().flags['gus.shortcut'])G.walls.push({x:-1500,z:-1350,w:145,d:22,h:280,invisible:true,gusDoor:true});
+ G.gusWorkshop={steps,door:{x:-1500,z:-1350},revision:1};
+}
+function drawGusWorkshop(s){
+ if(!G.gusWorkshop)return;
+ const open=s.flags['gus.shortcut'];
+ if(!open){for(let k=0;k<7;k++)bx(-1560+k*20,82,-1350,18,164,15,'#725036');bx(-1500,65,-1338,140,12,10,'#a88855');}
+ else {bx(-1585,82,-1400,15,164,105,'#725036');bx(-1585,65,-1400,20,12,105,'#a88855');}
+ if(!s.flags['event.briar.gus.tools']){bx(-1460,111,-1270,48,14,24,'#a27f51');for(const x of [-1475,-1445])bx(x,119,-1270,5,3,26,'#4e3929');bx(-1460,121,-1270,23,4,7,'#c2beb0');}
+ const fixed=s.flags['gus.sign_fixed'];pushM();mv(-1170,0,-750);if(!fixed)rotZ(.55);bx(0,38,0,9,76,9,'#654b31');bx(0,66,0,82,28,12,fixed?'#c0a26e':'#8b734f');bx(-5,66,7,40,5,2,'#473c2e');bx(19,70,7,10,5,2,'#473c2e');popM();
+}
 function drawBriarStory(t){
  if(!inBriar())return;const s=adventureStoryState(),f=s.flags;
  drawHomefieldsGranary(s,t);
+ drawGusWorkshop(s);
  const inside=G.p.x>335&&G.p.x<545&&G.p.z>-320&&G.p.z<-120;
  for(const part of G.storyStore||[])bx(part.x,(part.y0||0)+part.h/2,part.z,part.w,part.h,part.d,part.c,null,inside?.16:1);
  for(const n of G.storyNpcs||[]){
   if(!window.__npc3dDrawn?.(n.id)){pushM();mv(n.x,n.y,n.z);bx(0,27,0,22,34,14,n.id==='mara'?'#b4c0ad':'#886b49');bx(0,51,0,16,16,16,'#d1ad88');popM();}
-  const available=n.id==='thomas'?!f['thomas.ready']:f['thomas.ready']&&!f['briar.depart'];
-  if(available&&mode==='play'){const ready=n.id==='mara'&&(s.items.tangle_root||0)>=3&&(s.items.dressings||0)>=1;bx(n.x,82+Math.sin(t*2)*2,n.z,5,12,5,ready?'#9be4b0':'#e4c674');bx(n.x,72+Math.sin(t*2)*2,n.z,5,4,5,ready?'#9be4b0':'#e4c674');}
+  const available=n.id==='gus'?f['thomas.ready']&&!f['gus.closed']&&!f['gus.shortcut']:n.id==='thomas'?!f['thomas.ready']:f['thomas.ready']&&!f['briar.depart'];
+  if(available&&mode==='play'){const ready=n.id==='gus'?(s.items.gus_tools||0)>0:n.id==='mara'&&(s.items.tangle_root||0)>=3&&(s.items.dressings||0)>=1;bx(n.x,82+Math.sin(t*2)*2,n.z,5,12,5,ready?'#9be4b0':'#e4c674');bx(n.x,72+Math.sin(t*2)*2,n.z,5,4,5,ready?'#9be4b0':'#e4c674');}
  }
  for(const o of G.storyObjects||[]){if(f['event.'+o.key]&&o.kind!=='bellstone')continue;
   if(o.kind==='bellstone'){bx(o.x,o.y+5,o.z,86,10,34,'#737661');bx(o.x,o.y+25,o.z,70,34,24,'#aaa48c');for(let k=0;k<3;k++)bx(o.x,o.y+17+k*8,o.z+13,48-k*6,2,2,'#565d50');}
@@ -3175,7 +3224,7 @@ function openJournal(){
   const notes=Object.values(state.notes).filter(n=>n.region===region.id);
   const items=Object.entries(state.items).filter(([,n])=>n>0);
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
-  const itemNames={tangle_root:'Tangle roots',dressings:'Clean dressings'};
+  const itemNames={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll'};
   showOverlayHTML(`<div class="card" style="max-width:760px;text-align:left"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(region.name):'Your notes'}</h2><p style="color:#b8c6b7">${campaign?esc(G.areaName||'Current part')+' · Progress is saved when you finish this part.':'Enter a campaign level to follow its tasks and clues.'}</p><div style="max-height:55vh;overflow:auto;padding-right:12px"><h3>What to do next</h3><ul style="list-style:none;padding:0">${main.join('')||'<li>No campaign task here.</li>'}</ul>${optional.length?'<h3>Optional tasks you found</h3><ul style="list-style:none;padding:0">'+optional.join('')+'</ul>':''}<h3>Clues and reminders</h3>${notes.map(n=>`<p><strong>${esc(n.title)}</strong><br>${esc(n.text)}</p>`).join('')||'<p style="color:#b8c6b7">No clues recorded for this region yet.</p>'}<h3>Quest items</h3><p style="font-size:13px;color:#b8c6b7">These do not use bag space and cannot be sold.</p><ul>${items.concat(fetchItems).map(([id,n])=>'<li>'+esc(itemNames[id]||id)+' × '+esc(n)+'</li>').join('')||'<li>No quest items.</li>'}</ul></div><button class="bigbtn ghost" id="journalClose" style="margin-top:18px">Close journal</button></div>`);
   document.getElementById('journalClose').onclick=closeJournal;
   document.getElementById('journalClose').focus({preventScroll:true});
@@ -21372,7 +21421,7 @@ window.__BF3={ collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampa
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1990"></script>
+<script type="module" src="./hero3d.js?v=1995"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -7,7 +7,7 @@ async page=>{
  const open=async id=>{await page.evaluate(id=>{const b=__BF3,n=b.G.storyNpcs.find(n=>n.id===id);Object.assign(b.G.p,{x:n.x+50,z:n.z+45,y:n.y});b.briarRequest('open',{npc:id});},id);await page.waitForSelector('#hubReveal')};
  const choice=async id=>{await page.locator('#hubReveal').click();await page.waitForTimeout(300);await page.evaluate(id=>{const b=__BF3;b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice:id});},id)};
  const world=async key=>{await page.evaluate(key=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key===key);Object.assign(b.G.p,{x:o.x,y:o.y,z:o.z});b.briarRequest('world',{key});},key)};
- ok('two campaign NPCs and no legacy Shade',await page.evaluate(()=>__BF3.G.storyNpcs.length===2&&!__BF3.G.npc));
+ ok('three campaign NPCs and no legacy Shade',await page.evaluate(()=>__BF3.G.storyNpcs.length===3&&!__BF3.G.npc));
  await page.evaluate(()=>__BF3.briarRequest('world',{key:'briar.dressings'}));ok('cannot collect supplies before quest or from afar',await page.evaluate(()=>!__BF3.G.storyState.items.dressings));
  await open('thomas');const time=await page.evaluate(()=>__BF3.G.time);await page.evaluate(()=>__BF3.update(.5));ok('conversation pauses world',await page.evaluate(t=>__BF3.G.time===t,time));
  await choice('protect');await page.keyboard.press('Escape');await open('thomas');ok('leaving resumes same line',await page.evaluate(()=>__BF3.G.storyState.conversation.node==='briar.thomas.protect'));await choice('prepare');await page.keyboard.press('Escape');

@@ -30,6 +30,12 @@
         }
       ],
       "availability": "live"
+    },
+    "lewis": {
+      "name": "Lewis",
+      "role": "Village scout",
+      "start": "briar.lewis.first",
+      "availability": "live"
     }
   },
   "nodes": {
@@ -739,6 +745,122 @@
         "direction": "Curt, controlled hurt. Final refusal for this attempt, not a melodramatic threat.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
+    },
+    "briar.lewis.first": {
+      "text": "Keep your voice down. Their signal post is ahead. If that horn sounds, every patrol in these woods will know where our neighbors are.",
+      "choices": [
+        {
+          "id": "route",
+          "text": "How do I get past them?",
+          "next": "briar.lewis.routes",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "prisoners",
+          "text": "What are they doing out here?",
+          "next": "briar.lewis.prisoners",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "lewis",
+        "scene": "Black Woods arrival",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Quiet urgency. You are watching the tree line while helping someone you know.",
+        "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
+      }
+    },
+    "briar.lewis.routes": {
+      "text": "The low path runs through their camp. Or climb the roots on the right and cross the old hunting platforms. Stop the crank below the horn, or cut its cable from above. Either works. I would take the high path. My knees voted against it.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "Keep the others here. I’ll stop the signal.",
+          "next": "briar.lewis.waiting",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "woods.ready"
+            },
+            {
+              "type": "note",
+              "id": "woods.signal",
+              "region": "outskirts",
+              "title": "Silence the signal",
+              "text": "Lewis is keeping the neighbors back. I can stop the signal at its ground crank or climb the eastern roots to cut its upper cable. The northern clearing leads onward."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "lewis",
+        "scene": "Black Woods arrival",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Useful directions, then a small dry joke. Keep the danger believable.",
+        "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
+      }
+    },
+    "briar.lewis.prisoners": {
+      "text": "They marched prisoners north, toward Hollow Pass. I saw one guard call a woman by name. She thought he knew her. Then he tied her hands. We cannot let them catch our people.",
+      "choices": [
+        {
+          "id": "route",
+          "text": "Show me the way to the signal.",
+          "next": "briar.lewis.routes",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "lewis",
+        "scene": "Black Woods arrival",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Controlled anger. A witness describing what happened, not a lore lecture.",
+        "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
+      }
+    },
+    "briar.lewis.waiting": {
+      "text": "I’ll keep the neighbors behind us. Once the horn is quiet, use the north clearing. And watch the old platforms. The wood is older than my excuses.",
+      "choices": [
+        {
+          "id": "clear",
+          "text": "The signal is down. Get everyone moving.",
+          "next": "briar.lewis.clear",
+          "effects": [],
+          "when": [
+            {
+              "flag": "woods.signal",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "lewis",
+        "scene": "Black Woods arrival",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Steady support. Let the last sentence release a little tension.",
+        "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
+      }
+    },
+    "briar.lewis.clear": {
+      "text": "No horn. No patrol rushing after us. That is the best thing I have heard all day. The others are resting here. Something large is blocking the way ahead. I wish that was another joke.",
+      "choices": [],
+      "voice": {
+        "speaker": "lewis",
+        "scene": "Black Woods arrival",
+        "order": 5,
+        "status": "recording-ready",
+        "direction": "Relief first, then sober warning. Keep the last line quiet.",
+        "context": "The signal is disabled and the neighbors have reached shelter. The Brute still blocks their escape."
+      }
     }
   },
   "events": {
@@ -1208,6 +1330,130 @@
           "region": "outskirts",
           "title": "The orchard lookout",
           "text": "Someone left their savings in the lookout chest. The walkway and the far steps make a loop back through the orchard."
+        }
+      ]
+    },
+    "woods.signal.crank": {
+      "once": true,
+      "when": [
+        {
+          "flag": "woods.ready",
+          "is": true
+        },
+        {
+          "flag": "woods.signal",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "woods.signal"
+        },
+        {
+          "type": "note",
+          "id": "woods.signal",
+          "region": "outskirts",
+          "title": "The horn is silent",
+          "text": "The Legion signal is disabled. The neighbors can move toward the northern shelter. The path beyond leads to the Brute’s approach. I can still explore before leaving this part."
+        }
+      ]
+    },
+    "woods.signal.cable": {
+      "once": true,
+      "when": [
+        {
+          "flag": "woods.ready",
+          "is": true
+        },
+        {
+          "flag": "woods.signal",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "woods.signal"
+        },
+        {
+          "type": "note",
+          "id": "woods.signal",
+          "region": "outskirts",
+          "title": "The horn is silent",
+          "text": "The Legion signal is disabled. The neighbors can move toward the northern shelter. The path beyond leads to the Brute’s approach. I can still explore before leaving this part."
+        }
+      ]
+    },
+    "woods.tracks.clue": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "woods.tracks",
+          "region": "outskirts",
+          "title": "Tracks around the old stones",
+          "text": "The carving says: Follow the tracks from the shallow pool to the split tree. Press the matching stones in that order. The prints are still visible along the grove’s western edge."
+        }
+      ]
+    },
+    "woods.tracks.bird": {
+      "when": [
+        {
+          "flag": "woods.tracks.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "woods.tracks",
+          "solution": [
+            "bird",
+            "deer",
+            "wolf"
+          ],
+          "value": "bird"
+        }
+      ]
+    },
+    "woods.tracks.deer": {
+      "when": [
+        {
+          "flag": "woods.tracks.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "woods.tracks",
+          "solution": [
+            "bird",
+            "deer",
+            "wolf"
+          ],
+          "value": "deer"
+        }
+      ]
+    },
+    "woods.tracks.wolf": {
+      "when": [
+        {
+          "flag": "woods.tracks.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "woods.tracks",
+          "solution": [
+            "bird",
+            "deer",
+            "wolf"
+          ],
+          "value": "wolf"
         }
       ]
     }

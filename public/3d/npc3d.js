@@ -1,7 +1,7 @@
 import * as T from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import {loadKitModel,kitModel} from './mob3d.js?v=1981s';
-const cast={gus:['Monk',0x9e8057,'hammer'],thomas:['Monk',0xa38357,'satchel'],mara:['Ranger',0xd5dbbf,'medic'],quartermaster:['Rogue',0xc4a565,'ledger'],drillmaster:['Warrior',0xb87463,'medal'],keeper:['Cleric',0xb99bc9,'shears'],beastkeeper:['Ranger',0x8eac87,'satchel'],anvil:['Monk',0xbb8e60,'hammer']};
+const cast={lewis:['Ranger',0x7a8964,'satchel'],gus:['Monk',0x9e8057,'hammer'],thomas:['Monk',0xa38357,'satchel'],mara:['Ranger',0xd5dbbf,'medic'],quartermaster:['Rogue',0xc4a565,'ledger'],drillmaster:['Warrior',0xb87463,'medal'],keeper:['Cleric',0xb99bc9,'shears'],beastkeeper:['Ranger',0x8eac87,'satchel'],anvil:['Monk',0xbb8e60,'hammer']};
 const records=new Map(),pending=new Set();let group;const visible=new Set();
 function addDetail(root,src,role,col){const h=src._nativeH,metal=new T.MeshStandardMaterial({color:col,roughness:.5,metalness:.3}),leather=new T.MeshStandardMaterial({color:0x49392a,roughness:1}),paper=new T.MeshStandardMaterial({color:0xd9c8a3,roughness:1});const made=[];
  const part=(geometry,material,x,y,z)=>{const m=new T.Mesh(geometry,material);m.position.set(x*h,y*h,z*h);root.add(m);made.push(m);return m;};

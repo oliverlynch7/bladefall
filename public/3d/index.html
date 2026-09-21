@@ -1040,7 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.997.0-first-rift-shard';
+const VERSION3D='1.998.0-black-woods';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2853,13 +2853,15 @@ function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
 function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
 function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
-function areaQuests(ai){ if(inBriar()&&(ai==null||ai===0))return briarQuest(); if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
+function areaQuests(ai){ if(inBlackWoods()&&(ai==null||ai===1))return [{id:'woods.signal',k:'story',n:1,d:!G.storyState?.flags['woods.ready']?'Speak to Lewis at the forest entrance':!G.storyState?.flags['woods.signal']?'Silence the signal: ground crank or upper cable':'Reach the northern shelter'}]; if(inBriar()&&(ai==null||ai===0))return briarQuest(); if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 // Relevant current-region notes and quest items are checkpointed with the route.
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=fetch('./story/briar-foundation.json?v=1996').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
+const briarReady=fetch('./story/briar-foundation.json?v=1998').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
+function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
+function inBriarStory(){return inBriar()||inBlackWoods();}
 function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
 function briarId(){return MP.active?MP.myId:'solo';}
 function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
@@ -2870,12 +2872,12 @@ function briarQuest(){
  return [{id:'briar.opening',k:'story',d,n:1}];
 }
 function briarObjects(){
- if(!inBriar())return [];
+ if(!inBriarStory())return [];
  const f=adventureStoryState().flags;
  return (G.storyObjects||[]).map(o=>({...o,available:!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
 }
 function briarReceive(request,actor,position){
- if(!inBriar()||!briarBook||(MP.active&&!MP.isHost))return false;
+ if(!inBriarStory()||!briarBook||(MP.active&&!MP.isHost))return false;
  const s=adventureStoryState(),party=MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];
  if(!party.includes(actor))return false;
  const r=BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:mode==='play',npcs:G.storyNpcs||[],objects:briarObjects(),party});
@@ -2905,7 +2907,8 @@ function briarSync(){
   if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast((id==='home.bells.cache'?'Tower chest opened':'Quest complete')+' · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='rift_shard'&&id==='briar.gus.BR-02'){const outcome=collectRiftShard('BR-02');if(outcome!=='invalid')G.storyClaims[id]=true;}
  }
- if(!inBriar())return;
+ if(!inBriarStory())return;
+ if(inBlackWoods()){if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
@@ -2913,6 +2916,7 @@ function briarSync(){
  syncHomefieldsOrchard(s);
  if(s.flags['gus.shortcut'])G.walls=G.walls.filter(w=>!w.gusDoor);
  if(G.homefieldsExploration){const count=s.items['home.bells']||0;if(G._bellProgress!==undefined&&G._bellProgress!==count){playFx('lever');toast(friendlyBellText(count,s.flags['home.bells.open']));}G._bellProgress=count;}
+ }
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
@@ -2922,14 +2926,72 @@ function briarSync(){
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
  questUpdate();hudUpdate();
 }
-function briarDisconnect(actor){if(inBriar()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
+function briarDisconnect(actor){if(inBriarStory()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
 function briarInteract(){
- if(!inBriar())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
+ if(!inBriarStory())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65)return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={x:o.x,z:o.z,y:(o.y||0)+62,label,act};}};
- for(const n of G.storyNpcs||[])if((n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
+ for(const n of G.storyNpcs||[])if((inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
  if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&BFStoryState.matches(s,briarBook.events[o.key]?.when))consider(o,o.available?o.label:'Clear the bridge guards first',()=>o.available?briarRequest('world',{key:o.key}):toast('The wagons cannot pass while the bridge guards are still here.'));
  return best;
 }
+function buildBlackWoods(){
+ for(const key of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[key]=[];
+ G.haz=null;G.thorns=[];G.vents=[];G.phasers=[];G.debris=[];G.lights=[];G.npc=null;G.secret=null;G.secretTrigger=null;G.waystone=null;G.dashSign=null;G.beam=null;G.collapse=[];G.optionalMissions=[];G._midSeq=0;G.portal=null;G.vertical=true;
+ G.storyNpcs=[{id:'lewis',name:'Lewis',x:-100,z:180,y:0}];G.storyObjects=[];
+ G.areaName='Briar Town · Black Woods';G.campaignLayout={revision:1998,experience:{title:'Black Woods',objectives:['Find a way past the patrols','Silence the signal','Reach the northern shelter']}};
+ const rooms=[['Forest Arrival',0,200,750,650],['Split Roots',0,-650,950,750],['Occupied Camp',-650,-1850,1100,1000],['Hunting Platforms',850,-1650,1100,1200],['Track Grove',-1850,-2320,1000,1000],['Signal Clearing',0,-3100,1250,950],['North Shelter',0,-4400,1000,900]];
+ for(const [name,x,z,w,d]of rooms){vseg(x,z,w,d,{meadow:true});G.rooms.push({name,x,z,w,d,y:0,monsters:[],encounter:false,cleared:true});}
+ const paths=[[[0,200],[0,-650],[-650,-1250],[-650,-1850],[0,-2600],[0,-3100],[0,-4400]],[[0,-650],[850,-950],[850,-1650],[900,-2300],[0,-3100]],[[-650,-1850],[-1850,-2100],[-1850,-2320]],[[-1850,-2320],[-1150,-2900],[0,-3100]]];
+ for(const path of paths)for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],n=Math.ceil(Math.hypot(a[0]-b[0],a[1]-b[1])/130);for(let j=0;j<=n;j++)vseg(a[0]+(b[0]-a[0])*j/n,a[1]+(b[1]-a[1])*j/n,360,360,{path:true});}
+ vseg(1400,-1870,600,600,{meadow:true});vseg(-560,-3520,360,360,{meadow:true});
+ const stair=(a,b)=>{const n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/95,Math.abs(b[2]-a[2])/22)),out=[];for(let k=0;k<=n;k++){const q=a.map((v,i)=>v+(b[i]-v)*k/n);vplat(q[0],q[1],q[2],190,190,{slab:14,checkpoint:true,roots:true});out.push(q);}return out;};
+ const climb=stair([560,-740,0],[850,-1360,160]),upper=stair([850,-1360,160],[900,-2300,220]),cross=stair([900,-2300,220],[0,-3040,220]),loft=stair([900,-1800,185],[1390,-1850,240]);
+ vplat(1390,-1870,240,420,320,{slab:14,checkpoint:true});vsolid(1390,-1780,240,95,94,24,'#554c35');
+ vplat(0,-3100,220,670,410,{slab:16,checkpoint:true});const down=stair([-280,-3140,220],[-580,-3540,0]);
+ for(const [x,z,y]of [[850,-1360,160],[900,-1950,200],[900,-2300,220],[1390,-1870,240],[0,-3100,220]]){
+  for(const dx of [-70,70])G.deco.push({x:x+dx,z,y0:0,w:18,h:y+14,d:18,c:'#54442e',nocol:true});
+  for(let j=0;j<7;j++)G.deco.push({x:x-76+j*24,z,y0:y+1,w:19,h:4,d:165,c:'#89714b',nocol:true});
+ }
+ // Trees frame the clearings, with open gaps where connecting routes enter.
+ for(let i=0;i<rooms.length;i++){const [,x,z,w,d]=rooms[i];for(let k=0;k<10;k++){const a=k*Math.PI*2/10+.17*i,tx=x+Math.cos(a)*(w*.58),tz=z+Math.sin(a)*(d*.58),h=155+(k%4)*22;
+  if(paths.some(path=>path.some(q=>Math.hypot(q[0]-tx,q[1]-tz)<210)))continue;
+  const trunk=vcol(tx,tz,28,28,h);trunk.treeCol=true;G.deco.push({x:tx,z:tz,y0:h,w:105,h:95,d:105,c:'#304f38',theme:'forest',kind:'tree',lead:true,trunkH:h});}}
+ // Camp shelters face an open center; the crank can be approached from either side.
+ for(const [x,z]of [[-930,-1660],[-350,-2030]]){vsolid(x,z,0,180,68,145,'#514b3b');G.deco.push({x,z,y0:70,w:215,h:24,d:180,c:'#667053',nocol:true});}
+ for(const [x,z]of [[-830,-2150],[-450,-1620],[210,-2900]])vsolid(x,z,0,130,44,28,'#675942');
+ vsolid(370,-3250,0,180,100,22,'#615039');for(const x of [280,470])vsolid(x,-3410,0,45,65,60,'#756145');
+ // Small pool and the ordered tracks are environmental clues, not a revealed solution list.
+ G.deco.push({x:-2160,z:-2020,y0:1,w:150,h:2,d:110,c:'#47685c',nocol:true});
+ vsolid(-2150,-2660,0,25,160,30,'#574d39');vsolid(-2100,-2670,0,25,185,30,'#574d39');
+ G.storyObjects=[{key:'woods.signal.crank',label:'Stop the signal crank',x:80,z:-3060,y:0,kind:'signalcrank'},
+ {key:'woods.signal.cable',label:'Cut the horn cable',x:0,z:-3070,y:220,kind:'signalcable'},
+ {key:'woods.tracks.clue',label:'Read the old grove stone',x:-1770,z:-2050,y:0,kind:'trackclue'},
+ ...['bird','deer','wolf'].map((animal,i)=>({key:'woods.tracks.'+animal,label:'Press the '+animal+' stone',x:-1800+i*110,z:-2480,y:0,kind:'trackstone',animal}))];
+ for(const [x,z]of [[160,-650],[-1130,-2600],[180,-4090]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
+ for(const [type,x,z]of [['grunt',-570,-1360],['grunt',-820,-1800],['caster',-400,-1870],['grunt',-650,-2220],['flyer',1040,-2120],['thornboar',-1600,-2180],['thornboar',-1920,-2770],['grunt',-200,-2890],['caster',240,-3100],['grunt',-170,-3600]]){const e=spawnEnemy(type,x,z,false);e.woodsEncounter=true;}
+ G.bounds={minX:-2600,maxX:1800,minZ:-4900,maxZ:650};G.progressEnd=-4850;G.portalPos={x:0,z:-4680,y:0};G.goalPos={...G.portalPos};G.startPos={x:0,z:300};G.lastSafe={x:0,z:300,y:0};Object.assign(G.p,{x:0,z:300,y:0,vy:0});
+ G.blackWoods={paths,climb,upper,cross,loft,down,revision:1998};briarPending=null;G._storyEpoch=null;briarEpoch();briarSync();
+}
+function drawWoodsTrack(animal,x,z,y=3){
+ const c='#c8bb91';
+ if(animal==='bird'){for(const d of [-1,0,1]){pushM();mv(x,y,z);rotY(d*.6);bx(0,0,-10,4,2,23,c);popM();}bx(x,y,z+8,4,2,14,c);}
+ else if(animal==='deer'){for(const dx of [-7,7])bx(x+dx,y,z,9,2,24,c);}
+ else {bx(x,y,z+5,22,2,17,c);for(let k=0;k<4;k++)bx(x-15+k*10,y,z-10-Math.sin(k)*4,6,2,7,c);}
+}
+function drawBlackWoods(t){
+ if(!inBlackWoods())return;const s=adventureStoryState(),f=s.flags;
+ const n=G.storyNpcs[0];if(!window.__npc3dDrawn?.('lewis')){bx(n.x,28,n.z,22,38,16,'#6c7754');bx(n.x,55,n.z,16,16,16,'#cbb38f');}
+ if(!f['woods.ready']){bx(n.x,80,n.z,5,13,5,'#e3cb8a');bx(n.x,70,n.z,5,4,5,'#e3cb8a');}
+ for(const x of [-45,45])bx(x,270,-3130,12,100,12,'#61503b');bx(0,322,-3130,115,12,22,'#8d7348');
+ for(let k=0;k<4;k++)bx(0,296,-3130-k*12,12+k*12,14+k*6,14,'#b29a62');
+ if(!f['woods.signal']){bx(0,157,-3070,3,314,3,'#c9b985');bx(80,26,-3060,18,52,18,'#69543a');pushM();mv(80,50,-3060);rotY(t*1.7);box(62,7,9,'#a68c5b');popM();}
+ else bx(0,229,-3070,3,18,3,'#c9b985');
+ for(const o of G.storyObjects)if(o.kind==='trackstone'||o.kind==='trackclue'){
+  bx(o.x,8,o.z,70,16,60,'#676d59');if(o.animal)drawWoodsTrack(o.animal,o.x,o.z,17);else{bx(o.x,25,o.z,58,18,30,'#93917a');for(let j=0;j<3;j++)bx(o.x,27+j*4,o.z+16,40-j*5,2,2,'#4c5145');}}
+ for(const [animal,z]of [['bird',-2110],['deer',-2280],['wolf',-2470]]){for(const dx of [-14,14])drawWoodsTrack(animal,-2160+dx,z+(dx>0?28:0));}
+ const count=s.items['woods.tracks']||0;for(let k=0;k<3;k++)bx(-1690+k*22,24,-2550,12,8,12,k<count?'#b89cdc':'#575b51');
+}
+
 function buildBriarOpening(){
  G.areaName='Briar Town · Homefields';G.npc=null;G.qmarks=[];G.dens=[];
  rebuildHomefieldsVillage();
@@ -3360,7 +3422,7 @@ function questHuntKill(e){
   addText(e.x, e.y + (e.h||40) + 20, e.z, 'QUARRY SLAIN', 'var(--amber)', true);
   if(G.qmarks) for(const m of G.qmarks) if(m.q === e.huntQ) m.done = true; }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
-function openWay(){ if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
+function openWay(){ if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
   if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
@@ -4768,7 +4830,7 @@ function loadArea(){
   if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
-  if(inBriar())buildBriarOpening();else{G.storyNpcs=[];G.storyObjects=[];}
+  if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else{G.storyNpcs=[];G.storyObjects=[];}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -5044,7 +5106,10 @@ function abandonTrial(){ restoreBank(); openHub(); }
 // Authored shard placements are staged without replacing legacy trial access until complete.
 // Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
 const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
-function worldRiftShards(){return inBriar()&&adventureStoryState().flags['mara.healing']?[{id:'BR-01',x:-240,z:-95,y:0}]:[];}
+function worldRiftShards(){
+ if(inBriar()&&adventureStoryState().flags['mara.healing'])return [{id:'BR-01',x:-240,z:-95,y:0}];
+ if(inBlackWoods())return [{id:'BR-03',x:1480,z:-1950,y:240},{id:'BR-05',x:370,z:-3390,y:0},...(adventureStoryState().flags['woods.tracks.open']?[{id:'BR-04',x:-2130,z:-2530,y:0}]:[])];return [];
+}
 function riftShardTaken(id){const a=BFRiftShards.pending(G?.pendingRiftShards);return a.found.includes(id)||a.echoes.includes(id);}
 function takeWorldRiftShard(id){
  if(mode!=='play'||!isCampaignAdventure()||G.p.dead||G.p.downed)return 'invalid';
@@ -18311,6 +18376,7 @@ function drawCourse(s,t){
     if(!spent){bx(hp.x,py+12,hp.z,5,2,19,'#d9ffe6','#72caa0',.9);bx(hp.x,py+12,hp.z,19,2,5,'#d9ffe6','#72caa0',.9);}
   }
   drawBriarStory(t);
+  drawBlackWoods(t);
   drawRiftShardDiscovery(t);
   // crumbling stepping stones (shake, drop, respawn)
   /* Deferring a crumble was necessary and NOT sufficient, which is the second half of the finding.
@@ -21525,7 +21591,7 @@ window.__BF3={ worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJou
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1997"></script>
+<script type="module" src="./hero3d.js?v=1998"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

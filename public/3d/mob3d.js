@@ -1,7 +1,7 @@
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
 import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2000';
-import { enemyActionState } from './enemy-action-state.js?v=1974';
+import { enemyActionState } from './enemy-action-state.js?v=2004';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 

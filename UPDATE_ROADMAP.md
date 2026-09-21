@@ -1800,3 +1800,7 @@ Expanded Hollow Pass part one: prisoner trail, split routes, bridge weights/brak
 
 ## [Codex | 2026-09-20] 2.003 — Lost Canyon
 Expanded Hollow Pass part two with prison rescue routes, Ward/Ruth dialogue, alarm, cave loop, rail puzzle and HP-03/04. 16 new VO lines and five renderer previews. Marksman/HP-05 next. See docs/IMPLEMENTATION_LOST_CANYON_2026-09-20.md.
+
+
+## [Codex | 2026-09-20] 2.004 — Hollow Marksman
+New split canyon boss arena, reachable nests, locked shots, working cover, one glide/guard pair, safe landing and hidden HP-05. All five Hollow Pass shards available. Ruined Keep next. See docs/IMPLEMENTATION_MARKSMAN_2026-09-20.md.

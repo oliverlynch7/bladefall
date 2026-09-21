@@ -26,6 +26,7 @@ export function buildHollow(scene,w){
   // Each heightfield slab retains its exact extent. Broad caps split into worn flagstones.
   const surfaces=new Map();
   function surface(o,base,top,wood=false){
+    if(w.marksmanCrossing&&wood){for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},'marksman-deck'))rawSurface(part,base,top,true);return;}
     if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood);
     for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},w.cliffScene!=null?'cliff-union':base+':'+top))rawSurface(part,base,top,wood);
   }

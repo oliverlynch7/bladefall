@@ -1,5 +1,8 @@
 // Read-only animation phase selection from authoritative gameplay timers.
 export function enemyActionState(e){
+ if(e.marksmanCrossing&&e.markState==='aim')return {phase:'Windup',key:'markClock',remaining:e.markClock};
+ if(e.marksmanCrossing&&e.markAttack>0)return {phase:'Attack',key:'markAttack',remaining:e.markAttack};
+ if(e.marksmanCrossing&&e.markState==='glide')return {phase:'Attack',key:'markGlide',remaining:e.markClock};
  const keys=['windT','slamW','cleaveW','novaW','poundW','eruptW','knightW','pinT','blinkFx','fuseT','meleeW','shotW'];
  let remaining=0,key=null;
  for(const k of keys)if((e[k]||0)>remaining){remaining=e[k];key=k;}

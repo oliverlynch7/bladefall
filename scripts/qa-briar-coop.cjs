@@ -30,6 +30,10 @@ async page=>{
    await late.evaluate(()=>{BFHubDialogue.close(false,true);__BF3.restartCampaignCheckpoint(true)});ok('late join does not bank unfinished host quest',await late.evaluate(()=>!__BF3.G.storyState.flags['mara.healing']&&__BF3.meta.gold===1000));
   }finally{await lateContext.close();}
   await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();
+  await guest.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:-240,z:-95,y:0});b.takeWorldRiftShard('BR-01');});await flush();
+  ok('world shard belongs only to collecting guest',await guest.evaluate(()=>__BF3.G.pendingRiftShards.found.includes('BR-01'))&&await page.evaluate(()=>!__BF3.G.pendingRiftShards?.found?.includes('BR-01')));
+  const shardPacket=await page.evaluate(()=>__BF3.briarPacket());await guest.evaluate(p=>__BF3.briarApply(p),shardPacket);ok('shared story snapshot preserves personal shard',await guest.evaluate(()=>__BF3.G.pendingRiftShards.found.includes('BR-01')));
+  ok('host can still collect the same world crystal',await page.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:-240,z:-95,y:0});return b.takeWorldRiftShard('BR-01')==='found'}));
   const grain=async(target,key)=>{await target.evaluate(key=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='home.grain.'+key);Object.assign(b.G.p,{x:o.x,z:o.z,y:0});if(!b.MP.isHost)b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key:o.key});},key);await flush()};
   await grain(page,'weight.1');await grain(guest,'weight.2');
   ok('both peers see wrong granary total and closed door',await page.evaluate(()=>__BF3.G.storyState.items['home.grain']===6&&!__BF3.G.granary.open)&&await guest.evaluate(()=>__BF3.G.storyState.items['home.grain']===6&&!__BF3.G.granary.open));

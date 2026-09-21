@@ -1040,7 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.996.0-farms-orchard';
+const VERSION3D='1.997.0-first-rift-shard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3278,7 +3278,7 @@ function openJournal(){
   const items=Object.entries(state.items).filter(([,n])=>n>0);
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
   const itemNames={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll'};
-  showOverlayHTML(`<div class="card" style="max-width:760px;text-align:left"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(region.name):'Your notes'}</h2><p style="color:#b8c6b7">${campaign?esc(G.areaName||'Current part')+' · Progress is saved when you finish this part.':'Enter a campaign level to follow its tasks and clues.'}</p><div style="max-height:55vh;overflow:auto;padding-right:12px"><h3>What to do next</h3><ul style="list-style:none;padding:0">${main.join('')||'<li>No campaign task here.</li>'}</ul>${optional.length?'<h3>Optional tasks you found</h3><ul style="list-style:none;padding:0">'+optional.join('')+'</ul>':''}<h3>Clues and reminders</h3>${notes.map(n=>`<p><strong>${esc(n.title)}</strong><br>${esc(n.text)}</p>`).join('')||'<p style="color:#b8c6b7">No clues recorded for this region yet.</p>'}<h3>Quest items</h3><p style="font-size:13px;color:#b8c6b7">These do not use bag space and cannot be sold.</p><ul>${items.concat(fetchItems).map(([id,n])=>'<li>'+esc(itemNames[id]||id)+' × '+esc(n)+'</li>').join('')||'<li>No quest items.</li>'}</ul></div><button class="bigbtn ghost" id="journalClose" style="margin-top:18px">Close journal</button></div>`);
+  showOverlayHTML(`<div class="card" style="max-width:760px;text-align:left"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(region.name):'Your notes'}</h2><p style="color:#b8c6b7">${campaign?esc(G.areaName||'Current part')+' · Progress is saved when you finish this part.':'Enter a campaign level to follow its tasks and clues.'}</p><div style="max-height:55vh;overflow:auto;padding-right:12px"><h3>What to do next</h3><ul style="list-style:none;padding:0">${main.join('')||'<li>No campaign task here.</li>'}</ul>${optional.length?'<h3>Optional tasks you found</h3><ul style="list-style:none;padding:0">'+optional.join('')+'</ul>':''}${riftShardJournal()}<h3>Clues and reminders</h3>${notes.map(n=>`<p><strong>${esc(n.title)}</strong><br>${esc(n.text)}</p>`).join('')||'<p style="color:#b8c6b7">No clues recorded for this region yet.</p>'}<h3>Quest items</h3><p style="font-size:13px;color:#b8c6b7">These do not use bag space and cannot be sold.</p><ul>${items.concat(fetchItems).map(([id,n])=>'<li>'+esc(itemNames[id]||id)+' × '+esc(n)+'</li>').join('')||'<li>No quest items.</li>'}</ul></div><button class="bigbtn ghost" id="journalClose" style="margin-top:18px">Close journal</button></div>`);
   document.getElementById('journalClose').onclick=closeJournal;
   document.getElementById('journalClose').focus({preventScroll:true});
 }
@@ -5041,13 +5041,62 @@ function skipTrial(){
   toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
 }
 function abandonTrial(){ restoreBank(); openHub(); }
-// Authored placements are enabled region-by-region with their complete five-shard routes.
+// Authored shard placements are staged without replacing legacy trial access until complete.
 // Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
+const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
+function worldRiftShards(){return inBriar()&&adventureStoryState().flags['mara.healing']?[{id:'BR-01',x:-240,z:-95,y:0}]:[];}
+function riftShardTaken(id){const a=BFRiftShards.pending(G?.pendingRiftShards);return a.found.includes(id)||a.echoes.includes(id);}
+function takeWorldRiftShard(id){
+ if(mode!=='play'||!isCampaignAdventure()||G.p.dead||G.p.downed)return 'invalid';
+ const o=worldRiftShards().find(o=>o.id===id),p=G.p;
+ if(!o||Math.hypot(o.x-p.x,o.z-p.z)>70||Math.abs(p.y-o.y)>45)return 'invalid';
+ return collectRiftShard(id);
+}
+function riftShardInteract(){
+ if(!isCampaignAdventure())return null;
+ const p=G.p,o=worldRiftShards().find(o=>!riftShardTaken(o.id)&&Math.hypot(o.x-p.x,o.z-p.z)<68&&Math.abs(p.y-o.y)<=45);
+ return o?{x:o.x,z:o.z,y:o.y+74,label:meta.riftShards.includes(o.id)?'Collect the saved shard’s gold echo':'Collect the Rift Shard',act:()=>takeWorldRiftShard(o.id)}:null;
+}
+function drawRiftShardCrystal(o,t,spent=false,scale=1){
+ const col=spent?'#898397':'#9e57db',light=spent?'#b4adbe':'#e1b5ff';
+ pushM();mv(o.x,o.y+33+Math.sin(t*2)*3,o.z);rotY(t*.55);CURM=mMul(CURM,mS(scale,scale,scale));
+ // Seven beveled courses make a pointed crystal, with a smaller bright inner spine.
+ for(let k=0;k<7;k++){const w=5+(3-Math.abs(k-3))*4;bx(0,(k-3)*6,0,w,6,w*.7,k%2?col:light,spent?null:'#612796');}
+ bx(0,0,0,4,28,4,light,spent?null:'#bd71ff');
+ for(let j=0;j<3;j++){const a=t*.35+j*Math.PI*2/3;pushM();mv(Math.cos(a)*25,Math.sin(a*2)*8,Math.sin(a)*25);rotZ(.55+j);box(5,13,5,col,spent?null:'#8741c0');popM();}
+ popM();
+}
+function drawRiftShardDiscovery(t){
+ for(const o of worldRiftShards()){
+  const spent=meta.riftShards.includes(o.id),taken=riftShardTaken(o.id);
+  bx(o.x,o.y+2,o.z,62,4,62,'#66616d');bx(o.x,o.y+5,o.z,43,3,43,spent?'#797482':'#8c6aa9');
+  for(let j=0;j<5;j++){const a=j*Math.PI*2/5;pushM();mv(o.x+Math.sin(a)*25,o.y+6,o.z+Math.cos(a)*25);rotY(a);box(5,2,9,spent?'#aaa3b0':'#d9adff');popM();}
+  if(!taken&&!window.__riftShard3dDrawn?.has(o.id))drawRiftShardCrystal(o,t,spent);
+ }
+ const r=G?.riftReveal,age=r?G.time-r.start:99;
+ if(r&&age<1.1&&!window.__riftShard3dDrawn?.has('pickup')){const f=age/1.1;drawRiftShardCrystal({x:r.x,z:r.z,y:r.y+f*55},t,false,1-f*.8);}
+ let card=document.getElementById('riftDiscovery');
+ if(!card){card=document.createElement('aside');card.id='riftDiscovery';card.setAttribute('role','status');card.style.cssText='position:fixed;left:50%;bottom:125px;transform:translateX(-50%);width:min(400px,calc(100vw - 28px));box-sizing:border-box;padding:15px 18px;border:1px solid #b582de;border-radius:12px;background:rgba(27,17,40,.96);color:#ecddff;font:14px/1.5 system-ui;z-index:35;pointer-events:none;box-shadow:0 0 28px #a258c544';document.body.appendChild(card);}
+ const visible=!!r&&r.first&&age<18&&mode==='play'&&isCampaignAdventure();
+ card.style.display=visible?'block':'none';
+ if(visible&&card._reveal!==r){card._reveal=r;card.innerHTML='<strong style="display:block;font-size:19px;color:#dfb5ff">You found a Rift Shard</strong><p style="margin:7px 0">Five matching shards rebuild a training rift and open a path to a new fighting style.</p><p style="margin:7px 0"><b>Finish this part to save it.</b> Dying or leaving first loses unsaved shards.</p><small>Read more in your Journal. World crystals must be collected by each player.</small>';}
+}
+function riftShardJournal(){
+ if(!isCampaignAdventure())return '';
+ const region=BFRiftShards.regions[G.zone],p=region&&BFRiftShards.progress(meta.riftShards,G.pendingRiftShards,region.id);
+ if(!p||!(p.banked+p.pending))return '';
+ return '<section aria-label="Rift Shards"><h3>Rift Shards</h3><p><strong>'+p.banked+' / 5 saved</strong> · '+p.pending+' carried this part</p><p style="color:#cdb5e4">'+RIFT_SHARD_HELP+'</p></section>';
+}
 function collectRiftShard(id){
  if(!isCampaignAdventure()||!G.p||G.p.dead)return 'invalid';
  const result=BFRiftShards.collect(meta.riftShards,G.pendingRiftShards,id);
  G.pendingRiftShards=result.pending;
- if(result.outcome==='found'){playFx('secretget');toast('Rift Shard found — finish this part to keep it.','#c47bff','event-secret-rift');}
+ if(result.outcome==='found'){
+  playFx('secretget');toast('Rift Shard found — finish this part to keep it.','#c47bff','event-secret-rift');
+  const first=!G._riftIntroShown&&!BFRiftShards.normalize(meta.riftShards).length;
+  G.riftReveal={id,start:G.time,first,x:G.p.x,y:G.p.y,z:G.p.z};G._riftIntroShown=true;
+  burst(G.p.x,G.p.y+34,G.p.z,'#bd83f0',20);addText(G.p.x,G.p.y+85,G.p.z,'RIFT SHARD','#d9baff',true);
+ }
  else if(result.outcome==='echo'){const gold=awardGold(120);toast('A shard you already saved — +'+gold+' gold.','#c9b6ff','event-secret-rift');}
  return result.outcome;
 }
@@ -16852,6 +16901,7 @@ function updateInteract(){
   if(!it && G.dashSign){ const s=G.dashSign, d=dXZ(s.x,s.z,p.x,p.z); if(d<100) it={x:s.x,z:s.z,y:74,label:'📖 Read the sign · How to cross the gap',act:()=>openDashTutorial()}; }   // re-read the mid-air-dash lesson anytime
   const storyInteraction=briarInteract();if(storyInteraction)it=storyInteraction;
   const windbreak=canyonWindInteract();if(windbreak)it=windbreak;
+  const shardInteraction=riftShardInteract();if(shardInteraction)it=shardInteraction;
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
@@ -18261,6 +18311,7 @@ function drawCourse(s,t){
     if(!spent){bx(hp.x,py+12,hp.z,5,2,19,'#d9ffe6','#72caa0',.9);bx(hp.x,py+12,hp.z,19,2,5,'#d9ffe6','#72caa0',.9);}
   }
   drawBriarStory(t);
+  drawRiftShardDiscovery(t);
   // crumbling stepping stones (shake, drop, respawn)
   /* Deferring a crumble was necessary and NOT sufficient, which is the second half of the finding.
      The voxel slab's visible face spans y 0..1.4; world3d parks its floor tiles at y=1.45 ("just
@@ -21346,7 +21397,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={ collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={ worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
@@ -21474,7 +21525,7 @@ window.__BF3={ collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampa
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1995"></script>
+<script type="module" src="./hero3d.js?v=1997"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

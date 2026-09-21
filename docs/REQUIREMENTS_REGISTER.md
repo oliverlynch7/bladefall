@@ -317,3 +317,7 @@ Gus workshop/loft/sign and shared quest shortcut are implemented with checkpoint
 
 ## [Codex | 2026-09-20] MAP-01/GOV-02 farm/orchard increment
 Added field-discovered supply recovery, mixed farm enemies, orchard beasts and a deployable raised lookout route with return descent and shared stash. Checkpoint-tested; full expansion remains OPEN. See IMPLEMENTATION_HOMEFIELDS_FARMS_2026-09-20.md.
+
+
+## [Codex | 2026-09-20] RIFT-02/MP-02 first world pickup increment
+BR-01 is now individually collectible after Mara, with faceted art, nonblocking explanation, personal journal saved/carried counts, gray echoes and checkpoint/co-op tests. RIFT-02 remains PARTIAL because Hall location guidance requires the actual room; five placements and Hall access remain OPEN. See IMPLEMENTATION_FIRST_RIFT_SHARD_2026-09-20.md.

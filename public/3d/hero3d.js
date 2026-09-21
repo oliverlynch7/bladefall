@@ -1,4 +1,5 @@
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
+import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=1995';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions} from './companion3d.js?v=1981s';
@@ -1887,6 +1888,7 @@ export function drawHero3D(p, t){
       syncMobs(scene, dt);
       syncCompanions(scene,dt);
       syncNpcs(scene,dt);
+      syncRiftShards(scene);
   syncProjectiles(scene);
       syncProps(scene, dt);           // chests and the other objects you interact with
       syncClass();                    // respec or a different save changes the body

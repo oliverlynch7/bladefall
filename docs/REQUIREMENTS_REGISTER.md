@@ -313,3 +313,7 @@ Validation: new reducer puzzle tests, existing story/bell/Gus/authority/voice AP
 
 ## [Codex | 2026-09-20] MAP-01/GOV-02 optional workshop increment
 Gus workshop/loft/sign and shared quest shortcut are implemented with checkpoint-banked BR-02; existing spoken script preserved. See IMPLEMENTATION_GUS_WORKSHOP_2026-09-20.md for scope and checks. Region expansion and Rift Hall remain partial; no requirement closed merely because one quest shipped.
+
+
+## [Codex | 2026-09-20] MAP-01/GOV-02 farm/orchard increment
+Added field-discovered supply recovery, mixed farm enemies, orchard beasts and a deployable raised lookout route with return descent and shared stash. Checkpoint-tested; full expansion remains OPEN. See IMPLEMENTATION_HOMEFIELDS_FARMS_2026-09-20.md.

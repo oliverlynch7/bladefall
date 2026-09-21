@@ -1136,6 +1136,80 @@
           "text": "Five balanced the door. The weights are held in place and the store room is open. We recovered the grain keeper’s saved coins."
         }
       ]
+    },
+    "home.farm.supplies": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "home.farm.saved"
+        },
+        {
+          "type": "reward",
+          "id": "home.farm.supplies",
+          "kind": "gold",
+          "amount": 100
+        },
+        {
+          "type": "note",
+          "id": "home.farm",
+          "region": "outskirts",
+          "title": "Supplies for Briar",
+          "text": "I recovered the wagon’s food and bandages. The neighbors will need these on the way out. I also found the driver’s spare coins."
+        }
+      ]
+    },
+    "home.orchard.clue": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "home.orchard",
+          "region": "outskirts",
+          "title": "The fruit pickers’ walkway",
+          "text": "The old note says: Raise the walkway when the boars come. The hand wheel is up by the picking platforms. There may still be something in the lookout chest."
+        }
+      ]
+    },
+    "home.orchard.wheel": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "home.orchard.open"
+        },
+        {
+          "type": "note",
+          "id": "home.orchard",
+          "region": "outskirts",
+          "title": "Above the orchard",
+          "text": "I lowered the fruit pickers’ walkway. It leads to a lookout beyond the trees. The steps on the far side lead back down."
+        }
+      ]
+    },
+    "home.orchard.cache": {
+      "once": true,
+      "when": [
+        {
+          "flag": "home.orchard.open",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "reward",
+          "id": "home.orchard.cache",
+          "kind": "gold",
+          "amount": 140
+        },
+        {
+          "type": "note",
+          "id": "home.orchard",
+          "region": "outskirts",
+          "title": "The orchard lookout",
+          "text": "Someone left their savings in the lookout chest. The walkway and the far steps make a loop back through the orchard."
+        }
+      ]
     }
   }
 }

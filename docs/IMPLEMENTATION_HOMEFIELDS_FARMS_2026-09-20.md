@@ -1,0 +1,16 @@
+# Western farm and orchard increment
+
+Continue MAP-01/GOV-02 approved exploration and discovery scope. Existing farm has three same-type enemies and hay blocks; orchard has a short stair climb ending in a chest. Keep tested paths and Gus quest intact. Add a recoverable village supply wagon, broken defensive lanes, mixed existing melee/caster enemies, and two independent thornboars around the orchard. No new faction lore or dialogue recording changes.
+
+Extend orchard north with an elevated fruit-picker lookout connected by a lowered walkway. The hand wheel on the existing climb deploys the walkway; a maintenance note explains its purpose. A small stash rewards the detour. A return descent and continuous ground beneath provide safe recovery rather than lethal jumps. This is an exploration mechanism, not another bell/code puzzle. Main mill route and all five approved shard IDs remain independent. Farm supplies and orchard stash are once-only shared story rewards, provisional until the half checkpoint. Use existing host-authoritative events for interactions/bridge flag; render deployed geometry on all peers. No forced enemy quota: a player may risk collecting the wagon supplies while enemies are active.
+
+Validate route traversal, remote/ground pickup rejection, shared geometry/rewards, replay idempotence, checkpoint rollback and legacy saves. Inspect screenshots. Enemy types/geometry remain browser-sized; actual fight balance needs gameplay checks and must not be claimed from stunned movement tests.
+
+
+## [Codex | 2026-09-20] Western farms and orchard — 1.996
+
+Continued MAP-01/GOV-02: added optional supply-wagon recovery with a visible empty wagon and provision crates beside Mara after recovery; field completion requires no NPC return or enemy quota. Farm defenses create staggered lanes and existing caster replaces one of three grunts. Two independent thornboars occupy extended orchard ground. The existing climb now branches to a hand wheel that lowers a collidable timber walkway, reaching a fruit-picker lookout/cache and a return descent. A discovered note enters the journal. No new spoken lines, shard IDs, major lore or main-route dependencies. Rewards use existing shared once-only transactions and half-checkpoint banking.
+
+Validated in actual browser: new farm/orchard QA passed 23 movement waypoints and 10 access/reward/rollback checks; existing exploration passed 33 waypoints. Caster activated, wound up and fired; boar activated, wound up and charged at ground height (behavior smoke test with invulnerable player, not difficulty tuning). Controlled two-context co-op passed 22 checks including shared bridge geometry and both-player discovery rewards; not a real WebRTC session. Finishing half and reloading preserved both reward receipts and bridge flag. Legacy/checkpoint suite passed 11 checks; Gus reducer and voice API tests passed. Fixed two outer ground recovery gaps found in traversal and a legacy tree intersection found in screenshots. Reviewed farm and orchard screenshots and added to gallery. Full regional art/encounter balance still needs iteration.
+
+Next: BR-01 discovery/tutorial, remaining five-shard and Rift Hall integration, then Black Woods terrain/quests/boss and other regions. All campaign expansion remains partial; do not mark the region complete.

@@ -162,3 +162,12 @@ Validation: live browser workshop QA passed 17 movement waypoints and 10 checks 
 ## [Codex | 2026-09-20] Workshop production verification
 
 a987630 deployed successfully through Cloudflare Pages (a2d5b082-07b2-4503-a9ad-7bc1ffb5cc6d). Read-only production browser verified 1.995, Gus live availability, nine gallery images loaded and no horizontal overflow at 390px. No production gameplay save changed. Legacy-save/checkpoint regression passed all 11 checks. Private archive 2026-09-20-gus-workshop holds 139 user-role messages with zero unparsed lines and valid references.
+
+
+## [Codex | 2026-09-20] Western farms and orchard — 1.996
+
+Continued MAP-01/GOV-02: added optional supply-wagon recovery with a visible empty wagon and provision crates beside Mara after recovery; field completion requires no NPC return or enemy quota. Farm defenses create staggered lanes and existing caster replaces one of three grunts. Two independent thornboars occupy extended orchard ground. The existing climb now branches to a hand wheel that lowers a collidable timber walkway, reaching a fruit-picker lookout/cache and a return descent. A discovered note enters the journal. No new spoken lines, shard IDs, major lore or main-route dependencies. Rewards use existing shared once-only transactions and half-checkpoint banking.
+
+Validated in actual browser: new farm/orchard QA passed 23 movement waypoints and 10 access/reward/rollback checks; existing exploration passed 33 waypoints. Caster activated, wound up and fired; boar activated, wound up and charged at ground height (behavior smoke test with invulnerable player, not difficulty tuning). Controlled two-context co-op passed 22 checks including shared bridge geometry and both-player discovery rewards; not a real WebRTC session. Finishing half and reloading preserved both reward receipts and bridge flag. Legacy/checkpoint suite passed 11 checks; Gus reducer and voice API tests passed. Fixed two outer ground recovery gaps found in traversal and a legacy tree intersection found in screenshots. Reviewed farm and orchard screenshots and added to gallery. Full regional art/encounter balance still needs iteration.
+
+Next: BR-01 discovery/tutorial, remaining five-shard and Rift Hall integration, then Black Woods terrain/quests/boss and other regions. All campaign expansion remains partial; do not mark the region complete.

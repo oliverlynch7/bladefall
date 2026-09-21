@@ -3,7 +3,7 @@ import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskir
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2001';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1972';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1972';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2005';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2006';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2004';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.

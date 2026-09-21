@@ -1,0 +1,950 @@
+{
+  "version": 1,
+  "region": "keep",
+  "status": "The Dungeons playable; The Fallen redesign remains next",
+  "npcs": {
+    "walter": {
+      "name": "Walter",
+      "role": "Stoneworker who knows how the prison was rebuilt",
+      "start": "kd.walter.first"
+    },
+    "sly": {
+      "name": "Sly",
+      "role": "A prisoner who stole from someone worse off",
+      "start": "kd.sly.first"
+    }
+  },
+  "nodes": {
+    "kd.walter.first": {
+      "text": "You're not wearing their colors. That will upset the management. I'm Walter. I used to mend these walls. Now I sleep beside them. Read the list at the stairs, then look in the west cells. The guards' numbers don't match the beds.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Where did they move everyone?",
+          "next": "kd.walter.marks",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.walter.met",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": "lift",
+          "text": "Can we get people out of here?",
+          "next": "kd.walter.lift",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.walter.met",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "walter",
+        "scene": "A builder notices what the guards tried to hide",
+        "order": 1,
+        "emotion": "Male. Older, steady, dry humor. Observant rather than mysterious.",
+        "direction": "Male. Older, steady, dry humor. Observant rather than mysterious.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A builder notices what the guards tried to hide"
+      }
+    },
+    "kd.walter.marks": {
+      "text": "They built a false wall behind the empty cells. Old service marks still show where the passage ran. Follow those. Stone can hide a doorway, but it can't explain why the floor keeps going through it.",
+      "choices": [
+        {
+          "id": "lift",
+          "text": "What about the lift?",
+          "next": "kd.walter.lift"
+        },
+        {
+          "id": "papers",
+          "text": "The papers mention Professor Ellis.",
+          "next": "kd.walter.ellis",
+          "when": [
+            {
+              "flag": "kd.papers",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "walter",
+        "scene": "An optional clue to the hidden holding room",
+        "order": 2,
+        "emotion": "Matter-of-fact pride in knowing his trade. Clear directions without naming every turn.",
+        "direction": "Matter-of-fact pride in knowing his trade. Clear directions without naming every turn.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. An optional clue to the hidden holding room"
+      }
+    },
+    "kd.walter.lift": {
+      "text": "The lift carries people to the upper shelter. Its load plate shows four. Hook weights that add up to four; leave the others off. Free the people first. They'll gather on the platform while you work. The eastern service stairs let you follow or come back down.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will find the missing prisoners.",
+          "next": "kd.walter.marks"
+        },
+        {
+          "id": "papers",
+          "text": "What do you know about Ellis?",
+          "next": "kd.walter.ellis",
+          "when": [
+            {
+              "flag": "kd.papers",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "walter",
+        "scene": "The required puzzle and return route",
+        "order": 3,
+        "emotion": "Patient, like explaining a tool to someone who needs it now.",
+        "direction": "Patient, like explaining a tool to someone who needs it now.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. The required puzzle and return route"
+      }
+    },
+    "kd.walter.ellis": {
+      "text": "Ellis worked on the King's early research. They wanted him back, badly. He escaped north before the last transport. The people you found heard the guards arguing about the frozen mountains. Frostfell. If he knows how this began, he might know what we can do next.",
+      "choices": [
+        {
+          "id": "king",
+          "text": "Does he know where the King is?",
+          "next": "kd.walter.unknown"
+        },
+        {
+          "id": "hall",
+          "text": "What is beyond the upper shelter?",
+          "next": "kd.walter.fallen"
+        }
+      ],
+      "voice": {
+        "speaker": "walter",
+        "scene": "The next destination comes from rescued people and papers",
+        "order": 4,
+        "emotion": "Hope, cautiously earned. No claim that Ellis knows the final answer.",
+        "direction": "Hope, cautiously earned. No claim that Ellis knows the final answer.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. The next destination comes from rescued people and papers"
+      }
+    },
+    "kd.walter.unknown": {
+      "text": "I don't know. Neither do the guards who work down here. But someone who helped with the first experiments knows more than a stoneworker with a cracked hammer. Start with what we have.",
+      "choices": [
+        {
+          "id": "hall",
+          "text": "Then I need the way out.",
+          "next": "kd.walter.fallen"
+        }
+      ],
+      "voice": {
+        "speaker": "walter",
+        "scene": "Keeps the castle location a secret",
+        "order": 5,
+        "emotion": "Honest uncertainty. No coy refusal or invented hidden knowledge.",
+        "direction": "Honest uncertainty. No coy refusal or invented hidden knowledge.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Keeps the castle location a secret"
+      }
+    },
+    "kd.walter.fallen": {
+      "text": "The Fallen guards the release hall. Used to be a champion. Now it stands there waiting for orders. We'll stay in the upper shelter until the hall is clear. You've done enough carrying for one day; let us keep ourselves out of trouble.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Stay together.",
+          "next": "kd.walter.lift"
+        }
+      ],
+      "voice": {
+        "speaker": "walter",
+        "scene": "Warns of the final obstacle",
+        "order": 6,
+        "emotion": "Serious, then quiet gratitude. Never identify the champion as Bladeborn.",
+        "direction": "Serious, then quiet gratitude. Never identify the champion as Bladeborn.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Warns of the final obstacle"
+      }
+    },
+    "kd.sly.first": {
+      "text": "A rescue? Lovely. I was starting to think my appeal had been filed under 'never.' Call me Sly. Before we leave, I may need help returning something. A small something. With a chain on it.",
+      "choices": [
+        {
+          "id": "ask",
+          "text": "Whose is it?",
+          "next": "kd.sly.truth"
+        },
+        {
+          "id": "busy",
+          "text": "I am looking for the hidden prisoners.",
+          "next": "kd.sly.busy"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "A thief tests the waters",
+        "order": 7,
+        "emotion": "Male. Quick charm covering shame; do not make him a cartoon villain.",
+        "direction": "Male. Quick charm covering shame; do not make him a cartoon villain.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A thief tests the waters"
+      }
+    },
+    "kd.sly.busy": {
+      "text": "So am I, in a less useful way. Walter knows these walls. I know which guards kick first. His knowledge is probably more helpful just now.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About that chain...",
+          "next": "kd.sly.truth"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "Main rescue remains independent",
+        "order": 8,
+        "emotion": "A quick dry joke, then back off.",
+        "direction": "A quick dry joke, then back off.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Main rescue remains independent"
+      }
+    },
+    "kd.sly.truth": {
+      "text": "A man in the hidden cells kept a little picture of his family on it. I took that and a purple shard while he slept. Thought I could trade them for a way out. Turns out there's a price for being that sort of person, too.",
+      "choices": [
+        {
+          "id": "quiet",
+          "text": "Return his picture. Make it right, and I will keep this between us.",
+          "next": "kd.sly.quiet",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.keepsake",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "kd.sly.quiet",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "kd.sly",
+              "region": "keep",
+              "title": "A picture on a chain",
+              "text": "Return the stolen keepsake to its owner in the hidden holding room. Sly has agreed to make amends. Then speak to him again."
+            }
+          ]
+        },
+        {
+          "id": "open",
+          "text": "He deserves an apology, not another secret.",
+          "next": "kd.sly.open",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.keepsake",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "kd.sly.open",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "kd.sly",
+              "region": "keep",
+              "title": "An honest return",
+              "text": "Return the family keepsake in the hidden holding room. Sly has agreed to admit what he did. Speak to him afterward."
+            }
+          ]
+        },
+        {
+          "id": "keep",
+          "text": "Hand it over. I could sell it myself.",
+          "next": "kd.sly.angry",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.keepsake",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "kd.sly.angry",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "kd.sly",
+              "region": "keep",
+              "title": "An empty collar",
+              "text": "Sly says the owner keeps reaching for the chain he lost. The keepsake can still be returned in the hidden holding room."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "A meaningful choice about making amends",
+        "order": 9,
+        "emotion": "The charm drops. Quiet shame, no demand for pity.",
+        "direction": "The charm drops. Quiet shame, no demand for pity.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A meaningful choice about making amends"
+      }
+    },
+    "kd.sly.quiet": {
+      "text": "All right. Put the picture back in his bundle once he's free. I'll carry his things out and tell him I owe him a favor. Several favors. If you're going to let me be better, I'd better actually do it.",
+      "choices": [
+        {
+          "id": "returned",
+          "text": "His picture is back where it belongs.",
+          "next": "kd.sly.quiet.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.sly.reward",
+              "value": true
+            },
+            {
+              "type": "reward",
+              "id": "kd.sly.RK-04",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "flag": "kd.returned",
+              "is": true
+            },
+            {
+              "flag": "kd.sly.reward",
+              "is": false
+            },
+            {
+              "flag": "kd.transfer",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "text": "I will return it.",
+          "next": "kd.sly.quiet"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "A quiet restitution route",
+        "order": 10,
+        "emotion": "Reluctant sincerity. The player is not excusing the theft.",
+        "direction": "Reluctant sincerity. The player is not excusing the theft.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A quiet restitution route"
+      }
+    },
+    "kd.sly.open": {
+      "text": "You're right. Horrible habit, being right. Put it in his bundle and I'll tell him who took it. Then he can decide whether I carry his pack or walk well ahead of him.",
+      "choices": [
+        {
+          "id": "returned",
+          "text": "The picture is back. Keep your word.",
+          "next": "kd.sly.open.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.sly.reward",
+              "value": true
+            },
+            {
+              "type": "reward",
+              "id": "kd.sly.RK-04",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "flag": "kd.returned",
+              "is": true
+            },
+            {
+              "flag": "kd.sly.reward",
+              "is": false
+            },
+            {
+              "flag": "kd.transfer",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "text": "I will find his bundle.",
+          "next": "kd.sly.open"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "An open apology route",
+        "order": 11,
+        "emotion": "Wry resignation, then commitment.",
+        "direction": "Wry resignation, then commitment.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. An open apology route"
+      }
+    },
+    "kd.sly.angry": {
+      "text": "I was hoping you were better than me. He's still reaching for that empty chain around his neck. Funny, the things your hands remember. I haven't much else to say to you.",
+      "choices": [
+        {
+          "id": "repair",
+          "text": "I put the picture back. I was wrong.",
+          "next": "kd.sly.repair",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.sly.angry",
+              "value": false
+            },
+            {
+              "type": "flag",
+              "id": "kd.sly.open",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "flag": "kd.returned",
+              "is": true
+            },
+            {
+              "flag": "kd.transfer",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "I will think about it.",
+          "next": "kd.sly.angry"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "Selfish choice closes cooperation until actual repair",
+        "order": 12,
+        "emotion": "Disappointed and curt. The empty-chain observation is the repair clue, not a task demand.",
+        "direction": "Disappointed and curt. The empty-chain observation is the repair clue, not a task demand.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Selfish choice closes cooperation until actual repair"
+      }
+    },
+    "kd.sly.repair": {
+      "text": "You went back. Good. Then I'll stop using your bad answer as an excuse for mine. I'll tell him. And you should take the shard somewhere it can do some good.",
+      "choices": [
+        {
+          "id": "accept",
+          "text": "Then we both keep our word.",
+          "next": "kd.sly.open.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "kd.sly.reward",
+              "value": true
+            },
+            {
+              "type": "reward",
+              "id": "kd.sly.RK-04",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "flag": "kd.sly.reward",
+              "is": false
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "Repair through action, before departure",
+        "order": 13,
+        "emotion": "Surprised relief. A small chance to be decent again.",
+        "direction": "Surprised relief. A small chance to be decent again.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Repair through action, before departure"
+      }
+    },
+    "kd.sly.quiet.reward": {
+      "text": "Here's the purple piece. No trade this time. I helped him onto the lift and he thanked me. That felt worse than being shouted at. Maybe it was supposed to.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Keep helping him.",
+          "next": "kd.sly.done"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "Quiet route reward",
+        "order": 14,
+        "emotion": "Soft, thoughtful. Do not turn the moment into a punchline.",
+        "direction": "Soft, thoughtful. Do not turn the moment into a punchline.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Quiet route reward"
+      }
+    },
+    "kd.sly.open.reward": {
+      "text": "He knows. Told me to carry the heavy pack. Then gave me half his bread. I had a whole speech ready and everything. Here's the shard. Let's see if I can earn the bread.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "That sounds like a start.",
+          "next": "kd.sly.done"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "Open apology or repaired route reward",
+        "order": 15,
+        "emotion": "A little stunned by kindness. Warm, understated humor.",
+        "direction": "A little stunned by kindness. Warm, understated humor.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Open apology or repaired route reward"
+      }
+    },
+    "kd.sly.done": {
+      "text": "I'll stay with the others. No wandering hands. You can stop checking your pockets now. Well... after we leave this prison.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Carry the pack, Sly.",
+          "next": "kd.sly.done"
+        }
+      ],
+      "voice": {
+        "speaker": "sly",
+        "scene": "Brief repeat interaction",
+        "order": 16,
+        "emotion": "A cautious return of humor. No second reward.",
+        "direction": "A cautious return of humor. No second reward.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Brief repeat interaction"
+      }
+    }
+  },
+  "events": {
+    "kd.roster": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.roster",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "kd.roster",
+          "region": "keep",
+          "title": "The missing names",
+          "text": "The list assigns prisoners to the west cells, but the beds are empty. Old service marks continue behind those rooms. Find where the prisoners were moved."
+        }
+      ]
+    },
+    "kd.marks": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "kd.marks",
+          "region": "keep",
+          "title": "A wall built later",
+          "text": "The floor stones and paired service marks lead behind the empty west cells. A narrow door was covered by newer stone."
+        }
+      ]
+    },
+    "kd.hidden": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.hidden",
+          "value": true
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.roster",
+          "is": true
+        }
+      ]
+    },
+    "kd.free": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.free",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "kd.rescue",
+          "region": "keep",
+          "title": "Get them to the lift",
+          "text": "The hidden prisoners are free. They will gather at the central lift. Its marked weights need a total of four. Read their confiscated papers before leaving."
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.hidden",
+          "is": true
+        }
+      ]
+    },
+    "kd.papers": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.papers",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "kd.ellis",
+          "region": "keep",
+          "title": "Ellis escaped north",
+          "text": "The prisoners confirm the note: Professor Ellis escaped toward Frostfell before transport. The Legion wants him for his knowledge of the King’s early research. First, make the way out safe for this group."
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.free",
+          "is": true
+        }
+      ]
+    },
+    "kd.lift.note": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "kd.lift",
+          "region": "keep",
+          "title": "Lift load plate",
+          "text": "UPPER SHELTER: 4. Hook weights that add up to four. A hooked weight is raised and pale green; a loose one stays dark. The eastern service stairs connect both landings."
+        }
+      ]
+    },
+    "kd.lift.0": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.lift",
+          "weights": [
+            1,
+            2,
+            3
+          ],
+          "target": 4,
+          "index": 0
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.free",
+          "is": true
+        }
+      ]
+    },
+    "kd.lift.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.lift",
+          "weights": [
+            1,
+            2,
+            3
+          ],
+          "target": 4,
+          "index": 1
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.free",
+          "is": true
+        }
+      ]
+    },
+    "kd.lift.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.lift",
+          "weights": [
+            1,
+            2,
+            3
+          ],
+          "target": 4,
+          "index": 2
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.free",
+          "is": true
+        }
+      ]
+    },
+    "kd.transfer": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.transfer",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "kd.safe",
+          "region": "keep",
+          "title": "The group reached shelter",
+          "text": "The lift carried everyone up. The Fallen still blocks the final release hall. You can keep exploring before entering that hall."
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.free",
+          "is": true
+        },
+        {
+          "flag": "kd.lift.open",
+          "is": true
+        }
+      ]
+    },
+    "kd.depth.note": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "kd.depth",
+          "region": "keep",
+          "title": "Two loads, one safety bar",
+          "text": "The lower plate shows two steps: set the safety bank to 5, then lock its bar. Set the separate lower bank to 8. The bar holds the first load while the lower lock releases."
+        }
+      ]
+    },
+    "kd.brace.0": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.brace",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "target": 5,
+          "index": 0
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.lift.open",
+          "is": true
+        }
+      ]
+    },
+    "kd.brace.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.brace",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "target": 5,
+          "index": 1
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.lift.open",
+          "is": true
+        }
+      ]
+    },
+    "kd.brace.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.brace",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "target": 5,
+          "index": 2
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.lift.open",
+          "is": true
+        }
+      ]
+    },
+    "kd.deep.0": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.deep",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "target": 8,
+          "index": 0
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.latch",
+          "is": true
+        }
+      ]
+    },
+    "kd.deep.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.deep",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "target": 8,
+          "index": 1
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.latch",
+          "is": true
+        }
+      ]
+    },
+    "kd.deep.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "kd.deep",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "target": 8,
+          "index": 2
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.latch",
+          "is": true
+        }
+      ]
+    },
+    "kd.latch": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.latch",
+          "value": true
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.brace.open",
+          "is": true
+        }
+      ]
+    },
+    "kd.return": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "kd.returned",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "kd.sly",
+          "region": "keep",
+          "title": "The keepsake is back",
+          "text": "The picture is safe in its owner’s bundle. Speak to Sly once the group reaches the upper shelter."
+        }
+      ],
+      "when": [
+        {
+          "flag": "kd.free",
+          "is": true
+        },
+        {
+          "flag": "kd.keepsake",
+          "is": true
+        }
+      ]
+    },
+    "kd.drain.note": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "kd.drain",
+          "region": "keep",
+          "title": "Marks above the water",
+          "text": "Pairs of scratches follow the old dry route. Three scratches mark unused turns. The water runs back toward the entrance. No one in the cells mentioned this passage."
+        }
+      ]
+    },
+    "kd.cache": {
+      "once": true,
+      "effects": [
+        {
+          "type": "reward",
+          "id": "kd.drain.armor",
+          "kind": "keep_armor",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "kd.cache",
+          "region": "keep",
+          "title": "Dry store",
+          "text": "A rare chest piece was kept above the floodwater. The store is empty now."
+        }
+      ]
+    }
+  }
+}

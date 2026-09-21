@@ -1808,3 +1808,7 @@ New split canyon boss arena, reachable nests, locked shots, working cover, one g
 
 ## [Codex | 2026-09-20] Shipped 2.005 — Broken Walls
 Ruined Keep part one: Grant/Felix, 30-second breach defense, alternate dungeon entry, workshop timing puzzle, rare dagger, tower/chamber Reaper shards. Ten new VO lines; 129 total. Verified traversal, controlled co-op and half checkpoints. The Dungeons and The Fallen remain next.
+
+
+## [Codex | 2026-09-20] Shipped 2.006 — The Dungeons
+Hidden prisoners, shared working lift, Walter/Sly dialogue, optional lower weights and drain maze, rare armor, remaining three Reaper shards. All five Keep shards available before boss. 16 new VO lines; 145 total. Traversal, controlled co-op, checkpoint and previous district regressions verified. The Fallen redesign remains next.

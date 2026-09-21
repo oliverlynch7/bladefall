@@ -34,10 +34,11 @@ export function buildKeep(scene,w){
   const surfaces=new Map();
   function surface(o,base,top,wood=false,facade=true){
     if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood,facade);
-    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},w.keepScene?'broken-walls':base+':'+top))rawSurface(part,base,top,wood,facade);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},w.keepScene?(o.prisonLayer||'upper'):base+':'+top))rawSurface(part,base,top,wood,facade);
   }
   function rawSurface(o,base,top,wood=false,facade=true){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
+    if(o.water){add('stone',o.x,-5,o.z,ww,10,dd,'#263f42');for(let i=0;i<Math.floor(dd/110);i++)block(o.x,.8,o.z-dd/2+i*110,ww*.7,.6,2,'#3d5d60');return;}
     add(wood?'timber':'stone',o.x,base+h/2,o.z,ww,h,dd,wood?'#493a28':'#444b45');cap({...o,w:ww,d:dd},top,wood);
     if(h<35||!facade)return;const rows=Math.min(10,Math.ceil(h/30)),rh=h/rows;
     for(let row=0;row<rows;row++)for(const side of [-1,1])for(const axis of [0,1]){
@@ -47,7 +48,7 @@ export function buildKeep(scene,w){
     block(o.x,top-2,o.z,ww,4,dd,wood?'#6c573c':'#807967');
   }
   function brazier(x,y,z,s=20){add('brazier',x,y,z,s);lamps.push(new THREE.Vector3(x,y+s*2.05,z));}
-  if(w.keepScene){const terrain=[...(w.segments||[]).filter(s=>!s.nofloor).map(s=>({o:s,base:-25,top:0})),...(w.obstacles||[]).filter(o=>o.kind==='plat').map(o=>({o,base:-25,top:o.h||0}))].sort((a,b)=>b.top-a.top);for(const t of terrain){source=t.o.kind==='plat'?t.o:null;surface(t.o,t.base,t.top,!!t.o.bridge);if(t.o.kind==='plat')obstacles.add(t.o);}source=null;}else for(const s of w.segments||[])if(!s.nofloor)surface(s,-25,0,!!s.bridge,false);
+  if(w.keepScene){const terrain=[...(w.segments||[]).filter(s=>!s.nofloor).map(s=>({o:s,base:-25,top:0})),...(w.obstacles||[]).filter(o=>o.kind==='plat').map(o=>({o,base:o.y0??-25,top:o.h||0}))].sort((a,b)=>b.top-a.top);for(const t of terrain){source=t.o.kind==='plat'?t.o:null;surface(t.o,t.base,t.top,!!t.o.bridge);if(t.o.kind==='plat')obstacles.add(t.o);}source=null;}else for(const s of w.segments||[])if(!s.nofloor)surface(s,-25,0,!!s.bridge,false);
   const solids=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
   for(const o of solids){if(w.keepScene&&o.kind==='plat')continue;source=w.keepScene?o:null;const base=o.y0??(o.kind==='plat'?Math.min(0,(o.h||0)-16):0),top=o.h||1;
     const deco=(w.deco||[]).find(d=>d.x===o.x&&d.z===o.z&&d.w===o.w&&(d.d||d.w)===o.d&&d.c?.startsWith('#4'));
@@ -91,7 +92,7 @@ export function buildKeep(scene,w){
       add('banner',x,top-58,z,24,48,3,null,side*.04);target=null;
     }else brazier(x,y,z,under?17:20);
   }}
-  if(w.keepScene){
+  if(w.keepScene==='broken-walls'){
     // A ruined garrison: banners, battered defenses and domestic traces around clear routes.
     for(const o of solids)if(o.kind==='col'&&Math.max(o.w,o.d)>280&&o.h>150){
       const alongX=o.w>o.d,len=alongX?o.w:o.d,n=Math.floor(len/70);
@@ -115,6 +116,20 @@ export function buildKeep(scene,w){
     for(const [x,z,y]of [[-525,-975,0],[570,-990,0],[-700,-2280,0],[700,-2280,0],[-1780,-1740,0],[1660,-3090,0],[-1720,-3900,80]]){
       for(let i=0;i<4;i++)add('rubble',x+i*18,y,z+(i%2)*22,35,15+i*3,28);
     }
+  }
+  if(w.keepScene==='dungeons'){
+    // Open tops let the chase camera read an enclosed prison without looking through roofs.
+    for(const [x,z,y]of [[-720,-950,180],[800,-1020,180],[-1100,-2130,180]]){
+      for(const dx of [-170,170]){block(x+dx,y+90,z-140,24,180,24,'#6e6b5e');block(x+dx,y+180,z,28,16,310,'#827967');}
+      block(x,y+186,z-140,370,24,32,'#8d846f');
+      for(let i=0;i<5;i++)block(x-120+i*60,y+55,z-135,8,110,8,'#4f5654');
+      for(const dx of [-95,95]){block(x+dx,y+8,z+60,65,16,125,'#594936');block(x+dx,y+18,z+70,55,5,100,'#80765a');}
+    }
+    for(const x of [-205,205])for(const z of [-2690,-2310]){block(x,335,z,34,350,34,'#625f52');block(x,512,-2500,40,18,420,'#96866a');}
+    for(const x of [-330,330]){add('banner',x,400,-3490,45,100,8);brazier(x,360,-3550,19);}
+    for(const [x,z,y]of [[-1380,-1810,180],[-380,-3050,180],[980,-3340,190],[300,-2950,0],[1470,-3190,40]]){add('crate',x,y,z,58,40,42);add('rubble',x+45,y,z-45,60,22,45);}
+    // The drain has brick banks and low arches; safe stones remain brighter than water.
+    for(const z of [-3410,-3880,-4370,-4840])for(const x of [1225,2550]){block(x,80,z,35,160,110,'#52594e');block(x+(x<1800?55:-55),155,z,110,22,80,'#77745f');}
   }
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,list} of bins.values()){

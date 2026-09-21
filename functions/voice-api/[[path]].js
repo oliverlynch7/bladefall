@@ -4,7 +4,8 @@ import hall from '../../public/3d/story/rift-hall.json';
 import cliffs from '../../public/3d/story/hollow-cliffs.json';
 import canyon from '../../public/3d/story/lost-canyon.json';
 import keep from '../../public/3d/story/broken-walls.json';
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes}};
+import prison from '../../public/3d/story/prison-dungeons.json';
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes}};
 
 const encoder=new TextEncoder(),MAX_AUDIO=12*1024*1024;
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};

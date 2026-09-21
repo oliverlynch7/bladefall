@@ -36,6 +36,16 @@
       "role": "Village scout",
       "start": "briar.lewis.first",
       "availability": "live"
+    },
+    "beth": {
+      "name": "Beth",
+      "role": "Village shepherd",
+      "start": "briar.beth.first"
+    },
+    "bethBrother": {
+      "name": "Beth’s brother",
+      "role": "A missing neighbor",
+      "start": "briar.bethBrother.first"
     }
   },
   "nodes": {
@@ -861,6 +871,240 @@
         "direction": "Relief first, then sober warning. Keep the last line quiet.",
         "context": "The signal is disabled and the neighbors have reached shelter. The Brute still blocks their escape."
       }
+    },
+    "briar.beth.first": {
+      "npc": "beth",
+      "text": "My brother went after the sheep. Then the bridge broke. I heard him shout once. Now all I can hear is those beasts. Please tell me you’re better at climbing than I am.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Show me where he went.",
+          "next": "briar.beth.trail",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "beth.help",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "woods.rescue",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "woods.rescue",
+              "region": "outskirts",
+              "title": "Nobody left behind",
+              "text": "Beth’s brother went east after their sheep. Follow the boot prints past the broken bridge. He may be trapped near the old rope lift. This rescue is optional; the signal post is still the main task."
+            }
+          ],
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "sheep",
+          "text": "He went back for sheep?",
+          "next": "briar.beth.sheep",
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "safe",
+          "text": "Your brother is safe.",
+          "next": "briar.beth.relief",
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "character": "Beth",
+        "scene": "Nobody left behind",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Worried, trying to stay steady. Relief should come later.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "beth"
+      }
+    },
+    "briar.beth.sheep": {
+      "npc": "beth",
+      "text": "They’re our winter food, our wool, half our living. He wasn’t being foolish. Well, he was being a little foolish. But for a good reason.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I’ll look for him.",
+          "next": "briar.beth.trail",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "beth.help",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "woods.rescue",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "woods.rescue",
+              "region": "outskirts",
+              "title": "Nobody left behind",
+              "text": "Beth’s brother went east after their sheep. Follow the boot prints past the broken bridge. He may be trapped near the old rope lift. This rescue is optional; the signal post is still the main task."
+            }
+          ],
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "safe",
+          "text": "He is safe now.",
+          "next": "briar.beth.relief",
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "character": "Beth",
+        "scene": "Nobody left behind",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Defend him warmly; a tiny rueful smile on the last sentence.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "beth"
+      }
+    },
+    "briar.beth.trail": {
+      "npc": "beth",
+      "text": "His boots leave a crooked heel print. Follow them east. The old bridge has a few beams left, and there’s a dry path below if you slip. Please bring him back. I can shout at him myself.",
+      "choices": [
+        {
+          "id": "safe",
+          "text": "He’s free. The crossing is safe now.",
+          "next": "briar.beth.relief",
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "character": "Beth",
+        "scene": "Nobody left behind",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Practical directions, then affectionate worry.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "beth"
+      }
+    },
+    "briar.beth.relief": {
+      "npc": "beth",
+      "text": "There he is. Both legs. That’s a good start. Our dog has been trying to follow you since you got here. Once we’re safely out of these woods, let him come with you. He knows who keeps people safe.",
+      "choices": [],
+      "voice": {
+        "character": "Beth",
+        "scene": "Nobody left behind",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Deep relief. Brief dry humor; offer the dog with trust, not a sales pitch.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "beth"
+      }
+    },
+    "briar.bethBrother.first": {
+      "npc": "bethBrother",
+      "text": "Don’t come straight at the tree! The trunk will roll. That rope lift can take its weight, but those beasts won’t let anyone near it.",
+      "choices": [
+        {
+          "id": "ready",
+          "text": "I’ll clear a path to the rope.",
+          "next": "briar.bethBrother.wait"
+        },
+        {
+          "id": "safe",
+          "text": "You’re free. Beth’s waiting.",
+          "next": "briar.bethBrother.safe",
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "character": "Beth’s brother",
+        "scene": "Nobody left behind",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Urgent but clear. He is stuck behind the fallen tree, not mortally wounded.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "bethBrother"
+      }
+    },
+    "briar.bethBrother.wait": {
+      "npc": "bethBrother",
+      "text": "I can walk. I just need a way out. Beth is going to be furious. If she asks, this was a very sensible plan until the bridge part.",
+      "choices": [
+        {
+          "id": "safe",
+          "text": "You can get back across now.",
+          "next": "briar.bethBrother.safe",
+          "when": [
+            {
+              "flag": "beth.rescued",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "character": "Beth’s brother",
+        "scene": "Nobody left behind",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Nervous joke. Keep the danger believable.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "bethBrother"
+      }
+    },
+    "briar.bethBrother.safe": {
+      "npc": "bethBrother",
+      "text": "You lifted the tree and fixed the crossing? Right. I’m going before you find a third thing I broke. Thank you. Really.",
+      "choices": [],
+      "voice": {
+        "character": "Beth’s brother",
+        "scene": "Nobody left behind",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Starts sheepish, ends with sincere gratitude.",
+        "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+        "speaker": "bethBrother"
+      }
     }
   },
   "events": {
@@ -1454,6 +1698,62 @@
             "wolf"
           ],
           "value": "wolf"
+        }
+      ]
+    },
+    "woods.rescue.tracks": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "beth.help",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "woods.rescue",
+          "value": "active"
+        },
+        {
+          "type": "note",
+          "id": "woods.rescue",
+          "region": "outskirts",
+          "title": "Nobody left behind",
+          "text": "Beth’s brother went east after their sheep. Follow the boot prints past the broken bridge. He may be trapped near the old rope lift. This rescue is optional; the signal post is still the main task."
+        }
+      ]
+    },
+    "woods.rescue.release": {
+      "once": true,
+      "when": [
+        {
+          "flag": "beth.rescued",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "beth.rescued",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "woods.rescue",
+          "value": "complete"
+        },
+        {
+          "type": "note",
+          "id": "woods.rescue",
+          "region": "outskirts",
+          "title": "Nobody left behind",
+          "text": "Beth and her brother are together at the eastern trail junction. The rope lift has opened a safe crossing. Their shepherd dog will join my companions when I finish Black Woods. I do not need to return to Beth to claim it."
+        },
+        {
+          "type": "reward",
+          "id": "woods.rescue.shepherd",
+          "kind": "companion",
+          "amount": 1
         }
       ]
     }

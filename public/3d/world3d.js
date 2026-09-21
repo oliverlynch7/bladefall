@@ -2,7 +2,7 @@ import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './porta
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2001';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1972';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2008';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2009';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2007';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2004';
 /* ─────────────────────────────────────────────────────────────────────────────

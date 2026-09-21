@@ -1,0 +1,23 @@
+# Deep Ice Caves
+
+## [Codex | 2026-09-21] Grounded implementation plan
+
+Authority: campaign expansion section 4, requirements STORY-18 and STORY-17. The Legion has just captured Professor Ellis in his hidden laboratory and is preparing to move him to the single Hollow Gate. Rescue him before transport. No surprise timer. His recovered notes explain the original immortality work and the unexpected obedience; the next lead is Emberdeep's weapon supply, not Sunspire or the final restoration.
+
+Build a descending entrance, a wide crystal junction, a laboratory shelf with two approaches, a lower waterworks basin and a raised frozen-waterfall loop. Preserve the Frostfell GLB kit and opaque faceted ice; add readable mechanical controls, research props and isolated warm rest points. Collision, pickups and interactable heights must agree. Cave roofs must not hide the player or dialogue camera.
+
+Main progress: discover pages; defeat the laboratory guard group; release Ellis; recover his sealed notes and return them; operate the waterworks in the authored fill/freeze/drain order; reach the officer exit. Wrong operations reset the unfinished sequence without drowning or destroying routes. A separate optional basin uses a different order taught by its own physical clue.
+
+Hugo is an optional explorer trapped below a broken ice shelf. Discover him, secure the rescue frame, recover rope and lower it. The rescued explorer moves along the safe route toward the junction. Shared NPC reward FF-03; personal FF-04 in the optional channel chamber; personal FF-05 beyond the frozen-waterfall climb. All three bank at the boss boundary. Earlier mountain shards remain banked on death; cave discoveries and dialogue reset on retry.
+
+Reuse story authority, checkpoint machinery, dialogue pause, journal and voice catalog. Add stable recording IDs for Ellis and Hugo. Validate rude/helpful conversation paths, guard and puzzle gates, physical routes including jumps, co-op state and personal pickups, death/retry, preview images and live catalog after deployment. The three-officer boss is a subsequent batch, not silently included in this completion claim.
+
+## [Codex | 2026-09-21] Deep Ice Caves implemented — 2.009
+
+Frostfell part two now has a descending entrance, two laboratory approaches, a lower research pack, separate waterworks basins, an optional rescue route, a raised frozen-waterfall loop and narrow shard ledges. Defeat Ellis's guards, release him, recover and return his sealed notes, then complete the fill/freeze/drain crossing. His notes point to Emberdeep's arms supply. The firm dialogue route rejoins the required objective. No timed capture failure, underwater breathing, early Bladeborn reveal or final-cut spoiler.
+
+Hugo's optional rescue requires securing the frame and recovering rope before lowering it. He walks to the dry junction. FF-03 is a shared NPC reward; FF-04 is a personal pickup behind the optional drain/fill/freeze cycle; FF-05 is a personal waterfall climbing reward. Wrong cycles safely reset, completed crossings stay open, and falling into the basins returns the player to dry controls. Four limited healing pads serve the longer routes. Ellis has ten new voice nodes and Hugo eight; stable IDs are in the public catalog, totaling 173 lines. The obsolete Rime Shelf HUD label is replaced with Deep Ice Caves.
+
+Validation: story/authority/shard/voice API/cache regression tests passed; authored cave graph and all reward/puzzle gates passed. Browser tests passed 63 controller walking/jumping waypoints, 11 runtime progression assertions, four death/banking assertions and nine two-context co-op assertions through actual multiplayer handlers with a controlled packet relay. Both clients pause for dialogue and receive puzzle bridges/Hugo's reward; physical shards stay personal. Cave death rolls back cave discoveries, mountain shards remain, and boss entry banks all five Frostfell shards. No captured browser errors. Six new reviewed browser screenshots (63 gallery images); Hugo dialogue fits 390px. Cave scenery is 40,904 triangles with spatial chunk culling; this is not a device benchmark. Combat balance and real-network latency still require human playtesting.
+
+Private conversation archive: ../../decision-archive/2026-09-21-ice-caves — 156 user messages, zero unparsed lines, valid source references. Existing approvals remain tracked. This batch completes the cave section, not the entire Frostfell redesign or wider queue. The legacy Frost Sorcerer remains playable temporarily; NEXT is the approved coordinated three-officer boss and high/low cavern arena, bringing the encounter into line with Ellis's recording-ready dialogue. Then Emberdeep's expanded forge campaign.

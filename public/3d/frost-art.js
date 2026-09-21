@@ -18,12 +18,12 @@ const material=new THREE.MeshLambertMaterial({vertexColors:true,emissive:'#07111
 const crystalMaterial=new THREE.MeshLambertMaterial({vertexColors:true,emissive:'#10364c'});
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildFrost(scene,w){
-  const outdoor=!!w.frostScene;
+  const outdoor=String(w.frostScene||'').startsWith('peaks:'),authored=!!w.frostScene;
   if(!kit.has('peakRock')){
     const install=(name,geo)=>{const col=new Float32Array(geo.attributes.position.count*3);col.fill(1);geo.setAttribute('color',new THREE.BufferAttribute(col,3));kit.set(name,{geo,mean:new THREE.Color(1,1,1),tri:(geo.index?.count||geo.attributes.position.count)/3});};
     install('drift',new THREE.IcosahedronGeometry(.5,0));install('barrel',new THREE.CylinderGeometry(.45,.4,1,10));install('peakRock',new THREE.CylinderGeometry(.43,.64,1,7,1));install('pine',new THREE.ConeGeometry(.5,1,7));install('trunk',new THREE.CylinderGeometry(.07,.10,1,6));
   }
-  const root=new THREE.Group();root.name=w.frostScene?'Frostfell · Snowbound Peaks':'Frostfell · The Crystal Labyrinth';
+  const root=new THREE.Group();root.name=outdoor?'Frostfell · Snowbound Peaks':authored?'Frostfell · Deep Ice Caves':'Frostfell · The Crystal Labyrinth';
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),roofs=new Map(),fade=[],glows=[],bodies=new Set();let floors=0,target=null,source=null;
   function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,obstacle=null){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,obstacle:obstacle||source});}
   function cap(o,top,isWall){
@@ -46,11 +46,16 @@ export function buildFrost(scene,w){
   }
   for(const s of w.segments||[])if(!s.nofloor)surface(s,-22,0);
   const solids=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
-  for(const o of solids){source=outdoor?o:null;const top=o.h||1,base=outdoor&&o.mountainPath?-120:(o.y0??(o.kind==='plat'?Math.min(0,top-16):0));surface(o,base,top);obstacles.add(o);
+  for(const o of solids){source=authored?o:null;const top=o.h||1,base=outdoor&&o.mountainPath?-120:(o.y0??(o.kind==='plat'?Math.min(0,top-16):0));surface(o,base,top);obstacles.add(o);
     if(outdoor&&(o.terrain||(o.mountainPath&&hash(o.x,o.z)<.13))){const h=Math.max(100,top+120);add('peakRock',o.x,top-h*.5-4,o.z,o.w*1.35,h,o.d*1.35,'#6e8490',hash(o.x,o.z)*2);}
   }source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;surface({...o,caveWall:true},o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
-  for(const d of w.deco||[]){source=outdoor?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+  for(const d of w.deco||[]){source=authored?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+    if(d.kind==='iceResearch'){
+      add('slab',d.x,y+hh-6,d.z,ww,12,dd,'#8a775c');for(const dx of [-ww*.4,ww*.4])for(const dz of [-dd*.35,dd*.35])add('slab',d.x+dx,y+hh*.45,d.z+dz,9,hh*.9,9,'#665844');
+      if(hh>90){for(let j=0;j<3;j++){add('slab',d.x,y+30+j*32,d.z,ww,5,dd,'#937b59');for(let k=0;k<5;k++)add('slab',d.x-ww*.35+k*ww*.16,y+42+j*32,d.z,ww*.11,20,dd*.6,k%2?'#837855':'#586f7b');}}
+      else{add('slab',d.x-ww*.18,y+hh+2,d.z,45,3,35,'#d3c8a5');add('barrel',d.x+ww*.25,y+hh+14,d.z,20,28,20,'#77abb7');add('barrel',d.x+ww*.25,y+hh+29,d.z,14,3,14,'#b9b59e');}continue;
+    }
     if(d.kind==='mountainCamp'){
       for(const dx of [-40,40]){add('barrel',d.x+dx,y+24,d.z,38,48,38,'#7b6145');for(const dy of [9,37])add('barrel',d.x+dx,y+dy,d.z,40,5,40,'#47545b');}
       add('slab',d.x+10,y+9,d.z+70,130,14,30,'#877254');
@@ -84,7 +89,7 @@ export function buildFrost(scene,w){
     m.userData.artMatrices=m.instanceMatrix.array.slice();m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='snow'&&name!=='roof';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.72:.18)}});
-  const oldFog=scene.fog;scene.fog=new THREE.Fog(w.frostScene?'#8ea8b5':'#1c3547',w.frostScene?800:500,w.frostScene?2400:2000);
+  const oldFog=scene.fog;scene.fog=new THREE.Fog(outdoor?'#8ea8b5':'#1c3547',outdoor?800:500,outdoor?2400:2000);
   const sun=new THREE.DirectionalLight('#d3edff',1.8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-740,right:740,top:740,bottom:-740,near:1,far:2600});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#5bc8ff',800,210,1.6);root.add(l);return l});
   const counts={frostArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};

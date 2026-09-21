@@ -350,3 +350,8 @@ RIFT-03 room/labels/assembly live in this release; RIFT-02 introduction now poin
 ## [Codex | 2026-09-20] Winding Cliffs — 2.002
 
 Partial implementation evidence for GOV-02, campaign exploration, NPC/VO, puzzle, co-op and Rift Shard requirements: Hollow Pass part one now has the authored Winding Cliffs journey, Caleb/Skip, bridge/rope/code puzzles and HP-01/02. 13 new recording lines; 103 catalog total. See [implementation and verification](IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md). Lost Canyon, its remaining shards and the Marksman redesign remain pending. This is not completion of the broader campaign or entire approved queue.
+
+
+## [Codex | 2026-09-20] Lost Canyon — 2.003
+
+Implemented Hollow Pass part two: Ward/Ruth, alternate entrances, cage rescues, finite alarm response, moving prisoners/shelter shortcut, wagon cave loop, freight puzzle and HP-03/04. 16 new VO lines; 119 total. Verified 253 route waypoints, quest/co-op/checkpoint/alarm checks and phone dialogue. See docs/IMPLEMENTATION_LOST_CANYON_2026-09-20.md for complete evidence and limits. Private archive ../../decision-archive/2026-09-20-lost-canyon preserves 149 messages with valid references. Marksman/HP-05 next; broader approved queue remains open.

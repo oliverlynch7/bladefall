@@ -1796,3 +1796,7 @@ Separate Rift Hall, personal five-saved-shard assembly, legacy class-access pres
 
 ## [Codex | 2026-09-20] 2.002 — Winding Cliffs
 Expanded Hollow Pass part one: prisoner trail, split routes, bridge weights/brakes, Skip’s rope and uncommon javelin, two physical Ninja shards, seeded code chest, lookout approach choices, 13 new recording lines, shared world state and mobile previews. Lost Canyon/Marksman redesign next. See docs/IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md for verification and limits.
+
+
+## [Codex | 2026-09-20] 2.003 — Lost Canyon
+Expanded Hollow Pass part two with prison rescue routes, Ward/Ruth dialogue, alarm, cave loop, rail puzzle and HP-03/04. 16 new VO lines and five renderer previews. Marksman/HP-05 next. See docs/IMPLEMENTATION_LOST_CANYON_2026-09-20.md.

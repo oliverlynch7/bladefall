@@ -254,3 +254,11 @@ ba01376 deployed successfully (Cloudflare e881e69c-11ab-4d8c-a4b9-cecf46164328).
 Validated 112 elevation-aware movement waypoints, 12 progression checks, ten controlled co-op checks, four shard rollback/banking/echo checks, three patrol/shield/wind checks, plus existing 11 checkpoint/legacy/trial checks and pure story/authority/puzzle/Voice API suites. Five real-renderer gallery shots; 390px dialogue fits. Controlled tests are not a balance certification or internet co-op soak. See ../IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md.
 
 Next: Lost Canyon's Ward/Ruth, cage rescues, alarm, wagon cave, freight puzzle and HP-03/04; then Marksman arena and HP-05. Part two has its approved name but still old gameplay; the boss is unchanged. Legacy Ninja access retained. Rest of approved queue remains open. Private archive ../../decision-archive/2026-09-20-winding-cliffs: 148 messages, zero unparsed, valid refs. Raw archives remain outside git.
+
+## [Codex | 2026-09-20] Winding Cliffs production verification
+ac37e04 deployed successfully (Cloudflare 59c39a57-6e4c-4df3-a0a3-9e49c3d2a01a). Read-only production browser verified 2.002.0-winding-cliffs, 13 new authored/catalog lines, 103 total Voice Studio lines with Caleb/Skip available, and all 31 gallery images including five new screenshots, without horizontal overflow at 390px. No production gameplay save or voice take was changed. This receipt is queued for the next implementation commit to avoid a docs-only deployment. Next: Lost Canyon and the Marksman, as listed above.
+
+
+## [Codex | 2026-09-20] Lost Canyon — 2.003
+
+Implemented Hollow Pass part two: Ward/Ruth, alternate entrances, cage rescues, finite alarm response, moving prisoners/shelter shortcut, wagon cave loop, freight puzzle and HP-03/04. 16 new VO lines; 119 total. Verified 253 route waypoints, quest/co-op/checkpoint/alarm checks and phone dialogue. See docs/IMPLEMENTATION_LOST_CANYON_2026-09-20.md for complete evidence and limits. Private archive ../../decision-archive/2026-09-20-lost-canyon preserves 149 messages with valid references. Marksman/HP-05 next; broader approved queue remains open.

@@ -1,0 +1,10 @@
+async page=>{
+await page.goto('http://127.0.0.1:4331/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.openHub();b.enterZone(1);b.nextArea();b.meta.camMode='far';b.meta.tutOff=true;for(const e of b.G.enemies)e.stunT=999;b.G.p.invuln=999;});await page.waitForFunction(()=>__world3d().counts.hollowArt&&!BF_LOADING.active);await page.waitForTimeout(500);
+const out='public/3d/art-previews/briar-story/';
+await page.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:-690,z:-2040,y:0});b.G.camYaw=3.4;b.G.stageBanner=0;});await page.waitForTimeout(650);await page.screenshot({path:out+'canyon-holding-yard.png'});
+await page.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:-1850,z:-3500,y:0});b.G.camYaw=3.1;});await page.waitForTimeout(650);await page.screenshot({path:out+'canyon-freight-puzzle.png'});
+await page.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:2260,z:-3300,y:0});b.G.camYaw=2.7;});await page.waitForTimeout(650);await page.screenshot({path:out+'canyon-hidden-loop.png'});
+await page.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:-90,z:-630,y:140});b.briarRequest('open',{npc:'ward'});document.getElementById('hubReveal')?.click();});await page.waitForTimeout(600);await page.screenshot({path:out+'ward-dialogue.png'});
+await page.evaluate(()=>{const b=__BF3;b.briarRequest('close');Object.assign(b.G.p,{x:-440,z:-1450,y:0});b.briarRequest('open',{npc:'ruth'});document.getElementById('hubReveal')?.click();});await page.setViewportSize({width:390,height:844});await page.waitForTimeout(600);await page.screenshot({path:out+'ruth-phone.png'});const phone=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,line:BFHubDialogue.active?.lineId}));await page.setViewportSize({width:1440,height:900});await page.evaluate(()=>__BF3.briarRequest('close'));if(phone.width!==phone.scroll)throw Error(JSON.stringify(phone));return phone;
+}

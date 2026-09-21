@@ -44,6 +44,11 @@ export function buildHollow(scene,w){
           block(o.x+side*(ww/2-.7),y,o.z,1.6,4,dd,'#b28a57');
         }
       }
+      if(String(w.cliffScene).startsWith('canyon:')&&ww>150&&dd>150){
+        // Shallow wind lines sit above the cap, with no coplanar decals or extra collision.
+        for(let k=0;k<4;k++){const xx=o.x+(hash(o.x+k*7,o.z)-.5)*ww*.72,zz=o.z+(k-1.5)*dd*.19;add('timber',xx,top+1.35,zz,Math.min(ww*.22,90),.35,2,'#ad8758',.15);}
+        if(r<.55)add('tuft',o.x+ww*.35,top+1.5,o.z+dd*.34,13,16,13,'#897c50');
+      }
       if(ww>160&&dd>160&&r<.3)add('scree',o.x+ww*.31,top+1,o.z-dd*.27,17,9,20);
       floors++;return;
     }
@@ -96,6 +101,7 @@ export function buildHollow(scene,w){
   source=null;
   // Replace the old decorative canyon scatter, preserving every supplied anchor and height.
   for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+    if(d.kind==='campdetail'){add('timber',d.x,y+hh/2,d.z,ww,hh,dd,d.c);continue;}
     if(d.kind==='fossil'){add('fossil',d.x,y,d.z,ww,hh*2,dd,'#e3d5b0',Math.PI/2);continue;}
     if(d.kind==='windbreak'){
       add('beacon',d.x,y,d.z,20,20,20,'#c79a54');

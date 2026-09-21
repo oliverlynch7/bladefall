@@ -2,7 +2,8 @@ import briar from '../../public/3d/story/briar-foundation.json';
 import hub from '../../public/3d/story/hub-dialogue.json';
 import hall from '../../public/3d/story/rift-hall.json';
 import cliffs from '../../public/3d/story/hollow-cliffs.json';
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes}};
+import canyon from '../../public/3d/story/lost-canyon.json';
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes}};
 
 const encoder=new TextEncoder(),MAX_AUDIO=12*1024*1024;
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};

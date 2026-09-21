@@ -165,3 +165,8 @@ RIFT-03 implemented as a separate room with saved-only personal assembly and co-
 ## [Codex | 2026-09-20] Winding Cliffs — 2.002
 
 Latest user instruction preserved: “Continue another long work session. Don’t waste usage.” No new creative requirements inferred. Private archive ../../decision-archive/2026-09-20-winding-cliffs contains 148 user-role messages, zero unparsed lines and valid references. Implemented the approved Winding Cliffs plan using shared story/checkpoint systems; one release. Full scope, implementation choices, verification and limits: ../IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md. Remaining Hollow Pass content is still explicitly open.
+
+
+## [Codex | 2026-09-20] Lost Canyon — 2.003
+
+Implemented Hollow Pass part two: Ward/Ruth, alternate entrances, cage rescues, finite alarm response, moving prisoners/shelter shortcut, wagon cave loop, freight puzzle and HP-03/04. 16 new VO lines; 119 total. Verified 253 route waypoints, quest/co-op/checkpoint/alarm checks and phone dialogue. See docs/IMPLEMENTATION_LOST_CANYON_2026-09-20.md for complete evidence and limits. Private archive ../../decision-archive/2026-09-20-lost-canyon preserves 149 messages with valid references. Marksman/HP-05 next; broader approved queue remains open.

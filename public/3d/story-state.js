@@ -25,6 +25,7 @@
     for(const e of list||[]){
       if(!e.id||['__proto__','constructor','prototype'].includes(e.id))throw Error('Invalid effect key');
       switch(e.type){
+        case 'conditional':if(matches(s,e.when))effects(s,e.effects);break;
         case 'flag':s.flags[e.id]=e.value!==false;break;
         case 'item':{
           if(!Number.isSafeInteger(e.amount))throw Error('Invalid item amount');

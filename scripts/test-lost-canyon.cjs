@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),S=require('../public/3d/story-state.js'),C=require('../public/3d/lost-canyon.js');
+const book=JSON.parse(fs.readFileSync('public/3d/story/lost-canyon.json','utf8'));let s=S.create(),seq=0;
+function act(type,fields){const r=S.transact(s,book,{id:'lc-test-'+ ++seq,type,...fields});s=r.state;return r.changed;}
+const world=key=>act('world',{key}),open=npc=>act('open',{npc}),choose=choice=>act('choose',{line:s.conversation.node,choice}),close=()=>act('close');
+open('ward');assert(!choose('orders'));choose('bluff');assert(s.flags['lc.gate.fight']);close();world('lc.orders');open('ward');assert(!choose('orders'));close();assert(world('lc.side'));assert(s.flags['lc.entry']);
+s=S.create();world('lc.orders');open('ward');choose('orders');assert(s.flags['lc.entry']&&!s.flags['lc.gate.fight']);close();
+assert(!world('lc.cage.south'));open('ruth');choose('curt');close();assert(s.flags['lc.rescue']);world('lc.cage.south');assert(s.flags['lc.alarm.called']);world('lc.alarm');world('lc.cage.north');assert(!C.ready(s));world('lc.escape');assert(C.ready(s));world('lc.cage.extra');open('ruth');choose('back');assert(!choose('reward'));choose('repair');assert(!choose('water'));close();world('lc.water');open('ruth');assert(choose('water'));choose('back');choose('back');assert(choose('reward'));assert(s.rewards['lc.ruth.HP-03']);choose('back');choose('back');choose('back');assert(!choose('reward'));close();
+s=S.create();open('ruth');choose('help');close();world('lc.alarm');world('lc.cage.north');world('lc.cage.south');assert(!s.flags['lc.alarm.called'],'quiet rescue must not spawn alarm response');
+world('lc.rail.north');world('lc.rail.east');assert(!s.flags['lc.rail.open']);for(const d of ['north','west','south','east'])world('lc.rail.'+d);assert(s.flags['lc.rail.open']);assert.deepEqual(C.shards(s).map(x=>x.id),['HP-04']);
+for(const [id,n]of Object.entries(book.nodes)){assert(n.voice.speaker in book.npcs);assert(n.voice.context&&n.voice.direction);for(const c of n.choices)assert(c.next in book.nodes,id+': '+c.next);}
+assert(!C.available('lc.cage.south',{enemies:[{canyonGuard:'south',hp:10}]},s));assert(C.available('lc.cage.south',{enemies:[{canyonGuard:'south',hp:0,dead:true}]},s));
+console.log('Lost Canyon: order/bluff/side routes, required rescues, alarm order, Ruth consequence/repair, single shard reward, rail reset/solution and guard gates passed.');

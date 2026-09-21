@@ -1,0 +1,878 @@
+{
+  "version": 1,
+  "region": "hollow",
+  "status": "Lost Canyon playable dialogue; Marksman finale remains next",
+  "npcs": {
+    "ward": {
+      "name": "Captain Ward",
+      "role": "Hollowed officer following the holding-yard orders",
+      "start": "lc.ward.first"
+    },
+    "ruth": {
+      "name": "Ruth",
+      "role": "Prisoner organizer who keeps people together",
+      "start": "lc.ruth.first"
+    }
+  },
+  "nodes": {
+    "lc.ward.first": {
+      "text": "Holding yard. No visitors. State your work detail.",
+      "choices": [
+        {
+          "id": "orders",
+          "text": "Fourth cart. West yard. The shift orders are here.",
+          "next": "lc.ward.pass",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.entry",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "lc.ward.pass",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "lc.entry",
+              "region": "hollow",
+              "title": "A quiet entrance",
+              "text": "Ward accepted the shift orders. Find Ruth by the first cage yard."
+            }
+          ],
+          "when": [
+            {
+              "flag": "lc.orders",
+              "is": true
+            },
+            {
+              "flag": "lc.gate.fight",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "bluff",
+          "text": "The King sent me. You don't want to keep him waiting.",
+          "next": "lc.ward.fail",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.gate.fight",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "flag": "lc.entry",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "ask",
+          "text": "What work details are allowed?",
+          "next": "lc.ward.rules"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "At the front gate",
+        "order": 1,
+        "emotion": "Male voice. Controlled, calm and almost normal, but with no warmth. Never a snarling zombie.",
+        "direction": "Male voice. Controlled, calm and almost normal, but with no warmth. Never a snarling zombie.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. At the front gate"
+      }
+    },
+    "lc.ward.rules": {
+      "text": "The written orders decide. Not your coat. Not your face. The written orders. The records desk is west of this post.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll check the desk.",
+          "next": "lc.ward.first"
+        },
+        {
+          "id": "moral",
+          "text": "These people have families.",
+          "next": "lc.ward.families"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "Learning how to pass",
+        "order": 2,
+        "emotion": "Matter-of-fact. He is applying instructions, not offering a favor.",
+        "direction": "Matter-of-fact. He is applying instructions, not offering a favor.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Learning how to pass"
+      }
+    },
+    "lc.ward.families": {
+      "text": "Families may request transport together. All names must be entered in the record.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "That is not what I meant.",
+          "next": "lc.ward.first"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "A disturbing, ordinary-sounding answer",
+        "order": 3,
+        "emotion": "Polite administrative tone. The horror comes from the lack of concern, not a villain laugh.",
+        "direction": "Polite administrative tone. The horror comes from the lack of concern, not a villain laugh.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A disturbing, ordinary-sounding answer"
+      }
+    },
+    "lc.ward.pass": {
+      "text": "Fourth cart. West yard. Shift change. Order matches. The work detail will use the other stairs. Proceed.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Understood.",
+          "next": "lc.ward.done"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "Paperwork redirects the work detail",
+        "order": 4,
+        "emotion": "A slight pause while checking the order. No sense of choosing to help the player.",
+        "direction": "A slight pause while checking the order. No sense of choosing to help the player.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Paperwork redirects the work detail"
+      }
+    },
+    "lc.ward.done": {
+      "text": "Your assigned path is open. Do not delay the next transport.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I heard you.",
+          "next": "lc.ward.done"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "Brief response after entry",
+        "order": 5,
+        "emotion": "Flat, efficient, no hostility unless orders require it.",
+        "direction": "Flat, efficient, no hostility unless orders require it.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Brief response after entry"
+      }
+    },
+    "lc.ward.fail": {
+      "text": "No personal orders were received. False authority. Guards: seize the speaker.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Then I'll open the gate myself.",
+          "next": "lc.ward.locked"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "Unsupported bluff exposed",
+        "order": 6,
+        "emotion": "Same calm voice. The command is the danger. Fighting waits until dialogue ends.",
+        "direction": "Same calm voice. The command is the danger. Fighting waits until dialogue ends.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Unsupported bluff exposed"
+      }
+    },
+    "lc.ward.locked": {
+      "text": "Remain where you are. The gate is closed.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "We will see about that.",
+          "next": "lc.ward.locked"
+        }
+      ],
+      "voice": {
+        "speaker": "ward",
+        "scene": "The combat route remains possible",
+        "order": 7,
+        "emotion": "Short and final, not angry. He cannot be talked into changing sides.",
+        "direction": "Short and final, not angry. He cannot be talked into changing sides.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. The combat route remains possible"
+      }
+    },
+    "lc.ruth.first": {
+      "text": "Caleb made it, then. Good. I told him to run, and he spent half the night apologizing for doing it. I'm Ruth. There are people in both cage yards, and that winch above us calls the next guard shift. We need a way out, not another brave last stand.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Let's get them out. Tell me what you need.",
+          "next": "lc.ruth.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.entry",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "lc.rescue",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "lc.rescue",
+              "region": "hollow",
+              "title": "Get the prisoners out",
+              "text": "Free the south and north cage groups, stop the raised alarm winch, and open the escape gate. You choose the order. Ruth will guide the freed groups to shelter."
+            }
+          ]
+        },
+        {
+          "id": "curt",
+          "text": "I'm here for the crossing, not everyone in these cages.",
+          "next": "lc.ruth.curt",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.entry",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "lc.rescue",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "lc.rescue",
+              "region": "hollow",
+              "title": "Get the prisoners out",
+              "text": "Free the south and north cage groups, stop the raised alarm winch, and open the escape gate. You choose the order. Ruth will guide the freed groups to shelter."
+            },
+            {
+              "type": "flag",
+              "id": "lc.ruth.curt",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "A rescue with people behind it",
+        "order": 8,
+        "emotion": "Female voice, tired but firm. Dry affection when mentioning Caleb. Practical, not helpless.",
+        "direction": "Female voice, tired but firm. Dry affection when mentioning Caleb. Practical, not helpless.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A rescue with people behind it"
+      }
+    },
+    "lc.ruth.curt": {
+      "text": "The crossing is beyond the north shelter. You still need these gates open to reach it. Help with that much, at least. I'll handle the people you haven't got time for.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Where are the locks?",
+          "next": "lc.ruth.plan"
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "A selfish answer has a social cost",
+        "order": 9,
+        "emotion": "Keep the anger quiet. She gives the required directions anyway.",
+        "direction": "Keep the anger quiet. She gives the required directions anyway.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A selfish answer has a social cost"
+      }
+    },
+    "lc.ruth.plan": {
+      "text": "Each yard has its own lock. The guards won't let you work on one for long. Cut the alarm cable first if you want a quieter rescue. Once both groups are free, we'll lay a short crossing beside the rock spine and wait in the shelter. You can open the escape gate from there.",
+      "choices": [
+        {
+          "id": "others",
+          "text": "Is that everyone?",
+          "next": "lc.ruth.extra",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.extra.quest",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "lc.extra",
+              "region": "hollow",
+              "title": "One more cage",
+              "text": "Ruth says a small group is held in the old raised cage on the west side. Their rescue is optional; she refuses to forget them."
+            }
+          ],
+          "when": [
+            {
+              "flag": "lc.ruth.curt",
+              "is": false
+            },
+            {
+              "flag": "lc.extra",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "repair",
+          "text": "You have gone quiet.",
+          "next": "lc.ruth.repair",
+          "when": [
+            {
+              "flag": "lc.ruth.curt",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "reward",
+          "text": "The old cage is open. They are coming back.",
+          "next": "lc.ruth.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.reward",
+              "value": true
+            },
+            {
+              "type": "reward",
+              "id": "lc.ruth.HP-03",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "flag": "lc.extra",
+              "is": true
+            },
+            {
+              "flag": "lc.ruth.curt",
+              "is": false
+            },
+            {
+              "flag": "lc.reward",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "crossing",
+          "text": "What is waiting at the crossing?",
+          "next": "lc.ruth.marksman"
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "Clear plan, free choice of task order",
+        "order": 10,
+        "emotion": "Steady, concise directions. No artificial countdown.",
+        "direction": "Steady, concise directions. No artificial countdown.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Clear plan, free choice of task order"
+      }
+    },
+    "lc.ruth.extra": {
+      "text": "There's an older cage up on the west shelf. They put the slow walkers there, as if being tired was a crime. We heard them last night. Please don't let the guards' head count be the last time anyone counts them.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll look for them.",
+          "next": "lc.ruth.plan"
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "Optional rescue of overlooked prisoners",
+        "order": 11,
+        "emotion": "Compassion with restrained anger. Do not reveal the freight puzzle.",
+        "direction": "Compassion with restrained anger. Do not reveal the freight puzzle.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Optional rescue of overlooked prisoners"
+      }
+    },
+    "lc.ruth.repair": {
+      "text": "One of the boys can barely swallow. We passed a clean spring beyond the loaded wagon, but they wouldn't let us stop. I keep looking at these empty flasks. It's hard to make small talk.",
+      "choices": [
+        {
+          "id": "water",
+          "text": "I brought clean water. Give him this.",
+          "next": "lc.ruth.water",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.ruth.curt",
+              "value": false
+            },
+            {
+              "type": "flag",
+              "id": "lc.water.given",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "flag": "lc.water",
+              "is": true
+            },
+            {
+              "flag": "lc.water.given",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "back",
+          "text": "I'll see what I can do.",
+          "next": "lc.ruth.plan",
+          "effects": [
+            {
+              "type": "note",
+              "id": "lc.water",
+              "region": "hollow",
+              "title": "An empty flask",
+              "text": "Ruth is worried about a boy who needs water. A clean spring lies beyond the loaded wagon on the east side."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "A natural clue for repairing trust",
+        "order": 12,
+        "emotion": "Low, distracted concern for the child. No demand for an apology quest.",
+        "direction": "Low, distracted concern for the child. No demand for an apology quest.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A natural clue for repairing trust"
+      }
+    },
+    "lc.ruth.water": {
+      "text": "Thank you. He's been trying not to ask. Look... I know you can't carry everyone. Just don't decide who is worth saving before you've met them.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about the people still missing.",
+          "next": "lc.ruth.extra",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.extra.quest",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "Trust repaired by an actual helpful act",
+        "order": 13,
+        "emotion": "Relief first. Honest, gentle correction, not a lecture.",
+        "direction": "Relief first. Honest, gentle correction, not a lecture.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Trust repaired by an actual helpful act"
+      }
+    },
+    "lc.ruth.reward": {
+      "text": "All of them. You went back for all of them. One of the workers gave me this purple piece to keep safe. Said he found it caught in his cart wheel. Take it. I'd rather it help someone than spend another night hidden in my shoe.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Keep everyone together.",
+          "next": "lc.ruth.safe"
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "Optional rescue earns a Rift Shard",
+        "order": 14,
+        "emotion": "Warm, deeply relieved. Small laugh at the shoe after the emotion lands.",
+        "direction": "Warm, deeply relieved. Small laugh at the shoe after the emotion lands.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Optional rescue earns a Rift Shard"
+      }
+    },
+    "lc.ruth.safe": {
+      "text": "We'll wait under cover until the last crossing is safe. No one gets left behind this time. And if Caleb apologizes again, tell him I said to carry a blanket and be useful.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About that crossing...",
+          "next": "lc.ruth.marksman"
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "After the optional reward",
+        "order": 15,
+        "emotion": "Hopeful and grounded. A fond joke about Caleb, not ridicule.",
+        "direction": "Hopeful and grounded. A fond joke about Caleb, not ridicule.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. After the optional reward"
+      }
+    },
+    "lc.ruth.marksman": {
+      "text": "A Hollowed marksman watches the last crossing. Open ground is his advantage. Ours is that he can't watch every path at once. Get us through, and we can follow the holding records toward Ruined Keep.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Stay under cover. I'll find a way.",
+          "next": "lc.ruth.plan"
+        }
+      ],
+      "voice": {
+        "speaker": "ruth",
+        "scene": "Sets up the next boss without spoiling its exact mechanics",
+        "order": 16,
+        "emotion": "Serious, useful warning. No claim that the King is at the Keep.",
+        "direction": "Serious, useful warning. No claim that the King is at the Keep.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Sets up the next boss without spoiling its exact mechanics"
+      }
+    }
+  },
+  "events": {
+    "lc.orders": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.orders",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.orders",
+          "region": "hollow",
+          "title": "Shift orders",
+          "text": "Fourth cart. West yard. Shift change. Ward is ordered to admit a work detail carrying these papers and redirect his detail to the other stairs."
+        }
+      ],
+      "once": true
+    },
+    "lc.force": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.gate.fight",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.gate",
+          "region": "hollow",
+          "title": "The front gate",
+          "text": "The chain brought three guards to the gate. Clear them, then work the gate handle. The high side path is another way in."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "lc.entry",
+          "is": false
+        }
+      ]
+    },
+    "lc.gate": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.entry",
+          "value": true
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "lc.gate.fight",
+          "is": true
+        }
+      ]
+    },
+    "lc.side": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.entry",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "id": "lc.side",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.side",
+          "region": "hollow",
+          "title": "Above the gate",
+          "text": "The side ladder drops into the holding yard. Ward never saw you use it."
+        }
+      ],
+      "once": true
+    },
+    "lc.cage.south": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.south",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.south",
+          "region": "hollow",
+          "title": "South cage opened",
+          "text": "The freed group is taking a sheltered route to Ruth."
+        },
+        {
+          "type": "conditional",
+          "id": "lc.alarm.check",
+          "when": [
+            {
+              "flag": "lc.alarm",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.alarm.called",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "lc.rescue",
+          "is": true
+        }
+      ]
+    },
+    "lc.cage.north": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.north",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.north",
+          "region": "hollow",
+          "title": "North cage opened",
+          "text": "The freed group is taking a sheltered route to Ruth."
+        },
+        {
+          "type": "conditional",
+          "id": "lc.alarm.check",
+          "when": [
+            {
+              "flag": "lc.alarm",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "lc.alarm.called",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "lc.rescue",
+          "is": true
+        }
+      ]
+    },
+    "lc.cage.extra": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.extra",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.extra",
+          "region": "hollow",
+          "title": "Extra cage opened",
+          "text": "The freed group is taking a sheltered route to Ruth."
+        }
+      ],
+      "once": true
+    },
+    "lc.alarm": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.alarm",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.alarm",
+          "region": "hollow",
+          "title": "Alarm stopped",
+          "text": "The cable is cut. Opening another cage will not call more guards."
+        }
+      ],
+      "once": true
+    },
+    "lc.escape": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.escape",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.escape",
+          "region": "hollow",
+          "title": "Escape route open",
+          "text": "Both cage groups can reach the shelter and the alarm is stopped. Make the last crossing safe for them."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "lc.south",
+          "is": true
+        },
+        {
+          "flag": "lc.north",
+          "is": true
+        },
+        {
+          "flag": "lc.alarm",
+          "is": true
+        }
+      ]
+    },
+    "lc.wagon": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.wagon",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.wagon",
+          "region": "hollow",
+          "title": "A different way out",
+          "text": "Unloading the wagon cleared the cave. The canyon floor beyond it has a climbing route back to the northern path."
+        }
+      ],
+      "once": true
+    },
+    "lc.water": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.water",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.water",
+          "region": "hollow",
+          "title": "Clean water",
+          "text": "You filled a flask at the spring beyond the wagon. Someone in the holding yard may need it."
+        }
+      ],
+      "once": true
+    },
+    "lc.cache": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.cache",
+          "value": true
+        },
+        {
+          "type": "reward",
+          "id": "lc.cave.supplies",
+          "kind": "gold",
+          "amount": 180
+        }
+      ],
+      "once": true
+    },
+    "lc.rail.clue": {
+      "effects": [
+        {
+          "type": "note",
+          "id": "lc.rail",
+          "region": "hollow",
+          "title": "The freight track",
+          "text": "Follow the loaded cart’s track. Turn the handles in the order the track bends. A wrong turn rolls the lock back. No one in the yard has mentioned this store."
+        }
+      ],
+      "once": true
+    },
+    "lc.rail.north": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "lc.rail",
+          "solution": [
+            "north",
+            "west",
+            "south",
+            "east"
+          ],
+          "value": "north"
+        }
+      ],
+      "once": false
+    },
+    "lc.rail.west": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "lc.rail",
+          "solution": [
+            "north",
+            "west",
+            "south",
+            "east"
+          ],
+          "value": "west"
+        }
+      ],
+      "once": false
+    },
+    "lc.rail.south": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "lc.rail",
+          "solution": [
+            "north",
+            "west",
+            "south",
+            "east"
+          ],
+          "value": "south"
+        }
+      ],
+      "once": false
+    },
+    "lc.rail.east": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "lc.rail",
+          "solution": [
+            "north",
+            "west",
+            "south",
+            "east"
+          ],
+          "value": "east"
+        }
+      ],
+      "once": false
+    }
+  }
+}

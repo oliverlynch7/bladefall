@@ -21,7 +21,7 @@ function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(
 export function buildKeep(scene,w){
   const root=new THREE.Group();root.name='Ruined Keep · The Fallen Standard';
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),lamps=[],structures=[],bodies=new Set(),occluders=new Map();let target=null,source=null,floors=0;
-  const under=w.area===1||w.side;
+  const under=w.area===1||w.side||w.keepScene==='fallen';
   function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
   const block=(x,y,z,ww,h,d,c)=>add(Math.min(ww,h,d)<=3?'timber':'stone',x,y,z,ww,h,d,c);
   function cap(o,top,wood){
@@ -130,6 +130,14 @@ export function buildKeep(scene,w){
     for(const [x,z,y]of [[-1380,-1810,180],[-380,-3050,180],[980,-3340,190],[300,-2950,0],[1470,-3190,40]]){add('crate',x,y,z,58,40,42);add('rubble',x+45,y,z-45,60,22,45);}
     // The drain has brick banks and low arches; safe stones remain brighter than water.
     for(const z of [-3410,-3880,-4370,-4840])for(const x of [1225,2550]){block(x,80,z,35,160,110,'#52594e');block(x+(x<1800?55:-55),155,z,110,22,80,'#77745f');}
+  }
+  if(w.keepScene==='fallen'){
+    // Recessed cells and high wall arches surround a clear, flat duel floor.
+    for(const x of [-220,220])for(const z of [-230,220]){block(x,9,z,112,18,112,'#9b927a');block(x,242,z,112,12,112,'#a99b80');for(const dz of [-42,42])block(x,123,z+dz,8,218,5,'#a89b7c');}
+    for(const x of [-510,510])for(const z of [-570,0,570]){brazier(x,0,z,18);add('banner',x,175,z,32,94,6);}
+    for(const z of [-640,640]){for(const x of [-460,460])block(x,250,z,35,45,40,'#a49677');block(0,278,z,950,16,40,'#827764');}
+    for(const x of [-665,665]){add('crate',x,0,-125,65,45,50);for(let i=0;i<3;i++)block(x-35+i*35,18,125,24,36,12,'#a4926e');}
+    for(const x of [-90,90])block(x,1.2,0,5,1.4,1330,'#8f846e');
   }
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,list} of bins.values()){

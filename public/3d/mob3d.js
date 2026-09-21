@@ -1,7 +1,7 @@
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2000';
-import { enemyActionState } from './enemy-action-state.js?v=2004';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2007';
+import { enemyActionState } from './enemy-action-state.js?v=2007';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -117,7 +117,7 @@ function acquireMob(type,e){
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
     const clips=src._revisedAnimations||(src._revisedAnimations=revisedClips(root,type,src.animations));
-    for(const c of clips){const a=mixer.clipAction(c);if(['Attack','Hit','Death','Windup','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
+    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||['Attack','Hit','Death','Windup','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
   Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,attack:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});
@@ -186,7 +186,9 @@ function syncMobsInner(scene,dt){
     if(released||started){rec.attack=state.phase==='Attack'?state.remaining:.42;rec.cur=null;}
     if(state.phase==='Windup'&&(rec.phase!=='Windup'||rec.phaseKey!==state.key||wind>rec.wind+.05))rec.cur=null;
     const orchard=e.bruteOrchard?{wind:'BruteBrace',charge:'BruteRush',stagger:'BruteStagger'}[e.bruteState]:null;
-    if(orchard)play(rec,orchard,orchard==='BruteBrace'?wind:undefined);
+    const fallen=e.fallenDuel?{feint:'FallenFeint',stagger:'FallenStagger'}[e.fallState]:null;
+    if(fallen)play(rec,fallen,e.fallClock);
+    else if(orchard)play(rec,orchard,orchard==='BruteBrace'?wind:undefined);
     else if(wind>0)play(rec,'Windup',wind);
     else if(rec.attack>0||state.phase==='Attack')play(rec,'Attack',state.phase==='Attack'?state.remaining:rec.attack);
     else if((e.hitFlash||0)>rec.hit+.025){rec.cur=null;play(rec,'Hit');}

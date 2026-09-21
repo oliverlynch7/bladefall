@@ -1,6 +1,6 @@
 import * as THREE from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
-import { loadKitModel, kitModel } from './mob3d.js?v=1981s';
+import { loadKitModel, kitModel } from './mob3d.js?v=2007';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PROP3D — the world's INTERACTIVE OBJECTS as 3D models.

@@ -1812,3 +1812,7 @@ Ruined Keep part one: Grant/Felix, 30-second breach defense, alternate dungeon e
 
 ## [Codex | 2026-09-20] Shipped 2.006 — The Dungeons
 Hidden prisoners, shared working lift, Walter/Sly dialogue, optional lower weights and drain maze, rare armor, remaining three Reaper shards. All five Keep shards available before boss. 16 new VO lines; 145 total. Traversal, controlled co-op, checkpoint and previous district regressions verified. The Fallen redesign remains next.
+
+
+## [Codex | 2026-09-21] Shipped 2.007 — The Fallen
+Compact pillar duel, locked thrust/feint/sweep and recoveries, shared boss state and exit, lore correction. Unified enemy-renderer imports prevent fallback overlap. Browser combat/traversal, co-op, checkpoint and renderer regression verified. 145 VO lines unchanged. Next Frostfell.

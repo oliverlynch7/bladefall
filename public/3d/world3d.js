@@ -3,7 +3,7 @@ import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskir
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2001';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1972';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1972';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2006';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2007';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2004';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
@@ -42,8 +42,8 @@ import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hol
 /* Same specifier hero3d uses. Importing 'three' via the importmap could resolve to a
    SECOND module instance, and two THREE copies break every instanceof check silently. */
 import * as THREE from './three.module.js';
-import { clearMobs } from './mob3d.js?v=1981s';
-import { clearProps } from './prop3d.js?v=1981s';
+import { clearMobs } from './mob3d.js?v=2007';
+import { clearProps } from './prop3d.js?v=2007';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 

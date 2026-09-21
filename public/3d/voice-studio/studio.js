@@ -1,5 +1,6 @@
+import {openStereoCapture} from './stereo-capture.js?v=1';
 const $=id=>document.getElementById(id),API='/voice-api/';
-let catalog=[],selected=null,recording=null,stream=null,busy=false,tick=null,objectURL=null;
+let catalog=[],selected=null,recording=null,stream=null,busy=false,tick=null,objectURL=null,capture=null;
 const say=text=>{$('status').textContent=text;};
 const hash=async text=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),b=>b.toString(16).padStart(2,'0')).join('');
 async function api(path,options={}){
@@ -54,7 +55,7 @@ async function saveRecording(blob,line,duration,takeId){
 }
 async function work(fn){if(busy||recording)return;busy=true;lock();try{await fn()}catch(e){say(e.message)}finally{busy=false;lock()}}
 function lock(){
- for(const id of ['record','saveText','text','speaker','search','unfinished','refresh','restore','upload','next','backup'])$(id).disabled=busy||!!recording;
+ for(const id of ['record','channels','saveText','text','speaker','search','unfinished','refresh','restore','upload','next','backup'])$(id).disabled=busy||!!recording;
  $('stop').disabled=!recording||recording.state!=='recording';$('approve').disabled=busy||!!recording||!selected?.takes.some(t=>t.id===$('takes').value&&t.revision===selected.revision);
  $('takes').disabled=busy||!!recording;for(const b of $('lines').children)b.disabled=busy||!!recording;
 }
@@ -63,18 +64,18 @@ async function startRecording(){
  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){say('This browser cannot record here. Try a current browser, or upload an existing recording.');return}
  busy=true;lock();$('player').pause();const line={...selected};
  try{
-  stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+  capture=await openStereoCapture($('channels').value==='center');stream=capture.stream;$('channelInfo').textContent=capture.label;
   const mime=['audio/webm;codecs=opus','audio/mp4','audio/webm','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported(t));
-  recording=new MediaRecorder(stream,mime?{mimeType:mime}:{});let chunks=[],started=Date.now(),failed=false,localQueue=Promise.resolve(),takeId=crypto.randomUUID();
+  recording=new MediaRecorder(stream,{...(mime?{mimeType:mime}:{}),audioBitsPerSecond:192000});let chunks=[],started=Date.now(),failed=false,localQueue=Promise.resolve(),takeId=crypto.randomUUID();
   recording.ondataavailable=e=>{if(!e.data.size)return;chunks.push(e.data);const row={take:takeId,id:line.id,text:line.text,revision:line.revision,duration:(Date.now()-started)/1000,blob:new Blob(chunks,{type:recording.mimeType}),created:started};localQueue=localQueue.then(()=>pendingStore('put',row)).catch(()=>say('Local recovery storage is unavailable. Stop and download this take before leaving.'));};
   recording.onerror=()=>{failed=true;say('The microphone stopped unexpectedly. Any captured audio will be saved.')};
   recording.onstop=async()=>{
-   clearInterval(tick);const type=recording.mimeType;recording=null;for(const t of stream?.getTracks()||[])t.stop();stream=null;busy=true;lock();
+   clearInterval(tick);const type=recording.mimeType;recording=null;const closing=capture;capture=null;stream=null;busy=true;lock();await closing?.close().catch(()=>{});
    try{const blob=new Blob(chunks,{type});if(blob.size<32)throw Error('No audio was captured. Check your microphone and try again.');await localQueue;await saveRecording(blob,line,(Date.now()-started)/1000,takeId);if(failed)say('Interrupted take saved. Please listen before approving.')}catch(e){say(e.message)}finally{busy=false;lock()}
   };
-  for(const track of stream.getAudioTracks())track.onended=()=>{if(recording?.state==='recording')recording.stop()};
+  for(const track of capture.input.getAudioTracks())track.onended=()=>{if(recording?.state==='recording')recording.stop()};
   recording.start(1000);tick=setInterval(()=>{const sec=Math.floor((Date.now()-started)/1000);$('clock').textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec>=180&&recording?.state==='recording')recording.stop()},250);say('Recording. Stop when you finish the line.');
- }catch(e){for(const t of stream?.getTracks()||[])t.stop();stream=null;recording=null;say(e.name==='NotAllowedError'?'Microphone access was denied. Allow it in your browser settings, then try again.':e.message)}finally{busy=false;lock()}
+ }catch(e){await capture?.close().catch(()=>{});capture=null;stream=null;recording=null;say(e.name==='NotAllowedError'?'Microphone access was denied. Allow it in your browser settings, then try again.':e.message)}finally{busy=false;lock()}
 }
 async function audioBlob(t){const r=await fetch(API+'audio/'+t.id,{cache:'no-store'});if(!r.ok)throw Error('Could not download this take. Check your connection and retry.');return r.blob()}
 const base64=buffer=>{let text='';const a=new Uint8Array(buffer);for(let i=0;i<a.length;i+=8192)text+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(text)};

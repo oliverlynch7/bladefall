@@ -1,6 +1,7 @@
 /* The Waystation: original, instanced Blender scenery. The layout is owned by
    rebuildWaystationSanctum; service callbacks and portal unlocks stay in the game. */
 import * as THREE from './three.module.js';
+import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2001';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
 
 const meshes=new Map(),loader=new GLTFLoader(),dummy=new THREE.Object3D();
@@ -29,6 +30,7 @@ const surface=new THREE.MeshLambertMaterial({vertexColors:true});
 function texture(url){if(!textures.has(url)){const t=new THREE.TextureLoader().load(url);t.colorSpace=THREE.SRGBColorSpace;textures.set(url,t)}return textures.get(url)}
 
 export function buildHubArt(scene,w){
+  if(w.hubArt?.riftHall)return buildRiftHallArt(scene,w);
   const root=new THREE.Group();root.name='The Waystation · Lantern Court';
   const batches=new Map(),owned=[],lamps=[],animated=[],HU=w.hubArt.upgrades||{};
   let origin={x:0,z:0,ry:0};
@@ -158,6 +160,11 @@ export function buildHubArt(scene,w){
   for(const [i,id] of icons.entries())if(w.hubArt.zoneDone[id]){block(-847,64,-150+i*65,19,40,23,palette[i]);block(-847,39,-150+i*65,25,8,27,'#9b8966');}
   if(HU.braziers)for(const x of [-270,270])for(const z of [-245,395]){add('lamp',x,0,z,27);lamps.push(new THREE.Vector3(x,105,z));}
 
+  if(w.hubArt.riftDoor){const {x,z}=w.hubArt.riftDoor;at(x,z,0,()=>{
+    for(const side of [-1,1]){block(side*65,67,0,22,134,24,'#6e6379');block(side*65,156,0,12,24,12,'#c09df2');}
+    block(0,140,0,152,18,28,'#94849e');block(0,6,0,165,12,65,'#79707d');label('RIFT HALL',0,170,6,164,'#e1c6ff');
+    for(const side of [-1,1])block(side*48,63,-8,5,112,5,'#a884d1');
+  });}
   let triangles=0,instances=0;
   for(const [name,list] of batches){
     const rec=meshes.get(name),m=new THREE.InstancedMesh(rec.geo,surface,list.length),col=new THREE.Color();
@@ -177,6 +184,7 @@ export function buildHubArt(scene,w){
   return {group:root,counts};
 }
 export function updateHubArt(w,t){
+  if(w.hubArt?.riftHall){updateRiftHallArt(w,t);return;}
   if(!active)return;const p=w.p;if(!p)return;
   const low=window.__BF_META?.().quality==='low';if(active.quality!==low){active.quality=low;window.__HUB_SHADOW_DIRTY=true;}
   const nearest=active.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);

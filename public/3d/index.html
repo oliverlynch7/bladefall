@@ -1022,8 +1022,9 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./loading.js?v=1981s"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=1989">
 <script src="./voice-content.js?v=1989"></script>
-<script src="./hub-dialogue.js?v=1990"></script>
+<script src="./hub-dialogue.js?v=2001"></script>
 <script src="./rift-shards.js?v=1992"></script>
+<script src="./rift-hall.js?v=2001"></script>
 <script src="./brute-encounter.js?v=2000"></script>
 <script src="./story-state.js?v=1994"></script>
 <script src="./story-authority.js?v=1990"></script>
@@ -1041,7 +1042,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.000.0-brute-orchard';
+const VERSION3D='2.001.0-rift-hall';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1076,7 +1077,7 @@ const GLOBAL_FIELDS=['hubDialogue','dialogueVoice','dialogueTTS','unlockedSkins'
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -1090,7 +1091,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},arcadeOwned:false,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
-  riftShards:[],hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
+  riftOpen:[],riftHallStory:null,riftShards:[],hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 // One-time: over-the-shoulder is the new default camera. Flip saves still on the old 'far' default
@@ -1149,6 +1150,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
   meta.trialsDone=mv.trialsDone&&typeof mv.trialsDone==='object'?mv.trialsDone:{};
   meta.riftShards=BFRiftShards.normalize(mv.riftShards);
+  meta.riftOpen=BFRiftHall.normalize(mv.riftOpen);meta.riftHallStory=BFStoryState.restore(mv.riftHallStory);
   meta.sideFound=mv.sideFound&&typeof mv.sideFound==='object'?mv.sideFound:{};
   meta.sideDone=mv.sideDone&&typeof mv.sideDone==='object'?mv.sideDone:{};
   // pets (migrates old saves cleanly — no pet fields => an empty Pet Yard)
@@ -2861,13 +2863,13 @@ function areaQuests(ai){ if(inBlackWoods()&&(ai==null||ai===1))return [{id:'wood
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=fetch('./story/briar-foundation.json?v=1999').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall'].map(id=>fetch('./story/'+id+'.json?v=2001').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
-function inBriarStory(){return inBriar()||inBlackWoods();}
+function inBriarStory(){return inBriar()||inBlackWoods()||!!G?.riftHall||!!G?.riftMentor;}
 function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
 function briarId(){return MP.active?MP.myId:'solo';}
 function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
-function briarPacket(){return isCampaignAdventure()?{epoch:briarEpoch(),zone:G.zone,area:G.area,run:G.runSeed,state:adventureStoryState(),checkpointStory:meta.run?.campaign?.storyState,rescueGuards:inBlackWoods()?G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length:0,guards:inBriar()?G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length:0}:null;}
+function briarPacket(){return (isCampaignAdventure()||G?.riftHall)?{scene:G.riftHall?'rift-hall':'campaign',epoch:briarEpoch(),zone:G.zone,area:G.area,run:G.runSeed,state:adventureStoryState(),checkpointStory:meta.run?.campaign?.storyState,rescueGuards:inBlackWoods()?G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length:0,guards:inBriar()?G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length:0}:null;}
 function briarQuest(){
  const s=G?.storyState||BFStoryState.create(),f=s.flags,i=s.items;
  let d=!f['thomas.ready']?'Speak to Thomas near your home':s.quests['briar.supplies']!=='active'&&!f['mara.healing']?'Speak to Mara by the village beds':!f['mara.healing']?((i.tangle_root||0)<3||(i.dressings||0)<1?`Gather tangle roots (${i.tangle_root||0}/3) and clean dressings (${i.dressings||0}/1)`:'Bring the supplies back to Mara'):s.quests['briar.escape']!=='active'&&!f['briar.depart']?'Ask Mara what needs doing next':!f['briar.water']?'Stop the water beside the mill':!f['briar.jam']?'Remove the timber caught in the mill wheel':!f['briar.bridge']?'Lower the mill crossing with the bridge handle':!f['briar.depart']?'Clear the guards at the old bridge, then open the wagon gate':'Follow the neighbors into the Black Woods';
@@ -2896,14 +2898,15 @@ function briarRequest(type,fields={}){
 }
 function briarSendPending(){if(!briarPending||!MP.active||MP.isHost)return;try{MP.hostConn?.send({t:'storyRequest',request:briarPending.request});briarPending.sent=performance.now();}catch(e){}}
 function briarApply(packet,place=false,ack){
- if(!packet||!isCampaignAdventure()||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
+ if(!packet||!(isCampaignAdventure()||G?.riftHall)||(packet.scene||'campaign')!==(G.riftHall?'rift-hall':'campaign')||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
  if(!place&&(G._storyEpoch!==packet.epoch||packet.state.revision<(G.storyState?.revision||0)))return;
- G._storyEpoch=packet.epoch;G._briarGuards=packet.guards;G._rescueGuards=packet.rescueGuards;G.storyState=checkpointClone(packet.state);
+ if(place&&G.riftHall)G._hallAssembly=packet.state.items?.['hall.assembly']||0;
+  G._storyEpoch=packet.epoch;G._briarGuards=packet.guards;G._rescueGuards=packet.rescueGuards;G.storyState=checkpointClone(packet.state);
  if(briarPending&&(ack===briarPending.request.event.id||packet.state.events[briarPending.request.event.id]||packet.state.revision>briarPending.request.event.revision))briarPending=null;
  briarSync();
 }
 function briarSync(){
- if(!isCampaignAdventure())return;
+ if(!isCampaignAdventure()&&!G?.riftHall&&!G?.riftMentor)return;
  const s=adventureStoryState();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
   if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast((id==='home.bells.cache'?'Tower chest opened':'Quest complete')+' · +'+gold+' gold');G.storyClaims[id]=true;}
@@ -2911,7 +2914,7 @@ function briarSync(){
   else if(reward.kind==='rift_shard'&&id==='briar.gus.BR-02'){const outcome=collectRiftShard('BR-02');if(outcome!=='invalid')G.storyClaims[id]=true;}
  }
  if(!inBriarStory())return;
- if(inBlackWoods()){syncBethRescue(s);if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
+ if(G.riftMentor){if(s.flags['trial.taught']&&!G.portal)openWay();}else if(G.riftHall){syncRiftHall(s);}else if(inBlackWoods()){syncBethRescue(s);if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
@@ -2923,7 +2926,7 @@ function briarSync(){
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
-  BFHubDialogue.present(n,{meta,eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
+  BFHubDialogue.present(n,{meta,location:G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:G.riftMentor?'Return to training':G.riftHall?'Return to the hall':'Return to the path',eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
    enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
    leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>briarRequest('close'),choose:(line,choice)=>briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
@@ -3444,7 +3447,7 @@ function optionalBump(id,by){ const m=(G.optionalMissions||[]).find(x=>x.id===id
 }
 function questKill(type){
   if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
-    if(G.trialKills>=T.kills && !G.portal) openWay();
+    if(G.trialKills>=T.kills && !G.portal){if(G.riftMentor)trialMentorProved();else openWay();}
     questUpdate(); return; }
   for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
 /* The `hunt` verb bumps on a SPECIFIC creature dying, not on its species, so it needs the entity
@@ -3457,7 +3460,7 @@ function questHuntKill(e){
   addText(e.x, e.y + (e.h||40) + 20, e.z, 'QUARRY SLAIN', 'var(--amber)', true);
   if(G.qmarks) for(const m of G.qmarks) if(m.q === e.huntQ) m.done = true; }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
-function openWay(){ if(G.bruteArena&&G.enemies.some(e=>!e.dead&&e.hp>0))return;if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
+function openWay(){ if(G.riftMentor&&!G.storyState?.flags['trial.taught'])return;if(G.bruteArena&&G.enemies.some(e=>!e.dead&&e.hp>0))return;if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
   if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
@@ -3494,6 +3497,7 @@ function questUpdate(){
      only goal here is the stairs down.
      Hidden at the DISPLAY rather than by clearing G.qs: questUpdate and the kill tracker both read
      that object and expect it to exist, and nulling it threw on the first frame. */
+  if(G?.riftHall){const el=document.getElementById('questbox');if(el)el.classList.add('hide');return;}
   if(G && G.delve){ const _el=document.getElementById('questbox'); if(_el) _el.classList.add('hide'); return; }
   const el=document.getElementById('questbox'); if(!el) return;
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
@@ -3504,8 +3508,8 @@ function questUpdate(){
       applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`,G.floorCleared); return; }
   const Z=curZone();
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
-    const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
-    applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`,d); return; }
+    const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐',(G.riftMentor&&!G.storyState?.flags['trial.taught']?'Speak to your mentor at the exit':'Take the portal'),null):'');
+    applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}|${!!G.storyState?.flags['trial.taught']}`,d); return; }
   if(G.side){ const gd=G.sideGuardian, hunt=!!gd, lm=G.localMission, done=lm?lm.done:(hunt&&gd.dead), task=lm?lm.name:(G.sideTask||'Reach the exit');
     let rows=qrow(done,done?'☑':(hunt?'⚔':'☐'),done?(lm?'Local mission complete':'Trial guardian defeated'):task,lm&&!done?`${lm.progress}/${lm.total}`:null);
     if(done) rows+=qrow(false,eventIcon('event-secret-rift'),'Take the opened gate',null);
@@ -3644,7 +3648,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -4861,7 +4865,7 @@ function loadArea(){
      The floor seed is derived here too, so floors stop sharing a layout with each other. */
   if(G.delve){ G.areaSeed = 500 + (G.floor||1)*13; G.areaName = 'Floor ' + (G.floor||1);
                loadStage(G.stageIndex||0); return; }
-  if(G.trial){ const T=TRIALS[G.trial]; G.areaSeed=T.seed; G.areaName=T.name; loadStage(T.stage); return; }
+  if(G.trial){ const T=TRIALS[G.trial]; G.areaSeed=T.seed; G.areaName=T.name; loadStage(T.stage);setupTrialMentor(); return; }
   if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
@@ -4917,9 +4921,9 @@ function startTrial(cid,fromZone){
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
 function showTutorial(cid){ mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The blood is awake in you</p><h2 class="ovh">The Proving Chamber</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Your first steps</p><h2 class="ovh">The Proving Chamber</h2>
     <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
-      <p style="color:#e6d2ff">Before you make your Bladefall, what woke in you has to be proven. This sealed chamber is where the blood tests its own. Survive it and the way down is yours. Fail and no one below will ever know your name.</p>
+      <p style="color:#e6d2ff">Practice your movement, attacks, and skills here before you head out. Learn how to spot an opening, avoid a strike, and make it safely through the chamber.</p>
       <p><b>Move</b> — WASD / left stick. <b>Jump</b> — Space (tap = hop, hold = higher).</p>
       <p><b>Attack</b> — J / the SLASH button; it auto-aims where you're looking. <b>Dodge</b> — K / Shift.</p>
       <p><b>Skills</b> — keys 1–4 (they unlock as your class ranks up).</p>
@@ -5140,7 +5144,7 @@ function skipTrial(){
 function abandonTrial(){ restoreBank(); openHub(); }
 // Authored shard placements are staged without replacing legacy trial access until complete.
 // Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
-const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
+const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Bring saved sets to the Rift Keeper in the Waystation’s Rift Hall. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
 function worldRiftShards(){
  if(inBriar()&&adventureStoryState().flags['mara.healing'])return [{id:'BR-01',x:-240,z:-95,y:0}];
  if(inBlackWoods())return [{id:'BR-03',x:1480,z:-1950,y:240},{id:'BR-05',x:370,z:-3390,y:0},...(adventureStoryState().flags['woods.tracks.open']?[{id:'BR-04',x:-2130,z:-2530,y:0}]:[])];return [];
@@ -5179,7 +5183,7 @@ function drawRiftShardDiscovery(t){
  if(!card){card=document.createElement('aside');card.id='riftDiscovery';card.setAttribute('role','status');card.style.cssText='position:fixed;left:50%;bottom:125px;transform:translateX(-50%);width:min(400px,calc(100vw - 28px));box-sizing:border-box;padding:15px 18px;border:1px solid #b582de;border-radius:12px;background:rgba(27,17,40,.96);color:#ecddff;font:14px/1.5 system-ui;z-index:35;pointer-events:none;box-shadow:0 0 28px #a258c544';document.body.appendChild(card);}
  const visible=!!r&&r.first&&age<18&&mode==='play'&&isCampaignAdventure();
  card.style.display=visible?'block':'none';
- if(visible&&card._reveal!==r){card._reveal=r;card.innerHTML='<strong style="display:block;font-size:19px;color:#dfb5ff">You found a Rift Shard</strong><p style="margin:7px 0">Five matching shards rebuild a training rift and open a path to a new fighting style.</p><p style="margin:7px 0"><b>Finish this part to save it.</b> Dying or leaving first loses unsaved shards.</p><small>Read more in your Journal. World crystals must be collected by each player.</small>';}
+ if(visible&&card._reveal!==r){card._reveal=r;card.innerHTML='<strong style="display:block;font-size:19px;color:#dfb5ff">You found a Rift Shard</strong><p style="margin:7px 0">Five matching shards rebuild a training rift and open a path to a new fighting style.</p><p style="margin:7px 0"><b>Finish this part to save it.</b> Dying or leaving first loses unsaved shards.</p><small>Visit the Rift Hall in the Waystation with five saved shards. Read more in your Journal.</small>';}
 }
 function riftShardJournal(){
  if(!isCampaignAdventure())return '';
@@ -13524,6 +13528,7 @@ const MP={
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d); }
       else if(d.t==='storyRequest'){const q=this.peers[c._pid];briarReceive(d.request,c._pid,q?{...q,x:q.tx,y:q.ty,z:q.tz}:null);}
+      else if(d.t==='riftRoom'){const q=this.peers[c._pid],n=G?.hubNpcs?.find(n=>n.id===(d.hall?'rifthall':'riftexit'));if(G?.hub&&mode==='play'&&q&&n&&!q.dead&&!q.downed&&(q.hp==null||q.hp>0)&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130)travelRiftHall(!!d.hall);}
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
       else if(d.t==='petdmg'){ this.routePetPvp(d); }      // owner-authoritative companion damage
@@ -13572,7 +13577,7 @@ const MP={
     else if(d.t==='special'){ this.applySpecial(d); }
     else if(d.t==='campaignClear'){if(isCampaignAdventure()&&G.zone===d.zone&&G.runSeed===d.rseed){securePendingSecret();zoneClear();}}
     else if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
-      if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
+      if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)||!!G.riftHall!==!!d.hall){try{if(!G?.hub){openHub();if(d.hall)enterWaystation(true);}else enterWaystation(!!d.hall);}catch(e){console.error(e)}}if(d.story){if(d.rseed!=null)G.runSeed=d.rseed;briarApply(d.story,true);} }   // follow the host into the shared Waystation
       else { this.zone=d.zone;
         /* `!G.hub` is not defensive - without it a guest NEVER follows the host into zone 0, which
            is the zone every party walks through first (startRun is enterZone(0)).
@@ -13616,7 +13621,7 @@ const MP={
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
   onEnter(zi,restart=false){ this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
-    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()});}catch(e){}}); },
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()});}catch(e){}}); },
   specialMsg(kind){
     if(!G) return null;
     kind=kind||(G.endless?'endless':G.sprintFun&&G.bonusActive?'sprint':G.bossRush?'gauntlet':null);
@@ -13654,7 +13659,7 @@ const MP={
   teamOf(id){ return this.teamMap[id]||0; },
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
-  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
+  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
@@ -15551,7 +15556,7 @@ function randomLoot(rid){ const r=Math.random();
   return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
 // Re-capture the mouse for the shoulder/fps camera the instant a menu closes, so a normal menu
 // interaction never costs you camera control — only Esc releases it. (Runs inside the closing click = a valid gesture.)
-function regrabCam(){ if(!_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ canvas.requestPointerLock(); }catch(e){} } }
+function regrabCam(){ if(!_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ const request=canvas.requestPointerLock();request?.catch?.(()=>{}); }catch(e){} } }
 // The single menu-to-game boundary. Active play must always have the full HUD restored;
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
@@ -16536,7 +16541,77 @@ function rebuildWaystationSanctum(){
     ...G.hubNpcs.map(n=>({id:n.id,x:n.x+(n.district==='undercroft'||n.id==='sparring'?0:n.x<0?70:-70),z:n.z+(n.district==='undercroft'?-70:n.id==='sparring'?65:0),tx:n.x,tz:n.z})),
     {id:'tinkerer',x:-806,z:706,tx:-806,tz:644}];
 }
-function enterWaystation(){
+function trialMentorSpot(origin){
+ // Generated trials still contain random props. Reserve no new geometry; choose a clear
+ // patch within the existing room so talking does not require standing inside scenery.
+ for(const radius of [110,95])for(let ring=0;ring<=8;ring++)for(let k=0;k<(ring?12:1);k++){
+  const a=k*Math.PI/6,x=origin.x+Math.cos(a)*ring*45,z=origin.z+Math.sin(a)*ring*45;
+  if(!G.segments.some(g=>Math.abs(x-g.x)+radius<g.w/2&&Math.abs(z-g.z)+radius<g.d/2))continue;
+  if([...G.walls,...G.obstacles,...G.movers,...G.crumbles].some(o=>(o.h||0)>6&&Math.abs(x-o.x)<o.w/2+radius&&Math.abs(z-o.z)<o.d/2+radius))continue;
+  if([...(G.geysers||[]),...(G.springs||[]),...(G.spikefields||[])].some(o=>Math.hypot(o.x-x,o.z-z)<radius+(o.r||40)))continue;
+  return {x,z,y:0};
+ }
+ return {x:origin.x,z:origin.z,y:highestSurfaceAt(origin.x,origin.z,12)};
+}
+function setupTrialMentor(){
+ const id='mentor_'+G.trial;if(!['berserker','ninja','reaper','chronomancer','pirate','paladin','necromancer'].includes(G.trial))return;
+ G.riftMentor=id;G.storyState=BFStoryState.create();G.storyObjects=[];G.npc=null;
+ G.storyNpcs=[{id,name:CLASSES[G.trial].disp+' Mentor',...trialMentorSpot({x:G.p.x+65,z:G.p.z-70})}];
+}
+function trialMentorProved(){
+ const st=adventureStoryState();if(st.flags['trial.proved'])return;st.flags['trial.proved']=true;st.revision++;
+ const n=G.storyNpcs[0];st.cursors[n.id]={npc:n.id,node:'trial.'+G.trial+'.proved',lastChoice:''};
+ if(G.portalPos)Object.assign(n,trialMentorSpot(G.portalPos));
+ toast('Chamber cleared. Your mentor is waiting by the exit.');
+}
+function riftHallFrames(){return BFRiftHall.frames(meta,ZONES,TRIALS);}
+function syncRiftHall(st){
+ const count=st.items['hall.assembly']||0;
+ if(count!==G._hallAssembly){G._hallAssembly=count;const result=BFRiftHall.assemble(meta,ZONES,TRIALS);meta.riftOpen=result.opened;
+  if(result.added.length){playFx('secret');toast('Rifts restored: '+riftHallFrames().filter(f=>result.added.includes(f.id)).map(f=>f.className).join(', '));}
+  else toast('No new complete sets yet. The frames show your saved progress.');
+ }
+ const receipt=briarEpoch()+':'+st.revision;if(G._hallSavedReceipt!==receipt){G._hallSavedReceipt=receipt;meta.riftHallStory=BFStoryState.restore(st);persist();}
+}
+function travelRiftHall(hall){
+ if(!G?.hub)return;
+ if(MP.active&&!MP.isHost){const n=G.hubNpcs.find(n=>n.id===(hall?'rifthall':'riftexit'));if(n&&Math.hypot(G.p.x-n.x,G.p.z-n.z)<130){MP.hostConn?.send({t:'riftRoom',hall:!!hall});toast('Asking the party to enter '+(hall?'the Rift Hall':'the Waystation')+'.');}else toast('Walk to the '+(hall?'Rift Hall entrance':'Waystation door')+' with your party.');return;}
+ if(BFHubDialogue.active)BFHubDialogue.close(false,true);
+ meta.hero=snapOf(G.p);persist();enterWaystation(!!hall);
+ if(!hall){G.p.x=-350;G.p.z=480;G.p.yaw=Math.PI;}
+}
+function openRiftFrame(id){
+ const f=riftHallFrames().find(f=>f.id===id);if(!f)return;
+ mode='menu';showGameUI(false);
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Rift Hall · ${f.name}</p><h2 class="ovh">${f.className}</h2><p class="ovsub">${f.banked} / 5 saved Rift Shards</p><p>${f.status}.</p>${f.legacy&&!f.assembled?'<p class="hint">Your earlier discovery still grants access. Your saved shards are shown separately.</p>':''}<p class="hint">Five matching saved shards let the Rift Keeper repair this frame. Enter its trial to learn the class. Your normal equipment is kept safe during training.</p>${f.open?'<button class="bigbtn" id="hallTrial">'+(f.learned?'Practice the trial':'Enter the trial')+'</button>':''}<button class="bigbtn ghost" id="hallBack">Return to the hall</button></div>`);
+ document.getElementById('hallBack').onclick=wsResume;
+ const btn=document.getElementById('hallTrial');if(btn)btn.onclick=()=>{
+  if(MP.active){toast('Class training is solo for now. Leave the party from the co-op menu before entering.');return;}
+  const now=riftHallFrames().find(x=>x.id===id);if(!now?.open)return;
+  const zi=ZONES.findIndex(z=>z.side?.trial===now.classId);startTrial(now.classId,Math.max(0,zi));
+ };
+}
+function buildRiftHall(){
+ G.riftHall=true;G.hubLayout='rift-hall-v1';G.areaName='Rift Hall';G.areaSeed=2001;G.hubArt={version:1,riftHall:true};
+ for(const key of ['segments','walls','obstacles','movers','pads','healpads','chests','deco','rooms','doors','plates','torches','gates','enemies','pickups','projectiles','qmarks','dens'])G[key]=[];
+ G.bounds={minX:-520,maxX:520,minZ:-840,maxZ:840};G.npc=null;G.secret=null;G.waystone=null;G.portal=null;G.portalPos=null;G.storyObjects=[];
+ G.segments.push({x:0,z:0,w:1040,d:1680});G.rooms.push({x:0,z:0,w:1040,d:1680,monsters:[],encounter:false,cleared:true});
+ G.walls.push({x:-520,z:0,w:24,d:1680,h:280,invisible:true},{x:520,z:0,w:24,d:1680,h:280,invisible:true},{x:0,z:-840,w:1040,d:24,h:280,invisible:true},{x:0,z:840,w:1040,d:24,h:280,invisible:true});
+ G.storyState=BFStoryState.restore(meta.riftHallStory);G._hallAssembly=G.storyState.items['hall.assembly']||0;
+ G.storyNpcs=[{id:'riftkeeper',name:'Rift Keeper',x:0,z:-645,y:0}];
+ G.hubNpcs=[{...G.storyNpcs[0],direct:true,open:()=>briarRequest('open',{npc:'riftkeeper'})},{id:'riftexit',name:'Waystation',x:0,z:740,prop:'riftDoor',direct:true,verb:'Return to the Waystation',open:()=>travelRiftHall(false)}];
+ for(const f of riftHallFrames()){const x=f.index%2?370:-370,z=-405+Math.floor(f.index/2)*270;
+  G.hubNpcs.push({id:'rift-'+f.id,name:f.name+' · '+f.className,x,z,prop:'riftFrame',direct:true,verb:'Inspect '+f.className+' rift',open:()=>openRiftFrame(f.id)});
+  for(const dz of [-83,83])G.walls.push({x:x+(x<0?-35:35),z:z+dz,w:32,d:26,h:150,invisible:true});
+ }
+ G.p.x=0;G.p.z=610;G.hubArt.approaches=G.hubNpcs.map(n=>({id:n.id,x:n.x? n.x-Math.sign(n.x)*85:0,z:n.z+(n.z<0?85:-85),tx:n.x,tz:n.z}));
+}
+function drawRiftHallFallback(t){
+ deferOn();for(const f of riftHallFrames()){const x=f.index%2?370:-370,z=-405+Math.floor(f.index/2)*270;for(const dz of [-83,83])bx(x,70,z+dz,24,140,24,'#716481');bx(x,153,z,26,22,190,'#9682b9');if(f.open)bx(x,75,z,3,120,135,'#9162cd','#a777ed',.65);}
+ if(!window.__npc3dDrawn?.('riftkeeper')){pushM();mv(0,0,-645);hubNpcModel({id:'shade'},t);popM();}
+}
+function enterWaystation(riftHall=false){
+  if(BFHubDialogue.active)BFHubDialogue.close(false,true);briarPending=null;
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
   if(IN_ARENA){ IN_ARENA=false; if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; } if(MP.active){ MP.pvp=false; MP.arenaMsg=null; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} }
@@ -16783,7 +16858,9 @@ function enterWaystation(){
                    bw:b.w,bd:b.d,storeys:b.storeys,style:b.style,ry:b.ry||0});
       G.deco.push({x:b.x,z:b.z,y0:bh,w:fw+12,h:30,d:fd+12,c:b.rc,kind:'building',lead:false});
     } }
-  if(HUB_CITADEL){rebuildWaystationCitadel();rebuildWaystationSanctum();}
+  if(HUB_CITADEL){rebuildWaystationCitadel();G.gates=G.gates.filter(g=>!g.side);rebuildWaystationSanctum();}
+  G.gates=G.gates.filter(g=>!g.side);
+  if(riftHall)buildRiftHall();else{G.hubNpcs.push({id:'rifthall',name:'Rift Hall',x:-350,z:410,prop:'riftDoor',direct:true,verb:'Enter the Rift Hall',open:()=>travelRiftHall(true)});G.hubArt&&(G.hubArt.riftDoor={x:-350,z:410});for(const dx of [-65,65])G.walls.push({x:-350+dx,z:410,w:22,d:24,h:134,invisible:true});}
   /* The hub builds outside loadStage, so it never reaches snapWorldInteractables - and the hub is
      exactly where Oliver counted 105 walk-through props. Normalise here too, BEFORE the edits
      replay, so a collider he deleted by hand stays deleted. */
@@ -16793,9 +16870,9 @@ function enterWaystation(){
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   if(MP.active) MP.onEnter(MP.HUB);   // co-op: the Waystation is a shared space — allies appear here too (Phase 2)
-  document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
+  document.getElementById('stagetag').textContent=G.riftHall?'RIFT HALL':'THE WAYSTATION'; questUpdate(); hudUpdate();
   if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
-  if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('The Void Scythe is now available in the Shop.'); }
+  if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('Your Reaper scythe is part of the class. Its power grows as your class rank and player level rise.'); }
   if(meta._iansBladeNotify){ meta._iansBladeNotify=false; meta._iansBladeAnnounced=true; persist(); storyToast("Ian's Blade now waits in the Shop."); }
   if(!meta.hubTutDone && Object.keys(meta.trialsDone||{}).length){ meta.hubTutDone=true; persistGlobal(); hubTutorial(); }   // one-time hub onboarding after the first trial
 }
@@ -17055,9 +17132,9 @@ function updateInteract(){
       const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
       if(eff<best){ best=eff; it=make(); } };
     for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.prop?46:66),label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
-    consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
+    if(!G.riftHall)consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
-    consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
+    if(!G.riftHall)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
   }
   else if(G.qmarks && G.qmarks.some(function(m){ return !m.done && (m.k==='kindle'||m.k==='purge'); })){
     const fy=playerAimYaw(p), fx=Math.sin(fy), fz=Math.cos(fy); let best=1e9;
@@ -17218,8 +17295,7 @@ function openHubMenu(){
   const mainRows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
     const desc=`${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'}<br><span class="navmeta">Level ${i+1}</span>${done?' <span class="navdone">✓ CLEARED</span>':''}`;
     return navCard('',`icons/destinations/${Z.id}.png`,open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled'); }).join('');
-  const chamberRows=ZONES.map((Z,i)=>{ if(!Z.side||!meta.sideFound[Z.side.id]) return ''; const sd=!!meta.sideDone[Z.side.id];
-    return navCard('',`icons/destinations/${Z.side.id}.png`,Z.side.name,`${Z.side.blurb}<br><span class="navmeta">Trial Chamber</span>${sd?' <span class="navdone">✓ CLEARED</span>':''}`,'destcard side',`data-s="${i}"`); }).join('');  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
+  const chamberRows=navCard('','icons/destinations/thornwood.png','Rift Hall','View saved shards, restore rifts and enter class trials.','destcard side','id="riftHallTravel"');  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
     <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
     <div class="sect">Main Levels</div><div class="destgrid">${mainRows}</div>
@@ -17230,7 +17306,7 @@ function openHubMenu(){
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.getElementById('riseBtn').onclick=wsResume;
   document.querySelectorAll('.destcard[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
-  document.querySelectorAll('.destcard[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
+  document.getElementById('riftHallTravel').onclick=()=>travelRiftHall(true);
   document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }
@@ -19340,6 +19416,7 @@ function drawLanternCourtEntities(t){
   for(let i=0;i<7;i++){const a=t*.18+i*.898;bx(Math.cos(a)*43,50+Math.sin(t+i)*12,30+Math.sin(a)*43,1.4,1.4,1.4,'#f4d59c','#eac17c',.6);}
 }
 function drawWaystation(t){
+  if(G.riftHall){if(!window.__HUB_ART_ACTIVE)drawRiftHallFallback(t);return;}
   if(G.hubArt&&window.__HUB_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on){drawLanternCourtEntities(t);return;}
   /* THE WAYSTATION'S FURNITURE IS ENTITIES, NOT ARCHITECTURE — and calling the whole function
      "world" was the same wrong test that hid the torches and the stepping stones. The only
@@ -19612,6 +19689,7 @@ function drawWaystation(t){
       const cx=n.x+26; bx(cx,8,n.z, 28,16,28,'#3a2a55'); bx(cx,24,n.z-12, 26,34,7,'#4a3a66'); bx(cx,20,n.z, 24,4,24,'#7a5f9c');
       bx(cx,2,n.z, 9,4,9,'#b06bff','#b06bff',0.5); for(const s of [-1,1]) bx(cx+s*17,27,n.z, 4,3,11,'#6b5a8a'); bx(cx,46,n.z, 12,8,7,'#5a4a7a');   // headrest
       continue; }
+    if(n.prop==='riftDoor'){for(const dx of [-65,65])bx(n.x+dx,67,n.z,22,134,24,'#6e6379');bx(n.x,140,n.z,152,18,28,'#94849e');continue;}
     // a living hub keeper — a DISTINCT voxel model per character (approved art), not a palette swap
     drawShadow(n.x,n.z,13,0.25);
     pushM(); mv(n.x,0,n.z); rotY(hubNpcFacing(n,n.x,n.z));
@@ -20360,13 +20438,13 @@ function updateHubTags(){
   if(!G||!G.hub||G.sparringRoom||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
   box.classList.remove('hide');
   if(box.childElementCount!==G.hubNpcs.length){ box.innerHTML=G.hubNpcs.map(n=>
-    `<div class="htag"><span class="hi">${n.ic}</span><span class="hn">${n.name}</span><span class="hr">${n.role}</span></div>`).join(''); }
+    `<div class="htag"><span class="hi">${n.ic||'◇'}</span><span class="hn">${n.name}</span><span class="hr">${n.role||''}</span></div>`).join(''); }
   const tags=box.children;
   G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
     const mark=window.BFHubDialogue?.known(n.id)?(!meta.hubDialogue?.[n.id]?.introduced?' · !':BFHubDialogue.hasNews(n,{meta})?' · ◆':''):'';
     const nameTag=tg.querySelector('.hn');if(nameTag&&nameTag.textContent!==n.name+mark)nameTag.textContent=n.name+mark;
     const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
-    if(dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
+    if(n.prop==='riftFrame'||dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
     const a=hubTagAnchor(n), sp=project(a.x,a.y,a.z);
     if(!sp){ tg.style.display='none'; return; }
     tg.style.display='';
@@ -21571,7 +21649,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={ worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={ trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
@@ -21699,7 +21777,7 @@ window.__BF3={ worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJou
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2000"></script>
+<script type="module" src="./hero3d.js?v=2001"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

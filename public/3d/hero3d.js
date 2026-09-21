@@ -1,6 +1,6 @@
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=1999';
+import {syncNpcs} from './npc3d.js?v=2001';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions} from './companion3d.js?v=1999s';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2000';
+import { WORLD3D, syncWorld } from './world3d.js?v=2001';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2000';
 import { PROP3D, syncProps } from './prop3d.js?v=1981s';
 
@@ -1390,6 +1390,7 @@ function buildFace(){
 }
 
 /* Reuse the fitted face frames for service NPCs without changing the player's presets. */
+window.__npcPaintClassBody=paintClassBody;
 window.__npcBuildFace=(root,model,eyeColor)=>{
  const savedEye={...EYE},savedMouth={...MOUTH},holder={root,model,eyeColor};
  try{addEyes(holder,true);addMouth(holder,true);}finally{Object.assign(EYE,savedEye);Object.assign(MOUTH,savedMouth);}

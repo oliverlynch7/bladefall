@@ -1,0 +1,24 @@
+async page=>{
+ const checks=[],errors=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n)};const context=await page.context().browser().newContext(),guest=await context.newPage();page.on('pageerror',e=>errors.push(e.message));guest.on('pageerror',e=>errors.push(e.message));
+ try{
+  await page.goto('http://127.0.0.1:4331/3d/?mute=1');await guest.goto('http://127.0.0.1:4331/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);await guest.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+  const setup=async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.classUnlocked={warrior:true};b.meta.riftShards=[];b.meta.riftOpen=[];b.meta.riftHallStory=null;b.meta.sideFound={};b.openHub();window.qaPackets=[];};await page.evaluate(setup);await guest.evaluate(setup);
+  await page.evaluate(()=>{const b=__BF3,m=b.MP;m.active=true;m.isHost=true;m.myId='h';m.conns=[];window.qaListeners={};const c={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>qaListeners[k]=f};m.wireGuest(c);qaListeners.open();b.meta.riftShards=['BR-01','BR-02','BR-03','BR-04','BR-05'];});
+  await guest.evaluate(()=>{const b=__BF3,m=b.MP;m.active=true;m.isHost=false;m.myId='g';m.hostConn={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d)))};b.meta.riftShards=['BR-01','BR-02','BR-03','BR-04'];});
+  const flush=async()=>{for(let i=0;i<2;i++){for(const d of await guest.evaluate(()=>qaPackets.splice(0)))await page.evaluate(d=>qaListeners.data(d),d);for(const d of await page.evaluate(()=>qaPackets.splice(0)))await guest.evaluate(d=>__BF3.MP.onGuestData(d),d);}};
+  const hello=await guest.evaluate(()=>({t:'hello',p:__BF3.MP.selfState()}));await page.evaluate(d=>qaListeners.data(d),hello);await flush();await page.evaluate(()=>__BF3.travelRiftHall(true));await flush();
+  ok('host and guest share separate hall',await guest.evaluate(()=>__BF3.G.riftHall));
+  await page.waitForFunction(()=>__world3d().counts.riftHall&&!BF_LOADING.active);await guest.waitForFunction(()=>__world3d().counts.riftHall&&!BF_LOADING.active);
+  await page.evaluate(()=>{Object.assign(__BF3.G.p,{x:0,z:-565,y:0});__BF3.briarRequest('open',{npc:'riftkeeper'});});await flush();ok('both see the same Keeper line',await guest.evaluate(()=>BFHubDialogue.active?.lineId==='hall.keeper.intro'&&__BF3.mode==='npc'));
+  const rev=await page.evaluate(()=>__BF3.G.storyState.revision);await guest.evaluate(()=>__BF3.briarRequest('choose',{line:'hall.keeper.intro',choice:'continue'}));await flush();ok('non-owner cannot choose for party',await page.evaluate(r=>__BF3.G.storyState.revision===r,rev));
+  await page.evaluate(()=>{const b=__BF3;b.briarRequest('choose',{line:'hall.keeper.intro',choice:'continue'});b.briarRequest('choose',{line:'hall.keeper.welcome',choice:'assemble'});});await flush();ok('host complete set opens',await page.evaluate(()=>__BF3.meta.riftOpen.includes('briar')));ok('guest incomplete set stays personal and closed',await guest.evaluate(()=>__BF3.meta.riftShards.length===4&&__BF3.meta.riftOpen.length===0&&BFHubDialogue.active.lineId==='hall.keeper.assemble'));
+  await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();ok('either player can leave for both',await page.evaluate(()=>__BF3.mode==='play'&&!BFHubDialogue.active));
+  await guest.evaluate(()=>{__BF3.meta.riftShards.push('BR-05');__BF3.persist();});await page.evaluate(()=>{const b=__BF3;b.briarRequest('open',{npc:'riftkeeper'});b.briarRequest('choose',{line:'hall.keeper.assemble',choice:'back'});b.briarRequest('choose',{line:'hall.keeper.welcome',choice:'assemble'});});await flush();ok('repeat assembly opens newly completed guest set',await guest.evaluate(()=>__BF3.meta.riftOpen.join()==='briar'));
+  const packet=await page.evaluate(()=>__BF3.briarPacket());await guest.evaluate(p=>{__BF3.briarApply(p);__BF3.briarApply(p);},packet);ok('duplicate snapshots cannot duplicate assembly',await guest.evaluate(()=>__BF3.meta.riftOpen.length===1));
+  await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();
+  await guest.evaluate(()=>{Object.assign(__BF3.G.p,{x:0,y:0,z:665});qaPackets.push({t:'s',p:__BF3.MP.selfState()});});await flush();
+  // Use real guest room request with the host's last received authoritative peer location.
+  await page.evaluate(()=>{const q=__BF3.MP.peers.g;if(q)Object.assign(q,{tx:0,ty:0,tz:665});});await guest.evaluate(()=>__BF3.travelRiftHall(false));await flush();ok('guest door request returns party together',await page.evaluate(()=>__BF3.G.hub&&!__BF3.G.riftHall)&&await guest.evaluate(()=>__BF3.G.hub&&!__BF3.G.riftHall));
+  if(errors.length)throw Error(JSON.stringify(errors));return {checks,errors};
+ }finally{await page.evaluate(()=>{__BF3.MP.active=false;__BF3.MP.conns=[];});await context.close();}
+}

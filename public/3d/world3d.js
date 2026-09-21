@@ -1,6 +1,6 @@
 import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=1972';
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
-import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=1959';
+import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2001';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1972';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1972';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1972';

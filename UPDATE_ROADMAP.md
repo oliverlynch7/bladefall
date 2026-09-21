@@ -1788,3 +1788,7 @@ Next: Brute orchard arena and its charge/stagger/finite-handler mechanics, then 
 
 ## [Codex | 2026-09-20] 2.000 Brute orchard
 Authored campaign orchard/barn arena, charge-cover stagger, jumpable slam, two finite handler waves, shared co-op state, completion gating, body clips and preview screenshots. Controller, traversal, co-op and save checks passed; see requirements/CONTINUITY for evidence and limits. Next: Rift Hall.
+
+
+## [Codex | 2026-09-20] 2.001.0-rift-hall
+Separate Rift Hall, personal five-saved-shard assembly, legacy class-access preservation, shared Keeper conversation, seven existing-class teachers and 36 new Voice Studio lines (90 total). Six reviewed previews. Browser solo/co-op, mentor/equipment, save/checkpoint and story/voice checks passed; limits and next region recorded in requirements continuity. Trial arena redesigns, co-op trial combat and Pyromancer remain pending.

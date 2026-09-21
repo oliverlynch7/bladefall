@@ -152,3 +152,11 @@ Workflow going forward: group related implementation into coherent playable mile
 
 ## [Codex | 2026-09-20] Efficiency workflow confirmed
 User: “Yea okay sounds like we found a compromise! Keep going”. Continue approved scope using coherent milestones and targeted validation, without changing chosen model or reducing design depth. Source snapshot: private decision-archive/2026-09-20-brute-orchard (145 user-role messages).
+
+
+## [Codex | 2026-09-20] Longer implementation batches
+User explicitly welcomes longer consecutive work sessions when they reduce overhead. Continue coherent milestones with targeted checks and one release, without reducing approved depth, model quality, or requirements. Grounded current plan: `docs/IMPLEMENTATION_RIFT_HALL_2026-09-20.md`.
+
+
+## [Codex | 2026-09-20] Rift Hall implementation evidence
+RIFT-03 implemented as a separate room with saved-only personal assembly and co-op Keeper conversation. RIFT-05/06 partial: seven existing classes now have authored teachers, while new trial arenas, co-op trials, Pyromancer and later-region five-shard content remain open. See `docs/IMPLEMENTATION_RIFT_HALL_2026-09-20.md` and continuity release receipt. No new user canon decisions; no personal mentor names or rift creators invented. 36 new recording-ready lines; existing 54 unchanged. Private source archive preserves 147 messages.

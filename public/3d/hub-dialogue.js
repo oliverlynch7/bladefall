@@ -16,7 +16,7 @@
  }
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?'BRIAR TOWN':'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer><button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer><button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
   el('hubLeave').onclick=()=>close();el('hubLeave').focus({preventScroll:true});
  }
  function line(id,lastChoice='',topic='intro'){
@@ -49,7 +49,7 @@
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
   const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;active.signature=signature;
-  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),'Return to the village',canChoose);
+  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Return to the path',canChoose);
  }
  function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0),len=Math.hypot(p.x-x,p.z-z)||1;return {x,y:n.y||0,z,dx:(p.x-x)/len,dz:(p.z-z)/len,blend:a.meta.reduceMotion?1:Math.min(1,(performance.now()-active.start)/550),from:active.eye}}
  document.addEventListener('keydown',e=>{if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden])')];const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);

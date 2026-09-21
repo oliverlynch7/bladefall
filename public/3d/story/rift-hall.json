@@ -1,0 +1,736 @@
+{
+  "version": 1,
+  "region": "rift-hall",
+  "status": "Recording-ready Rift Keeper and seven class mentors; trial arena redesigns pending",
+  "npcs": {
+    "riftkeeper": {
+      "name": "Rift Keeper",
+      "role": "Repairs the crystalline training rifts",
+      "start": "hall.keeper.intro"
+    },
+    "mentor_berserker": {
+      "name": "Berserker Mentor",
+      "role": "Teaches the Berserker discipline",
+      "start": "trial.berserker.intro"
+    },
+    "mentor_ninja": {
+      "name": "Ninja Mentor",
+      "role": "Teaches the Ninja discipline",
+      "start": "trial.ninja.intro"
+    },
+    "mentor_reaper": {
+      "name": "Reaper Mentor",
+      "role": "Teaches the Reaper discipline",
+      "start": "trial.reaper.intro"
+    },
+    "mentor_chronomancer": {
+      "name": "Chronomancer Mentor",
+      "role": "Teaches the Chronomancer discipline",
+      "start": "trial.chronomancer.intro"
+    },
+    "mentor_pirate": {
+      "name": "Pirate Mentor",
+      "role": "Teaches the Pirate discipline",
+      "start": "trial.pirate.intro"
+    },
+    "mentor_paladin": {
+      "name": "Paladin Mentor",
+      "role": "Teaches the Paladin discipline",
+      "start": "trial.paladin.intro"
+    },
+    "mentor_necromancer": {
+      "name": "Necromancer Mentor",
+      "role": "Teaches the Necromancer discipline",
+      "start": "trial.necromancer.intro"
+    }
+  },
+  "nodes": {
+    "hall.keeper.intro": {
+      "text": "Welcome to the Rift Hall. I keep the broken rifts here until their missing pieces return. Five matching shards make a whole. Bring them to me, and I can join them. Try not to carry them loose in a pocket. You will miss the pocket.",
+      "choices": [
+        {
+          "id": "continue",
+          "text": "Show me how this works.",
+          "next": "hall.keeper.welcome",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "hall.introduced"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "First meeting",
+        "order": 1,
+        "emotion": "Warm male voice, patient and gently amused. Dry humor on the last line.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Warm male voice, patient and gently amused. Dry humor on the last line."
+      }
+    },
+    "hall.keeper.welcome": {
+      "text": "Each frame names the land where its shards fell and the fighting style it leads to. The count shows the pieces you have brought back safely. Which shall we look at?",
+      "choices": [
+        {
+          "id": "assemble",
+          "text": "Can you join my saved shards?",
+          "next": "hall.keeper.assemble",
+          "effects": [
+            {
+              "type": "item",
+              "id": "hall.assembly",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "origin",
+          "text": "Where did these rifts come from?",
+          "next": "hall.keeper.origin"
+        },
+        {
+          "id": "training",
+          "text": "What is waiting on the other side?",
+          "next": "hall.keeper.training"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "At the frames",
+        "order": 2,
+        "emotion": "Helpful and unhurried. Explain the visible room without sounding like a tutorial announcer.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Helpful and unhurried. Explain the visible room without sounding like a tutorial announcer."
+      }
+    },
+    "hall.keeper.assemble": {
+      "text": "Set your saved pieces here. I will join every complete set. If a frame still waits, read the count above it. A missing piece cannot be replaced with enthusiasm. Many have tried.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "What else should I know?",
+          "next": "hall.keeper.welcome"
+        },
+        {
+          "id": "save",
+          "text": "What counts as a saved piece?",
+          "next": "hall.keeper.saving"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "Joining the shards",
+        "order": 3,
+        "emotion": "Careful concentration, then a small smile. Do not promise a portal opened: the player may have incomplete sets.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Careful concentration, then a small smile. Do not promise a portal opened: the player may have incomplete sets."
+      }
+    },
+    "hall.keeper.origin": {
+      "text": "These rifts once stood in Sunspire Palace. When the Legion took it, a scholar threw them out rather than let that fighting knowledge be lost. The fall broke them. A desperate choice, but the pieces survived.",
+      "choices": [
+        {
+          "id": "guard",
+          "text": "So the scholar saved them by breaking them?",
+          "next": "hall.keeper.scholar"
+        },
+        {
+          "id": "back",
+          "text": "Then we should put them back together.",
+          "next": "hall.keeper.welcome"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "The fall from Sunspire",
+        "order": 4,
+        "emotion": "Quiet respect. Do not name the scholar or claim who first created the rifts.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Quiet respect. Do not name the scholar or claim who first created the rifts."
+      }
+    },
+    "hall.keeper.scholar": {
+      "text": "Better scattered across Aerth than locked away from everyone who needs them. Now a farmer, a traveler, anyone willing to search can reach a teacher. I suspect the Legion finds that deeply annoying.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Good. Let us annoy them.",
+          "next": "hall.keeper.welcome"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "A useful act of defiance",
+        "order": 5,
+        "emotion": "Hopeful, with a restrained chuckle on deeply annoying. No prophecy or lineage reveal.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Hopeful, with a restrained chuckle on deeply annoying. No prophecy or lineage reveal."
+      }
+    },
+    "hall.keeper.training": {
+      "text": "A teacher of that discipline waits beyond each restored rift. You prove you can use what they teach, and bring those skills back with you. Opening a rift gives you a chance to learn. It does not do the learning for you.",
+      "choices": [
+        {
+          "id": "danger",
+          "text": "Are these like the Hollow Gate?",
+          "next": "hall.keeper.difference"
+        },
+        {
+          "id": "back",
+          "text": "Let us check my pieces.",
+          "next": "hall.keeper.welcome"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "Fighting disciplines",
+        "order": 6,
+        "emotion": "Clear, encouraging, lightly firm on the last sentence. These mentors are not all dead Bladeborn.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Clear, encouraging, lightly firm on the last sentence. These mentors are not all dead Bladeborn."
+      }
+    },
+    "hall.keeper.difference": {
+      "text": "No. These are paths to training. The Hollow Gate is the black opening the Abyss King uses to take people from themselves. Purple crystal here. Hungry darkness there. Do not confuse the two.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will remember that.",
+          "next": "hall.keeper.welcome"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "Different kinds of portals",
+        "order": 7,
+        "emotion": "Serious but reassuring. No new explanation of how the Hollow Gate works or ending spoilers.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Serious but reassuring. No new explanation of how the Hollow Gate works or ending spoilers."
+      }
+    },
+    "hall.keeper.saving": {
+      "text": "Finish the part of the level you are in to keep its shards. If you fall before that, the pieces you found in that part are lost. The pieces already saved stay yours. If a friend finds one on the ground, each of you must pick it up.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Understood.",
+          "next": "hall.keeper.welcome"
+        }
+      ],
+      "voice": {
+        "speaker": "riftkeeper",
+        "scene": "Keeping your shards",
+        "order": 8,
+        "emotion": "Plain and practical. This is checkpoint guidance, not a new magical law.",
+        "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+        "direction": "Plain and practical. This is checkpoint guidance, not a new magical law."
+      }
+    },
+    "trial.berserker.intro": {
+      "text": "You have something worth fighting for. Good. Anger gets you moving. It does not get to choose where you stop. Show me you can finish a fight without letting it own you.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.berserker.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_berserker",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning."
+      }
+    },
+    "trial.berserker.lesson": {
+      "text": "Keep moving between your blows. Save a heavy swing for a clear opening. Hitting harder is useful. Standing still so everyone can hit you back is less useful.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.berserker.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_berserker",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning."
+      }
+    },
+    "trial.berserker.proved": {
+      "text": "Still standing. And still listening, I hope. Come here before you pick another fight.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.berserker.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_berserker",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning."
+      }
+    },
+    "trial.berserker.learn": {
+      "text": "That will do. You kept your head when the fight grew loud. Carry that with you. A Berserker protects what matters, then lives to protect it again.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_berserker",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Direct, warm male veteran. Firm rather than shouting. A dry smile on the practical warning."
+      }
+    },
+    "trial.ninja.intro": {
+      "text": "Most people watch the weapon. I watch the feet. Show me where you choose to stand, and I will know how much trouble you are about to cause.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.ninja.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_ninja",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Quiet male teacher, precise and playful. Never mystical or grand.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Quiet male teacher, precise and playful. Never mystical or grand."
+      }
+    },
+    "trial.ninja.lesson": {
+      "text": "Move out of a warning before it becomes a hit. Strike from a clear angle, then find the next one. A quick weapon cannot make a poor position safe.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.ninja.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_ninja",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Quiet male teacher, precise and playful. Never mystical or grand.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Quiet male teacher, precise and playful. Never mystical or grand."
+      }
+    },
+    "trial.ninja.proved": {
+      "text": "I was watching your feet. Yes, the whole time. Come over here.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.ninja.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_ninja",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Quiet male teacher, precise and playful. Never mystical or grand.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Quiet male teacher, precise and playful. Never mystical or grand."
+      }
+    },
+    "trial.ninja.learn": {
+      "text": "Better. You found openings instead of waiting to be given them. Take the exit. Keep your steps light, and your plans lighter.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_ninja",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Quiet male teacher, precise and playful. Never mystical or grand.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Quiet male teacher, precise and playful. Never mystical or grand."
+      }
+    },
+    "trial.reaper.intro": {
+      "text": "The scythe has reach. You still need judgment. Get too close, and you give that reach away. Rush every opening, and you may discover it was not an opening.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.reaper.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_reaper",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief."
+      }
+    },
+    "trial.reaper.lesson": {
+      "text": "Keep the fight near the edge of your reach. Watch for the enemy to commit before you swing. Power is not permission to ignore a warning.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.reaper.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_reaper",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief."
+      }
+    },
+    "trial.reaper.proved": {
+      "text": "The chamber is quiet. You are not done learning. Come closer.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.reaper.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_reaper",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief."
+      }
+    },
+    "trial.reaper.learn": {
+      "text": "You learned when to step in, and when to let a blow pass. That patience belongs beside your power. Take both through the exit.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_reaper",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Low, steady male voice. Serious but not cruel; this teacher is not the Abyss King or a soul thief."
+      }
+    },
+    "trial.chronomancer.intro": {
+      "text": "Everyone wants more time. Most would spend the extra minute making the same mistake twice. Let us start with the minute you already have.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.chronomancer.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_chronomancer",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon."
+      }
+    },
+    "trial.chronomancer.lesson": {
+      "text": "Watch the pause before a strike. That is time you can use to move, aim, or prepare. When your skills alter the pace of a fight, spend that opening on purpose.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.chronomancer.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_chronomancer",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon."
+      }
+    },
+    "trial.chronomancer.proved": {
+      "text": "We have a moment to spare. Let us use it before you rush through the exit.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.chronomancer.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_chronomancer",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon."
+      }
+    },
+    "trial.chronomancer.learn": {
+      "text": "You are learning to notice the moment before it is gone. Good. Through the exit, then. I could keep you here longer, but that would spoil the lesson.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_chronomancer",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Thoughtful older male voice. Gentle wit, conversational pace. No prophecy or time-travel canon."
+      }
+    },
+    "trial.pirate.intro": {
+      "text": "Welcome aboard. No, there is no ship. The welcome was free, so I would not ask for a refund. Show me you can keep your feet when a fight turns messy.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.pirate.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_pirate",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required."
+      }
+    },
+    "trial.pirate.lesson": {
+      "text": "With your pistol and saber, fire while you keep your distance. Charge the saber when trouble gets close. A loaded weapon is useful. Room to use it is better.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.pirate.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_pirate",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required."
+      }
+    },
+    "trial.pirate.proved": {
+      "text": "Well, you did not sink. That puts you ahead of several people I could name. Come here.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.pirate.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_pirate",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required."
+      }
+    },
+    "trial.pirate.learn": {
+      "text": "You kept your feet and picked your moments. That will serve you on a deck or dry land. Take the exit. Try not to look too pleased; I have a reputation.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_pirate",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Confident male sailor with easy humor. Clear speech, no exaggerated pirate accent required."
+      }
+    },
+    "trial.paladin.intro": {
+      "text": "Courage can look very ordinary. Someone stays when others need help. Someone lifts a shield. Show me that you can hold your ground without throwing your life away.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.paladin.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_paladin",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Warm, calm male voice. Light authority and sincere care, never preachy.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Warm, calm male voice. Light authority and sincere care, never preachy."
+      }
+    },
+    "trial.paladin.lesson": {
+      "text": "Watch what threatens you before you answer it. Leave room to dodge, and use your protection when a blow is coming. Holy light does not excuse bad footing.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.paladin.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_paladin",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Warm, calm male voice. Light authority and sincere care, never preachy.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Warm, calm male voice. Light authority and sincere care, never preachy."
+      }
+    },
+    "trial.paladin.proved": {
+      "text": "You made it through. Rest a moment. There is something I want you to remember.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.paladin.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_paladin",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Warm, calm male voice. Light authority and sincere care, never preachy.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Warm, calm male voice. Light authority and sincere care, never preachy."
+      }
+    },
+    "trial.paladin.learn": {
+      "text": "You stood firm without becoming careless. Carry that strength through the exit. Let people feel safer when they see you coming.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_paladin",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Warm, calm male voice. Light authority and sincere care, never preachy.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Warm, calm male voice. Light authority and sincere care, never preachy."
+      }
+    },
+    "trial.necromancer.intro": {
+      "text": "A good commander notices what every ally is doing. A poor one stands in the middle and looks important. We will aim for the first. It tends to last longer.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.necromancer.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_necromancer",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing."
+      }
+    },
+    "trial.necromancer.lesson": {
+      "text": "Give your summons room to fight. Move when danger turns toward you, and watch for the opening your allies create. Calling for help is only the start of using it well.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about your approach again.",
+          "next": "trial.necromancer.intro"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_necromancer",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing."
+      }
+    },
+    "trial.necromancer.proved": {
+      "text": "The fighting is over. Come closer, and bring your attention. Your troops can wait.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.necromancer.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_necromancer",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing."
+      }
+    },
+    "trial.necromancer.learn": {
+      "text": "You fought with your allies, rather than simply beside them. Take that lesson through the exit. Command is a responsibility, even when your troops have unusual habits.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_necromancer",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Dry, composed male voice. Humane and matter-of-fact; ordinary necromancy is separate from Hollowing."
+      }
+    }
+  },
+  "events": {}
+}

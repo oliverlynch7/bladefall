@@ -1037,6 +1037,105 @@
           "text": "The bells opened the old tower chest. We recovered the coins inside."
         }
       ]
+    },
+    "home.grain.clue": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "home.grain",
+          "region": "outskirts",
+          "title": "The granary scale",
+          "text": "The grain keeper left a note: Five sacks balance the old store-room door. The hanging weights are marked one, two and four. I can raise or lower each one with its handle."
+        }
+      ]
+    },
+    "home.grain.weight.0": {
+      "when": [
+        {
+          "flag": "home.grain.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "home.grain",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 0,
+          "target": 5
+        }
+      ]
+    },
+    "home.grain.weight.1": {
+      "when": [
+        {
+          "flag": "home.grain.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "home.grain",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 1,
+          "target": 5
+        }
+      ]
+    },
+    "home.grain.weight.2": {
+      "when": [
+        {
+          "flag": "home.grain.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "home.grain",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 2,
+          "target": 5
+        }
+      ]
+    },
+    "home.grain.cache": {
+      "once": true,
+      "when": [
+        {
+          "flag": "home.grain.open",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "reward",
+          "id": "home.grain.cache",
+          "kind": "gold",
+          "amount": 160
+        },
+        {
+          "type": "note",
+          "id": "home.grain",
+          "region": "outskirts",
+          "title": "The granary store room",
+          "text": "Five balanced the door. The weights are held in place and the store room is open. We recovered the grain keeper’s saved coins."
+        }
+      ]
     }
   }
 }

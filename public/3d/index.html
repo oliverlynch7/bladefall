@@ -1024,7 +1024,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./voice-content.js?v=1989"></script>
 <script src="./hub-dialogue.js?v=1990"></script>
 <script src="./rift-shards.js?v=1992"></script>
-<script src="./story-state.js?v=1987"></script>
+<script src="./story-state.js?v=1994"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./combat-art.js?v=1981s"></script>
@@ -1040,7 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.993.0-homefields-exploration';
+const VERSION3D='1.994.0-village-granary';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2859,7 +2859,7 @@ function areaQuests(ai){ if(inBriar()&&(ai==null||ai===0))return briarQuest(); i
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=fetch('./story/briar-foundation.json?v=1990').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
+const briarReady=fetch('./story/briar-foundation.json?v=1994').then(r=>{if(!r.ok)throw Error('Briar dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)).then(b=>{briarBook=b;return b}).catch(e=>{console.warn(e);return null});
 function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
 function briarId(){return MP.active?MP.myId:'solo';}
 function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
@@ -2909,6 +2909,7 @@ function briarSync(){
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
+ syncHomefieldsGranary(s);
  if(G.homefieldsExploration){const count=s.items['home.bells']||0;if(G._bellProgress!==undefined&&G._bellProgress!==count){playFx('lever');toast(friendlyBellText(count,s.flags['home.bells.open']));}G._bellProgress=count;}
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
@@ -2929,6 +2930,7 @@ function briarInteract(){
 }
 function buildBriarOpening(){
  G.areaName='Briar Town · Homefields';G.npc=null;G.qmarks=[];G.dens=[];
+ rebuildHomefieldsVillage();
  G.optionalMissions=(G.optionalMissions||[]).filter(m=>!['outCaravan','outMill'].includes(m.id));
  G.pickups=G.pickups.filter(p=>!['outCaravan','outMill'].includes(p.localItem?.id));
  G.storyNpcs=[{id:'thomas',name:'Thomas',x:0,z:350,y:0},{id:'mara',name:'Mara',x:-190,z:160,y:0}];
@@ -2977,8 +2979,105 @@ function buildBriarOpening(){
  G.campaignLayout.experience={title:'Briar Town: Homefields',objectives:['Help Mara treat the neighbors','Repair the mill crossing','Open a route out of Briar'],revision:3};
  G.rooms[0].name='Briar Homes';G.rooms[1].name='Overrun Fields';G.rooms.at(-1).name='Wagon Gate';
  buildHomefieldsExploration();
+ buildHomefieldsGranary();
  G.portal=null;briarPending=null;briarEpoch();briarSync();
 }
+function rebuildHomefieldsVillage(){
+ const within=o=>o.x>-900&&o.x<900&&o.z>-740&&o.z<900;
+ G.deco=G.deco.filter(o=>!within(o));G.obstacles=G.obstacles.filter(o=>!within(o));G.walls=G.walls.filter(o=>!within(o));
+ for(const c of G.chests)if(within(c))c.y=0;
+ vseg(0,220,1540,1160,{meadow:true});vseg(0,940,1540,360,{meadow:true});G.bounds.maxZ=Math.max(G.bounds.maxZ,1100);vseg(-520,-350,720,620,{meadow:true});vseg(550,-350,740,620,{meadow:true});
+ const detail=(x,z,y,w,h,d,c)=>G.deco.push({x,z,y0:y,w,h,d,c,nocol:true});
+ const house=(x,z,w,d,h,plaster,roof)=>{
+  vsolid(x,z,0,w,h,d,plaster);
+  detail(x,z,0,w+12,12,d+12,'#6b705f');
+  for(const dx of [-w/2+5,w/2-5])for(const dz of [-d/2+4,d/2-4])detail(x+dx,z+dz,10,11,h,11,'#55412e');
+  for(const dz of [-d/2-2,d/2+2])for(const y of [25,h-12])detail(x,z+dz,y,w,7,5,'#68503a');
+  for(let k=0;k<6;k++)detail(x,z,h+k*8,w+34-k*(w/7),9,d+32,roof);
+  detail(x+w*.28,z-d*.2,h+28,25,50,24,'#8b8771');detail(x+w*.28,z-d*.2,h+78,32,8,32,'#b2ab91');
+  detail(x,z+d/2+4,12,38,65,7,'#453a2c');detail(x,z+d/2+9,10,50,5,24,'#a29c7d');
+  for(const dx of [-w*.3,w*.3]){detail(x+dx,z+d/2+5,49,27,30,6,'#473f32');detail(x+dx,z+d/2+9,53,21,22,3,'#cdbb76');detail(x+dx,z+d/2+12,53,3,22,3,'#705c3c');}
+ };
+ house(-540,520,230,160,106,'#b0a17b','#78603c');
+ house(380,540,185,145,96,'#a99570','#736448');
+ house(-730,130,180,155,110,'#a49c80','#6d593c');
+ house(700,105,195,175,120,'#b2a788','#71563c');
+ // Familiar household details distinguish homes without obstructing the open yard.
+ detail(-545,640,0,150,14,34,'#73573b');for(const x of [-600,-495])detail(x,640,0,12,35,12,'#604e35');
+ for(const [x,z]of [[-660,620],[-635,620],[510,595]]){detail(x,z,0,26,30,25,'#6c5133');detail(x,z,30,32,5,31,'#84653e');}
+ // A pair of open washing lines and vegetable patches add life around the homes.
+ for(const x of [240,515])detail(x,730,0,8,95,8,'#6f563a');detail(375,730,86,275,3,3,'#8c8061');
+ for(let k=0;k<5;k++)detail(280+k*44,730,48,28,38,3,k%2?'#acb5a0':'#ccbfa1');
+ for(const z of [470,700])for(let k=0;k<8;k++){detail(-820+k*22,z,2,14,6,20,'#554b31');detail(-820+k*22,z,8,12,14,13,'#779457');}
+ // Broken paving, rather than a giant flat slab, connects the doors to the commons.
+ for(const [x,z]of [[-300,430],[235,430],[-520,180],[480,130]])for(let k=0;k<4;k++)detail(x+k*30,z+(k%2)*7,1,25,2,31,'#999579');
+ G.homefieldsVillage={revision:1,homes:4};
+}
+function buildHomefieldsGranary(){
+ const detail=(x,z,y,w,h,d,c)=>G.deco.push({x,z,y0:y,w,h,d,c,nocol:true});
+ const inside=o=>o.x>820&&o.x<1480&&o.z>-395&&o.z<430;
+ G.deco=G.deco.filter(o=>!inside(o));G.obstacles=G.obstacles.filter(o=>!inside(o));
+ vseg(1110,130,780,690,{meadow:true});vseg(775,330,480,260,{meadow:true});vseg(1450,-350,520,300,{meadow:true});vseg(1550,0,280,900,{meadow:true});vseg(1150,-265,350,310,{meadow:true});
+ // Barn is a real interior with a wide south entrance, open central aisle and a loft.
+ const wall=(x,z,w,h,d)=>vsolid(x,z,0,w,h,d,'#826544');
+ wall(900,90,18,190,430);wall(1400,90,18,190,430);
+ wall(975,305,168,160,18);wall(1325,305,168,160,18);
+ wall(990,-130,200,220,18);wall(1310,-130,200,220,18);
+ // Timber rails, narrow board seams and a worn wooden floor break up the large wall faces.
+ for(const x of [889,1411])for(const h of [20,95,170])detail(x,85,h,7,8,420,'#51432f');
+ for(const x of [889,1411])for(let k=0;k<10;k++)detail(x,-105+k*40,24,6,140,4,'#a48b60');
+ for(const x of [975,1325])for(const h of [22,86,145])detail(x,316,h,162,7,5,'#56452e');
+ for(let k=0;k<12;k++)detail(925+k*40,85,2,37,3,410,k%3===0?'#8c774e':'#99835c');
+ // Small locked annex. High enclosing walls prevent bypassing the latch with a normal jump.
+ wall(1030,-243,16,280,225);wall(1270,-243,16,280,225);wall(1150,-350,255,280,16);
+ for(const x of [900,1400])for(const z of [-130,85,305]){detail(x,z,0,23,210,23,'#4d3d2b');detail(x,z,210,35,10,35,'#a18a5a');}
+ for(const z of [-130,305]){detail(1150,z,210,530,14,20,'#635035');for(let k=0;k<5;k++)detail(1150,z,224+k*12,450-k*85,13,24,'#786545');}
+ // Roof strips stay over the side walls; the aisle is open to the camera and sky.
+ for(const x of [925,1375])detail(x,85,220,80,12,440,'#6b583b');
+ vplat(960,250,22,110,125,{checkpoint:true});vplat(960,150,48,110,125,{checkpoint:true});vplat(960,50,74,110,125,{checkpoint:true});
+ vplat(960,-55,100,110,125,{checkpoint:true});vplat(1100,-55,100,170,90,{slab:12,checkpoint:true});
+ G.chests.push({x:1100,z:-55,y:100,opened:false,bob:0});
+ for(const z of [-95,-15])detail(1100,z,112,150,7,7,'#9b8252');
+ // Grain bags and crates sit in bays; the middle remains clear for combat and co-op.
+ for(const [x,z]of [[940,-105],[1360,230],[1360,180]])for(let k=0;k<3;k++){detail(x,z+k*22,0,34,28+(k%2)*8,20,'#c0ae77');detail(x,z+k*22,20,36,4,22,'#7d6b45');}
+ G.storyObjects.push({key:'home.grain.clue',label:'Read the grain keeper’s note',x:1260,z:255,y:0,kind:'grainnote'},
+ {key:'home.grain.weight.0',label:'Move the one-sack weight',x:1050,z:125,y:0,kind:'grainweight',weight:1,index:0},
+ {key:'home.grain.weight.1',label:'Move the two-sack weight',x:1160,z:30,y:0,kind:'grainweight',weight:2,index:1},
+ {key:'home.grain.weight.2',label:'Move the four-sack weight',x:1300,z:125,y:0,kind:'grainweight',weight:4,index:2},
+ {key:'home.grain.cache',label:'Open the grain keeper’s chest',x:1150,z:-260,y:0,kind:'graincache',bounds:{minX:1040,maxX:1260,minZ:-335,maxZ:-150}});
+ const open=!!adventureStoryState().flags['home.grain.open'];
+ G.granary={x:1150,z:-130,open};
+ if(!open)G.walls.push({x:1150,z:-130,w:110,d:22,h:280,invisible:true,grainDoor:true});
+ // A shortcut from the barn yard rejoins the eastern exploration trail.
+ G.homefieldsVillage.granary=true;
+}
+function syncHomefieldsGranary(s){
+ if(!G.granary)return;const open=!!s.flags['home.grain.open'],weight=s.items['home.grain']||0;
+ if(open&&!G.granary.open){G.granary.open=true;G.walls=G.walls.filter(w=>!w.grainDoor);playFx('lever');toast('The scale balances. The store-room door rises.');}
+ else if(G.granary.weight!==undefined&&weight!==G.granary.weight){playFx('lever');toast('The scale holds '+weight+' sacks of weight.');}
+ if(s.flags['event.home.grain.clue']&&!G.granary.read){G.granary.read=true;toast('Grain keeper’s note added to your journal · J');}
+ G.granary.weight=weight;
+}
+function drawHomefieldsGranary(s,t){
+ if(!G.granary)return;const f=s.flags,mask=s.items['home.grain.mask']||0,total=s.items['home.grain']||0;
+ const d=G.granary,y=d.open?235:0;
+ for(let k=0;k<7;k++)bx(d.x-45+k*15,y+110,d.z,12,220,12,'#826a44');
+ for(const h of [20,190])bx(d.x,y+h,d.z+9,105,9,8,'#4f5145');
+ // Five fixed marks show the target; the moving pointer shows current balance.
+ bx(1160,74,-93,115,42,10,'#786b4c');for(let k=0;k<5;k++)bx(1120+k*20,74,-86,5,21,3,'#e0d3a1');
+ bx(1120+Math.min(total,7)*16,102,-86,5,16,4,f['home.grain.open']?'#a7d896':'#d9ad6b');
+ for(const o of G.storyObjects.filter(o=>o.kind==='grainweight')){
+  const lowered=!!(mask&(1<<o.index));
+  for(const dx of [-26,26])bx(o.x+dx,72,o.z,7,144,9,'#665136');bx(o.x,146,o.z,64,9,14,'#967d53');
+  const h=lowered?40:94;bx(o.x,(146+h)/2,o.z,3,146-h,3,'#554938');
+  bx(o.x,h,o.z,31,24+o.weight*4,26,'#858573');bx(o.x,h,o.z+15,26,15,4,'#514d3c');
+  for(let k=0;k<o.weight;k++)bx(o.x-10+k*6,h,o.z+18,3,10,2,'#e0d1a1');
+  bx(o.x+28,24,o.z+17,25,6,6,'#b6a16e');
+ }
+ const note=G.storyObjects.find(o=>o.kind==='grainnote');if(note){bx(note.x,32,note.z,8,64,8,'#66563b');bx(note.x,63,note.z,52,35,7,'#c2b991');for(let k=0;k<3;k++)bx(note.x,55+k*8,note.z+5,36-k*4,2,2,'#605b49');}
+ if(!f['event.home.grain.cache']){bx(1150,18,-260,68,36,40,'#806039');bx(1150,38,-260,70,6,43,'#b39b61');for(const x of [1127,1173])bx(x,20,-238,5,36,4,'#4b4e41');}
+}
+
 function friendlyBellText(n,open){return open?'The tower chest clicks open.':n?'A clear note rings out.':'The notes fade. Try the bells again.';}
 function buildHomefieldsExploration(){
  // Broad connected wings preserve the main northward evacuation spine.
@@ -3028,6 +3127,7 @@ function buildHomefieldsExploration(){
 }
 function drawBriarStory(t){
  if(!inBriar())return;const s=adventureStoryState(),f=s.flags;
+ drawHomefieldsGranary(s,t);
  const inside=G.p.x>335&&G.p.x<545&&G.p.z>-320&&G.p.z<-120;
  for(const part of G.storyStore||[])bx(part.x,(part.y0||0)+part.h/2,part.z,part.w,part.h,part.d,part.c,null,inside?.16:1);
  for(const n of G.storyNpcs||[]){

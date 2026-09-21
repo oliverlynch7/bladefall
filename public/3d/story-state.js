@@ -30,6 +30,15 @@
           if(!Number.isSafeInteger(e.amount))throw Error('Invalid item amount');
           const count=(s.items[e.id]||0)+e.amount;if(count<0)throw Error('Missing quest items');s.items[e.id]=count;break;
         }
+        case 'counterweight':{
+          if(!Array.isArray(e.weights)||!e.weights.every(n=>Number.isSafeInteger(n)&&n>0)||!Number.isInteger(e.index)||e.index<0||e.index>=e.weights.length||e.weights.length>8||!Number.isSafeInteger(e.target))throw Error('Invalid counterweight');
+          if(s.flags[e.id+'.open'])break;
+          const mask=(Number(s.items[e.id+'.mask'])||0)^(1<<e.index);
+          s.items[e.id+'.mask']=mask;
+          s.items[e.id]=e.weights.reduce((sum,w,i)=>sum+((mask&(1<<i))?w:0),0);
+          if(s.items[e.id]===e.target)s.flags[e.id+'.open']=true;
+          break;
+        }
         case 'sequence':{
           if(!Array.isArray(e.solution)||!e.solution.length||!e.solution.includes(e.value))throw Error('Invalid sequence');
           if(s.flags[e.id+'.open'])break;

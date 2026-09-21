@@ -30,6 +30,12 @@ async page=>{
    await late.evaluate(()=>{BFHubDialogue.close(false,true);__BF3.restartCampaignCheckpoint(true)});ok('late join does not bank unfinished host quest',await late.evaluate(()=>!__BF3.G.storyState.flags['mara.healing']&&__BF3.meta.gold===1000));
   }finally{await lateContext.close();}
   await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();
+  const grain=async(target,key)=>{await target.evaluate(key=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='home.grain.'+key);Object.assign(b.G.p,{x:o.x,z:o.z,y:0});if(!b.MP.isHost)b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key:o.key});},key);await flush()};
+  await grain(page,'weight.1');await grain(guest,'weight.2');
+  ok('both peers see wrong granary total and closed door',await page.evaluate(()=>__BF3.G.storyState.items['home.grain']===6&&!__BF3.G.granary.open)&&await guest.evaluate(()=>__BF3.G.storyState.items['home.grain']===6&&!__BF3.G.granary.open));
+  await grain(guest,'weight.1');await grain(page,'weight.0');
+  ok('shared scale latch removes both door collisions',await page.evaluate(()=>__BF3.G.granary.open&&!__BF3.G.walls.some(w=>w.grainDoor))&&await guest.evaluate(()=>__BF3.G.granary.open&&!__BF3.G.walls.some(w=>w.grainDoor)));
+  await grain(guest,'cache');ok('granary rewards both eligible players',await page.evaluate(n=>__BF3.meta.gold>n&&__BF3.G.storyClaims['home.grain.cache'],goldHost)&&await guest.evaluate(n=>__BF3.meta.gold>n&&__BF3.G.storyClaims['home.grain.cache'],goldGuest));
   await page.evaluate(()=>{__BF3.restartCampaignCheckpoint();});await flush();ok('shared retry rolls back quest and rewards on both clients',await page.evaluate(()=>!__BF3.G.storyState.flags['mara.healing']&&__BF3.meta.gold===1000)&&await guest.evaluate(()=>!__BF3.G.storyState.flags['mara.healing']&&__BF3.meta.gold===1000));
   await guest.evaluate(()=>{const b=__BF3,n=b.G.storyNpcs[0];Object.assign(b.G.p,{x:n.x+40,z:n.z+40,y:0});b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('open',{npc:'thomas'});});await flush();ok('new epoch accepts new requests after retry',await page.evaluate(()=>__BF3.G.storyState.conversation?.owner==='g'));
   await page.evaluate(()=>qaListeners.close());ok('departing conversation owner releases host',await page.evaluate(()=>__BF3.mode==='play'&&!__BF3.G.storyState.conversation));

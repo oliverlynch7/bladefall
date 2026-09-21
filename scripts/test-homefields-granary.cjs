@@ -1,0 +1,6 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),E=require('../public/3d/story-state.js'),b=JSON.parse(fs.readFileSync('public/3d/story/briar-foundation.json'));
+let s=E.create(),i=0;function world(key){const r=E.transact(s,b,{id:'grain-'+ ++i,type:'world',key:'home.grain.'+key});s=r.state;return r.changed}
+assert(!world('cache'));assert(world('clue'));assert(s.notes['home.grain']);const checkpoint=E.restore(s);
+world('weight.1');assert.equal(s.items['home.grain'],2);world('weight.2');assert.equal(s.items['home.grain'],6);assert(!s.flags['home.grain.open']);world('weight.1');assert.equal(s.items['home.grain'],4);world('weight.0');assert(s.flags['home.grain.open']);assert.equal(s.items['home.grain.mask'],5);assert(!world('weight.2'),'solved mechanism stays latched');assert(world('cache'));assert(!world('cache'));assert.equal(s.rewards['home.grain.cache'].amount,160);assert(E.restore(s).flags['home.grain.open']);assert(!checkpoint.flags['home.grain.open']);
+for(let n=0;n<3;n++){s=E.create();world('weight.'+n);world('weight.'+n);assert.equal(s.items['home.grain'],0,'every wrong choice is reversible')}
+console.log('Granary passed: discovery clue, wrong totals, reversible toggles, correct latch, once-only reward, checkpoint restore and rollback.');

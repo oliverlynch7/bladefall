@@ -1,0 +1,508 @@
+{
+  "version": 1,
+  "region": "keep",
+  "status": "Broken Walls playable; The Dungeons and The Fallen remain next",
+  "npcs": {
+    "grant": {
+      "name": "Grant",
+      "role": "Captured guard trying to get his people home",
+      "start": "rk.grant.first"
+    },
+    "felix": {
+      "name": "Felix",
+      "role": "Nervous locksmith with steady hands",
+      "start": "rk.felix.first"
+    }
+  },
+  "nodes": {
+    "rk.grant.first": {
+      "text": "Keep your head down. That bow above the wall covers the gate. I'm Grant. There are people hiding on the other side, and more locked below. Clear the arrow post, cut its bow cord, then lift this gate. We can still get them out.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I'll clear the wall. Get them ready.",
+          "next": "rk.grant.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rk.help",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "rk.rescue",
+              "region": "keep",
+              "title": "Make an opening",
+              "text": "Clear the raised arrow post and cut its bow cord. Open the side gate, then meet Grant at the breach. The stairs begin east of the entrance."
+            }
+          ]
+        },
+        {
+          "id": "who",
+          "text": "Are these your soldiers?",
+          "next": "rk.grant.people"
+        }
+      ],
+      "voice": {
+        "speaker": "grant",
+        "scene": "A guard speaks through a damaged wall",
+        "order": 1,
+        "emotion": "Male. Worn, practical, quietly urgent. Never a grand speech.",
+        "direction": "Male. Worn, practical, quietly urgent. Never a grand speech.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. A guard speaks through a damaged wall"
+      }
+    },
+    "rk.grant.people": {
+      "text": "Two carried grain. One repaired boots. The Legion put a rope around them and called it a work detail. I tried to stop the cart. As rescue plans go, mine needs a second draft.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Then let's write one.",
+          "next": "rk.grant.first"
+        }
+      ],
+      "voice": {
+        "speaker": "grant",
+        "scene": "Who is being rescued",
+        "order": 2,
+        "emotion": "Dry self-blame, then resolve. The joke does not dismiss their danger.",
+        "direction": "Dry self-blame, then resolve. The joke does not dismiss their danger.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Who is being rescued"
+      }
+    },
+    "rk.grant.plan": {
+      "text": "Once the gate is open, ring the bell at the breach when you're ready. I'll move the group through the middle. You can meet the attackers at either gap or hold the narrow opening between the fallen walls. Stay nearby until we're clear. If we have to pull back, we try again.",
+      "choices": [
+        {
+          "id": "below",
+          "text": "How do I reach the cells?",
+          "next": "rk.grant.cells"
+        },
+        {
+          "id": "safe",
+          "text": "Your group made it across.",
+          "next": "rk.grant.safe",
+          "when": [
+            {
+              "flag": "rk.breach.done",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "grant",
+        "scene": "Preparing a thirty-second escape",
+        "order": 3,
+        "emotion": "Firm, reassuring instructions. No fragile escort or threat of permanent failure.",
+        "direction": "Firm, reassuring instructions. No fragile escort or threat of permanent failure.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Preparing a thirty-second escape"
+      }
+    },
+    "rk.grant.cells": {
+      "text": "The guards keep a jail key at the lower post. Or climb the eastern wall and turn the old gate wheel. Either opens the stairs. We're drawing enough attention up here; leave the gate until the others are across.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Two ways in. Good.",
+          "next": "rk.grant.plan"
+        }
+      ],
+      "voice": {
+        "speaker": "grant",
+        "scene": "Two routes into the prison",
+        "order": 4,
+        "emotion": "Useful directions, delivered like a guard who knows this place.",
+        "direction": "Useful directions, delivered like a guard who knows this place.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Two routes into the prison"
+      }
+    },
+    "rk.grant.safe": {
+      "text": "They're all here. Even the man who swore he couldn't run. I'll get them to shelter. Go find the people below. The Legion keeps records of everyone it takes. If you're following a missing person, those papers are worth more than their silver.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll look for the records.",
+          "next": "rk.grant.cells"
+        }
+      ],
+      "voice": {
+        "speaker": "grant",
+        "scene": "The rescue points toward the next half",
+        "order": 5,
+        "emotion": "Relief, then serious purpose. Do not name or reveal the location of Ellis yet.",
+        "direction": "Relief, then serious purpose. Do not name or reveal the location of Ellis yet.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. The rescue points toward the next half"
+      }
+    },
+    "rk.felix.first": {
+      "text": "Don't mind the shaking. My hands only do that when there's nothing useful in them. I'm Felix. They took my tools to that workshop on the east side. Its latch still moves with the old clock. Bring my tools back, and I can open the barred chamber on the west side. You can keep my spare dagger, too.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I'll get your tools.",
+          "next": "rk.felix.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rk.felix.quest",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "rk.tools",
+              "region": "keep",
+              "title": "Felix’s tools",
+              "text": "The seized workshop is east of the breach. Release its latch when the moving notch is green, collect the tools, and return them to Felix. He offers a rare Lockpick dagger and a chamber shortcut."
+            }
+          ]
+        },
+        {
+          "id": "chamber",
+          "text": "What is in the chamber?",
+          "next": "rk.felix.chamber"
+        }
+      ],
+      "voice": {
+        "speaker": "felix",
+        "scene": "An optional trade, not a required rescue",
+        "order": 6,
+        "emotion": "Male. Nervous quick start, but clear technical directions. A little embarrassed by his own joke.",
+        "direction": "Male. Nervous quick start, but clear technical directions. A little embarrassed by his own joke.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. An optional trade, not a required rescue"
+      }
+    },
+    "rk.felix.plan": {
+      "text": "Watch the notch above the workshop latch. Green means the pin is lined up. Press it then. Forcing it won't help; I tried that with a chair. The chair lost.",
+      "choices": [
+        {
+          "id": "return",
+          "text": "Here are your tools.",
+          "next": "rk.felix.reward",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rk.felix.returned",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "rk.chamber",
+              "value": true
+            },
+            {
+              "type": "reward",
+              "id": "rk.felix.lockpick",
+              "kind": "keep_lockpick",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "rk.chamber",
+              "region": "keep",
+              "title": "The west chamber is open",
+              "text": "Felix opened the lower entrance. A shield rests inside. Look around before lifting it; the chamber guards are still there."
+            }
+          ],
+          "when": [
+            {
+              "flag": "rk.tools",
+              "is": true
+            },
+            {
+              "flag": "rk.felix.returned",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "chamber",
+          "text": "Tell me about that chamber.",
+          "next": "rk.felix.chamber"
+        }
+      ],
+      "voice": {
+        "speaker": "felix",
+        "scene": "Workshop timing clue",
+        "order": 7,
+        "emotion": "A small defeated laugh about the chair. Keep the timing clue clear.",
+        "direction": "A small defeated laugh about the chair. Keep the timing clue clear.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Workshop timing clue"
+      }
+    },
+    "rk.felix.chamber": {
+      "text": "A shield on a stand. Armed figures around it. I wouldn't assume they're decorations. There's a bar on the far side, too. Someone with a head for heights might reach it from the broken western wall. Mine is mostly a head for worrying.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About your tools...",
+          "next": "rk.felix.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rk.felix.quest",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "felix",
+        "scene": "Hints at a separate route without solving it",
+        "order": 8,
+        "emotion": "Uneasy honesty, not a sales pitch. He does not know where the shard is.",
+        "direction": "Uneasy honesty, not a sales pitch. He does not know where the shard is.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Hints at a separate route without solving it"
+      }
+    },
+    "rk.felix.reward": {
+      "text": "Oh, that's better. Something my fingers understand. There: the west chamber is open. And here's the Lockpick. Yes, it's a dagger. Sometimes a lock needs a very strong opinion.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "A fair trade. Stay safe.",
+          "next": "rk.felix.done"
+        }
+      ],
+      "voice": {
+        "speaker": "felix",
+        "scene": "Tools returned; reward and shortcut",
+        "order": 9,
+        "emotion": "Visible relief, pride in his work. Let the joke land lightly.",
+        "direction": "Visible relief, pride in his work. Let the joke land lightly.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Tools returned; reward and shortcut"
+      }
+    },
+    "rk.felix.done": {
+      "text": "I will. From behind this very solid piece of wall. Mind the guards in that chamber. If they wake up, give yourself room before you swing.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll be careful.",
+          "next": "rk.felix.done"
+        }
+      ],
+      "voice": {
+        "speaker": "felix",
+        "scene": "Brief follow-up after reward",
+        "order": 10,
+        "emotion": "Calmer now, sincerely concerned.",
+        "direction": "Calmer now, sincerely concerned.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Brief follow-up after reward"
+      }
+    }
+  },
+  "events": {
+    "rk.arrow": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.arrow",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.arrow",
+          "region": "keep",
+          "title": "Arrow post cleared",
+          "text": "The bow cord is cut. Grant’s side gate can be opened."
+        }
+      ]
+    },
+    "rk.gate": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.gate",
+          "value": true
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.arrow",
+          "is": true
+        }
+      ]
+    },
+    "rk.breach": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.breach.start",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.breach",
+          "region": "keep",
+          "title": "Hold the breach",
+          "text": "Keep the attackers away while the group crosses. Stay in the breach for thirty seconds, then clear the remaining attackers. Leaving the area for four seconds lets the group retreat safely for another try."
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.help",
+          "is": true
+        },
+        {
+          "flag": "rk.gate",
+          "is": true
+        }
+      ]
+    },
+    "rk.breach.complete": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.breach.done",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.breach",
+          "region": "keep",
+          "title": "The group is safe",
+          "text": "Grant’s group reached cover. Open the dungeon gate with the guard-post key or the wheel on the eastern battlements. No need to return to Grant."
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.breach.start",
+          "is": true
+        }
+      ]
+    },
+    "rk.key": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.cells",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.cells",
+          "region": "keep",
+          "title": "Down to the cells",
+          "text": "The dungeon gate is open. The stairs are beyond the lower guard post."
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.breach.done",
+          "is": true
+        }
+      ]
+    },
+    "rk.wheel": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.cells",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.cells",
+          "region": "keep",
+          "title": "Down to the cells",
+          "text": "The dungeon gate is open. The stairs are beyond the lower guard post."
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.breach.done",
+          "is": true
+        }
+      ]
+    },
+    "rk.timing": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.workshop",
+          "value": true
+        }
+      ]
+    },
+    "rk.tools": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.tools",
+          "value": true
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.workshop",
+          "is": true
+        }
+      ]
+    },
+    "rk.wall": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.chamber",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.chamber",
+          "region": "keep",
+          "title": "A way through the old wall",
+          "text": "You unbarred the west chamber from behind. The lower passage is now a shortcut."
+        }
+      ]
+    },
+    "rk.trial": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.trial.start",
+          "value": true
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.chamber",
+          "is": true
+        }
+      ]
+    },
+    "rk.trial.complete": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rk.trial.done",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "rk.trial",
+          "region": "keep",
+          "title": "The chamber is quiet",
+          "text": "The guards have fallen. A Rift Shard has appeared at the back of the chamber."
+        }
+      ],
+      "when": [
+        {
+          "flag": "rk.trial.start",
+          "is": true
+        }
+      ]
+    }
+  }
+}

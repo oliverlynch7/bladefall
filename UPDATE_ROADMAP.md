@@ -1804,3 +1804,7 @@ Expanded Hollow Pass part two with prison rescue routes, Ward/Ruth dialogue, ala
 
 ## [Codex | 2026-09-20] 2.004 — Hollow Marksman
 New split canyon boss arena, reachable nests, locked shots, working cover, one glide/guard pair, safe landing and hidden HP-05. All five Hollow Pass shards available. Ruined Keep next. See docs/IMPLEMENTATION_MARKSMAN_2026-09-20.md.
+
+
+## [Codex | 2026-09-20] Shipped 2.005 — Broken Walls
+Ruined Keep part one: Grant/Felix, 30-second breach defense, alternate dungeon entry, workshop timing puzzle, rare dagger, tower/chamber Reaper shards. Ten new VO lines; 129 total. Verified traversal, controlled co-op and half checkpoints. The Dungeons and The Fallen remain next.

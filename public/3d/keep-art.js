@@ -20,9 +20,9 @@ const bannerMaterial=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildKeep(scene,w){
   const root=new THREE.Group();root.name='Ruined Keep · The Fallen Standard';
-  const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),lamps=[],structures=[],bodies=new Set();let target=null,floors=0;
+  const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),lamps=[],structures=[],bodies=new Set(),occluders=new Map();let target=null,source=null,floors=0;
   const under=w.area===1||w.side;
-  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot});}
+  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
   const block=(x,y,z,ww,h,d,c)=>add(Math.min(ww,h,d)<=3?'timber':'stone',x,y,z,ww,h,d,c);
   function cap(o,top,wood){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];
@@ -34,7 +34,7 @@ export function buildKeep(scene,w){
   const surfaces=new Map();
   function surface(o,base,top,wood=false,facade=true){
     if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood,facade);
-    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},base+':'+top))rawSurface(part,base,top,wood,facade);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},w.keepScene?'broken-walls':base+':'+top))rawSurface(part,base,top,wood,facade);
   }
   function rawSurface(o,base,top,wood=false,facade=true){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
@@ -47,9 +47,9 @@ export function buildKeep(scene,w){
     block(o.x,top-2,o.z,ww,4,dd,wood?'#6c573c':'#807967');
   }
   function brazier(x,y,z,s=20){add('brazier',x,y,z,s);lamps.push(new THREE.Vector3(x,y+s*2.05,z));}
-  for(const s of w.segments||[])if(!s.nofloor)surface(s,-25,0,!!s.bridge,false);
+  if(w.keepScene){const terrain=[...(w.segments||[]).filter(s=>!s.nofloor).map(s=>({o:s,base:-25,top:0})),...(w.obstacles||[]).filter(o=>o.kind==='plat').map(o=>({o,base:-25,top:o.h||0}))].sort((a,b)=>b.top-a.top);for(const t of terrain){source=t.o.kind==='plat'?t.o:null;surface(t.o,t.base,t.top,!!t.o.bridge);if(t.o.kind==='plat')obstacles.add(t.o);}source=null;}else for(const s of w.segments||[])if(!s.nofloor)surface(s,-25,0,!!s.bridge,false);
   const solids=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
-  for(const o of solids){const base=o.y0??(o.kind==='plat'?Math.min(0,(o.h||0)-16):0),top=o.h||1;
+  for(const o of solids){if(w.keepScene&&o.kind==='plat')continue;source=w.keepScene?o:null;const base=o.y0??(o.kind==='plat'?Math.min(0,(o.h||0)-16):0),top=o.h||1;
     const deco=(w.deco||[]).find(d=>d.x===o.x&&d.z===o.z&&d.w===o.w&&(d.d||d.w)===o.d&&d.c?.startsWith('#4'));
     const crate=deco&&['#49392e','#3b2d24'].includes(deco.c)&&o.w>80;
     if(o.kind==='col'&&top>90&&o.w<180&&o.d<180){target='s'+structures.length;structures.push({cell:target,o});}
@@ -59,8 +59,9 @@ export function buildKeep(scene,w){
     // Existing column silhouettes receive inset arrow slits without occupying extra floor.
     if(o.kind==='col'&&o.w>=70&&o.d>=60&&top>100){for(const side of [-1,1]){block(o.x,base+(top-base)*.61,o.z+side*(o.d/2+.35),12,28,1.2,'#151f1d');block(o.x,base+(top-base)*.58,o.z+side*(o.d/2+1),3,16,.5,'#bb7939');}}
   }
+  source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;if(w.delve){target='s'+structures.length;structures.push({cell:target,o});}surface(o,o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);target=null;}
-  for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+  for(const d of w.deco||[]){source=w.keepScene?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(solids.some(o=>Math.abs(o.x-d.x)<.01&&Math.abs(o.z-d.z)<.01&&o.w===ww&&o.d===dd&&Math.abs(o.h-y-hh)<2))continue;
     if(d.theme==='ruins'||d.theme==='dungeon'){
       if(hh>110&&ww>45){add('tower',d.x,y,d.z,ww,hh,dd);if(r<.42)add('banner',d.x+ww*.21,y+hh*.34,d.z+dd*.5+2,ww*.42,hh*.36,12,null,.04);}
@@ -75,6 +76,7 @@ export function buildKeep(scene,w){
     else if(d.kind==='grave'||(hh<35&&ww>55&&dd>30)){surface({...d,d:dd},y,y+hh);block(d.x,y+hh+1,d.z,ww*.65,1.5,3,'#988468');}
     else block(d.x,y+hh/2,d.z,ww,hh,dd,d.c==='#292d36'?'#424942':palette[Math.floor(r*5)]);
   }
+  source=null;
   // Span the actual two parallel curtain walls. There are no new posts in the passage.
   if(!w.side&&w.area===0&&(w.walls||[]).length>=2){const a=w.walls.find(o=>o.x===-730),b=w.walls.find(o=>o.x===20);if(a&&b){const x=(a.x+b.x)/2,z=-575;
     add('arch',x,198,z,(b.x-a.x)/2,170,42);for(const wall of [a,b]){add('banner',wall.x+(wall.x<x?35:-35),94,z+20,50,110,10);brazier(wall.x+(wall.x<x?0:0),220,z,18);}
@@ -89,10 +91,35 @@ export function buildKeep(scene,w){
       add('banner',x,top-58,z,24,48,3,null,side*.04);target=null;
     }else brazier(x,y,z,under?17:20);
   }}
+  if(w.keepScene){
+    // A ruined garrison: banners, battered defenses and domestic traces around clear routes.
+    for(const o of solids)if(o.kind==='col'&&Math.max(o.w,o.d)>280&&o.h>150){
+      const alongX=o.w>o.d,len=alongX?o.w:o.d,n=Math.floor(len/70);
+      for(let i=0;i<n;i++){const d=-len/2+35+i*70;block(o.x+(alongX?d:0),o.h+13,o.z+(alongX?0:d),alongX?34:o.w,26,alongX?o.d:34,'#797767');}
+      if(alongX)add('banner',o.x,o.h-100,o.z+o.d/2+3,50,90,8);
+    }
+    for(const [x,z,y]of [[-540,420,0],[540,420,0],[-720,-2640,0],[720,-2640,0],[-1860,-3750,80],[420,-4360,0]]){
+      add('tower',x,y-12,z,115,280,115);add('banner',x,y+95,z+60,45,105,8);brazier(x,y+280,z,17);
+    }
+    // Supplies and bedding explain why the freed group waits under the outer wall.
+    for(const [x,z]of [[-370,-1610],[-435,-1645],[-350,-3030]]){add('crate',x,0,z,52,40,38);block(x+42,4,z+10,28,8,62,'#6e6e54');}
+    // The seized workshop has an open roof for camera visibility, with a distinct timber frame.
+    for(const x of [1160,1710])for(const z of [-2740,-3190]){block(x,75,z,18,150,18,'#59462e');block(x,142,-2965,22,18,470,'#816a47');}
+    block(1435,155,-3190,570,22,24,'#816a47');
+    for(const x of [1260,1630]){block(x,32,-3100,95,12,50,'#796448');for(const dx of [-36,36])block(x+dx,14,-3100,9,28,38,'#50412d');add('crate',x,0,-3180,54,46,42);}
+    // Broken bell frame crowns the climb. The shard is tucked behind its stone screen.
+    for(const x of [-1810,-1590]){block(x,396,-1680,24,152,28,'#7c7868');block(x,474,-1620,28,12,145,'#978d72');}
+    block(-1700,479,-1680,244,18,34,'#9b8e70');add('brazier',-1700,401,-1680,27);
+    // A shield and empty weapon stands make the optional chamber challenge readable.
+    for(const [x,z]of [[-1800,-3710],[-1180,-3710]]){block(x,115,z,16,70,18,'#594d37');block(x,143,z,80,12,18,'#8a7751');add('banner',x,115,z+12,33,50,5);}
+    for(const [x,z,y]of [[-525,-975,0],[570,-990,0],[-700,-2280,0],[700,-2280,0],[-1780,-1740,0],[1660,-3090,0],[-1720,-3900,80]]){
+      for(let i=0;i<4;i++)add('rubble',x+i*18,y,z+(i%2)*22,35,15+i*3,28);
+    }
+  }
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,list} of bins.values()){
     if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,name==='banner'?bannerMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
-    for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);}
+    for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.source){if(!occluders.has(d.source))occluders.set(d.source,{o:d.source,parts:[],hidden:false});occluders.get(d.source).parts.push({mesh:m,index:i,matrix:dummy.matrix.clone()});}}
     m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='banner'&&name!=='timber';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   for(const s of structures)if(groups.has(s.cell))groups.get(s.cell).userData.obstacle=s.o;
@@ -101,7 +128,7 @@ export function buildKeep(scene,w){
   const sun=new THREE.DirectionalLight('#ffe1b2',under?1.15:2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:3000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.2;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffad55',900,180,1.6);root.add(l);return l});
   const counts={keepArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  active={root,groups,obstacles,walls,sun,counts,lamps,lights};window.__KEEP_ART_ACTIVE=true;
+  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
   root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateKeep(w){
@@ -109,6 +136,13 @@ export function updateKeep(w){
   for(const [cell,g] of a.groups){const o=g.userData.obstacle,[cx,cz]=o?[o.x,o.z]:cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;
     if(g.visible&&o&&w.eye&&p.y<o.h-5&&window.__BF_META?.().camMode!=='fps')for(let t=.08;t<.95;t+=.08){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t;if(Math.abs(x-o.x)<o.w/2+5&&Math.abs(z-o.z)<o.d/2+5){g.visible=false;break;}}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}
+  }
+  for(const f of a.occluders.values()){
+    const o=f.o,top=o.h||0,base=o.y0??Math.min(0,top-18);let hidden=false;
+    if(w.eye&&window.__BF_META?.().camMode!=='fps'&&p.y<top-8&&Math.hypot(o.x-p.x,o.z-p.z)<600)for(let t=.04;t<.96;t+=.06){
+      const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t,y=w.eye.y+(p.y+30-w.eye.y)*t;
+      if(y>base-2&&y<top+4&&Math.abs(x-o.x)<o.w/2+6&&Math.abs(z-o.z)<o.d/2+6){hidden=true;break;}}
+    if(hidden!==f.hidden){for(const q of f.parts){q.mesh.setMatrixAt(q.index,hidden?a.zero:q.matrix);q.mesh.instanceMatrix.needsUpdate=true;}f.hidden=hidden;window.__KEEP_SHADOW_DIRTY=true;}
   }
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;
   const near=a.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.y-p.y)**2+(v.z-p.z)**2})).sort((x,y)=>x.d-y.d);a.lights.forEach((l,i)=>{l.visible=!low&&near[i]?.d<300**2;if(l.visible)l.position.copy(near[i].v)});

@@ -3,7 +3,8 @@ import hub from '../../public/3d/story/hub-dialogue.json';
 import hall from '../../public/3d/story/rift-hall.json';
 import cliffs from '../../public/3d/story/hollow-cliffs.json';
 import canyon from '../../public/3d/story/lost-canyon.json';
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes}};
+import keep from '../../public/3d/story/broken-walls.json';
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes}};
 
 const encoder=new TextEncoder(),MAX_AUDIO=12*1024*1024;
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};

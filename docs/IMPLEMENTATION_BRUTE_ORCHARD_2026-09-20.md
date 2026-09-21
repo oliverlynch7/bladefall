@@ -1,0 +1,8 @@
+# Brute orchard encounter
+Approved basis: CAMPAIGN_EXPANSION_PLAN Briar boss; varied outdoor arena, charge into cart/stone -> stagger, two finite handler waves, safe floor and low lane fences. Reuse existing Brute art, damage multiplier, enemy roster, hit detection and checkpoint flow. No new central lore or boss renaming.
+
+Build only main-campaign Briar boss layout; leave trials/other modes intact. Use asymmetric connected orchard/barn grounds, peripheral shallow terraces, four marked robust charge targets, open dodging lanes. Implement isolated deterministic encounter controller for chase, locked-direction warning, charge, recovery, stagger and telegraphed slam. No random accumulated rubble. Handlers at two HP thresholds with visible arrival warning; host alone creates them. Explicit boss-state/wave synchronization for guests, avoiding autonomous divergent charges. Required exit waits for boss and spawned handlers.
+
+QA: controller timing/direction/collision/wave caps; browser real movement around props and through side loops, boss charge collision/stagger/damage and warning safety, death retry, completion, controlled two-client sync, screenshots. Existing checkpoint and affected Briar checks at release. No assertion of full balance from invulnerable tests. Milestone includes layout, combat, multiplayer, visual review and one release.
+
+Implementation and local QA complete; see CONTINUITY 2.000 entry for parameters, evidence, source archive and remaining limits. New clips are based on original idle/move, only torso/head tracks change, preserving established arm/weapon contact. Deployment verification follows the single release.

@@ -1024,6 +1024,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./voice-content.js?v=1989"></script>
 <script src="./hub-dialogue.js?v=1990"></script>
 <script src="./rift-shards.js?v=1992"></script>
+<script src="./brute-encounter.js?v=2000"></script>
 <script src="./story-state.js?v=1994"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
@@ -1040,7 +1041,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.999.0-beth-rescue';
+const VERSION3D='2.000.0-brute-orchard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3456,7 +3457,7 @@ function questHuntKill(e){
   addText(e.x, e.y + (e.h||40) + 20, e.z, 'QUARRY SLAIN', 'var(--amber)', true);
   if(G.qmarks) for(const m of G.qmarks) if(m.q === e.huntQ) m.done = true; }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
-function openWay(){ if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
+function openWay(){ if(G.bruteArena&&G.enemies.some(e=>!e.dead&&e.hp>0))return;if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
   if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
@@ -3510,7 +3511,7 @@ function questUpdate(){
     if(done) rows+=qrow(false,eventIcon('event-secret-rift'),'Take the opened gate',null);
     applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name} · Trial Chamber`,rows,`side${Z.side.id}|${done?'done':'hunt'}`,done); return; }
   let rows,sig;
-  if(G.area<0){ rows=qrow(false,eventIcon('event-boss-skull'),`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
+  if(G.area<0){const left=G.bruteArena?G.enemies.filter(e=>!e.dead&&!e.boss&&e.hp>0).length:0,down=G.bruteArena&&G.boss?.dead;rows=qrow(!!down,eventIcon('event-boss-skull'),down?'The Brute defeated':`Slay <b>${Z.boss.name}</b>`,null);if(down)rows+=qrow(false,'☐',left?'Defeat the remaining handlers':'Take the opened portal',left?String(left):null);sig='boss'+Z.id+'|'+down+'|'+left; }
   else { const qs=areaQuests();
     const secret=(G.secret && !G.secret.spent && Z.side && !meta.sideFound[Z.side.id]) ? G.secret : null;   // an unfound purple secret hides in this area
     const secretRow=secret ? qrow(false,eventIcon('event-secret-rift'),`Find the hidden <b>purple rift</b> — ${Z.side.name}`,null) : '';
@@ -3643,7 +3644,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -7456,8 +7457,74 @@ function placeOutskirtsObjectives(ctx,rooms){
 
 /* Boss layouts preserve the boss implementation and keep a generous, flat fighting
    floor. Their perimeter shapes and cover positions are authored for each fight. */
+// Briar's orchard: one authored footprint, reusable charge cover, no growing rubble field.
+function buildBruteOrchard(ctx){
+ G._scapeTable='BRUTE_ORCHARD';G.spireRY=null;G.vertical=true;G.haz=null;
+ G.campaignLayout={revision:2000,zone:'outskirts',area:-1};
+ G.bruteArena={props:[{id:'cart-west',kind:'cart',x:-340,z:120,w:150,d:80},{id:'cart-east',kind:'cart',x:370,z:-310,w:150,d:80},{id:'stone-north',kind:'stone',x:-260,z:-570,w:145,d:85},{id:'stone-south',kind:'stone',x:300,z:450,w:135,d:90}],waveSeq:0,seenWaves:new Set()};
+ // Adjoining rectangles share edges, never coplanar overlapping top faces.
+ for(const [x,z,w,d]of [[0,-80,1600,1500],[-1000,20,400,680],[1000,-350,400,900],[0,795,380,250],[0,-955,480,250]])vseg(x,z,w,d,{district:'Trampled Orchard',meadow:true});
+ G.bounds={minX:-1260,maxX:1260,minZ:-1130,maxZ:980};G.progressEnd=-1080;
+ G.startPos={x:0,z:850};G.goalPos={x:0,z:-1000};G.lastSafe={x:0,z:850,y:0};G.portalPos={x:0,z:-1000};
+ for(const q of G.bruteArena.props){const o=vcol(q.x,q.z,q.w,q.d,86);o.autoCol=true;o.orchardProp=q.id;}
+ // Low, forgiving side terraces. All required combat can be played on the open floor.
+ for(const [x,z,w,d]of [[1000,-350,360,860],[-1000,20,360,640]])vplat(x,z,16,w,d,{terrain:true});
+ // Barn pillars have matching collision; its open central aisle is a second route.
+ for(const x of [-1160,-840])for(const z of [-230,270]){const o=vcol(x,z,22,22,220);o.autoCol=true;}
+ for(const [x,z,h]of [[-700,-650,140],[-670,-350,155],[-685,450,125],[700,-660,150],[1080,-670,150],[1080,-100,140],[660,510,145],[-670,60,155],[660,-330,145],[675,20,150],[1090,-430,160]]){
+  const o=vcol(x,z,25,25,h);o.treeCol=true;G.deco.push({x,z,y0:h,w:100,h:60,d:105,kind:'tree',lead:true,trunkH:h,c:'#53633a',theme:'plains'});
+ }
+ const e=ctx.mkMonster('brute',0,-250,null);e.bruteOrchard=true;e.h=112;e.r=44;e.home={x:0,z:-100,hw:1100,hd:800};e.dropT=0;
+ Object.assign(G.p,{x:0,z:850,y:0,vx:0,vy:0,vz:0,yaw:Math.PI,onGround:true});if(G.cam)G.cam.y=0;G.camYaw=Math.PI;G.camPitch=.12;
+ snapWorldInteractables();document.getElementById('stagetag').textContent='The Brute · Trampled Orchard';questUpdate();hudUpdate();return true;
+}
+function updateOrchardBrute(e,dt,p,eff){
+ updateBossBar(e);if(MP.guest()){if(['wind','charge'].includes(e.bruteState))e.yaw=Math.atan2(e.teleX,e.teleZ);return;}
+ // Pick the nearest living co-op player, then lock the charge before it begins.
+ let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{})){if(q&&q.hp>0&&q.zone===MP.zone&&Number.isFinite(q.x)&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;}if(!target)return;
+ BFBruteEncounter.step(e,dt,target,{props:G.bruteArena.props,speed:Math.max(35,eff*1.9),
+  tell:line=>{e._orchardHints=e._orchardHints||new Set();if(!e._orchardHints.has(line)){e._orchardHints.add(line);toast(line);}},
+  impact:q=>{q.flashUntil=G.time+.45;G.shake=Math.min(9,G.shake+5);playFx('heavyhit');burst(e.x,e.y+35,e.z,'#c8ac73',12);addText(e.x,e.y+e.h+24,e.z,'STAGGERED!','#ffd47a');},
+  slam:()=>{const id=++G.bruteArena.waveSeq;G.shockwaves.push({orchardId:id,fxType:'brute',x:e.x,z:e.z,y:e.y,r:22,maxR:230,dmg:e.dmg*1.25,life:0,spd:270});G.shake=Math.min(8,G.shake+4);playFx('heavyhit');},
+  handlers:wave=>{const side=wave===1?-1:1;for(let i=0;i<2;i++){const h=spawnEnemy(wave===2&&i===1?'caster':'grunt',side*1000,-120+i*150,true);h.orchardHandler=true;h.active=true;h.dropT=0;h.y=16;h.sx=h.x;h.sz=h.z;h.shootT=1.2;}toast(wave===1?'Handlers have entered the barn!':'Handlers are coming through the orchard!');}
+ });
+}
+function syncOrchardWaves(waves){
+ const arena=G.bruteArena;if(!arena)return;
+ for(const q of waves){let w=G.shockwaves.find(w=>w.orchardId===q.orchardId);if(w){w.r=Math.max(w.r,q.r);continue;}if(arena.seenWaves.has(q.orchardId))continue;arena.seenWaves.add(q.orchardId);G.shockwaves.push({...q});}
+}
+function drawBruteOrchard(t){
+ if(!G.bruteArena)return;
+ // Wheel rims, individual boards and iron bands distinguish sturdy carts from scenery.
+ for(const q of G.bruteArena.props){pushM();mv(q.x,0,q.z);const glow=(q.flashUntil||0)>G.time;
+  if(q.kind==='cart'){
+   for(const x of [-54,54])for(const z of [-44,44]){bx(x,27,z,32,46,10,'#39382e');bx(x,27,z+(z>0?6:-6),18,28,3,'#9c865b');bx(x,27,z+(z>0?9:-9),7,9,5,'#302e29');}
+   bx(0,38,0,150,14,80,'#685132');for(const z of [-36,36])for(let k=0;k<3;k++)bx(0,52+k*13,z,150,10,8,glow?'#e9c97a':'#8f7248');
+   for(const x of [-68,68])bx(x,66,0,10,42,80,'#6c5538');for(const x of [-47,47])for(const z of [-42,42])bx(x,65,z,8,48,4,'#343d3d');
+   for(let k=0;k<3;k++)bx(-42+k*40,72,0,32,24,45,'#b39a60');
+  }else{bx(0,33,0,q.w,66,q.d,'#5c655a');bx(-12,74,0,q.w-24,24,q.d-8,glow?'#e9c97a':'#8a8d75');for(const x of [-35,25])bx(x,88,0,8,3,62,'#b7a779');}
+  // Amber chevrons teach these are the impact targets without covering the whole arena.
+  for(const x of [-24,24])bx(x,92,0,16,4,25,'#d4b06c');popM();
+ }
+ // A roofless, damaged barn stays readable from the combat camera.
+ for(const x of [-1160,-840])for(const z of [-230,270]){bx(x,118,z,22,204,22,'#59442e');bx(x,218,z,30,16,30,'#978158');}
+ for(const z of [-230,270]){bx(-1000,222,z,350,16,24,'#79613e');for(const x of [-1140,-860]){pushM();mv(x,188,z);rotZ(x<-1000?-.65:.65);bx(0,0,0,12,80,12,'#9a8151');popM();}}
+ for(const z of [-170,-80,10,100,190]){bx(-1185,38,z,16,44,72,'#6a5839');bx(-1185,65,z,20,9,80,'#96805a');}
+ for(let z=-220;z<=260;z+=24){const h=60+((z+220)%72);bx(-1170,16+h/2,z,10,h,19,'#796044');bx(-1177,16+h,z,4,8,21,'#a18a5f');}
+ for(const z of [-220,-55,110,260]){pushM();mv(-1100,241,z);rotZ(-.22);bx(0,0,0,155,12,20,'#8e7550');popM();}
+ for(let z=-228;z<265;z+=32){pushM();mv(-1130,246,z);rotZ(-.22);bx(0,0,0,105,8,28,'#65543c');popM();}
+
+ // Short broken fence stretches have generous openings; they are low enough to step over.
+ for(const [x,z,w]of [[-520,590,240],[550,100,170],[-430,-760,280],[480,-730,220]]){bx(x,7,z,w,14,10,'#776343');for(const dx of [-w/2,w/2])bx(x+dx,14,z,10,28,10,'#8d7650');}
+ for(const [x,z]of [[-640,590],[700,180],[-570,-740],[620,-720]]){bx(x,16,z,36,32,32,'#7b653f');bx(x,34,z,42,6,42,'#ac935c');}
+ const e=G.boss;if(!e||e.dead)return;
+ if(e.windT>0){const tx=e.teleX,tz=e.teleZ,locked=e.windT<=.45,c=locked?'#ff7044':'#e9b367';for(let d=55;d<660;d+=45){bx(e.x+tx*d,5,e.z+tz*d,18,4,18,c,c,.9);}dangerRing(e.x,3,e.z,e.r+28,c,.9);}
+ if(e.staggerT>0){for(let i=0;i<3;i++){const a=t*3+i*Math.PI*2/3;bx(e.x+Math.cos(a)*40,e.y+e.h+24,e.z+Math.sin(a)*40,9,9,9,'#ffe3a2');}}
+ if(e.bruteWaveWarn>0){const x=e.bruteWaveSide*1000;for(const z of [-120,30]){dangerRing(x,20,z,55,'#efbd72',.8);bx(x,110,z,8,24,8,'#efbd72');}}
+}
+
 function buildCampaignArena(ctx){
-  const zone=curZone().id;
+  const zone=curZone().id;if(zone==='outskirts')return buildBruteOrchard(ctx);
   const specs={
     outskirts:{name:'Trampled Orchard',rows:[[0,0,1080,600],[0,-360,840,180],[0,360,840,180]],cover:[[-330,-200,32,32,120],[370,180,32,32,110]],color:'#725a38'},
     hollow:{name:'The Crossfire Bowl',rows:[[0,0,1180,620],[0,-400,900,220],[0,400,900,220]],cover:[[-240,100,62,100,125],[240,-110,62,100,125],[-360,-300,58,80,110],[360,310,58,80,110]],color:'#987749'},
@@ -8358,7 +8425,8 @@ const BOSS_ARENAS={
 /* The editor replays Oliver's edit list onto the level the generator just built. Wrapped rather
    than called at each `return` inside loadStage: that function has three early exits today and a
    fourth would silently skip the edits, which would look like the editor losing his work. */
-function loadStage(i){ loadStageRaw(i); applyEditsNow(); }
+function loadStage(i){
+  G.bruteArena=null; loadStageRaw(i); applyEditsNow(); }
 function applyEditsNow(){
   try {
     if(!window.__bfEditor || !window.__bfEditor.applyLayer) return;
@@ -12436,7 +12504,7 @@ function checkStageClear(){
   // normal courses: the portal exists from the start — reaching the end IS the goal.
   // boss stages: the portal opens when the boss falls.
   if(G.portal) return;
-  if(G.portalPos && G.boss && G.boss.dead){
+  if(G.portalPos && G.boss && G.boss.dead && (!G.bruteArena||!G.enemies.some(e=>!e.dead&&e.hp>0))){
     snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
@@ -13472,7 +13540,7 @@ const MP={
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
-    const msg={t:'state',players:all, en:this.enemySnap(), ek};
+    const msg={t:'state',players:all, en:this.enemySnap(), ek};if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
     const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -13536,7 +13604,7 @@ const MP={
     else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
-      if(d.en&&!G?.storyState?.conversation) this.applyEnemies(d.en, d.ek);if(d.story)briarApply(d.story); }
+      if(d.en&&!G?.storyState?.conversation){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story); }
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
@@ -13591,7 +13659,7 @@ const MP={
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
       [Math.round(pr.x),Math.round(pr.y),Math.round(pr.z),Math.round(pr.vx),Math.round(pr.vy),Math.round(pr.vz),pr.size||6,pr.color||'#fff',pr.shape||'orb',pr.el||0,pr.gravity||0,+(pr.life||1.4).toFixed(2),pr.glow?1:0,pr.trail||0]); } }
-    if(G.shockwaves) for(const s of G.shockwaves){ if(s._mp||s.visual||(G.duel&&s.foeBot)) continue; s._mp=1; (sw=sw||[]).push(
+    if(G.shockwaves) for(const s of G.shockwaves){ if(s._mp||s.visual||s.orchardId||(G.duel&&s.foeBot)) continue; s._mp=1; (sw=sw||[]).push(
       [Math.round(s.x),Math.round(s.z),Math.round(s.r),Math.round(s.maxR),Math.round(s.spd||270),s.col||'#ffd24a',s.col2||'#c33',s.arc?+(s.arc.toFixed(2)):0,s.arc?+((s.dirX||0).toFixed(2)):0,s.arc?+((s.dirZ||0).toFixed(2)):0]); }
     if(!proj&&!sw) return; const m={t:'cfx'}; if(proj)m.proj=proj; if(sw)m.sw=sw;
     if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
@@ -13694,7 +13762,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.bruteOrchard?BFBruteEncounter.snapshot(e):null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -13716,6 +13784,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
+    for(const a of en)if(a[7]?.bruteOrchard){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -14667,7 +14736,7 @@ function update(dt){
         if(!t.dead && (t.invuln||0)<=0 && (t.dodgeTimer||0)<=0 && Math.abs(dXZ(t.x,t.z,sw.x,sw.z)-sw.r)<28 && !sw.hitFoe){ sw.hitFoe=true; if(t.foe) botHurtFoe(t.foe,sw.dmg); }
         continue; }
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
-      if(p.invuln<=0 && p.dodgeTimer<=0 && Math.abs(p.y-(sw.y||0))<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow',src:G.boss||null}); } }
+      if(p.invuln<=0 && p.dodgeTimer<=0 && Math.abs(p.y-(sw.y||0))<(sw.orchardId?24:42) && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow',src:G.boss||null}); } }
     G.shockwaves=G.shockwaves.filter(sw=>(sw.delay>0)||sw.r<sw.maxR); }
   if(G.collapse && G.collapse.length){ for(const tl of G.collapse){   // Void Tyrant: telegraphed floor tiles drop away, then re-form
       if(tl.warn>0){ tl.warn-=dt; if(tl.warn<=0) tl.open=1.4; }
@@ -15011,7 +15080,7 @@ function updateAmbient(dt,s){
   for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*a.sw*dt; a.y+=a.vy*dt; if(a.tw)a.tw+=dt*6; a.life-=dt; }
   G.ambient=G.ambient.filter(a=>a.life>0 && a.y>-5 && a.y<300);
 }
-function onBossActivate(e){ SFX.boss();
+function onBossActivate(e){ SFX.boss();if(e.bruteOrchard)toast('Bait its charge into a cart or stone. Jump the ground wave.');
   playFx({brute:'bossroar1',warden:'bossroar1',archer:'bossroar2',sorcerer:'bossroar2',colossus:'bossroar3',king:'bossroar3',tyrant:'bossroar3'}[e.type]||'bossroar1');   // batch-2 boss-reveal roar, varied across the roster
   { const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); bn.textContent=e.label; } document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
   if(G&&!G.trial&&!G.side){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
@@ -15023,7 +15092,7 @@ function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
 }
 function drawEnemyDanger(e){
   if(e.blinkFx>0&&e.blinkTarget)dangerRing(e.blinkTarget.x,e.y,e.blinkTarget.z,e.r+20,'#c49bff',.9);
-  const cues=[['slamW',230,.7],['cleaveW',300,.75],['novaW',260,.7],['poundW',300,.7],['knightW',170,.6],['eruptW',210,.7],['fuseT',150,.55],['meleeW',e.r+G.p.r,.65]];
+  const cues=[['slamW',230,e.bruteOrchard?.95:.7],['cleaveW',300,.75],['novaW',260,.7],['poundW',300,.7],['knightW',170,.6],['eruptW',210,.7],['fuseT',150,.55],['meleeW',e.r+G.p.r,.65]];
   for(const [key,r,max]of cues)if(e[key]>0){const arc=key==='cleaveW'?.95:Math.PI;
     dangerRing(e.x,e.y,e.z,r,'#f5ad58',.85,arc,e.cleaveX,e.cleaveZ);
     dangerRing(e.x,e.y+1,e.z,r*Math.max(.08,1-e[key]/max),'#ff6653',.7,arc,e.cleaveX,e.cleaveZ);}
@@ -15229,6 +15298,7 @@ function bossEnterShield(e){ if(!bossRaid(e)) return;
   G.shake=Math.min(G.shake+8,16); SFX.boss(); addText(e.x,e.h+30,e.z,'WARDED','#7fd6ff',true);
   toast('🔮 The '+ (e.label||'boss') +' is shielded — shatter the healing crystals!'); playFx('portalopen'); }
 function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
+  if(e.bruteOrchard){updateOrchardBrute(e,dt,p,eff);return;}
   if(e.slamW>0||e.cleaveW>0||e.novaW>0||e.poundW>0||e.shotW>0)eff=0;
   updateBossBar(e); // y handled by the climb/support logic in the enemy loop
   if(e.staggerT>0) e.staggerT-=dt;
@@ -18336,6 +18406,7 @@ function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shado
   bx(0, y+0.06, 0, R*2.2, 0.24, R*2.2, '#000000',null, a*0.16); popM();
   popM(); }
 function drawCourse(s,t){
+  if(G.bruteArena)s={...s,ground:'#596047'};
   const outskirtsArt=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   const hollowArt=!!window.__HOLLOW_ART_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   const keepArt=!!window.__KEEP_ART_ACTIVE && three3DLive() && !!window.__world3d?.().on;
@@ -18413,6 +18484,7 @@ function drawCourse(s,t){
   drawBriarStory(t);
   drawBlackWoods(t);
   drawBethRescue(t);
+  drawBruteOrchard(t);
   drawRiftShardDiscovery(t);
   // crumbling stepping stones (shake, drop, respawn)
   /* Deferring a crumble was necessary and NOT sufficient, which is the second half of the finding.
@@ -20677,7 +20749,7 @@ function render(t){
       gl.depthMask(true);
     }
     drawEnemyDanger(e);
-    if(e.windT>0){                                     // TELEGRAPH: an unmistakable wind-up you can dodge on reaction
+    if(e.windT>0&&!e.bruteOrchard){                                     // TELEGRAPH: an unmistakable wind-up you can dodge on reaction
       const prog=1-(e.windT/(e.windMax||0.55)), flash=0.5+0.5*Math.sin(t*34);   // fast flash + a bar that fills toward the strike
       /* A BOSS TELEGRAPHS TWICE AS LOUDLY. The same cue that reads clearly on a jackal is lost
          against something eight times its size, so the markers, the aura and the reach all scale
@@ -21627,7 +21699,7 @@ window.__BF3={ worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJou
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1999"></script>
+<script type="module" src="./hero3d.js?v=2000"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

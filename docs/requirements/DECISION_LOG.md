@@ -143,3 +143,12 @@ User approves beginning substantial Homefields expansion with discoverable puzzl
 ## [Codex | 2026-09-20] Ground-up layout permission
 
 User explicitly permits replacing any existing level layout from the ground up. Preserve established assets/theming where useful, and author new assets/details as needed for coherent, beautiful environments. This applies to all levels. Existing footprint is not a constraint; current Homefields wings are a first playable terrain iteration, not approval to retain the old core permanently.
+
+
+## [Codex | 2026-09-20] Usage efficiency without reduced quality
+User reports high weekly Pro usage and asks to reduce overhead while preserving all approved depth/quality. Explicitly does not want a weaker model; retain Astra/current chosen reasoning. No scope reduction authorized.
+Workflow going forward: group related implementation into coherent playable milestones rather than deploying every small addition; retain small local commits. Reuse tested quest/checkpoint/co-op/voice systems while keeping authored environments and mechanics unique. Keep a compact current-task code/test map with links to full canonical requirements, preserving original sources. Use narrow reads and concise pass/fail outputs; inspect full logs on failure. Run focused checks during edits and appropriate broader/save/co-op/visual checks at release boundaries; repeat only for relevant changes or unresolved risks. Batch release documentation and archives at milestone boundaries. Avoid a large refactor solely for hoped-for savings. No guaranteed savings percentage, no model/settings/plugin changes, and no claim that later levels will be cheap. Next milestone remains Brute encounter, followed by Rift Hall.
+
+
+## [Codex | 2026-09-20] Efficiency workflow confirmed
+User: “Yea okay sounds like we found a compromise! Keep going”. Continue approved scope using coherent milestones and targeted validation, without changing chosen model or reducing design depth. Source snapshot: private decision-archive/2026-09-20-brute-orchard (145 user-role messages).

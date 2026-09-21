@@ -82,8 +82,8 @@ export function buildOutskirts(scene,w){
     for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){
       const x=s.x-s.w/2+(ix+.5)*dx,z=s.z-s.d/2+(iz+.5)*dz;
       if(done.some(r=>x-dx/2>=r.x-r.w/2&&x+dx/2<=r.x+r.w/2&&z-dz/2>=r.z-r.d/2&&z+dz/2<=r.z+r.d/2))continue;
-      const road=s.path||paths.some(p=>covers(p,x,z)),r=hash(x,z);
-      const c=road?['#a79470','#ac9975','#9d8b69','#b29e79'][Math.floor(r*4)]:(s.meadow?['#707345','#76784a','#7d7b4b','#696e43'][Math.floor(r*4)]:soil);
+      const road=s.path||paths.some(p=>covers(p,x,z))||(w.bruteOrchard&&Math.abs(x-Math.sin(z*.004)*110)<105),r=hash(x,z);
+      const c=road?['#a79470','#ac9975','#9d8b69','#b29e79'][Math.floor(r*4)]:(w.bruteOrchard?['#71754b','#70734b','#74764e','#6e734b'][Math.floor(r*4)]:s.meadow?['#707345','#76784a','#7d7b4b','#696e43'][Math.floor(r*4)]:soil);
       add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx,2,road&&!s.meadow?dz-.5:dz,c,0);floors++;if(road)roads++;
       if(!road&&r<.055){add('grass',x,2,z,25,25+hash(z,x)*12,25,woods?'#777344':null,r*6.28)}
       if(!road&&r>.982)add('rubble',x,1.8,z,18,10,18,null,r*6.28);
@@ -117,6 +117,7 @@ export function buildOutskirts(scene,w){
       const h=(d.trunkH||0)+hh+30,base=y-(d.trunkH||0),sc=h/3.5;
       add('tree',d.x,base,d.z,sc,sc,sc,null,r*6.28);
       // Dark, sparse crowns in the woods retain its canopy identity.
+      if(w.bruteOrchard)for(let k=0;k<4;k++)add('brick',d.x+Math.cos(k*1.6)*24,base+h*.72+(k%2)*14,d.z+Math.sin(k*1.6)*24,65,38,62,['#566936','#687b3e','#748448','#5c713b'][k],r*2);
       if(woods)for(let k=0;k<3;k++)add('brick',d.x+(k-1)*23,base+h*.67+Math.abs(k-1)*9,d.z,44,25,48,['#343d2b','#434932','#515337'][k],r*2);
       continue;
     }
@@ -142,6 +143,13 @@ export function buildOutskirts(scene,w){
     }else if(ww>55&&dd>45&&hh>32){
       const o={...d};B.structure(o,()=>B.solid(o,d.c,timber));
     }else add(timber?'timber':'tile',d.x,y+hh/2,d.z,ww,Math.max(.8,hh),dd,d.c||soil);
+  }
+  if(w.bruteOrchard){
+    // Fruit crowns distinguish this orchard from the bare woodland kit.
+    for(const d of deco.filter(d=>d.kind==='tree'))for(let i=0;i<7;i++){
+      const a=i*2.4,r=25+hash(d.x+i,d.z)*24;add('tile',d.x+Math.cos(a)*r,d.y0+18+hash(d.z+i,d.x)*25,d.z+Math.sin(a)*r,7,8,7,'#ae633c',a);
+    }
+
   }
   const state=B.finish();root.userData.art=state;
   // Lights affect only this zone and are restored by the outer world's clear function.

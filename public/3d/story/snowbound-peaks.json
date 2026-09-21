@@ -1,0 +1,554 @@
+{
+  "version": 1,
+  "region": "frost",
+  "status": "Snowbound Peaks recording-ready. Deep Ice Caves and Ellis rescue follow in the next batch.",
+  "npcs": {
+    "heath": {
+      "name": "Heath",
+      "role": "Mountain guide keeping a shelter open while Ellis is missing",
+      "start": "ff.heath.first"
+    }
+  },
+  "nodes": {
+    "ff.heath.first": {
+      "text": "If you've come for the view, you're early. The clouds usually move next week. You're looking for Ellis? He scratched those arrows himself. Said nobody would follow a scientist into a freezing mountain. Then the Legion came asking.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I came to find him. What do I need?",
+          "next": "ff.heath.prepare",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ff.heath"
+            },
+            {
+              "type": "note",
+              "id": "ff.heater",
+              "region": "frost",
+              "title": "Shelter before the storm",
+              "text": "Heath needs the heater part from the abandoned lift house west of his shelter. Bring it back to him. The sheltered ridge avoids the exposed crossing."
+            }
+          ]
+        },
+        {
+          "id": "blunt",
+          "text": "Skip the weather report. Where is he?",
+          "next": "ff.heath.blunt"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 1,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.blunt": {
+      "text": "Up. That's the short answer. The useful answer takes a little longer, and I'd rather not carry you back down in pieces.",
+      "choices": [
+        {
+          "id": "listen",
+          "text": "Fair enough. Tell me the useful answer.",
+          "next": "ff.heath.prepare",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ff.heath"
+            },
+            {
+              "type": "note",
+              "id": "ff.heater",
+              "region": "frost",
+              "title": "Shelter before the storm",
+              "text": "Heath needs the heater part from the abandoned lift house west of his shelter. Bring it back to him. The sheltered ridge avoids the exposed crossing."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 2,
+        "emotion": "Briefly annoyed, then plainly concerned. No lasting grudge.",
+        "direction": "Briefly annoyed, then plainly concerned. No lasting grudge.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.prepare": {
+      "text": "Ellis used the caves above the signal crown. The entrance disappears under fresh snow. First, help me get this shelter working. There's a heater part in the old lift house. Bring it here and I'll thaw the crossing winch. The longer ridge is sheltered if the wind gets rough.",
+      "choices": [
+        {
+          "id": "return",
+          "text": "Here is the heater part.",
+          "next": "ff.heath.repaired",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ff.heater"
+            }
+          ],
+          "when": [
+            {
+              "flag": "ff.part",
+              "is": true
+            },
+            {
+              "flag": "ff.heater",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "ellis",
+          "text": "Why was Ellis hiding up here?",
+          "next": "ff.heath.ellis"
+        },
+        {
+          "id": "wind",
+          "text": "How do I cross in this wind?",
+          "next": "ff.heath.wind"
+        },
+        {
+          "id": "camp",
+          "text": "Who left the old markers?",
+          "next": "ff.heath.camp"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 3,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.ellis": {
+      "text": "He came up with a pack full of papers and barely enough food for a day. Kept asking whether anyone had followed him. I didn't ask what he'd done. I asked whether he wanted soup. He said yes before I finished the question.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About the shelter…",
+          "next": "ff.heath.prepare"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 4,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.wind": {
+      "text": "Watch the hanging cloth near the lift house. First it stirs, then it snaps sideways. Wait behind the rock until it hangs loose again. Or take the tucked-away ridge. Being brave doesn't mean arguing with the weather.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About the shelter…",
+          "next": "ff.heath.prepare"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 5,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.camp": {
+      "text": "An explorer used to camp west of the upper trail. Carved notches into three stones so he could find his box after a storm. Said the shadows would remember the order. I told him a pocket would be simpler.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About the shelter…",
+          "next": "ff.heath.prepare"
+        },
+        {
+          "id": "track",
+          "text": "I’ll look for the camp.",
+          "next": "ff.heath.prepare",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ff.camp.heard"
+            },
+            {
+              "type": "note",
+              "id": "ff.camp.hint",
+              "region": "frost",
+              "title": "The buried camp",
+              "text": "Heath mentioned an explorer’s camp west of the upper trail. Three marked stones and their shadows may reveal the order of its lock."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 6,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.repaired": {
+      "text": "There. Warm hands, a working winch, and one less thing trying to kill us. The crossing is down. That small healing pad still has some charge, but it won't last forever. Up at the signal crown, read the carving before you turn the reflectors. Ellis liked to hide a door in plain sight.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "I’ll find that entrance.",
+          "next": "ff.heath.waiting",
+          "effects": [
+            {
+              "type": "note",
+              "id": "ff.signal",
+              "region": "frost",
+              "title": "Find the cave mouth",
+              "text": "The repaired crossing leads to the signal crown. Read the carving and match its shape using the reflectors. Then follow the light to the buried entrance."
+            }
+          ]
+        },
+        {
+          "id": "warm",
+          "text": "You should come down when this is over.",
+          "next": "ff.heath.home"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 7,
+        "emotion": "Relief and quiet gratitude. The heater has just started.",
+        "direction": "Relief and quiet gratitude. The heater has just started.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.home": {
+      "text": "Someone has to keep a light up here for people coming back. Find Ellis. I'll put another bowl on. And before you ask, yes, it is the same soup.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Keep it warm for him.",
+          "next": "ff.heath.waiting"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 8,
+        "emotion": "Gentle humor, then firm hope.",
+        "direction": "Gentle humor, then firm hope.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.waiting": {
+      "text": "The upper crossing is ready. Look for the signal carving at the highest broad shelf. If Ellis left a way in, the light will show it.",
+      "choices": [
+        {
+          "id": "camp",
+          "text": "Tell me about the buried camp.",
+          "next": "ff.heath.aftercamp"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 9,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    },
+    "ff.heath.aftercamp": {
+      "text": "West of the upper trail. Three notched stones, with their shadows cut into the ground so snow couldn't erase the clue. He trusted stone more than his own memory. I can respect that.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I’ll keep an eye out.",
+          "next": "ff.heath.waiting"
+        }
+      ],
+      "voice": {
+        "speaker": "heath",
+        "scene": "A shelter above the snow line",
+        "order": 10,
+        "emotion": "Dry, practical warmth; a tired male mountain guide.",
+        "direction": "Dry, practical warmth; a tired male mountain guide.",
+        "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line"
+      }
+    }
+  },
+  "events": {
+    "ff.trail": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.trail"
+        },
+        {
+          "type": "note",
+          "id": "ff.trail",
+          "region": "frost",
+          "title": "A trail in the snow",
+          "text": "Ellis scratched arrows toward Heath’s shelter above the switchbacks. The Legion is searching this mountain too."
+        }
+      ]
+    },
+    "ff.part": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.part"
+        },
+        {
+          "type": "note",
+          "id": "ff.part",
+          "region": "frost",
+          "title": "The heater part",
+          "text": "A heavy metal part survived inside the abandoned lift house. Heath may be able to use it."
+        }
+      ]
+    },
+    "ff.lift": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.lift"
+        }
+      ]
+    },
+    "ff.reflect.clue": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.reflect.clue"
+        },
+        {
+          "type": "note",
+          "id": "ff.reflect",
+          "region": "frost",
+          "title": "The signal carving",
+          "text": "“The tree drinks the light. The mountain turns it away. The broken moon shows the hollow.” Choose the matching shape on the signal stand."
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.heater",
+          "is": true
+        }
+      ]
+    },
+    "ff.reflect.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "ff.reflect",
+          "value": 1,
+          "solution": [
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.reflect.clue",
+          "is": true
+        },
+        {
+          "flag": "ff.reflect.open",
+          "is": false
+        }
+      ]
+    },
+    "ff.reflect.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "ff.reflect",
+          "value": 2,
+          "solution": [
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.reflect.clue",
+          "is": true
+        },
+        {
+          "flag": "ff.reflect.open",
+          "is": false
+        }
+      ]
+    },
+    "ff.reflect.3": {
+      "once": false,
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "ff.reflect",
+          "value": 3,
+          "solution": [
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.reflect.clue",
+          "is": true
+        },
+        {
+          "flag": "ff.reflect.open",
+          "is": false
+        }
+      ]
+    },
+    "ff.cave": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.cave"
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.heater",
+          "is": true
+        },
+        {
+          "flag": "ff.reflect.open",
+          "is": true
+        }
+      ]
+    },
+    "ff.camp": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.camp.found"
+        },
+        {
+          "type": "note",
+          "id": "ff.camp",
+          "region": "frost",
+          "title": "Something under the snow",
+          "text": "The notebook says: “Read the shadows from left to right. Then turn their stones in that order.” The carved shadows survive even under cloudy skies."
+        }
+      ]
+    },
+    "ff.marker.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "ff.camp",
+          "value": 1,
+          "solution": [
+            1,
+            3,
+            2
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.camp.found",
+          "is": true
+        },
+        {
+          "flag": "ff.camp.open",
+          "is": false
+        }
+      ]
+    },
+    "ff.marker.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "ff.camp",
+          "value": 2,
+          "solution": [
+            1,
+            3,
+            2
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.camp.found",
+          "is": true
+        },
+        {
+          "flag": "ff.camp.open",
+          "is": false
+        }
+      ]
+    },
+    "ff.marker.3": {
+      "once": false,
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "ff.camp",
+          "value": 3,
+          "solution": [
+            1,
+            3,
+            2
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.camp.found",
+          "is": true
+        },
+        {
+          "flag": "ff.camp.open",
+          "is": false
+        }
+      ]
+    },
+    "ff.cache": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.cache"
+        },
+        {
+          "type": "note",
+          "id": "ff.reward",
+          "region": "frost",
+          "title": "The explorer’s keepsakes",
+          "text": "The buried chest held a winter cloak and a Rift Shard. Collect the shard beside the chest yourself. Reach Deep Ice Caves to keep both discoveries."
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.camp.open",
+          "is": true
+        }
+      ]
+    }
+  }
+}

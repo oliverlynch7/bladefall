@@ -1032,6 +1032,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./lost-canyon.js?v=2003"></script>
 <script src="./broken-walls.js?v=2005"></script>
 <script src="./prison-dungeons.js?v=2006"></script>
+<script src="./snowbound-peaks.js?v=2008"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
@@ -1048,7 +1049,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.007.0-fallen-duel';
+const VERSION3D='2.008.0-snowbound-peaks';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2791,6 +2792,7 @@ const DIFFS={
 /* Cosmetics: pure swagger, earned by doing things. No stats attached, ever. */
 const COSMETICS={
   cape:[
+    {id:'winter',name:'Winter Cloak',col:'#aec7ce',hint:'Find the buried explorer’s chest and finish Snowbound Peaks',has:()=>!!meta.cosmetics?.['cape:winter']},
     {id:'wanderer',name:'Wanderer’s Cape',col:'#6b7183',hint:'Clear your first zone',has:()=>(meta.zonesCleared||0)>=1},
     {id:'delver',name:'Delver’s Cape',col:'#c47bff',hint:'Find 3 secrets',has:()=>(meta.secretsFound||0)>=3},
     {id:'slayer',name:'Slayer’s Cape',col:'#e8453d',hint:'Kill 50 elites',has:()=>(meta.elitesKilled||0)>=50},
@@ -2863,19 +2865,20 @@ function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
 function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
 function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
-function areaQuests(ai){ if(inPrison()&&(ai==null||ai===1))return [{id:"kd.rescue",k:"story",n:1,d:BFPrison.quest(adventureStoryState())}]; if(inBrokenWalls()&&(ai==null||ai===0))return [{id:"rk.keep",k:"story",n:1,d:BFBrokenWalls.quest(adventureStoryState(),G.keep?.remote||G.keep)}]; if(inLostCanyon()&&(ai==null||ai===1))return [{id:"lc.rescue",k:"story",n:1,d:BFLostCanyon.quest(adventureStoryState())}]; if(inWindingCliffs()&&(ai==null||ai===0))return [{id:"hp.cliffs",k:"story",n:1,d:BFHollowCliffs.quest(adventureStoryState())}]; if(inBlackWoods()&&(ai==null||ai===1))return [{id:'woods.signal',k:'story',n:1,d:!G.storyState?.flags['woods.ready']?'Speak to Lewis at the forest entrance':!G.storyState?.flags['woods.signal']?'Silence the signal: ground crank or upper cable':'Reach the northern shelter'}]; if(inBriar()&&(ai==null||ai===0))return briarQuest(); if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
+function areaQuests(ai){ if(inSnowbound()&&(ai==null||ai===0))return [{id:"ff.peaks",k:"story",n:1,d:BFSnowbound.quest(adventureStoryState())}]; if(inPrison()&&(ai==null||ai===1))return [{id:"kd.rescue",k:"story",n:1,d:BFPrison.quest(adventureStoryState())}]; if(inBrokenWalls()&&(ai==null||ai===0))return [{id:"rk.keep",k:"story",n:1,d:BFBrokenWalls.quest(adventureStoryState(),G.keep?.remote||G.keep)}]; if(inLostCanyon()&&(ai==null||ai===1))return [{id:"lc.rescue",k:"story",n:1,d:BFLostCanyon.quest(adventureStoryState())}]; if(inWindingCliffs()&&(ai==null||ai===0))return [{id:"hp.cliffs",k:"story",n:1,d:BFHollowCliffs.quest(adventureStoryState())}]; if(inBlackWoods()&&(ai==null||ai===1))return [{id:'woods.signal',k:'story',n:1,d:!G.storyState?.flags['woods.ready']?'Speak to Lewis at the forest entrance':!G.storyState?.flags['woods.signal']?'Silence the signal: ground crank or upper cable':'Reach the northern shelter'}]; if(inBriar()&&(ai==null||ai===0))return briarQuest(); if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 // Relevant current-region notes and quest items are checkpointed with the route.
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons'].map(id=>fetch('./story/'+id+'.json?v=2006').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks'].map(id=>fetch('./story/'+id+'.json?v=2008').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
+function inSnowbound(){return isCampaignAdventure()&&G.zone===3&&G.area===0;}
 function inPrison(){return isCampaignAdventure()&&G.zone===2&&G.area===1;}
 function inBrokenWalls(){return isCampaignAdventure()&&G.zone===2&&G.area===0;}
 function inLostCanyon(){return isCampaignAdventure()&&G.zone===1&&G.area===1;}
 function inWindingCliffs(){return isCampaignAdventure()&&G.zone===1&&G.area===0;}
-function inBriarStory(){return inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBriar()||inBlackWoods()||!!G?.riftHall||!!G?.riftMentor;}
+function inBriarStory(){return inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBriar()||inBlackWoods()||!!G?.riftHall||!!G?.riftMentor;}
 function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
 function briarId(){return MP.active?MP.myId:'solo';}
 function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
@@ -2930,7 +2933,7 @@ function briarSync(){
   else if(reward.kind==='rift_shard'&&['briar.gus.BR-02','lc.ruth.HP-03','kd.sly.RK-04'].includes(id)){const outcome=collectRiftShard(id.split('.').pop());if(outcome!=='invalid')G.storyClaims[id]=true;}
  }
  if(!inBriarStory())return;
- if(inPrison()){BFPrison.sync({G,state:s,openWay});}else if(inBrokenWalls()){BFBrokenWalls.sync({G,state:s,openWay});}else if(inLostCanyon()){BFLostCanyon.sync({G,state:s,seg:vseg,openWay,spawn:spawnEnemy,host:!MP.active||MP.isHost,toast});}else if(inWindingCliffs()){BFHollowCliffs.sync({G,state:s,seg:vseg,plat:vplat,openWay,toast,sound:playFx});}else if(G.riftMentor){if(s.flags['trial.taught']&&!G.portal)openWay();}else if(G.riftHall){syncRiftHall(s);}else if(inBlackWoods()){syncBethRescue(s);if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
+ if(inSnowbound()){BFSnowbound.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inPrison()){BFPrison.sync({G,state:s,openWay});}else if(inBrokenWalls()){BFBrokenWalls.sync({G,state:s,openWay});}else if(inLostCanyon()){BFLostCanyon.sync({G,state:s,seg:vseg,openWay,spawn:spawnEnemy,host:!MP.active||MP.isHost,toast});}else if(inWindingCliffs()){BFHollowCliffs.sync({G,state:s,seg:vseg,plat:vplat,openWay,toast,sound:playFx});}else if(G.riftMentor){if(s.flags['trial.taught']&&!G.portal)openWay();}else if(G.riftHall){syncRiftHall(s);}else if(inBlackWoods()){syncBethRescue(s);if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
@@ -2942,7 +2945,7 @@ function briarSync(){
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
-  BFHubDialogue.present(n,{meta,location:inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:G.riftMentor?'Return to training':G.riftHall?'Return to the hall':'Return to the path',eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
+  BFHubDialogue.present(n,{meta,location:inSnowbound()?'SNOWBOUND PEAKS':inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:G.riftMentor?'Return to training':G.riftHall?'Return to the hall':'Return to the path',eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
    enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
    leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>briarRequest('close'),choose:(line,choice)=>briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
@@ -2952,11 +2955,16 @@ function briarDisconnect(actor){if(inBriarStory()&&G.storyState?.conversation?.o
 function briarInteract(){
  if(!inBriarStory())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65)return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={x:o.x,z:o.z,y:(o.y||0)+62,label,act};}};
- for(const n of G.storyNpcs||[])if((inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
+ for(const n of G.storyNpcs||[])if((inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
  if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&BFStoryState.matches(s,briarBook.events[o.key]?.when))consider(o,o.available?o.label:(o.blockedLabel||'Clear the bridge guards first'),()=>o.available?briarRequest('world',{key:o.key}):toast(o.blockedText||'The wagons cannot pass while the bridge guards are still here.'));
  return best;
 }
 function configureCliffCode(){if(!briarBook||!G.cliffs)return;for(const n of [1,2,3])briarBook.events['hp.code.'+n].effects[0].solution=[...G.cliffs.code];}
+function buildSnowbound(){
+ BFSnowbound.build({G,seg:vseg,plat:vplat,solid:vsolid,spawn:spawnEnemy});
+ briarPending=null;G._storyEpoch=null;briarEpoch();briarSync();
+}
+function drawSnowbound(t){if(inSnowbound())BFSnowbound.draw({G,state:adventureStoryState(),bx},t);}
 function buildPrison(){
  BFPrison.build({G,seg:vseg,plat:vplat,solid:vsolid,spawn:spawnEnemy});
  Object.assign(G.storyObjects.find(o=>o.key==='kd.free'),{blockedLabel:'Clear the holding-room guards',blockedText:'The guards still control the cell locks.'});
@@ -3421,8 +3429,9 @@ function openJournal(){
   if(inLostCanyon()&&state.flags['lc.extra.quest'])optional.push(task('Free the old western cage',state.flags['lc.extra']?'Tell Ruth the group is safe':'Follow the raised western path',!!state.flags['lc.reward']));
   if(inBrokenWalls()&&state.flags['rk.felix.quest'])optional.push(task('Felix’s tools',state.flags['rk.tools']?'Return the tools to Felix':'Open the timed workshop latch on the east side',!!state.flags['rk.felix.returned']));
   if(inPrison()&&state.flags['kd.keepsake'])optional.push(task('The stolen family picture',state.flags['kd.returned']?'Speak to Sly after the group reaches shelter':'Return it to the bundle in the hidden holding room',!!state.flags['kd.sly.reward']));
+  if(inSnowbound()&&state.flags['ff.camp.found'])optional.push(task('Something under the snow','Read the carved shadows and turn the marked stones',!!state.flags['ff.cache']));
   const notes=Object.values(state.notes).filter(n=>n.region===region.id);
-  const items=Object.entries(state.items).filter(([id,n])=>n>0&&!id.startsWith('hp.')&&!id.startsWith('lc.')&&!id.startsWith('rk.')&&!id.startsWith('kd.'));
+  const items=Object.entries(state.items).filter(([id,n])=>n>0&&!id.startsWith('hp.')&&!id.startsWith('lc.')&&!id.startsWith('rk.')&&!id.startsWith('kd.')&&!id.startsWith('ff.'));
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
   const itemNames={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll'};
   showOverlayHTML(`<div class="card" style="max-width:760px;text-align:left"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(region.name):'Your notes'}</h2><p style="color:#b8c6b7">${campaign?esc(G.areaName||'Current part')+' · Progress is saved when you finish this part.':'Enter a campaign level to follow its tasks and clues.'}</p><div style="max-height:55vh;overflow:auto;padding-right:12px"><h3>What to do next</h3><ul style="list-style:none;padding:0">${main.join('')||'<li>No campaign task here.</li>'}</ul>${optional.length?'<h3>Optional tasks you found</h3><ul style="list-style:none;padding:0">'+optional.join('')+'</ul>':''}${riftShardJournal()}<h3>Clues and reminders</h3>${notes.map(n=>`<p><strong>${esc(n.title)}</strong><br>${esc(n.text)}</p>`).join('')||'<p style="color:#b8c6b7">No clues recorded for this region yet.</p>'}<h3>Quest items</h3><p style="font-size:13px;color:#b8c6b7">These do not use bag space and cannot be sold.</p><ul>${items.concat(fetchItems).map(([id,n])=>'<li>'+esc(itemNames[id]||id)+' × '+esc(n)+'</li>').join('')||'<li>No quest items.</li>'}</ul></div><button class="bigbtn ghost" id="journalClose" style="margin-top:18px">Close journal</button></div>`);
@@ -3507,7 +3516,7 @@ function questHuntKill(e){
   addText(e.x, e.y + (e.h||40) + 20, e.z, 'QUARRY SLAIN', 'var(--amber)', true);
   if(G.qmarks) for(const m of G.qmarks) if(m.q === e.huntQ) m.done = true; }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
-function openWay(){ if(inPrison()&&!BFPrison.ready(adventureStoryState()))return;if(inBrokenWalls()&&!BFBrokenWalls.ready(adventureStoryState()))return;if(inLostCanyon()&&!BFLostCanyon.ready(adventureStoryState()))return;if(inWindingCliffs()&&!G.storyState?.flags['hp.descent'])return;if(G.riftMentor&&!G.storyState?.flags['trial.taught'])return;if(G.bruteArena&&G.enemies.some(e=>!e.dead&&e.hp>0))return;if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
+function openWay(){ if(inSnowbound()&&!BFSnowbound.ready(adventureStoryState()))return;if(inPrison()&&!BFPrison.ready(adventureStoryState()))return;if(inBrokenWalls()&&!BFBrokenWalls.ready(adventureStoryState()))return;if(inLostCanyon()&&!BFLostCanyon.ready(adventureStoryState()))return;if(inWindingCliffs()&&!G.storyState?.flags['hp.descent'])return;if(G.riftMentor&&!G.storyState?.flags['trial.taught'])return;if(G.bruteArena&&G.enemies.some(e=>!e.dead&&e.hp>0))return;if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
   if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
@@ -3695,7 +3704,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {frostScene:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -4899,7 +4908,7 @@ function enterZone(zi){
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
-  G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;
+  G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;G.peaks=null;
   const Z=curZone();
   /* THE ENDLESS DUNGEON PICKS ITS OWN FLOOR, and this function used to throw that away.
      Oliver: "the first level of the endless dungeon was way too hard, i died within two rooms."
@@ -4917,7 +4926,7 @@ function loadArea(){
   if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
-  if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else{G.storyNpcs=[];G.storyObjects=[];}
+  if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else{G.storyNpcs=[];G.storyObjects=[];}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -4930,7 +4939,7 @@ function enterSide(zi){
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   toast(S.icon+' '+S.name+' — Tier '+G.zoneTier+'. Reach the exit alive.');
 }
-function hazToast(){ if(inBrokenWalls()||inPrison())return;const Z=curZone(); if(!Z.haz||G.side||G.trial) return;
+function hazToast(){ if(inSnowbound()||inBrokenWalls()||inPrison())return;const Z=curZone(); if(!Z.haz||G.side||G.trial) return;
   const H=HAZARDS[Z.haz]; toast('⚠ '+H.name+' — '+H.blurb); }
 function sideClear(){
   const Z=curZone(), S=Z.side;
@@ -5194,6 +5203,7 @@ function abandonTrial(){ restoreBank(); openHub(); }
 // Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
 const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Bring saved sets to the Rift Keeper in the Waystation’s Rift Hall. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
 function worldRiftShards(){
+ if(inSnowbound())return BFSnowbound.shards(adventureStoryState());
  if(inPrison())return BFPrison.shards(adventureStoryState());
  if(inBrokenWalls())return BFBrokenWalls.shards(adventureStoryState());
  if(G?.marksmanArena&&G.portal&&G.boss?.dead)return [{id:'HP-05',x:680,z:-1670,y:0}];
@@ -5267,6 +5277,7 @@ function secureRiftShards(){
 function securePendingSecret(){
   // Both host and guest call this boundary with their own collected shards.
   secureRiftShards();
+  if(inSnowbound()&&adventureStoryState().flags['ff.cache']){meta.cosmetics['cape:winter']=1;persistGlobal();toast('Winter Cloak secured — available at the Keeper.');}
   for(const id of G.pendingCompanions||[])if(PETS[id]?.questOnly&&!meta.petOwned.includes(id)){meta.petOwned.push(id);toast(PETS[id].name+' secured — equip at the Beastkeeper.');}G.pendingCompanions=[];
   // A claimed secret becomes permanent when its half is completed alive.
   if(G.pendingSecret){ const ps=G.pendingSecret; G.pendingSecret=null;
@@ -7233,11 +7244,12 @@ function canyonWindState(){
   if(!G?.canyonWind)return null;const p=G.p,w=G.canyonWind;w.time=G.time;
   const z=w.zones.find(z=>Math.hypot(p.x-z.x,p.z-z.z)<z.r&&Math.abs(p.y-z.y)<160);
   if(!z)return {sheltered:true,push:0};
+  if(inSnowbound())return {sheltered:false,left:0,...BFSnowbound.wind(G.time),vane:z.vane};
   const left=Math.max(0,w.vanes[z.vane].until-G.time),cycle=Math.sin(G.time*.6);
   return {sheltered:false,left,push:left>0?0:cycle,vane:z.vane};
 }
 function canyonWindInteract(){
-  if(inWindingCliffs())return null; // New cliff windbreak is a shared authored world action.
+  if(inWindingCliffs()||inSnowbound())return null; // New cliff windbreak is a shared authored world action.
   if(!G?.canyonWind)return null;const p=G.p;
   const v=G.canyonWind.vanes.find(v=>Math.hypot(v.x-p.x,v.z-p.z)<95&&Math.abs(p.y-v.y)<55);
   if(!v)return null;
@@ -7247,7 +7259,7 @@ function canyonWindInteract(){
 }
 function drawCanyonWind(c){
   const w=canyonWindState();if(!w)return;
-  const label=inWindingCliffs()&&G.storyState?.flags['hp.wind.safe']?'Windbreak tied · upper crossing sheltered':w.sheltered?'Canyon shelter · protected from gusts':w.left>0?'Windbreak steady · '+Math.ceil(w.left)+'s':Math.abs(w.push)>.55?'Crosswind · brace a windbreak or wait for the lull':'Wind easing · a good time to cross';
+  const label=inSnowbound()?(w.sheltered?'Rock shelter · protected from wind':w.phase==='calm'?'Wind quiet · cross now':w.phase==='warning'?'Cloth lifting · gust coming':'Strong gust · wait behind the rock'):inWindingCliffs()&&G.storyState?.flags['hp.wind.safe']?'Windbreak tied · upper crossing sheltered':w.sheltered?'Canyon shelter · protected from gusts':w.left>0?'Windbreak steady · '+Math.ceil(w.left)+'s':Math.abs(w.push)>.55?'Crosswind · brace a windbreak or wait for the lull':'Wind easing · a good time to cross';
   c.save();c.font='600 12px system-ui';c.textAlign='center';c.textBaseline='middle';const width=c.measureText(label).width+24;
   c.fillStyle='rgba(22,27,27,.85)';c.fillRect(VW/2-width/2,VH-205,width,25);c.fillStyle=w.left>0?'#8ee4d0':'#f2c882';c.fillText(label,VW/2,VH-192);c.restore();
 }
@@ -18646,6 +18658,7 @@ function drawCourse(s,t){
   drawLostCanyon(t);
   drawBrokenWalls(t);
   drawPrison(t);
+  drawSnowbound(t);
   drawBethRescue(t);
   drawBruteOrchard(t);
   if(G.marksmanArena)BFMarksman.draw({G,bx},t);
@@ -20657,7 +20670,7 @@ function render(t){
   const keepArtSky=window.__KEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const frostArtSky=window.__FROST_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const deepArtSky=window.__DEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
-  const sky=deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?[.110,.208,.278]:keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
+  const sky=deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.49,.62,.70]:[.110,.208,.278]):keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
@@ -21866,7 +21879,7 @@ window.__BF3={ trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syn
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2007"></script>
+<script type="module" src="./hero3d.js?v=2008"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

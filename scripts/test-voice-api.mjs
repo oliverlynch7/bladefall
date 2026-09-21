@@ -7,8 +7,9 @@ const cliffs=JSON.parse(await fs.readFile('public/3d/story/hollow-cliffs.json','
 const canyon=JSON.parse(await fs.readFile('public/3d/story/lost-canyon.json','utf8'));
 const keep=JSON.parse(await fs.readFile('public/3d/story/broken-walls.json','utf8'));
 const prison=JSON.parse(await fs.readFile('public/3d/story/prison-dungeons.json','utf8'));
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes}};
-let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
+const peaks=JSON.parse(await fs.readFile('public/3d/story/snowbound-peaks.json','utf8'));
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes}};
+let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
 const {handle,digest}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 class Bucket{
  data=new Map();seq=0;

@@ -241,3 +241,16 @@ Validation: 12 Hall browser assertions and 25 movement waypoints; nine controlle
 Limits: Hall/conversations support co-op, but existing trials lack synchronized trial identity and personal eligibility. Hall entry explicitly keeps training solo until that work ships. No trial arena/encounter redesign or Pyromancer implementation is claimed. Other seven regions retain old single-secret discovery until their five authored shard routes are built. RIFT-05/06 and the wider campaign therefore remain partial. Next: expanded Hollow Pass terrain, routes, puzzles, NPC quests, five shards and its unique boss arena, while tracking trial arena/co-op and Pyromancer dependency work. Existing music, cape/trail, equipment-fit and broader queue remain open where not previously verified.
 
 Private source archive `../../decision-archive/2026-09-20-rift-hall`: 147 user-role messages, zero unparsed lines, valid source references. User's longer-session preference preserved. This is one coherent release, not intermediate deployments.
+
+
+## [Codex | 2026-09-20] Rift Hall production verification
+ba01376 deployed successfully (Cloudflare e881e69c-11ab-4d8c-a4b9-cecf46164328). Read-only production browser confirmed version 2.001, all 36 new authored and catalog lines, 90 total Voice Studio lines with Keeper/seven mentor filters, all 26 gallery images loaded and no phone overflow at 390px. No production gameplay save or voice recording changed. This receipt stays queued for the next implementation commit to avoid a docs-only deployment. Next milestone: Hollow Pass expansion; the broader campaign, trial arena/co-op and Pyromancer work remain partial as listed above.
+
+
+## [Codex | 2026-09-20] Winding Cliffs — 2.002
+
+2.002 implements Winding Cliffs, Hollow Pass part one: eight named areas, split routes, bridge weights/brakes, Skip’s rope/ridge/javelin reward, HP-01/02, seeded support-count chest, shielded patrol or upper-rope approach, shared windbreak and limited pads. 13 Caleb/Skip recording lines; 103 total. Existing 90 lines unchanged. New modules: hollow-cliffs.js and story/hollow-cliffs.json. Integration still uses briar* shared story APIs; configureCliffCode derives the authored lock sequence from runSeed. New resetPuzzle effect supports the wrong brake. New geometry uses current sandstone art kit and highest-surface footprint subtraction.
+
+Validated 112 elevation-aware movement waypoints, 12 progression checks, ten controlled co-op checks, four shard rollback/banking/echo checks, three patrol/shield/wind checks, plus existing 11 checkpoint/legacy/trial checks and pure story/authority/puzzle/Voice API suites. Five real-renderer gallery shots; 390px dialogue fits. Controlled tests are not a balance certification or internet co-op soak. See ../IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md.
+
+Next: Lost Canyon's Ward/Ruth, cage rescues, alarm, wagon cave, freight puzzle and HP-03/04; then Marksman arena and HP-05. Part two has its approved name but still old gameplay; the boss is unchanged. Legacy Ninja access retained. Rest of approved queue remains open. Private archive ../../decision-archive/2026-09-20-winding-cliffs: 148 messages, zero unparsed, valid refs. Raw archives remain outside git.

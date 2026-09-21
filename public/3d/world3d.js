@@ -4,7 +4,7 @@ import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1972';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1972';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1972';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=1972';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2002';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -1983,7 +1983,7 @@ function signature(world){
   if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
   const d = world.deco || [];
   const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
-  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava].join('|')+'|';
+  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene].join('|')+'|';
   if(world.bonus&&world.sprintFun)return prefix+JSON.stringify(world.course||[]);
   if(!d.length) return prefix+'empty|'+world.segments.length+'|'+world.obstacles.length;
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];

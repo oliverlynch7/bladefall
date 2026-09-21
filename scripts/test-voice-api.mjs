@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 const briar=JSON.parse(await fs.readFile('public/3d/story/briar-foundation.json','utf8'));
 const hub=JSON.parse(await fs.readFile('public/3d/story/hub-dialogue.json','utf8'));
 const hall=JSON.parse(await fs.readFile('public/3d/story/rift-hall.json','utf8'));
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes}};
-let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
+const cliffs=JSON.parse(await fs.readFile('public/3d/story/hollow-cliffs.json','utf8'));
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes}};
+let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
 const {handle,digest}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 class Bucket{
  data=new Map();seq=0;

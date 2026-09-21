@@ -1,0 +1,688 @@
+{
+  "version": 1,
+  "region": "hollow",
+  "status": "Winding Cliffs recording-ready; Lost Canyon and Marksman follow in the next batch",
+  "npcs": {
+    "caleb": {
+      "name": "Caleb",
+      "role": "Escaped prisoner who helps you follow the transport trail",
+      "start": "hp.caleb.first"
+    },
+    "skip": {
+      "name": "Skip",
+      "role": "Climber who trades a useful ridge route for his missing rope",
+      "start": "hp.skip.first"
+    }
+  },
+  "nodes": {
+    "hp.caleb.first": {
+      "text": "You're from Briar? I saw the smoke. I ran when the wagon lost a wheel. Ruth stayed with the others. I told myself I'd come back with help. You're the first person who hasn't told me to keep running.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Then let's make the trip back count.",
+          "next": "hp.caleb.trail",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "hp.trail",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "hp.trail",
+              "region": "hollow",
+              "title": "The prisoner trail",
+              "text": "Caleb escaped from a broken wagon. Follow the wheel tracks past the split trail. Look for scraps of pale cloth."
+            }
+          ]
+        },
+        {
+          "id": "blame",
+          "text": "You left them behind?",
+          "next": "hp.caleb.blame"
+        }
+      ],
+      "voice": {
+        "speaker": "caleb",
+        "scene": "An escaped prisoner at the refuge",
+        "order": 1,
+        "emotion": "Exhausted male voice. Shame under the relief, not helplessness.",
+        "direction": "Exhausted male voice. Shame under the relief, not helplessness.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. An escaped prisoner at the refuge"
+      }
+    },
+    "hp.caleb.blame": {
+      "text": "Yes. I did. You can spend the morning telling me that, or we can find the people still in chains. I can get you to the wagon. After that, I need someone who can fight.",
+      "choices": [
+        {
+          "id": "repair",
+          "text": "You're right. Show me the trail.",
+          "next": "hp.caleb.trail",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "hp.trail",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "hp.trail",
+              "region": "hollow",
+              "title": "The prisoner trail",
+              "text": "Follow the broken wagon tracks beyond the split trail. Pale cloth marks the bend."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "caleb",
+        "scene": "A blunt challenge",
+        "order": 2,
+        "emotion": "Hurt, but firm. He will not let an argument cost the prisoners their chance.",
+        "direction": "Hurt, but firm. He will not let an argument cost the prisoners their chance.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. A blunt challenge"
+      }
+    },
+    "hp.caleb.trail": {
+      "text": "Take the lower path past the split rocks. The wagon is below the tall stone arch. I tied bits of my shirt along the trail. It was a good shirt. I'd like to call that a noble sacrifice, but the wheels had already ruined it.",
+      "choices": [
+        {
+          "id": "timing",
+          "text": "How far ahead are they?",
+          "next": "hp.caleb.timing"
+        },
+        {
+          "id": "help",
+          "text": "Can anyone down there help us?",
+          "next": "hp.caleb.ruth"
+        },
+        {
+          "id": "orders",
+          "text": "Their orders say Ruined Keep.",
+          "next": "hp.caleb.keep",
+          "when": [
+            {
+              "flag": "hp.orders",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "caleb",
+        "scene": "Directions without revealing every location",
+        "order": 3,
+        "emotion": "Practical. A brief, tired smile at the shirt joke.",
+        "direction": "Practical. A brief, tired smile at the shirt joke.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Directions without revealing every location"
+      }
+    },
+    "hp.caleb.timing": {
+      "text": "They wait at the canyon cages until the next escort arrives. The lookout controls the lift down. Lower the freight bridge first. You can fight through the lookout, or try the high shelves behind it. I wouldn't cross those shelves in a strong gust.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Tell me about the others.",
+          "next": "hp.caleb.ruth"
+        },
+        {
+          "id": "trail",
+          "text": "The wagon first. Understood.",
+          "next": "hp.caleb.trail"
+        }
+      ],
+      "voice": {
+        "speaker": "caleb",
+        "scene": "Escort timing and two approaches",
+        "order": 4,
+        "emotion": "Measured urgency. Do not imply an invisible countdown has started.",
+        "direction": "Measured urgency. Do not imply an invisible countdown has started.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Escort timing and two approaches"
+      }
+    },
+    "hp.caleb.ruth": {
+      "text": "Ruth kept us moving when the guards stopped feeding us. She counted everyone at every stop. Not numbers. Names. If she's still there, she'll know who needs help and which cages they moved.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll look for her.",
+          "next": "hp.caleb.trail"
+        }
+      ],
+      "voice": {
+        "speaker": "caleb",
+        "scene": "Why these prisoners matter",
+        "order": 5,
+        "emotion": "Sincere respect, with a little strength returning.",
+        "direction": "Sincere respect, with a little strength returning.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Why these prisoners matter"
+      }
+    },
+    "hp.caleb.keep": {
+      "text": "Ruined Keep. Then those cages are only a stop along the way. Get them out before the next escort leaves. I'll stay where anyone escaping can see me. This time, nobody has to make that walk alone.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll open the way down.",
+          "next": "hp.caleb.trail"
+        }
+      ],
+      "voice": {
+        "speaker": "caleb",
+        "scene": "Evidence gives the journey its next destination",
+        "order": 6,
+        "emotion": "Resolve replaces guilt. No knowledge of the hidden castle.",
+        "direction": "Resolve replaces guilt. No knowledge of the hidden castle.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Evidence gives the journey its next destination"
+      }
+    },
+    "hp.skip.first": {
+      "text": "Mind the edge. It has a very strict no-refunds policy. Name's Skip. I climb these cliffs for a living, which sounded much better before I said it out loud.",
+      "choices": [
+        {
+          "id": "rope",
+          "text": "You look like you lost something.",
+          "next": "hp.skip.rope",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "hp.skip.quest",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "hp.rope",
+              "region": "hollow",
+              "title": "Skip’s rope",
+              "text": "Skip dropped his rope below the broken platform east of his rest spot. Bring it back to open his ridge route."
+            }
+          ]
+        },
+        {
+          "id": "path",
+          "text": "Is there another way past the patrol?",
+          "next": "hp.skip.advice"
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "Meeting the local climber",
+        "order": 7,
+        "emotion": "Light male voice. Dry, friendly humor; never mock the player.",
+        "direction": "Light male voice. Dry, friendly humor; never mock the player.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Meeting the local climber"
+      }
+    },
+    "hp.skip.rope": {
+      "text": "My good rope is hanging below the broken platform east of here. There is a lower shelf you can reach without a long fall. Bring it back and I'll rig the ridge crossing. There's a spear in it for you, too. Long reach. Useful when something bites.",
+      "choices": [
+        {
+          "id": "return",
+          "text": "Here is your rope.",
+          "next": "hp.skip.thanks",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "hp.skip.returned",
+              "value": true
+            },
+            {
+              "type": "reward",
+              "id": "hp.cliffrunner",
+              "kind": "cliff_runner",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "hp.ridge",
+              "region": "hollow",
+              "title": "Skip’s ridge is open",
+              "text": "Skip has rigged the high ridge beyond his rest spot. Short jumps lead to a hidden overlook. A broad lower shelf catches missed jumps."
+            }
+          ],
+          "when": [
+            {
+              "flag": "hp.rope",
+              "is": true
+            },
+            {
+              "flag": "hp.skip.returned",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "advice",
+          "text": "How should I cross the ridge?",
+          "next": "hp.skip.advice"
+        },
+        {
+          "id": "joke",
+          "text": "Does the spear come with a no-falling promise?",
+          "next": "hp.skip.joke"
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "A return quest with a useful reward",
+        "order": 8,
+        "emotion": "Clear directions first; warm grin on the last sentence.",
+        "direction": "Clear directions first; warm grin on the last sentence.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. A return quest with a useful reward"
+      }
+    },
+    "hp.skip.joke": {
+      "text": "Absolutely. The spear has never fallen off a cliff. I have, twice. We agreed not to hold each other responsible.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll find the rope.",
+          "next": "hp.skip.rope"
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "A small joke, no extra branch burden",
+        "order": 9,
+        "emotion": "Deadpan, then a quick smile.",
+        "direction": "Deadpan, then a quick smile.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. A small joke, no extra branch burden"
+      }
+    },
+    "hp.skip.advice": {
+      "text": "Watch the hanging cloth. When it drops, the wind is easing. You can tie the windbreak below this shelf shut to shelter the upper crossing. On the high ridge, take one landing at a time. That purple glint up there is real. I wasn't brave enough to check it.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About that rope...",
+          "next": "hp.skip.rope",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "hp.skip.quest",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "Climbing advice, not an exact shard marker",
+        "order": 10,
+        "emotion": "Confident about climbing; mildly embarrassed about the glint.",
+        "direction": "Confident about climbing; mildly embarrassed about the glint.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Climbing advice, not an exact shard marker"
+      }
+    },
+    "hp.skip.thanks": {
+      "text": "That's the one. I've tied off the ridge crossing. And here's Cliff Runner, as promised. Try the long pointy end first. People keep inventing much worse ways to use it.",
+      "choices": [
+        {
+          "id": "route",
+          "text": "Any last advice?",
+          "next": "hp.skip.ready"
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "Quest turned in; ridge and fixed javelin reward",
+        "order": 11,
+        "emotion": "Genuine gratitude with an easy laugh.",
+        "direction": "Genuine gratitude with an easy laugh.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Quest turned in; ridge and fixed javelin reward"
+      }
+    },
+    "hp.skip.ready": {
+      "text": "The ridge is yours. If you're heading for the prisoners, the freight bridge is below us. Match its hanging weights to the marks on the plate, then use the brake attached to the bridge. The other brake holds the cart. Ask me how I learned that.",
+      "choices": [
+        {
+          "id": "joke",
+          "text": "How did you learn that?",
+          "next": "hp.skip.brake"
+        },
+        {
+          "id": "thanks",
+          "text": "Thanks, Skip.",
+          "next": "hp.skip.ready"
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "Post-quest practical guidance",
+        "order": 12,
+        "emotion": "Helpful, then wary amusement.",
+        "direction": "Helpful, then wary amusement.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Post-quest practical guidance"
+      }
+    },
+    "hp.skip.brake": {
+      "text": "A very short ride. A very long walk back.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I'll read the plate.",
+          "next": "hp.skip.ready"
+        }
+      ],
+      "voice": {
+        "speaker": "skip",
+        "scene": "A quick button on the joke",
+        "order": 13,
+        "emotion": "Brief deadpan. Let the pause do the work.",
+        "direction": "Brief deadpan. Let the pause do the work.",
+        "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. A quick button on the joke"
+      }
+    }
+  },
+  "events": {
+    "hp.orders": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.orders",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "hp.orders",
+          "region": "hollow",
+          "title": "Prisoner transport orders",
+          "text": "The prisoners are bound for Ruined Keep. First reach the Lost Canyon holding yard. The freight bridge leads to the lookout and its lift."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "hp.trail",
+          "is": true
+        }
+      ]
+    },
+    "hp.rope": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.rope",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "hp.rope",
+          "region": "hollow",
+          "title": "Rope found",
+          "text": "Bring the rope back to Skip at the high rest spot."
+        }
+      ],
+      "once": true
+    },
+    "hp.bridge.clue": {
+      "effects": [
+        {
+          "type": "note",
+          "id": "hp.bridge",
+          "region": "hollow",
+          "title": "Freight bridge",
+          "text": "The plate has seven marks. Three hanging weights show two, three and five marks. The bridge brake has a cable running to the bridge; the cart brake holds the wagon."
+        }
+      ],
+      "once": true
+    },
+    "hp.weight.2": {
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "hp.weight",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "index": 0,
+          "target": 7
+        }
+      ],
+      "once": false,
+      "when": [
+        {
+          "flag": "hp.bridge",
+          "is": false
+        }
+      ]
+    },
+    "hp.weight.3": {
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "hp.weight",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "index": 1,
+          "target": 7
+        }
+      ],
+      "once": false,
+      "when": [
+        {
+          "flag": "hp.bridge",
+          "is": false
+        }
+      ]
+    },
+    "hp.weight.5": {
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "hp.weight",
+          "weights": [
+            2,
+            3,
+            5
+          ],
+          "index": 2,
+          "target": 7
+        }
+      ],
+      "once": false,
+      "when": [
+        {
+          "flag": "hp.bridge",
+          "is": false
+        }
+      ]
+    },
+    "hp.brake.wrong": {
+      "effects": [
+        {
+          "type": "resetPuzzle",
+          "id": "hp.weight"
+        },
+        {
+          "type": "note",
+          "id": "hp.bridge.mistake",
+          "region": "hollow",
+          "title": "The wrong brake",
+          "text": "The cart rolled against its stop, and the weights dropped back. Nobody was hurt. Use the brake connected to the bridge."
+        }
+      ],
+      "once": false,
+      "when": [
+        {
+          "flag": "hp.bridge",
+          "is": false
+        }
+      ]
+    },
+    "hp.brake.right": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.bridge",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "hp.bridge.done",
+          "region": "hollow",
+          "title": "Bridge lowered",
+          "text": "The freight bridge is down. The lower path leads through the patrol. The high shelves reach a rope behind the lookout."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "hp.orders",
+          "is": true
+        },
+        {
+          "flag": "hp.weight.open",
+          "is": true
+        }
+      ]
+    },
+    "hp.quiet": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.quiet",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "hp.quiet",
+          "region": "hollow",
+          "title": "Behind the lookout",
+          "text": "You tied a rope behind the lookout. You can reach the lift without fighting through the lower patrol."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "hp.bridge",
+          "is": true
+        }
+      ]
+    },
+    "hp.lift": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.descent",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "hp.descent",
+          "region": "hollow",
+          "title": "The way down",
+          "text": "The lift into Lost Canyon is ready. Find Ruth and stop the next prisoner transport."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "hp.bridge",
+          "is": true
+        }
+      ]
+    },
+    "hp.code.clue": {
+      "effects": [
+        {
+          "type": "note",
+          "id": "hp.code",
+          "region": "hollow",
+          "title": "The cliff chest",
+          "text": "Three groups of marked supports sit along this side trail. Count the marked supports beneath one dot, then two dots, then three dots. Press those three numbers on the chest lock. A wrong number starts it over."
+        }
+      ],
+      "once": true
+    },
+    "hp.code.1": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "hp.code",
+          "solution": [
+            1,
+            2,
+            3
+          ],
+          "value": 1
+        }
+      ],
+      "once": false
+    },
+    "hp.code.2": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "hp.code",
+          "solution": [
+            1,
+            2,
+            3
+          ],
+          "value": 2
+        }
+      ],
+      "once": false
+    },
+    "hp.code.3": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "hp.code",
+          "solution": [
+            1,
+            2,
+            3
+          ],
+          "value": 3
+        }
+      ],
+      "once": false
+    },
+    "hp.code.claim": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.code.claimed",
+          "value": true
+        },
+        {
+          "type": "reward",
+          "id": "hp.cliffcache",
+          "kind": "cliff_cache",
+          "amount": 1
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "hp.code.open",
+          "is": true
+        }
+      ]
+    },
+    "hp.windbreak": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.wind.safe"
+        },
+        {
+          "type": "note",
+          "id": "hp.wind",
+          "region": "hollow",
+          "title": "The windbreak is tied shut",
+          "text": "The cloth screens now shelter the exposed upper crossing. The lower trail remains safe too."
+        }
+      ]
+    }
+  }
+}

@@ -160,3 +160,8 @@ User explicitly welcomes longer consecutive work sessions when they reduce overh
 
 ## [Codex | 2026-09-20] Rift Hall implementation evidence
 RIFT-03 implemented as a separate room with saved-only personal assembly and co-op Keeper conversation. RIFT-05/06 partial: seven existing classes now have authored teachers, while new trial arenas, co-op trials, Pyromancer and later-region five-shard content remain open. See `docs/IMPLEMENTATION_RIFT_HALL_2026-09-20.md` and continuity release receipt. No new user canon decisions; no personal mentor names or rift creators invented. 36 new recording-ready lines; existing 54 unchanged. Private source archive preserves 147 messages.
+
+
+## [Codex | 2026-09-20] Winding Cliffs — 2.002
+
+Latest user instruction preserved: “Continue another long work session. Don’t waste usage.” No new creative requirements inferred. Private archive ../../decision-archive/2026-09-20-winding-cliffs contains 148 user-role messages, zero unparsed lines and valid references. Implemented the approved Winding Cliffs plan using shared story/checkpoint systems; one release. Full scope, implementation choices, verification and limits: ../IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md. Remaining Hollow Pass content is still explicitly open.

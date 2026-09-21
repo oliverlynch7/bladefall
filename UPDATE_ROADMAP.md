@@ -1792,3 +1792,7 @@ Authored campaign orchard/barn arena, charge-cover stagger, jumpable slam, two f
 
 ## [Codex | 2026-09-20] 2.001.0-rift-hall
 Separate Rift Hall, personal five-saved-shard assembly, legacy class-access preservation, shared Keeper conversation, seven existing-class teachers and 36 new Voice Studio lines (90 total). Six reviewed previews. Browser solo/co-op, mentor/equipment, save/checkpoint and story/voice checks passed; limits and next region recorded in requirements continuity. Trial arena redesigns, co-op trial combat and Pyromancer remain pending.
+
+
+## [Codex | 2026-09-20] 2.002 — Winding Cliffs
+Expanded Hollow Pass part one: prisoner trail, split routes, bridge weights/brakes, Skip’s rope and uncommon javelin, two physical Ninja shards, seeded code chest, lookout approach choices, 13 new recording lines, shared world state and mobile previews. Lost Canyon/Marksman redesign next. See docs/IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md for verification and limits.

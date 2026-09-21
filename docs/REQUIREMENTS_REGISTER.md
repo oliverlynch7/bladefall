@@ -345,3 +345,8 @@ Private archive 2026-09-20-brute-orchard preserves 145 user-role messages, zero 
 
 ### Implementation evidence — 2.001 Rift Hall and mentors
 RIFT-03 room/labels/assembly live in this release; RIFT-02 introduction now points to Hall. RIFT-05 partial: seven role-named class-specific teachers and 28 recording-ready lines, eight Keeper lines; trial encounters remain their existing designs. RIFT-06 frame mapping follows approved classes; later-region shard placement and Pyromancer remain open. Save-safe legacy access is carried by its original class, not reinterpreted as a new region reward. Co-op Hall/shared dialogue and personal assembly verified with controlled packets; trial combat explicitly remains solo pending correct party eligibility/synchronization. Full evidence: `IMPLEMENTATION_RIFT_HALL_2026-09-20.md` and `requirements/CONTINUITY.md`. No claim that the whole campaign expansion is complete.
+
+
+## [Codex | 2026-09-20] Winding Cliffs — 2.002
+
+Partial implementation evidence for GOV-02, campaign exploration, NPC/VO, puzzle, co-op and Rift Shard requirements: Hollow Pass part one now has the authored Winding Cliffs journey, Caleb/Skip, bridge/rope/code puzzles and HP-01/02. 13 new recording lines; 103 catalog total. See [implementation and verification](IMPLEMENTATION_WINDING_CLIFFS_2026-09-20.md). Lost Canyon, its remaining shards and the Marksman redesign remain pending. This is not completion of the broader campaign or entire approved queue.

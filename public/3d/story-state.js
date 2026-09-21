@@ -39,8 +39,9 @@
           if(s.items[e.id]===e.target)s.flags[e.id+'.open']=true;
           break;
         }
+        case 'resetPuzzle':s.items[e.id]=0;s.items[e.id+'.mask']=0;s.flags[e.id+'.open']=false;break;
         case 'sequence':{
-          if(!Array.isArray(e.solution)||!e.solution.length||!e.solution.includes(e.value))throw Error('Invalid sequence');
+          if(!Array.isArray(e.solution)||!e.solution.length||typeof e.value!==typeof e.solution[0])throw Error('Invalid sequence');
           if(s.flags[e.id+'.open'])break;
           const at=Number(s.items[e.id]||0);
           s.items[e.id]=e.value===e.solution[at]?at+1:(e.value===e.solution[0]?1:0);

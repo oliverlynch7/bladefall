@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),S=require('../public/3d/story-state.js'),C=require('../public/3d/hollow-cliffs.js');
+const book=JSON.parse(fs.readFileSync('public/3d/story/hollow-cliffs.json','utf8'));let s=S.create(),seq=0;
+function doEvent(type,fields){const r=S.transact(s,book,{id:'test-'+ ++seq,type,...fields});s=r.state;return r.changed;}
+function world(key){return doEvent('world',{key});}function choose(id){return doEvent('choose',{line:s.conversation.node,choice:id});}
+assert(!world('hp.orders'));doEvent('open',{npc:'caleb'});choose('blame');choose('repair');assert(s.flags['hp.trail']);doEvent('close');assert(world('hp.orders'));
+assert(!world('hp.brake.right'));world('hp.weight.2');world('hp.weight.5');assert(s.flags['hp.weight.open']);world('hp.brake.wrong');assert(!s.flags['hp.weight.open']);assert.equal(s.items['hp.weight.mask'],0);assert(!world('hp.brake.right'));
+world('hp.weight.2');world('hp.weight.5');world('hp.brake.right');assert(s.flags['hp.bridge']);assert(!world('hp.brake.wrong'));
+doEvent('open',{npc:'skip'});choose('rope');assert(!choose('return'));doEvent('close');world('hp.rope');doEvent('open',{npc:'skip'});assert(choose('return'));assert(s.flags['hp.skip.returned']);assert.equal(Object.keys(s.rewards).length,1);doEvent('close');assert(!world('hp.rope'));assert(C.shards(s).some(x=>x.id==='HP-02'));
+for(const seed of [0,1,42,912345,'party-seed']){const sol=C.code(seed);assert(sol.every(n=>n>=1&&n<=3));assert.deepEqual(C.code(seed),sol);for(let n=1;n<=3;n++)book.events['hp.code.'+n].effects[0].solution=sol;s=S.create();world('hp.code.'+sol[0]);world('hp.code.'+(sol[1]%3+1));assert(!s.flags['hp.code.open']);s=S.create();for(const n of sol)world('hp.code.'+n);assert(s.flags['hp.code.open']);assert(world('hp.code.claim'));assert(!world('hp.code.claim'));}
+for(const [id,n]of Object.entries(book.nodes)){assert(n.voice.speaker in book.npcs);assert(n.voice.context&&n.voice.direction);for(const c of n.choices)assert(c.next in book.nodes,id+': missing '+c.next);}
+console.log('Winding Cliffs: blame/repair main route, weight reset, bridge gate, rope return, once-only rewards, seeded code and all dialogue links passed.');

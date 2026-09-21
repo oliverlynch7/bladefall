@@ -27,11 +27,26 @@ export function buildHollow(scene,w){
   const surfaces=new Map();
   function surface(o,base,top,wood=false){
     if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood);
-    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},base+':'+top))rawSurface(part,base,top,wood);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},w.cliffScene!=null?'cliff-union':base+':'+top))rawSurface(part,base,top,wood);
   }
   function rawSurface(o,base,top,wood=false){
     const ww=o.w||20,dd=o.d||ww,height=Math.max(1,top-base),r=hash(o.x,o.z),c=palette[Math.floor(r*5)];
     if(o.canyonCliff){add('column',o.x,base,o.z,ww,height,dd,'#b78954',r*.22);return;}
+    // The expanded pass is carved out of rock, not a staircase of floating paving slabs.
+    // Collision tops remain exact; the rock beneath extends into the canyon mist.
+    if(w.cliffScene!=null&&!wood){
+      const bottom=-360,depth=top-bottom;
+      add('stone',o.x,bottom+depth/2,o.z,ww,depth,dd,'#977047');
+      add('timber',o.x,top+.55,o.z,ww,1.1,dd,c);
+      for(let y=bottom+65;y<top-10;y+=72){
+        for(const side of [-1,1]){
+          block(o.x,y,o.z+side*(dd/2-.7),ww,4,1.6,'#b28a57');
+          block(o.x+side*(ww/2-.7),y,o.z,1.6,4,dd,'#b28a57');
+        }
+      }
+      if(ww>160&&dd>160&&r<.3)add('scree',o.x+ww*.31,top+1,o.z-dd*.27,17,9,20);
+      floors++;return;
+    }
     if(top===0&&!wood){
       add('stone',o.x,base+height/2,o.z,ww,height,dd,'#b78b56');
       add('timber',o.x,.4,o.z,ww+0.02,1.2,dd+0.02,'#cba36b');floors++;
@@ -59,6 +74,13 @@ export function buildHollow(scene,w){
     if(top>130&&ww>=80&&dd>=70&&r<.36){add('scree',o.x,top+1.2,o.z,30,25,30);if(r<.12)add('thorn',o.x+ww*.21,top+1,o.z,24,30,24);else add('tuft',o.x-ww*.22,top+1,o.z,28);}
   }
   // Subtract overlapping road rectangles before tiling; crossing roads must not z-fight.
+  if(w.cliffScene!=null){
+    // Highest surface owns each footprint. Subtract lower overlaps before adding cliff faces,
+    // preventing coplanar sidewalls and caps along the switchbacks.
+    const entries=[...tops.map(o=>({o,base:o.y0??Math.min(0,o.h-18),top:o.h,solid:true})),
+      ...(w.segments||[]).filter(o=>!o.nofloor).map(o=>({o,base:-25,top:0}))].sort((a,b)=>b.top-a.top);
+    for(const e of entries){source=e.solid?e.o:null;surface(e.o,e.base,e.top,!!e.o.bridge);if(e.solid)obstacles.add(e.o);}
+  }else{
   const laid=[];
   for(const s of w.segments||[]){if(s.nofloor)continue;let pieces=[{a:s.x-s.w/2,b:s.x+s.w/2,c:s.z-s.d/2,d:s.z+s.d/2}];
     for(const old of laid)pieces=pieces.flatMap(p=>{const a=Math.max(p.a,old.a),b=Math.min(p.b,old.b),c=Math.max(p.c,old.c),d=Math.min(p.d,old.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.01&&q.d-q.c>.01)});
@@ -69,6 +91,7 @@ export function buildHollow(scene,w){
       for(const side of [-1,1])for(let i=0;i<=Math.floor(length/65);i++){const u=-length/2+i*length/Math.max(1,Math.floor(length/65));add('timber',o.x+(alongX?u:side*(width/2-3)),top+17,o.z+(alongX?side*(width/2-3):u),3,34,3,'#6e5436');}
       for(const side of [-1,1])add('timber',o.x+(alongX?0:side*(width/2-3)),top+28,o.z+(alongX?side*(width/2-3):0),alongX?length:2.2,2.2,alongX?2.2:length,'#ad9060');
     }
+  }
   }
   source=null;
   // Replace the old decorative canyon scatter, preserving every supplied anchor and height.

@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');const {createQueue,readingTime}=require('../public/3d/journal-notice.js');
+const q=createQueue(),a={a:{region:'keep',title:'Cell list',text:'Find the service marks behind the west cells.'}};
+q.observe('keep',a,'keep');assert.equal(q.pending,0,'loaded notes are not replayed');
+const b={...a,b:{region:'keep',title:'Lift weights',text:'The marks show a total of four.'}};
+q.observe('keep',b,'keep');assert.equal(q.pending,1);q.observe('keep',b,'keep');assert.equal(q.pending,1,'duplicate snapshot');
+q.tick(100,false);assert.equal(q.current,null,'conversation defers showing');q.tick(0,true);assert.equal(q.current.title,'Lift weights');const left=q.remaining;q.tick(100,false);assert.equal(q.remaining,left,'menus pause reading');q.tick(100,true,true);assert.equal(q.remaining,left,'hover and focus hold');q.tick(left-1,true);assert.ok(q.current);q.tick(2,true);assert.equal(q.current,null);
+q.observe('keep',b,'keep');assert.equal(q.pending,0,'expired notes never replay');
+q.observe('keep',{...b,b:{...b.b,text:'The lift is balanced. Lead the group to shelter.'}},'keep');assert.equal(q.pending,1,'changed note is announced');
+q.observe('frost',b,'frost');assert.equal(q.pending,0,'scene clears queue');
+q.push({id:'x',title:'Old',text:'First'});q.push({id:'x',title:'New',text:'Latest'});assert.equal(q.pending,1);q.tick(0,true);assert.equal(q.current.title,'New');q.dismiss();assert.equal(q.current,null);
+assert.ok(readingTime('word '.repeat(100))>45,'long notes get reading time');assert.ok(readingTime('One word')>=10);q.reset('frost',{});q.observe('frost',{a:a.a},'frost');assert.equal(q.pending,0,'other region not shown');
+console.log('Journal notice passed: restore, dedupe, queued changes, scene reset, dialogue/menu pause, hover hold, dismissal, length-based reading.');

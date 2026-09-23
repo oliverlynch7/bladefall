@@ -455,3 +455,10 @@ Shared story/authority, Rift ledger/Hall, music score, mob-module identity and V
 Preservation: private archive ../../decision-archive/2026-09-22-palace-courtyard has 171 messages, zero unparsed. Archive initially flagged U170 because its source file lacked the required heading; appended that heading, then validated all register references. No source wording removed. Date changed during session; grounded plan/source filenames retain September 22.
 
 Next: Sky Library routes/rotating shelves, Hugh and Simon, crystalline rift history, remaining three Paladin shards, guardian challenge, then distinct Marble Colossus arena and post-boss orb vision. Follow latest canonical orb question and reveal limits; never use the superseded viewing-frame/eye-vision proposal. Do not claim the full approved queue complete.
+
+## [Codex | 2026-09-23] Palace Courtyard production receipt
+Main 307e230 deployed successfully as f5feba18-3378-4fbe-b348-ad6efb041dc9. Read-only production Chromium verified 2.017.0-palace-courtyard, courtyard modules/story HTTP 200, 254 Voice Studio catalog lines and all 122 gallery images decoded at 390px without horizontal overflow. No production saves or recorded takes changed. Next: Sky Library half two, remaining Paladin shards, Marble Colossus redesign and post-boss orb scene; those remain legacy/pending.
+
+## [Codex | 2026-09-23] Sky Library
+
+Sky Library implemented as 2.018.0; see IMPLEMENTATION_SKY_LIBRARY_2026-09-23.md for scope and tests. Next: Marble Colossus circular reading hall with protective screens and armor seals, followed by the orb’s one question, soul vision and Castle Duskmoor directions. No final-cut/Ian spoilers. Then Castle’s two halves and finale; dragon remains pending. Private archive ../../decision-archive/2026-09-23-sky-library has 173 entries, zero unparsed; U172 environment metadata, U173 continuation. Ten new preview images, 268 voice lines. Do not claim campaign overhaul complete.

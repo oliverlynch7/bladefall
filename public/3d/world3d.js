@@ -1,3 +1,4 @@
+import {buildSkyLibrary} from './sky-library-art.js?v=2018';
 import {buildPalaceCourt} from './palace-courtyard-art.js?v=2017';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2016';
 import {buildStorm,updateStorm} from './storm-art.js?v=2015';
@@ -1767,7 +1768,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
- if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
+ if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.shipScene){clearWorld(scene);const art=world.shipScene==='hydra'||world.shipScene.startsWith('cliffs')?buildCoastHigh(scene,world):buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}

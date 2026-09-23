@@ -40,6 +40,14 @@
           if(s.items[e.id]===e.target)s.flags[e.id+'.open']=true;
           break;
         }
+        case 'rotatePuzzle':{
+          if(!Array.isArray(e.target)||!e.target.length||e.target.length>8||!e.target.every(n=>Number.isInteger(n)&&n>=0&&n<4)||!Number.isInteger(e.index)||e.index<0||e.index>=e.target.length)throw Error('Invalid rotating puzzle');
+          if(s.flags[e.id+'.open'])break;
+          const key=e.id+'.'+e.index;s.items[key]=((s.items[key]||0)+1)%4;
+          s.items[e.id+'.turns']=(s.items[e.id+'.turns']||0)+1;
+          if(e.target.every((n,i)=>(s.items[e.id+'.'+i]||0)===n))s.flags[e.id+'.open']=true;
+          break;
+        }
         case 'resetPuzzle':s.items[e.id]=0;s.items[e.id+'.mask']=0;s.flags[e.id+'.open']=false;break;
         case 'sequence':{
           if(!Array.isArray(e.solution)||!e.solution.length||typeof e.value!==typeof e.solution[0])throw Error('Invalid sequence');

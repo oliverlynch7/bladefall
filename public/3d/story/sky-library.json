@@ -1,0 +1,841 @@
+{
+  "version": 1,
+  "region": "palace",
+  "status": "authored",
+  "npcs": {
+    "hugh": {
+      "name": "Master Hugh",
+      "role": "Senior keeper; careful, proud, slowly learning to trust outsiders",
+      "start": "sl.hugh.hello"
+    },
+    "simon": {
+      "name": "Simon",
+      "role": "Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it",
+      "start": "sl.simon.hello"
+    }
+  },
+  "nodes": {
+    "sl.hugh.hello": {
+      "text": "Stop there. These halls hold knowledge that can hurt people. I used to think a locked door was enough to keep it safe.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "The Legion is already using it. Help me stop them.",
+          "next": "sl.hugh.need",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.met",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "rules",
+          "text": "You still care about rules? Look around.",
+          "next": "sl.hugh.cold",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.met",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "sl.rude",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "work",
+          "text": "What can I do to help?",
+          "next": "sl.hugh.records",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.met",
+              "value": true
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.hugh.need": {
+      "text": "Grace told me what happened below. People came here for shelter, not a lesson in patience. I cannot keep the door shut and call that protection.",
+      "choices": [
+        {
+          "id": "open",
+          "text": "Then let me through.",
+          "next": "sl.hugh.open",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.access",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "sl.access",
+              "region": "palace",
+              "title": "Knowledge under guard",
+              "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "records",
+          "text": "Are any records in danger?",
+          "next": "sl.hugh.records",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.hugh.cold": {
+      "text": "Yes. The rule about not handing dangerous knowledge to people who demand it loudly. That one has aged quite well.",
+      "choices": [
+        {
+          "id": "sorry",
+          "text": "I am afraid for the people back home. That came out badly.",
+          "next": "sl.hugh.need",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "work",
+          "text": "Let me prove I will take care of this place.",
+          "next": "sl.hugh.records",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "leave",
+          "text": "I will find another way.",
+          "next": "sl.hugh.wait",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sl.service",
+              "region": "palace",
+              "title": "Another way inside",
+              "text": "A service passage runs below the west side of Hugh’s desk. Its latch can be opened from below. Hugh can also be approached again."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.hugh.wait": {
+      "text": "The service workers never needed my permission to fix a broken door. I may have been too proud to notice what that says about my permission.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Can we start again?",
+          "next": "sl.hugh.need",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "work",
+          "text": "Tell me about the damaged records.",
+          "next": "sl.hugh.records",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.hugh.records": {
+      "text": "The east records room has a broken window. Lift the loose pages onto the dry desk before the rain gets in. No grand test. Just leave something better than you found it.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will take care of it.",
+          "next": "sl.hugh.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.records.known",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "sl.records",
+              "region": "palace",
+              "title": "Save the loose pages",
+              "text": "Use the rising east walkway. Lift the fallen records onto the dry desk, then tell Hugh they are safe."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "done",
+          "text": "The pages are safe on the desk.",
+          "next": "sl.hugh.open",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.access",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "sl.access",
+              "region": "palace",
+              "title": "Knowledge under guard",
+              "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
+            }
+          ],
+          "when": [
+            {
+              "flag": "sl.records",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.hugh.open": {
+      "text": "Take the central aisle. The Legion moved its orders into the reading hall. Beyond that is the guardian. It no longer knows the difference between a thief and someone trying to save us.",
+      "choices": [
+        {
+          "id": "orb",
+          "text": "What should I ask the orb?",
+          "next": "sl.hugh.orb",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "done",
+          "text": "I will find those orders.",
+          "next": "sl.hugh.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.hugh.orb": {
+      "text": "Ask what you came to learn. One clear question. The orb does not care how many titles you have. I spent years checking titles at the door. I wish I had noticed that sooner.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "How can we stop the Abyss King?",
+          "next": "sl.hugh.wait",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sl.question",
+              "region": "palace",
+              "title": "The question that matters",
+              "text": "You came to Sunspire to learn how to stop the Abyss King. Reach the orb beyond the guardian. Hugh warns that it answers one clear question."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "hugh",
+        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+      }
+    },
+    "sl.simon.hello": {
+      "text": "Welcome to the restricted shelves. We have rules for reading, rules for borrowing, and, until yesterday, a rule against running from armed invaders.",
+      "choices": [
+        {
+          "id": "shelf",
+          "text": "What is across that gap?",
+          "next": "sl.simon.shelf",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.shelf.known",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "legion",
+          "text": "Why did they take the library?",
+          "next": "sl.simon.legion",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "stands",
+          "text": "What are those three stands?",
+          "next": "sl.simon.stands",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sl.vow.known",
+              "value": true
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "sl.simon.shelf": {
+      "text": "A shard landed behind the turning shelves. The handles move the shelves and their small bridges together. Look at the arrows on the guide. We designed it for readers, not acrobats.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will work it out.",
+          "next": "sl.simon.hello",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sl.shelves",
+              "region": "palace",
+              "title": "The turning shelves",
+              "text": "Three handles turn the shelf bridges. The guide beside them shows their directions. Match all three to reach the far shelf and its Rift Shard."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "hint",
+          "text": "Give me a hint.",
+          "next": "sl.simon.hint",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "sl.simon.hint": {
+      "text": "The first handle points toward the sunrise. The next points back toward Hugh. The last points away from the rising sun. Start with the little gold tips, not the book spines.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "That gives me enough to try.",
+          "next": "sl.simon.hello",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sl.shelf.hint",
+              "region": "palace",
+              "title": "Simon’s hint",
+              "text": "Set the first gold tip east, the second south, and the third west. North is toward the guardian door. The handles keep turning one step at a time."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "sl.simon.legion": {
+      "text": "Maps, old spells, ways to break a city without touching its walls. Knowledge is power. It is also meant to be shared. We remembered the first part and forgot the second.",
+      "choices": [
+        {
+          "id": "rifts",
+          "text": "What happened to the empty displays?",
+          "next": "sl.simon.frames",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "back",
+          "text": "I should keep looking.",
+          "next": "sl.simon.hello",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "sl.simon.frames": {
+      "text": "One of our senior scholars threw the training rifts from the palace before the Legion could take them. They broke in the fall. Somewhere down there, people can still put those lessons back together.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "Then the lessons survived.",
+          "next": "sl.simon.hello",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sl.frames",
+              "region": "palace",
+              "title": "The frames that fell",
+              "text": "A scholar threw the crystalline training rifts from Sunspire to keep them from the Legion. Their pieces scattered across Aerth. The Rift Hall can restore their training paths."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "sl.simon.stands": {
+      "text": "The Legion left a spell on those archive stands. Wake one seal at a time. Its guards will try to drain it. Defeat them and secure the stand before the gold marks fade. If it fails, try that stand again.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I can protect those records.",
+          "next": "sl.simon.hello",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sl.vow",
+              "region": "palace",
+              "title": "Protect the archive",
+              "text": "Activate an archive stand, defeat its three guards within forty seconds, then secure the stand. Repeat for the other two. Failed stands can be retried; completed stands stay safe during this attempt."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "reward",
+          "text": "Is that a shard behind the last stand?",
+          "next": "sl.simon.reward",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "sl.simon.reward": {
+      "text": "Yes. We kept it inside the archive seal. Save the records and it is yours to collect. Please do not file it under purple. That is how we lost a whole week.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will try to be more specific.",
+          "next": "sl.simon.hello",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    }
+  },
+  "events": {
+    "sl.maintenance": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.access",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.access",
+          "region": "palace",
+          "title": "Knowledge under guard",
+          "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
+        },
+        {
+          "type": "note",
+          "id": "sl.service",
+          "region": "palace",
+          "title": "A door without a title",
+          "text": "The service latch opens the reading halls. The people who maintained this place always had their own way in."
+        }
+      ]
+    },
+    "sl.records": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.records",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.records.saved",
+          "region": "palace",
+          "title": "Pages saved",
+          "text": "The loose pages are on the dry desk. Hugh can now see you came to help."
+        }
+      ]
+    },
+    "sl.orders": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sl.access",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.orders",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.orders",
+          "region": "palace",
+          "title": "Keep the orb beyond reach",
+          "text": "The Legion orders say to keep all visitors away from the orb. The guardian has been turned against anyone who approaches. Defeat the reading hall patrol, then release the seal at the guardian door."
+        }
+      ]
+    },
+    "sl.release": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sl.orders",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.ready",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "sl.library",
+          "value": "complete"
+        },
+        {
+          "type": "note",
+          "id": "sl.guardian",
+          "region": "palace",
+          "title": "The guardian door",
+          "text": "The seal is released. Crossing into the guardian hall secures this half’s Rift Shards. Finish any exploring you want to do first."
+        }
+      ]
+    },
+    "sl.history": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.history",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.frames",
+          "region": "palace",
+          "title": "The frames that fell",
+          "text": "A scholar’s last note: “I threw the training rifts over the edge. Better scattered in the hands of strangers than whole in the hands of the Legion.” Their broken mounts remain here."
+        }
+      ]
+    },
+    "sl.display.clue": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "note",
+          "id": "sl.display",
+          "region": "palace",
+          "title": "Three empty places",
+          "text": "The mounts show a sun above a sword, with a wing between them. A note reads: “Begin with the light. Carry the lesson. Keep it safe.” Press the marks in that order."
+        }
+      ]
+    },
+    "sl.shelf.clue": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "note",
+          "id": "sl.shelf.guide",
+          "region": "palace",
+          "title": "The shelf guide",
+          "text": "The carved guide shows three arrows: EAST, SOUTH, WEST. North points toward the guardian door. Turn each shelf handle until its gold tip matches its arrow."
+        }
+      ]
+    },
+    "sl.shelf.0": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "rotatePuzzle",
+          "id": "sl.shelf",
+          "index": 0,
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    "sl.display.0": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sl.display",
+          "value": 0,
+          "solution": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    "sl.vow.0": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sl.vow.0",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sl.attempt.0",
+          "amount": 1
+        },
+        {
+          "type": "flag",
+          "id": "sl.vow.known",
+          "value": true
+        }
+      ]
+    },
+    "sl.seal.0": {
+      "once": true,
+      "when": [
+        {
+          "item": "sl.attempt.0",
+          "count": 1
+        },
+        {
+          "flag": "sl.vow.0",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.vow.0",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.stand.0",
+          "region": "palace",
+          "title": "Archive stand 1 saved",
+          "text": "The seal is stable and the records are safe. The other stands can be defended in any order."
+        }
+      ]
+    },
+    "sl.shelf.1": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "rotatePuzzle",
+          "id": "sl.shelf",
+          "index": 1,
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    "sl.display.1": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sl.display",
+          "value": 1,
+          "solution": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    "sl.vow.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sl.vow.1",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sl.attempt.1",
+          "amount": 1
+        },
+        {
+          "type": "flag",
+          "id": "sl.vow.known",
+          "value": true
+        }
+      ]
+    },
+    "sl.seal.1": {
+      "once": true,
+      "when": [
+        {
+          "item": "sl.attempt.1",
+          "count": 1
+        },
+        {
+          "flag": "sl.vow.1",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.vow.1",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.stand.1",
+          "region": "palace",
+          "title": "Archive stand 2 saved",
+          "text": "The seal is stable and the records are safe. The other stands can be defended in any order."
+        }
+      ]
+    },
+    "sl.shelf.2": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "rotatePuzzle",
+          "id": "sl.shelf",
+          "index": 2,
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    "sl.display.2": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sl.display",
+          "value": 2,
+          "solution": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    "sl.vow.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sl.vow.2",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sl.attempt.2",
+          "amount": 1
+        },
+        {
+          "type": "flag",
+          "id": "sl.vow.known",
+          "value": true
+        }
+      ]
+    },
+    "sl.seal.2": {
+      "once": true,
+      "when": [
+        {
+          "item": "sl.attempt.2",
+          "count": 1
+        },
+        {
+          "flag": "sl.vow.2",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.vow.2",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sl.stand.2",
+          "region": "palace",
+          "title": "Archive stand 3 saved",
+          "text": "The seal is stable and the records are safe. The other stands can be defended in any order."
+        }
+      ]
+    }
+  }
+}

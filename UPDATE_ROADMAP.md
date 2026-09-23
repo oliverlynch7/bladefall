@@ -1880,3 +1880,7 @@ Storm Coast second-half terrain, lift, Abe/Dash, cave/race/tide puzzles, three s
 
 ## [Codex | 2026-09-23] 2.017.0 Palace Courtyard
 Sunspire half one: courtyard/garden/balcony terrain, two defense routes, mirror puzzle, Grace/Victor, rooftop jumps, two Paladin shards and banked Refuge garden. 18 VO lines (254 total), 10 previews. Controller/combat/co-op/checkpoint/save/render QA passed. See docs/IMPLEMENTATION_PALACE_COURTYARD_2026-09-22.md. Next: Sky Library and Marble Colossus; full queue remains open.
+
+
+## [Codex | 2026-09-23] Sky Library — 2.018.0
+Sunspire half two: alternate access routes, Hugh/Simon, turning shelves, rift history, three archive defenses and remaining three Paladin shards. Fourteen new Voice Studio lines; browser route/combat/co-op/checkpoint/save checks passed. Boss/orb redesign next. See docs/IMPLEMENTATION_SKY_LIBRARY_2026-09-23.md.

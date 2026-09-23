@@ -452,3 +452,7 @@ Thunder Cliffs and chained hydra implemented in 2.016.0; completes Storm Coast h
 
 ## [Codex | 2026-09-23] U171 implementation checkpoint
 Palace Courtyard (Sunspire half one) implemented as 2.017.0: two defense approaches, mirror door, Grace/Victor, garden delivery and cosmetic Refuge reward, rooftop parkour, SP-01/02, eighteen VO lines (254 total). Details and browser evidence in IMPLEMENTATION_PALACE_COURTYARD_2026-09-22.md / requirements/CONTINUITY.md. Sky Library, orb and Marble Colossus redesign still pending. No new canon decisions.
+
+## [Codex | 2026-09-23] Sky Library
+
+U173 continuation: Sky Library half two implemented as 2.018.0. Main access alternatives, raised/low routes, Hugh/Simon, shelf/display puzzles, archive defense, SP-03/04/05 and fourteen VO lines. Evidence: IMPLEMENTATION_SKY_LIBRARY_2026-09-23.md. Boss/orb/dragon still pending; no new canon.

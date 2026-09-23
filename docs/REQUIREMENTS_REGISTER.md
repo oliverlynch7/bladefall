@@ -478,3 +478,11 @@ Continue STORY-12 through STORY-21 and Castle finale plan. New implementation do
 
 ## [Codex | 2026-09-23] Final King and restoration
 U177: Castle final boss and restoration ending authored as 2.022.0. STORY finale sequence, single Gate, cutscene-only Blade, retry/skip charge, shared co-op contribution and twelve VO lines implemented. Evidence and playtesting limitations: IMPLEMENTATION_FINAL_KING_2026-09-23.md. Other remaining requirements stay open.
+
+
+## [Codex | 2026-09-23] U178 return visits
+Continue approved hub return adventures and per-save introductions. Grounded plan IMPLEMENTATION_RETURN_VISITS_2026-09-23.md. Source U178 archived. Dragon rider combat remains an explicit pending question, independent work continues.
+
+
+## [Codex | 2026-09-23] Return visit checkpoint
+Implemented the two approved Smith/Quartermaster return hooks, hub campaign news and save-local introductions. Evidence and exact scope: docs/IMPLEMENTATION_RETURN_VISITS_2026-09-23.md. This does not close the remaining companion/dragon or wider equipment/cosmetic queue. No new user design decisions inferred.

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "region": "hub",
-  "status": "Recording-ready service conversations; no campaign quest unlocks",
+  "status": "Recording-ready service conversations and campaign return news",
   "npcs": {
     "quartermaster": {
       "name": "Quartermaster",
@@ -10,7 +10,21 @@
       "service": "Browse wares",
       "about": "hub.quartermaster.about",
       "news": "hub.quartermaster.news",
-      "newsAfterCompletedRegions": 1
+      "newsAfterCompletedRegions": 1,
+      "newsStages": [
+        {
+          "id": "hub.quartermaster.news.keep",
+          "zone": "keep"
+        },
+        {
+          "id": "hub.quartermaster.news.ember",
+          "zone": "ember"
+        },
+        {
+          "id": "hub.quartermaster.news.castle",
+          "zone": "castle"
+        }
+      ]
     },
     "anvil": {
       "name": "The Smith",
@@ -19,7 +33,21 @@
       "service": "Use the forge",
       "about": "hub.anvil.about",
       "news": "hub.anvil.news",
-      "newsAfterCompletedRegions": 1
+      "newsAfterCompletedRegions": 1,
+      "newsStages": [
+        {
+          "id": "hub.anvil.news.keep",
+          "zone": "keep"
+        },
+        {
+          "id": "hub.anvil.news.ember",
+          "zone": "ember"
+        },
+        {
+          "id": "hub.anvil.news.castle",
+          "zone": "castle"
+        }
+      ]
     },
     "keeper": {
       "name": "The Stylist",
@@ -28,7 +56,21 @@
       "service": "Open wardrobe",
       "about": "hub.keeper.about",
       "news": "hub.keeper.news",
-      "newsAfterCompletedRegions": 1
+      "newsAfterCompletedRegions": 1,
+      "newsStages": [
+        {
+          "id": "hub.keeper.news.keep",
+          "zone": "keep"
+        },
+        {
+          "id": "hub.keeper.news.ember",
+          "zone": "ember"
+        },
+        {
+          "id": "hub.keeper.news.castle",
+          "zone": "castle"
+        }
+      ]
     },
     "drillmaster": {
       "name": "Drillmaster",
@@ -37,7 +79,21 @@
       "service": "Train and view classes",
       "about": "hub.drillmaster.about",
       "news": "hub.drillmaster.news",
-      "newsAfterCompletedRegions": 1
+      "newsAfterCompletedRegions": 1,
+      "newsStages": [
+        {
+          "id": "hub.drillmaster.news.keep",
+          "zone": "keep"
+        },
+        {
+          "id": "hub.drillmaster.news.ember",
+          "zone": "ember"
+        },
+        {
+          "id": "hub.drillmaster.news.castle",
+          "zone": "castle"
+        }
+      ]
     },
     "beastkeeper": {
       "name": "Beastkeeper",
@@ -46,7 +102,21 @@
       "service": "Visit the Pet Yard",
       "about": "hub.beastkeeper.about",
       "news": "hub.beastkeeper.news",
-      "newsAfterCompletedRegions": 1
+      "newsAfterCompletedRegions": 1,
+      "newsStages": [
+        {
+          "id": "hub.beastkeeper.news.keep",
+          "zone": "keep"
+        },
+        {
+          "id": "hub.beastkeeper.news.ember",
+          "zone": "ember"
+        },
+        {
+          "id": "hub.beastkeeper.news.castle",
+          "zone": "castle"
+        }
+      ]
     }
   },
   "nodes": {
@@ -348,6 +418,186 @@
         "status": "recording-ready",
         "direction": "Easygoing caretaker with amused affection. Treat the animals as capable partners, not toys.",
         "context": "The player has completed at least one campaign region and returned alive. Encourage them without claiming a specific rescue, death, or new shop stock."
+      }
+    },
+    "hub.quartermaster.news.keep": {
+      "text": "More people are reaching us from the Keep. That means more hands to help and more mouths to feed. I prefer both to an empty village.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "News after Ruined Keep",
+        "order": 20,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.quartermaster.news.ember": {
+      "text": "The forge is quiet. For once, fewer weapons is good news. Now we need tools, roof nails, and someone who can count supplies without falling asleep.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "News after Emberdeep",
+        "order": 21,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.quartermaster.news.castle": {
+      "text": "People are coming home. Some we had stopped waiting for. I put out more bowls this morning. Had to borrow a table too. Best shortage I have ever had.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "News after restoration",
+        "order": 22,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.anvil.news.keep": {
+      "text": "A prisoner came by asking for a door latch. Not a sword. A latch. That is what all this work is for.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "News after Ruined Keep",
+        "order": 20,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.anvil.news.ember": {
+      "text": "You stopped their forge. Now let us put what they left behind to better use. A hammer can build a roof as easily as it can break one.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "News after Emberdeep",
+        "order": 21,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.anvil.news.castle": {
+      "text": "I have a list of repairs longer than my arm. Windows. Gates. Cooking pots. No orders from the Legion. I could get used to this.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "News after restoration",
+        "order": 22,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.keeper.news.keep": {
+      "text": "The people from the Keep asked for clean clothes before anything else. It is hard to feel like yourself in something your jailer chose.",
+      "choices": [],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "News after Ruined Keep",
+        "order": 20,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.keeper.news.ember": {
+      "text": "A worker brought me a scrap of colored cloth from Emberdeep. Kept it hidden all that time. Said it helped him remember home. I think I can find a use for it.",
+      "choices": [],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "News after Emberdeep",
+        "order": 21,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.keeper.news.castle": {
+      "text": "Someone asked me what people should wear now that they are free. Whatever they like, I said. Apparently that was the right answer.",
+      "choices": [],
+      "voice": {
+        "speaker": "keeper",
+        "scene": "News after restoration",
+        "order": 22,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.drillmaster.news.keep": {
+      "text": "Word from the Keep is spreading. I have three new people asking to train. Yesterday they were asking where to hide.",
+      "choices": [],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "News after Ruined Keep",
+        "order": 20,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.drillmaster.news.ember": {
+      "text": "They can replace a broken blade. A silent forge is harder to replace. You are learning to hurt the Legion where it matters.",
+      "choices": [],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "News after Emberdeep",
+        "order": 21,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.drillmaster.news.castle": {
+      "text": "Keep practicing. Peace is worth protecting. But take a day off first. That is an order I expect you to argue with.",
+      "choices": [],
+      "voice": {
+        "speaker": "drillmaster",
+        "scene": "News after restoration",
+        "order": 22,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.beastkeeper.news.keep": {
+      "text": "One of the freed prisoners knew a scared dog by name. You should have seen its ears when it heard him. Animals remember more than people think.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "News after Ruined Keep",
+        "order": 20,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.beastkeeper.news.ember": {
+      "text": "Less smoke from Emberdeep means the animals can breathe easier too. They will not thank you with words. You may get a very wet nose instead.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "News after Emberdeep",
+        "order": 21,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
+      }
+    },
+    "hub.beastkeeper.news.castle": {
+      "text": "The animals that came back seem lost at first. Then they recognize a voice, or a hand. Give them time. They have finally got time again.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "News after restoration",
+        "order": 22,
+        "status": "recording-ready",
+        "direction": "Familiar and grounded. Small relief after Keep, growing hope after Emberdeep, quiet joy after restoration.",
+        "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
       }
     }
   }

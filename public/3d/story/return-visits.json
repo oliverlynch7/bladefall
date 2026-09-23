@@ -1,0 +1,517 @@
+{
+  "version": 1,
+  "region": "hub",
+  "status": "authored return quests",
+  "npcs": {
+    "anvil": {
+      "name": "The Smith",
+      "role": "Tools for Tomorrow",
+      "start": "rv.pattern.offer",
+      "when": [
+        {
+          "flag": "rv.eligible.pattern",
+          "is": true
+        }
+      ]
+    },
+    "quartermaster": {
+      "name": "Quartermaster",
+      "role": "Food for the Refuge",
+      "start": "rv.supplies.offer",
+      "when": [
+        {
+          "flag": "rv.eligible.supplies",
+          "is": true
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "rv.pattern.offer": {
+      "text": "The Legion kept a pattern for strong tool heads in the western stores. With that, I can make tools that last. We need to build homes again, not just sharper swords.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I can bring it back.",
+          "next": "rv.pattern.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.pattern"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.pattern",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "text": "I have other work first.",
+          "next": "rv.pattern.later",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Tools for Tomorrow",
+        "order": 1,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.pattern.later": {
+      "text": "Then do that first. This can wait. I am asking for a favor, not sending you to your doom on a shopping trip.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Actually, tell me where to look.",
+          "next": "rv.pattern.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.pattern"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.pattern",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Tools for Tomorrow",
+        "order": 2,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.pattern.accepted": {
+      "text": "The pattern box is in the western stores of Iron Halls. Its plate should explain the cooling wheel and clamp. Reach the Great Furnace before you head home; that gives us a safe route to carry it out.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Tools for Tomorrow",
+        "order": 3,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.pattern.wait": {
+      "text": "Still looking? Western stores, Iron Halls. Cool the box before you open it. Finish that half, then bring the pattern here.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Tools for Tomorrow",
+        "order": 4,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.pattern.deliver": {
+      "text": "Is that the pattern? Let me see. Yes. A proper working edge. These tools will be useful long after the fighting stops.",
+      "choices": [
+        {
+          "id": "give",
+          "text": "It is yours.",
+          "next": "rv.pattern.thanks",
+          "when": [
+            {
+              "flag": "rv.ready.pattern",
+              "is": true
+            },
+            {
+              "flag": "rv.done.pattern",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.done.pattern"
+            },
+            {
+              "type": "reward",
+              "id": "rv.finish.pattern",
+              "kind": "return_finish",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Tools for Tomorrow",
+        "order": 5,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.pattern.thanks": {
+      "text": "Look beside the forge. The first tools are already laid out. Take 450 gold for the trip. You brought back something that helps people live.",
+      "choices": [],
+      "voice": {
+        "speaker": "anvil",
+        "scene": "Tools for Tomorrow",
+        "order": 6,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.supplies.offer": {
+      "text": "The rescued prisoners marked a sealed store in the western chamber. There is food inside. Good food, if the rats have not learned to use a hoist. I would rather our neighbors got it.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I can bring it back.",
+          "next": "rv.supplies.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.supplies"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.supplies",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "text": "I have other work first.",
+          "next": "rv.supplies.later",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Food for the Refuge",
+        "order": 7,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.supplies.later": {
+      "text": "Then do that first. This can wait. I am asking for a favor, not sending you to your doom on a shopping trip.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Actually, tell me where to look.",
+          "next": "rv.supplies.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.supplies"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.supplies",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Food for the Refuge",
+        "order": 8,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.supplies.accepted": {
+      "text": "Go to the western sealed chamber in Broken Walls. Check the hoist plate, then lower the supplies. Reach the Dungeons before heading home so the load can get out safely.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Food for the Refuge",
+        "order": 9,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.supplies.wait": {
+      "text": "Western chamber, Broken Walls. The hoist needs the right balance. Finish that half, then bring the supplies here.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Food for the Refuge",
+        "order": 10,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.supplies.deliver": {
+      "text": "You got it here in one piece. So did the food. An excellent day for everyone except the rats.",
+      "choices": [
+        {
+          "id": "give",
+          "text": "It is yours.",
+          "next": "rv.supplies.thanks",
+          "when": [
+            {
+              "flag": "rv.ready.supplies",
+              "is": true
+            },
+            {
+              "flag": "rv.done.supplies",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.done.supplies"
+            },
+            {
+              "type": "reward",
+              "id": "rv.finish.supplies",
+              "kind": "return_finish",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Food for the Refuge",
+        "order": 11,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    },
+    "rv.supplies.thanks": {
+      "text": "The shelves are stocked again. Take 300 gold. And if anyone asks, yes, I did count every sack. Twice.",
+      "choices": [],
+      "voice": {
+        "speaker": "quartermaster",
+        "scene": "Food for the Refuge",
+        "order": 12,
+        "status": "recording-ready",
+        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
+      }
+    }
+  },
+  "events": {
+    "rv.pattern.note": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.pattern",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "note",
+          "id": "rv.pattern.clue",
+          "title": "Tools for Tomorrow",
+          "text": "Cool the metal before loosening the clamp. Open the box last.",
+          "region": "ember"
+        }
+      ]
+    },
+    "rv.pattern.cool": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.pattern",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.pattern.cool"
+        }
+      ]
+    },
+    "rv.pattern.clamp": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.pattern",
+          "is": true
+        },
+        {
+          "flag": "rv.pattern.cool",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.pattern.clamp"
+        }
+      ]
+    },
+    "rv.pattern.take": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.pattern",
+          "is": true
+        },
+        {
+          "flag": "rv.pattern.clamp",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.collected.pattern"
+        },
+        {
+          "type": "reward",
+          "id": "rv.item.pattern",
+          "kind": "return_item",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "rv.pattern.recovered",
+          "title": "Tools for Tomorrow — recovered",
+          "text": "Finish this level half to keep the recovery. Then return to The Smith in the Waystation.",
+          "region": "ember"
+        }
+      ]
+    },
+    "rv.supplies.note": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.supplies",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "note",
+          "id": "rv.supplies.clue",
+          "title": "Food for the Refuge",
+          "text": "The loaded basket needs 8 on the other side. The weights are 3, 5 and 7. Use only the weights you need.",
+          "region": "keep"
+        }
+      ]
+    },
+    "rv.supplies.weight.0": {
+      "once": false,
+      "when": [
+        {
+          "flag": "rv.active.supplies",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "rv.supplies.balance",
+          "weights": [
+            3,
+            5,
+            7
+          ],
+          "index": 0,
+          "target": 8
+        }
+      ]
+    },
+    "rv.supplies.weight.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "rv.active.supplies",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "rv.supplies.balance",
+          "weights": [
+            3,
+            5,
+            7
+          ],
+          "index": 1,
+          "target": 8
+        }
+      ]
+    },
+    "rv.supplies.weight.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "rv.active.supplies",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "rv.supplies.balance",
+          "weights": [
+            3,
+            5,
+            7
+          ],
+          "index": 2,
+          "target": 8
+        }
+      ]
+    },
+    "rv.supplies.take": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.supplies",
+          "is": true
+        },
+        {
+          "flag": "rv.supplies.balance.open",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.collected.supplies"
+        },
+        {
+          "type": "reward",
+          "id": "rv.item.supplies",
+          "kind": "return_item",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "rv.supplies.recovered",
+          "title": "Food for the Refuge — recovered",
+          "text": "Finish this level half to keep the recovery. Then return to Quartermaster in the Waystation.",
+          "region": "keep"
+        }
+      ]
+    }
+  }
+}

@@ -123,10 +123,12 @@ export function buildHubArt(scene,w){
         if(spec?.[1])panel(texture('./icons/'+spec[1]),0,74,-51,32,32);
       }
       if(n.id==='quartermaster'||n.id==='drillmaster'){
+        if(n.id==='quartermaster'&&HU.returnSupplies)for(let j=0;j<4;j++){block(-58,12+j*19,-15,32,18,27,'#96774d');block(-58,13+j*19,-.8,24,9,1,'#d2c29b');}
         beam(0,15,16,79,30,19);beam(0,32,16,84,5,24,'#8b7050');
         for(let j=0;j<4;j++)block((j-1.5)*17,39,16,8,9,8,['#99895f','#a5ad99','#8377a1','#b78050'][j]);
       }else if(n.id==='chest')add('chest',0,1,0,27);
       else if(n.id==='anvil'){
+        if(HU.returnForge){beam(60,34,-15,40,6,36);for(let j=0;j<3;j++){block(47+j*12,57,-15,4,43,4,'#a78655');block(47+j*12,79,-15,14,10,9,'#c2c9c4');}}
         add('anvil',0,1,6,23);block(-29,20,-28,35,38,28,'#655744');block(-29,29,-12,21,21,2,'#d08742');
         block(35,8,8,24,14,18,'#625e50');block(35,16,8,21,1,15,'#62888b');
       }else if(n.id==='board')add('board',0,1,-8,29,29,29,null,Math.PI);

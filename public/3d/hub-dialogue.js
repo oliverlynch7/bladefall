@@ -2,17 +2,19 @@
 (function(){
  'use strict';
  let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,speaking=false;
- const ready=fetch('./story/hub-dialogue.json?v=1989').then(r=>{if(!r.ok)throw Error('Dialogue unavailable');return r.json()}).then(async b=>{book=await BFVoiceContent.apply(b);return book}).catch(()=>null);
+ const ready=fetch('./story/hub-dialogue.json?v=2023').then(r=>{if(!r.ok)throw Error('Dialogue unavailable');return r.json()}).then(async b=>{book=await BFVoiceContent.apply(b);return book}).catch(()=>null);
  const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function state(a,id){const all=a.meta.hubDialogue||(a.meta.hubDialogue={});return all[id]||(all[id]={introduced:false,newsSeen:false,cursor:null})}
- function hasNews(n,a){return !!book?.npcs[n.id]&&Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=book.npcs[n.id].newsAfterCompletedRegions&&!state(a,n.id).newsSeen}
+ function news(n,a){const d=book?.npcs[n.id];if(!d)return null;const latest=(d.newsStages||[]).filter(q=>a.meta.zoneDone?.[q.zone]).at(-1);if(latest)return state(a,n.id).newsSeenId===latest.id?null:latest.id;return Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=d.newsAfterCompletedRegions&&!state(a,n.id).newsSeen?d.news:null}
+ function hasNews(n,a){return !!news(n,a)}
  function stopVoice(){clearTimeout(timer);cancelAnimationFrame(frame);speaking=false;if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(utterance){speechSynthesis.cancel();utterance=null}}
  function close(service=false,remote=false){if(!active)return;if(active.external&&!remote){active.a.requestClose();return;}generation++;stopVoice();const {n,a}=active;active=null;el('hubDialogue')?.remove();document.body.classList.remove('npc-conversation');a.leave(service);if(service)n.open()}
  function commit(){active.a.save()}
  function landing(){
   if(!active)return;stopVoice();const {n,a}=active,s=state(a,n.id),def=book.npcs[n.id];s.cursor=null;commit();
-  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options"><button id="hubService">${esc(def.service)}</button><button id="hubAbout">Tell me about yourself.</button>${hasNews(n,a)?'<button id="hubNews">◆ What has changed?</button>':''}<button id="hubHelp">Remind me how this works.</button></div>`);
-  el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(def.news,'What has changed?','news');
+  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options"><button id="hubService">${esc(def.service)}</button><button id="hubAbout">Tell me about yourself.</button>${a.returnInfo?.(n)?'<button id="hubReturnQuest">◆ '+esc(a.returnInfo(n).label)+'</button>':''}${hasNews(n,a)?'<button id="hubNews">◆ What has changed?</button>':''}<button id="hubHelp">Remind me how this works.</button></div>`);
+  if(el('hubReturnQuest'))el('hubReturnQuest').onclick=()=>a.returnQuest(n);
+  el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
@@ -22,7 +24,7 @@
  function line(id,lastChoice='',topic='intro'){
   const {n,a}=active,s=state(a,n.id),node=book.nodes[id];if(!node){landing();return}
   s.cursor={id,lastChoice,topic};commit();
-  showLine(id,node,lastChoice,choice=>line(choice.next,choice.text,topic),()=>{if(topic==='intro'){s.introduced=true;s.cursor=null;commit();close(true)}else{if(topic==='news')s.newsSeen=true;landing()}},topic==='intro'?'Show me.':'Back to services');
+  showLine(id,node,lastChoice,choice=>line(choice.next,choice.text,topic),()=>{if(topic==='intro'){s.introduced=true;s.cursor=null;commit();close(true)}else{if(topic==='news'){s.newsSeen=true;s.newsSeenId=id;}landing()}},topic==='intro'?'Show me.':'Back to services');
  }
  function showLine(id,node,lastChoice,choose,finish,finishLabel,canChoose=true){
   stopVoice();const token=++generation,{a}=active;active.lineId=id;active.started=performance.now();

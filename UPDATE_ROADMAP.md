@@ -1872,3 +1872,7 @@ Storm Coast sailing foundation and batched longboat model at /3d/ship-preview/. 
 
 ## [Codex | 2026-09-22] 2.015.0 Shipwreck Shore
 First-half shore/quests/puzzles and campaign sailing integrated; 18 VO lines, co-op and checkpoint checks. Thunder Cliffs and hydra remain pending. See docs/IMPLEMENTATION_SHIPWRECK_SHORE_2026-09-22.md.
+
+
+## [Codex | 2026-09-22] 2.016.0 Thunder Cliffs and chained hydra
+Storm Coast second-half terrain, lift, Abe/Dash, cave/race/tide puzzles, three shards, sailcloth cape, and mercy hydra arena implemented. Browser routes/combat/co-op/checkpoint/save checks passed; 12 VO lines (236 total), 13 previews. See docs/IMPLEMENTATION_THUNDER_CLIFFS_2026-09-22.md. Next: Sunspire Palace. Full queue remains open.

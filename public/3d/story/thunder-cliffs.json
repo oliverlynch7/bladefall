@@ -1,0 +1,776 @@
+{
+  "version": 1,
+  "region": "storm",
+  "status": "authored",
+  "npcs": {
+    "abe": {
+      "name": "Abe",
+      "role": "Island fisher; calm, stubborn compassion, plain-spoken",
+      "start": "tc.abe.hello"
+    },
+    "dash": {
+      "name": "Dash",
+      "role": "Young scavenger; playful confidence hiding a fear of heights",
+      "start": "tc.dash.hello"
+    }
+  },
+  "nodes": {
+    "tc.abe.hello": {
+      "text": "You crossed in that little boat? I was about to wave you away. Then I saw you wave back. Hard to argue with that much confidence.",
+      "choices": [
+        {
+          "id": "palace",
+          "text": "I am trying to reach Sunspire.",
+          "next": "tc.abe.path",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "tc.ascent",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "tc.ascent",
+              "region": "storm",
+              "title": "The path above the sea",
+              "text": "Sunspire stands beyond the upper cliffs. Repair the cargo lift brake below, then climb the eastern steps and release its top catch. Abe waits near the landing."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 1,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.abe.path": {
+      "text": "The Legion broke our cargo lift. Fit the spare brake wheel below, then climb the steps to release the catch above. You can ride it after that. The climb is steep. The steps have not betrayed me yet.",
+      "choices": [
+        {
+          "id": "beast",
+          "text": "What is making that noise?",
+          "next": "tc.abe.beast",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.heard",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "go",
+          "text": "I will fix the lift.",
+          "next": "tc.abe.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 2,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.abe.wait": {
+      "text": "I will watch the boat. Go on. If you need me, I will be the one pretending not to worry.",
+      "choices": [
+        {
+          "id": "beast",
+          "text": "Tell me about the creature above.",
+          "next": "tc.abe.beast",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.heard",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "path",
+          "text": "Which way up?",
+          "next": "tc.abe.path",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 3,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.abe.beast": {
+      "text": "A sea hydra. The Legion dragged it here and chained its necks across the climb. It snaps at anyone who comes close. Not because it serves them. Because every step pulls those chains tight.",
+      "choices": [
+        {
+          "id": "free",
+          "text": "Then we break the chains.",
+          "next": "tc.abe.chains",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.mercy",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "tc.hydra",
+              "region": "storm",
+              "title": "What holds it here",
+              "text": "The hydra is trapped, not Hollowed. Inspect the discarded shackle on the middle ledge. Its worn joints may show how to break the neck restraints safely."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "danger",
+          "text": "Three heads sound hard to reason with.",
+          "next": "tc.abe.reason",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 4,
+        "emotion": "Concerned",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.abe.reason": {
+      "text": "I have had arguments at home that felt much the same. But this one is in pain. Give it a way out before you decide it has to die.",
+      "choices": [
+        {
+          "id": "free",
+          "text": "Show me what to look for.",
+          "next": "tc.abe.chains",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.mercy",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "tc.hydra",
+              "region": "storm",
+              "title": "What holds it here",
+              "text": "Find the discarded shackle beside the middle ledge. Look for worn joints. The Legion uses the trapped hydra to block the path to Sunspire."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 5,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.abe.chains": {
+      "text": "There is an old shackle beside the middle ledge. Look at the joint, where the neck would rub. If you can break the new ones while it rests, it might finally leave us both alone.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will look for the weak joints.",
+          "next": "tc.abe.farewell",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 6,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.abe.farewell": {
+      "text": "You came looking for a palace and stopped to help an animal that could swallow you. Whatever you find up there, do not lose that part of yourself.",
+      "choices": [
+        {
+          "id": "repeat",
+          "text": "Remind me about the chains.",
+          "next": "tc.abe.chains",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "abe",
+        "scene": "Thunder Cliffs",
+        "order": 7,
+        "emotion": "Warm",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.dash.hello": {
+      "text": "Careful! This is a serious treasure claim. I have marked it with my best stick. Legally, I think that makes me very important.",
+      "choices": [
+        {
+          "id": "claim",
+          "text": "What did you find?",
+          "next": "tc.dash.offer",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.dash.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "tc.cave",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "tc.cave",
+              "region": "storm",
+              "title": "Dash’s claim",
+              "text": "Dash found a sealed wreck cave beyond the western rock arch. Help him open its two catches, or follow his marked route challenge. The cave may contain a Rift Shard."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "dash",
+        "scene": "Thunder Cliffs",
+        "order": 8,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.dash.offer": {
+      "text": "A wreck cave. Two stuck catches. I can show you how to open them if we split the coins. Or beat my cliff route and keep the lot. I am judging from here. Better view. Nothing to do with the height.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "We split the coins. Show me the catches.",
+          "next": "tc.dash.help",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.cooperate",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "tc.race",
+              "value": false
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "race",
+          "text": "I will try your route.",
+          "next": "tc.dash.race",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "tc.race",
+              "value": true
+            },
+            {
+              "type": "flag",
+              "id": "tc.cooperate",
+              "value": false
+            },
+            {
+              "type": "item",
+              "id": "tc.race.attempt",
+              "amount": 1
+            },
+            {
+              "type": "resetPuzzle",
+              "id": "tc.route"
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "leave",
+          "text": "I will look around first.",
+          "next": "tc.dash.offer",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "dash",
+        "scene": "Thunder Cliffs",
+        "order": 9,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.dash.help": {
+      "text": "Hold the lower catch open, then turn the upper wheel. I put a brace by the lower one. That lets one person do it. I did contribute something besides the stick.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About our deal...",
+          "next": "tc.dash.offer",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "dash",
+        "scene": "Thunder Cliffs",
+        "order": 10,
+        "emotion": "Conversational",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.dash.race": {
+      "text": "Touch the three numbered flags in order, then the bell by the cave. Two minutes. If you miss it, come back and try again. No jumping off cliffs to save time. That is not winning. That is falling with ambition.",
+      "choices": [
+        {
+          "id": "retry",
+          "text": "Let me start again.",
+          "next": "tc.dash.race",
+          "effects": [
+            {
+              "type": "item",
+              "id": "tc.race.attempt",
+              "amount": 1
+            },
+            {
+              "type": "resetPuzzle",
+              "id": "tc.route"
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "deal",
+          "text": "Maybe we should just work together.",
+          "next": "tc.dash.offer",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "dash",
+        "scene": "Thunder Cliffs",
+        "order": 11,
+        "emotion": "Playful",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    },
+    "tc.dash.done": {
+      "text": "The coins were nice. Watching you make that climb was better. Do not quote me. I am trying to build a reputation for greed.",
+      "choices": [
+        {
+          "id": "bye",
+          "text": "Keep the stick. It suits you.",
+          "next": "tc.dash.done",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "dash",
+        "scene": "Thunder Cliffs",
+        "order": 12,
+        "emotion": "Warm",
+        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+      }
+    }
+  },
+  "events": {
+    "tc.brake": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.brake",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.lift",
+          "region": "storm",
+          "title": "The broken lift",
+          "text": "The brake wheel is fitted. Climb the eastern steps and release the catch at the upper landing."
+        }
+      ],
+      "when": [],
+      "once": true
+    },
+    "tc.lift": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.lift",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.lift",
+          "region": "storm",
+          "title": "Cargo lift restored",
+          "text": "The cargo lift now connects the landing to the middle ledge. Use either station to travel. The discarded shackle lies nearby."
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.brake",
+          "is": true
+        }
+      ],
+      "once": true
+    },
+    "tc.shackle": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.shackle",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "id": "tc.mercy",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.hydra",
+          "region": "storm",
+          "title": "Worn neck joints",
+          "text": "The shackle is worn thin at its joint. Wait until a hydra head finishes its attack, then strike the pale joint on that neck restraint. Each broken chain frees one head. The animal does not need to die."
+        }
+      ],
+      "when": [],
+      "once": true
+    },
+    "tc.approach": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.approach",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "tc.ascent",
+          "value": "complete"
+        },
+        {
+          "type": "note",
+          "id": "tc.ascent",
+          "region": "storm",
+          "title": "The upper path",
+          "text": "The barrier is open. The hydra blocks the last climb toward Sunspire. Finish exploring these cliffs before entering its ledges."
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.lift",
+          "is": true
+        },
+        {
+          "flag": "tc.shackle",
+          "is": true
+        }
+      ],
+      "once": true
+    },
+    "tc.brace": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.brace",
+          "value": true
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.cooperate",
+          "is": true
+        }
+      ],
+      "once": true
+    },
+    "tc.cave.help": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.cave.open",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "tc.cave",
+          "value": "complete"
+        },
+        {
+          "type": "reward",
+          "id": "tc.dash.coins",
+          "kind": "gold",
+          "amount": 150
+        },
+        {
+          "type": "note",
+          "id": "tc.cave",
+          "region": "storm",
+          "title": "An honest split",
+          "text": "Dash kept his word. The wreck cave is open; its Rift Shard must be collected in person."
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.brace",
+          "is": true
+        },
+        {
+          "flag": "tc.cooperate",
+          "is": true
+        }
+      ],
+      "once": true
+    },
+    "tc.race.1": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "tc.route",
+          "value": 1,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.race",
+          "is": true
+        }
+      ],
+      "once": false
+    },
+    "tc.race.2": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "tc.route",
+          "value": 2,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.race",
+          "is": true
+        }
+      ],
+      "once": false
+    },
+    "tc.race.3": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "tc.route",
+          "value": 3,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.race",
+          "is": true
+        }
+      ],
+      "once": false
+    },
+    "tc.race.finish": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.cave.open",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "tc.cave",
+          "value": "complete"
+        },
+        {
+          "type": "reward",
+          "id": "tc.dash.coins",
+          "kind": "gold",
+          "amount": 300
+        },
+        {
+          "type": "note",
+          "id": "tc.cave",
+          "region": "storm",
+          "title": "Dash’s cliff route",
+          "text": "The route challenge is complete. The wreck cave is open. Each explorer must collect the shard inside."
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.race",
+          "is": true
+        },
+        {
+          "flag": "tc.route.open",
+          "is": true
+        }
+      ],
+      "once": true
+    },
+    "tc.sail": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.sail",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.sail",
+          "region": "storm",
+          "title": "A sailor’s cape",
+          "text": "A cream and blue cape made from old sailcloth. Finish Thunder Cliffs to keep it, then equip it at the Keeper."
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.cave.open",
+          "is": true
+        }
+      ],
+      "once": true
+    },
+    "tc.tide.note": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.tide.note",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.tide",
+          "region": "storm",
+          "title": "The carved tide marks",
+          "text": "Three stones show the sea rising: one wave, two waves, three waves. A worn groove links them to the inland rock door."
+        }
+      ],
+      "when": [],
+      "once": true
+    },
+    "tc.tide.1": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "tc.tide",
+          "value": 1,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [],
+      "once": false
+    },
+    "tc.tide.2": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "tc.tide",
+          "value": 2,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [],
+      "once": false
+    },
+    "tc.tide.3": {
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "tc.tide",
+          "value": 3,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "when": [],
+      "once": false
+    },
+    "tc.wind.note": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.wind.note",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.wind",
+          "region": "storm",
+          "title": "The high shelf",
+          "text": "The high side climb has a steady wind cycle. White streaks gather before a gust. Wait on the wide rests, or use the low return path if the wind pushes you off."
+        }
+      ],
+      "when": [],
+      "once": true
+    }
+  }
+}

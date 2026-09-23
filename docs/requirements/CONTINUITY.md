@@ -423,3 +423,18 @@ Scope: Thunder Cliffs and hydra are NOT implemented yet. Arrival still enters th
 
 ## [Codex | 2026-09-22] Voice catalog loading follow-up — 2.015.1
 Initial deployment d0ae5c9 succeeded (5ab50262-cbc1-4bf1-a45b-e325fb6b9682). Production read-only QA hit the 30-second timeout reading the catalog. Changed catalog/game metadata loading from sequential reads to six bounded workers, preserving authored order and all approval/write semantics. No stored recordings or text changed.
+
+## [Codex | 2026-09-22] Shipwreck production receipt
+Main b79ee57 deployed successfully as 8a98b1d5-8bce-4910-bf2e-12d320c75c86. Read-only production Chromium verified 2.015.1-shipwreck-shore, shore modules/story HTTP 200, catalog 224 lines within request timeout, and all 99 gallery images decoded at 390px without overflow. No production save or recording mutations. Next: Thunder Cliffs and chained hydra; legacy second-half/boss are still present.
+
+## [Codex | 2026-09-22] Thunder Cliffs and hydra — 2.016.0
+
+U170 continuation completes the Storm Coast campaign replacement: Thunder Cliffs branching ascent, repairable cargo lift, personal wind climb, tidal-sequence grotto, Dash cooperation/race cave, optional sailcloth cape and SC-03/04/05. Abe explains the captive hydra and the route to Sunspire. Twelve stable new VO lines bring the catalog to 236; no existing takes edited. Slot 5 / abyss remains an internal compatibility identifier. Its campaign boss is now the chained sea hydra, not an early Abyss King.
+
+The three-head encounter has melee/ranged-accessible restraints, locked bite warnings, a low sweep avoided on the raised shelf, cover-blocked water blasts, and a recovery window exposing one restraint. Breaking each removes its head from attacks. Breaking all three frees the animal, stops attacks and opens the ascent. No corpse or King kill credit; rewards deduplicated. Shared phase/health/mercy state is host-owned. Distinct stone bridges, cover and upper paths replace the old arena. Added a walkable return from the optional wind safety ledge and repaired a cross-ledge gap found by controller QA.
+
+Evidence: test-thunder-hydra plus story state/authority, shard ledger, score, shared mob imports and Voice API all pass. Actual browser qa-thunder-cliffs passes 11 checks and 47 controller waypoints; qa-thunder-routes completes Dash race and visits all restraint ledges, rear refuge and exit; qa-hydra-combat passes 10 checks including real sword/bow hits, naturally timed damage, mercy/reward/retreat. Controlled two-browser co-op passes seven shared/personal/guest-attack/stale-state checks. Half death rolls back its provisional shard; boss arrival banks all five and cape; boss death resets three restraints while retaining banked rewards. Existing voyage regression passes all nine checks. Pre-change save retains gold, rank and checkpoint clue, without replaying the note. Thirteen new WebGL previews include 390px dialogue without overflow.
+
+Limits: scripted movement/invulnerability and controlled packet delivery are not human balance, mobile performance or real-network latency testing. Static Thunder art reports 39,912 triangles / 2,132 instances; not a frame-rate benchmark. Final boss/end sequence and remaining Sunspire/Castle redesign remain open. Next: Sunspire Palace terrain and knowledge-library quest progression, followed by its distinct boss; preserve late Bladeborn reveal and keep the orb from spoiling the final cut. Full approved queue is not complete.
+
+Source preservation: ../../decision-archive/2026-09-22-thunder-cliffs, 170 messages, zero unparsed lines, valid references. Grounded plan: docs/IMPLEMENTATION_THUNDER_CLIFFS_2026-09-22.md. Production confirmation is recorded separately after deployment.

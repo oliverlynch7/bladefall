@@ -1,3 +1,4 @@
+import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2016';
 import {buildStorm,updateStorm} from './storm-art.js?v=2015';
 import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=1972';
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
@@ -1765,7 +1766,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
- if(world.shipScene){clearWorld(scene);const art=buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
+ if(world.shipScene){clearWorld(scene);const art=world.shipScene==='hydra'||world.shipScene.startsWith('cliffs')?buildCoastHigh(scene,world):buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsFrost(world)&&frostReady()){clearWorld(scene);const art=buildFrost(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -2001,7 +2002,7 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateStorm(world);updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
+  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
@@ -2029,7 +2030,7 @@ export function syncWorld(scene){
     clearMobs();          // a new level must not inherit the previous zone's pooled creatures
     clearProps();         // ...nor its chests
     WORLD3D.built = sig;
-    updateStorm(world);updateOutskirts(world);
+    updateStorm(world);updateCoastHigh();updateOutskirts(world);
     updateHubArt(world,performance.now()/1000);
     updateHollow(world);
     updateKeep(world);

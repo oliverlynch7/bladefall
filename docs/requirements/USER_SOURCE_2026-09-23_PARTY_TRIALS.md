@@ -1,4 +1,4 @@
-# U181 — continuation
+## U181 — continuation
 
 Exact user message: “Continue another long work session. Don’t waste usage”
 

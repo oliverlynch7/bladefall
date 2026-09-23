@@ -1,3 +1,4 @@
+import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2022';
@@ -1431,6 +1432,7 @@ function syncClass(){
   _classNow = want;
   HERO3D.model = want;
   const wrap = HERO3D._wrap;
+  disposeCosmetics(wrap);
   if(actor && actor.parent){castleHelmet(actor,false);actor.parent.remove(actor);}
   actor = g.scene;
   actor.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; o.frustumCulled = false; } });
@@ -1774,7 +1776,7 @@ function peerModelFor(p){
 }
 
 function disposeRig(rec){
-  if(!rec) return;castleHelmet(rec.node,false);
+  if(!rec) return;disposeCosmetics(rec.wrap);castleHelmet(rec.node,false);
   if(rec.mixer) try { rec.mixer.stopAllAction(); rec.mixer.uncacheRoot(rec.node); } catch(e){}
   if(rec.node){clearWeapon(rec.holder);rec.node.traverse(o=>{if(o.userData._paletteOwner===o.uuid)for(const m of (Array.isArray(o.material)?o.material:[o.material]))m?.dispose();});if(rec.node.parent)rec.node.parent.remove(rec.node);}
 }
@@ -1955,6 +1957,9 @@ export function drawHero3D(p, t){
     poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
+    const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;
+    const cosmeticIds=cosmeticLocal?window.__BF3?.cosmeticAppearance?.():p.cosmetics||{};
+    syncCosmetics(wrap,p,['play','mirror'].includes(window.__BF3?.mode)?dt:0,{...cosmeticIds,model:rec?rec.model:HERO3D.model,accent:CLASS_SKINS[cosmeticClass]?.metal||'#ae9671',particles:cosmeticMeta?.particles!==false,hidden:!!p.dead||!!p.downed,sceneKey:[window.__BF3?.G?.runSeed,window.__BF3?.G?.zone,window.__BF3?.G?.area,window.__BF3?.G?.trial,window.__BF3?.G?.hub,window.__BF3?.G?.riftHall].join('|')});
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
        shared context its internal state cache is reset every frame, so being explicit removes a
        variable while diagnosing the missing skinned body. */
@@ -1987,6 +1992,7 @@ export function drawHero3D(p, t){
   }
 }
 window.drawHero3D = drawHero3D;
+window.__hero3dCosmetics=()=>({local:cosmeticStats(HERO3D._wrap),peers:[..._peerRigs.entries()].map(([id,r])=>({id,...cosmeticStats(r.wrap)}))});
 window.__hero3dFace  = () => HERO3D.face || 'not built';
 window.__hero3dClass = () => ({ classId: (window.__BF_META && window.__BF_META().classId),
                                 model: HERO3D.model, mapped: modelForClass() });
@@ -2123,7 +2129,7 @@ window.__hero3dAt = (key, o) => {
   try {
     let rec = _poses.get(key);
     const appearance=actor.uuid+'|'+(HERO3D.skin?.skinId||'')+'|'+(localWeaponHolder()?._paintKey||'')+'|'+(localWeaponHolder()?._weap?.uuid||'');
-    if(rec&&rec.appearance!==appearance){rec.node.removeFromParent();if(rec.mats)for(const m of rec.mats)m.dispose();rec.node.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.dispose();});_poses.delete(key);rec=null;}
+    if(rec&&rec.appearance!==appearance){disposeCosmetics(rec.node);rec.node.removeFromParent();if(rec.mats)for(const m of rec.mats)m.dispose();rec.node.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.dispose();});_poses.delete(key);rec=null;}
     if(!o){ if(rec) rec.node.visible = false; return false; }
     if(!rec){
       const node = SkeletonUtils.clone(actor);
@@ -2169,6 +2175,10 @@ window.__hero3dAt = (key, o) => {
     rec.node.position.set(o.x || 0, o.y || 0, o.z || 0);
     rec.node.rotation.y = (o.yaw || 0) + HERO3D.yawOff;
     rec.node.updateMatrixWorld(true);
+    const source=HERO3D._wrap?.userData.clothCape;
+    syncCosmetics(rec.node,{x:o.x||0,y:o.y||0,z:o.z||0,yaw:o.yaw||0},0,{cape:source?.id||null,model:HERO3D.model,accent:source?.accent,particles:false});
+    const cloth=rec.node.userData.clothCape;
+    if(cloth&&source){cloth.mesh.geometry.attributes.position.array.set(source.mesh.geometry.attributes.position.array);cloth.mesh.geometry.attributes.position.needsUpdate=true;cloth.mesh.geometry.computeVertexNormals();cloth.mesh.material.transparent=o.ghost!=null;cloth.mesh.material.opacity=o.ghost??1;cloth.mesh.material.depthWrite=o.ghost==null;}
     return true;
   } catch(e){ return false; }
 };

@@ -1061,7 +1061,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
-<script src="./combat-art.js?v=1981s"></script>
+<script src="./combat-art.js?v=2028"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script>
@@ -1074,7 +1074,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.027.0-cloth-motion';
+const VERSION3D='2.028.0-weapon-release';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11352,7 +11352,7 @@ function classStyleMul(p){
 }
 // a weapon supports tap/hold charging ONLY for its own class family (off-class = plain base attack, GLOBAL RULE)
 function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
-const THROWN_CHARGES=['hurl','javelin','scythethrow'];
+const THROWN_CHARGES=['hurl','javelin','scythethrow','daggerthrow'];
 function thrownWeaponHidden(p,w){ return !!(p&&w&&p.throwHideT>0&&p.throwHideArche===w.arche&&THROWN_CHARGES.includes(w.chg)); }
 function beginThrownWeapon(p,w,returns){
   p.swingId=(p.swingId||0)+1; p.throwToken=(p.throwToken||0)+1; p.throwHideArche=w.arche; p.throwHideReturn=!!returns;
@@ -11360,6 +11360,7 @@ function beginThrownWeapon(p,w,returns){
 }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
 function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
+  const previousSwing=p.swingId||0;
   if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
   else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
   G._desig=true;                                        // a charged release is a "designated" attack: spends Rune Marks + ruptures Corruption on its melee hits
@@ -11376,12 +11377,14 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
     case 'spellsweep': spellSweep(p,w,amt); break;     // spellblade: a wide magic sweep that stacks its affinity
     default: fireCharged(p,w,amt);                      // fallback elemental blast
   }
+  if((p.swingId||0)===previousSwing)p.swingId=previousSwing+1; // Every accepted release restarts its animation, including rapid same-clip follow-ups.
   G._desig=false;
 }
 function throwDagger(p,w,amt){
   const range=260+amt*160,t=projectileAimTarget(p,range),sp=700,oy=p.y+24;if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const throwToken=beginThrownWeapon(p,w,false);
   const flight=t?Math.max(.1,dXZ(p.x,p.z,t.x,t.z)/sp):range/sp;
-  G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vz:Math.cos(p.yaw)*sp,vy:t?(t.y+t.h*.5-oy)/flight:0,gravity:0,size:4,color:w.blade||'#d8dce0',shape:'arrow',dmg:w.dmg*effPower(p)*(1.5+amt*2)*offclassMul(p)*classStyleMul(p),kb:w.kb,pierce:0,el:w.el,life:range/sp,hitSet:[]});
+  G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vz:Math.cos(p.yaw)*sp,vy:t?(t.y+t.h*.5-oy)/flight:0,gravity:0,size:4,color:w.blade||'#d8dce0',shape:'dagger',dmg:w.dmg*effPower(p)*(1.5+amt*2)*offclassMul(p)*classStyleMul(p),kb:w.kb,pierce:0,el:w.el,life:range/sp,hitSet:[],throwToken});
   p.atkTimer=.22;SFX.shoot();
 }
 function pirateSaberSweep(p,w,amt){
@@ -13874,6 +13877,14 @@ const MP={
   _mnRender(raw){ if(!raw||!raw.length) return []; const out=[]; for(let i=0;i<raw.length;i++){ const a=raw[i]; out.push({id:'gravewraith',x:a[0],z:a[1],y:a[2]||0,yaw:a[3]||0,bob:0,t:0}); } return out; },
   _petRender(raw,old){ if(!raw||!raw.length)return null; const p=old&&old.id===raw[0]?old:{id:raw[0],x:raw[1],z:raw[2],y:raw[3]||0,yaw:raw[4]||0,bob:0,t:0};
     p.tx=raw[1];p.tz=raw[2];p.ty=raw[3]||0;p.tyaw=raw[4]||0;p.hp=raw[5]||0;p.maxHp=raw[6]||1;p.dead=!!raw[7];p.breathT=Math.max(0,Math.min(.7,Number(raw[8])||0));p.breathYaw=Number(raw[9])||0;return p; },
+  // Render-only motion; absent fields retain legacy peer behavior. Never changes movement authority.
+  motion(raw){
+    if(!raw||typeof raw!=='object')return null;
+    const velocity=v=>Number.isFinite(v)?Math.max(-3000,Math.min(3000,v)):0;
+    const p=raw.pose,allowed=['Sword_Attack','Sword_Attack2','Attack','Attack2','Punch','Bow_Shoot','Staff_Attack','Attacking_Idle','PickUp','Spell1','Spell2'];
+    const pose=p&&allowed.includes(p.clip)&&Number.isSafeInteger(p.serial)&&p.serial>=0&&Number.isFinite(p.remaining)&&p.remaining>0?{clip:p.clip,serial:p.serial,remaining:Math.min(1,p.remaining)}:null;
+    return {ground:raw.ground!==false,vx:velocity(raw.vx),vy:velocity(raw.vy),vz:velocity(raw.vz),pose};
+  },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
     cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petDisplayName(G.pet.id):undefined, zone:this.zone,
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
@@ -13884,15 +13895,16 @@ const MP={
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
     w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0,
+    am:p?this.motion({ground:p.onGround,vx:p.vx,vy:p.vy,vz:p.vz,pose:p.combatPose}):null,
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -14103,6 +14115,7 @@ const MP={
       if(q.pet){ const pt=q.pet; pt.t=(pt.t||0)+dt; pt.bob=Math.sin(pt.t*3)*3;
         pt.x+=(pt.tx-pt.x)*k;pt.y+=(pt.ty-pt.y)*k;pt.z+=(pt.tz-pt.z)*k;
         let py=pt.tyaw-pt.yaw;while(py>Math.PI)py-=2*Math.PI;while(py<-Math.PI)py+=2*Math.PI;pt.yaw+=py*k; }
+      if(q.motion?.pose)q.motion.pose.remaining=Math.max(0,q.motion.pose.remaining-dt);
       if(q.at>0) q.at=Math.max(0,q.at-dt);
       if(q.sb>0) q.sb=Math.max(0,q.sb-dt);
       if(q.th>0)q.th=Math.max(0,q.th-dt);
@@ -14138,7 +14151,7 @@ const MP={
       /* peerId and cid ride along so the 3D layer can give this ally a rig of their OWN - one keyed
          to them, wearing their class's body and their weapon. Without an id every ally was an
          anonymous plain object and the only rig available was yours. */
-      const pp={ cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:mv2>0.2?60:0, vz:0, onGround:true,
+      const pp={ cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:q.motion?q.motion.vx:(mv2>0.2?60:0), vz:q.motion?.vz||0, vy:q.motion?.vy||0, onGround:q.motion?.ground!==false, combatPose:q.motion?.pose||null,
         skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
         dead:false, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       try{ drawHero3(pp,t); }
@@ -21429,6 +21442,12 @@ function drawProjectile3(pr,t){
     pushM(); mv(0,0,25); box(5.8,5.8,9,tint(c,'#fff',0.25)); mv(0,0,6); box(2.2,2.2,5,'#eef2f4'); popM();
     pushM(); mv(0,0,-20); box(5.5,1.1,9,'#8b3d32'); box(1.1,5.5,9,'#8b3d32'); popM();
   }
+  else if(pr.shape==='dagger'){ // Short thrown blade: grip, guard and taper, never arrow fletching.
+    const c=pr.color||'#d8dce0';
+    pushM(); mv(0,0,-7); box(2.4,2.4,7,'#594333'); popM();
+    pushM(); mv(0,0,-3); box(7,2,2,tint(c,'#000',.25)); popM();
+    box(4,1.4,8,c); pushM(); mv(0,0,5); box(2.6,1.2,4,tint(c,'#fff',.2)); mv(0,0,3); box(1.2,1,3,c); popM();
+  }
   else if(pr.shape==='arrow'||pr.shape==='bolt'){     // a real arrow: shaft + head + fletching, pointing along travel (+z)
     const c=pr.color, g=pr.glow?pr.color:null;
     box(1.4,1.4,15, c, g);                                          // shaft
@@ -22278,7 +22297,7 @@ window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestParty
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2027"></script>
+<script type="module" src="./hero3d.js?v=2028"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

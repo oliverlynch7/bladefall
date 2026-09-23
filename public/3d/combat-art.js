@@ -35,8 +35,8 @@ function pose(p,id){
 function weapon(g,p,cls,charged){
  if(p.combatPose)p.combatPose.remaining=0;
  const w=p.weapon,art=w.art,forms={sword:'slash',spellblade:'slash',dagger:'cross',great:'slash',hammer:'execute',axe:'execute',scythe:'spiral',fist:'bash',bow:'lance',cross:'fan',javelin:'lance',flintlock:'bash',staff:'bolt',wand:'bolt'};
- const chargeForms={quake:'quake',spin:'spiral',spellsweep:'slash',hurl:'execute',javelin:'lance',powershot:'lance',scythethrow:'spiral',bolt:'bolt'};
- if(charged)p.combatPose={serial:++serial,clip:({bow:'Bow_Shoot',javelin:'Staff_Attack',staff:'Staff_Attack',wand:'Spell2',spellblade:'Sword_Attack2'})[art]||'Attack2',remaining:.45};
+ const chargeForms={quake:'quake',spin:'spiral',spellsweep:'slash',hurl:'execute',daggerthrow:'lance',javelin:'lance',powershot:'lance',scythethrow:'spiral',bolt:'bolt'};
+ if(charged)p.combatPose={serial:++serial,clip:({bow:'Bow_Shoot',dagger:'Staff_Attack',javelin:'Staff_Attack',staff:'Staff_Attack',wand:'Spell2',spellblade:'Sword_Attack2'})[art]||'Attack2',remaining:.45};
  const profile={id:w.arche,cls:cls||'warrior',form:charged?(chargeForms[w.chg]||'bolt'):(forms[art]||'slash'),slot:charged?2:-1,weapon:true,element:w.el};
  const list=g.combatArt||(g.combatArt=[]);
  list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:charged?.55:Math.max(.16,p.atkTimer||.24),radius:w.range||48,serial:++serial});

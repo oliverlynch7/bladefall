@@ -1617,7 +1617,7 @@ function playFor(p, A){
     sword:      pick('Sword_Attack', 'Sword_Attack2'),
     saber:      pick('Sword_Attack', 'Sword_Attack2'),
     spellblade: pick('Sword_Attack', 'Sword_Attack2'),
-    dagger:     pick('Dagger_Attack', 'Dagger_Attack2'),
+    dagger:     p.throwHideT>0?'Staff_Attack':pick('Dagger_Attack', 'Dagger_Attack2'),
     great:      pick('Attack', 'Attack2'),
     hammer:     pick('Attack', 'Attack2'),
     axe:        pick('Attack', 'Attack2'),

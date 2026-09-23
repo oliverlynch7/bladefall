@@ -1884,3 +1884,7 @@ Sunspire half one: courtyard/garden/balcony terrain, two defense routes, mirror 
 
 ## [Codex | 2026-09-23] Sky Library — 2.018.0
 Sunspire half two: alternate access routes, Hugh/Simon, turning shelves, rift history, three archive defenses and remaining three Paladin shards. Fourteen new Voice Studio lines; browser route/combat/co-op/checkpoint/save checks passed. Boss/orb redesign next. See docs/IMPLEMENTATION_SKY_LIBRARY_2026-09-23.md.
+
+
+## [Codex | 2026-09-23] Marble guardian and orb — 2.019.0
+Custom Sunspire boss: rotating protective screens expose armor, clear heavy/sweep/falling-stone warnings, ground combat and raised paths. Post-boss orb reveals souls and route to Duskmoor without ending spoilers. Eight VO lines; browser combat/co-op/checkpoint/save and renderer checks passed. Castle expansion next.

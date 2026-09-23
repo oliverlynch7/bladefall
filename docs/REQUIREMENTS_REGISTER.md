@@ -456,3 +456,7 @@ Palace Courtyard (Sunspire half one) implemented as 2.017.0: two defense approac
 ## [Codex | 2026-09-23] Sky Library
 
 U173 continuation: Sky Library half two implemented as 2.018.0. Main access alternatives, raised/low routes, Hugh/Simon, shelf/display puzzles, archive defense, SP-03/04/05 and fourteen VO lines. Evidence: IMPLEMENTATION_SKY_LIBRARY_2026-09-23.md. Boss/orb/dragon still pending; no new canon.
+
+## [Codex | 2026-09-23] Marble guardian and orb
+
+U174: campaign Sunspire Marble Colossus arena/mechanics and post-boss orb reveal implemented in 2.019.0. Eight new VO lines, 276 total. Scope/tests/limits: IMPLEMENTATION_MARBLE_ORB_2026-09-23.md. Castle and finale still pending; no final-reveal spoilers introduced.

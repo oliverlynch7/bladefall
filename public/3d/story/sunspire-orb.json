@@ -1,0 +1,268 @@
+{
+  "version": 1,
+  "region": "palace",
+  "status": "authored",
+  "npcs": {
+    "sunspire_orb": {
+      "name": "The Sunspire Orb",
+      "role": "Conscious keeper of knowledge; calm, clear, compassionate, never theatrical",
+      "start": "mc.orb.hello",
+      "when": [
+        {
+          "flag": "mc.defeated",
+          "is": true
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "mc.orb.hello": {
+      "text": "You have reached me. One question, freely asked. No title is needed here.",
+      "choices": [
+        {
+          "id": "ask",
+          "text": "How can we stop the Abyss King?",
+          "next": "mc.orb.souls",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "mc.asked",
+              "value": true
+            }
+          ]
+        },
+        {
+          "id": "steady",
+          "text": "Give me a moment. People are depending on this.",
+          "next": "mc.orb.steady",
+          "effects": []
+        },
+        {
+          "id": "wry",
+          "text": "I had a speech ready. That was most of it.",
+          "next": "mc.orb.wry",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "Gentle welcome. Simple, direct. This is a conscious presence, not a machine.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.steady": {
+      "text": "Then take that moment. Fear does not make your purpose smaller.",
+      "choices": [
+        {
+          "id": "ask",
+          "text": "How can we stop the Abyss King?",
+          "next": "mc.orb.souls",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "mc.asked",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "Quiet reassurance without suggesting destiny or hidden ancestry.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.wry": {
+      "text": "A short speech leaves more room for the truth.",
+      "choices": [
+        {
+          "id": "ask",
+          "text": "How can we stop the Abyss King?",
+          "next": "mc.orb.souls",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "mc.asked",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "A faint warmth; dry humor, not a joke voice.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.souls": {
+      "text": "Look. These are the people taken through the Hollow Gate. Their souls are still in the Abyssal Void. Their bodies obey the King, but the people themselves are trapped here, apart from everything they love.",
+      "choices": [
+        {
+          "id": "listen",
+          "text": "They are still there. All this time.",
+          "next": "mc.orb.anchor",
+          "effects": [
+            {
+              "type": "note",
+              "id": "mc.souls",
+              "region": "palace",
+              "title": "The people are still there",
+              "text": "The orb showed souls imprisoned in the Abyssal Void. The Hollowed are not willing servants. Their bodies are controlled while their souls remain trapped."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "Let the sight carry the horror. Slow down slightly at “still.” The orb shows a vision, not a new Gate.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.anchor": {
+      "text": "His own soul holds the Gate under his control. You must defeat him to break that control. While he lives, he can keep taking people from Aerth. Those already trapped cannot reach freedom while he holds them.",
+      "choices": [
+        {
+          "id": "listen",
+          "text": "Then we have to reach him.",
+          "next": "mc.orb.route",
+          "effects": [
+            {
+              "type": "note",
+              "id": "mc.anchor",
+              "region": "palace",
+              "title": "The King’s hold",
+              "text": "The King’s own soul anchors his control of the Hollow Gate. Defeating him is necessary to break that control and give the trapped souls a chance at freedom. The orb has not promised that his death alone restores them."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "Clear and firm. Necessary first action, no final-cut explanation and no guaranteed instant restoration.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.route": {
+      "text": "Castle Duskmoor. Far beyond the familiar paths. See the shore, the narrow landing, then the climb beneath the western wall. Remember this route. The King has hidden his home, but a hidden place is still a place.",
+      "choices": [
+        {
+          "id": "remember",
+          "text": "I see the way. I will remember it.",
+          "next": "mc.orb.farewell",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "mc.answer",
+              "value": true
+            },
+            {
+              "type": "note",
+              "id": "mc.route",
+              "region": "palace",
+              "title": "The way to Castle Duskmoor",
+              "text": "The orb revealed Castle Duskmoor and a route to its shore. A narrow landing leads to the climb below the western wall. Bring this knowledge to the people helping you prepare; the King can now be reached."
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "The vision shows a usable approach. Precise directions, measured confidence. Do not imply a second question.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.farewell": {
+      "text": "You came here for a way forward. Now you have one. Go with care for the people you mean to save.",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "That is why I started.",
+          "next": "mc.orb.quiet",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "Warm but restrained. The player remains an ordinary person in their own understanding.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    },
+    "mc.orb.quiet": {
+      "text": "The path has been shown. What you do with it belongs to you.",
+      "choices": [
+        {
+          "id": "remember",
+          "text": "I will carry it with me.",
+          "next": "mc.orb.quiet",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "sunspire_orb",
+        "direction": "Peaceful closing. No extra answers or lore reveals.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+      }
+    }
+  },
+  "events": {
+    "mc.defeated": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "mc.defeated",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "mc.guardian",
+          "region": "palace",
+          "title": "The guardian is still",
+          "text": "The Colossus no longer blocks the northern chamber. The orb is within reach. Its answer may give the people resisting the King a way forward."
+        }
+      ]
+    },
+    "mc.guide": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "mc.screens",
+          "region": "palace",
+          "title": "Turn its strength against it",
+          "text": "Turn a protective screen until its broad golden face points toward the Colossus. Stand behind it when the long heavy-strike warning appears, then dodge aside if needed. The screen sends that force back and opens the armor seal. Strike while the joints are pale. Used screens must be turned away and back to reset. The low sweep can be jumped, outrun or avoided from a balcony."
+        }
+      ]
+    },
+    "mc.screen.0": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "mc.screen.0",
+          "amount": 1
+        }
+      ]
+    },
+    "mc.screen.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "mc.screen.1",
+          "amount": 1
+        }
+      ]
+    },
+    "mc.screen.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "mc.screen.2",
+          "amount": 1
+        }
+      ]
+    }
+  }
+}

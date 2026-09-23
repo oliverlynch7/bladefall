@@ -294,3 +294,7 @@ Palace Courtyard (Sunspire half one) implemented as 2.017.0: two defense approac
 ## [Codex | 2026-09-23] Sky Library
 
 U173 implementation checkpoint: Sky Library half two and remaining Sunspire shards authored. Fourteen VO lines; 268 total. Latest orb reveal limits preserved by leaving that scene for the next boss batch. U172 is environment metadata, not a user decision. Source preserved in USER_SOURCE_2026-09-23_SKY_LIBRARY.md.
+
+## [Codex | 2026-09-23] Marble guardian and orb
+
+U174 continuation implemented the approved solo screen-deflection guardian and orb question. No new major canon. Source USER_SOURCE_2026-09-23_MARBLE_ORB.md; private archive has 174 entries, zero unparsed and valid earlier references.

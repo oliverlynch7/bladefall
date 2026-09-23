@@ -1,3 +1,4 @@
+import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2019';
 import {buildSkyLibrary} from './sky-library-art.js?v=2018';
 import {buildPalaceCourt} from './palace-courtyard-art.js?v=2017';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2016';
@@ -1768,7 +1769,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
- if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
+ if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('guardian:')?buildMarbleGuardian(scene,world):String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.shipScene){clearWorld(scene);const art=world.shipScene==='hydra'||world.shipScene.startsWith('cliffs')?buildCoastHigh(scene,world):buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -2005,7 +2006,7 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
+  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
@@ -2038,7 +2039,7 @@ export function syncWorld(scene){
     updateHollow(world);
     updateKeep(world);
     updateFrost(world);
-    updateDeep(world);
+    updateDeep(world);updateMarbleOrb(world);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);

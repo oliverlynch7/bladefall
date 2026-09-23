@@ -462,3 +462,10 @@ Main 307e230 deployed successfully as f5feba18-3378-4fbe-b348-ad6efb041dc9. Read
 ## [Codex | 2026-09-23] Sky Library
 
 Sky Library implemented as 2.018.0; see IMPLEMENTATION_SKY_LIBRARY_2026-09-23.md for scope and tests. Next: Marble Colossus circular reading hall with protective screens and armor seals, followed by the orb’s one question, soul vision and Castle Duskmoor directions. No final-cut/Ian spoilers. Then Castle’s two halves and finale; dragon remains pending. Private archive ../../decision-archive/2026-09-23-sky-library has 173 entries, zero unparsed; U172 environment metadata, U173 continuation. Ten new preview images, 268 voice lines. Do not claim campaign overhaul complete.
+
+## [Codex | 2026-09-23] Sky Library production receipt
+Main c3dcfa3 deployed successfully as e7a2bfd7-70db-4921-9463-21a3daffb9cd. Read-only live Chromium verified 2.018.0-sky-library, library assets/story HTTP 200, 268 voice catalog lines and all 132 gallery images decoded at 390px without overflow. No production saves or approved takes changed. Next: Marble Colossus arena/combat and post-boss orb scene, then Castle Duskmoor. Current library half is authored; boss and orb remain pending.
+
+## [Codex | 2026-09-23] Marble guardian and orb
+
+2.019.0-sunspire-guardian: both Sunspire halves, five shards, custom boss and orb scene now authored. See IMPLEMENTATION_MARBLE_ORB_2026-09-23.md for evidence and limits. New modules marble-guardian.js / marble-guardian-art.js; story/sunspire-orb.json. Eight new VO lines (276 total), ten screenshots (142 gallery). Next: Castle Duskmoor half one, then spiral ascent half two, King phase logic and ending. Preserve Ian/final cut surprise; current orb identifies necessary linked-soul target without claiming his death alone restores everyone. New art uses shared deep-art.js?v=2017 identity; hero/world/npc versions2019. Archive ../../decision-archive/2026-09-23-marble-orb has174 entries. Current changed continuity may include previous production receipt.

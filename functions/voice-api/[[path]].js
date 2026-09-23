@@ -33,6 +33,12 @@ async function loadLine(bucket,id){
  if(object)return {state:await object.json(),etag:object.etag};
  const text=book.nodes[id].text;return {state:{id,text,revision:await digest(text),version:0,history:[],takes:[],approval:null},etag:null};
 }
+// Bound storage concurrency while keeping the authored recording order stable.
+async function loadCatalog(bucket){
+ const ids=Object.keys(book.nodes),rows=new Array(ids.length);let next=0;
+ await Promise.all(Array.from({length:Math.min(6,ids.length)},async()=>{while(next<ids.length){const i=next++;rows[i]=(await loadLine(bucket,ids[i])).state;}}));
+ return rows;
+}
 async function saveLine(bucket,state,etag){
  const saved=await bucket.put('lines/'+state.id+'.json',JSON.stringify(state),{onlyIf:etag?{etagMatches:etag}:{etagDoesNotMatch:'*'},httpMetadata:{contentType:'application/json'}});
  if(!saved)fail('This line changed on another device. Refresh before saving.',409);
@@ -46,7 +52,7 @@ export async function handle(request,env){
  try{
   // Game access is deliberately limited to the exact approved, non-stale take.
   if(action==='game'&&request.method==='GET'){
-   const lines={};for(const id of Object.keys(book.nodes)){const {state:s}=await loadLine(env.VOICE_BUCKET,id);if(isCurrent(s))lines[id]={text:s.text,revision:s.revision,audio:'/voice-api/published/'+id+'/'+s.approval.take};}
+   const lines={};for(const s of await loadCatalog(env.VOICE_BUCKET)){if(isCurrent(s))lines[s.id]={text:s.text,revision:s.revision,audio:'/voice-api/published/'+s.id+'/'+s.approval.take};}
    return json({lines});
   }
   if(action==='published'&&request.method==='GET'){
@@ -58,7 +64,7 @@ export async function handle(request,env){
   // Owner requested password-free studio access. Writes still require this site's Origin.
   if(action==='status'&&request.method==='GET')return json({access:'open'});
   if(action==='catalog'&&request.method==='GET'){
-   const lines=[];for(const id of Object.keys(book.nodes)){const {state:s}=await loadLine(env.VOICE_BUCKET,id);lines.push({...metadata(id),...s,currentApproval:!!isCurrent(s)});}return json({lines});
+   const lines=(await loadCatalog(env.VOICE_BUCKET)).map(s=>({...metadata(s.id),...s,currentApproval:!!isCurrent(s)}));return json({lines});
   }
   if(action==='audio'&&request.method==='GET'){
    const id=parts[1];if(!validId(id))fail('Not found.',404);const object=await env.VOICE_BUCKET.get('audio/'+id);if(!object)fail('Not found.',404);

@@ -1,0 +1,1247 @@
+{
+  "version": 1,
+  "region": "ember",
+  "status": "Great Furnace recording-ready; Colossus encounter integrated.",
+  "npcs": {
+    "pike": {
+      "name": "Foreman Pike",
+      "role": "A Hollowed overseer following strict production and safety orders",
+      "start": "gf.pike.first"
+    },
+    "martin": {
+      "name": "Martin",
+      "role": "A worker organizer with a dry sense of humor and a plan for every friend",
+      "start": "gf.martin.first"
+    }
+  },
+  "nodes": {
+    "gf.pike.first": {
+      "text": "Production is interrupted. State your work station and reason for entry. Workers without a task return to the line.",
+      "choices": [
+        {
+          "id": "fault",
+          "text": "A pipe is leaking. Your schedule says that needs a patrol.",
+          "next": "gf.pike.proof",
+          "effects": [],
+          "when": [
+            {
+              "flag": "gf.fault",
+              "is": true
+            },
+            {
+              "flag": "gf.schedule",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "look",
+          "text": "Where are the maintenance records?",
+          "next": "gf.pike.records",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "force",
+          "text": "Open the gate. I am getting the workers out.",
+          "next": "gf.pike.alarm",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.alarm"
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "back",
+          "text": "I will check my work order.",
+          "next": "gf.pike.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "pike",
+        "scene": "Inspection gate",
+        "order": 1,
+        "emotion": "Flat male voice. Almost normal, with no anger or warmth.",
+        "direction": "Flat male voice. Almost normal, with no anger or warmth.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Inspection gate"
+      }
+    },
+    "gf.pike.records": {
+      "text": "West maintenance bay. All faults must be checked against the shift schedule. Unsupported claims delay production.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will check it.",
+          "next": "gf.pike.first",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "pike",
+        "scene": "The rules can be used",
+        "order": 2,
+        "emotion": "Precise and empty. A memorized instruction.",
+        "direction": "Precise and empty. A memorized instruction.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The rules can be used"
+      }
+    },
+    "gf.pike.wait": {
+      "text": "Your delay has been noted.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About my work order...",
+          "next": "gf.pike.first",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "pike",
+        "scene": "Waiting at the gate",
+        "order": 3,
+        "emotion": "No threat in the voice; that makes it worse.",
+        "direction": "No threat in the voice; that makes it worse.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Waiting at the gate"
+      }
+    },
+    "gf.pike.proof": {
+      "text": "Pressure loss confirmed. Inspection takes priority. Gate patrol: examine the west pipe. Worker passage is cleared for maintenance.",
+      "choices": [
+        {
+          "id": "pass",
+          "text": "I will see to the passage.",
+          "next": "gf.pike.done",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.access"
+            },
+            {
+              "type": "note",
+              "id": "gf.entry",
+              "region": "ember",
+              "title": "Past the foreman",
+              "text": "Pike sent the gate patrol to inspect the leaking pipe. Martin is in the break room beyond the gate."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "pike",
+        "scene": "A valid fault report",
+        "order": 4,
+        "emotion": "He obeys his standing orders, not a personal appeal.",
+        "direction": "He obeys his standing orders, not a personal appeal.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. A valid fault report"
+      }
+    },
+    "gf.pike.alarm": {
+      "text": "Unassigned movement. Gate patrol: stop this worker. Production must continue.",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Then I will make my own way.",
+          "next": "gf.pike.done",
+          "effects": [
+            {
+              "type": "note",
+              "id": "gf.entry",
+              "region": "ember",
+              "title": "Open the worker gate",
+              "text": "Clear the gate patrol, then use the handle beside the gate. Martin is in the break room beyond it."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "pike",
+        "scene": "Combat entrance",
+        "order": 5,
+        "emotion": "Same flat delivery. Do not shout or cackle.",
+        "direction": "Same flat delivery. Do not shout or cackle.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Combat entrance"
+      }
+    },
+    "gf.pike.done": {
+      "text": "The schedule does not allow further discussion.",
+      "choices": [],
+      "voice": {
+        "speaker": "pike",
+        "scene": "Orders complete",
+        "order": 6,
+        "emotion": "Short, hollow, final.",
+        "direction": "Short, hollow, final.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Orders complete"
+      }
+    },
+    "gf.martin.first": {
+      "text": "You stopped the hammers. We heard the silence all the way down here. Best thing this place has made in years. Now help me get everyone out before someone decides we should fix it.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "What is the safest way out?",
+          "next": "gf.martin.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.martin.met"
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "rush",
+          "text": "We should leave right now.",
+          "next": "gf.martin.early",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.martin.met"
+            },
+            {
+              "type": "flag",
+              "id": "gf.early"
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "Worker break room",
+        "order": 7,
+        "emotion": "Warm male voice, tired but quick. A little smile at the joke.",
+        "direction": "Warm male voice, tired but quick. A little smile at the joke.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Worker break room"
+      }
+    },
+    "gf.martin.plan": {
+      "text": "Open the worker passage first. Then choose: ring the work bell and the shelter bell to get everyone out now, or climb west and stop the transport chain. That pulls patrols away. If you do that, ring the shelter bell first so we know to leave quietly.",
+      "choices": [
+        {
+          "id": "early",
+          "text": "Get them out now. I can handle the patrols.",
+          "next": "gf.martin.early",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.early"
+            },
+            {
+              "type": "note",
+              "id": "gf.workers",
+              "region": "ember",
+              "title": "Get the workers out",
+              "text": "Open the worker passage on the lower western floor. Ring the work bell there, then the shelter bell in the break room. The patrols will remain on the lower route."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "quiet",
+          "text": "I will stop the transport chain first.",
+          "next": "gf.martin.quiet",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.quiet"
+            },
+            {
+              "type": "note",
+              "id": "gf.workers",
+              "region": "ember",
+              "title": "A quieter escape",
+              "text": "Open the worker passage. Take the western climbing route to stop the transport chain. Then ring the shelter bell in the break room, followed by the work bell below. This draws patrols away from the workers."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "Two evacuation routes",
+        "order": 8,
+        "emotion": "Practical, protective. Neither choice is foolish.",
+        "direction": "Practical, protective. Neither choice is foolish.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Two evacuation routes"
+      }
+    },
+    "gf.martin.early": {
+      "text": "Then open the passage west of the worker floor. Work bell first, shelter bell second. They will run when they hear it. You keep the guards busy. No one has to be a hero twice today.",
+      "choices": [
+        {
+          "id": "ready",
+          "text": "I will clear their path.",
+          "next": "gf.martin.wait",
+          "effects": [
+            {
+              "type": "note",
+              "id": "gf.workers",
+              "region": "ember",
+              "title": "Get the workers out",
+              "text": "Open the worker passage on the lower western floor. Ring the work bell there, then the shelter bell in the break room. The patrols remain on the lower route."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "Direct evacuation",
+        "order": 9,
+        "emotion": "Firm and grateful, not sentimental.",
+        "direction": "Firm and grateful, not sentimental.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Direct evacuation"
+      }
+    },
+    "gf.martin.quiet": {
+      "text": "The brake is above the west loading floor. Expect guards. Once the chain stops, shelter bell first, work bell second. The noise should cover our feet. Most of us are very good at leaving work.",
+      "choices": [
+        {
+          "id": "ready",
+          "text": "Stay ready.",
+          "next": "gf.martin.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "Quiet evacuation",
+        "order": 10,
+        "emotion": "A quick dry joke, then back to work.",
+        "direction": "A quick dry joke, then back to work.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Quiet evacuation"
+      }
+    },
+    "gf.martin.wait": {
+      "text": "I am keeping count. Every worker, every time. What have you found?",
+      "choices": [
+        {
+          "id": "cool",
+          "text": "They are safe. How do I stop the furnace?",
+          "next": "gf.martin.cool",
+          "effects": [
+            {
+              "type": "note",
+              "id": "gf.cool",
+              "region": "ember",
+              "title": "Cool the furnace crossing",
+              "text": "Trace the pipes at the cooling controls: fill the round tank, open the square channel, drain the triangle tray. The crossing rises only after the workers are safe."
+            }
+          ],
+          "when": [
+            {
+              "flag": "gf.evacuated",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "pages",
+          "text": "These writings mention Sunspire Palace.",
+          "next": "gf.martin.pages",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.route"
+            },
+            {
+              "type": "note",
+              "id": "gf.route",
+              "region": "ember",
+              "title": "A route toward Sunspire",
+              "text": "The seized writings describe a hidden wisdom orb in Sunspire Palace that answers one question. Martin knows sailors on Storm Coast who may help reach the sea cliffs below the palace. First, get past the Colossus."
+            }
+          ],
+          "when": [
+            {
+              "flag": "gf.writings",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "cage",
+          "text": "There is something alive in that work cage.",
+          "next": "gf.martin.cage",
+          "effects": [],
+          "when": [
+            {
+              "flag": "gf.cage",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "Keep them together. I will be back.",
+          "next": "gf.martin.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "Progress and next task",
+        "order": 11,
+        "emotion": "Attentive and focused. He remembers people, not numbers.",
+        "direction": "Attentive and focused. He remembers people, not numbers.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Progress and next task"
+      }
+    },
+    "gf.martin.cool": {
+      "text": "Round tank, square channel, triangle tray. The old signs still show the order. Cool the crossing and it will rise. That gets you to the Colossus. Its armor drinks heat from this place. Cooling should do more than make the walk pleasant.",
+      "choices": [
+        {
+          "id": "office",
+          "text": "What is in the high office?",
+          "next": "gf.martin.office",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "back",
+          "text": "I will follow the pipes.",
+          "next": "gf.martin.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "The Colossus approach",
+        "order": 12,
+        "emotion": "Calm technical advice in everyday words.",
+        "direction": "Calm technical advice in everyday words.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The Colossus approach"
+      }
+    },
+    "gf.martin.office": {
+      "text": "Seized papers. The guards carry them up the east gallery and lock them away. I know which stairs they use. I do not know what the papers say. If the Legion hides something that carefully, I would like a look.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will search it.",
+          "next": "gf.martin.wait",
+          "effects": [
+            {
+              "type": "note",
+              "id": "gf.office",
+              "region": "ember",
+              "title": "Confiscated writings",
+              "text": "The command office stands above the eastern gallery. Search its desk. The guards have been locking seized papers there."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "The high office",
+        "order": 13,
+        "emotion": "Curious, with a sharp edge of resentment.",
+        "direction": "Curious, with a sharp edge of resentment.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The high office"
+      }
+    },
+    "gf.martin.pages": {
+      "text": "A palace above the sea cliffs. And an orb that answers one question? I thought these were shipping papers. I know sailors on Storm Coast. They will know the crossing. Get us past that giant, and I will send word. You will not have to find the way alone.",
+      "choices": [
+        {
+          "id": "one",
+          "text": "One question. We had better make it count.",
+          "next": "gf.martin.hope",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "thanks",
+          "text": "Thank you. I could use the help.",
+          "next": "gf.martin.hope",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "The writings reveal the next destination",
+        "order": 14,
+        "emotion": "Genuine surprise. He learns the secret from the papers now.",
+        "direction": "Genuine surprise. He learns the secret from the papers now.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The writings reveal the next destination"
+      }
+    },
+    "gf.martin.hope": {
+      "text": "You came here to stop their weapons. You are leaving with people willing to help you. I think that is the better trade. We will keep the way back open.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will deal with the Colossus.",
+          "next": "gf.martin.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "A growing circle of help",
+        "order": 15,
+        "emotion": "Quiet hope; no prophecy or knowledge of the player’s bloodline.",
+        "direction": "Quiet hope; no prophecy or knowledge of the player’s bloodline.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. A growing circle of help"
+      }
+    },
+    "gf.martin.cage": {
+      "text": "They use its heat to move the cage. It snaps because they keep hurting it. Close the heat feed, open the little air vent, then release the lock. It might bite you anyway. But at least it will be an honest bite.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will try.",
+          "next": "gf.martin.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "martin",
+        "scene": "The captive fire creature",
+        "order": 16,
+        "emotion": "Compassionate, with a wry ending.",
+        "direction": "Compassionate, with a wry ending.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The captive fire creature"
+      }
+    }
+  },
+  "events": {
+    "gf.fault": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.fault"
+        },
+        {
+          "type": "note",
+          "id": "gf.fault",
+          "region": "ember",
+          "title": "A real maintenance fault",
+          "text": "A cracked pipe leaks beside the west maintenance bay. Pike may accept a fault report if it follows the work schedule."
+        }
+      ]
+    },
+    "gf.schedule": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.schedule"
+        },
+        {
+          "type": "note",
+          "id": "gf.schedule",
+          "region": "ember",
+          "title": "Inspection comes first",
+          "text": "The work schedule orders gate patrols to inspect any confirmed pressure loss before returning to guard duty. The leaking pipe is beside this bay."
+        }
+      ]
+    },
+    "gf.gate": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.alarm",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.access"
+        }
+      ]
+    },
+    "gf.passage": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.martin.met",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.passage"
+        },
+        {
+          "type": "note",
+          "id": "gf.passage",
+          "region": "ember",
+          "title": "The worker passage is open",
+          "text": "The lower passage is open. Follow the bell order agreed with Martin to guide the workers to shelter."
+        }
+      ]
+    },
+    "gf.transport": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.access",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.transport"
+        }
+      ]
+    },
+    "gf.workbell": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.passage",
+          "is": true
+        },
+        {
+          "flag": "gf.evacuated",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "conditional",
+          "id": "gf.bells.early",
+          "when": [
+            {
+              "flag": "gf.early",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "sequence",
+              "id": "gf.bells",
+              "value": 1,
+              "solution": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.bells.quiet",
+          "when": [
+            {
+              "flag": "gf.quiet",
+              "is": true
+            },
+            {
+              "flag": "gf.transport",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "sequence",
+              "id": "gf.bells",
+              "value": 1,
+              "solution": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.bells.done",
+          "when": [
+            {
+              "flag": "gf.bells.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.evacuated"
+            },
+            {
+              "type": "note",
+              "id": "gf.safe",
+              "region": "ember",
+              "title": "The workers are safe",
+              "text": "Both bells sounded in order. The workers have reached shelter and opened a service crossing. Find the cooling controls north of the furnace."
+            }
+          ]
+        }
+      ]
+    },
+    "gf.shelterbell": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.passage",
+          "is": true
+        },
+        {
+          "flag": "gf.evacuated",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "conditional",
+          "id": "gf.bells.early",
+          "when": [
+            {
+              "flag": "gf.early",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "sequence",
+              "id": "gf.bells",
+              "value": 2,
+              "solution": [
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.bells.quiet",
+          "when": [
+            {
+              "flag": "gf.quiet",
+              "is": true
+            },
+            {
+              "flag": "gf.transport",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "sequence",
+              "id": "gf.bells",
+              "value": 2,
+              "solution": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.bells.done",
+          "when": [
+            {
+              "flag": "gf.bells.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "gf.evacuated"
+            },
+            {
+              "type": "note",
+              "id": "gf.safe",
+              "region": "ember",
+              "title": "The workers are safe",
+              "text": "Both bells sounded in order. The workers have reached shelter and opened a service crossing. Find the cooling controls north of the furnace."
+            }
+          ]
+        }
+      ]
+    },
+    "gf.pipes": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.access",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.pipes"
+        },
+        {
+          "type": "note",
+          "id": "gf.pipes",
+          "region": "ember",
+          "title": "Follow the water",
+          "text": "The cooling diagram shows a round tank feeding a square channel, then a triangle-marked drain. Fill, open, drain. The safety system empties the tanks if the order is wrong."
+        }
+      ]
+    },
+    "gf.cool.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.evacuated",
+          "is": true
+        },
+        {
+          "flag": "gf.pipes",
+          "is": true
+        },
+        {
+          "flag": "gf.cool.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.cool",
+          "value": 1,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "item",
+          "id": "gf.cool.tries",
+          "amount": 1
+        }
+      ]
+    },
+    "gf.cool.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.evacuated",
+          "is": true
+        },
+        {
+          "flag": "gf.pipes",
+          "is": true
+        },
+        {
+          "flag": "gf.cool.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.cool",
+          "value": 2,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "item",
+          "id": "gf.cool.tries",
+          "amount": 1
+        }
+      ]
+    },
+    "gf.cool.3": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.evacuated",
+          "is": true
+        },
+        {
+          "flag": "gf.pipes",
+          "is": true
+        },
+        {
+          "flag": "gf.cool.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.cool",
+          "value": 3,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "item",
+          "id": "gf.cool.tries",
+          "amount": 1
+        }
+      ]
+    },
+    "gf.writings": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.access",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.writings"
+        },
+        {
+          "type": "note",
+          "id": "gf.sunspire",
+          "region": "ember",
+          "title": "The hidden wisdom of Sunspire",
+          "text": "Confiscated pages describe Sunspire Palace above remote sea cliffs. In a protected chamber, a living orb of wisdom answers one question. The pages describe a sea approach from Storm Coast. Finding the orb may reveal how to reach the Abyss King. Show Martin the route marks."
+        }
+      ]
+    },
+    "gf.pressure": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.access",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.pressure"
+        },
+        {
+          "type": "note",
+          "id": "gf.pressure",
+          "region": "ember",
+          "title": "A cooler approach",
+          "text": "The upper pressure valve opens a maintenance passage below the walkway. Less pressure now reaches the Colossus floor."
+        }
+      ]
+    },
+    "gf.cache": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.cool.open",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.cache"
+        },
+        {
+          "type": "note",
+          "id": "gf.cache",
+          "region": "ember",
+          "title": "The cooling-box plate",
+          "text": "Three marks run against the water flow: triangle, square, circle. The sealed cooling box has the same three buttons."
+        }
+      ]
+    },
+    "gf.cache.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.cache",
+          "is": true
+        },
+        {
+          "flag": "gf.cache.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.cache",
+          "value": 1,
+          "solution": [
+            3,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    "gf.cache.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.cache",
+          "is": true
+        },
+        {
+          "flag": "gf.cache.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.cache",
+          "value": 2,
+          "solution": [
+            3,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    "gf.cache.3": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.cache",
+          "is": true
+        },
+        {
+          "flag": "gf.cache.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.cache",
+          "value": 3,
+          "solution": [
+            3,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    "gf.cage": {
+      "once": true,
+      "when": [
+        {
+          "flag": "gf.access",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "gf.cage"
+        },
+        {
+          "type": "note",
+          "id": "gf.cage",
+          "region": "ember",
+          "title": "Something alive in the cage",
+          "text": "A small fire creature is trapped in the work cage. Its pipes are marked: heat feed, air vent, lock. Stop feeding heat before letting the cage breathe. Martin may know more."
+        }
+      ]
+    },
+    "gf.pet.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.cage",
+          "is": true
+        },
+        {
+          "flag": "gf.pet.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.pet",
+          "value": 1,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.pet.reward",
+          "when": [
+            {
+              "flag": "gf.pet.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "gf.cinder",
+              "kind": "companion",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "gf.cinder",
+              "region": "ember",
+              "title": "Cinder is free",
+              "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
+            }
+          ]
+        }
+      ]
+    },
+    "gf.pet.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.cage",
+          "is": true
+        },
+        {
+          "flag": "gf.pet.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.pet",
+          "value": 2,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.pet.reward",
+          "when": [
+            {
+              "flag": "gf.pet.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "gf.cinder",
+              "kind": "companion",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "gf.cinder",
+              "region": "ember",
+              "title": "Cinder is free",
+              "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
+            }
+          ]
+        }
+      ]
+    },
+    "gf.pet.3": {
+      "once": false,
+      "when": [
+        {
+          "flag": "gf.cage",
+          "is": true
+        },
+        {
+          "flag": "gf.pet.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "gf.pet",
+          "value": 3,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "gf.pet.reward",
+          "when": [
+            {
+              "flag": "gf.pet.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "gf.cinder",
+              "kind": "companion",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "gf.cinder",
+              "region": "ember",
+              "title": "Cinder is free",
+              "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
+            }
+          ]
+        }
+      ]
+    },
+    "fc.valve.0": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "fc.cool",
+          "amount": 1
+        }
+      ]
+    },
+    "fc.valve.1": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "fc.cool",
+          "amount": 1
+        }
+      ]
+    },
+    "fc.valve.2": {
+      "once": false,
+      "effects": [
+        {
+          "type": "item",
+          "id": "fc.cool",
+          "amount": 1
+        }
+      ]
+    }
+  }
+}

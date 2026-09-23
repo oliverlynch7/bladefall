@@ -1,8 +1,8 @@
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2011';
+import {syncNpcs} from './npc3d.js?v=2014';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
-import {syncCompanions} from './companion3d.js?v=2010';
+import {syncCompanions} from './companion3d.js?v=2014';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 

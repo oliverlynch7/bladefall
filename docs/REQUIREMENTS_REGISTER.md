@@ -417,3 +417,11 @@ Oliver reports frozen enemies and bosses, absent visual feedback for world inter
 
 ## [Codex | 2026-09-21] Apply supplied desktop soundtrack
 Oliver authorizes importing Desktop/BladeFall Music tracks and both placement text files, choosing sensible placements where suggestions overlap. Preserve copies of the music in Git. The round-two note explicitly selects The Wayfarer’s Hearth as the main hub theme, beginning eight bars before the flute around 1:10 and ending around 3:07 with a smooth loop. Preserve the original and create a derived loop. Use exact scene-specific choices over broad alternatives; retain unimplemented ship/hydra/finale cues for their intended future scenes.
+
+## [Codex | 2026-09-22] Continued implementation authorization
+User: "Ok continue. Do a long update session and don’t waste usage"
+Continue the approved queue from Great Furnace, then Colossus; reuse shared systems and perform focused verification. No requirements removed or assumed complete. Grounded plan: IMPLEMENTATION_GREAT_FURNACE_2026-09-22.md.
+
+
+## [Codex | 2026-09-22] 2.014 implementation evidence
+Great Furnace and Colossus campaign batch complete with 16 new VO nodes, two rescue paths, cooling/pressure puzzles, three remaining Emberdeep shards, Cinder and shared machinery/boss state. See IMPLEMENTATION_GREAT_FURNACE_2026-09-22.md for exact scope, tests and limitations. Pyromancer/trial, Storm Coast and the wider approved queue remain open. U167 preserved separately; no older approvals removed.

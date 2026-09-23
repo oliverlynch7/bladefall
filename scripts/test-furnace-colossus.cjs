@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict'),C=require('../public/3d/furnace-colossus.js');
+let e={furnaceColossus:true,hp:1000,maxHp:1000,x:0,z:0,fcState:'recover',fcClock:0,fcBeat:0,fcSeq:0,fcExposed:0,fcValveCd:0,fcVent:true},p={x:100,z:300,y:0,hp:100},repairs=0,a={enemies:[],repair:()=>repairs++};
+C.step(e,.016,p,a);assert.equal(e.fcState,'wind');assert(!C.inAttack(e,p));const target=[e.fcX,e.fcZ];p.x=900;for(let i=0;i<100;i++)C.step(e,.016,p,a);assert.deepEqual([e.fcX,e.fcZ],target);assert(!C.inAttack(e,p));assert(C.inAttack(e,{...p,x:target[0],z:target[1]}));
+C.cool(e,1);assert.equal(e.fcExposed,13);assert.equal(e.fcState,'recover');assert(!C.available({boss:e}));C.cool(e,1);assert.equal(e.fcExposed,13);e.hp=400;for(let i=0;i<500;i++)C.step(e,.016,p,a);assert.equal(repairs,1);assert(e.fcExposed<6);
+Object.assign(e,{fcState:'strike',fcKind:'sweep',fcDX:0,fcDZ:1});assert(C.inAttack(e,{x:0,z:400,y:0,hp:10}));assert(!C.inAttack(e,{x:0,z:400,y:120,hp:10}));assert(!C.inAttack(e,{x:0,z:-400,y:0,hp:10}));Object.assign(e,{fcKind:'vents',fcX:0,fcZ:0,fcY:0,fcVent:false});assert(!C.inAttack(e,{x:280,z:0,y:0,hp:10}));e.fcVent=true;assert(C.inAttack(e,{x:280,z:0,y:0,hp:10}));
+a.enemies=[{furnaceRepair:true,hp:10}];for(let i=0;i<4000;i++)C.step(e,.05,p,a);assert(e._fcHealed<=80.00001);assert.equal(repairs,1);assert(C.fields.every(k=>k in C.snapshot(e)));
+console.log('Colossus passed: locked warnings, exact attack geometry, high-route sweep protection, cooling, limited repair budget, pressure benefit and snapshot fields.');

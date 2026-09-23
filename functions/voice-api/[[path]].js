@@ -8,7 +8,8 @@ import prison from '../../public/3d/story/prison-dungeons.json';
 import peaks from '../../public/3d/story/snowbound-peaks.json';
 import caves from '../../public/3d/story/deep-ice-caves.json';
 import iron from '../../public/3d/story/iron-halls.json';
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes}};
+import furnace from '../../public/3d/story/great-furnace.json';
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes}};
 
 const encoder=new TextEncoder(),MAX_AUDIO=12*1024*1024;
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};

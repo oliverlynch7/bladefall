@@ -1862,3 +1862,7 @@ Restore zero-delay boss activation and expiring Stopped Clock; fix elevated enem
 
 ## [Codex | 2026-09-22] 2.013 supplied soundtrack
 40 original songs and placement notes preserved in Git; trimmed stereo Wayfarer hub loop. Per-half and per-boss scene routing, final phase music, dialogue ducking, current-scene unmute, and future ship/hydra/ending cue map. All 41 runtime tracks decode; native loop, routing, old-save and mobile listening-page checks passed.
+
+
+## [Codex | 2026-09-22] 2.014 Great Furnace and Colossus
+Expanded Emberdeep part two, Pike/Martin and 16 recording lines, rescue branches, restored lift, cooling puzzles, Cinder, ED-03/04/05 and Sunspire writings. Giant Colossus cooling-valve fight, raised horseshoe, warned attacks, finite repair crew, wider camera. Shared state, personal pickups, checkpoint and pre-change save checks passed. Details: docs/IMPLEMENTATION_GREAT_FURNACE_2026-09-22.md. Next Storm Coast; wider queue remains open.

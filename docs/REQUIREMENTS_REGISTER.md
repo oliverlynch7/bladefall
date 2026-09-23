@@ -425,3 +425,14 @@ Continue the approved queue from Great Furnace, then Colossus; reuse shared syst
 
 ## [Codex | 2026-09-22] 2.014 implementation evidence
 Great Furnace and Colossus campaign batch complete with 16 new VO nodes, two rescue paths, cooling/pressure puzzles, three remaining Emberdeep shards, Cinder and shared machinery/boss state. See IMPLEMENTATION_GREAT_FURNACE_2026-09-22.md for exact scope, tests and limitations. Pyromancer/trial, Storm Coast and the wider approved queue remain open. U167 preserved separately; no older approvals removed.
+
+
+## [Codex | 2026-09-22] Storm Coast crossing foundation — 2.014.1
+
+U168 continues the approved campaign queue. Built a host-owned voyage state machine and reusable low-poly longboat asset, plus an isolated browser preview at /3d/ship-preview/. Course alternates steering, two normal-combat handoff states, a sheltered one-use repair/role-swap stop and landing. It includes stale-input expiry, host-only wave completion, no client-supplied kills/arrival, pause, disconnect/dead-crew handling, deterministic obstacle placement and a long-hull collision capsule. Landing is emitted once; this module itself writes no saves or rewards. Static meshes are batched. Three new preview images are linked from the campaign gallery.
+
+Validation: 80 seeded courses cleared without damage by a steering controller; collision dedupe, failure/arrival exclusion, wave gates, repair cap, solo/role swap, disconnects, pause, fixed-step determinism and stale snapshot rejection pass. Real Chromium browser: actual keyboard and pointer steering, pause/resume, two-player-role simulation, both ready buttons, repair button, 390px layout, no JavaScript errors and unchanged localStorage. Reviewed desktop/phone boat views and corrected phone framing. A pre-change 2.014 save retained gold/class/checkpoint clue without a replayed journal notice. This is not real network QA or normal-weapon deck-combat QA. Recorded preview views use roughly 2.8–4.2k triangles; device performance is not established.
+
+IMPORTANT: this is an isolated development preview, not the completed Storm Coast replacement. Main campaign slot 5 still uses its legacy level. No shore quests, NPC voice lines, shards, hydra or normal combat were claimed as integrated. Next: build Shipwreck Shore routes, Otto/Rose quests and puzzles, connect the crossing to actual game combat/co-op/checkpoint systems, then Thunder Cliffs and hydra. Existing 206 Voice Studio lines/takes remain unchanged. Full queue remains open.
+
+Private archive ../../decision-archive/2026-09-22-storm-crossing has 168 user messages, zero unparsed lines and valid source references. Implementation plan/evidence: docs/IMPLEMENTATION_STORM_CROSSING_2026-09-22.md.

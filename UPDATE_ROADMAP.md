@@ -1866,3 +1866,6 @@ Restore zero-delay boss activation and expiring Stopped Clock; fix elevated enem
 
 ## [Codex | 2026-09-22] 2.014 Great Furnace and Colossus
 Expanded Emberdeep part two, Pike/Martin and 16 recording lines, rescue branches, restored lift, cooling puzzles, Cinder, ED-03/04/05 and Sunspire writings. Giant Colossus cooling-valve fight, raised horseshoe, warned attacks, finite repair crew, wider camera. Shared state, personal pickups, checkpoint and pre-change save checks passed. Details: docs/IMPLEMENTATION_GREAT_FURNACE_2026-09-22.md. Next Storm Coast; wider queue remains open.
+
+## [Codex | 2026-09-22] 2.014.1 ship preview
+Storm Coast sailing foundation and batched longboat model at /3d/ship-preview/. Seeded course, host authority, collision, role swap, repair, pause and browser controls verified. Isolated preview only: shore/real combat/network/checkpoint integration and Thunder Cliffs/hydra remain next. Existing saves and Voice Studio takes unchanged.

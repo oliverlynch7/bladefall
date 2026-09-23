@@ -24,6 +24,17 @@
           "is": true
         }
       ]
+    },
+    "beastkeeper": {
+      "name": "Beastkeeper",
+      "role": "A Kinder Trail",
+      "start": "rv.tracks.offer",
+      "when": [
+        {
+          "flag": "rv.eligible.tracks",
+          "is": true
+        }
+      ]
     }
   },
   "nodes": {
@@ -310,6 +321,383 @@
         "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
+    },
+    "rv.tracks.offer": {
+      "text": "You brought one frightened creature home. I reckon you have room to help two more. Fresh paw marks lead west from the old grove in Black Woods. There are abandoned traps out there. Nobody has gone back to check them.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I will follow those tracks.",
+          "next": "rv.tracks.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "text": "I have other work first.",
+          "next": "rv.tracks.later",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "A Kinder Trail",
+        "order": 40,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
+      }
+    },
+    "rv.tracks.later": {
+      "text": "They are off the main path. Keep it in mind when you have a safe chance. I will put clean bedding aside. Hope is useful. Dry bedding is better.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Actually, tell me where to look.",
+          "next": "rv.tracks.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "A Kinder Trail",
+        "order": 41,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
+      }
+    },
+    "rv.tracks.accepted": {
+      "text": "Follow the paw marks west of the old grove. One trail climbs the low logs. The other stays near the roots. Free both animals, finish Black Woods, then tell me what you found.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "A Kinder Trail",
+        "order": 42,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
+      }
+    },
+    "rv.tracks.wait": {
+      "text": "Look for round pads with four toes. A split hoof belongs to a deer. Check the roots and the old raised cage. You do not need to take your own companion into danger.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "A Kinder Trail",
+        "order": 43,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
+      }
+    },
+    "rv.tracks.deliver": {
+      "text": "Both free? Good. I will get them settled and teach our companions a little better care. A dry shelter, clean dressings, a proper meal. Heroes need those too, despite the rumors.",
+      "choices": [
+        {
+          "id": "give",
+          "text": "They are both out of the traps.",
+          "next": "rv.tracks.thanks",
+          "when": [
+            {
+              "flag": "rv.ready.tracks",
+              "is": true
+            },
+            {
+              "flag": "rv.done.tracks",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.done.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.finish.tracks",
+              "kind": "return_finish",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "A Kinder Trail",
+        "order": 44,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
+      }
+    },
+    "rv.tracks.thanks": {
+      "text": "The care shelter is ready. Every companion you equip now has ten percent more maximum health. No bill. You did the hard part.",
+      "choices": [],
+      "voice": {
+        "speaker": "beastkeeper",
+        "scene": "A Kinder Trail",
+        "order": 45,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
+      }
+    },
+    "rv.keepsake.offer": {
+      "text": "Word reached me about the people you helped at the Keep. I came to see for myself that you still have all your limbs. If you go home again, would you look for that little wooden bird? The one you carved with the crooked beak.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I will look for it.",
+          "next": "rv.keepsake.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.keepsake"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.keepsake",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "worry",
+          "text": "Are you still worried about me?",
+          "next": "rv.keepsake.worry",
+          "effects": []
+        },
+        {
+          "id": "later",
+          "text": "I have other work first.",
+          "next": "rv.keepsake.later",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 40,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
+      }
+    },
+    "rv.keepsake.later": {
+      "text": "It can wait. I want you back more than I want a bit of wood. Just promise me you are eating something that did not come out of a monster.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Actually, tell me where to look.",
+          "next": "rv.keepsake.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.keepsake"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.keepsake",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 41,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
+      }
+    },
+    "rv.keepsake.accepted": {
+      "text": "Our old house is southwest of the village yard. You always hid things where rain could not reach, but muddy boots could. Look behind the house. Finish Homefields before bringing it back here.",
+      "choices": [],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 42,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
+      }
+    },
+    "rv.keepsake.wait": {
+      "text": "Behind our old house, southwest of the yard. I remember a plant pot that was always in the way. You called that security. I called it a bruised toe.",
+      "choices": [],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 43,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
+      }
+    },
+    "rv.keepsake.deliver": {
+      "text": "You found it. Still crooked. Still my favorite bird. Let me put it here, where I can see it while I wait for you.",
+      "choices": [
+        {
+          "id": "give",
+          "text": "Here you go, Dad.",
+          "next": "rv.keepsake.thanks",
+          "when": [
+            {
+              "flag": "rv.ready.keepsake",
+              "is": true
+            },
+            {
+              "flag": "rv.done.keepsake",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.done.keepsake"
+            },
+            {
+              "type": "reward",
+              "id": "rv.finish.keepsake",
+              "kind": "return_finish",
+              "amount": 1
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 44,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
+      }
+    },
+    "rv.keepsake.thanks": {
+      "text": "There. A small piece of home, even here. Take these coins I set aside. And when this is over, perhaps we can sit down long enough for you to carve another.",
+      "choices": [
+        {
+          "id": "home",
+          "text": "What will you do now?",
+          "next": "rv.keepsake.home",
+          "effects": []
+        },
+        {
+          "id": "reports",
+          "text": "What have people been saying?",
+          "next": "rv.keepsake.reports",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 45,
+        "status": "recording-ready",
+        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
+      }
+    },
+    "rv.keepsake.worry": {
+      "text": "Of course I am. You could walk in carrying a mountain and I would ask whether you hurt your back. But people came home because you refused to give up. I am proud of you. Both things can be true.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I will find your bird.",
+          "next": "rv.keepsake.accepted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.keepsake"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.keepsake",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "text": "Let us talk later.",
+          "next": "rv.keepsake.later",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 46,
+        "status": "recording-ready",
+        "direction": "A father holding worry and pride together. A small smile, no grand speech.",
+        "context": "Optional conversation after Keep. No bloodline, adoption or final-battle revelation."
+      }
+    },
+    "rv.keepsake.home": {
+      "text": "Mend what I can. Make sure the new arrivals have a seat and a hot meal. You are not the only stubborn person in this family.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I learned from the best.",
+          "next": "rv.keepsake.thanks",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 47,
+        "status": "recording-ready",
+        "direction": "A father holding worry and pride together. A small smile, no grand speech.",
+        "context": "Optional conversation after Keep. No bloodline, adoption or final-battle revelation."
+      }
+    },
+    "rv.keepsake.reports": {
+      "text": "They tell me about doors you opened and people you brought back. Some of the stories get taller every time I hear them. The part I believe is that you stopped to help.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "They needed someone.",
+          "next": "rv.keepsake.thanks",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "thomas",
+        "scene": "A Small Piece of Home",
+        "order": 48,
+        "status": "recording-ready",
+        "direction": "A father holding worry and pride together. A small smile, no grand speech.",
+        "context": "Optional conversation after Keep. No bloodline, adoption or final-battle revelation."
+      }
     }
   },
   "events": {
@@ -510,6 +898,244 @@
           "title": "Food for the Refuge — recovered",
           "text": "Finish this level half to keep the recovery. Then return to Quartermaster in the Waystation.",
           "region": "keep"
+        }
+      ]
+    },
+    "rv.tracks.start": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.tracks",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "note",
+          "id": "rv.tracks.start",
+          "region": "outskirts",
+          "title": "A Kinder Trail",
+          "text": "Tracks leave the old grove to the west. Round pads and four toes point toward the trapped animals. One route follows roots; another climbs the low logs."
+        }
+      ]
+    },
+    "rv.tracks.hoof": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.tracks",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "note",
+          "id": "rv.tracks.hoof",
+          "region": "outskirts",
+          "title": "A different visitor",
+          "text": "These prints have a split hoof. A deer came here for fallen fruit. Follow the four-toed paw marks farther west."
+        }
+      ]
+    },
+    "rv.tracks.paw": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.tracks",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "note",
+          "id": "rv.tracks.paw",
+          "region": "outskirts",
+          "title": "Two trails",
+          "text": "One animal stayed beside the roots. Another trail turns toward the old raised cage. Check both before returning to the Beastkeeper."
+        }
+      ]
+    },
+    "rv.tracks.snare": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.tracks",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.tracks.snare"
+        },
+        {
+          "type": "item",
+          "id": "rv.tracks.freed",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "rv.tracks.snare",
+          "region": "outskirts",
+          "title": "A trap made safe",
+          "text": "The animal is free. Check the other trail too. Finish Black Woods to keep this rescue, then report to the Beastkeeper."
+        },
+        {
+          "type": "conditional",
+          "id": "rv.tracks.complete",
+          "when": [
+            {
+              "item": "rv.tracks.freed",
+              "count": 2
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.collected.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.item.tracks",
+              "kind": "return_item",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "rv.tracks.saved",
+              "region": "outskirts",
+              "title": "Both animals are free",
+              "text": "Finish Black Woods and enter the boss clearing to keep this rescue. Then report to the Beastkeeper in the Waystation. You do not need to lead the animals through the level."
+            }
+          ]
+        }
+      ]
+    },
+    "rv.tracks.cage": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.tracks",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.tracks.cage"
+        },
+        {
+          "type": "item",
+          "id": "rv.tracks.freed",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "rv.tracks.cage",
+          "region": "outskirts",
+          "title": "A trap made safe",
+          "text": "The animal is free. Check the other trail too. Finish Black Woods to keep this rescue, then report to the Beastkeeper."
+        },
+        {
+          "type": "conditional",
+          "id": "rv.tracks.complete",
+          "when": [
+            {
+              "item": "rv.tracks.freed",
+              "count": 2
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.collected.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.item.tracks",
+              "kind": "return_item",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "rv.tracks.saved",
+              "region": "outskirts",
+              "title": "Both animals are free",
+              "text": "Finish Black Woods and enter the boss clearing to keep this rescue. Then report to the Beastkeeper in the Waystation. You do not need to lead the animals through the level."
+            }
+          ]
+        }
+      ]
+    },
+    "rv.keepsake.clue": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.keepsake",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "note",
+          "id": "rv.keepsake.clue",
+          "region": "outskirts",
+          "title": "The old back step",
+          "text": "Mud has worn a line past the plant pot behind the house. One board has a small bird scratched into its edge."
+        }
+      ]
+    },
+    "rv.keepsake.pot": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.keepsake",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.keepsake.pot"
+        },
+        {
+          "type": "note",
+          "id": "rv.keepsake.step",
+          "region": "outskirts",
+          "title": "A familiar hiding place",
+          "text": "The plant pot slides aside. A loose board covers a shallow space under the back step."
+        }
+      ]
+    },
+    "rv.keepsake.take": {
+      "once": true,
+      "when": [
+        {
+          "flag": "rv.active.keepsake",
+          "is": true
+        },
+        {
+          "flag": "rv.keepsake.pot",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "rv.collected.keepsake"
+        },
+        {
+          "type": "reward",
+          "id": "rv.item.keepsake",
+          "kind": "return_item",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "rv.keepsake.found",
+          "region": "outskirts",
+          "title": "The wooden bird",
+          "text": "The little wooden bird is safe. Finish Homefields and enter Black Woods to keep it. Then bring it to Thomas in the Waystation."
         }
       ]
     }

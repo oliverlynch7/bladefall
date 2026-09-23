@@ -103,6 +103,8 @@ export function buildHubArt(scene,w){
 
   const stationArt={quartermaster:['Quartermaster','action_buy.png'],chest:['Your Bag','action_bag_stash.png'],anvil:['The Smith','action_forge_fuse.png'],keeper:['The Stylist','action_wardrobe_stylist.png'],drillmaster:['Drillmaster','class-core.png'],beastkeeper:['Beastkeeper','beastkeeper.png'],board:['Postings',null],mirror:['The Mirror',null],sparring:['Sparring Room',null]};
   for(const n of w.hubNpcs||[]){
+    if(n.id==='thomas'){at(n.x,n.z,0,()=>{for(const x of [-25,25])beam(x,12,-38,7,24,7);beam(0,25,-38,75,7,28);beam(0,40,-53,75,24,6);if(HU.homeBird){beam(58,18,-32,24,36,24);block(58,42,-32,17,12,12,'#c09d63');block(67,48,-32,8,9,8,'#c09d63');block(73,47,-32,5,3,4,'#e3c78c');block(50,44,-32,10,3,8,'#876437',-.3);for(const dz of [-7,7]){block(57,43,-32+dz,10,6,2,'#927143');block(68,50,-32+dz*.6,2,2,1,'#34291c');}for(const dx of [55,62])beam(dx,35,-32,2,5,2,'#72512e');}label('Thomas',0,96,-42,100);});continue;}
+
     if(n.id==='arcade'){at(n.x,n.z,Math.PI,()=>{beam(0,38,0,45,76,30,'#354439');block(0,48,16,32,31,2,'#75a28c');beam(0,24,22,42,6,16);label(n.name,0,87,13,100);});continue;}
     if(n.district==='undercroft'){
       at(n.x,n.z,Math.PI,()=>{
@@ -137,6 +139,8 @@ export function buildHubArt(scene,w){
       }else if(n.id==='keeper'){
         beam(28,12,0,23,24,24,'#5d4a64');beam(28,31,-10,23,36,5,'#5d4a64');
       }else if(n.id==='beastkeeper'){
+        if(HU.companionCare){for(const dx of [-95,-55])beam(dx,30,-15,6,60,6);beam(-75,60,-15,52,7,56,'#657b5c');block(-75,8,-15,42,12,44,'#b9a577');block(-75,17,-15,32,6,32,'#dad0ad');block(-110,17,23,18,34,20,'#867552');block(-110,35,23,20,4,22,'#bfae83');}
+
         for(const s of [-1,1]){beam(s*36,12,0,27,24,30);block(s*36,24,0,25,3,28,'#b09b60');}
       }else if(n.id==='sparring'){
         add('arch',0,0,-17,22);beam(0,46,-15,44,90,8);label('Sparring',0,120,-5,119);

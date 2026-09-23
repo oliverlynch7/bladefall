@@ -1042,7 +1042,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./castle-gates.js?v=2020"></script>
 <script src="./long-ascent.js?v=2021"></script>
 <script src="./final-king.js?v=2022"></script>
-<script src="./return-visits.js?v=2023"></script>
+<script src="./return-adventures.js?v=2025"></script>
+<script src="./return-visits.js?v=2025"></script>
 <script src="./palace-courtyard.js?v=2017"></script>
 <script src="./dragon-rescue.js?v=2024"></script>
 <script src="./dragon-combat.js?v=2024"></script>
@@ -1073,7 +1074,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.024.0-dragon-rescue';
+const VERSION3D='2.025.0-home-trails';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1801,7 +1802,7 @@ function petLevelScale(){ return 1+((G&&G.p?G.p.level:1)*0.045); }   // keeps ch
 function petAtkDmg(id){ const P=PETS[id]; let v=(P.dmg||4)*petLevelScale()*petTrainMul(id); if(meta.classId==='beastmaster'){v*=2.2;   // was 1.15 — the companion IS the beastmaster's damage but hit for almost nothing (playtest: too weak)
     if(c2Passive('bst_heavy'))v*=1.15;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.15;} return Math.max(1,Math.round(v)); }
 function petHealAmt(id){ const P=PETS[id]; let v=(P.heal||3)*petTrainMul(id); if(meta.classId==='beastmaster'){v*=1.15;if(c2Passive('bst_wildkeeper'))v*=1.20;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.10;} return Math.max(1,Math.round(v)); }
-function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); let v=base*petLevelScale()*(1+petTrainLvl(id)*.12);if(meta.classId==='beastmaster'){v*=1.25;if(c2Passive('bst_heavy'))v*=1.25;}return Math.round(v); }
+function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); let v=base*petLevelScale()*(1+petTrainLvl(id)*.12);if(meta.classId==='beastmaster'){v*=1.25;if(c2Passive('bst_heavy'))v*=1.25;}if(meta.hubUpgrades?.companionCare)v*=1.1;return Math.round(v); }
 // Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
 function rarityReq(rid){ return (RARITY[rid]&&RARITY[rid].req)||1; }
 function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.hero.level)||1); }
@@ -2907,7 +2908,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2024').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2025').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -2926,13 +2927,14 @@ function inLostCanyon(){return isCampaignAdventure()&&G.zone===1&&G.area===1;}
 function inWindingCliffs(){return isCampaignAdventure()&&G.zone===1&&G.area===0;}
 function inReturnHub(){return !!(G?.hub&&!G.riftHall&&!G.sparringRoom&&!IN_ARENA);}
 function returnHubInfo(n){return BFReturnVisits.info(n,meta);}
-function setupReturnHub(){if(!inReturnHub())return;G.storyState=BFStoryState.create();G.storyClaims={};G.storyNpcs=G.hubNpcs.filter(n=>['anvil','quartermaster'].includes(n.id));G.storyObjects=[];G._storyEpoch=null;briarEpoch();BFReturnVisits.seedHub(G.storyState,meta);}
+function syncReturnHubNpcs(){if(!inReturnHub())return;const s=adventureStoryState();if(s.flags['rv.eligible.keepsake']&&!G.hubNpcs.some(n=>n.id==='thomas'))G.hubNpcs.push({id:'thomas',name:'Thomas',role:'A piece of home',c1:'#665442',c2:'#c7aa76',x:300,z:350,y:0,direct:true,verb:'Talk to Thomas',open:()=>openReturnRequest(G.hubNpcs.find(n=>n.id==='thomas'))});G.storyNpcs=G.hubNpcs.filter(n=>Object.values(BFReturnVisits.defs).some(q=>q.npc===n.id));}
+function setupReturnHub(){if(!inReturnHub())return;G.storyState=BFStoryState.create();G.storyClaims={};G.storyObjects=[];G._storyEpoch=null;briarEpoch();BFReturnVisits.seedHub(G.storyState,meta);syncReturnHubNpcs();}
 function openReturnRequest(n){if(!inReturnHub()||G.storyState?.conversation)return;BFHubDialogue.close();briarRequest('open',{npc:n.id});}
-function syncReturnField(){if(!isCampaignAdventure())return;const s=adventureStoryState();if(!G.returnActive)G.returnActive=BFReturnVisits.active(G,meta);if(!MP.guest())for(const id of G.returnActive)s.flags['rv.active.'+id]=true;G.storyObjects=(G.storyObjects||[]).filter(o=>!o.returnObject).concat(BFReturnVisits.fieldObjects(G.returnActive));}
+function syncReturnField(){if(!isCampaignAdventure())return;const s=adventureStoryState();if(!G.returnActive)G.returnActive=BFReturnVisits.active(G,meta);if(!MP.guest())for(const id of G.returnActive)s.flags['rv.active.'+id]=true;G.storyObjects=(G.storyObjects||[]).filter(o=>!o.returnObject).concat(BFReturnVisits.fieldObjects(G.returnActive));BFReturnAdventures.sync({G,s,seg:vseg,plat:vplat});}
 function applyReturnReward(id,reward){const key=id.split('.').pop(),q=BFReturnVisits.defs[key];if(!q)return false;meta.returnVisits=BFReturnVisits.normalize(meta.returnVisits);
  if(reward.kind==='return_accept'){if(!meta.returnVisits[key])meta.returnVisits[key]='accepted';if(inReturnHub())persist();return true;}
  if(reward.kind==='return_item'){if(meta.returnVisits[key]!=='done'&&meta.returnVisits[key]!=='ready'){G.pendingReturnItems=[...new Set([...(G.pendingReturnItems||[]),key])];toast(q.title+' recovered — finish this level half to keep it.');}return true;}
- if(reward.kind==='return_finish'&&inReturnHub()){if(meta.returnVisits[key]!=='done'){meta.returnVisits[key]='done';meta.hubUpgrades[q.upgrade]=true;const amount=awardGold(q.gold);toast(q.title+' · +'+amount+' gold. The Waystation has improved.');persist();}return true;}return false;
+ if(reward.kind==='return_finish'&&inReturnHub()){if(meta.returnVisits[key]!=='done'){meta.returnVisits[key]='done';meta.hubUpgrades[q.upgrade]=true;const amount=awardGold(q.gold);if(q.upgrade==='companionCare'&&G.pet){G.pet.maxHp=petMaxHp(G.pet.id);G.pet.hp=Math.min(G.pet.hp,G.pet.maxHp);}toast(q.title+(amount?' · +'+amount+' gold.':' ·')+(q.upgrade==='companionCare'?' Companion care improved: +10% maximum health.':' The Waystation has improved.'));persist();}return true;}return false;
 }
 function secureReturnItems(){for(const id of G.pendingReturnItems||[])if(BFReturnVisits.defs[id]&&meta.returnVisits?.[id]!=='done'){meta.returnVisits=meta.returnVisits||{};meta.returnVisits[id]='ready';toast(BFReturnVisits.defs[id].title+' saved — return to the Waystation.');}G.pendingReturnItems=[];}
 
@@ -3024,7 +3026,7 @@ function briarSync(){
  if(s.flags['gus.shortcut'])G.walls=G.walls.filter(w=>!w.gusDoor);
  if(G.homefieldsExploration){const count=s.items['home.bells']||0;if(G._bellProgress!==undefined&&G._bellProgress!==count){playFx('lever');toast(friendlyBellText(count,s.flags['home.bells.open']));}G._bellProgress=count;}
  }
- syncReturnField();
+ syncReturnField();syncReturnHubNpcs();
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(n){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
@@ -5100,7 +5102,7 @@ function enterZone(zi){
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
- G.returnActive=null;G.pendingReturnItems=[];
+ G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
   G.kingFinal=null;document.getElementById('finalCharge')?.remove();G.ascent=null;G.ascentWorkers=[];G.castleGates=null;G.library=null;G.court=null;G.thunder=null;G.shore=null;G.voyage=null;G.voyageLanded=false;document.getElementById("voyagehud")?.remove();G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;G.peaks=null;G.iceCaves=null;G.iron=null;G.furnace=null;G.ironWorkers=[];
   const Z=curZone();
   /* THE ENDLESS DUNGEON PICKS ITS OWN FLOOR, and this function used to throw that away.
@@ -18125,7 +18127,7 @@ function openQuestBoard(back){
    Hub-only (it's a hub NPC), so a pet can never be swapped mid-run. */
 const PET_ARCH_TAG={attacker:'⚔ Attacker',healer:'✚ Healer',utility:'💰 Utility'};
 function petIcon(id){ return 'icons/pets/pet-'+id+(['shepherd','cinder','sunwing'].includes(id)?'.svg':'.png'); }
-function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'';
+function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=(lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'')+(meta.hubUpgrades?.companionCare?' · Care shelter: +10% max HP':'');
   if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petMaxHp(id)} HP · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
   if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · ${petMaxHp(id)} HP · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
   return `${PET_ARCH_TAG.utility} · ${petMaxHp(id)} HP · pulls loot within ${P.pull}${tag}`; }
@@ -19821,7 +19823,7 @@ function drawShadeModel(t,zoneId){
 function drawLanternCourtEntities(t){
   deferOn();
   for(const n of G.hubNpcs){
-    if(['quartermaster','drillmaster','keeper','beastkeeper','anvil'].includes(n.id)){
+    if(['quartermaster','drillmaster','keeper','beastkeeper','anvil','thomas'].includes(n.id)){
       const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0);
       drawShadow(x,z,12,.24);pushM();mv(x,0,z);rotY(hubNpcFacing(n,x,z));
       hubNpcModel(n.id==='anvil'?{...n,id:'smith'}:n,t);popM();
@@ -22216,7 +22218,7 @@ window.__BF3={openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,s
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2024"></script>
+<script type="module" src="./hero3d.js?v=2025"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -2,7 +2,7 @@ import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} 
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2022';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
-import {syncCompanions} from './companion3d.js?v=2024';
+import {syncCompanions} from './companion3d.js?v=2025';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 
@@ -27,7 +27,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2023';
+import { WORLD3D, syncWorld } from './world3d.js?v=2025';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2022';
 import { PROP3D, syncProps } from './prop3d.js?v=2022';
 

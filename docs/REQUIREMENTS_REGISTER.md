@@ -494,3 +494,11 @@ Latest continuation asks to continue efficiently. Next scoped work: approved Sun
 
 ## [Codex | 2026-09-23] Sunspire dragon rescue checkpoint
 U179 continuation implemented as 2.024.0-dragon-rescue: optional nesting route and rescue, ground companion/model/breath and four stable Simon lines. Evidence and limitations: IMPLEMENTATION_DRAGON_RESCUE_2026-09-23.md. COMP-03 riding/limited flight remains OPEN; no answer inferred to mounted-combat question. Original voice text preserved.
+
+
+## [Codex | 2026-09-23] Home and tracks work start
+U180 continues approved queue. Grounded plan: IMPLEMENTATION_HOME_TRAILS_2026-09-23.md. Two remaining return hooks; no new central lore or mounted-combat decision inferred.
+
+
+## [Codex | 2026-09-23] Home/tracks checkpoint
+U180 implemented as 2.025.0-home-trails: optional Thomas keepsake and Beastkeeper rescue/care shelter. Fifteen new voice lines; original dialogue unchanged. Scope, evidence and limits in IMPLEMENTATION_HOME_TRAILS_2026-09-23.md. No new central canon; COMP-03 mount/flight remains open.

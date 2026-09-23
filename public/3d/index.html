@@ -1074,7 +1074,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.025.0-home-trails';
+const VERSION3D='2.026.0-party-trials';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2942,7 +2942,7 @@ function inBriarStory(){return inReturnHub()||!!G?.kingFinal||inLongAscent()||in
 function inBriar(){return isCampaignAdventure()&&G.zone===0&&G.area===0;}
 function briarId(){return MP.active?MP.myId:'solo';}
 function briarEpoch(){return G._storyEpoch||(G._storyEpoch=G.runSeed+':'+G.area+':'+Math.random().toString(36).slice(2));}
-function briarPacket(){return (isCampaignAdventure()||G?.riftHall||inReturnHub())?{returnActive:G.returnActive||[],scene:inReturnHub()?'hub-return':G.riftHall?'rift-hall':'campaign',epoch:briarEpoch(),zone:G.zone,area:G.area,run:G.runSeed,state:adventureStoryState(),notice:G._storyNotice||null,checkpointStory:meta.run?.campaign?.storyState,finalStatus:G?.kingFinal?BFFinalKing.snapshot(G.boss):null,ascentStatus:inLongAscent()?BFLongAscent.status(G):null,castleStatus:inCastleGates()?BFCastleGates.status(G):null,libraryStatus:inSkyLibrary()?BFSkyLibrary.status(G):null,courtStatus:inPalaceCourtyard()?BFPalaceCourtyard.status(G):null,thunderStatus:inThunderCliffs()?{clock:G.thunder.clock,raceAt:G.thunder.raceAt,raceAttempt:G.thunder.raceAttempt}:null,shoreStatus:inShipwreck()?BFShipwreckShore.status(G):null,voyage:inShipwreck()&&G.voyage?BFShipCrossing.snapshot(G.voyage):null,furnaceStatus:inGreatFurnace()?BFGreatFurnace.status(G):null,ironStatus:inIronHalls()?BFIronHalls.status(G):null,iceStatus:inIceCaves()?BFIceCaves.status(G):null,prisonStatus:inPrison()?BFPrison.status(G):null,keepStatus:inBrokenWalls()?BFBrokenWalls.status(G):null,canyonGuards:inLostCanyon()?BFLostCanyon.guards(G):null,canyonPrisoners:inLostCanyon()?(G.canyonPrisoners||[]).map(n=>({id:n.id,x:n.x,y:n.y,z:n.z,step:n.step,walking:n.walking})):null,canyonAlarm:inLostCanyon()?Math.max(0,(G.canyon?.alarmAt||0)-G.time):0,cliffGuards:inWindingCliffs()?G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length:0,rescueGuards:inBlackWoods()?G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length:0,guards:inBriar()?G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length:0}:null;}
+function briarPacket(){return (isCampaignAdventure()||G?.riftHall||G?.riftMentor||inReturnHub())?{trialSession:G.trialSession||null,trialKills:G.trialKills||0,returnActive:G.returnActive||[],scene:G.riftMentor?'class-trial':inReturnHub()?'hub-return':G.riftHall?'rift-hall':'campaign',epoch:briarEpoch(),zone:G.zone,area:G.area,run:G.runSeed,state:adventureStoryState(),notice:G._storyNotice||null,checkpointStory:meta.run?.campaign?.storyState,finalStatus:G?.kingFinal?BFFinalKing.snapshot(G.boss):null,ascentStatus:inLongAscent()?BFLongAscent.status(G):null,castleStatus:inCastleGates()?BFCastleGates.status(G):null,libraryStatus:inSkyLibrary()?BFSkyLibrary.status(G):null,courtStatus:inPalaceCourtyard()?BFPalaceCourtyard.status(G):null,thunderStatus:inThunderCliffs()?{clock:G.thunder.clock,raceAt:G.thunder.raceAt,raceAttempt:G.thunder.raceAttempt}:null,shoreStatus:inShipwreck()?BFShipwreckShore.status(G):null,voyage:inShipwreck()&&G.voyage?BFShipCrossing.snapshot(G.voyage):null,furnaceStatus:inGreatFurnace()?BFGreatFurnace.status(G):null,ironStatus:inIronHalls()?BFIronHalls.status(G):null,iceStatus:inIceCaves()?BFIceCaves.status(G):null,prisonStatus:inPrison()?BFPrison.status(G):null,keepStatus:inBrokenWalls()?BFBrokenWalls.status(G):null,canyonGuards:inLostCanyon()?BFLostCanyon.guards(G):null,canyonPrisoners:inLostCanyon()?(G.canyonPrisoners||[]).map(n=>({id:n.id,x:n.x,y:n.y,z:n.z,step:n.step,walking:n.walking})):null,canyonAlarm:inLostCanyon()?Math.max(0,(G.canyon?.alarmAt||0)-G.time):0,cliffGuards:inWindingCliffs()?G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length:0,rescueGuards:inBlackWoods()?G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length:0,guards:inBriar()?G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length:0}:null;}
 function briarQuest(){
  const s=G?.storyState||BFStoryState.create(),f=s.flags,i=s.items;
  let d=!f['thomas.ready']?'Speak to Thomas near your home':s.quests['briar.supplies']!=='active'&&!f['mara.healing']?'Speak to Mara by the village beds':!f['mara.healing']?((i.tangle_root||0)<3||(i.dressings||0)<1?`Gather tangle roots (${i.tangle_root||0}/3) and clean dressings (${i.dressings||0}/1)`:'Bring the supplies back to Mara'):s.quests['briar.escape']!=='active'&&!f['briar.depart']?'Ask Mara what needs doing next':!f['briar.water']?'Stop the water beside the mill':!f['briar.jam']?'Remove the timber caught in the mill wheel':!f['briar.bridge']?'Lower the mill crossing with the bridge handle':!f['briar.depart']?'Clear the guards at the old bridge, then open the wagon gate':'Follow the neighbors into the Black Woods';
@@ -2979,11 +2979,12 @@ function briarRequest(type,fields={}){
 }
 function briarSendPending(){if(!briarPending||!MP.active||MP.isHost)return;try{MP.hostConn?.send({t:'storyRequest',request:briarPending.request});briarPending.sent=performance.now();}catch(e){}}
 function briarApply(packet,place=false,ack){
- if(!packet||!(isCampaignAdventure()||G?.riftHall||inReturnHub())||(packet.scene||'campaign')!==(inReturnHub()?'hub-return':G.riftHall?'rift-hall':'campaign')||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
+ if(!packet||!(isCampaignAdventure()||G?.riftHall||G?.riftMentor||inReturnHub())||(packet.scene||'campaign')!==(G.riftMentor?'class-trial':inReturnHub()?'hub-return':G.riftHall?'rift-hall':'campaign')||(G.riftMentor&&packet.trialSession!==G.trialSession)||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
  if(!place&&(G._storyEpoch!==packet.epoch||packet.state.revision<(G.storyState?.revision||0)))return;
  if(place&&G.riftHall)G._hallAssembly=packet.state.items?.['hall.assembly']||0;
   G.returnActive=packet.returnActive||[];G._storyEpoch=packet.epoch;G._canyonGuards=packet.canyonGuards||{};G._cliffGuards=packet.cliffGuards;G._briarGuards=packet.guards;G._rescueGuards=packet.rescueGuards;G.storyState=checkpointClone(packet.state);if(G.kingFinal&&packet.finalStatus){Object.assign(G.boss,packet.finalStatus);prepareFinalScene();}
  if(briarPending&&(ack===briarPending.request.event.id||packet.state.events[briarPending.request.event.id]||packet.state.revision>briarPending.request.event.revision))briarPending=null;
+ if(G.riftMentor){G.trialKills=Math.max(0,Number(packet.trialKills)||0);if(G.storyState.flags['trial.proved']&&G.storyNpcs[0]&&G.portalPos)Object.assign(G.storyNpcs[0],trialMentorSpot(G.portalPos));}
  if(place)journalNoticeSync(true);
  briarSync();presentStoryNotice(packet.notice,place);
  if(inLongAscent())G.ascent.remote=packet.ascentStatus;
@@ -3689,7 +3690,7 @@ function optionalBump(id,by){ const m=(G.optionalMissions||[]).find(x=>x.id===id
 }
 function questKill(type){
   if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
-    if(G.trialKills>=T.kills && !G.portal){if(G.riftMentor)trialMentorProved();else openWay();}
+    if(G.trialKills>=T.kills && !G.portal&&!MP.guest()){if(G.riftMentor)trialMentorProved();else openWay();}
     questUpdate(); return; }
   for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
 /* The `hunt` verb bumps on a SPECIFIC creature dying, not on its species, so it needs the entity
@@ -5150,7 +5151,8 @@ function sideClear(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 /* ---- Trials: starter tutorials (skippable) and earned-class gauntlets (must be won) ---- */
-function startTrial(cid,fromZone){
+function startTrial(cid,fromZone,opts={}){
+  if(MP.active&&!opts.remote){requestPartyTrial(cid);return;}
   const T=TRIALS[cid]; if(!T) return;
   initAudio(); queueLevelUp=0; queueSubclass=false;
   /* Bank FIRST, then switch. bankNow() escrows meta.classId, so switching before banking would
@@ -5166,6 +5168,7 @@ function startTrial(cid,fromZone){
   recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0,
     trialHadHero:hadHero,trialReturnHero:hadHero?JSON.parse(JSON.stringify(meta.hero)):null,trialIssuedWeapon:JSON.parse(JSON.stringify(issued))});
+  if(opts.session){G.trialSession=opts.session;G.trialPartySize=Math.max(1,Math.min(8,opts.partySize||1));G.runSeed=opts.runSeed;MP.zone=MP.TRIAL;MP.rseed=opts.runSeed;}
   meta.run=null; persist();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   if(!T.earned && !meta.tutDone){ meta.tutDone=true; persistGlobal(); showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
@@ -5362,7 +5365,11 @@ function openHelp(back){
 function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
 function sameTrialItem(a,b){ try{return !!a&&!!b&&JSON.stringify(a)===JSON.stringify(b);}catch(e){return false;} }
 function keepTrialFind(it){ if(!it) return; if(!Array.isArray(meta.stash)) meta.stash=[]; meta.stash.push(it); }
-function trialComplete(){
+function trialComplete(remote=false){
+  if(!G?.trial||G.trialCompleted)return;
+  if(MP.active&&!remote){finishPartyTrial();return;}
+  if(MP.active&&(!G.storyState?.flags['trial.taught']||G.trialKills<TRIALS[G.trial].kills))return;
+  G.trialCompleted=true;
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
   const protectedHero=G.trialReturnHero||((meta.bank&&meta.bank.hero)||null);
@@ -5375,7 +5382,7 @@ function trialComplete(){
     for(const k of ['hp','maxHp','mana','maxMana','level','xp','xpNext','stats','maxJumps','skin']) if(trialHero[k]!=null) escrow[k]=JSON.parse(JSON.stringify(trialHero[k]));
     meta.hero=escrow;
   } else meta.hero=trialHero;                              // first-ever class trial establishes the initial loadout normally
-  if(T.earned){ meta.sideDone[curZone().side.id]=true; }
+  if(T.earned){const source=ZONES.find(z=>z.side?.trial===cid);if(source)meta.sideDone[source.side.id]=true;}
   if(cid==='reaper') meta._scytheNotify=true;   // announce the Void Scythe when they reach the hub
   meta.bank=null; persist(); checkAchievements();
   mode='menu'; SFX.win(); showGameUI(false);
@@ -5383,9 +5390,9 @@ function trialComplete(){
   showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">TRIAL COMPLETE</p>
     <h2 class="title" style="font-size:34px">${C.icon} ${C.disp}</h2>
     <p class="ovsub">${C.disp} unlocked and equipped.<br>Favors <b>${C.family.join(', ')}</b>.</p>
-    ${cid==='reaper'?`<p class="ovsub" style="color:${elementColor('void')};font-weight:800">⚔ The Void Scythe is now available in the Shop.</p>`:''}
+    ${cid==='reaper'?`<p class="ovsub" style="color:${elementColor('void')};font-weight:800">⚔ Your built-in Void Scythe grows with your Reaper rank and player level.</p>`:''}
     <button class="bigbtn" id="hubBtn">Enter the Hub</button></div>`);
-  document.getElementById('hubBtn').onclick=openHub;
+  document.getElementById('hubBtn').onclick=()=>{if(MP.guest()){MP.hostConn?.send({t:'trialExit',session:G.trialSession});toast('Asking the party to return to the Waystation.');}else openHub();};
 }
 function skipTrial(){
   const cid=G?G.trial:null; if(!cid) return;
@@ -5393,7 +5400,8 @@ function skipTrial(){
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid; meta.bank=null; persist();
   toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
 }
-function abandonTrial(){ restoreBank(); openHub(); }
+function restoreTrialExit(){if(G?._trialWiped)return;if((mode==='dead'||mode==='dying')&&isPermadeath()){G._trialWiped=true;wipeMode(MODE);persist();if(MP.active)MP.leave('Your character fell. The party has ended; your earned classes are safe.');}else restoreBank();}
+function abandonTrial(){if(MP.active&&G?.trialSession){if(MP.guest()){MP.hostConn?.send({t:'trialExit',session:G.trialSession});toast('Asking the party to leave the trial.');return;}MP.trialReceipt=G.trialCompleted?{session:G.trialSession,cid:G.trial,kills:G.trialKills,complete:true,story:briarPacket()}:{session:G.trialSession,cid:G.trial,complete:false};}restoreTrialExit();openHub();}
 // Authored shard placements are staged without replacing legacy trial access until complete.
 // Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
 const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Bring saved sets to the Rift Keeper in the Waystation’s Rift Hall. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
@@ -9234,6 +9242,7 @@ const NO_PARTY_SCALE = (function(){ try { return /[?&]noparty=1/.test(location.s
 function partySize(){
   try {
     if(!MP.active || !MP.isHost || MP.pvp) return 1;
+    if(G?.trialSession)return G.trialPartySize||1;
     const ps = MP.peers || {}; let n = 1;
     for(const id in ps){ if(ps[id] && ps[id].zone === MP.zone) n++; }
     return n;
@@ -13826,7 +13835,7 @@ const MP={
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
   kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
-  HUB:-100, ARENA:-200, ENDLESS:-300, SPRINT:-301, GAUNTLET:-302, // shared-scene sentinels; never collide with campaign zone ids
+  HUB:-100, ARENA:-200, ENDLESS:-300, SPRINT:-301, GAUNTLET:-302, TRIAL:-303, // shared-scene sentinels; never collide with campaign zone ids
   pvp:false, scores:{}, arenaMsg:null,     // Phase 3 PvP duel + shared-arena state
   teams:false, teamMap:{},  // team (2v2) mode: id -> team index (0/1)
   hasZone(){ return this.zone!=null && this.zone!==-1; },
@@ -13868,7 +13877,7 @@ const MP={
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
        is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
        an older build simply sends no cid and hero3d falls back to your model as before. */
-    cid:meta.classId||'', disguise:!!(G?.castleGates&&G.storyState?.flags['cg.disguise']&&!G.storyState?.flags['cg.alarm']),
+    trialAccess:G?.hub?riftHallFrames().filter(f=>f.open).map(f=>f.classId):undefined, hall:!!G?.riftHall, cid:meta.classId||'', disguise:!!(G?.castleGates&&G.storyState?.flags['cg.disguise']&&!G.storyState?.flags['cg.alarm']),
     x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight',
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
@@ -13876,12 +13885,12 @@ const MP={
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -13907,6 +13916,9 @@ const MP={
         try{ mpHideBanner(); toast('⚔️ '+(d.p.name||'Your friend')+' joined the arena!','#7de08a'); }catch(e){} }
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d); }
+      else if(d.t==='trialRequest'){const q=this.peers[c._pid],f=riftHallFrames().find(f=>f.classId===d.cid),n=f&&G?.hubNpcs?.find(n=>n.id==='rift-'+f.id);if(G?.riftHall&&q?.hall&&n&&!q.downed&&q.hp>0&&Math.hypot(q.tx-n.x,q.tz-n.z)<150)requestPartyTrial(d.cid,c);}
+      else if(d.t==='trialFinish'){const q=this.peers[c._pid];if(G?.trialSession===d.session&&q&&q.zone===this.TRIAL&&!q.downed&&q.hp>0&&G.portal&&Math.hypot(q.tx-G.portal.x,q.tz-G.portal.z)<170)finishPartyTrial();}
+      else if(d.t==='trialExit'){if(G?.trialSession===d.session)abandonTrial();}
       else if(d.t==='endingCommand'){finalCommand(c._pid,d.command);}
       else if(d.t==='shipCommand'){voyageReceive(c._pid,d.command);}
       else if(d.t==='storyRequest'){const q=this.peers[c._pid];briarReceive(d.request,c._pid,q?{...q,x:q.tx,y:q.ty,z:q.tz}:null);}
@@ -13927,7 +13939,7 @@ const MP={
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
-    const msg={t:'state',players:all, en:this.enemySnap(), ek};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
+    const msg={t:'state',players:all, en:this.enemySnap(), ek};if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
     const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -13954,13 +13966,15 @@ const MP={
       try{ persist(); }catch(e){}
     } },
   onGuestData(d){
-    if(d.t==='zone'||d.t==='arena'||d.t==='special') this.ensureGuestReady();
+    if(d.t==='zone'||d.t==='arena'||d.t==='special'||d.t==='trial') this.ensureGuestReady();
     if(d.hydra&&G?.hydraArena)BFHydra.apply(G,d.hydra,briarEpoch());
     if(d.voyage&&inShipwreck())applyVoyage(d.voyage);
-    if(d.t==='story'){briarApply(d.story,false,d.ack);}
+    if(d.t==='trialNotice'){toast(d.text);}
+    else if(d.t==='trial'){applyPartyTrial(d);}
+    else if(d.t==='story'){briarApply(d.story,false,d.ack);}
     else if(d.t==='special'){ this.applySpecial(d); }
     else if(d.t==='campaignClear'){if(isCampaignAdventure()&&G.zone===d.zone&&G.runSeed===d.rseed){securePendingSecret();zoneClear();}}
-    else if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
+    else if(d.t==='zone'){if(d.zone!==this.HUB&&(!Number.isInteger(d.zone)||!ZONES[d.zone]))return;if(G?.trialSession){if(d.trialEnd?.session!==G.trialSession)return;this._trialExitSession=G.trialSession;if(d.trialEnd.complete){applyTrialProgress(d.trialEnd);if(!G.trialCompleted)return;}closedPartyTrials.add(G.trialSession);if(!G.trialCompleted)restoreTrialExit();} this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)||!!G.riftHall!==!!d.hall){try{if(!G?.hub){openHub();if(d.hall)enterWaystation(true);}else enterWaystation(!!d.hall);}catch(e){console.error(e)}}if(d.story){if(d.rseed!=null)G.runSeed=d.rseed;briarApply(d.story,true);} }   // follow the host into the shared Waystation
       else { this.zone=d.zone;
         /* `!G.hub` is not defensive - without it a guest NEVER follows the host into zone 0, which
@@ -13990,10 +14004,10 @@ const MP={
       ARENA_LOADOUT.map=d.map||'flat'; if(d.fair && d.ld){ Object.assign(ARENA_LOADOUT,d.ld); ARENA_LOADOUT.fair=true; }
       if(!IN_ARENA){ try{ enterArena(); }catch(e){} } }
     else if(d.t==='teams'){ this.teamMap=d.map||{}; this.teams=!!d.on; }
-    else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
+    else if(d.t==='state'){if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return; const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
-      if(d.en&&!G?.storyState?.conversation){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story); }
+      if(d.en&&!G?.storyState?.conversation){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
@@ -14004,8 +14018,9 @@ const MP={
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
-  onEnter(zi,restart=false){ this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
-    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()});}catch(e){}}); },
+  onEnter(zi,restart=false){if(G?.trialSession){this.zone=this.TRIAL;if(this.isHost)for(const c of this.conns)try{c.send(partyTrialPacket());}catch(e){}return;} this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
+    if(zi!==this.HUB)this.trialReceipt=null;
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',trialEnd:this.trialReceipt,zone:zi,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()});}catch(e){}}); },
   specialMsg(kind){
     if(!G) return null;
     kind=kind||(G.endless?'endless':G.sprintFun&&G.bonusActive?'sprint':G.bossRush?'gauntlet':null);
@@ -14043,7 +14058,7 @@ const MP={
   teamOf(id){ return this.teamMap[id]||0; },
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
-  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
+  placeMsg(){if(G?.trialSession)return partyTrialPacket(); if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
@@ -14076,6 +14091,7 @@ const MP={
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
+    updateTrialPartyStatus();
     if(G?.storyState?.conversation){this._sendT+=dt;if(this._sendT>=.07){this._sendT=0;if(this.isHost)this.broadcast();else try{this.hostConn?.send({t:'pos',p:this.selfState()});}catch(e){}}return;}
     try{ syncPingBtn(); }catch(e){}      // the ping button is co-op only; this is the only place that knows
     for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
@@ -14255,7 +14271,7 @@ const MP={
     try{ burst(p.x,p.y+30,p.z,'#7de08a',16); hudUpdate(); }catch(e){} },
   leave(msg){
     briarPending=null;if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
-    const rollback=this.active&&!!campaignCheckpoint()&&isCampaignAdventure();this.active=false;
+    const leavingTrial=this.active&&!!G?.trialSession;const rollback=this.active&&!!campaignCheckpoint()&&isCampaignAdventure();this.active=false;
     try{ mpHideBanner(); }catch(e){}
     try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
@@ -14264,6 +14280,7 @@ const MP={
     try{ syncPingBtn(); }catch(e){}      // tick() stops running when the party ends, so hide it here
     this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={}; this.arenaMsg=null;
     if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
+    if(leavingTrial){closedPartyTrials.add(G.trialSession);if(!G.trialCompleted)restoreTrialExit();openHub();}
     if(rollback)restartCampaignCheckpoint(true);
     if(msg){ try{ toast(msg+(rollback?' Unfinished progress reset to this part’s start.':'')); }catch(e){} } }
 };
@@ -16028,7 +16045,7 @@ function showDeathScreen(){
     ${!checkpoint&&playtestReviveOn()?`<button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest aid, not a game mechanic</span></button>`:''}
     <button class="bigbtn" id="hubBtn" style="margin-top:8px">${hubBtnLabel()}</button></div>`);
   { const rb=document.getElementById('reviveBtn'); if(rb) rb.onclick=reviveAtStart; const cp=document.getElementById('checkpointRetry');if(cp)cp.onclick=()=>restartCampaignCheckpoint(); }
-  document.getElementById('hubBtn').onclick=()=>{ if(perma) wipeMode(MODE); else restoreBank(); persist();   // commit the loss only when you accept it
+  document.getElementById('hubBtn').onclick=()=>{if(MP.active&&G?.trialSession){const fd=document.getElementById('deathfade');if(fd)fd.remove();abandonTrial();return;} if(perma) wipeMode(MODE); else restoreBank(); persist();   // commit the loss only when you accept it
     const fd=document.getElementById('deathfade'); if(fd) fd.remove(); openHub(); };
 }
 function hubBtnLabel(){ return Object.keys(meta.classUnlocked||{}).length ? 'Return to Hub' : 'Choose your class'; }   // a class-less death routes to class select — say so
@@ -16792,6 +16809,8 @@ function openDiffSelect(){
    THE WAYSTATION — the walkable hub (Firelink, not a menu)
    ============================================================ */
 function openHub(){
+  if(G?.trialSession)document.getElementById('deathfade')?.remove();
+  if(MP.active&&G?.trialSession){if(MP.guest()&&MP._trialExitSession!==G.trialSession){MP.hostConn?.send({t:'trialExit',session:G.trialSession});toast('Asking the party to return together.');return;}if(MP.isHost)MP.trialReceipt={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted,story:briarPacket()};}
   document.getElementById('bosshpwrap').classList.remove('on');
   if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
   if(!Object.keys(meta.classUnlocked).length){ mode='menu'; showGameUI(false); musicPlay('hub'); openClassPicker(); return; }
@@ -16988,13 +17007,52 @@ function travelRiftHall(hall){
  meta.hero=snapOf(G.p);persist();enterWaystation(!!hall);
  if(!hall){G.p.x=-350;G.p.z=480;G.p.yaw=Math.PI;}
 }
+
+// Shared trials keep the borrowed class/loadout in each player's existing local escrow.
+const closedPartyTrials=new Set();
+function updateTrialPartyStatus(){const el=document.getElementById('trialPartyStatus');if(!el||!MP.active)return;const cid=el.dataset.class,me=MP.selfState(),party=[me,...Object.values(MP.peers).filter(q=>q.last<3)];const lines=party.map(q=>(q.id===MP.myId?'You':q.name||'Teammate')+' — '+(!q.trialAccess?.includes(cid)?'restore this class rift':!q.hall?'come to the Rift Hall':q.hp<=0||q.downed||q.dn?'not ready':'ready'));const text='Party training\n'+lines.join('\n');if(el.textContent!==text)el.textContent=text;}
+function partyTrialPacket(){return {t:'trial',partySize:G.trialPartySize||1,cid:G.trial,zone:G.zone,session:G.trialSession,runSeed:G.runSeed,kills:G.trialKills||0,complete:!!G.trialCompleted,story:briarPacket()};}
+function requestPartyTrial(cid,requester){
+ const f=riftHallFrames().find(f=>f.classId===cid),tell=text=>{toast(text);if(requester)try{requester.send({t:'trialNotice',text});}catch(e){}};
+ if(!G?.riftHall||!f?.open||!TRIALS[cid]?.earned||G.storyState?.conversation){tell('Open your own class rift, then gather in the Rift Hall.');return false;}
+ if(MP.guest()){MP.hostConn?.send({t:'trialRequest',cid});toast('Asking the party to begin '+f.className+' training.');return false;}
+ for(const c of MP.conns.filter(c=>c.open)){const q=MP.peers[c._pid];if(!q||q.zone!==MP.HUB||!q.hall||q.hp<=0||q.downed||!q.trialAccess?.includes(cid)){tell((q?.name||'A teammate')+' must open this class rift and join you in the Rift Hall.');return false;}}
+ if(G.p.dead||G.p.downed||G.p.hp<=0)return false;
+ const zi=ZONES.findIndex(z=>z.side?.trial===cid),session=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),runSeed=(Math.random()*0x7fffffff)|0;
+ MP.trialReceipt=null;MP._wiped=false;MP._killed={};MP.kills=[];MP._gotEn=false;
+ startTrial(cid,Math.max(0,zi),{remote:true,session,runSeed,partySize:1+MP.conns.filter(c=>c.open).length});MP.onEnter(MP.TRIAL);return true;
+}
+function applyPartyTrial(d){
+ if(!MP.guest()||!TRIALS[d.cid]?.earned||typeof d.session!=='string'||closedPartyTrials.has(d.session))return;
+ const same=G?.trialSession===d.session;
+ if(!same){if(G?.trialSession)return;const f=riftHallFrames().find(f=>f.classId===d.cid);if(!f?.open){MP.leave('You need your own restored rift to join this class trial.');return;}
+ if(!G?.hub){MP.leave('Join class training from the Rift Hall.');return;}
+ MP._wiped=false;MP._killed={};MP.kills=[];MP._gotEn=false;MP.rseed=d.runSeed;
+ startTrial(d.cid,d.zone,{remote:true,session:d.session,runSeed:d.runSeed,partySize:d.partySize});
+ }
+ if(d.story)briarApply(d.story,!same);applyTrialProgress(d);
+}
+function applyTrialProgress(d){
+ if(!G?.trialSession||d.session!==G.trialSession||d.cid!==G.trial)return;
+ G.trialKills=Math.max(G.trialKills||0,Math.max(0,Number(d.kills)||0));
+ if(d.story)briarApply(d.story);
+ if(d.complete&&G.storyState?.flags['trial.taught']&&G.trialKills>=TRIALS[G.trial].kills){trialComplete(true);MP.trialReceipt={session:d.session,cid:d.cid,kills:G.trialKills,complete:true,story:briarPacket()};}
+ questUpdate();
+}
+function finishPartyTrial(){
+ if(!G?.trialSession||G.trialCompleted||!G.portal||!G.storyState?.flags['trial.taught']||G.trialKills<TRIALS[G.trial].kills)return;
+ if(MP.guest()){MP.hostConn?.send({t:'trialFinish',session:G.trialSession});return;}
+ trialComplete(true);MP.trialReceipt={session:G.trialSession,cid:G.trial,kills:G.trialKills,complete:true,story:briarPacket()};
+ for(const c of MP.conns)try{c.send(partyTrialPacket());}catch(e){}
+}
+
 function openRiftFrame(id){
  const f=riftHallFrames().find(f=>f.id===id);if(!f)return;
  mode='menu';showGameUI(false);
- showOverlayHTML(`<div class="card"><p class="ovkicker">Rift Hall · ${f.name}</p><h2 class="ovh">${f.className}</h2><p class="ovsub">${f.banked} / 5 saved Rift Shards</p><p>${f.status}.</p>${f.legacy&&!f.assembled?'<p class="hint">Your earlier discovery still grants access. Your saved shards are shown separately.</p>':''}<p class="hint">Five matching saved shards let the Rift Keeper repair this frame. Enter its trial to learn the class. Your normal equipment is kept safe during training.</p>${f.open?'<button class="bigbtn" id="hallTrial">'+(f.learned?'Practice the trial':'Enter the trial')+'</button>':''}<button class="bigbtn ghost" id="hallBack">Return to the hall</button></div>`);
- document.getElementById('hallBack').onclick=wsResume;
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Rift Hall · ${f.name}</p><h2 class="ovh">${f.className}</h2><p class="ovsub">${f.banked} / 5 saved Rift Shards</p><p>${f.status}.</p>${MP.active?'<p id="trialPartyStatus" class="hint" style="white-space:pre-line" data-class="'+f.classId+'"></p>':''}${f.legacy&&!f.assembled?'<p class="hint">Your earlier discovery still grants access. Your saved shards are shown separately.</p>':''}<p class="hint">Five matching saved shards let the Rift Keeper repair this frame. Enter its trial to learn the class. Your normal equipment is kept safe during training. In a party, everyone must have opened this class rift and be in the Rift Hall.</p>${f.open?'<button class="bigbtn" id="hallTrial">'+(f.learned?'Practice the trial':'Enter the trial')+'</button>':''}<button class="bigbtn ghost" id="hallBack">Return to the hall</button></div>`);
+ updateTrialPartyStatus();document.getElementById('hallBack').onclick=wsResume;
  const btn=document.getElementById('hallTrial');if(btn)btn.onclick=()=>{
-  if(MP.active){toast('Class training is solo for now. Leave the party from the co-op menu before entering.');return;}
+  if(MP.active){requestPartyTrial(f.classId);return;}
   const now=riftHallFrames().find(x=>x.id===id);if(!now?.open)return;
   const zi=ZONES.findIndex(z=>z.side?.trial===now.classId);startTrial(now.classId,Math.max(0,zi));
  };
@@ -22090,7 +22148,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

@@ -502,3 +502,13 @@ U180 continues approved queue. Grounded plan: IMPLEMENTATION_HOME_TRAILS_2026-09
 
 ## [Codex | 2026-09-23] Home/tracks checkpoint
 U180 implemented as 2.025.0-home-trails: optional Thomas keepsake and Beastkeeper rescue/care shelter. Fifteen new voice lines; original dialogue unchanged. Scope, evidence and limits in IMPLEMENTATION_HOME_TRAILS_2026-09-23.md. No new central canon; COMP-03 mount/flight remains open.
+
+
+## [Codex | 2026-09-23] Party trial work start
+U181 continuation archived. Implement existing earned-trial multiplayer identity, personal eligibility and protected completion. Grounded plan IMPLEMENTATION_PARTY_TRIALS_2026-09-23.md. Encounter redesign and Pyromancer kit remain separate.
+
+
+## [Codex | 2026-09-23] Party trials — 2.026
+Implemented shared entry and completion for the seven existing earned class trials. Every participant requires personal Rift access and must gather in the Hall. Guest requests are host-validated; mentor dialogue, enemy progress and teaching sync under a dedicated session identity. Existing party HP scaling applies. Local equipment escrow, duplicate/stale message protection, completion receipts, abandonment, disconnect and existing hardcore wipe semantics are preserved. Starter tutorials remain solo.
+
+Evidence: 34 two-context multiplayer handler checks, seven solo mentor/reward/loadout checks, nine Hall co-op checks, eleven return-adventure co-op checks, hardcore exit, pre-change save preservation, story/Rift/authority/Voice API tests and inline syntax passed. Three staged browser previews; gallery191. Voice Studio remains359 lines; no recorded text changed. Controlled relay is not an internet WebRTC soak test or combat balance certification. Trial arenas, Pyromancer kit, mounts/flight and remaining equipment/cape/trail audit remain open. Exact U181 archived with181 messages,zero parse errors and valid source references.

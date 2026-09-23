@@ -526,3 +526,9 @@ Limits: controlled handler relay is not real WebRTC latency QA; no claim of whol
 
 ## [Codex | 2026-09-23] Home/tracks production receipt
 Main97333f5 deployed as73601893-eca8-4969-830e-c8dfcb59d383. Read-only production Chromium verified2.025.0-home-trails, all new assetsHTTP200,359 Voice Studio lines and188 gallery images decoded at390px without overflow. No production save or voice take modified. Next: reconcile the remaining trial/Pyromancer, mount and equipment/cosmetic work against its approved design boundaries; do not count these as completed.
+
+
+## [Codex | 2026-09-23] Party trials — 2.026
+Implemented shared entry and completion for the seven existing earned class trials. Every participant requires personal Rift access and must gather in the Hall. Guest requests are host-validated; mentor dialogue, enemy progress and teaching sync under a dedicated session identity. Existing party HP scaling applies. Local equipment escrow, duplicate/stale message protection, completion receipts, abandonment, disconnect and existing hardcore wipe semantics are preserved. Starter tutorials remain solo.
+
+Evidence: 34 two-context multiplayer handler checks, seven solo mentor/reward/loadout checks, nine Hall co-op checks, eleven return-adventure co-op checks, hardcore exit, pre-change save preservation, story/Rift/authority/Voice API tests and inline syntax passed. Three staged browser previews; gallery191. Voice Studio remains359 lines; no recorded text changed. Controlled relay is not an internet WebRTC soak test or combat balance certification. Trial arenas, Pyromancer kit, mounts/flight and remaining equipment/cape/trail audit remain open. Exact U181 archived with181 messages,zero parse errors and valid source references.

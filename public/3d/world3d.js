@@ -1,3 +1,4 @@
+import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2022';
 import {buildLongAscent} from './long-ascent-art.js?v=2021';
 import {buildCastleGates} from './castle-gates-art.js?v=2020';
 import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2019';
@@ -49,8 +50,8 @@ import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hol
 /* Same specifier hero3d uses. Importing 'three' via the importmap could resolve to a
    SECOND module instance, and two THREE copies break every instanceof check silently. */
 import * as THREE from './three.module.js';
-import { clearMobs } from './mob3d.js?v=2010';
-import { clearProps } from './prop3d.js?v=2010';
+import { clearMobs } from './mob3d.js?v=2022';
+import { clearProps } from './prop3d.js?v=2022';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -1771,6 +1772,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+ if(world.finalStage&&deepReady(world)){clearWorld(scene);const art=buildFinalKing(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.castleScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.castleScene).startsWith('ascent:')?buildLongAscent(scene,world):buildCastleGates(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('guardian:')?buildMarbleGuardian(scene,world):String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.shipScene){clearWorld(scene);const art=world.shipScene==='hydra'||world.shipScene.startsWith('cliffs')?buildCoastHigh(scene,world):buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1993,7 +1995,7 @@ function signature(world){
   if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
   const d = world.deco || [];
   const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
-  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene,world.palaceScene,world.castleScene].join('|')+'|';
+  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene,world.palaceScene,world.castleScene,world.finalStage].join('|')+'|';
   if(world.bonus&&world.sprintFun)return prefix+JSON.stringify(world.course||[]);
   if(!d.length) return prefix+'empty|'+world.segments.length+'|'+world.obstacles.length;
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];
@@ -2009,7 +2011,7 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world); return true; }
+  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
@@ -2042,7 +2044,7 @@ export function syncWorld(scene){
     updateHollow(world);
     updateKeep(world);
     updateFrost(world);
-    updateDeep(world);updateMarbleOrb(world);
+    updateDeep(world);updateMarbleOrb(world);updateFinalKing(world);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);

@@ -471,3 +471,10 @@ U175: Castle Gates half one authored in 2.020.0. MAP-08 first-half infiltration/
 
 ## [Codex | 2026-09-23] U176 Long Ascent continuation
 Continue the approved Castle half-two scope in CAMPAIGN_EXPANSION_PLAN. Implementation plan: docs/IMPLEMENTATION_LONG_ASCENT_2026-09-23.md. Exact continuation archived in USER_SOURCE_2026-09-23_LONG_ASCENT.md. Final boss/ending remain pending.
+
+## [Codex | 2026-09-23] U177 final encounter batch
+Continue STORY-12 through STORY-21 and Castle finale plan. New implementation document records attack/charge defaults and checks. Preserve all unresolved ancestry/cosmology, cutscene-only Blade, and no victory before restoration.
+
+
+## [Codex | 2026-09-23] Final King and restoration
+U177: Castle final boss and restoration ending authored as 2.022.0. STORY finale sequence, single Gate, cutscene-only Blade, retry/skip charge, shared co-op contribution and twelve VO lines implemented. Evidence and playtesting limitations: IMPLEMENTATION_FINAL_KING_2026-09-23.md. Other remaining requirements stay open.

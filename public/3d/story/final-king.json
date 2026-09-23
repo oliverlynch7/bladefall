@@ -1,0 +1,272 @@
+{
+  "version": 1,
+  "region": "castle",
+  "status": "authored",
+  "npcs": {
+    "abyss_king": {
+      "name": "The Abyss King",
+      "role": "Former lord, now tyrant. Certain of his cure; fear appears only at recognition.",
+      "start": "ak.king.offer"
+    },
+    "ian": {
+      "name": "Ian",
+      "role": "The previous Bladeborn, present only as a spirit. Warm, grounded, proud without grand speeches.",
+      "start": "ak.ian.welcome"
+    }
+  },
+  "nodes": {
+    "ak.king.offer": {
+      "text": "Every healer fights death. Every parent begs for more time. I found an answer. You climbed all this way to destroy it.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Your answer took their freedom.",
+          "next": "ak.king.price",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "abyss_king",
+        "scene": "Castle Duskmoor finale",
+        "order": 1,
+        "emotion": "steady",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.king.price": {
+      "text": "They will never grow old. Never bury their children. You offer them a few frightened years and call that mercy.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Their lives belong to them. Fight me.",
+          "next": "ak.king.price",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ak.start",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "abyss_king",
+        "scene": "Castle Duskmoor finale",
+        "order": 2,
+        "emotion": "cold certainty",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.king.recognize": {
+      "text": "No. Ian is dead. There has been no Bladeborn since him. You should not be able to stand against this power.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "And yet I am still here.",
+          "next": "ak.king.plunge",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "abyss_king",
+        "scene": "Castle Duskmoor finale",
+        "order": 3,
+        "emotion": "shaken, struggling to hide fear",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.king.plunge": {
+      "text": "A part of the Void was not enough. Then I will take the rest. I will not lose Aerth to you.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Stand ready.",
+          "next": "ak.king.plunge",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ak.plunge",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "abyss_king",
+        "scene": "Castle Duskmoor finale",
+        "order": 4,
+        "emotion": "fear turning into desperate anger",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.welcome": {
+      "text": "You fought for them before you knew you could win. I have been waiting to meet the person who would do that.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Ian?",
+          "next": "ak.ian.name",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 5,
+        "emotion": "gentle, relieved",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.name": {
+      "text": "What remains of me. I lived my life, and it was a good one. Yours is only beginning. You are Bladeborn.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Then where did this power come from?",
+          "next": "ak.ian.family",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 6,
+        "emotion": "steady",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.family": {
+      "text": "Your blood carries an old Bladeborn line. Thomas found you without a family and raised you as his own. The blood was a gift from people you never knew. The courage was yours.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Thomas is still my father.",
+          "next": "ak.ian.father",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 7,
+        "emotion": "careful and kind",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.father": {
+      "text": "Of course he is. The man who stays, feeds you, worries, and lets you go when every part of him wants you safe? That is a father.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Can we save these people?",
+          "next": "ak.ian.souls",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 8,
+        "emotion": "warm, slight smile",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.souls": {
+      "text": "The King can command them no longer. But the binding still holds their souls here. We have to break it from within.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Tell me how.",
+          "next": "ak.ian.blade",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 9,
+        "emotion": "steady",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.blade": {
+      "text": "Take my blade. Put everything you have into one cut. Not at the people. At the bond that holds them. I kept Aerth safe as long as I could. Now it is your turn.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "I am ready.",
+          "next": "ak.ian.blade",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ak.charge",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 10,
+        "emotion": "firm encouragement",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.restored": {
+      "text": "Look. The souls are going home. Even those whose bodies fell are whole again. They can choose. They can live. You gave them their lives back.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Will I see you again?",
+          "next": "ak.ian.legacy",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 11,
+        "emotion": "quiet wonder and joy",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    },
+    "ak.ian.legacy": {
+      "text": "One day, when your life is done. The Bladeborn who came before us are together. We teach, we learn, and we watch over Aerth. But not yet. You have a home to return to.",
+      "choices": [
+        {
+          "id": "next",
+          "text": "Then I had better get back to it.",
+          "next": "ak.ian.legacy",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "ak.home",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "ian",
+        "scene": "Inside the Abyssal Void",
+        "order": 12,
+        "emotion": "warm farewell",
+        "direction": "Clear conversational words. Let the pauses carry the scale; avoid a theatrical growl on every word.",
+        "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected."
+      }
+    }
+  },
+  "events": {}
+}

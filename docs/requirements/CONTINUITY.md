@@ -481,3 +481,10 @@ Main 58b33e7 deployed successfully as 95961ab1-18a4-4044-9906-8f883e2d4637. Read
 
 ## [Codex | 2026-09-23] Long Ascent
 2.021.0-long-ascent authored. New long-ascent.js/art/story JSON; castleScene prefix ascent:. World/npc cache2021; shared deep-art cache remains2017. Nine Miles lines,301 total. Ten previews,163 gallery total. CD-04 shared independent rescue,CD-03 vault physical,CD-05 memorial physical. Refuge ramparts at boss-entry checkpoint. New stacked-storey seating narrowly gated by G.ascent. Main route260 checkpoints,combat9,co-op8,checkpoint3,pre-change save and regressions passed. Plan/evidence docs/IMPLEMENTATION_LONG_ASCENT_2026-09-23.md. Latest continuation U176 private archive checked. Next final King/ending; dragon and larger queue still pending.
+
+## [Codex | 2026-09-23] Long Ascent production receipt
+Main 8d68cdd deployed as 21e652e3-0775-4c63-b546-e6087d34a77e. Read-only production Chromium confirmed 2.021.0-long-ascent, new module/art/story HTTP 200,301 Voice Studio lines,163 gallery images decoded at390px with no horizontal overflow. No production save or recorded take modified. Next final King arena/phases and Ian/Space-charge/restoration ending; single summit Hollow Gate presentation belongs to that batch.
+
+
+## [Codex | 2026-09-23] Final King and restoration
+2.022.0-final-king authored. New final-king.js/art/story JSON, hero/world/mob/NPC/prop/companion cache2022 consistently. Shared deep-art stays2017. Twelve new lines,313 catalog total. Six finale browser previews (spoilers). Tests and limits in IMPLEMENTATION_FINAL_KING_2026-09-23.md. Main campaign now has the authored finale; do not call the whole queue finished. Next audit remaining approved optional rewards/dragon, hub return dialogue and end-to-end campaign balance/navigation. Never skip unfinished register items. Exact continuation U177 archived; U176 source heading corrected (content was present).

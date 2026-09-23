@@ -1,3 +1,4 @@
+const finale=JSON.parse(await fs.readFile('public/3d/story/final-king.json','utf8'));
 const ascent=JSON.parse(await fs.readFile('public/3d/story/long-ascent.json','utf8'));
 const castle=JSON.parse(await fs.readFile('public/3d/story/castle-gates.json','utf8'));
 const orb=JSON.parse(await fs.readFile('public/3d/story/sunspire-orb.json','utf8'));
@@ -18,8 +19,8 @@ const caves=JSON.parse(await fs.readFile('public/3d/story/deep-ice-caves.json','
 const iron=JSON.parse(await fs.readFile('public/3d/story/iron-halls.json','utf8'));
 const furnace=JSON.parse(await fs.readFile('public/3d/story/great-furnace.json','utf8'));
 const shore=JSON.parse(await fs.readFile('public/3d/story/shipwreck-shore.json','utf8'));
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs,...thunder.npcs,...court.npcs,...library.npcs,...orb.npcs,...castle.npcs,...ascent.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes,...thunder.nodes,...court.nodes,...library.nodes,...orb.nodes,...castle.nodes,...ascent.nodes}};
-let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import ascent[^;]+;\s*import castle[^;]+;\s*import orb[^;]+;\s*import library[^;]+;\s*import court[^;]+;\s*import thunder[^;]+;\s*import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*import caves[^;]+;\s*import iron[^;]+;\s*import furnace[^;]+;\s*import shore[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs,...thunder.npcs,...court.npcs,...library.npcs,...orb.npcs,...castle.npcs,...ascent.npcs,...finale.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes,...thunder.nodes,...court.nodes,...library.nodes,...orb.nodes,...castle.nodes,...ascent.nodes,...finale.nodes}};
+let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import finale[^;]+;\s*import ascent[^;]+;\s*import castle[^;]+;\s*import orb[^;]+;\s*import library[^;]+;\s*import court[^;]+;\s*import thunder[^;]+;\s*import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*import caves[^;]+;\s*import iron[^;]+;\s*import furnace[^;]+;\s*import shore[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
 const {handle,digest}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 class Bucket{
  data=new Map();seq=0;

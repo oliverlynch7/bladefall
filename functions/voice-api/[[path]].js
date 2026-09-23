@@ -1,3 +1,4 @@
+import finale from '../../public/3d/story/final-king.json';
 import ascent from '../../public/3d/story/long-ascent.json';
 import castle from '../../public/3d/story/castle-gates.json';
 import orb from '../../public/3d/story/sunspire-orb.json';
@@ -16,7 +17,7 @@ import caves from '../../public/3d/story/deep-ice-caves.json';
 import iron from '../../public/3d/story/iron-halls.json';
 import furnace from '../../public/3d/story/great-furnace.json';
 import shore from '../../public/3d/story/shipwreck-shore.json';
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs,...thunder.npcs,...court.npcs,...library.npcs,...orb.npcs,...castle.npcs,...ascent.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes,...thunder.nodes,...court.nodes,...library.nodes,...orb.nodes,...castle.nodes,...ascent.nodes}};
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs,...thunder.npcs,...court.npcs,...library.npcs,...orb.npcs,...castle.npcs,...ascent.npcs,...finale.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes,...thunder.nodes,...court.nodes,...library.nodes,...orb.nodes,...castle.nodes,...ascent.nodes,...finale.nodes}};
 
 const encoder=new TextEncoder(),MAX_AUDIO=12*1024*1024;
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};

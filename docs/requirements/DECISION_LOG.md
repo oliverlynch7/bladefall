@@ -305,3 +305,7 @@ U175 continued approved Castle Gates plan with no new major canon. Source USER_S
 
 ## [Codex | 2026-09-23] U176 implementation receipt
 Continuation implements previously approved Long Ascent; no new user canon inferred. Optional living Miles, independent worker rescue, two latching main catches, mechanical vault, hidden memorial, CD-03..05 and checkpoint banking. Final boss/ending remain separate. Exact continuation source: USER_SOURCE_2026-09-23_LONG_ASCENT.md.
+
+
+## [Codex | 2026-09-23] Final King and restoration
+U177 continuation implements the previously approved finale. Charge defaults: ten seconds, sixty accepted presses; any connected player contributes, host starts/retries/skips, skip after five failures. No new parentage, awakening mechanism or Void cosmology is canonized. Ian weapon never enters equipment/bag. These are implementation choices under existing authorization.

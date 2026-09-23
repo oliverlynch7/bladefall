@@ -1895,3 +1895,7 @@ Rebuilt Castle half one with disguise/guard reasoning or finite assault, Rolandâ
 
 ## [Codex | 2026-09-23] Long Ascent - 2.021.0
 Castle second half: massive two-turn tower, Miles, optional worker rescue, service lift/vault, three Rift Shards, shared quest and individual pickup behavior, checkpoint banking. Nine VO lines; ten browser previews. Controller, combat, co-op, save and regression checks passed. Final King and ending next; full queue not complete.
+
+
+## [Codex | 2026-09-23] Final King and restoration â€” 2.022.0
+Campaign Castle finale: two boss phases, single Hollow Gate, Ian spirit and temporary cinematic Blade, shared Space/touch charge with retry/fifth-failure skip, restoration before once-only completion. Twelve VO lines. Evidence: docs/IMPLEMENTATION_FINAL_KING_2026-09-23.md. Broader queue and human balance QA remain open.

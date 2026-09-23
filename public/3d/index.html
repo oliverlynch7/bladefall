@@ -1040,6 +1040,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./iron-halls.js?v=2011"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2012">
 <script src="./journal-notice.js?v=2012"></script>
+<script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
 <script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=1990"></script>
@@ -1057,7 +1058,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.012.0-combat-journal';
+const VERSION3D='2.013.0-original-score';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1399,8 +1400,9 @@ function claimIansBlade(then){
    Separate from SFX on purpose: SFX stay procedural WebAudio, music is plain
    <audio> so the browser streams it instead of us holding 46MB in memory.
    Tracks load lazily the first time a slot is asked for.
-   EVERY track is CC-BY — see CREDITS. The credits screen is not optional. */
+   Supplied Bladefall tracks stream from /music/bladefall/. Legacy cues retain their credits. */
 const MUSCREDITS=[
+  {who:'Bladefall original soundtrack',url:'bladefall.pages.dev',lic:'Custom music supplied by Oliver',licUrl:'/music/bladefall/manifest.json',tracks:Object.values(BFMusicScore.tracks).map(t=>t.title)},
   {who:'Matthew Pablo', url:'matthewpablo.com', lic:'CC BY 3.0', licUrl:'https://creativecommons.org/licenses/by/3.0/',
    tracks:['Dark Descent','Pleasant Creek','Woodland Fantasy','Tactical Pursuit','Defying Commodus','The Dark Amulet','Colossal Boss Battle Theme','The Fall of Arcana','Lively Meadow (Victory Fanfare)']},
   {who:'Kevin MacLeod', url:'incompetech.com', lic:'CC BY 4.0', licUrl:'https://creativecommons.org/licenses/by/4.0/',
@@ -1412,11 +1414,14 @@ const MUS_DEFAULT=0.30;                               // Phase 20: music sits UN
 let musEls={}, musCur=null, musCurKey=null, musFadeT=null;
 let gameAudioPaused=false, pausedHtmlAudio=[];
 const musicStings=new Set();
+function musicVolume(key){return (MUSVOL[key]??(key==='wayfarers_hearth_loop'?.36:MUS_DEFAULT))*(meta.musicVol??1)*(mode==='npc'?.45:1);}
+let musDialogueMix=false;
+function musicMixUpdate(){const duck=mode==='npc';if(duck!==musDialogueMix){musDialogueMix=duck;if(musCur&&musicOK())musFade(musCur,musicVolume(musCurKey),350);}}
 function musicOK(){ return meta.musicOn!==false && typeof Audio!=='undefined'; }
 function musEl(key){
   if(typeof Audio==='undefined') return null;         // no audio in this environment — music is optional, never fatal
   let a=musEls[key];
-  if(!a){ try{ a=new Audio(MUSDIR+key+'.mp3'); }catch(e){ return null; }
+  if(!a){ try{ a=new Audio();a.preload='none';const track=BFMusicScore.tracks[key];a.src=track?track.url:MUSDIR+key+'.mp3'; }catch(e){ return null; }
     a.loop=true; a.preload='none'; a.volume=0;
     a.addEventListener('error',()=>{ /* a missing track must never break the game */ });
     musEls[key]=a; }
@@ -1434,13 +1439,14 @@ function musFade(el,to,ms,stopAt){                    // volume ramp; el is park
 }
 function musicPlay(key,opts){
   if(!key) return musicStop();
+  key=BFMusicScore.canonical(key);
   opts=opts||{};
   if(musCurKey===key && musCur && !musCur.paused) return;   // already on it — never restart a looping track
   const prev=musCur;
   const el=musEl(key); if(!el) return;
   musCurKey=key; musCur=el;
   if(!musicOK()){ if(prev) musFade(prev,0,300,true); return; }
-  const vol=(MUSVOL[key]!=null?MUSVOL[key]:MUS_DEFAULT)*(meta.musicVol!=null?meta.musicVol:1);
+  const vol=musicVolume(key);
   if(gameAudioPaused){ el.volume=vol; return; }
   if(prev&&prev!==el) musFade(prev,0,opts.fade||900,true);
   el.loop=opts.loop!==false; el.volume=0;
@@ -1457,21 +1463,19 @@ function musicSting(key){                             // one-shot over the top o
   const p=a.play(); if(p&&p.catch) p.catch(()=>{});
   if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,back,900); },2600); }
 }
-function musicForScene(){                             // one place decides what should be playing right now
-  if(!G||G.hub) return musicPlay('hub');
-  if(G.trial) return musicPlay('trial_chamber');   // Phase 19: the trial chambers earned their own song — 'Silent Descent' (Mixkit free license)
-  if(G.side) return musicPlay('secret');
-  const Z=curZone();
-  if(G.area<0) return musicPlay((Z.boss&&Z.boss.mus)||'boss_brute');   // the boss arena gets its own track
-  musicPlay(Z.mus||'outskirts');
+function musicForScene(){
+ const c=G?.storyState?.conversation;
+ return musicPlay(BFMusicScore.scene({zone:G?curZone().id:null,area:G?.area,phase:G?.boss?.phase||1,victory:G?._winPending,mode,hub:!G||G.hub,riftHall:G?.riftHall,trial:G?.trial,side:G?.side,sparring:G?.sparringRoom,bossRush:G?.bossRush,bossType:G?.boss?.type,arena:G?.arena,endless:G?.endless,delve:G?.delve,npc:c?.npc,line:c?.node}));
 }
+// Reserved scene cues are invoked by their actual story/minigame event, never by a timer.
+function musicCue(name){const cue=BFMusicScore.cues[name];if(!cue)return false;musicPlay(cue.track,{loop:!cue.once});if(cue.once){const el=musCur;el.addEventListener('ended',()=>{if(musCur===el)musicForScene();},{once:true});}return true;}
 /* Volume settings: sliders are the one control. 0% = off; anything else keeps the on-flags true. */
 function setMusicVol(v){
   meta.musicVol=v; meta.musicOn=v>0.001; persistGlobal();
   if(!meta.musicOn){ musicRefresh(); return; }
-  if(gameAudioPaused){ if(musCur) musCur.volume=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:MUS_DEFAULT)*v; return; }
-  if(musCur && musCurKey && !musCur.paused){ const vol=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:MUS_DEFAULT)*v; musFade(musCur,vol,120); }
-  else musicRefresh();                                // was muted — bring the scene's track back at the new level
+  if(gameAudioPaused){ if(musCur) musCur.volume=musicVolume(musCurKey); return; }
+  if(musCur && musCurKey && !musCur.paused){ const vol=musicVolume(musCurKey); musFade(musCur,vol,120); }
+  else musicForScene();                               // was muted — bring the scene's track back at the new level
 }
 function setSfxVol(v){
   meta.sfxVol=v; meta.soundOn=v>0.001; persistGlobal();
@@ -2971,6 +2975,7 @@ function briarSync(){
    enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
    leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>briarRequest('close'),choose:(line,choice)=>briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
+ if(mode==='npc')musicForScene();
  questUpdate();hudUpdate();
 }
 function briarDisconnect(actor){if(inBriarStory()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
@@ -15543,7 +15548,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       if(!(MP.active&&!MP.isHost)) for(let i=0;i<Math.min(2,room);i++){ const ne=spawnEnemy('shadeling',e.x+(i?70:-70),e.z+30); ne.dropT=0.4; ne._shade=true; }   // co-op: host summons; guests mirror
       if(room>0) addText(e.x,e.h+16,e.z,'SUMMON SHADES!','var(--danger)',true); }
   }
-  if(e.hp/e.maxHp<0.5 && e.phase<2){ e.phase=2; e.speed*=1.22; e.dmg*=1.1;   // Phase 11: HP-threshold phase 2 — faster, harder, specials on a shorter fuse
+  if(e.hp/e.maxHp<0.5 && e.phase<2){ e.phase=2;if(G.boss===e&&curZone().id==='castle')musicForScene(); e.speed*=1.22; e.dmg*=1.1;   // Phase 11: HP-threshold phase 2 — faster, harder, specials on a shorter fuse
     for(const k of ['slamCd','cleaveCd','novaCd','poundCd']) if(e[k]!=null) e[k]=Math.min(e[k],1.2);   // a signature special comes almost immediately on the flip
     if(e.ranged) e.shootT=Math.min(e.shootT,0.6);
     if(e.type==='king'){ e.ranged=true; e.shot={count:3,spread:0.22,speed:380,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=2.0; e.shootT=0.8; }
@@ -15721,7 +15726,7 @@ function randomLoot(rid){ const r=Math.random();
 function regrabCam(){ if(!_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ const request=canvas.requestPointerLock();request?.catch?.(()=>{}); }catch(e){} } }
 // The single menu-to-game boundary. Active play must always have the full HUD restored;
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
-function resumePlay(){ mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
+function resumePlay(){ mode='play'; musicForScene(); showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
 function die(){
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
@@ -16278,6 +16283,7 @@ function winGame(){
   meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
   persistGlobal(); checkAchievements(); checkCosmetics(); SFX.win();
   const lines=STORY.ending.slice(); if(STORY.endLadder[D.id]) lines.push(STORY.endLadder[D.id]);
+  musicCue('restoration');
   playStory(lines, ()=>{                                            // the ending dialogue rolls, THEN you get control back
     mode='play'; showOverlay(false); showGameUI(true); if(typeof regrabCam==='function') regrabCam();
     const px=G.p.x, pz=G.p.z-150, py=(typeof highestSurfaceAt==='function'?highestSurfaceAt(px,pz,20):0);
@@ -16288,11 +16294,11 @@ function winGame(){
 function winFinale(){                                               // entering the home portal → the finale cutscene + results
   const D=curDiff(), bonus=awardGold(500);
   meta.hero=snapOf(G.p); meta.bank=null; meta.run=null; persist();  // snapshot with all the loot you grabbed
-  mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
+  mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicCue('restoration');
   winScreen(bonus,D);
 }
 function winScreen(bonus,D){
-  mode='win'; musicPlay('hub');
+  mode='win'; musicCue('restoration');
   const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
   showOverlayHTML(`<div class="card"><h2 class="title">${eventIcon('event-trophy')} VICTORY</h2>
     <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Abyss King is ended.
@@ -16430,7 +16436,7 @@ function openSlots(){
     document.getElementById('delNo').onclick=openSlots; });
   document.getElementById('backBtn').onclick=titleScreen;
 }
-function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
+function titleScreen(){ musicPlay('village_vigil');   // the home theme introduces the ordinary person at the story's center
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   const currentSlot=slotSummary(SLOT);
   const savedSlots=[0,1,2].filter(sl=>!slotSummary(sl).empty), hasSave=savedSlots.length>0;
@@ -21317,7 +21323,7 @@ function frame(ts){
   const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
-  journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);
+  musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);
   window.BF_LOADING?.tick(G,mode);
   if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
   PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
@@ -21888,7 +21894,7 @@ window.__BF3={ journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySuppor
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterZone, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND, intrinsicWeapon, migrateClassEquipment, isIntrinsicLoot, CLASS_GROUPS, WEAPON_GROUPS, classFamilyOk, classStartWeapon, ensureClassWeapon, cheatGiveWeapons,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
-  MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
+  MUSCREDITS, MUSDIR, musicCue, musicVolume, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,

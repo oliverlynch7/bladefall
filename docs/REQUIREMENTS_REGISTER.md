@@ -414,3 +414,6 @@ Private archive ../../decision-archive/2026-09-21-iron-halls: 160 user messages,
 
 ## [Codex | 2026-09-21] Immediate gameplay repair priority
 Oliver reports frozen enemies and bosses, absent visual feedback for world interactions, and quest trackers stuck on first objectives across levels. Pause campaign expansion. Restore natural combat activation and expiring crowd control; correct elevated traversal. Show each newly added journal clue in an animated side panel for a length-sensitive reading interval. Keep current main and discovered optional tasks synchronized across authored and legacy levels. Validate real update-loop combat without forced activation, plus world interaction and peer updates.
+
+## [Codex | 2026-09-21] Apply supplied desktop soundtrack
+Oliver authorizes importing Desktop/BladeFall Music tracks and both placement text files, choosing sensible placements where suggestions overlap. Preserve copies of the music in Git. The round-two note explicitly selects The Wayfarer’s Hearth as the main hub theme, beginning eight bars before the flute around 1:10 and ending around 3:07 with a smooth loop. Preserve the original and create a derived loop. Use exact scene-specific choices over broad alternatives; retain unimplemented ship/hydra/finale cues for their intended future scenes.

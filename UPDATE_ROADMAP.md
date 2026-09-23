@@ -1859,3 +1859,6 @@ Private archive ../../decision-archive/2026-09-21-iron-halls: 160 user messages,
 
 ## [Codex | 2026-09-21] 2.012 combat and journal repair
 Restore zero-delay boss activation and expiring Stopped Clock; fix elevated enemy steps. Update main/optional quest HUD from real content. Add length-timed journal clue panel and synchronized pickup feedback. Real browser combat checked in all 16 campaign halves and eight boss encounters; tracker, co-op, old-save and mobile checks passed. Great Furnace remains next.
+
+## [Codex | 2026-09-22] 2.013 supplied soundtrack
+40 original songs and placement notes preserved in Git; trimmed stereo Wayfarer hub loop. Per-half and per-boss scene routing, final phase music, dialogue ducking, current-scene unmute, and future ship/hydra/ending cue map. All 41 runtime tracks decode; native loop, routing, old-save and mobile listening-page checks passed.

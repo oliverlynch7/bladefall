@@ -146,6 +146,7 @@ export function buildHubArt(scene,w){
     block(s*800,8,z,126,16,118,'#6d715d');block(s*800,17,z,113,2,104,'#434b39');
     add('tree',s*800,18,z,41);for(let i=0;i<14;i++)add('grass',s*800+(hash(i,z)-.5)*105,18,z+(hash(z,i)-.5)*98,28);
   }
+  if(HU.sunspireGarden)for(const side of [-1,1])for(let i=0;i<12;i++){const x=side*800+(i%4-1.5)*23,z=590+(Math.floor(i/4)-1)*25;block(x,35,z,5,34,5,'#729267');block(x,53,z,17,8,17,i%3?'#f0ddae':'#b5bfd9');}
   for(const p of w.hubArt.lamps)lamp(p.x,p.z);
   add('chest',-806,1,670,24);
   // Outlying silhouettes sit beyond the courtyard, never between a station and the player.

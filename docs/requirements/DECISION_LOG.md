@@ -287,3 +287,6 @@ Scope: Thunder Cliffs and hydra are NOT implemented yet. Arrival still enters th
 
 ## [Codex | 2026-09-22] U170 implementation checkpoint
 Thunder Cliffs and chained hydra implemented in 2.016.0; completes Storm Coast halves/boss and five Pirate shards. Twelve Abe/Dash voice lines added (236 total). Existing approvals unchanged; not a new canon decision. Detailed scope, tests and limitations in IMPLEMENTATION_THUNDER_CLIFFS_2026-09-22.md and requirements/CONTINUITY.md. Sunspire and Castle remain pending.
+
+## [Codex | 2026-09-23] U171 implementation checkpoint
+Palace Courtyard (Sunspire half one) implemented as 2.017.0: two defense approaches, mirror door, Grace/Victor, garden delivery and cosmetic Refuge reward, rooftop parkour, SP-01/02, eighteen VO lines (254 total). Details and browser evidence in IMPLEMENTATION_PALACE_COURTYARD_2026-09-22.md / requirements/CONTINUITY.md. Sky Library, orb and Marble Colossus redesign still pending. No new canon decisions.

@@ -106,15 +106,15 @@ export function buildDeep(scene,w){
     m.userData.artMatrices=m.instanceMatrix.array.slice();m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=!['cap','glow','rune'].includes(name);m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.8:.15)}});
-  const oldFog=scene.fog;scene.fog=new THREE.Fog(cfg.fog,600,2400);
+  const oldFog=scene.fog;scene.fog=new THREE.Fog(cfg.fog,w.palaceScene!=null?1100:600,w.palaceScene!=null?3600:2400);
   const sun=new THREE.DirectionalLight(cfg.sun,2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-740,right:740,top:740,bottom:-740,near:1,far:4000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight(cfg.lamp,900,230,1.6);root.add(l);return l});
   const counts={deepArt:w.zone,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  active={root,groups,obstacles,walls,sun,counts,fade,glows,lights};window.__DEEP_ART_LOOK=cfg;window.__DEEP_ART_ACTIVE=w.zone;
+  active={root,groups,obstacles,walls,sun,counts,fade,glows,lights,palaceCourt:w.palaceScene!=null};window.__DEEP_ART_LOOK=cfg;window.__DEEP_ART_ACTIVE=w.zone;
   root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();material.dispose();glowMaterial.dispose();if(active?.root===root)active=null;window.__DEEP_ART_ACTIVE=false;window.__DEEP_ART_LOOK=null;};return {group:root,counts};
 }
 export function updateDeep(w){
-  if(!active||!w.p)return;const a=active,p=w.p,meta=window.__BF_META?.(),low=meta?.quality==='low',range=low?780:1200,fps=meta?.camMode==='fps';let tris=0,calls=0;
+  if(!active||!w.p)return;const a=active,p=w.p,meta=window.__BF_META?.(),low=meta?.quality==='low',range=a.palaceCourt?(low?1400:2200):(low?780:1200),fps=meta?.camMode==='fps';let tris=0,calls=0;
   for(const [cell,g] of a.groups){const [cx,cz]=cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}}
   for(const f of a.fade){const o=f.o;let hidden=false;if(!fps&&w.eye&&p.y<o.h-12&&Math.hypot(o.x-p.x,o.z-p.z)<500){for(let t=.05;t<.94;t+=.1){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t,y=w.eye.y+(p.y+28-w.eye.y)*t;if(y<o.h+5&&Math.abs(x-o.x)<o.w/2+8&&Math.abs(z-o.z)<o.d/2+8){hidden=true;break;}}}if(hidden!==f.hidden){f.mesh.setMatrixAt(f.index,hidden?zero:f.matrix);f.mesh.instanceMatrix.needsUpdate=true;f.hidden=hidden;}}
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;

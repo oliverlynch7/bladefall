@@ -1,9 +1,10 @@
+import {buildPalaceCourt} from './palace-courtyard-art.js?v=2017';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2016';
 import {buildStorm,updateStorm} from './storm-art.js?v=2015';
-import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=1972';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2017';
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
-import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2001';
-import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2011';
+import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2017';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2017';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2010';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2007';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2004';
@@ -1766,6 +1767,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+ if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.shipScene){clearWorld(scene);const art=world.shipScene==='hydra'||world.shipScene.startsWith('cliffs')?buildCoastHigh(scene,world):buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1986,7 +1988,7 @@ function signature(world){
   if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
   const d = world.deco || [];
   const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
-  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene].join('|')+'|';
+  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene,world.palaceScene].join('|')+'|';
   if(world.bonus&&world.sprintFun)return prefix+JSON.stringify(world.course||[]);
   if(!d.length) return prefix+'empty|'+world.segments.length+'|'+world.obstacles.length;
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];

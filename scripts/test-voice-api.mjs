@@ -1,3 +1,4 @@
+const court=JSON.parse(await fs.readFile('public/3d/story/palace-courtyard.json','utf8'));
 const thunder=JSON.parse(await fs.readFile('public/3d/story/thunder-cliffs.json','utf8'));
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
@@ -13,8 +14,8 @@ const caves=JSON.parse(await fs.readFile('public/3d/story/deep-ice-caves.json','
 const iron=JSON.parse(await fs.readFile('public/3d/story/iron-halls.json','utf8'));
 const furnace=JSON.parse(await fs.readFile('public/3d/story/great-furnace.json','utf8'));
 const shore=JSON.parse(await fs.readFile('public/3d/story/shipwreck-shore.json','utf8'));
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs,...thunder.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes,...thunder.nodes}};
-let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import thunder[^;]+;\s*import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*import caves[^;]+;\s*import iron[^;]+;\s*import furnace[^;]+;\s*import shore[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs,...thunder.npcs,...court.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes,...thunder.nodes,...court.nodes}};
+let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import court[^;]+;\s*import thunder[^;]+;\s*import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*import caves[^;]+;\s*import iron[^;]+;\s*import furnace[^;]+;\s*import shore[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
 const {handle,digest}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 class Bucket{
  data=new Map();seq=0;

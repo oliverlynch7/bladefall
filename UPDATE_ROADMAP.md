@@ -1876,3 +1876,7 @@ First-half shore/quests/puzzles and campaign sailing integrated; 18 VO lines, co
 
 ## [Codex | 2026-09-22] 2.016.0 Thunder Cliffs and chained hydra
 Storm Coast second-half terrain, lift, Abe/Dash, cave/race/tide puzzles, three shards, sailcloth cape, and mercy hydra arena implemented. Browser routes/combat/co-op/checkpoint/save checks passed; 12 VO lines (236 total), 13 previews. See docs/IMPLEMENTATION_THUNDER_CLIFFS_2026-09-22.md. Next: Sunspire Palace. Full queue remains open.
+
+
+## [Codex | 2026-09-23] 2.017.0 Palace Courtyard
+Sunspire half one: courtyard/garden/balcony terrain, two defense routes, mirror puzzle, Grace/Victor, rooftop jumps, two Paladin shards and banked Refuge garden. 18 VO lines (254 total), 10 previews. Controller/combat/co-op/checkpoint/save/render QA passed. See docs/IMPLEMENTATION_PALACE_COURTYARD_2026-09-22.md. Next: Sky Library and Marble Colossus; full queue remains open.

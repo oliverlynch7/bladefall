@@ -1,0 +1,1120 @@
+{
+  "version": 1,
+  "region": "palace",
+  "status": "authored",
+  "npcs": {
+    "grace": {
+      "name": "Sister Grace",
+      "role": "Palace caretaker; warm, firm, tired, quietly funny",
+      "start": "pc.grace.hello"
+    },
+    "victor": {
+      "name": "Sergeant Victor",
+      "role": "Surviving palace defender; precise, practical, dry humor",
+      "start": "pc.victor.hello"
+    }
+  },
+  "nodes": {
+    "pc.grace.hello": {
+      "text": "Mind the broken tiles. The Legion took the palace, and somehow I am still the one warning people about the floor.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Who needs help?",
+          "next": "pc.grace.water",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.court",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "pc.court",
+              "region": "palace",
+              "title": "A place to stand",
+              "text": "Grace is sheltering palace workers near the dry fountain. Remove the iron clamp at the west waterworks, then open its wheel. This will restore the court and its large healing pad."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "orb",
+          "text": "I came for the orb.",
+          "next": "pc.grace.orb",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.met",
+              "value": true
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 1,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.orb": {
+      "text": "Then you need the Sky Library. Its doors are shut, and the Legion holds the balconies. Help us keep this court safe first. Knowledge is worth saving. So are the people who dust it.",
+      "choices": [
+        {
+          "id": "water",
+          "text": "What can I do?",
+          "next": "pc.grace.water",
+          "effects": [
+            {
+              "type": "quest",
+              "id": "pc.court",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "pc.court",
+              "region": "palace",
+              "title": "A place to stand",
+              "text": "Remove the Legion clamp at the west waterworks, then open the wheel. The restored court gives the survivors a safe place and reopens its large healing pad."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 2,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.water": {
+      "text": "The waterworks are down the west steps. Pull off the iron clamp before you turn the wheel. Please leave the pipes in one piece. I have enough buckets in my life.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will get the water running.",
+          "next": "pc.grace.wait",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "demand",
+          "text": "Open the library. The plants can wait.",
+          "next": "pc.grace.curt",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.grace.curt",
+              "value": true
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 3,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.curt": {
+      "text": "Those pipes feed our healing station. There are people behind me who cannot walk. Open the wheel, then we can discuss your hurry.",
+      "choices": [
+        {
+          "id": "sorry",
+          "text": "I did not realize. I will help.",
+          "next": "pc.grace.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.grace.curt",
+              "value": false
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "leave",
+          "text": "Fine. The west steps.",
+          "next": "pc.grace.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 4,
+        "emotion": "Firm",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.wait": {
+      "text": "West steps, iron clamp, water wheel. Victor is watching the next terrace. He will know a way past the guards.",
+      "choices": [
+        {
+          "id": "garden",
+          "text": "What happened to the gardens?",
+          "next": "pc.grace.garden",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.garden.known",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "active"
+            }
+          ],
+          "when": [
+            {
+              "flag": "pc.court",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "ready",
+          "text": "The water is running.",
+          "next": "pc.grace.restored",
+          "effects": [],
+          "when": [
+            {
+              "flag": "pc.court",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 5,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.restored": {
+      "text": "There. A place to breathe. This large healing pad will keep working for as long as you need it. The small ones on the paths run out. Stay a moment, if you can.",
+      "choices": [
+        {
+          "id": "route",
+          "text": "How do I reach the library?",
+          "next": "pc.grace.route",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "garden",
+          "text": "Can anything else be saved?",
+          "next": "pc.grace.garden",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.garden.known",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "active"
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 6,
+        "emotion": "Relieved",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.route": {
+      "text": "Victor is beyond the fountain, on the next terrace. The Legion holds both balconies. He has been counting their steps. I think it is how he stops himself from worrying.",
+      "choices": [
+        {
+          "id": "garden",
+          "text": "And the gardens?",
+          "next": "pc.grace.garden",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.garden.known",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "active"
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "go",
+          "text": "I will find him.",
+          "next": "pc.grace.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 7,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.garden": {
+      "text": "The east greenhouse still has dry seeds. Open the garden channel, then bring me the seed tin. We can grow food here again. Take some home too. A village needs more than walls.",
+      "choices": [
+        {
+          "id": "accept",
+          "text": "I will bring them back.",
+          "next": "pc.grace.garden.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.garden.accepted",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "pc.garden",
+              "region": "palace",
+              "title": "The garden still lives",
+              "text": "Open the garden channel beside the east greenhouse. Find the seed tin inside, then bring it back to Grace. Seeds can restore this garden and a small garden at the Refuge."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "mock",
+          "text": "You want me to garden during an invasion?",
+          "next": "pc.grace.garden.curt",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.garden.offended",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "deliver",
+          "text": "The channel is open. Here are the seeds.",
+          "next": "pc.grace.thanks",
+          "effects": [
+            {
+              "type": "item",
+              "id": "pc.seeds",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "pc.garden.done",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "pc.grace.SP-02",
+              "kind": "rift_shard",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "pc.garden.done",
+              "region": "palace",
+              "title": "Seeds for home",
+              "text": "Grace replanted the court and gave you a Rift Shard recovered from the garden. Finish this half to keep the shard and the Refuge garden."
+            }
+          ],
+          "when": [
+            {
+              "flag": "pc.garden.water",
+              "is": true
+            },
+            {
+              "item": "pc.seeds",
+              "count": 1
+            },
+            {
+              "flag": "pc.garden.done",
+              "is": false
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 8,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.garden.curt": {
+      "text": "People eat during invasions too. You do not have to help. Just do not laugh at the few things we can still put right.",
+      "choices": [
+        {
+          "id": "repair",
+          "text": "You are right. I can carry a seed tin.",
+          "next": "pc.grace.garden.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.garden.offended",
+              "value": false
+            },
+            {
+              "type": "flag",
+              "id": "pc.garden.accepted",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "active"
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "leave",
+          "text": "I have other things to do.",
+          "next": "pc.grace.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 9,
+        "emotion": "Hurt, restrained",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.garden.wait": {
+      "text": "A tin of seeds. One clear channel. Not much against an army, perhaps. Enough for a start.",
+      "choices": [
+        {
+          "id": "deliver",
+          "text": "The channel is open. Here are the seeds.",
+          "next": "pc.grace.thanks",
+          "effects": [
+            {
+              "type": "item",
+              "id": "pc.seeds",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "pc.garden.done",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.garden",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "pc.grace.SP-02",
+              "kind": "rift_shard",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "pc.garden.done",
+              "region": "palace",
+              "title": "Seeds for home",
+              "text": "Grace has seeds for Sunspire and your Refuge. Finish the courtyard to secure the garden and her Rift Shard."
+            }
+          ],
+          "when": [
+            {
+              "flag": "pc.garden.water",
+              "is": true
+            },
+            {
+              "item": "pc.seeds",
+              "count": 1
+            },
+            {
+              "flag": "pc.garden.done",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "remind",
+          "text": "Where should I look?",
+          "next": "pc.grace.garden",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 10,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.grace.thanks": {
+      "text": "I found this purple piece under a broken planter. It belongs with the other Rift Shards. Take it. And take these seeds home when the way is clear. Let something there grow because of this trip.",
+      "choices": [],
+      "voice": {
+        "speaker": "grace",
+        "scene": "Palace Courtyard",
+        "order": 11,
+        "emotion": "Warm gratitude",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.hello": {
+      "text": "Sergeant Victor. Last of the courtyard watch still standing. Before you ask, yes, I have tried shouting at the gates. Excellent echoes. No result.",
+      "choices": [
+        {
+          "id": "route",
+          "text": "I need to reach the library.",
+          "next": "pc.victor.route",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.victor.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "pc.defenses",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "pc.defenses",
+              "region": "palace",
+              "title": "Two ways past the balconies",
+              "text": "Each occupied balcony controls a library barrier. Fight its guards and pull the upper release, or take the garden steps below and drain its water-powered lock. You can mix the two routes."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "people",
+          "text": "Grace has the court open.",
+          "next": "pc.victor.people",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.victor.met",
+              "value": true
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 12,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.people": {
+      "text": "Good. The workers have somewhere safe to gather. The Legion forced everyone out of the halls and put guards on the records. They came for what this place knows.",
+      "choices": [
+        {
+          "id": "route",
+          "text": "Show me the way through.",
+          "next": "pc.victor.route",
+          "effects": [
+            {
+              "type": "quest",
+              "id": "pc.defenses",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "pc.defenses",
+              "region": "palace",
+              "title": "Two ways past the balconies",
+              "text": "Clear a balcony patrol and pull its release, or drain the lock from the lower garden. Disable both defenses to reach the mirror terrace."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 13,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.route": {
+      "text": "Two balconies, two locks. The direct route means fighting their guards. The lower gardens reach the water controls underneath. Drain a lock and its barrier drops. Your choice. I recommend coming back alive.",
+      "choices": [
+        {
+          "id": "mirror",
+          "text": "And the final door?",
+          "next": "pc.victor.mirrors",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "pc.mirror.known",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "doubt",
+          "text": "You are letting a stranger do this?",
+          "next": "pc.victor.stranger",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "go",
+          "text": "I will open the way.",
+          "next": "pc.victor.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 14,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.stranger": {
+      "text": "You came up from the sea when everyone here was trying to get away. I can work with that. I will keep the route behind you clear.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "Then watch my back.",
+          "next": "pc.victor.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 15,
+        "emotion": "Sincere",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.mirrors": {
+      "text": "Three mirrors send light to the door. Match each beam to the sun mark in front of it. When all three beams reach their marks, the door opens. The old keepers made even their doors into lessons.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will follow the marks.",
+          "next": "pc.victor.wait",
+          "effects": [
+            {
+              "type": "note",
+              "id": "pc.mirrors",
+              "region": "palace",
+              "title": "Light the way",
+              "text": "On the mirror terrace, compare each beam with its carved sun receiver. Turn the mirrors until all three beams reach their marked receivers. An incorrect turn is harmless."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 16,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.wait": {
+      "text": "I will hold the fountain side. If a plan goes wrong, try the other path. No medal for making the same mistake twice.",
+      "choices": [
+        {
+          "id": "remind",
+          "text": "Explain the routes again.",
+          "next": "pc.victor.route",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "mirror",
+          "text": "What do the mirror marks mean?",
+          "next": "pc.victor.mirrors",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "done",
+          "text": "The library door is open.",
+          "next": "pc.victor.done",
+          "effects": [],
+          "when": [
+            {
+              "flag": "pc.light.open",
+              "is": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 17,
+        "emotion": "Conversational",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    },
+    "pc.victor.done": {
+      "text": "Then go. Find someone who knows how to end this. We will keep this court open for whoever follows you.",
+      "choices": [],
+      "voice": {
+        "speaker": "victor",
+        "scene": "Palace Courtyard",
+        "order": 18,
+        "emotion": "Hope, held in check",
+        "direction": "Speak clearly and naturally; let the humor come from the situation.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+      }
+    }
+  },
+  "events": {
+    "pc.clamp": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.met",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.clamp",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "pc.clamp",
+          "region": "palace",
+          "title": "The wheel is free",
+          "text": "The Legion clamp is off. Open the nearby wheel to restore the fountain court."
+        }
+      ]
+    },
+    "pc.water": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.clamp",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.court",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "pc.court",
+          "value": "complete"
+        },
+        {
+          "type": "note",
+          "id": "pc.court.open",
+          "region": "palace",
+          "title": "The fountain court is safe",
+          "text": "Water runs again and the large healing pad is restored. It heals without running out. Victor waits beyond the fountain. The library is still held by two balcony locks."
+        }
+      ]
+    },
+    "pc.west.upper": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.court",
+          "is": true
+        },
+        {
+          "flag": "pc.west",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.west",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "pc.west",
+          "region": "palace",
+          "title": "West barrier released",
+          "text": "The west balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+        }
+      ]
+    },
+    "pc.west.lower": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.court",
+          "is": true
+        },
+        {
+          "flag": "pc.west",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.west",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "pc.west",
+          "region": "palace",
+          "title": "West barrier released",
+          "text": "The west balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+        }
+      ]
+    },
+    "pc.east.upper": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.court",
+          "is": true
+        },
+        {
+          "flag": "pc.east",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.east",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "pc.east",
+          "region": "palace",
+          "title": "East barrier released",
+          "text": "The east balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+        }
+      ]
+    },
+    "pc.east.lower": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.court",
+          "is": true
+        },
+        {
+          "flag": "pc.east",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.east",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "pc.east",
+          "region": "palace",
+          "title": "East barrier released",
+          "text": "The east balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+        }
+      ]
+    },
+    "pc.garden.water": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.court",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.garden.water",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "id": "pc.garden.known",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "pc.garden",
+          "value": "active"
+        },
+        {
+          "type": "note",
+          "id": "pc.garden.water",
+          "region": "palace",
+          "title": "Water for the garden",
+          "text": "The greenhouse channel is open. Its dry seed tin can be taken to Grace at the fountain court."
+        }
+      ]
+    },
+    "pc.seeds": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "pc.seeds",
+          "amount": 1
+        },
+        {
+          "type": "flag",
+          "id": "pc.garden.known",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "pc.garden",
+          "value": "active"
+        },
+        {
+          "type": "note",
+          "id": "pc.seeds",
+          "region": "palace",
+          "title": "The dry seed tin",
+          "text": "These seeds survived in a sealed tin. Open the greenhouse channel, then bring the tin to Grace."
+        }
+      ]
+    },
+    "pc.memorial": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "note",
+          "id": "pc.memorial",
+          "region": "palace",
+          "title": "A keeper’s promise",
+          "text": "The gardener left a small ladder by the west roof. Beyond it, broken stepping stones lead to the memorial. A carving reads: Keep a path for those who come after you."
+        }
+      ]
+    },
+    "pc.mirror.note": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.west",
+          "is": true
+        },
+        {
+          "flag": "pc.east",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.mirror.known",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "pc.mirrors",
+          "region": "palace",
+          "title": "The three sun marks",
+          "text": "Each mirror has two receivers. Only one receiver has a carved sun. Send every beam to its matching sun; the three pieces open the library door."
+        }
+      ]
+    },
+    "pc.mirror.0": {
+      "once": false,
+      "when": [
+        {
+          "flag": "pc.west",
+          "is": true
+        },
+        {
+          "flag": "pc.east",
+          "is": true
+        },
+        {
+          "flag": "pc.light.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "pc.light",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 0,
+          "target": 5
+        }
+      ]
+    },
+    "pc.mirror.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "pc.west",
+          "is": true
+        },
+        {
+          "flag": "pc.east",
+          "is": true
+        },
+        {
+          "flag": "pc.light.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "pc.light",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 1,
+          "target": 5
+        }
+      ]
+    },
+    "pc.mirror.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "pc.west",
+          "is": true
+        },
+        {
+          "flag": "pc.east",
+          "is": true
+        },
+        {
+          "flag": "pc.light.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "pc.light",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 2,
+          "target": 5
+        }
+      ]
+    },
+    "pc.enter": {
+      "once": true,
+      "when": [
+        {
+          "flag": "pc.light.open",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "pc.ready",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "pc.defenses",
+          "value": "complete"
+        },
+        {
+          "type": "note",
+          "id": "pc.library",
+          "region": "palace",
+          "title": "The Sky Library",
+          "text": "The mirror door is open. The occupied library holds the orb and the knowledge you came for. Finish exploring before entering; crossing the door secures this half’s finds."
+        }
+      ]
+    }
+  }
+}

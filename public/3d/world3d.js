@@ -1,3 +1,4 @@
+import {buildLongAscent} from './long-ascent-art.js?v=2021';
 import {buildCastleGates} from './castle-gates-art.js?v=2020';
 import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2019';
 import {buildSkyLibrary} from './sky-library-art.js?v=2018';
@@ -1770,7 +1771,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
- if(world.castleScene!=null&&deepReady(world)){clearWorld(scene);const art=buildCastleGates(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
+ if(world.castleScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.castleScene).startsWith('ascent:')?buildLongAscent(scene,world):buildCastleGates(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('guardian:')?buildMarbleGuardian(scene,world):String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.shipScene){clearWorld(scene);const art=world.shipScene==='hydra'||world.shipScene.startsWith('cliffs')?buildCoastHigh(scene,world):buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}

@@ -1892,3 +1892,6 @@ Custom Sunspire boss: rotating protective screens expose armor, clear heavy/swee
 
 ## [Codex | 2026-09-23] Castle Gates — 2.020.0
 Rebuilt Castle half one with disguise/guard reasoning or finite assault, Roland’s optional armor exchange, two Rift Shard routes, drain bridge, supply balconies, shared dialogue/rewards, temporary uniform and sixteen VO lines. Tests and limits: docs/IMPLEMENTATION_CASTLE_GATES_2026-09-23.md. Long Ascent/finale remain pending.
+
+## [Codex | 2026-09-23] Long Ascent - 2.021.0
+Castle second half: massive two-turn tower, Miles, optional worker rescue, service lift/vault, three Rift Shards, shared quest and individual pickup behavior, checkpoint banking. Nine VO lines; ten browser previews. Controller, combat, co-op, save and regression checks passed. Final King and ending next; full queue not complete.

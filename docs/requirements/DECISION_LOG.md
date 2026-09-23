@@ -302,3 +302,6 @@ U174 continuation implemented the approved solo screen-deflection guardian and o
 ## [Codex | 2026-09-23] Castle Gates
 
 U175 continued approved Castle Gates plan with no new major canon. Source USER_SOURCE_2026-09-23_CASTLE_GATES.md; private archive has175 entries, zero unparsed, valid reference IDs. Implementation/test evidence in IMPLEMENTATION_CASTLE_GATES_2026-09-23.md.
+
+## [Codex | 2026-09-23] U176 implementation receipt
+Continuation implements previously approved Long Ascent; no new user canon inferred. Optional living Miles, independent worker rescue, two latching main catches, mechanical vault, hidden memorial, CD-03..05 and checkpoint banking. Final boss/ending remain separate. Exact continuation source: USER_SOURCE_2026-09-23_LONG_ASCENT.md.

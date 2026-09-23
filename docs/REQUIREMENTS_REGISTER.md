@@ -467,3 +467,7 @@ U175 continues approved MAP-08, LV-01..11, DLG, MP and shard work; no new canon.
 ## [Codex | 2026-09-23] Castle Gates
 
 U175: Castle Gates half one authored in 2.020.0. MAP-08 first-half infiltration/assault, Roland/Cross dialogue, two shard routes, appearance-only uniform and checkpoint behavior implemented/tested. Sixteen new VO lines, 292 total. See IMPLEMENTATION_CASTLE_GATES_2026-09-23.md. Long Ascent, last three shards, finale remain pending.
+
+
+## [Codex | 2026-09-23] U176 Long Ascent continuation
+Continue the approved Castle half-two scope in CAMPAIGN_EXPANSION_PLAN. Implementation plan: docs/IMPLEMENTATION_LONG_ASCENT_2026-09-23.md. Exact continuation archived in USER_SOURCE_2026-09-23_LONG_ASCENT.md. Final boss/ending remain pending.

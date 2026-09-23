@@ -1,0 +1,468 @@
+{
+  "version": 1,
+  "region": "castle",
+  "status": "authored",
+  "npcs": {
+    "miles": {
+      "name": "Miles",
+      "role": "Living castle servant. Tired, dry humor, careful with strangers; warmth shows when workers are safe.",
+      "start": "la.miles.hello"
+    }
+  },
+  "nodes": {
+    "la.miles.hello": {
+      "text": "Quiet. The guards count footsteps now. I told them the stairs would win.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I need to reach the King.",
+          "next": "la.miles.menu",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "la.met",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 1,
+        "emotion": "dry, hushed",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.menu": {
+      "text": "The King is above us. My friends are locked below him. I know which problem I would solve first.",
+      "choices": [
+        {
+          "id": "stairs",
+          "text": "How do I get upstairs?",
+          "next": "la.miles.stairs"
+        },
+        {
+          "id": "workers",
+          "text": "Who is locked up?",
+          "next": "la.miles.workers",
+          "when": [
+            {
+              "flag": "la.cells",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "safe",
+          "text": "Your friends are free.",
+          "next": "la.miles.safe",
+          "when": [
+            {
+              "flag": "la.cells",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "vault",
+          "text": "What is behind the service door?",
+          "next": "la.miles.vault"
+        },
+        {
+          "id": "joke",
+          "text": "Do the guards ever take a break?",
+          "next": "la.miles.joke"
+        },
+        {
+          "id": "refuse",
+          "text": "I came for the King, not your chores.",
+          "next": "la.miles.refuse",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "la.curt",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "flag": "la.cells",
+              "is": false
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 2,
+        "emotion": "dry, hushed",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.stairs": {
+      "text": "Two catches hold the upper doors. One is on the first great turn, the other on the second. They stay released. You will not need three hands.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Then I can do them one at a time.",
+          "next": "la.miles.menu"
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 3,
+        "emotion": "dry, hushed",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.workers": {
+      "text": "They carried food to a prisoner. That was enough. The cells are on the next turn. Clear the guards and pull the release wheel. I can get them out through the service passage.",
+      "choices": [
+        {
+          "id": "accept",
+          "text": "I will open the cells.",
+          "next": "la.miles.menu",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "la.workers.known",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "la.workers",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "la.workers",
+              "region": "castle",
+              "title": "No One Left Below",
+              "text": "Workers are locked on the next stair turn. Defeat the cell guards and use the release wheel. Miles knows a safe way out."
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "text": "I need to look around first.",
+          "next": "la.miles.menu"
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 4,
+        "emotion": "worried, practical",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.safe": {
+      "text": "They are moving. No marching. No orders. Just people choosing where to go. I had forgotten what that looked like.",
+      "choices": [
+        {
+          "id": "refuge",
+          "text": "There is a place where they can help rebuild.",
+          "next": "la.miles.refuge"
+        },
+        {
+          "id": "back",
+          "text": "Keep them safe.",
+          "next": "la.miles.menu"
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 5,
+        "emotion": "relieved, sincere",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.refuge": {
+      "text": "Then we will put our hands to something better. You have given us a way out. We can give your people a stronger wall.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will see you there.",
+          "next": "la.miles.menu"
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 6,
+        "emotion": "quiet hope",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.vault": {
+      "text": "The cell lock holds the service wheels shut. Free my friends first. Then check the repair tally beside the linen shelves. The wheels have four marks each. They need the repair settings, not matching marks.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will look for the tally.",
+          "next": "la.miles.menu",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "la.vault.known",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 7,
+        "emotion": "dry, hushed",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.joke": {
+      "text": "They do not sleep. Somehow they still need bedrooms cleaned.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "That sounds like a complaint worth keeping.",
+          "next": "la.miles.menu"
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 8,
+        "emotion": "deadpan",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    },
+    "la.miles.refuse": {
+      "text": "Then keep climbing. The stairs will not ask you for a favor. If you change your mind, the cell wheel is still there.",
+      "choices": [
+        {
+          "id": "sorry",
+          "text": "That came out badly. They deserve help.",
+          "next": "la.miles.workers",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "la.curt",
+              "value": false
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "I understand.",
+          "next": "la.miles.menu"
+        }
+      ],
+      "voice": {
+        "speaker": "miles",
+        "scene": "Long Ascent — castle service rooms",
+        "order": 9,
+        "emotion": "hurt, restrained",
+        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+      }
+    }
+  },
+  "events": {
+    "la.lower": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "la.lower",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "la.lower",
+          "region": "castle",
+          "title": "Stair catch released",
+          "text": "The lower catch will stay open. The throne doors need both catches released."
+        }
+      ]
+    },
+    "la.upper": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "la.upper",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "la.upper",
+          "region": "castle",
+          "title": "Stair catch released",
+          "text": "The upper catch will stay open. The throne doors need both catches released."
+        }
+      ]
+    },
+    "la.notice": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "la.notice",
+          "region": "castle",
+          "title": "Two stair catches",
+          "text": "Both stair catches must be released before the throne doors can open. They latch in place, so one person can release them in turn."
+        }
+      ]
+    },
+    "la.cells": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "la.cells",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "id": "la.workers.known",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "la.workers",
+          "value": "complete"
+        },
+        {
+          "type": "reward",
+          "id": "la.workers.CD-04",
+          "kind": "rift_shard",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "la.freed",
+          "region": "castle",
+          "title": "No One Left Below",
+          "text": "The workers escaped through the service passage and left a Rift Shard in thanks. The service lift now joins the linen room to the second turn. Reach the throne room to secure the shard and their help repairing the Refuge walls."
+        }
+      ]
+    },
+    "la.vault.note": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "la.vault.known",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "la.vault",
+          "region": "castle",
+          "title": "Service wheel tally",
+          "text": "The cell lock holds the service wheels shut. Free the workers first. Then set the four-mark wheels from rest: left two turns, right three. The door stays open once the marks line up."
+        }
+      ]
+    },
+    "la.vault.left": {
+      "once": false,
+      "effects": [
+        {
+          "type": "rotatePuzzle",
+          "id": "la.vault",
+          "target": [
+            2,
+            3
+          ],
+          "index": 0
+        }
+      ],
+      "when": [
+        {
+          "flag": "la.cells",
+          "is": true
+        }
+      ]
+    },
+    "la.vault.right": {
+      "once": false,
+      "effects": [
+        {
+          "type": "rotatePuzzle",
+          "id": "la.vault",
+          "target": [
+            2,
+            3
+          ],
+          "index": 1
+        }
+      ],
+      "when": [
+        {
+          "flag": "la.cells",
+          "is": true
+        }
+      ]
+    },
+    "la.orders": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "la.orders",
+          "region": "castle",
+          "title": "An urgent order",
+          "text": "Bring every healer to the summit. No one is to touch the black opening. The King has begun a dangerous test and will not leave his chamber."
+        }
+      ]
+    },
+    "la.memorial.note": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "la.memorial",
+          "region": "castle",
+          "title": "Names behind the wall",
+          "text": "These names belong to the people who built the tower. Someone still left a fresh candle here. The narrow chamber continues behind the stone marker."
+        }
+      ]
+    },
+    "la.summit": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "la.summit",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "la.ascent",
+          "value": "complete"
+        }
+      ],
+      "when": [
+        {
+          "flag": "la.lower",
+          "is": true
+        },
+        {
+          "flag": "la.upper",
+          "is": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1104 @@
+{
+  "version": 1,
+  "region": "storm",
+  "status": "authored",
+  "npcs": {
+    "otto": {
+      "name": "Otto",
+      "role": "Boatbuilder; practical, dry humor, steady under pressure",
+      "start": "sc.otto.hello"
+    },
+    "rose": {
+      "name": "Captain Rose",
+      "role": "Male retired captain; proud, grieving, warm once trusted",
+      "start": "sc.rose.hello"
+    }
+  },
+  "nodes": {
+    "sc.otto.hello": {
+      "text": "Martin sent you? Then the forge really has gone quiet. Good. I was getting tired of fixing boats for people who planned to steal them.",
+      "choices": [
+        {
+          "id": "palace",
+          "text": "I need to reach Sunspire.",
+          "next": "sc.otto.plan",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.boat",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "sc.boat",
+              "region": "storm",
+              "title": "Something that floats",
+              "text": "Otto can repair the boat. Find a rudder in the tilted wreck, sailcloth at the lookout, and rope in the storage cave. Bring back any supplies together."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 1,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.plan": {
+      "text": "Sunspire is beyond the island cliffs. This boat can get you there. It needs a rudder, sailcloth and rope. The sea has been kind enough to scatter all three within walking distance. Its first helpful act in years.",
+      "choices": [
+        {
+          "id": "work",
+          "text": "I will find them.",
+          "next": "sc.otto.work",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 2,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.work": {
+      "text": "What have you found? I can fit one piece while you look for the others. Or bring the whole lot. I charge the same either way: please come back alive.",
+      "choices": [
+        {
+          "id": "deliver.rudder",
+          "text": "Give Otto the rudder.",
+          "next": "sc.otto.rudder",
+          "effects": [
+            {
+              "type": "item",
+              "id": "sc.rudder",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.installed.rudder",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "item": "sc.rudder",
+              "count": 1
+            },
+            {
+              "flag": "sc.installed.rudder",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "deliver.sail",
+          "text": "Give Otto the sailcloth.",
+          "next": "sc.otto.sail",
+          "effects": [
+            {
+              "type": "item",
+              "id": "sc.sail",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.installed.sail",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "item": "sc.sail",
+              "count": 1
+            },
+            {
+              "flag": "sc.installed.sail",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "deliver.rope",
+          "text": "Give Otto the rope.",
+          "next": "sc.otto.rope",
+          "effects": [
+            {
+              "type": "item",
+              "id": "sc.rope",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.installed.rope",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "item": "sc.rope",
+              "count": 1
+            },
+            {
+              "flag": "sc.installed.rope",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "ready",
+          "text": "Is the boat ready?",
+          "next": "sc.otto.ready",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.boat.ready",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.boat",
+              "value": "complete"
+            }
+          ],
+          "when": [
+            {
+              "flag": "sc.installed.rudder",
+              "is": true
+            },
+            {
+              "flag": "sc.installed.sail",
+              "is": true
+            },
+            {
+              "flag": "sc.installed.rope",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "routes",
+          "text": "Remind me where to look.",
+          "next": "sc.otto.routes",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 3,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.rudder": {
+      "text": "A little split, but straight. That will do. Now we can choose which rock we hit. Ideally, none.",
+      "choices": [
+        {
+          "id": "more",
+          "text": "About the other supplies...",
+          "next": "sc.otto.work",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 4,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.sail": {
+      "text": "Good cloth. The Legion used it to cover their supplies. Apparently keeping stolen bread dry matters more than letting people leave.",
+      "choices": [
+        {
+          "id": "more",
+          "text": "About the other supplies...",
+          "next": "sc.otto.work",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 5,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.rope": {
+      "text": "Dry enough, strong enough. Two things I can rarely say about myself after a day here.",
+      "choices": [
+        {
+          "id": "more",
+          "text": "About the other supplies...",
+          "next": "sc.otto.work",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 6,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.routes": {
+      "text": "The tilted hull lies west of here. Its deck rises toward the broken stern. Sailcloth is on the east lookout. The storage cave is below that ridge; open its drain before lifting the inside latch.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I have what I need.",
+          "next": "sc.otto.work",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 7,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.ready": {
+      "text": "She floats. That is the first test. Keep clear of the marked rocks. If anyone boards you, hold a safe course and clear the deck. There is sheltered water halfway across where you can patch the hull and trade the helm.",
+      "choices": [
+        {
+          "id": "depart",
+          "text": "I will board when I am ready.",
+          "next": "sc.otto.farewell",
+          "effects": [
+            {
+              "type": "note",
+              "id": "sc.crossing",
+              "region": "storm",
+              "title": "Before setting sail",
+              "text": "Board beside Otto when you are ready. Shore secrets cannot be collected during the voyage. Steer around rocks; fight boarders on the safe stretches. Repair once in sheltered water. Reach the far shore to keep this half's rewards."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 8,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.otto.farewell": {
+      "text": "Take a last look around before you leave. Boats are good at going places. Less good at popping back for something you forgot.",
+      "choices": [
+        {
+          "id": "check",
+          "text": "Let me check the shore.",
+          "next": "sc.otto.farewell",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "otto",
+        "scene": "Shipwreck Shore",
+        "order": 9,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.hello": {
+      "text": "That wreck was mine. Bell still hangs inside, I expect. I keep meaning to fetch it. Funny how a short walk can get longer every morning.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I can bring the bell back.",
+          "next": "sc.rose.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.rose.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.bell",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "sc.bell",
+              "region": "storm",
+              "title": "Rose's last voyage",
+              "text": "Captain Rose wants the bell from his old wreck north-west of the work beach. There may be a record of what happened inside."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "ask",
+          "text": "What happened to your crew?",
+          "next": "sc.rose.memory",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 10,
+        "emotion": "Quiet pride with grief under the surface",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.memory": {
+      "text": "Storm drove us ashore. I stayed with the wheel. They took the small boat. I never saw where it landed. A captain is supposed to know where everyone is.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "I will look for the bell and a record.",
+          "next": "sc.rose.wait",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.rose.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.bell",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "sc.bell",
+              "region": "storm",
+              "title": "Rose's last voyage",
+              "text": "Find the bell and the crew record inside Rose's wreck."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 11,
+        "emotion": "Guarded, regretful",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.wait": {
+      "text": "Found anything? No need to make it sound better than it is.",
+      "choices": [
+        {
+          "id": "truth",
+          "text": "Your crew reached the beach. The log says they left together.",
+          "next": "sc.rose.truth",
+          "effects": [
+            {
+              "type": "item",
+              "id": "sc.bell",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.rose.reward",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.bell",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "sc.rose.SC-02",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "item": "sc.bell",
+              "count": 1
+            },
+            {
+              "flag": "sc.record",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "kind",
+          "text": "They got off the ship together. You gave them that chance.",
+          "next": "sc.rose.kind",
+          "effects": [
+            {
+              "type": "item",
+              "id": "sc.bell",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.rose.reward",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.bell",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "sc.rose.SC-02",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "item": "sc.bell",
+              "count": 1
+            },
+            {
+              "flag": "sc.record",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "mock",
+          "text": "At least the bell survived your sailing.",
+          "next": "sc.rose.angry",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.rose.angry",
+              "value": true
+            }
+          ],
+          "when": [
+            {
+              "item": "sc.bell",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "looking",
+          "text": "I am still looking.",
+          "next": "sc.rose.wait",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 12,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.truth": {
+      "text": "Together. That is more than I knew yesterday. Thank you for telling it straight. Take this strange purple piece. Pulled it from our deck after the palace fell silent. It deserves a better journey than mine.",
+      "choices": [
+        {
+          "id": "advice",
+          "text": "Any advice for the crossing?",
+          "next": "sc.rose.advice",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 13,
+        "emotion": "Relief, restrained rather than cheerful",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.kind": {
+      "text": "I have spent so long remembering who I could not see that I forgot who got away. Keep this purple piece. And keep your head when the sea starts shouting.",
+      "choices": [
+        {
+          "id": "advice",
+          "text": "What should I watch for?",
+          "next": "sc.rose.advice",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 14,
+        "emotion": "Warm, moved",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.advice": {
+      "text": "Watch the water beside a rock, not the rock itself. That is where you need to go. And never argue with a wave. It has heard every good argument and sunk all of them.",
+      "choices": [
+        {
+          "id": "thanks",
+          "text": "I will remember that.",
+          "next": "sc.rose.advice",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 15,
+        "emotion": "Conversational",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.angry": {
+      "text": "Their names are still on that little board beside the wreck. Someone ought to straighten it before the tide takes it. I have nothing else to say to you.",
+      "choices": [
+        {
+          "id": "sorry",
+          "text": "That was cruel. I am sorry.",
+          "next": "sc.rose.repair",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.rose.apology",
+              "value": true
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "again",
+          "text": "Perhaps the board needs a better captain too.",
+          "next": "sc.rose.closed",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "sc.rose.closed",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.bell",
+              "value": "closed"
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 16,
+        "emotion": "Hurt, controlled anger",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.repair": {
+      "text": "I heard you. I would rather see what you do next.",
+      "choices": [
+        {
+          "id": "restore",
+          "text": "I set the crew board upright. Here is your bell.",
+          "next": "sc.rose.kind",
+          "effects": [
+            {
+              "type": "item",
+              "id": "sc.bell",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.rose.reward",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.bell",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "sc.rose.SC-02",
+              "kind": "rift_shard",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "flag": "sc.memorial",
+              "is": true
+            },
+            {
+              "flag": "sc.record",
+              "is": true
+            },
+            {
+              "item": "sc.bell",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "leave",
+          "text": "I will give you some space.",
+          "next": "sc.rose.repair",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 17,
+        "emotion": "Wary, not yet forgiving",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    },
+    "sc.rose.closed": {
+      "text": "Leave the bell on the beach if you want. Leave me in peace either way.",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "I will go.",
+          "next": "sc.rose.closed",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "rose",
+        "scene": "Shipwreck Shore",
+        "order": 18,
+        "emotion": "Curt, final; optional reward closed for this attempt",
+        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+      }
+    }
+  },
+  "events": {
+    "sc.rudder": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sc.rudder",
+          "amount": 1
+        }
+      ]
+    },
+    "sc.sail": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sc.sail",
+          "amount": 1
+        }
+      ]
+    },
+    "sc.rope": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sc.drain",
+          "is": true
+        },
+        {
+          "flag": "sc.latch",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sc.rope",
+          "amount": 1
+        }
+      ]
+    },
+    "sc.drain": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.drain",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sc.drain",
+          "region": "storm",
+          "title": "The storage cave",
+          "text": "The outer drain is open. Lift the inner latch to reach the dry rope shelf."
+        }
+      ]
+    },
+    "sc.latch": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sc.drain",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.latch",
+          "value": true
+        }
+      ]
+    },
+    "sc.bell": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "sc.bell",
+          "amount": 1
+        }
+      ]
+    },
+    "sc.record": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.record",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sc.record",
+          "region": "storm",
+          "title": "The last crew entry",
+          "text": "The small boat reached the beach. The crew left together before the Legion patrol came. Their later route is not recorded."
+        }
+      ]
+    },
+    "sc.memorial": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.memorial",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sc.memorial",
+          "region": "storm",
+          "title": "A name worth keeping",
+          "text": "The crew board stands above the tide again. Rose may notice what was done for his crew."
+        }
+      ]
+    },
+    "sc.hull.note": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.hull.note",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sc.hull",
+          "region": "storm",
+          "title": "The trapped crawlspace",
+          "text": "A hanging beam pins the lower hatch. The old repair marks show a load of five. Three hanging weights are marked one, two and four."
+        }
+      ]
+    },
+    "sc.weight.1": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "sc.hull",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 0,
+          "target": 5
+        }
+      ]
+    },
+    "sc.weight.2": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "sc.hull",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 1,
+          "target": 5
+        }
+      ]
+    },
+    "sc.weight.3": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "counterweight",
+          "id": "sc.hull",
+          "weights": [
+            1,
+            2,
+            4
+          ],
+          "index": 2,
+          "target": 5
+        }
+      ]
+    },
+    "sc.code.note": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.code.note",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "sc.code",
+          "region": "storm",
+          "title": "The ship chest",
+          "text": "The lid shows anchor, wheel, sail. Count the intact lanterns beside each matching mark around this wreck. Enter the three counts in that order."
+        }
+      ]
+    },
+    "sc.code.1": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sc.code.note",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sc.code",
+          "value": 1,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "sc.code.reward",
+          "when": [
+            {
+              "flag": "sc.code.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "sc.stormshot",
+              "kind": "stormshot",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "sc.code.2": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sc.code.note",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sc.code",
+          "value": 2,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "sc.code.reward",
+          "when": [
+            {
+              "flag": "sc.code.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "sc.stormshot",
+              "kind": "stormshot",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "sc.code.3": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sc.code.note",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sc.code",
+          "value": 3,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "sc.code.reward",
+          "when": [
+            {
+              "flag": "sc.code.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "sc.stormshot",
+              "kind": "stormshot",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "sc.code.4": {
+      "once": false,
+      "when": [
+        {
+          "flag": "sc.code.note",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "sequence",
+          "id": "sc.code",
+          "value": 4,
+          "solution": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "conditional",
+          "id": "sc.code.reward",
+          "when": [
+            {
+              "flag": "sc.code.open",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "reward",
+              "id": "sc.stormshot",
+              "kind": "stormshot",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "sc.board": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sc.boat.ready",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.depart",
+          "value": true
+        }
+      ]
+    }
+  }
+}

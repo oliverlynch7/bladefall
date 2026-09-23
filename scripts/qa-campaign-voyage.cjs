@@ -1,0 +1,16 @@
+async page=>{
+const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:4331/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&HERO3D?.ready);await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.classes.warrior.rank=10;b.meta.autoAttack=false;b.meta.petActive=null;b.meta.riftShards=[];b.openHub();b.enterZone(5);b.meta.tutOff=true;b.meta.camMode='far';b.G.p.level=50;});await page.waitForFunction(()=>!BF_LOADING.active);
+const result=await page.evaluate(()=>{const b=__BF3,G=b.G,p=G.p,checks=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n)},tick=n=>{for(let i=0;i<n;i++)b.update(.016);};
+ok('shore enemies are ordinary troops, not bosses',!G.boss&&!G.enemies.some(e=>e.boss));const enemy=G.enemies.find(e=>e.shoreLookout&&e.type==='grunt');Object.assign(p,{x:1350,z:-1450,y:350,hp:10000,maxHp:10000,invuln:0});const start={x:enemy.x,z:enemy.z,hp:p.hp};tick(600);ok('lookout guards naturally pursue and attack',Math.hypot(enemy.x-start.x,enemy.z-start.z)>20&&p.hp<start.hp);p.invuln=999;
+const act=key=>{const o=G.storyObjects.find(o=>o.key==='sc.'+key);Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key:o.key});},talk=(choices)=>{const o=G.storyNpcs.find(o=>o.id==='otto');Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('open',{npc:'otto'});for(const choice of choices)b.briarRequest('choose',{line:G.storyState.conversation.node,choice});b.briarRequest('close');};
+for(const e of G.enemies){e.hp=0;e.dead=true;}act('rudder');act('sail');act('drain');act('latch');act('rope');talk(['palace','work','deliver.rudder','more','deliver.sail','more','deliver.rope','more','ready','depart']);act('weight.1');act('weight.3');const o=b.worldRiftShards()[0];Object.assign(p,{x:o.x,z:o.z,y:o.y});b.takeWorldRiftShard('SC-01');act('board');ok('boarding starts actual campaign deck',!!G.voyage&&G.obstacles.length===1&&!G.storyNpcs.length);
+let firstHit=false,waves=0,steps=0;while(G.area===0&&steps++<22000){const v=G.voyage;if(!v)throw Error('lost voyage');const kind=BFShipCrossing.current(v).kind;
+ if(kind==='steer'){const o=BFShipCrossing.obstacles(v.seed,v.stage).find(o=>o.z>v.distance-8),target=o?-Math.sign(o.x)*17:0;b.input.jx=Math.max(-1,Math.min(1,(target-v.x)*.5));}
+ else {b.input.jx=0;if(kind==='fight'){
+ const live=G.enemies.filter(e=>e.shipBoarder&&!e.dead&&e.hp>0);if(live.length&&!firstHit){const e=live[0];Object.assign(p,{x:e.x,z:e.z+38,y:16,atkCd:0,yaw:Math.PI});const hp=e.hp;b.playerAttack();tick(30);ok('normal weapon damages a real boarder',e.hp<hp);firstHit=true;}
+ if(live.length){waves++;for(const e of live)b.hitEnemy(e,99999,0,0,{noCrit:true});}
+ }else if(kind==='rest'){const hull=v.hull;b.voyageSend('repair');b.voyageSend('repair');ok('repair bounded once',v.repaired&&v.hull<=Math.min(100,hull+45));b.voyageSend('ready');}}
+ b.update(.016);
+}
+b.input.jx=0;ok('two actual boarding waves',waves===2);ok('arrival advances only at end',G.area===1);ok('arrival banks carried shard',b.meta.riftShards.includes('SC-01'));ok('second-half checkpoint captured',!!b.campaignCheckpoint()&&b.meta.run.campaign.area===1);return {checks,steps,hpLost:start.hp-p.hp};});if(errors.length)throw Error(errors.join(';'));return {...result,errors};
+}

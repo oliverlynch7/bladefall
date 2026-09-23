@@ -1869,3 +1869,6 @@ Expanded Emberdeep part two, Pike/Martin and 16 recording lines, rescue branches
 
 ## [Codex | 2026-09-22] 2.014.1 ship preview
 Storm Coast sailing foundation and batched longboat model at /3d/ship-preview/. Seeded course, host authority, collision, role swap, repair, pause and browser controls verified. Isolated preview only: shore/real combat/network/checkpoint integration and Thunder Cliffs/hydra remain next. Existing saves and Voice Studio takes unchanged.
+
+## [Codex | 2026-09-22] 2.015.0 Shipwreck Shore
+First-half shore/quests/puzzles and campaign sailing integrated; 18 VO lines, co-op and checkpoint checks. Thunder Cliffs and hydra remain pending. See docs/IMPLEMENTATION_SHIPWRECK_SHORE_2026-09-22.md.

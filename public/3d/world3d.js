@@ -1,3 +1,4 @@
+import {buildStorm,updateStorm} from './storm-art.js?v=2015';
 import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=1972';
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2001';
@@ -1764,6 +1765,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+ if(world.shipScene){clearWorld(scene);const art=buildStorm(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsFrost(world)&&frostReady()){clearWorld(scene);const art=buildFrost(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1983,7 +1985,7 @@ function signature(world){
   if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
   const d = world.deco || [];
   const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
-  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene].join('|')+'|';
+  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene].join('|')+'|';
   if(world.bonus&&world.sprintFun)return prefix+JSON.stringify(world.course||[]);
   if(!d.length) return prefix+'empty|'+world.segments.length+'|'+world.obstacles.length;
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];
@@ -1999,11 +2001,11 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
+  if(sig === WORLD3D.built){ updateStorm(world);updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
-  const customDeep=!customPortal&&wantsDeep(world);
+  const customDeep=!world.shipScene&&!customPortal&&wantsDeep(world);
   if(customDeep&&!deepReady(world)){loadDeep(world);return false;}
   const customFrost=!customPortal&&wantsFrost(world);
   if(customFrost&&!frostReady()){loadFrost();return false;}
@@ -2018,7 +2020,7 @@ export function syncWorld(scene){
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!customPortal && !custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !_propsReady){
+  if(!world.shipScene && !customPortal && !custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }
@@ -2027,7 +2029,7 @@ export function syncWorld(scene){
     clearMobs();          // a new level must not inherit the previous zone's pooled creatures
     clearProps();         // ...nor its chests
     WORLD3D.built = sig;
-    updateOutskirts(world);
+    updateStorm(world);updateOutskirts(world);
     updateHubArt(world,performance.now()/1000);
     updateHollow(world);
     updateKeep(world);

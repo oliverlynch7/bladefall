@@ -11,8 +11,9 @@ const peaks=JSON.parse(await fs.readFile('public/3d/story/snowbound-peaks.json',
 const caves=JSON.parse(await fs.readFile('public/3d/story/deep-ice-caves.json','utf8'));
 const iron=JSON.parse(await fs.readFile('public/3d/story/iron-halls.json','utf8'));
 const furnace=JSON.parse(await fs.readFile('public/3d/story/great-furnace.json','utf8'));
-const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes}};
-let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*import caves[^;]+;\s*import iron[^;]+;\s*import furnace[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
+const shore=JSON.parse(await fs.readFile('public/3d/story/shipwreck-shore.json','utf8'));
+const book={npcs:{...briar.npcs,...hub.npcs,...hall.npcs,...cliffs.npcs,...canyon.npcs,...keep.npcs,...prison.npcs,...peaks.npcs,...caves.npcs,...iron.npcs,...furnace.npcs,...shore.npcs},nodes:{...briar.nodes,...hub.nodes,...hall.nodes,...cliffs.nodes,...canyon.nodes,...keep.nodes,...prison.nodes,...peaks.nodes,...caves.nodes,...iron.nodes,...furnace.nodes,...shore.nodes}};
+let source=await fs.readFile('functions/voice-api/[[path]].js','utf8');source=source.replace(/import briar[^;]+;\s*import hub[^;]+;\s*import hall[^;]+;\s*import cliffs[^;]+;\s*import canyon[^;]+;\s*import keep[^;]+;\s*import prison[^;]+;\s*import peaks[^;]+;\s*import caves[^;]+;\s*import iron[^;]+;\s*import furnace[^;]+;\s*import shore[^;]+;\s*const book=[^;]+;/,'const book='+JSON.stringify(book)+';');
 const {handle,digest}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 class Bucket{
  data=new Map();seq=0;

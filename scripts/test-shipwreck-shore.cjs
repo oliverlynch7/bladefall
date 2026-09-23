@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),E=require('../public/3d/story-state.js'),S=require('../public/3d/shipwreck-shore.js'),book=JSON.parse(fs.readFileSync('public/3d/story/shipwreck-shore.json','utf8'));
+let s,n=0;const reset=()=>s=E.create(),act=(type,x={})=>{const r=E.transact(s,book,{id:'shore-'+ ++n,type,...x});s=r.state;return r.changed},world=key=>act('world',{key:'sc.'+key}),pick=choice=>act('choose',{line:s.conversation.node,choice}),talk=(id,choices)=>{assert(act('open',{npc:id}));for(const c of choices)assert(pick(c),c);act('close');};
+for(const branch of ['truth','kind','repair','hostile']){reset();assert(!world('board'));assert(!world('rope'));world('drain');assert(!world('rope'));world('latch');world('rope');world('rudder');world('sail');talk('otto',['palace','work','deliver.rudder','more','deliver.sail','more','deliver.rope','more','ready','depart']);assert(s.flags['sc.boat.ready']);assert(world('board'));assert(!s.flags['sc.rose.met']);talk('rose',['help']);world('bell');assert(!act('world',{key:'sc.bell'}));world('record');
+ if(branch==='truth'||branch==='kind')talk('rose',[branch]);else{talk('rose',['mock',branch==='repair'?'sorry':'again']);world('memorial');if(branch==='repair')talk('rose',['restore']);}
+ assert.equal(!!s.rewards['sc.rose.SC-02'],branch!=='hostile');world('hull.note');world('weight.2');assert(!s.flags['sc.hull.open']);world('weight.2');world('weight.1');world('weight.3');assert.equal(S.shards(s)[0].id,'SC-01');
+ world('code.note');world('code.4');assert(!s.rewards['sc.stormshot']);[1,2,3].forEach(i=>world('code.'+i));assert(s.rewards['sc.stormshot']);const before=JSON.stringify(s.rewards);world('code.3');assert.equal(JSON.stringify(s.rewards),before);
+}
+for(const [id,line]of Object.entries(book.nodes)){assert(book.npcs[line.voice.speaker]);assert(line.voice.context&&line.voice.direction);for(const c of line.choices)assert(book.nodes[c.next],id);}
+for(let seed=0;seed<500;seed++){const code=S.code(seed);assert(code.every(n=>n>=1&&n<=4));assert.deepEqual(code,S.code(seed));}
+assert(!S.available('sc.sail',{shore:{},enemies:[{shoreLookout:true,hp:10}]}));
+console.log('Shipwreck Shore passed: four Rose branches, main independence, deliveries, cave order, optional balance, code reward dedupe, 500 clue seeds and voice graph.');

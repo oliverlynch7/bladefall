@@ -1,6 +1,6 @@
 import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2019';
+import {syncNpcs} from './npc3d.js?v=2020';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions} from './companion3d.js?v=2014';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2019';
+import { WORLD3D, syncWorld } from './world3d.js?v=2020';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2010';
 import { PROP3D, syncProps } from './prop3d.js?v=2010';
 
@@ -1335,12 +1335,30 @@ function repaintTexture(srcTex, skin){
 }
 /* Class palettes apply to body/clothing by default. Natural faces remain original;
    Ranger/Rogue hoods are recolored with their clothing. Each cloned rig owns its materials. */
-function paintClassBody(root,cls,packOriginal=false){
-  const skin=CLASS_SKINS[cls];if(!root||!skin)return 0;
+const castleHelmets=new WeakMap();
+function castleHelmet(root,enabled){
+ if(!root)return;const old=castleHelmets.get(root);if(old){if(enabled)return;old.group.removeFromParent();for(const g of old.geos)g.dispose();old.material.dispose();castleHelmets.delete(root);return;}
+ // A cloned source body may include its local player's attachment; never dispose shared clone geometry.
+ root.getObjectByName('Castle supply helmet')?.removeFromParent();if(!enabled)return;
+ const M=headMetrics({root,model:'Warrior'});if(!M)return;
+ const group=new THREE.Group();group.name='Castle supply helmet';group.position.copy(M.centre);group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(M.RIGHT,M.UP,M.FWD));
+ const material=new THREE.MeshStandardMaterial({color:'#86828c',metalness:.5,roughness:.62}),geos=[];
+ const part=(geo,x,y,z)=>{geos.push(geo);const m=new THREE.Mesh(geo,material);m.userData._disguisePart=true;m.position.set(x,y,z);group.add(m);return m;};
+ const crown=part(new THREE.SphereGeometry(1,12,6,0,Math.PI*2,0,Math.PI/2),0,M.h*.18,0);crown.scale.set(M.w*.65,M.h*.57,M.d*.75);
+ part(new THREE.BoxGeometry(M.w*1.27,M.h*.09,M.d*.13),0,M.h*.19,M.d*.62);
+ part(new THREE.BoxGeometry(M.w*1.27,M.h*.50,M.d*.12),0,0,-M.d*.73);
+ for(const sign of [-1,1])part(new THREE.BoxGeometry(M.w*.13,M.h*.46,M.d*.55),sign*M.w*.59,0,M.d*.16);
+ part(new THREE.BoxGeometry(M.w*.07,M.h*.3,M.d*.07),0,M.h*.02,M.d*.63);
+ M.head.add(group);castleHelmets.set(root,{group,geos,material});
+}
+const LEGION_UNIFORM={id:"castle_supply_uniform",metal:"#85828d",cloth:"#56313d",leather:"#4c4443",lift:1.13};
+function castleDisguise(){const g=window.__BF3?.G;return !!(g?.castleGates&&g.storyState?.flags["cg.disguise"]&&!g.storyState?.flags["cg.alarm"]);}
+function paintClassBody(root,cls,packOriginal=false,override=null){
+  const skin=override||CLASS_SKINS[cls];if(!root||!skin)return 0;
   let painted=0;
   root.traverse(o=>{
     const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls]);
-    if(!o.isMesh||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
+    if(!o.isMesh||o.userData._disguisePart||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
     // Skeleton clones share source materials. Always isolate before touching a palette.
     if(o.userData._paletteOwner!==o.uuid){
       // Material.clone JSON-copies userData. Preserve the real source Texture for same-body allies.
@@ -1352,7 +1370,7 @@ function paintClassBody(root,cls,packOriginal=false){
       m.map=packOriginal?m.userData._srcMap:repaintTexture(m.userData._srcMap,skin);
       if(m.emissive){
         if(!m.userData._paletteEmissive)m.userData._paletteEmissive={color:m.emissive.clone(),intensity:m.emissiveIntensity};
-        if(cls==='paladin'&&!packOriginal){m.emissive.set('#d9ac48');m.emissiveIntensity=.12;}
+        if(cls==='paladin'&&!packOriginal&&!override){m.emissive.set('#d9ac48');m.emissiveIntensity=.12;}
         else{m.emissive.copy(m.userData._paletteEmissive.color);m.emissiveIntensity=m.userData._paletteEmissive.intensity;}
       }
       m.needsUpdate=true;painted++;
@@ -1363,12 +1381,14 @@ function applyClassSkin(){
   if(!actor)return null;
   const cls=window.__BF_META?.()?.classId||'warrior',skin=CLASS_SKINS[cls];if(!skin)return null;
   const packOriginal=HERO3D.skinId==='pack-original';
-  const painted=paintClassBody(actor,cls,packOriginal);
-  HERO3D.skin={classId:cls,skinId:packOriginal?'pack-original':skin.id,metal:skin.metal,painted};return HERO3D.skin;
+  const disguised=castleDisguise(),painted=paintClassBody(actor,disguised?"warrior":cls,disguised?false:packOriginal,disguised?LEGION_UNIFORM:null);
+  castleHelmet(actor,disguised);
+  HERO3D.skin={classId:cls,disguised,skinId:packOriginal?'pack-original':skin.id,metal:skin.metal,painted};return HERO3D.skin;
 }
 
 /* The player's class, from the game's own state. */
 function modelForClass(){
+  if(castleDisguise())return 'Warrior';
   try {
     const m = window.__BF_META && window.__BF_META();
     const id = m && m.classId;
@@ -1405,13 +1425,13 @@ window.__npcBuildFace=(root,model,eyeColor)=>{
    the body while bone-parented props keep drawing. That bug cost a session in the slice. */
 function syncClass(){
   const want = modelForClass();
-  if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId)applyClassSkin();syncLocalEquipment();return;}
+  if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId||HERO3D.skin?.disguised!==castleDisguise())applyClassSkin();syncLocalEquipment();return;}
   const g = _loaded[want];
   if(!g) return;
   _classNow = want;
   HERO3D.model = want;
   const wrap = HERO3D._wrap;
-  if(actor && actor.parent) actor.parent.remove(actor);
+  if(actor && actor.parent){castleHelmet(actor,false);actor.parent.remove(actor);}
   actor = g.scene;
   actor.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; o.frustumCulled = false; } });
   wrap.add(actor);
@@ -1749,12 +1769,12 @@ function peerCap(){
 
 function peerModelFor(p){
   const cid = p && p.cid;
-  const want = (cid && CLASS_TO_MODEL[cid]) || HERO3D.model || 'Warrior';
+  const want = p?.disguise?'Warrior':(cid && CLASS_TO_MODEL[cid]) || HERO3D.model || 'Warrior';
   return _loaded[want] ? want : (HERO3D.model || 'Warrior');
 }
 
 function disposeRig(rec){
-  if(!rec) return;
+  if(!rec) return;castleHelmet(rec.node,false);
   if(rec.mixer) try { rec.mixer.stopAllAction(); rec.mixer.uncacheRoot(rec.node); } catch(e){}
   if(rec.node){clearWeapon(rec.holder);rec.node.traverse(o=>{if(o.userData._paletteOwner===o.uuid)for(const m of (Array.isArray(o.material)?o.material:[o.material]))m?.dispose();});if(rec.node.parent)rec.node.parent.remove(rec.node);}
 }
@@ -1800,7 +1820,7 @@ function peerRig(p, key){
             art: undefined, rar: undefined, arming: false, seen: _frameNo };
     _peerRigs.set(key, rec);
   }
-  if(rec.palette!==p.cid){paintClassBody(rec.node,p.cid||'warrior');rec.palette=p.cid;}
+  if(rec.palette!==p.cid||rec.disguise!==!!p.disguise){paintClassBody(rec.node,p.disguise?'warrior':p.cid||'warrior',false,p.disguise?LEGION_UNIFORM:null);castleHelmet(rec.node,!!p.disguise);rec.palette=p.cid;rec.disguise=!!p.disguise;}
   rec.seen = _frameNo;
   return rec;
 }

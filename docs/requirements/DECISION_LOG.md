@@ -298,3 +298,7 @@ U173 implementation checkpoint: Sky Library half two and remaining Sunspire shar
 ## [Codex | 2026-09-23] Marble guardian and orb
 
 U174 continuation implemented the approved solo screen-deflection guardian and orb question. No new major canon. Source USER_SOURCE_2026-09-23_MARBLE_ORB.md; private archive has 174 entries, zero unparsed and valid earlier references.
+
+## [Codex | 2026-09-23] Castle Gates
+
+U175 continued approved Castle Gates plan with no new major canon. Source USER_SOURCE_2026-09-23_CASTLE_GATES.md; private archive has175 entries, zero unparsed, valid reference IDs. Implementation/test evidence in IMPLEMENTATION_CASTLE_GATES_2026-09-23.md.

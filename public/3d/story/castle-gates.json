@@ -1,0 +1,1061 @@
+{
+  "version": 1,
+  "region": "castle",
+  "status": "authored",
+  "npcs": {
+    "roland": {
+      "name": "Roland",
+      "role": "Living armor maker; careful, proud, quietly angry, dry humor",
+      "start": "cg.roland.hello"
+    },
+    "cross": {
+      "name": "Captain Cross",
+      "role": "Hollowed gate captain; precise, flat, controlled. Never a willing villain.",
+      "start": "cg.cross.hello",
+      "when": [
+        {
+          "flag": "cg.bridge.open",
+          "is": true
+        },
+        {
+          "flag": "cg.alarm",
+          "is": false
+        },
+        {
+          "flag": "cg.entry",
+          "is": false
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "cg.roland.hello": {
+      "text": "Stop there. You are walking toward the most guarded door in Aerth wearing a very clear statement of intent.",
+      "choices": [
+        {
+          "id": "help",
+          "text": "Can you help me get inside?",
+          "next": "cg.roland.menu",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.disguise",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.disguise",
+              "region": "castle",
+              "title": "Borrowed colors",
+              "text": "Roland can fit a supply crew disguise. Find the coat in the supply yard, a repaired helmet by the armor wash, and papers on the wagon. Learn the crew orders at the bell post. Actual equipment stays unchanged. A direct assault is also possible."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "blunt",
+          "text": "I mean to stop the King.",
+          "next": "cg.roland.menu",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.met",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.disguise",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.disguise",
+              "region": "castle",
+              "title": "Borrowed colors",
+              "text": "Roland can fit a supply crew disguise. Find the coat in the supply yard, a repaired helmet by the armor wash, and papers on the wagon. Learn the crew orders at the bell post. Actual equipment stays unchanged. A direct assault is also possible."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 1,
+        "emotion": "Quiet, practical",
+        "direction": "Low voice, looking out for patrols. Dry rather than silly.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.menu": {
+      "text": "I repair their armor. I do not repair their cause. Bring me a supply coat, a sound helmet and the crew papers. I can make you look expected. You will still need to sound expected.",
+      "choices": [
+        {
+          "id": "fit",
+          "text": "Here are the coat, helmet and papers.",
+          "next": "cg.roland.fitted",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.disguise",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.disguise",
+              "value": "complete"
+            },
+            {
+              "type": "note",
+              "id": "cg.fitted",
+              "region": "castle",
+              "title": "Ready for inspection",
+              "text": "Roland has fitted the dark supply uniform over my gear. Cross will check the crew and its orders. Read the roster and bell notice before speaking to him."
+            }
+          ],
+          "when": [
+            {
+              "flag": "cg.disguise",
+              "is": false
+            },
+            {
+              "item": "cg.coat"
+            },
+            {
+              "item": "cg.helmet"
+            },
+            {
+              "item": "cg.papers"
+            }
+          ]
+        },
+        {
+          "id": "personal",
+          "text": "What did they take from you?",
+          "next": "cg.roland.personal",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.personal.known",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.personal",
+              "value": "active"
+            }
+          ],
+          "when": [
+            {
+              "flag": "cg.return",
+              "is": false
+            },
+            {
+              "flag": "cg.kept",
+              "is": false
+            },
+            {
+              "flag": "cg.refused",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "orders",
+          "text": "How do I get across?",
+          "next": "cg.roland.bridge",
+          "effects": [
+            {
+              "type": "note",
+              "id": "cg.bridge",
+              "region": "castle",
+              "title": "The supply crossing",
+              "text": "The bridge has two catches in the drain below the bell post. Release both, then turn the wheel on the north bank. Both catches stay released; no second person is needed."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 2,
+        "emotion": "Quiet, practical",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.fitted": {
+      "text": "There. Dark steel, dull cloth, no hero shining through the seams. It sits over your own gear. Keep your answers short. Cross was never fond of chatter, even before they took his soul.",
+      "choices": [
+        {
+          "id": "ready",
+          "text": "I will check the orders.",
+          "next": "cg.roland.menu",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 3,
+        "emotion": "Small satisfaction, then sober",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.bridge": {
+      "text": "Two catches below the bell post. One wheel on the far bank. They built it so one tired worker could use it. A rare moment of kindness, entirely by accident.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "I will find them.",
+          "next": "cg.roland.menu",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 4,
+        "emotion": "Quiet, practical",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.personal": {
+      "text": "My old chest piece is in the seized goods room, east of the wagon yard. My name is stamped inside. I made it when I still chose who wore my work. Bring it back, and I have something strange you may want.",
+      "choices": [
+        {
+          "id": "look",
+          "text": "I will look for your name.",
+          "next": "cg.roland.menu",
+          "effects": [
+            {
+              "type": "note",
+              "id": "cg.personal",
+              "region": "castle",
+              "title": "The armor he kept",
+              "text": "Roland’s old chest piece is in the seized goods room east of the supply yard. His name is stamped inside. He offered something unusual in exchange."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "return",
+          "text": "This is yours.",
+          "next": "cg.roland.thanks",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.return",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.personal",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "cg.roland.CD-01",
+              "kind": "rift_shard",
+              "amount": 1
+            },
+            {
+              "type": "note",
+              "id": "cg.returned",
+              "region": "castle",
+              "title": "A name returned",
+              "text": "I returned Roland’s armor. He gave the party a Rift Shard found in a supply crate. Finish this half to keep it."
+            }
+          ],
+          "when": [
+            {
+              "item": "cg.personal"
+            },
+            {
+              "flag": "cg.kept",
+              "is": false
+            },
+            {
+              "flag": "cg.return",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "keep",
+          "text": "I found it. I need the armor myself.",
+          "next": "cg.roland.kept",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.kept",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.personal",
+              "value": "closed"
+            },
+            {
+              "type": "reward",
+              "id": "cg.roland.armor",
+              "kind": "castle_armor",
+              "amount": 1
+            }
+          ],
+          "when": [
+            {
+              "item": "cg.personal"
+            },
+            {
+              "flag": "cg.return",
+              "is": false
+            },
+            {
+              "flag": "cg.kept",
+              "is": false
+            }
+          ]
+        },
+        {
+          "id": "threat",
+          "text": "Just hand over what you have.",
+          "next": "cg.roland.warning",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 5,
+        "emotion": "Quiet, practical",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.warning": {
+      "text": "They already tried that voice on me. Do you want to try a different one?",
+      "choices": [
+        {
+          "id": "sorry",
+          "text": "You are right. I am sorry.",
+          "next": "cg.roland.personal",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "insist",
+          "text": "I am not asking.",
+          "next": "cg.roland.refused",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.refused",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.personal",
+              "value": "closed"
+            },
+            {
+              "type": "note",
+              "id": "cg.refused",
+              "region": "castle",
+              "title": "A closed offer",
+              "text": "Roland withdrew his personal offer after I threatened him. He will still fit the disguise. The castle can also be entered by force."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 6,
+        "emotion": "Controlled anger",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.refused": {
+      "text": "Then we are finished discussing what belongs to me. I will fit the uniform. Too many people above us need you to get through that door.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About getting inside...",
+          "next": "cg.roland.menu",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 7,
+        "emotion": "Cold, restrained",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.kept": {
+      "text": "It will stop a blade. I hope that is worth more to you than giving an old man his own name back. Our deal is finished. The uniform is a separate matter.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "About the uniform...",
+          "next": "cg.roland.menu",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 8,
+        "emotion": "Hurt, without begging",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.roland.thanks": {
+      "text": "There it is. My name, still mine. Take this shard. It fell from a crate that came from the palace. I kept it because they wanted it thrown away. That seemed a fine reason.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "Thank you, Roland.",
+          "next": "cg.roland.menu",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "roland",
+        "scene": "Castle Gates",
+        "order": 9,
+        "emotion": "Warm relief, tiny spark of defiance",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.hello": {
+      "text": "State your crew.",
+      "choices": [
+        {
+          "id": "west",
+          "text": "West supply crew.",
+          "next": "cg.cross.order",
+          "effects": [],
+          "when": [
+            {
+              "flag": "cg.disguise",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "royal",
+          "text": "The King’s personal guard.",
+          "next": "cg.cross.check",
+          "effects": [],
+          "when": [
+            {
+              "flag": "cg.disguise",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "visitor",
+          "text": "I have an urgent message for the King.",
+          "next": "cg.cross.check",
+          "effects": [],
+          "when": []
+        },
+        {
+          "id": "fight",
+          "text": "Open the gate, or I will.",
+          "next": "cg.cross.alarm",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.alarm",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.entry",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.alarm",
+              "region": "castle",
+              "title": "The gate guard",
+              "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 10,
+        "emotion": "Quiet, practical",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.check": {
+      "text": "That does not match this delivery. Present the crew papers. One more answer.",
+      "choices": [
+        {
+          "id": "evidence",
+          "text": "West supply crew. Here is the stamped list.",
+          "next": "cg.cross.order",
+          "effects": [],
+          "when": [
+            {
+              "flag": "cg.disguise",
+              "is": true
+            },
+            {
+              "item": "cg.papers"
+            }
+          ]
+        },
+        {
+          "id": "bluff",
+          "text": "The King will punish you for delaying me.",
+          "next": "cg.cross.alarm",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.alarm",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.entry",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.alarm",
+              "region": "castle",
+              "title": "The gate guard",
+              "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "fight",
+          "text": "Enough. I am coming through.",
+          "next": "cg.cross.alarm",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.alarm",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.entry",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.alarm",
+              "region": "castle",
+              "title": "The gate guard",
+              "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 11,
+        "emotion": "Flat suspicion",
+        "direction": "No anger. Like a precise test being repeated.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.order": {
+      "text": "When does this crew enter?",
+      "choices": [
+        {
+          "id": "third",
+          "text": "At the third bell.",
+          "next": "cg.cross.pass",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.entry",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.entry",
+              "value": "complete"
+            },
+            {
+              "type": "reward",
+              "id": "cg.entry",
+              "kind": "gold",
+              "amount": 180
+            },
+            {
+              "type": "note",
+              "id": "cg.entry",
+              "region": "castle",
+              "title": "Inside Castle Duskmoor",
+              "text": "The inner gate is open. Finish exploring before entering the tower. Reaching the next part secures this half’s rewards and Rift Shards."
+            }
+          ],
+          "when": [
+            {
+              "flag": "cg.disguise",
+              "is": true
+            }
+          ]
+        },
+        {
+          "id": "first",
+          "text": "At the first bell.",
+          "next": "cg.cross.alarm",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.alarm",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.entry",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.alarm",
+              "region": "castle",
+              "title": "The gate guard",
+              "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
+            }
+          ],
+          "when": []
+        },
+        {
+          "id": "anytime",
+          "text": "Whenever the wagon arrives.",
+          "next": "cg.cross.alarm",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "cg.alarm",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "cg.entry",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "cg.alarm",
+              "region": "castle",
+              "title": "The gate guard",
+              "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
+            }
+          ],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 12,
+        "emotion": "Emotionless, routine",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.pass": {
+      "text": "Papers accepted. Keep the passage clear. Do not leave the assigned route.",
+      "choices": [
+        {
+          "id": "go",
+          "text": "Understood.",
+          "next": "cg.cross.done",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 13,
+        "emotion": "Flat, no warmth",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.done": {
+      "text": "Move along.",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "Moving.",
+          "next": "cg.cross.done",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 14,
+        "emotion": "Flat",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.alarm": {
+      "text": "False orders. Hold the court. No one passes.",
+      "choices": [
+        {
+          "id": "ready",
+          "text": "Then I will break through.",
+          "next": "cg.cross.end",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 15,
+        "emotion": "Clear command, not shouted rage",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    },
+    "cg.cross.end": {
+      "text": "Guard. Advance.",
+      "choices": [
+        {
+          "id": "leave",
+          "text": "I am ready.",
+          "next": "cg.cross.end",
+          "effects": [],
+          "when": []
+        }
+      ],
+      "voice": {
+        "speaker": "cross",
+        "scene": "Castle Gates",
+        "order": 16,
+        "emotion": "Cold command",
+        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+      }
+    }
+  },
+  "events": {
+    "cg.coat": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "cg.coat",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "cg.coat",
+          "region": "castle",
+          "title": "The supply coat",
+          "text": "A dark Legion supply coat. Roland can fit it over my equipment."
+        }
+      ]
+    },
+    "cg.helmet": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "cg.helmet",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "cg.helmet",
+          "region": "castle",
+          "title": "The repaired helmet",
+          "text": "A repaired supply helmet from the armor wash. It matches the coat Roland described."
+        }
+      ]
+    },
+    "cg.papers": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "item",
+          "id": "cg.papers",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "cg.papers",
+          "region": "castle",
+          "title": "Stamped supply papers",
+          "text": "The wagon papers carry a western crew stamp. Deliveries are checked against the gate roster."
+        }
+      ]
+    },
+    "cg.orders": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.orders",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "cg.orders",
+          "region": "castle",
+          "title": "The gate roster",
+          "text": "The west supply crew brings repaired armor. The King’s personal guard uses a different entrance. Cross checks papers at the inner gate."
+        }
+      ]
+    },
+    "cg.bells": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.bells",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "cg.bells",
+          "region": "castle",
+          "title": "The bell notice",
+          "text": "First bell: the watch changes. Second bell: the yard clears. Third bell: the west supply crew enters. Three long marks are cut below the notice."
+        }
+      ]
+    },
+    "cg.catch.west": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.catch.west",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "cg.catch.west",
+          "region": "castle",
+          "title": "West catch released",
+          "text": "The west catch is released and stays open. Release the other catch, then use the wheel on the north bank."
+        }
+      ]
+    },
+    "cg.catch.east": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.catch.east",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "cg.catch.east",
+          "region": "castle",
+          "title": "East catch released",
+          "text": "The east catch is released and stays open. Release the other catch, then use the wheel on the north bank."
+        }
+      ]
+    },
+    "cg.bridge": {
+      "once": true,
+      "when": [
+        {
+          "flag": "cg.catch.west",
+          "is": true
+        },
+        {
+          "flag": "cg.catch.east",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.bridge.open",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "cg.bridge",
+          "region": "castle",
+          "title": "Crossing lowered",
+          "text": "Both catches are free. The bridge is down. The gate court is ahead. Prepare with Roland and read the orders, or use the challenge bell to fight through."
+        }
+      ]
+    },
+    "cg.personal": {
+      "once": true,
+      "when": [
+        {
+          "flag": "cg.return",
+          "is": false
+        },
+        {
+          "flag": "cg.kept",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "cg.personal",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "cg.personal.found",
+          "region": "castle",
+          "title": "Roland’s mark",
+          "text": "The chest piece is stamped ROLAND inside. He asked for it back. I can return it for his unusual reward or keep the rare armor instead."
+        }
+      ]
+    },
+    "cg.store.note": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "note",
+          "id": "cg.store",
+          "region": "castle",
+          "title": "The seized goods room",
+          "text": "Personal armor was moved behind the east supply yard. A chest piece marked ROLAND is on the rear rack."
+        }
+      ]
+    },
+    "cg.balcony.note": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "note",
+          "id": "cg.balcony",
+          "region": "castle",
+          "title": "A loose supply tag",
+          "text": "The tag says: “Something purple caught behind the roof. Use the old wall steps. Do not carry a crate across that gap.”"
+        }
+      ]
+    },
+    "cg.break": {
+      "once": true,
+      "when": [
+        {
+          "flag": "cg.bridge.open",
+          "is": true
+        },
+        {
+          "flag": "cg.alarm",
+          "is": false
+        },
+        {
+          "flag": "cg.entry",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.alarm",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "cg.entry",
+          "value": "active"
+        },
+        {
+          "type": "note",
+          "id": "cg.alarm",
+          "region": "castle",
+          "title": "The gate guard",
+          "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
+        }
+      ]
+    },
+    "cg.release": {
+      "once": true,
+      "when": [
+        {
+          "flag": "cg.alarm",
+          "is": true
+        },
+        {
+          "flag": "cg.entry",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "cg.entry",
+          "value": true
+        },
+        {
+          "type": "quest",
+          "id": "cg.entry",
+          "value": "complete"
+        },
+        {
+          "type": "reward",
+          "id": "cg.entry",
+          "kind": "gold",
+          "amount": 180
+        },
+        {
+          "type": "note",
+          "id": "cg.entry",
+          "region": "castle",
+          "title": "Inside Castle Duskmoor",
+          "text": "The inner gate is open. Finish exploring before entering the tower. Reaching the next part secures this half’s rewards and Rift Shards."
+        }
+      ]
+    }
+  }
+}

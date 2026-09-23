@@ -460,3 +460,10 @@ U173 continuation: Sky Library half two implemented as 2.018.0. Main access alte
 ## [Codex | 2026-09-23] Marble guardian and orb
 
 U174: campaign Sunspire Marble Colossus arena/mechanics and post-boss orb reveal implemented in 2.019.0. Eight new VO lines, 276 total. Scope/tests/limits: IMPLEMENTATION_MARBLE_ORB_2026-09-23.md. Castle and finale still pending; no final-reveal spoilers introduced.
+
+## [Codex | 2026-09-23] Castle Gates work begins
+U175 continues approved MAP-08, LV-01..11, DLG, MP and shard work; no new canon. Grounded plan: IMPLEMENTATION_CASTLE_GATES_2026-09-23.md. Not yet shipped.
+
+## [Codex | 2026-09-23] Castle Gates
+
+U175: Castle Gates half one authored in 2.020.0. MAP-08 first-half infiltration/assault, Roland/Cross dialogue, two shard routes, appearance-only uniform and checkpoint behavior implemented/tested. Sixteen new VO lines, 292 total. See IMPLEMENTATION_CASTLE_GATES_2026-09-23.md. Long Ascent, last three shards, finale remain pending.

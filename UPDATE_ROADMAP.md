@@ -1888,3 +1888,7 @@ Sunspire half two: alternate access routes, Hugh/Simon, turning shelves, rift hi
 
 ## [Codex | 2026-09-23] Marble guardian and orb — 2.019.0
 Custom Sunspire boss: rotating protective screens expose armor, clear heavy/sweep/falling-stone warnings, ground combat and raised paths. Post-boss orb reveals souls and route to Duskmoor without ending spoilers. Eight VO lines; browser combat/co-op/checkpoint/save and renderer checks passed. Castle expansion next.
+
+
+## [Codex | 2026-09-23] Castle Gates — 2.020.0
+Rebuilt Castle half one with disguise/guard reasoning or finite assault, Roland’s optional armor exchange, two Rift Shard routes, drain bridge, supply balconies, shared dialogue/rewards, temporary uniform and sixteen VO lines. Tests and limits: docs/IMPLEMENTATION_CASTLE_GATES_2026-09-23.md. Long Ascent/finale remain pending.

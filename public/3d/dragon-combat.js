@@ -1,0 +1,8 @@
+(function(root){'use strict';
+function blocked(p,e,walls){return walls.some(w=>{const y=p.y+32;if(y<(w.y0||0)||y>(w.y0||0)+(w.h||96))return false;let lo=0,hi=1;for(const [a,b,c,r]of [[p.x,e.x,w.x,w.w/2],[p.z,e.z,w.z,w.d/2]]){const d=b-a;if(Math.abs(d)<.001){if(a<c-r||a>c+r)return false;continue;}let u=(c-r-a)/d,v=(c+r-a)/d;if(u>v)[u,v]=[v,u];lo=Math.max(lo,u);hi=Math.min(hi,v);if(lo>hi)return false;}return hi>0&&lo<1;});}
+function targets(pet,enemies,walls=[]){return enemies.filter(e=>{if(e.dead||!e.active||e.dummy||e.hp<=0||blocked(pet,e,walls)||Math.abs((e.y||0)-pet.y)>75)return false;const dx=e.x-pet.x,dz=e.z-pet.z,d=Math.hypot(dx,dz);return d<255&&(d<35||(dx*Math.sin(pet.breathYaw)+dz*Math.cos(pet.breathYaw))/d>.78);}).sort((a,b)=>Math.hypot(a.x-pet.x,a.z-pet.z)-Math.hypot(b.x-pet.x,b.z-pet.z)).slice(0,3);}
+function start(pet,dmg){pet.breathT=.70;pet.breathYaw=pet.yaw;pet.breathDmg=dmg;pet.breathHit=false;}
+function tick(pet,dt,enemies,hit,walls=[]){if(!(pet.breathT>0))return;const prev=pet.breathT;pet.breathT=Math.max(0,pet.breathT-dt);pet.yaw=pet.breathYaw;if(prev>.40&&pet.breathT<=.40&&!pet.breathHit){pet.breathHit=true;for(const e of targets(pet,enemies,walls))hit(e,pet.breathDmg);}}
+function draw(pet,bx,t){if(!(pet?.breathT>0))return;const warm=pet.breathT>.4,n=warm?2:11,sy=Math.sin(pet.breathYaw),cy=Math.cos(pet.breathYaw);for(let i=0;i<n;i++){const d=warm?44:45+i*17,spread=warm?0:Math.sin(i*2.4+t*16)*i*1.9,size=warm?6:9+i*.75;bx(pet.x+sy*d+cy*spread,pet.y+32+Math.sin(i+t*15)*3,pet.z+cy*d-sy*spread,size,size*.65,size,i%2?'#e7a94d':'#ffdc89',i%2?'#884a13':'#9b5c20',.85);}}
+const api={start,tick,targets,draw};root.BFDragonCombat=api;if(typeof module!=='undefined')module.exports=api;
+})(typeof window!=='undefined'?window:globalThis);

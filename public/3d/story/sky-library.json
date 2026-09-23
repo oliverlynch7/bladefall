@@ -301,6 +301,36 @@
             }
           ],
           "when": []
+        },
+        {
+          "id": "dragon",
+          "text": "What is that noise outside?",
+          "next": "dr.simon.nest",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "dr.known"
+            },
+            {
+              "type": "note",
+              "id": "dr.nest",
+              "region": "palace",
+              "title": "Wings Above the Clouds",
+              "text": "A dragon is trapped on the western nesting terraces beyond the empty displays. Find the supply ledge below its winch. The main path can wait, but the rescue is optional."
+            }
+          ]
+        },
+        {
+          "id": "rescued",
+          "text": "The dragon is free.",
+          "next": "dr.simon.free",
+          "effects": [],
+          "when": [
+            {
+              "flag": "dr.bond",
+              "is": true
+            }
+          ]
         }
       ],
       "voice": {
@@ -455,6 +485,100 @@
       "voice": {
         "speaker": "simon",
         "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+      }
+    },
+    "dr.simon.nest": {
+      "text": "The Legion caught a young dragon on the western terraces. They want it alive. I would rather they had neither the dragon nor a working net. Follow the ledge beyond the empty displays.",
+      "choices": [
+        {
+          "id": "safe",
+          "text": "How do I get it out safely?",
+          "next": "dr.simon.safe",
+          "effects": []
+        },
+        {
+          "id": "joke",
+          "text": "Does the library allow dragons?",
+          "next": "dr.simon.joke",
+          "effects": []
+        },
+        {
+          "id": "back",
+          "text": "I will take a look.",
+          "next": "sl.simon.hello",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "scene": "Wings Above the Clouds",
+        "order": 30,
+        "status": "recording-ready",
+        "direction": "Worried, speaking quietly. He cares about the animal; the dry joke comes second.",
+        "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
+      }
+    },
+    "dr.simon.safe": {
+      "text": "The frame is cracked. Brace it before you turn the winch, or the whole thing could fall. There are spare beams and dried meat on the lower supply ledge. Once the net is loose, go up and unfasten it.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "That gives me a plan.",
+          "next": "sl.simon.hello",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "scene": "Wings Above the Clouds",
+        "order": 31,
+        "status": "recording-ready",
+        "direction": "Practical instructions; stress brace BEFORE winch. No poetry or magical explanation.",
+        "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
+      }
+    },
+    "dr.simon.joke": {
+      "text": "Only if they return their books. This one ate a corner of the rules, which has made it very popular with the staff.",
+      "choices": [
+        {
+          "id": "safe",
+          "text": "About that net...",
+          "next": "dr.simon.safe",
+          "effects": []
+        },
+        {
+          "id": "back",
+          "text": "I think we will get along.",
+          "next": "sl.simon.hello",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "scene": "Wings Above the Clouds",
+        "order": 32,
+        "status": "recording-ready",
+        "direction": "Fond, dry humor. Smile on the last phrase without making the danger a joke.",
+        "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
+      }
+    },
+    "dr.simon.free": {
+      "text": "It is watching you instead of the sky. That means something. Give it room, and get through the reading halls together. I suspect the Beastkeeper will have a very good day.",
+      "choices": [
+        {
+          "id": "back",
+          "text": "I will look after it.",
+          "next": "sl.simon.hello",
+          "effects": []
+        }
+      ],
+      "voice": {
+        "speaker": "simon",
+        "scene": "Wings Above the Clouds",
+        "order": 33,
+        "status": "recording-ready",
+        "direction": "Relieved and warm. No riding promise; no lineage or final-cut revelations.",
+        "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
       }
     }
   },
@@ -834,6 +958,163 @@
           "region": "palace",
           "title": "Archive stand 3 saved",
           "text": "The seal is stable and the records are safe. The other stands can be defended in any order."
+        }
+      ]
+    },
+    "dr.clue": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.known"
+        },
+        {
+          "type": "note",
+          "id": "dr.frame",
+          "region": "palace",
+          "title": "The cracked frame",
+          "text": "The keeper’s notice warns: brace the cracked frame before lowering the net. Spare beams and dried meat are stored on the lower ledge. Unfasten the net from the high nest only when the ropes hang loose."
+        }
+      ]
+    },
+    "dr.tools": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.known"
+        },
+        {
+          "type": "flag",
+          "id": "dr.tools"
+        },
+        {
+          "type": "note",
+          "id": "dr.beam",
+          "region": "palace",
+          "title": "A beam for the frame",
+          "text": "Carry the spare beam to the cracked frame on the winch terrace. It will hold the weight while the net is lowered."
+        }
+      ]
+    },
+    "dr.food": {
+      "once": true,
+      "when": [],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.known"
+        },
+        {
+          "type": "flag",
+          "id": "dr.food"
+        },
+        {
+          "type": "note",
+          "id": "dr.food",
+          "region": "palace",
+          "title": "A quiet offer",
+          "text": "Dried meat may help the frightened dragon trust you. First free it, then offer the food and step back."
+        }
+      ]
+    },
+    "dr.brace": {
+      "once": true,
+      "when": [
+        {
+          "flag": "dr.tools",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.brace"
+        },
+        {
+          "type": "note",
+          "id": "dr.braced",
+          "region": "palace",
+          "title": "The frame is steady",
+          "text": "The beam holds. Drive off the Legion handlers, then turn the winch to lower the net slowly."
+        }
+      ]
+    },
+    "dr.winch": {
+      "once": true,
+      "when": [
+        {
+          "flag": "dr.brace",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.slack"
+        },
+        {
+          "type": "note",
+          "id": "dr.slack",
+          "region": "palace",
+          "title": "Loose ropes",
+          "text": "The net is lowered safely. Climb the narrow upper ledge and unfasten it beside the dragon."
+        }
+      ]
+    },
+    "dr.release": {
+      "once": true,
+      "when": [
+        {
+          "flag": "dr.slack",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.free"
+        },
+        {
+          "type": "note",
+          "id": "dr.free",
+          "region": "palace",
+          "title": "Room to breathe",
+          "text": "The dragon is free. A fallen service bridge now leads back from the winch terrace to the displays. Offer the dried meat at the nest, then step back."
+        }
+      ]
+    },
+    "dr.feed": {
+      "once": true,
+      "when": [
+        {
+          "flag": "dr.free",
+          "is": true
+        },
+        {
+          "flag": "dr.food",
+          "is": true
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "dr.bond"
+        },
+        {
+          "type": "reward",
+          "id": "dr.sunwing",
+          "kind": "companion",
+          "amount": 1
+        },
+        {
+          "type": "note",
+          "id": "dr.bond",
+          "region": "palace",
+          "title": "An unexpected friend",
+          "text": "The dragon accepts your help. Finish Sky Library and enter the guardian hall to keep your new companion. Then select Sunspire Dragon at the Beastkeeper. Leaving or dying before that loses this rescue."
         }
       ]
     }

@@ -313,3 +313,7 @@ U177 continuation implements the previously approved finale. Charge defaults: te
 
 ## [Codex | 2026-09-23] Return visit checkpoint
 Implemented the two approved Smith/Quartermaster return hooks, hub campaign news and save-local introductions. Evidence and exact scope: docs/IMPLEMENTATION_RETURN_VISITS_2026-09-23.md. This does not close the remaining companion/dragon or wider equipment/cosmetic queue. No new user design decisions inferred.
+
+
+## [Codex | 2026-09-23] Sunspire dragon rescue checkpoint
+U179 continuation implemented as 2.024.0-dragon-rescue: optional nesting route and rescue, ground companion/model/breath and four stable Simon lines. Evidence and limitations: IMPLEMENTATION_DRAGON_RESCUE_2026-09-23.md. COMP-03 riding/limited flight remains OPEN; no answer inferred to mounted-combat question. Original voice text preserved.

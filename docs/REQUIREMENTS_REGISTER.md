@@ -548,3 +548,6 @@ Music list emailed to the explicitly requested recipient through Gmail; SENT rec
 U187 implements U186. Grounded family-specific geometry pass documented in IMPLEMENTATION_WEAPON_PRESENCE_2026-09-23.md. Hand/support regions and rear pole shafts protected; no combat scaling or element balance changes.
 
 U186/U187 weapon presence implemented in 2.030: family-specific distal sizing, protected grips, six-element visual consistency, mirror tint fix; validation and remaining work in docs/IMPLEMENTATION_WEAPON_PRESENCE_2026-09-23.md. Damage/element balance unchanged.
+
+## [Codex | 2026-09-23] Shared surface audit started
+FX-02 continuation: inspected partial overlap in shared ground tiling. Plan and limits: docs/IMPLEMENTATION_SURFACES_2026-09-23.md.

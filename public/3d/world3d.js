@@ -1,3 +1,4 @@
+import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2022';
 import {buildLongAscent} from './long-ascent-art.js?v=2021';
 import {buildCastleGates} from './castle-gates-art.js?v=2020';
@@ -10,8 +11,8 @@ import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './porta
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2025';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2017';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2010';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2007';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2031';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2031';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2004';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
@@ -1076,23 +1077,14 @@ function buildGround(world, paths){
   const roadIdx = roadRec ? vars.length - 1 : -1;
   const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
   const cells = [];
-  /* Segments OVERLAP - every road crosses the districts it joins, and each one tiles its own
-     rectangle independently, so the shared area was being covered twice. Nothing showed, because
-     the two layers land at the same y and the depth test throws the second one away, but the
-     Ruined Keep was paying for 4406 floor instances to draw about 2200 tiles' worth of ground.
-     A cell is dropped only when it lies ENTIRELY inside a segment already tiled. Testing the
-     centre instead would be cheaper and wrong: the lattices differ per segment (a 1380-wide room
-     steps at 76.7 units, a 170-wide road at 56.7), so a cell can have its centre covered and its
-     edges hanging out, and dropping it would open a hairline of bare slab along every overlap.
-     Under-covering is a visible gap; over-covering is only wasted work. */
-  const done = [];
-  const buried = (x, z, hw, hd) => done.some(p =>
-    x - hw >= p.x0 && x + hw <= p.x1 && z - hd >= p.z0 && z + hd <= p.z1);
+  // Split crossing segments first: dropping only fully buried tiles leaves partial
+  // coplanar overlaps. Claiming the union preserves every exposed strip without duplicates.
+  const ledger = new Map();
+  const disjoint = segs.filter(s => !s.nofloor && (s.w||0)>=8 && (s.d||0)>=8)
+    .flatMap(s => claimSurface(ledger,s));
   let dropped = 0;
-  for(const sg of segs){
-    if(sg.nofloor) continue;    // the game skips these too: coplanar sub-segments kept for collision
-    const w = sg.w || 0, d = sg.d || 0;
-    if(w < 8 || d < 8) continue;
+  for(const sg of disjoint){
+    const w=sg.w,d=sg.d;
     /* Ceil, not round: rounding down on a segment slightly narrower than a whole tile leaves an
        uncovered strip at its edge. Over-covering is invisible, under-covering is a visible gap. */
     const nx = Math.max(1, Math.ceil(w / TILE));
@@ -1101,11 +1093,9 @@ function buildGround(world, paths){
     for(let ix = 0; ix < nx; ix++){
       for(let iz = 0; iz < nz; iz++){
         const cx = sg.x - w/2 + (ix + 0.5) * tw, cz = sg.z - d/2 + (iz + 0.5) * td;
-        if(buried(cx, cz, tw/2, td/2)){ dropped++; continue; }
         cells.push({ x: cx, z: cz, w: tw, d: td });
       }
     }
-    done.push({ x0: sg.x - w/2, x1: sg.x + w/2, z0: sg.z - d/2, z1: sg.z + d/2 });
   }
   if(!cells.length) return NO_GROUND;
   /* Tint MULTIPLIES the tile's texture, so it comes from THEME_GROUND, not from the stage's own

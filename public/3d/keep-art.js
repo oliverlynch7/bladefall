@@ -105,7 +105,7 @@ export function buildKeep(scene,w){
     // Supplies and bedding explain why the freed group waits under the outer wall.
     for(const [x,z]of [[-370,-1610],[-435,-1645],[-350,-3030]]){add('crate',x,0,z,52,40,38);block(x+42,4,z+10,28,8,62,'#6e6e54');}
     // The seized workshop has an open roof for camera visibility, with a distinct timber frame.
-    for(const x of [1160,1710])for(const z of [-2740,-3190]){block(x,75,z,18,150,18,'#59462e');block(x,142,-2965,22,18,470,'#816a47');}
+    for(const x of [1160,1710]){for(const z of [-2740,-3190])block(x,75,z,18,150,18,'#59462e');block(x,142,-2965,22,18,470,'#816a47');}
     block(1435,155,-3190,570,22,24,'#816a47');
     for(const x of [1260,1630]){block(x,32,-3100,95,12,50,'#796448');for(const dx of [-36,36])block(x+dx,14,-3100,9,28,38,'#50412d');add('crate',x,0,-3180,54,46,42);}
     // Broken bell frame crowns the climb. The shard is tucked behind its stone screen.
@@ -125,7 +125,7 @@ export function buildKeep(scene,w){
       for(let i=0;i<5;i++)block(x-120+i*60,y+55,z-135,8,110,8,'#4f5654');
       for(const dx of [-95,95]){block(x+dx,y+8,z+60,65,16,125,'#594936');block(x+dx,y+18,z+70,55,5,100,'#80765a');}
     }
-    for(const x of [-205,205])for(const z of [-2690,-2310]){block(x,335,z,34,350,34,'#625f52');block(x,512,-2500,40,18,420,'#96866a');}
+    for(const x of [-205,205]){for(const z of [-2690,-2310])block(x,335,z,34,350,34,'#625f52');block(x,512,-2500,40,18,420,'#96866a');}
     for(const x of [-330,330]){add('banner',x,400,-3490,45,100,8);brazier(x,360,-3550,19);}
     for(const [x,z,y]of [[-1380,-1810,180],[-380,-3050,180],[980,-3340,190],[300,-2950,0],[1470,-3190,40]]){add('crate',x,y,z,58,40,42);add('rubble',x+45,y,z-45,60,22,45);}
     // The drain has brick banks and low arches; safe stones remain brighter than water.

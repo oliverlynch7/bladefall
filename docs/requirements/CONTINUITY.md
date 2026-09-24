@@ -591,3 +591,13 @@ Remaining separate work: global level surface/z-fighting review; outstanding tri
 
 ### Production receipt — 2026-09-23, 2.030
 Main 7e701fc deployed as 318557df-7171-4cca-a2e2-a4cb39b1b1cb. Read-only production Chromium confirmed 2.030.0-weapon-presence, all four changed module URLs HTTP200, hero ready without renderer error. Phone gallery: 89/89 images decoded, no horizontal overflow at390px. Additional local repeated-equip check: all five owned Claymore geometries disposed on each of three swaps, stable1528 vertices. No production saves or voice recordings modified. Next: global surface/flickering audit.
+
+
+## 2.031 validation and scope
+Shared fallback ground now splits partial segment overlaps before tiling. Keep roof crossbeams were emitted once per supporting post (two copies per beam); both the upper Keep and prison loops now emit each beam once. Frost mountain supports now deduplicate identical x/z/size/top bodies while retaining every collision obstacle.
+
+Browser inspection covered 24 campaign scenes (two halves and boss per eight zones), with no page errors. Refined instance scan ignores unused capacity and zero-scale occlusion instances. Six duplicate Frost peak meshes and four duplicate Keep beams were found; corrected Frost and Keep part1 passed the full scan, and targeted prison recheck returned zero duplicates after its final correction. Stored JSON is the scan before the final two prison beam fixes, deliberately retained as evidence. Exact-transform scans do not detect every partial intersection.
+
+Shared floor fixture:253 rendered instances in one draw call. Rectangle test verifies11100 units of union area, no positive-area overlap and sampled coverage. Pre-change save retained gold, rank, companions, return state, hub introduction, checkpoint and clue. Syntax/diff checks passed. No gameplay, collision, dialogue or progression changes.
+
+Remaining: near/far moving-camera review of decorative intersections, transparent layers and boss effects. This batch is not a claim that every flicker across the game has been eliminated.

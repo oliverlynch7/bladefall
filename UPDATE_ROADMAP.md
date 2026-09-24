@@ -1944,3 +1944,13 @@ Implemented family-specific blade/head growth while preserving hand/support zone
 Unified six-element colors and legacy storm/lightning aliases. Fixed missing mirror recoloring, saturated/gold surfaces and textured staff-head coloring; natural grip colors remain. Signature materials now retain their ownership during transitional recoloring, fixing disposal on equipment swaps.
 Validation: 64 asset/body fits across 448 poses; 96 protected geometry samples; Pirate seven-pose containment/forward aim; crossbow 48 pose checks; 23 imported models x six elements (138 checks) plus 23 aliases; crossbow disposal (3 geometries/3 materials), mirror visibility and peer support; pre-change save retained pets, rank, gold, hub introduction, return state, checkpoint and journal clue. Syntax and diff checks passed. New phone gallery has 15 current screenshots alongside 74 historical images. Screenshots are sampled poses, not a guarantee of zero clipping at every animation frame.
 Remaining separate work: global level surface/z-fighting review; outstanding trial/Pyromancer and mount decisions remain outside this batch. Production receipt follows after deployment verification.
+
+
+## 2.031 validation and scope
+Shared fallback ground now splits partial segment overlaps before tiling. Keep roof crossbeams were emitted once per supporting post (two copies per beam); both the upper Keep and prison loops now emit each beam once. Frost mountain supports now deduplicate identical x/z/size/top bodies while retaining every collision obstacle.
+
+Browser inspection covered 24 campaign scenes (two halves and boss per eight zones), with no page errors. Refined instance scan ignores unused capacity and zero-scale occlusion instances. Six duplicate Frost peak meshes and four duplicate Keep beams were found; corrected Frost and Keep part1 passed the full scan, and targeted prison recheck returned zero duplicates after its final correction. Stored JSON is the scan before the final two prison beam fixes, deliberately retained as evidence. Exact-transform scans do not detect every partial intersection.
+
+Shared floor fixture:253 rendered instances in one draw call. Rectangle test verifies11100 units of union area, no positive-area overlap and sampled coverage. Pre-change save retained gold, rank, companions, return state, hub introduction, checkpoint and clue. Syntax/diff checks passed. No gameplay, collision, dialogue or progression changes.
+
+Remaining: near/far moving-camera review of decorative intersections, transparent layers and boss effects. This batch is not a claim that every flicker across the game has been eliminated.

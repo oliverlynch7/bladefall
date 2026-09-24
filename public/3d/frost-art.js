@@ -46,8 +46,9 @@ export function buildFrost(scene,w){
   }
   for(const s of w.segments||[])if(!s.nofloor)surface(s,-22,0);
   const solids=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
+  const peakBodies=new Set();
   for(const o of solids){source=authored?o:null;const top=o.h||1,base=outdoor&&o.mountainPath?-120:(o.y0??(o.kind==='plat'?Math.min(0,top-16):0));surface(o,base,top);obstacles.add(o);
-    if(outdoor&&(o.terrain||(o.mountainPath&&hash(o.x,o.z)<.13))){const h=Math.max(100,top+120);add('peakRock',o.x,top-h*.5-4,o.z,o.w*1.35,h,o.d*1.35,'#6e8490',hash(o.x,o.z)*2);}
+    if(outdoor&&(o.terrain||(o.mountainPath&&hash(o.x,o.z)<.13))){const peakKey=[o.x,o.z,o.w,o.d,top].join(',');if(peakBodies.has(peakKey))continue;peakBodies.add(peakKey);const h=Math.max(100,top+120);add('peakRock',o.x,top-h*.5-4,o.z,o.w*1.35,h,o.d*1.35,'#6e8490',hash(o.x,o.z)*2);}
   }source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;surface({...o,caveWall:true},o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
   for(const d of w.deco||[]){source=authored?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);

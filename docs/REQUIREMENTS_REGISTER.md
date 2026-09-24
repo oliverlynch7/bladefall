@@ -543,3 +543,8 @@ Approved for next weapon visual pass: slightly oversized silhouettes for most we
 Current inspected system: Fire/Frost, Poison/Arcane, Holy/Void opposition pairs; matching-element damage0.6, opposing1.5. Existing renderer has element tints; consistency/readability across models remains the audit. Storm/lightning are migration aliases to Arcane, not new active affinities.
 
 Music list emailed to the explicitly requested recipient through Gmail; SENT receipt1a0d0ce62699de5c. Includes all14 recommendations, the six-piece priority batch, current coverage and creation notes. All40 desktop MP3s verified exact and tracked; live music router matches repository after newline normalization. Alternate Waystation Refuge remains unused; edited Wayfarer's Hearth is the hub theme. No runtime changes in this decision-recording turn. Weapon scale pass is queued alongside the existing global surface audit; neither is claimed complete.
+
+## [Codex | 2026-09-23] Weapon presence work started
+U187 implements U186. Grounded family-specific geometry pass documented in IMPLEMENTATION_WEAPON_PRESENCE_2026-09-23.md. Hand/support regions and rear pole shafts protected; no combat scaling or element balance changes.
+
+U186/U187 weapon presence implemented in 2.030: family-specific distal sizing, protected grips, six-element visual consistency, mirror tint fix; validation and remaining work in docs/IMPLEMENTATION_WEAPON_PRESENCE_2026-09-23.md. Damage/element balance unchanged.

@@ -1,3 +1,4 @@
+import {presenceFor,shapePresence} from './weapon-style.js?v=2030';
 import * as THREE from './three.module.js';
 // Handle sections measured from the actual asset geometry, in source coordinates.
 // These replace body-dependent bounding-box pivots. One asset has one grip and one physical size.
@@ -43,13 +44,21 @@ export function attachGrip(actor,rig,body,name,content){
   if(profile.axis==='z')geometry.rotation.x=-Math.PI/2;
   if(profile.kind==='bow')geometry.rotation.y=Math.PI;
   geometry.scale.setScalar(scale);
+  const presence=presenceFor(name,profile);geometry.updateMatrixWorld(true);
+  // Cached source geometry stays untouched. Protect the grip in final rig units, not source units.
+  content.traverse(mesh=>{if(!mesh.isMesh)return;const transform=mesh.matrixWorld.clone(),inverse=transform.clone().invert(),g=mesh.geometry.clone(),a=g.attributes.position,v=new THREE.Vector3();let lo=Infinity,hi=-Infinity;const head=new Uint8Array(a.count);
+    for(let i=0;i<a.count;i++){v.fromBufferAttribute(a,i).applyMatrix4(transform);lo=Math.min(lo,v.y);hi=Math.max(hi,v.y);head[i]=v.y>.20?1:0;shapePresence(v,presence);v.applyMatrix4(inverse);a.setXYZ(i,v.x,v.y,v.z);}
+    g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();mesh.geometry=g;mesh.userData.gripGeometryOwned=true;mesh.userData.elementSurface=lo>.20||(lo+hi)*.5>.45;
+    if(profile.kind==='staff'&&g.attributes.uv){const uv=g.attributes.uv,indices=g.index,triangles=[];for(let i=0;i<(indices?.count||a.count);i+=3){const ids=[0,1,2].map(k=>indices?indices.getX(i+k):i+k);if(ids.reduce((n,j)=>n+head[j],0)<2)continue;for(const j of ids)triangles.push(uv.getX(j),uv.getY(j));}mesh.userData.elementUvTriangles=triangles;}
+  });
   const grip=new THREE.Group();grip.name='WeaponPalmGrip';grip.userData._weap=true;
-  grip.userData.gripProfile={name,...profile};grip.position.fromArray(palm.right);grip.rotation.z=Math.PI/2;
+  grip.userData.gripProfile={name,...profile};grip.userData.presence=presence;grip.position.fromArray(palm.right);grip.rotation.z=Math.PI/2;
   grip.add(geometry);
   if(profile.kind==='bow'){
     content.traverse(o=>{if(o.name==='White')o.visible=false;});
+    const stringHalf=presence.start+(profile.stringHalf-presence.start)*presence.grow;
     const string=new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(profile.stringX,-profile.stringHalf,0),new THREE.Vector3(profile.stringX,0,0),new THREE.Vector3(profile.stringX,profile.stringHalf,0)
+      new THREE.Vector3(profile.stringX,-stringHalf,0),new THREE.Vector3(profile.stringX,0,0),new THREE.Vector3(profile.stringX,stringHalf,0)
     ]),new THREE.LineBasicMaterial({color:'#e8dcc1'}));
     string.name='BowString';string.userData._weap=true;string.userData.signaturePart=true;grip.add(string);
   }

@@ -1,3 +1,4 @@
+import {weaponTint} from './weapon-style.js?v=2030';
 import * as THREE from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 // Authored around the trigger palm: +X fires, +Y up, +Z spans the limbs.
@@ -20,7 +21,7 @@ export function makeCrossbow(){
   for(let i=0;i<3;i++){const m=part('IronLimb',[.085,.06,.19],[.49-i*.035,.17,side*(.145+i*.17)],iron);m.rotation.y=side*.20;}
   part('LimbTip',[.075,.065,.05],[.40,.17,side*.59],edge);
  }
- const string=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(.4,.18,-.59),new THREE.Vector3(-.03,.25,0),new THREE.Vector3(.4,.18,.59)]),new THREE.LineBasicMaterial({color:'#d7c69c'}));
+ const string=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(.4,.18,-.6433),new THREE.Vector3(-.03,.25,0),new THREE.Vector3(.4,.18,.6433)]),new THREE.LineBasicMaterial({color:'#d7c69c'}));
  string.name='CrossbowString';string.userData={_weap:true,signaturePart:true};root.add(string);
  const bolt=new THREE.Group();bolt.name='CrossbowBolt';root.add(bolt);
  for(const [name,size,pos,color]of [['BoltShaft',[.56,.018,.018],[.29,.27,0],wood],['BoltHead',[.09,.025,.04],[.61,.27,0],edge],['BoltFeather',[.08,.055,.006],[.03,.27,0],'#a39275']]){const m=part(name,size,pos,color);bolt.add(m);}
@@ -33,13 +34,14 @@ export function makeCrossbow(){
    g.setAttribute('color',new THREE.BufferAttribute(colors,3));g.setAttribute('crossbowBaseColor',new THREE.BufferAttribute(colors.slice(),3));g.setAttribute('crossbowMetal',new THREE.BufferAttribute(metal,1));geometries.push(g);m.removeFromParent();m.geometry.dispose();m.material.dispose();
   }
   const geometry=mergeGeometries(geometries,false);for(const g of geometries)g.dispose();
+  const positions=geometry.attributes.position;for(let i=0;i<positions.count;i++){const x=positions.getX(i),z=positions.getZ(i);positions.setX(i,x>.45?.45+(x-.45)*1.15:x);positions.setZ(i,Math.abs(z)>.18?Math.sign(z)*(.18+(Math.abs(z)-.18)*1.13):z);}geometry.computeBoundingBox();geometry.computeBoundingSphere();
   const mesh=new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({vertexColors:true}));mesh.name=parent===root?'CrossbowBody':'CrossbowAmmunition';mesh.castShadow=true;mesh.userData={_weap:true,signaturePart:true};parent.add(mesh);
  }
  return root;
 }
 
 export function paintCrossbow(root,weapon){
- const tint=({fire:'#e77f45',ice:'#a2dce8',poison:'#91bc61',arcane:'#ad88d2',holy:'#e4c16b',void:'#8971b4'})[weapon.el]||null;
+ const tint=weaponTint(weapon);
  if(root.userData.crossbowTint===tint)return;root.userData.crossbowTint=tint;
  const accent=tint?new THREE.Color(tint):null;
  root.traverse(m=>{const g=m.geometry,base=g?.attributes.crossbowBaseColor,color=g?.attributes.color,mask=g?.attributes.crossbowMetal;if(!base||!color)return;

@@ -1937,3 +1937,10 @@ Dagger throw identity, hand hide/recovery and release clip corrected. Charge ser
 
 ## [Codex | 2026-09-23] 2.029 crossbow
 Icon-aligned wood/iron crossbow replaces longbow stand-in; anatomical two-hand aim/moving fire, string/recoil/bolt motion, seven element/neutral colors.300 triangles/three draw primitives. Mirror copies now follow thrown-weapon and bolt visibility.48 new/448 existing pose checks, lifecycle/peer/palette/save checks passed. Seven new weapon gallery screenshots.
+
+
+## 2026-09-23 — 2.030 weapon presence (U186/U187)
+Implemented family-specific blade/head growth while preserving hand/support zones and rear shafts. Greatsword ~2.10 normalized units, sword ~1.39, dagger ~0.69, spellblade ~1.57. Pirate saber/barrel and crossbow forward limbs increased modestly. No additional triangles or combat range/damage changes.
+Unified six-element colors and legacy storm/lightning aliases. Fixed missing mirror recoloring, saturated/gold surfaces and textured staff-head coloring; natural grip colors remain. Signature materials now retain their ownership during transitional recoloring, fixing disposal on equipment swaps.
+Validation: 64 asset/body fits across 448 poses; 96 protected geometry samples; Pirate seven-pose containment/forward aim; crossbow 48 pose checks; 23 imported models x six elements (138 checks) plus 23 aliases; crossbow disposal (3 geometries/3 materials), mirror visibility and peer support; pre-change save retained pets, rank, gold, hub introduction, return state, checkpoint and journal clue. Syntax and diff checks passed. New phone gallery has 15 current screenshots alongside 74 historical images. Screenshots are sampled poses, not a guarantee of zero clipping at every animation frame.
+Remaining separate work: global level surface/z-fighting review; outstanding trial/Pyromancer and mount decisions remain outside this batch. Production receipt follows after deployment verification.

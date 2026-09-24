@@ -1,6 +1,7 @@
-import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2029';
+import {weaponTint} from './weapon-style.js?v=2030';
+import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
-import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=2029';
+import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=2030';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2022';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
@@ -924,7 +925,7 @@ function clearWeapon(actor,dispose=true){
   const paintMaterials=new Set();
   for(const o of strays){for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m?.userData?._weaponPaint)paintMaterials.add(m);if(o.parent)o.parent.remove(o);}
   if(dispose)for(const m of paintMaterials)m.dispose();
-  if(dispose)for(const o of strays){if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
+  if(dispose)for(const o of strays){if(o.userData.gripGeometryOwned)o.geometry?.dispose();if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
@@ -1012,10 +1013,10 @@ async function equipWeapon(actor, opts){
     // WeaponR is above the palm. Center the handle inside the skinned fist, not at that socket.
     gun.position.set(-.085,.024,-.045);
     makePart(gun,new THREE.BoxGeometry(.12,.24,.12),'#65432c',0,0,0).rotation.z=-.18;
-    makePart(gun,new THREE.BoxGeometry(.43,.095,.115),'#805333',.17,.14,0);
-    makePart(gun,new THREE.CylinderGeometry(.047,.058,.49,12),'#687581',.20,.20,0).rotation.z=-Math.PI/2;
-    makePart(gun,new THREE.TorusGeometry(.052,.013,5,12),'#be9b52',.445,.20,0).rotation.y=Math.PI/2;
-    const muzzle=makePart(gun,new THREE.CylinderGeometry(.037,.037,.007,12),'#161c23',.451,.20,0);muzzle.rotation.z=-Math.PI/2;muzzle.name='PirateMuzzle';
+    makePart(gun,new THREE.BoxGeometry(.51,.095,.115),'#805333',.21,.14,0);
+    makePart(gun,new THREE.CylinderGeometry(.047,.058,.57,12),'#687581',.24,.20,0).rotation.z=-Math.PI/2;
+    makePart(gun,new THREE.TorusGeometry(.052,.013,5,12),'#be9b52',.525,.20,0).rotation.y=Math.PI/2;
+    const muzzle=makePart(gun,new THREE.CylinderGeometry(.037,.037,.007,12),'#161c23',.531,.20,0);muzzle.rotation.z=-Math.PI/2;muzzle.name='PirateMuzzle';
     makePart(gun,new THREE.TorusGeometry(.064,.012,5,10),'#be9b52',.105,-.01,0);
     makePart(gun,new THREE.BoxGeometry(.035,.08,.035),'#be9b52',-.065,.245,0).rotation.z=-.4;
     const saber=new THREE.Group();saber.name='PirateSaber';saber.userData._weap=true;saber.userData.pirateSaber=true;
@@ -1026,7 +1027,7 @@ async function equipWeapon(actor, opts){
     makePart(saber,new THREE.SphereGeometry(.061,8,5),'#bc984e',0,-.14,0);
     const guard=makePart(saber,new THREE.TorusGeometry(.105,.018,5,12,Math.PI),'#c2a15d',0,0,0);guard.rotation.z=Math.PI/2;
     makePart(saber,new THREE.BoxGeometry(.25,.035,.07),'#c2a15d',0,.125,0);
-    const blade=new THREE.Shape();blade.moveTo(-.047,.14);blade.lineTo(.06,.14);blade.lineTo(.09,.60);blade.quadraticCurveTo(.10,.87,.015,1.05);blade.lineTo(-.015,.80);blade.lineTo(-.047,.14);
+    const blade=new THREE.Shape();blade.moveTo(-.047,.14);blade.lineTo(.06,.14);blade.lineTo(.108,.72);blade.quadraticCurveTo(.12,1.06,.018,1.27);blade.lineTo(-.018,.98);blade.lineTo(-.047,.14);
     const bladeMesh=makePart(saber,new THREE.ExtrudeGeometry(blade,{depth:.025,bevelEnabled:false,curveSegments:5}),'#c1d2de',0,0,-.0125);
     bladeMesh.material.emissive.set('#111820');
     if(rig.stock)rig.stock.visible=false;
@@ -1243,14 +1244,21 @@ function equipForClass(opts){
   });
 }
 
-const weaponPaletteCache=new Map();
+const weaponPaletteCache=new Map(),weaponHeadMasks=new WeakMap();
+function weaponHeadMask(mesh,width,height,flipY){
+ const triangles=mesh.userData.elementUvTriangles;if(!triangles?.length)return null;
+ let mask=weaponHeadMasks.get(mesh);if(mask)return mask;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';
+ for(let i=0;i<triangles.length;i+=6){ctx.beginPath();for(let k=0;k<3;k++){const x=triangles[i+k*2]*width,v=triangles[i+k*2+1],y=(flipY?1-v:v)*height;k?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();}
+ mask=ctx.getImageData(0,0,width,height).data;weaponHeadMasks.set(mesh,mask);return mask;
+}
 function colorWeapon(holder,w){
  if(!holder?._weap||!w||w.intrinsic==='pirate')return;
  if(w.art==='cross'){paintCrossbow(holder._weap,w);return;}
- const tint=({fire:'#e77f45',ice:'#a2dce8',poison:'#91bc61',arcane:'#ad88d2',holy:'#e4c16b',void:'#8971b4'})[w.el]||w.blade||'#d8dce0',key=w.art+'|'+tint;
+ const tint=weaponTint(w)||w.blade||'#d8dce0',key=w.art+'|'+tint;
  if(holder._paintNode===holder._weap&&holder._paintKey===key)return;holder._paintNode=holder._weap;holder._paintKey=key;
- holder._weap.traverse(o=>{if(!o.isMesh)return;const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=m.userData._weaponPaint?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
- if(src?.image?.width){const k=src.uuid+'|'+tint;let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint);for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if(h[2]>.35&&(h[1]<.28||h[0]>65)){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
+ holder._weap.traverse(o=>{if(o.name==='BowString'){o.material.color.set(weaponTint(w)||'#e8dcc1');return;}if(!o.isMesh)return;const accentSurface=!!weaponTint(w)&&!!o.userData.elementSurface,elementGold=!!weaponTint(w)&&holder.fit?.name?.includes('Golden');const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=(m.userData._weaponPaint||o.userData.signaturePart)?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
+ if(src?.image?.width){const k=src.uuid+'|'+tint+'|'+accentSurface+'|'+(o.userData.elementUvTriangles?.length?holder.fit?.name:'');let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint),head=weaponTint(w)?weaponHeadMask(o,canvas.width,canvas.height,src.flipY):null;for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if((head?.[i+3]>0&&h[2]>.1)||(h[2]>.35&&(accentSurface||h[1]<.28||h[0]>65))){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if((accentSurface&&hsv[2]>.1)||(elementGold&&hsv[0]>=30&&hsv[0]<=65&&hsv[2]>.25))out.color.set(tint).multiplyScalar(.55+.45*hsv[2]);else if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
 }
 function movingCombatLegs(p,A,dt){
  if(A.local)HERO3D.locomotionOverlay=null;
@@ -1966,7 +1974,7 @@ export function drawHero3D(p, t){
     }
     pirateWeaponPose(p,wrap,anim,dt);
     poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
-    if(_isLocal)colorWeapon(localWeaponHolder(),p.weapon);
+    if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;
     const cosmeticIds=cosmeticLocal?window.__BF3?.cosmeticAppearance?.():p.cosmetics||{};

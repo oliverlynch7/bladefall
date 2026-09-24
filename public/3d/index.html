@@ -1033,6 +1033,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./marksman-encounter.js?v=2004"></script>
 <script src="./story-state.js?v=2032"></script>
 <script src="./campaign-patrols.js?v=2034"></script>
+<script src="./campaign-elites.js?v=2035"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
 <script src="./lost-canyon.js?v=2003"></script>
 <script src="./broken-walls.js?v=2023"></script>
@@ -1076,7 +1077,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.034.0-campaign-training';
+const VERSION3D='2.035.0-named-encounters';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5133,7 +5134,7 @@ function loadArea(){
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
-  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G);if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;}}
+  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G);if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -7780,6 +7781,42 @@ function buildBruteOrchard(ctx){
  const e=ctx.mkMonster('brute',0,-250,null);e.bruteOrchard=true;e.h=112;e.r=44;e.home={x:0,z:-100,hw:1100,hd:800};e.dropT=0;
  Object.assign(G.p,{x:0,z:850,y:0,vx:0,vy:0,vz:0,yaw:Math.PI,onGround:true});if(G.cam)G.cam.y=0;G.camYaw=Math.PI;G.camPitch=.12;
  snapWorldInteractables();document.getElementById('stagetag').textContent='The Brute · Trampled Orchard';questUpdate();hudUpdate();return true;
+}
+function updateCampaignElite(e,dt,p,eff){
+ const kit=BFCampaignElites.kits[e.ceKind];if(!kit)return;
+ if(!MP.guest()&&Math.hypot(e.hurtKbX||0,e.hurtKbZ||0)>30&&['wind','strike'].includes(e.ceState)){e.ceState='recover';e.ceClock=kit.recover;}
+ if(!MP.guest()){
+  let target=p.hp>0&&!p.downed?p:null;
+  for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+  BFCampaignElites.step(e,dt,target,eff);
+ }
+ if(['wind','strike'].includes(e.ceState))e.yaw=Math.atan2(e.ceDX,e.ceDZ);
+ // Use the existing body wind-up/release clips, without generic contact damage.
+ e.meleeW=e.ceState==='wind'?e.ceClock:0;e.meleeActive=e.ceState==='strike'?e.ceClock:0;
+ if(e.ceState==='wind'){
+  if(e._ceWarnSerial!==e.ceSerial){e._ceWarnSerial=e.ceSerial;e._ceSeen=0;playFx('atk2',.55);if(!e._ceHint){e._ceHint=true;toast(e.label+': '+kit.hint);}}
+  e._ceSeen+=dt;
+ }
+ // A guest that missed the warning never gets an invisible catch-up hit.
+ if(e.ceState==='strike'&&(!MP.guest()||(e._ceWarnSerial===e.ceSerial&&e._ceSeen>=.55))){
+  if(e._ceFx!==e.ceSerial){e._ceFx=e.ceSerial;playFx(e.ceKind==='shore'?'heavyhit':'ma_stomp',.65);}
+  if(e._ceHit!==e.ceSerial&&BFCampaignElites.contains(e,p)&&!losBlocked(e.ceX,e.ceZ,p.x,p.z)&&!BFCampaignElites.blocked(e,p,G.obstacles)){e._ceHit=e.ceSerial;hurtPlayer(e.dmg*kit.damage,e.ceX,e.ceZ,foeHit(e,kit.title.toLowerCase()));}
+  if(G.pet&&!G.pet.dead&&e._cePetHit!==e.ceSerial&&BFCampaignElites.contains(e,G.pet)&&!losBlocked(e.ceX,e.ceZ,G.pet.x,G.pet.z)&&!BFCampaignElites.blocked(e,G.pet,G.obstacles)){e._cePetHit=e.ceSerial;hurtPet(e.dmg*kit.damage,e.ceX,e.ceZ);}
+ }
+}
+function drawCampaignEliteDanger(e){
+ const k=BFCampaignElites.kits[e.ceKind];if(!k||!['wind','strike'].includes(e.ceState))return;
+ const strike=e.ceState==='strike',color=strike?'#fff1d0':k.color,alpha=strike?1:.86,x=e.ceX,z=e.ceZ;
+ const mark=(px,pz,width,alpha2=alpha)=>{const floor=floorAt(px,pz,2,e.ceY+65);if(Number.isFinite(floor)&&floor>=e.ceY-45)bx(px,floor+5,pz,width,3,width,color,color,alpha2);};
+ const ring=(radius,arc=Math.PI)=>{const base=Math.atan2(e.ceDZ,e.ceDX),n=Math.max(10,Math.ceil(radius*arc*2/18));for(let i=0;i<=n;i++){const a=base-arc+2*arc*i/n;mark(x+Math.cos(a)*radius,z+Math.sin(a)*radius,5);}if(arc<Math.PI)for(const side of [-1,1]){const a=base+side*arc;line(x,z,x+Math.cos(a)*radius,z+Math.sin(a)*radius,4);}};
+ const line=(ax,az,bx2,bz2,width)=>{const len=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(len/22));for(let i=0;i<=n;i++)mark(ax+(bx2-ax)*i/n,az+(bz2-az)*i/n,width);};
+ const point=(f,a)=>({x:x+e.ceDX*f+e.ceDZ*a,z:z+e.ceDZ*f-e.ceDX*a});
+ const lane=(dx,dz,reach,width,both=false)=>{const a=both?-reach:0;for(const side of [-1,1])line(x+dx*a+dz*width*side,z+dz*a-dx*width*side,x+dx*reach+dz*width*side,z+dz*reach-dx*width*side,4);};
+ if(e.ceKind==='raid')ring(k.reach,1.05);
+ else if(e.ceKind==='forge'){ring(k.reach);const r=strike?25+(k.reach-25)*(1-e.ceClock/k.strike):k.reach*(1-e.ceClock/k.wind);ring(Math.max(10,r));}
+ else if(e.ceKind==='shore')for(const a of [-.32,0,.32]){const q=point(Math.cos(a),Math.sin(a));lane(q.x-x,q.z-z,k.reach,13);}
+ else {lane(e.ceDX,e.ceDZ,k.reach,22,true);lane(e.ceDZ,-e.ceDX,k.reach,22,true);}
+ if(!strike)ring(16+24*(1-e.ceClock/k.wind));
 }
 function updateOrchardBrute(e,dt,p,eff){
  updateBossBar(e);if(MP.guest()){if(['wind','charge'].includes(e.bruteState))e.yaw=Math.atan2(e.teleX,e.teleZ);return;}
@@ -14191,7 +14228,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.campaignElite||e.patrolReturn?{campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn?{campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -15258,6 +15295,7 @@ function update(dt){
     const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)); let dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
     e.yaw=Math.atan2(dirX,dirZ);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
+    if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}
     const contactOnly=e.dmg>0&&!e.boss&&e.kind!=='charger'&&e.kind!=='goblin';
     if(contactOnly){
@@ -15280,8 +15318,6 @@ function update(dt){
           if(n) addText(e.x,e.h+14,e.z,'HEAL','#7de08a'); } }
       if(e.role==='shielder'){ if(e.shieldYaw==null)e.shieldYaw=e.yaw; let dd=e.yaw-e.shieldYaw; while(dd>Math.PI)dd-=6.283; while(dd<-Math.PI)dd+=6.283; e.shieldYaw+=Math.max(-1.5*dt,Math.min(1.5*dt,dd)); }   // shield tracks you SLOWLY — dash behind it
     }
-    if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
-    if(e.tethered>0) e.tethered-=dt;                  // void-tether buff decays once the tether dies
     if(e.spec){ specBehavior(e,dt,p,dirX,dirZ,d); }
     if(e.eruptW>0||e.knightW>0||e.fuseT>0||e.blinkFx>0)eff=0;   // Batch-2 unique-mob behaviors (totem/trail/blink/tether/knightslam)
     if(e.kind==='fly'){ e.bob+=dt*2.4;
@@ -15324,6 +15360,9 @@ function update(dt){
         if(d<300 && e.atkTimer<=0){ e.windT=G.trial?(e.elite?0.42:0.55):.7; e.windMax=e.windT;e.teleX=dirX;e.teleZ=dirZ; e.atkTimer=e.elite?1.8:2.8; playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
+    }
+    if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
+    if(e.tethered>0) e.tethered-=dt;                  // void-tether buff decays once the tether dies
     /* CO-OP: pull this body toward where the host says it is. Placed after every movement branch and
        BEFORE the obstacle/edge guard below, so the game's own rules validate the correction — a pull
        into a wall is resolved and a pull onto a hazard is caught by enemySupport, exactly as the
@@ -15341,7 +15380,7 @@ function update(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dead && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+    if(!e.dead && !e.ceKind && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
       if(petClose) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
       else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
   }
@@ -15537,6 +15576,7 @@ function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
   for(let i=0;i<n;i++){const a=base-arc+(i+.5)*step;pushM();mv(x+Math.cos(a)*r,y+4,z+Math.sin(a)*r);rotY(-a);box(4,2,Math.max(2,r*step*.82),color,color,alpha);popM();}
 }
 function drawEnemyDanger(e){
+  if(e.ceKind){drawCampaignEliteDanger(e);return;}
   if(e.marbleGuardian)return;
   if(e.blinkFx>0&&e.blinkTarget)dangerRing(e.blinkTarget.x,e.y,e.blinkTarget.z,e.r+20,'#c49bff',.9);
   const cues=[['slamW',230,e.bruteOrchard?.95:.7],['cleaveW',300,.75],['novaW',260,.7],['poundW',300,.7],['knightW',170,.6],['eruptW',210,.7],['fuseT',150,.55],['meleeW',e.r+G.p.r,.65]];
@@ -22315,7 +22355,7 @@ window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestParty
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2033"></script>
+<script type="module" src="./hero3d.js?v=2035"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -102,7 +102,7 @@ export async function loadKitModel(file){
 export function kitModel(file){ return _mobModels.get(file); }
 
 // Actor identity survives list reordering; skinned clones share immutable geometry/materials.
-function appearance(e, w){if(e.frostOfficer&&e.frostOfficer!=='caster')return 'officer-'+e.frostOfficer;return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
+function appearance(e, w){const elite={forge:'siegeknight',shore:'archer',tower:'royalarcanist'}[e.ceKind];if(elite)return elite;if(e.frostOfficer&&e.frostOfficer!=='caster')return 'officer-'+e.frostOfficer;return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
 function requestModel(file){
   if(!_mobModels.has(file) && !_pending.has(file)){
     const p=loadKitModel(file);_pending.set(file,p);p.finally(()=>_pending.delete(file));

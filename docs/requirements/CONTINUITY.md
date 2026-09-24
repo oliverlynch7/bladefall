@@ -666,3 +666,7 @@ Evidence correction: the earlier half-combat harness used nextArea and silently 
 Remaining: broader natural-route puzzle/shortcut/quest playability and moving-camera visual audit. Trial/Pyromancer kit and mounted combat/flight decisions remain open. This batch does not complete the entire approved queue.
 
 Final integration check: weapon knockback remains active and strong knockback interrupts a locked strike, preventing damage from the abandoned attack origin. Guest bodies face the shared aim during warnings/strikes. Defense suite now13 checks.
+
+
+## [Codex | 2026-09-24] 2.035 production receipt
+Main b496a5a deployed. Read-only production Chromium confirms2.035.0-named-encounters, all four encounter kits, renderer ready with no error and three runtime module URLs plus preview page HTTP200. Live phone gallery decodes all4 images with no390px overflow. Live saves and recordings untouched. Private source archive193 user messages,zero unparsed records,valid requirements references. Next: broader natural-route puzzle/shortcut/quest-transition/camera audit; unresolved trial/Pyromancer and riding decisions remain separately open.

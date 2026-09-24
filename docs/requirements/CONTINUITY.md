@@ -571,3 +571,6 @@ Evidence:48 crossbow poses across Ranger/Ninja/Pirate/Skylancer/Bladedancer/Beas
 Limits: sampled poses and existing imported full-body clips, not a claim of zero clipping in every possible skill frame. No internet latency soak test or low-end device performance certification. The300-triangle/three-primitive budget is a model count, not total scene cost. U184 archived privately with184 messages,zero parse errors and valid source references.
 
 Next independent approved batch: FX-02/global level surface and z-fighting audit (both halves and boss arenas, moving/near/far views). Earned-trial scripts/Pyromancer and mounts/flight still have unresolved design details and remain open. Do not silently invent those designs.
+
+## [Codex | 2026-09-23] Crossbow production receipt
+Main d8131e8 deployed as996293f5-ec5d-4eaf-88b9-df0238391637. Read-only production Chromium verified2.029.0-crossbow; hero/grips/crossbow/combat-art assetsHTTP200; hero ready without renderer error. Weapon gallery74/74 images decoded, including seven crossbow screenshots, at390px with no overflow. No live save or recorded voice modified. Next: global level surface/flickering audit.

@@ -601,3 +601,6 @@ Browser inspection covered 24 campaign scenes (two halves and boss per eight zon
 Shared floor fixture:253 rendered instances in one draw call. Rectangle test verifies11100 units of union area, no positive-area overlap and sampled coverage. Pre-change save retained gold, rank, companions, return state, hub introduction, checkpoint and clue. Syntax/diff checks passed. No gameplay, collision, dialogue or progression changes.
 
 Remaining: near/far moving-camera review of decorative intersections, transparent layers and boss effects. This batch is not a claim that every flicker across the game has been eliminated.
+
+### Production receipt - 2.031
+Main4fdaeb2 deployed as fde1113e-f5ca-4dfe-a582-45c3efc1d6c1. Read-only Chromium confirms2.031.0-floor-surfaces; hero/world/keep/frost modules HTTP200 and renderer ready without error. Existing89-image phone gallery still decodes without overflow. No live save or VO data modified. User archive188 messages,zero parse errors,valid references. Remaining global moving-camera/transparent-surface audit is explicitly open.

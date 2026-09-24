@@ -98,7 +98,8 @@ export function poseWeaponGrip(p,root,A,body,dt){
   const attacking=p.atkTimer>0;
   const bow=profile.kind==='bow',heavy=profile.support>0;
   const javelin=p.weapon?.art==='javelin';
-  const ready=!free&&(!attacking||bow||javelin);
+  const cross=profile.kind==='crossbow';
+  const ready=!free&&(!attacking||bow||javelin||cross);
   if(bow){
     const draw=!free?((p.chargeAmt||0)>.04?.05+.14*Math.min(1,p.chargeAmt):attacking?.16*Math.pow(Math.min(1,p.atkTimer/.18),2):0):0;
     A.bowDraw=THREE.MathUtils.damp(A.bowDraw||0,draw,45,dt);
@@ -110,7 +111,23 @@ export function poseWeaponGrip(p,root,A,body,dt){
   // The source idle leaves the left fingers open. A support pose must actually close around the shaft.
   if(!thrown&&!p.dead)root.getObjectByName('Fist2R')?.quaternion.set(-.740597,-.032689,.058509,.668599).normalize();
   const fingers=root.getObjectByName('Fist1R');
-  if(weight>.002){
+  if(cross){
+    const phase=THREE.MathUtils.clamp(1-(p.atkTimer||0)/.20,0,1),release=attacking?Math.sin(Math.PI*phase):0;
+    const string=grip.getObjectByName('CrossbowString');if(string){string.geometry.attributes.position.setX(1,-.03+release*.38);string.geometry.attributes.position.needsUpdate=true;string.geometry.computeBoundingSphere();}
+    const bolt=grip.getObjectByName('CrossbowBolt');if(bolt)bolt.visible=!attacking;
+    if(weight>.002){
+      const wrist=root.getObjectByName('FistR');
+      if(fingers)fingers.quaternion.identity();root.updateMatrixWorld(true);
+      const tilt=.10+release*.07,f=Math.sqrt(1-tilt*tilt);
+      const frame=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,tilt,f),new THREE.Vector3(0,f,-tilt),new THREE.Vector3(-1,0,0)));
+      const desired=root.getWorldQuaternion(new THREE.Quaternion()).multiply(frame),wq=wrist.getWorldQuaternion(new THREE.Quaternion()),gq=grip.getWorldQuaternion(new THREE.Quaternion());
+      const rotation=desired.clone().multiply(gq.clone().invert()),wristQ=rotation.clone().multiply(wq);
+      const offset=grip.getWorldPosition(new THREE.Vector3()).sub(wrist.getWorldPosition(new THREE.Vector3())).applyQuaternion(rotation);
+      const target=root.localToWorld(new THREE.Vector3(-.18,1.28,.36-release*.035)).sub(offset);
+      armTo(root,'R',target,root.localToWorld(new THREE.Vector3(-.7,1.15,.1)),wristQ,weight);
+    }
+  }
+  if(!cross&&weight>.002){
     const stab=javelin&&attacking?Math.sin(Math.PI*THREE.MathUtils.clamp(1-p.atkTimer/.22,0,1)):0;
     const tilt=javelin&&attacking?.12:bow?.98:profile.kind==='pole'?.96:profile.kind==='dagger'?.65:heavy?.92:.84;
     A.gripTilt=THREE.MathUtils.damp(A.gripTilt??tilt,tilt,35,dt);
@@ -133,7 +150,7 @@ export function poseWeaponGrip(p,root,A,body,dt){
       root.getObjectByName('Fist2L')?.quaternion.set(-.740597,.032689,-.058509,.668599).normalize();
       const solveTarget=()=>{
         root.updateMatrixWorld(true);
-        const anchor=grip.localToWorld(new THREE.Vector3(bow?profile.stringX-A.bowDraw:(profile.supportX||0),bow?0:profile.support,0));
+        const anchor=grip.localToWorld(profile.supportPoint?new THREE.Vector3().fromArray(profile.supportPoint):new THREE.Vector3(bow?profile.stringX-A.bowDraw:(profile.supportX||0),bow?0:profile.support,0));
         const orientation=grip.getWorldQuaternion(new THREE.Quaternion()).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI/2));
         const offset=new THREE.Vector3().fromArray(palm.left).add(left.position).multiply(wrist.getWorldScale(new THREE.Vector3())).applyQuaternion(orientation);
         return {target:anchor.sub(offset),orientation};

@@ -1,5 +1,6 @@
+import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2029';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
-import {WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=1986a';
+import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=2029';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2022';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
@@ -395,7 +396,7 @@ const ART_MODELS = {
   hammer:     ['Hammer_Small', 'Hammer_Double', 'Hammer_Double_Golden'],
   dagger:     ['Dagger', 'Dagger_2', 'Dagger_Golden'],
   bow:        ['Bow_Wooden', 'Bow_Wooden2', 'Bow_Evil', 'Bow_Golden'],
-  cross:      ['Bow_Wooden2', 'Bow_Evil', 'Bow_Golden'],
+  cross:      ['Crossbow'],
   javelin:    ['Spear'],
   spear:      ['Spear'],
   scythe:     ['Scythe'],
@@ -1032,6 +1033,15 @@ async function equipWeapon(actor, opts){
     actor._weap=gun;actor._weapGrip=null;
     return {name:'Flintlock & Saber',intrinsic:'pirate',paired:true,grip:'palm-local'};
   }
+  if(pw?.art==='cross'){
+    const rig=weaponRig(actor);if(!rig)return null;
+    const grip=new THREE.Group();grip.name='WeaponPalmGrip';grip.userData._weap=true;
+    grip.userData.gripProfile={name:'Crossbow',kind:'crossbow',support:.32,supportPoint:[.32,.035,0]};
+    grip.position.fromArray((PALMS[BODY]||PALMS.Warrior).right);
+    grip.rotation.z=Math.PI/2;grip.add(makeCrossbow());rig.bone.add(grip);if(rig.stock)rig.stock.visible=false;
+    actor._weap=grip;actor._weapGrip=null;actor.fit={name:'Crossbow',anatomical:true};
+    return {name:'Crossbow',anatomical:true,body:BODY};
+  }
   const name = opts?.name || modelForWeapon(pw) || (pw?.art === 'fist' ? null : DEFAULT_WEAPON[BODY]);
   if(!name){
     const rig = weaponRig(actor);
@@ -1236,6 +1246,7 @@ function equipForClass(opts){
 const weaponPaletteCache=new Map();
 function colorWeapon(holder,w){
  if(!holder?._weap||!w||w.intrinsic==='pirate')return;
+ if(w.art==='cross'){paintCrossbow(holder._weap,w);return;}
  const tint=({fire:'#e77f45',ice:'#a2dce8',poison:'#91bc61',arcane:'#ad88d2',holy:'#e4c16b',void:'#8971b4'})[w.el]||w.blade||'#d8dce0',key=w.art+'|'+tint;
  if(holder._paintNode===holder._weap&&holder._paintKey===key)return;holder._paintNode=holder._weap;holder._paintKey=key;
  holder._weap.traverse(o=>{if(!o.isMesh)return;const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=m.userData._weaponPaint?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
@@ -1626,14 +1637,14 @@ function playFor(p, A){
     wand:       pick('Spell1', 'Spell2'),
     bow:        'Bow_Shoot',
     flintlock:  p.weapon?.intrinsic==='pirate'?'Idle':'Bow_Shoot',
-    cross:      'Bow_Shoot',
+    cross:      'Idle',
     javelin:    p.throwHideT>0?'Staff_Attack':'Idle',
     fist:       'Punch',
   };
   /* Charging: a bow draws, everything else winds up into the attacking idle rather than snapping
      to a neutral stand. */
   const charging = (p.chargeAmt || 0) > 0.04 && !(p.atkTimer > 0);
-  const CHG = art === 'bow' ? 'Bow_Draw' : (clips.Attacking_Idle ? 'Attacking_Idle' : 'Idle_Attacking');
+  const CHG = art === 'cross' ? 'Idle' : art === 'bow' ? 'Bow_Draw' : (clips.Attacking_Idle ? 'Attacking_Idle' : 'Idle_Attacking');
 
   const cast = p.combatPose?.remaining > 0 && !(p.dodgeTimer > 0) && !airborne;
   const want = p.dead ? 'Death'
@@ -2169,6 +2180,7 @@ window.__hero3dAt = (key, o) => {
       }
     }
     actor.traverse(n=>{if(n.isBone){const b=rec.node.getObjectByName(n.name);if(b){b.position.copy(n.position);b.quaternion.copy(n.quaternion);b.scale.copy(n.scale);}}});
+    for(const name of ['WeaponPalmGrip','CrossbowBolt']){const source=actor.getObjectByName(name),copy=rec.node.getObjectByName(name);if(source&&copy)copy.visible=source.visible;}
     rec.node.visible = true;
     const sc = HERO3D.scale * (o.scale != null ? o.scale : 1);
     rec.node.scale.setScalar(sc);

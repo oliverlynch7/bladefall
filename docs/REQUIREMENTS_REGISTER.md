@@ -530,3 +530,9 @@ U183 continues approved equipment animation audit. Grounded scope: docs/IMPLEMEN
 
 ## [Codex | 2026-09-23] Weapon motion validation
 EQ-10 / VISUAL-REVIEW-03/04/05 release and co-op motion subset verified for2.028. See implementation report for tests and limits. Existing grip anchors retained; crossbow identity and remaining interaction poses remain open.
+
+## [Codex | 2026-09-23] Crossbow correction started
+U184 continuation: replace demonstrated crossbow-as-longbow mismatch with icon-aligned lightweight model and two-hand aiming pose. Scope and validation in IMPLEMENTATION_CROSSBOW_2026-09-23.md; combat rules unchanged.
+
+## [Codex | 2026-09-23] Crossbow verification
+Crossbow mismatch corrected in2.029 underEQ-10/VISUAL-REVIEW-03/04.48 crossbow poses,448 existing grip poses, peer/mirror/equip lifecycle, element colors and pre-change save checks passed. See IMPLEMENTATION_CROSSBOW_2026-09-23.md for scope/limits. Global surface/flicker audit remains next; trials/Pyromancer and mounts remain open.

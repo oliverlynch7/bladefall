@@ -558,3 +558,9 @@ Approved journal/feedback, early pickups, kill quests/respawn pockets/elites, fa
 
 ## [Codex | 2026-09-24] U191 — default NPC speech and continuation
 User approves the face detail improvement and requests default device text-to-speech for existing lines without recordings, varied voices and male/female differentiation where available, followed by unfinished approved work in an efficient long session. Approved recordings remain primary; no paid generation or publishing of unapproved takes. Explicit existing speech-off preference remains respected. Plan: shared stable speaker voice selection, delayed voice discovery, safe cancellation/error recovery, settings default-on, approved face detail default-on, browser lifecycle/co-op/save regression; then continue the outstanding surface audit.
+
+
+## [Codex | 2026-09-24] U192 — progression/combat continuation
+User: Go ahead with a long work session. Don’t waste usage
+Grounded continuation of U189: initial roster plus two combat tasks per level and Hydra rescue projects one rank10 class by finale under2.4 class XP/raw XP, rank7 by Frostfell. Player progression projects level10 by Frostfell and15 by finale; keep player rate1.5. Increase campaign class award to4/raw XP, retain other modes. Verify through actual gainXp with per-award class switching at10. This budget excludes dynamic quest waves, repeat farming and optional discoveries; not a timed human playthrough.
+Found concrete co-op defects: noteKill runs before Bones resurrection, incorrectly advertising a death; guest applying host kill can resurrect its local Bones and loses later kill packets. Guest recreated elite uses its local base XP instead of host kill packet XP. Correct death authority and test both clients. Patrol re-spawns leave every old dead object in G.enemies; prune only retired patrol corpses after the existing fade, keeping authored story enemies.

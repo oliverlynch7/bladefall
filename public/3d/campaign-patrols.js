@@ -17,7 +17,10 @@ function setup(G){const d=definition(G.zone,G.area);if(!d)return;const safe=e=>!
  return {work:G.patrolWork,elite: G.area===0&&[0,2,4,5,7].includes(G.zone)?candidates.find(e=>!members.includes(e)):null};
 }
 function task(G,s){const d=G.patrolWork||definition(G.zone,G.area);if(!d||!s.flags[d.id+'.known'])return null;const n=Math.min(d.total,s.items[d.id]||0);return {title:d.title,progress:n+'/'+d.total+' defeated',done:!!s.flags[d.id+'.done']};}
-function tick(G,s,dt,api){const w=G.patrolWork;if(!w||!api.host||G.voyage)return;
+function tick(G,s,dt,api){const w=G.patrolWork;if(!w)return;
+ // Keep authored bodies (quest references), but don't retain unlimited refill corpses.
+ if(G.enemies.some(e=>e.patrolReturn&&e.dead&&Number.isFinite(e.defeatedAt)&&G.time-e.defeatedAt>2))G.enemies=G.enemies.filter(e=>!e.patrolReturn||!e.dead||!Number.isFinite(e.defeatedAt)||G.time-e.defeatedAt<=2);
+ if(!api.host||G.voyage)return;
  if(w.anchor&&Math.hypot(G.p.x-w.anchor.x,G.p.z-w.anchor.z)<450&&!s.flags[w.id+'.camp']){s.flags[w.id+'.camp']=true;s.flags[w.id+'.known']=true;s.revision++;api.notice(w.title,w.text+' Enemy patrols return here after a short break. You can train here, or continue your journey.');}
  for(const slot of w.slots){if(G.enemies.some(e=>e.mid===slot.mid&&!e.dead&&e.hp>0)){slot.readyAt=null;continue;}if(slot.readyAt==null)slot.readyAt=G.time+25;
   const near=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<1100),crowded=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<220&&Math.abs((p.y||0)-slot.y)<100);

@@ -1,6 +1,6 @@
 import * as T from './three.module.js';
 import {claimSurface} from './surface-regions.js?v=1972';
-import {createHydra} from './hydra-art.js?v=2016';
+import {createHydra} from './hydra-art.js?v=2033';
 let active;
 export function buildCoastHigh(scene,w){
  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.5:.16);}});

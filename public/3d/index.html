@@ -1025,7 +1025,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./loading.js?v=1981s"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=1989">
 <script src="./voice-content.js?v=1989"></script>
-<script src="./hub-dialogue.js?v=2023"></script>
+<script src="./dialogue-speech.js?v=2033"></script>
+<script src="./hub-dialogue.js?v=2033"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2001"></script>
 <script src="./brute-encounter.js?v=2000"></script>
@@ -1075,7 +1076,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.032.0-adventure-feedback';
+const VERSION3D='2.033.0-character-voices';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1513,7 +1514,7 @@ function audioSettingsHTML(){
     <div class="setrow"><label><span><span id="sfxIcon" class="ico ico-menu ico-sound-${sv?'on':'off'}"></span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
       <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>
     <div class="setrow"><label><span>Recorded NPC voices</span><input id="dialogueVoice" type="checkbox" ${meta.dialogueVoice!==false?'checked':''}></label></div>
-    <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS?'checked':''}></label><small>Optional. Uses your device’s speech voice. Both follow sound-effects volume.</small></div>`;
+    <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS!==false?'checked':''}></label><small>On by default. Character voices depend on your device. Both follow sound-effects volume.</small></div>`;
 }
 function bindAudioSettings(){
   for(const id of ['dialogueVoice','dialogueTTS']){const e=document.getElementById(id);if(e)e.onchange=()=>{meta[id]=e.checked;persistGlobal();};}
@@ -22307,7 +22308,7 @@ window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestParty
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2032"></script>
+<script type="module" src="./hero3d.js?v=2033"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

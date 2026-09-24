@@ -1,13 +1,13 @@
 /* Service conversations share exact stable line IDs with the private Voice Studio. */
 (function(){
  'use strict';
- let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,speaking=false;
+ let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,voiceTimer=0,speaking=false;
  const ready=fetch('./story/hub-dialogue.json?v=2023').then(r=>{if(!r.ok)throw Error('Dialogue unavailable');return r.json()}).then(async b=>{book=await BFVoiceContent.apply(b);return book}).catch(()=>null);
  const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function state(a,id){const all=a.meta.hubDialogue||(a.meta.hubDialogue={});return all[id]||(all[id]={introduced:false,newsSeen:false,cursor:null})}
  function news(n,a){const d=book?.npcs[n.id];if(!d)return null;const latest=(d.newsStages||[]).filter(q=>a.meta.zoneDone?.[q.zone]).at(-1);if(latest)return state(a,n.id).newsSeenId===latest.id?null:latest.id;return Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=d.newsAfterCompletedRegions&&!state(a,n.id).newsSeen?d.news:null}
  function hasNews(n,a){return !!news(n,a)}
- function stopVoice(){clearTimeout(timer);cancelAnimationFrame(frame);speaking=false;if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(utterance){speechSynthesis.cancel();utterance=null}}
+ function stopVoice(){generation++;clearTimeout(voiceTimer);clearTimeout(timer);cancelAnimationFrame(frame);speaking=false;if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(utterance){speechSynthesis.cancel();utterance=null}}
  function close(service=false,remote=false){if(!active)return;if(active.external&&!remote){active.a.requestClose();return;}generation++;stopVoice();const {n,a}=active;active=null;el('hubDialogue')?.remove();document.body.classList.remove('npc-conversation');a.leave(service);if(service)n.open()}
  function commit(){active.a.save()}
  function landing(){
@@ -39,7 +39,22 @@
   el('hubReveal').onclick=unlock;
   const began=performance.now();function reveal(now){if(token!==generation||revealed)return;let count=Math.floor((now-began)/26);if(speaking&&audio&&Number.isFinite(audio.duration)&&audio.duration>0)count=Math.floor(node.text.length*audio.currentTime/audio.duration);el('hubLine').textContent=node.text.slice(0,count);if(count>=node.text.length)unlock();else frame=requestAnimationFrame(reveal)}frame=requestAnimationFrame(reveal);
   const allowed=a.meta.soundOn!==false;
-  function tts(){if(token!==generation||!allowed||!a.meta.dialogueTTS||!('speechSynthesis'in window))return;utterance=new SpeechSynthesisUtterance(node.text);utterance.volume=Math.max(0,Math.min(1,a.meta.sfxVol??1));utterance.rate=.96;utterance.onstart=()=>{if(token===generation)speaking=true};utterance.onend=utterance.onerror=()=>{if(token===generation){speaking=false;unlock()}};speechSynthesis.speak(utterance)}
+  let ttsStarted=false;
+  async function tts(){
+   if(ttsStarted||token!==generation||!allowed||a.meta.dialogueTTS===false)return;ttsStarted=true;
+   try{
+    const u=await BFDialogueSpeech.prepare(node.text,node.voice?.speaker||active.n.id,node.voice||{},a.meta.sfxVol);
+    if(token!==generation||!active)return;
+    if(!u){el('hubVoiceStatus').textContent='Device speech is unavailable. You can still read every line.';return;}
+    utterance=u;el('hubVoiceStatus').textContent='Device voice'+(u.voice?' · '+u.voice.name:'');
+    const done=()=>{if(token===generation){clearTimeout(voiceTimer);speaking=false;unlock();}};
+    u.onstart=()=>{if(token===generation)speaking=true;};u.onend=done;
+    u.onerror=()=>{if(token===generation){el('hubVoiceStatus').textContent='Device voice could not play. Subtitles are still available.';done();}};
+    // Some engines omit onend. Never leave a mouth moving or choices locked forever.
+    voiceTimer=setTimeout(()=>{if(token===generation){speechSynthesis.cancel();done();}},Math.max(12000,Math.min(180000,node.text.length*130+5000)));
+    speechSynthesis.speak(u);
+   }catch(_){if(token===generation){speaking=false;el('hubVoiceStatus').textContent='Device speech is unavailable. Subtitles are still available.';unlock();}}
+  }
   if(allowed&&a.meta.dialogueVoice!==false&&node.recordedAudio){audio=new Audio(node.recordedAudio);audio.volume=Math.max(0,Math.min(1,a.meta.sfxVol??1));audio.onplaying=()=>{if(token===generation)speaking=true};audio.onpause=audio.onwaiting=()=>{if(token===generation)speaking=false};audio.onended=()=>{if(token===generation){speaking=false;unlock()}};audio.onerror=()=>{if(token===generation){speaking=false;audio=null;tts()}};audio.play().catch(()=>{if(token===generation){audio=null;speaking=false;el('hubVoiceStatus').textContent='Voice could not play. Subtitles are still available.';tts()}})}else tts();
  }
  async function open(n,a){

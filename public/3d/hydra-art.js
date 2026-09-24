@@ -12,7 +12,7 @@ export function createHydra(parent){
  for(const s of [-1,1]){ell(s*59,27,36,9,6,16,eye,head);ell(s*66,38,-8,21,16,45,ridge,head);const horn=make(new T.ConeGeometry(16,85,5),tooth,head);horn.position.set(s*44,66,-35);horn.rotation.z=-s*.35;for(let j=0;j<4;j++){const t=make(new T.ConeGeometry(6,25,4),tooth,head);t.rotation.x=Math.PI;t.position.set(s*43,-14,48+j*23);}}
  const cuff=make(new T.TorusGeometry(59,10,6,12),iron,g);cuff.material=iron.clone();mats.push(cuff.material);cuff.rotation.x=Math.PI/2;const links=[];for(let j=0;j<10;j++){const l=make(new T.TorusGeometry(15,4,5,8),iron,g);links.push(l);}
  necks.push({g,segs,head,cuff,links});}
- const jet=make(new T.CylinderGeometry(1,1,1,8),new T.MeshBasicMaterial({color:0x9adee9,transparent:true,opacity:.78}));mats.push(jet.material);jet.visible=false;
+ const jet=make(new T.CylinderGeometry(1,1,1,8),new T.MeshBasicMaterial({color:0x9adee9,transparent:true,opacity:.78,depthWrite:false}));mats.push(jet.material);jet.name='Hydra water jet';jet.visible=false;
  function update(G){const h=G.hydraArena;if(!h)return;const t=h.elapsed;jet.visible=h.state==='strike'&&h.kind==='blast'&&!h.freed;if(jet.visible){const a=window.BFHydra.heads[h.head],dir=new T.Vector3(h.x-a.x,0,h.z-a.z).normalize();let len=2200;for(let d=20;d<2200;d+=20)if(window.BFHydra.blocked({x:a.x+dir.x*d,z:a.z+dir.z*d},a)){len=d;break;}const start=new T.Vector3(a.x,180,a.z),end=start.clone().addScaledVector(dir,len);jet.position.copy(start.add(end).multiplyScalar(.5));jet.scale.set(50,len,50);jet.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),dir);}
  root.position.z=-h.retreat*2100;root.position.y=-h.retreat*370;
  necks.forEach((n,i)=>{const anchor=window.BFHydra.heads[i],broken=(h.broken||[]).includes(i);

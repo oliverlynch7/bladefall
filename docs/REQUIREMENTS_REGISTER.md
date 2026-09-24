@@ -554,3 +554,7 @@ FX-02 continuation: inspected partial overlap in shared ground tiling. Plan and 
 
 ## [Codex | 2026-09-23] U189 playtest priorities
 Approved journal/feedback, early pickups, kill quests/respawn pockets/elites, faster progression/shared rarity requirements, terminal dialogue exits and face review. Full reconciled scope and voice audit: requirements/USER_SOURCE_2026-09-23_PLAYTEST.md. Supersedes prior slower class-XP balance.
+
+
+## [Codex | 2026-09-24] U191 — default NPC speech and continuation
+User approves the face detail improvement and requests default device text-to-speech for existing lines without recordings, varied voices and male/female differentiation where available, followed by unfinished approved work in an efficient long session. Approved recordings remain primary; no paid generation or publishing of unapproved takes. Explicit existing speech-off preference remains respected. Plan: shared stable speaker voice selection, delayed voice discovery, safe cancellation/error recovery, settings default-on, approved face detail default-on, browser lifecycle/co-op/save regression; then continue the outstanding surface audit.

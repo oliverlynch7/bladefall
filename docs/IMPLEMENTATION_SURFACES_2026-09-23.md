@@ -13,3 +13,7 @@ Browser inspection covered 24 campaign scenes (two halves and boss per eight zon
 Shared floor fixture:253 rendered instances in one draw call. Rectangle test verifies11100 units of union area, no positive-area overlap and sampled coverage. Pre-change save retained gold, rank, companions, return state, hub introduction, checkpoint and clue. Syntax/diff checks passed. No gameplay, collision, dialogue or progression changes.
 
 Remaining: near/far moving-camera review of decorative intersections, transparent layers and boss effects. This batch is not a claim that every flicker across the game has been eliminated.
+
+
+## September24 continuation
+Code audit found translucent Hydra jet and transparent Rift label planes still writing depth. This can hide later transparent effects behind their invisible/partially transparent fragments. Disable depth writes only for those materials, retain depth testing and opaque geometry. Check both live scenes and sample all campaign halves/arenas from near and far camera views; do not treat sampled views as proof of zero intersections everywhere.

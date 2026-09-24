@@ -618,3 +618,17 @@ Voice catalog audited read-only:359 lines,48 speakers,10441 words,55491 characte
 
 ## Production receipt - 2.032
 Main39604d1 deployed as31973a90-1be4-40a3-abb0-a875acf555bc. Read-only Chromium confirms2.032.0-adventure-feedback, patrol module present, renderer ready with no renderer error. Six face preview images decode at390px without horizontal overflow. Live saves and voice recordings untouched.
+
+
+## [Codex | 2026-09-24] U191 — default NPC speech and continuation
+User approves the face detail improvement and requests default device text-to-speech for existing lines without recordings, varied voices and male/female differentiation where available, followed by unfinished approved work in an efficient long session. Approved recordings remain primary; no paid generation or publishing of unapproved takes. Explicit existing speech-off preference remains respected. Plan: shared stable speaker voice selection, delayed voice discovery, safe cancellation/error recovery, settings default-on, approved face detail default-on, browser lifecycle/co-op/save regression; then continue the outstanding surface audit.
+
+
+## [Codex | 2026-09-24] 2.033 — character voices and transparent effects
+Default device speech now covers unrecorded hub/campaign/trial/finale dialogue through the shared presenter. Approved audio remains first; audio failure falls back once. Explicit speech-off preference and sound-effects mute/volume remain respected. Stable speaker hashing chooses English system voices, preferring recognized male/female voice names; mild delivery differences reflect character tone. Device APIs have no gender field and available voices vary. Delayed voice discovery, cancellation on exit/line change, errors, and an end watchdog keep subtitles and mouth state usable. No paid voices generated; no stored takes changed. Approved face detail is default; faceDetail=0 remains a comparison option.
+
+Continuation: Hydra translucent jet and Rift Hall label planes no longer write depth, preventing their translucent fragments from hiding later transparent effects. Depth testing remains enabled. No combat or collision changes.
+
+Validation:18 browser speech lifecycle checks (controlled voices),11 co-op story checks, pre-change save preservation including explicit speech-off, pure story/authority/Hydra/Rift Hall tests and syntax checks passed. Native browser exposes speech APIs but no named voices in this test context: acoustic quality and actual male/female availability are not certified.48 sampled near/far views across24 campaign scenes rendered without page/renderer errors; active Hydra blast and all8 Rift labels pass material assertions and screenshots. These are sampled views, not an exhaustive moving traversal or proof that all flicker is gone. SourceU191 recorded verbatim.
+
+Next: broader route-by-route visual/combat playtesting and progression balance; dedicated miniboss mechanics and the unresolved earned-trial/Pyromancer/mount design work remain open. No claim that the whole production queue is complete.

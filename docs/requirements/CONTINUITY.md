@@ -604,3 +604,17 @@ Remaining: near/far moving-camera review of decorative intersections, transparen
 
 ### Production receipt - 2.031
 Main4fdaeb2 deployed as fde1113e-f5ca-4dfe-a582-45c3efc1d6c1. Read-only Chromium confirms2.031.0-floor-surfaces; hero/world/keep/frost modules HTTP200 and renderer ready without error. Existing89-image phone gallery still decodes without overflow. No live save or VO data modified. User archive188 messages,zero parse errors,valid references. Remaining global moving-camera/transparent-surface audit is explicitly open.
+
+
+## [Codex | 2026-09-23] 2.032 adventure feedback (U189)
+Journal now prioritizes the next main task and three recent current-half clues, with older clues, prior-half notes, optional tasks, items, shards and completed work in folded sections. Existing notes remain intact. Story objects remain inspectable before prerequisites; Briar roots, dressings and tools can be collected early. Collected objects use existing consumed flags; notices/toasts acknowledge actions and repeatable puzzle interactions. No-effect conversation loops now offer Leave conversation and preserve the cursor for reopening.
+
+Added 16 story-related optional combat tasks, one per campaign half. Selected ordinary ground patrol slots replenish after 25 seconds when players are nearby but not standing on the spawn. Quest guards remain finite. Keep halves and the final ascent have finite quotas; other halves have one to three refill slots. Four suitable first-half areas receive named elites (Briar, Emberdeep, Storm Coast, castle approach). Existing elite renderer and behavior retained. Campaign player XP is 1.5x and class XP is 3x its prior rate; other modes retain their rates. Fixed quick-loot armor bypass of shared rarity levels1/5/12/20/30. These initial rates still need full campaign balance playtesting.
+
+Validation:13 browser UI/progression checks,9 live patrol/reward/checkpoint checks,11 co-op story checks, combat/journal regression,16-half spawn audit, pure story/authority/journal/combat tests and syntax passed. Pre-change save retained rank, gold, pets, introductions, return progress, checkpoint and clue. Six face models rendered with optional faceDetail=1; gallery /3d/art-previews/faces/ provides comparison. Faces are a modest detail preview, not a global replacement or complete remodel. Static local server lacks voice-api/game, causing expected HTTP404 audio-catalog requests during mirror previews; no JavaScript exception was observed. Source archive189 messages,zero parse errors,valid references.
+
+Voice catalog audited read-only:359 lines,48 speakers,10441 words,55491 characters,about75 minutes at140wpm,0 approvals,2 stored takes untouched. Concise ElevenLabs email sent to isaac2055@gmail.com (Gmail SENT1a0d0efec0035c50). No paid generation initiated. Full campaign pacing, dedicated miniboss mechanics, a full face redesign and remaining global moving-camera z-fighting review are still open; this batch does not claim completion of the entire production queue.
+
+
+## Production receipt - 2.032
+Main39604d1 deployed as31973a90-1be4-40a3-abb0-a875acf555bc. Read-only Chromium confirms2.032.0-adventure-feedback, patrol module present, renderer ready with no renderer error. Six face preview images decode at390px without horizontal overflow. Live saves and voice recordings untouched.

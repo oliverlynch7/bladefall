@@ -67,7 +67,7 @@
   function node(book,id){return own(book.nodes,id)?book.nodes[id]:null;}
   function view(s,book){
     const c=s.conversation,n=c&&node(book,c.node);if(!n)return null;
-    return {npc:c.npc,lineId:c.node,text:n.text,lastChoice:c.lastChoice||'',choices:(n.choices||[]).filter(x=>matches(s,x.when)).map(x=>({id:x.id,text:x.text}))};
+    return {npc:c.npc,lineId:c.node,text:n.text,lastChoice:c.lastChoice||'',choices:(n.choices||[]).filter(x=>matches(s,x.when)).map(x=>({id:x.id,text:(!(x.effects||[]).length&&(x.next===c.node||(c.trail||[]).includes(x.next)))?'Leave conversation':x.text}))};
   }
   function transact(original,book,event){
     // Return the original on invalid/stale input. All effects commit together.
@@ -81,7 +81,7 @@
         const def=book.npcs[event.npc],saved=s.cursors[event.npc];
         const start=saved?.node||def.start;if(!node(book,start))return {state:original,changed:false};
         if(!matches(s,def.when))return {state:original,changed:false};
-        s.conversation={npc:event.npc,node:start,lastChoice:saved?.lastChoice||''};
+        s.conversation={npc:event.npc,node:start,lastChoice:saved?.lastChoice||'',trail:[start]};
       }else if(event.type==='close'){
         if(!s.conversation)return {state:original,changed:false};
         s.cursors[s.conversation.npc]=copy(s.conversation);s.conversation=null;
@@ -90,7 +90,7 @@
         if(!n||event.line!==c.node)return {state:original,changed:false};
         const option=n.choices?.find(x=>x.id===event.choice&&matches(s,x.when));
         if(!option||!node(book,option.next))return {state:original,changed:false};
-        effects(s,option.effects);c.node=option.next;c.lastChoice=option.text;s.cursors[c.npc]=copy(c);
+        if(!(option.effects||[]).length&&(option.next===c.node||(c.trail||[]).includes(option.next))){s.cursors[c.npc]=copy(c);s.conversation=null;}else{effects(s,option.effects);c.trail=[...new Set([...(c.trail||[]),c.node,option.next])];c.node=option.next;c.lastChoice=option.text;s.cursors[c.npc]=copy(c);}
       }else if(event.type==='world'){
         const e=own(book.events,event.key)&&book.events[event.key];
         if(!e||!matches(s,e.when)||(e.once&&s.flags['event.'+event.key]))return {state:original,changed:false};

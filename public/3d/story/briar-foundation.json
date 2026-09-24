@@ -1110,12 +1110,7 @@
   "events": {
     "briar.root.1": {
       "once": true,
-      "when": [
-        {
-          "quest": "briar.supplies",
-          "is": "active"
-        }
-      ],
+      "when": [],
       "effects": [
         {
           "type": "item",
@@ -1126,12 +1121,7 @@
     },
     "briar.root.2": {
       "once": true,
-      "when": [
-        {
-          "quest": "briar.supplies",
-          "is": "active"
-        }
-      ],
+      "when": [],
       "effects": [
         {
           "type": "item",
@@ -1142,12 +1132,7 @@
     },
     "briar.root.3": {
       "once": true,
-      "when": [
-        {
-          "quest": "briar.supplies",
-          "is": "active"
-        }
-      ],
+      "when": [],
       "effects": [
         {
           "type": "item",
@@ -1158,12 +1143,7 @@
     },
     "briar.dressings": {
       "once": true,
-      "when": [
-        {
-          "quest": "briar.supplies",
-          "is": "active"
-        }
-      ],
+      "when": [],
       "effects": [
         {
           "type": "item",
@@ -1272,10 +1252,6 @@
     "briar.gus.tools": {
       "once": true,
       "when": [
-        {
-          "quest": "briar.gus.tools",
-          "is": "active"
-        },
         {
           "flag": "gus.closed",
           "is": false

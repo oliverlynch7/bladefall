@@ -1,3 +1,4 @@
+const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')==='1';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
@@ -500,7 +501,8 @@ function mouthTexture(shape, color){
     x.stroke();
   };
   if(shape === 'line' || shape === 'flat'){
-    x.beginPath(); x.moveTo(cx-w, cy); x.lineTo(cx+w, cy); x.stroke();
+    if(!FACE_DETAIL_PREVIEW){x.beginPath();x.moveTo(cx-w,cy);x.lineTo(cx+w,cy);x.stroke();}else{
+    x.lineWidth=LW*.62;x.beginPath();x.moveTo(cx-w,cy);x.quadraticCurveTo(cx,cy+S*.016,cx+w,cy);x.stroke();x.strokeStyle='#bc8d76';x.lineWidth=LW*.30;x.beginPath();x.moveTo(cx-w*.60,cy+LW*.8);x.quadraticCurveTo(cx,cy+LW*1.2,cx+w*.60,cy+LW*.8);x.stroke();}
   } else if(shape === 'smile'){
     curve(h*1.5);
   } else if(shape === 'frown'){
@@ -584,6 +586,13 @@ function addEyes(actor, useSaved){
     pu.position.z = frontZ * 1.02;
     pu.material.depthWrite = false; pu.renderOrder = (EYE.onTop ? 999 : 3) + 2;
     g.add(pu);
+    if(FACE_DETAIL_PREVIEW){
+    // Small fitted facial details; all stay in the existing hand-placed eye frame.
+    const rim=mk(new THREE.RingGeometry(irR*.86,irR,20),'#33413d');rim.position.z=frontZ*1.01;rim.material.depthWrite=false;rim.renderOrder=ir.renderOrder;g.add(rim);
+    const shine=mk(new THREE.CircleGeometry(irR*.18,8),'#fff7df');shine.position.set(-irR*.25,irR*.30,frontZ*1.05);shine.material.depthWrite=false;shine.renderOrder=pu.renderOrder+1;g.add(shine);
+    const brow=mk(new THREE.BoxGeometry(R*1.65,R*.14,R*.12),(actor.model||eyeModel())==='Wizard'?'#a4a39b':'#594736');brow.position.set(0,R*EYE.squash*1.2,frontZ*.72);brow.rotation.z=side*.06;g.add(brow);
+    }
+
 
     /* Build the position from the head's own basis vectors: sideways along RIGHT, up
        along UP, outward along FWD. Works whichever way the bone happens to be oriented. */

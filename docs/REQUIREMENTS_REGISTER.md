@@ -551,3 +551,6 @@ U186/U187 weapon presence implemented in 2.030: family-specific distal sizing, p
 
 ## [Codex | 2026-09-23] Shared surface audit started
 FX-02 continuation: inspected partial overlap in shared ground tiling. Plan and limits: docs/IMPLEMENTATION_SURFACES_2026-09-23.md.
+
+## [Codex | 2026-09-23] U189 playtest priorities
+Approved journal/feedback, early pickups, kill quests/respawn pockets/elites, faster progression/shared rarity requirements, terminal dialogue exits and face review. Full reconciled scope and voice audit: requirements/USER_SOURCE_2026-09-23_PLAYTEST.md. Supersedes prior slower class-XP balance.

@@ -1030,7 +1030,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./rift-hall.js?v=2001"></script>
 <script src="./brute-encounter.js?v=2000"></script>
 <script src="./marksman-encounter.js?v=2004"></script>
-<script src="./story-state.js?v=2018"></script>
+<script src="./story-state.js?v=2032"></script>
+<script src="./campaign-patrols.js?v=2032"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
 <script src="./lost-canyon.js?v=2003"></script>
 <script src="./broken-walls.js?v=2023"></script>
@@ -1054,7 +1055,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./ship-crossing.js?v=2015"></script>
 <script src="./great-furnace.js?v=2014"></script>
 <script src="./furnace-colossus.js?v=2014"></script>
-<link rel="stylesheet" href="./journal-notice.css?v=2012">
+<link rel="stylesheet" href="./journal-notice.css?v=2032">
 <script src="./journal-notice.js?v=2012"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
@@ -1074,7 +1075,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.031.0-floor-surfaces';
+const VERSION3D='2.032.0-adventure-feedback';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2910,7 +2911,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2025').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2032').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -2960,12 +2961,13 @@ function briarReceive(request,actor,position){
  const s=adventureStoryState(),party=MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];
  if(!party.includes(actor))return false;
  const r=BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:mode==='play',npcs:G.storyNpcs||[],objects:briarObjects(),party});
- if(r.changed){journalNoticeSync();G.storyState=r.state;briarSync();
+ if(r.changed){journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=r.state.revision;}G.storyState=r.state;briarSync();
   if(request.event.type==='world'){
    const key=request.event.key,event=briarBook.events[key],notesChanged=JSON.stringify(s.notes)!==JSON.stringify(r.state.notes);
+   if(notesChanged){const note=Object.entries(r.state.notes).filter(([id,n])=>JSON.stringify(n)!==JSON.stringify(s.notes[id])).at(-1)?.[1];if(note)toast('Journal updated · '+note.title);}
    if(!notesChanged){const o=(G.storyObjects||[]).find(o=>o.key===key),gains=(event?.effects||[]).filter(e=>e.type==='item'&&e.amount>0&&!/^(mc\.screen\.|sl\.attempt\.)/.test(e.id));
-    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:o?.label||'Item collected',text:(areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
-    else if(event?.once!==false)presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:areaQuests()[0]?.d||'Your progress has been updated.'});
+    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:(areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
+    else presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:areaQuests()[0]?.d||'Your progress has been updated.'});
    }
   }
  }
@@ -3007,6 +3009,7 @@ function briarSync(){
  const s=adventureStoryState();journalNoticeSync();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
   if(reward.kind.startsWith('return_')){if(applyReturnReward(id,reward))G.storyClaims[id]=true;}
+  else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+Math.round(reward.amount*1.5)+' XP');}
   else if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast((id==='home.bells.cache'?'Tower chest opened':'Quest complete')+' · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast(reward.kind==='cliff_runner'?'Cliff Runner earned — an uncommon javelin.':'Cliff chest opened — uncommon leggings.');G.storyClaims[id]=true;}
   else if(reward.kind.startsWith('forgeguard_')){const art=reward.kind.slice(11),item=art==='armor'?{armor:makeArmor('rare','chest')}:{weapon:makeWeapon(art,'rare','Forgeguard')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Forgeguard earned — rare '+(art==='armor'?'chest armor':art)+'. Finish Iron Halls to keep it.');G.storyClaims[id]=true;}
@@ -3047,7 +3050,7 @@ function briarInteract(){
  if(inLongAscent()&&G.ascent.lift)for(const y of [250,1250])consider({x:1420,z:-170,y,range:110},y===250?'Ride service lift up':'Ride service lift down',()=>BFLongAscent.ride(G,y===250));
  if(inThunderCliffs()&&G.thunder.lift)for(const y of [40,340])consider({x:-300,z:-650,y,range:115},y===40?'Ride lift up':'Ride lift down',()=>BFThunderCliffs.ride(G,y===40));
  for(const n of G.storyNpcs||[])if((G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
- if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&BFStoryState.matches(s,briarBook.events[o.key]?.when))consider(o,o.available?o.label:(o.blockedLabel||'Clear the bridge guards first'),()=>o.available?briarRequest('world',{key:o.key}):toast(o.blockedText||'The wagons cannot pass while the bridge guards are still here.'));
+ if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]){const ready=o.available&&BFStoryState.matches(s,briarBook.events[o.key]?.when);consider(o,ready?o.label:'Inspect · '+o.label,()=>{if(ready)briarRequest('world',{key:o.key});else{const text=o.blockedText||(o.available?'This may be useful later. Follow your current task, then return here.':'This needs another step first. Check the current task in your journal.');BFJournalNotice.push({id:'inspect.'+o.key,kind:'Not ready yet',title:o.label,text});toast(text);}});}
  return best;
 }
 function configureCliffCode(){if(!briarBook||!G.cliffs)return;for(const n of [1,2,3])briarBook.events['hp.code.'+n].effects[0].solution=[...G.cliffs.code];}
@@ -3564,7 +3567,7 @@ function drawBriarStory(t){
 
 function adventureStoryState(){ if(!G)return null;return G.storyState||(G.storyState=BFStoryState.create()); }
 function presentStoryNotice(note,seed=false){
- if(!note?.id||G._seenStoryNotice===note.id)return;G._seenStoryNotice=note.id;G._storyNotice=note;if(!seed)BFJournalNotice.push(note);
+ if(!note?.id||G._seenStoryNotice===note.id)return;G._seenStoryNotice=note.id;G._storyNotice=note;if(!seed){BFJournalNotice.push(note);toast(note.title);}
 }
 function journalNoticeSync(seed=false){
  if(!G)return;BFJournalNotice.observe(G,[G.zone,G.area,G.hub,G.side,G.trial,G.riftHall].join(':'),G.storyState?.notes||{},curZone().id,seed);
@@ -3572,7 +3575,7 @@ function journalNoticeSync(seed=false){
 BFJournalNotice.configure(()=>openJournal());
 function addJournalNote(id,title,text){
   if(!isCampaignAdventure()||typeof id!=='string'||!id||['__proto__','constructor','prototype'].includes(id))return false;
-  const state=adventureStoryState();journalNoticeSync();state.notes[id]={region:curZone().id,title:String(title),text:String(text)};journalNoticeSync();return true;
+  const state=adventureStoryState();journalNoticeSync();state.notes[id]={region:curZone().id,part:G.area,order:state.revision+1,title:String(title),text:String(text)};journalNoticeSync();return true;
 }
 const journalEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let _journalFrom='play';
@@ -3581,6 +3584,7 @@ function discoveredOptionalTasks(){
   const state=adventureStoryState(),entry=(title,progress,done)=>({title,progress,done});
   const optional=(G.optionalMissions||[]).filter(m=>m.discovered).map(m=>entry(m.name,`${m.progress}/${m.total}`,m.done));
   optional.push(...BFReturnVisits.tasks(G,meta,state));
+  const combatTask=isCampaignAdventure()?BFCampaignPatrols.task(G,state):null;if(combatTask)optional.push(combatTask);
   if(inWindingCliffs()&&state.flags['hp.skip.quest'])optional.push(entry('Bring Skip his rope',state.flags['hp.rope']?'Rope found':'Search below the broken eastern platform',!!state.flags['hp.skip.returned']));
   if(inLostCanyon()&&state.flags['lc.extra.quest'])optional.push(entry('Free the old western cage',state.flags['lc.extra']?'Tell Ruth the group is safe':'Follow the raised western path',!!state.flags['lc.reward']));
   if(inBrokenWalls()&&state.flags['rk.felix.quest'])optional.push(entry('Felix’s tools',state.flags['rk.tools']?'Return the tools to Felix':'Open the timed workshop latch on the east side',!!state.flags['rk.felix.returned']));
@@ -3616,14 +3620,17 @@ function openJournal(){
   _journalFrom=mode;mode='journal';showGameUI(false);document.getElementById('toast')?.classList.remove('show');for(const k in input)if(typeof input[k]==='boolean')input[k]=false;
   if(document.pointerLockElement)document.exitPointerLock();
   const region=curZone(),campaign=isCampaignAdventure(),state=adventureStoryState(),esc=journalEscape;
-  const task=(title,progress,done)=>`<li style="padding:12px 0;border-bottom:1px solid #ffffff18"><span style="color:${done?'#9fc69c':'#e9c98b'}">${done?'✓':'○'}</span> ${esc(title)}${progress?` <small style="color:#c3ccb9">${esc(progress)}</small>`:''}</li>`;
-  const main=campaign?(G.area<0?[task('Defeat '+region.boss.name,'',!!G.boss?.dead)]:areaQuests().map(q=>task(q.d,questProgressText(q),questDone(q)))):[];
-  const optional=discoveredOptionalTasks().map(m=>task(m.title,m.progress,m.done));
-  const notes=Object.values(state.notes).filter(n=>n.region===region.id);
-  const items=Object.entries(state.items).filter(([id,n])=>n>0&&!/^(rv\.|mc\.|sl\.shelf|sl\.attempt|pc\.light)/.test(id)&&!id.startsWith('hp.')&&!id.startsWith('lc.')&&!id.startsWith('rk.')&&!id.startsWith('kd.')&&!id.startsWith('ff.')&&!id.startsWith('ic.')&&!id.startsWith('ih.')&&!id.startsWith('gf.')&&!id.startsWith('fc.'));
+  const row=(title,progress,done)=>`<li class="journal-task ${done?'done':''}"><strong>${done?'✓ ':''}${esc(title)}</strong>${progress?`<span>${esc(progress)}</span>`:''}</li>`;
+  const main=campaign?(G.area<0?[{title:'Defeat '+region.boss.name,done:!!G.boss?.dead}]:areaQuests().map(q=>({title:q.d,progress:questProgressText(q),done:questDone(q)}))):[];
+  const optional=discoveredOptionalTasks(),active=main.filter(q=>!q.done),finished=main.concat(optional).filter(q=>q.done);
+  const notes=Object.entries(state.notes).filter(([id,n])=>n.region===region.id).map(([id,n],i)=>({id,...n,sort:n.order||i})).sort((a,b)=>b.sort-a.sort);
+  const current=notes.filter(n=>n.part==null||n.part===G.area),earlier=notes.filter(n=>n.part!=null&&n.part!==G.area);
+  const note=n=>`<article class="journal-clue"><strong>${esc(n.title)}</strong><p>${esc(n.text)}</p></article>`;
+  const fold=(title,body,count)=>`<details class="journal-fold"><summary>${esc(title)} <small>${count}</small></summary>${body}</details>`;
+  const items=Object.entries(state.items).filter(([id,n])=>n>0&&(!id.includes('.')||/^(cg\.(coat|helmet|papers|personal)|pc\.seeds|sc\.(rudder|sail|rope|bell))$/.test(id)));
+  const names={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll','cg.coat':'Legion coat','cg.helmet':'Legion helmet','cg.papers':'Patrol papers','cg.personal':'Roland’s armor','pc.seeds':'Seed tin','sc.rudder':'Rudder','sc.sail':'Sail','sc.rope':'Ship rope','sc.bell':'Ship bell'};
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
-  const itemNames={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll'};
-  showOverlayHTML(`<div class="card" style="max-width:760px;text-align:left"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(region.name):'Your notes'}</h2><p style="color:#b8c6b7">${campaign?esc(G.areaName||'Current part')+' · Progress is saved when you finish this part.':'Enter a campaign level to follow its tasks and clues.'}</p><div style="max-height:55vh;overflow:auto;padding-right:12px"><h3>What to do next</h3><ul style="list-style:none;padding:0">${main.join('')||'<li>No campaign task here.</li>'}</ul>${optional.length?'<h3>Optional tasks you found</h3><ul style="list-style:none;padding:0">'+optional.join('')+'</ul>':''}${riftShardJournal()}<h3>Clues and reminders</h3>${notes.map(n=>`<p><strong>${esc(n.title)}</strong><br>${esc(n.text)}</p>`).join('')||'<p style="color:#b8c6b7">No clues recorded for this region yet.</p>'}<h3>Quest items</h3><p style="font-size:13px;color:#b8c6b7">These do not use bag space and cannot be sold.</p><ul>${items.concat(fetchItems).map(([id,n])=>'<li>'+esc(itemNames[id]||id)+' × '+esc(n)+'</li>').join('')||'<li>No quest items.</li>'}</ul></div><button class="bigbtn ghost" id="journalClose" style="margin-top:18px">Close journal</button></div>`);
+  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Current tasks first. Newest clues first.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false)).join('')+'</ul>',active.length-1):''}<h3>Latest clues</h3>${current.slice(0,3).map(note).join('')||'<p class="journal-muted">No clues found in this part yet.</p>'}${current.length>3?fold('Older clues from this part',current.slice(3).map(note).join(''),current.length-3):''}${earlier.length?fold('Clues from the previous part',earlier.map(note).join(''),earlier.length):''}${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
   document.getElementById('journalClose').onclick=closeJournal;
   document.getElementById('journalClose').focus({preventScroll:true});
 }
@@ -5125,6 +5132,7 @@ function loadArea(){
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
+  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G);if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;}}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -12717,7 +12725,7 @@ function killEnemy(e,weaponKill){
     (G.trails=G.trails||[]).push({x:e.x,z:e.z,y:e.y,warn:0.85,warnMax:0.85,r:56,life:3.0,max:3.0,dmg:Math.max(4,Math.round(e.dmg*0.45)),hit:0,col:'#ff8a3a',cause:{name:'a dying emberling',attack:'the cinders'}});
     burst(e.x,e.y+10,e.z,'#ff8a3a',18);
   }
-  e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  e.dead=true; if(isCampaignAdventure()&&BFCampaignPatrols.killed(G,adventureStoryState(),e,{host:!MP.guest(),party:MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'],notice:(title,text)=>presentStoryNotice({id:(G.patrolWork?.id||'combat')+':'+adventureStoryState().revision+':'+title,title,text,kind:'Task complete'})})){briarSync();questUpdate();} G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5,sourceType:e.type==='colossus'&&__BF_WORLD().theme==='marble'?'marblecolossus':e.type,sourceH:e.h,ranged:['archer','caster','frostlobber','sunpriest','royalarcanist','cragspitter','voidtether'].includes(e.type)}); G.lastSlainEnemy=G.corpses[G.corpses.length-1]; if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
   if(weaponKill) gainMana(G.p,12,true);
@@ -12745,7 +12753,7 @@ function killEnemy(e,weaponKill){
     addText(e.x,e.y+e.h+12,e.z,'SPORE BURST','#9fd84a',true); }
   const _erw=G.endless?(G.endReward||1):1;                    // Endless: XP + gold scale with floor depth so it's the best grind at any level
   if(G.endless) G.endKillsTotal=(G.endKillsTotal||0)+1;
-  const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+_xp+' XP','var(--xp)'); gainXp(_xp);
+  const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+Math.round(_xp*(isCampaignAdventure()?1.5:1))+' XP','var(--xp)'); gainXp(_xp);
   /* BOUNTY HUNTER's gold clause. A multiplier on the kill's own purse rather than a second
      awardGold call, so the payout formula stays in exactly one place and cannot drift from it. */
   const _bounty=(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&(e.markT||0)>0)?1.1:1;
@@ -12877,9 +12885,9 @@ function rollDrop(e){
 function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=1.018; p.stats.speed*=1.006; p.stats.lifesteal+=0.002; }
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){
-  const p=G.p; p.xp+=n;
-  const classAward=Math.max(1,Math.round(n*0.8));
-  gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // trials still reach Rank 2; normal class progression is 2.5x longer
+  const p=G.p; p.xp+=Math.round(n*(isCampaignAdventure()?1.5:1));
+  const classAward=n>0?Math.max(1,Math.round(n*(isCampaignAdventure()?2.4:.8))):0;
+  gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // Campaign classes gain 3x the previous XP; trials retain their existing pace.
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);
     autoLevelGrow(p); recomputeArmor(p);
     p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
@@ -14182,7 +14190,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:null]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.campaignElite||e.patrolReturn?{campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -14204,7 +14212,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
-    for(const a of en)if(a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.campaignElite||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -14852,6 +14860,7 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
+  if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:[G.p,...Object.values(MP.peers||{}).filter(p=>p.zone===G.zone&&!p.downed)],spawn:spawnEnemy,notice:(title,text)=>{BFJournalNotice.push({id:G.patrolWork.id+'.camp',title,text,kind:'Combat area'});questUpdate();}});
   G._freezeT=Math.max(0,(G._freezeT||0)-dt);
   /* Headlong drives you forward and refuses to be steered - the whole point of it.
      AND IT HAS TO LET GO. _headlongT was set to 0.9 by SKILL_FX.bsk_charge and decremented by
@@ -15951,7 +15960,7 @@ function renderLootCard(){ const d=G&&G.lootCard, el=document.getElementById('lo
   else if(kind==='armor'){ const cur=(p.gear&&p.gear[it.slot])||{defense:0}; typ=((SLOTS&&SLOTS[it.slot]?SLOTS[it.slot].label:it.slot)||'armor');
     rows=numRow('Defense',cur.defense||0,it.defense||0)+(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b class="up">${a.label}</b></div>`).join(''); }
   else { typ=(TRINKETS&&TRINKETS[it.slot]?TRINKETS[it.slot].label:'trinket'); rows=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Passive</span><b class="up">${a.label}</b></div>`).join('')||'<div class="lcrow"><span>bonus</span></div>'; }
-  const lock=(kind==='weapon'&&typeof canWield==='function'&&!canWield(it))?` 🔒Lv${rarityReq(it.rarity)}`:'';
+  const lock=(typeof canWield==='function'&&!canWield(it))?` 🔒Lv${rarityReq(it.rarity)}`:'';
   el.style.setProperty('--lc',col);
   const _ic=(()=>{ try{ return itemAv(it); }catch(e){ return ''; } })();
   el.innerHTML=`<div class="lchead">${_ic?`<img class="lcicon" src="${_ic}" alt="">`:''}<div class="lchtext"><div class="lcrar">${rar.name}${(G.lootQueue&&G.lootQueue.length)?' · +'+G.lootQueue.length+' waiting':''}</div><div class="lcname">${it.name}${lock}</div></div></div>`
@@ -15961,6 +15970,7 @@ function renderLootCard(){ const d=G&&G.lootCard, el=document.getElementById('lo
   el.className=''; }
 function lootTick(){ const d=G&&G.lootCard; if(!d) return; const rem=Math.max(0,d.expire-(G.time||0)), f=document.getElementById('lcbarfill'); if(f) f.style.width=Math.round(100*rem/d.max)+'%'; if(rem<=0) lootToBag(true); }
 function lootEquipCurrent(){ const d=G&&G.lootCard; if(!d) return; const it=d.item;
+  if(!canWield(it)){toast('Requires Level '+rarityReq(it.rarity)+' to equip this gear.');return;}
   if(d.kind==='weapon'){ if(typeof canWield==='function'&&!canWield(it)){ toast('🔒 Requires Level '+rarityReq(it.rarity)+' to wield'); return; }
     if(monkBlocksWeapons(it)){ toast('The Monk fights with its hands'); return; }
     if(!classFamilyOk(it)){ refuseOffclass(it); return; }                    // C1: hard block, not a damage penalty
@@ -22231,7 +22241,7 @@ window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestParty
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicCue, musicVolume, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
-  classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
+  classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor, lootEquipCurrent, gainXp,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   enterArena, exitArena, openArenaSetup, arenaRandomRespec, arenaApplyClass, arenaApplyPet, buildArenaPlayer, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
@@ -22297,7 +22307,7 @@ window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestParty
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2031"></script>
+<script type="module" src="./hero3d.js?v=2032"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

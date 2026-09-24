@@ -10,3 +10,7 @@ Continuation: Hydra translucent jet and Rift Hall label planes no longer write d
 Validation:18 browser speech lifecycle checks (controlled voices),11 co-op story checks, pre-change save preservation including explicit speech-off, pure story/authority/Hydra/Rift Hall tests and syntax checks passed. Native browser exposes speech APIs but no named voices in this test context: acoustic quality and actual male/female availability are not certified.48 sampled near/far views across24 campaign scenes rendered without page/renderer errors; active Hydra blast and all8 Rift labels pass material assertions and screenshots. These are sampled views, not an exhaustive moving traversal or proof that all flicker is gone. SourceU191 recorded verbatim.
 
 Next: broader route-by-route visual/combat playtesting and progression balance; dedicated miniboss mechanics and the unresolved earned-trial/Pyromancer/mount design work remain open. No claim that the whole production queue is complete.
+
+
+## Production receipt - 2.033
+Main15a23ac is live. Read-only Chromium confirms2.033.0-character-voices, speech selector loaded, renderer ready without error, and all five changed speech/face/effect modules HTTP200. Face detail defaults on. Live saves and recordings untouched. Source references validated; private archive191 messages includes U190 environment and U191 exact user instruction, zero unparsed lines.

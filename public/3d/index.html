@@ -1026,7 +1026,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <link rel="stylesheet" href="./hub-dialogue.css?v=1989">
 <script src="./voice-content.js?v=1989"></script>
 <script src="./dialogue-speech.js?v=2033"></script>
-<script src="./hub-dialogue.js?v=2033"></script>
+<script src="./hub-dialogue.js?v=2038"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2001"></script>
 <script src="./brute-encounter.js?v=2000"></script>
@@ -1045,7 +1045,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./castle-gates.js?v=2020"></script>
 <script src="./long-ascent.js?v=2021"></script>
 <script src="./final-king.js?v=2022"></script>
-<script src="./return-adventures.js?v=2025"></script>
+<script src="./return-adventures.js?v=2038"></script>
 <script src="./return-visits.js?v=2025"></script>
 <script src="./palace-courtyard.js?v=2017"></script>
 <script src="./dragon-rescue.js?v=2024"></script>
@@ -1078,7 +1078,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.037.0-party-navigation';
+const VERSION3D='2.038.0-party-saves';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3052,7 +3052,7 @@ function briarInteract(){
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65)return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={x:o.x,z:o.z,y:(o.y||0)+62,label,act};}};
  if(inLongAscent()&&G.ascent.lift)for(const y of [250,1250])consider({x:1420,z:-170,y,range:110},y===250?'Ride service lift up':'Ride service lift down',()=>BFLongAscent.ride(G,y===250));
  if(inThunderCliffs()&&G.thunder.lift)for(const y of [40,340])consider({x:-300,z:-650,y,range:115},y===40?'Ride lift up':'Ride lift down',()=>BFThunderCliffs.ride(G,y===40));
- for(const n of G.storyNpcs||[])if((G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>briarRequest('open',{npc:n.id}));
+ for(const n of G.storyNpcs||[])if((G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>inReturnHub()&&n.open&&!n.direct?openNpcTalk(n):briarRequest('open',{npc:n.id}));
  if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]){const ready=o.available&&BFStoryState.matches(s,briarBook.events[o.key]?.when);consider(o,ready?o.label:'Inspect · '+o.label,()=>{if(ready)briarRequest('world',{key:o.key});else{const text=o.blockedText||(o.available?'This may be useful later. Follow your current task, then return here.':'This needs another step first. Check the current task in your journal.');BFJournalNotice.push({id:'inspect.'+o.key,kind:'Not ready yet',title:o.label,text});toast(text);}});}
  return best;
 }
@@ -9342,8 +9342,8 @@ function spawnEnemy(type,x,z,isBoss){
 
 /* ---------------- Input (joystick + keys; identical bindings) ---------------- */
 const input={left:false,right:false,up:false,down:false,jump:false,attack:false,dodge:false,jumpEdge:false,dodgeEdge:false,jx:0,jz:0};
-function moveX(){ return Math.max(-1,Math.min(1,input.jx+(input.right?1:0)-(input.left?1:0))); }
-function moveZ(){ return Math.max(-1,Math.min(1,input.jz+(input.down?1:0)-(input.up?1:0))); }
+function moveX(){const digital=(input.right?1:0)-(input.left?1:0);return input.right||input.left?digital:Math.max(-1,Math.min(1,Number(input.jx)||0));}
+function moveZ(){const digital=(input.down?1:0)-(input.up?1:0);return input.down||input.up?digital:Math.max(-1,Math.min(1,Number(input.jz)||0));}
 function bindBtn(id,key){
   const el=document.getElementById(id); let heldId=null;
   const set=v=>{ el.classList.toggle('pressed',v);
@@ -9433,7 +9433,7 @@ function ensureKeybinds(){ if(!meta.keybinds||typeof meta.keybinds!=='object') m
   rebuildKeyLookup(); try{ updateHudKeys(); }catch(e){} }
 let _codeToAction={};
 const heldKeyboard=new Map();
-function releaseKeyboard(){for(const act of heldKeyboard.values())if(MOVE_ACTS[act])input[act]=false;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
+function releaseKeyboard(){for(const act of Object.keys(MOVE_ACTS))input[act]=false;input.jx=0;input.jz=0;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
 window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
 function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } try{ updateHudKeys(); }catch(e){} }
 function keyAction(code){ return _codeToAction[code]||null; }
@@ -9442,6 +9442,8 @@ ensureKeybinds();
    than a cached flag because the editor module loads after this script and toggles at any time. */
 function _edOpen(){ return !!(window.__bfEd && window.__bfEd.EDITOR && window.__bfEd.EDITOR.on); }
 window.addEventListener('keydown',e=>{
+  if(typeof _rebindState!=='undefined'&&_rebindState)return;
+  const test=document.getElementById('keyboardTest');if(test&&!e.metaKey&&!e.ctrlKey){const code=BFPartyNavigation.keyCode(e);test.textContent='Received '+code+' → '+(keyAction(code)||'not bound');}
   /* EDIT MODE OWNS THE KEYBOARD. Oliver, testing the editor: "when I try to press some of the keys,
      it moves my character around while I'm trying to do things." Nudging a platform with the arrow
      keys was also walking the hero across the level, and R/D/C/K are all bound to something.
@@ -9492,8 +9494,8 @@ window.addEventListener('keydown',e=>{
   if(act==='loot'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); cycleLootMode(); } return; }
   if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   if(act==='ping'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); dropPing(); } return; }
-  if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
-window.addEventListener('keyup',e=>{const code=BFPartyNavigation.keyCode(e),act=heldKeyboard.get(code)||keyAction(code);heldKeyboard.delete(code);if(act==='partyTeleport'){partyHeld=false;partyNeedsRelease=false;partyCancel();}if(act&&MOVE_ACTS[act])input[act]=[...heldKeyboard.values()].includes(act);});   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
+  if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } },true);
+window.addEventListener('keyup',e=>{const code=BFPartyNavigation.keyCode(e),act=heldKeyboard.get(code)||keyAction(code);heldKeyboard.delete(code);if(act==='partyTeleport'){partyHeld=false;partyNeedsRelease=false;partyCancel();}if(act&&MOVE_ACTS[act])input[act]=[...heldKeyboard.values()].includes(act);},true);   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
 // ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
 //    LB/RB/LT/RT = skills 1-4, Start = pause, right stick = camera (shoulder/first-person). Auto-detected. ──
 let _padPrev=[], _padSeen=false;
@@ -14031,10 +14033,12 @@ const MP={
   // the hub/zone would bounce them to the class-picker or intro story and they'd never load in. Give
   // them a ready starter (Warrior) so they drop in immediately; they can respec at the Drillmaster.
   ensureGuestReady(){
+    if(!MODE)loadMode('rl');
+    if(!meta.hero&&meta.run?.p?.gear)meta.hero=checkpointClone(meta.run.p);
     if(!meta.introSeen){ meta.introSeen=true; try{ persistGlobal(); }catch(e){} }
     if(!meta.classUnlocked || !Object.keys(meta.classUnlocked).length){
-      meta.classUnlocked={warrior:true}; meta.classId='warrior'; try{ classState('warrior'); }catch(e){}
-      if(!meta.hero){ try{ const p=freshPlayer(); p.weapon=classStartWeapon('warrior'); meta.hero=snapOf(p); }catch(e){} }
+      meta.classId=CLASSES[meta.classId]?meta.classId:'warrior';meta.classUnlocked={[meta.classId]:true};try{classState(meta.classId);}catch(e){}
+      if(!meta.hero){ try{ const p=freshPlayer(); p.weapon=classStartWeapon(meta.classId); meta.hero=snapOf(p); }catch(e){} }
       try{ persist(); }catch(e){}
     } },
   onGuestData(d){
@@ -14371,10 +14375,35 @@ function mpRoomBanner(code){ let el=document.getElementById('mpbanner');
   el.innerHTML='⚔️ PvP Room <b style="color:#ffd24a;font-family:ui-monospace,monospace;letter-spacing:.18em">'+code+'</b> — share it · waiting for your friend…';
   el.style.display='block'; }
 function mpHideBanner(){ const el=document.getElementById('mpbanner'); if(el) el.style.display='none'; }
+function partySaveChoices(){
+ const out=[];for(let slot=0;slot<3;slot++){const pre=slot?'s'+slot+'_':'';for(const m of ['rl','hc','hl']){const save=loadJSON('bladefall3d_'+pre+m);if(!save)continue;const hero=save.run?.checkpoint?.state?.hero||save.hero||save.run?.p;if(!hero?.gear)continue;out.push({slot,m,hero,name:save.heroName||'Unnamed Warden',cls:save.classId||'warrior',rank:save.classes?.[save.classId]?.rank||1});}}
+ return out;
+}
+function choosePartySave(kind,code='',pvp=false){
+ if(MP.active){toast('Leave your current room before switching characters.');return;}
+ autosaveRun();const rows=partySaveChoices();mode='menu';showGameUI(false);
+ showOverlayHTML(`<div class="card narrow"><p class="ovkicker">${kind==='host'?'Host':'Join'} Co-op</p><h2 class="ovh">Choose your saved character</h2><p class="ovsub">Your level, class ranks and equipment come with you. Progress saves to this character. Unfinished level progress follows the usual checkpoint rules.</p>${rows.map((r,j)=>`<button class="bigbtn ghost" data-party-save="${j}">${htmlSafe(r.name)} · Save ${r.slot+1}<br><small>${htmlSafe(CLASSES[r.cls]?.disp||r.cls)} · Level ${r.hero.level||1} · Rank ${r.rank} · ${r.m==='rl'?'Adventure':r.m==='hc'?'Hardcore':'Hitless'}</small></button>`).join('')||'<p class="ovsub">Create a character in a save slot first, then return here to play together.</p>'}<button class="bigbtn ghost" id="partyPickBack">Back</button></div>`);
+ document.getElementById('partyPickBack').onclick=openMPLobby;
+ document.querySelectorAll('[data-party-save]').forEach(btn=>btn.onclick=()=>{const r=rows[+btn.dataset.partySave];const intent={slot:r.slot,m:r.m,kind,code,pvp,at:Date.now()};
+  if(r.slot!==SLOT){try{sessionStorage.setItem('bf3_party_intent',JSON.stringify(intent));localStorage.setItem('bf3_slot',String(r.slot));}catch(e){toast('Could not switch save files. Please check browser storage.');return;}location.reload();}
+  else startPartySave(intent);
+ });
+}
+function startPartySave(intent){
+ if(!intent||intent.slot!==SLOT||!['rl','hc','hl'].includes(intent.m)||!['host','join'].includes(intent.kind)||Date.now()-intent.at>300000)return false;
+ // Load the selected save BEFORE any room handshake can create or advertise a character.
+ G=null;loadMode(intent.m);meta.diff=intent.m==='hc'?'hardcore':intent.m==='hl'?'hitless':'normal';MP.ensureGuestReady();
+ mode='menu';showGameUI(false);showOverlayHTML('<div class="card narrow"><h2 class="ovh">Connecting your character…</h2><p class="ovsub" id="partyConnectStatus">Loading your chosen save and opening the room.</p></div>');
+ const failure=info=>{mode='menu';showGameUI(false);showOverlayHTML('<div class="card narrow"><h2 class="ovh">Could not connect</h2><p class="ovsub">'+htmlSafe(info)+'. Your chosen save is still available.</p><button class="bigbtn" id="partyRetry">Try again</button><button class="bigbtn ghost" id="partyCancelConnect">Back</button></div>');document.getElementById('partyRetry').onclick=()=>startPartySave({...intent,at:Date.now()});document.getElementById('partyCancelConnect').onclick=openMPLobby;};
+ Promise.resolve(briarReady).then(()=>{if(intent.kind==='host')MP.host((ok,info)=>{if(!ok){failure(info);return;}if(intent.pvp){ARENA_LOADOUT.bots=0;enterArena();}else {resumeSavedAdventure();if(G&&!G.hub)MP.onEnter(G.zone);}mpRoomBanner(info);const banner=document.getElementById('mpbanner');if(!intent.pvp&&banner)banner.textContent='Co-op room '+info+' — share this code with your friends';},!!intent.pvp);
+ else {openHub();MP.join(intent.code,(ok,info)=>{if(!ok){failure(info);return;}toast('Joined '+info+' with '+(meta.heroName||'your saved character'));});}}).catch(e=>failure(e.message||'Please retry'));
+ return true;
+}
+
 function openMPLobby(){
   mode='menu'; showGameUI(false);
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Co-op · beta</p><h2 class="ovh">Multiplayer</h2>
-    <p class="ovsub">Play together. Needs an internet connection. One player <b>hosts</b> and shares the code; the other <b>joins</b> and drops into the host's world. Your single-player save is untouched.</p>
+    <p class="ovsub">Play together. Needs an internet connection. One player <b>hosts</b> and shares the code; the other <b>joins</b> and drops into the host's world. Choose a saved character before hosting or joining. Your progress belongs to that character.</p>
     <button class="bigbtn" id="mpHost">🤝 Host Co-op</button>
     <button class="bigbtn" id="mpHostPvp" style="background:linear-gradient(180deg,#c0533f,#8a2f24);margin-top:8px">⚔️ Host PvP Duel</button>
     <div id="mpHostInfo" style="display:none;margin:6px 0"><p class="ovsub" id="mpHostHint">Share this code, then start a game — friends who join land in your world.</p><div id="mpCode" style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--amber,#e8a33d);letter-spacing:.18em;text-align:center;margin:4px 0">····</div></div>
@@ -14383,48 +14412,10 @@ function openMPLobby(){
     <p class="ovsub" style="opacity:.45;font-size:11px;margin-top:2px">build ${VERSION3D}</p>
     <button class="bigbtn ghost" id="mpBack" style="margin-top:6px">Back</button></div>`);
   const st=(m,ok)=>{ const e=document.getElementById('mpStatus'); if(e){ e.textContent=m; e.style.color=ok?'var(--good,#3ad07f)':'var(--muted,#8b8f9a)'; } };
-  let _ctick=null; const stopTick=()=>{ if(_ctick){ clearInterval(_ctick); _ctick=null; } };
-  const connCountdown=()=>{ stopTick(); let s=0; st('Connecting… 0s'); _ctick=setInterval(()=>{ s++; st('Connecting… '+s+'s'); if(s>=24) stopTick(); }, 1000); };
-  document.getElementById('mpBack').onclick=()=>{ stopTick(); titleScreen(); };
-  /* THE GUEST'S HALF OF HOST-BEFORE-ENTER. A join can succeed completely against a host that has no
-     zone — and that is the NORMAL state at join time, not an exotic one: this lobby is reachable
-     only from the title screen (index.html:15014), so a host that has just pressed Host is standing
-     nowhere and MP.hasZone() is false. placeMsg() (:12441) then returns null, no 'zone' packet is
-     ever sent, and onGuestData never fires.
-     MEASURED on two real clients (harness/mp2/lobbywait.js, 2026-08-13): every other signal is
-     green — socket open, `hello` landed, peer lists populated in BOTH directions, host broadcasting
-     — while the guest's MP.zone is -1 and rseed 0. The old one-shot line sat there in the SUCCESS
-     colour, byte-identical across 44 samples in 22s. That is the bug: a lobby that is waiting
-     correctly and a lobby that will wait forever printed the same pixels.
-     So the line is LIVE. A counter first, because a moving number is the cheapest proof the page is
-     not hung; then, past 8s, the success colour goes and it says plainly what the HOST has to do,
-     since there is nothing the guest can do about it.
-     It stops itself on every exit, and the card being GONE is one of them: openMPLobby() builds a
-     fresh closure per visit, so an interval left over from a previous visit would be writing into
-     the NEXT card's status line. */
-  const waitHost=()=>{ stopTick(); const t0=Date.now();
-    const over=()=>!document.getElementById('mpStatus')||!MP.active||MP.hasZone();
-    const paint=()=>{ if(over()){ stopTick(); if(!MP.active) st('The host left — the party ended.'); return; }
-      const s=((Date.now()-t0)/1000)|0;
-      if(s<8) st('Connected! Waiting for the host to enter a zone… '+s+'s',true);
-      else st('Connected to '+MP.code+', but the host has not entered a zone yet ('+s+'s). Your connection is '
-        +'fine — they still have to start or continue a game. You drop in the moment they do.'); };
-    if(over()) return; paint(); _ctick=setInterval(paint,1000); };
-  const doHost=(pvp)=>{ connCountdown(); try{SFX.pickup();}catch(e){}
-    MP.host((ok,info)=>{ stopTick(); if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
-      const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
-      const cc=document.getElementById('mpCode'); if(cc) cc.textContent=info;
-      const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Dropping you into the arena lobby now — share this code and your friend joins straight into it. First to 5 wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
-      if(pvp){ st('PvP lobby ready — entering the arena…',true);
-        ARENA_LOADOUT.bots=0;   // clean player-vs-player lobby (host can add bots via the Arena Master)
-        setTimeout(()=>{ try{ MP.ensureGuestReady&&MP.ensureGuestReady(); enterArena(); mpRoomBanner(info); }catch(e){} }, 500);   // host drops straight into the PvP arena; the room code stays on-screen to share
-      } else { st('Hosting co-op. Press Back and start a game — friends who join land with you.',true); } }, pvp); };
-  document.getElementById('mpHost').onclick=()=>doHost(false);
-  document.getElementById('mpHostPvp').onclick=()=>doHost(true);
-  document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
-    if(!c){ st('Enter a room code.'); return; } connCountdown(); try{SFX.pickup();}catch(e){}
-    MP.join(c,(ok,info)=>{ stopTick(); if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':info==='timeout'?'Could not reach the host (timed out). Check the code, make sure they hosted, and retry.':'Could not join ('+info+'). Check the code.'); return; }
-      waitHost(); }); };
+  document.getElementById('mpBack').onclick=titleScreen;
+  document.getElementById('mpHost').onclick=()=>choosePartySave('host');
+  document.getElementById('mpHostPvp').onclick=()=>choosePartySave('host','',true);
+  document.getElementById('mpJoin').onclick=()=>{const code=document.getElementById('mpJoinCode').value.trim().toUpperCase();if(!code){st('Enter a room code.');return;}choosePartySave('join',code);};
 }
 /* ============================================================================
    THE ARENA — a fully save-protected sandbox + PvP battleground (solo or co-op).
@@ -16654,7 +16645,7 @@ function winScreen(bonus,D){
   document.getElementById('hubBtn').onclick=openHub;
 }
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
-function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); // free the mouse to click menus
+function showOverlay(v){if(!v&&overlay.contains(document.activeElement)){document.activeElement.blur();canvas.tabIndex=0;canvas.focus({preventScroll:true});}overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); // free the mouse to click menus
   if(v){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract'); if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); } }
 function titleEmbers(){ const host=document.getElementById('tembers'); if(!host) return; if(host.childElementCount) return;   // drifting embers behind the key art
   let h=''; for(let i=0;i<16;i++){ const dur=(7+Math.random()*9).toFixed(1), delay=(-Math.random()*12).toFixed(1), left=(Math.random()*100).toFixed(1), dx=((Math.random()*2-1)*70).toFixed(0), sz=(2+Math.random()*2.5).toFixed(1);
@@ -18278,7 +18269,8 @@ function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=(lv>0?` · t
   return `${PET_ARCH_TAG.utility} · ${petMaxHp(id)} HP · pulls loot within ${P.pull}${tag}`; }
 function petEquip(id){ if(!meta.petOwned.includes(id)) return; meta.petActive=id; if(G) G.pet=null; persist(); SFX.pickup(); }
 function petUnequip(){ meta.petActive=null; if(G) G.pet=null; persist(); SFX.pickup(); }
-function petBuy(id){ const P=PETS[id]; if(!P||P.questOnly||meta.petOwned.includes(id)) return; if(meta.gold<P.price){ toast('Not enough gold'); SFX.hurt(); return; }
+function petShopUnlocked(){return meta.returnVisits?.tracks==='done'||!!meta.hubUpgrades?.companionCare;}
+function petBuy(id){if(!petShopUnlocked()){toast('Rescue both trapped animals in Black Woods, then report to the Beastkeeper to unlock pet purchases.');return;} const P=PETS[id]; if(!P||P.questOnly||meta.petOwned.includes(id)) return; if(meta.gold<P.price){ toast('Not enough gold'); SFX.hurt(); return; }
   meta.gold-=P.price; meta.petOwned.push(id); if(!meta.petActive){ meta.petActive=id; if(G) G.pet=null; }
   playFx('buy'); SFX.achieve(); persist(); toast('🐾 '+petDisplayName(id)+' joins you'); }
 function petSell(id){ const P=PETS[id]; if(!P||P.questOnly||!meta.petOwned.includes(id)) return; const refund=Math.round(P.price*0.4);
@@ -18310,9 +18302,9 @@ function openBeastkeeper(back){
     return `<div class="petsection">Active companion</div><section class="pethero" style="--petcol:${col}"><img class="petheroart" src="${petIcon(active)}" alt="${htmlSafe(P.name)}"><div><div class="pettitle">${htmlSafe(petDisplayName(active))}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(active)}</div>${training(active)}</div><div class="petactions">${btn(max?'Fully trained':`Train · ${petTrainCost(active)}g`,max?'':`data-train="${active}"`,'',max)}${btn('Rename',`data-name="${active}"`,'ghost')}${btn('Stow','data-uneq="1"','ghost')}</div></section>`; })()
     :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
-  const shop=unowned.map(id=>petCard(id,'shop')).join('');
+  const shop=petShopUnlocked()?unowned.map(id=>petCard(id,'shop')).join(''):'';
   showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. They help; they never carry.</p></header>
-    ${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
+    ${!petShopUnlocked()?'<p class="ovsub">Pet purchases unlock after A Kinder Trail. Ask the Beastkeeper about rescuing both trapped animals in Black Woods. You can still manage companions you already own.</p>':''}${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
     <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
   const reopen=()=>openBeastkeeper(back);
   document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ petBuy(b.dataset.buy); reopen(); });
@@ -18785,7 +18777,7 @@ function openKeybinds(back){
   const rows=KEYACTIONS.map(a=>`<div class="kbrow"><span class="kblabel">${a.label}</span><div class="kbcaps">${cap(a,0)}${cap(a,1)}</div><button class="kbreset" data-r="${a.id}" title="Reset to default">↺</button></div>`).join('');
   showOverlayHTML(`<div class="card kbcard"><p class="ovkicker">Settings · Controls</p><h2 class="ovh">⌨️ Key Bindings</h2>
     <p class="ovsub">Choose either slot, then press a keyboard key or mouse button. <b>Esc</b> cancels. Every action holds two bindings. Menu keys (Esc, Enter) stay fixed.</p>
-    <div class="kblist">${rows}</div>
+    <p class="ovsub" id="keyboardTest" aria-live="polite">Control test: press W, A, S or D here to see what your browser sends.</p><div class="kblist">${rows}</div>
     <div class="kbfoot"><button class="bigbtn ghost" id="kbResetAll">↺ Reset all to defaults</button><button class="bigbtn" id="kbDone">Done</button></div></div>`);
   const rerender=()=>openKeybinds(back);
   document.getElementById('kbDone').onclick=()=>{ _rebindState=null; back(); };
@@ -18803,7 +18795,7 @@ function startRebind(id,slot,rerender){
     _rebindState=null; rebuildKeyLookup(); persistGlobal(); if(SFX&&SFX.pickup)SFX.pickup(); rerender(); };
   const onKey=(e)=>{ e.preventDefault(); e.stopPropagation();
     if(e.code==='Escape'){ cleanup(); _rebindState=null; rerender(); return; }                    // Esc cancels; menu keys stay fixed
-    bindCode(e.code); };
+    bindCode(BFPartyNavigation.keyCode(e)); };
   const onPointer=(e)=>{ if(e.pointerType!=='mouse') return; e.preventDefault(); e.stopPropagation(); bindCode('Mouse'+e.button); };
   const onContext=(e)=>{ if(_rebindState){ e.preventDefault(); e.stopPropagation(); } };
   window.addEventListener('keydown',onKey,true);
@@ -21826,8 +21818,9 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'){ try{autosaveRun();}catch(e){} } });
 window.addEventListener('pagehide',()=>{ try{autosaveRun();}catch(e){} });
 window.addEventListener('beforeunload',()=>{ try{autosaveRun();}catch(e){} });
-titleScreen();
-try{ if(sessionStorage.getItem('bf3_continue_after_slot')==='1'){
+let pendingParty=null;try{pendingParty=JSON.parse(sessionStorage.getItem('bf3_party_intent')||'null');sessionStorage.removeItem('bf3_party_intent');}catch(e){}
+if(!startPartySave(pendingParty))titleScreen();
+try{ if(!pendingParty&&sessionStorage.getItem('bf3_continue_after_slot')==='1'){
   sessionStorage.removeItem('bf3_continue_after_slot');
   if(titleScreen._reveal) titleScreen._reveal();
   setTimeout(modeSelect,0);
@@ -22309,7 +22302,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

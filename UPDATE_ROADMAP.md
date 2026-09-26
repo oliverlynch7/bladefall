@@ -1990,3 +1990,7 @@ Evidence correction: the earlier half-combat harness used nextArea and silently 
 Remaining: broader natural-route puzzle/shortcut/quest playability and moving-camera visual audit. Trial/Pyromancer kit and mounted combat/flight decisions remain open. This batch does not complete the entire approved queue.
 
 Final integration check: weapon knockback remains active and strong knockback interrupts a locked strike, preventing damage from the abandoned attack origin. Guest bodies face the shared aim during warnings/strikes. Defense suite now13 checks.
+
+
+## [Codex | 2026-09-25] Co-op combat presentation — 2.036
+Added visual-only relay for all 128 configured class skill identities and basic/charged weapon effects; persistent peer shields/guards; projectile spin and elevated/delayed shockwaves. Capture shots before collision removal. Scene checks and bounded duplicate suppression avoid replay across scenes. Browser two-context serialized host/guest relay: 8 checks passed (128 skills, 28 weapon effects, 15 projectile styles, poses/defenses, no damage replay, other-guest relay, dedupe, stale scene rejection). Existing co-op kill/reward regression: 7 passed. Pre-change save fixture preserved checkpoint/clue, pets, rank, gold, hub intro, return visits and disabled speech. This is controlled browser relay testing, not a two-device internet latency soak.

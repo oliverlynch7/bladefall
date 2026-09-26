@@ -24,8 +24,18 @@ function emit(g,id,p,origin,radius){
  const list=g.combatArt||(g.combatArt=[]);
  const life=profile.slot===3?1.05:.65;
  list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,origin,radius,t:0,life,serial:++serial});
- if(list.length>18)list.splice(0,list.length-18);
+ if(list.length>48)list.splice(0,list.length-48);
 }
+// Transfer only presentation data; receiving a cast never runs its gameplay function.
+function packet(e){return {id:e.profile.id,profile:e.profile.weapon?e.profile:null,x:e.x,y:e.y,z:e.z,yaw:e.yaw,origin:e.origin,radius:e.radius,t:e.t,life:e.life,serial:e.serial};}
+function receive(g,rows){for(const a of (Array.isArray(rows)?rows:[]).slice(0,48)){
+ if(!a||![a.x,a.y,a.z,a.yaw,a.life,a.t].every(Number.isFinite)||Math.abs(a.x)>1e7||Math.abs(a.z)>1e7)continue;
+ let profile=profiles[a.id];
+ if(a.profile?.weapon){const p=a.profile;if(!themes[p.cls]||!['slash','cross','execute','spiral','bash','lance','fan','bolt','quake'].includes(p.form))continue;profile={id:String(p.id||'').slice(0,64),cls:p.cls,form:p.form,slot:p.slot===2?2:-1,weapon:true,element:p.element};}
+ if(!profile)continue;const life=Math.min(3,Math.max(.05,a.life)),t=Math.max(0,a.t);if(t>=life)continue;
+ const origin=a.origin&&[a.origin.x,a.origin.y,a.origin.z].every(Number.isFinite)?{x:a.origin.x,y:a.origin.y,z:a.origin.z}:undefined;
+ (g.combatArt||(g.combatArt=[])).push({profile,x:a.x,y:a.y,z:a.z,yaw:a.yaw,origin,radius:Number.isFinite(a.radius)?Math.max(0,Math.min(2000,a.radius)):undefined,t,life,serial:a.serial,visual:true,_mp:1});
+ }if(g.combatArt?.length>48)g.combatArt.splice(0,g.combatArt.length-48);}
 function pose(p,id){
  const f=profiles[id].form;
  if(["dash","blink","ghost","dive","rise"].includes(f))return;
@@ -40,7 +50,7 @@ function weapon(g,p,cls,charged){
  const profile={id:w.arche,cls:cls||'warrior',form:charged?(chargeForms[w.chg]||'bolt'):(forms[art]||'slash'),slot:charged?2:-1,weapon:true,element:w.el};
  const list=g.combatArt||(g.combatArt=[]);
  list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:charged?.55:Math.max(.16,p.atkTimer||.24),radius:w.range||48,serial:++serial});
- if(list.length>18)list.splice(0,list.length-18);
+ if(list.length>48)list.splice(0,list.length-48);
 }
 function tick(g,dt){if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
 function render(g,d){
@@ -62,8 +72,8 @@ function render(g,d){
   const points=shapes[kind];for(let i=1;i<points.length;i++)line(points[i-1],points[i],1.7,col,alpha);popM();
  }
  // Persistent defenses use real gameplay state, not an arbitrary animation duration.
- const p=g.p;if(p&&(p.shieldHp>0||p.guardT>0)){
-  const [col,hot,kind]=themes[d.classId]||themes.warrior;
+ for(const p of [g.p,...(g.peerDefenses||[])])if(p&&(p.shieldHp>0||p.guardT>0)){
+  const [col,hot,kind]=themes[p.cid||d.classId]||themes.warrior;
   pushM();mv(p.x,p.y+4,p.z);rotY(p.yaw||0);
   for(let j=0;j<6;j++)motif(kind,31,23,j*Math.PI/3,col,.65);
   arc(31,7,0,Math.PI*2,hot,.4,1.3,24);popM();
@@ -170,5 +180,5 @@ function render(g,d){
  }
 
 }
-root.BF_COMBAT_ART={configure,profiles,emit,pose,weapon,tick,render,themes};
+root.BF_COMBAT_ART={configure,profiles,emit,pose,weapon,tick,render,themes,packet,receive};
 })(window);

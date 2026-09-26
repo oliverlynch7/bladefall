@@ -1064,7 +1064,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
-<script src="./combat-art.js?v=2029"></script>
+<script src="./combat-art.js?v=2036"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script>
@@ -1077,7 +1077,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.035.0-named-encounters';
+const VERSION3D='2.036.0-coop-combat';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13932,6 +13932,7 @@ const MP={
     return {ground:raw.ground!==false,vx:velocity(raw.vx),vy:velocity(raw.vy),vz:velocity(raw.vz),pose};
   },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
+    area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0}:null,
     cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petDisplayName(G.pet.id):undefined, zone:this.zone,
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
        is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
@@ -13945,12 +13946,12 @@ const MP={
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -14120,12 +14121,14 @@ const MP={
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
   placeMsg(){if(G?.trialSession)return partyTrialPacket(); if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
-  sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
+  combatScene(){return JSON.stringify([this.zone,G?.area,G?.runSeed,G?.trialSession||null,G?.floor||0,G?.brIdx||0]);},
+  sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null, art=null;
+    for(const e of G.combatArt||[])if(!e._mp&&!e.visual){e._mp=1;(art=art||[]).push(BF_COMBAT_ART.packet(e));}
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
-      [Math.round(pr.x),Math.round(pr.y),Math.round(pr.z),Math.round(pr.vx),Math.round(pr.vy),Math.round(pr.vz),pr.size||6,pr.color||'#fff',pr.shape||'orb',pr.el||0,pr.gravity||0,+(pr.life||1.4).toFixed(2),pr.glow?1:0,pr.trail||0]); } }
+      [Math.round(pr.x),Math.round(pr.y),Math.round(pr.z),Math.round(pr.vx),Math.round(pr.vy),Math.round(pr.vz),pr.size||6,pr.color||'#fff',pr.shape||'orb',pr.el||0,pr.gravity||0,+(pr.life||1.4).toFixed(2),pr.glow?1:0,pr.trail||0,pr.spin||0]); } }
     if(G.shockwaves) for(const s of G.shockwaves){ if(s._mp||s.visual||s.orchardId||(G.duel&&s.foeBot)) continue; s._mp=1; (sw=sw||[]).push(
-      [Math.round(s.x),Math.round(s.z),Math.round(s.r),Math.round(s.maxR),Math.round(s.spd||270),s.col||'#ffd24a',s.col2||'#c33',s.arc?+(s.arc.toFixed(2)):0,s.arc?+((s.dirX||0).toFixed(2)):0,s.arc?+((s.dirZ||0).toFixed(2)):0]); }
-    if(!proj&&!sw) return; const m={t:'cfx'}; if(proj)m.proj=proj; if(sw)m.sw=sw;
+      [Math.round(s.x),Math.round(s.z),Math.round(s.r),Math.round(s.maxR),Math.round(s.spd||270),s.col||'#ffd24a',s.col2||'#c33',s.arc?+(s.arc.toFixed(2)):0,s.arc?+((s.dirX||0).toFixed(2)):0,s.arc?+((s.dirZ||0).toFixed(2)):0,s.y||0,s.delay||0,s.fxType||null]); }
+    if(!proj&&!sw&&!art) return; const m={t:'cfx',by:this.myId,seq:(this._fxSeq=(this._fxSeq||0)+1),scene:this.combatScene()}; if(proj)m.proj=proj;if(sw)m.sw=sw;if(art)m.art=art;
     if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
     else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(m);}catch(e){} } },
   /* ---- world pings: same send-and-relay shape as sendCombat/recvCombat above ---- */
@@ -14144,9 +14147,13 @@ const MP={
     addMark(d.x,d.z,d.y||0,d.by,(d.n||'Ally').slice(0,14),(d.mid==null?null:d.mid));
     try{ SFX.pickup(); }catch(e){}
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
-  recvCombat(d,fromConn){ if(!G||G.storyState?.conversation) return;
-    if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0}); }
-    if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0}); }
+  recvCombat(d,fromConn){ if(!G||!d||G.storyState?.conversation) return;
+    if(this.isHost&&fromConn?._pid)d={...d,by:fromConn._pid};
+    if(d.by===this.myId||(d.scene&&d.scene!==this.combatScene()))return;
+    if(d.by&&Number.isSafeInteger(d.seq)){const key=d.by+':'+d.seq,seen=G._combatSeen||(G._combatSeen=new Set());if(seen.has(key))return;seen.add(key);if(seen.size>256)seen.delete(seen.values().next().value);}
+    BF_COMBAT_ART.receive(G,d.art);
+    if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0,spin:a[14]||0}); }
+    if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0,y:a[10]||0,delay:a[11]||0,fxType:a[12]||undefined}); }
     // host relays a guest's combat FX to the OTHER guests so everyone sees it
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
@@ -15386,6 +15393,8 @@ function update(dt){
   }
   // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
   for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }
+  // Capture even short-lived shots before their first collision/removal.
+  if(MP.active)MP.sendCombat();
   // projectiles
   for(const pr of G.projectiles){
     pr.life-=dt; if(pr.gravity) pr.vy-=pr.gravity*dt;
@@ -21115,6 +21124,7 @@ const SKYSUN={
    the end of a 300-line render function and is one frame late, i.e. invisible. */
 let _poseKeep = [];
 function render(t){
+  if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
   try{ if(window.__hero3dPoseSweep) window.__hero3dPoseSweep(_poseKeep); }catch(e){}
   _poseKeep = [];
   try{ dodgeEchoDraw(_poseKeep); }catch(e){}

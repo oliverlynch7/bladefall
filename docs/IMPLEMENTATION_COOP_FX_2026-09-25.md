@@ -6,3 +6,5 @@ User explicitly requests visible teammate skills, all weapon attacks and project
 
 ## [Codex | 2026-09-25] Co-op combat presentation — 2.036
 Added visual-only relay for all 128 configured class skill identities and basic/charged weapon effects; persistent peer shields/guards; projectile spin and elevated/delayed shockwaves. Capture shots before collision removal. Scene checks and bounded duplicate suppression avoid replay across scenes. Browser two-context serialized host/guest relay: 8 checks passed (128 skills, 28 weapon effects, 15 projectile styles, poses/defenses, no damage replay, other-guest relay, dedupe, stale scene rejection). Existing co-op kill/reward regression: 7 passed. Pre-change save fixture preserved checkpoint/clue, pets, rank, gold, hub intro, return visits and disabled speech. This is controlled browser relay testing, not a two-device internet latency soak.
+
+Production receipt: 8ae74e3 pushed to main. Live browser confirmed 2.036.0-coop-combat, HERO3D ready and BF_COMBAT_ART.receive loaded. Both peers must reload to send the new presentation events. Private decision archive validated all 195 source messages with zero unparsed lines.

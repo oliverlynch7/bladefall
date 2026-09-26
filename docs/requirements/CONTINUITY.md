@@ -715,3 +715,7 @@ Validation:19 browser guidance assertions using actual clue/puzzle transactions 
 Testing limits: route suites walk authored segments after preparing quest state, suppressing enemies; they are not a full natural campaign playthrough or a combat balance verdict. Old route harnesses needed max-rank preparation after faster XP introduced upgrade pauses; terminal-dialogue test now reopens the conversation after leaving, matching shipped behavior. Co-op uses controlled browser packet relay, not a two-device internet soak. Exact Brave/Mac keyboard confirmation remains outstanding.
 
 Next: continue U201 puzzle variety through spatial light routing in Sunspire and physical ice/water route manipulation in Frostfell; inspect existing hints/voice lines before authoring. These are proposed implementation directions under approved variety scope, not completed designs. Broader campaign moving-camera/playability audit, unresolved Pyromancer/trials and mounts remain open. Do not mark the whole queue or all puzzles complete.
+
+
+## [Codex | 2026-09-26] 2.039 production receipt
+Main ac4a9dd deployed. Read-only production Chromium confirms 2.039.0-campaign-guidance, renderer ready, and journal-clue, machinery and puzzle-feedback modules loaded. No live save or recording edits. Next: further distinct environmental puzzle designs and route review; this release redesigns Iron Halls only, not every campaign puzzle.

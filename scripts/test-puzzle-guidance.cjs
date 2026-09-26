@@ -1,0 +1,9 @@
+const assert=require('node:assert/strict'),F=require('../public/3d/puzzle-feedback.js'),J=require('../public/3d/journal-clues.js'),Q=require('../public/3d/journal-notice.js'),M=require('../public/3d/iron-machinery.js');
+const s=(items={},flags={})=>({items,flags});
+let n=F.notice({effects:[{type:'sequence',id:'test',solution:[2,1,3]},{type:'item',id:'tries',amount:1}]},s(),s({test:0}),{},'a');assert.equal(n.title,'Pattern reset');assert(!n.text.includes('2,1,3'));
+const q=Q.createQueue();q.reset('scene',{});for(let i=0;i<20;i++)q.push({...n,id:String(i),text:'Attempt '+i});assert.equal(q.pending,1);q.tick(0,true);q.push({...n,id:'new',text:'Latest'});assert.equal(q.pending,0);assert.equal(q.current.text,'Latest');q.push({id:'clue',text:'Keep this actual clue'});assert.equal(q.pending,1);q.reset('next',{});assert.equal(q.current,null);
+const g={p:{x:0,z:0,y:100},storyObjects:[{key:'ih.line.2',x:0,z:50,y:100}],storyState:{notes:{'ih.order':{title:'Machine plate',text:'Find the safe band.'}}}};assert.equal(J.related(g,null),'ih.order');delete g.storyState.notes['ih.order'];assert.equal(J.related(g,null),null,'undiscovered clues stay hidden');
+assert.equal(J.search([{title:'Old lift',text:'Add the weights'},{title:'Mirror',text:'Turn toward the sun'}],'LIFT weights').length,1);assert.equal(J.search([],'x').length,0);
+assert(!M.pressure(2.99).safe);assert(M.pressure(3).safe);assert(M.pressure(5.99).safe);assert(!M.pressure(6).safe);
+const game={iron:{clock:10,braceCount:0},storyState:s({'ih.line':2})};M.sync(game,s({'ih.braces':1}));assert.equal(game.iron.braceUntil,18);M.sync(game,s({'ih.braces':1}));assert.equal(game.iron.braceUntil,18);assert(M.available('ih.line.3',game));game.iron.clock=18;assert(!M.available('ih.line.3',game));assert(M.available('ih.brace',game));
+console.log('Puzzle notice coalescing, discovered-clue search, pressure boundaries, timed retry and duplicate synchronization passed.');

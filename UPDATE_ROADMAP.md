@@ -2003,3 +2003,7 @@ Browser checks:43 channel/input/presence/initial-target assertions;61 later-stat
 
 ## [Codex | 2026-09-25] 2.038 - Co-op saves and services
 Host/Join saved-character picker with direct world entry; hub quests separated from services; Beastkeeper rescue unlock; capture-phase keyboard input, analog priority, focus reset and received-key diagnostic. Browser and pre-change save checks pass. Brave/Mac device confirmation remains outstanding. See docs/IMPLEMENTATION_PARTY_SAVES_2026-09-25.md.
+
+
+## [Codex | 2026-09-26] 2.039 campaign guidance
+Searchable journal with relevant/exact clue access; advancing puzzle/guard markers; coalesced puzzle notices; Iron Halls physical pressure/cable/hammer challenge. Save, co-op, route, timing and phone UI checks passed. Full results and remaining variety work: docs/IMPLEMENTATION_CAMPAIGN_GUIDANCE_2026-09-26.md.

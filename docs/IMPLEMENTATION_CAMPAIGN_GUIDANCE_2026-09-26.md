@@ -1,0 +1,29 @@
+# Campaign guidance and route continuity
+
+## Grounded scope
+Continuation requested: “Ok what’s next for updates? Go ahead with a long Work session don’t waste usage”. Existing approved navigation, readable quest tracking and expanded-level playability requirements apply.
+
+Inspection: party-navigation.js keeps targeting consumed clue objects until the whole puzzle is solved in Hollow Canyon, prison, both Frostfell halves, both Emberdeep halves and Sunspire courtyard. Snowbound/ice quest text also retains the read-clue instruction. Prison transfer points to the consumed load plate during the timed rescue. Existing route tests cover authored waypoint walking but often start each branch separately; they are not full natural playthroughs. Sky Library route harness currently pauses on the newly faster class rank reward and needs explicit test-only max-rank preparation, not a gameplay pause bypass.
+
+Plan: transition clue guidance to a neutral center of required puzzle controls, never the correct answer or next solution input. Guide Hollow Canyon from balanced weights to the brake area. Track prisoner transfer at the lift. Use plain task labels and update quest wording after reading. Preserve optional-secret hiding, quest choice freedom, puzzle solutions, save fields and combat balance. Verify real story transactions at each puzzle, resets, completion destinations, saved-state restoration and existing route traversal. Audit mandatory combat blockers only where supported by authored metadata; do not invent new quests or canon.
+
+
+## [Codex | 2026-09-26] Puzzle variety and journal steering
+User: “I will say that a lot of puzzles were quite boring and all the same. Wish there was more variety and ingenuity. Also a lot of clues were hard to find in the journal after collecting still. Wasn’t intuitive”
+Approved correction: replace repetitive puzzle interactions with varied environmental mechanics; prioritize discovered relevant clues and make every found regional clue searchable. Current batch starts with a physical timed machine shutdown in Iron Halls rather than another three-button memorization sequence. Other puzzle redesigns remain queued; do not claim campaign-wide variety is complete. Preserve quest outcomes, secret ownership, co-op authority and saves.
+
+
+## [Codex | 2026-09-26] 2.039 campaign guidance, journal access and first puzzle redesign
+Sources U200/U201: requirements/USER_SOURCE_2026-09-26_PUZZLES.md. Private source archive:201 messages, zero unparsed records, valid references.
+
+Journal: discovered nearby puzzle clue shown above latest discoveries; main-puzzle fallback when not nearby. Open-journal notification and journal hotkey while a clue notice is present open that exact saved note. Search covers every collected note in the current region, including both halves; all notes also have one browsable list. Typed journal shortcut letters no longer close the search. No undiscovered clues shown. Repeat puzzle feedback replaces itself instead of queuing minutes of stale steps. Real clues keep reading time; internal attempt counters no longer masquerade as pickups for these puzzle events.
+
+Navigation: consumed clue destinations advance to neutral control groups in six retained main puzzles; balanced Canyon weights guide to the brake area, prison rescue tracks the lift. Seven authored required guard groups get a clear-guards marker until the interaction is usable. Snowbound/ice instructions advance after the clue is read. No correct code/sequence input is revealed.
+
+Iron Halls: first replacement of a repeated sequence with a physical shutdown. West feed -> visible pressure gauge safe band -> safety cable -> timed hammer lock, with distinct placements, tank/gauge and moving press. Eight lights/eight seconds; missed cable leaves prior steps complete and allows free retries. A normal walking route tested at6.128 seconds. Existing quest/loot/shard outcomes and completed saves remain. Host validates pressure/window; deadline and clock replicate. Flint reminder and machine-plate note now explain this design; one existing VO line changes wording and uses the established matching-recording fallback, no recordings modified.
+
+Validation:19 browser guidance assertions using actual clue/puzzle transactions and real scene guards;15 forge timing/movement/snapshot checks;41 Iron Halls and41 Sky Library route waypoints,54 Furnace and260 Long Ascent waypoints;9 controlled two-context Iron Halls co-op checks;7 existing press warning/damage checks; phone journal relevance/search/exact-notification/typing/overflow checks. Pure puzzle feedback/queue/clue/timing, story state/authority, journal and Iron Halls graph suites pass. Pre-change save preserves checkpoint/clue, pets, return quests, gold, class rank, hub intro and speech-off. Reviewed phone journal and shoulder-view gauge screenshot; moved gauge ahead of tank face to remove occlusion. Syntax and runtime diff checks pass. Exact source transcription retains original trailing whitespace.
+
+Testing limits: route suites walk authored segments after preparing quest state, suppressing enemies; they are not a full natural campaign playthrough or a combat balance verdict. Old route harnesses needed max-rank preparation after faster XP introduced upgrade pauses; terminal-dialogue test now reopens the conversation after leaving, matching shipped behavior. Co-op uses controlled browser packet relay, not a two-device internet soak. Exact Brave/Mac keyboard confirmation remains outstanding.
+
+Next: continue U201 puzzle variety through spatial light routing in Sunspire and physical ice/water route manipulation in Frostfell; inspect existing hints/voice lines before authoring. These are proposed implementation directions under approved variety scope, not completed designs. Broader campaign moving-camera/playability audit, unresolved Pyromancer/trials and mounts remain open. Do not mark the whole queue or all puzzles complete.

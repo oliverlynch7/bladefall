@@ -220,7 +220,7 @@
       }
     },
     "ih.flint.remind": {
-      "text": "Shelter first. Jack next. He needs handles from the western stores for his cart. At the controls, follow the machine plate. Stop the feed, let the pressure out, then stop the hammer. The safety vent will catch a mistake, but don’t make a hobby of it.",
+      "text": "Shelter first. Jack next. He needs handles from the western stores for his cart. At the machines, stop the feed and watch the pressure gauge. Vent it in the pale band. Then pull the safety cable and hurry to the hammer lock. Miss it? Pull the cable again. No prize for losing a hand.",
       "choices": [
         {
           "id": "back",
@@ -624,7 +624,7 @@
           "id": "ih.order",
           "region": "ember",
           "title": "Stop the weapon line",
-          "text": "The arrows lead from metal feed to pressure tank to hammer. Cut the feed, release pressure, stop the hammer. First move the workers into shelter."
+          "text": "Stop the metal feed at the west machine. Vent the pressure tank only when its needle reaches the pale safe band. Then pull the safety cable at the north end and reach the hammer lock before its eight lights go out. If you miss it, pull the cable again. The stopped feed and empty tank stay safe."
         }
       ]
     },
@@ -751,6 +751,30 @@
         {
           "flag": "ih.line.open",
           "is": false
+        }
+      ]
+    },
+    "ih.brace": {
+      "once": false,
+      "when": [
+        {
+          "flag": "ih.workers.safe",
+          "is": true
+        },
+        {
+          "flag": "ih.plate",
+          "is": true
+        },
+        {
+          "flag": "ih.line.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "item",
+          "id": "ih.braces",
+          "amount": 1
         }
       ]
     }

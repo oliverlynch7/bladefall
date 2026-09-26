@@ -16,7 +16,7 @@ const paths={
  exit:[[0,-4450,180],[0,-4900,180],[0,-5460,180]]
 };
 const flag=(s,k)=>!!s.flags[k],ready=s=>flag(s,'ic.ellis.lead')&&flag(s,'ic.lock.open');
-function quest(s){return !flag(s,'ic.pages')?'Follow the dropped pages into the caves':!flag(s,'ic.free')?'Reach the hidden laboratory and release Ellis':!flag(s,'ic.ellis.met')?'Speak to Professor Ellis in the laboratory':!flag(s,'ic.notes')?'Recover Ellis’s sealed notes from the fallen research pack':!flag(s,'ic.ellis.lead')?'Bring the sealed notes back to Ellis':!flag(s,'ic.lock.open')?'Read the waterworks plate and open the ice crossing':'Reach the north cavern — three Legion officers guard the exit';}
+function quest(s){return !flag(s,'ic.pages')?'Follow the dropped pages into the caves':!flag(s,'ic.free')?'Reach the hidden laboratory and release Ellis':!flag(s,'ic.ellis.met')?'Speak to Professor Ellis in the laboratory':!flag(s,'ic.notes')?'Recover Ellis’s sealed notes from the fallen research pack':!flag(s,'ic.ellis.lead')?'Bring the sealed notes back to Ellis':!flag(s,'ic.lock.open')?(flag(s,'event.ic.lock.clue')?'Use the water controls to build the ice crossing':'Read the waterworks plate and open the ice crossing'):'Reach the north cavern — three Legion officers guard the exit';}
 function status(G){return {guards:G.enemies.filter(e=>e.iceGuard&&!e.dead&&e.hp>0).length,rescueT:G.iceCaves.rescueT};}
 function available(key,G,remote){return key!=='ic.free'||!(remote||status(G)).guards;}
 function build({G,seg,plat,solid,spawn}){

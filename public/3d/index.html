@@ -1064,7 +1064,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
-<script src="./combat-art.js?v=2036"></script>
+<script src="./party-navigation.js?v=2037"></script>
+<script src="./combat-art.js?v=2037"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script>
@@ -1077,7 +1078,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.036.0-coop-combat';
+const VERSION3D='2.037.0-party-navigation';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1108,7 +1109,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -9415,6 +9416,8 @@ const KEYACTIONS=[
   /* ensureKeybinds() fills any newly-added action into an existing save, so this arrives on old
      profiles without touching a binding anyone has customised. */
   {id:'ping',    label:'Ping the World',    def:['KeyG']},
+  {id:'partyTeleport',label:'Hold to teleport to friend',def:['KeyT']},
+  {id:'partyNext',label:'Select next friend',def:['KeyY']},
   {id:'journal', label:'Open Journal', def:['KeyN']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
@@ -9429,6 +9432,9 @@ function ensureKeybinds(){ if(!meta.keybinds||typeof meta.keybinds!=='object') m
   if(Array.isArray(meta.keybinds.loot)&&meta.keybinds.loot.includes('KeyQ')&&!meta.keybinds.loot.includes('Tab')) meta.keybinds.loot=meta.keybinds.loot.map(c=>c==='KeyQ'?'Tab':c);   // migrate: Q now sells a drop; auto-loot cycle moved to Tab
   rebuildKeyLookup(); try{ updateHudKeys(); }catch(e){} }
 let _codeToAction={};
+const heldKeyboard=new Map();
+function releaseKeyboard(){for(const act of heldKeyboard.values())if(MOVE_ACTS[act])input[act]=false;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
+window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
 function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } try{ updateHudKeys(); }catch(e){} }
 function keyAction(code){ return _codeToAction[code]||null; }
 ensureKeybinds();
@@ -9473,9 +9479,11 @@ window.addEventListener('keydown',e=>{
       if(fresh){ const btns=document.querySelectorAll('.choice,.c2opt'); if(btns[pickMap[e.code]]) btns[pickMap[e.code]].click(); }
       return; }
   }
-  const act=keyAction(e.code); if(!act) return;
+  const code=BFPartyNavigation.keyCode(e),act=keyAction(code); if(!act) return;
+  if(act==='partyTeleport'){e.preventDefault();if(mode==='play'&&!e.repeat){partyHeld=true;partyNeedsRelease=false;}return;}
+  if(act==='partyNext'){e.preventDefault();if(mode==='play'&&!e.repeat){partyCancel();const a=partyFriends(),q=partySelected();partyChoice=a[(a.indexOf(q)+1)%a.length]?.id||null;}return;}
   if(act==='journal'){if(!e.repeat&&(mode==='play'||mode==='pause')){e.preventDefault();openJournal();}return;}
-  if(MOVE_ACTS[act]){ e.preventDefault(); initAudio();
+  if(MOVE_ACTS[act]){ if(mode!=='play')return;heldKeyboard.set(code,act);e.preventDefault(); initAudio();
     if(act==='jump'&&!input.jump) input.jumpEdge=true; if(act==='dodge'&&!input.dodge) input.dodgeEdge=true; input[act]=true; return; }
   if(/^skill[1-4]$/.test(act)){ if(mode==='play'&&!e.repeat){ e.preventDefault(); useSkill(+act.slice(5)-1); } return; }
   if(act==='lootEquip'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootEquipCurrent(); } return; }
@@ -9485,7 +9493,7 @@ window.addEventListener('keydown',e=>{
   if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   if(act==='ping'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); dropPing(); } return; }
   if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
-window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
+window.addEventListener('keyup',e=>{const code=BFPartyNavigation.keyCode(e),act=heldKeyboard.get(code)||keyAction(code);heldKeyboard.delete(code);if(act==='partyTeleport'){partyHeld=false;partyNeedsRelease=false;partyCancel();}if(act&&MOVE_ACTS[act])input[act]=[...heldKeyboard.values()].includes(act);});   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
 // ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
 //    LB/RB/LT/RT = skills 1-4, Start = pause, right stick = camera (shoulder/first-person). Auto-detected. ──
 let _padPrev=[], _padSeen=false;
@@ -11333,6 +11341,7 @@ function autoAtkTarget(p,w){
   return t;
 }
 function playerAttack(cdMul){
+  if(partyChannel)return;
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
   /* SWIFT STEEL, rewritten. Was "+10% attack speed" - invisible. Now every FOURTH swing costs no
@@ -11405,7 +11414,7 @@ function beginThrownWeapon(p,w,returns){
   p.throwHideT=returns?2.25:0.36; return p.throwToken;
 }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
-function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
+function chargeRelease(p,w,amt){ if(partyChannel)return; if(!classFamilyOk(w)) return;
   const previousSwing=p.swingId||0;
   if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
   else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
@@ -12248,6 +12257,7 @@ SKILL_FX.chr_overload= SKILL_FX.chr_overload|| SKILL_FX.m_overload;   // chronom
    two copies of a leash is how a pet ends up ordered somewhere it is not allowed to go. */
 const PET_LEASH=460;
 function useSkill(i){
+  if(partyChannel){partyCancel('Skill interrupted your teleport');}
   /* Attunement: each cast advances the Mage's element, so a ten-second window walks the whole
      reaction table instead of repeating one. */
   try {
@@ -13288,6 +13298,7 @@ const CLASS_BASIC = {
 };
 
 function hurtPlayer(dmg,sx,sz,by){
+  partyCancel('Hit interrupted your teleport');
   dmg = Math.max(1, Math.round(dmg));   // same fix as hitEnemy: never show the player a fractional hit either
   /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
      hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving
@@ -13932,7 +13943,7 @@ const MP={
     return {ground:raw.ground!==false,vx:velocity(raw.vx),vy:velocity(raw.vy),vz:velocity(raw.vz),pose};
   },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
-    area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0}:null,
+    tw:p?.warpSerial||0,area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0,warp:p.warp||0}:null,
     cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petDisplayName(G.pet.id):undefined, zone:this.zone,
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
        is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
@@ -13946,12 +13957,12 @@ const MP={
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -14888,6 +14899,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arBack').onclick=back||titleScreen;
 }
 function update(dt){
+  partyTravelTick(dt);partyHud();
   if(!G?.kingFinal)document.getElementById('finalCharge')?.remove();
   if(G?.voyage||document.getElementById('voyagehud'))voyageHud();
   if(briarPending&&performance.now()-briarPending.sent>650)briarSendPending();
@@ -18881,6 +18893,8 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="particlesBtn">✨ Particles: ${meta.particles!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="objectiveArrowsBtn">Main objective arrows: ${meta.objectiveArrows!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="friendArrowsBtn">Friend arrows: ${meta.friendArrows!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
@@ -18895,6 +18909,7 @@ function openPauseSettingsV2(){
     <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
+  for(const key of ['objectiveArrows','friendArrows'])document.getElementById(key+'Btn').onclick=()=>{meta[key]=meta[key]===false;persistGlobal();openPauseSettingsV2();};
   document.getElementById('settingsBack').onclick=openPauseV2;
   document.getElementById('fsBtn').onclick=()=>{ toggleFullscreen(); setTimeout(openPauseSettingsV2,120); };
   document.getElementById('camBtn').onclick=()=>{ const o=['far','shoulder','fps']; meta.camMode=o[(o.indexOf(meta.camMode)+1)%3]; persist(); openPauseSettingsV2(); };
@@ -21053,8 +21068,65 @@ function drawHpBars(){
       c.fillStyle='rgba(5,6,10,.88)'; c.beginPath(); c.arc(px+15,y+15,4.5,0,Math.PI*2); c.fill();
       c.fillStyle='#fff'; c.fillText(cnt,px+15,y+15); } }
   drawThreatArrows(c);
-  drawQuestPointer(c);
+  drawCanyonWind(c);drawNavigation(c);
 }
+// Party travel is presentation plus a local safe relocation, never quest progression.
+let partyChoice=null,partyHeld=false,partyNeedsRelease=false,partyChannel=null;
+function partyPeers(){return !MP.active||MP.pvp||!G?[]:Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.last<3).sort((a,b)=>a.id.localeCompare(b.id));}
+function partyFriends(){return partyPeers().filter(q=>q.hp>0&&!q.downed);}
+function partySelected(){const a=partyFriends();return a.find(q=>q.id===partyChoice)||a[0];}
+function partyCancel(message){if(partyChannel&&message)toast(message,'#c3b0ff');partyChannel=null;if(G?.p){G.p.warp=0;if(G.p.combatPose?.partyWarp)G.p.combatPose.remaining=0;}if(partyHeld)partyNeedsRelease=true;}
+function partyLanding(q){
+ if(!q||q.motion?.ground===false)return null;
+ const p=G.p,r=p.r||13;
+ for(const radius of [65,95,125])for(let j=0;j<12;j++){
+  const x=q.x+Math.sin(j*Math.PI/6)*radius,z=q.z+Math.cos(j*Math.PI/6)*radius,y=floorAt(x,z,r,(q.y||0)+20);
+  if(!Number.isFinite(y)||Math.abs(y-(q.y||0))>24)continue;
+  const blocked=[...(G.walls||[]),...(G.obstacles||[]),...(G.doors||[]).filter(o=>!o.open)].some(o=>{const bottom=o.y0||0,top=o.h||0;return top>y+3&&bottom<y+(p.h||40)&&Math.abs(x-o.x)<(o.w||0)/2+r&&Math.abs(z-o.z)<(o.d||0)/2+r;});
+  if(blocked||(G.enemies||[]).some(e=>!e.dead&&Math.hypot(e.x-x,e.z-z)<(e.r||15)+r+20&&Math.abs(e.y-y)<60))continue;
+  if((G.spikefields||[]).some(h=>Math.hypot(h.x-x,h.z-z)<(h.r||Math.max(h.w||60,h.d||60))+r))continue;
+  return {x,y,z};
+ }return null;
+}
+function partyTravelTick(dt){
+ const p=G?.p,q=partySelected(),allowed=mode==='play'&&MP.active&&!MP.pvp&&p&&p.hp>0&&!p.downed&&!G.voyage&&!G.kingFinal&&!_edOpen();
+ if(!allowed){partyCancel();return;}
+ if(partyChannel){
+  const same=partyChannel.scene===MP.combatScene()&&q?.id===partyChannel.id;
+  if(!partyHeld||!same||!q||Math.abs(moveX())+Math.abs(moveZ())>.1||input.jump||input.dodge||Math.hypot(p.x-partyChannel.x,p.z-partyChannel.z)>8||Math.abs(p.y-partyChannel.y)>8){partyCancel('Teleport cancelled');return;}
+  partyChannel.t+=Math.min(dt,.1);p.warp=partyChannel.t;p.combatPose={serial:partyChannel.serial,clip:'Spell2',remaining:.3,partyWarp:true};
+  if(partyChannel.t>=3){const dest=partyLanding(q);if(!dest){partyCancel('No safe landing beside your friend yet');return;}
+   const profile=Object.keys(BF_COMBAT_ART.profiles).find(id=>BF_COMBAT_ART.profiles[id].cls==='mage'&&BF_COMBAT_ART.profiles[id].form==='blink');
+   if(profile)BF_COMBAT_ART.emit(G,profile,p);Object.assign(p,dest,{vx:0,vy:0,vz:0,onGround:true,charging:false,chargeAmt:0});G.lastSafe={...dest};p.warpSerial=(p.warpSerial||0)+1;if(profile)BF_COMBAT_ART.emit(G,profile,p);SFX.magic('arcane');partyCancel();toast('Arrived beside '+q.name,'#79ddff');
+  }
+ }else if(partyHeld&&!partyNeedsRelease&&q){
+  if(!p.onGround||Math.abs(moveX())+Math.abs(moveZ())>.1||input.jump||input.dodge){partyNeedsRelease=true;toast('Stand still on solid ground to teleport');return;}
+  partyChoice=q.id;partyChannel={id:q.id,scene:MP.combatScene(),x:p.x,y:p.y,z:p.z,t:.01,serial:Date.now()};p.warp=.01;p.charging=false;p.chargeAmt=0;SFX.magic('arcane');
+ }
+}
+function partyHud(){
+ let el=document.getElementById('partyTravel');if(!el){el=document.createElement('div');el.id='partyTravel';el.style.cssText='position:fixed;left:14px;top:43%;max-width:min(240px,42vw);padding:10px 13px;border:1px solid #697697;border-radius:10px;background:#111827de;color:#daefff;font:13px system-ui;pointer-events:none;z-index:8';document.body.appendChild(el);}
+ const q=partySelected(),a=partyFriends(),far=q&&Math.hypot(q.x-G.p.x,q.z-G.p.z)>850;
+ el.hidden=mode!=='play'||!q||G.voyage||G.kingFinal||(!far&&!partyChannel);if(el.hidden)return;
+ const key=id=>keyLabel(meta.keybinds?.[id]?.[0]||'');
+ el.textContent=partyChannel?'Teleporting to '+q.name+' · '+Math.ceil((3-partyChannel.t)*10)/10+'s — keep holding '+key('partyTeleport'):'Far from '+q.name+' · Hold '+key('partyTeleport')+' for 3 seconds'+(a.length>1?' · '+key('partyNext')+' next friend ('+(a.indexOf(q)+1)+'/'+a.length+')':'')+' · Hits cancel teleport';
+}
+function drawNavigation(c){
+ if(!G||mode!=='play')return;
+ const main=meta.objectiveArrows!==false?BFPartyNavigation.target(G):null;
+ const friends=meta.friendArrows!==false?partyPeers():[];
+ const markers=[...(main?[{o:main,color:'#ffe07a',label:'Main objective'}]:[]),...friends.map(q=>({o:q,color:'#75ddff',label:q.name+(q.downed?' · Needs help':'')}))];
+ for(const {o,color,label}of markers){
+  const sp=project(o.x,(o.y??o.y0??0)+65,o.z),cx=VW/2,cy=VH/2,mx=Math.max(50,cx-150*DPR),my=Math.max(50,cy-175*DPR);
+  let dx,dy;if(sp){dx=sp[0]-cx;dy=sp[1]-cy;}else{const rel=Math.atan2(o.x-G.p.x,o.z-G.p.z)-(G.camYaw??Math.PI);dx=Math.sin(rel);dy=Math.cos(rel)>0?-1:1;}
+  const inside=sp&&Math.abs(dx)<mx&&Math.abs(dy)<my,scale=inside?1:Math.min(mx/Math.max(.001,Math.abs(dx)),my/Math.max(.001,Math.abs(dy)));
+  const x=cx+dx*scale,y=cy+dy*scale,ang=inside?Math.PI/2:Math.atan2(dy,dx);
+  c.save();c.translate(x,y);c.rotate(ang);c.fillStyle=color;c.strokeStyle='#101521';c.lineWidth=2*DPR;c.beginPath();c.moveTo(10*DPR,0);c.lineTo(-7*DPR,-6*DPR);c.lineTo(-7*DPR,6*DPR);c.closePath();c.fill();c.stroke();c.restore();
+  c.save();c.font='600 '+11*DPR+'px system-ui';c.textAlign='center';c.strokeStyle='#101521';c.lineWidth=4*DPR;c.fillStyle=color;
+  const height=(o.y??o.y0??0)-G.p.y,caption=label+(height>70?' ↑':height< -70?' ↓':'');const tx=Math.max(75*DPR,Math.min(VW-75*DPR,x)),ty=y-15*DPR;c.strokeText(caption,tx,ty);c.fillText(caption,tx,ty);c.restore();
+ }
+}
+
 // Phase 11: off-screen threat arrows — edge indicators pointing at nearby enemies you can't see
 // (a 3D camera + auto-aim makes off-camera cheap-shots unfair; only in the aiming cameras where it matters)
 function drawThreatArrows(c){
@@ -21124,7 +21196,7 @@ const SKYSUN={
    the end of a 300-line render function and is one frame late, i.e. invisible. */
 let _poseKeep = [];
 function render(t){
-  if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
+  if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,warp:q.def?.warp||0,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
   try{ if(window.__hero3dPoseSweep) window.__hero3dPoseSweep(_poseKeep); }catch(e){}
   _poseKeep = [];
   try{ dodgeEchoDraw(_poseKeep); }catch(e){}
@@ -22306,6 +22378,7 @@ window.__BF3={cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestParty
   runDuelOnce, duelMatrix,
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,
+  partyTravel:{tick:partyTravelTick,cancel:partyCancel,landing:partyLanding,friends:partyFriends,selected:partySelected,get channel(){return partyChannel;},get held(){return partyHeld;}},
   floorAt:(x,z)=>G?floorAt(x,z,13,0):null,   // debug: walkable floor height at x/z (-Infinity = void/no ground)
   get NO_POS_SYNC(){ return NO_POS_SYNC; },  // so a probe can say WHY it measured no correction, not just that it did not
   // PLAYTEST CAMERA: teleport the hero to a vantage point + aim the overhead camera + force a render, so an

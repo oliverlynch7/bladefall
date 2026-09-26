@@ -572,3 +572,7 @@ Continue U189 optional miniboss requirements: four existing named ground elites 
 
 ## [Codex | 2026-09-25] U195 — co-op combat visibility
 User explicitly requests visible teammate skills, all weapon attacks and projectiles. Inspection: presence already carries body/cast poses, but cfx only relays basic projectile arrays and shockwaves. New combatArt identity effects are never relayed; persistent defense presentation only reads the local player. Implement bounded visual-only effect transfer, persistent teammate defenses, retained projectile styles, shockwave height/timing, scene isolation and duplicate suppression. Never execute remote SKILL_FX or duplicate combat damage. Verify all configured skill profiles, basic/charge weapon families, body poses, relay/echo and scene changes in real browsers; preserve saves.
+
+
+## [Codex | 2026-09-25] U196 — party travel and navigation
+Approved interruptible held teleport, teammate cycling and distant-party hint; gold main-objective arrows and cyan friend arrows; Mac movement input investigation. Exact source: requirements/USER_SOURCE_2026-09-25_PARTY_NAV.md. Grounded plan: IMPLEMENTATION_PARTY_NAV_2026-09-25.md. Teleport uses T for three seconds, Y cycles; both rebindable. Same scene only, no PvP/ship/finale scene skips; supported landing; movement/hits/release/menu/focus loss interrupt. Independent saved arrow toggles. Keyboard code fallback and held-key focus cleanup preserve existing bindings; exact Mac symptom not reproduced on the development PC.

@@ -612,3 +612,7 @@ Approved: larger full character preview; unmistakable naming; repair eye color; 
 ## [Codex | 2026-09-27] Immediate new-player experience improvements
 
 User: What else can we improve for a new players experience? Make some clear improvements now. Implemented focused instructions/help and class-choice confirmation; evidence: IMPLEMENTATION_FIRST_STEPS_2026-09-27.md. Full natural-route first-session playtest and illustrated opening remain unfinished.
+
+
+## [Codex | 2026-09-27] Supplied opening illustrations
+User: “Here are the 5 pngs for opening scene”. Five supplied files are JPEGs; preserve originals and integrate in provided order. Manual readable story cards, no late-game spoilers; canonical Ian death of old age and Briar defense. Runtime art direction otherwise remains undecided.

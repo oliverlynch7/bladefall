@@ -745,3 +745,6 @@ User explicitly requests larger uncropped centered character preview, obvious ch
 ## [Codex | 2026-09-27] New-player first steps
 
 User asks for immediate new-player improvements. 2.041.0 implements accurate rebound-control practice instructions, skip confirmation, focused hub guidance, plain-language contextual tips, direct pause Help with search, and review/confirm for class skill/passive choices. Evidence: docs/IMPLEMENTATION_FIRST_STEPS_2026-09-27.md; scripts/qa-first-steps.cjs and existing-save regression. Opening illustration sequence remains pending, no visual-identity commitment or SFX work.
+
+## [Codex | 2026-09-27] Illustrated opening
+2.042.0: supplied five opening illustrations integrated, canonical spoiler-safe text, manual navigation and creator handoff. Tests and scope: docs/IMPLEMENTATION_OPENING_2026-09-27.md. Other legacy story entries still need a separate canon audit.

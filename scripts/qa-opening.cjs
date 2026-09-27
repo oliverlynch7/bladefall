@@ -1,0 +1,9 @@
+async page=>{
+ await page.goto('http://127.0.0.1:4331/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&HERO3D?.ready);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1440,height:900});
+ await page.evaluate(()=>{window.openingDone=0;__BF3.playStory(__BF3.STORY.origin,()=>window.openingDone++);});
+ for(let i=0;i<5;i++){await page.waitForFunction(()=>document.querySelector('#openingArt').complete&&document.querySelector('#openingArt').naturalWidth===1280);if(!await page.locator('#openingCount').innerText().then(t=>t.includes((i+1)+' / 5')))throw Error('Bad card');if(i===0){await page.waitForTimeout(5000);if(!await page.locator('#openingCount').innerText().then(t=>t.includes('1 / 5')))throw Error('Auto advanced');await page.screenshot({path:'output/playwright/opening-desktop.png'});}if(i<4)await page.locator('#openingNext').click();}
+ await page.locator('#openingBack').click();await page.keyboard.press('ArrowRight');await page.locator('#openingNext').click();if(await page.evaluate(()=>openingDone)!==1)throw Error('completion');
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>__BF3.playStory(__BF3.STORY.origin,()=>window.openingDone++));for(let i=0;i<4;i++)await page.locator('#openingNext').click();await page.screenshot({path:'output/playwright/opening-phone.png'});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Overflow');await page.locator('#openingSkip').click();if(await page.evaluate(()=>openingDone)!==2)throw Error('skip');
+ await page.evaluate(()=>__BF3.playStory(__BF3.STORY.origin,()=>window.openingDone++));await page.keyboard.press('Escape');if(await page.locator('#openingStory').count())throw Error('Escape');if(errors.length)throw Error(errors.join('\n'));return {fiveImagesLoaded:true,manualPacing:true,backAndKeyboard:true,completionOnce:true,skip:true,phone:true,errors};
+}

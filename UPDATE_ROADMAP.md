@@ -2015,3 +2015,6 @@ Larger responsive character creator, explicit naming, class explanations, actual
 ## 2.041.0-first-steps — 2026-09-27
 
 New-player instructions use current controls, practice skip confirmation, concise next-step hub guidance, searchable Help directly from Pause, and explicit class upgrade review/confirmation. Browser and pre-change-save checks passed; see docs/IMPLEMENTATION_FIRST_STEPS_2026-09-27.md.
+
+## [Codex | 2026-09-27] 2.042.0 — Illustrated opening
+Five supplied originals, simple canonical opening, manual pacing and responsive layout. Hub intro corrected. Fresh New Game, desktop/phone navigation and prechange save regression passed; see docs/IMPLEMENTATION_OPENING_2026-09-27.md.

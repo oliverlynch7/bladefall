@@ -1,0 +1,3 @@
+async page=>{
+ const c=await page.context().browser().newContext({viewport:{width:1280,height:800}});const p=await c.newPage();try{await p.goto('http://127.0.0.1:4331/3d/?mute=1');await p.waitForFunction(()=>window.__BF3&&HERO3D?.ready);await p.keyboard.press('Enter');await p.locator('#mmNew').click();await p.locator('#openingStory').waitFor();if(await p.evaluate(()=>__BF3.meta.originSeen))throw Error('Marked before finish');for(let i=0;i<5;i++)await p.locator('#openingNext').click();if(!await p.evaluate(()=>__BF3.meta.originSeen))throw Error('Not marked');await p.locator('#ccName').waitFor({timeout:3000});return {freshNewGame:true,creatorHandoff:true};}finally{await c.close();}
+}

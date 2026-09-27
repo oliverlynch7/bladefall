@@ -969,6 +969,17 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 
 #bosshpwrap.officer-team{top:calc(env(safe-area-inset-top) + 294px);width:min(580px,82vw)}
 @media(min-width:840px) and (pointer:fine){#bosshpwrap.officer-team{top:202px}}
+
+#openingStory{position:fixed;inset:0;z-index:1000;background:#0b0d12;display:flex;flex-direction:column;overflow:auto;color:#fff}
+#openingArt{width:100%;min-height:0;flex:1;object-fit:contain;display:block}
+.openingCopy{flex-shrink:0;padding:18px max(24px,calc((100vw - 880px)/2)) max(18px,env(safe-area-inset-bottom));background:#10131b;text-align:left}
+#openingCount{font-size:12px;letter-spacing:2px;color:#d9bd82;margin:0 0 6px}
+#openingTitle{font-size:clamp(21px,3vw,30px);margin:0 0 8px}
+#openingText{font-size:clamp(17px,2vw,21px);line-height:1.55;margin:0 0 16px;max-width:880px}
+.openingCopy nav{display:flex;gap:10px;flex-wrap:wrap}.openingCopy button{min-height:44px;padding:10px 20px;border:1px solid #82745a;border-radius:7px;background:#242a36;color:white;font:inherit;cursor:pointer}
+.openingCopy button:disabled{opacity:.4;cursor:default}#openingNext{background:#dfbf79;color:#19170f;font-weight:bold}.openingCopy button:focus-visible{outline:3px solid #fff;outline-offset:3px}.openingCopy small{display:block;color:#b9c1cf;margin-top:12px}
+@media(max-width:600px){#openingArt{flex:0 0 auto;height:auto;aspect-ratio:16/9;margin-top:auto}.openingCopy{padding:18px 18px max(20px,env(safe-area-inset-bottom));margin-bottom:auto}.openingCopy button{padding:10px 13px}}
+
 </style>
 </head>
 <body>
@@ -1081,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.041.0-first-steps';
+const VERSION3D='2.042.0-illustrated-opening';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1224,27 +1235,17 @@ function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold
    Delivery: a text intro cutscene once per save, a card the first time you enter a
    zone, a line when a boss reveals, and endings that vary by difficulty. */
 const STORY={
-  // The OPENING — plays once at New Game, before you choose a class. Sets up the world, the threat,
-  // Ian's fall, and who you are: an ordinary guardian stepping up because no one else will.
+  // Spoiler-safe opening. Supplied illustrations remain unchanged JPEG originals.
   origin:[
-    "Something has been waking beneath the world for a long time. People call it the Abyss King.",
-    "His corruption creeps upward — it twists animals into monsters, raises the dead, and rots every land it touches.",
-    "The towns are losing ground. Every year there is a little less left to protect.",
-    "There used to be an answer. Rare warriors called the Bladeborn carried a power that could hold the King back.",
-    "The last of them was Ian. He was humanity's best hope — and he fell in the Abyss before the fight was finished.",
-    "That was years ago. No new Bladeborn has risen since. The bloodline seems lost, and the world keeps waiting for a hero who isn't coming.",
-    "You are no one special. A guardian from a small town, sword in hand, watching it all get worse.",
-    "But someone has to act. People can't keep waiting on a legend. So you take the road down — because no one else will.",
-    "First, decide how you fight."
+    "For generations, Ian protected Aerth. He was a Bladeborn—a rare warrior with extraordinary power.",
+    "Ian lived a long life and died of old age. Years passed. No new Bladeborn appeared.",
+    "Then a wealthy lord promised a life without aging. People traveled to his castle to walk through the Eternal Gate.",
+    "They returned changed. Their eyes were empty. They could no longer refuse his orders. The lord became the Abyss King. His army became the Hollowed Legion.",
+    "Now the Legion threatens Briar Town—your home. Your father, Thomas, helps your neighbors prepare. They have few weapons and no army. You decide to stand with them."
   ],
   intro:[
-    "The Abyss King is waking beneath the world.",
-    "His power is spreading upward. It corrupts animals, raises the dead, and twists every land it reaches.",
-    "If nobody stops him, the corruption will reach the last human settlements.",
-    "For generations, warriors called the Bladeborn entered the Abyss to keep him contained.",
-    "Ian was the last Bladeborn. He was humanity's final hope, but he fell before he could finish the fight.",
-    "No trained warden is coming, {player}. So you go where they won't — down, to finish what Ian started.",
-    "Enter the Abyss, defeat the King, and save what remains of humanity."
+    "You are ready to help Briar Town. The Hollowed Legion is drawing closer, and your neighbors need you.",
+    "Find the path to Briar Town in the Waystation. Thomas and Mara can help you get started."
   ],
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
     "Something in you straightens its back — something that was always there, waiting for its turn.",
@@ -1324,6 +1325,7 @@ function storyText(line){
 }
 // A simple fading text cutscene over a dark veil. Skippable. onDone fires after the last line.
 function playStory(lines, onDone, opts){
+  if(lines===STORY.origin){playOpening(onDone);return;}
   opts=opts||{}; const veil=document.getElementById('storyveil'), tx=document.getElementById('storytext'), sk=document.getElementById('storyskip');
   if(!veil){ if(onDone) onDone(); return; }
   mode='story'; showGameUI(false); showOverlay(false);
@@ -1337,6 +1339,26 @@ function playStory(lines, onDone, opts){
   sk.onclick=story._skip;
   veil.onclick=()=>{ clearTimeout(story._t); advance(); };   // tap to advance faster
   advance();
+}
+// Manual pacing keeps every opening card readable at the player's own speed.
+function playOpening(onDone){
+  const root=document.createElement('section'); root.id='openingStory';
+  root.setAttribute('role','dialog'); root.setAttribute('aria-modal','true'); root.setAttribute('aria-label','The story of Aerth');
+  root.innerHTML=`<img id="openingArt" alt=""><div class="openingCopy"><p id="openingCount"></p><h1 id="openingTitle"></h1><p id="openingText" aria-live="polite"></p><nav aria-label="Story controls"><button id="openingBack">Back</button><button id="openingNext">Next</button><button id="openingSkip">Skip story</button></nav><small>Read at your own pace · Arrow keys to turn pages</small></div>`;
+  const names=['ian-protects-aerth','ians-memorial','eternal-gate','hollowed-return','briar-defends'];
+  const titles=['Aerth’s protector','A world without its protector','A promise of eternal life','The Hollowed Legion','Your home. Your choice.'];
+  const descriptions=['Ian watches over the peaceful towns of Aerth.','Families leave flowers at a memorial to Ian.','A lord welcomes families to a towering black Eternal Gate.','A woman reaches toward a returned traveler whose eyes seem empty.','Thomas builds a barricade while Mara and the villagers prepare to defend Briar.'];
+  mode='story'; showGameUI(false); showOverlay(false); document.body.append(root);
+  names.forEach(name=>{const im=new Image();im.src='assets/story/opening/'+name+'.jpg';});
+  let page=0,done=false;
+  const finish=()=>{if(done)return;done=true;document.removeEventListener('keydown',keys,true);root.remove();story._skip=null;if(onDone)onDone();};
+  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=page===4?'Create your character':'Next';};
+  const next=()=>{if(page===4)finish();else{page++;render();}};
+  const back=()=>{if(page>0){page--;render();}};
+  const keys=e=>{if(!['Escape','Enter','Space','ArrowRight','ArrowLeft'].includes(e.code))return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(e.code==='Escape')finish();else if(e.code==='ArrowLeft')back();else if((e.code==='Enter'||e.code==='Space')&&e.target.tagName==='BUTTON')e.target.click();else next();};
+  document.addEventListener('keydown',keys,true);story._skip=finish;
+  root.querySelector('#openingNext').onclick=next;root.querySelector('#openingBack').onclick=back;root.querySelector('#openingSkip').onclick=finish;
+  render();root.querySelector('#openingNext').focus();
 }
 function story(){}   // namespace holder for _t/_skip
 /* The Warden's Shade: a dead predecessor at every zone mouth — quest-giver + lore. */
@@ -16822,7 +16844,7 @@ function titleScreen(){ musicPlay('village_vigil');   // the home theme introduc
   window.addEventListener('keydown',revealMenu);
   window.addEventListener('pointerdown',revealMenu);
   document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){}
-    if(currentSlot.empty){ if(!meta.originSeen){ meta.originSeen=true; persistGlobal(); playStory(STORY.origin, openCharCreate); } else openCharCreate(); }   // first time: the opening cutscene sets up the world, then class select
+    if(currentSlot.empty){ if(!meta.originSeen){ playStory(STORY.origin, ()=>{meta.originSeen=true;persistGlobal();openCharCreate();}); } else openCharCreate(); }   // first time: the opening cutscene sets up the world, then class select
     else openSlots(); };   // else pick/free a slot
   const cont=document.getElementById('mmCont'), contSave=document.getElementById('mmContSave'), contWrap=document.getElementById('mmContinueWrap');
   const paintPreview=dir=>{ const su=slotSummary(previewSlot), C=su.cls&&CLASSES[su.cls]?CLASSES[su.cls]:null;

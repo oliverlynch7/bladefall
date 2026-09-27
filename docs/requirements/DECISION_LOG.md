@@ -357,3 +357,7 @@ Music list emailed to the explicitly requested recipient through Gmail; SENT rec
 
 ## [Codex | 2026-09-24] U191 — default NPC speech and continuation
 User approves the face detail improvement and requests default device text-to-speech for existing lines without recordings, varied voices and male/female differentiation where available, followed by unfinished approved work in an efficient long session. Approved recordings remain primary; no paid generation or publishing of unapproved takes. Explicit existing speech-off preference remains respected. Plan: shared stable speaker voice selection, delayed voice discovery, safe cancellation/error recovery, settings default-on, approved face detail default-on, browser lifecycle/co-op/save regression; then continue the outstanding surface audit.
+
+
+## [Codex | 2026-09-27] Supplied opening illustrations
+User: “Here are the 5 pngs for opening scene”. Five supplied files are JPEGs; preserve originals and integrate in provided order. Manual readable story cards, no late-game spoilers; canonical Ian death of old age and Briar defense. Runtime art direction otherwise remains undecided.

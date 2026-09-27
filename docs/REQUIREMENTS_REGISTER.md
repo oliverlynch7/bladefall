@@ -589,3 +589,22 @@ Validation: real Chromium save-picker host/join with controlled transport callba
 ## [Codex | 2026-09-26] Puzzle variety and journal steering
 User: “I will say that a lot of puzzles were quite boring and all the same. Wish there was more variety and ingenuity. Also a lot of clues were hard to find in the journal after collecting still. Wasn’t intuitive”
 Approved correction: replace repetitive puzzle interactions with varied environmental mechanics; prioritize discovered relevant clues and make every found regional clue searchable. Current batch starts with a physical timed machine shutdown in Iron Halls rather than another three-button memorization sequence. Other puzzle redesigns remain queued; do not claim campaign-wide variety is complete. Preserve quest outcomes, secret ownership, co-op authority and saves.
+
+## [Codex | 2026-09-26] Enemy identity, grinding and equipment impact — pending implementation
+
+Source: [verbatim user messages](requirements/USER_SOURCE_2026-09-26_ENEMY_GEAR.md), ENEMY-GEAR-01 and TRACKING-01/02. This supplements the combat/parkour/opening-story direction recorded in CONTINUITY; does not mark any gameplay work shipped.
+
+| ID | Decision | Requirement / acceptance condition |
+|---|---|---|
+| COMBAT-IDENTITY-01 | A | Enemies need substantial size, bulk, color, shape and anatomy variation; avoid uniformly small toy-soldier humanoids. Entirely distinct designs permitted within existing art/performance constraints. |
+| COMBAT-IDENTITY-02 | A | Research successful enemy rosters and adapt proven visual/behavior/encounter principles before the redesign. Prior puzzle research alone does not fulfill this enemy-research request. |
+| COMBAT-GRIND-01 | A | Grinding must be enjoyable in itself and reward character XP, class XP and loot; combine this with previously requested area/type-specific defeat quests and capped respawning populations. |
+| GEAR-IDENTITY-01 | A | Develop behavior-changing equipment bonuses with tradeoffs across armor, amulets, rings and weapons, beyond ordinary stat affinities. Airborne damage is a user example, not a locked item or numeric effect. |
+| GEAR-IMPACT-01 | A | Audit equipment contribution relative to player/class scaling; ordinary weapon and armor upgrades should feel consequential and rewarding. Exotic effects alone do not fulfill this. Exact formulas remain to be designed and tested. |
+| GOV-TRACKING-20260926 | A | Preserve every update idea, correction and decision in project records. Separate verbatim user source, approved direction, exploratory ideas, assistant proposals, implementation and verified completion. |
+
+Related decisions: friend keyboard issue resolved by user confirmation; SFX work held for user. Element secondary-effect mapping remains exploratory. Assistant enemy roster, six-card intro, exotic set names and exact mechanics are suggestions, not approved specifications. Three requested image prompts were delivered; user questioned the combat-scene choice, so it must not be treated as a required art deliverable.
+
+## [Codex | 2026-09-27] Character creation usability
+
+Approved: larger full character preview; unmistakable naming; repair eye color; clearer class playstyle explanations; show actual starting weapons. Implementation evidence: [creator report](IMPLEMENTATION_CHARACTER_CREATOR_2026-09-27.md). Existing model replacement remains tabled; visual references are exploratory, not approved production designs.

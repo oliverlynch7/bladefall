@@ -577,6 +577,7 @@ function addEyes(actor, useSaved){
        once hair goes, and now it is visible on your actual face. */
     const _pick = (function(){ try { const m = window.__BF_META && window.__BF_META(); return m && m.eyeColor; } catch(e){ return null; } })();
     const ir = mk(new THREE.CircleGeometry(1, 20), actor.eyeColor || _pick || EYE.iris);
+    ir.userData._iris = true;
     ir.scale.setScalar(irR);
     ir.position.z = frontZ * 0.995;
     ir.material.depthWrite = false; ir.renderOrder = (EYE.onTop ? 999 : 3) + 1;
@@ -1454,6 +1455,7 @@ window.__npcBuildFace=(root,model,eyeColor)=>{
    the body while bone-parented props keep drawing. That bug cost a session in the slice. */
 function syncClass(){
   const want = modelForClass();
+  if(actor){const color=window.__BF_META?.()?.eyeColor;if(color&&actor.userData.eyeColor!==color){actor.traverse(o=>{if(o.userData?._iris)o.material.color.set(color);});actor.userData.eyeColor=color;}}
   if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId||HERO3D.skin?.disguised!==castleDisguise())applyClassSkin();syncLocalEquipment();return;}
   const g = _loaded[want];
   if(!g) return;
@@ -2079,58 +2081,49 @@ window.__hero3dScene = () => scene;
    The model is a SkeletonUtils clone for the same reason the mirror's is - one actor cannot be in
    two places, and the game may already be using it. */
 let _pv = null;
-window.__hero3dPreview = (canvas, opts) => {
-  opts = opts || {};
-  if(!canvas) return false;
-  try {
-    if(!_pv || _pv.canvas !== canvas){
-      if(_pv && _pv.renderer) _pv.renderer.dispose();
-      const r = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-      r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-      const sc = new THREE.Scene();
-      sc.add(new THREE.AmbientLight(0xffffff, 1.35));
-      const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(2, 4, 3); sc.add(key);
-      const rim = new THREE.DirectionalLight(0x9fd6ff, 0.7); rim.position.set(-3, 2, -2); sc.add(rim);
-      const cam2 = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-      _pv = { canvas, renderer:r, scene:sc, cam:cam2, wrap:new THREE.Group(), model:null, yaw:0 };
-      sc.add(_pv.wrap);
-    }
-    const want = opts.model || 'Warrior';
-    if(_pv.model !== want){
-      const g = _loaded[want];
-      if(!g) return false;                       // not loaded yet; the caller retries
-      while(_pv.wrap.children.length) _pv.wrap.remove(_pv.wrap.children[0]);
-      const clone = SkeletonUtils.clone(g.scene);
-      clone.traverse(o => { if(o.isMesh){ o.frustumCulled = false; o.castShadow = false; } });
-      _pv.wrap.add(clone);
-      _pv.model = want;
-      /* FIXED FRAMING, not Box3. Measuring a SKINNED clone is the trap this file already documents
-         twice: a SkinnedMesh's bounds are computed in BIND space, so setFromObject returns a box
-         that has nothing to do with where the character actually is - and the camera derived from
-         it flew far enough away to render an empty frame. The kit characters are all built to
-         roughly the same height, so framing them the same way is both correct and simpler. */
-      /* FULL FIGURE. This framing is the one verified to render (_shot/out/cc2.png). Two attempts
-         to frame the FACE instead both failed - Box3 on a skinned clone returns bind-space bounds,
-         and findHeadBone threw inside this function's try/catch, which fails silently to a blank
-         canvas. Showing the whole character is worth having now; tightening onto the face so eye
-         colour reads clearly is a known follow-up, and must be verified by LOOKING because a
-         silent catch here renders nothing rather than something wrong. */
-      _pv.wrap.position.set(0, -0.95, 0);
-      _pv.cam.position.set(0, 0.15, 3.1);
-      _pv.cam.lookAt(0, 0.05, 0);
-    }
-    const previewClass=opts.classId||window.__BF_META?.()?.classId||'warrior';
-    if(_pv.palette!==previewClass||_pv.paletteNode!==_pv.wrap.children[0]){paintClassBody(_pv.wrap,previewClass);_pv.palette=previewClass;_pv.paletteNode=_pv.wrap.children[0];}
-    if(opts.yaw != null) _pv.yaw = opts.yaw;
-    _pv.wrap.rotation.y = _pv.yaw;
-    const w = canvas.clientWidth || 220, hh = canvas.clientHeight || 260;
-    if(canvas.width !== w || canvas.height !== hh){
-      _pv.renderer.setSize(w, hh, false);
-      _pv.cam.aspect = w / hh; _pv.cam.updateProjectionMatrix();
-    }
-    _pv.renderer.render(_pv.scene, _pv.cam);
-    return true;
-  } catch(e){ return false; }
+window.__hero3dPreviewDispose=()=>{if(!_pv)return;_pv.face?.dispose();if(_pv.holder){_pv.holder._weapSeq=(_pv.holder._weapSeq||0)+1;clearWeapon(_pv.holder);}_pv.renderer.dispose();_pv=null;};
+window.__hero3dPreview = (canvas, opts={}) => {
+ if(!canvas)return false;
+ try{
+  if(!_pv||_pv.canvas!==canvas){
+   window.__hero3dPreviewDispose();
+   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));
+   const sc=new THREE.Scene();sc.add(new THREE.AmbientLight(0xffffff,1.35));
+   const key=new THREE.DirectionalLight(0xffffff,1.5);key.position.set(2,4,3);sc.add(key);
+   const rim=new THREE.DirectionalLight(0x9fd6ff,.7);rim.position.set(-3,2,-2);sc.add(rim);
+   const wrap=new THREE.Group();sc.add(wrap);
+   _pv={canvas,renderer,scene:sc,wrap,cam:new THREE.PerspectiveCamera(32,1,.01,100),model:null};
+  }
+  const rec=_pv,want=opts.model||'Warrior';
+  if(rec.model!==want){
+   const g=_loaded[want];if(!g)return false;
+   rec.face?.dispose();if(rec.holder)clearWeapon(rec.holder);rec.wrap.clear();
+   const clone=SkeletonUtils.clone(g.scene);
+   const remove=[];clone.traverse(o=>{if(o.userData?._eye||o.userData?._mouth||o.userData?._weap)remove.push(o);if(o.isMesh){o.frustumCulled=false;o.castShadow=false;}});remove.forEach(o=>o.removeFromParent());
+   rec.wrap.add(clone);rec.model=want;rec.holder={root:clone,model:want};
+   rec.face=window.__npcBuildFace(clone,want,opts.eyeColor);rec.eye=opts.eyeColor;
+   paintClassBody(clone,opts.classId||'warrior');
+   rec.mixer=new THREE.AnimationMixer(clone);const idle=g.animations?.find(a=>/idle/i.test(a.name));if(idle){rec.mixer.clipAction(idle).play();rec.mixer.update(.01);}
+   queueEquip(()=>_pv===rec?equipWeapon(rec.holder,{model:want,weapon:opts.weapon||null}):null).then(()=>{if(_pv===rec){poseWeaponGrip({weapon:opts.weapon,onGround:true},rec.wrap,{},want,1);rec.wrap.updateMatrixWorld(true);rec.wrap.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});rec.bounds=null;}}).catch(e=>console.warn('Creator weapon preview',e));
+  }
+  if(rec.eye!==opts.eyeColor){rec.face?.dispose();rec.face=window.__npcBuildFace(rec.holder.root,want,opts.eyeColor);rec.eye=opts.eyeColor;}
+  const w=canvas.clientWidth||400,h=canvas.clientHeight||440;
+  if(rec.w!==w||rec.h!==h){rec.renderer.setSize(w,h,false);rec.w=w;rec.h=h;rec.cam.aspect=w/h;rec.cam.updateProjectionMatrix();}
+  // Precise bounds sample deformed vertices, not stale bind-space boxes.
+  rec.wrap.rotation.y=0;rec.wrap.updateMatrixWorld(true);
+  if(!rec.bounds)rec.bounds=new THREE.Box3().setFromObject(rec.wrap,true);
+  const size=rec.bounds.getSize(new THREE.Vector3()),center=rec.bounds.getCenter(new THREE.Vector3());
+  const radius=Math.max(size.x,size.z)*.5;
+  let target=center.clone(),height=size.y,width=radius*2;
+  if(opts.face){height=size.y*.30;width=height;target.y=rec.bounds.max.y-height*.46;}
+  const distance=Math.max(height/2,width/(2*rec.cam.aspect))/Math.tan(THREE.MathUtils.degToRad(16))*1.14+(opts.face?.12:radius*.45);
+  rec.cam.position.set(target.x,target.y,distance+target.z);rec.cam.lookAt(target);
+  rec.wrap.rotation.y=opts.yaw||0;rec.wrap.updateMatrixWorld(true);
+  rec.renderer.render(rec.scene,rec.cam);
+  window.__creatorPreviewRoot=rec.wrap;
+  window.__creatorPreviewState={model:want,eye:rec.eye,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face};
+  return true;
+ }catch(e){console.warn('Character preview',e);return false;}
 };
 window.__hero3dPreviewReady = (model) => !!_loaded[model || 'Warrior'];
 window.__hero3dClassModel = (cid) => CLASS_TO_MODEL[cid] || 'Warrior';

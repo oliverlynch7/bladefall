@@ -719,3 +719,25 @@ Next: continue U201 puzzle variety through spatial light routing in Sunspire and
 
 ## [Codex | 2026-09-26] 2.039 production receipt
 Main ac4a9dd deployed. Read-only production Chromium confirms 2.039.0-campaign-guidance, renderer ready, and journal-clue, machinery and puzzle-feedback modules loaded. No live save or recording edits. Next: further distinct environmental puzzle designs and route review; this release redesigns Iron Halls only, not every campaign puzzle.
+
+## [Codex | 2026-09-26] User direction: combat, traversal and opening-story quality
+
+User confirms friend's keyboard issue fixed (possibly browser-related); close outstanding device confirmation. Hold SFX work: user will handle it.
+
+User feedback/required direction: combat underwhelming; enemies too similar visually and behaviorally, animations lackluster. More story-relevant defeat-count quests targeting named enemy types in specific areas, with repeat respawns bounded by population caps, to convey fighting a large Hollowed Legion. Massive new-character opening cutscene rework using simple canonical story and multiple illustrative PNGs. Parkour must become central: moderate required main-route challenges and difficult optional routes for Rift Shards, side quests and rare gear. Expand meaningful exotic armor/equippables. Research three established adventure puzzle games and adapt proven mechanical frameworks instead of repeatedly inventing switch sequences.
+
+Exploratory, not final balance approval: replace elemental effectiveness chart with six distinct secondary effects (Fire, Ice, Void, Poison, Arcane, Holy), preserve appreciated weapon recolors. User floats poison DOT, burn damage reduction, ice mild slow, holy defense gain, void attack gain, undecided arcane. Exact effects, trigger rules, caps and PvP balance remain proposals. Do not silently lock illustrative effects as approved mechanics.
+
+Response proposals: distinct enemy roles/animated tells and squad combinations; geographically bounded reinforcement camps with optional shutdown; fair traversal retries and universal base movement access; behavior-changing exotic rewards; six-card spoiler-safe intro; puzzle references Zelda Tears of the Kingdom, Immortals Fenyx Rising, Uncharted Lost Legacy. No runtime implementation or deployment in this discussion turn.
+
+## [Codex | 2026-09-26] Tracking correction — latest enemy/gear feedback preserved
+
+Latest enemy size/anatomy/color, enemy-reference research, enjoyable grinding, exotic gear and equipment-impact requests now have individual pending requirements in REQUIREMENTS_REGISTER (COMBAT-IDENTITY-01/02, COMBAT-GRIND-01, GEAR-IDENTITY-01, GEAR-IMPACT-01). Verbatim latest messages: USER_SOURCE_2026-09-26_ENEMY_GEAR.md. Previous reply supplied image prompts but had not persisted this latest feedback; this entry closes that documentation gap. No claim that all historic messages have been freshly audited or that these updates are implemented. Continue preserving source and reconciling each new user correction before implementation; do not rely on conversation memory alone.
+
+## [Codex | 2026-09-26] Visual identity prototype priority
+
+User supplies three concept images and explicitly prioritizes cohesive visual identity before further large gameplay changes. Requests critique, new variations, and one high-detail but browser-conscious Blender character inspired by the three-character equipment image; wants to assess improvement over rejected earlier prototype. This authorizes isolated exploration, not wholesale replacement of existing characters. Prototype source, concept variation, actual renders and measured budget are in prototypes/holy-guardian/. Gold/ivory knight chosen as test subject. Clearly distinguish generated concept art from Blender geometry. Static model is not production rigging/animation or a proven browser crowd-performance result.
+
+## [Codex | 2026-09-27] Character creator clarity
+
+User explicitly requests larger uncropped centered character preview, obvious character naming, functional eye colors after face upgrade, clearer class explanations and starting weapons. Implemented in 2.040.0-character-creator; see IMPLEMENTATION_CHARACTER_CREATOR_2026-09-27.md. Existing art direction remains undecided and replacement modeling tabled. SFX remains held for user. Opening-story rewrite/illustrations and new-player first-session audit remain next work, not included in this creator batch.

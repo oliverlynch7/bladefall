@@ -1081,7 +1081,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.039.0-campaign-guidance';
+const VERSION3D='2.040.0-character-creator';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17878,101 +17878,41 @@ function openClassPicker(){
 // NEW GAME -> character creation: name, class, and appearance (eye colour, hair style + colour), then the class trial
 function openCharCreate(){
   mode='menu'; showGameUI(false); _offerT=Date.now();
-  const EYES=['#8fd0ff','#5affc8','#ffd24a','#ff7a3a','#c47bff','#e8e8e8','#ff4a8a','#4be08a'];
-  /* HAIRSTYLE AND HAIR COLOUR ARE GONE. They were built for the voxel character and the 3D models
-     have their own hair baked into the mesh - the options changed nothing you could see, so every
-     player was making two meaningless decisions before their first real one. Name, class and eye
-     colour are what actually exist. */
-  const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff'};
-  let pvYaw=0.5, pvDrag=null, pvRaf=0;
+  const eyes=[['Sky blue','#8fd0ff'],['Turquoise','#5affc8'],['Gold','#ffd24a'],['Amber','#ff7a3a'],['Violet','#c47bff'],['Silver','#e8e8e8'],['Rose','#ff4a8a'],['Green','#4be08a']];
+  const guide={warrior:{tag:'Close combat · Tough',text:'Fight up close with a sword. Repeated hits on one enemy build toward a stagger, giving you room to keep attacking.',tip:'A good first choice if you are learning. Stay close enough to hit, but move away from enemy attack warnings.'},ranger:{tag:'Ranged combat · Mobile',text:'Shoot enemies from a distance with a bow. Move to keep space between you and enemies, then pause briefly when it is safe to improve your aim.',tip:'Good if you enjoy aiming and moving. Watch for enemies approaching from the sides.'},mage:{tag:'Ranged magic · Powerful but fragile',text:'Launch magic with a staff. Standing still builds power, but your lower health makes positioning important.',tip:'Good if you enjoy powerful spells. Find a safe opening to cast, then move before enemies reach you.'}};
+  const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff',face:false};
+  let yaw=.55,drag=null,raf=0;
   function render(){
-    /* The card now answers "what is this like to play", not "what does it hold". The innate is
-       pulled from CLASS2 rather than retyped, so it can never drift from the one the game grants. */
-    const classCards=STARTERS.map(cid=>{ const C=CLASSES[cid],on=st.cls===cid;
-      const F=STARTER_FEEL[cid]||{}, IN=(CLASS2[cid]&&CLASS2[cid].innate)||null;
-      return `<button class="ccpick ${on?'on':''}" data-cls="${cid}">`
-        +`<b>${C.icon} ${C.disp}</b>`
-        +`<span class="cctag">${F.tag||C.family.join(' · ')}</span>`
-        +`<span class="ccfeel">${F.feel||''}</span>`
-        +(IN?`<span class="ccinn"><i>Always:</i> ${IN.d}</span>`:'')
-        +`<span class="ccfam">${C.family.join(' · ')}</span>`
-        +`</button>`; }).join('');
-    const eyeSw=EYES.map(c=>`<button class="ccsw ${st.eye===c?'on':''}" data-eye="${c}" style="background:${c}"></button>`).join('');
-
+    cancelAnimationFrame(raf);
+    const C=CLASSES[st.cls],F=guide[st.cls],w=classStartWeapon(st.cls),inn=CLASS2[st.cls]?.innate;
     showOverlayHTML(`<style>
-      .cc .cclbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin:12px 0 5px}
-      .cc .ccpick{display:flex;flex-direction:column;gap:4px;text-align:left;padding:11px 13px;max-width:250px}
-      .cc .ccpick .cctag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);opacity:.85}
-      .cc .ccpick .ccfeel{font-size:12.5px;line-height:1.45;opacity:.86;white-space:normal}
-      .cc .ccpick .ccinn{font-size:11.5px;line-height:1.4;opacity:.62;white-space:normal}
-      .cc .ccpick .ccinn i{color:var(--amber);opacity:.8;font-style:normal}
-      .cc .ccpick .ccfam{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.4}
-      .cc .ccreassure{font-size:12px;opacity:.62;margin:9px 0 0;line-height:1.5}
-      /* Short screens: the enriched cards are tall enough to push the confirm button past the
-         fold at 720p, so the panel scrolls instead of hiding its own primary action. */
-      .cc{max-height:88vh;overflow-y:auto}
-      .cc .ccpick .ccfeel{font-size:12px}
-      .cc .ccrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
-      .ccname input{width:100%;padding:11px 14px;font-size:16px;text-align:center;background:rgba(10,9,14,.7);border:1px solid #3d3123;border-radius:10px;color:#ffe6ad;letter-spacing:.06em}
-      .ccname input:focus{outline:none;border-color:var(--amber)}
-      .ccpick{flex:1;min-width:96px;display:flex;flex-direction:column;gap:2px;align-items:center;padding:9px 8px;background:rgba(28,22,16,.7);border:1px solid #3d3123;border-radius:11px;cursor:pointer;color:#e7dbc2}
-      .ccpick b{font-size:14px}.ccpick span{font-size:10px;opacity:.6}
-      .ccpick.on{border-color:var(--amber);background:rgba(60,43,22,.85);color:#ffe6ad;box-shadow:0 0 16px rgba(232,163,61,.2)}
-      .ccsw{width:30px;height:30px;border-radius:8px;border:2px solid #2a2a34;cursor:pointer;padding:0}.ccsw.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.4)}
-      .ccpill{padding:8px 13px;background:rgba(28,22,16,.7);border:1px solid #3d3123;border-radius:9px;cursor:pointer;color:#e7dbc2;font-size:13px}
-      .ccpill.on{border-color:var(--amber);background:rgba(60,43,22,.85);color:#ffe6ad}
-      .ccprev{width:200px;height:240px;margin:2px auto 0;border-radius:14px;background:linear-gradient(160deg,#2a2230,#141018);border:1px solid #3a3f52;position:relative;overflow:hidden;cursor:grab;touch-action:none}
-      .ccprev.drag{cursor:grabbing}
-      .ccprev canvas{width:100%;height:100%;display:block}
-      .ccprevhint{position:absolute;left:0;right:0;bottom:5px;text-align:center;font-size:10px;letter-spacing:.1em;opacity:.45;pointer-events:none}
-    </style>
-    <div class="card cc"><p class="ovkicker">New Warden</p><h2 class="ovh">Create Your Warden</h2>
-      <div class="ccprev" id="ccPrev"><canvas id="ccPrevC"></canvas><div class="ccprevhint">drag to turn</div></div>
-      <div class="cclbl">Name</div><div class="ccname"><input id="ccName" maxlength="20" placeholder="Name your Warden" value="${htmlSafe(st.name)}"></div>
-      <div class="cclbl">Class</div><div class="ccrow">${classCards}</div>
-      <!-- The single most valuable sentence on this screen. The pick was ALREADY reversible - the
-           Drillmaster in the hub swaps your class, and thirteen more are earned through trials -
-           but nothing said so, which turned a reversible choice into an anxious one. Telling the
-           player costs a line and removes the whole problem. -->
-      <p class="ccreassure">Not permanent — the Drillmaster in the Waystation swaps your class for free, and thirteen more are earned by clearing trials.</p>
-      <div class="cclbl">Eye Colour</div><div class="ccrow">${eyeSw}</div>
-      <button class="bigbtn" id="ccBegin" style="margin-top:15px">⚔ Begin Your Legend</button>
-      <button class="bigbtn ghost" id="ccBack">Back</button></div>`);
-    const ni=document.getElementById('ccName'); if(ni) ni.oninput=()=>{ st.name=ni.value; };
-    document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ st.cls=b.dataset.cls; try{SFX.pickup();}catch(e){} render(); });
-    document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{ st.eye=b.dataset.eye; try{SFX.pickup();}catch(e){} render(); });
-    /* THE LIVE PREVIEW. Spins on its own, and you can grab it. The eye colour is written into meta
-       BEFORE each frame because that is where the 3D face reads it from - so the swatch you click
-       changes the eyes you are looking at, immediately, which is the entire point of showing a
-       preview at all. */
-    const pv=document.getElementById('ccPrev'), pvc=document.getElementById('ccPrevC');
-    if(pv&&pvc){
-      const down=e=>{ pvDrag={x:(e.touches?e.touches[0].clientX:e.clientX)}; pv.classList.add('drag'); };
-      const move=e=>{ if(!pvDrag) return; const x=(e.touches?e.touches[0].clientX:e.clientX);
-        pvYaw+=(x-pvDrag.x)*0.012; pvDrag.x=x; if(e.cancelable)e.preventDefault(); };
-      const up=()=>{ pvDrag=null; pv.classList.remove('drag'); };
-      pv.addEventListener('mousedown',down); pv.addEventListener('touchstart',down,{passive:true});
-      addEventListener('mousemove',move); addEventListener('touchmove',move,{passive:false});
-      addEventListener('mouseup',up); addEventListener('touchend',up);
-      cancelAnimationFrame(pvRaf);
-      const spin=()=>{
-        if(!document.getElementById('ccPrevC')) return;            // screen closed
-        if(!pvDrag) pvYaw+=0.006;                                   // idle turntable
-        const savedEye=meta.eyeColor; meta.eyeColor=st.eye;
-        try{ const m=window.__hero3dClassModel?window.__hero3dClassModel(st.cls):'Warrior';
-             window.__hero3dPreview&&window.__hero3dPreview(pvc,{model:m,yaw:pvYaw}); }catch(e){}
-        meta.eyeColor=savedEye;
-        pvRaf=requestAnimationFrame(spin);
-      };
-      spin();
-    }
+    .card#ovcard:has(.cc){width:100%;max-width:1120px;padding:0;background:none;border:0;box-shadow:none}.card#ovcard:has(.cc)::before{display:none}.card.cc{width:100%;max-width:1080px;max-height:94dvh;overflow:auto;padding:24px;box-sizing:border-box;text-align:left}
+    .cc *{box-sizing:border-box}.cc h2{margin:0;font-size:30px}.cc .ccintro{color:#cabfae;margin:8px 0 18px;line-height:1.5}
+    .ccgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:26px}.ccvisual{min-width:0}
+    .ccprev{height:440px;min-height:280px;background:radial-gradient(ellipse at 50% 40%,#393440,#13131c 75%);border:1px solid #62533c;border-radius:16px;position:relative;touch-action:none;cursor:grab}
+    .ccprev canvas{width:100%;height:100%;display:block;border-radius:16px}.ccprevhint{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:12px;color:#d6c9b2;pointer-events:none}
+    .ccviews{display:flex;gap:8px;justify-content:center;margin:10px 0}.cc button{font:inherit}.ccviews button,.ccpick{padding:10px 13px;background:#211e27;color:#e8dcc5;border:1px solid #615440;border-radius:9px;cursor:pointer}
+    .cc button:focus-visible,.cc input:focus-visible{outline:3px solid #ffd485;outline-offset:3px}.cc button[aria-pressed=true]{border-color:#ffd485;background:#473824}
+    .cc label,.cc legend{display:block;font-size:17px;font-weight:bold;color:#ffe1a5;margin:0 0 8px}.cc fieldset{border:0;padding:0;margin:18px 0}
+    .ccname input{width:100%;padding:14px;font-size:20px;background:#14121b;border:2px solid #a18045;border-radius:10px;color:#fff3dc}.ccsmall{font-size:13px;color:#c4baac;line-height:1.5;margin:7px 0}
+    .ccrow{display:flex;gap:8px;flex-wrap:wrap}.ccpick{flex:1;text-align:center}.ccdetail{padding:15px;background:#201d26;border:1px solid #49414b;border-radius:10px;line-height:1.5;margin-top:10px}.ccdetail p{margin:7px 0}.ccdetail h3{margin:0;color:#ffdc99;font-size:17px}.ccweapon{color:#ffe3aa;font-weight:bold}.ccsw{width:38px;height:38px;border-radius:50%;border:3px solid #514d58;cursor:pointer}.cc .ccsw[aria-pressed=true]{outline:2px solid white;outline-offset:2px}.ccactions{display:flex;gap:10px;margin-top:18px}.ccactions .bigbtn{margin:0;flex:1}.ccreassure{font-size:13px;line-height:1.5;color:#c4baac}
+    @media(max-width:700px){.card.cc{padding:17px;max-height:96dvh}.ccgrid{grid-template-columns:1fr;gap:16px}.ccprev{height:330px}.cc h2{font-size:26px}.ccactions{flex-direction:column}}
+    </style><div class="card cc"><h2>Create your character</h2><p class="ccintro">Choose a name and your first fighting style. Your class tutorial will help you learn.</p>
+    <div class="ccgrid"><section class="ccvisual" aria-label="Character preview"><div class="ccprev" id="ccPrev"><canvas id="ccPrevC" aria-label="Selected character and starting weapon"></canvas><div class="ccprevhint" id="ccPreviewHint">Loading your character…</div></div><div class="ccviews"><button id="ccFull" aria-pressed="${!st.face}">Full character</button><button id="ccFace" aria-pressed="${st.face}">Face & eyes</button></div><p class="ccweapon">Starting weapon: ${htmlSafe(w.name)}</p><p class="ccsmall">You will find stronger equipment on your adventure.</p></section>
+    <section><div class="ccname"><label for="ccName">1. Name your character</label><input id="ccName" maxlength="20" autocomplete="off" placeholder="Type your character’s name" value="${htmlSafe(st.name)}"><p class="ccsmall">Shown on your save and above your character in co-op. Up to 20 characters.</p></div>
+    <fieldset><legend>2. Choose your starting class</legend><div class="ccrow">${STARTERS.map(cid=>`<button class="ccpick" data-cls="${cid}" aria-pressed="${st.cls===cid}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('')}</div><div class="ccdetail"><h3>${F.tag}</h3><p>${F.text}</p><p class="ccsmall">${F.tip}</p>${inn?`<p class="ccsmall"><strong>Class bonus:</strong> ${htmlSafe(inn.d)}</p>`:''}</div></fieldset>
+    <fieldset><legend>3. Choose your eye color</legend><div class="ccrow">${eyes.map(([name,c])=>`<button class="ccsw" data-eye="${c}" title="${name}" aria-label="${name} eyes" aria-pressed="${st.eye===c}" style="background:${c}"></button>`).join('')}</div><p class="ccsmall">Select a color to see it in the face close-up.</p></fieldset>
+    <p class="ccreassure">You can change classes later at the Waystation and unlock more through class trials.</p><div class="ccactions"><button class="bigbtn" id="ccBegin">Start ${C.disp} tutorial</button><button class="bigbtn ghost" id="ccBack">Back</button></div><p class="ccsmall" id="ccNameError" role="status"></p></section></div></div>`);
+    const ni=document.getElementById('ccName');ni.oninput=()=>{st.name=ni.value;document.getElementById('ccNameError').textContent='';};
+    document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{st.cls=b.dataset.cls;render();});
+    document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{st.eye=b.dataset.eye;st.face=true;yaw=.12;render();});
+    document.getElementById('ccFull').onclick=()=>{st.face=false;yaw=.55;render();};document.getElementById('ccFace').onclick=()=>{st.face=true;yaw=.12;render();};
+    const pv=document.getElementById('ccPrev'),canvas=document.getElementById('ccPrevC');
+    pv.onpointerdown=e=>{drag=e.clientX;pv.setPointerCapture(e.pointerId);};pv.onpointermove=e=>{if(drag===null)return;yaw+=(e.clientX-drag)*.012;drag=e.clientX;};pv.onpointerup=pv.onpointercancel=()=>{drag=null;};
+    const spin=()=>{if(!canvas.isConnected){window.__hero3dPreviewDispose?.();return;}const ready=window.__hero3dPreview?.(canvas,{model:window.__hero3dClassModel?.(st.cls)||'Warrior',classId:st.cls,eyeColor:st.eye,weapon:w,yaw,face:st.face});document.getElementById('ccPreviewHint').textContent=ready?'Drag to turn your character':'Loading your character…';raf=requestAnimationFrame(spin);};spin();
     document.getElementById('ccBack').onclick=titleScreen;
-    document.getElementById('ccBegin').onclick=()=>{ try{initAudio();}catch(e){}
-      meta.heroName=(st.name||'').trim().slice(0,20)||'Warden';
-      meta.eyeColor=st.eye; persist();
-      try{SFX.classup();}catch(e){} startTrial(st.cls); };
-  }
-  render();
+    document.getElementById('ccBegin').onclick=()=>{const name=st.name.trim();if(!name){document.getElementById('ccNameError').textContent='Give your character a name to begin.';ni.focus();return;}initAudio();meta.heroName=name.slice(0,20);meta.eyeColor=st.eye;persist();startTrial(st.cls);};
+  }render();
 }
 /* Classes & Skills viewer — see every class, its rank, path, and skill tree with
    unlock state + full descriptions. Read-only (equip/respec live at the hub trainer). */
@@ -22440,7 +22380,7 @@ window.__BF3={partySaveChoices,choosePartySave,startPartySave,openMPLobby,petSho
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2035"></script>
+<script type="module" src="./hero3d.js?v=2040"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

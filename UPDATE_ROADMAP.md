@@ -2007,3 +2007,7 @@ Host/Join saved-character picker with direct world entry; hub quests separated f
 
 ## [Codex | 2026-09-26] 2.039 campaign guidance
 Searchable journal with relevant/exact clue access; advancing puzzle/guard markers; coalesced puzzle notices; Iron Halls physical pressure/cable/hammer challenge. Save, co-op, route, timing and phone UI checks passed. Full results and remaining variety work: docs/IMPLEMENTATION_CAMPAIGN_GUIDANCE_2026-09-26.md.
+
+## 2.040.0-character-creator — 2026-09-27
+
+Larger responsive character creator, explicit naming, class explanations, actual equipped starter preview, full/face views, working eye colors and local iris synchronization. Existing character assets preserved. Browser creator/persistence/phone checks documented in docs/IMPLEMENTATION_CHARACTER_CREATOR_2026-09-27.md.

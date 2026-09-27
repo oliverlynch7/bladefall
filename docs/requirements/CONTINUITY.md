@@ -769,3 +769,6 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Storm Coast traversal
 2.049.0: cargo/beam feedback and inner hatch ramp, broken wreck decking, required upper-cliff and optional wind jumps with recovery, raised Hydra flank stepping routes. Story, boat crossing and mercy outcome preserved. Browser routes, combat, controlled co-op and pre-change save pass. Evidence/limits: docs/IMPLEMENTATION_STORM_TRAVERSAL_2026-09-27.md. Broader overhaul remains ongoing.
+
+## [Codex | 2026-09-27] Duskmoor ascent continuation
+2.050.0: second upper exposed flight/two new gaps, memorial stepping stones, bridge chain and vault bolt/target feedback, discovered clue updates. Browser single-jump paths/recovery, story, co-op and save tests pass. Scope/limits: docs/IMPLEMENTATION_DUSKMOOR_ASCENT_2026-09-27.md. Finale unchanged; broader campaign testing remains outstanding.

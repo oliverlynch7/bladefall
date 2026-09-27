@@ -1,0 +1,170 @@
+{
+  "ascent": {
+    "starts": [
+      [
+        "walk",
+        240
+      ],
+      [
+        "caster",
+        240
+      ],
+      [
+        "walk",
+        500
+      ],
+      [
+        "caster",
+        500
+      ],
+      [
+        "walk",
+        750
+      ],
+      [
+        "caster",
+        750
+      ],
+      [
+        "walk",
+        750
+      ],
+      [
+        "caster",
+        950
+      ],
+      [
+        "walk",
+        950
+      ],
+      [
+        "walk",
+        1250
+      ],
+      [
+        "caster",
+        1250
+      ],
+      [
+        "walk",
+        1500
+      ],
+      [
+        "caster",
+        1500
+      ],
+      [
+        "walk",
+        1960
+      ],
+      [
+        "caster",
+        1970
+      ],
+      [
+        "walk",
+        2000
+      ]
+    ],
+    "waypoints": 259,
+    "counts": {
+      "deepArt": "castle",
+      "artObstacles": true,
+      "floorTiles": 784,
+      "totalTriangles": 68580,
+      "instances": 1391,
+      "chunks": 45,
+      "visibleTriangles": 24096,
+      "visibleDrawCalls": 61,
+      "customTriangles": 8712,
+      "customDrawCalls": 24,
+      "name": "Long Ascent"
+    }
+  },
+  "gates": {
+    "checks": [
+      "patrols are ordinary enemies",
+      "unfinished gate blocks forced advance",
+      "exit preserves conversation cursor",
+      "patrol blocks coat pickup",
+      "disguise without equipment change",
+      "shared shard provisional",
+      "bridge requires both catches",
+      "recovery opens gate without assault"
+    ],
+    "waypoints": 43,
+    "counts": {
+      "deepArt": "castle",
+      "artObstacles": true,
+      "floorTiles": 2387,
+      "totalTriangles": 157020,
+      "instances": 3403,
+      "chunks": 106,
+      "visibleTriangles": 11004,
+      "visibleDrawCalls": 24,
+      "name": "Castle Gates"
+    },
+    "errors": []
+  },
+  "coop": {
+    "checks": [
+      "Miles conversation pauses both players",
+      "non-owner cannot choose",
+      "rescue shard shared without extra NPC visit",
+      "vault and lift shared",
+      "physical vault shard individual",
+      "guest upper catch latches on host",
+      "throne doors open for both",
+      "boss entry banks shared shard"
+    ],
+    "errors": []
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 284,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 284,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "recovery": {
+    "checks": [
+      "gap 219 recovery",
+      "gap 225 recovery"
+    ]
+  }
+}

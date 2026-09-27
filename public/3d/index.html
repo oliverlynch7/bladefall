@@ -1054,8 +1054,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./iron-machinery.js?v=2039"></script>
 <script src="./iron-halls.js?v=2039"></script>
 <script src="./thunder-cliffs.js?v=2049"></script>
-<script src="./castle-gates.js?v=2020"></script>
-<script src="./long-ascent.js?v=2045"></script>
+<script src="./castle-gates.js?v=2050"></script>
+<script src="./long-ascent.js?v=2050"></script>
 <script src="./final-king.js?v=2022"></script>
 <script src="./return-adventures.js?v=2038"></script>
 <script src="./return-visits.js?v=2025"></script>
@@ -1071,7 +1071,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./furnace-colossus.js?v=2014"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2032">
 <script src="./journal-notice.js?v=2039"></script>
-<script src="./puzzle-feedback.js?v=2049"></script>
+<script src="./puzzle-feedback.js?v=2050"></script>
 <script src="./journal-clues.js?v=2046"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.049.0-storm-traversal';
+const VERSION3D='2.050.0-duskmoor-ascent';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2939,7 +2939,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2049').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2050').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}

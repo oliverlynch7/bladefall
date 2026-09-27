@@ -638,3 +638,6 @@ User approved the proposed Emberdeep machinery/puzzle/parkour pass. Grounded sco
 
 ## [Codex | 2026-09-27] Storm Coast traversal and machinery
 User approved Storm Coast next. Inspected existing boat repair/crossing, counterweight hatch, cliff lift/race/wind route and merciful Hydra. Scope: visible cargo/beam response and a lowered hatch-access ramp using existing solved flag; broken wreck decking; required upper-cliff gaps and narrower optional wind stepping stones with catch ledges; raised Hydra flank jumping route above low sweep. Preserve story, recordings, class shards, boat minigame and restrained-animal outcome. Validate single-jump routes, recovery, co-op and saves. Tide sequence is unchanged in this batch.
+
+## [Codex | 2026-09-27] Duskmoor traversal continuation
+User: Continue after Storm Coast. Grounded batch: preserve disguise challenge/finite assault and finale. Add second exposed upper spiral stretch with two single-jump gaps/catches; optional memorial shard stepping route; improve existing bridge catch and vault wheel physical feedback using current flags/settings and no new recorded lines. Preserve solved flags and shard IDs. Verify routes, story branches, co-op and saves.

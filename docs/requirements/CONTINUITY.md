@@ -763,3 +763,6 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Sunspire light and rooftop continuation
 2.047.0: courtyard mirrors relay one continuous reflected beam; wrong turns break downstream lighting. Optical feedback, discovered-clue migration and four rising optional roof jumps with recovery ledges. Existing solved flags, dialogue recordings and rewards preserved. Browser routes, co-op, recovery and save checks pass. Details: docs/IMPLEMENTATION_SUNSPIRE_RELAY_2026-09-27.md. Wider puzzle work remains ongoing.
+
+## [Codex | 2026-09-27] Emberdeep cooling and parkour
+2.048.0: Great Furnace guard-controlled water cooling, visible heat gauge, safe drain threshold, two main crossing gaps and six optional high-route stepping platforms. Clues and fall recovery updated; existing dialogue and solved progress preserved. Browser, controlled co-op, save and story checks pass. Scope/evidence: docs/IMPLEMENTATION_EMBERDEEP_COOLING_2026-09-27.md. Wider campaign overhaul remains ongoing.

@@ -632,3 +632,6 @@ User: “Continue” after the 2.045 puzzle batch. Grounded next batch: retain t
 
 ## [Codex | 2026-09-27] Sunspire relay and roof continuation
 User: “Keep on” after dungeon puzzle batch. Grounded plan: change courtyard mirror presentation from independent receivers to one spatial sunbeam relay with three real reflection points and a final door receiver; retain mask/open flags and existing two-position controls, but draw only reached mirrors as lit and replace weight feedback with light-path feedback. Expand optional roof ascent with single-jump rising stones and catch ledges. Preserve main route, NPC recordings, solved saves and SP-01.
+
+## [Codex | 2026-09-27] Emberdeep physical cooling and traversal
+User approved the proposed Emberdeep machinery/puzzle/parkour pass. Grounded scope after inspection: retain Iron Halls pressure/timed hammer shutdown; enhance Great Furnace staged cooling with actual declining heat, water/steam/gauge feedback and a guard controlling channel access. Drain must wait for the safe heat band, validated by host and replicated to guests. Preserve current shape order/recorded Martin directions and solved flags. Add two modest gaps to cooled crossing with catch/recovery, and rising jumps/catch ledges on optional upper pressure path. Preserve workers, Sunspire papers, ED shard IDs and main-story gates.

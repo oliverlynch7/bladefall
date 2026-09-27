@@ -1,0 +1,105 @@
+{
+  "routes": {
+    "checks": [
+      "Pike and Martin in Great Furnace",
+      "proof diverts gate patrol and opens gate",
+      "office guards block papers",
+      "quiet route requires transport brake",
+      "workers reach break room",
+      "wrong cooling order resets safely",
+      "hot crossing cannot drain early",
+      "cooling raises physical bridge",
+      "Sunspire papers and practical advice open exit",
+      "two personal shards provisional",
+      "Cinder provisional until boss entry"
+    ],
+    "waypoints": 80,
+    "failed": [],
+    "counts": {
+      "deepArt": "ember",
+      "artObstacles": true,
+      "floorTiles": 3267,
+      "totalTriangles": 192260,
+      "instances": 4463,
+      "chunks": 125,
+      "visibleTriangles": 12324,
+      "visibleDrawCalls": 27
+    },
+    "errors": []
+  },
+  "coop": {
+    "checks": [
+      "combat entrance remains gated by guards",
+      "Martin conversation synchronized",
+      "dialogue pauses both simulations",
+      "both worlds receive cooling and exit",
+      "both earn provisional Cinder",
+      "reward snapshot deduplicates",
+      "physical shard remains personal",
+      "both bank companion at boss boundary",
+      "guest valve cools authoritative boss",
+      "guest receives cooling and pressure advantage",
+      "attack state matches host"
+    ],
+    "errors": []
+  },
+  "cooling": {
+    "checks": [
+      "live control guard blocks valve",
+      "clearing guard permits flow",
+      "early drain stays blocked",
+      "heat decreases gradually",
+      "remote hot state blocks drain",
+      "safe band reached",
+      "crossing opens",
+      "missed bridge jump returns to start",
+      "dead player is not teleported"
+    ],
+    "warmHeat": 56.800000000000495,
+    "finalHeat": 0,
+    "jumps": 6,
+    "bridgeSteps": 9
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 134,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 134,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

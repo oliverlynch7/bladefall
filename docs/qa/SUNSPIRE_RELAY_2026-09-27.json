@@ -1,0 +1,101 @@
+{
+  "routes": {
+    "checks": [
+      "no boss proxies among patrols",
+      "clamp before water",
+      "infinite pad restored",
+      "patrol blocks upper control",
+      "lower routes bypass patrols",
+      "mirror gate remains shut",
+      "main complete without optional return",
+      "shared garden reward provisional"
+    ],
+    "mode": "play",
+    "waypoints": 50,
+    "failed": [],
+    "counts": {
+      "deepArt": "palace",
+      "artObstacles": true,
+      "floorTiles": 2400,
+      "totalTriangles": 152184,
+      "instances": 3273,
+      "chunks": 89,
+      "visibleTriangles": 72972,
+      "visibleDrawCalls": 117,
+      "name": "Palace Courtyard"
+    },
+    "errors": []
+  },
+  "relay_recovery": {
+    "recovery": [
+      {
+        "catchHeight": 255,
+        "recovered": true
+      },
+      {
+        "catchHeight": 295,
+        "recovered": true
+      },
+      {
+        "catchHeight": 335,
+        "recovered": true
+      }
+    ],
+    "mask": 5,
+    "receiver": true
+  },
+  "coop": {
+    "checks": [
+      "Grace conversation shared and paused",
+      "court and defenses shared",
+      "NPC shard automatically awarded to guest",
+      "physical roof shard stays personal",
+      "guest mirror action reaches host",
+      "shared solved mirror and exit",
+      "shared reward banks for both without giving guest physical shard"
+    ],
+    "errors": []
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 134,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 134,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

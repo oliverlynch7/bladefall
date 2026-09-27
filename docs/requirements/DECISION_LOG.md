@@ -374,3 +374,6 @@ User: “Keep going with the puzzle overhaul. And you could probably add more pa
 
 ## [Codex | 2026-09-27] Continue puzzle and parkour overhaul
 User: “Continue” after the 2.045 puzzle batch. Grounded next batch: retain the Dungeons main rescue lift and its safety bank; replace the duplicate optional lower total-of-eight lock with a visible two-sided balance beam using the existing 2/3/5 weights. Each control cycles its weight through rack/left/right; all weights must be hanging with equal loads. Preserve kd.deep.open and RK-03, migrate discovered clue text, leave recorded dialogue unchanged. Raise the existing optional drain route and add three stepping-stone stretches; keep scratch navigation, RK-05 and the dry store reward, with safe water recovery. Verify single jumps, main rescue, co-op and saves.
+
+## [Codex | 2026-09-27] Sunspire relay and roof continuation
+User: “Keep on” after dungeon puzzle batch. Grounded plan: change courtyard mirror presentation from independent receivers to one spatial sunbeam relay with three real reflection points and a final door receiver; retain mask/open flags and existing two-position controls, but draw only reached mirrors as lit and replace weight feedback with light-path feedback. Expand optional roof ascent with single-jump rising stones and catch ledges. Preserve main route, NPC recordings, solved saves and SP-01.

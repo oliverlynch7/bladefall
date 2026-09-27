@@ -581,7 +581,7 @@
           "id": "ic.lock",
           "region": "frost",
           "title": "The main waterworks",
-          "text": "Fill to the marked line, freeze the surface, then drain beneath it. The ice stays in place as a crossing. Wrong unfinished cycles drain safely."
+          "text": "The middle notch lines up with both banks. Each pull adds one notch of water. Freeze at the bank height, then drain beneath the ice. Draining a bad sheet clears it safely; you can try again."
         }
       ],
       "when": [
@@ -603,7 +603,7 @@
           "id": "ic.channel",
           "region": "frost",
           "title": "The old side channel",
-          "text": "The lower plate shows a drain mark first: empty the old water, fill with fresh water, then freeze. The sealed chamber opens at the far end."
+          "text": "The spring feeds the chiller through the outer pipes. The middle pipe spills water away. Open a path from the spring to the chiller without feeding the spill. Watch where the water actually runs."
         }
       ]
     },
@@ -611,14 +611,10 @@
       "once": false,
       "effects": [
         {
-          "type": "sequence",
+          "type": "waterworks",
           "id": "ic.lock",
-          "value": 1,
-          "solution": [
-            1,
-            2,
-            3
-          ]
+          "action": "fill",
+          "target": 2
         }
       ],
       "when": [
@@ -636,14 +632,10 @@
       "once": false,
       "effects": [
         {
-          "type": "sequence",
+          "type": "waterworks",
           "id": "ic.lock",
-          "value": 2,
-          "solution": [
-            1,
-            2,
-            3
-          ]
+          "action": "freeze",
+          "target": 2
         }
       ],
       "when": [
@@ -661,14 +653,10 @@
       "once": false,
       "effects": [
         {
-          "type": "sequence",
+          "type": "waterworks",
           "id": "ic.lock",
-          "value": 3,
-          "solution": [
-            1,
-            2,
-            3
-          ]
+          "action": "drain",
+          "target": 2
         }
       ],
       "when": [
@@ -686,14 +674,9 @@
       "once": false,
       "effects": [
         {
-          "type": "sequence",
+          "type": "flowSwitch",
           "id": "ic.channel",
-          "value": 1,
-          "solution": [
-            3,
-            1,
-            2
-          ]
+          "index": 0
         }
       ],
       "when": [
@@ -711,14 +694,9 @@
       "once": false,
       "effects": [
         {
-          "type": "sequence",
+          "type": "flowSwitch",
           "id": "ic.channel",
-          "value": 2,
-          "solution": [
-            3,
-            1,
-            2
-          ]
+          "index": 1
         }
       ],
       "when": [
@@ -736,14 +714,9 @@
       "once": false,
       "effects": [
         {
-          "type": "sequence",
+          "type": "flowSwitch",
           "id": "ic.channel",
-          "value": 3,
-          "solution": [
-            3,
-            1,
-            2
-          ]
+          "index": 2
         }
       ],
       "when": [

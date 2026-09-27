@@ -5,7 +5,7 @@ export function buildLongAscent(scene,w){
  result.group.traverse(o=>{if(o.isInstancedMesh&&['castle ring','castle rune'].includes(o.name))o.visible=false;});
  const geos=[],mats=[new T.MeshStandardMaterial({color:'#6d6472',roughness:.8}),new T.MeshStandardMaterial({color:'#b79869',metalness:.55,roughness:.5}),new T.MeshStandardMaterial({color:'#323843',metalness:.4,roughness:.7})];
  const part=(g,m,x,y,z)=>{geos.push(g);const mesh=new T.Mesh(g,mats[m]);mesh.position.set(x,y,z);result.group.add(mesh);return mesh;};
- for(const [i,p]of window.BFLongAscent.path.entries())part(new T.BoxGeometry(270,24,70),0,p[0],p[2]-12,p[1]).rotation.y=i/120*Math.PI*2-Math.PI/2;
+ for(const [i,p]of window.BFLongAscent.path.entries())if(!window.BFLongAscent.gaps.includes(i))part(new T.BoxGeometry(270,24,70),0,p[0],p[2]-12,p[1]).rotation.y=i/120*Math.PI*2-Math.PI/2;
  // A cutaway tower shell gives the climb weight without putting a roof in the camera.
  for(let i=0;i<18;i++){const a=Math.PI*.5+i*Math.PI/17,x=Math.sin(a)*1430,z=Math.cos(a)*1430;if(z>-800)continue;
   part(new T.BoxGeometry(105,2350,115),0,x,1020,z).rotation.y=a;

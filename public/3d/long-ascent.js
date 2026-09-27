@@ -6,6 +6,7 @@ function point(t,r=940){const a=t*TAU;return [Math.round(Math.sin(a)*r),Math.rou
 const path=Array.from({length:241},(_,i)=>point(i/120));
 // A broken flight becomes a short exposed ledge, then returns to the same staircase.
 for(let i=129;i<=147;i++){const u=(i-129)/18;path[i]=point(i/120,940+Math.sin(u*Math.PI)*360);}
+const gaps=[135,143];
 const anchors={entry:point(0),service:point(.25),cells:point(.75),lower:point(.5),upper:point(1.5),memorial:point(1.75),summit:point(2)};
 const ready=s=>f(s,'summit');
 function status(G){return {cells:G.enemies.filter(e=>e.ascentGuard==='cells'&&!e.dead&&e.hp>0).length,summit:G.enemies.filter(e=>e.ascentGuard==='summit'&&!e.dead&&e.hp>0).length};}
@@ -17,10 +18,11 @@ function build({G,plat,spawn}){
  Object.assign(G,{boss:null,haz:null,canyonWind:null,npc:null,secret:null,secretTrigger:null,waystone:null,beam:null,collapse:[],optionalMissions:[],portal:null,bonusPortal:null,bonusActive:false,vertical:true,thorns:[],vents:[],phasers:[],debris:[],lights:[],spireRY:true,ascent:{}});
  const floor=(p,w=260,d=w)=>plat(p[0],p[1],p[2],w,d,{slab:32,checkpoint:true});
  const route=(ps,w=200)=>{for(let j=1;j<ps.length;j++){const a=ps[j-1],b=ps[j],n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/75,Math.abs(b[2]-a[2])/10));for(let i=0;i<=n;i++)floor(a.map((v,k)=>v+(b[k]-v)*i/n),w);}};
- for(const [i,p]of path.entries()){const a=i/120*TAU;for(let j=-2;j<=2;j++)plat(p[0]+Math.sin(a)*j*48,p[1]+Math.cos(a)*j*48,p[2],76,76,{slab:24,checkpoint:true,invisible:true});}
+ for(const [i,p]of path.entries()){if(gaps.includes(i))continue;const a=i/120*TAU;for(let j=-2;j<=2;j++)plat(p[0]+Math.sin(a)*j*48,p[1]+Math.cos(a)*j*48,p[2],76,76,{slab:24,checkpoint:true,invisible:true});}
+ for(const i of gaps){const p=path[i];plat(p[0],p[1],p[2]-70,220,220,{slab:20,ascentCatch:true});}
  const side={service:[anchors.service,[1270,0,250],[1460,-250,250]],cells:[anchors.cells,[-1310,0,750],[-1460,-310,750]],vault:[[1460,-250,250],[1740,-250,250],[1860,90,250]],memorial:[anchors.memorial,[-1240,0,1750],[-1440,350,1800],[-1730,350,1800]],liftUpper:[point(1.25),[1420,-170,1250]],upperCatch:[anchors.upper,[350,-1190,1500]],lowerCatch:[anchors.lower,[-350,-1190,500]]};
  for(const ps of Object.values(side))route(ps,190);
- G.ascent.routes={spiral:path,...side};
+ G.ascent.routes={spiral:path.filter((_,i)=>!gaps.includes(i)),...side};
  const room=(name,p,w,d)=>{floor(p,w,d);G.rooms.push({name,x:p[0],z:p[1],y:p[2],w,d,encounter:false,cleared:true,monsters:[]});};
  room('Tower foot',anchors.entry,600,500);room('Service landing',anchors.service,540,520);room('Lower stair catch',anchors.lower,620,490);room('Locked workers',[-1300,-180,750],740,730);room('Broken flight',point(1),600,500);room('Upper stair catch',anchors.upper,650,520);room('Throne approach',anchors.summit,760,620);room('Linen room',[1390,-190,250],520,650);room('Service vault',[1810,30,250],410,450);room('Old memorial',[-1630,350,1800],460,400);
  const wall=(p,w,d,h,tag)=>G.walls.push({x:p[0],z:p[1],y0:p[2],w,d,h,c:'#494851',courtWall:true,ascentTag:tag});
@@ -54,5 +56,5 @@ function draw({G,state:s,bx,ring},t){for(const o of G.storyObjects){const used=s
  if(!f(s,'summit')){for(let i=-5;i<=5;i++)bx(i*65,2180,1170,25,360,20,'#716676');for(const y of [2080,2290])bx(0,y,1170,740,22,26,'#a19187');}
  if(G.ascent.lift)for(const [x,y]of [[1420,250],[1420,1250]]){bx(x,y+3,-170,155,6,120,'#a08763');bx(x,y+60,-110,8,115,8,'#b5a07f');}if(G.ascent.ride)bx(G.p.x,G.p.y-6,G.p.z,160,12,130,'#9d825d');
 }
-const api={point,path,anchors,build,status,quest,available,visualKey,ready,sync,ride,tick,shards,draw};root.BFLongAscent=api;if(typeof module!=='undefined')module.exports=api;
+const api={point,path,gaps,anchors,build,status,quest,available,visualKey,ready,sync,ride,tick,shards,draw};root.BFLongAscent=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

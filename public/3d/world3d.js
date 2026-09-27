@@ -1,6 +1,6 @@
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2022';
-import {buildLongAscent} from './long-ascent-art.js?v=2021';
+import {buildLongAscent} from './long-ascent-art.js?v=2045';
 import {buildCastleGates} from './castle-gates-art.js?v=2020';
 import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2019';
 import {buildSkyLibrary} from './sky-library-art.js?v=2018';

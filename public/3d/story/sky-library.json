@@ -717,7 +717,7 @@
           "id": "sl.shelf.guide",
           "region": "palace",
           "title": "The shelf guide",
-          "text": "The carved guide shows three arrows: EAST, SOUTH, WEST. North points toward the guardian door. Turn each shelf handle until its gold tip matches its arrow."
+          "text": "Each handle turns two shelves: its own and the next one. The third also turns the first. Match the gold pointers to the pale marks carved beside them. The return lever resets all three. Once aligned, the shelves lock and the stepping platforms extend."
         }
       ]
     },
@@ -726,7 +726,7 @@
       "when": [],
       "effects": [
         {
-          "type": "rotatePuzzle",
+          "type": "linkedRotate",
           "id": "sl.shelf",
           "index": 0,
           "target": [
@@ -806,7 +806,7 @@
       "when": [],
       "effects": [
         {
-          "type": "rotatePuzzle",
+          "type": "linkedRotate",
           "id": "sl.shelf",
           "index": 1,
           "target": [
@@ -886,7 +886,7 @@
       "when": [],
       "effects": [
         {
-          "type": "rotatePuzzle",
+          "type": "linkedRotate",
           "id": "sl.shelf",
           "index": 2,
           "target": [
@@ -1115,6 +1115,22 @@
           "region": "palace",
           "title": "An unexpected friend",
           "text": "The dragon accepts your help. Finish Sky Library and enter the guardian hall to keep your new companion. Then select Sunspire Dragon at the Beastkeeper. Leaving or dying before that loses this rescue."
+        }
+      ]
+    },
+    "sl.shelf.reset": {
+      "once": false,
+      "when": [],
+      "effects": [
+        {
+          "type": "linkedRotate",
+          "id": "sl.shelf",
+          "index": -1,
+          "target": [
+            1,
+            2,
+            3
+          ]
         }
       ]
     }

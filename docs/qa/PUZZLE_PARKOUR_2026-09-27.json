@@ -1,0 +1,192 @@
+{
+  "puzzles": [
+    {
+      "level": "Ice Caves",
+      "water": true,
+      "flow": true
+    },
+    {
+      "level": "Sky Library",
+      "gears": true,
+      "jumpWaypoints": 7
+    }
+  ],
+  "tower": {
+    "starts": [
+      [
+        "walk",
+        240
+      ],
+      [
+        "caster",
+        240
+      ],
+      [
+        "walk",
+        500
+      ],
+      [
+        "caster",
+        500
+      ],
+      [
+        "walk",
+        750
+      ],
+      [
+        "caster",
+        750
+      ],
+      [
+        "walk",
+        750
+      ],
+      [
+        "caster",
+        950
+      ],
+      [
+        "walk",
+        950
+      ],
+      [
+        "walk",
+        1250
+      ],
+      [
+        "caster",
+        1250
+      ],
+      [
+        "walk",
+        1500
+      ],
+      [
+        "caster",
+        1500
+      ],
+      [
+        "walk",
+        1960
+      ],
+      [
+        "caster",
+        1970
+      ],
+      [
+        "walk",
+        2000
+      ]
+    ],
+    "waypoints": 258,
+    "counts": {
+      "deepArt": "castle",
+      "artObstacles": true,
+      "floorTiles": 772,
+      "totalTriangles": 67524,
+      "instances": 1367,
+      "chunks": 44,
+      "visibleTriangles": 23612,
+      "visibleDrawCalls": 58,
+      "customTriangles": 8736,
+      "customDrawCalls": 24,
+      "name": "Long Ascent"
+    }
+  },
+  "recovery": [
+    {
+      "zone": 6,
+      "results": [
+        {
+          "landed": 280,
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "zone": 7,
+      "results": [
+        {
+          "landed": 1060,
+          "recovered": true
+        },
+        {
+          "landed": 1160,
+          "recovered": true
+        }
+      ]
+    }
+  ],
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 134,
+      "rank": {
+        "rank": 3,
+        "xp": 673,
+        "ch": {
+          "2": "w_bash"
+        },
+        "v2": 1
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 134,
+      "rank": {
+        "rank": 3,
+        "xp": 673,
+        "ch": {
+          "2": "w_bash"
+        },
+        "v2": 1
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "ice_coop": {
+    "checks": [
+      "remote cannot release Ellis through living guards",
+      "Ellis dialogue shared",
+      "conversation pauses both worlds",
+      "guest receives both bridges and main exit",
+      "Hugo reaches same junction on both",
+      "Hugo shard awarded to both players",
+      "repeat snapshots cannot duplicate rescue reward",
+      "environmental shard remains personal",
+      "friend can collect their own channel shard"
+    ],
+    "errors": []
+  },
+  "library_coop": {
+    "checks": [
+      "shared Hugh conversation pauses guest",
+      "access shared",
+      "guest turn reaches host",
+      "bridge built on both clients",
+      "physical shard remains personal",
+      "vow guards and timer shared",
+      "completed stand shared"
+    ],
+    "errors": []
+  }
+}

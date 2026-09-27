@@ -48,6 +48,37 @@
           if(e.target.every((n,i)=>(s.items[e.id+'.'+i]||0)===n))s.flags[e.id+'.open']=true;
           break;
         }
+        case 'waterworks':{
+          if(!['fill','freeze','drain'].includes(e.action)||!Number.isInteger(e.target)||e.target<1||e.target>3)throw Error('Invalid waterworks');
+          if(s.flags[e.id+'.open'])break;
+          let level=Math.max(0,Math.min(3,Number(s.items[e.id+'.level'])||0)),ice=!!s.flags[e.id+'.frozen'];
+          if(e.action==='fill'&&!ice)level=Math.min(3,level+1);
+          if(e.action==='freeze'&&level>0)ice=true;
+          if(e.action==='drain'){
+            if(ice&&level===e.target)s.flags[e.id+'.open']=true;
+            level=0;ice=false;
+          }
+          s.items[e.id+'.level']=level;s.flags[e.id+'.frozen']=ice;s.items[e.id]=level;
+          break;
+        }
+        case 'flowSwitch':{
+          if(!Number.isInteger(e.index)||e.index<0||e.index>2)throw Error('Invalid flow switch');
+          if(s.flags[e.id+'.open'])break;
+          const mask=((Number(s.items[e.id+'.mask'])||0)&7)^(1<<e.index);
+          s.items[e.id+'.mask']=mask;
+          // Spring and chiller connected, spill outlet shut. No dependence on input order.
+          if(mask===5)s.flags[e.id+'.open']=true;
+          break;
+        }
+        case 'linkedRotate':{
+          if(!Array.isArray(e.target)||e.target.length!==3||!e.target.every(n=>Number.isInteger(n)&&n>=0&&n<4)||!Number.isInteger(e.index)||e.index< -1||e.index>2)throw Error('Invalid linked gears');
+          if(s.flags[e.id+'.open'])break;
+          if(e.index===-1){for(let i=0;i<3;i++)s.items[e.id+'.'+i]=0;}
+          else for(const i of [e.index,(e.index+1)%3])s.items[e.id+'.'+i]=((Number(s.items[e.id+'.'+i])||0)+1)%4;
+          s.items[e.id+'.turns']=(s.items[e.id+'.turns']||0)+1;
+          if(e.target.every((n,i)=>(s.items[e.id+'.'+i]||0)===n))s.flags[e.id+'.open']=true;
+          break;
+        }
         case 'resetPuzzle':s.items[e.id]=0;s.items[e.id+'.mask']=0;s.flags[e.id+'.open']=false;break;
         case 'sequence':{
           if(!Array.isArray(e.solution)||!e.solution.length||typeof e.value!==typeof e.solution[0])throw Error('Invalid sequence');

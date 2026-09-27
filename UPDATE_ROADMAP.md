@@ -2024,3 +2024,6 @@ Specific western farm raider hunt, differentiated enemy roles and capped refills
 
 ## [Codex | 2026-09-27] Remaining campaign refinement
 2.044.0: all remaining 15 halves gain specific capped hunting groups, explicit soldier roles, height-aware refills and co-op identities. Expanded discovered-clue access and pickup explanations; real gaps on Keep bell/ Lost Canyon roof routes. Saves preserved. Evidence, baseline test limitations and remaining scope: docs/IMPLEMENTATION_CAMPAIGN_REFINEMENT_2026-09-27.md. Broader art/enemy/puzzle overhaul remains unfinished.
+
+## [Codex | 2026-09-27] Puzzle variety and parkour
+2.045.0: Ice Caves water-depth/freezing and pipe-routing puzzles; Sky Library linked gears/reset and single-jump shard crossing; two Long Ascent gaps with catch ledges. Existing completed puzzle flags preserved. Real-browser traversal, fall recovery, controlled co-op and pre-change save checks passed. Evidence and limitations: docs/IMPLEMENTATION_PUZZLE_PARKOUR_2026-09-27.md. Wider campaign overhaul remains ongoing.

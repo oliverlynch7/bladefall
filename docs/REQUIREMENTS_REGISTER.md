@@ -608,3 +608,7 @@ Related decisions: friend keyboard issue resolved by user confirmation; SFX work
 ## [Codex | 2026-09-27] Character creation usability
 
 Approved: larger full character preview; unmistakable naming; repair eye color; clearer class playstyle explanations; show actual starting weapons. Implementation evidence: [creator report](IMPLEMENTATION_CHARACTER_CREATOR_2026-09-27.md). Existing model replacement remains tabled; visual references are exploratory, not approved production designs.
+
+## [Codex | 2026-09-27] Immediate new-player experience improvements
+
+User: What else can we improve for a new players experience? Make some clear improvements now. Implemented focused instructions/help and class-choice confirmation; evidence: IMPLEMENTATION_FIRST_STEPS_2026-09-27.md. Full natural-route first-session playtest and illustrated opening remain unfinished.

@@ -1081,7 +1081,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.040.0-character-creator';
+const VERSION3D='2.041.0-first-steps';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5197,33 +5197,16 @@ function startTrial(cid,fromZone,opts={}){
   else if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
-function showTutorial(cid){ mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Your first steps</p><h2 class="ovh">The Proving Chamber</h2>
-    <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
-      <p style="color:#e6d2ff">Practice your movement, attacks, and skills here before you head out. Learn how to spot an opening, avoid a strike, and make it safely through the chamber.</p>
-      <p><b>Move</b> — WASD / left stick. <b>Jump</b> — Space (tap = hop, hold = higher).</p>
-      <p><b>Attack</b> — J / the SLASH button; it auto-aims where you're looking. <b>Dodge</b> — K / Shift.</p>
-      <p><b>Skills</b> — keys 1–4 (they unlock as your class ranks up).</p>
-      <p><b>Talk / use</b> — walk up and press <b>E</b>. <b>Pause / camera</b> — Esc.</p>
-      <p style="color:var(--amber)"><b>Goal:</b> clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss.</p></div>
-    <button class="bigbtn" id="tutGo">Begin the trial</button>
-    <button class="bigbtn ghost" id="tutSkip">Skip tutorial &amp; trial</button></div>`);
-  document.getElementById('tutGo').onclick=()=>{ resumePlay(); };   // the trial now teaches each verb just-in-time (trialTeachTick) instead of a front-loaded tip
-  document.getElementById('tutSkip').onclick=()=>{ skipTrial(); };
+function controlHint(id){const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Not assigned — set in Key Bindings';}
+function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag','B'],['Pause / release mouse','Esc']];}
+function showTutorial(cid){mode='menu';
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Practice here before your adventure. You can take your time.</p><div style="text-align:left;line-height:1.65"><p><strong>Your goal:</strong> defeat the enemies, then walk into the exit portal to reach the Waystation.</p><div class="beginner-controls">${beginnerControls().slice(0,5).map(([a,b])=>`<p><strong>${a}:</strong> ${htmlSafe(b)}</p>`).join('')}</div><p>Hold jump for a higher jump. Move away from enemy attack warnings, or dodge through a strike.</p><p>On touch screens, use the movement stick and labeled action buttons. Press <strong>Esc</strong> or the pause button whenever you need a break or want to change the camera.</p><p>You will unlock skills as your class rank increases. We will explain them when they become available.</p></div><button class="bigbtn" id="tutGo">Start practicing</button><button class="bigbtn ghost" id="tutSkip">Skip practice — keep my class</button></div>`);
+ document.getElementById('tutGo').onclick=resumePlay;
+ document.getElementById('tutSkip').onclick=()=>{showOverlayHTML(`<div class="card"><h2 class="ovh">Skip the practice area?</h2><p class="ovsub">You will keep your chosen class and go to the Waystation. You can find the controls again in Pause → Help.</p><button class="bigbtn" id="skipYes">Skip and go to the Waystation</button><button class="bigbtn ghost" id="skipNo">Return to practice instructions</button></div>`);document.getElementById('skipYes').onclick=skipTrial;document.getElementById('skipNo').onclick=()=>showTutorial(cid);};
 }
 // second-stage onboarding: how the hub works, shown once after the first trial is done
-function hubTutorial(){ mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The Waystation</p><h2 class="ovh">Welcome home</h2>
-    <div style="text-align:left;font-size:14px;line-height:1.75;color:#cfd6df;margin:6px 0 12px">
-      <p>You proved yourself — this is the <b>Waystation</b>, your home base. You'll come back here after every dive to spend what you earned and grow stronger.</p>
-      <p>Ringing the plaza are the <b>keepers</b>. Walk up to one and press <b>E</b> (or the TALK button) to use them — each one explains itself the first time you visit:</p>
-      <p style="opacity:.9">🛒 <b>Quartermaster</b> — gear &amp; upgrades · 🔨 <b>Smith</b> — forge gear · ⚔️ <b>Drillmaster</b> — classes &amp; respec<br>🎒 <b>Pack</b> — your bag · 📜 <b>Postings</b> — quests · 🐾 <b>Beastkeeper</b> — pets · 🪞 <b>Mirror</b> · 🧥 <b>Keeper</b> — looks · ⚔️ <b>Arena</b>.</p>
-      <p>The glowing <b>Waystone</b> in the centre <b>heals you and banks your progress</b> — touch it anytime.</p>
-      <p>The <b>Gates</b> along the far wall are the zones. Walk into one and press <b>E</b> to descend. Clear a zone's quests and beat its boss to open the next Gate.</p>
-      <p>🎥 <b>Camera:</b> you're playing <b>over-the-shoulder</b> by default. Prefer a different view? Press <b>Esc</b> (or the Pause button) and tap <b>Camera</b> to cycle <b>Over-the-shoulder → Overhead → First-person</b> — pick whatever feels best.</p>
-      <p style="color:var(--amber);font-weight:600">The loop is simple: dive → clear → return → upgrade → dive deeper.</p></div>
-    <button class="bigbtn" id="hubTutGo">Got it</button></div>`);
-  document.getElementById('hubTutGo').onclick=resumePlay;
+function hubTutorial(){mode='menu';
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Your home base</p><h2 class="ovh">The Waystation</h2><div style="text-align:left;line-height:1.7"><p><strong>Next: go to Briar Town.</strong> Find its campaign entrance and use ${htmlSafe(controlHint('interact'))} or the interact button.</p><p>You do not need to visit every shop before leaving. Return here when you want to buy equipment, change classes or manage your companions.</p><p><strong>Need directions?</strong> Gold markers point toward main objectives. You can change this in Pause → Settings.</p><p><strong>Your bag:</strong> B. <strong>Your journal:</strong> ${htmlSafe(controlHint('journal'))}. The journal keeps your tasks and discovered clues.</p><p>Press Esc or the pause button for camera options, settings and help. Choose the view that feels easiest to control.</p></div><button class="bigbtn" id="hubTutGo">Ready to explore</button></div>`);document.getElementById('hubTutGo').onclick=resumePlay;
 }
 /* ---- Tutorial / Help foundation: a one-time contextual teach primitive + a persistent Help/Codex ---- */
 const HELP_ENTRIES=[
@@ -5350,16 +5333,16 @@ function teachQueueTick(dt){
 function trialTeachTick(dt){ if(!G||!G.trial||mode!=='play') return; const T=TRIALS[G.trial]; if(!T||T.earned||meta.tutOff) return; const p=G.p; if(!p) return;
   G._ttT=(G._ttT||0)+dt;
   // 1) MOVE — the instant you gain control, before any threat
-  if(G._ttT>0.6) teachOnce('t_move','Move with the left stick or WASD. Jump with Space. Get a feel for your footing.',{icon:'🏃',pri:0});
+  if(G._ttT>0.6) teachOnce('t_move',`Move: ${['up','left','down','right'].map(controlHint).join(' · ')}. Jump: ${controlHint('jump')}. Hold jump to go higher.`,{icon:'🏃',pri:0});
   const live=G.enemies.filter(e=>!e.dead&&!e.practice&&!e.dummy);
   // 2) ATTACK — when the first foe closes in
-  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack','A foe! Tap SLASH (J) to strike — it auto-aims at whatever you face. Hold to keep swinging.',{icon:'⚔️',pri:0});
+  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack',`Attack with ${controlHint('attack')} or the attack button. Face your enemy. Hold to keep attacking.`,{icon:'⚔️',pri:0});
   // 3) DODGE — the first time an enemy winds up a blow near you (the Barnacle principle: learn the danger safely)
-  if(live.some(e=>(e.windT>0||e.fuseT>0)&&dXZ(e.x,e.z,p.x,p.z)<190)) teachOnce('t_dodge','It’s winding up! DODGE with K / Shift — the roll has invincibility frames, so roll THROUGH the blow, not just away.',{icon:'💨',pri:0});
+  if(live.some(e=>(e.windT>0||e.fuseT>0)&&dXZ(e.x,e.z,p.x,p.z)<190)) teachOnce('t_dodge',`An attack is coming! Dodge with ${controlHint('dodge')} or the dodge button. The dodge briefly protects you while you move.`,{icon:'💨',pri:0});
   // 4) first kill → the goal
   if((G.trialKills||0)>=1) teachOnce('t_progress','Well struck. Clear the chamber — the way down opens once every foe has fallen.',{icon:'✨',pri:1});
   // 5) the portal
-  if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to claim your class and make your Bladefall.',{icon:'🌀',pri:1});
+  if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to finish practice and reach the Waystation.',{icon:'🌀',pri:1});
 }
 // The mid-air DASH lesson — fires once when you approach the Outskirts' required dash chasm.
 function openDashTutorial(){ if(!G) return; meta.tut=meta.tut||{}; meta.tut.dash=1; persistGlobal();
@@ -5375,14 +5358,18 @@ function openDashTutorial(){ if(!G) return; meta.tut=meta.tut||{}; meta.tut.dash
   const b=document.getElementById('tutGo'); if(b) b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); resumePlay(); };
 }
 function openHelp(back){
-  mode='menu';
-  const cats=[...new Set(HELP_ENTRIES.map(e=>e.cat))];
-  const body=cats.map(c=>`<div class="sect">${c}</div>`+HELP_ENTRIES.filter(e=>e.cat===c).map(e=>
-    `<div class="setrow" style="display:block"><b style="color:var(--amber)">${e.title}</b><div style="color:#cfd6df;font-size:12.5px;line-height:1.5;margin-top:3px">${e.body}</div></div>`).join('')).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Field manual</p><h2 class="ovh">❔ Help &amp; Tutorials</h2>
-    <div style="text-align:left;max-height:58vh;overflow:auto;margin:6px 0 12px">${body}</div>
-    <button class="bigbtn ghost" id="helpBack">Back</button></div>`);
-  document.getElementById('helpBack').onclick=back||openPause;
+ mode='menu';
+ const entries=HELP_ENTRIES.filter(e=>e.cat!=='Controls'&&!['Elements & weakness','Companions (pets)','The skill fork'].includes(e.title)).concat([
+ {cat:'Combat',title:'Skills and passives',body:'Class ranks unlock choices. Skills are actions you trigger; passives work automatically. Read both options, select one, then confirm. The Drillmaster can help you change your choices later.'},
+ {cat:'Exploration',title:'Find your next objective',body:'The quest tracker shows your current task. Gold direction markers guide you to main objectives. Turn them on or off in Pause → Settings. Optional secrets are left for you to discover.'},
+ {cat:'Exploration',title:'Find a clue again',body:'Open the journal to see your next task and collected clues. Search by a place, object or word. Selecting Open journal on a new-note notice opens that exact clue.'},
+ {cat:'Exploration',title:'Healing pads',body:'Small healing pads have limited healing. Large healing pads are rare and can restore your health repeatedly. Watch your health before starting another fight.'},
+ {cat:'Controls',title:'Change the camera or controls',body:'Pause to choose a camera view. Key Bindings shows your current controls and lets you change them. On touch screens, use the movement stick and action buttons.'}
+ ]);
+ const next=G?.trial?'Practice: defeat the enemies, then enter the exit portal.':G?.hub?'To start the campaign, use the Briar Town entrance. You can visit the shops later.':'Follow the current main task in the quest tracker. Open your journal if you need the clue again.';
+ showOverlayHTML(`<style>#ovcard:has(.beginnerhelp){padding:0;border:0;background:none;box-shadow:none}.beginnerhelp{box-sizing:border-box;width:100%;max-width:760px!important}.beginnerhelp span{min-width:0;text-align:right;overflow-wrap:anywhere}.beginnerhelp summary{line-height:1.5}</style><div class="card beginnerhelp"><h2 class="ovh">Help for your adventure</h2><p class="ovsub">${next}</p><div style="text-align:left;max-height:62vh;overflow:auto"><details open><summary style="color:var(--amber);font-size:18px;cursor:pointer">Your current controls</summary>${beginnerControls().map(([a,b])=>`<div style="display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid #333"><strong>${a}</strong><span>${htmlSafe(b)}</span></div>`).join('')}<p>Skills: ${['skill1','skill2','skill3','skill4'].map(controlHint).map(htmlSafe).join(' · ')}. Locked skills become available as your class ranks up.</p></details><label for="helpSearch" style="display:block;margin-top:16px">Search help</label><input id="helpSearch" type="search" placeholder="Try healing, controls or clues" style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0;font-size:16px;background:#171921;color:#fff;border:1px solid #947748;border-radius:8px"><div id="helpResults"></div></div><button class="bigbtn ghost" id="helpBack">Back</button></div>`);
+ const search=document.getElementById('helpSearch'),results=document.getElementById('helpResults');
+ const draw=()=>{const q=search.value.trim().toLowerCase(),found=entries.filter(e=>(e.title+' '+e.body+' '+e.cat).toLowerCase().includes(q));results.innerHTML=found.length?found.map(e=>`<details style="padding:12px 0;border-bottom:1px solid #34313b" ${q?'open':''}><summary style="cursor:pointer;color:var(--amber)">${htmlSafe(e.title)}</summary><p style="font-size:14px;line-height:1.6">${e.body}</p></details>`).join(''):'<p>No matching help. Try a shorter word.</p>';};search.oninput=draw;draw();document.getElementById('helpBack').onclick=back||openPause;
 }
 function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
 function sameTrialItem(a,b){ try{return !!a&&!!b&&JSON.stringify(a)===JSON.stringify(b);}catch(e){return false;} }
@@ -11765,11 +11752,15 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Compare both paths carefully — you can respec later at the Drillmaster.</p></div>
     <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div></div>`);
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
-    c2ch()[rank]=b.dataset.pick; persist(); SFX.classup();
-    const nx=c2NextChoice(); if(nx) openClassChoice(nx);
-    else { skillbarUpdate(); const first=c2CurSkills()[0];
-      if(rank===2 && first && !(meta.tut&&meta.tut.skill)) openSkillTutorial(first);   // v2 classes learn the mechanic when their first skill is picked
-      else resumePlay(); } });
+    const selected=[R.a,R.b].find(o=>o.id===b.dataset.pick);if(!selected)return;
+    const confirmAt=Date.now();
+    showOverlayHTML(`<div class="card"><p class="ovkicker">Review your choice</p><h2 class="ovh">${htmlSafe(selected.n)}</h2><p class="ovsub">${htmlSafe(selected.d)}</p><p>${isSk?'This becomes skill '+slot+'. Use it with '+htmlSafe(controlHint('skill'+slot))+'.':'This passive works automatically. You do not need to press a button.'}</p><p class="ovsub">You can change your choices later at the Drillmaster.</p><button class="bigbtn" id="classChoiceConfirm">Confirm ${isSk?'skill':'passive'}</button><button class="bigbtn ghost" id="classChoiceBack">Compare both options again</button></div>`);
+    let committed=false;
+    document.getElementById('classChoiceBack').onclick=()=>openClassChoice(rank);
+    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.classup();
+      const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(rank===2&&first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
+    };
+  });
 }
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
@@ -18887,11 +18878,13 @@ function openPauseV2(){
         ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}
         ${navCard('titleBtnP',`icons/title-screen-exit.png?v=${VERSION3D}`,'Title Screen','Save and leave the game')}
       </div></section>
+    <button class="bigbtn ghost" id="helpBtn">Help &amp; controls</button>
     ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
     </div>`);
   document.getElementById('titleBtnP').onclick=()=>{ persist(); resumeGameAudio(false); titleScreen(); };
   document.getElementById('resBtn').onclick=()=>{ resumeGameAudio(true); resumePlay(); };
   document.getElementById('optBtn').onclick=openPauseSettingsV2;
+  document.getElementById('helpBtn').onclick=()=>openHelp(openPauseV2);
   document.getElementById('gearBtn').onclick=()=>openGear(openPauseV2);
   document.getElementById('bagBtnP').onclick=()=>openBag(openPauseV2);
   document.getElementById('classesBtn').onclick=()=>openClasses(openPauseV2);

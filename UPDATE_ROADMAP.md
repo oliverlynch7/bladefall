@@ -2011,3 +2011,7 @@ Searchable journal with relevant/exact clue access; advancing puzzle/guard marke
 ## 2.040.0-character-creator — 2026-09-27
 
 Larger responsive character creator, explicit naming, class explanations, actual equipped starter preview, full/face views, working eye colors and local iris synchronization. Existing character assets preserved. Browser creator/persistence/phone checks documented in docs/IMPLEMENTATION_CHARACTER_CREATOR_2026-09-27.md.
+
+## 2.041.0-first-steps — 2026-09-27
+
+New-player instructions use current controls, practice skip confirmation, concise next-step hub guidance, searchable Help directly from Pause, and explicit class upgrade review/confirmation. Browser and pre-change-save checks passed; see docs/IMPLEMENTATION_FIRST_STEPS_2026-09-27.md.

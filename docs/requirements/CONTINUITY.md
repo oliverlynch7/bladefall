@@ -741,3 +741,7 @@ User supplies three concept images and explicitly prioritizes cohesive visual id
 ## [Codex | 2026-09-27] Character creator clarity
 
 User explicitly requests larger uncropped centered character preview, obvious character naming, functional eye colors after face upgrade, clearer class explanations and starting weapons. Implemented in 2.040.0-character-creator; see IMPLEMENTATION_CHARACTER_CREATOR_2026-09-27.md. Existing art direction remains undecided and replacement modeling tabled. SFX remains held for user. Opening-story rewrite/illustrations and new-player first-session audit remain next work, not included in this creator batch.
+
+## [Codex | 2026-09-27] New-player first steps
+
+User asks for immediate new-player improvements. 2.041.0 implements accurate rebound-control practice instructions, skip confirmation, focused hub guidance, plain-language contextual tips, direct pause Help with search, and review/confirm for class skill/passive choices. Evidence: docs/IMPLEMENTATION_FIRST_STEPS_2026-09-27.md; scripts/qa-first-steps.cjs and existing-save regression. Opening illustration sequence remains pending, no visual-identity commitment or SFX work.

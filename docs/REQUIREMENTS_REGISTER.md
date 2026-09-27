@@ -619,3 +619,7 @@ User: “Here are the 5 pngs for opening scene”. Five supplied files are JPEGs
 
 ## [Codex | 2026-09-27] Approved Briar refinement pass
 User approved combat/exploration improvements while away: distinct enemy roles, area-specific capped reinforcement hunt, meaningful safe-retry jumps, clear interaction results, nearby clue retrieval, and local canon cleanup. Grounded plan: refine existing western farm enemies/patrol system instead of adding duplicate quests; reuse existing telegraphs and raid elite; strengthen store-entry and orchard traversal; include Briar puzzle notes in clue lookup. Preserve larger art/element decisions as pending.
+
+## [Codex | 2026-09-27] Remaining campaign refinement authorized
+User: “Go ahead and make this improvement pass on the rest of the levels. Do a long work session don’t waste usage”. Extend Briar’s combat, traversal, interaction feedback and clue-access refinement across the remaining campaign halves. Preserve established art, finite story guards, saves and boss objectives; custom SFX remains deferred.
+Grounded plan: replace generic kill counting with geographically authored hunt groups; preserve combat.* IDs/rewards; use reserved groups where every original enemy is a quest guard; prevent reinforcement discovery/spawns across tower storeys; expand discovered-only clue lookup; distinguish puzzle counters from picked-up items; strengthen selected existing optional traversal paths and verify existing specialized routes.

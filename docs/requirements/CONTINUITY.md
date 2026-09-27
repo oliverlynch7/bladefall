@@ -751,3 +751,6 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Briar adventure refinement
 2.043.0: western farm target-specific hunt/roles and capped refills, real single-jump store/orchard traversal, nearby Briar clues and actionable pickup feedback. Preserves existing art and prior quest progress. Evidence and limits: docs/IMPLEMENTATION_BRIAR_REFINEMENT_2026-09-27.md. Wider campaign redesign remains pending.
+
+## [Codex | 2026-09-27] Remaining campaign refinement
+2.044.0: all remaining 15 halves gain specific capped hunting groups, explicit soldier roles, height-aware refills and co-op identities. Expanded discovered-clue access and pickup explanations; real gaps on Keep bell/ Lost Canyon roof routes. Saves preserved. Evidence, baseline test limitations and remaining scope: docs/IMPLEMENTATION_CAMPAIGN_REFINEMENT_2026-09-27.md. Broader art/enemy/puzzle overhaul remains unfinished.

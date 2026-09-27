@@ -2021,3 +2021,6 @@ Five supplied originals, simple canonical opening, manual pacing and responsive 
 
 ## [Codex | 2026-09-27] 2.043.0 — Briar adventure refinement
 Specific western farm raider hunt, differentiated enemy roles and capped refills, store/orchard jumps, related puzzle clues, clearer pickup feedback. Browser movement/combat/UI, rewards/respawns and prior-save checks passed. Details: docs/IMPLEMENTATION_BRIAR_REFINEMENT_2026-09-27.md.
+
+## [Codex | 2026-09-27] Remaining campaign refinement
+2.044.0: all remaining 15 halves gain specific capped hunting groups, explicit soldier roles, height-aware refills and co-op identities. Expanded discovered-clue access and pickup explanations; real gaps on Keep bell/ Lost Canyon roof routes. Saves preserved. Evidence, baseline test limitations and remaining scope: docs/IMPLEMENTATION_CAMPAIGN_REFINEMENT_2026-09-27.md. Broader art/enemy/puzzle overhaul remains unfinished.

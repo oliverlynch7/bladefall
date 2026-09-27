@@ -1043,11 +1043,11 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./brute-encounter.js?v=2000"></script>
 <script src="./marksman-encounter.js?v=2004"></script>
 <script src="./story-state.js?v=2032"></script>
-<script src="./campaign-patrols.js?v=2043"></script>
+<script src="./campaign-patrols.js?v=2044"></script>
 <script src="./campaign-elites.js?v=2035"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
-<script src="./lost-canyon.js?v=2003"></script>
-<script src="./broken-walls.js?v=2023"></script>
+<script src="./lost-canyon.js?v=2044"></script>
+<script src="./broken-walls.js?v=2044"></script>
 <script src="./prison-dungeons.js?v=2006"></script>
 <script src="./snowbound-peaks.js?v=2039"></script>
 <script src="./deep-ice-caves.js?v=2039"></script>
@@ -1067,12 +1067,12 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./hydra.js?v=2016"></script>
 <script src="./shipwreck-shore.js?v=2015"></script>
 <script src="./ship-crossing.js?v=2015"></script>
-<script src="./great-furnace.js?v=2014"></script>
+<script src="./great-furnace.js?v=2044"></script>
 <script src="./furnace-colossus.js?v=2014"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2032">
 <script src="./journal-notice.js?v=2039"></script>
-<script src="./puzzle-feedback.js?v=2039"></script>
-<script src="./journal-clues.js?v=2043"></script>
+<script src="./puzzle-feedback.js?v=2044"></script>
+<script src="./journal-clues.js?v=2044"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
 <script src="./frost-officers.js?v=2010"></script>
@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.043.0-briar-adventure';
+const VERSION3D='2.044.0-campaign-adventure';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2995,10 +2995,10 @@ function briarReceive(request,actor,position){
    if(notesChanged){const note=Object.entries(r.state.notes).filter(([id,n])=>JSON.stringify(n)!==JSON.stringify(s.notes[id])).at(-1)?.[1];if(note)toast('Journal updated · '+note.title);}
    const o=(G.storyObjects||[]).find(o=>o.key===key),puzzle=BFPuzzleFeedback.notice(event,s,r.state,o,request.event.id);
    if(puzzle)presentStoryNotice(puzzle);
-   else if(!notesChanged){const gains=(event?.effects||[]).filter(e=>e.type==='item'&&e.amount>0&&!/^(mc\.screen\.|sl\.attempt\.)/.test(e.id));
+   else if(!notesChanged){const gains=(event?.effects||[]).filter(e=>e.type==='item'&&e.amount>0&&!/^(mc\.screen\.|sl\.attempt\.)|(?:attempts?|tries)$|^fc\.cool$/.test(e.id));
     if(gains.length)SFX.pickup();
-    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:((inBriar()?({'briar.root.1':'Tangle root collected for Mara.','briar.root.2':'Tangle root collected for Mara.','briar.root.3':'Tangle root collected for Mara.','briar.dressings':'Clean dressings collected. Bring them and three tangle roots to Mara.','briar.gus.tools':'Gus’s tools collected. Return the tool roll to him at the workshop.'})[key]:null)||areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
-    else presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:areaQuests()[0]?.d||'Your progress has been updated.'});
+    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:((inBriar()?({'briar.root.1':'Tangle root collected for Mara.','briar.root.2':'Tangle root collected for Mara.','briar.root.3':'Tangle root collected for Mara.','briar.dressings':'Clean dressings collected. Bring them and three tangle roots to Mara.','briar.gus.tools':'Gus’s tools collected. Return the tool roll to him at the workshop.'})[key]:null)||BFPuzzleFeedback.outcome(key)||areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
+    else presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:BFPuzzleFeedback.outcome(key)||areaQuests()[0]?.d||'Your progress has been updated.'});
    }
   }
  }
@@ -5168,7 +5168,7 @@ function loadArea(){
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
-  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G);if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
+  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -12868,6 +12868,7 @@ function killEnemy(e,weaponKill){
     if(!e.frostOfficer&&Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
     if(e.look==='slime' && !e.noSplit && !(MP.active&&!MP.isHost)){ // slimes split into two slimelets (host-authoritative in co-op)
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
+        if(e.patrolGroup)Object.assign(sl,{patrolGroup:e.patrolGroup,patrolParent:e.mid,patrolReturn:true,label:'Tide slimelet',y:e.y,sy:e.y});
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
   checkStageClear();
 }
@@ -12986,7 +12987,7 @@ function checkStageClear(){ if(G?.kingFinal)return;
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if(e?.homeRaid)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
+function foeName(e){ if(e?.homeRaid||e?.patrolGroup&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -14274,7 +14275,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn?{homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -14296,7 +14297,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
-    for(const a of en)if(a[7]?.campaignElite||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -20951,7 +20952,7 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
 function drawHpBar3(e){
   if(e.dead) return;
   const namedElite=e.campaignElite&&dXZ(e.x,e.z,G.p.x,G.p.z)<900;
-  if((e.homeRaid&&dXZ(e.x,e.z,G.p.x,G.p.z)<420)||namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,raider:!!e.homeRaid,name:namedElite||e.homeRaid?e.label:null}); }
+  if(((e.homeRaid||e.patrolGroup)&&dXZ(e.x,e.z,G.p.x,G.p.z)<420&&Math.abs(e.y-G.p.y)<130)||namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,raider:!!(e.homeRaid||e.patrolGroup),name:namedElite||e.homeRaid||e.patrolGroup?e.label:null}); }
   // elemental status pips (shown even at full HP + on bosses)
   if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
     if(keys.length){ const sp=project(e.x,e.y+e.h+(namedElite?75:e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }

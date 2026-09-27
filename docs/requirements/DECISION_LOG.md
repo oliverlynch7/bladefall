@@ -364,3 +364,7 @@ User: “Here are the 5 pngs for opening scene”. Five supplied files are JPEGs
 
 ## [Codex | 2026-09-27] Approved focused Briar pass
 User: 'Yeah go ahead' to proposed combat, hunting, traversal, interaction feedback and clue improvements. Implemented refinement of existing systems, not a new duplicate quest or new visual direction. See IMPLEMENTATION_BRIAR_REFINEMENT_2026-09-27.md.
+
+## [Codex | 2026-09-27] Remaining campaign refinement authorized
+User: “Go ahead and make this improvement pass on the rest of the levels. Do a long work session don’t waste usage”. Extend Briar’s combat, traversal, interaction feedback and clue-access refinement across the remaining campaign halves. Preserve established art, finite story guards, saves and boss objectives; custom SFX remains deferred.
+Grounded plan: replace generic kill counting with geographically authored hunt groups; preserve combat.* IDs/rewards; use reserved groups where every original enemy is a quest guard; prevent reinforcement discovery/spawns across tower storeys; expand discovered-only clue lookup; distinguish puzzle counters from picked-up items; strengthen selected existing optional traversal paths and verify existing specialized routes.

@@ -616,3 +616,6 @@ User: What else can we improve for a new players experience? Make some clear imp
 
 ## [Codex | 2026-09-27] Supplied opening illustrations
 User: “Here are the 5 pngs for opening scene”. Five supplied files are JPEGs; preserve originals and integrate in provided order. Manual readable story cards, no late-game spoilers; canonical Ian death of old age and Briar defense. Runtime art direction otherwise remains undecided.
+
+## [Codex | 2026-09-27] Approved Briar refinement pass
+User approved combat/exploration improvements while away: distinct enemy roles, area-specific capped reinforcement hunt, meaningful safe-retry jumps, clear interaction results, nearby clue retrieval, and local canon cleanup. Grounded plan: refine existing western farm enemies/patrol system instead of adding duplicate quests; reuse existing telegraphs and raid elite; strengthen store-entry and orchard traversal; include Briar puzzle notes in clue lookup. Preserve larger art/element decisions as pending.

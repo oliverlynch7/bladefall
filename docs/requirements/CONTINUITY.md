@@ -748,3 +748,6 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Illustrated opening
 2.042.0: supplied five opening illustrations integrated, canonical spoiler-safe text, manual navigation and creator handoff. Tests and scope: docs/IMPLEMENTATION_OPENING_2026-09-27.md. Other legacy story entries still need a separate canon audit.
+
+## [Codex | 2026-09-27] Briar adventure refinement
+2.043.0: western farm target-specific hunt/roles and capped refills, real single-jump store/orchard traversal, nearby Briar clues and actionable pickup feedback. Preserves existing art and prior quest progress. Evidence and limits: docs/IMPLEMENTATION_BRIAR_REFINEMENT_2026-09-27.md. Wider campaign redesign remains pending.

@@ -361,3 +361,6 @@ User approves the face detail improvement and requests default device text-to-sp
 
 ## [Codex | 2026-09-27] Supplied opening illustrations
 User: “Here are the 5 pngs for opening scene”. Five supplied files are JPEGs; preserve originals and integrate in provided order. Manual readable story cards, no late-game spoilers; canonical Ian death of old age and Briar defense. Runtime art direction otherwise remains undecided.
+
+## [Codex | 2026-09-27] Approved focused Briar pass
+User: 'Yeah go ahead' to proposed combat, hunting, traversal, interaction feedback and clue improvements. Implemented refinement of existing systems, not a new duplicate quest or new visual direction. See IMPLEMENTATION_BRIAR_REFINEMENT_2026-09-27.md.

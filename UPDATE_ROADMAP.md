@@ -2018,3 +2018,6 @@ New-player instructions use current controls, practice skip confirmation, concis
 
 ## [Codex | 2026-09-27] 2.042.0 — Illustrated opening
 Five supplied originals, simple canonical opening, manual pacing and responsive layout. Hub intro corrected. Fresh New Game, desktop/phone navigation and prechange save regression passed; see docs/IMPLEMENTATION_OPENING_2026-09-27.md.
+
+## [Codex | 2026-09-27] 2.043.0 — Briar adventure refinement
+Specific western farm raider hunt, differentiated enemy roles and capped refills, store/orchard jumps, related puzzle clues, clearer pickup feedback. Browser movement/combat/UI, rewards/respawns and prior-save checks passed. Details: docs/IMPLEMENTATION_BRIAR_REFINEMENT_2026-09-27.md.

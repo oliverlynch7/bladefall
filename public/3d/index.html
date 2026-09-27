@@ -1043,7 +1043,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./brute-encounter.js?v=2000"></script>
 <script src="./marksman-encounter.js?v=2004"></script>
 <script src="./story-state.js?v=2032"></script>
-<script src="./campaign-patrols.js?v=2034"></script>
+<script src="./campaign-patrols.js?v=2043"></script>
 <script src="./campaign-elites.js?v=2035"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
 <script src="./lost-canyon.js?v=2003"></script>
@@ -1072,7 +1072,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <link rel="stylesheet" href="./journal-notice.css?v=2032">
 <script src="./journal-notice.js?v=2039"></script>
 <script src="./puzzle-feedback.js?v=2039"></script>
-<script src="./journal-clues.js?v=2039"></script>
+<script src="./journal-clues.js?v=2043"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
 <script src="./frost-officers.js?v=2010"></script>
@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.042.0-illustrated-opening';
+const VERSION3D='2.043.0-briar-adventure';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1293,8 +1293,8 @@ const STORY={
     hitless:"Untouched, start to finish — the way the Bladeborn always swore it could be done and never once managed. Ian would have wanted to see it."
   },
   npc:{  // the Shade: a Bladeborn of an age past, still manning the post at each zone mouth. Lore + why the quests matter + a warning about the boss.
-    outskirts:{lore:["I held this road for eleven years. My blood was the same as yours — that's why I could.","The dreaming spreads through everything that lives here — cut it back, or it follows you down."],
-      why:"Thin the grunts and light the old waystone. Every marker you wake weakens his reach up here.",
+    outskirts:{lore:["The Legion is approaching Briar. The townspeople are doing what they can.","Protect the supplies and help your neighbors prepare. Every person you help gives the town a better chance."],
+      why:"Mara needs supplies for the injured. Beyond the fields, the mill crossing leads toward the Black Woods.",
       boss:"The Brute at the wood's end was a farmer's ox. Do not let what it has become reach you."},
     hollow:{lore:["The wind you hear is the canyon trying to empty itself.","I posted watchers on the rims in my age. The rims are still why you'll live or die here."],
       why:"The chargers breed in the nests — burn through them. The bones on the rims were my watchers. Bring them down for burial.",
@@ -2996,7 +2996,8 @@ function briarReceive(request,actor,position){
    const o=(G.storyObjects||[]).find(o=>o.key===key),puzzle=BFPuzzleFeedback.notice(event,s,r.state,o,request.event.id);
    if(puzzle)presentStoryNotice(puzzle);
    else if(!notesChanged){const gains=(event?.effects||[]).filter(e=>e.type==='item'&&e.amount>0&&!/^(mc\.screen\.|sl\.attempt\.)/.test(e.id));
-    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:(areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
+    if(gains.length)SFX.pickup();
+    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:((inBriar()?({'briar.root.1':'Tangle root collected for Mara.','briar.root.2':'Tangle root collected for Mara.','briar.root.3':'Tangle root collected for Mara.','briar.dressings':'Clean dressings collected. Bring them and three tangle roots to Mara.','briar.gus.tools':'Gus’s tools collected. Return the tool roll to him at the workshop.'})[key]:null)||areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
     else presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:areaQuests()[0]?.d||'Your progress has been updated.'});
    }
   }
@@ -3297,17 +3298,17 @@ function buildBriarOpening(){
  // Shuttered store: blocked front, open rear window and two small climbable crates.
  const storeStart=G.deco.length;
  const wall=(x,z,w,h,d)=>vsolid(x,z,0,w,h,d,'#886440');
- wall(347,-220,15,115,180);wall(533,-220,15,115,180);wall(440,-130,200,115,15);
- wall(376,-310,73,115,15);wall(504,-310,73,115,15);wall(440,-310,55,28,15);
- G.deco.push({x:440,z:-310,y0:91,w:55,h:24,d:15,c:'#886440',nocol:true});vplat(440,-344,18,68,48,{checkpoint:true});vplat(440,-308,28,55,22,{checkpoint:true});
- G.deco.push({x:440,z:-220,y0:116,w:220,h:18,d:200,c:'#62482f',nocol:true});
+ wall(347,-220,15,160,180);wall(533,-220,15,160,180);wall(440,-130,200,160,15);
+ wall(376,-310,73,160,15);wall(504,-310,73,160,15);wall(440,-310,55,84,15);
+ G.deco.push({x:440,z:-310,y0:130,w:55,h:30,d:15,c:'#886440',nocol:true});vplat(440,-360,60,82,64,{checkpoint:true});vplat(440,-308,84,55,22,{checkpoint:true});
+ G.deco.push({x:440,z:-220,y0:161,w:220,h:18,d:200,c:'#62482f',nocol:true});
  for(const x of [418,458])G.deco.push({x,z:-119,y0:20,w:16,h:80,d:8,c:'#b39b73',nocol:true});
  vsolid(440,-255,0,68,20,44,'#70573a');
  G.storyStore=G.deco.splice(storeStart);
  // Timber framing and a lintel make the rear entrance readable; walls fade only while inside.
- for(const x of [347,533])for(const z of [-130,-310])G.storyStore.push({x,z,y0:0,w:13,h:118,d:13,c:'#4d3827'});
- for(const z of [-128,-312])for(const y0 of [12,64,107])G.storyStore.push({x:440,z,y0,w:196,h:6,d:4,c:'#b29262'});
- G.storyStore.push({x:440,z:-314,y0:84,w:62,h:8,d:9,c:'#d0b478'});
+ for(const x of [347,533])for(const z of [-130,-310])G.storyStore.push({x,z,y0:0,w:13,h:162,d:13,c:'#4d3827'});
+ for(const z of [-128,-312])for(const y0 of [12,64,150])G.storyStore.push({x:440,z,y0,w:196,h:6,d:4,c:'#b29262'});
+ G.storyStore.push({x:440,z:-314,y0:124,w:62,h:8,d:9,c:'#d0b478'});
  // Two modest cloth beds beside Mara; the restored pad has a distinct large footprint.
  for(const x of [-265,-330]){vsolid(x,225,0,44,13,90,'#78563b');G.deco.push({x,z:225,y0:14,w:40,h:5,d:78,c:'#bdb99b',nocol:true});}
  G.healpads.push({storyPad:true,infinite:true,locked:!adventureStoryState().flags['mara.healing'],x:-210,z:15,y:0,r:77,charge:1,_acc:0});
@@ -3438,7 +3439,7 @@ function buildHomefieldsExploration(){
  for(const x of [-2720,-1870]){vsolid(x,-680,0,110,75,110,'#a88d50');G.deco.push({x,z:-680,y0:76,w:135,h:20,d:130,c:'#725235',nocol:true});}
  // Orchard climb has a broad ground route beneath it and recovery shelves.
  const steps=[[-2700,-1490,24],[-2700,-1610,52],[-2700,-1730,80],[-2620,-1840,108],[-2490,-1840,136],[-2360,-1840,164]];
- for(const [x,z,y]of steps)vplat(x,z,y,150,150,{terrace:true,checkpoint:true});
+ for(const [x,z,y]of steps)vplat(x,z,y,70,56,{terrace:true,checkpoint:true});
  vplat(-2210,-1840,164,230,240,{terrace:true,checkpoint:true});
  G.chests.push({x:-2210,z:-1840,y:164,opened:false,bob:0});
  for(const [x,z]of [[-2750,-2000],[-2520,-2030],[-1950,-1900],[-1950,-1540]]){G.deco.push({x,z,y0:0,w:34,h:145,d:34,c:'#66503b',nocol:true});G.deco.push({x,z,y0:115,w:145,h:85,d:150,c:'#708449',nocol:true});}
@@ -3462,7 +3463,7 @@ function buildHomefieldsExploration(){
  {key:'home.bell.cache',label:'Open the tower chest',x:2350,z:-1810,y:168,kind:'bellcache'});
  G.healpads.push({x:-2300,z:-1350,y:0,r:32,charge:1,_acc:0});
  // Small separate engagements: melee among hay shelters; mixed patrol in open pasture.
- for(const [type,x,z]of [['grunt',-2430,-800],['caster',-2190,-930],['grunt',-2040,-700],['grunt',1910,-740],['grunt',2130,-860],['flyer',2060,-550]]){const e=spawnEnemy(type,x,z,false);if(e)e.homefieldsWing=true;}
+ for(const [type,x,z]of [['grunt',-2430,-800],['caster',-2190,-930],['grunt',-2040,-700],['grunt',-2380,-1060],['grunt',2130,-860],['flyer',2060,-550]]){const e=spawnEnemy(type,x,z,false);if(e){e.homefieldsWing=true;if(x<-1900)BFCampaignPatrols.dressRaider(e,type==='caster'?'caster':x===-2040?'heavy':'runner');}}
  G.bounds.minX=Math.min(G.bounds.minX,-3030);G.bounds.maxX=Math.max(G.bounds.maxX,2850);
  G.homefieldsExploration={districts,paths,orchardSteps:steps,revision:1};
 }
@@ -3568,7 +3569,8 @@ function drawBriarStory(t){
  drawGusWorkshop(s);
  drawHomefieldsFarmDiscovery(s,t);
  const inside=G.p.x>335&&G.p.x<545&&G.p.z>-320&&G.p.z<-120;
- for(const part of G.storyStore||[])bx(part.x,(part.y0||0)+part.h/2,part.z,part.w,part.h,part.d,part.c,null,inside?.16:1);
+ const nearStore=Math.hypot(G.p.x-440,G.p.z+260)<340;
+ for(const part of G.storyStore||[])bx(part.x,(part.y0||0)+part.h/2,part.z,part.w,part.h,part.d,part.c,null,inside?.16:nearStore&&((part.y0||0)+part.h)>95?.10:1);
  for(const n of G.storyNpcs||[]){
   if(!window.__npc3dDrawn?.(n.id)){pushM();mv(n.x,n.y,n.z);bx(0,27,0,22,34,14,n.id==='mara'?'#b4c0ad':'#886b49');bx(0,51,0,16,16,16,'#d1ad88');popM();}
   const available=n.id==='gus'?f['thomas.ready']&&!f['gus.closed']&&!f['gus.shortcut']:n.id==='thomas'?!f['thomas.ready']:f['thomas.ready']&&!f['briar.depart'];
@@ -3637,7 +3639,7 @@ function discoveredOptionalTasks(){
   if(inIronHalls()&&state.flags['ih.flint.work'])optional.push(entry('Flint’s own work',state.flags['ih.blank']?'Return the blade blank to Flint':'Find the seized blade blank above the eastern presses',!!state.flags['ih.flint.reward']));
   if(inBriar()){
     if(state.quests['briar.gus.tools']&&state.quests['briar.gus.tools']!=='closed')optional.push(entry('Gus’s good tools',state.items.gus_tools?'Bring the tool roll back to Gus':'Search the workshop loft',state.quests['briar.gus.tools']==='complete'));
-    for(const [id,title,done]of [['home.bells','The tower bells','home.bells.cache'],['home.grain','The granary scale','home.grain.cache'],['home.orchard','The old orchard','home.orchard.cache']])if(state.notes[id])optional.push(entry(title,'See the clue in your journal',!!state.rewards[done]));
+    for(const [id,title,done]of [['home.bells','The tower bells','home.bells.cache'],['home.grain','The granary scale','home.grain.cache'],['home.orchard','The old orchard','home.orchard.cache']])if(state.notes[id])optional.push(entry(title,({'home.bells':'Ring the marked bells at the eastern tower','home.grain':'Balance the weights inside the granary','home.orchard':'Climb the western picking platforms and lower the walkway'})[id],!!state.rewards[done]));
   }
   if(inBlackWoods()){
     if(state.flags['beth.help'])optional.push(entry('Nobody left behind','Follow the boot prints to the old rope lift',!!state.flags['beth.rescued']));
@@ -12984,7 +12986,7 @@ function checkStageClear(){ if(G?.kingFinal)return;
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
+function foeName(e){ if(e?.homeRaid)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -14272,7 +14274,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn?{campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn?{homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -14930,6 +14932,7 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
+  if(inBriar()&&!G._storeJumpHint&&Math.hypot(G.p.x-440,G.p.z+360)<160){G._storeJumpHint=true;BFJournalNotice.push({id:'briar.store.jump',kind:'Movement tip',title:'The store’s rear window',text:'Jump onto the crate, then jump through the low window. Hold '+controlHint('jump')+' for a higher jump. The clean dressings are inside. Missing a jump leaves you safely on the ground.'});}
   if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:[G.p,...Object.values(MP.peers||{}).filter(p=>p.zone===G.zone&&!p.downed)],spawn:spawnEnemy,notice:(title,text)=>{BFJournalNotice.push({id:G.patrolWork.id+'.camp',title,text,kind:'Combat area'});questUpdate();}});
   G._freezeT=Math.max(0,(G._freezeT||0)-dt);
   /* Headlong drives you forward and refuses to be steered - the whole point of it.
@@ -17621,7 +17624,7 @@ function enterSparringRoom(){
   document.getElementById('stagetag').textContent='SPARRING ROOM';questUpdate();toast('Sparring Room — practice foes give no XP, gold, or loot.');
 }
 const BESTIARY_INFO={
-  grunt:{name:'Rotbound',tell:'Closes in for simple melee strikes.',lore:'A common victim of the King’s dream, with little left beyond hunger and motion.'},
+  grunt:{name:'Hollowed Soldier',tell:'Closes in, then pauses before striking. Step away during the warning.',lore:'A living soldier forced to obey the Abyss King. Their empty eyes reveal the Hollowing.'},
   flyer:{name:'Dreamwing',tell:'Hovers over obstacles and attacks from above.',lore:'A small airborne scavenger twisted by nightmare-soaked air.'},
   thornboar:{name:'Thornboar',tell:'Lowers its tusks before a heavy charge.',lore:'Once ordinary meadow stock, now plated in bark and black thorns.'},
   sporeback:{name:'Sporeback',tell:'After death, its marked spore cloud swells for one second before becoming harmful.',lore:'The forest rot learned to walk by filling dead beasts with spores.'},
@@ -20948,7 +20951,7 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
 function drawHpBar3(e){
   if(e.dead) return;
   const namedElite=e.campaignElite&&dXZ(e.x,e.z,G.p.x,G.p.z)<900;
-  if(namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,name:namedElite?e.label:null}); }
+  if((e.homeRaid&&dXZ(e.x,e.z,G.p.x,G.p.z)<420)||namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,raider:!!e.homeRaid,name:namedElite||e.homeRaid?e.label:null}); }
   // elemental status pips (shown even at full HP + on bosses)
   if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
     if(keys.length){ const sp=project(e.x,e.y+e.h+(namedElite?75:e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
@@ -21009,6 +21012,7 @@ function drawHpBars(){
       c.fillStyle='#161923';c.fillRect(b.x-w/2-2*DPR,b.y-2*DPR,w+4*DPR,h+4*DPR);c.strokeStyle='#a47a37';c.lineWidth=DPR;c.strokeRect(b.x-w/2-DPR,b.y-DPR,w+2*DPR,h+2*DPR);
       c.fillStyle='#df9f46';c.fillRect(b.x-w/2,b.y,w*b.f,h);continue;
     }
+    if(b.raider&&b.name){c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(10*DPR)+'px system-ui,sans-serif';c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText(b.name,b.x,b.y-6*DPR);c.fillStyle='#ead6af';c.fillText(b.name,b.x,b.y-6*DPR);}
     if(b.pet&&b.name){   // ally pet: small name label above its bar
       c.textAlign='center'; c.textBaseline='alphabetic'; c.font='bold 9px system-ui,sans-serif';
       c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(b.name, b.x+0.6, b.y-4.4);

@@ -1,6 +1,7 @@
 /* Choose from discovered notes only. Never manufacture or reveal a hidden clue. */
 (function(root){'use strict';
 const puzzles=[
+ ['home.bell','home.bells'],['home.grain','home.grain'],['home.orchard','home.orchard'],['woods.track','woods.tracks'],
  ['hp.weight','hp.bridge'],['hp.brake','hp.bridge'],['hp.code','hp.code'],
  ['kd.lift','kd.lift'],['kd.depth','kd.depth'],['kd.drain','kd.drain'],
  ['ff.reflect','ff.reflect'],['ff.marker','ff.camp'],['ic.lock','ic.lock'],['ic.channel','ic.channel'],

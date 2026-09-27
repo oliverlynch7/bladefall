@@ -757,3 +757,6 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Puzzle variety and parkour
 2.045.0: Ice Caves water-depth/freezing and pipe-routing puzzles; Sky Library linked gears/reset and single-jump shard crossing; two Long Ascent gaps with catch ledges. Existing completed puzzle flags preserved. Real-browser traversal, fall recovery, controlled co-op and pre-change save checks passed. Evidence and limitations: docs/IMPLEMENTATION_PUZZLE_PARKOUR_2026-09-27.md. Wider campaign overhaul remains ongoing.
+
+## [Codex | 2026-09-27] Dungeon balance and drain parkour
+2.046.0: replaced the duplicate optional lower weight-total puzzle with a visible two-pan balance beam; three raised drain stepping-stone stretches with safe water recovery. Main rescue unchanged, discovered clues migrated, old completed locks preserved. Browser routes, co-op, checkpoint and save checks passed. Scope and limits: docs/IMPLEMENTATION_DUNGEON_PUZZLES_2026-09-27.md. Campaign-wide puzzle work remains ongoing.

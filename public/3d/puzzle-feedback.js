@@ -17,13 +17,14 @@ const outcomes={
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
  if(event?.effects?.some(e=>e.id==='ih.braces'))return {id,replaceKey:'puzzle:ih.line',kind:'Machine safety',title:'Safety cable pulled',text:'Eight lights are counting down. Reach the hammer lock before they go out. You can pull this cable again if you miss it.'};
- const e=event?.effects?.find(e=>['counterweight','rotatePuzzle','sequence','resetPuzzle','waterworks','flowSwitch','linkedRotate'].includes(e.type));
+ const e=event?.effects?.find(e=>['counterweight','rotatePuzzle','sequence','resetPuzzle','balanceBeam','waterworks','flowSwitch','linkedRotate'].includes(e.type));
  if(!e)return null;
  const solved=!!after.flags[e.id+'.open'],wasSolved=!!before.flags[e.id+'.open'];
  if(wasSolved&&solved)return null;
  let title='Puzzle updated',text;
  if(e.id==='ih.line'){const step=after.items[e.id]||0;title=solved?'Weapon line stopped':step===1?'Metal feed stopped':'Pressure released';text=solved?'The machinery is safe. The repaired cart leads onward.':step===1?'Watch the pressure gauge. Vent the tank while the needle is inside its pale band.':'Pull the safety cable, then hurry to the hammer lock before its eight lights go out.';}
  else if(solved){title='Puzzle solved';text=e.type==='counterweight'?'The weights are balanced. The mechanism is ready.':'The mechanism locks into place. Check what has changed nearby.';}
+ else if(e.type==='balanceBeam'){title='Balance beam moved';text='Weight '+e.weights[e.index]+': '+['on the rack','on the left pan','on the right pan'][after.items[e.id+'.side.'+e.index]||0]+'. Left load: '+(after.items[e.id+'.left']||0)+'. Right load: '+(after.items[e.id+'.right']||0)+'. All three weights must hang before the lock can release.';}
  else if(e.type==='waterworks'){const depth=after.items[e.id+'.level']||0;title=after.flags[e.id+'.frozen']?'Water frozen':e.action==='drain'?'Basin drained':'Water level';text=depth?'Water stands at notch '+depth+' of 3. '+(after.flags[e.id+'.frozen']?'The ice holds this height. Drain beneath it to test the crossing.':'Compare the surface with the banks before freezing.'):'The basin is empty. Fill it to build a new sheet of ice.';}
  else if(e.type==='flowSwitch'){const mask=after.items[e.id+'.mask']||0;text=['Spring inlet: '+(mask&1?'open':'closed'),'Spill outlet: '+(mask&2?'open':'closed'),'Chiller feed: '+(mask&4?'open':'closed')].join('. ')+'. Follow the lit pipes to see where water flows.';}
  else if(e.type==='linkedRotate'){title=e.index===-1?'Shelf gears reset':'Linked shelves turned';text=e.index===-1?'All three pointers return to their starting marks. Try another combination.':'This handle turns two shelves together. Compare all three gold pointers with their pale marks.';}

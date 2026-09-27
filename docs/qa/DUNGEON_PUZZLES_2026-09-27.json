@@ -1,0 +1,96 @@
+{
+  "dungeon_routes": {
+    "checks": [
+      "service door needs discovered roster",
+      "living guards block captive release",
+      "main clues work without NPC dialogue",
+      "wrong load does not start lift",
+      "one plus three restores lift",
+      "player rides rising lift",
+      "dialogue freezes lift and rescue",
+      "prisoners reach shelter and open final approach",
+      "Sly restitution grants shared RK04 once",
+      "lower bank locked before safety latch",
+      "two-stage lower load opens shard chamber",
+      "dry store grants rare armor",
+      "three second-half shards stay provisional",
+      "deep water returns to drain entrance without death"
+    ],
+    "waypoints": 337,
+    "failed": [],
+    "counts": {
+      "keepArt": true,
+      "artObstacles": true,
+      "floorTiles": 5019,
+      "totalTriangles": 126744,
+      "instances": 8039,
+      "chunks": 96,
+      "visibleTriangles": 17836,
+      "visibleDrawCalls": 29
+    },
+    "errors": []
+  },
+  "coop": {
+    "checks": [
+      "Walter conversation opens for both",
+      "guest cannot forge rescue completion",
+      "guest receives opened door and working lift",
+      "guest lift and rider track host snapshot",
+      "shared dialogue pauses both lifts",
+      "rescue and lower chamber open on guest",
+      "NPC shard awarded to both players",
+      "repeat packets cannot duplicate shared shard",
+      "environmental shard remains personal",
+      "guest can collect their own lower shard"
+    ],
+    "errors": []
+  },
+  "checkpoint": [
+    "three Dungeons shards provisional",
+    "death restarts Dungeons and drops only its progress",
+    "boss entrance banks all five Keep shards",
+    "boss retry retains complete Reaper shard set"
+  ],
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 134,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 134,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

@@ -736,8 +736,8 @@
           "type": "note",
           "id": "kd.depth",
           "region": "keep",
-          "title": "Two loads, one safety bar",
-          "text": "The lower plate shows two steps: set the safety bank to 5, then lock its bar. Set the separate lower bank to 8. The bar holds the first load while the lower lock releases."
+          "title": "Two pans, one lock",
+          "text": "Set the safety bank to 5 and lock its bar. Then hang all three lower weights across the two pans. Each handle moves its weight from the rack to the left pan, then the right pan, then back to the rack. Equal loads release the lower lock."
         }
       ]
     },
@@ -811,14 +811,13 @@
       "once": false,
       "effects": [
         {
-          "type": "counterweight",
+          "type": "balanceBeam",
           "id": "kd.deep",
           "weights": [
             2,
             3,
             5
           ],
-          "target": 8,
           "index": 0
         }
       ],
@@ -833,14 +832,13 @@
       "once": false,
       "effects": [
         {
-          "type": "counterweight",
+          "type": "balanceBeam",
           "id": "kd.deep",
           "weights": [
             2,
             3,
             5
           ],
-          "target": 8,
           "index": 1
         }
       ],
@@ -855,14 +853,13 @@
       "once": false,
       "effects": [
         {
-          "type": "counterweight",
+          "type": "balanceBeam",
           "id": "kd.deep",
           "weights": [
             2,
             3,
             5
           ],
-          "target": 8,
           "index": 2
         }
       ],
@@ -924,7 +921,7 @@
           "id": "kd.drain",
           "region": "keep",
           "title": "Marks above the water",
-          "text": "Pairs of scratches follow the old dry route. Three scratches mark unused turns. The water runs back toward the entrance. No one in the cells mentioned this passage."
+          "text": "Pairs of scratches follow the old dry route. Three scratches mark unused turns. Jump between the raised stones where the walkway is broken. If you fall, the current returns you to the drain entrance."
         }
       ]
     },

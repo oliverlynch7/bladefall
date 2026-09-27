@@ -8,7 +8,7 @@ const puzzles=[
  ['cg.bridge','cg.catch.west'],['cg.catch','cg.catch.west'],['la.lower','la.notice'],['la.upper','la.notice'],['dr.winch','dr.beam'],['dr.brace','dr.frame'],
  ['home.bell','home.bells'],['home.grain','home.grain'],['home.orchard','home.orchard'],['woods.track','woods.tracks'],
  ['hp.weight','hp.bridge'],['hp.brake','hp.bridge'],['hp.code','hp.code'],
- ['kd.lift','kd.lift'],['kd.depth','kd.depth'],['kd.drain','kd.drain'],
+ ['kd.lift','kd.lift'],['kd.depth','kd.depth'],['kd.deep','kd.depth'],['kd.brace','kd.depth'],['kd.latch','kd.depth'],['kd.drain','kd.drain'],
  ['ff.reflect','ff.reflect'],['ff.marker','ff.camp'],['ic.lock','ic.lock'],['ic.channel','ic.channel'],
  ['ih.line','ih.order'],['ih.brace','ih.order'],['gf.cool','gf.pipes'],['gf.cache','gf.cache'],['gf.pet','gf.cage'],
  ['pc.mirror','pc.mirrors'],['sl.shelf','sl.shelf.guide'],['sl.display','sl.display'],['la.vault','la.vault'],['tc.tide','tc.tide']

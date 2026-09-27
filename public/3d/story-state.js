@@ -48,6 +48,16 @@
           if(e.target.every((n,i)=>(s.items[e.id+'.'+i]||0)===n))s.flags[e.id+'.open']=true;
           break;
         }
+        case 'balanceBeam':{
+          if(!Array.isArray(e.weights)||e.weights.length!==3||!e.weights.every(n=>Number.isSafeInteger(n)&&n>0)||!Number.isInteger(e.index)||e.index<0||e.index>2)throw Error('Invalid balance beam');
+          if(s.flags[e.id+'.open'])break;
+          const key=e.id+'.side.'+e.index;s.items[key]=((Number(s.items[key])||0)+1)%3;
+          let left=0,right=0,hanging=0;
+          e.weights.forEach((w,i)=>{const side=s.items[e.id+'.side.'+i]||0;if(side===1){left+=w;hanging++;}if(side===2){right+=w;hanging++;}});
+          s.items[e.id+'.left']=left;s.items[e.id+'.right']=right;
+          if(hanging===3&&left===right)s.flags[e.id+'.open']=true;
+          break;
+        }
         case 'waterworks':{
           if(!['fill','freeze','drain'].includes(e.action)||!Number.isInteger(e.target)||e.target<1||e.target>3)throw Error('Invalid waterworks');
           if(s.flags[e.id+'.open'])break;

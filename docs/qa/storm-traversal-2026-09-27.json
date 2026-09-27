@@ -1,0 +1,452 @@
+{
+  "shore": {
+    "checks": [
+      "lookout patrol blocks sailcloth",
+      "storage cave needs drain and latch",
+      "three installed boat parts",
+      "balanced load opens actual wall",
+      "physical and quest shards remain provisional",
+      "Stormshot awarded once"
+    ],
+    "waypoints": 50,
+    "failed": [],
+    "counts": {
+      "name": "Storm Coast",
+      "artObstacles": true,
+      "floorTiles": 1189,
+      "totalTriangles": 17004,
+      "triangles": 17004,
+      "instances": 1189
+    },
+    "errors": []
+  },
+  "cliffs": {
+    "checks": [
+      "no disguised boss troops",
+      "brake required before release",
+      "lift restored",
+      "lift reaches upper station",
+      "inspect chain before opening approach",
+      "main open without optional NPC",
+      "lower brace required",
+      "cave physically opens",
+      "wrong sequence stays closed",
+      "tidal wall opens",
+      "three personal shards provisional"
+    ],
+    "waypoints": 131,
+    "failed": [],
+    "counts": {
+      "name": "Thunder Cliffs",
+      "artObstacles": true,
+      "triangles": 40032,
+      "totalTriangles": 40032,
+      "instances": 2143
+    },
+    "errors": []
+  },
+  "hydraCombat": {
+    "checks": [
+      "no early King or extra enemies",
+      "spawn stands above ground",
+      "taut restraint rejects attacks",
+      "real sword strikes reachable restraint",
+      "real bow projectile hits exposed restraint",
+      "natural warned attack damages player",
+      "all chains free animal and open exit",
+      "no hydra corpse or King credit",
+      "victory paid once and retreat completes",
+      "release note recorded"
+    ],
+    "damage": 11,
+    "errors": []
+  },
+  "traversal": {
+    "waypoints": 26,
+    "walks": [
+      {
+        "to": [
+          -510,
+          760,
+          240
+        ],
+        "at": [
+          -510,
+          760,
+          240
+        ]
+      },
+      {
+        "to": [
+          -595,
+          705,
+          245
+        ],
+        "at": [
+          -594,
+          705,
+          277
+        ]
+      },
+      {
+        "to": [
+          -680,
+          650,
+          250
+        ],
+        "at": [
+          -682,
+          649,
+          282
+        ]
+      },
+      {
+        "to": [
+          -740,
+          570,
+          255
+        ],
+        "at": [
+          -744,
+          566,
+          287
+        ]
+      },
+      {
+        "to": [
+          -800,
+          490,
+          260
+        ],
+        "at": [
+          -800,
+          490,
+          292
+        ]
+      },
+      {
+        "to": [
+          -810,
+          390,
+          265
+        ],
+        "at": [
+          -811,
+          386,
+          297
+        ]
+      },
+      {
+        "to": [
+          -820,
+          290,
+          270
+        ],
+        "at": [
+          -820,
+          288,
+          302
+        ]
+      },
+      {
+        "to": [
+          -820,
+          190,
+          275
+        ],
+        "at": [
+          -820,
+          186,
+          307
+        ]
+      },
+      {
+        "to": [
+          -820,
+          90,
+          280
+        ],
+        "at": [
+          -820,
+          87,
+          312
+        ]
+      },
+      {
+        "to": [
+          -785,
+          -5,
+          270
+        ],
+        "at": [
+          -783,
+          -10,
+          302
+        ]
+      },
+      {
+        "to": [
+          -750,
+          -100,
+          260
+        ],
+        "at": [
+          -748,
+          -104,
+          292
+        ]
+      },
+      {
+        "to": [
+          -685,
+          -175,
+          240
+        ],
+        "at": [
+          -683,
+          -178,
+          274
+        ]
+      },
+      {
+        "to": [
+          -620,
+          -250,
+          220
+        ],
+        "at": [
+          -615,
+          -255,
+          254
+        ]
+      },
+      {
+        "to": [
+          510,
+          760,
+          240
+        ],
+        "at": [
+          510,
+          760,
+          240
+        ]
+      },
+      {
+        "to": [
+          595,
+          705,
+          245
+        ],
+        "at": [
+          594,
+          705,
+          277
+        ]
+      },
+      {
+        "to": [
+          680,
+          650,
+          250
+        ],
+        "at": [
+          682,
+          649,
+          282
+        ]
+      },
+      {
+        "to": [
+          740,
+          570,
+          255
+        ],
+        "at": [
+          744,
+          566,
+          287
+        ]
+      },
+      {
+        "to": [
+          800,
+          490,
+          260
+        ],
+        "at": [
+          800,
+          490,
+          292
+        ]
+      },
+      {
+        "to": [
+          810,
+          390,
+          265
+        ],
+        "at": [
+          811,
+          386,
+          297
+        ]
+      },
+      {
+        "to": [
+          820,
+          290,
+          270
+        ],
+        "at": [
+          820,
+          288,
+          302
+        ]
+      },
+      {
+        "to": [
+          820,
+          190,
+          275
+        ],
+        "at": [
+          820,
+          186,
+          307
+        ]
+      },
+      {
+        "to": [
+          820,
+          90,
+          280
+        ],
+        "at": [
+          820,
+          87,
+          312
+        ]
+      },
+      {
+        "to": [
+          785,
+          -5,
+          270
+        ],
+        "at": [
+          783,
+          -10,
+          302
+        ]
+      },
+      {
+        "to": [
+          750,
+          -100,
+          260
+        ],
+        "at": [
+          748,
+          -104,
+          292
+        ]
+      },
+      {
+        "to": [
+          685,
+          -175,
+          240
+        ],
+        "at": [
+          683,
+          -178,
+          274
+        ]
+      },
+      {
+        "to": [
+          620,
+          -250,
+          220
+        ],
+        "at": [
+          615,
+          -255,
+          254
+        ]
+      }
+    ],
+    "recovery": true
+  },
+  "cliffCoop": {
+    "checks": [
+      "Abe conversation shared",
+      "shared lift and cave geometry",
+      "physical shard remains personal",
+      "same hydra stage and epoch",
+      "guest weapon damages host restraint",
+      "shared mercy exit and broken chains",
+      "stale hydra state rejected"
+    ],
+    "errors": []
+  },
+  "shoreCoop": {
+    "checks": [
+      "shared Otto conversation",
+      "both worlds pause in dialogue",
+      "shared quest shard; physical shard remains personal",
+      "both enter fixed deck",
+      "non-helm steering rejected",
+      "shelter swaps helm to guest",
+      "one ready does not leave",
+      "guest repair and ready accepted",
+      "guest now steers authoritative boat",
+      "stale snapshot rejected",
+      "disconnect returns helm to host"
+    ],
+    "errors": []
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 284,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 284,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

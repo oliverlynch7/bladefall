@@ -2036,3 +2036,6 @@ Specific western farm raider hunt, differentiated enemy roles and capped refills
 
 ## [Codex | 2026-09-27] Emberdeep cooling and parkour
 2.048.0: Great Furnace guard-controlled water cooling, visible heat gauge, safe drain threshold, two main crossing gaps and six optional high-route stepping platforms. Clues and fall recovery updated; existing dialogue and solved progress preserved. Browser, controlled co-op, save and story checks pass. Scope/evidence: docs/IMPLEMENTATION_EMBERDEEP_COOLING_2026-09-27.md. Wider campaign overhaul remains ongoing.
+
+## [Codex | 2026-09-27] Storm Coast traversal
+2.049.0: cargo/beam feedback and inner hatch ramp, broken wreck decking, required upper-cliff and optional wind jumps with recovery, raised Hydra flank stepping routes. Story, boat crossing and mercy outcome preserved. Browser routes, combat, controlled co-op and pre-change save pass. Evidence/limits: docs/IMPLEMENTATION_STORM_TRAVERSAL_2026-09-27.md. Broader overhaul remains ongoing.

@@ -11,6 +11,7 @@ function build({G,plat,spawn}){
  for(const side of [-1,1])for(let i=0;i<=15;i++)floor(side*(780-i*18),550+i*14,120+i*8,160,170);
  floor(0,760,240,1180,250);for(const p of covers)G.walls.push({...p,y0:120,h:170,c:'#58747a',hydraCover:true});
  for(const side of [-1,1])for(let i=0;i<=22;i++)floor(side*(860-i*25),-200-i*42,120+i*10,180,180);
+ G.hydraArena.flankJumps=[];for(const side of [-1,1]){const path=[[side*510,760,240],[side*680,650,250],[side*800,490,260],[side*820,290,270],[side*820,90,280],[side*750,-100,260],[side*620,-250,220]];const steps=[path[0]];for(let j=1;j<path.length;j++){const a=path[j-1],b=path[j],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/150);for(let i=1;i<=n;i++)steps.push(a.map((v,k)=>v+(b[k]-v)*i/n));}G.hydraArena.flankJumps.push(steps);for(const q of steps)floor(...q,75,85);}
  floor(0,-1140,340,900,320);
  G.rooms=[{name:'The Hydra Ledges',x:0,z:100,y:120,w:1700,d:1750,cleared:true,encounter:false,monsters:[]}];
  G.bounds={minX:-1100,maxX:1100,minZ:-1430,maxZ:1080};G.startPos={x:0,z:510,y:120};G.lastSafe={...G.startPos};G.portalPos={x:0,z:-1140,y:340};G.goalPos={...G.portalPos};G.progressEnd=-1300;

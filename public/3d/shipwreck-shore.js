@@ -12,8 +12,8 @@ function build({G,plat,spawn}){
  G.shore={clock:0,walks:{},code:code(G.runSeed)};G.areaName='Storm Coast - Shipwreck Shore';G.campaignLayout={revision:2015,zone:'storm',area:0};
  const floor=(x,z,y,w,d,extra={})=>plat(x,z,y,w,d,{slab:40,checkpoint:true,...extra});
  for(const [id,points]of Object.entries(paths)){const walk=[];for(let j=1;j<points.length;j++){
-  const a=points[j-1],b=points[j],n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/105,Math.abs(b[2]-a[2])/12));
-  for(let i=0;i<=n;i++){const p=a.map((v,k)=>v+(b[k]-v)*i/n);floor(...p,id==='cache'?180:300,id==='cache'?180:300,{shoreTimber:id==='wreck'});walk.push(p);}
+  const a=points[j-1],b=points[j],jump=id==='wreck'&&j===2,n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/(jump?155:105),Math.abs(b[2]-a[2])/(jump?25:12)));
+  for(let i=0;i<=n;i++){const p=a.map((v,k)=>v+(b[k]-v)*i/n);floor(...p,jump?90:id==='cache'?180:300,jump?90:id==='cache'?180:300,{shoreTimber:id==='wreck'});if(jump)floor(p[0],p[1],p[2]-80,210,210);walk.push(p);}
  }G.shore.walks[id]=walk;}
  for(const [name,x,z,y,w,d]of [['Work beach',0,-450,30,820,1900],['Broken hull',-1510,-1830,240,500,500],['Rudder deck',-1370,-2320,300,520,520],['Occupied lookout',1350,-1900,350,620,600],['Dry storage cave',2300,-1380,0,650,1550],['Lower hatch',-1860,-1220,40,500,500],['Rose\'s wreck',-1320,-3400,130,750,650],['Lantern wreck',-2130,-3540,200,630,660],['Crew memorial',0,-4050,30,650,480]]){floor(x,z,y,w,d,{shoreTimber:name==='Broken hull'||name==='Rudder deck'});G.rooms.push({name,x,z,y,w,d,monsters:[],encounter:false,cleared:true});}
  // Lower crawlspace has its own route under the leaning hull, not an invisible pickup.
@@ -38,8 +38,8 @@ function build({G,plat,spawn}){
  for(const [type,x,z,y,guard]of [['grunt',-950,-850,65],['caster',-1670,-1800,240],['grunt',-720,-2200,120],['grunt',1390,-1700,350,true],['caster',1210,-1840,350,true],['grunt',1550,-2040,350,true],['slime',2350,-1030,0],['slime',2250,-1810,0],['grunt',-1060,-3190,115],['caster',-2050,-3480,200],['grunt',0,-3830,30]]){const e=spawn(type,x,z,false);e.y=y;e.shoreLookout=!!guard;}
  G.bounds={minX:-2900,maxX:2950,minZ:-4400,maxZ:900};G.progressEnd=-4300;G.startPos={x:0,z:490,y:30};G.lastSafe={...G.startPos};G.portalPos={x:-180,z:-210,y:30};G.goalPos={...G.portalPos};Object.assign(G.p,{...G.startPos,vy:0});
 }
-function sync({G,state:s,plat}){
- if(f(s,'hull.open')&&!G.shore.hatchOpen){G.shore.hatchOpen=true;G.walls=G.walls.filter(w=>!w.shoreHatch);}
+function sync({G,state:s,plat}){if(s.notes['sc.hull'])s.notes['sc.hull'].text='Cargo weights marked one, two and four hang beside the hatch beam. Its repair mark is five. Match that load to lift the beam and lower the ramp into the hull. The broken deck can be crossed with ordinary jumps; lower boards catch a missed jump.';
+ if(f(s,'hull.open')&&!G.shore.hatchOpen){G.shore.hatchOpen=true;G.walls=G.walls.filter(w=>!w.shoreHatch);G.shore.hatchRamp=[];for(let i=0;i<=6;i++){const q=[-1860,-1600+i*45,40+i*3];plat(...q,145,150,{slab:18,checkpoint:true});G.shore.hatchRamp.push(q);}}
  for(const [part,x,z,y]of [['rudder',-600,-1350,45],['sail',650,-1300,45],['rope',1500,-700,70]])if(s.items['sc.'+part]&&!G.shore[part+'return']){G.shore[part+'return']=true;for(let i=0;i<=6;i++)plat(x*(1-i/6),z+(i/6)*(-850-z),y+(30-y)*i/6,170,190,{slab:28,checkpoint:true});}
  G.shore.parts=['rudder','sail','rope'].map(k=>f(s,'installed.'+k));
 }
@@ -55,6 +55,7 @@ function draw({G,state:s,bx},t){
   else if(o.kind==='chest'){bx(o.x,y+30,o.z,95,55,60,f(s,'code.open')?'#6b806e':'#96663e');for(const x of [-30,30])bx(o.x+x,y+30,o.z,9,58,64,'#566775');}
   else if(o.kind!=='board'){bx(o.x,y+25,o.z,48,50,48,'#4d5d60');bx(o.x,y+63,o.z,8,35,8,'#cab780');if(o.kind.startsWith('weight')){const n=[1,2,4][+o.kind.slice(-1)];for(let i=0;i<n;i++)bx(o.x-15+(i%2)*20,y+20+Math.floor(i/2)*17,o.z+26,8,8,3,'#e0d1a1');}else if(o.kind.startsWith('code'))for(let i=0;i<+o.kind.slice(-1);i++)bx(o.x-16+i*10,y+30,o.z+25,5,15,3,'#efddb0');}
  }
+ const load=s.items['sc.hull']||0,open=f(s,'hull.open'),mask=s.items['sc.hull.mask']||0;for(let i=0;i<3;i++){const x=-1540+i*125,y=300+((mask&(1<<i))?55:130);bx(x,430,-2230,8,70,8,'#b99c6a');bx(x,y,-2230,48,40,48,'#795534');for(let n=0;n<[1,2,4][i];n++)bx(x-16+n*10,y+15,-2203,5,12,3,'#ead8a2');}bx(-1430,open?500:380+Math.min(load,7)*12,-2230,360,25,35,'#ac8552');for(let i=0;i<5;i++)bx(-1550+i*55,455,-2200,15,10,6,i<load?'#e8d29b':'#414b4c');
  // Lantern counts remain physical, indestructible clues. Rows carry anchor/wheel/sail marks.
  for(let row=0;row<3;row++)for(let i=0;i<G.shore.code[row];i++){const x=-2350+row*205,z=-3270+i*55;bx(x,270,z,10,140,10,'#635344');bx(x,330,z,30,35,30,'#e5bb70');}
 }

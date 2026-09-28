@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.058.0-notice-layout';
+const VERSION3D='2.059.0-briar-solids';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3296,7 +3296,7 @@ function drawBlackWoods(t){
 }
 
 function buildBriarOpening(){
- G.areaName='Briar Town · Homefields';G.npc=null;G.qmarks=[];G.dens=[];
+ G.areaName='Briar Town · Homefields';G.npc=null;G.qmarks=[];G.dens=[];G.secret=null;G.secretTrigger=null;
  rebuildHomefieldsVillage();
  G.optionalMissions=(G.optionalMissions||[]).filter(m=>!['outCaravan','outMill'].includes(m.id));
  G.pickups=G.pickups.filter(p=>!['outCaravan','outMill'].includes(p.localItem?.id));
@@ -3349,7 +3349,18 @@ function buildBriarOpening(){
  buildGusWorkshop();
  buildHomefieldsFarmDiscovery();
  buildHomefieldsGranary();
+ solidifyBriarProps();
  G.portal=null;briarPending=null;briarEpoch();briarSync();
+}
+// Authored opening props are added after the legacy scape collision pass.
+function solidifyBriarProps(){
+ for(const o of G.deco){
+  const y=o.y0||0,w=o.w||0,d=o.d||0,h=o.h||0;
+  if(!o.nocol||y>30||w<8||d<8||h<24||!['fence','standstone',undefined].includes(o.kind))continue;
+  const covered=G.obstacles.some(b=>Math.abs(b.x-o.x)+w/2<=b.w/2+2&&Math.abs(b.z-o.z)+d/2<=b.d/2+2&&(b.y0||0)<=y+2&&b.h>=y+h-2);
+  if(covered)continue;
+  G.obstacles.push({kind:'col',x:o.x,z:o.z,y0:y,w,d,h:y+h,briarProp:true});
+ }
 }
 function rebuildHomefieldsVillage(){
  const within=o=>o.x>-900&&o.x<900&&o.z>-740&&o.z<900;

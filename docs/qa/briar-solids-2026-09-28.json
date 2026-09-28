@@ -1,0 +1,317 @@
+{
+  "probe": {
+    "newSolidProps": 70,
+    "isolatedColliderShapesBlock": true,
+    "crateFencePostTrunk": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "oldPortalRemoved": true,
+    "shards": 0
+  },
+  "movement": [
+    {
+      "x": -660,
+      "z": 620,
+      "phased": false,
+      "highest": 35,
+      "finishX": -462.8055246316495
+    },
+    {
+      "x": -435,
+      "z": -85,
+      "phased": false,
+      "highest": 32,
+      "finishX": -369.8055246316493
+    },
+    {
+      "x": 240,
+      "z": 730,
+      "phased": false,
+      "highest": 0,
+      "finishX": 223
+    },
+    {
+      "x": -2750,
+      "z": -2000,
+      "phased": false,
+      "highest": 28,
+      "finishX": -2780
+    }
+  ],
+  "granary": {
+    "walks": [
+      {
+        "to": [
+          180,
+          340
+        ],
+        "at": [
+          168,
+          0,
+          349
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          650,
+          340
+        ],
+        "at": [
+          635,
+          0,
+          338
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1000,
+          380
+        ],
+        "at": [
+          985,
+          0,
+          377
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1150,
+          270
+        ],
+        "at": [
+          1138,
+          0,
+          279
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1260,
+          255
+        ],
+        "at": [
+          1246,
+          0,
+          256
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1150,
+          220
+        ],
+        "at": [
+          1164,
+          0,
+          224
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          960,
+          250
+        ],
+        "at": [
+          974,
+          49,
+          247
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          960,
+          150
+        ],
+        "at": [
+          956,
+          84,
+          163
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          960,
+          50
+        ],
+        "at": [
+          959,
+          99,
+          65
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          960,
+          -55
+        ],
+        "at": [
+          959,
+          136,
+          -40
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1100,
+          -55
+        ],
+        "at": [
+          1085,
+          128,
+          -59
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1150,
+          -95
+        ],
+        "at": [
+          1154,
+          0,
+          -80
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1150,
+          -260
+        ],
+        "at": [
+          1150,
+          0,
+          -244
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1150,
+          245
+        ],
+        "at": [
+          1150,
+          0,
+          230
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1150,
+          380
+        ],
+        "at": [
+          1150,
+          0,
+          365
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1520,
+          380
+        ],
+        "at": [
+          1507,
+          0,
+          383
+        ],
+        "ok": true
+      },
+      {
+        "to": [
+          1550,
+          -350
+        ],
+        "at": [
+          1550,
+          0,
+          -335
+        ],
+        "ok": true
+      }
+    ],
+    "checks": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "blocked": {
+      "to": [
+        1150,
+        -240
+      ],
+      "at": [
+        1150,
+        0,
+        -106
+      ],
+      "ok": false
+    }
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 10,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 10,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "limits": "Briar first-half props only. Existing orchard-jump and store-window scripted route failures reproduced on pre-change build, unchanged by this pass. Granary route passes. Broader campaign collision audit is not completed."
+}

@@ -420,3 +420,7 @@ User: "ok lets revamp briar now then. i can playtest when u done". Scope: both B
 
 ## [Codex | 2026-09-28] Journal and loot overlap
 User reports journal notes overlap item-drop UI and requests repositioning. Inspection: both occupy left side around 175px/31% height. Plan: place journal beside visible loot on wide screens; defer journal display without consuming reading time on narrow screens. Preserve all notes and loot actions. Verify simultaneous panels at desktop/laptop/mobile sizes.
+
+
+## [Codex | 2026-09-28] Briar obsolete portal and solid props
+User requests removal of leftover purple portal in Briar first half and collision on solid objects. Inspection confirms legacy G.secret thornwood portal survives new opening builder, and authored nocol crates/fences/posts/trunks bypass old large-mass auto collision. Plan: clear only Briar legacy secret/trigger; preserve Rift Hall/shards. Add final Briar solid-prop pass for ground-level wooden/stone boxes and fences, excluding vegetation, terrain banks and overhead details; retain existing colliders where already present. Verify physical blocking and authored access routes in browser. Broader campaign collision audit remains separate from this focused Briar fix.

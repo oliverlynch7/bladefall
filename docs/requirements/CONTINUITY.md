@@ -808,3 +808,7 @@ Validation: real-browser attacks in both halves, dodge/locked-aim/wall/height ch
 
 ## [Codex | 2026-09-28] Journal/loot layout — 2.058.0
 Journal notices move beside visible loot cards at widths >=1050px, with clearance for their entrance animation. Narrower screens defer the note and freeze reading time until loot clears. Browser bounding-box checks pass at 1440/1050/1024/700/390px; pre-change save fixture passes. No save schema changes. Evidence: docs/qa/notice-layout-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Briar portal and solid props — 2.059.0
+Removed legacy Thornwood secret portal/trigger from Homefields builder. Added final collision pass for 70 ground-level authored solid prop pieces, including crates, fences, posts and orchard trunks. Leaves/crops, terrain banks and overhead trim excluded; existing matching colliders reused. Actual movement probes confirm no phasing through four representative props (low obstacles can be stepped onto), isolated shape checks pass for all additions, granary traversal and old-save fixture pass. Existing orchard/store-window scripted route failures reproduced identically before this change; do not claim full traversal completion. Evidence: docs/qa/briar-solids-2026-09-28.json. Broader campaign collision audit remains outstanding.

@@ -1,0 +1,339 @@
+{
+  "test": {
+    "rows": [
+      {
+        "zone": 0,
+        "half": 1,
+        "multiplier": 1,
+        "damage": 8.496
+      },
+      {
+        "zone": 0,
+        "half": 2,
+        "multiplier": 1,
+        "damage": 8.496
+      },
+      {
+        "zone": 1,
+        "half": 1,
+        "multiplier": 1.1,
+        "damage": 9.345600000000001
+      },
+      {
+        "zone": 1,
+        "half": 2,
+        "multiplier": 1.1300000000000001,
+        "damage": 9.600480000000001
+      },
+      {
+        "zone": 2,
+        "half": 1,
+        "multiplier": 1.2,
+        "damage": 10.1952
+      },
+      {
+        "zone": 2,
+        "half": 2,
+        "multiplier": 1.23,
+        "damage": 10.450079999999998
+      },
+      {
+        "zone": 3,
+        "half": 1,
+        "multiplier": 1.3,
+        "damage": 11.0448
+      },
+      {
+        "zone": 3,
+        "half": 2,
+        "multiplier": 1.33,
+        "damage": 11.29968
+      },
+      {
+        "zone": 4,
+        "half": 1,
+        "multiplier": 1.4,
+        "damage": 11.8944
+      },
+      {
+        "zone": 4,
+        "half": 2,
+        "multiplier": 1.43,
+        "damage": 12.14928
+      },
+      {
+        "zone": 5,
+        "half": 1,
+        "multiplier": 1.5,
+        "damage": 12.744
+      },
+      {
+        "zone": 5,
+        "half": 2,
+        "multiplier": 1.53,
+        "damage": 12.99888
+      },
+      {
+        "zone": 6,
+        "half": 1,
+        "multiplier": 1.6,
+        "damage": 13.5936
+      },
+      {
+        "zone": 6,
+        "half": 2,
+        "multiplier": 1.6300000000000001,
+        "damage": 13.84848
+      },
+      {
+        "zone": 7,
+        "half": 1,
+        "multiplier": 1.7000000000000002,
+        "damage": 14.443200000000003
+      },
+      {
+        "zone": 7,
+        "half": 2,
+        "multiplier": 1.7300000000000002,
+        "damage": 14.698080000000003
+      }
+    ],
+    "parties": [
+      {
+        "players": 2,
+        "maxHp": 59,
+        "hp": 21.83
+      },
+      {
+        "players": 3,
+        "maxHp": 81,
+        "hp": 29.97
+      },
+      {
+        "players": 4,
+        "maxHp": 104,
+        "hp": 38.48
+      },
+      {
+        "players": 2,
+        "maxHp": 59,
+        "hp": 21.83
+      },
+      {
+        "players": 1,
+        "maxHp": 37,
+        "hp": 13.69
+      }
+    ],
+    "repeatCycles": 20,
+    "checks": [
+      "curve",
+      "boss-arena exclusion",
+      "hub exclusion",
+      "trial exclusion",
+      "late joins and departures",
+      "health fraction",
+      "dummy exclusion",
+      "no compounding",
+      "spawn scaling",
+      "offline restore",
+      "guest authority",
+      "king second phase"
+    ]
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 1,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 1,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "combat": [
+    {
+      "z": 0,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 1,
+      "a": 0,
+      "type": "dustjackal",
+      "moved": 101,
+      "damage": 68,
+      "active": true
+    },
+    {
+      "z": 1,
+      "a": 1,
+      "type": "dustjackal",
+      "moved": 101,
+      "damage": 72,
+      "active": true
+    },
+    {
+      "z": 2,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 45,
+      "active": true
+    },
+    {
+      "z": 2,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 45,
+      "active": true
+    },
+    {
+      "z": 3,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 50,
+      "active": true
+    },
+    {
+      "z": 3,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 50,
+      "active": true
+    },
+    {
+      "z": 4,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 55,
+      "active": true
+    },
+    {
+      "z": 4,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 55,
+      "active": true
+    },
+    {
+      "z": 5,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 60,
+      "active": true
+    },
+    {
+      "z": 5,
+      "a": 1,
+      "type": "slime",
+      "role": "exploder",
+      "moved": 19,
+      "damage": 42,
+      "active": true
+    },
+    {
+      "z": 6,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 65,
+      "active": true
+    },
+    {
+      "z": 6,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 65,
+      "active": true
+    },
+    {
+      "z": 7,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 65,
+      "active": true
+    },
+    {
+      "z": 7,
+      "a": 1,
+      "type": "siegeknight",
+      "role": "shielder",
+      "moved": 164,
+      "damage": 144,
+      "active": true
+    }
+  ],
+  "coop": {
+    "checks": [
+      "two player health multiplier",
+      "guest receives authoritative health"
+    ],
+    "enemies": 16,
+    "errors": []
+  },
+  "hydra": {
+    "chains": 3,
+    "brokenChainPreserved": true,
+    "halfHealthPreserved": true,
+    "total": 441,
+    "scaled": 705.2,
+    "restored": 441
+  }
+}

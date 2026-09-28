@@ -775,3 +775,7 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Campaign audit and difficulty steering
 User approved campaign-wide testing and added: "my guess is that the difficultyl is slightly too easy right now." Diagnostic pass found ordinary enemy damage unchanged across regions while HP scales; 61 navigation transitions and 15 half-level movement/attack probes pass. No balance changes yet. Exact limits, repetition candidates and proposed controlled difficulty experiment: docs/CAMPAIGN_AUDIT_2026-09-27.md. Full natural fresh-save playthrough remains outstanding.
+
+
+## [Codex | 2026-09-27] Campaign balance and co-op HP
+2.051.0: regular-enemy damage grows after Briar (+10% per region, +3 points in part two); existing 1.6x/2.2x/2.8x co-op HP now reconciles late joins/departures while preserving health fraction, boss phase state and Hydra chains. No new boss damage or solo HP inflation. Browser curve, 20 join/leave cycles, host/guest health, 15-section combat and pre-change save checks pass. Scope and limits: docs/IMPLEMENTATION_CAMPAIGN_BALANCE_2026-09-27.md. Natural full-campaign balance playtesting remains outstanding.

@@ -389,3 +389,6 @@ User: Continue after Storm Coast. Grounded batch: preserve disguise challenge/fi
 
 ## [Codex | 2026-09-27] Campaign audit and difficulty steering
 User approved campaign-wide testing and added: "my guess is that the difficultyl is slightly too easy right now." Diagnostic pass found ordinary enemy damage unchanged across regions while HP scales; 61 navigation transitions and 15 half-level movement/attack probes pass. No balance changes yet. Exact limits, repetition candidates and proposed controlled difficulty experiment: docs/CAMPAIGN_AUDIT_2026-09-27.md. Full natural fresh-save playthrough remains outstanding.
+
+## [Codex | 2026-09-27] Approved progression and co-op rebalance
+User authorizes logical progression rebalance and co-op enemy HP below 2x for two players. Inspection: existing +60% HP per ally applies only at spawn. Plan: retain 1/1.6/2.2/2.8 curve, reconcile existing campaign enemies on host when party size changes, preserve HP fraction and special boss base HP. Regular campaign half-level enemy damage +10% per region, +3% second half outside Briar; no extra enemy HP or boss damage scaling. Preserve beginner trials/PvP/side-mode tuning and existing difficulty presets. Verify late join/leave/no compounding, boss base HP, damage curve and saves.

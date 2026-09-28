@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.050.0-duskmoor-ascent';
+const VERSION3D='2.051.0-campaign-balance';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9318,13 +9318,31 @@ function partySize(){
   } catch(e){ return 1; }
 }
 function partyHpMul(){ return NO_PARTY_SCALE ? 1 : (1 + PARTY_HP_PER_ALLY * (partySize() - 1)); }
+function campaignEnemyDamageMul(){return isCampaignAdventure()&&G.area>=0&&G.zone>0?1+Math.min(7,G.zone)*.10+(G.area===1?.03:0):1;}
+function syncCampaignPartyHealth(){
+  if(!isCampaignAdventure()||(MP.active&&!MP.isHost)||MP.pvp)return;
+  const mul=partyHpMul();let changed=false;
+  for(const e of G.enemies){
+    if(e.dead||e.hp<=0||e.dummy||e.practice||e.bot||e.crackWall||!Number.isFinite(e.partyHealthMul)||e.partyHealthMul===mul)continue;
+    const ratio=mul/e.partyHealthMul,fraction=e.hp/e.maxHp;
+    // Cache the unscaled maximum; recapture if an encounter changed it (e.g. phase two).
+    if(e.partyScaledMax!==e.maxHp)e.partyBaseMax=e.maxHp/e.partyHealthMul;
+    e.maxHp=Math.max(1,Math.round(e.partyBaseMax*mul));e.partyScaledMax=e.maxHp;
+    e.hp=Math.min(e.maxHp,e.maxHp*fraction);
+    if(Number.isFinite(e.akBaseHP))e.akBaseHP*=ratio;
+    if(Number.isFinite(e.shellHp))e.shellHp*=ratio;
+    e.partyHealthMul=mul;changed=true;
+  }
+  if(changed&&G.hydraArena)G.hydraArena.totalHp=G.enemies.filter(e=>e.hydraChain).reduce((n,e)=>n+e.maxHp/(e.partyHealthMul||mul)*mul,0);
+}
+
 
 function spawnEnemy(type,x,z,isBoss){
   const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1)*partyHpMul();   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale); partyHpMul is 1 solo
-  const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
+  const e={partyHealthMul:partyHpMul(),type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
-    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:1)*(_earnedTrial?1.25:1)*tEnemyDmg()*(a.boss?dtune().boss:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
+    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:campaignEnemyDamageMul())*(_earnedTrial?1.25:1)*tEnemyDmg()*(a.boss?dtune().boss:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
     look:a.look||null,dive:!!a.dive,deathpuff:!!a.deathpuff,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
@@ -14915,7 +14933,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arBack').onclick=back||titleScreen;
 }
 function update(dt){
-  partyTravelTick(dt);partyHud();
+  partyTravelTick(dt);partyHud();syncCampaignPartyHealth();
   if(!G?.kingFinal)document.getElementById('finalCharge')?.remove();
   if(G?.voyage||document.getElementById('voyagehud'))voyageHud();
   if(briarPending&&performance.now()-briarPending.sent>650)briarSendPending();
@@ -22271,7 +22289,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

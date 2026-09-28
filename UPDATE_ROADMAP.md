@@ -2042,3 +2042,7 @@ Specific western farm raider hunt, differentiated enemy roles and capped refills
 
 ## [Codex | 2026-09-27] Duskmoor ascent continuation
 2.050.0: second upper exposed flight/two new gaps, memorial stepping stones, bridge chain and vault bolt/target feedback, discovered clue updates. Browser single-jump paths/recovery, story, co-op and save tests pass. Scope/limits: docs/IMPLEMENTATION_DUSKMOOR_ASCENT_2026-09-27.md. Finale unchanged; broader campaign testing remains outstanding.
+
+
+## [Codex | 2026-09-27] Campaign balance and co-op HP
+2.051.0: regular-enemy damage grows after Briar (+10% per region, +3 points in part two); existing 1.6x/2.2x/2.8x co-op HP now reconciles late joins/departures while preserving health fraction, boss phase state and Hydra chains. No new boss damage or solo HP inflation. Browser curve, 20 join/leave cycles, host/guest health, 15-section combat and pre-change save checks pass. Scope and limits: docs/IMPLEMENTATION_CAMPAIGN_BALANCE_2026-09-27.md. Natural full-campaign balance playtesting remains outstanding.

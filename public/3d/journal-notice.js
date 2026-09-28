@@ -18,7 +18,15 @@ function mount(){if(panel||!root.document)return;panel=document.createElement('a
  panel.querySelector('.jn-close').onclick=()=>{queue.dismiss();shown=null;panel.hidden=true;};panel.querySelector('.jn-open').onclick=()=>openJournal(queue.current?.id);
 }
 function observe(G,key,notes,region,seed=false){if(sceneOwner!==G||sceneKey!==key||seed){sceneOwner=G;sceneKey=key;queue.reset(key,notes);shown=null;if(panel)panel.hidden=true;}queue.observe(key,notes,region);}
-function tick(dt,visible){mount();if(!panel)return;const n=queue.tick(dt,visible,held||panel.contains(document.activeElement));panel.hidden=!visible||!n;if(!visible||!n)return;if(n!==shown){shown=n;panel.querySelector('.jn-kind').textContent=n.kind||'Journal updated';panel.querySelector('h3').textContent=n.title;panel.querySelector('p').textContent=n.text;panel.querySelector('.jn-reading').scrollTop=0;panel.classList.remove('jn-arrive');void panel.offsetWidth;panel.classList.add('jn-arrive');}
+function tick(dt,visible){mount();if(!panel)return;
+ // Keep loot decisions and reading in separate lanes; compact screens queue the note.
+ const loot=document.getElementById('lootcard'),lootOpen=loot&&!loot.classList.contains('hide');
+ panel.style.removeProperty('left');
+ if(lootOpen){
+  if(root.innerWidth<1050)visible=false;
+  else panel.style.left=(loot.getBoundingClientRect().right+48)+'px';
+ }
+ const n=queue.tick(dt,visible,held||panel.contains(document.activeElement));panel.hidden=!visible||!n;if(!visible||!n)return;if(n!==shown){shown=n;panel.querySelector('.jn-kind').textContent=n.kind||'Journal updated';panel.querySelector('h3').textContent=n.title;panel.querySelector('p').textContent=n.text;panel.querySelector('.jn-reading').scrollTop=0;panel.classList.remove('jn-arrive');void panel.offsetWidth;panel.classList.add('jn-arrive');}
  panel.querySelector('.jn-count').textContent=queue.pending?queue.pending+' more':'';panel.querySelector('.jn-time i').style.width=(100*queue.remaining/readingTime(n.title+' '+n.text))+'%';
 }
 const api={createQueue,readingTime,observe,tick,push:n=>queue.push(n),configure:fn=>openJournal=fn,queue};root.BFJournalNotice=api;if(typeof module!=='undefined')module.exports=api;

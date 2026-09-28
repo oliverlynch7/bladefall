@@ -671,3 +671,7 @@ User reports deletion failed and requests rigorous audit after disrupted friend 
 
 ## [Codex | 2026-09-28] Briar combat revamp approved
 User: "ok lets revamp briar now then. i can playtest when u done". Scope: both Briar campaign halves. Inspection finds existing hunting tasks, replenishing camps, farm raid leader and authored Brute; ordinary soldiers still share basic AI. Implement three readable ordinary troop roles (committed runner lunge, slower guard sweep, aimed ground hex), consistent respawns and host-owned co-op attack snapshots. Preserve quest/save IDs, current art direction, finite story guards, beasts, terrain, parkour, and boss encounter. Keep introductory warnings generous and punish through avoidable attacks rather than increased health. No custom SFX work. Verify actual browser combat, dodge geometry, camp replenishment, co-op synchronization and pre-change save.
+
+
+## [Codex | 2026-09-28] Journal and loot overlap
+User reports journal notes overlap item-drop UI and requests repositioning. Inspection: both occupy left side around 175px/31% height. Plan: place journal beside visible loot on wide screens; defer journal display without consuming reading time on narrow screens. Preserve all notes and loot actions. Verify simultaneous panels at desktop/laptop/mobile sizes.

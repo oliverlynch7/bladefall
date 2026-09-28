@@ -663,3 +663,7 @@ User clarifies that multiplayer opened inside a save should not ask for a save a
 
 ## [Codex | 2026-09-27] New character slot navigation
 User reports Create for another character reloads to title. Inspection: slot Create and Play both call selectSlot, which reloads without a follow-up action. Plan: carry a one-shot create intent for an empty selected slot, start opening/creation after reload, immediately create for current empty slot, route occupied Play through continueSlot. Guard existing saves against creation and keep deletion behavior unchanged. Verify browser slot-switch creation, saved-slot resume and prior-save preservation.
+
+
+## [Codex | 2026-09-27] Save/multiplayer regression audit
+User reports deletion failed and requests rigorous audit after disrupted friend playtest. Reproduced: active slot deletion removes mode file but unload rewrites global achievements; slotSummary treats achievements as character, leaving phantom occupied slot. Plan: per-slot generation invalidates stale writers (including other tabs), blank global record prevents legacy resurrection, slot occupancy based on real save data, checked deletion errors. Audit create/complete/skip/reload, three slots, active/inactive/cancel deletion, stale writers, legacy imports, host/join selection, success/failure/retry/cancel and controlled two-browser room transitions. Inspect/fix additional evidenced defects; distinguish simulated transport from real remote network testing.

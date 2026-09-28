@@ -2062,3 +2062,7 @@ Specific western farm raider hunt, differentiated enemy roles and capped refills
 
 ## [Codex | 2026-09-27] Character slot continuation
 2.055.0: empty-slot Create now carries a consumed-once creation intent across slot reload and opens story/creator directly; same-slot creation launches immediately. Existing-slot Play uses continuation rather than stopping at title. Occupied slots protected from creation. Browser UI creates and saves second character without modifying original save, verifies intent removal and returning to first character; pre-change campaign save fixture and syntax pass. Evidence: docs/qa/character-slot-flow-2026-09-27.json; scripts/qa-character-slot-flow.cjs.
+
+
+## [Codex | 2026-09-27] Save and multiplayer regression release
+2.056.0: reproduced/fixed deleted-save resurrection and phantom occupied slots; generation guard plus stale-tab notice, legacy reset marker, checked deletion errors. Fixed async connection exception handling, failure Back context and missing-save intent validation. Broad browser suite passes including native PeerJS host/join, different character levels, reload/rejoin, disconnect, cross-slot Hardcore host, successful retry, PvP save protection, all-slot delete/recreate/stale-writer checks and prior tutorial/creation/save regressions. Exact evidence/limits: docs/SAVE_FLOW_AUDIT_2026-09-27.md and docs/qa/save-flow-audit-2026-09-27.json. Refresh both clients; friend-specific Mac/Brave/network environment not directly reproduced.

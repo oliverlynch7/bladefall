@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.055.0-character-slot-flow';
+const VERSION3D='2.056.0-save-flow-audit';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1104,12 +1104,15 @@ let SLOT=0; try{ SLOT=Math.max(0,Math.min(2,parseInt(localStorage.getItem('bf3_s
 const SLOTPFX=SLOT===0?'':('s'+SLOT+'_');
 const GKEY='bladefall3d_'+SLOTPFX+'global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
 const MKEY=m=>'bladefall3d_'+SLOTPFX+m;
+const SAVE_EPOCH_KEY=MKEY('generation');
+const SAVE_EPOCH=(()=>{try{return localStorage.getItem(SAVE_EPOCH_KEY);}catch(e){return null;}})();
+function saveGenerationCurrent(){try{return localStorage.getItem(SAVE_EPOCH_KEY)===SAVE_EPOCH;}catch(e){return false;}}
 function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
   let g={}; try{ g=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+'global')||'{}'); }catch(e){}
   let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
-    if(mv.hero||mv.gold||mv.zoneMax||mv.run?.p){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
+    if(mv.hero||mv.gold||mv.zoneMax||mv.run?.p||Object.values(mv.classUnlocked||{}).some(Boolean)){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
   if(best?.run?.p) best={...best,hero:best.run.p};
-  const cls=(best&&best.classId)||g.classId, has=best||cls||(g.achievements&&Object.keys(g.achievements).length);
+  const cls=best&&best.classId, has=!!best;
   return has?{empty:false,cls,lvl:best&&best.hero?best.hero.level:1,name:(best&&best.heroName)||'Unnamed Warden',gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal,
     hero:(best&&best.hero)||null,skin:(best&&best.hero&&best.hero.skin)||g.selectedSkin||'knight',rank:(best&&best.classes&&cls&&best.classes[cls]&&best.classes[cls].rank)||1}:{empty:true};
 }
@@ -1132,8 +1135,19 @@ function beginCharacterCreation(){
   if(!meta.originSeen)playStory(STORY.origin,()=>{meta.originSeen=true;persistGlobal();openCharCreate();});
   else openCharCreate();
 }
-function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
-  for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
+function deleteSlot(sl){
+  if(!Number.isInteger(sl)||sl<0||sl>2)return false;
+  const pfx=sl===0?'':('s'+sl+'_'),key='bladefall3d_'+pfx;
+  try{
+    // Invalidate this and other open tabs before clearing the character's files.
+    localStorage.setItem(key+'generation',Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
+    for(const k of ['rl','hc','hl'])localStorage.removeItem(key+k);
+    // An explicit empty profile prevents old 2D/3D migration from reviving a deleted slot.
+    localStorage.setItem(key+'global','{}');
+    if(sl===SLOT){MODE=null;sessionStorage.removeItem('bf3_create_after_slot');sessionStorage.removeItem('bf3_continue_after_slot');sessionStorage.removeItem('bf3_party_intent');}
+    return true;
+  }catch(e){toast('Could not fully delete this save. Please check browser storage and retry.');return false;}
+}
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
@@ -1143,7 +1157,7 @@ const GLOBAL_FIELDS=['objectiveArrows','friendArrows','legacyHubDialogue','dialo
 const MODE_FIELDS=['hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
-  let old=loadJSON(SAVE_KEY_OLD);
+  let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
   if(!old){ let t=loadJSON(SAVE_KEY_2D)||{}; old={}; GLOBAL_FIELDS.forEach(f=>{ if(t[f]!=null) old[f]=t[f]; }); }
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });_g.legacyHubDialogue=_g.legacyHubDialogue||old?.hubDialogue||{};
 }
@@ -1179,9 +1193,9 @@ if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
   const h=(location.hostname||''), muted=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(h) || /[?&]mute=1\b/.test(location.search);
   if(muted){ meta.soundOn=false; meta.musicOn=false; }
 }catch(e){} })();
-function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
+function persistGlobal(){ if(!saveGenerationCurrent())return; const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
-function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
+function persist(){ if(!saveGenerationCurrent()||IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
   persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); const cp=campaignCheckpoint(); if(cp) Object.assign(mv,checkpointClone(cp.state)); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv)); window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){ window.__saveStatus={ok:false,error:e.name,at:Date.now(),mode:MODE}; console.error('[save] Progress could not be stored',e); } } }
 // Campaign writes the committed half-entry checkpoint, never unfinished-half gains.
 // Secondary modes retain their own save contracts.
@@ -14442,24 +14456,25 @@ function choosePartySave(kind,code='',pvp=false,back=titleScreen){
  autosaveRun();const rows=partySaveChoices();
  if(back===openPauseV2&&MODE&&G){
   if(!rows.some(r=>r.slot===SLOT&&r.m===MODE)){toast('Finish or skip your starter practice first, then play together.');return;}
-  startPartySave({slot:SLOT,m:MODE,kind,code,pvp,at:Date.now()});return;
+  startPartySave({slot:SLOT,m:MODE,kind,code,pvp,at:Date.now()},back);return;
  }
  mode='menu';showGameUI(false);
  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">${kind==='host'?'Host':'Join'} Co-op</p><h2 class="ovh">Choose your saved character</h2><p class="ovsub">Your level, class ranks and equipment come with you. Progress saves to this character. Unfinished level progress follows the usual checkpoint rules.</p>${rows.map((r,j)=>`<button class="bigbtn ghost" data-party-save="${j}">${htmlSafe(r.name)} · Save ${r.slot+1}<br><small>${htmlSafe(CLASSES[r.cls]?.disp||r.cls)} · Level ${r.hero.level||1} · Rank ${r.rank} · ${r.m==='rl'?'Adventure':r.m==='hc'?'Hardcore':'Hitless'}</small></button>`).join('')||'<p class="ovsub">Create a character in a save slot first, then return here to play together.</p>'}<button class="bigbtn ghost" id="partyPickBack">Back</button></div>`);
  document.getElementById('partyPickBack').onclick=()=>openMPLobby(back);
  document.querySelectorAll('[data-party-save]').forEach(btn=>btn.onclick=()=>{const r=rows[+btn.dataset.partySave];const intent={slot:r.slot,m:r.m,kind,code,pvp,at:Date.now()};
   if(r.slot!==SLOT){try{sessionStorage.setItem('bf3_party_intent',JSON.stringify(intent));localStorage.setItem('bf3_slot',String(r.slot));}catch(e){toast('Could not switch save files. Please check browser storage.');return;}location.reload();}
-  else startPartySave(intent);
+  else startPartySave(intent,back);
  });
 }
-function startPartySave(intent){
+function startPartySave(intent,back=titleScreen){
  if(!intent||intent.slot!==SLOT||!['rl','hc','hl'].includes(intent.m)||!['host','join'].includes(intent.kind)||Date.now()-intent.at>300000)return false;
+ if(!partySaveChoices().some(r=>r.slot===intent.slot&&r.m===intent.m)){toast('That character save is no longer available. Choose another save.');return false;}
  // Load the selected save BEFORE any room handshake can create or advertise a character.
  G=null;loadMode(intent.m);meta.diff=intent.m==='hc'?'hardcore':intent.m==='hl'?'hitless':'normal';MP.ensureGuestReady();
  mode='menu';showGameUI(false);showOverlayHTML('<div class="card narrow"><h2 class="ovh">Connecting your character…</h2><p class="ovsub" id="partyConnectStatus">Loading your chosen save and opening the room.</p></div>');
- const failure=info=>{mode='menu';showGameUI(false);showOverlayHTML('<div class="card narrow"><h2 class="ovh">Could not connect</h2><p class="ovsub">'+htmlSafe(info)+'. Your chosen save is still available.</p><button class="bigbtn" id="partyRetry">Try again</button><button class="bigbtn ghost" id="partyCancelConnect">Back</button></div>');document.getElementById('partyRetry').onclick=()=>startPartySave({...intent,at:Date.now()});document.getElementById('partyCancelConnect').onclick=openMPLobby;};
- Promise.resolve(briarReady).then(()=>{if(intent.kind==='host')MP.host((ok,info)=>{if(!ok){failure(info);return;}if(intent.pvp){ARENA_LOADOUT.bots=0;enterArena();}else {resumeSavedAdventure();if(G&&!G.hub)MP.onEnter(G.zone);}mpRoomBanner(info);const banner=document.getElementById('mpbanner');if(!intent.pvp&&banner)banner.textContent='Co-op room '+info+' — share this code with your friends';},!!intent.pvp);
- else {openHub();MP.join(intent.code,(ok,info)=>{if(!ok){failure(info);return;}toast('Joined '+info+' with '+(meta.heroName||'your saved character'));});}}).catch(e=>failure(e.message||'Please retry'));
+ const failure=info=>{mode='menu';showGameUI(false);showOverlayHTML('<div class="card narrow"><h2 class="ovh">Could not connect</h2><p class="ovsub">'+htmlSafe(info)+'. Your chosen save is still available.</p><button class="bigbtn" id="partyRetry">Try again</button><button class="bigbtn ghost" id="partyCancelConnect">Back</button></div>');document.getElementById('partyRetry').onclick=()=>startPartySave({...intent,at:Date.now()},back);document.getElementById('partyCancelConnect').onclick=()=>{if(back===openPauseV2){resumeSavedAdventure();openMPLobby(back);}else openMPLobby();};};
+ Promise.resolve(briarReady).then(()=>{if(intent.kind==='host')return MP.host((ok,info)=>{if(!ok){failure(info);return;}if(intent.pvp){ARENA_LOADOUT.bots=0;enterArena();}else {resumeSavedAdventure();if(G&&!G.hub)MP.onEnter(G.zone);}mpRoomBanner(info);const banner=document.getElementById('mpbanner');if(!intent.pvp&&banner)banner.textContent='Co-op room '+info+' — share this code with your friends';},!!intent.pvp);
+ else {openHub();return MP.join(intent.code,(ok,info)=>{if(!ok){failure(info);return;}toast('Joined '+info+' with '+(meta.heroName||'your saved character'));});}}).catch(e=>failure(e.message||'Please retry'));
  return true;
 }
 
@@ -16837,7 +16852,7 @@ function openSlots(){
       <h2 class="ovh">Erase this character?</h2><p class="ovsub">${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].disp:su.cls)+' · Lv '+su.lvl:'this save'} will be gone for good.</p>
       <button class="bigbtn" id="delYes" style="background:linear-gradient(180deg,#e8635a,#c33)">Erase it</button>
       <button class="bigbtn ghost" id="delNo">Keep it</button></div>`);
-    document.getElementById('delYes').onclick=()=>{ deleteSlot(sl); if(sl===SLOT) selectSlot(0); else openSlots(); };
+    document.getElementById('delYes').onclick=()=>{ if(!deleteSlot(sl))return; if(sl===SLOT) selectSlot(sl); else openSlots(); };
     document.getElementById('delNo').onclick=openSlots; });
   document.getElementById('backBtn').onclick=titleScreen;
 }
@@ -21836,6 +21851,13 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'){ try{autosaveRun();}catch(e){} } });
 window.addEventListener('pagehide',()=>{ try{autosaveRun();}catch(e){} });
 window.addEventListener('beforeunload',()=>{ try{autosaveRun();}catch(e){} });
+window.addEventListener('storage',event=>{
+  if(event.key!==SAVE_EPOCH_KEY||event.newValue===SAVE_EPOCH)return;
+  if(MP.active)MP.leave();
+  mode='menu';showGameUI(false);
+  showOverlayHTML('<div class="card narrow"><h2 class="ovh">This save was deleted in another tab</h2><p class="ovsub">This older session cannot overwrite the deleted or replacement character. Reload to choose a save.</p><button class="bigbtn" id="deletedSaveReload">Reload saves</button></div>');
+  document.getElementById('deletedSaveReload').onclick=()=>location.reload();
+});
 let pendingParty=null;try{pendingParty=JSON.parse(sessionStorage.getItem('bf3_party_intent')||'null');sessionStorage.removeItem('bf3_party_intent');}catch(e){}
 if(!startPartySave(pendingParty))titleScreen();
 try{const createSlot=sessionStorage.getItem('bf3_create_after_slot');sessionStorage.removeItem('bf3_create_after_slot');

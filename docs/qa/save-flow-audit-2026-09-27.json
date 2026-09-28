@@ -1,0 +1,331 @@
+{
+  "deletionBefore": {
+    "empty": false,
+    "global": {
+      "legacyHubDialogue": {},
+      "unlockedSkins": [
+        "knight"
+      ],
+      "selectedSkin": "knight",
+      "achievements": {
+        "firstKill": true
+      },
+      "soundOn": false,
+      "showArmor": true,
+      "autoAttack": false,
+      "autoKeep": false,
+      "autoBag": false,
+      "camMode": "shoulder",
+      "camV2": 1,
+      "lookSens": 1,
+      "fpsFov": 92,
+      "renderDist": 1,
+      "silhouette": true,
+      "quality": "high",
+      "particles": true,
+      "totalKills": 0,
+      "bossKills": 0,
+      "kingKills": 0,
+      "tyrantKills": 0,
+      "magicBossKills": 0,
+      "rangedBossKills": 0,
+      "legendaryFound": 0,
+      "flawlessStages": 0,
+      "maxLevel": 1,
+      "beatNormal": false,
+      "beatHardcore": false,
+      "beatHitless": false,
+      "jetpack": true,
+      "diff": "normal",
+      "cosmetics": {},
+      "cosEquipped": {
+        "cape": null,
+        "trail": null,
+        "glow": null
+      },
+      "zonesCleared": 0,
+      "elitesKilled": 0,
+      "secretsFound": 0,
+      "musicOn": false,
+      "musicVol": 1,
+      "sfxVol": 1,
+      "introSeen": false,
+      "zoneSeen": {},
+      "shadeSeen": {},
+      "endlessBest": 0,
+      "dmgNumbers": true,
+      "keybinds": {
+        "up": [
+          "KeyW",
+          "ArrowUp"
+        ],
+        "down": [
+          "KeyS",
+          "ArrowDown"
+        ],
+        "left": [
+          "KeyA",
+          "ArrowLeft"
+        ],
+        "right": [
+          "KeyD",
+          "ArrowRight"
+        ],
+        "jump": [
+          "Space"
+        ],
+        "attack": [
+          "Mouse0",
+          "KeyJ"
+        ],
+        "dodge": [
+          "Mouse2",
+          "KeyK"
+        ],
+        "skill1": [
+          "Digit1"
+        ],
+        "skill2": [
+          "Digit2"
+        ],
+        "skill3": [
+          "Digit3"
+        ],
+        "skill4": [
+          "Digit4"
+        ],
+        "interact": [
+          "KeyE"
+        ],
+        "loot": [
+          "Tab"
+        ],
+        "lootEquip": [
+          "KeyF"
+        ],
+        "lootBag": [
+          "KeyR"
+        ],
+        "lootSell": [
+          "KeyQ"
+        ],
+        "auto": [
+          "KeyL"
+        ],
+        "ping": [
+          "KeyG"
+        ],
+        "partyTeleport": [
+          "KeyT"
+        ],
+        "partyNext": [
+          "KeyY"
+        ],
+        "journal": [
+          "KeyN"
+        ]
+      },
+      "arcadeOwned": false
+    },
+    "character": false
+  },
+  "deletion": [
+    {
+      "target": 0,
+      "cancelPreserved": true,
+      "deletedAllModes": true,
+      "emptyAfterReload": true,
+      "legacyNotRestored": true,
+      "staleTabBlocked": true,
+      "staleTabNotified": true,
+      "otherSlotsUntouched": true,
+      "recreatedSlotSaves": true,
+      "staleTabCannotOverwriteReplacement": true
+    },
+    {
+      "target": 1,
+      "cancelPreserved": true,
+      "deletedAllModes": true,
+      "emptyAfterReload": true,
+      "legacyNotRestored": true,
+      "staleTabBlocked": true,
+      "staleTabNotified": true,
+      "otherSlotsUntouched": true,
+      "recreatedSlotSaves": true,
+      "staleTabCannotOverwriteReplacement": true
+    },
+    {
+      "target": 2,
+      "cancelPreserved": true,
+      "deletedAllModes": true,
+      "emptyAfterReload": true,
+      "legacyNotRestored": true,
+      "staleTabBlocked": true,
+      "staleTabNotified": true,
+      "otherSlotsUntouched": true,
+      "recreatedSlotSaves": true,
+      "staleTabCannotOverwriteReplacement": true
+    }
+  ],
+  "connectionFailures": {
+    "checks": [
+      "host offline failure, retry and cancel to pause",
+      "join offline failure, retry and cancel to pause",
+      "async transport exception shown",
+      "missing save rejected without default character",
+      "storage deletion error reported"
+    ]
+  },
+  "nativeCoop": {
+    "transport": "native PeerJS",
+    "available": true,
+    "players": [
+      {
+        "name": "Host Audit",
+        "level": 13,
+        "zone": 0,
+        "active": true
+      },
+      {
+        "name": "Guest Audit",
+        "level": 7,
+        "zone": 0,
+        "active": true
+      }
+    ],
+    "guestFollowsHostToBriar": true,
+    "hostDisconnectHandled": true,
+    "guestSavePreserved": true,
+    "guestReloadAndTitleRejoin": true
+  },
+  "crossSlotHardcoreHost": {
+    "crossSlotHost": true,
+    "hardcoreSaveChosen": true,
+    "level": 21,
+    "intentConsumed": true,
+    "otherSavesUntouched": true
+  },
+  "pvpSaveProtection": {
+    "nativePvpHost": true,
+    "temporaryStatsNotSaved": true,
+    "restored": {
+      "name": "Current Warden",
+      "level": 12,
+      "gold": 0,
+      "cls": "warrior"
+    }
+  },
+  "nativeRetry": {
+    "failedHostThenNativeRetrySucceeded": true,
+    "result": {
+      "active": true,
+      "name": "Current Warden",
+      "level": 12,
+      "hub": true
+    }
+  },
+  "tutorial": [
+    {
+      "scenario": {
+        "old": false,
+        "skip": false,
+        "slot": 0
+      },
+      "loaded": {
+        "cls": "ranger",
+        "name": "Tutorial Tester",
+        "complete": true,
+        "hub": true,
+        "other": true
+      }
+    },
+    {
+      "scenario": {
+        "old": false,
+        "skip": true,
+        "slot": 1
+      },
+      "loaded": {
+        "cls": "ranger",
+        "name": "Tutorial Tester",
+        "complete": true,
+        "hub": true,
+        "other": true
+      }
+    }
+  ],
+  "creation": {
+    "newSlotOpensCreation": true,
+    "newCharacterSaved": true,
+    "previousSaveUntouched": true,
+    "intentConsumed": true,
+    "existingSlotPlayResumes": true
+  },
+  "currentSaveRouting": [
+    {
+      "connection": {
+        "kind": "host",
+        "name": "Current Warden",
+        "level": 12,
+        "pvp": false,
+        "slot": 0
+      },
+      "picker": false
+    },
+    {
+      "connection": {
+        "kind": "join",
+        "code": "ABC123",
+        "name": "Current Warden",
+        "level": 12,
+        "slot": 0
+      },
+      "picker": false
+    },
+    {
+      "titlePickerPreserved": true
+    }
+  ],
+  "existingSave": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

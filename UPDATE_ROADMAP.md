@@ -2058,3 +2058,7 @@ Specific western farm raider hunt, differentiated enemy roles and capped refills
 
 ## [Codex | 2026-09-27] Current-character multiplayer
 2.054.0: Esc multiplayer automatically uses current SLOT/MODE for host/join, with no save picker; title entry retains picker. Existing connection flow and checkpoint behavior preserved. Browser UI tests intercept connection endpoints and confirm name, level 12 and slot reach both host/join without a picker; title picker remains. Existing-save fixture and syntax pass. Evidence: docs/qa/current-save-coop-2026-09-27.json; scripts/qa-current-save-coop.cjs. No external network handshake claimed. Supersedes pause picker expectations in the 2.053 QA script.
+
+
+## [Codex | 2026-09-27] Character slot continuation
+2.055.0: empty-slot Create now carries a consumed-once creation intent across slot reload and opens story/creator directly; same-slot creation launches immediately. Existing-slot Play uses continuation rather than stopping at title. Occupied slots protected from creation. Browser UI creates and saves second character without modifying original save, verifies intent removal and returning to first character; pre-change campaign save fixture and syntax pass. Evidence: docs/qa/character-slot-flow-2026-09-27.json; scripts/qa-character-slot-flow.cjs.

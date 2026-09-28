@@ -659,3 +659,7 @@ User requests multiplayer from the in-game Esc pause menu. Grounded plan: add a 
 
 ## [Codex | 2026-09-27] Use active save for in-game multiplayer
 User clarifies that multiplayer opened inside a save should not ask for a save again. Supersedes prior pause-picker requirement. Plan: distinguish pause entry via its existing Back callback, save using normal checkpoint rules, automatically pass current SLOT/MODE to the existing connection flow. Title-screen multiplayer retains picker. Do not connect an unfinished starter with no saved hero; explain completing/skipping practice.
+
+
+## [Codex | 2026-09-27] New character slot navigation
+User reports Create for another character reloads to title. Inspection: slot Create and Play both call selectSlot, which reloads without a follow-up action. Plan: carry a one-shot create intent for an empty selected slot, start opening/creation after reload, immediately create for current empty slot, route occupied Play through continueSlot. Guard existing saves against creation and keep deletion behavior unchanged. Verify browser slot-switch creation, saved-slot resume and prior-save preservation.

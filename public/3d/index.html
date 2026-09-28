@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.054.0-current-save-coop';
+const VERSION3D='2.055.0-character-slot-flow';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1118,6 +1118,19 @@ function continueSlot(sl){
   if(sl===SLOT){ modeSelect(); return; }
   try{ sessionStorage.setItem('bf3_continue_after_slot','1'); localStorage.setItem('bf3_slot',sl); }catch(e){}
   location.reload();
+}
+function createCharacterSlot(sl){
+  if(!Number.isInteger(sl)||sl<0||sl>2)return;
+  if(!slotSummary(sl).empty){openSlots();return;}
+  if(sl===SLOT){beginCharacterCreation();return;}
+  try{sessionStorage.removeItem('bf3_continue_after_slot');sessionStorage.setItem('bf3_create_after_slot',String(sl));localStorage.setItem('bf3_slot',String(sl));}
+  catch(e){toast('Could not switch save slots. Please check browser storage.');return;}
+  location.reload();
+}
+function beginCharacterCreation(){
+  if(!slotSummary(SLOT).empty){openSlots();return;}
+  if(!meta.originSeen)playStory(STORY.origin,()=>{meta.originSeen=true;persistGlobal();openCharCreate();});
+  else openCharCreate();
 }
 function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
@@ -16817,7 +16830,7 @@ function openSlots(){
     <div class="achlist">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   { const pb=document.querySelector('[data-play]'); if(pb) pb.onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} modeSelect(); }; }
-  document.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectSlot(+b.dataset.sel));
+  document.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>{const sl=+b.dataset.sel;if(slotSummary(sl).empty)createCharacterSlot(sl);else continueSlot(sl);});
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const sl=+b.dataset.del;
     const su=slotSummary(sl);
     showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--danger)">Delete Slot ${sl+1}?</p>
@@ -16879,7 +16892,7 @@ function titleScreen(){ musicPlay('village_vigil');   // the home theme introduc
   window.addEventListener('keydown',revealMenu);
   window.addEventListener('pointerdown',revealMenu);
   document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){}
-    if(currentSlot.empty){ if(!meta.originSeen){ playStory(STORY.origin, ()=>{meta.originSeen=true;persistGlobal();openCharCreate();}); } else openCharCreate(); }   // first time: the opening cutscene sets up the world, then class select
+    if(currentSlot.empty)beginCharacterCreation();   // first time: the opening cutscene sets up the world, then class select
     else openSlots(); };   // else pick/free a slot
   const cont=document.getElementById('mmCont'), contSave=document.getElementById('mmContSave'), contWrap=document.getElementById('mmContinueWrap');
   const paintPreview=dir=>{ const su=slotSummary(previewSlot), C=su.cls&&CLASSES[su.cls]?CLASSES[su.cls]:null;
@@ -21825,6 +21838,13 @@ window.addEventListener('pagehide',()=>{ try{autosaveRun();}catch(e){} });
 window.addEventListener('beforeunload',()=>{ try{autosaveRun();}catch(e){} });
 let pendingParty=null;try{pendingParty=JSON.parse(sessionStorage.getItem('bf3_party_intent')||'null');sessionStorage.removeItem('bf3_party_intent');}catch(e){}
 if(!startPartySave(pendingParty))titleScreen();
+try{const createSlot=sessionStorage.getItem('bf3_create_after_slot');sessionStorage.removeItem('bf3_create_after_slot');
+  if(!pendingParty&&createSlot!==null&&Number(createSlot)===SLOT&&slotSummary(SLOT).empty){
+    sessionStorage.removeItem('bf3_continue_after_slot');
+    if(titleScreen._reveal)titleScreen._reveal();setTimeout(beginCharacterCreation,0);
+  }
+}catch(e){}
+
 try{ if(!pendingParty&&sessionStorage.getItem('bf3_continue_after_slot')==='1'){
   sessionStorage.removeItem('bf3_continue_after_slot');
   if(titleScreen._reveal) titleScreen._reveal();

@@ -400,3 +400,7 @@ User reports completed starter tutorial reopens class selection after returning 
 
 ## [Codex | 2026-09-27] Pause-menu multiplayer access
 User requests multiplayer from the in-game Esc pause menu. Grounded plan: add a Multiplayer entry, preserve the existing host/join save selection, carry a contextual Back action through lobby and save picker, and show current-room code/leave controls when connected. Opening/backing out must retain current world and checkpoint.
+
+
+## [Codex | 2026-09-27] Use active save for in-game multiplayer
+User clarifies that multiplayer opened inside a save should not ask for a save again. Supersedes prior pause-picker requirement. Plan: distinguish pause entry via its existing Back callback, save using normal checkpoint rules, automatically pass current SLOT/MODE to the existing connection flow. Title-screen multiplayer retains picker. Do not connect an unfinished starter with no saved hero; explain completing/skipping practice.

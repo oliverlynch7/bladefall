@@ -787,3 +787,7 @@ User approved campaign-wide testing and added: "my guess is that the difficultyl
 
 ## [Codex | 2026-09-27] Multiplayer in Esc menu
 2.053.0: Multiplayer pause entry opens existing host/join save selection with contextual Back through picker/lobby to pause. Connected room shows code and Leave Room. New SVG party icon. Browser Esc navigation, host/join pickers, Back/Resume retaining campaign checkpoint, connected-room UI/leave, and pre-change save fixture pass. This pass tests UI routing, not an external PeerJS connection. Evidence: docs/qa/pause-multiplayer-2026-09-27.json; scripts/qa-pause-multiplayer.cjs. Includes 2.052 tutorial persistence fix.
+
+
+## [Codex | 2026-09-27] Current-character multiplayer
+2.054.0: Esc multiplayer automatically uses current SLOT/MODE for host/join, with no save picker; title entry retains picker. Existing connection flow and checkpoint behavior preserved. Browser UI tests intercept connection endpoints and confirm name, level 12 and slot reach both host/join without a picker; title picker remains. Existing-save fixture and syntax pass. Evidence: docs/qa/current-save-coop-2026-09-27.json; scripts/qa-current-save-coop.cjs. No external network handshake claimed. Supersedes pause picker expectations in the 2.053 QA script.

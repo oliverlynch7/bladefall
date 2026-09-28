@@ -1,0 +1,69 @@
+{
+  "routing": [
+    {
+      "connection": {
+        "kind": "host",
+        "name": "Current Warden",
+        "level": 12,
+        "pvp": false,
+        "slot": 0
+      },
+      "picker": false
+    },
+    {
+      "connection": {
+        "kind": "join",
+        "code": "ABC123",
+        "name": "Current Warden",
+        "level": 12,
+        "slot": 0
+      },
+      "picker": false
+    },
+    {
+      "titlePickerPreserved": true
+    }
+  ],
+  "existingSave": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

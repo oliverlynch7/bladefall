@@ -1,6 +1,6 @@
 import * as T from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
-import {kitModel,loadKitModel} from './mob3d.js?v=2022';
+import {kitModel,loadKitModel} from './mob3d.js?v=2057';
 import {buildDeep} from './deep-art.js?v=2017';
 let active=null;
 export function buildFinalKing(scene,w){

@@ -1044,7 +1044,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./marksman-encounter.js?v=2004"></script>
 <script src="./story-state.js?v=2046"></script>
 <script src="./campaign-patrols.js?v=2044"></script>
-<script src="./campaign-elites.js?v=2035"></script>
+<script src="./campaign-elites.js?v=2057"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
 <script src="./lost-canyon.js?v=2044"></script>
 <script src="./broken-walls.js?v=2044"></script>
@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.056.0-save-flow-audit';
+const VERSION3D='2.057.0-briar-combat';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7844,14 +7844,14 @@ function updateCampaignElite(e,dt,p,eff){
  // Use the existing body wind-up/release clips, without generic contact damage.
  e.meleeW=e.ceState==='wind'?e.ceClock:0;e.meleeActive=e.ceState==='strike'?e.ceClock:0;
  if(e.ceState==='wind'){
-  if(e._ceWarnSerial!==e.ceSerial){e._ceWarnSerial=e.ceSerial;e._ceSeen=0;playFx('atk2',.55);if(!e._ceHint){e._ceHint=true;toast(e.label+': '+kit.hint);}}
+  if(e._ceWarnSerial!==e.ceSerial){e._ceWarnSerial=e.ceSerial;e._ceSeen=0;playFx('atk2',.55);if(!e._ceHint){e._ceHint=true;G._combatHints=G._combatHints||{};if(!G._combatHints[e.ceKind]){G._combatHints[e.ceKind]=true;toast(e.label+': '+kit.hint);}}}
   e._ceSeen+=dt;
  }
  // A guest that missed the warning never gets an invisible catch-up hit.
  if(e.ceState==='strike'&&(!MP.guest()||(e._ceWarnSerial===e.ceSerial&&e._ceSeen>=.55))){
   if(e._ceFx!==e.ceSerial){e._ceFx=e.ceSerial;playFx(e.ceKind==='shore'?'heavyhit':'ma_stomp',.65);}
-  if(e._ceHit!==e.ceSerial&&BFCampaignElites.contains(e,p)&&!losBlocked(e.ceX,e.ceZ,p.x,p.z)&&!BFCampaignElites.blocked(e,p,G.obstacles)){e._ceHit=e.ceSerial;hurtPlayer(e.dmg*kit.damage,e.ceX,e.ceZ,foeHit(e,kit.title.toLowerCase()));}
-  if(G.pet&&!G.pet.dead&&e._cePetHit!==e.ceSerial&&BFCampaignElites.contains(e,G.pet)&&!losBlocked(e.ceX,e.ceZ,G.pet.x,G.pet.z)&&!BFCampaignElites.blocked(e,G.pet,G.obstacles)){e._cePetHit=e.ceSerial;hurtPet(e.dmg*kit.damage,e.ceX,e.ceZ);}
+  if(e._ceHit!==e.ceSerial&&BFCampaignElites.contains(e,p)&&(e.briarRole!=='hex'||!losBlocked(e.x,e.z,p.x,p.z))&&!losBlocked(e.ceX,e.ceZ,p.x,p.z)&&!BFCampaignElites.blocked(e,p,G.obstacles)){e._ceHit=e.ceSerial;hurtPlayer(e.dmg*kit.damage,e.ceX,e.ceZ,foeHit(e,kit.title.toLowerCase()));}
+  if(G.pet&&!G.pet.dead&&e._cePetHit!==e.ceSerial&&BFCampaignElites.contains(e,G.pet)&&(e.briarRole!=='hex'||!losBlocked(e.x,e.z,G.pet.x,G.pet.z))&&!losBlocked(e.ceX,e.ceZ,G.pet.x,G.pet.z)&&!BFCampaignElites.blocked(e,G.pet,G.obstacles)){e._cePetHit=e.ceSerial;hurtPet(e.dmg*kit.damage,e.ceX,e.ceZ);}
  }
 }
 function drawCampaignEliteDanger(e){
@@ -7862,7 +7862,9 @@ function drawCampaignEliteDanger(e){
  const line=(ax,az,bx2,bz2,width)=>{const len=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(len/22));for(let i=0;i<=n;i++)mark(ax+(bx2-ax)*i/n,az+(bz2-az)*i/n,width);};
  const point=(f,a)=>({x:x+e.ceDX*f+e.ceDZ*a,z:z+e.ceDZ*f-e.ceDX*a});
  const lane=(dx,dz,reach,width,both=false)=>{const a=both?-reach:0;for(const side of [-1,1])line(x+dx*a+dz*width*side,z+dz*a-dx*width*side,x+dx*reach+dz*width*side,z+dz*reach-dx*width*side,4);};
- if(e.ceKind==='raid')ring(k.reach,1.05);
+ if(e.ceKind==='raid'||e.briarRole==='guard')ring(k.reach,1.05);
+ else if(e.briarRole==='runner')lane(e.ceDX,e.ceDZ,k.reach,19);
+ else if(e.briarRole==='hex')ring(k.radius);
  else if(e.ceKind==='forge'){ring(k.reach);const r=strike?25+(k.reach-25)*(1-e.ceClock/k.strike):k.reach*(1-e.ceClock/k.wind);ring(Math.max(10,r));}
  else if(e.ceKind==='shore')for(const a of [-.32,0,.32]){const q=point(Math.cos(a),Math.sin(a));lane(q.x-x,q.z-z,k.reach,13);}
  else {lane(e.ceDX,e.ceDZ,k.reach,22,true);lane(e.ceDZ,-e.ceDX,k.reach,22,true);}
@@ -13034,7 +13036,7 @@ function checkStageClear(){ if(G?.kingFinal)return;
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if(e?.homeRaid||e?.patrolGroup&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
+function foeName(e){ if((e?.briarRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -14344,7 +14346,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
-    for(const a of en)if(a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -15369,9 +15371,11 @@ function update(dt){
   for(const e of G.enemies){
     if(e.dead) continue;
     if(e.hydraChain)continue;
+    if(!MP.guest()&&G.zone===0&&G.area>=0&&isCampaignAdventure())BFCampaignElites.briar(e);
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
-    if(e.dropT>0){ if(dXZ(e.x,e.z,p.x,p.z)<(e.marksmanCrossing?1600:640)){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
+    const wakeDistance=e.briarRole&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===G.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
+    if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
@@ -21016,7 +21020,7 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
 function drawHpBar3(e){
   if(e.dead) return;
   const namedElite=e.campaignElite&&dXZ(e.x,e.z,G.p.x,G.p.z)<900;
-  if(((e.homeRaid||e.patrolGroup)&&dXZ(e.x,e.z,G.p.x,G.p.z)<420&&Math.abs(e.y-G.p.y)<130)||namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,raider:!!(e.homeRaid||e.patrolGroup),name:namedElite||e.homeRaid||e.patrolGroup?e.label:null}); }
+  if(((e.briarRole||e.homeRaid||e.patrolGroup)&&dXZ(e.x,e.z,G.p.x,G.p.z)<420&&Math.abs(e.y-G.p.y)<130)||namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:namedElite||e.briarRole||e.homeRaid||e.patrolGroup?e.label:null}); }
   // elemental status pips (shown even at full HP + on bosses)
   if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
     if(keys.length){ const sp=project(e.x,e.y+e.h+(namedElite?75:e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
@@ -22478,7 +22482,7 @@ window.__BF3={campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,ch
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2045"></script>
+<script type="module" src="./hero3d.js?v=2057"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

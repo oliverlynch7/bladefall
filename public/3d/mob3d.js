@@ -2,7 +2,7 @@ import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
 import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2007';
-import { enemyActionState } from './enemy-action-state.js?v=2022';
+import { enemyActionState } from './enemy-action-state.js?v=2057';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -171,14 +171,14 @@ function syncMobsInner(scene,dt){
     // Training targets and resurrected skeletons can reuse the same gameplay object.
     if(rec.wasDead){rec.wasDead=false;rec.cur=null;rec.mixer.stopAllAction();}
     const s=(e.h||38)/rec.src._nativeH;
-    rec.root.scale.setScalar(s);
+    rec.root.scale.set(s*(e.briarRole==='guard'?1.12:e.briarRole==='runner'?.92:1),s,s*(e.briarRole==='guard'?1.12:1));
     rec.root.position.set(e.x,(e.y||0)-rec.src._baseY*s-(e.dropT||0)*(e.h||38)*.22,e.z);
     rec.root.rotation.y=e.yaw||0;rec.root.visible=true;
     for(const m of rec.materials){
       if(e.finalKing&&!m.userData.kingPhase){m.userData.kingPhase={value:0};const previous=m.onBeforeCompile;m.onBeforeCompile=shader=>{previous?.(shader);shader.uniforms.kingPhase=m.userData.kingPhase;shader.vertexShader='varying vec3 vKingLocal;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvKingLocal = position;');shader.fragmentShader='uniform float kingPhase; varying vec3 vKingLocal;\n'+shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\nif(kingPhase > 0.5 && (kingPhase > 1.5 || vKingLocal.x < 0.0)){float crack=step(0.94,sin(vKingLocal.y*13.0+vKingLocal.z*9.0));diffuseColor.rgb=mix(vec3(0.055,0.035,0.10),vec3(0.62,0.42,0.86),crack);}');};m.customProgramCacheKey=()=> 'final-king-infusion-v1';m.needsUpdate=true;}
       if(m.userData.kingPhase)m.userData.kingPhase.value=e.finalKing?e.phase:0;
       m.opacity=e.untargetable&&!e.finalKing ? .28 : 1;m.depthWrite=!e.untargetable;
-      m.color.set(e.slowT>0?0xb6ddff:0xffffff);
+      m.color.set(e.slowT>0?0xb6ddff:({runner:0xffd4a6,guard:0xb1d2ee,hex:0xe0b9ff}[e.briarRole]||0xffffff));
       m.emissive.set(0xffffff);m.emissiveIntensity=e.hitFlash>0 ? .65 : 0;
     }
     const speed=dt>0?Math.hypot(e.x-rec.x,e.z-rec.z)/dt:0;rec.x=e.x;rec.z=e.z;

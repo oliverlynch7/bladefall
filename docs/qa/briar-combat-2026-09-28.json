@@ -1,0 +1,213 @@
+{
+  "roles": [
+    {
+      "area": 0,
+      "roles": {
+        "guard": 4,
+        "runner": 4,
+        "hex": 1
+      },
+      "tests": [
+        {
+          "role": "runner",
+          "damage": 14,
+          "phases": [
+            "wind",
+            "strike",
+            "recover",
+            "hunt"
+          ],
+          "size": 47,
+          "movement": 124.99999999999545
+        },
+        {
+          "role": "guard",
+          "damage": 18,
+          "phases": [
+            "wind",
+            "strike",
+            "recover",
+            "hunt"
+          ],
+          "size": 65,
+          "movement": 1.6268800000000283
+        },
+        {
+          "role": "hex",
+          "damage": 10,
+          "phases": [
+            "wind",
+            "strike",
+            "recover",
+            "hunt"
+          ],
+          "size": 56,
+          "movement": 0.9984000000004016
+        }
+      ],
+      "slots": 3,
+      "task": "Drive back the farm raiders"
+    },
+    {
+      "area": 1,
+      "roles": {
+        "guard": 3,
+        "runner": 2,
+        "hex": 2
+      },
+      "tests": [
+        {
+          "role": "runner",
+          "damage": 14,
+          "phases": [
+            "wind",
+            "strike",
+            "recover",
+            "hunt"
+          ],
+          "size": 47,
+          "movement": 125.0000000000008
+        },
+        {
+          "role": "guard",
+          "damage": 18,
+          "phases": [
+            "wind",
+            "strike",
+            "recover",
+            "hunt"
+          ],
+          "size": 65,
+          "movement": 1.4316544000000704
+        },
+        {
+          "role": "hex",
+          "damage": 10,
+          "phases": [
+            "wind",
+            "strike",
+            "recover",
+            "hunt"
+          ],
+          "size": 56,
+          "movement": 0.9983999999999469
+        }
+      ],
+      "slots": 3,
+      "task": "Guard the forest route"
+    }
+  ],
+  "camps": {
+    "geometry": {
+      "runnerLocksAim": true,
+      "runnerDodge": true,
+      "runnerHits": true,
+      "runnerHeightSafe": true,
+      "guardLocksAim": true,
+      "guardDodge": true,
+      "guardHits": true,
+      "guardHeightSafe": true,
+      "hexLocksAim": true,
+      "hexDodge": true,
+      "hexHits": true,
+      "hexHeightSafe": true,
+      "wallBlocks": true,
+      "floorDoesNotBlock": true
+    },
+    "camps": [
+      {
+        "area": 0,
+        "count": 10,
+        "done": true,
+        "reward": "campaign_combat",
+        "cycles": 4,
+        "respawnCap": 3,
+        "alive": 3
+      },
+      {
+        "area": 1,
+        "count": 12,
+        "done": true,
+        "reward": "campaign_combat",
+        "cycles": 4,
+        "respawnCap": 3,
+        "alive": 3
+      }
+    ]
+  },
+  "coop": {
+    "transport": "native PeerJS",
+    "available": true,
+    "players": [
+      {
+        "name": "Host Audit",
+        "level": 13,
+        "zone": 0,
+        "active": true
+      },
+      {
+        "name": "Guest Audit",
+        "level": 7,
+        "zone": 0,
+        "active": true
+      }
+    ],
+    "rolesMatched": 10,
+    "remotePhases": [
+      "hunt",
+      "wind",
+      "strike",
+      "recover"
+    ]
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 1,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 1,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "limits": [
+    "Combat probes isolate enemies on clear authored ground with enlarged player health; they verify behavior, not natural-run difficulty.",
+    "Co-op uses two browser contexts on this computer over native PeerJS, not two physical devices.",
+    "Pre-change index loads current auxiliary modules; save schema is unchanged.",
+    "Screenshot confirms in-world warning, labels and existing models; no new art direction."
+  ]
+}

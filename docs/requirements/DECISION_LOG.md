@@ -436,3 +436,7 @@ User requests yellow exclamation indicators when hub NPC questlines become avail
 
 ## [Codex | 2026-09-28] First tutorial death retry
 User requests that a new player dying in their first tutorial retries and respawns without choosing a class again. Plan: dedicated first starter-trial death screen with Retry tutorial; respawn at its start with restored health and mana, keeping chosen class and tutorial progress. No character wipe during this onboarding, including challenge-mode onboarding; later campaign/challenge deaths unchanged.
+
+
+## [Codex | 2026-09-28] Remove tutorial Treasure Sprint portal
+User requests no Treasure Sprint portal in tutorial trials. Generator currently adds bonus portals at shared stage indices even during beginner trials. Guard this generation with !inBeginnerTrial(); keep normal exits and hub sprint.

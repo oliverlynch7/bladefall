@@ -1094,7 +1094,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.062.0-tutorial-retry';
+const VERSION3D='2.063.0-tutorial-portal';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9221,7 +9221,7 @@ function loadStageRaw(i){
   // spring + goblin
   if(!isBoss && rnd2()<0.22){ const r=G.rooms[1+Math.floor(rnd2()*Math.max(1,G.rooms.length-1))]||entryRoom; G.springs.push({x:r.x,z:r.z,used:false}); }
   if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.15)){ const r=G.rooms[Math.floor(rnd2()*G.rooms.length)]||entryRoom; const gb=spawnEnemy('goblin',r.x,r.z); gb.despawnT=9; gb.dropT=0.2; }
-  if((i===1||i===5||i===9) && !isBoss && !isMini && leaves.length){ const lr=leaves[leaves.length-1]; G.bonusPortal={x:lr.x,z:lr.z,t:0}; }
+  if(!inBeginnerTrial() && (i===1||i===5||i===9) && !isBoss && !isMini && leaves.length){ const lr=leaves[leaves.length-1]; G.bonusPortal={x:lr.x,z:lr.z,t:0}; }
   // bounds (deco + culling)
   let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
   for(const sg of G.segments){ mnX=Math.min(mnX,sg.x-sg.w/2); mxX=Math.max(mxX,sg.x+sg.w/2); mnZ=Math.min(mnZ,sg.z-sg.d/2); mxZ=Math.max(mxZ,sg.z+sg.d/2); }

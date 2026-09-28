@@ -2091,3 +2091,7 @@ New and ready-to-turn-in hub return requests show a dedicated yellow exclamation
 
 ## [Codex | 2026-09-28] First tutorial retry — 2.062.0
 First starter-trial deaths offer Retry tutorial instead of class selection or bank-loss messaging. Respawns a fresh player state at the tutorial start, restores health/mana, grants 3 seconds protection, preserves class/name and trial progress. Restricted to beginner trials without an existing hero or unlocked class; later death flows unchanged. Real browser Warrior/Ranger/Mage death-and-button-retry checks and old-save fixture passed. Evidence: docs/qa/tutorial-retry-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Tutorial bonus portal — 2.063.0
+Removed shared-generator Treasure Sprint portal from beginner trials. Browser checks confirm no bonus portal and retained completion exit for Warrior/Ranger/Mage; hub Sprint remains available. Pre-change save fixture and syntax pass. Evidence: docs/qa/tutorial-portal-2026-09-28.json.

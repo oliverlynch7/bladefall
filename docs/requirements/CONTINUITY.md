@@ -779,3 +779,7 @@ User approved campaign-wide testing and added: "my guess is that the difficultyl
 
 ## [Codex | 2026-09-27] Campaign balance and co-op HP
 2.051.0: regular-enemy damage grows after Briar (+10% per region, +3 points in part two); existing 1.6x/2.2x/2.8x co-op HP now reconciles late joins/departures while preserving health fraction, boss phase state and Hydra chains. No new boss damage or solo HP inflation. Browser curve, 20 join/leave cycles, host/guest health, 15-section combat and pre-change save checks pass. Scope and limits: docs/IMPLEMENTATION_CAMPAIGN_BALANCE_2026-09-27.md. Natural full-campaign balance playtesting remains outstanding.
+
+
+## [Codex | 2026-09-27] Tutorial completion save fix
+2.052.0: direct New Game previously entered creation with MODE=null, preventing character writes despite tutorial completion. Creation now initializes the Normal character store before name/trial; skipping first practice establishes a durable hero snapshot too. Real-browser UI reproduction on pre-change index confirms no character save; fixed completion and skip survive title/Continue and full reload, preserving name/class and separate slots. Existing pre-change campaign save fixture passes. Evidence: docs/qa/tutorial-save-2026-09-27.json; scripts/qa-tutorial-save.cjs. Completion test invokes the real trial-completion handler rather than replaying combat. Previously unwritten progress cannot be reconstructed after closing the tab.

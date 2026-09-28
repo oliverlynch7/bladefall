@@ -1,0 +1,82 @@
+{
+  "regression": [
+    {
+      "scenario": {
+        "old": true,
+        "skip": false,
+        "slot": 0
+      },
+      "bugReproduced": true
+    },
+    {
+      "scenario": {
+        "old": false,
+        "skip": false,
+        "slot": 0
+      },
+      "loaded": {
+        "cls": "ranger",
+        "name": "Tutorial Tester",
+        "complete": true,
+        "hub": true,
+        "other": true
+      }
+    },
+    {
+      "scenario": {
+        "old": false,
+        "skip": true,
+        "slot": 1
+      },
+      "loaded": {
+        "cls": "ranger",
+        "name": "Tutorial Tester",
+        "complete": true,
+        "hub": true,
+        "other": true
+      }
+    }
+  ],
+  "existingSave": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "rank": 10,
+        "xp": 0,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

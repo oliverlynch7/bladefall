@@ -647,3 +647,7 @@ User approved campaign-wide testing and added: "my guess is that the difficultyl
 
 ## [Codex | 2026-09-27] Approved progression and co-op rebalance
 User authorizes logical progression rebalance and co-op enemy HP below 2x for two players. Inspection: existing +60% HP per ally applies only at spawn. Plan: retain 1/1.6/2.2/2.8 curve, reconcile existing campaign enemies on host when party size changes, preserve HP fraction and special boss base HP. Regular campaign half-level enemy damage +10% per region, +3% second half outside Briar; no extra enemy HP or boss damage scaling. Preserve beginner trials/PvP/side-mode tuning and existing difficulty presets. Verify late join/leave/no compounding, boss base HP, damage curve and saves.
+
+
+## [Codex | 2026-09-27] Tutorial completion persistence
+User reports completed starter tutorial reopens class selection after returning to title/reloading. Inspection: title resets MODE=null; direct New Game -> openCharCreate never loads a mode, so persist skips character storage. Plan: initialize Normal save before character creation when no mode is active; preserve selected name/appearance and completed trial flags/loadout; ensure skipping first practice also establishes hero snapshot. Verify actual new-character UI, complete/skip, title/reload and separate slots; do not use global tutDone as completion evidence.

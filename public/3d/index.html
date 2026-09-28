@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.051.0-campaign-balance';
+const VERSION3D='2.052.0-tutorial-save';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5430,7 +5430,9 @@ function trialComplete(remote=false){
 function skipTrial(){
   const cid=G?G.trial:null; if(!cid) return;
   if(TRIALS[cid].earned){ toast('This one you have to earn.'); return; }
-  meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid; meta.bank=null; persist();
+  meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
+  if(!G.trialHadHero)meta.hero=snapOf(G.p);
+  meta.bank=null; persist();
   toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
 }
 function restoreTrialExit(){if(G?._trialWiped)return;if((mode==='dead'||mode==='dying')&&isPermadeath()){G._trialWiped=true;wipeMode(MODE);persist();if(MP.active)MP.leave('Your character fell. The party has ended; your earned classes are safe.');}else restoreBank();}
@@ -17912,6 +17914,9 @@ function openClassPicker(){
 }
 // NEW GAME -> character creation: name, class, and appearance (eye colour, hair style + colour), then the class trial
 function openCharCreate(){
+  // New Game can enter directly from the title, where MODE is deliberately null.
+  // Activate the character store before naming, banking or completing its tutorial.
+  if(!MODE){meta.diff='normal';loadMode('rl');}
   mode='menu'; showGameUI(false); _offerT=Date.now();
   const eyes=[['Sky blue','#8fd0ff'],['Turquoise','#5affc8'],['Gold','#ffd24a'],['Amber','#ff7a3a'],['Violet','#c47bff'],['Silver','#e8e8e8'],['Rose','#ff4a8a'],['Green','#4be08a']];
   const guide={warrior:{tag:'Close combat · Tough',text:'Fight up close with a sword. Repeated hits on one enemy build toward a stagger, giving you room to keep attacking.',tip:'A good first choice if you are learning. Stay close enough to hit, but move away from enemy attack warnings.'},ranger:{tag:'Ranged combat · Mobile',text:'Shoot enemies from a distance with a bow. Move to keep space between you and enemies, then pause briefly when it is safe to improve your aim.',tip:'Good if you enjoy aiming and moving. Watch for enemies approaching from the sides.'},mage:{tag:'Ranged magic · Powerful but fragile',text:'Launch magic with a staff. Standing still builds power, but your lower health makes positioning important.',tip:'Good if you enjoy powerful spells. Find a safe opening to cast, then move before enemies reach you.'}};

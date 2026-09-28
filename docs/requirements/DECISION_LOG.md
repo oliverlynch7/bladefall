@@ -424,3 +424,7 @@ User reports journal notes overlap item-drop UI and requests repositioning. Insp
 
 ## [Codex | 2026-09-28] Briar obsolete portal and solid props
 User requests removal of leftover purple portal in Briar first half and collision on solid objects. Inspection confirms legacy G.secret thornwood portal survives new opening builder, and authored nocol crates/fences/posts/trunks bypass old large-mass auto collision. Plan: clear only Briar legacy secret/trigger; preserve Rift Hall/shards. Add final Briar solid-prop pass for ground-level wooden/stone boxes and fences, excluding vegetation, terrain banks and overhead details; retain existing colliders where already present. Verify physical blocking and authored access routes in browser. Broader campaign collision audit remains separate from this focused Briar fix.
+
+
+## [Codex | 2026-09-28] Bag hierarchy and companion framing
+User requests two top-level bag categories: Weapons and Armor (including rings/amulets); Weapons has Physical, Ranged, Magical rather than individual weapon types. Character previews should zoom out to show the pet. Plan: nested collapsed groups using existing weapCat family classification, retain armor slot subgroups, preserve expansion on equip/sell/sort. Pull back shared bag/inspect portrait camera and center framing on hero plus companion. Verify grouping and item actions in browser.

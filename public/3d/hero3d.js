@@ -6,7 +6,7 @@ import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeapon
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2057';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
-import {syncCompanions} from './companion3d.js?v=2057';
+import {syncCompanions} from './companion3d.js?v=2060';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 
@@ -1939,7 +1939,7 @@ export function drawHero3D(p, t){
       syncWorld(scene);
       syncCombatArt(scene,cam);
       syncMobs(scene, dt);
-      syncCompanions(scene,dt);
+      if(!p._portrait)syncCompanions(scene,dt);
       syncNpcs(scene,dt);
       syncRiftShards(scene);
   syncProjectiles(scene);
@@ -1947,6 +1947,8 @@ export function drawHero3D(p, t){
       syncClass();                    // respec or a different save changes the body
       reapRigs(peerCap());
     }
+
+    if(p._portrait)syncCompanions(scene,dt,p._previewPets||(p._previewPet?[p._previewPet]:[]));
 
     /* WHOSE BODY IS THIS? The local hero is identity-checked against G.p, exactly as drawHero3 does
        when it decides who goes to the front of the queue. An ally is keyed by the peer id the game
@@ -2009,7 +2011,7 @@ export function drawHero3D(p, t){
     if(window.__HOLLOW_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HOLLOW_SHADOW_DIRTY=false;}
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
-    if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
+    if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
     try{renderer.render(scene, cam);}finally{for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();

@@ -965,6 +965,7 @@
   @media (min-width:900px) and (max-height:800px) and (pointer:fine){
     #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:36px}.progbox{height:52px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:22px}#skillframe{bottom:8px;height:104px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
+.baginventory .achlist{display:block}.bagequip .bagslots{width:42%;max-width:245px}.bagequip .bagdoll3d{width:50%;height:380px}
 details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
 
 #bosshpwrap.officer-team{top:calc(env(safe-area-inset-top) + 294px);width:min(580px,82vw)}
@@ -1092,7 +1093,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.059.0-briar-solids';
+const VERSION3D='2.060.0-bag-categories';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4864,6 +4865,7 @@ function setupBagDoll(HR,centered){
   p.level=src.level||1; ['eyeColor','hairStyle','hairColor'].forEach(k=>{ if(src[k]!=null) p[k]=src[k]; });
   recomputeArmor(p); p.hp=effMaxHp(p);
   const pet=(meta.petActive&&PETS[meta.petActive])?{id:meta.petActive,x:0,y:0,z:0,bob:0,t:0,yaw:0,hp:1,maxHp:1}:null;
+  p._portrait=true;p._previewPet=pet;
   bagDoll={p,pet,yaw:0.6,t:1.2,centered:!!centered};
   bagDollRender();
   let dragX=null;
@@ -4879,7 +4881,7 @@ function bagDollRender(){
   gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   setFlatLights();
   PROJ=mPersp(40*Math.PI/180,VW/VH,5,900);
-  const cx=Math.sin(yaw)*172, cz=Math.cos(yaw)*172;
+  const cx=Math.sin(yaw)*210, cz=Math.cos(yaw)*210;
   VIEW=mLookAt([cx,60,cz],[0,28,0],[0,1,0]);
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
   gl.uniform2f(U.uFogNF,1400,5000); gl.uniform3f(U.uFog,0.06,0.06,0.08);
@@ -4900,7 +4902,7 @@ function bagDollRender(){
   p.x=0; p.z=0; p.y=0; p.yaw=0;
   const _doll3d = !!(window.HERO3D && window.HERO3D.on && window.HERO3D.ready && window.drawHero3D);
   if(!_doll3d) drawHero3(p,t,true);
-  if(pet){ pet.x=30; pet.z=14; pet.y=0; pet.yaw=-0.35; pet.bob=0; drawPet3(pet,t); }
+  if(pet){ pet.x=30; pet.z=14; pet.y=0; pet.yaw=-0.35; pet.bob=0; if(!_doll3d)drawPet3(pet,t); }
   flushBatch();                       // draw the accumulated cubes before we grab the pixels
   /* AFTER the voxel batch and BEFORE the grab: the 3D hero composites over what is already there,
      exactly as it does in the world. */
@@ -4926,7 +4928,7 @@ function bagDollRender(){
   // BAG: frame the pair pushed to the right so the hero clears the equip cards on the left.
   // GEAR (centered): centre the hero in its own panel and show the full body.
   const CEN=bagDoll.centered;
-  const ctr=(typeof project==='function'?project(CEN?4:-12, CEN?16:30, 0):null)||[VW/2,VH/2];
+  const ctr=(typeof project==='function'?project(pet?20:0, CEN?16:24, pet?4:0):null)||[VW/2,VH/2];
   /* A SOLID BACKDROP, painted before the blit. The doll used to key its black background out so the
      character floated on the panel - which means anything the key did not catch (a lit prop, a
      bright wall) floated there with him. Oliver: "the preview image should show our character on a
@@ -4936,9 +4938,7 @@ function bagDollRender(){
   bg.addColorStop(0,'#20242e'); bg.addColorStop(1,'#12141b');
   ctx.fillStyle=bg; ctx.fillRect(0,0,cnv.width,cnv.height);
 
-  /* TIGHTER CROP - 0.60 of the viewport height showed the character at a distance with room to
-     spare. 0.38 fills the panel with him, which is the point of a portrait. The vertical anchor
-     rises with it so the tighter frame centres on the torso and head rather than the feet. */
+  /* Pull the camera back and center the pair so companion feet and tails fit the portrait. */
   const sw=VH*(CEN?0.38:0.38)*DPR, sh=VH*(CEN?0.78:0.66)*DPR;
   ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*(CEN?0.30:0.42), sw, sh, 0,0, cnv.width, cnv.height);
 
@@ -4978,10 +4978,15 @@ function openBag(back,keepOpen=false){
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
   const groups=new Map();
   const rowNodes=new DOMParser().parseFromString('<div>'+itemRows+'</div>','text/html').querySelectorAll('.gearrow');
-  order.forEach((x,i)=>{const o=oOf(x),key=x.it.weapon?'weapon-'+o.art:x.it.armor?'armor-'+o.slot:'trinket-'+o.slot;
-    if(!groups.has(key))groups.set(key,{name:x.it.weapon?weapFamily(o):slotLabel(o.slot),rows:[]});
+  order.forEach((x,i)=>{const o=oOf(x),key=x.it.weapon?'weapon-'+weapCat(o):'armor-'+o.slot;
+    if(!groups.has(key))groups.set(key,{name:x.it.weapon?({melee:'Physical',ranged:'Ranged',magic:'Magical'}[weapCat(o)]):slotLabel(o.slot),rows:[]});
     if(rowNodes[i])groups.get(key).rows.push(rowNodes[i].outerHTML);});
-  const rows=order.length?[...groups].map(([key,g])=>`<details class="baggroup" data-group="${key}" ${expanded.has(key)?'open':''} style="border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:8px"><summary style="cursor:pointer;font-weight:800;padding:5px">${g.name} <span style="color:var(--muted)">(${g.rows.length})</span></summary>${g.rows.join('')}</details>`).join(''):itemRows;
+  const groupHtml=(key,name,count,body)=>`<details class="baggroup" data-group="${key}" ${expanded.has(key)?'open':''} style="border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:8px"><summary style="cursor:pointer;font-weight:800;padding:5px">${name} <span style="color:var(--muted)">(${count})</span></summary>${body}</details>`;
+  const weaponGroups=['melee','ranged','magic'].map(cat=>{const key='weapon-'+cat,g=groups.get(key);return groupHtml(key,{melee:'Physical',ranged:'Ranged',magic:'Magical'}[cat],g?.rows.length||0,g?g.rows.join(''):'<p class="hint">No weapons in this category.</p>');}).join('');
+  const armorGroups=[...groups].filter(([key])=>key.startsWith('armor-')).map(([key,g])=>groupHtml(key,g.name,g.rows.length,g.rows.join(''))).join('');
+  const weaponCount=order.filter(x=>x.it.weapon).length;
+  const rows=groupHtml('weapons','Weapons',weaponCount,weaponGroups)+groupHtml('armor','Armor',order.length-weaponCount,armorGroups||'<p class="hint">Armor, rings and amulets appear here.</p>');
+
   const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
   const eq=HR||{weapon:null,gear:{}};
   const slotRow=(id,label,item)=>{ const col=item&&item.rarity?RARITY[item.rarity].color:'#6e778b', fallback=id==='weapon'?`<span class="ico ico-damage ico-damage-physical"></span>`:slotIcon(id);
@@ -17545,8 +17550,9 @@ function openMirror(back){
   p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
   p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.invuln=0;
   p.level=(h&&h.level)||1; recomputeArmor(p); p.hp=effMaxHp(p);
-  const pet=meta.petActive&&PETS[meta.petActive]?{id:meta.petActive,x:46,y:16,z:24,bob:0,t:0,yaw:Math.PI}:null;
-  mirror={ t:0, yaw:0.49, spin:false, back:back||openHubMenu, p, pet }; mirrorPanelMode=null;
+  const pet=meta.petActive&&PETS[meta.petActive]?{id:meta.petActive,x:46,y:16,z:24,bob:0,t:0,yaw:0}:null;
+  p._portrait=true;p._previewPet=pet;
+  mirror={ reflectionPet:pet?{...pet,z:-145,yaw:Math.PI}:null,t:0, yaw:0.49, spin:false, back:back||openHubMenu, p, pet }; mirrorPanelMode=null;
   mode='mirror'; showOverlay(false); showGameUI(false);
   hpBars=[]; statPips=[]; drawHpBars(); updatePetLabel();
   document.getElementById('questbox').classList.add('hide');
@@ -17579,7 +17585,7 @@ function renderMirror(t){
   gl.clearColor(0.055,0.05,0.07,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   setFlatLights();
   PROJ=mPersp(42*Math.PI/180,VW/VH,5,900);
-  const yaw=mirror.yaw, cx=Math.sin(yaw)*150, cz=Math.cos(yaw)*150;
+  const yaw=mirror.yaw, cx=Math.sin(yaw)*190, cz=Math.cos(yaw)*190;
   VIEW=mLookAt([cx,66,cz],[0,26,0],[0,1,0]);
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
   gl.uniform2f(U.uFogNF,600,2200); gl.uniform3f(U.uFog,0.055,0.05,0.07);
@@ -17588,9 +17594,9 @@ function renderMirror(t){
   // pedestal + mirror base
   bx(0,-8,-70, 300,16,60,'#171922');
   bx(0,-8,0, 220,16,180,'#181b24'); bx(0,2,0, 130,6,130,'#242a36'); bx(0,6,0, 100,3,100,'#2c3340');
-  const p=mirror.p; p.yaw=0;   // hero faces the camera-front consistently; the CAMERA orbits
+  const p=mirror.p;p._previewPets=[mirror.pet,...(!behind?[mirror.reflectionPet]:[])].filter(Boolean); p.yaw=0;   // hero faces the camera-front consistently; the CAMERA orbits
   drawShadow(0,0,17,0.34);
-  if(!behind){ p.z=-168; p.yaw=Math.PI; if(window.__hero3dAt?.('mirrorInspect',{x:0,y:0,z:-168,yaw:Math.PI})){_poseKeep.push('mirrorInspect');}else drawHero3({...p},t,false); if(mirror.pet){const mp=mirror.pet,oz=mp.z,oy=mp.y,oyaw=mp.yaw;mp.z=-145;mp.y=16;mp.yaw=0;drawPet3(mp,t);mp.z=oz;mp.y=oy;mp.yaw=oyaw;} p.z=0; p.yaw=0; }   // reflected hero and companion
+  if(!behind){ p.z=-168; p.yaw=Math.PI; if(window.__hero3dAt?.('mirrorInspect',{x:0,y:0,z:-168,yaw:Math.PI})){_poseKeep.push('mirrorInspect');}else drawHero3({...p},t,false); if(mirror.pet&&!(window.HERO3D?.on&&window.HERO3D?.ready)){const mp=mirror.pet,oz=mp.z,oy=mp.y,oyaw=mp.yaw;mp.z=-145;mp.y=16;mp.yaw=0;drawPet3(mp,t);mp.z=oz;mp.y=oy;mp.yaw=oyaw;} p.z=0; p.yaw=0; }   // reflected hero and companion
   if(behind){ gl.depthMask(false);   // phantom frame from the far side — never blocks the view
     bx(0,90,-84, 150,190,10,'#2a2f3d',null,0.07); bx(0,188,-84, 168,14,14,'#3a4152',null,0.07);
     gl.depthMask(true);
@@ -17601,7 +17607,7 @@ function renderMirror(t){
     bx(0,188,-84, 168,14,14,'#3a4152');
   }
   drawHero3(p,t,false);              // the real you, drawn last — always visible
-  if(mirror.pet) drawPet3(mirror.pet,t); // equipped companion poses just behind the hero; drawPet3 supplies its unique idle
+  if(mirror.pet&&!(window.HERO3D?.on&&window.HERO3D?.ready)) drawPet3(mirror.pet,t); // equipped companion poses just behind the hero; drawPet3 supplies its unique idle
 }
 function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide');
   const mt=document.getElementById('mirrorToggle'); if(mt) mt.style.display='none';
@@ -22493,7 +22499,7 @@ window.__BF3={campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,ch
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2057"></script>
+<script type="module" src="./hero3d.js?v=2060"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

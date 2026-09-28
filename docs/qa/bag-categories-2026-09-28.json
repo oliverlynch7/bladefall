@@ -1,0 +1,90 @@
+{
+  "categories": {
+    "initial": {
+      "top": [
+        "weapons",
+        "armor"
+      ],
+      "open": 0,
+      "weaponGroups": [
+        "Physical (2)",
+        "Ranged (2)",
+        "Magical (1)"
+      ],
+      "armorGroups": [
+        "armor-chest",
+        "armor-amulet",
+        "armor-ring"
+      ]
+    },
+    "afterSale": {
+      "count": 7,
+      "parent": true,
+      "child": true
+    },
+    "sortingPreservesExpansion": true
+  },
+  "mirror": {
+    "companion": {
+      "actors": 2,
+      "pending": 0,
+      "types": [
+        "enemy-assets/companions/shepherd",
+        "enemy-assets/companions/shepherd"
+      ]
+    },
+    "canvas": true
+  },
+  "return": {
+    "world": {
+      "actors": 1,
+      "pet": "shepherd",
+      "error": null
+    }
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 20,
+      "rank": {
+        "xp": 0,
+        "rank": 10,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 20,
+      "rank": {
+        "xp": 0,
+        "rank": 10,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "visual": "Bag screenshot confirms complete hero and dog visible beside equipment; mirror confirms companion visible. No full pet roster audit."
+}

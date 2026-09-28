@@ -687,3 +687,7 @@ User requests two top-level bag categories: Weapons and Armor (including rings/a
 
 ## [Codex | 2026-09-28] Hub quest exclamation indicators
 User requests yellow exclamation indicators when hub NPC questlines become available. Existing labels use a small diamond and require a known service dialogue, hiding Thomas requests. Plan: dedicated yellow ! above nameplates for new/ready return quests, independent of service dialogue; show these farther across plaza. Keep introduction/news indicators and shop access unchanged; accepted/completed quests clear quest marker.
+
+
+## [Codex | 2026-09-28] First tutorial death retry
+User requests that a new player dying in their first tutorial retries and respawns without choosing a class again. Plan: dedicated first starter-trial death screen with Retry tutorial; respawn at its start with restored health and mana, keeping chosen class and tutorial progress. No character wipe during this onboarding, including challenge-mode onboarding; later campaign/challenge deaths unchanged.

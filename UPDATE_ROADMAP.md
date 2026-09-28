@@ -2087,3 +2087,7 @@ Bag now has collapsed Weapons and Armor roots. Weapons groups Physical, Ranged a
 
 ## [Codex | 2026-09-28] Hub quest markers — 2.061.0
 New and ready-to-turn-in hub return requests show a dedicated yellow exclamation above the NPC nameplate, visible within 650 world units rather than the ordinary 230. Independent of service-dialogue registration, so story-only givers are included. Accepted/completed requests clear the quest marker. Shops and other dialogue states unchanged. Browser available/accepted/ready/done marker transitions, yellow color, and pre-change save passed. Evidence: docs/qa/hub-quest-markers-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] First tutorial retry — 2.062.0
+First starter-trial deaths offer Retry tutorial instead of class selection or bank-loss messaging. Respawns a fresh player state at the tutorial start, restores health/mana, grants 3 seconds protection, preserves class/name and trial progress. Restricted to beginner trials without an existing hero or unlocked class; later death flows unchanged. Real browser Warrior/Ranger/Mage death-and-button-retry checks and old-save fixture passed. Evidence: docs/qa/tutorial-retry-2026-09-28.json.

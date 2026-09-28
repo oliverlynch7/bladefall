@@ -1094,7 +1094,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.061.0-hub-quest-markers';
+const VERSION3D='2.062.0-tutorial-retry';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -16210,6 +16210,16 @@ function reviveAtStart(){   // playtesting aid: shrug off the death and respawn 
 function showDeathScreen(){
   if(mode!=='dying'&&mode!=='dead')return;
   mode='dead';
+  if(inBeginnerTrial()&&!G.trialHadHero&&!Object.keys(meta.classUnlocked||{}).length){
+    showOverlayHTML(`<div class="card narrow"><h2 class="ovh">Try again</h2><p class="ovsub">You're still learning. Respawn at the start with full health and keep practicing as your ${CLASSES[G.trial].disp}. Your tutorial progress is safe.</p><button class="bigbtn" id="tutorialRetry">Retry tutorial</button></div>`);
+    document.getElementById('tutorialRetry').onclick=()=>{
+      document.getElementById('deathfade')?.remove();
+      G.p=freshFromSnapshot(snapOf(G.p));const p=G.p,sp=G.startPos||{x:0,z:0};
+      p.dead=false;p.downed=false;p.hp=effMaxHp(p);p.mana=p.maxMana;p.invuln=3;p.x=sp.x;p.z=sp.z;p.y=(sp.y||0)+30;p.vx=p.vy=p.vz=0;p.onGround=false;
+      G.lastHitBy=null;G.slowmo=0;G.shake=0;resumePlay();
+    };
+    return;
+  }
   const Z=curZone(), perma=isPermadeath(), hitless=isHitless(), checkpoint=!perma&&isCampaignAdventure()&&!!campaignCheckpoint();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
   const cb=G.lastHitBy;

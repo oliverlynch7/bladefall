@@ -1,0 +1,1196 @@
+{
+  "budget": [
+    {
+      "zone": 0,
+      "area": 0,
+      "foes": 26,
+      "rawXP": 526,
+      "combatBonus": 160,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "grunt": 10,
+        "thornboar": 7,
+        "sporeback": 5,
+        "flyer": 3,
+        "caster": 1
+      }
+    },
+    {
+      "zone": 0,
+      "area": 1,
+      "foes": 12,
+      "rawXP": 212,
+      "combatBonus": 160,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "grunt": 5,
+        "caster": 2,
+        "flyer": 1,
+        "thornboar": 4
+      }
+    },
+    {
+      "zone": 0,
+      "area": -1,
+      "foes": 1,
+      "rawXP": 140,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "brute",
+          "xp": 140
+        }
+      ],
+      "types": {
+        "brute": 1
+      }
+    },
+    {
+      "zone": 1,
+      "area": 0,
+      "foes": 9,
+      "rawXP": 170,
+      "combatBonus": 215,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "dustjackal": 3,
+        "cragspitter": 1,
+        "galewisp": 1,
+        "bones": 1,
+        "grunt": 2,
+        "caster": 1
+      }
+    },
+    {
+      "zone": 1,
+      "area": 1,
+      "foes": 9,
+      "rawXP": 164,
+      "combatBonus": 215,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 4,
+        "caster": 2,
+        "galewisp": 1,
+        "dustjackal": 1,
+        "cragspitter": 1
+      }
+    },
+    {
+      "zone": 1,
+      "area": -1,
+      "foes": 1,
+      "rawXP": 230,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "archer",
+          "xp": 230
+        }
+      ],
+      "types": {
+        "archer": 1
+      }
+    },
+    {
+      "zone": 2,
+      "area": 0,
+      "foes": 10,
+      "rawXP": 160,
+      "combatBonus": 270,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "caster": 3,
+        "grunt": 6,
+        "bones": 1
+      }
+    },
+    {
+      "zone": 2,
+      "area": 1,
+      "foes": 12,
+      "rawXP": 230,
+      "combatBonus": 270,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "grunt": 4,
+        "caster": 4,
+        "bones": 3,
+        "siegeknight": 1
+      }
+    },
+    {
+      "zone": 2,
+      "area": -1,
+      "foes": 1,
+      "rawXP": 200,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "warden",
+          "xp": 200
+        }
+      ],
+      "types": {
+        "warden": 1
+      }
+    },
+    {
+      "zone": 3,
+      "area": 0,
+      "foes": 15,
+      "rawXP": 254,
+      "combatBonus": 325,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "frostling": 8,
+        "grunt": 4,
+        "caster": 3
+      }
+    },
+    {
+      "zone": 3,
+      "area": 1,
+      "foes": 16,
+      "rawXP": 284,
+      "combatBonus": 325,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "frostling": 8,
+        "grunt": 4,
+        "caster": 2,
+        "frostlobber": 2
+      }
+    },
+    {
+      "zone": 3,
+      "area": -1,
+      "foes": 3,
+      "rawXP": 251,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "sorcerer",
+          "xp": 81
+        },
+        {
+          "type": "warden",
+          "xp": 97
+        },
+        {
+          "type": "sentinel",
+          "xp": 73
+        }
+      ],
+      "types": {
+        "sorcerer": 1,
+        "warden": 1,
+        "sentinel": 1
+      }
+    },
+    {
+      "zone": 4,
+      "area": 0,
+      "foes": 16,
+      "rawXP": 302,
+      "combatBonus": 380,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 8,
+        "caster": 3,
+        "magmaskit": 3,
+        "emberling": 2
+      }
+    },
+    {
+      "zone": 4,
+      "area": 1,
+      "foes": 16,
+      "rawXP": 285,
+      "combatBonus": 380,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 7,
+        "caster": 4,
+        "magmaskit": 3,
+        "emberling": 2
+      }
+    },
+    {
+      "zone": 4,
+      "area": -1,
+      "foes": 1,
+      "rawXP": 380,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "colossus",
+          "xp": 380
+        }
+      ],
+      "types": {
+        "colossus": 1
+      }
+    },
+    {
+      "zone": 5,
+      "area": 0,
+      "foes": 11,
+      "rawXP": 206,
+      "combatBonus": 435,
+      "patrols": 3,
+      "bosses": [],
+      "types": {
+        "grunt": 6,
+        "caster": 3,
+        "slime": 2
+      }
+    },
+    {
+      "zone": 5,
+      "area": 1,
+      "foes": 10,
+      "rawXP": 167,
+      "combatBonus": 435,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 5,
+        "caster": 3,
+        "slime": 2
+      }
+    },
+    {
+      "zone": 5,
+      "area": -1,
+      "foes": 3,
+      "rawXP": 0,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [],
+      "types": {
+        "grunt": 3
+      }
+    },
+    {
+      "zone": 6,
+      "area": 0,
+      "foes": 12,
+      "rawXP": 206,
+      "combatBonus": 490,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 6,
+        "caster": 5,
+        "slime": 1
+      }
+    },
+    {
+      "zone": 6,
+      "area": 1,
+      "foes": 13,
+      "rawXP": 214,
+      "combatBonus": 490,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 8,
+        "caster": 5
+      }
+    },
+    {
+      "zone": 6,
+      "area": -1,
+      "foes": 1,
+      "rawXP": 380,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "colossus",
+          "xp": 380
+        }
+      ],
+      "types": {
+        "colossus": 1
+      }
+    },
+    {
+      "zone": 7,
+      "area": 0,
+      "foes": 9,
+      "rawXP": 219,
+      "combatBonus": 545,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 5,
+        "caster": 2,
+        "royalarcanist": 2
+      }
+    },
+    {
+      "zone": 7,
+      "area": 1,
+      "foes": 16,
+      "rawXP": 418,
+      "combatBonus": 545,
+      "patrols": 2,
+      "bosses": [],
+      "types": {
+        "grunt": 6,
+        "caster": 4,
+        "siegeknight": 3,
+        "royalarcanist": 3
+      }
+    },
+    {
+      "zone": 7,
+      "area": -1,
+      "foes": 1,
+      "rawXP": 800,
+      "combatBonus": 0,
+      "patrols": 0,
+      "bosses": [
+        {
+          "type": "tyrant",
+          "xp": 800
+        }
+      ],
+      "types": {
+        "tyrant": 1
+      }
+    }
+  ],
+  "navigation": {
+    "checked": 61
+  },
+  "combat": [
+    {
+      "z": 0,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 1,
+      "a": 0,
+      "type": "dustjackal",
+      "moved": 101,
+      "damage": 64,
+      "active": true
+    },
+    {
+      "z": 1,
+      "a": 1,
+      "type": "dustjackal",
+      "moved": 101,
+      "damage": 64,
+      "active": true
+    },
+    {
+      "z": 2,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 2,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 3,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 3,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 4,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 4,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 5,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 5,
+      "a": 1,
+      "type": "slime",
+      "moved": 152,
+      "damage": 30,
+      "active": true
+    },
+    {
+      "z": 6,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 6,
+      "a": 1,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 7,
+      "a": 0,
+      "type": "grunt",
+      "role": "shielder",
+      "moved": 92,
+      "damage": 35,
+      "active": true
+    },
+    {
+      "z": 7,
+      "a": 1,
+      "type": "siegeknight",
+      "role": "shielder",
+      "moved": 108,
+      "damage": 83,
+      "active": true
+    }
+  ],
+  "damage": [
+    {
+      "z": 0,
+      "enemies": 26,
+      "grunt": [
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 36,
+          "damage": 12.744,
+          "role": null
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 54,
+          "damage": 12.744,
+          "role": null
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 20,
+          "damage": 8.496,
+          "role": null
+        }
+      ],
+      "caster": [
+        {
+          "hp": 18,
+          "damage": 10.62,
+          "cooldown": 3.1
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 1,
+      "enemies": 9,
+      "grunt": [
+        {
+          "hp": 24,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 24,
+          "damage": 8.496,
+          "role": "exploder"
+        }
+      ],
+      "caster": [
+        {
+          "hp": 22,
+          "damage": 10.62,
+          "cooldown": 2.5
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 2,
+      "enemies": 10,
+      "grunt": [
+        {
+          "hp": 29,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 29,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 29,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 29,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 29,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 29,
+          "damage": 8.496,
+          "role": "flanker"
+        }
+      ],
+      "caster": [
+        {
+          "hp": 26,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 26,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 26,
+          "damage": 10.62,
+          "cooldown": 2.8
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 3,
+      "enemies": 15,
+      "grunt": [
+        {
+          "hp": 33,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 33,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 33,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 33,
+          "damage": 8.496,
+          "role": null
+        }
+      ],
+      "caster": [
+        {
+          "hp": 30,
+          "damage": 10.62,
+          "cooldown": 2.8
+        },
+        {
+          "hp": 30,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 30,
+          "damage": 10.62,
+          "cooldown": 2.5
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 4,
+      "enemies": 16,
+      "grunt": [
+        {
+          "hp": 101,
+          "damage": 12.744,
+          "role": null
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 37,
+          "damage": 8.496,
+          "role": null
+        }
+      ],
+      "caster": [
+        {
+          "hp": 34,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 34,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 34,
+          "damage": 10.62,
+          "cooldown": 2.8
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 5,
+      "enemies": 11,
+      "grunt": [
+        {
+          "hp": 114,
+          "damage": 12.744,
+          "role": null
+        },
+        {
+          "hp": 42,
+          "damage": 8.496,
+          "role": "exploder"
+        },
+        {
+          "hp": 42,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 42,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 42,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 42,
+          "damage": 8.496,
+          "role": null
+        }
+      ],
+      "caster": [
+        {
+          "hp": 38,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 38,
+          "damage": 10.62,
+          "cooldown": 2.8
+        },
+        {
+          "hp": 38,
+          "damage": 10.62,
+          "cooldown": 2.5
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 6,
+      "enemies": 12,
+      "grunt": [
+        {
+          "hp": 46,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 46,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 46,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 46,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 46,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 46,
+          "damage": 8.496,
+          "role": "shielder"
+        }
+      ],
+      "caster": [
+        {
+          "hp": 42,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 42,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 42,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 42,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 42,
+          "damage": 10.62,
+          "cooldown": 2.8
+        }
+      ],
+      "playerHp": 100
+    },
+    {
+      "z": 7,
+      "enemies": 9,
+      "grunt": [
+        {
+          "hp": 50,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 50,
+          "damage": 8.496,
+          "role": "flanker"
+        },
+        {
+          "hp": 50,
+          "damage": 8.496,
+          "role": "shielder"
+        },
+        {
+          "hp": 50,
+          "damage": 8.496,
+          "role": null
+        },
+        {
+          "hp": 135,
+          "damage": 12.744,
+          "role": null
+        }
+      ],
+      "caster": [
+        {
+          "hp": 46,
+          "damage": 10.62,
+          "cooldown": 2.5
+        },
+        {
+          "hp": 46,
+          "damage": 10.62,
+          "cooldown": 2.5
+        }
+      ],
+      "playerHp": 100
+    }
+  ],
+  "puzzles": [
+    {
+      "file": "briar-foundation.json",
+      "puzzles": [
+        {
+          "id": "home.bells",
+          "type": "sequence",
+          "target": [
+            "sun",
+            "water",
+            "wheat"
+          ]
+        },
+        {
+          "id": "home.grain",
+          "type": "counterweight",
+          "target": 5
+        },
+        {
+          "id": "woods.tracks",
+          "type": "sequence",
+          "target": [
+            "bird",
+            "deer",
+            "wolf"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "deep-ice-caves.json",
+      "puzzles": [
+        {
+          "id": "ic.lock",
+          "type": "waterworks",
+          "target": 2
+        },
+        {
+          "id": "ic.channel",
+          "type": "flowSwitch",
+          "target": null
+        }
+      ]
+    },
+    {
+      "file": "great-furnace.json",
+      "puzzles": [
+        {
+          "id": "gf.cool",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": "gf.cache",
+          "type": "sequence",
+          "target": [
+            3,
+            2,
+            1
+          ]
+        },
+        {
+          "id": "gf.pet",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "file": "hollow-cliffs.json",
+      "puzzles": [
+        {
+          "id": "hp.weight",
+          "type": "counterweight",
+          "target": 7
+        },
+        {
+          "id": "hp.code",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "file": "iron-halls.json",
+      "puzzles": [
+        {
+          "id": "ih.line",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "file": "long-ascent.json",
+      "puzzles": [
+        {
+          "id": "la.vault",
+          "type": "rotatePuzzle",
+          "target": [
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "file": "lost-canyon.json",
+      "puzzles": [
+        {
+          "id": "lc.rail",
+          "type": "sequence",
+          "target": [
+            "north",
+            "west",
+            "south",
+            "east"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "palace-courtyard.json",
+      "puzzles": [
+        {
+          "id": "pc.light",
+          "type": "counterweight",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "file": "prison-dungeons.json",
+      "puzzles": [
+        {
+          "id": "kd.lift",
+          "type": "counterweight",
+          "target": 4
+        },
+        {
+          "id": "kd.brace",
+          "type": "counterweight",
+          "target": 5
+        },
+        {
+          "id": "kd.deep",
+          "type": "balanceBeam",
+          "target": null
+        }
+      ]
+    },
+    {
+      "file": "return-visits.json",
+      "puzzles": [
+        {
+          "id": "rv.supplies.balance",
+          "type": "counterweight",
+          "target": 8
+        }
+      ]
+    },
+    {
+      "file": "shipwreck-shore.json",
+      "puzzles": [
+        {
+          "id": "sc.hull",
+          "type": "counterweight",
+          "target": 5
+        },
+        {
+          "id": "sc.code",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "file": "sky-library.json",
+      "puzzles": [
+        {
+          "id": "sl.shelf",
+          "type": "linkedRotate",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": "sl.display",
+          "type": "sequence",
+          "target": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "file": "snowbound-peaks.json",
+      "puzzles": [
+        {
+          "id": "ff.reflect",
+          "type": "sequence",
+          "target": [
+            3
+          ]
+        },
+        {
+          "id": "ff.camp",
+          "type": "sequence",
+          "target": [
+            1,
+            3,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "file": "thunder-cliffs.json",
+      "puzzles": [
+        {
+          "id": "tc.route",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": "tc.tide",
+          "type": "sequence",
+          "target": [
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    }
+  ]
+}

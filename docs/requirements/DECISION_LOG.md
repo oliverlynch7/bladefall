@@ -386,3 +386,6 @@ User approved Storm Coast next. Inspected existing boat repair/crossing, counter
 
 ## [Codex | 2026-09-27] Duskmoor traversal continuation
 User: Continue after Storm Coast. Grounded batch: preserve disguise challenge/finite assault and finale. Add second exposed upper spiral stretch with two single-jump gaps/catches; optional memorial shard stepping route; improve existing bridge catch and vault wheel physical feedback using current flags/settings and no new recorded lines. Preserve solved flags and shard IDs. Verify routes, story branches, co-op and saves.
+
+## [Codex | 2026-09-27] Campaign audit and difficulty steering
+User approved campaign-wide testing and added: "my guess is that the difficultyl is slightly too easy right now." Diagnostic pass found ordinary enemy damage unchanged across regions while HP scales; 61 navigation transitions and 15 half-level movement/attack probes pass. No balance changes yet. Exact limits, repetition candidates and proposed controlled difficulty experiment: docs/CAMPAIGN_AUDIT_2026-09-27.md. Full natural fresh-save playthrough remains outstanding.

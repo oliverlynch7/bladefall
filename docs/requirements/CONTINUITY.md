@@ -772,3 +772,6 @@ User asks for immediate new-player improvements. 2.041.0 implements accurate reb
 
 ## [Codex | 2026-09-27] Duskmoor ascent continuation
 2.050.0: second upper exposed flight/two new gaps, memorial stepping stones, bridge chain and vault bolt/target feedback, discovered clue updates. Browser single-jump paths/recovery, story, co-op and save tests pass. Scope/limits: docs/IMPLEMENTATION_DUSKMOOR_ASCENT_2026-09-27.md. Finale unchanged; broader campaign testing remains outstanding.
+
+## [Codex | 2026-09-27] Campaign audit and difficulty steering
+User approved campaign-wide testing and added: "my guess is that the difficultyl is slightly too easy right now." Diagnostic pass found ordinary enemy damage unchanged across regions while HP scales; 61 navigation transitions and 15 half-level movement/attack probes pass. No balance changes yet. Exact limits, repetition candidates and proposed controlled difficulty experiment: docs/CAMPAIGN_AUDIT_2026-09-27.md. Full natural fresh-save playthrough remains outstanding.

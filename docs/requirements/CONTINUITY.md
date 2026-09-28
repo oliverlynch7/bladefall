@@ -783,3 +783,7 @@ User approved campaign-wide testing and added: "my guess is that the difficultyl
 
 ## [Codex | 2026-09-27] Tutorial completion save fix
 2.052.0: direct New Game previously entered creation with MODE=null, preventing character writes despite tutorial completion. Creation now initializes the Normal character store before name/trial; skipping first practice establishes a durable hero snapshot too. Real-browser UI reproduction on pre-change index confirms no character save; fixed completion and skip survive title/Continue and full reload, preserving name/class and separate slots. Existing pre-change campaign save fixture passes. Evidence: docs/qa/tutorial-save-2026-09-27.json; scripts/qa-tutorial-save.cjs. Completion test invokes the real trial-completion handler rather than replaying combat. Previously unwritten progress cannot be reconstructed after closing the tab.
+
+
+## [Codex | 2026-09-27] Multiplayer in Esc menu
+2.053.0: Multiplayer pause entry opens existing host/join save selection with contextual Back through picker/lobby to pause. Connected room shows code and Leave Room. New SVG party icon. Browser Esc navigation, host/join pickers, Back/Resume retaining campaign checkpoint, connected-room UI/leave, and pre-change save fixture pass. This pass tests UI routing, not an external PeerJS connection. Evidence: docs/qa/pause-multiplayer-2026-09-27.json; scripts/qa-pause-multiplayer.cjs. Includes 2.052 tutorial persistence fix.

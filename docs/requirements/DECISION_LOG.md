@@ -396,3 +396,7 @@ User authorizes logical progression rebalance and co-op enemy HP below 2x for tw
 
 ## [Codex | 2026-09-27] Tutorial completion persistence
 User reports completed starter tutorial reopens class selection after returning to title/reloading. Inspection: title resets MODE=null; direct New Game -> openCharCreate never loads a mode, so persist skips character storage. Plan: initialize Normal save before character creation when no mode is active; preserve selected name/appearance and completed trial flags/loadout; ensure skipping first practice also establishes hero snapshot. Verify actual new-character UI, complete/skip, title/reload and separate slots; do not use global tutDone as completion evidence.
+
+
+## [Codex | 2026-09-27] Pause-menu multiplayer access
+User requests multiplayer from the in-game Esc pause menu. Grounded plan: add a Multiplayer entry, preserve the existing host/join save selection, carry a contextual Back action through lobby and save picker, and show current-room code/leave controls when connected. Opening/backing out must retain current world and checkpoint.

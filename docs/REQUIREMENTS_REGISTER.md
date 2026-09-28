@@ -683,3 +683,7 @@ User requests removal of leftover purple portal in Briar first half and collisio
 
 ## [Codex | 2026-09-28] Bag hierarchy and companion framing
 User requests two top-level bag categories: Weapons and Armor (including rings/amulets); Weapons has Physical, Ranged, Magical rather than individual weapon types. Character previews should zoom out to show the pet. Plan: nested collapsed groups using existing weapCat family classification, retain armor slot subgroups, preserve expansion on equip/sell/sort. Pull back shared bag/inspect portrait camera and center framing on hero plus companion. Verify grouping and item actions in browser.
+
+
+## [Codex | 2026-09-28] Hub quest exclamation indicators
+User requests yellow exclamation indicators when hub NPC questlines become available. Existing labels use a small diamond and require a known service dialogue, hiding Thomas requests. Plan: dedicated yellow ! above nameplates for new/ready return quests, independent of service dialogue; show these farther across plaza. Keep introduction/news indicators and shop access unchanged; accepted/completed quests clear quest marker.

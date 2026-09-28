@@ -876,6 +876,7 @@
     box-shadow:0 3px 10px rgba(0,0,0,.5);}
   .htag .hi{font-size:13px;} .htag .hn{font-size:11px;font-weight:800;color:var(--ink);}
   .htag .hr{font-size:9.5px;color:var(--amber);font-weight:700;}
+  .htag .hq{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);font:bold 36px/1 system-ui;color:#ffe047;text-shadow:0 2px 3px #000,0 0 12px #bd861f;background:#211b0ee8;border:2px solid #ffe047;border-radius:50%;width:40px;height:44px;text-align:center;}
   .htag.near{border-color:var(--amber);box-shadow:0 0 12px rgba(232,163,61,.4);}
 
   /* v1.191 — locked-reference HUD.  The approved compact concept is the specification:
@@ -1093,7 +1094,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.060.0-bag-categories';
+const VERSION3D='2.061.0-hub-quest-markers';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -21060,13 +21061,15 @@ function updateHubTags(){
   if(!G||!G.hub||G.sparringRoom||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
   box.classList.remove('hide');
   if(box.childElementCount!==G.hubNpcs.length){ box.innerHTML=G.hubNpcs.map(n=>
-    `<div class="htag"><span class="hi">${n.ic||'◇'}</span><span class="hn">${n.name}</span><span class="hr">${n.role||''}</span></div>`).join(''); }
+    `<div class="htag"><span class="hq" hidden aria-label="Quest available">!</span><span class="hi">${n.ic||'◇'}</span><span class="hn">${n.name}</span><span class="hr">${n.role||''}</span></div>`).join(''); }
   const tags=box.children;
   G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
-    const mark=window.BFHubDialogue?.known(n.id)?(!meta.hubDialogue?.[n.id]?.introduced?' · !':(returnHubInfo(n)?.fresh||BFHubDialogue.hasNews(n,{meta}))?' · ◆':''):'';
+    const quest=returnHubInfo(n),questAvailable=!!quest?.fresh,questTag=tg.querySelector('.hq');
+    questTag.hidden=!questAvailable;questTag.setAttribute('aria-label',quest?.status==='ready'?'Quest ready to turn in':'Quest available');
+    const mark=window.BFHubDialogue?.known(n.id)?(!meta.hubDialogue?.[n.id]?.introduced?' · !':BFHubDialogue.hasNews(n,{meta})?' · ◆':''):'';
     const nameTag=tg.querySelector('.hn');if(nameTag&&nameTag.textContent!==n.name+mark)nameTag.textContent=n.name+mark;
     const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
-    if(n.prop==='riftFrame'||dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
+    if(n.prop==='riftFrame'||dist>(questAvailable?650:HUB_TAG_REVEAL)){ tg.style.display='none'; tg.classList.remove('near'); return; }
     const a=hubTagAnchor(n), sp=project(a.x,a.y,a.z);
     if(!sp){ tg.style.display='none'; return; }
     tg.style.display='';

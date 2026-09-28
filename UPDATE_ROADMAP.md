@@ -2083,3 +2083,7 @@ Removed legacy Thornwood secret portal/trigger from Homefields builder. Added fi
 
 ## [Codex | 2026-09-28] Bag categories and companion previews — 2.060.0
 Bag now has collapsed Weapons and Armor roots. Weapons groups Physical, Ranged and Magical using the existing combat family classification; Armor includes slot groups for rings and amulets. Expansion survives sorting and selling. Pulled portrait/mirror cameras back, gave bag portrait separate space from equipment cards, and connected real companion art to isolated preview actors. Normal world companion rendering restores on exit. Browser category/sell/sort checks, visual bag/mirror inspection, world return and pre-change save fixture passed; syntax/diff checks passed. Evidence: docs/qa/bag-categories-2026-09-28.json. No full pet roster visual audit.
+
+
+## [Codex | 2026-09-28] Hub quest markers — 2.061.0
+New and ready-to-turn-in hub return requests show a dedicated yellow exclamation above the NPC nameplate, visible within 650 world units rather than the ordinary 230. Independent of service-dialogue registration, so story-only givers are included. Accepted/completed requests clear the quest marker. Shops and other dialogue states unchanged. Browser available/accepted/ready/done marker transitions, yellow color, and pre-change save passed. Evidence: docs/qa/hub-quest-markers-2026-09-28.json.

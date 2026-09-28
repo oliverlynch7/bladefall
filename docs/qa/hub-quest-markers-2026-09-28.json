@@ -1,0 +1,72 @@
+{
+  "states": {
+    "available": {
+      "hidden": false,
+      "text": "!",
+      "color": "rgb(255, 224, 71)",
+      "label": "Quest available"
+    },
+    "accepted": {
+      "hidden": true,
+      "text": "!",
+      "color": "rgb(255, 224, 71)",
+      "label": "Quest available"
+    },
+    "ready": {
+      "hidden": false,
+      "text": "!",
+      "color": "rgb(255, 224, 71)",
+      "label": "Quest ready to turn in"
+    },
+    "done": {
+      "hidden": true,
+      "text": "!",
+      "color": "rgb(255, 224, 71)",
+      "label": "Quest available"
+    }
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 70,
+      "rank": {
+        "xp": 0,
+        "rank": 10,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 70,
+      "rank": {
+        "xp": 0,
+        "rank": 10,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

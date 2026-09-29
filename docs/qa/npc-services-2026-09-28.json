@@ -1,0 +1,87 @@
+{
+  "services": [
+    {
+      "id": "quartermaster",
+      "label": "\ud83d\uded2Browse wares\u203a",
+      "height": 73,
+      "otherHeight": 47,
+      "icon": true
+    },
+    {
+      "id": "anvil",
+      "label": "\u2692\ufe0fUse the forge\u203a",
+      "height": 73,
+      "otherHeight": 47,
+      "icon": true
+    },
+    {
+      "id": "keeper",
+      "label": "\ud83c\udfa8Open wardrobe\u203a",
+      "height": 73,
+      "otherHeight": 47,
+      "icon": true
+    },
+    {
+      "id": "drillmaster",
+      "label": "\u2694\ufe0fTrain and view classes\u203a",
+      "height": 73,
+      "otherHeight": 47,
+      "icon": true
+    },
+    {
+      "id": "beastkeeper",
+      "label": "\ud83d\udc3eVisit the Pet Yard\u203a",
+      "height": 73,
+      "otherHeight": 47,
+      "icon": true
+    }
+  ],
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

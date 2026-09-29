@@ -10,15 +10,16 @@
  function stopVoice(){generation++;clearTimeout(voiceTimer);clearTimeout(timer);cancelAnimationFrame(frame);speaking=false;if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(utterance){speechSynthesis.cancel();utterance=null}}
  function close(service=false,remote=false){if(!active)return;if(active.external&&!remote){active.a.requestClose();return;}generation++;stopVoice();const {n,a}=active;active=null;el('hubDialogue')?.remove();document.body.classList.remove('npc-conversation');a.leave(service);if(service)n.open()}
  function commit(){active.a.save()}
+ function serviceButton(id,n){const icon={quartermaster:'🛒',anvil:'⚒️',keeper:'🎨',drillmaster:'⚔️',beastkeeper:'🐾'}[n.id]||'✦';return `<button id="${id}" class="hub-service-primary"><span class="hub-service-icon" aria-hidden="true">${icon}</span><span>${esc(book?.npcs[n.id]?.service||'Open services')}</span><span class="hub-service-arrow" aria-hidden="true">›</span></button>`}
  function landing(){
   if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book.npcs[n.id];s.cursor=null;commit();
-  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options"><button id="hubService">${esc(def.service)}</button><button id="hubAbout">Tell me about yourself.</button>${a.returnInfo?.(n)?'<button id="hubReturnQuest">◆ '+esc(a.returnInfo(n).label)+'</button>':''}${hasNews(n,a)?'<button id="hubNews">◆ What has changed?</button>':''}<button id="hubHelp">Remind me how this works.</button></div>`);
+  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options">${serviceButton('hubService',n)}<button id="hubAbout">Tell me about yourself.</button>${a.returnInfo?.(n)?'<button id="hubReturnQuest">◆ '+esc(a.returnInfo(n).label)+'</button>':''}${hasNews(n,a)?'<button id="hubNews">◆ What has changed?</button>':''}<button id="hubHelp">Remind me how this works.</button></div>`);
   if(el('hubReturnQuest'))el('hubReturnQuest').onclick=()=>a.returnQuest(n);
   el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&active.lineId&&n.open?'<button id="hubQuickService">Open services</button>':''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
   if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();el('hubLeave').focus({preventScroll:true});
  }
  function line(id,lastChoice='',topic='intro'){

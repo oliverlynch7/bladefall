@@ -852,3 +852,7 @@ Pause Records tile removed; records expand inside Achievements using shared reco
 
 ## [Codex | 2026-09-28] Hub entrances and eight-button pause — 2.069.0
 Removed Postings. Sparring entrance now occupies (610,245), with its fallback pavilion and nearby dummy relocated consistently. Rift Hall moved to southwest activity row at (-610,710), clear of the Stylist sign, with matching collision pillars. Pause has Gear/Bag/Classes/Achievements above Settings/Multiplayer/Quit to Hub/Title Screen. Browser verified exact button order, both destination entries, clear entrance approaches, and pre-change save persistence; syntax passed. Class rank appearance variants remain pending. Evidence: docs/qa/hub-entrances-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Prominent NPC services — 2.070.0
+All five hub service NPCs now show larger gold-bordered main buttons with matching icons and explicit service labels, both on landing menus and dialogue shortcuts. Browser measured 73px service buttons versus 47px conversation options and verified both click routes for every NPC. Service access logic unchanged. Pre-change save and syntax checks passed. Evidence: docs/qa/npc-services-2026-09-28.json.

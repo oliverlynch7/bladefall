@@ -472,3 +472,7 @@ User requests remove Postings, relocate Sparring Room to its former place, and m
 
 ## [Codex | 2026-09-28] Pause grid and class appearance requirements
 User specifies four top buttons: Gear, Bag, Classes, Achievements; four bottom buttons: Settings, Multiplayer, Quit to Hub, Title Screen. Remove pause Skins access; Stylist remains appearance entry. Earlier approved class appearance overhaul remains pending: default/rank-5/rank-10 variants for every class, increasing visual richness, cosmetic-only, customize only equipped class, remember each class selection. This hub/menu cleanup does not claim the rank palettes are implemented.
+
+
+## [Codex | 2026-09-28] Prominent NPC services
+User requests larger main hub service buttons with matching icons. Apply shared prominent service button to landing and in-conversation shortcut for all five service NPCs, using the actual service label; preserve quests and service gates. Verify size, icons and click behavior in browser.

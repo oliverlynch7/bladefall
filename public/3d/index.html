@@ -1097,7 +1097,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.068.0-menu-organization';
+const VERSION3D='2.069.0-hub-entrances';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17061,8 +17061,8 @@ function rebuildWaystationCitadel(){
     take('quartermaster',-610,-110,{district:'market'}), take('chest',-610,35,{district:'market'}),
     take('anvil',-610,205,{district:'market'}), take('keeper',-610,375,{district:'market'}),
     take('drillmaster',610,-110,{district:'warden'}), take('beastkeeper',610,65,{district:'warden'}),
-    take('board',610,245,{district:'warden',faceZ:120}), take('mirror',610,425,{district:'warden'}),
-    take('sparring',425,425,{district:'warden'}),
+    take('mirror',610,425,{district:'warden'}),
+    take('sparring',610,245,{district:'warden'}),
     take('abyss',-400,710,{district:'undercroft'}), take('delve',-200,710,{district:'undercroft'}),
     take('arena',0,710,{district:'undercroft'}), take('gauntlet',200,710,{district:'undercroft'}),
     take('sprint',400,710,{district:'undercroft'})
@@ -17094,7 +17094,7 @@ function rebuildWaystationCitadel(){
      halls were tested here, but their kit backs read as enormous flat colour slabs across the
      campaign skyline from arrival. Keep that sightline clean instead of shipping bad geometry. */
   building(735,500,2,3,1,'plaster',-Math.PI/2);    // Mirror pavilion
-  building(500,500,2,3,1,'brick',-Math.PI/2);      // Sparring entry
+  building(610,320,2,3,1,'brick',-Math.PI/2);      // Sparring entry
 
   // Curated dressing. Every entry has a colour fallback because the voxel renderer requires it.
   const asset=(set,x,z,w,h,d,ry=0,c='#8c765c')=>G.deco.push({kind:'asset',set,x,z,y0:0,w,h,d,ry,c,lead:true});
@@ -17123,7 +17123,7 @@ function rebuildWaystationCitadel(){
   for(const g of G.gates) for(const s of [-1,1]) G.walls.push({x:g.x+s*31,z:g.z,w:15,d:26,h:112,invisible:true});
 
   // A single harmless dummy stays outside the isolated Sparring Room as a damage checker.
-  { const d=spawnEnemy('dummy',440,350); d.dummy=true; d.active=true; d.dropT=0; d.range=true; }
+  { const d=spawnEnemy('dummy',440,245); d.dummy=true; d.active=true; d.dropT=0; d.range=true; }
   G.torches=[{x:-760,z:-420,ph:1},{x:760,z:-420,ph:2},{x:-500,z:600,ph:3},{x:500,z:600,ph:4}];
   G.startPos={x:0,z:500,y:0}; G.lastSafe={x:0,z:500,y:0}; G.goalPos={x:0,z:-520};
   G.p.x=0; G.p.z=500;
@@ -17414,7 +17414,6 @@ function enterWaystation(riftHall=false){
     {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
     {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
-    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-495,z:342,faceZ:0,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-235,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate(),needZones:1},
@@ -17437,7 +17436,6 @@ function enterWaystation(riftHall=false){
     {x:548,z:-60,w:78,d:54},   // Drillmaster's booth
     {x:548,z:150,w:54,d:54},   // Beastkeeper
     {x:560,z:500,w:74,d:28},   // Sparring Room door (SE court)
-    {x:-495,z:342,w:66,d:24},  // Postings board — centred on the SW wall, sitting slightly off it
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-607,z:45,w:48,d:40},   // Your Bag chest — pushed back near the west wall (small gap, not flush), between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30},     // The Arena gate (deep-centre annex plaza)
@@ -17526,7 +17524,7 @@ function enterWaystation(riftHall=false){
     } }
   if(HUB_CITADEL){rebuildWaystationCitadel();G.gates=G.gates.filter(g=>!g.side);rebuildWaystationSanctum();}
   G.gates=G.gates.filter(g=>!g.side);
-  if(riftHall)buildRiftHall();else{G.hubNpcs.push({id:'rifthall',name:'Rift Hall',x:-350,z:410,prop:'riftDoor',direct:true,verb:'Enter the Rift Hall',open:()=>travelRiftHall(true)});G.hubArt&&(G.hubArt.riftDoor={x:-350,z:410});for(const dx of [-65,65])G.walls.push({x:-350+dx,z:410,w:22,d:24,h:134,invisible:true});}
+  if(riftHall)buildRiftHall();else{G.hubNpcs.push({id:'rifthall',name:'Rift Hall',x:-610,z:710,prop:'riftDoor',direct:true,verb:'Enter the Rift Hall',open:()=>travelRiftHall(true)});G.hubArt&&(G.hubArt.riftDoor={x:-610,z:710});for(const dx of [-65,65])G.walls.push({x:-610+dx,z:710,w:22,d:24,h:134,invisible:true,hubFixture:'rifthall'});}
   /* The hub builds outside loadStage, so it never reaches snapWorldInteractables - and the hub is
      exactly where Oliver counted 105 walk-through props. Normalise here too, BEFORE the edits
      replay, so a collider he deleted by hand stays deleted. */
@@ -19008,10 +19006,9 @@ function openPauseV2(){
         ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
         ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
         ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes','Skills, ranks, and paths')}
-        ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
+        ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
       </div></section>
     <section class="pausegroup pauseutility"><div class="pausegrouplabel">Menu &amp; Navigation</div><div class="navgrid">
-        ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
         ${navCard('optBtn','icons/settings.png','Settings','Audio, view, and controls')}
         ${navCard('multiplayerBtnP','icons/multiplayer.svg','Multiplayer',MP.active?'Room code and party options':'Host or join with friends')}
         ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}
@@ -19028,7 +19025,6 @@ function openPauseV2(){
   document.getElementById('gearBtn').onclick=()=>openGear(openPauseV2);
   document.getElementById('bagBtnP').onclick=()=>openBag(openPauseV2);
   document.getElementById('classesBtn').onclick=()=>openClasses(openPauseV2);
-  document.getElementById('skinBtn').onclick=()=>openSkins(openPauseV2);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPauseV2);
   { const rb=document.getElementById('recBtn'); if(rb) rb.onclick=()=>openRecords(openPauseV2); }
   document.getElementById('qmenu').onclick=()=>{ persist(); resumeGameAudio(false); openHub(); };

@@ -2115,3 +2115,7 @@ Map rotates with character facing using shortest-angle exponential smoothing; ar
 
 ## [Codex | 2026-09-28] Organized menus — 2.068.0
 Pause Records tile removed; records expand inside Achievements using shared records content. Pause Settings grouped into five accordions (controls/camera, graphics/appearance, audio/voices, accessibility/guidance, help/tutorial), retaining current section after setting toggles. Bag category icons use existing assets; all five gear slots remain present with zero counts when empty. Browser Records expansion/back, settings toggle retention and audio slider, ten bag groups/icons, screenshots and old-save fixture passed. Evidence: docs/qa/menu-organization-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Hub entrances and eight-button pause — 2.069.0
+Removed Postings. Sparring entrance now occupies (610,245), with its fallback pavilion and nearby dummy relocated consistently. Rift Hall moved to southwest activity row at (-610,710), clear of the Stylist sign, with matching collision pillars. Pause has Gear/Bag/Classes/Achievements above Settings/Multiplayer/Quit to Hub/Title Screen. Browser verified exact button order, both destination entries, clear entrance approaches, and pre-change save persistence; syntax passed. Class rank appearance variants remain pending. Evidence: docs/qa/hub-entrances-2026-09-28.json.

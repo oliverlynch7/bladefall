@@ -1,0 +1,88 @@
+{
+  "hub": {
+    "hub": {
+      "doors": [
+        {
+          "id": "sparring",
+          "x": 610,
+          "z": 245,
+          "approach": {
+            "x": 610,
+            "z": 310
+          }
+        },
+        {
+          "id": "rifthall",
+          "x": -610,
+          "z": 710,
+          "approach": {
+            "x": -610,
+            "z": 640
+          }
+        }
+      ],
+      "sparringWorks": true
+    },
+    "top": [
+      "gearBtn",
+      "bagBtnP",
+      "classesBtn",
+      "achBtn"
+    ],
+    "bottom": [
+      "optBtn",
+      "multiplayerBtnP",
+      "qmenu",
+      "titleBtnP"
+    ],
+    "riftEntry": true
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

@@ -719,3 +719,11 @@ User requests minimap follow player facing rather than north-up. Rotate terrain/
 
 ## [Codex | 2026-09-28] Menu organization and bag consistency
 User requests Records as a dropdown within Achievements and removal of pause Records tile; Settings logically grouped; icons on Weapons/Armor and Physical/Ranged/Magical; all armor/jewelry categories visible even at zero items. Plan: reusable records content in a details section, organized settings accordions retaining selected section through toggles, existing icon assets and all GEARSLOTS populated.
+
+
+## [Codex | 2026-09-28] Hub entrance cleanup
+User requests remove Postings, relocate Sparring Room to its former place, and move Rift Hall to an uncluttered southwest position near Abyssal Descent. Plan: remove board interaction/render record, move sparring fixture to (610,245) and its fallback pavilion/dummy consistently; place Rift Hall at (-610,710) with aligned pillars and clear approach, away from Stylist sign. Preserve all destination functionality.
+
+
+## [Codex | 2026-09-28] Pause grid and class appearance requirements
+User specifies four top buttons: Gear, Bag, Classes, Achievements; four bottom buttons: Settings, Multiplayer, Quit to Hub, Title Screen. Remove pause Skins access; Stylist remains appearance entry. Earlier approved class appearance overhaul remains pending: default/rank-5/rank-10 variants for every class, increasing visual richness, cosmetic-only, customize only equipped class, remember each class selection. This hub/menu cleanup does not claim the rank palettes are implemented.

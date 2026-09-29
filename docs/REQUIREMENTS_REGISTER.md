@@ -834,3 +834,7 @@ Real Chrome test passed 19 image decodes, all 8 skill-bar variants, all 8 rank-c
 ## [Codex | 2026-09-29] Approved UI icon rollout
 User: "Gpt finished the new icons. Please download them in the same bladefall icons pinned chat and apply them tot rhbgame". Scope: 33 subjects plus 4 optional destination refreshes; settings/emote repeats are alternatives.
 Plan: preserve original images and mapping, split transparent sheets into individual icons, normalize padding, select coherent alternatives. Wire all 37 to existing destinations, voyage HUD, journal/quests, settings sections, emotes, class appearances, stat allocation, co-op teleport and built-in equipment portraits. No mechanics or save-ID changes. Verify real browser rendering, images and pre-change save compatibility.
+
+## [Codex | 2026-09-29] Stylist facial customization
+User: "We should be able to change our eye color, or face, or mouth shape rather, and our name for a small amount of gold at the stylist as well."
+Implementation plan: 25 gold flat per confirmed makeover, combining eye color, mouth, eyebrows and name. Reuse character-creator options, preview the equipped class/look, keep edits in a draft until explicit purchase, no charge on unchanged/cancelled/invalid edits or insufficient funds. Store through existing per-character fields; route Mirror rename through the same paid hub service. Test old-save loading, exact charges, cancel/no-op/insufficient funds, persistence and preview cleanup.

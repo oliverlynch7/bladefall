@@ -1057,6 +1057,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./hub-tour.js?v=2082"></script>
 <script src="./controller.js?v=2080"></script>
 <script src="./ui-icons.js?v=2087"></script>
+<script src="./stylist.js?v=2088"></script>
 <script src="./character-stats.js?v=2087"></script>
 <script src="./class-looks.js?v=2084"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2084"></script>
@@ -1117,7 +1118,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.087.0-ui-icon-art';
+const VERSION3D='2.088.0-stylist-makeover';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17874,7 +17875,6 @@ function buildMirrorPanel(){
   const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
   const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   if(mirrorPanelMode==='stats') pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div><div class="msbody">${mirrorStatsHTML()}</div><div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: ${mirror.spin?'On':'Off'}</button><button class="wsbig ghost" id="msClose">Close</button></div>`;
-  else if(mirrorPanelMode==='name') pn.innerHTML=`<button class="msmodalclose" id="msClose" aria-label="Cancel rename" title="Cancel">×</button><div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" minlength="2" maxlength="20" value="${escText(nm)}" placeholder="Name your character…"><div class="msnamehint">2–20 characters</div><button class="wsbig" id="msNameGo">Save Name</button></div>`;
   else pn.innerHTML='';
   pn.classList.toggle('hide',!mirrorPanelMode);
   pn.classList.toggle('rename',mirrorPanelMode==='name');
@@ -17887,15 +17887,12 @@ function buildMirrorPanel(){
   esc.style.display='block'; esc.onclick=()=>exitMirror();
   let mt=document.getElementById('mirrorToggle'); if(!mt){ mt=document.createElement('button'); mt.id='mirrorToggle'; document.body.appendChild(mt); }
   let mn=document.getElementById('mirrorNameToggle'); if(!mn){ mn=document.createElement('button'); mn.id='mirrorNameToggle'; document.body.appendChild(mn); }
-  mt.innerHTML='<i></i>Character Stats'; mn.innerHTML='<i></i>Rename Character'; mt.style.display=mn.style.display='flex';
+  mt.innerHTML='<i></i>Character Stats'; mn.innerHTML='<i></i>Stylist · Face & name'; mt.style.display=mn.style.display='flex';
   mt.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='stats'?null:'stats';SFX.pickup();buildMirrorPanel();};
-  mn.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='name'?null:'name';SFX.pickup();buildMirrorPanel();};
+  mn.onclick=()=>{if(!G?.hub){toast('Visit the Stylist in the Waystation to change your face or name.');return;}exitMirror();openStylistMakeover();};
   const close=document.getElementById('msClose'); if(close) close.onclick=()=>{mirrorPanelMode=null;buildMirrorPanel();};
   const spin=document.getElementById('msSpin'); if(spin) spin.onclick=()=>{mirror.spin=!mirror.spin;spin.textContent='🔄 Spin: '+(mirror.spin?'On':'Off');};
-  const ni=document.getElementById('msName'); if(ni){ const save=document.getElementById('msNameGo');
-    const valid=()=>((ni.value||'').trim().length>=2); const sync=()=>{ save.disabled=!valid(); }; sync(); ni.addEventListener('input',sync);
-    const saveName=()=>{ if(!valid()) return; meta.heroName=(ni.value||'').trim().slice(0,20); persist(); hudUpdate(); buildMirrorInfo(); SFX.pickup(); mirrorPanelMode=null; buildMirrorPanel(); };
-    save.onclick=saveName; ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}}; ni.focus(); ni.select(); }
+
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
@@ -18447,6 +18444,16 @@ function openCredits(back){
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
+function openStylistMakeover(back=()=>openWardrobe(wsResume)){
+ if(!G?.hub){toast('Visit the Stylist in the Waystation to change your face or name.');return;}
+ mode='menu';showGameUI(false);
+ BFStylist.open({show:showOverlayHTML,safe:htmlSafe,meta,back,
+ preview:()=>({model:window.__hero3dClassModel?.(meta.classId),classId:meta.classId,lookTier:BFClassLooks.tier(meta,meta.classId),weapon:G.p.weapon}),
+ commit:draft=>{if(!G?.hub)return false;const result=BFStylist.purchase(meta,draft);if(!result.ok)return false;
+  if(G.p)G.p.eyeColor=meta.eyeColor;if(meta.hero)meta.hero.eyeColor=meta.eyeColor;
+  persist();hudUpdate();toast('Makeover saved · 25 gold');return true;}
+ });
+}
 function openWardrobe(back){
   mode='menu'; checkCosmetics();
   menuTip('tip_wardrobe','the <b>Keeper</b>. Change your look — skins and appearance. Purely cosmetic: it never changes your stats, so wear whatever you like.');
@@ -18462,12 +18469,13 @@ function openWardrobe(back){
   const owned=Object.keys(meta.cosmetics||{}).length, total=COSSLOTS.reduce((a,s)=>a+COSMETICS[s.k].length,0);
   showOverlayHTML(`<div class="card wardrobe-card"><p class="ovkicker">The Stylist · ${owned}/${total} Discovered</p><h2 class="ovh">Wardrobe</h2>
     <p class="ovsub">Wear the victories you earned. Cosmetics change your legend—not your stats.</p>
-    <div class="wardrobe-body">${secs}</div>
+    <button class="bigbtn" id="makeoverBtn">Face &amp; name · 25 gold</button><div class="wardrobe-body">${secs}</div>
     <div class="wardrobe-actions"><button class="bigbtn ghost" id="skinBtn2">${uiIcon('action-class-appearance')} Class appearances</button><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
   document.querySelectorAll('.cosrow[data-k]').forEach(r=>r.onclick=()=>{
     const k=r.dataset.k; meta.cosEquipped[k]=(meta.cosEquipped[k]===r.dataset.i)?null:r.dataset.i;
     persistGlobal(); SFX.pickup(); openWardrobe(back); });
   document.querySelectorAll('.cosoff').forEach(b=>b.onclick=e=>{ e.stopPropagation(); meta.cosEquipped[b.dataset.off]=null; persistGlobal(); openWardrobe(back); });
+  document.getElementById('makeoverBtn').onclick=()=>openStylistMakeover(()=>openWardrobe(back));
   document.getElementById('skinBtn2').onclick=()=>openSkins(()=>openWardrobe(back));
   document.getElementById('backBtn').onclick=back;
 }
@@ -22586,7 +22594,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

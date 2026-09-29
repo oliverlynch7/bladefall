@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><title>Stylist QA</title><style>body{margin:0;background:#111;color:#eee;font:14px monospace}#status{padding:12px}iframe{border:0;width:100%;height:900px}</style><div id="status">Running real-game icon and old-save checks…</div><iframe id="game"></iframe><script>
+const f=document.querySelector('iframe'),status=document.querySelector('#status');let phase=0,before;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));const assert=(v,s)=>{if(!v)throw Error(s)};
+f.onload=async()=>{try{const w=f.contentWindow;for(let i=0;i<300&&!w.__BF3;i++)await wait(100);const b=w.__BF3;assert(b,'game boot');await b.briarReady;b.loadMode('rl');
+if(!phase){b.meta.classId='pyromancer';b.meta.classUnlocked.pyromancer=true;b.meta.classes.pyromancer={rank:10,xp:0,ch:Object.fromEntries([2,3,4,5,6,7,8,9].map(r=>[r,b.CLASS2.pyromancer['r'+r].a.id]))};b.meta.gold=12345;b.meta.heroName='Icon QA';b.meta.hubTutDone=true;b.meta.introSeen=true;b.meta.dialogueTTS=false;b.meta.petOwned=['shepherd'];b.persist();before=JSON.stringify({classId:b.meta.classId,rank:b.meta.classes.pyromancer,gold:b.meta.gold,name:b.meta.heroName,pets:b.meta.petOwned});phase=1;f.src='index.html?mute=1';return;}
+assert(before===JSON.stringify({classId:b.meta.classId,rank:b.meta.classes.pyromancer,gold:b.meta.gold,name:b.meta.heroName,pets:b.meta.petOwned}),'pre-change save preservation');
+
+
+b.enterWaystation();b.openWardrobe();w.document.querySelector('#makeoverBtn').click();
+const q=s=>w.document.querySelector(s),click=s=>{assert(q(s),'missing '+s);q(s).click();};
+const input=(s,value)=>{q(s).value=value;q(s).dispatchEvent(new w.Event('input',{bubbles:true}));};
+const initial=JSON.stringify(w.BFStylist.read(b.meta)),gold=b.meta.gold;
+assert(q('#stySave').disabled,'unchanged disabled');click('[data-value="smile"]');click('[data-value="#c47bff"]');input('#styName','Test Rename');assert(JSON.stringify(w.BFStylist.read(b.meta))===initial,'preview is draft');click('#styCancel');assert(b.meta.gold===gold&&JSON.stringify(w.BFStylist.read(b.meta))===initial,'cancel unchanged');
+b.openStylistMakeover();click('[data-value="smile"]');click('[data-value="focused"]');click('[data-value="#c47bff"]');input('#styName','Aster');
+const save=q('#stySave');click('#stySave');save.click();assert(b.meta.gold===gold-25,'one charge only');assert(b.meta.heroName==='Aster'&&b.meta.eyeColor==='#c47bff'&&b.meta.mouthStyle==='smile'&&b.meta.browStyle==='focused','all choices committed');
+b.openStylistMakeover();assert(q('#stySave').disabled,'saved choices no-op');click('#styCancel');b.meta.gold=24;b.openStylistMakeover();click('[data-value="frown"]');assert(q('#stySave').disabled,'insufficient gold disabled');q('#stySave').onclick();assert(b.meta.gold===24&&b.meta.mouthStyle==='smile','insufficient gold rejects handler');click('#styCancel');
+b.meta.gold=100;b.openStylistMakeover();input('#styName','   ');click('#stySave');assert(b.meta.heroName==='Nameless'&&b.meta.gold===75,'blank name and fee');b.persist();b.loadMode('rl');assert(b.meta.heroName==='Nameless'&&b.meta.gold===75&&b.meta.eyeColor==='#c47bff'&&b.meta.mouthStyle==='smile'&&b.meta.browStyle==='focused','saved makeover reload');
+b.enterWaystation();b.openStylistMakeover();await wait(2000);assert(w.__creatorPreviewState?.eye==='#c47bff'&&w.__creatorPreviewState?.mouth==='smile','preview rendered saved face');
+status.textContent='PASS: pre-change save, draft preview, cancel, no-op, exact 25g charge, double-click protection, insufficient gold, blank name, all face fields persisted and preview rendered.';document.title='PASS — Stylist';
+}catch(e){status.textContent='FAIL: '+e.stack;document.title='FAIL — Stylist';}};f.src='_qa-prechange.html?mute=1';
+</script>

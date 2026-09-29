@@ -1,0 +1,866 @@
+{
+  "choices": {
+    "rows": [
+      {
+        "name": "Bloodlust damage/speed/duration",
+        "data": {
+          "damage": 1.12,
+          "speed": 1.12,
+          "time": 6
+        }
+      },
+      {
+        "name": "Bloodlust expires",
+        "data": -0.09999999999999964
+      },
+      {
+        "name": "Growing Rage capped",
+        "data": 5
+      },
+      {
+        "name": "Growing Rage expires",
+        "data": 0
+      },
+      {
+        "name": "Frenzy speed bounded",
+        "data": 1.45
+      },
+      {
+        "name": "Frenzy no hidden damage",
+        "data": 1.15
+      },
+      {
+        "name": "Potent cost and damage",
+        "data": {
+          "mana": 44,
+          "hit": 155
+        }
+      },
+      {
+        "name": "Last Reserve affordable positive cost",
+        "data": {
+          "normal": 7,
+          "low": 4
+        }
+      },
+      {
+        "name": "Dark Power no HP penalty",
+        "data": 535
+      },
+      {
+        "name": "berserker cannot execute boss",
+        "data": 100
+      },
+      {
+        "name": "ninja cannot execute boss",
+        "data": 100
+      },
+      {
+        "name": "Bloodthirst restores HP",
+        "data": {
+          "before": 10,
+          "after": 31.400000000000002
+        }
+      },
+      {
+        "name": "Still Water restores HP",
+        "data": 20.700000000000003
+      },
+      {
+        "name": "Healing Light heals on actual skill cast",
+        "data": {
+          "hp": 54.57480000000001,
+          "mana": 62
+        }
+      },
+      {
+        "name": "Projectile fractional lifesteal works",
+        "data": 10.03
+      },
+      {
+        "name": "Choice UI clear",
+        "data": null
+      }
+    ],
+    "skills": [
+      {
+        "cls": "warrior",
+        "id": "w_cleave",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_bash",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_charge",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_whirl",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_guard",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_stomp",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_berserk",
+        "ok": true
+      },
+      {
+        "cls": "warrior",
+        "id": "w_execute",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_volley",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_pierce",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_tumble",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_shadow",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_spike",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_smoke",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_mark",
+        "ok": true
+      },
+      {
+        "cls": "ranger",
+        "id": "r_deathmark",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_bolt",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_beam",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_blink",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_nova",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_gravity",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_barrier",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_tempest",
+        "ok": true
+      },
+      {
+        "cls": "mage",
+        "id": "m_overload",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_reap",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_cleave",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_step",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_wraith",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_pull",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_bind",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_siphon",
+        "ok": true
+      },
+      {
+        "cls": "reaper",
+        "id": "x_vortex",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_bash",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_smite",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_taunt",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_ground",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_guard",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_burst",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_laststand",
+        "ok": true
+      },
+      {
+        "cls": "paladin",
+        "id": "pal_sky",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_summon",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_bolt",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_raise",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_nova",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_wall",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_grip",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_army",
+        "ok": true
+      },
+      {
+        "cls": "necromancer",
+        "id": "necro_storm",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_strike",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_barrage",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_step",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_smoke",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_mark",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_pierce",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_fury",
+        "ok": true
+      },
+      {
+        "cls": "ninja",
+        "id": "nin_storm",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_cleave",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_bash",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_charge",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_stomp",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_whirl",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_execute",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_berserk",
+        "ok": true
+      },
+      {
+        "cls": "berserker",
+        "id": "bsk_guard",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_pierce",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_volley",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_shadow",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_tumble",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_smoke",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_goldrush",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_deathmark",
+        "ok": true
+      },
+      {
+        "cls": "pirate",
+        "id": "pir_spike",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_bolt",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_beam",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_nova",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_blink",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_gravity",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_barrier",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_tempest",
+        "ok": true
+      },
+      {
+        "cls": "chronomancer",
+        "id": "chr_overload",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_flurry",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_palm",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_deflect",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_roll",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_whirl",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_stun",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_thousand",
+        "ok": true
+      },
+      {
+        "cls": "monk",
+        "id": "mon_dragon",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_bolt",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_lance",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_step",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_nova",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_orb",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_barrier",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_storm",
+        "ok": true
+      },
+      {
+        "cls": "stormcaller",
+        "id": "st_overload",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_bolt",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_lance",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_curse",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_drain",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_step",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_orb",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_storm",
+        "ok": true
+      },
+      {
+        "cls": "warlock",
+        "id": "war_final",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_rise",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_gale",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_dive",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_lift",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_dash",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_rain",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_crash",
+        "ok": true
+      },
+      {
+        "cls": "skylancer",
+        "id": "sky_cyclone",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_counter",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_twin",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_riposte",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_step",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_mirror",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_cross",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_steel",
+        "ok": true
+      },
+      {
+        "cls": "bladedancer",
+        "id": "bd_perfect",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_sic",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_coordinated",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_guardian",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_step",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_mend",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_roar",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_stampede",
+        "ok": true
+      },
+      {
+        "cls": "beastmaster",
+        "id": "bst_apex",
+        "ok": true
+      }
+    ],
+    "errors": [],
+    "classes": 16
+  },
+  "pvp": {
+    "rows": [
+      {
+        "name": "fractional healing retained",
+        "ok": true,
+        "data": 80.125
+      },
+      {
+        "name": "healing capped",
+        "ok": true,
+        "data": 477
+      },
+      {
+        "name": "confirmed damage heals",
+        "ok": true,
+        "data": 81.5
+      },
+      {
+        "name": "duplicate receipt cannot heal twice",
+        "ok": true,
+        "data": 81.5
+      },
+      {
+        "name": "blocked hit never heals",
+        "ok": true,
+        "data": 80
+      },
+      {
+        "name": "incoming PvP damage received",
+        "ok": true,
+        "data": {
+          "loss": 7,
+          "receipt": {
+            "t": "presult",
+            "id": "B",
+            "by": "A",
+            "token": "b1",
+            "dealt": 7,
+            "killed": false
+          }
+        }
+      },
+      {
+        "name": "duplicate hit ignored",
+        "ok": true,
+        "data": 73
+      },
+      {
+        "name": "invulnerability confirmed zero",
+        "ok": true,
+        "data": {
+          "t": "presult",
+          "id": "B",
+          "by": "A",
+          "token": "b2",
+          "dealt": 0,
+          "killed": false
+        }
+      },
+      {
+        "name": "shield blocks PvP damage",
+        "ok": true,
+        "data": {
+          "hp": 80,
+          "shield": 89.8,
+          "receipt": {
+            "t": "presult",
+            "id": "B",
+            "by": "A",
+            "token": "b3",
+            "dealt": 0,
+            "killed": false
+          }
+        }
+      },
+      {
+        "name": "PvP control capped",
+        "ok": true,
+        "data": 1.5
+      },
+      {
+        "name": "control immunity prevents refresh",
+        "ok": true,
+        "data": 0.1
+      }
+    ],
+    "errors": []
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

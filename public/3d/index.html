@@ -1099,7 +1099,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.074.0-solid-surfaces';
+const VERSION3D='2.075.0-clear-class-choices';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2059,9 +2059,9 @@ const CLASSES={
   berserker:{disp:'Berserker',icon:classIcon('berserker'),attackStyle:'warrior',earned:true,family:['great','axe','hammer'],
     subs:[{id:'fury',disp:'Fury',blurb:'Raw damage — hit like a landslide.'},{id:'blood',disp:'Blood',blurb:'Rage and lifesteal — the angrier, the stronger.'}],
     skills:[
-      {id:'bsk_cleave',n:'Bloodletting',icon:skillIcon('berserker-cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
+      {id:'bsk_cleave',n:"Blood Sweep",icon:skillIcon('berserker-cleave'),cd:5,rank:1,d:"Spend 10% of your maximum health to sweep nearby enemies for 2.6 times weapon damage. Cannot be used if the cost would leave you below 2 HP."},
       {id:'bsk_charge',n:'Headlong',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
-      {id:'bsk_whirl',n:'No Retreat',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
+      {id:'bsk_whirl',n:"Whirlwind",icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:"Sweep all nearby enemies for 2.2 times weapon damage."},
       {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
   /* Pirate: cutlass, boarding crossbow, pike, and a BOARDING AXE. The axe is a coverage fix as much
      as a flavour one - it and the greatsword were reachable by only two classes each, so those
@@ -2081,24 +2081,24 @@ const CLASSES={
     skills:[
       {id:'chr_bolt',n:'Time Bolt',icon:skillIcon('chrono-time-bolt'),cd:5,rank:1,d:'A heavy bolt of temporal energy'},
       {id:'chr_nova',n:'Slow Field',icon:skillIcon('chrono-slow-field'),cd:8,rank:2,d:'A burst that slows nearby foes'},
-      {id:'chr_blink',n:'Rewind',icon:skillIcon('chrono-rewind'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
-      {id:'chr_tempest',n:'Stopped Clock',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]},
+      {id:'chr_blink',n:"Time Step",icon:skillIcon('chrono-rewind'),cd:14,rank:4,d:"Teleport forward with brief invulnerability. Your automatic death-saving rewind is a separate class ability."},
+      {id:'chr_tempest',n:"Stop Time",icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:"Stop nearby enemy activity for 3 seconds, giving you time to attack or escape."}]},
   monk:{disp:'Monk',icon:classIcon('monk'),attackStyle:'warrior',earned:true,shopUnlock:true,charter:9000,family:['fist'],
     subs:[{id:'way',disp:'Way of the Fist',blurb:'Flurry and Focus — relentless offense.'},
           {id:'flow',disp:'Way of Flow',blurb:'Parry and evade — turn their blows against them.'}],
     skills:[
-      {id:'mon_flurry',n:'Flurry',icon:skillIcon('monk-flurry'),cd:2,rank:1,d:'A rapid barrage of strikes'},
+      {id:'mon_flurry',n:'Flurry',icon:skillIcon('monk-flurry'),cd:2,rank:1,d:"Deliver rapid punches. Each connecting hit builds your temporary damage bonus."},
       {id:'mon_deflect',n:'Deflect',icon:skillIcon('monk-deflect'),cd:9,rank:2,d:'A parry stance: brace and throw blows back'},
       {id:'mon_whirl',n:'Whirl Kick',icon:skillIcon('monk-whirl-kick'),cd:12,rank:4,d:'Spin, striking everything around you'},
-      {id:'mon_thousand',n:'Stillness',icon:skillIcon('monk-thousand-fists'),cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]},
+      {id:'mon_thousand',n:"Stillness",icon:skillIcon('monk-thousand-fists'),cd:24,rank:7,d:"For 6 seconds, standing still reflects double incoming damage back to attackers. You still take damage."}]},
   stormcaller:{disp:'Stormcaller',icon:classIcon('stormcaller'),attackStyle:'mage',earned:true,shopUnlock:true,charter:9000,family:['staff','wand'],
     subs:[{id:'tempest',disp:'Tempest',blurb:'Chain lightning and storms — spread the shock.'},
           {id:'current',disp:'Current',blurb:'Static speed — the longer you fight, the faster you strike.'}],
     skills:[
-      {id:'st_bolt',n:'Chain Bolt',icon:skillIcon('stormcaller-chain-bolt'),cd:2,rank:1,d:'A bolt that leaps between foes'},
+      {id:'st_bolt',n:'Chain Bolt',icon:skillIcon('stormcaller-chain-bolt'),cd:2,rank:1,d:"Fire a quick lightning bolt with a short cooldown."},
       {id:'st_nova',n:'Static Field',icon:skillIcon('stormcaller-static-field'),cd:8,rank:2,d:'A shock burst that slows nearby foes'},
       {id:'st_orb',n:'Ball Lightning',icon:skillIcon('stormcaller-ball-lightning'),cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
-      {id:'st_storm',n:'Conduit',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
+      {id:'st_storm',n:"Linked Lightning",icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:"Link nearby enemies for 8 seconds. Hitting one also damages the others."}]},
   warlock:{disp:'Warlock',icon:classIcon('warlock'),attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','dagger'],
     subs:[{id:'blood',disp:'Blood Pact',blurb:'Trade safety for brutal spell damage.'},
           {id:'curse',disp:'Curse Weaver',blurb:'Mark, drain, and control enemies from the shadows.'}],
@@ -2106,7 +2106,7 @@ const CLASSES={
       {id:'war_bolt',n:'Shadow Bolt',icon:skillIcon('warlock-shadow-bolt'),cd:2.5,rank:2,d:'A fast void bolt powered by a sliver of your health'},
       {id:'war_curse',n:'Curse Circle',icon:skillIcon('warlock-curse-circle'),cd:9,rank:4,d:'Mark nearby foes so your spells hit them harder'},
       {id:'war_step',n:'Rift Step',icon:skillIcon('warlock-rift-step'),cd:11,rank:6,d:'Tear through shadow and burst at both ends'},
-      {id:'war_storm',n:'Pact',icon:skillIcon('warlock-dark-storm'),cd:23,rank:8,d:'A violent void storm follows you'}]},
+      {id:'war_storm',n:"Blood Offering",icon:skillIcon('warlock-dark-storm'),cd:23,rank:8,d:"Spend half your current health to deal that much damage to every nearby enemy. Normal skill health cost also applies."}]},
   skylancer:{disp:'Skylancer',icon:classIcon('skylancer'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:13500,family:['javelin','bow'],
     subs:[{id:'diver',disp:'Storm Diver',blurb:'Launch high, then crash through the enemy line.'},
           {id:'wind',disp:'Wind Hunter',blurb:'Stay mobile and rain attacks down from safety.'}],
@@ -2122,7 +2122,7 @@ const CLASSES={
       {id:'bd_counter',n:'Counter Stance',icon:skillIcon('bladedancer-counter-stance'),cd:8,rank:2,d:'Briefly prepare to parry the next hit'},
       {id:'bd_riposte',n:'Riposte',icon:skillIcon('bladedancer-riposte'),cd:9,rank:4,d:'A powerful counter slash, stronger after a parry'},
       {id:'bd_mirror',n:'Mirror Guard',icon:skillIcon('bladedancer-mirror-guard'),cd:14,rank:6,d:'Parry and send the force back around you'},
-      {id:'bd_steel',n:'Perfect Guard',icon:skillIcon('bladedancer-dance-of-steel'),cd:22,rank:8,d:'A fast series of cuts through nearby enemies'}]},
+      {id:'bd_steel',n:"Perfect Guard",icon:skillIcon('bladedancer-dance-of-steel'),cd:22,rank:8,d:"Prepare a parry for up to 3 seconds. The first incoming hit is blocked and prepares an empowered Riposte."}]},
   beastmaster:{disp:'Beastmaster',icon:classIcon('beastmaster'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin'],
     subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
           {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
@@ -2170,204 +2170,204 @@ const STARTER_FEEL = {
    ============================================================================ */
 const CLASS2={
   warrior:{ disp:'Warrior', icon:classIcon('warrior'),
-    innate:{name:'Battle Ready', d:'Basic attacks deal +8% damage and gain +15% interrupt resistance while attacking.'},
-    cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Skill hits restore 2% max HP.'},
-    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:2,am:0.45,role:'Rapid · Group',fx:'w_cleave',d:'A fast, spammable sweep (~2s, softer per hit) — weave it between basic attacks.'},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
-    r3:{kind:'passive',a:{id:'w_heavy',n:'Heavy Hand',role:'Commitment',d:'Your basic attacks cannot be interrupted — and you cannot cancel them either.'},b:{id:'w_swift',n:'Swift Steel',role:'Rhythm',d:'Every fourth basic attack is free and instant, ignoring your attack timer.'}},
-    r4:{kind:'skill',slot:1,a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush through enemies for 1.6x damage and stun them.'},b:{id:'w_whirl',n:'Whirlwind',cd:10,role:'Group Damage',fx:'w_whirl',d:'Spin through a full circle twice, dealing 1.1x damage per sweep.'}},
-    r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:'You cannot be staggered, knocked back, or moved by anything.'}},
+    innate:{name:'Battle Ready', d:"Every third basic hit on the same enemy briefly staggers it. Switching targets restarts the count."},
+    cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Casting a skill restores 2% max HP.'},
+    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:2,am:0.45,role:'Rapid · Group',fx:'w_cleave',d:"A quick sweep hits nearby enemies. Short cooldown and low damage per cast."},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
+    r3:{kind:'passive',a:{id:'w_heavy',n:"Heavy Hand",role:'Commitment',d:"Basic attacks deal 20% more damage."},b:{id:'w_swift',n:'Swift Steel',role:'Rhythm',d:"Attack 10% faster. Every fourth basic attack lets you attack again immediately; every fourth basic hit deals 25% more damage."}},
+    r4:{kind:'skill',slot:1,a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush through enemies for 1.6x damage and stun them.'},b:{id:'w_whirl',n:'Whirlwind',cd:10,role:'Group Damage',fx:'w_whirl',d:"A full-circle sweep deals 2.2 times weapon damage to nearby enemies."}},
+    r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:"Take 18% less damage while below half health."}},
     r6:{kind:'skill',slot:2,a:{id:'w_guard',n:'Iron Guard',cd:13,role:'Defense',fx:'w_guard',d:'Brace for 3s, reducing incoming damage by 60%.'},b:{id:'w_stomp',n:'Shockwave Stomp',cd:12,role:'Control',fx:'w_stomp',d:'Slam the ground for 1.5x damage and heavy knockback all around.'}},
-    r7:{kind:'passive',a:{id:'w_bloodlust',n:'Bloodlust',role:'Offense',d:'A kill keeps your Momentum stacks instead of resetting them.'},b:{id:'w_tactical',n:'Tactical Guard',role:'Defense',d:'After dodging, gain 20% damage reduction for 2s.'}},
-    r8:{kind:'skill',slot:3,a:{id:'w_berserk',n:'Warcry',cd:22,role:'Offense',fx:'w_berserk',d:'+35% damage and +30% attack speed for 6s.'},b:{id:'w_execute',n:'Execution',cd:20,role:'Finisher',fx:'w_execute',d:'A crushing 4x strike that executes normal enemies below 20% HP.'}},
-    r9:{kind:'passive',a:{id:'w_master',n:'Weapon Master',role:'Damage',d:'Warrior-family weapons deal +10% damage and skills cost 10% less mana.'},b:{id:'w_juggernaut',n:'Juggernaut',role:'Defense',d:'+15% knockback resistance and +8% damage reduction while moving.'}}
+    r7:{kind:'passive',a:{id:'w_bloodlust',n:'Bloodlust',role:'Offense',d:"Defeating an enemy grants 12% more damage and 12% faster attacks for 6 seconds. Another kill refreshes the duration."},b:{id:'w_tactical',n:'Tactical Guard',role:'Defense',d:'After dodging, gain 20% damage reduction for 2s.'}},
+    r8:{kind:'skill',slot:3,a:{id:'w_berserk',n:"Warcry",cd:22,role:'Offense',fx:'w_berserk',d:"Draw nearby enemies toward you for 6 seconds, helping protect your allies."},b:{id:'w_execute',n:'Execution',cd:20,role:'Finisher',fx:'w_execute',d:'A crushing 4x strike that executes normal enemies below 20% HP.'}},
+    r9:{kind:'passive',a:{id:'w_master',n:'Weapon Master',role:'Damage',d:"Compatible weapons deal 10% more damage; skills cost 10% less mana. Stagger the same enemy every second basic hit instead of every third."},b:{id:'w_juggernaut',n:'Juggernaut',role:'Defense',d:'+15% knockback resistance and +8% damage reduction while moving.'}}
   },
   ranger:{ disp:'Ranger', icon:classIcon('ranger'),
-    innate:{name:'Clear Aim', d:'After 3s without taking direct damage: +10% damage and +10% ability range. A hit disables it until you avoid damage for 3s again.'},
+    innate:{name:'Clear Aim', d:"Avoid damage for 3 seconds to gain 10% damage and extra skill range until hit. Basic shots deal more damage at longer distances."},
     cap:{name:'Perfect Hunt', d:'Clear Aim becomes Perfect Aim: +3% more damage, survives a 0.75s grace after a hit, and a kill while active cuts skill cooldowns by 0.5s.'},
     r2:{kind:'skill',slot:0, a:{id:'r_volley',n:'Volley',cd:5,role:'Group Damage',fx:'r_volley',d:'Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.'},
                              b:{id:'r_pierce',n:'Piercing Shot',cd:5,role:'Boss Damage',fx:'r_pierce',d:'One shot through a line — 2.2x first (−10% its armor), 1.5x rest.'}},
-    r3:{kind:'passive', a:{id:'r_longshot',n:'Longshot',role:'Range',d:'+8% damage to enemies 7m+ away.'},
-                        b:{id:'r_closeq',n:'Close-Quarters Archer',role:'Reversal',d:'Enemies within 4m are knocked back by every shot.'}},
-    r4:{kind:'skill',slot:1, a:{id:'r_tumble',n:'Tumble',cd:8,role:'Movement',fx:'r_tumble',d:'Roll back ~5m with brief i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim.'},
+    r3:{kind:'passive', a:{id:'r_longshot',n:'Longshot',role:'Range',d:"Deal 12% more damage to enemies at least 7 metres away."},
+                        b:{id:'r_closeq',n:'Close-Quarters Archer',role:'Reversal',d:"Basic hits push enemies within 4 metres farther away. Bosses resist the push."}},
+    r4:{kind:'skill',slot:1, a:{id:'r_tumble',n:'Tumble',cd:8,role:'Movement',fx:'r_tumble',d:"Roll backward with brief invulnerability and fire a parting shot for 75% weapon damage."},
                              b:{id:'r_shadow',n:'Shadowstrike',cd:9,role:'Movement',fx:'r_shadow',d:'Dash through a target (2.0x) and appear behind it; tap again within 1s to return.'}},
-    r5:{kind:'passive', a:{id:'r_escape',n:'Escape Artist',role:'Defense',d:'After Tumble/Shadowstrike: −15% damage taken & −30% slows for 1.5s.'},
+    r5:{kind:'passive', a:{id:'r_escape',n:'Escape Artist',role:'Defense',d:"After dodging or using a movement skill, take 15% less damage for 2 seconds."},
                         b:{id:'r_ambush',n:'Ambusher',role:'Damage',d:'After Tumble/Shadowstrike: next click within 3s +20% (once per 6s).'}},
-    r6:{kind:'skill',slot:2, a:{id:'r_spike',n:'Spike Trap',cd:10,role:'Control',fx:'r_spike',d:'A 4m spike field for 5s: −35% slow, 0.25x/s (max 1.25x). Element once on entry.'},
-                             b:{id:'r_smoke',n:'Smoke Bomb',cd:11,role:'Support',fx:'r_smoke',d:'Smoke cloud: breaks targeting, −30% enemy accuracy, +20% your move speed.'}},
-    r7:{kind:'passive', a:{id:'r_patient',n:'Patient Hunter',role:'Damage',d:'Clear Aim 10%→14% damage, but needs 3.5s without a hit.'},
-                        b:{id:'r_quick',n:'Quickdraw',role:'Uptime',d:'Clear Aim activates after 2s instead of 3s.'}},
+    r6:{kind:'skill',slot:2, a:{id:'r_spike',n:'Spike Trap',cd:10,role:'Control',fx:'r_spike',d:"Place a trap for 5 seconds that repeatedly damages and slows enemies inside."},
+                             b:{id:'r_smoke',n:'Smoke Bomb',cd:11,role:'Support',fx:'r_smoke',d:"Become briefly invulnerable and slow nearby enemies with smoke."}},
+    r7:{kind:'passive', a:{id:'r_patient',n:'Patient Hunter',role:'Damage',d:"After 3 seconds without taking damage, your damage bonus rises from 10% to 18%."},
+                        b:{id:'r_quick',n:'Quickdraw',role:'Uptime',d:"Your 10% damage bonus activates after 2 seconds without taking damage instead of 3."}},
     r8:{kind:'skill',slot:3, a:{id:'r_mark',n:"Hunter's Mark",cd:12,role:'Boss Damage',fx:'r_mark',d:'Mark one enemy: you deal +18% and +10% crit to it for 8s.'},
                              b:{id:'r_deathmark',n:'Death Mark',cd:14,role:'Farming',fx:'r_deathmark',d:'Mark up to 5 enemies — they explode for 1.8x on death.'}},
-    r9:{kind:'passive', a:{id:'r_elem',n:'Elemental Archer',role:'Elements',d:'Your arrows carry the element of the ground they fly over.'},
+    r9:{kind:'passive', a:{id:'r_elem',n:"Elemental Archer",role:'Elements',d:"Deal 12% more damage while using an elemental weapon."},
                         b:{id:'r_bounty',n:'Bounty Hunter',role:'Sustain',d:'Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.'}}
   },
   mage:{ disp:'Mage', icon:classIcon('mage'),
-    innate:{name:'Arcane Attunement',d:'Magic weapons deal +8% damage and restore 2 mana whenever a basic attack hits.'},
+    innate:{name:'Arcane Attunement',d:"Basic hits spend 6 mana for 35% extra damage when enough mana is available. Magic basic hits also restore 2 mana."},
     cap:{name:'Archmage',d:'+12% magic damage, +10% cooldown reduction, and every third skill refunds half its mana cost.'},
-    r2:{kind:'skill',slot:0,a:{id:'m_bolt',n:'Elemental Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'m_bolt',d:'Rapid-fire elemental bolts (~2s, softer each) — a steady casting rhythm.'},b:{id:'m_beam',n:'Elemental Beam',cd:6,role:'Piercing Damage',fx:'m_beam',d:'Fire a piercing elemental lance for 2x damage through every target.'}},
-    r3:{kind:'passive',a:{id:'m_potent',n:'Potent Weave',role:'Power',d:'Overcharge costs double mana and hits twice as hard.'},b:{id:'m_efficient',n:'Efficient Casting',role:'Economy',d:'Skills cost 15% less mana.'}},
+    r2:{kind:'skill',slot:0,a:{id:'m_bolt',n:'Elemental Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'m_bolt',d:"Fire a quick elemental bolt. Short cooldown and low damage per cast."},b:{id:'m_beam',n:'Elemental Beam',cd:6,role:'Piercing Damage',fx:'m_beam',d:'Fire a piercing elemental lance for 2x damage through every target.'}},
+    r3:{kind:'passive',a:{id:'m_potent',n:"Potent Casting",role:'Power',d:"Empowered basic hits deal 55% extra damage instead of 35%, for the same 6 mana. Magic skills deal 12% more damage."},b:{id:'m_efficient',n:'Efficient Casting',role:'Economy',d:'Skills cost 15% less mana.'}},
     r4:{kind:'skill',slot:1,a:{id:'m_blink',n:'Blink',cd:8,role:'Movement',fx:'m_blink',d:'Teleport forward and become untouchable during the displacement.'},b:{id:'m_nova',n:'Nova',cd:9,role:'Control',fx:'m_nova',d:'Detonate a 1.4x freezing burst that slows nearby enemies.'}},
-    r5:{kind:'passive',a:{id:'m_glass',n:'Glass Cannon',role:'Gamble',d:'Below a quarter health your skills cost no mana at all.'},b:{id:'m_ward',n:'Arcane Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP for 3s.'}},
+    r5:{kind:'passive',a:{id:'m_glass',n:"Last Reserve",role:'Gamble',d:"Below half health, skills cost 40% less mana."},b:{id:'m_ward',n:'Arcane Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP for 3s.'}},
     r6:{kind:'skill',slot:2,a:{id:'m_gravity',n:'Gravity Well',cd:13,role:'Control',fx:'m_gravity',d:'Create an implosion that pulls enemies inward and deals 1.3x damage.'},b:{id:'m_barrier',n:'Rune Barrier',cd:14,role:'Defense',fx:'m_barrier',d:'Create a shield that absorbs 35% of max HP.'}},
-    r7:{kind:'passive',a:{id:'m_savant',n:'Elemental Savant',role:'Elements',d:'Overcharged attacks apply your weapon’s element instantly.'},b:{id:'m_temporal',n:'Temporal Focus',role:'Uptime',d:'Standing still for 1.5s grants 15% cooldown recovery until you move.'}},
-    r8:{kind:'skill',slot:3,a:{id:'m_tempest',n:'Attunement',cd:22,role:'Group Damage',fx:'m_tempest',d:'A 4s storm repeatedly damages enemies around you.'},b:{id:'m_overload',n:'Elemental Overload',cd:24,role:'Burst',fx:'m_overload',d:'Release a massive 3.4x elemental explosion around your target.'}},
+    r7:{kind:'passive',a:{id:'m_savant',n:'Elemental Savant',role:'Elements',d:"Basic hits empowered by spending 6 mana also apply your weapon element."},b:{id:'m_temporal',n:'Temporal Focus',role:'Uptime',d:"After standing still for 1.5 seconds, skills you cast have 15% shorter cooldowns. Moving ends the bonus."}},
+    r8:{kind:'skill',slot:3,a:{id:'m_tempest',n:'Attunement',cd:22,role:'Group Damage',fx:'m_tempest',d:"Create a damaging storm for 4 seconds. For 10 seconds, casting skills cycles your weapon element."},b:{id:'m_overload',n:'Elemental Overload',cd:24,role:'Burst',fx:'m_overload',d:'Release a massive 3.4x elemental explosion around your target.'}},
     r9:{kind:'passive',a:{id:'m_echo',n:'Spell Echo',role:'Burst',d:'Every fourth skill repeats at 35% power without extra mana.'},b:{id:'m_manafont',n:'Manafont',role:'Sustain',d:'+30% mana regeneration and +10 maximum mana.'}}
   },
   reaper:{ disp:'Reaper', icon:classIcon('reaper'),
-    innate:{name:'Soul Hunger',d:'Scythe damage heals 3% of damage dealt and slain enemies restore 2 mana.'},
+    innate:{name:'Soul Hunger',d:"Your scythe drains health. Defeating an enemy restores 2 mana."},
     cap:{name:'Avatar of Death',d:'+12% damage and lifesteal. Killing a marked or corrupted enemy reduces every cooldown by 0.75s.'},
-    r2:{kind:'skill',slot:0,a:{id:'x_reap',n:'Reap',cd:2,am:0.45,role:'Rapid · Sustain',fx:'x_reap',d:'Quick, spammable scythe arcs (~2s, softer each) with strong lifesteal — steady drain.'},b:{id:'x_cleave',n:'Soul Cleave',cd:6,role:'Ranged Damage',fx:'x_cleave',d:'Send a spectral scythe wave outward for 2.1x damage.'}},
-    r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Harvest',d:'Souls you collect are spent on your next skill, making it free.'},b:{id:'x_doom',n:'Lingering Doom',role:'Doom',d:'Marked enemies that die spread their mark to the nearest foe.'}},
+    r2:{kind:'skill',slot:0,a:{id:'x_reap',n:'Reap',cd:2,am:0.45,role:'Rapid · Sustain',fx:'x_reap',d:"A quick scythe sweep damages nearby enemies and restores health when it hits."},b:{id:'x_cleave',n:'Soul Cleave',cd:6,role:'Ranged Damage',fx:'x_cleave',d:'Send a spectral scythe wave outward for 2.1x damage.'}},
+    r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Harvest',d:"Defeating an enemy makes your next skill cost no mana. Stores one free cast at a time."},b:{id:'x_doom',n:'Lingering Doom',role:'Doom',d:"Your damage-over-time marks last 20% longer."}},
     r4:{kind:'skill',slot:1,a:{id:'x_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'},b:{id:'x_wraith',n:'Wraith Form',cd:10,role:'Defense',fx:'x_wraith',d:'Become spectral for 3s: faster movement and 65% damage reduction.'}},
     r5:{kind:'passive',a:{id:'x_armor',n:'Soul Armor',role:'Defense',d:'Collecting a kill grants a 3% max-HP shield for 5s.'},b:{id:'x_wraithwalk',n:'Wraithwalk',role:'Movement',d:'After using mobility, gain +18% move speed for 2.5s.'}},
     r6:{kind:'skill',slot:2,a:{id:'x_pull',n:'Void Pull',cd:12,role:'Control',fx:'x_pull',d:'Implode nearby enemies toward a central point and stagger them.'},b:{id:'x_bind',n:'Soul Tether',cd:12,role:'Linkage',fx:'x_bind',d:'Bind enemies in front of you, rooting them for 2.5s.'}},
-    r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:'Below half health, every soul you collect heals you outright.'},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:'Corrupted enemies cannot flee — they walk toward you instead.'}},
-    r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:'Drain nearby enemies for 4s, damaging them and restoring health.'},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
-    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Rupture',d:'Rupturing a corrupted enemy corrupts everything near it.'},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
+    r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:"Defeating an enemy while below half health restores 5% of your maximum health (at least 3 HP)."},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:"Enemies affected by your void weapon effect move 18% slower."}},
+    r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:"A powerful draining sweep damages nearby enemies and heals 5% of your maximum health per enemy damaged. Healing is halved against players."},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
+    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Rupture',d:"Your void weapon effect builds 25% faster. When a charged attack or skill bursts a fully affected target, the burst deals 15% more damage and spreads the effect to nearby enemies."},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
   },
   paladin:{ disp:'Paladin', icon:classIcon('paladin'),
-    innate:{name:'Holy Warrior', d:'While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal.'},
+    innate:{name:'Holy Warrior', d:"Your first basic-hit target takes 15% extra basic damage. While it lives, other enemies deal 33% less damage to you."},
     cap:{name:'Avatar of Light', d:'Take 18% less damage and deal +10% damage. Holy weapons heal you for an extra 1% of the damage you deal.'},
     r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:8,role:'Holy Damage',fx:'pal_smite',d:'Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.'}},
-    r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'The first hit of every fight deals no damage at all.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Judgement',d:'Your Sworn target takes double damage from your skills.'}},
+    r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:"Ignore an incoming hit after 5 seconds without being hit."}, b:{id:'pal_holypow',n:'Holy Power',role:'Judgement',d:"Skills deal double damage to the first enemy you hit in a fight, until that enemy dies."}},
     r4:{kind:'skill',slot:1, a:{id:'pal_taunt',n:'Taunt',cd:9,role:'Control',fx:'pal_taunt',d:'Pull nearby foes to you and brace behind a shield.'}, b:{id:'pal_ground',n:'Holy Ground',cd:10,role:'Group Damage',fx:'pal_ground',d:'Scorch every foe around you with holy light for 2.2x damage.'}},
-    r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Spread',d:'Killing your Sworn target sets every enemy near it alight.'}},
+    r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Spread',d:"Defeating the first enemy you hit in a fight spreads fire to nearby enemies."}},
     r6:{kind:'skill',slot:2, a:{id:'pal_guard',n:'Guard Up',cd:14,role:'Defense',fx:'pal_guard',d:'Raise a holy shield that absorbs up to 50% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.'}, b:{id:'pal_burst',n:'Light Burst',cd:9,role:'Control',fx:'pal_burst',d:'A radiant burst: damage and slow every nearby foe.'}},
-    r7:{kind:'passive', a:{id:'pal_bounce',n:'Bounce Back',role:'Defense',d:'Damage you block is returned to whoever dealt it.'}, b:{id:'pal_heal',n:'Healing Light',role:'Sustain',d:'Every skill you cast heals the ally nearest you, or you if alone.'}},
-    r8:{kind:'skill',slot:3, a:{id:'pal_laststand',n:'Last Stand',cd:24,role:'Defense',fx:'pal_laststand',d:'For 4s take almost no damage and heal each second.'}, b:{id:'pal_sky',n:'Sky Hammer',cd:22,role:'Burst',fx:'pal_sky',d:'Call a pillar of light down: heavy damage and knockback all around you.'}},
-    r9:{kind:'passive', a:{id:'pal_will',n:"Guardian's Will",role:'Defense',d:'Take 15% less damage while below half HP.'}, b:{id:'pal_blessed',n:'Blessed Blade',role:'Reach',d:'Your oath can be sworn at any range — mark without closing.'}}
+    r7:{kind:'passive', a:{id:'pal_bounce',n:'Bounce Back',role:'Defense',d:'Damage you block is returned to whoever dealt it.'}, b:{id:'pal_heal',n:'Healing Light',role:'Sustain',d:'Casting a skill restores 4% of your maximum health.'}},
+    r8:{kind:'skill',slot:3, a:{id:'pal_laststand',n:'Last Stand',cd:24,role:'Defense',fx:'pal_laststand',d:"Brace for 4 seconds, reducing incoming damage and reflecting nearby hits. Immediately restore 15% of your maximum health."}, b:{id:'pal_sky',n:'Sky Hammer',cd:22,role:'Burst',fx:'pal_sky',d:'Call a pillar of light down: heavy damage and knockback all around you.'}},
+    r9:{kind:'passive', a:{id:'pal_will',n:"Guardian's Will",role:'Defense',d:'Take 15% less damage while below half HP.'}, b:{id:'pal_blessed',n:'Blessed Blade',role:'Reach',d:"Your basic attack can select your first target before it hits, immediately granting your protection from other enemies."}}
   },
   necromancer:{ disp:'Necromancer', icon:classIcon('necromancer'),
-    innate:{name:"Death's Embrace", d:'Magic weapons deal +8% damage, and every kill restores 3 mana and leaves a corpse you can raise.'},
+    innate:{name:"Death's Embrace", d:"Kills restore 3 mana and leave bodies for Raise the Dead. Every fifth basic hit also creates a body, even if the enemy survives."},
     cap:{name:'Lich', d:'+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once.'},
     r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'necro_bolt',n:'Plague Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'necro_bolt',d:'Rapid-fire bolts of necrotic plague (~2s, softer each).'}},
-    r3:{kind:'passive', a:{id:'necro_legion',n:'Bone Legion',role:'Minions',d:'Summon one extra skeleton and your minions hit 20% harder.'}, b:{id:'necro_wither',n:'Withering',role:'Decay',d:'Enemies standing on a corpse cannot heal and rot slowly.'}},
+    r3:{kind:'passive', a:{id:'necro_legion',n:'Bone Legion',role:'Minions',d:'Summon one extra skeleton and your minions hit 20% harder.'}, b:{id:'necro_wither',n:"Withering Magic",role:'Decay',d:"Your own attacks and skills deal 12% more damage."}},
     r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Raise your most recently slain nearby enemy as an undead ally.'}, b:{id:'necro_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'necro_nova',d:'Detonate a burst of bone shards that slows nearby enemies.'}},
-    r5:{kind:'passive', a:{id:'necro_bond',n:'Grave Bond',role:'Sustain',d:'Each hit your minions land heals you a little.'}, b:{id:'necro_plague',n:'Plague',role:'Spread',d:'An enemy that dies while rotting infects everything near it.'}},
+    r5:{kind:'passive', a:{id:'necro_bond',n:'Grave Bond',role:'Sustain',d:"Each minion attack restores 0.6% of your maximum health (at least 1 HP)."}, b:{id:'necro_plague',n:'Plague',role:'Spread',d:"Defeating an enemy poisons nearby enemies. The poison refreshes instead of stacking without limit."}},
     r6:{kind:'skill',slot:2, a:{id:'necro_wall',n:'Bone Wall',cd:14,role:'Defense',fx:'necro_wall',d:'Raise a shield of bone that absorbs up to 35% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.'}, b:{id:'necro_grip',n:'Death Grip',cd:13,role:'Control',fx:'necro_grip',d:'A skeletal grip implodes enemies inward and deals damage.'}},
-    r7:{kind:'passive', a:{id:'necro_undying',n:'Undying',role:'Defense',d:'A killing blow instead consumes a minion, if you have one.'}, b:{id:'necro_harvest',n:'Soul Harvest',role:'Sustain',d:'Kills restore an extra 8% of your max mana.'}},
+    r7:{kind:'passive', a:{id:'necro_undying',n:'Undying',role:'Defense',d:"Take 12% less damage. A lethal hit sacrifices one of your minions to save you, if one is available."}, b:{id:'necro_harvest',n:'Soul Harvest',role:'Sustain',d:'Kills restore an extra 8% of your max mana.'}},
     r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance.'}, b:{id:'necro_storm',n:'Death Storm',cd:22,role:'Group Damage',fx:'necro_storm',d:'A storm of decay rages around you for 4s.'}},
-    r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:'Keep more minions at once and they hit even harder.'}, b:{id:'necro_pest',n:'Pestilence',role:'Swarm',d:'Your minions leave a rotting trail wherever they walk.'}}
+    r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:"Keep 6 more minions. Newly summoned minions deal 25% more damage."}, b:{id:'necro_pest',n:'Pestilence',role:'Swarm',d:"Your own attacks and skills deal 20% more damage to poisoned enemies."}}
   },
   ninja:{ disp:'Ninja', icon:classIcon('ninja'),
-    innate:{name:'Killer Instinct', d:'Daggers and swords deal +8% damage and you move 8% faster. You can EVADE attacks entirely (they MISS) — and every dodge stacks +9% damage (up to 5), fading if you stop dodging.'},
+    innate:{name:'Killer Instinct', d:"Stand still for 1 second to prepare a basic hit that teleports behind its target and deals 50% extra damage. Each automatic evasion adds 9% damage, up to 45%, for 5 seconds; another evasion refreshes it."},
     cap:{name:'Phantom', d:'+12% damage, +10% attack speed, take 12% less damage, and evade even more often.'},
     r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'nin_strike',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_barrage',n:'Shuriken Barrage',cd:8,role:'Group Damage',fx:'nin_barrage',d:'Fire three back-to-back shotgun bursts of stars — shreds packs of enemies.'}},
-    r3:{kind:'passive', a:{id:'nin_swift',n:'Swift',role:'Speed',d:'Unseen rearms in half the time — strike from behind twice as often.'}, b:{id:'nin_deadly',n:'Deadly Precision',role:'Execution',d:'An Unseen strike on an enemy below a third HP kills it outright.'}},
+    r3:{kind:'passive', a:{id:'nin_swift',n:'Swift',role:'Speed',d:"Stand still for only 0.5 seconds instead of 1 to prepare your next basic hit: teleport behind the target and deal 50% extra damage."}, b:{id:'nin_deadly',n:'Deadly Precision',role:'Execution',d:"After standing still for 1 second, your next basic hit finishes a normal enemy below one-third health. Bosses and players take 25% extra damage instead."}},
     r4:{kind:'skill',slot:1, a:{id:'nin_step',n:'Shadow Step',cd:8,role:'Movement',fx:'nin_step',d:'Dash through shadow and become briefly untouchable.'}, b:{id:'nin_smoke',n:'Smoke Bomb',cd:14,role:'Escape',fx:'nin_smoke',d:'Vanish in smoke (briefly invulnerable) and slow nearby foes.'}},
-    r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'+12% chance to dodge attacks entirely (MISS), and take 10% less damage. Each dodge also stacks your damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Chain',d:'Killing with Unseen instantly rearms it — chain from body to body.'}},
+    r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:"Gain 12 percentage points of automatic evasion and take 10% less damage."}, b:{id:'nin_combo',n:'Combo Edge',role:'Chain',d:"A kill with your prepared teleporting basic hit immediately prepares another, without needing to stand still."}},
     r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'nin_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_pierce',n:'Piercing Star',cd:9,role:'Single Target',fx:'nin_pierce',d:'Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses.'}},
     r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'+8% dodge chance and take 10% less damage — slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
-    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Vanish',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
-    r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
+    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:"Vanish",cd:22,role:'Group Damage',fx:'nin_storm',d:"Become invulnerable for 4 seconds and prepare your next teleporting basic hit immediately."}},
+    r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:"Take 18% less damage while below half health."}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
   },
   berserker:{ disp:'Berserker', icon:classIcon('berserker'),
-    innate:{name:'Bloodrage', d:'Deal +8% damage, and +15% more while below half HP.'},
+    innate:{name:'Bloodrage', d:"Basic damage increases as health falls, up to 85% extra near zero health. Below half health, all damage increases another 15%."},
     cap:{name:'Undying Rage', d:'+12% damage, +10% attack speed, and +8% lifesteal.'},
-    r2:{kind:'skill',slot:0, a:{id:'bsk_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'bsk_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'bsk_bash',n:'Headbutt',cd:6,role:'Control',fx:'bsk_bash',d:'Drive forward for 1.7x damage and stun.'}},
-    r3:{kind:'passive', a:{id:'bsk_heavy',n:'Heavy Hands',role:'Commitment',d:'You cannot dodge — but nothing can knock you back or stagger you.'}, b:{id:'bsk_reckless',n:'Reckless',role:'Sacrifice',d:'Every swing costs you a sliver of health, hit or miss.'}},
+    r2:{kind:'skill',slot:0, a:{id:'bsk_cleave',n:"Blood Sweep",cd:5,role:'Group Damage',fx:'bsk_cleave',d:"Spend 10% of your maximum health to sweep nearby enemies for 2.6 times weapon damage. Cannot be used if the cost would leave you below 2 HP."}, b:{id:'bsk_bash',n:"Headbutt",cd:6,role:'Control',fx:'bsk_bash',d:"Strike nearby enemies for 2.2 times weapon damage and stun them for 2.2 seconds. On a hit, spend 6% maximum health and pause for 0.5 seconds."}},
+    r3:{kind:'passive', a:{id:'bsk_heavy',n:"Steady Fighter",role:'Commitment',d:"Take 12% less damage and resist enemy knockback. You can still dodge."}, b:{id:'bsk_reckless',n:"Growing Rage",role:'Sacrifice',d:"Each kill grants 4% more damage, up to 20%. The bonus ends after 6 seconds without a kill."}},
     r4:{kind:'skill',slot:1, a:{id:'bsk_charge',n:'Charge',cd:9,role:'Movement',fx:'bsk_charge',d:'Rush forward, damaging and stunning in your path.'}, b:{id:'bsk_stomp',n:'Shockwave',cd:10,role:'Control',fx:'bsk_stomp',d:'Slam the ground for damage and heavy knockback.'}},
-    r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:'Damage that would drop you below 1 HP leaves you at 1 instead, once per fight.'}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:'Kills heal you — but only while you are below half health.'}},
-    r6:{kind:'skill',slot:2, a:{id:'bsk_whirl',n:'Whirlwind',cd:12,role:'Group Damage',fx:'bsk_whirl',d:'Spin, cutting everything around you for 2.2x.'}, b:{id:'bsk_execute',n:'Execute',cd:14,role:'Finisher',fx:'bsk_execute',d:'A brutal strike that finishes low-HP foes.'}},
-    r7:{kind:'passive', a:{id:'bsk_rage',n:'Rage',role:'Fury',d:'Below a quarter health you cannot be healed, and your damage doubles.'}, b:{id:'bsk_frenzy',n:'Frenzy',role:'Speed',d:'Your attack speed rises as your health falls, to double at a sliver.'}},
+    r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:"Survive a lethal hit at 1 HP. Rearms after 5 seconds without taking damage."}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:"Each kill restores 4% of your maximum health."}},
+    r6:{kind:'skill',slot:2, a:{id:'bsk_whirl',n:"Whirlwind",cd:12,role:'Group Damage',fx:'bsk_whirl',d:"Sweep all nearby enemies for 2.2 times weapon damage."}, b:{id:'bsk_execute',n:'Execute',cd:14,role:'Finisher',fx:'bsk_execute',d:'A brutal strike that finishes low-HP foes.'}},
+    r7:{kind:'passive', a:{id:'bsk_rage',n:'Rage',role:'Fury',d:"Basic attacks deal 50% more damage while below half health. Healing still works."}, b:{id:'bsk_frenzy',n:'Frenzy',role:'Speed',d:"Attack faster as health falls, up to 50% faster near zero health."}},
     r8:{kind:'skill',slot:3, a:{id:'bsk_berserk',n:'Berserk',cd:24,role:'Burst',fx:'bsk_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'bsk_guard',n:'Bloodguard',cd:14,role:'Defense',fx:'bsk_guard',d:'Raise a guard: heavy damage reduction and pull foes in.'}},
-    r9:{kind:'passive', a:{id:'bsk_tough',n:'Unbreakable',role:'Defense',d:'While below half health you cannot be stunned, slowed or feared.'}, b:{id:'bsk_brutal',n:'Brutal',role:'Execution',d:'Enemies below a quarter health die to any hit you land.'}}
+    r9:{kind:'passive', a:{id:'bsk_tough',n:'Unbreakable',role:'Defense',d:"Take 20% less damage while below half health."}, b:{id:'bsk_brutal',n:'Brutal',role:'Execution',d:"Basic hits finish normal enemies below one-quarter health. Bosses and players take 25% extra damage below that threshold."}}
   },
   pirate:{ disp:'Pirate', icon:classIcon('pirate'),
-    innate:{name:'Plunder', d:'Deal +8% damage and find more gold.'},
+    innate:{name:'Plunder', d:"Without an equipped weapon, fire your built-in pistol with basic attacks and swing your saber with a charged attack. Their damage grows with class rank and player level."},
     cap:{name:'Dread Captain', d:'+12% damage and +10% move speed.'},
     r2:{kind:'skill',slot:0, a:{id:'pir_pierce',n:'Aimed Shot',cd:2,am:0.4,role:'Rapid · Focused',fx:'pir_pierce',d:'Rapid piercing pistol shots (~2s, softer each) — a gunslinger\'s rhythm.'}, b:{id:'pir_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'pir_volley',d:'A spread of shots across your front.'}},
-    r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Powder',d:'The pistol pierces every enemy in a line.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Reload',d:'Opening a chest reloads your pistol.'}},
+    r3:{kind:'passive', a:{id:'pir_deadly',n:"Dead Aim",role:'Powder',d:"Basic attacks deal 15% more damage, including your built-in pistol."}, b:{id:'pir_swift',n:"Quick Hands",role:'Reload',d:"Attack 15% faster with any compatible weapon, including your built-in pistol."}},
     r4:{kind:'skill',slot:1, a:{id:'pir_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'pir_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'pir_tumble',n:'Roll',cd:8,role:'Movement',fx:'pir_tumble',d:'Roll back with a parting shot and snare.'}},
-    r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Footing',d:'You cannot be knocked off ledges or moving platforms.'}, b:{id:'pir_swagger',n:'Swagger',role:'Nerve',d:'While your pistol is loaded you move noticeably faster.'}},
+    r5:{kind:'passive', a:{id:'pir_tough',n:"Sea Legs",role:'Footing',d:"Take 12% less damage."}, b:{id:'pir_swagger',n:"Swagger",role:'Nerve',d:"Move 12% faster, with any compatible weapon."}},
     r6:{kind:'skill',slot:2, a:{id:'pir_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'pir_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'pir_goldrush',n:'Gold Rush',cd:20,role:'Gold Farming',fx:'pir_goldrush',d:'For 12s, every kill drops gold straight into your purse — and a killstreak stacks the payout higher and higher. The pirate\'s farming tool.'}},
-    r7:{kind:'passive', a:{id:'pir_evasive',n:'Slippery',role:'Escape',d:'Firing the pistol pushes you back out of melee range.'}, b:{id:'pir_luck',n:'Lucky',role:'Fortune',d:'A pistol kill sometimes drops gold on the spot.'}},
+    r7:{kind:'passive', a:{id:'pir_evasive',n:"Slippery",role:'Escape',d:"Dodge cooldown is 20% shorter."}, b:{id:'pir_luck',n:"Lucky",role:'Fortune',d:"Earn 25% more gold from defeated enemies and other gold rewards. Selling items is unchanged."}},
     r8:{kind:'skill',slot:3, a:{id:'pir_deathmark',n:'Cannonade',cd:24,role:'Farming',fx:'pir_deathmark',d:'Mark foes — they explode on death.'}, b:{id:'pir_spike',n:'Powder Keg',cd:18,role:'Control',fx:'pir_spike',d:'Drop a trap that damages and snares.'}},
-    r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Steel',d:'Your sword hits harder while the pistol is spent.'}, b:{id:'pir_greed',n:'Greed',role:'Plunder',d:'Every 500 gold you carry sharpens your blade a little further.'}}
+    r9:{kind:'passive', a:{id:'pir_brutal',n:"Cutthroat",role:'Steel',d:"Deal 20% more damage to enemies below half health."}, b:{id:'pir_greed',n:"Greed",role:'Plunder',d:"Deal 12% more damage with any compatible weapon. You do not need to hoard gold."}}
   },
   chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
-    innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage, cooldowns recover 5% faster, and each kill loops a little mana back.'},
+    innate:{name:'Time Attunement', d:"Magic weapons deal 8% more damage; skills have 5% shorter cooldowns; kills restore 4 mana. Once per area, a lethal hit rewinds you to your position and health from 3 seconds earlier."},
     cap:{name:'Timelord', d:'+12% damage and +10% cooldown reduction.'},
     r2:{kind:'skill',slot:0, a:{id:'chr_bolt',n:'Time Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'chr_bolt',d:'Rapid-fire bolts of temporal energy (~2s, softer each).'}, b:{id:'chr_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'chr_beam',d:'A piercing lance through every foe.'}},
-    r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Echo',d:'Rewinding also restores the mana you had three seconds ago.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'Rewinding resets every skill cooldown.'}},
-    r4:{kind:'skill',slot:1, a:{id:'chr_nova',n:'Slow Field',cd:8,role:'Control',fx:'chr_nova',d:'A burst that slows nearby foes.'}, b:{id:'chr_blink',n:'Rewind',cd:8,role:'Movement',fx:'chr_blink',d:'Blink through time, briefly untouchable.'}},
-    r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:'For three seconds after a Rewind you cannot be harmed.'}, b:{id:'chr_glass',n:'Focus',role:'Recall',d:'You may Rewind twice per area instead of once.'}},
+    r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Echo',d:"When a lethal hit triggers your automatic rewind, also restore the mana you had 3 seconds earlier, if it was higher."}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:"Skills have 10% shorter cooldowns. Your automatic death-saving rewind also refreshes every skill."}},
+    r4:{kind:'skill',slot:1, a:{id:'chr_nova',n:'Slow Field',cd:8,role:'Control',fx:'chr_nova',d:'A burst that slows nearby foes.'}, b:{id:'chr_blink',n:"Time Step",cd:8,role:'Movement',fx:'chr_blink',d:"Teleport forward with brief invulnerability. Your automatic death-saving rewind is a separate class ability."}},
+    r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:"Take 12% less damage. After your automatic death-saving rewind, become invulnerable for 3 seconds instead of 1.2."}, b:{id:'chr_glass',n:"Second Chance",role:'Recall',d:"Your automatic rewind can save you from death twice per area instead of once."}},
     r6:{kind:'skill',slot:2, a:{id:'chr_gravity',n:'Time Warp',cd:13,role:'Control',fx:'chr_gravity',d:'Implode foes inward and deal damage.'}, b:{id:'chr_barrier',n:'Aegis',cd:14,role:'Defense',fx:'chr_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
-    r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Stillness',d:'Standing still rewinds your cooldowns rather than merely pausing them.'}, b:{id:'chr_slow',n:'Entropy',role:'Decay',d:'Enemies you slow keep aging — they weaken the longer they are held.'}},
-    r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'chr_tempest',d:'A storm of decaying time around you.'}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
-    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Repeat',d:'Your last skill fires again, by itself, three seconds later.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Control',d:'A frozen enemy shatters instantly if you strike it from behind.'}}
+    r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Stillness',d:"All skills have 10% shorter cooldowns."}, b:{id:'chr_slow',n:"Weak Point",role:'Decay',d:"Deal 20% more damage to slowed enemies."}},
+    r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:"Stop Time",cd:22,role:'Group Damage',fx:'chr_tempest',d:"Stop enemies for 3 seconds. In PvP, slow opponents by 25% for up to 1.5 seconds instead of freezing their controls."}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
+    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Repeat',d:'Your last skill fires again, by itself, three seconds later.'}, b:{id:'chr_freeze',n:"Deep Chill",role:'Control',d:"Your skill hits slow enemies for 1.5 seconds. Bosses may resist slowing."}}
   },
   monk:{ disp:'Monk', icon:classIcon('monk'),
-    innate:{name:'Focus', d:'Fists are your true weapon: +15% damage and faster strikes bare-handed. Every hit you land builds a Focus stack (up to 5) — each adds +6% damage — fading if you stop attacking.'},
-    cap:{name:'Grandmaster', d:'+12% damage, +10% attack speed, and your Focus stacks hit harder and linger longer.'},
-    r2:{kind:'skill',slot:0, a:{id:'mon_flurry',n:'Flurry',cd:2,am:0.42,role:'Rapid · Focused',fx:'mon_flurry',d:'A blur of rapid strikes (~2s, softer each) — builds Focus fast.'}, b:{id:'mon_palm',n:'Palm Strike',cd:6,role:'Burst',fx:'mon_palm',d:'Dash in with a heavy palm that staggers the first foe.'}},
-    r3:{kind:'passive', a:{id:'mon_iron',n:'Iron Body',role:'Defense',d:'While your dodge is ready, you cannot be stunned or knocked back.'}, b:{id:'mon_fire',n:'Inner Fire',role:'Flow',d:'Dodging refunds mana instead of spending your rhythm.'}},
+    innate:{name:'Focus', d:"Fists deal 15% more damage and attack 15% faster. Each hit builds 6% extra damage, up to 30%, ending after 4 seconds without a hit. Basic hits also shorten your remaining dodge cooldown by 0.35 seconds."},
+    cap:{name:'Grandmaster', d:'+12% damage, +10% attack speed, and your temporary damage bonus can build to 42% instead of 30% (56% with Focused Mind).'},
+    r2:{kind:'skill',slot:0, a:{id:'mon_flurry',n:'Flurry',cd:2,am:0.42,role:'Rapid · Focused',fx:'mon_flurry',d:"Deliver rapid punches. Each connecting hit builds your temporary damage bonus."}, b:{id:'mon_palm',n:'Palm Strike',cd:6,role:'Burst',fx:'mon_palm',d:'Dash in with a heavy palm that staggers the first foe.'}},
+    r3:{kind:'passive', a:{id:'mon_iron',n:'Iron Body',role:'Defense',d:"Take 12% less damage while your dodge is ready."}, b:{id:'mon_fire',n:'Inner Fire',role:'Flow',d:"Dodging restores 5 mana."}},
     r4:{kind:'skill',slot:1, a:{id:'mon_deflect',n:'Deflect',cd:10,role:'Defense',fx:'mon_deflect',d:'A parry stance: for a moment take almost nothing and throw blows straight back.'}, b:{id:'mon_roll',n:'Roll',cd:8,role:'Movement',fx:'mon_roll',d:'Roll aside with brief i-frames and a parting strike.'}},
-    r5:{kind:'passive', a:{id:'mon_flow',n:'Flow',role:'Rhythm',d:'Each hit shortens your dodge twice as much.'}, b:{id:'mon_focused',n:'Focused Mind',role:'Damage',d:'Focus stacks build faster and your Focus damage is stronger.'}},
+    r5:{kind:'passive', a:{id:'mon_flow',n:'Flow',role:'Rhythm',d:"Each basic hit removes 0.7 seconds from your remaining dodge cooldown instead of 0.35."}, b:{id:'mon_focused',n:'Focused Mind',role:'Damage',d:"Each hit builds 8% extra damage instead of 6%, up to 40% (56% at rank 10). The bonus ends after 5 seconds without a hit instead of 4."}},
     r6:{kind:'skill',slot:2, a:{id:'mon_whirl',n:'Whirl Kick',cd:12,role:'Group Damage',fx:'mon_whirl',d:'A spinning kick that strikes everything around you.'}, b:{id:'mon_stun',n:'Stunning Palm',cd:12,role:'Control',fx:'mon_stun',d:'A shockwave palm that dazes and slows nearby foes.'}},
-    r7:{kind:'passive', a:{id:'mon_med',n:'Meditation',role:'Sustain',d:'Slowly heal while you fight — a calm center.'}, b:{id:'mon_killer',n:'Killer Focus',role:'Burst',d:'The first strike after a dodge hits for triple.'}},
-    r8:{kind:'skill',slot:3, a:{id:'mon_thousand',n:'Thousand Fists',cd:24,role:'Burst',fx:'mon_thousand',d:'A blinding assault: +35% damage and attack speed for 6s.'}, b:{id:'mon_dragon',n:'Dragon Kick',cd:20,role:'Finisher',fx:'mon_dragon',d:'A soaring kick that erupts on impact, blasting everything around.'}},
-    r9:{kind:'passive', a:{id:'mon_still',n:'Still Water',role:'Calm',d:'Standing still for a moment restores health, and quickly.'}, b:{id:'mon_master',n:'Master Striker',role:'Chain',d:'Every fourth unbroken strike hits everything around you.'}}
+    r7:{kind:'passive', a:{id:'mon_med',n:'Meditation',role:'Sustain',d:"Restore 1.2% of your maximum health each second."}, b:{id:'mon_killer',n:'Killer Focus',role:'Burst',d:'The first strike after a dodge hits for triple.'}},
+    r8:{kind:'skill',slot:3, a:{id:'mon_thousand',n:"Stillness",cd:24,role:'Burst',fx:'mon_thousand',d:"For 6 seconds, standing still reflects double incoming damage back to attackers. You still take damage."}, b:{id:'mon_dragon',n:'Dragon Kick',cd:20,role:'Finisher',fx:'mon_dragon',d:'A soaring kick that erupts on impact, blasting everything around.'}},
+    r9:{kind:'passive', a:{id:'mon_still',n:'Still Water',role:'Calm',d:"After standing still for 1.5 seconds, restore 2% of your maximum health each second until you move."}, b:{id:'mon_master',n:'Master Striker',role:'Chain',d:"Every fourth hit within your temporary damage-bonus window also strikes nearby enemies. Waiting more than 4 seconds between hits breaks the chain (5 with Focused Mind)."}}
   },
   stormcaller:{ disp:'Stormcaller', icon:classIcon('stormcaller'),
-    innate:{name:'Static Charge', d:'Magic weapons deal +8% damage. Every hit you land builds a Static stack (up to 5) — each one makes you strike and move faster — fading if you stop attacking. The longer you fight, the faster the storm.'},
+    innate:{name:'Static Charge', d:"Basic hits send lightning to a nearby enemy for 34% damage. Each hit adds 3% attack speed and 2.5% move speed, up to 15% and 12.5%; bonuses end after 4 seconds without a hit."},
     cap:{name:'Storm Lord', d:'+12% damage, +10% cooldown reduction, and your lightning arcs to more enemies.'},
-    r2:{kind:'skill',slot:0, a:{id:'st_bolt',n:'Chain Bolt',cd:2,am:0.4,role:'Rapid · Chain',fx:'st_bolt',d:'Rapid bolts that leap to a nearby foe (~2s, softer each) — builds Static fast.'}, b:{id:'st_lance',n:'Lightning Lance',cd:6,role:'Piercing Damage',fx:'st_lance',d:'A piercing bolt through every foe in a line.'}},
-    r3:{kind:'passive', a:{id:'st_conductor',n:'Conductor',role:'Conduct',d:'Wet, frozen or shocked enemies chain to everything near them.'}, b:{id:'st_overcharge',n:'Overcharge',role:'Chain',d:'Your lightning arcs to a third enemy as well as a second.'}},
+    r2:{kind:'skill',slot:0, a:{id:'st_bolt',n:'Chain Bolt',cd:2,am:0.4,role:'Rapid · Chain',fx:'st_bolt',d:"Fire a quick lightning bolt with a short cooldown."}, b:{id:'st_lance',n:'Lightning Lance',cd:6,role:'Piercing Damage',fx:'st_lance',d:'A piercing bolt through every foe in a line.'}},
+    r3:{kind:'passive', a:{id:'st_conductor',n:'Conductor',role:'Conduct',d:"Lightning from basic hits deals 50% damage to the nearby enemy instead of 34%."}, b:{id:'st_overcharge',n:'Overcharge',role:'Chain',d:'Your lightning arcs to a third enemy as well as a second.'}},
     r4:{kind:'skill',slot:1, a:{id:'st_step',n:'Thunder Step',cd:8,role:'Movement',fx:'st_step',d:'Blink in a crack of lightning, briefly untouchable.'}, b:{id:'st_nova',n:'Static Field',cd:8,role:'Control',fx:'st_nova',d:'A shock burst that slows nearby foes.'}},
-    r5:{kind:'passive', a:{id:'st_momentum',n:'Momentum',role:'Speed',d:'Static stacks give even more attack and move speed.'}, b:{id:'st_ward',n:'Storm Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP.'}},
+    r5:{kind:'passive', a:{id:'st_momentum',n:"Gathering Speed",role:'Speed',d:"Each hit grants 4.5% attack speed and 4% move speed, up to 22.5% and 20%. Bonuses end after 4 seconds without a hit."}, b:{id:'st_ward',n:'Storm Ward',role:'Defense',d:"Casting a skill grants a shield worth 4% of your maximum health for at least 3 seconds. Repeated casts refresh it, not add shields."}},
     r6:{kind:'skill',slot:2, a:{id:'st_orb',n:'Ball Lightning',cd:13,role:'Control',fx:'st_orb',d:'A crackling orb that pulls foes in and zaps them.'}, b:{id:'st_barrier',n:'Storm Barrier',cd:14,role:'Defense',fx:'st_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
-    r7:{kind:'passive', a:{id:'st_charged',n:'Charged',role:'Reach',d:'Your chain jumps twice as far between targets.'}, b:{id:'st_amped',n:'Amped',role:'Power',d:'Each jump in a chain hits harder than the last, not weaker.'}},
-    r8:{kind:'skill',slot:3, a:{id:'st_storm',n:'Thunderstorm',cd:22,role:'Group Damage',fx:'st_storm',d:'A storm of lightning rages around you for 4s.'}, b:{id:'st_overload',n:'Chain Reaction',cd:24,role:'Burst',fx:'st_overload',d:'A massive electric explosion around your target.'}},
-    r9:{kind:'passive', a:{id:'st_master',n:'Static Master',role:'Control',d:'A chained enemy is briefly stunned by the jolt.'}, b:{id:'st_galvanize',n:'Galvanize',role:'Return',d:'Chains that find no second target strike the first one twice.'}}
+    r7:{kind:'passive', a:{id:'st_charged',n:'Charged',role:'Reach',d:'Your chain jumps twice as far between targets.'}, b:{id:'st_amped',n:'Amped',role:'Power',d:"Lightning from basic hits deals 50% more damage to secondary enemies."}},
+    r8:{kind:'skill',slot:3, a:{id:'st_storm',n:"Linked Lightning",cd:22,role:'Group Damage',fx:'st_storm',d:"Link nearby enemies for 8 seconds. Hitting one also damages the others."}, b:{id:'st_overload',n:'Chain Reaction',cd:24,role:'Burst',fx:'st_overload',d:'A massive electric explosion around your target.'}},
+    r9:{kind:'passive', a:{id:'st_master',n:"Stunning Lightning",role:'Control',d:"Lightning from basic hits briefly stuns secondary enemies for 0.4 seconds. Bosses and players are excluded."}, b:{id:'st_galvanize',n:'Galvanize',role:'Return',d:"When no secondary enemy is in range, lightning strikes your original target for an extra 34% damage."}}
   },
   warlock:{ disp:'Warlock', icon:classIcon('warlock'),
     innate:{name:'Dark Bargain',d:'Magic weapons deal +12% damage. Every skill sacrifices 3% max HP, but the sacrifice can never defeat you. Power always has a price.'},
     cap:{name:'Dark Ascension',d:'+12% damage. Dark Bargain costs only 1.5% max HP, and defeating a cursed foe cuts every skill cooldown by 1 second.'},
     r2:{kind:'skill',slot:0,a:{id:'war_bolt',n:'Shadow Bolt',cd:2.5,am:.62,role:'Rapid Damage',fx:'war_bolt',d:'Fire a fast void bolt that pierces one extra foe.'},b:{id:'war_lance',n:'Blood Lance',cd:6,role:'Boss Damage',fx:'war_lance',d:'Hurl a heavy crimson lance through every foe in a line.'}},
-    r3:{kind:'passive',a:{id:'war_frail',n:'Frail Power',role:'Damage',d:'+15% damage, but -10% maximum HP.'},b:{id:'war_shield',n:'Soul Shield',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP.'}},
+    r3:{kind:'passive',a:{id:'war_frail',n:"Dark Power",role:'Damage',d:"Deal 15% more damage. Maximum health is unchanged."},b:{id:'war_shield',n:'Soul Shield',role:'Defense',d:"Casting a skill grants a shield worth 4% of your maximum health for at least 3 seconds. Repeated casts refresh it, not add shields."}},
     r4:{kind:'skill',slot:1,a:{id:'war_curse',n:'Curse Circle',cd:9,role:'Control',fx:'war_curse',d:'Mark nearby foes for 7 seconds. Your damage against them is increased.'},b:{id:'war_drain',n:'Life Drain',cd:10,role:'Sustain',fx:'war_drain',d:'Rip health from the strongest nearby foe and heal yourself.'}},
     r5:{kind:'passive',a:{id:'war_deep',n:'Deep Curse',role:'Damage',d:'Deal 15% more damage to cursed enemies.'},b:{id:'war_swift',n:'Dark Step',role:'Movement',d:'Casting a skill grants +12% move speed for 2.5 seconds.'}},
     r6:{kind:'skill',slot:2,a:{id:'war_step',n:'Rift Step',cd:11,role:'Movement',fx:'war_step',d:'Blink forward and detonate shadow at your starting point and destination.'},b:{id:'war_orb',n:'Doom Orb',cd:14,role:'Group Damage',fx:'war_orb',d:'Collapse a slow void orb on your target, damaging and pulling nearby foes.'}},
-    r7:{kind:'passive',a:{id:'war_pact',n:'Blood Pact',role:'Damage',d:'Deal +18% damage while below half HP.'},b:{id:'war_safe',n:'Careful Casting',role:'Sustain',d:'Dark Bargain sacrifices 35% less health.'}},
-    r8:{kind:'skill',slot:3,a:{id:'war_storm',n:'Dark Storm',cd:23,role:'Group Damage',fx:'war_storm',d:'A moving void storm tears at nearby foes for 5 seconds.'},b:{id:'war_final',n:'Final Curse',cd:24,role:'Boss Damage',fx:'war_final',d:'Condemn the strongest nearby foe with a massive delayed shadow blast.'}},
+    r7:{kind:'passive',a:{id:'war_pact',n:'Blood Pact',role:'Damage',d:'Deal +18% damage while below half HP.'},b:{id:'war_safe',n:'Careful Casting',role:'Sustain',d:"Skills sacrifice 35% less health. Does not reduce the separate health cost of basic attacks or Blood Offering."}},
+    r8:{kind:'skill',slot:3,a:{id:'war_storm',n:"Blood Offering",cd:23,role:'Group Damage',fx:'war_storm',d:"Spend half your current health to deal that much damage to every nearby enemy. Normal skill health cost also applies."},b:{id:'war_final',n:'Final Curse',cd:24,role:'Boss Damage',fx:'war_final',d:'Condemn the strongest nearby foe with a massive delayed shadow blast.'}},
     r9:{kind:'passive',a:{id:'war_feast',n:'Soul Feast',role:'Sustain',d:'Defeating a cursed foe restores 5% max HP and 6 mana.'},b:{id:'war_last',n:'Last Breath',role:'Defense',d:'Below 30% HP, gain 15% damage reduction.'}}
   },
   skylancer:{ disp:'Skylancer', icon:classIcon('skylancer'),
     innate:{name:'Born to Fly',d:'Ranged weapons deal +10% damage. While airborne, you fall 20% slower and deal 10% more damage.'},
     cap:{name:'Sky Master',d:'+12% damage. Using a skill in the air renews one air jump and briefly holds you aloft.'},
     r2:{kind:'skill',slot:0,a:{id:'sky_rise',n:'Rising Spear',cd:7,role:'Movement',fx:'sky_rise',d:'Sweep nearby enemies and launch high into the air.'},b:{id:'sky_gale',n:'Gale Shot',cd:5,role:'Rapid Damage',fx:'sky_gale',d:'Fire a fast wind spear that grows stronger while airborne.'}},
-    r3:{kind:'passive',a:{id:'sky_high',n:'High Ground',role:'Height',d:'The higher you are when you strike, the harder you land it.'},b:{id:'sky_soft',n:'Soft Landing',role:'Defense',d:'Take 15% less damage in the air and for 2 seconds after landing.'}},
+    r3:{kind:'passive',a:{id:'sky_high',n:'High Ground',role:'Height',d:"Deal 15% more damage while airborne."},b:{id:'sky_soft',n:'Soft Landing',role:'Defense',d:'Take 15% less damage in the air and for 2 seconds after landing.'}},
     r4:{kind:'skill',slot:1,a:{id:'sky_dive',n:'Dive Strike',cd:10,role:'Burst',fx:'sky_dive',d:'Dive forward. Your next landing damages nearby enemies.'},b:{id:'sky_lift',n:'Wind Lift',cd:12,role:'Control',fx:'sky_lift',d:'Create a rising wind that damages foes and launches you upward.'}},
     r5:{kind:'passive',a:{id:'sky_tail',n:'Tailwind',role:'Movement',d:'Landing grants +15% move speed for 3 seconds.'},b:{id:'sky_guard',n:'Cloud Guard',role:'Defense',d:'Using a skill in the air grants a shield equal to 6% max HP.'}},
     r6:{kind:'skill',slot:2,a:{id:'sky_dash',n:'Sky Dash',cd:11,role:'Movement',fx:'sky_dash',d:'Dash through the air, damaging every enemy in your path.'},b:{id:'sky_rain',n:'Spear Rain',cd:15,role:'Group Damage',fx:'sky_rain',d:'Call down five wind spears around your target.'}},
-    r7:{kind:'passive',a:{id:'sky_float',n:'Long Flight',role:'Movement',d:'Fall 25% slower and gain more control in the air.'},b:{id:'sky_eye',n:'Hunter’s Eye',role:'Dive',d:'Attacking while falling drives you down onto the target.'}},
-    r8:{kind:'skill',slot:3,a:{id:'sky_crash',n:'Thunder Dive',cd:22,role:'Group Damage',fx:'sky_crash',d:'Drop like lightning. Your next landing creates a large shockwave.'},b:{id:'sky_cyclone',n:'Updraft',cd:21,role:'Air Control',fx:'sky_cyclone',d:'Spin in place and fire a ring of wind blades.'}},
-    r9:{kind:'passive',a:{id:'sky_reset',n:'Second Wind',role:'Movement',d:'Defeating an enemy in the air renews your air jump and trims dodge cooldown.'},b:{id:'sky_armor',n:'Sky Armor',role:'Defense',d:'Nothing can hit you in the first moment after a jump.'}}
+    r7:{kind:'passive',a:{id:'sky_float',n:'Long Flight',role:'Movement',d:"Fall 45% slower instead of 20% slower."},b:{id:'sky_eye',n:'Hunter’s Eye',role:'Dive',d:'Attacking while falling drives you down onto the target.'}},
+    r8:{kind:'skill',slot:3,a:{id:'sky_crash',n:'Thunder Dive',cd:22,role:'Group Damage',fx:'sky_crash',d:'Drop like lightning. Your next landing creates a large shockwave.'},b:{id:'sky_cyclone',n:'Updraft',cd:21,role:'Air Control',fx:'sky_cyclone',d:"Lift nearby normal enemies for 3.2 seconds and strike with a ring of wind blades."}},
+    r9:{kind:'passive',a:{id:'sky_reset',n:'Second Wind',role:'Movement',d:"An airborne kill restores one air jump and removes 1.5 seconds from your dodge cooldown."},b:{id:'sky_armor',n:'Sky Armor',role:'Defense',d:"Become invulnerable for 0.18 seconds after jumping."}}
   },
   bladedancer:{ disp:'Bladedancer', icon:classIcon('bladedancer'),
-    innate:{name:'Perfect Timing',d:'Blade weapons deal +10% damage. A successful parry stores one Riposte charge for your counterattacks.'},
+    innate:{name:'Perfect Timing',d:"Blade weapons deal 18% more damage. Parrying blocks a hit and empowers your next Riposte skill; only one empowered use can be saved at a time."},
     cap:{name:'Endless Dance',d:'+12% damage. A successful parry refreshes your second skill and grants one second of speed and damage protection.'},
     r2:{kind:'skill',slot:0,a:{id:'bd_counter',n:'Counter Stance',cd:8,role:'Defense',fx:'bd_counter',d:'Open a short parry window. A hit during it deals no damage and stores a Riposte.'},b:{id:'bd_twin',n:'Twin Cut',cd:5,role:'Rapid Damage',fx:'bd_twin',d:'Cut twice in a wide arc. The second cut pushes enemies back.'}},
-    r3:{kind:'passive',a:{id:'bd_sharp',n:'Sharp Counter',role:'Damage',d:'A stored Riposte deals 35% more damage.'},b:{id:'bd_feet',n:'Light Feet',role:'Footwork',d:'Dodging through an enemy parries their next attack automatically.'}},
+    r3:{kind:'passive',a:{id:'bd_sharp',n:"Sharp Counter",role:'Damage',d:"After a successful parry, Riposte hits for 4.4 times weapon damage instead of 3.3. Requires the Riposte skill."},b:{id:'bd_feet',n:'Light Feet',role:'Footwork',d:"Move 10% faster. Dodging through an enemy opens a 0.65-second parry window."}},
     r4:{kind:'skill',slot:1,a:{id:'bd_riposte',n:'Riposte',cd:9,role:'Boss Damage',fx:'bd_riposte',d:'Lunge and slash. A stored Riposte greatly increases its damage and reach.'},b:{id:'bd_step',n:'Dance Step',cd:8,role:'Movement',fx:'bd_step',d:'Dash through enemies and turn to face them for your next attack.'}},
-    r5:{kind:'passive',a:{id:'bd_patient',n:'Patient Guard',role:'Defense',d:'Parry windows last 0.2 seconds longer.'},b:{id:'bd_fast',n:'Fast Hands',role:'Tempo',d:'A parry refunds the time your attack would have taken.'}},
+    r5:{kind:'passive',a:{id:'bd_patient',n:'Patient Guard',role:'Defense',d:'Parry windows last 0.2 seconds longer.'},b:{id:'bd_fast',n:'Fast Hands',role:'Tempo',d:"Attack 12% faster. A successful parry also lets you attack again immediately."}},
     r6:{kind:'skill',slot:2,a:{id:'bd_mirror',n:'Mirror Guard',cd:14,role:'Defense',fx:'bd_mirror',d:'Open a parry window that releases a shockwave when it catches an attack.'},b:{id:'bd_cross',n:'Cross Slash',cd:12,role:'Group Damage',fx:'bd_cross',d:'Cut an X ahead of you and leave enemies briefly stunned.'}},
-    r7:{kind:'passive',a:{id:'bd_heal',n:'Healing Counter',role:'Sustain',d:'A successful parry restores 5% max HP.'},b:{id:'bd_flow',n:'Keep Moving',role:'Momentum',d:'You cannot be hit while moving between two parries.'}},
-    r8:{kind:'skill',slot:3,a:{id:'bd_steel',n:'Dance of Steel',cd:22,role:'Group Damage',fx:'bd_steel',d:'Flash between nearby enemies with a rapid series of six cuts.'},b:{id:'bd_perfect',n:'Perfect Counter',cd:24,role:'Boss Damage',fx:'bd_perfect',d:'Hold a long parry stance. Catching a hit unleashes a massive counterattack.'}},
-    r9:{kind:'passive',a:{id:'bd_last',n:'Last Step',role:'Movement',d:'Below 35% HP, dodge cooldown is 20% shorter.'},b:{id:'bd_guard',n:'Duelist Guard',role:'Defense',d:'Take 10% less damage from nearby enemies.'}}
+    r7:{kind:'passive',a:{id:'bd_heal',n:'Healing Counter',role:'Sustain',d:'A successful parry restores 5% max HP.'},b:{id:'bd_flow',n:'Keep Moving',role:'Momentum',d:"A successful parry grants 20% damage reduction for 3 seconds."}},
+    r8:{kind:'skill',slot:3,a:{id:'bd_steel',n:"Perfect Guard",cd:22,role:'Group Damage',fx:'bd_steel',d:"Prepare a parry for up to 3 seconds. The first incoming hit is blocked and prepares an empowered Riposte."},b:{id:'bd_perfect',n:'Perfect Counter',cd:24,role:'Boss Damage',fx:'bd_perfect',d:'Hold a long parry stance. Catching a hit unleashes a massive counterattack.'}},
+    r9:{kind:'passive',a:{id:'bd_last',n:'Last Step',role:'Movement',d:'Below 35% HP, dodge cooldown is 20% shorter.'},b:{id:'bd_guard',n:'Duelist Guard',role:'Defense',d:"Take 10% less damage from attackers within 6 metres."}}
   },
   beastmaster:{ disp:'Beastmaster', icon:classIcon('beastmaster'),
     innate:{name:'Bonded Companion',d:'Your companion gains +25% max HP and +15% damage or healing, and catches up quickly across climbs. Without an equipped pet, a spectral wolf answers your commands.'},
     cap:{name:'One Pack',d:'+10% damage for you and your companion. Once per level, a lethal hit leaves your companion at 1 HP, briefly untargetable and shielded. Commands empower your next basic attack; basic attacks empower your companion.'},
     r2:{kind:'skill',slot:0,a:{id:'bst_sic',n:"Sic 'Em",cd:5,role:'Control',fx:'bst_sic',d:'Your companion lunges for 1.6x damage and briefly stuns.'},b:{id:'bst_coordinated',n:'Coordinated Strike',cd:6,role:'Boss Damage',fx:'bst_coordinated',d:'You and your companion strike together; the target is marked for increased companion damage.'}},
-    r3:{kind:'passive',a:{id:'bst_heavy',n:'Heavy Collar',role:'Power',d:'+25% companion HP and +15% damage, but 10% slower attacks.'},b:{id:'bst_swift',n:'Swift Paws',role:'Speed',d:'+18% companion attack and movement speed; commands recover 12% faster.'}},
+    r3:{kind:'passive',a:{id:'bst_heavy',n:"Heavy Collar",role:'Power',d:"Your companion gains 25% more maximum health and deals 15% more damage."},b:{id:'bst_swift',n:'Swift Paws',role:'Speed',d:"Your companion moves 18% faster and attacks 18% more often. Commands have 12% shorter cooldowns."}},
     r4:{kind:'skill',slot:1,a:{id:'bst_guardian',n:'Guardian Bond',cd:12,role:'Defense',fx:'bst_guardian',d:'For 4s your companion intercepts part of incoming damage and gains a shield.'},b:{id:'bst_step',n:'Pack Step',cd:9,role:'Movement',fx:'bst_step',d:'You and your companion dash to opposite sides of the target with brief dodge protection.'}},
     r5:{kind:'passive',a:{id:'bst_vitality',n:'Shared Vitality',role:'Sustain',d:'Healing either partner also heals the other for 30% of that amount.'},b:{id:'bst_rhythm',n:"Predator's Rhythm",role:'Uptime',d:'Basic attacks reduce all Beastmaster command cooldowns by 0.25s.'}},
     r6:{kind:'skill',slot:2,a:{id:'bst_mend',n:'Mend the Pack',cd:14,role:'Sustain',fx:'bst_mend',d:'Restore 30% companion HP and 10% player HP over time.'},b:{id:'bst_roar',n:'Alpha Roar',cd:13,role:'Control',fx:'bst_roar',d:'A damaging roar slows nearby foes and turns their attention toward your companion.'}},
-    r7:{kind:'passive',a:{id:'bst_scent',n:'Blood Scent',role:'Damage',d:'+20% companion damage against marked, elite, boss, or wounded targets.'},b:{id:'bst_wildkeeper',n:'Wildkeeper',role:'Defense',d:'+20% companion healing and 12% damage reduction while it is below half HP.'}},
+    r7:{kind:'passive',a:{id:'bst_scent',n:'Blood Scent',role:'Damage',d:"Companion damage increases 20% against marked enemies, bosses, elites, and enemies below 35% health."},b:{id:'bst_wildkeeper',n:'Wildkeeper',role:'Defense',d:'+20% companion healing and 12% damage reduction while it is below half HP.'}},
     r8:{kind:'skill',slot:3,a:{id:'bst_stampede',n:'Stampede',cd:24,role:'Group Damage',fx:'bst_stampede',d:'Call a spectral herd through a wide lane, striking and knocking enemies aside.'},b:{id:'bst_apex',n:'Apex Unleashed',cd:22,role:'Companion',fx:'bst_apex',d:'For 8s your companion gains +35% damage/healing, +30% speed, and relentless pursuit.'}},
-    r9:{kind:'passive',a:{id:'bst_authority',n:"Alpha's Authority",role:'Damage',d:'Companion attacks gain occasional splash damage and commands are 15% stronger.'},b:{id:'bst_handler',n:'Master Handler',role:'Economy',d:'Commands cost 15% less mana, recover 12% faster, and briefly speed you up.'}}
+    r9:{kind:'passive',a:{id:'bst_authority',n:"Alpha's Authority",role:'Damage',d:"Commands deal 15% more damage. Companion hits have a 28% chance to splash 35% damage onto nearby enemies."},b:{id:'bst_handler',n:'Master Handler',role:'Economy',d:"Commands cost 15% less mana and have 12% shorter cooldowns. Casting one grants 10% move speed for 2 seconds."}}
   }
 };
 const PASSIVE_ART={
@@ -4619,7 +4619,7 @@ function classMaxMana(){ return Math.round(100*classManaCfg().pool); }
 function effMagPower(p,includeLevel=false){ return (p.stats.magPower||1)*(includeLevel?Math.pow(1.045,Math.max(0,(p.level||1)-1)):1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
-  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(meta.classId==='warlock'&&c2Passive('war_frail'))v*=.90; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
+  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul;  if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
 /* THE INNATE FOLD. Fourteen of sixteen innate traits opened with a flat +8-12% damage - a bonus
    every class had, which therefore distinguished none of them, while burying each class's actual
    mechanic behind an identical opening clause. The percentages are stripped from the class blocks
@@ -4635,7 +4635,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
     if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
   if(p.berserkT>0) v*=1.35;
   if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
-  if(meta.classId==='warrior'&&c2def('warrior')){ if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12;  if((p.bloodlustT||0)>0)v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if(classState('warrior').rank>=10)v*=1.10; }   // Weapon Master's FIRST clause; the second (10% mana) was the only one implemented — classFamilyOk is the file's own family line, the one offclassMul uses
+  if(meta.classId==='warrior'&&c2def('warrior')){ if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.20;  if((p.bloodlustT||0)>0)v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if(classState('warrior').rank>=10)v*=1.10; }   // Weapon Master's FIRST clause; the second (10% mana) was the only one implemented — classFamilyOk is the file's own family line, the one offclassMul uses
   if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){  if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
   if(meta.classId==='paladin'&&c2def('paladin')){ const holy=!!(p.weapon&&p.weapon.el==='holy');
                    // Holy Power
@@ -4643,7 +4643,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
                   // Blessed Blade
     if(classState('paladin').rank>=10)v*=1.10; }             // Avatar of Light
   if(meta.classId==='necromancer'&&c2def('necromancer')){
-      
+
     if(classState('necromancer').rank>=10)v*=1.12; }
   if(meta.classId==='ninja'&&c2def('ninja')){ const blade=p.weapon&&(p.weapon.art==='dagger'||p.weapon.art==='sword');
       if(c2Passive('nin_bleed'))v*=1.10; if(c2Passive('nin_assassin'))v*=1.12;
@@ -4653,10 +4653,10 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
     if(fist)v*=1.15;   // innate Focus: fists are the monk's true weapon
     const fCap=classState('monk').rank>=10?7:5, fDmg=c2Passive('mon_focused')?0.08:0.06;   // Focus snowball (restored — playtest showed Monk felt WEAK; harness over-read its max-stack ceiling)
     if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;
-      
+
     if(classState('monk').rank>=10)v*=1.12; }
   if(meta.classId==='stormcaller'&&c2def('stormcaller')){
-        
+
     if(classState('stormcaller').rank>=10)v*=1.12; }
   if(meta.classId==='warlock'&&c2def('warlock')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.12;
     if(c2Passive('war_frail'))v*=1.15; if(c2Passive('war_pact')&&p.hp<effMaxHp(p)*.5)v*=1.18;
@@ -4667,34 +4667,39 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
   if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(p.weapon&&['sword','dagger','spellblade'].includes(p.weapon.art))v*=1.18;   // was 1.10 — bladedancer was bottom of both DPS and PvP
     if((p.bdFlowT||0)>0)v*=1.15;if(classState('bladedancer').rank>=10)v*=1.12;}
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
-    if(c2Passive('r_patient'))v*=1.04; 
+
     if(classState('ranger').rank>=10)v*=1.12; }
-  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); } const low=p.hp<effMaxHp(p)*.5; if(low)v*=1.15;   // Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class
-       
+  if(meta.classId==='berserker'&&c2def('berserker')){  const low=p.hp<effMaxHp(p)*.5; if(low)v*=1.15;   // Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class
+
     if(classState('berserker').rank>=10)v*=1.12; }
   if(meta.classId==='pirate'&&c2def('pirate')){ v*=1.08;
-       
+
     if(classState('pirate').rank>=10)v*=1.12; }
   if(meta.classId==='chronomancer'&&c2def('chronomancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;
-        
+
     if(classState('chronomancer').rank>=10)v*=1.12; }
   if(meta.classId==='beastmaster'&&c2def('beastmaster')){ v*=1.20;   // innate personal damage — beastmaster's OWN attacks were unbuffed (only the pet scaled), leaving it bottom-tier
     if(classState('beastmaster').rank>=10)v*=1.10; }
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
+  if(meta.classId==='berserker'&&c2Passive('bsk_reckless')&&(p.rageKillT||0)>0)v*=1+.04*Math.min(5,p.rageKills||0);
+  if(meta.classId==='necromancer'&&c2Passive('necro_wither'))v*=1.12;
+  if(meta.classId==='ranger'&&c2Passive('r_elem')&&p.weapon?.el)v*=1.12;
+  if(meta.classId==='pirate'&&c2Passive('pir_greed'))v*=1.12;
+  if(meta.classId==='skylancer'&&c2Passive('sky_high')&&!p.onGround)v*=1.15;
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(classState('pirate').rank>=10)v*=1.10;if(c2Passive('pir_swagger')&&p._loaded!==false)v*=1.10;}   /* SWAGGER (r5 b): "while your pistol is loaded you move noticeably faster" — wired 2026-08-11, one of docs/SKILL_TRIAGE.md section E's dead passives. Nothing invented: 1.10 is the Dread Captain step one clause to the left, and `_loaded` is the pistol state the class already keeps (spent 11267, reloaded on a kill 10939) and that Cutthroat already reads at 11265. `!==false` rather than truthiness because a pirate ARRIVES loaded with the flag still undefined (12851) — the same reading CLASS_BASIC.pirate's own guard takes. */ if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+.5*(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.15;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=((p.slowT||0)>0?.75:1)*p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(classState('pirate').rank>=10)v*=1.10;if(c2Passive('pir_swagger'))v*=1.12;}   /* SWAGGER (r5 b): "while your pistol is loaded you move noticeably faster" — wired 2026-08-11, one of docs/SKILL_TRIAGE.md section E's dead passives. Nothing invented: 1.10 is the Dread Captain step one clause to the left, and `_loaded` is the pistol state the class already keeps (spent 11267, reloaded on a kill 10939) and that Cutthroat already reads at 11265. `!==false` rather than truthiness because a pirate ARRIVES loaded with the flag still undefined (12851) — the same reading CLASS_BASIC.pirate's own guard takes. */ if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;}
-  if(meta.classId==='paladin'&&c2def('paladin')&&c2Passive('pal_heal'))v+=.05;   // Healing Light
-  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v+=.08;}   // Bloodthirst + Undying Rage
+     // Healing Light
+  if(meta.classId==='berserker'&&c2def('berserker')){ if(classState('berserker').rank>=10)v+=.08;}   // Bloodthirst + Undying Rage
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
-function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge;if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(c2Passive('bd_last')&&p.hp<effMaxHp(p)*.35)v*=.80;} if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
+function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); if(meta.classId==='pirate'&&c2Passive('pir_evasive'))v*=.8; const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge;if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(c2Passive('bd_last')&&p.hp<effMaxHp(p)*.35)v*=.80;} if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
-function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
+function effGoldFind(p){ return (meta.classId==='pirate'&&c2Passive('pir_luck')?1.25:1)+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
 function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} if(meta.classId==='chronomancer'&&c2def('chronomancer')){v+=.05;if(c2Passive('chr_haste'))v+=.10;if(c2Passive('chr_temporal'))v+=.10;if(classState('chronomancer').rank>=10)v+=.10;}
   /* STORM LORD (stormcaller rank-10 capstone, 2176): "+12% damage, +10% cooldown reduction, and your
      lightning arcs to more enemies." The +12% is at 3728 and the arcs clause is unbuilt, but the
@@ -8907,7 +8912,7 @@ function loadStageRaw(i){
     if(room){ m.room=room; (room.monsters=room.monsters||[]).push(m); if(room.encounter) m.dropT=9999; }
     if(!m.boss && !isBoss && rnd2()<eliteRate) makeElite(m);
     return m; };
-  /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss). 
+  /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss).
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && !G.endless && !G.bossRush && CAMPAIGN_ROUTES[curZone().id]){
     const srnd=mulberry(i*7919+31+so),srnd2=mulberry(i*104729+7+so*3);
@@ -11187,6 +11192,10 @@ function estat(e){ return e.st||(e.st={burn:0,chill:0,venom:0,rune:0,radiance:0,
 function statTotal(e){ if(!e.st) return 0; let n=0; for(const k in e.st) n+=e.st[k]; return n; }
 // buildup per hit: normalized by attack speed (cd), with the Scythe specialization + boss resistance
 function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.2:1; return Math.min(2.4,(cd/0.4))*scy*(boss?0.5:1); }
+function statusDamage(e,dmg,flatHeal=0){
+ if(e._peer){MP.sendPvp(e._peerId||e.id,dmg,G.p.x,G.p.z,{flatHeal});return;}
+ e.hp-=dmg;if(e.hp<=0)killEnemy(e);
+}
 function applyStatus(e,el,dmg,w){
   el=normEl(el); const stat=EL_STAT[el]; if(!stat||e.dummy) return;
   const now=(G&&G.time)||0; e.stcd=e.stcd||{};
@@ -11209,7 +11218,7 @@ function applyElement(e,el,dmg){ applyStatus(e,el,dmg, (G&&G.p)?G.p.weapon:null)
 function c2ReactionMul(){ return meta.classId==='mage'&&c2Passive('m_savant')?1.15:1; }
 function igniteBurn(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.2:2.2)*c2ReactionMul()); e.st.burn=0;
   skillRing(e.x,e.z,'#ffd07a','#ff7a3a',110); burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',16); addText(e.x,e.y+e.h+12,e.z,'IGNITE','#ff7a3a',true);
-  e.hp-=dmg; for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){ o.hp-=Math.round(dmg*0.4); estat(o).burn=Math.min(STCAP.burn,o.st.burn+1); } }   // combustion splash
+  statusDamage(e,dmg); for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){ statusDamage(o,Math.round(dmg*0.4)); estat(o).burn=Math.min(STCAP.burn,o.st.burn+1); } }   // combustion splash
   if(e.hp<=0) killEnemy(e); }
 function freezeChill(e){
   if(e.boss){ e.slowT=Math.max(e.slowT,2.2); e.stunT=Math.max(e.stunT,0.4); e.st.chill=2.5; addText(e.x,e.y+e.h+12,e.z,'DEEP CHILL','#7fd6ff'); }  // bosses stagger + heavy slow, never full-freeze
@@ -11217,7 +11226,7 @@ function freezeChill(e){
   else e.st.chill=STCAP.chill-1; }
 function purifyRadiance(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.0:1.8)*c2ReactionMul()); e.st.radiance=0; e.exposed=4;
   skillRing(e.x,e.z,'#fff8d6','#ffe9a8',115); burst(e.x,e.y+e.h*0.6,e.z,'#ffe9a8',16); addText(e.x,e.y+e.h+12,e.z,'PURIFY','#ffe9a8',true);
-  e.hp-=dmg; if(e.hp<=0) killEnemy(e); }
+  statusDamage(e,dmg); }
 // designated attacks (Reaper scythe finisher / charged scythe / void charge) rupture a primed target
 function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corrupt)) return 0;
   const base=e.stDmg||10, mastery=(meta.classId==='reaper'&&c2Passive('x_corrupt'))?1.15:1, dmg=Math.round(base*(e.boss?1.4:2.5)*mastery); e.primed=false; if(e.st) e.st.corrupt=0;
@@ -11259,11 +11268,10 @@ function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corru
         spread++; } }
     if(spread){ skillRing(e.x,e.z,'#8f52d6','#3d175e',120); addText(e.x,e.y+e.h+30,e.z,'CORRUPTION SPREADS','#d69bff',true); }
   }
-  e.hp-=dmg; const p=G.p; if(p){ const heal=Math.max(3,Math.round(effMaxHp(p)*0.04)); p.hp=Math.min(effMaxHp(p),p.hp+heal); }   // predatory Reaper sustain
-  if(e.hp<=0) killEnemy(e); return dmg; }
+  const p=G.p,heal=p?Math.max(3,effMaxHp(p)*.04):0;statusDamage(e,dmg,heal);if(p&&!e._peer)classHeal(p,heal);return dmg; }
 // consume Rune Marks on a designated attack (charged/skill) for a burst — more marks, bigger payoff
 function consumeRunes(e){ if(!e.st||e.st.rune<1) return 0; const marks=Math.floor(e.st.rune), base=e.stDmg||8, dmg=Math.round(marks*base*0.5*c2ReactionMul());
-  e.st.rune=0; skillRing(e.x,e.z,'#e1b9ff','#c47bff',90); addText(e.x,e.y+e.h+12,e.z,'RUNE ×'+marks,'#c47bff',true); e.hp-=dmg; if(e.hp<=0) killEnemy(e); return dmg; }
+  e.st.rune=0; skillRing(e.x,e.z,'#e1b9ff','#c47bff',90); addText(e.x,e.y+e.h+12,e.z,'RUNE ×'+marks,'#c47bff',true); statusDamage(e,dmg); return dmg; }
 // per-enemy status upkeep (DoT + decay + chill slow factor). Returns the movement-speed multiplier from Chill.
 function statusTick(e,dt){
   if(!e.st){ return 1; } const now=(G&&G.time)||0, st=e.st;
@@ -11273,7 +11281,7 @@ function statusTick(e,dt){
     if(Math.random()<0.25) G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:'#ff7a3a',sz:2}); }
   if(st.venom>0.01){ e.stAcc=(e.stAcc||0)+Math.floor(st.venom)*(e.stDmg||6)*0.04*dt;
     if(Math.random()<0.18) G.particles.push({x:e.x,y:e.y+Math.random()*e.h*0.6,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#86e05a',sz:2}); }
-  if(e.stAcc>=1){ const d=Math.floor(e.stAcc); e.stAcc-=d; e.hp-=d; if(e.hp<=0){ killEnemy(e); return 1; } }
+  if(e.stAcc>=1){ const d=Math.floor(e.stAcc); e.stAcc-=d; statusDamage(e,d); if(!e._peer&&e.hp<=0)return 1; }
   if(e.healCut && st.venom<3) e.healCut=0;
   if(e.exposed>0) e.exposed-=dt;
   // decay meters past their grace window
@@ -11297,7 +11305,7 @@ function pvpHostiles(){
   const myTeam=MP.teamOf(MP.myId);
   for(const id in MP.peers){
     const q=MP.peers[id];
-    if(!q||q.zone!==MP.zone||q.downed)continue;
+    if(!q||q.zone!==MP.zone||q.downed||q.hp<=0)continue;
     if(MP.teams&&MP.teamOf(id)===myTeam)continue;
     q._peer=true;q._peerId=id;q.active=true;q.dead=false;
     q.r=q.r||16;q.h=q.h||44;
@@ -11670,7 +11678,7 @@ const SKILL_FX={
   harvest(p,ok,am){ const w=p.weapon; SFX.magic('void'); skillRing(p.x,p.z,'#b06bff','#6a2fa0',185);
     const dmg=(w?w.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL); let hit=0;
     for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>160+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
-      hitEnemy(e,dmg,p,180,0,null); hit++;
+      const before=e.hp;G._hitHeal=ok?effMaxHp(p)*.05:0;try{hitEnemy(e,dmg,p,180,0,null);}finally{G._hitHeal=0;}if(!e._peer&&e.hp<before)hit++;
       for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*1.6,vy:60,vz:(p.z-e.z)*1.6,life:0.4,color:'#b06bff',sz:3}); }
     if(hit&&ok){ const heal=Math.round(effMaxHp(p)*0.05*hit); p.hp=Math.min(effMaxHp(p),p.hp+heal);
       addText(p.x,p.y+70,p.z,'+'+heal,'var(--good)'); hudUpdate(); } },
@@ -11765,9 +11773,9 @@ function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classSta
   for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
 function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
-  menuTip('tip_choice','every rank you gain gives you a <b>choice</b> — a new active <b>skill</b> or a permanent <b>passive</b>. This is how you build your own Warden; there is no single right path. Pick what fits how you want to fight — and you can re-pick <b>any</b> choice later at the Drillmaster, so nothing here is permanent.');
+  menuTip('tip_choice','every rank you gain gives you a <b>choice</b> — a new active <b>skill</b> or a permanent <b>passive</b>. This is how you build your character; there is no single right path. Pick what fits how you want to fight — and you can re-pick <b>any</b> choice later at the Drillmaster, so nothing here is permanent.');
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
-    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Always active</span><span class="c2badge">Permanent passive</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
+    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span><span class="c2badge">Conditions below</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
   showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Compare both paths carefully — you can respec later at the Drillmaster.</p></div>
@@ -11785,6 +11793,10 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
 }
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
+  for(const key of ['_controlResist','slowT','rageKillT','escapeGuardT','counterGuardT','_attuneT','_noRetreatT'])p[key]=Math.max(0,(p[key]||0)-dt);
+  if(!p.rageKillT)p.rageKills=0;
+  if(meta.classId==='monk'&&c2Passive('mon_still')&&(p._stillT||0)>=1.5&&!p.dead)p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*.02*dt);
+
   if(meta.classId!=='ranger'||!c2def('ranger')) p.clearAim=false;
   /* THE STAND-STILL CLOCK, ungated from the mage 2026-08-12. It used to sit inside
      `if(meta.classId==='mage')` because m_temporal (effCdr, 3766) was the first thing to want it —
@@ -11870,7 +11882,7 @@ function class2Innate(p,dt){
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
   if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
-  const need=c2Passive('r_patient')?3.5:(c2Passive('r_quick')?2.0:3.0);
+  const need=c2Passive('r_quick')?2.0:3.0;
   p._noHitT=(p._noHitT||0)+dt;
   if(!p.clearAim && p._noHitT>=need){ p.clearAim=true; if(!p._caAnn){ p._caAnn=1; addText(p.x,p.y+70,p.z,'CLEAR AIM','#f7d79a'); } }
 }
@@ -11882,9 +11894,15 @@ function class2OnHit(p){ // called from hurtPlayer — a direct hit breaks Clear
 }
 function rangerDmgMul(p){ // Clear Aim damage bonus (Perfect Hunt +3%, Patient Hunter 14→17)
   if(meta.classId!=='ranger'||!p||!p.clearAim) return 1;
-  const cap=classState('ranger').rank>=10; let b=c2Passive('r_patient')?0.14:0.10; if(cap) b+=0.03; return 1+b;
+  const cap=classState('ranger').rank>=10; let b=c2Passive('r_patient')?0.18:0.10; if(cap) b+=0.03; return 1+b;
 }
-function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims skill cooldowns
+function c2OnKill(p,e){
+  if(meta.classId==='berserker'){
+    if(c2Passive('bsk_reckless')){p.rageKills=Math.min(5,(p.rageKills||0)+1);p.rageKillT=6;addText(p.x,p.y+p.h+24,p.z,'+'+(p.rageKills*4)+'% DAMAGE','#ffad77');}
+    if(c2Passive('bsk_blood'))p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*.04);
+  }
+  if(meta.classId==='necromancer'&&c2Passive('necro_plague'))for(const q of combatTargets())if(q!==e&&!q.dead&&dXZ(q.x,q.z,e.x,e.z)<150){applyElement(q,'poison',e.stDmg||10);}
+ // Perfect Hunt: a kill while Clear Aim active trims skill cooldowns
   if(meta.classId==='ranger' && classState('ranger').rank>=10 && p&&p.clearAim && (G.time-(p._caCdT||-9))>=1){
     p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
   /* BOUNTY HUNTER (ranger r9 b): "Marked enemies deal -8% to you; killing one heals 4% HP and gives
@@ -11943,7 +11961,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
         lit++; } }
     if(lit){ skillRing(e.x,e.z,'#ffd07a','#ff7a3a',120); addText(e.x,e.y+e.h+12,e.z,'BURNING LIGHT','#ff7a3a',true); }
   }
-  if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
+  if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=6;
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
   if(meta.classId==='chronomancer'&&c2def('chronomancer')) gainMana(p,4,false);   // Time Attunement: kills loop a little mana back
   if(meta.classId==='warlock'&&c2def('warlock')&&e&&(e.warCurseT||0)>0){
@@ -11986,7 +12004,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
       p.hp=Math.min(effMaxHp(p),p.hp+h);
       if(p.hp>pre) addText(p.x,p.y+72,p.z,'CRIMSON HARVEST +'+(p.hp-pre),'#ff5a6a',true,'heal');
     }
-    if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
+    if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=Math.max(p.shieldT||0,5);}
     if(classState('reaper').rank>=10&&p.skillCd&&(e&&((e.markT||0)>0||(e.st&&e.st.corrupt>0))))for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-.75);
   }
 }
@@ -12224,9 +12242,9 @@ function skillManaCost(i,s){
   s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
   let v=(s&&SKILL_MANA[s.id])||12;
   /* Glass Cannon: below a quarter health your skills are free. */
-  if(c2Passive('m_glass') && G && G.p && G.p.hp < effMaxHp(G.p)*0.25) return 0;
+  if(c2Passive('m_glass') && G && G.p && G.p.hp < effMaxHp(G.p)*0.5) v*=.60;
   if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
-  if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;if(c2Passive('m_potent'))v*=1.08;}
+  if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;}
   if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))v*=.85;
   v*=classManaCfg().cost;   // per-class mana economy: casters pay more, martials less
   return Math.max(1,Math.round(v));
@@ -12332,19 +12350,22 @@ function useSkill(i){
     const manaSpent = soulFree ? skillManaCost(i,s) : spendSkillMana(p,i,s); if(!manaSpent) return;
     if(soulFree){ p._soulFree=0; addText(p.x,p.y+p.h+24,p.z,'SOUL SPENT','#c47bff',true); hudUpdate(); skillbarUpdate(); }
     initAudio();
-    G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
-    if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
+    const oldShots=new Set(G.projectiles);G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
+    if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=Math.max(p.shieldT||0,3);} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
     // Stormcaller STORM WARD (r5 b): "Casting a skill grants a shield equal to 4% max HP." Its id was
     // read by nothing at all until now — one of the 46 in docs/SKILL_TRIAGE.md section E. Deliberately
     // the same sentence, the same number and the same three lines as mage m_ward above and warlock
     // war_shield below, because the card already says what it does and inventing a different number
     // here would be a balance call rather than delivering the promise on it.
-    if(meta.classId==='stormcaller'&&fx&&c2Passive('st_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
+    if(meta.classId==='stormcaller'&&fx&&c2Passive('st_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=Math.max(p.shieldT||0,3);}
     if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
+    for(const shot of G.projectiles)if(!oldShots.has(shot)&&shot.owner==='player')shot.desig=true;
     G._desig=false;
+    if(meta.classId==='ranger'&&c2Passive('r_escape')&&['r_tumble','r_shadow'].includes(s.id))p.escapeGuardT=2;
     /* A refunded cast never happened - it found no target and did not go on cooldown - so a soul
        spent on it is put back rather than paid out as mana the player never spent. */
+    if(r!=='refund'&&meta.classId==='paladin'&&c2Passive('pal_heal')){classHeal(p,effMaxHp(p)*.04);hudUpdate();}
     if(r==='refund'){ if(soulFree) p._soulFree=1; else gainMana(p,manaSpent,false); return; }
     /* ECHO (chronomancer r9 a): "Your last skill fires again, by itself, three seconds later."
        Wired 2026-08-11; it was one of the 33 in docs/SKILL_TRIAGE.md section E that the rank menu
@@ -12362,7 +12383,7 @@ function useSkill(i){
     if(meta.classId==='warlock'&&fx){
       const cap=classState('warlock').rank>=10, safe=c2Passive('war_safe'), frac=(cap?0.015:0.03)*(safe?0.65:1);
       const blood=Math.max(1,Math.round(effMaxHp(p)*frac)); p.hp=Math.max(1,p.hp-blood);
-      if(c2Passive('war_shield')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
+      if(c2Passive('war_shield')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=Math.max(p.shieldT||0,3);}
       if(c2Passive('war_swift'))p.warSpeedT=2.5;
       addText(p.x,p.y+p.h+22,p.z,'-'+blood+' HP','#ff6684'); hudUpdate();
     }
@@ -12512,7 +12533,13 @@ function resolveSwing(){
   }
   if(MP.active&&MP.pvp) MP.pvpMelee(p,w,dmg);   // Phase 3 PvP: the same swing can strike a rival player
 }
+function classHeal(p,amount){
+ if(!p||p.dead||p.downed||p._pvpDead||!Number.isFinite(amount)||amount<=0)return 0;
+ const before=p.hp;p.hp=Math.min(effMaxHp(p),p.hp+amount);return p.hp-before;
+}
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+ if(src?.projSrc&&!src.pet)src=G.p;
+
  if(e?.marbleGuardian&&!(e.mcExposed>0)){if((e._mcHint||0)<G.time){e._mcHint=G.time+2;addText(e.x,e.y+150,e.z,'BREAK THE ARMOR SEAL','#e4d5a7');}return;}
  if(e?.hydraChain&&(e.dead||!BFHydra.exposed(G,e))){if(!e.dead&&(e._chainHint||0)<G.time){e._chainHint=G.time+2;addText(e.x,e.y+100,e.z,'WAIT FOR THE PALE JOINT','#d1decd');}return;}
   /* SHADELING's fade. One guard here covers melee, projectiles, skills, pets and damage-over-time,
@@ -12538,17 +12565,6 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     burst(e.x,(e.y||0)+(e.h||30)*.5,e.z,'#ff8a62',4);SFX.hit();
     return;
   }
-  if(e&&e._peer){
-    if(e.markT>0)dmg*=1.4;
-    if(meta.classId==='warlock'&&(e.warCurseT||0)>0)dmg*=c2Passive('war_deep')?1.30:1.15;
-    dmg=Math.max(1,Math.round(dmg));
-    const sx=src&&Number.isFinite(src.x)?src.x:G.p.x,sz=src&&Number.isFinite(src.z)?src.z:G.p.z;
-    MP.sendPvp(e._peerId||e.id,dmg,sx,sz);
-    e.hitFlash=.12;addText(e.x,(e.y||0)+(e.h||44)+10,e.z,dmg,G._crit?'#ffd24a':'#fff',false,G._crit?'crit':'dmg');
-    burst(e.x,(e.y||0)+(e.h||44)*.5,e.z,e.color||'#9cc8ff',4);SFX.hit();
-    if(lifesteal>0){const lsMul=meta.classId==='reaper'?.25:.15,heal=Math.round(dmg*lifesteal*lsMul);if(heal>0)G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);}
-    return;
-  }
   // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
   // but never reduce hp or kill locally — the host applies it and drives death for everyone.
   // Player-owned companions/summons use {pet:true} as their damage source. Guests must relay
@@ -12566,11 +12582,26 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
-    if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3, heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+    if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3; classHeal(G.p,Math.min(dmg,Math.max(0,e.hp))*lifesteal*lsMul); }
     return;
   }
   if(e.shielded && e.boss){ e.hitFlash=0.1; if(Math.random()<0.5) addText(e.x,e.y+e.h+12,e.z,'WARDED','#7fd6ff'); return; }   // the boss ward absorbs everything until its crystals fall
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
+  if(src===G.p){
+    if(meta.classId==='ranger'){
+      if(c2Passive('r_longshot')&&dXZ(src.x,src.z,e.x,e.z)>=280)dmg*=1.12;
+      if(c2Passive('r_closeq')&&!G._desig&&dXZ(src.x,src.z,e.x,e.z)<160)kb=(kb||0)+180;
+    }
+    if(meta.classId==='pirate'){
+      if(c2Passive('pir_deadly')&&!G._desig)dmg*=1.15;
+      if(c2Passive('pir_brutal')&&e.hp<e.maxHp*.5)dmg*=1.20;
+    }
+    if(meta.classId==='chronomancer'){
+      if(c2Passive('chr_slow')&&(e.slowT||0)>0)dmg*=1.20;
+      if(c2Passive('chr_freeze')&&G._desig)e.slowT=Math.max(e.slowT||0,1.5);
+    }
+    if(meta.classId==='necromancer'&&c2Passive('necro_pest')&&(e.st?.venom||0)>0)dmg*=1.20;
+  }
   let mod=elemMod(el,e.element);
   if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}if(meta.classId==='mage'&&c2def('mage')&&src.weapon&&src.weapon.sch==='mag')gainMana(src,2,false);}
   if(src===G.p&&meta.classId==='paladin'&&c2def('paladin')&&src.weapon&&src.weapon.el==='holy'){ const frac=0.02+(classState('paladin').rank>=10?0.01:0); const h=Math.max(1,Math.round(dmg*frac)); src.hp=Math.min(effMaxHp(src),src.hp+h); }   // Holy Warrior: heal on holy-weapon hits
@@ -12591,7 +12622,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   //    shockwave that splashes holy to everything near the strike. Its power is the sword's, so every class wields it whole.
   const iansHit=src===G.p&&G.p.weapon&&G.p.weapon.ians&&!e._iansSplash;
   if(iansHit){
-    const execute=!e.boss&&!e.dummy&&!e.practice&&(e.hp-dmg)<=e.maxHp*0.25;   // Radiant Execution: reap the wounded
+    const execute=!e.boss&&!e._peer&&!e.bot&&!e.dummy&&!e.practice&&(e.hp-dmg)<=e.maxHp*0.25;   // Radiant Execution: reap the wounded
     if(execute){ dmg=Math.max(dmg,e.hp); addText(e.x,e.y+e.h+24,e.z,'IAN\'S JUDGMENT','#fff4ae',true); skillRing(e.x,e.z,'#fff4ae','#ffd24a',118); }
     else if(e.boss||e.elite) dmg=Math.round(dmg*1.3);                          // no reaping the mighty — raw radiant bonus instead
     burst(e.x,e.y+e.h*0.58,e.z,'#fff4ae',execute?20:9);
@@ -12600,7 +12631,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     if(splash>0){ skillRing(e.x,e.z,'#ffe9a8','#ffd24a',150); for(const e2 of combatTargets()){ if(e2===e||e2.dead||e2.dummy) continue; if(dXZ(e2.x,e2.z,e.x,e.z)<150){ e2._iansSplash=1; hitEnemy(e2,splash,src,120,0,'holy'); e2._iansSplash=0; } } }
   }
   if(src===G.p && (G.p._noRetreatT||0)>0) dmg*=2;      // No Retreat: paid for by being unable to back away
-  if(src===G.p) dmg=dmg*tPlayerDmg();            // difficulty + beginner-trial player damage dial
+  if(src===G.p&&!e._peer) dmg=dmg*tPlayerDmg();            // difficulty + beginner-trial player damage dial
   /* ── THE BASIC-ATTACK HOOK ─────────────────────────────────────────────────
      The keystone of the class rewrite. Five classes share one swing and fourteen innates open with
      the same flat damage percentage, and both problems have the same root: there was nowhere for a
@@ -12639,6 +12670,13 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      fraction into the floating-point tail. Rounding at the point of application keeps the number on
      screen and the number subtracted from HP identical, which a display-only round would not. */
   dmg = Math.max(1, Math.round(dmg));
+  if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
+  if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
+  if(e._peer){
+    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0});
+    e.hitFlash=.12;return;
+  }
+  const dealt=Math.min(Math.max(0,e.hp),dmg);
   e.hp-=dmg; e.hitFlash=0.12;
   if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
@@ -12672,7 +12710,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
   if(lifesteal>0 && src===G.p){                                    // lifesteal heavily nerfed globally; the Reaper keeps a clear edge but is no longer a free full-heal
     const lsMul = meta.classId==='reaper'?0.5:0.3;
-    const heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+    classHeal(G.p,dealt*lifesteal*lsMul); }
   const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
   if(weaponManaHit) gainMana(G.p,4,false);
   /* MASTER STRIKER (monk r9 b): "Every fourth unbroken strike hits everything around you."
@@ -12710,8 +12748,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
       if(n){ skillRing(mp.x,mp.z,'#ffd27a','#8c642f',185); addText(mp.x,mp.y+mp.h+22,mp.z,'MASTER STRIKER','#ffd27a',true); }
     }
   }
-  if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
-  if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
+
   if(e.hp<=0) killEnemy(e,weaponManaHit);
 }
 function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGoldMul)||1))); meta.gold=(meta.gold||0)+n; return n; }
@@ -12727,10 +12764,6 @@ function killEnemy(e,weaponKill){
     if(meta.classId==='ninja' && c2Passive('nin_combo') && e && e._ninUnseen === G.p.swingId){
       G.p._stillT = 9; addText(G.p.x, G.p.y+44, G.p.z, 'UNSEEN READY', '#9fe0ff');
     }
-  } catch(err){}
-  /* Bloodlust: a kill KEEPS your Momentum instead of resetting it - the Warrior's snowball. */
-  try {
-    if(meta.classId==='warrior' && c2Passive('w_bloodlust') && G && G.p){ G.p._momKeep = 1; }
   } catch(err){}
   /* The Pirate reloads on a KILL - the pistol is a resource you earn by finishing things. */
   try {
@@ -13017,7 +13050,7 @@ function ninjaEvade(p,sx,sz){                               // a dodge: MISS tex
   p.invuln=Math.max(p.invuln,0.22);                        // short grace so a multi-hit volley doesn't all connect
   p.evadeStacks=Math.min(NIN_EVADE_CAP,(p.evadeStacks||0)+1); p.evadeStackT=5;
   addText(p.x,p.y+p.h+10,p.z,'MISS','#9fe0ff',true);
-  if(p.evadeStacks>1) addText(p.x,p.y+p.h+30,p.z,'⚡'+p.evadeStacks,'#c9f0ff');   // building damage snowball
+  if(p.evadeStacks>1) addText(p.x,p.y+p.h+30,p.z,'+'+(p.evadeStacks*9)+'% DAMAGE','#c9f0ff');   // building damage snowball
   try{ burst(p.x,p.y+16,p.z,'#9fe0ff',8); SFX.dodge&&SFX.dodge(); }catch(_){}
   G.combo=G.combo; hudUpdate();
 }
@@ -13029,7 +13062,7 @@ const CLASS_BASIC = {
   /* MOMENTUM. Hitting the SAME target builds up; the third staggers it. Rewards committing to one
      enemy rather than spreading damage around, which is what a warrior does. */
   warrior(p, e, dmg){
-    if(p._momT !== e){ p._momT = e; if(!p._momKeep) p._mom = 0; p._momKeep = 0; }
+    if(p._momT !== e){ p._momT = e; p._mom = 0; }
     p._mom = (p._mom || 0) + 1;
     if(p._mom >= (c2Passive('w_master') ? 2 : 3)){   // Weapon Master: stagger a hit sooner
       p._mom = 0;
@@ -13082,8 +13115,9 @@ const CLASS_BASIC = {
       p._chaining = 1;
       try {
         skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 90);
-        for(let i = 0; i < arcs && i < near.length; i++)
-          hitEnemy(near[i].o, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
+        for(let i = 0; i < arcs && i < near.length; i++){
+          if(c2Passive('st_master')&&!near[i].o.boss&&!near[i].o.bot&&!near[i].o._peer)near[i].o.stunT=Math.max(near[i].o.stunT||0,.4);
+          hitEnemy(near[i].o, Math.max(1, Math.round(dmg * (c2Passive('st_conductor')?.50:.34)*(c2Passive('st_amped')?1.5:1))), p, 0, 0, 'shock');}
       } catch(err){}
       p._chaining = 0;
     }
@@ -13097,7 +13131,7 @@ const CLASS_BASIC = {
       p._chaining = 1;
       try {
         skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 70);
-        hitEnemy(e, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
+        hitEnemy(e, Math.max(1, Math.round(dmg * .34)), p, 0, 0, 'shock');
       } catch(err){}
       p._chaining = 0;
     }
@@ -13140,7 +13174,7 @@ const CLASS_BASIC = {
     if(p.weapon?.intrinsic==='pirate')return; // signature already has its full shot damage; no hidden reload multiplier
     if((meta.pirateSlot||'basic') !== 'basic') return;
     if(!p._loaded && p._loaded !== undefined){
-      return c2Passive('pir_brutal') ? dmg * 1.45 : undefined;   // Cutthroat: steel bites while reloading
+      return undefined;   // Cutthroat: steel bites while reloading
     }
     p._loaded = false;
     /* SLIPPERY (r7 a): "Firing the pistol pushes you back out of melee range" — wired 2026-08-11, one
@@ -13152,7 +13186,7 @@ const CLASS_BASIC = {
        Roll's i-frames and snare are NOT copied, and neither is dodgeTimer itself; see the movement
        branch for why that field would have smuggled in damage immunity. Fires once per shot: the
        Cutthroat guard above returns for every later body in a pierced line. */
-    if(c2Passive('pir_evasive')){ p._slipT=0.22; p._slipX=-Math.sin(p.yaw); p._slipZ=-Math.cos(p.yaw); }
+
     addText(e.x, e.y + e.h + 18, e.z, 'BANG', '#ffd24a');
     try { burst(e.x, e.y + e.h*0.5, e.z, '#ffe9a8', 12); playFx && playFx('shoot'); } catch(err){}
     return dmg * 2.3;                                      // one heavy shot, then reload on a kill
@@ -13165,11 +13199,11 @@ const CLASS_BASIC = {
     /* Brutal: anything already gutted dies to any hit you land. */
     if(c2Passive('bsk_brutal') && e.hp <= e.maxHp * 0.25){
       addText(e.x, e.y + e.h + 26, e.z, 'BUTCHERED', '#ff5a6a', true);
-      return e.hp + 9999;
+      return (e.boss||e.bot||e._peer||e.finalKing||e.hydraChain||e.furnaceColossus)?dmg*1.25:e.hp+9999;
     }
     const frac = Math.max(0, Math.min(1, p.hp / Math.max(1, effMaxHp(p))));
     /* Rage: below a quarter, the damage doubles instead of merely climbing. */
-    const rage = (c2Passive('bsk_rage') && frac < 0.25) ? 2 : 1;
+    const rage = (c2Passive('bsk_rage') && frac < 0.5) ? 1.5 : 1;
     return dmg * (1 + (1 - frac) * 0.85) * rage;
   },
 
@@ -13208,7 +13242,7 @@ const CLASS_BASIC = {
     /* Deadly Precision: an Unseen strike finishes anything already badly hurt. */
     if(c2Passive('nin_deadly') && e.hp <= e.maxHp/3){
       addText(e.x, e.y + e.h + 26, e.z, 'EXECUTE', '#ff5a6a', true);
-      return e.hp + 9999;
+      return (e.boss||e.bot||e._peer||e.finalKing||e.hydraChain||e.furnaceColossus)?dmg*1.25:e.hp+9999;
     }
     const a = Math.atan2(p.x - e.x, p.z - e.z);
     p.x = e.x - Math.sin(a) * (e.r + 26); p.z = e.z - Math.cos(a) * (e.r + 26);
@@ -13245,7 +13279,7 @@ const CLASS_BASIC = {
      for a skill is choosing to punch softer. */
   mage(p, e, dmg){
     const potent = c2Passive('m_potent');                 // Potent Weave: costs double, hits double
-    const cost = potent ? 12 : 6;
+    const cost = 6;
     if((p.mana || 0) < cost) return;
     p.mana -= cost;
     /* Elemental Savant: an overcharged hit applies your weapon's element outright. */
@@ -13253,7 +13287,7 @@ const CLASS_BASIC = {
       try { applyElement(e, p.weapon.el, dmg); } catch(err){}
     }
     try { hudUpdate(); } catch(err){}
-    return dmg * (potent ? 1.7 : 1.35);
+    return dmg * (potent ? 1.55 : 1.35);
   },
 
   /* HARVEST. Every basic hit builds toward a corpse: at five, the target drops one whether it dies
@@ -13329,14 +13363,14 @@ function hurtPlayer(dmg,sx,sz,by){
      run and dying to a floor. */
   /* Stillness: while it runs and you are not moving, what hits you is returned doubled to whoever
      threw it. Movement cancels the benefit rather than the state, so it stays a discipline. */
-  if((G.p._stillnessT||0)>0 && Math.abs(G.p.vx||0)+Math.abs(G.p.vz||0) < 6){
+  if(!by?.reflected&&(G.p._stillnessT||0)>0 && Math.abs(G.p.vx||0)+Math.abs(G.p.vz||0) < 6){
     const _atk = attackerOf(by);
     /* The floater lives INSIDE the guard: telling the player RETURNED while returning nothing to
        nobody is worse than saying nothing at all. */
     if(_atk){ try{ hitEnemy(_atk, Math.round(dmg*2), G.p, 120, 0, null);
                    addText(G.p.x,G.p.y+40,G.p.z,'RETURNED','#ffe6ad'); }catch(e){} }
   }
-  dmg=dmg*tPlayerTake();
+  dmg=dmg*(by?.pvp?1:tPlayerTake());
   /* THICK ARMOR, rewritten. Was "take 12% less damage from every source" - a number you could not
      feel and could not play around. Now the FIRST hit of every fight deals nothing, which you feel
      every single time and which rewards opening a fight rather than surviving one. Rearms whenever
@@ -13352,8 +13386,8 @@ function hurtPlayer(dmg,sx,sz,by){
   }
   /* THE OATH pays out here rather than where it is sworn: while your Sworn target lives, everything
      ELSE hits you for a third less. That is what makes swapping off it a real cost. */
-  if(meta.classId==='paladin' && G.p._oath && !G.p._oath.dead && by && by!==G.p._oath) dmg*=0.67;
-  if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
+  if(meta.classId==='paladin' && G.p._oath && !G.p._oath.dead && by && attackerOf(by)!==G.p._oath) dmg*=0.67;
+  if(G.hub&&!by?.pvp) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='bladedancer'&&c2def('bladedancer')&&(p.bdParryT||0)>0){
@@ -13373,12 +13407,12 @@ function hurtPlayer(dmg,sx,sz,by){
        on purpose (10454). The card refunds time, not a pose.
        A no-op when nothing was pending, which is correct: a parry with no swing behind it has no
        time to give back. */
-    if(c2Passive('bd_fast'))p.atkCd=0;
+    if(c2Passive('bd_fast'))p.atkCd=0; if(c2Passive('bd_flow'))p.counterGuardT=3;
     const counter=p.bdPerfectDmg||p.bdMirrorDmg||0;if(counter>0){const R=p.bdPerfectDmg?260:190;for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<R+e.r)hitEnemy(e,counter,p,420,0,null);G.shake=Math.min(18,G.shake+10);}
     p.bdPerfectDmg=0;p.bdMirrorDmg=0;if(classState('bladedancer').rank>=10){if(p.skillCd)p.skillCd[1]=0;p.bdCapT=1;}hudUpdate();SFX.dodge();return;
   }
   if(typeof sx==='number' && meta.classId==='ninja'){ const ev=effEvade(p); if(ev>0 && Math.random()<ev){ ninjaEvade(p,sx,sz); return; } }   // NINJA: dodge the hit entirely
-  if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
+  if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.82;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   /* BOUNTY HUNTER's defensive clause: a foe you have MARKED hits you for 8% less. Conditioned on
@@ -13393,7 +13427,7 @@ function hurtPlayer(dmg,sx,sz,by){
      `reachableInPlay` false → true, ratio 1.000 → 0.92 on the game's own door. */
   if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')){
     const _mk=attackerOf(by); if(_mk&&(_mk.markT||0)>0)dmg*=.92; }
-  if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
+  if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.82;if(classState('ninja').rank>=10)dmg*=.88;}
   /* A BERSERKER CLAUSE USED TO SIT HERE AND IT HARD-LOCKED THE GAME. It read
        if(c2Passive('bsk_frenzy')){ … v*=1+(1-fr); }
      which is the ATTACK-SPEED line from effAtkSpeed (3754) pasted into the damage-TAKEN function.
@@ -13407,21 +13441,28 @@ function hurtPlayer(dmg,sx,sz,by){
      Deleted rather than repaired: Frenzy is attack speed, it is already correctly implemented in
      effAtkSpeed, and there is nothing it could honestly mean to damage taken. Giving `v` a meaning
      here would be inventing a defensive bonus the card does not promise. */
-  if(meta.classId==='monk'&&c2def('monk')){}
+  if(meta.classId==='monk'&&c2Passive('mon_iron')&&(p.dodgeCdT||0)<=0)dmg*=.88;
+  if(meta.classId==='berserker'){
+    if(c2Passive('bsk_heavy'))dmg*=.88;
+    if(c2Passive('bsk_tough')&&p.hp<effMaxHp(p)*.5)dmg*=.80;
+  }
+  if(meta.classId==='pirate'&&c2Passive('pir_tough'))dmg*=.88;
+  if(meta.classId==='ranger'&&c2Passive('r_escape')&&(p.escapeGuardT||0)>0)dmg*=.85;
+  if(meta.classId==='bladedancer'&&c2Passive('bd_flow')&&(p.counterGuardT||0)>0)dmg*=.80;
   if(meta.classId==='pirate'&&c2def('pirate')){}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
   if(meta.classId==='warlock'&&c2def('warlock')&&c2Passive('war_last')&&p.hp<effMaxHp(p)*.30)dmg*=.85;
   if(meta.classId==='skylancer'&&c2def('skylancer')){
     if(!p.onGround&&c2Passive('sky_soft'))dmg*=.85;
-    
-    if((p.skyGuardT||0)>0&&c2Passive('sky_soft'))dmg*=.85;
+
+    if(p.onGround&&(p.skyGuardT||0)>0&&c2Passive('sky_soft'))dmg*=.85;
   }
   if(meta.classId==='bladedancer'&&c2def('bladedancer')){
     if((p.bdCapT||0)>0)dmg*=.80;
     if(c2Passive('bd_guard')&&typeof sx==='number'&&dXZ(p.x,p.z,sx,sz)<240)dmg*=.90;
   }
   if(meta.classId==='beastmaster'&&G.pet&&(G.pet.guardBondT||0)>0){const share=dmg*.35;dmg-=share;hurtPet(share,sx,sz);}
-  if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
+
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
   if(p.guardT>0){
     const _blocked=dmg*0.6;                                 // what the brace is about to eat
@@ -13433,7 +13474,7 @@ function hurtPlayer(dmg,sx,sz,by){
        p.reflectT just below at 1.5x, and the monk's Stillness at 11170, whose hitEnemy(by,…) inside a
        try/catch is the shape this copies. The paladin reaches the brace through its own default kit
        (pal_bash is w_bash, pal_taunt is bulwark). */
-    if(meta.classId==='paladin'&&c2Passive('pal_bounce')&&_blocked>=1){
+    if(!by?.reflected&&meta.classId==='paladin'&&c2Passive('pal_bounce')&&_blocked>=1){
       /* `by` used to be tested directly here and it passed on a `{name, attack}` pair, so this
          reflected onto a throwaway and still printed BOUNCED. The floater is inside the guard now
          for the same reason as Stillness's above. */
@@ -13442,7 +13483,7 @@ function hurtPlayer(dmg,sx,sz,by){
                      addText(p.x,p.y+46,p.z,'BOUNCED','#ffe6ad'); }catch(e){} }
     }
   }
-  if(p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
+  if(!by?.reflected&&p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
@@ -13547,6 +13588,7 @@ function hurtPlayer(dmg,sx,sz,by){
     return;
   }
   if(p.hp<=0){
+    if(by?.pvp){p.hp=0;return;}
     if(MP.active && !MP.pvp && MP.anyAllyUp()){ MP.goDown(); return; }   // co-op: go DOWN (revivable) instead of dying while an ally still stands
     p.hp=0; p.dead=true; die();
   }
@@ -13608,7 +13650,7 @@ function petUpdate(dt){
   let dyaw=fy-pet.yaw; while(dyaw>Math.PI)dyaw-=6.283; while(dyaw<-Math.PI)dyaw+=6.283; pet.yaw+=dyaw*Math.min(1,dt*8);
   if(!playing) return;
   if(P.arch==='attacker'){ pet.atkT-=dt;
-    if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ let cd=P.cd;if(meta.classId==='beastmaster'&&c2Passive('bst_heavy'))cd*=1.10;if(meta.classId==='beastmaster'&&c2Passive('bst_swift'))cd*=.82;if((pet.apexT||0)>0)cd*=.77;pet.atkT=cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
+    if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ let cd=P.cd;if(meta.classId==='beastmaster'&&c2Passive('bst_swift'))cd/=1.18;if((pet.apexT||0)>0)cd*=.77;pet.atkT=cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
   else if(P.arch==='healer'){ pet.healT-=dt;
     if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
       if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
@@ -14020,7 +14062,9 @@ const MP={
       else if(d.t==='storyRequest'){const q=this.peers[c._pid];briarReceive(d.request,c._pid,q?{...q,x:q.tx,y:q.ty,z:q.tz}:null);}
       else if(d.t==='riftRoom'){const q=this.peers[c._pid],n=G?.hubNpcs?.find(n=>n.id===(d.hall?'rifthall':'riftexit'));if(G?.hub&&mode==='play'&&q&&n&&!q.dead&&!q.downed&&(q.hp==null||q.hp>0)&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130)travelRiftHall(!!d.hall);}
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
-      else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
+      else if(d.t==='pcontrol'){this.routeCombatMessage({...d,by:c._pid});}
+      else if(d.t==='presult'){this.routeCombatMessage({...d,by:c._pid});}
+      else if(d.t==='pdmg'){ this.routePvp({...d,by:c._pid}); }           // host relays PvP damage to the target
       else if(d.t==='petdmg'){ this.routePetPvp(d); }      // owner-authoritative companion damage
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
@@ -14108,6 +14152,8 @@ const MP={
       if(d.en&&!G?.storyState?.conversation){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
+    else if(d.t==='pcontrol'){if(d.id===this.myId)this.takePvpControl(d);}
+    else if(d.t==='presult'){if(d.id===this.myId)this.takePvpResult(d);}
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
     else if(d.t==='petdmg'){ if(d.id===this.myId) this.takePetPvpDamage(d); }
     else if(d.t==='score'){ this.showScore(d.id,d.n); }
@@ -14195,6 +14241,14 @@ const MP={
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
+    if(this.pvp&&G?.p){
+      for(const q of pvpHostiles()){
+        statusTick(q,dt);
+        for(const key of ['markT','warCurseT','_tetherT','doomT'])q[key]=Math.max(0,(q[key]||0)-dt);
+        const control=Math.max(q.slowT||0,q.stunT||0,q._noLand||0,(q.st?.chill||0)>=1?.6:0);
+        if(control>0){this.routeCombatMessage({t:'pcontrol',id:q.id,by:this.myId,seconds:Math.min(1.5,control)});q.slowT=q.stunT=q._noLand=0;}
+      }
+    }
     updateTrialPartyStatus();
     if(G?.storyState?.conversation){this._sendT+=dt;if(this._sendT>=.07){this._sendT=0;if(this.isHost)this.broadcast();else try{this.hostConn?.send({t:'pos',p:this.selfState()});}catch(e){}}return;}
     try{ syncPingBtn(); }catch(e){}      // the ping button is co-op only; this is the only place that knows
@@ -14341,15 +14395,41 @@ const MP={
       if(this.teams && this.teamOf(id)===this.teamOf(this.myId)) continue;   // no friendly fire
       const dx=(q.x||0)-p.x, dz=(q.z||0)-p.z, d=Math.hypot(dx,dz);
       if(d<=reach+16&&(d<=16||(dx*fx+dz*fz)/d>=0.35)&&q._pvpSwing!==p.swingId){
-        q._pvpSwing=p.swingId;this.sendPvp(q.id,Math.round(dmg),p.x,p.z);try{addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a');}catch(e){}}
+        q._pvpSwing=p.swingId;q._peer=true;q._peerId=q.id;hitEnemy(q,dmg,p,w.kb||0,effLifesteal(p),w.el);try{addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a');}catch(e){}}
       const pet=q.pet;if(!pet||pet.dead||pet.hp<=0)continue;
       const px=pet.x-p.x,pz=pet.z-p.z,pd=Math.hypot(px,pz);if(pd>reach+14)continue;
       if(pd>14&&(px*fx+pz*fz)/pd<0.35)continue;
       if(pet._pvpSwing===p.swingId)continue;pet._pvpSwing=p.swingId;
       this.sendPetPvp(q.id,Math.round(dmg),p.x,p.z);try{addText(pet.x,(pet.y||0)+40,pet.z,'HIT','#ffb47a');}catch(e){} } },
-  sendPvp(id,dmg,sx,sz){ const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId};
-    if(this.isHost){ if(id===this.myId) this.takePvpDamage(m); else { const c=this.conns.find(x=>x._pid===id); if(c) try{c.send(m);}catch(e){} } }
-    else { if(this.hostConn&&this.hostConn.open) try{this.hostConn.send(m);}catch(e){} } },
+  sendPvp(id,dmg,sx,sz,effects={}){
+    if(!this.pvp||!Number.isFinite(dmg)||dmg<=0)return;
+    this._hitSerial=(this._hitSerial||0)+1;const token=this.myId+':'+this._hitSerial;
+    this._pendingHits=this._pendingHits||new Map();
+    for(const [k,v] of this._pendingHits)if(performance.now()-v.time>10000)this._pendingHits.delete(k);
+    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId});
+    const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId,token,slow:Math.min(1.5,effects.slow||0),element:effects.element,reflected:!!this._receivingHit};
+    this.routeCombatMessage(m);
+  },
+  routeCombatMessage(m){
+    if(m.id===this.myId){if(m.t==='presult')this.takePvpResult(m);else if(m.t==='pcontrol')this.takePvpControl(m);else this.takePvpDamage(m);return;}
+    if(this.isHost){const c=this.conns.find(x=>x._pid===m.id);if(c)try{c.send(m);}catch(e){}}
+    else if(this.hostConn?.open)try{this.hostConn.send(m);}catch(e){}
+  },
+  takePvpControl(m){
+    if(!this.pvp||!G?.p||G.p.invuln>0||G.p._pvpDead)return;
+    if(this.teams&&this.teamOf(m.by)===this.teamOf(this.myId))return;
+    const p=G.p;if((p._controlResist||0)>0)return;
+    p.slowT=Math.max(p.slowT||0,Math.min(1.5,Math.max(0,Number(m.seconds)||0)));p._controlResist=3;
+  },
+  takePvpResult(m){
+    const hit=this._pendingHits?.get(m.token);if(!hit||hit.target!==m.by||performance.now()-hit.time>10000)return;
+    this._pendingHits.delete(m.token);if(hit.cls!==meta.classId)return;
+    const dealt=Math.max(0,Math.min(hit.damage,Number(m.dealt)||0));
+    classHeal(G.p,dealt*hit.ls*.5*(meta.classId==='reaper'?.5:.3));
+    if(dealt>0){classHeal(G.p,hit.flatHeal*.5);const target=this.peers[m.by];if(target){if(hit.element)applyElement(target,hit.element,dealt);if(hit.designated){consumeRunes(target);ruptureCorrupt(target,G.p);}}}
+    if(m.killed&&dealt>0)c2OnKill(G.p,this.peers[m.by]||{x:0,z:0});
+    hudUpdate();
+  },
   routePvp(m){ if(m.id===this.myId){ this.takePvpDamage(m); return; } const c=this.conns.find(x=>x._pid===m.id); if(c) try{c.send(m);}catch(e){} },
   sendPetPvp(id,dmg,sx,sz){ const m={t:'petdmg',id,d:Math.max(1,Math.round(dmg)),sx:Math.round(sx),sz:Math.round(sz),by:this.myId};
     if(this.isHost){if(id===this.myId)this.takePetPvpDamage(m);else{const c=this.conns.find(x=>x._pid===id);if(c)try{c.send(m);}catch(e){}}}
@@ -14357,14 +14437,21 @@ const MP={
   routePetPvp(m){if(m.id===this.myId){this.takePetPvpDamage(m);return;}const c=this.conns.find(x=>x._pid===m.id);if(c)try{c.send(m);}catch(e){}},
   takePetPvpDamage(m){if(!this.pvp||!G||!G.pet||G.pet.dead)return; if(this.teams&&m.by&&this.teamOf(m.by)===this.teamOf(this.myId))return;
     hurtPet(Math.max(1,Math.round((m.d||1)*.6)),m.sx,m.sz);},
-  takePvpDamage(m){ if(!G||!G.p||G.p._pvpDead) return; if(this.teams && m.by && this.teamOf(m.by)===this.teamOf(this.myId)) return;   // friendly fire off
-    const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
-    let dmg=Math.max(1,Math.round((m.d||1)*(1-(typeof defenseR==='function'?defenseR(p):0))*0.6));   // 0.6 PvP scalar so duels last
-    p.hp-=dmg; p.hurtFlash=0.3; p.invuln=0.5; const d=Math.max(1,Math.hypot(p.x-m.sx,p.z-m.sz));
-    p.vx=(p.x-m.sx)/d*240; p.vz=(p.z-m.sz)/d*240; p.vy=150; p.onGround=false;
-    try{ addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'#ff5e54'); SFX.hurt(); G.shake=Math.min(G.shake+8,16); hudUpdate(); }catch(e){}
-    if(p.hp<=0){ p.hp=0; p._pvpDead=true; this.reportFrag(m.by); try{ toast('💀 Defeated — respawning…'); }catch(e){}
-      const self=this; setTimeout(()=>self.pvpRespawn(),2000); } },
+  takePvpDamage(m){
+    if(!this.pvp||!G?.p||G.p._pvpDead||!Number.isFinite(m.d)||m.d<=0)return;
+    if(this.teams&&m.by&&this.teamOf(m.by)===this.teamOf(this.myId))return;
+    this._receivedHits=this._receivedHits||new Map();
+    for(const [k,t] of this._receivedHits)if(performance.now()-t>10000)this._receivedHits.delete(k);
+    if(m.token&&this._receivedHits.has(m.token))return;if(m.token)this._receivedHits.set(m.token,performance.now());
+    const p=G.p,attacker=this.peers[m.by];if(attacker){attacker._peer=true;attacker._peerId=m.by;}
+    const before=p.hp;this._receivingHit=true;
+    try{hurtPlayer(m.d*.6,m.sx,m.sz,{pvp:true,reflected:!!m.reflected,name:attacker?.name||'a rival',attack:'a PvP attack',src:attacker});}
+    finally{this._receivingHit=false;}
+    const dealt=Math.max(0,before-p.hp),killed=p.hp<=0;
+    if(dealt>0&&m.slow>0)this.takePvpControl({by:m.by,seconds:m.slow});
+    if(m.token)this.routeCombatMessage({t:'presult',id:m.by,by:this.myId,token:m.token,dealt,killed});
+    if(killed){p.hp=0;p._pvpDead=true;this.reportFrag(m.by);toast('Defeated — respawning…');setTimeout(()=>this.pvpRespawn(),2000);}
+  },
   reportFrag(byId){ if(this.isHost) this.hostScore(byId); else if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'frag',by:byId});}catch(e){} },
   hostScore(byId){ if(!this.isHost) return; this.scores[byId]=(this.scores[byId]||0)+1; const n=this.scores[byId];
     this.conns.forEach(c=>{try{c.send({t:'score',id:byId,n});}catch(e){}}); this.showScore(byId,n); },
@@ -15193,10 +15280,10 @@ function update(dt){
      passive stops applying, and the button below reads as unavailable rather than silently eating
      the input — a passive that swallows a press without saying so is indistinguishable from a
      dropped input. */
-  const _noDodge = meta.classId==='berserker'&&c2def('berserker')&&c2Passive('bsk_heavy');
+  const _noDodge = false;
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0&&!_noDodge){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
-    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; if(meta.classId==='monk'&&c2Passive('mon_killer'))p._killerHit=1; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
+    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='ranger'&&c2Passive('r_escape'))p.escapeGuardT=2;if(meta.classId==='monk'&&c2Passive('mon_fire'))gainMana(p,5,false); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; if(meta.classId==='monk'&&c2Passive('mon_killer'))p._killerHit=1; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
   /* KILLER FOCUS arms HERE, at the dodge itself, exactly like Tactical Guard on the line above —
      that one is the same passive shape read on the taking side (hurtPlayer, 11207), this one on the
      dealing side (CLASS_BASIC.monk). It is a bare flag with no timer because its card does not state
@@ -15461,7 +15548,7 @@ function update(dt){
              why a guest's projectiles dealt nothing that survived the next host snapshot.
              NOT named `shot`: enemies already carry `.shot` as their ranged-attack config, so that
              name would be true on any enemy-shaped src and relay hits that must not be relayed. */
-          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true},pr.kb,effLifesteal(G.p),pr.el);
+          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true,pet:!!pr.petSeek},pr.kb,pr.petSeek?0:effLifesteal(G.p),pr.el);
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
       G._desig=false; G._crit=false;
     } else if(G.duel && pr.foeBot){                          // DUEL: a bot's shot hits only its opponent, never the parked player
@@ -15555,42 +15642,7 @@ function update(dt){
   else if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
   else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
   class2Innate(G.p,dt);
-  /* RAGE'S OTHER HALF. bsk_rage (r7 a, 2134) reads "Below a quarter health you cannot be healed, and
-     your damage doubles." The doubling is CLASS_BASIC.berserker's (11390); the heal lock was nowhere
-     in the file, so what shipped was a card with its DRAWBACK missing - i.e. a strict upgrade over
-     the Frenzy it is offered against. docs/SKILL_TRIAGE.md section Q.
 
-     WHY THIS IS A CLAMP AND NOT A DOOR. The obvious fix is a healPlayer() every heal goes through,
-     and this file has no such door: ~20 separate `p.hp=Math.min(effMaxHp(p),p.hp+X)` sites, spread
-     over lifesteal, pickups, class riders, death saves and the Abyss floor breather. Routing all of
-     them is a refactor across every class before it is a passive fix, it can only ever cover the
-     sites that existed on the day it was written, and every site it MISSES is a silent hole in a
-     drawback. Comparing the health at the end of the frame against the health at the start needs one
-     place, covers every heal path in the game including ones added later, and cannot be got wrong per
-     site. What it costs is stated rather than hidden: a blocked heal is UNDONE rather than refused,
-     so a heal and a hit inside one frame net out, and the heal's own floater still appears - which is
-     why this prints its own floater underneath, so the player is told why the green number did not
-     stick.
-
-     THE TEST IS THE HEALTH YOU HAD, not the health you end up with, and that is the whole mechanic:
-     read the other way, a big enough heal lands in full precisely because it carries you back over
-     the quarter line, and the lock would only ever stop the small heals. Damage is never touched -
-     hp below the mark simply moves the mark down with it.
-
-     Not in the Waystation: `hurtPlayer` puts you back at half there rather than killing you (11679,
-     "the Waystation is stakes-free"), and clamping that restore would pin a Berserker at whatever he
-     walked in with. */
-  { const P=G.p;
-    if(P && !P.dead && !G.hub && meta.classId==='berserker' && c2def('berserker') && c2Passive('bsk_rage')){
-      const prev=P._rageHp;
-      if(prev!=null && prev<effMaxHp(P)*0.25 && P.hp>prev){
-        P.hp=prev;
-        if((G.time-(P._rageSayT||-99))>=1.2){ P._rageSayT=G.time; addText(P.x,P.y+(P.h||0)+24,P.z,'RAGE — NO HEALING','#ff5a6a',true); }
-        hudUpdate();
-      }
-      P._rageHp=P.hp;
-    } else if(P) P._rageHp=null;
-  }
 }
 const AMBIENT={
   frost:{c:'#e6f7ff',vy:-40,n:2.4,g:1},           // snow drifting down
@@ -21889,6 +21941,7 @@ SKILL_FX.war_storm=function(p,ok,am){
    roster that deals no damage at all: the value is entirely in what you do with the time. */
 SKILL_FX.chr_tempest=function(p,ok,am){
   G._freezeT=3;
+  if(MP.pvp)for(const q of pvpHostiles())MP.routeCombatMessage({t:'pcontrol',id:q.id,by:MP.myId,seconds:1.5});
   addText(p.x,p.y+56,p.z,'STOPPED','#9fd6ff',true);
   try{ skillRing(p.x,p.z,'#9fd6ff','#1a2a3a',420); }catch(err){}
 };
@@ -22149,11 +22202,7 @@ SKILL_FX.mon_roll=function(p,ok,am){
 
 /* BERSERKER - NO RETREAT. You cannot move backwards for 10s, and all your damage doubles. The class
    is played by choosing not to retreat; this removes the choice and pays you for it. */
-SKILL_FX.bsk_whirl=function(p,ok,am){
-  p._noRetreatT=10;
-  addText(p.x,p.y+56,p.z,'NO RETREAT','#ff5a6a',true);
-  try{ skillRing(p.x,p.z,'#ff5a6a','#3a1218',260); }catch(err){}
-};
+SKILL_FX.bsk_whirl=SKILL_FX.w_whirl;
 
 /* BERSERKER - BLOODLETTING, replacing a copy of the Warrior's Cleave. Wound yourself to swing far
    harder: the damage is paid for in health, which is the only currency this class has. */
@@ -22316,7 +22365,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

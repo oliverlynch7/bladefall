@@ -2139,3 +2139,8 @@ Replaced main WebGL canvas capture, gl.finish and pixel readback/keying with a d
 ## [Codex | 2026-09-28] Solid walkable surfaces — 2.074.0
 Fixed camera cutaway height convention and added shared 3D sightline intersection across campaign renderers and fallback renderer. Surfaces at or below player feet remain opaque, including jumping above them; intervening walls still cut away. Removed coplanar facade trim/base faces, overlapping roof slab ends, and overlapping same-height Briar/Black Woods platform regions without changing collision. Kept deep-art module cache versions consistent across palace/castle builders.
 Validation: all 16 campaign parts passed support checks with no renderer errors; 57 actual Black Woods platform groups passed 12 camera/height combinations each; positive wall/FPS checks passed. Briar district exact duplicate triangles: zero; mimic terrace same-height cap overlaps: zero. Prechange save regression, inline syntax and diff checks passed. House/terrace screenshots reviewed. These checks address shared causes and reported areas, not a claim of exhaustive visual inspection of every asset in every level.
+
+
+## [Codex | 2026-09-28] Class clarity, healing and PvP repair pass
+
+2.075.0-clear-class-choices: reviewed 16 class trees, wired 23 missing passive effects, corrected descriptions and selected balance problems. Fractional/projectile lifesteal, Healing Light, shared PvP defenses and confirmed hit healing are repaired. Browser: 128 skill-handler smoke checks, 27 targeted assertions, old-save preservation passed. See docs/CLASS_AUDIT_2026-09-28.md and docs/qa/class-audit-2026-09-28.json. Exhaustive per-passive behavioral coverage and real remote PvP balance remain follow-up work; do not claim all matchups fully validated.

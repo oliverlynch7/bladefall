@@ -456,3 +456,7 @@ User says first-shard explanation lasts too long and blocks the character. Repla
 
 ## [Codex | 2026-09-28] Co-op name and health overlap
 User reports friend names blocking health bars. Found duplicate friend navigation caption near the existing overhead nameplate, plus unscaled peer text/bar offsets. Suppress navigation marker when peer is inside the view, retain edge guidance, and give name/class/HP/ping distinct DPR-scaled rows.
+
+
+## [Codex | 2026-09-28] Heading-up minimap
+User requests minimap follow player facing rather than north-up. Rotate terrain/enemies/exit together around a fixed upward player arrow, smoothly follow shortest-angle turns, and move the N compass marker around the rim. Update tutorial wording.

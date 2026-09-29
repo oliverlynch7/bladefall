@@ -2107,3 +2107,7 @@ First-shard explanation moved from centered 400px/18s card to right-side 280px c
 
 ## [Codex | 2026-09-28] Co-op nameplate spacing — 2.066.0
 Removed duplicate in-view friend navigation caption; edge guidance retained. Peer class/level, name, wider HP bar and ping use separated DPR-scaled rows. Browser synthetic-peer rendering confirms one name position and visible half-health bar; old-save fixture and syntax passed. No networking changes. Evidence: docs/qa/party-nameplates-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Heading-up minimap — 2.067.0
+Map rotates with character facing using shortest-angle exponential smoothing; arrow stays upward and north marker rotates around rim. Terrain and markers share the same transform. Tutorial/accessibility wording updated. Browser canvas transform checks confirm forward enemies appear above player at four cardinal headings; old-save fixture and syntax passed. Evidence: docs/qa/heading-map-2026-09-28.json.

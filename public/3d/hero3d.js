@@ -591,7 +591,7 @@ function addEyes(actor, useSaved){
     // Small fitted facial details; all stay in the existing hand-placed eye frame.
     const rim=mk(new THREE.RingGeometry(irR*.86,irR,20),'#33413d');rim.position.z=frontZ*1.01;rim.material.depthWrite=false;rim.renderOrder=ir.renderOrder;g.add(rim);
     const shine=mk(new THREE.CircleGeometry(irR*.18,8),'#fff7df');shine.position.set(-irR*.25,irR*.30,frontZ*1.05);shine.material.depthWrite=false;shine.renderOrder=pu.renderOrder+1;g.add(shine);
-    const brow=mk(new THREE.BoxGeometry(R*1.65,R*.14,R*.12),(actor.model||eyeModel())==='Wizard'?'#a4a39b':'#594736');brow.position.set(0,R*EYE.squash*1.2,frontZ*.72);brow.rotation.z=side*.06;g.add(brow);
+    const brow=mk(new THREE.BoxGeometry(R*1.65,R*.14,R*.12),(actor.model||eyeModel())==='Wizard'?'#a4a39b':'#594736');brow.position.set(0,R*EYE.squash*1.2,frontZ*.72);brow.rotation.z=actor.browStyle==='straight'?0:actor.browStyle==='focused'?side*.24:actor.browStyle==='raised'?-side*.13:side*.06;if(actor.browStyle==='raised')brow.position.y+=R*.35;brow.userData._brow=true;g.add(brow);
     }
 
 
@@ -618,7 +618,7 @@ function addMouth(actor, useSaved){
   const M = headMetrics(actor);
   if(!M) return null;
 
-  const tex = mouthTexture(MOUTH.shape, MOUTH.color);
+  const tex = mouthTexture(MOUTH_SHAPES.includes(actor.mouthStyle)?actor.mouthStyle:MOUTH.shape, MOUTH.color);
   const mat = new THREE.MeshBasicMaterial({
     map: tex, transparent: true, alphaTest: 0.04,
     depthTest: !MOUTH.onTop, depthWrite: false, side: THREE.DoubleSide,
@@ -1440,9 +1440,10 @@ function modelForClass(){
 }
 
 /* Build the face from the frozen frame + Oliver's preset for whichever model is worn. */
+const fittedFaces=new WeakMap();
 function buildFace(){
   if(!actor) return null;
-  const holder = { root: actor };
+  const holder=fittedFaces.get(actor)||{root:actor};fittedFaces.set(actor,holder);const appearance=window.__BF_META?.()||{};holder.mouthStyle=appearance.mouthStyle||'line';holder.browStyle=appearance.browStyle||'natural';actor.userData.faceStyle=holder.mouthStyle+'|'+holder.browStyle;
   eyeLoadFor(eyeModel());
   mouthLoadFor(eyeModel());
   clearEyes(holder); clearMouth(holder);
@@ -1454,8 +1455,8 @@ function buildFace(){
 
 /* Reuse the fitted face frames for service NPCs without changing the player's presets. */
 window.__npcPaintClassBody=paintClassBody;
-window.__npcBuildFace=(root,model,eyeColor)=>{
- const savedEye={...EYE},savedMouth={...MOUTH},holder={root,model,eyeColor};
+window.__npcBuildFace=(root,model,eyeColor,appearance={})=>{
+ const savedEye={...EYE},savedMouth={...MOUTH},holder={root,model,eyeColor,mouthStyle:appearance.mouthStyle,browStyle:appearance.browStyle};
  try{addEyes(holder,true);addMouth(holder,true);}finally{Object.assign(EYE,savedEye);Object.assign(MOUTH,savedMouth);}
  const mouth=holder._mouth,base=mouth?.scale.y||1;
  return {tick(t,talking){if(mouth)mouth.scale.y=base*(talking ? .7+Math.abs(Math.sin(t*14))*1.8 : 1);},
@@ -1468,6 +1469,7 @@ window.__npcBuildFace=(root,model,eyeColor)=>{
    the body while bone-parented props keep drawing. That bug cost a session in the slice. */
 function syncClass(){
   const want = modelForClass();
+  if(actor){const m=window.__BF_META?.()||{};if(actor.userData.faceStyle!==(m.mouthStyle||'line')+'|'+(m.browStyle||'natural'))buildFace();}
   if(actor){const color=window.__BF_META?.()?.eyeColor;if(color&&actor.userData.eyeColor!==color){actor.traverse(o=>{if(o.userData?._iris)o.material.color.set(color);});actor.userData.eyeColor=color;}}
   if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId||HERO3D.skin?.disguised!==castleDisguise())applyClassSkin();syncLocalEquipment();return;}
   const g = _loaded[want];
@@ -2099,7 +2101,7 @@ window.__hero3dScene = () => scene;
    The model is a SkeletonUtils clone for the same reason the mirror's is - one actor cannot be in
    two places, and the game may already be using it. */
 let _pv = null;
-window.__hero3dPreviewDispose=()=>{if(!_pv)return;_pv.face?.dispose();if(_pv.holder){_pv.holder._weapSeq=(_pv.holder._weapSeq||0)+1;clearWeapon(_pv.holder);}_pv.renderer.dispose();_pv=null;};
+window.__hero3dPreviewDispose=()=>{if(!_pv)return;const rec=_pv;_pv=null;rec.face?.dispose();if(rec.holder){rec.holder._weapSeq=(rec.holder._weapSeq||0)+1;clearWeapon(rec.holder);}rec.mixer?.stopAllAction();if(rec.holder)rec.mixer?.uncacheRoot(rec.holder.root);rec.wrap.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});rec.renderer.dispose();rec.renderer.forceContextLoss();};
 window.__hero3dPreview = (canvas, opts={}) => {
  if(!canvas)return false;
  try{
@@ -2115,16 +2117,16 @@ window.__hero3dPreview = (canvas, opts={}) => {
   const rec=_pv,want=opts.model||'Warrior';
   if(rec.model!==want){
    const g=_loaded[want];if(!g)return false;
-   rec.face?.dispose();if(rec.holder)clearWeapon(rec.holder);rec.wrap.clear();
+   rec.face?.dispose();if(rec.holder){clearWeapon(rec.holder);rec.mixer?.stopAllAction();rec.mixer?.uncacheRoot(rec.holder.root);rec.holder.root.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});}rec.wrap.clear();
    const clone=SkeletonUtils.clone(g.scene);
    const remove=[];clone.traverse(o=>{if(o.userData?._eye||o.userData?._mouth||o.userData?._weap)remove.push(o);if(o.isMesh){o.frustumCulled=false;o.castShadow=false;}});remove.forEach(o=>o.removeFromParent());
    rec.wrap.add(clone);rec.model=want;rec.holder={root:clone,model:want};
-   rec.face=window.__npcBuildFace(clone,want,opts.eyeColor);rec.eye=opts.eyeColor;
+   rec.face=window.__npcBuildFace(clone,want,opts.eyeColor,opts);rec.eye=opts.eyeColor;rec.faceStyle=opts.mouthStyle+'|'+opts.browStyle;
    paintClassBody(clone,opts.classId||'warrior');
    rec.mixer=new THREE.AnimationMixer(clone);const idle=g.animations?.find(a=>/idle/i.test(a.name));if(idle){rec.mixer.clipAction(idle).play();rec.mixer.update(.01);}
    queueEquip(()=>_pv===rec?equipWeapon(rec.holder,{model:want,weapon:opts.weapon||null}):null).then(()=>{if(_pv===rec){poseWeaponGrip({weapon:opts.weapon,onGround:true},rec.wrap,{},want,1);rec.wrap.updateMatrixWorld(true);rec.wrap.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});rec.bounds=null;}}).catch(e=>console.warn('Creator weapon preview',e));
   }
-  if(rec.eye!==opts.eyeColor){rec.face?.dispose();rec.face=window.__npcBuildFace(rec.holder.root,want,opts.eyeColor);rec.eye=opts.eyeColor;}
+  if(rec.eye!==opts.eyeColor||rec.faceStyle!==opts.mouthStyle+'|'+opts.browStyle){rec.face?.dispose();rec.face=window.__npcBuildFace(rec.holder.root,want,opts.eyeColor,opts);rec.eye=opts.eyeColor;rec.faceStyle=opts.mouthStyle+'|'+opts.browStyle;}
   const w=canvas.clientWidth||400,h=canvas.clientHeight||440;
   if(rec.w!==w||rec.h!==h){rec.renderer.setSize(w,h,false);rec.w=w;rec.h=h;rec.cam.aspect=w/h;rec.cam.updateProjectionMatrix();}
   // Precise bounds sample deformed vertices, not stale bind-space boxes.
@@ -2139,7 +2141,7 @@ window.__hero3dPreview = (canvas, opts={}) => {
   rec.wrap.rotation.y=opts.yaw||0;rec.wrap.updateMatrixWorld(true);
   rec.renderer.render(rec.scene,rec.cam);
   window.__creatorPreviewRoot=rec.wrap;
-  window.__creatorPreviewState={model:want,eye:rec.eye,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face};
+  window.__creatorPreviewState={model:want,eye:rec.eye,mouth:opts.mouthStyle,brow:opts.browStyle,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face};
   return true;
  }catch(e){console.warn('Character preview',e);return false;}
 };

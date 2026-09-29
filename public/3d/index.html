@@ -1057,10 +1057,11 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./hub-tour.js?v=2082"></script>
 <script src="./controller.js?v=2080"></script>
 <script src="./ui-icons.js?v=2087"></script>
-<script src="./stylist.js?v=2088"></script>
+<script src="./face-options.js?v=2089"></script>
+<script src="./stylist.js?v=2089"></script>
 <script src="./character-stats.js?v=2087"></script>
 <script src="./class-looks.js?v=2084"></script>
-<link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2084"></script>
+<link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2089"></script>
 <script src="./emotes.js?v=2087"></script>
 <script src="./camera-occlusion.js?v=2074"></script>
 <script src="./rift-shards.js?v=1992"></script>
@@ -1118,7 +1119,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.088.0-stylist-makeover';
+const VERSION3D='2.089.0-face-options';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1180,7 +1181,7 @@ const GLOBAL_FIELDS=['objectiveArrows','friendArrows','legacyHubDialogue','dialo
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
@@ -1265,7 +1266,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.petTrain=mv.petTrain&&typeof mv.petTrain==='object'?mv.petTrain:{};
   meta.petLabel=mv.petLabel!==false;
   meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,20):'';
-  meta.classLooks=Object.fromEntries(Object.keys(BFClassLooks.catalog).map(c=>[c,BFClassLooks.valid(mv.classLooks?.[c])]));meta.eyeColor=mv.eyeColor||'#8fd0ff';meta.mouthStyle=['line','smile','frown','o','open'].includes(mv.mouthStyle)?mv.mouthStyle:'line';meta.browStyle=['natural','straight','raised','focused'].includes(mv.browStyle)?mv.browStyle:'natural'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
+  meta.classLooks=Object.fromEntries(Object.keys(BFClassLooks.catalog).map(c=>[c,BFClassLooks.valid(mv.classLooks?.[c])]));meta.eyeColor=mv.eyeColor||'#8fd0ff';meta.mouthStyle=['line','smile','frown','o','open'].includes(mv.mouthStyle)?mv.mouthStyle:'line';meta.faceAdjust=BFFaceOptions.normalize(mv.faceAdjust);meta.browStyle=['natural','straight','raised','focused','none'].includes(mv.browStyle)?mv.browStyle:'natural'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
   meta.optionalDone=mv.optionalDone&&typeof mv.optionalDone==='object'?mv.optionalDone:{}; meta.optionalProgress=mv.optionalProgress&&typeof mv.optionalProgress==='object'?mv.optionalProgress:{};
   meta.iansShards=Array.isArray(mv.iansShards)?mv.iansShards:[]; meta.iansComplete=!!mv.iansComplete;   // Ian's Blade progress (was not persisted before)
   meta.masterSeal=!!mv.masterSeal; meta.masterSealSeen=!!mv.masterSealSeen;                             // Drillmaster's Seal (field class-swap/respec)
@@ -18201,7 +18202,7 @@ function openClassPicker(){
 function openCharCreate(){
  if(!MODE){meta.diff='normal';loadMode('rl');}mode='menu';showGameUI(false);releaseKeyboard();
  const descriptions={warrior:['Close combat - Tough','Fight up close with a sword. Repeated hits can stagger an enemy.','A sturdy first choice. Dodge enemy attack warnings.'],ranger:['Ranged combat - Mobile','Use a bow and keep enemies at a distance.','Keep moving; pause to aim when it is safe.'],mage:['Ranged magic - Powerful','Cast with a staff. Standing still builds power.','Lower health means choosing safe places to cast.']};
- BFCharacterCreator.open({classes:STARTERS.map(id=>({id,name:CLASSES[id].disp,icon:CLASSES[id].icon,tag:descriptions[id][0],text:descriptions[id][1],tip:descriptions[id][2]})),eye:meta.eyeColor,mouth:meta.mouthStyle,brow:meta.browStyle,name:meta.heroName,show:showOverlayHTML,safe:htmlSafe,weapon:classStartWeapon,back:titleScreen,start:st=>{initAudio();meta.heroName=st.name;meta.eyeColor=st.eye;meta.mouthStyle=st.mouth;meta.browStyle=st.brow;persist();creationAllocation=st.allocation;try{startTrial(st.cls);}finally{creationAllocation=null;}}});
+ BFCharacterCreator.open({classes:STARTERS.map(id=>({id,name:CLASSES[id].disp,icon:CLASSES[id].icon,tag:descriptions[id][0],text:descriptions[id][1],tip:descriptions[id][2]})),eye:meta.eyeColor,mouth:meta.mouthStyle,brow:meta.browStyle,faceAdjust:meta.faceAdjust,name:meta.heroName,show:showOverlayHTML,safe:htmlSafe,weapon:classStartWeapon,back:titleScreen,start:st=>{initAudio();meta.heroName=st.name;meta.eyeColor=st.eye;meta.mouthStyle=st.mouth;meta.browStyle=st.brow;meta.faceAdjust=BFFaceOptions.normalize(st.faceAdjust);persist();creationAllocation=st.allocation;try{startTrial(st.cls);}finally{creationAllocation=null;}}});
 }
 /* Classes & Skills viewer — see every class, its rank, path, and skill tree with
    unlock state + full descriptions. Read-only (equip/respec live at the hub trainer). */
@@ -18742,7 +18743,7 @@ function openSkins(back){
  const clean=()=>{if(closed)return;closed=true;cancelAnimationFrame(raf);observer.disconnect();window.__hero3dPreviewDispose?.(canvas);};const observer=new MutationObserver(()=>{if(!canvas.isConnected)clean();});observer.observe(document.body,{childList:true,subtree:true});
  document.getElementById('wearLook').onclick=()=>{if(meta.classId!==cid||classState(cid).rank<looks[viewed].rank)return;meta.classLooks??={};meta.classLooks[cid]=viewed;persist();draw();};
  document.getElementById('lookBack').onclick=()=>{clean();back();};
- function frame(){if(closed)return;window.__hero3dPreview?.(canvas,{model:window.__hero3dClassModel?.(cid),classId:cid,lookTier:viewed,eyeColor:meta.eyeColor,mouthStyle:meta.mouthStyle,browStyle:meta.browStyle,weapon:G.p.weapon,yaw});raf=requestAnimationFrame(frame);}draw();frame();
+ function frame(){if(closed)return;window.__hero3dPreview?.(canvas,{model:window.__hero3dClassModel?.(cid),classId:cid,lookTier:viewed,eyeColor:meta.eyeColor,mouthStyle:meta.mouthStyle,browStyle:meta.browStyle,faceAdjust:meta.faceAdjust,weapon:G.p.weapon,yaw});raf=requestAnimationFrame(frame);}draw();frame();
 }
 // A single home for everything the game quietly tracks — personal bests, combat tallies, and journey milestones.
 function recordsContent(){
@@ -22723,7 +22724,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2084"></script>
+<script type="module" src="./hero3d.js?v=2089"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

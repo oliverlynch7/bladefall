@@ -838,3 +838,10 @@ Plan: preserve original images and mapping, split transparent sheets into indivi
 ## [Codex | 2026-09-29] Stylist facial customization
 User: "We should be able to change our eye color, or face, or mouth shape rather, and our name for a small amount of gold at the stylist as well."
 Implementation plan: 25 gold flat per confirmed makeover, combining eye color, mouth, eyebrows and name. Reuse character-creator options, preview the equipped class/look, keep edits in a draft until explicit purchase, no charge on unchanged/cancelled/invalid edits or insufficient funds. Store through existing per-character fields; route Mirror rename through the same paid hub service. Test old-save loading, exact charges, cancel/no-op/insufficient funds, persistence and preview cleanup.
+
+## [Codex | 2026-09-29] All-model face options and no eyebrows
+User requests mouth/eyebrow variations across character models, including No eyebrows in character creation. Shared fitted-face renderer already supports the five selectable mouths and four eyebrow poses on all six base models (17 classes). Add none to both UI option lists and saved-value validation; omit eyebrow meshes entirely for none. Validate actual rendered meshes/textures across classes, purchase/save reload and creator choice.
+
+## [Codex | 2026-09-29] Facial position, tilt and randomization
+User: "You should also add the ability for the player to adjust the position and tilt of mouth and eyes for more customization. And add a randomize feature too for fun."
+Add shared optional position/tilt sliders (horizontal, vertical, tilt for eyes and mouth), bounded relative to each fitted model. Randomize face changes only eye color, mouth, eyebrows and gentle offsets; never name/class/stats. Creator and Stylist share the controls, reset and normalization. Persist faceAdjust per character, zero defaults for existing saves, same 25g total Stylist fee.

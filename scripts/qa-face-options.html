@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>Stylist QA</title><style>body{margin:0;background:#111;color:#eee;font:14px monospace}#status{padding:12px}iframe{border:0;width:100%;height:900px}</style><div id="status">Running real-game icon and old-save checks…</div><iframe id="game"></iframe><script>
+const f=document.querySelector('iframe'),status=document.querySelector('#status');let phase=0,before;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));const assert=(v,s)=>{if(!v)throw Error(s)};
+f.onload=async()=>{try{const w=f.contentWindow;for(let i=0;i<300&&!w.__BF3;i++)await wait(100);const b=w.__BF3;assert(b,'game boot');await b.briarReady;b.loadMode('rl');
+if(!phase){b.meta.classId='pyromancer';b.meta.classUnlocked.pyromancer=true;b.meta.classes.pyromancer={rank:10,xp:0,ch:Object.fromEntries([2,3,4,5,6,7,8,9].map(r=>[r,b.CLASS2.pyromancer['r'+r].a.id]))};b.meta.gold=12345;b.meta.heroName='Icon QA';b.meta.hubTutDone=true;b.meta.introSeen=true;b.meta.dialogueTTS=false;b.meta.petOwned=['shepherd'];b.persist();before=JSON.stringify({classId:b.meta.classId,rank:b.meta.classes.pyromancer,gold:b.meta.gold,name:b.meta.heroName,pets:b.meta.petOwned});phase=1;f.src='index.html?mute=1';return;}
+assert(before===JSON.stringify({classId:b.meta.classId,rank:b.meta.classes.pyromancer,gold:b.meta.gold,name:b.meta.heroName,pets:b.meta.petOwned}),'pre-change save preservation');
+
+
+
+b.enterWaystation();b.openStylistMakeover();const q=s=>w.document.querySelector(s);assert(q('[data-value="none"]'),'stylist option');q('[data-value="none"]').click();const slider=q('[data-face-adjust="mouthX"]');slider.value=35;slider.dispatchEvent(new w.Event('input',{bubbles:true}));q('#stySave').click();assert(b.meta.browStyle==='none','purchase no eyebrows');b.persist();b.loadMode('rl');assert(b.meta.browStyle==='none'&&b.meta.faceAdjust.mouthX===35,'no eyebrows and offsets saved');
+b.openCharCreate();q('#ccNext').click();assert(q('[data-brow="none"]'),'creator option');q('[data-brow="none"]').click();assert(w.__creatorWizardState().brow==='none','creator draft');q('#ccRandomFace').click();assert(w.__creatorWizardState().faceAdjust,'creator randomized');assert(q('[data-face-adjust="eyeTilt"]'),'creator sliders');q('#ccBack').click();q('#ccBack').click();await wait(100);
+const canvas=w.document.createElement('canvas');canvas.style.cssText='position:fixed;inset:20px;width:400px;height:400px;z-index:9999;background:#222';w.document.body.append(canvas);let count=0;
+for(const cid of Object.keys(b.CLASSES)){
+ const model=w.__hero3dClassModel(cid);for(let i=0;i<200&&!w.__hero3dPreviewReady(model);i++)await wait(100);assert(w.__hero3dPreviewReady(model),'model ready '+model);
+ for(const mouth of ['line','smile','frown','o','open'])for(const brow of ['natural','straight','raised','focused','none']){
+  assert(w.__hero3dPreview(canvas,{model,classId:cid,eyeColor:'#c47bff',mouthStyle:mouth,browStyle:brow,face:true,yaw:.08}),'render '+cid);
+  let nativeClean=model!=='Wizard';let eyebrows=0,foundMouth=false;w.__creatorPreviewRoot.traverse(o=>{if(o.name==='Face'&&o.geometry?.userData.fittedBrows)nativeClean=true;if(o.userData?._brow)eyebrows++;if(o.isMesh&&o.userData?._mouthShape===mouth)foundMouth=true;});
+  assert(nativeClean,'built-in Wizard eyebrows removed');assert(eyebrows===(brow==='none'?0:2),'brows '+cid+' '+brow+': '+eyebrows);assert(foundMouth,'mouth texture '+cid+' '+mouth);count++;
+ }
+}
+const opts={model:'Warrior',classId:'warrior',mouthStyle:'smile',browStyle:'natural',face:true};
+w.__hero3dPreview(canvas,opts);let node;w.__creatorPreviewRoot.traverse(o=>{if(o.userData?._mouthShape)node=o;});const pos=node.position.clone(),rot=node.quaternion.clone();w.__hero3dPreview(canvas,{...opts,faceAdjust:{mouthX:100,mouthY:100,mouthTilt:100}});w.__creatorPreviewRoot.traverse(o=>{if(o.userData?._mouthShape)node=o;});assert(pos.distanceTo(node.position)>0&&rot.angleTo(node.quaternion)>0,'actual mouth position and tilt changed');
+w.__hero3dPreview(canvas,opts);let eye;w.__creatorPreviewRoot.traverse(o=>{if(o.type==='Group'&&o.userData?._eye)eye=o;});const ep=eye.position.clone(),eq=eye.quaternion.clone();w.__hero3dPreview(canvas,{...opts,faceAdjust:{eyeX:100,eyeY:100,eyeTilt:100}});w.__creatorPreviewRoot.traverse(o=>{if(o.type==='Group'&&o.userData?._eye)eye=o;});assert(ep.distanceTo(eye.position)>0&&eq.angleTo(eye.quaternion)>0,'actual eye position and tilt changed');
+w.__hero3dPreviewDispose(canvas);canvas.remove();b.enterWaystation();b.openStylistMakeover();const oldName=b.meta.heroName,oldGold=b.meta.gold;q('#styRandomFace').click();assert(b.meta.heroName===oldName&&b.meta.gold===oldGold,'randomize is free draft');q('[data-face-reset]').click();assert([...w.document.querySelectorAll('[data-face-adjust]')].every(el=>el.value==='0'),'reset sliders');q('[data-value="none"]').click();q('.face-adjust').open=true;status.textContent='PASS: '+count+' rendered class/mouth/eyebrow combinations, actual eyebrow mesh counts and mouth textures; creator No eyebrows; Stylist purchase and save reload; pre-change save preserved; saved offsets, randomization, reset and actual position/tilt verified.';document.title='PASS — Face options';
+}catch(e){status.textContent='FAIL: '+e.stack;document.title='FAIL — Face options';}};f.src='_qa-prechange.html?mute=1';
+</script>

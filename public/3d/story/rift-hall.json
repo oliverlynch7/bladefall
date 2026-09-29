@@ -5,7 +5,7 @@
   "npcs": {
     "riftkeeper": {
       "name": "Rift Keeper",
-      "role": "Repairs the crystalline training rifts",
+      "role": "Explains the training rifts and their history",
       "start": "hall.keeper.intro"
     },
     "mentor_berserker": {
@@ -46,7 +46,7 @@
   },
   "nodes": {
     "hall.keeper.intro": {
-      "text": "Welcome to the Rift Hall. I keep the broken rifts here until their missing pieces return. Five matching shards make a whole. Bring them to me, and I can join them. Try not to carry them loose in a pocket. You will miss the pocket.",
+      "text": "Welcome to the Rift Hall. Five matching saved shards automatically restore their training rift. The frames follow your journey around the hall, starting with Briar Town on your right. I can explain their history and how the trials work.",
       "choices": [
         {
           "id": "continue",
@@ -74,15 +74,8 @@
       "choices": [
         {
           "id": "assemble",
-          "text": "Can you join my saved shards?",
-          "next": "hall.keeper.assemble",
-          "effects": [
-            {
-              "type": "item",
-              "id": "hall.assembly",
-              "amount": 1
-            }
-          ]
+          "text": "How do the portals open?",
+          "next": "hall.keeper.assemble"
         },
         {
           "id": "origin",
@@ -105,7 +98,7 @@
       }
     },
     "hall.keeper.assemble": {
-      "text": "Set your saved pieces here. I will join every complete set. If a frame still waits, read the count above it. A missing piece cannot be replaced with enthusiasm. Many have tried.",
+      "text": "Each portal opens on its own once you have saved all five matching shards. You do not need my help to join them. The Castle Duskmoor trial also requires you to finish the castle. Read each frame to see your progress.",
       "choices": [
         {
           "id": "back",

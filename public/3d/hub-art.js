@@ -2,7 +2,7 @@
    rebuildWaystationSanctum; service callbacks and portal unlocks stay in the game. */
 import * as THREE from './three.module.js';
 import {buildWaystone,animateWaystone} from './hub-waystone.js?v=2072';
-import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2033';
+import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2076';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
 
 const meshes=new Map(),loader=new GLTFLoader(),dummy=new THREE.Object3D();

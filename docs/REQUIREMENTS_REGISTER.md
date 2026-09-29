@@ -753,3 +753,6 @@ User requests rigorous audit of all class skills/passive choices: remove unexpla
 
 ## [Codex | 2026-09-28] Functional class audit includes healing and PvP
 User explicitly adds runtime verification of every class choice, especially healing/lifesteal, and consistent enemy/player targeting in PvP with sensible PvP limits. Inspection found projectile sources bypassing class and lifesteal hooks, PvP early-return bypassing attacker passives, and incoming PvP subtracting HP directly without shields/defensive passives. Extend audit to shared damage handling, confirmed-hit lifesteal, healing triggers, and multiplayer damage/receipt tests.
+
+## [Codex | 2026-09-28] Automatic ordered Rift Hall
+User requests portals in campaign order counterclockwise, Briar Town first at entrance; five matching shards automatically open the portal. Keeper is optional lore/information only. Preserve saved-shard rules and Necromancer ending prerequisite. Plan: share frame coordinates across interaction/collision/art; derive access from saved sets; remove assembly action.

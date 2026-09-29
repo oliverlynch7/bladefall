@@ -877,3 +877,6 @@ Validation: all 16 campaign parts passed support checks with no renderer errors;
 ## [Codex | 2026-09-28] Class clarity, healing and PvP repair pass
 
 2.075.0-clear-class-choices: reviewed 16 class trees, wired 23 missing passive effects, corrected descriptions and selected balance problems. Fractional/projectile lifesteal, Healing Light, shared PvP defenses and confirmed hit healing are repaired. Browser: 128 skill-handler smoke checks, 27 targeted assertions, old-save preservation passed. See docs/CLASS_AUDIT_2026-09-28.md and docs/qa/class-audit-2026-09-28.json. Exhaustive per-passive behavioral coverage and real remote PvP balance remain follow-up work; do not claim all matchups fully validated.
+
+## [Codex | 2026-09-28] Rift Hall — 2.076.0
+Portals now run counterclockwise from Briar at entrance-right, up right wall and down left. Shared frame coordinates drive art, collisions, interactions. Complete saved sets grant access immediately without Keeper assembly; hall entry persists restored sets. Keeper now explains automatic opening. Castle ending prerequisite retained. Existing Pyromancer trial remains unavailable (not implemented); frame stays in sequence. Browser verified eight coordinates, automatic access without conversation, castle prerequisite and pre-change save preservation.

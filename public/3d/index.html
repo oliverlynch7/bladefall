@@ -1099,7 +1099,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.076.0-automatic-rift-hall';
+const VERSION3D='2.077.0-safe-unseen-strike';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10476,6 +10476,19 @@ function snapWorldInteractables(){ if(!G) return;
   for(const o of (G.springs||[])) snap(o);
   for(const e of (G.enemies||[])) snapEnemyToSurface(e);
 }
+// Combat blink destinations require full-footprint support, not collision edge tolerance.
+function unseenLanding(p,e){
+ const r=p.r||13,ref=Number(e.y)||0,angle=Math.atan2(p.x-e.x,p.z-e.z)+Math.PI;
+ for(const offset of [0,.3,-.3,.6,-.6,1,-1]){
+  const a=angle+offset,d=(e.r||15)+r+13,x=e.x+Math.sin(a)*d,z=e.z+Math.cos(a)*d;
+  const b=G.bounds;if(b&&(x-r<b.minX||x+r>b.maxX||z-r<b.minZ||z+r>b.maxZ))continue;
+  const y=floorAt(x,z,0,ref+2);if(!Number.isFinite(y)||Math.abs(y-ref)>24)continue;
+  if([[r,0],[-r,0],[0,r],[0,-r],[r*.71,r*.71],[-r*.71,r*.71],[r*.71,-r*.71],[-r*.71,-r*.71]].some(([dx,dz])=>Math.abs(floorAt(x+dx,z+dz,0,y+1)-y)>2))continue;
+  if([...(G.walls||[]),...(G.obstacles||[]),...(G.doors||[]).filter(o=>!o.open)].some(o=>(o.h||0)>y+2&&(o.y0||0)<y+(p.h||40)&&Math.abs(x-o.x)<o.w/2+r&&Math.abs(z-o.z)<o.d/2+r))continue;
+  if((G.spikefields||[]).some(o=>Math.hypot(x-o.x,z-o.z)<(o.r||Math.max(o.w||60,o.d||60))+r))continue;
+  return {x,y,z};
+ }return null;
+}
 function enemySupport(e){
   let f=-Infinity;
   for(const sg of G.segments){ if(Math.abs(e.x-sg.x)<sg.w/2+e.r*0.35 && Math.abs(e.z-sg.z)<sg.d/2+e.r*0.35){ f=0; break; } }
@@ -13244,8 +13257,8 @@ const CLASS_BASIC = {
       addText(e.x, e.y + e.h + 26, e.z, 'EXECUTE', '#ff5a6a', true);
       return (e.boss||e.bot||e._peer||e.finalKing||e.hydraChain||e.furnaceColossus)?dmg*1.25:e.hp+9999;
     }
-    const a = Math.atan2(p.x - e.x, p.z - e.z);
-    p.x = e.x - Math.sin(a) * (e.r + 26); p.z = e.z - Math.cos(a) * (e.r + 26);
+    const landing=unseenLanding(p,e);
+    if(landing){Object.assign(p,landing,{vx:0,vy:0,vz:0,onGround:true});G.lastSafe={...landing};p.warpSerial=(p.warpSerial||0)+1;}
     p.yaw = Math.atan2(e.x - p.x, e.z - p.z);
     addText(e.x, e.y + e.h + 18, e.z, 'UNSEEN', '#9fe0ff');
     try { burst(p.x, p.y + 16, p.z, '#9fe0ff', 10); } catch(err){}
@@ -22362,7 +22375,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

@@ -501,3 +501,6 @@ User explicitly adds runtime verification of every class choice, especially heal
 
 ## [Codex | 2026-09-28] Automatic ordered Rift Hall
 User requests portals in campaign order counterclockwise, Briar Town first at entrance; five matching shards automatically open the portal. Keeper is optional lore/information only. Preserve saved-shard rules and Necromancer ending prerequisite. Plan: share frame coordinates across interaction/collision/art; derive access from saved sets; remove assembly action.
+
+## [Codex | 2026-09-28] Safe Ninja Unseen landing
+User requires Unseen Strike never teleport off-map and always land on solid ground. Plan: validate footprint, bounds, height and blocking geometry; try nearby rear positions; keep original position when none is safe.

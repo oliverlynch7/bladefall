@@ -880,3 +880,6 @@ Validation: all 16 campaign parts passed support checks with no renderer errors;
 
 ## [Codex | 2026-09-28] Rift Hall — 2.076.0
 Portals now run counterclockwise from Briar at entrance-right, up right wall and down left. Shared frame coordinates drive art, collisions, interactions. Complete saved sets grant access immediately without Keeper assembly; hall entry persists restored sets. Keeper now explains automatic opening. Castle ending prerequisite retained. Existing Pyromancer trial remains unavailable (not implemented); frame stays in sequence. Browser verified eight coordinates, automatic access without conversation, castle prerequisite and pre-change save preservation.
+
+## [Codex | 2026-09-28] Safe Unseen Strike — 2.077.0
+Ninja basic Unseen rear blink validates map bounds, full footprint support, target-height support and body clearance, rejecting spike fields. Tries rear arc alternatives; no safe destination means strike without relocating. Successful blink snaps to support, clears velocity and updates lastSafe/warp serial. Browser checks: rear landing, edge rejection, void fallback, elevated platform, solid wall; pre-change save preserved.

@@ -1,0 +1,85 @@
+{
+  "emotes": {
+    "wave": {
+      "id": "wave",
+      "t": 0,
+      "stamp": 1764.2000000029802
+    },
+    "pose": {
+      "emote": {
+        "id": "wave",
+        "t": 0.6166666666666669
+      },
+      "arm": [
+        -0.842701372566597,
+        -0.21270968764673853,
+        0.07127143992372983,
+        0.4894173774617988
+      ]
+    },
+    "checks": [
+      "wave",
+      "point",
+      "cheer",
+      "bow",
+      "dance"
+    ]
+  },
+  "legs": {
+    "clip": "Run",
+    "tracks": 33,
+    "parents": [
+      "Root",
+      "Body",
+      "Hips"
+    ]
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  }
+}

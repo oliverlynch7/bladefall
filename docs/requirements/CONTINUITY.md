@@ -856,3 +856,7 @@ Removed Postings. Sparring entrance now occupies (610,245), with its fallback pa
 
 ## [Codex | 2026-09-28] Prominent NPC services — 2.070.0
 All five hub service NPCs now show larger gold-bordered main buttons with matching icons and explicit service labels, both on landing menus and dialogue shortcuts. Browser measured 73px service buttons versus 47px conversation options and verified both click routes for every NPC. Service access logic unchanged. Pre-change save and syntax checks passed. Evidence: docs/qa/npc-services-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Moving combat and emotes — 2.071.0
+Locomotion overlay now includes Root/Body/Hips with leg tracks so moving attack legs share their parent pose. Added M directional mouse wheel with Wave/Point/Cheer/Bow/Dance; click selection, keyboard 1–5/Tab/arrows/Enter, M/Esc cancel. Four-second procedural rig emotes cancel on movement/actions/damage/death; shared through validated co-op motion state with remote elapsed time. Existing class rigs use shared bone names. Browser verified M/click, all five packet-to-peer round trips, movement/damage/expiry cancellation, lower-body overlay parent coverage, visible wheel screenshot, and pre-change saves. Real two-person animation playtest and subjective animation polish remain to verify; no claim of exhaustive class-by-class visual QA. Evidence: docs/qa/emotes-2026-09-28.json.

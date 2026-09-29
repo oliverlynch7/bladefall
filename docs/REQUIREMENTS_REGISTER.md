@@ -731,3 +731,7 @@ User specifies four top buttons: Gear, Bag, Classes, Achievements; four bottom b
 
 ## [Codex | 2026-09-28] Prominent NPC services
 User requests larger main hub service buttons with matching icons. Apply shared prominent service button to landing and in-conversation shortcut for all five service NPCs, using the actual service label; preserve quests and service gates. Verify size, icons and click behavior in browser.
+
+
+## [Codex | 2026-09-28] Moving attack legs and shared emotes
+User reports bowed/glitched legs while moving and attacking; requests M mouse-direction wheel of 4–5 universal emotes visible in co-op. Grounded plan: include locomotion parent bones in lower-body overlay; add Wave/Point/Cheer/Bow/Dance wheel, cancel on action/damage, synchronize validated visual-only state through existing motion packets. Test browser input, rig transforms, peer snapshots and saves.

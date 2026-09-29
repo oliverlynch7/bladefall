@@ -1270,14 +1270,27 @@ function colorWeapon(holder,w){
  holder._weap.traverse(o=>{if(o.name==='BowString'){o.material.color.set(weaponTint(w)||'#e8dcc1');return;}if(!o.isMesh)return;const accentSurface=!!weaponTint(w)&&!!o.userData.elementSurface,elementGold=!!weaponTint(w)&&holder.fit?.name?.includes('Golden');const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=(m.userData._weaponPaint||o.userData.signaturePart)?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
  if(src?.image?.width){const k=src.uuid+'|'+tint+'|'+accentSurface+'|'+(o.userData.elementUvTriangles?.length?holder.fit?.name:'');let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint),head=weaponTint(w)?weaponHeadMask(o,canvas.width,canvas.height,src.flipY):null;for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if((head?.[i+3]>0&&h[2]>.1)||(h[2]>.35&&(accentSurface||h[1]<.28||h[0]>65))){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if((accentSurface&&hsv[2]>.1)||(elementGold&&hsv[0]>=30&&hsv[0]<=65&&hsv[2]>.25))out.color.set(tint).multiplyScalar(.55+.45*hsv[2]);else if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
 }
+
+function restoreEmotePose(A){for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];}
+function applyEmotePose(p,wrap,A){
+ const e=p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
+ const t=e.t,blend=Math.min(1,t/.18,(4-t)/.25),s=Math.sin(t*7);
+ const turn=(name,x=0,y=0,z=0)=>{const b=wrap.getObjectByName(name);if(!b)return;A.emoteBones.push([b,b.quaternion.clone()]);b.rotateX(x*blend);b.rotateY(y*blend);b.rotateZ(z*blend);};
+ if(e.id==='wave'){turn('UpperArmR',0,0,-2);turn('LowerArmR',0,.3*s,-.35);}
+ if(e.id==='point'){turn('UpperArmR',-1.4,0,-.15);turn('LowerArmR',.15);}
+ if(e.id==='cheer'){turn('UpperArmR',0,0,-2.4);turn('UpperArmL',0,0,2.4);turn('Torso',.06*s);}
+ if(e.id==='bow'){turn('Torso',.65*Math.sin(Math.PI*Math.min(1,t/3.6)));turn('Head',.2);}
+ if(e.id==='dance'){turn('Hips',0,.15*s,.08*s);turn('Torso',0,-.18*s);turn('UpperArmR',.35*s,0,-.65);turn('UpperArmL',-.35*s,0,.65);turn('LowerArmR',-.4);turn('LowerArmL',-.4);turn('UpperLegR',.12*s);turn('UpperLegL',-.12*s);}
+}
+
 function movingCombatLegs(p,A,dt){
  if(A.local)HERO3D.locomotionOverlay=null;
  if(!p.onGround||p.dead||p.dodgeTimer>0||Math.hypot(p.vx||0,p.vz||0)<20||!(p.atkTimer>0||p.combatPose?.remaining>0))return;
  const clip=clips.Run||clips.Walk;if(!clip||!A.mixer)return;
- if(A.legRoot!==A.mixer.getRoot()){A.legRoot=A.mixer.getRoot();A.legTime=0;A.legTracks=clip.tracks.filter(t=>/UpperLeg|LowerLeg|Foot|PoleTarget/.test(t.name)).map(t=>({binding:THREE.PropertyBinding.create(A.legRoot,t.name),sample:t.createInterpolant()}));}
+ if(A.legRoot!==A.mixer.getRoot()){A.legRoot=A.mixer.getRoot();A.legTime=0;A.legTracks=clip.tracks.filter(t=>/^(Root|Body|Hips|UpperLeg[LR]|LowerLeg[LR]|Foot[LR]|PoleTarget[LR])\./.test(t.name)).map(t=>({binding:THREE.PropertyBinding.create(A.legRoot,t.name),sample:t.createInterpolant()}));}
  A.legTime=(A.legTime+dt*Math.max(.5,Math.hypot(p.vx||0,p.vz||0)/200))%clip.duration;
  for(const t of A.legTracks)t.binding.setValue(t.sample.evaluate(A.legTime),0);
- if(A.local)HERO3D.locomotionOverlay={clip:clip.name,tracks:A.legTracks.length};
+ if(A.local)HERO3D.locomotionOverlay={clip:clip.name,tracks:A.legTracks.length,parents:['Root','Body','Hips'].filter(n=>clip.tracks.some(t=>t.name.startsWith(n+'.')))};
 }
 
 let _lastW = 0, _lastH = 0;
@@ -1667,6 +1680,7 @@ function playFor(p, A){
 
   const cast = p.combatPose?.remaining > 0 && !(p.dodgeTimer > 0) && !airborne;
   const want = p.dead ? 'Death'
+             : p.emote && p.emote.t<4 ? 'Idle'
              : cast ? p.combatPose.clip
              : charging ? CHG
              /* p.atkTimer, NOT p.attackTimer. The picker has tested `p.attackTimer > 0 ||
@@ -1973,6 +1987,7 @@ export function drawHero3D(p, t){
     showOnly(wrap);
     if(_isLocal&&window.BFHubDialogue?.active)wrap.visible=false;
 
+    restoreEmotePose(anim);
     restoreGripPose(anim);
     playFor(p, anim);
     if(anim.mixer) anim.mixer.update(dt);
@@ -1987,6 +2002,7 @@ export function drawHero3D(p, t){
     }
     pirateWeaponPose(p,wrap,anim,dt);
     poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
+    applyEmotePose(p,wrap,anim);
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;

@@ -844,3 +844,7 @@ Removed duplicate in-view friend navigation caption; edge guidance retained. Pee
 
 ## [Codex | 2026-09-28] Heading-up minimap — 2.067.0
 Map rotates with character facing using shortest-angle exponential smoothing; arrow stays upward and north marker rotates around rim. Terrain and markers share the same transform. Tutorial/accessibility wording updated. Browser canvas transform checks confirm forward enemies appear above player at four cardinal headings; old-save fixture and syntax passed. Evidence: docs/qa/heading-map-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Organized menus — 2.068.0
+Pause Records tile removed; records expand inside Achievements using shared records content. Pause Settings grouped into five accordions (controls/camera, graphics/appearance, audio/voices, accessibility/guidance, help/tutorial), retaining current section after setting toggles. Bag category icons use existing assets; all five gear slots remain present with zero counts when empty. Browser Records expansion/back, settings toggle retention and audio slider, ten bag groups/icons, screenshots and old-save fixture passed. Evidence: docs/qa/menu-organization-2026-09-28.json.

@@ -460,3 +460,7 @@ User reports friend names blocking health bars. Found duplicate friend navigatio
 
 ## [Codex | 2026-09-28] Heading-up minimap
 User requests minimap follow player facing rather than north-up. Rotate terrain/enemies/exit together around a fixed upward player arrow, smoothly follow shortest-angle turns, and move the N compass marker around the rim. Update tutorial wording.
+
+
+## [Codex | 2026-09-28] Menu organization and bag consistency
+User requests Records as a dropdown within Achievements and removal of pause Records tile; Settings logically grouped; icons on Weapons/Armor and Physical/Ranged/Magical; all armor/jewelry categories visible even at zero items. Plan: reusable records content in a details section, organized settings accordions retaining selected section through toggles, existing icon assets and all GEARSLOTS populated.

@@ -968,6 +968,7 @@
   }
 .baginventory .achlist{display:block}.bagequip .bagslots{width:42%;max-width:245px}.bagequip .bagdoll3d{width:50%;height:380px}
 @media(max-width:700px){#riftDiscovery{right:14px!important;bottom:175px!important;width:calc(100vw - 28px)!important;font-size:12px!important;line-height:1.35!important}}
+.settingsSection{text-align:left;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}.settingsSection>summary{cursor:pointer;font-weight:800;color:var(--amber);padding:5px}.settingsContents{display:grid;gap:8px;margin-top:12px}.settingsContents .bigbtn{margin:0;text-align:left}.settingsContents .setrow{margin:4px 0}
 details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
 
 #bosshpwrap.officer-team{top:calc(env(safe-area-inset-top) + 294px);width:min(580px,82vw)}
@@ -1096,7 +1097,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.067.0-heading-minimap';
+const VERSION3D='2.068.0-menu-organization';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4984,9 +4985,10 @@ function openBag(back,keepOpen=false){
   order.forEach((x,i)=>{const o=oOf(x),key=x.it.weapon?'weapon-'+weapCat(o):'armor-'+o.slot;
     if(!groups.has(key))groups.set(key,{name:x.it.weapon?({melee:'Physical',ranged:'Ranged',magic:'Magical'}[weapCat(o)]):slotLabel(o.slot),rows:[]});
     if(rowNodes[i])groups.get(key).rows.push(rowNodes[i].outerHTML);});
-  const groupHtml=(key,name,count,body)=>`<details class="baggroup" data-group="${key}" ${expanded.has(key)?'open':''} style="border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:8px"><summary style="cursor:pointer;font-weight:800;padding:5px">${name} <span style="color:var(--muted)">(${count})</span></summary>${body}</details>`;
+  const bagCategoryIcon=key=>key.startsWith('armor-')?slotIcon(key.slice(6)):`<span aria-hidden="true" class="ico ${key==='armor'?'ico-slot ico-slot-chest':'ico-damage ico-damage-'+({'weapon-ranged':'ranged','weapon-magic':'magic'}[key]||'physical')}" style="vertical-align:middle;margin-right:8px"></span>`;
+  const groupHtml=(key,name,count,body)=>`<details class="baggroup" data-group="${key}" ${expanded.has(key)?'open':''} style="border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:8px"><summary style="cursor:pointer;font-weight:800;padding:5px">${bagCategoryIcon(key)}${name} <span style="color:var(--muted)">(${count})</span></summary>${body}</details>`;
   const weaponGroups=['melee','ranged','magic'].map(cat=>{const key='weapon-'+cat,g=groups.get(key);return groupHtml(key,{melee:'Physical',ranged:'Ranged',magic:'Magical'}[cat],g?.rows.length||0,g?g.rows.join(''):'<p class="hint">No weapons in this category.</p>');}).join('');
-  const armorGroups=[...groups].filter(([key])=>key.startsWith('armor-')).map(([key,g])=>groupHtml(key,g.name,g.rows.length,g.rows.join(''))).join('');
+  const armorGroups=GEARSLOTS.map(slot=>{const key='armor-'+slot,g=groups.get(key);return groupHtml(key,slotLabel(slot),g?.rows.length||0,g?g.rows.join(''):'<p class="hint">No items in this category.</p>');}).join('');
   const weaponCount=order.filter(x=>x.it.weapon).length;
   const rows=groupHtml('weapons','Weapons',weaponCount,weaponGroups)+groupHtml('armor','Armor',order.length-weaponCount,armorGroups||'<p class="hint">Armor, rings and amulets appear here.</p>');
 
@@ -18563,15 +18565,12 @@ function openSkins(back){
   document.getElementById('backBtn').onclick=back;
 }
 // A single home for everything the game quietly tracks — personal bests, combat tallies, and journey milestones.
-function openRecords(back){
-  mode='menu'; if(SFX&&SFX.pickup) SFX.pickup();
+function recordsContent(){
   const diffLine=['normal','hardcore','hitless'].map(id=>{ const flag={normal:'beatNormal',hardcore:'beatHardcore',hitless:'beatHitless'}[id]; return meta[flag]?((DIFFS[id]?DIFFS[id].icon+' '+DIFFS[id].name:id)):null; }).filter(Boolean).join(' · ')||'—';
   const row=(label,val)=>'<div class="vsrow"><span>'+label+'</span><b style="color:#e8dcff">'+val+'</b></div>';
   const grp=(title,rows)=>'<p class="hint" style="text-align:left;margin:12px 0 4px;color:#c47bff;font-weight:800">'+title+'</p><div class="statgrid">'+rows+'</div>';
   const n=x=>(x||0).toLocaleString();
-  showOverlayHTML('<div class="card" style="max-width:560px"><p class="ovkicker">Your legend so far</p><h2 class="ovh">📜 Records</h2>'
-    +'<div style="max-height:min(62vh,540px);overflow-y:auto;padding-right:4px">'
-    +grp('Challenges',
+  return grp('Challenges',
         row('💀 The Gauntlet · Normal', meta.bossRushBest?fmtTime(meta.bossRushBest):'—')
        +row('💀 The Gauntlet · Brutal', meta.bossRushBestBrutal?fmtTime(meta.bossRushBestBrutal):'—')
        +row('🕳️ Abyssal Descent · deepest', meta.endlessBest?('Floor '+meta.endlessBest):'—')
@@ -18587,9 +18586,10 @@ function openRecords(back){
        +row('Zones cleared', n(meta.zonesCleared))
        +row('Secrets found', n(meta.secretsFound)+' / 7')
        +row('Legendaries found', n(meta.legendaryFound))
-       +row('Flawless areas', n(meta.flawlessStages)))
-    +'</div><button class="bigbtn ghost" id="recBack" style="margin-top:12px">Back</button></div>');
-  document.getElementById('recBack').onclick=back;
+       +row('Flawless areas', n(meta.flawlessStages)));
+}
+function openRecords(back){
+  mode='menu';showOverlayHTML(`<div class="card"><h2 class="ovh">Records</h2>${recordsContent()}<button class="bigbtn ghost" id="recBack">Back</button></div>`);document.getElementById('recBack').onclick=back;
 }
 function openAchievements(back){
   mode='menu';
@@ -18598,7 +18598,7 @@ function openAchievements(back){
       <div><div class="at">${a.name}</div><div class="ad">${a.desc}${a.skin?` · unlocks ${SKINS[a.skin].name} skin`:''}</div></div></div>`; }).join('');
   const n=ACHIEVEMENTS.filter(a=>meta.achievements[a.id]).length;
   showOverlayHTML(`<div class="card"><h2 class="ovh">${eventIcon('event-achievement')} Achievements</h2><p class="ovsub">${n}/${ACHIEVEMENTS.length} complete</p>
-    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <details id="achievementRecords" class="settingsSection"><summary>📜 Records — personal bests and milestones</summary>${recordsContent()}</details><div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
 function openGear(back){
@@ -18881,7 +18881,6 @@ function openPause(){
       ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes & Skills','Ranks, paths, and skills')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
-        ${navCard('recBtn','icons/event-achievement.png','Records','Bests, kills &amp; milestones')}
     </div>
     <div class="sect">Settings</div>
     <div class="pgrid">
@@ -18938,6 +18937,21 @@ function openPause(){
   { const _rb=document.getElementById('recBtn'); if(_rb) _rb.onclick=()=>openRecords(openPause); }
   document.getElementById('qmenu').onclick=()=>{ if(IN_ARENA){ resumeGameAudio(false); exitArena(); return; } persist(); resumeGameAudio(false); openHub(); };
 }
+function organizePauseSettings(){
+  const back=document.getElementById('settingsBack'),card=back.closest('.card');
+  const groups=[
+    ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider']],
+    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn']],
+    ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS']],
+    ['Accessibility & guidance',['shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
+    ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
+  ];
+  for(const [title,ids]of groups){const section=document.createElement('details');section.className='settingsSection';section.open=(openPauseSettingsV2.section||groups[0][0])===title;const summary=document.createElement('summary');summary.textContent=title;section.append(summary);const contents=document.createElement('div');contents.className='settingsContents';section.append(contents);card.insertBefore(section,back);
+    for(const id of ids){const node=document.getElementById(id);if(node)contents.append(node.closest('.setrow')||node);}
+    summary.onclick=e=>{e.preventDefault();const opening=!section.open;card.querySelectorAll('.settingsSection').forEach(d=>d.open=false);section.open=opening;openPauseSettingsV2.section=opening?title:null;};
+  }
+  card.querySelectorAll(':scope > .pgrid,:scope > .sect').forEach(e=>e.remove());
+}
 function openPauseSettingsV2(){
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Game options</p><h2 class="ovh">Settings</h2>
@@ -18965,6 +18979,7 @@ function openPauseSettingsV2(){
     <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
+  organizePauseSettings();
   for(const key of ['objectiveArrows','friendArrows'])document.getElementById(key+'Btn').onclick=()=>{meta[key]=meta[key]===false;persistGlobal();openPauseSettingsV2();};
   document.getElementById('settingsBack').onclick=openPauseV2;
   document.getElementById('fsBtn').onclick=()=>{ toggleFullscreen(); setTimeout(openPauseSettingsV2,120); };
@@ -18997,7 +19012,6 @@ function openPauseV2(){
       </div></section>
     <section class="pausegroup pauseutility"><div class="pausegrouplabel">Menu &amp; Navigation</div><div class="navgrid">
         ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
-        ${navCard('recBtn','icons/event-achievement.png','Records','Bests, kills &amp; milestones')}
         ${navCard('optBtn','icons/settings.png','Settings','Audio, view, and controls')}
         ${navCard('multiplayerBtnP','icons/multiplayer.svg','Multiplayer',MP.active?'Room code and party options':'Host or join with friends')}
         ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}

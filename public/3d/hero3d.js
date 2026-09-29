@@ -31,7 +31,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2074';
+import { WORLD3D, syncWorld } from './world3d.js?v=2082';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2057';
 import { PROP3D, syncProps } from './prop3d.js?v=2057';
 

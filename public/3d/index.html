@@ -1042,8 +1042,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./voice-content.js?v=2079"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2079"></script>
-<link rel="stylesheet" href="./hub-tour.css?v=2079">
-<script src="./hub-tour.js?v=2079"></script>
+<link rel="stylesheet" href="./hub-tour.css?v=2082">
+<script src="./hub-tour.js?v=2082"></script>
 <script src="./controller.js?v=2080"></script>
 <script src="./character-stats.js?v=2081"></script>
 <script src="./emotes.js?v=2071"></script>
@@ -1092,7 +1092,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./combat-art.js?v=2081"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
-<script src="./guided-tutorial.js?v=2067"></script>
+<script src="./guided-tutorial.js?v=2082"></script>
 <script>
 (function(){
 "use strict";
@@ -1103,7 +1103,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.081.0-pyromancer-stats';
+const VERSION3D='2.082.0-tutorial-hub';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2672,7 +2672,7 @@ function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) ret
   for(let i=0;i<3;i++){ const pid=(cs.mix&&cs.mix[i+1])||cs.sub; out.push(skillsOf(pid)[i]||C.skills[1+i]); }
   return out; }
 function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) return false; const S=curSkills(); return S[i]?cs.rank>=S[i].rank:false; }
-function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return;
+function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return; if(inBeginnerTrial()&&cs.rank===1&&G.trialKills<3)n=Math.min(n,Math.max(0,RANK_XP(1)-1-cs.xp));
   cs.xp+=n; let up=false;
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
     const S=curSkills(meta.classId);
@@ -3953,7 +3953,7 @@ function optionalBump(id,by){ const m=(G.optionalMissions||[]).find(x=>x.id===id
   persist(); questUpdate();
 }
 function questKill(type){
-  if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
+  if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++; if(!T.earned&&G.trialKills===3){const cs=classState(meta.classId);if(cs.rank===1)gainClassXp(Math.max(1,RANK_XP(1)-cs.xp));}        // trials count every kill, whatever it was
     if(G.trialKills>=T.kills && !G.portal&&!MP.guest()){if(G.riftMentor)trialMentorProved();else openWay();}
     questUpdate(); return; }
   for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
@@ -5399,7 +5399,7 @@ function startTrial(cid,fromZone,opts={}){
 function controlHint(id){const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Not assigned — set in Key Bindings';}
 function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag','B'],['Pause / release mouse','Esc']];}
 function showTutorial(cid){mode='menu';
- showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Practice here before your adventure. You can take your time.</p><div style="text-align:left;line-height:1.65"><p><strong>Your goal:</strong> defeat the enemies, then walk into the exit portal to reach the Waystation.</p><div class="beginner-controls">${beginnerControls().slice(0,5).map(([a,b])=>`<p><strong>${a}:</strong> ${htmlSafe(b)}</p>`).join('')}</div><p>Hold jump for a higher jump. Move away from enemy attack warnings, or dodge through a strike.</p><p>On touch screens, use the movement stick and labeled action buttons. Press <strong>Esc</strong> or the pause button whenever you need a break or want to change the camera.</p><p>You will unlock skills as your class rank increases. We will explain them when they become available.</p></div><button class="bigbtn" id="tutGo">Start practicing</button><button class="bigbtn ghost" id="tutSkip">Skip practice — keep my class</button></div>`);
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · E</button><button class="bigbtn ghost" id="tutSkip">Skip practice · Q</button></div>`);
  document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
  document.getElementById('tutSkip').onclick=()=>{showOverlayHTML(`<div class="card"><h2 class="ovh">Skip the practice area?</h2><p class="ovsub">You will keep your chosen class and go to the Waystation. You can find the controls again in Pause → Help.</p><button class="bigbtn" id="skipYes">Skip and go to the Waystation</button><button class="bigbtn ghost" id="skipNo">Return to practice instructions</button></div>`);document.getElementById('skipYes').onclick=skipTrial;document.getElementById('skipNo').onclick=()=>showTutorial(cid);};
 }
@@ -9769,13 +9769,13 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Desktop: ANY click anywhere in live play recaptures the camera. Capture phase prevents HUD layers
 // or controls from shrinking the usable reacquisition region after tabbing away.
 function acquireCameraLock(event){
-  if(event?.target?.closest?.('#visual-qa-panel,#journalNotice,#questbox')) return;
+  if(event?.target?.closest?.('#visual-qa-panel,#journalNotice,#questbox,#guidedLesson')) return;
   /* NEVER grab the pointer while the level editor is open. Oliver: "i dont have control of my
      mouse." The over-the-shoulder camera pointer-locks the canvas on click to steer the hero, which
      hides the cursor and feeds the movement straight to the camera - so in edit mode you could not
      see where you were clicking, could not press a palette button, and could not drag to look.
      An editor is a cursor-driven tool; the lock has to be off for the whole time it is open. */
-  if(BFGuidedTutorial.state||_edOpen()||meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
+  if(BFGuidedTutorial.blocksPointerLock||_edOpen()||meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
   showGameUI(true); try{ const q=canvas.requestPointerLock(); if(q&&q.catch) q.catch(()=>{}); }catch(e){}
 }
 window.addEventListener('pointerdown',acquireCameraLock,true);
@@ -11952,17 +11952,7 @@ let queueSkillTut=null;
 // A quick, one-time lesson the first time you unlock a usable skill: what it does, and which key fires it.
 function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tut.skill=1; persist();
   mode='upgrade'; showGameUI(false); _offerT=Date.now();
-  const acc={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#e8a33d';
-  const art=s.icon||(s.fx&&typeof C2_ICON!=='undefined'&&C2_ICON[s.fx])||'✦';
-  showOverlayHTML(`<div class="card skilltut" style="--tut:${acc}">
-    <p class="ovkicker">Skill Unlocked</p><h2 class="ovh">${s.n}</h2>
-    <div class="tutbody"><div class="tuticon">${art}</div>
-      <div class="tutcopy"><p class="tutdesc">${s.d}</p>
-        <div class="tutkeyrow"><span class="tutkey">${htmlSafe(controlHint('skill1'))}</span><span class="tutkeymsg">Press <b>${htmlSafe(controlHint('skill1'))}</b> — or tap the first skill button — to unleash ${s.n}.</span></div>
-        <p class="tuthint"><b>Why use it:</b> skills are your strongest tools — far bigger than a basic attack. Save them for the moments that matter: a tough foe, a crowd to clear, or getting out of trouble.</p>
-        <p class="tuthint"><b>The cost:</b> after you use it, it recharges over ${s.cd}s${meta.classId==='mage'||meta.classId==='reaper'?' and spends mana':''}, so you can\'t spam it — time it well.</p>
-        <p class="tuthint"><b>What\'s next:</b> keep fighting to rank up. Each rank lets you pick another <b>skill or passive</b>, filling out combat slots <b>1–4</b> — you\'re building your own kit as you grow.</p></div></div>
-    <button class="bigbtn" id="tutGo">Got it — try it out</button></div>`);
+  showOverlayHTML(`<div class="card skilltut"><p class="ovkicker">Skill unlocked</p><h2>${htmlSafe(s.n)}</h2><p>${htmlSafe(s.d)}</p><p>Use ${htmlSafe(controlHint('skill1'))} · ${s.cd}s recharge</p><button class="bigbtn" id="tutGo">Try it · E</button></div>`);
   document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); if(inBeginnerTrial())BFGuidedTutorial.skill(G); };
 }
 function c2def(id){ return CLASS2[id||meta.classId]; }
@@ -11975,24 +11965,31 @@ function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classSta
   for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
 function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
-  menuTip('tip_choice','every rank you gain gives you a <b>choice</b> — a new active <b>skill</b> or a permanent <b>passive</b>. This is how you build your character; there is no single right path. Pick what fits how you want to fight — and you can re-pick <b>any</b> choice later at the Drillmaster, so nothing here is permanent.');
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
     return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span><span class="c2badge">Conditions below</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
   showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
-    <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Compare both paths carefully — you can respec later at the Drillmaster.</p></div>
-    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div></div>`);
+    <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Change choices later at the Drillmaster.</p></div>
+    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · E</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q</button></div></div>`);
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
     const selected=[R.a,R.b].find(o=>o.id===b.dataset.pick);if(!selected)return;
     const confirmAt=Date.now();
-    showOverlayHTML(`<div class="card"><p class="ovkicker">Review your choice</p><h2 class="ovh">${htmlSafe(selected.n)}</h2><p class="ovsub">${htmlSafe(selected.d)}</p><p>${isSk?'This becomes skill '+slot+'. Use it with '+htmlSafe(controlHint('skill'+slot))+'.':'This passive works automatically. You do not need to press a button.'}</p><p class="ovsub">You can change your choices later at the Drillmaster.</p><button class="bigbtn" id="classChoiceConfirm">Confirm ${isSk?'skill':'passive'}</button><button class="bigbtn ghost" id="classChoiceBack">Compare both options again</button></div>`);
+    document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline=el===b?'3px solid #ffd47d':'';el.setAttribute('aria-pressed',String(el===b));});
+    document.getElementById('choiceReview').hidden=false;document.getElementById('choiceSelected').textContent=selected.n;
     let committed=false;
-    document.getElementById('classChoiceBack').onclick=()=>openClassChoice(rank);
+    document.getElementById('classChoiceBack').onclick=()=>{document.getElementById('choiceReview').hidden=true;document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline='';el.setAttribute('aria-pressed','false');});};
     document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.classup();
       const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(rank===2&&first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
     };
   });
 }
+window.addEventListener('keydown',e=>{
+ if(e.repeat||!['KeyE','KeyQ'].includes(e.code)||['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName))return;
+ let b=null;const review=document.getElementById('choiceReview');
+ if(mode==='upgrade'&&review&&!review.hidden)b=document.getElementById(e.code==='KeyE'?'classChoiceConfirm':'classChoiceBack');
+ else if(['upgrade','menu'].includes(mode)&&document.getElementById('tutGo'))b=document.getElementById(e.code==='KeyE'?'tutGo':'tutSkip');
+ if(b){e.preventDefault();e.stopImmediatePropagation();b.click();}
+},true);
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
  if(meta.classId==='pyromancer'&&p.pyInfernoT>0){p.pyInfernoT=Math.max(0,p.pyInfernoT-dt);p.pyPulse-=dt;while(p.pyPulses>0&&p.pyPulse<=0){p.pyPulse+=1;p.pyPulses--;pyroArea(p,190,1,0);}}
@@ -13564,6 +13561,7 @@ const CLASS_BASIC = {
 };
 
 function hurtPlayer(dmg,sx,sz,by){
+ if(G?._tutorialSafe)return;
   partyCancel('Hit interrupted your teleport');
   dmg = Math.max(1, Math.round(dmg));   // same fix as hitEnemy: never show the player a fractional hit either
   /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
@@ -15614,8 +15612,9 @@ function update(dt){
   { const mm=(p.maxMana||100)+(meta.classId==='mage'&&c2Passive('m_manafont')?10:0), regen=(meta.classId==='mage'&&c2Passive('m_manafont')?1.3:1)*classManaCfg().regen; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035*regen); }  // slow passive mana regen, scaled per class (CLASS_MANA.regen)
   updateAmbient(dt,s);
   reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
-  // enemies
+  // Enemies wait continuously during basic-control practice, even while the player moves.
   for(const e of G.enemies){
+    if(G._tutorialSafe)continue;
     if(e.dead) continue;
     if(e.hydraChain)continue;
     if(!MP.guest()&&G.zone===0&&G.area>=0&&isCampaignAdventure())BFCampaignElites.briar(e);
@@ -16358,7 +16357,7 @@ function randomLoot(rid){ const r=Math.random();
   return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
 // Re-capture the mouse for the shoulder/fps camera the instant a menu closes, so a normal menu
 // interaction never costs you camera control — only Esc releases it. (Runs inside the closing click = a valid gesture.)
-function regrabCam(){ if(!BFGuidedTutorial.state && !_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ const request=canvas.requestPointerLock();request?.catch?.(()=>{}); }catch(e){} } }
+function regrabCam(){ if(!BFGuidedTutorial.blocksPointerLock && !_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ const request=canvas.requestPointerLock();request?.catch?.(()=>{}); }catch(e){} } }
 // The single menu-to-game boundary. Active play must always have the full HUD restored;
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; musicForScene(); showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
@@ -17330,7 +17329,7 @@ function rebuildWaystationSanctum(){
     for(const s of [-1,1])solid(g.x+s*1.5*scale,z,.7*scale,.8*scale,5*scale,'gate-'+g.zi);
   }
   for(const n of G.hubNpcs){
-    const ry=n.district==='undercroft'?Math.PI:n.id==='sparring'?0:-(n.x<0?-1:1)*Math.PI/2;
+    const ry=n.district==='undercroft'?Math.PI:-(n.x<0?-1:1)*Math.PI/2;
     const box=(x,z,w,d,h)=>{const a=Math.cos(ry),b=Math.sin(ry);solid(n.x+a*x+b*z,n.z-b*x+a*z,Math.abs(a)*w+Math.abs(b)*d,Math.abs(b)*w+Math.abs(a)*d,h,n.id)};
     if(n.id==='arcade'){box(0,0,45,36,86);continue;}
     if(n.district==='undercroft'||n.id==='sparring'){
@@ -17344,7 +17343,7 @@ function rebuildWaystationSanctum(){
     else if(n.id==='anvil'){box(0,6,51,24,39);box(-29,-28,35,28,39);}
     else if(n.id==='board')box(0,-8,32,8,65);
     else if(n.id==='keeper')box(28,0,28,28,49);
-    else if(n.id==='beastkeeper')for(const s of [-1,1])box(s*36,0,27,30,27);
+    else if(n.id==='beastkeeper')for(const s of [-1,1])box(s*76,-12,45,55,60);
   }
   for(const x of [-230,230])for(const z of [-300,260,560])G.hubArt.lamps.push({x,z});
   for(const x of [-765,765])for(const z of [-440,140,480])G.hubArt.lamps.push({x,z});
@@ -17354,7 +17353,7 @@ function rebuildWaystationSanctum(){
   // Captured before any renderer runs: these are testable approach points inside E's radius.
   G.hubArt.approaches=[{id:'waystone',x:0,z:100,tx:0,tz:30},
     ...G.gates.map(g=>({id:(g.side?'side-':'gate-')+g.zi,x:g.x,z:g.z+64,tx:g.x,tz:g.z})),
-    ...G.hubNpcs.map(n=>({id:n.id,x:n.x+(n.district==='undercroft'||n.id==='sparring'?0:n.x<0?70:-70),z:n.z+(n.district==='undercroft'?-70:n.id==='sparring'?65:0),tx:n.x,tz:n.z})),
+    ...G.hubNpcs.map(n=>({id:n.id,x:n.x+(n.district==='undercroft'?0:n.x<0?70:-70),z:n.z+(n.district==='undercroft'?-70:0),tx:n.x,tz:n.z})),
     {id:'tinkerer',x:-806,z:706,tx:-806,tz:644}];
 }
 function trialMentorSpot(origin){
@@ -17451,7 +17450,7 @@ function buildRiftHall(){
  G.walls.push({x:-520,z:0,w:24,d:1680,h:280,invisible:true},{x:520,z:0,w:24,d:1680,h:280,invisible:true},{x:0,z:-840,w:1040,d:24,h:280,invisible:true},{x:0,z:840,w:1040,d:24,h:280,invisible:true});
  G.storyState=BFStoryState.restore(meta.riftHallStory);syncRiftHall(G.storyState);
  G.storyNpcs=[{id:'riftkeeper',name:'Rift Keeper',x:0,z:-645,y:0}];
- G.hubNpcs=[{...G.storyNpcs[0],direct:true,open:()=>briarRequest('open',{npc:'riftkeeper'})},{id:'riftexit',name:'Waystation',x:0,z:740,prop:'riftDoor',direct:true,verb:'Return to the Waystation',open:()=>travelRiftHall(false)}];
+ G.hubNpcs=[{...G.storyNpcs[0],direct:true,open:()=>briarRequest('open',{npc:'riftkeeper'})},{id:'riftexit',name:'Waystation',x:0,z:740,prop:'riftDoor',role:'Class trials',facing:Math.PI,direct:true,verb:'Return to the Waystation',open:()=>travelRiftHall(false)}];
  for(const f of riftHallFrames()){const {x,z}=f;
   G.hubNpcs.push({id:'rift-'+f.id,name:f.name+' · '+f.className,x,z,prop:'riftFrame',direct:true,verb:'Inspect '+f.className+' rift',open:()=>openRiftFrame(f.id)});
   for(const dz of [-83,83])G.walls.push({x:x+(x<0?-35:35),z:z+dz,w:32,d:26,h:150,invisible:true});
@@ -17710,7 +17709,7 @@ function enterWaystation(riftHall=false){
     } }
   if(HUB_CITADEL){rebuildWaystationCitadel();G.gates=G.gates.filter(g=>!g.side);rebuildWaystationSanctum();}
   G.gates=G.gates.filter(g=>!g.side);
-  if(riftHall)buildRiftHall();else{G.hubNpcs.push({id:'rifthall',name:'Rift Hall',x:-610,z:710,prop:'riftDoor',direct:true,verb:'Enter the Rift Hall',open:()=>travelRiftHall(true)});G.hubArt&&(G.hubArt.riftDoor={x:-610,z:710});for(const dx of [-65,65])G.walls.push({x:-610+dx,z:710,w:22,d:24,h:134,invisible:true,hubFixture:'rifthall'});}
+  if(riftHall)buildRiftHall();else{G.hubNpcs.push({id:'rifthall',name:'Rift Hall',x:-610,z:710,prop:'riftDoor',role:'Class trials',facing:Math.PI,direct:true,verb:'Enter the Rift Hall',open:()=>travelRiftHall(true)});G.hubArt&&(G.hubArt.riftDoor={x:-610,z:710});for(const dx of [-65,65])G.walls.push({x:-610+dx,z:710,w:22,d:24,h:134,invisible:true,hubFixture:'rifthall'});}
   /* The hub builds outside loadStage, so it never reaches snapWorldInteractables - and the hub is
      exactly where Oliver counted 105 walk-through props. Normalise here too, BEFORE the edits
      replay, so a collider he deleted by hand stays deleted. */
@@ -17984,7 +17983,7 @@ function updateInteract(){
     const consider=(cx,cz,range,make)=>{ const dx=cx-p.x, dz=cz-p.z, d=Math.hypot(dx,dz); if(d>=range) return;
       const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
       if(eff<best){ best=eff; it=make(); } };
-    for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.prop?46:66),label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
+    for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.y||0)+(n.direct?155:142),service:n.role||'',label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
     if(!G.riftHall)consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
     if(!G.riftHall)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
@@ -18102,7 +18101,7 @@ function updateInteractPrompt(){ const pr=document.getElementById('interactpromp
   const it=(G&&G.interact&&mode==='play')?G.interact:null;
   if(!it){ if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); return; }
   if(btn) btn.classList.remove('hide');
-  if(pr){ const sp=project(it.x,it.y||40,it.z); if(sp){ pr.classList.remove('hide'); pr.style.left=(sp[0]/DPR)+'px'; pr.style.top=(sp[1]/DPR-8)+'px'; pr.innerHTML='<span class="k">E</span>'+it.label; } else pr.classList.add('hide'); } }
+  if(pr){ const sp=project(it.x,it.y||40,it.z); if(sp){ pr.classList.remove('hide'); pr.style.left=(sp[0]/DPR)+'px'; pr.style.top=(sp[1]/DPR-8)+'px'; pr.innerHTML='<span class="k">'+htmlSafe(controlHint('interact'))+'</span>'+htmlSafe(it.label)+(it.service?'<span style="color:#ffb65d;font-size:11px;margin-left:8px">('+htmlSafe(it.service)+')</span>':''); } else pr.classList.add('hide'); } }
 function wsResume(){
   if(G&&G.hub){
     if(meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
@@ -21266,7 +21265,7 @@ function updateHubTags(){
   if(!G||!G.hub||G.sparringRoom||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
   box.classList.remove('hide');
   if(box.childElementCount!==G.hubNpcs.length){ box.innerHTML=G.hubNpcs.map(n=>
-    `<div class="htag"><span class="hq" hidden aria-label="Quest available">!</span><span class="hi">${n.ic||'◇'}</span><span class="hn">${n.name}</span><span class="hr">${n.role||''}</span></div>`).join(''); }
+    `<div class="htag"><span class="hq" hidden aria-label="Quest available">!</span></div>`).join(''); }
   const tags=box.children;
   G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
     const quest=returnHubInfo(n),questAvailable=!!quest?.fresh,questTag=tg.querySelector('.hq');
@@ -21274,7 +21273,7 @@ function updateHubTags(){
     const mark=window.BFHubDialogue?.known(n.id)?(!meta.hubDialogue?.[n.id]?.introduced?' · !':BFHubDialogue.hasNews(n,{meta})?' · ◆':''):'';
     const nameTag=tg.querySelector('.hn');if(nameTag&&nameTag.textContent!==n.name+mark)nameTag.textContent=n.name+mark;
     const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
-    if(n.prop==='riftFrame'||dist>(questAvailable?650:HUB_TAG_REVEAL)){ tg.style.display='none'; tg.classList.remove('near'); return; }
+    if(!questAvailable||n.prop==='riftFrame'||dist>650){ tg.style.display='none'; tg.classList.remove('near'); return; }
     const a=hubTagAnchor(n), sp=project(a.x,a.y,a.z);
     if(!sp){ tg.style.display='none'; return; }
     tg.style.display='';
@@ -22728,7 +22727,7 @@ window.__BF3={openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2081"></script>
+<script type="module" src="./hero3d.js?v=2082"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

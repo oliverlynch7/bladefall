@@ -1056,10 +1056,11 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
 <script src="./hub-tour.js?v=2082"></script>
 <script src="./controller.js?v=2080"></script>
-<script src="./character-stats.js?v=2081"></script>
+<script src="./ui-icons.js?v=2087"></script>
+<script src="./character-stats.js?v=2087"></script>
 <script src="./class-looks.js?v=2084"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2084"></script>
-<script src="./emotes.js?v=2085"></script>
+<script src="./emotes.js?v=2087"></script>
 <script src="./camera-occlusion.js?v=2074"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
@@ -1116,7 +1117,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.086.0-pyromancer-icons';
+const VERSION3D='2.087.0-ui-icon-art';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3325,10 +3326,10 @@ function applyVoyage(packet){if(!inShipwreck()||packet.epoch!==briarEpoch())retu
 function voyageReceive(actor,command){if(!inShipwreck()||!G.voyage||mode!=='play'||(MP.active&&!MP.isHost))return false;BFShipCrossing.reconcileCrew(G.voyage,voyageCrew());return BFShipCrossing.command(G.voyage,actor,command);}
 function voyageSend(type,extra={}){if(!G?.voyage)return;const command={type,epoch:briarEpoch(),...extra};if(MP.active&&!MP.isHost)MP.hostConn?.send({t:'shipCommand',command});else voyageReceive(briarId(),command);}
 function voyageHud(){let el=document.getElementById('voyagehud');if(!G?.voyage||!inShipwreck()){el?.remove();return;}
- if(!el){el=document.createElement('section');el.id='voyagehud';el.style.cssText='position:fixed;z-index:65;left:50%;transform:translateX(-50%);bottom:135px;max-width:calc(100vw - 24px);width:340px;padding:10px;border:1px solid #90aca8;border-radius:10px;background:#172f38ee;color:#f1deb6;font:14px system-ui;text-align:center';el.innerHTML='<strong data-ship-title></strong><div data-ship-role></div><div data-ship-help></div><div data-ship-buttons><button data-ship-repair>Repair hull</button> <button data-ship-ready>Ready to sail</button></div>';document.body.appendChild(el);el.querySelector('[data-ship-repair]').onclick=()=>voyageSend('repair');el.querySelector('[data-ship-ready]').onclick=()=>voyageSend('ready');}
+ if(!el){el=document.createElement('section');el.id='voyagehud';el.style.cssText='position:fixed;z-index:65;left:50%;transform:translateX(-50%);bottom:135px;max-width:calc(100vw - 24px);width:340px;padding:10px;border:1px solid #90aca8;border-radius:10px;background:#172f38ee;color:#f1deb6;font:14px system-ui;text-align:center';el.innerHTML=uiIcon('voyage-hull')+'<strong data-ship-title></strong><div>'+uiIcon('voyage-helm')+'<span data-ship-role></span></div><div>'+uiIcon('voyage-boarders')+uiIcon('voyage-swap-roles')+'<span data-ship-help></span></div><div data-ship-buttons><button data-ship-repair>'+uiIcon('voyage-repair')+'Repair hull</button> <button data-ship-ready>'+uiIcon('voyage-ready')+'Ready to sail</button></div>';document.body.appendChild(el);el.querySelector('[data-ship-repair]').onclick=()=>voyageSend('repair');el.querySelector('[data-ship-ready]').onclick=()=>voyageSend('ready');}
  el.style.display=mode==='play'?'block':'none';const v=BFShipCrossing.view(G.voyage),helm=v.helm===briarId();el.querySelector('[data-ship-title]').textContent=v.title+' - Hull '+Math.ceil(v.hull)+'%';el.querySelector('[data-ship-role]').textContent=helm?'You have the helm':'Your ally has the helm';
  el.querySelector('[data-ship-help]').textContent=v.kind==='steer'?(helm?'A / D or left stick: steer toward open water.':'Stay on deck. Your turn at the helm comes after the shelter.'):v.kind==='fight'?'Use your usual weapon and skills. The boat holds a safe course.':v.kind==='rest'?'Repair once. Everyone must be ready to continue.':'';
- el.querySelector('[data-ship-buttons]').hidden=v.kind!=='rest';el.querySelector('[data-ship-repair]').disabled=!v.canRepair;el.querySelector('[data-ship-ready]').disabled=G.voyage.ready.includes(briarId());}
+ el.querySelector('[data-icon="voyage-boarders"]').hidden=v.kind!=='fight';el.querySelector('[data-icon="voyage-swap-roles"]').hidden=v.kind!=='rest';el.querySelector('[data-ship-buttons]').hidden=v.kind!=='rest';el.querySelector('[data-ship-repair]').disabled=!v.canRepair;el.querySelector('[data-ship-ready]').disabled=G.voyage.ready.includes(briarId());}
 function voyageTick(dt){if(!G.voyage)return;const C=BFShipCrossing,v=G.voyage;
  if(v.helm===briarId()&&C.current(v).kind==='steer'){Object.assign(G.p,{x:0,z:170,y:16,vx:0,vz:0,vy:0});G._shipSend=(G._shipSend||0)+dt;if(G._shipSend>.06){G._shipSend=0;voyageSend('steer',{value:moveX(),seq:(G._shipSeq=(G._shipSeq||0)+1)});}}
  if(!MP.active||MP.isHost){C.reconcileCrew(v,voyageCrew());if(C.current(v).kind==='fight')C.clearWave(v,C.current(v).wave,G.enemies.filter(e=>e.shipBoarder===C.current(v).wave&&!e.dead&&e.hp>0).length);C.advance(v,dt);
@@ -3849,7 +3850,7 @@ function discoveredOptionalTasks(){
   const state=adventureStoryState(),entry=(title,progress,done)=>({title,progress,done});
   const optional=(G.optionalMissions||[]).filter(m=>m.discovered).map(m=>entry(m.name,`${m.progress}/${m.total}`,m.done));
   optional.push(...BFReturnVisits.tasks(G,meta,state));
-  const combatTask=isCampaignAdventure()?BFCampaignPatrols.task(G,state):null;if(combatTask)optional.push(combatTask);
+  const combatTask=isCampaignAdventure()?BFCampaignPatrols.task(G,state):null;if(combatTask)optional.push({...combatTask,kind:'hunt'});
   if(inWindingCliffs()&&state.flags['hp.skip.quest'])optional.push(entry('Bring Skip his rope',state.flags['hp.rope']?'Rope found':'Search below the broken eastern platform',!!state.flags['hp.skip.returned']));
   if(inLostCanyon()&&state.flags['lc.extra.quest'])optional.push(entry('Free the old western cage',state.flags['lc.extra']?'Tell Ruth the group is safe':'Follow the raised western path',!!state.flags['lc.reward']));
   if(inBrokenWalls()&&state.flags['rk.felix.quest'])optional.push(entry('Felix’s tools',state.flags['rk.tools']?'Return the tools to Felix':'Open the timed workshop latch on the east side',!!state.flags['rk.felix.returned']));
@@ -3885,19 +3886,19 @@ function openJournal(focusId){
   _journalFrom=mode;mode='journal';showGameUI(false);document.getElementById('toast')?.classList.remove('show');for(const k in input)if(typeof input[k]==='boolean')input[k]=false;
   if(document.pointerLockElement)document.exitPointerLock();
   const region=curZone(),campaign=isCampaignAdventure(),state=adventureStoryState(),esc=journalEscape;
-  const row=(title,progress,done)=>`<li class="journal-task ${done?'done':''}"><strong>${done?'✓ ':''}${esc(title)}</strong>${progress?`<span>${esc(progress)}</span>`:''}</li>`;
+  const row=(title,progress,done,kind)=>`<li class="journal-task ${done?'done':''}"><strong>${kind==='hunt'?uiIcon('quest-hunt'):''}${done?'✓ ':''}${esc(title)}</strong>${progress?`<span>${esc(progress)}</span>`:''}</li>`;
   const main=campaign?(G.area<0?[{title:'Defeat '+region.boss.name,done:!!G.boss?.dead}]:areaQuests().map(q=>({title:q.d,progress:questProgressText(q),done:questDone(q)}))):[];
   const optional=discoveredOptionalTasks(),active=main.filter(q=>!q.done),finished=main.concat(optional).filter(q=>q.done);
   const notes=Object.entries(state.notes).filter(([id,n])=>n.region===region.id).map(([id,n],i)=>({id,...n,sort:n.order||i})).sort((a,b)=>b.sort-a.sort);
   const current=notes.filter(n=>n.part==null||n.part===G.area),earlier=notes.filter(n=>n.part!=null&&n.part!==G.area);
   if(typeof focusId!=='string'&&state.notes[BFJournalNotice.queue.current?.id])focusId=BFJournalNotice.queue.current.id;
   const relatedId=typeof focusId==='string'&&state.notes[focusId]?focusId:BFJournalClues.related(G,BFPartyNavigation.target(G)),related=notes.find(n=>n.id===relatedId);
-  const note=n=>`<article class="journal-clue" data-note-id="${esc(n.id)}"><strong>${esc(n.title)}</strong><p>${esc(n.text)}</p></article>`;
-  const fold=(title,body,count)=>`<details class="journal-fold"><summary>${esc(title)} <small>${count}</small></summary>${body}</details>`;
+  const note=n=>`<article class="journal-clue" data-note-id="${esc(n.id)}"><strong>${uiIcon('journal-clue')}${esc(n.title)}</strong><p>${esc(n.text)}</p></article>`;
+  const fold=(title,body,count)=>`<details class="journal-fold"><summary>${({'Other main tasks':uiIcon('quest-main'),'Optional tasks':uiIcon('quest-side'),'Quest items':uiIcon('quest-item'),'Rift shards':uiIcon('item-rift-shard')})[title]||''}${esc(title)} <small>${count}</small></summary>${body}</details>`;
   const items=Object.entries(state.items).filter(([id,n])=>n>0&&(!id.includes('.')||/^(cg\.(coat|helmet|papers|personal)|pc\.seeds|sc\.(rudder|sail|rope|bell))$/.test(id)));
   const names={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll','cg.coat':'Legion coat','cg.helmet':'Legion helmet','cg.papers':'Patrol papers','cg.personal':'Roland’s armor','pc.seeds':'Seed tin','sc.rudder':'Rudder','sc.sail':'Sail','sc.rope':'Ship rope','sc.bell':'Ship bell'};
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
-  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Your next step, nearby puzzle clues, and every clue you have found in this level.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false)).join('')+'</ul>',active.length-1):''}${related?'<section class="journal-next" id="journalRelevant"><h3>'+((typeof focusId==='string'&&focusId===relatedId)?'The clue you opened':'Clue for this puzzle')+'</h3>'+note(related)+'</section>':''}<label for="journalSearch"><strong>Find a clue</strong></label><input id="journalSearch" type="search" placeholder="Search a place, object or word…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0;padding:12px;background:#171e2c;color:#f6ecd6;border:1px solid #8c7958;border-radius:8px"><div id="journalClueResults"></div>${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
+  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">${uiIcon('journal')} JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Your next step, nearby puzzle clues, and every clue you have found in this level.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>${uiIcon('quest-main')} Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',active.length-1):''}${related?'<section class="journal-next" id="journalRelevant"><h3>'+uiIcon('quest-puzzle')+((typeof focusId==='string'&&focusId===relatedId)?'The clue you opened':'Clue for this puzzle')+'</h3>'+note(related)+'</section>':''}<label for="journalSearch"><strong>Find a clue</strong></label><input id="journalSearch" type="search" placeholder="Search a place, object or word…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0;padding:12px;background:#171e2c;color:#f6ecd6;border:1px solid #8c7958;border-radius:8px"><div id="journalClueResults"></div>${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true,q.kind)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
   const renderClues=()=>{const query=document.getElementById('journalSearch').value.trim(),found=BFJournalClues.search(notes,query),recent=current.filter(n=>n.id!==relatedId);document.getElementById('journalClueResults').innerHTML=query?'<h3>'+found.length+' matching clues</h3>'+found.map(note).join('')+(found.length?'':'<p class="journal-muted">No matching clues. Try a shorter word.</p>'):'<h3>Latest discoveries</h3>'+recent.slice(0,3).map(note).join('')+(recent.length?'':'<p class="journal-muted">No other clues found in this part yet.</p>')+fold('All clues in this level',notes.map(note).join('')||'<p>No clues found yet.</p>',notes.length);};
   document.getElementById('journalSearch').oninput=renderClues;renderClues();
   document.getElementById('journalClose').onclick=closeJournal;
@@ -16929,7 +16930,7 @@ function openLevelEntry(o){
 }
 function openGateEntry(g){ const Z=ZONES[g.zi], sd=g.side?Z.side:null, artId=(sd?sd.id:Z.id);
   openLevelEntry({
-    icon:`<img class="lecrestimg" src="icons/destinations/${artId}.png?v=${VERSION3D}" alt="">`,   // the same stylized destination art the Waystone travel menu uses
+    icon:`<img class="lecrestimg" src="${destinationArt(artId)}" alt="">`,   // the same stylized destination art the Waystone travel menu uses
     name:(sd?sd.name:Z.name),
     kicker:(sd?'Hidden Trial Chamber':('Campaign Gate · Tier '+Z.tier)),
     desc:(sd?sd.blurb:Z.blurb),
@@ -17035,8 +17036,10 @@ function decorateMenuIcons(){
 /* body has touch-action:none (the joystick needs it) — which silently kills native
    range-slider dragging on touch. So every overlay slider gets pointer-driven:
    we compute the value from the drag ourselves and fire 'input' like the real thing. */
+const uiIcon=(name)=>BFUIIcons.html(name);
+const destinationArt=id=>BFUIIcons.destination(id);
 function navCard(id,art,name,desc='',cls='',attrs=''){
-  return `<button class="navcard ${cls}${art?'':' noart'}" id="${id}" ${attrs}>${art?`<img class="navart" src="${art}" alt="">`:''}<span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
+  return `<button class="navcard ${cls}${art?'':' noart'}" ${id?`id="${id}"`:""} ${attrs}>${art?`<img class="navart" src="${art}" alt="">`:''}<span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
 }
 function htmlSafe(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
@@ -18171,8 +18174,8 @@ function openHubMenu(){
   const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
   const mainRows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
     const desc=`${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'}<br><span class="navmeta">Level ${i+1}</span>${done?' <span class="navdone">✓ CLEARED</span>':''}`;
-    return navCard('',`icons/destinations/${Z.id}.png`,open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled'); }).join('');
-  const chamberRows=navCard('','icons/destinations/thornwood.png','Rift Hall','View saved shards, restore rifts and enter class trials.','destcard side','id="riftHallTravel"');  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
+    return navCard('',destinationArt(Z.id),open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled'); }).join('');
+  const chamberRows=navCard('',BFUIIcons.url('destination-rift-hall'),'Rift Hall','View saved shards, restore rifts and enter class trials.','destcard side','id="riftHallTravel"');  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">${uiIcon('destination-waystation')} The Waystation</h2>
     <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
     <div class="sect">Main Levels</div><div class="destgrid">${mainRows}</div>
@@ -18460,7 +18463,7 @@ function openWardrobe(back){
   showOverlayHTML(`<div class="card wardrobe-card"><p class="ovkicker">The Stylist · ${owned}/${total} Discovered</p><h2 class="ovh">Wardrobe</h2>
     <p class="ovsub">Wear the victories you earned. Cosmetics change your legend—not your stats.</p>
     <div class="wardrobe-body">${secs}</div>
-    <div class="wardrobe-actions"><button class="bigbtn ghost" id="skinBtn2">Class appearances</button><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
+    <div class="wardrobe-actions"><button class="bigbtn ghost" id="skinBtn2">${uiIcon('action-class-appearance')} Class appearances</button><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
   document.querySelectorAll('.cosrow[data-k]').forEach(r=>r.onclick=()=>{
     const k=r.dataset.k; meta.cosEquipped[k]=(meta.cosEquipped[k]===r.dataset.i)?null:r.dataset.i;
     persistGlobal(); SFX.pickup(); openWardrobe(back); });
@@ -18725,7 +18728,7 @@ function openSkins(back){
  if(!G?.hub){toast('Visit the Stylist in the Waystation to change class appearances.');return;}
  mode='menu';const cid=meta.classId,rank=classState(cid).rank,looks=BFClassLooks.catalog[cid];if(!looks)return;
  let viewed=BFClassLooks.tier(meta,cid),raf=0,closed=false,yaw=.35,drag=null;
- showOverlayHTML(`<div class="card class-look-card" style="max-width:1050px"><p class="ovkicker">Stylist · ${CLASSES[cid].disp} · Rank ${rank}</p><h2 class="ovh">Class appearances</h2><p class="ovsub">Preview any look. Rank 5 and 10 unlock new designs. Cosmetic only.</p><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center"><div style="flex:1;min-width:230px"><canvas id="lookPreview" style="width:100%;height:340px;display:block"></canvas></div><div id="lookChoices" style="flex:1;min-width:230px"></div></div><button class="bigbtn" id="wearLook" style="background:#e9a13f;color:#231708"></button><button class="bigbtn ghost" id="lookBack">Back to Stylist</button></div>`);
+ showOverlayHTML(`<div class="card class-look-card" style="max-width:1050px"><p class="ovkicker">Stylist · ${CLASSES[cid].disp} · Rank ${rank}</p><h2 class="ovh">${uiIcon('action-class-appearance')} Class appearances</h2><p class="ovsub">Preview any look. Rank 5 and 10 unlock new designs. Cosmetic only.</p><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center"><div style="flex:1;min-width:230px"><canvas id="lookPreview" style="width:100%;height:340px;display:block"></canvas></div><div id="lookChoices" style="flex:1;min-width:230px"></div></div><button class="bigbtn" id="wearLook" style="background:#e9a13f;color:#231708"></button><button class="bigbtn ghost" id="lookBack">Back to Stylist</button></div>`);
  const canvas=document.getElementById('lookPreview');canvas.style.touchAction='none';canvas.onpointerdown=e=>{drag=e.clientX;canvas.setPointerCapture(e.pointerId);};canvas.onpointermove=e=>{if(drag!==null){yaw+=(e.clientX-drag)*.012;drag=e.clientX;}};canvas.onpointerup=canvas.onpointercancel=()=>drag=null;
  const draw=()=>{document.getElementById('lookChoices').innerHTML=looks.map((l,i)=>`<button class="bigbtn ghost" data-look="${i}" aria-pressed="${i===viewed}" style="text-align:left;border-color:${i===viewed?'#ffbd65':'#54483b'};width:100%"><b>${l.name}</b> · ${i?'Rank '+l.rank:'Default'}${BFClassLooks.tier(meta,cid)===i?' · Equipped':''}<small style="display:block;font-weight:normal">${l.detail}</small></button>`).join('');document.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>{viewed=Number(b.dataset.look);draw();});const btn=document.getElementById('wearLook');btn.disabled=rank<looks[viewed].rank;btn.textContent=btn.disabled?'Unlocks at rank '+looks[viewed].rank:BFClassLooks.tier(meta,cid)===viewed?'Equipped':'Wear '+looks[viewed].name;};
  const clean=()=>{if(closed)return;closed=true;cancelAnimationFrame(raf);observer.disconnect();window.__hero3dPreviewDispose?.(canvas);};const observer=new MutationObserver(()=>{if(!canvas.isConnected)clean();});observer.observe(document.body,{childList:true,subtree:true});
@@ -19115,7 +19118,7 @@ function organizePauseSettings(){
     ['Accessibility & guidance',['shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
   ];
-  for(const [title,ids]of groups){const section=document.createElement('details');section.className='settingsSection';section.open=(openPauseSettingsV2.section||groups[0][0])===title;const summary=document.createElement('summary');summary.textContent=title;section.append(summary);const contents=document.createElement('div');contents.className='settingsContents';section.append(contents);card.insertBefore(section,back);
+  for(const [title,ids]of groups){const section=document.createElement('details');section.className='settingsSection';section.open=(openPauseSettingsV2.section||groups[0][0])===title;const summary=document.createElement('summary');summary.innerHTML=uiIcon(['settings-controls','settings-graphics','settings-audio-voices','settings-accessibility','settings-help'][groups.findIndex(g=>g[0]===title)])+' '+title;section.append(summary);const contents=document.createElement('div');contents.className='settingsContents';section.append(contents);card.insertBefore(section,back);
     for(const id of ids){const node=document.getElementById(id);if(node)contents.append(node.closest('.setrow')||node);}
     summary.onclick=e=>{e.preventDefault();const opening=!section.open;card.querySelectorAll('.settingsSection').forEach(d=>d.open=false);section.open=opening;openPauseSettingsV2.section=opening?title:null;};
   }
@@ -21339,11 +21342,11 @@ function partyTravelTick(dt){
  }
 }
 function partyHud(){
- let el=document.getElementById('partyTravel');if(!el){el=document.createElement('div');el.id='partyTravel';el.style.cssText='position:fixed;left:14px;top:43%;max-width:min(240px,42vw);padding:10px 13px;border:1px solid #697697;border-radius:10px;background:#111827de;color:#daefff;font:13px system-ui;pointer-events:none;z-index:8';document.body.appendChild(el);}
+ let el=document.getElementById('partyTravel');if(!el){el=document.createElement('div');el.id='partyTravel';el.innerHTML=uiIcon('action-party-teleport')+'<span data-party-text></span>';el.style.cssText='position:fixed;left:14px;top:43%;max-width:min(240px,42vw);padding:10px 13px;border:1px solid #697697;border-radius:10px;background:#111827de;color:#daefff;font:13px system-ui;pointer-events:none;z-index:8';document.body.appendChild(el);}
  const q=partySelected(),a=partyFriends(),far=q&&Math.hypot(q.x-G.p.x,q.z-G.p.z)>850;
  el.hidden=mode!=='play'||!q||G.voyage||G.kingFinal||(!far&&!partyChannel);if(el.hidden)return;
  const key=id=>keyLabel(meta.keybinds?.[id]?.[0]||'');
- el.textContent=partyChannel?'Teleporting to '+q.name+' · '+Math.ceil((3-partyChannel.t)*10)/10+'s — keep holding '+key('partyTeleport'):'Far from '+q.name+' · Hold '+key('partyTeleport')+' for 3 seconds'+(a.length>1?' · '+key('partyNext')+' next friend ('+(a.indexOf(q)+1)+'/'+a.length+')':'')+' · Hits cancel teleport';
+ el.querySelector('[data-party-text]').textContent=partyChannel?'Teleporting to '+q.name+' · '+Math.ceil((3-partyChannel.t)*10)/10+'s — keep holding '+key('partyTeleport'):'Far from '+q.name+' · Hold '+key('partyTeleport')+' for 3 seconds'+(a.length>1?' · '+key('partyNext')+' next friend ('+(a.indexOf(q)+1)+'/'+a.length+')':'')+' · Hits cancel teleport';
 }
 function drawNavigation(c){
  if(!G||mode!=='play')return;
@@ -21987,10 +21990,10 @@ function itemStaticAv(item){
   if(item.cls){
     const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',venomedge:'aff_venom_sword',umbrablade:'aff_void_sword',sunblade:'aff_holy_sword',lightbringer:'aff_holy_sword',voidscythe:'voidscythe',iansblade:'iansblade',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
     const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
-    // PLACEHOLDERS: arches with no dedicated weapon art yet borrow an existing skill icon that already
-    // shows the right object, so they never render as a blank square. Swap these when real art lands.
-    const placeholder={flintlock:'icons/pirate_aimed_shot.png',fist:'icons/monk_flurry.png'};
-    const ph=placeholder[item.arche]; if(ph) return ph+'?v='+VERSION3D;
+    // Dedicated signature-weapon portraits; legacy archetypes retain the same artwork.
+    if(['pirate','monk','reaper'].includes(item.intrinsic))return BFUIIcons.url('equipment-'+item.intrinsic);
+    const placeholder={flintlock:BFUIIcons.url('equipment-pirate'),fist:BFUIIcons.url('equipment-monk')};
+    const ph=placeholder[item.arche]; if(ph) return ph;
     const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
     return file?'icons/items/weapons/'+file+'.png?v='+VERSION3D:null;
   }

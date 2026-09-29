@@ -1,0 +1,362 @@
+{
+  "sourceChat": "https://chatgpt.com/c/6a5ae262-191c-83e8-b64d-f96a1e3ba64c",
+  "selection": "Coherent gold-trimmed settings and hooded emotes; original sheets and alternatives retained. No generation added.",
+  "icons": [
+    {
+      "name": "destination-storm-coast",
+      "source": 25,
+      "crop": [
+        0,
+        100,
+        350,
+        630
+      ],
+      "runtime": "icons/ui/destination-storm-coast.png",
+      "original": "source-25.png",
+      "sha256": "7e45c9f8ab526c3766e5961937bf75fafc49576afdf683535aa4dfc45dc64166"
+    },
+    {
+      "name": "destination-rift-hall",
+      "source": 25,
+      "crop": [
+        350,
+        100,
+        672,
+        630
+      ],
+      "runtime": "icons/ui/destination-rift-hall.png",
+      "original": "source-25.png",
+      "sha256": "7e45c9f8ab526c3766e5961937bf75fafc49576afdf683535aa4dfc45dc64166"
+    },
+    {
+      "name": "destination-waystation",
+      "source": 25,
+      "crop": [
+        672,
+        100,
+        1010,
+        630
+      ],
+      "runtime": "icons/ui/destination-waystation.png",
+      "original": "source-25.png",
+      "sha256": "7e45c9f8ab526c3766e5961937bf75fafc49576afdf683535aa4dfc45dc64166"
+    },
+    {
+      "name": "item-rift-shard",
+      "source": 25,
+      "crop": [
+        1010,
+        100,
+        1283,
+        630
+      ],
+      "runtime": "icons/ui/item-rift-shard.png",
+      "original": "source-25.png",
+      "sha256": "7e45c9f8ab526c3766e5961937bf75fafc49576afdf683535aa4dfc45dc64166"
+    },
+    {
+      "name": "journal",
+      "source": 26,
+      "crop": [
+        0,
+        470,
+        337,
+        835
+      ],
+      "runtime": "icons/ui/journal.png",
+      "original": "source-26.png",
+      "sha256": "fe1081ced0a9d5384ea787ca0d9ff8cf7214ceb67eee278c72ad55ac625be899"
+    },
+    {
+      "name": "action-party-teleport",
+      "source": 26,
+      "crop": [
+        337,
+        470,
+        645,
+        835
+      ],
+      "runtime": "icons/ui/action-party-teleport.png",
+      "original": "source-26.png",
+      "sha256": "fe1081ced0a9d5384ea787ca0d9ff8cf7214ceb67eee278c72ad55ac625be899"
+    },
+    {
+      "name": "action-allocate-stats",
+      "source": 26,
+      "crop": [
+        645,
+        470,
+        939,
+        835
+      ],
+      "runtime": "icons/ui/action-allocate-stats.png",
+      "original": "source-26.png",
+      "sha256": "fe1081ced0a9d5384ea787ca0d9ff8cf7214ceb67eee278c72ad55ac625be899"
+    },
+    {
+      "name": "action-class-appearance",
+      "source": 26,
+      "crop": [
+        939,
+        470,
+        1264,
+        835
+      ],
+      "runtime": "icons/ui/action-class-appearance.png",
+      "original": "source-26.png",
+      "sha256": "fe1081ced0a9d5384ea787ca0d9ff8cf7214ceb67eee278c72ad55ac625be899"
+    },
+    {
+      "name": "voyage-helm",
+      "source": 30,
+      "crop": null,
+      "runtime": "icons/ui/voyage-helm.png",
+      "original": "source-30.png",
+      "sha256": "6d25be9c93fbafa44594551fb7e6bd20e93a920e5a822bc1db172a389240177c"
+    },
+    {
+      "name": "voyage-hull",
+      "source": 33,
+      "crop": null,
+      "runtime": "icons/ui/voyage-hull.png",
+      "original": "source-33.png",
+      "sha256": "c79b004b083f9e9f99d8a124c5e13b52de8322db1348b9051f628d1c3eebb510"
+    },
+    {
+      "name": "voyage-repair",
+      "source": 35,
+      "crop": null,
+      "runtime": "icons/ui/voyage-repair.png",
+      "original": "source-35.png",
+      "sha256": "51570f1d9a166804eaf10f788cdc7ccfc3921635306031324718654879f7b52e"
+    },
+    {
+      "name": "voyage-boarders",
+      "source": 40,
+      "crop": null,
+      "runtime": "icons/ui/voyage-boarders.png",
+      "original": "source-40.png",
+      "sha256": "923bc9e3abf837990bef2490020325de02ef822972f4c95663ff142e6e9aaa49"
+    },
+    {
+      "name": "voyage-swap-roles",
+      "source": 43,
+      "crop": null,
+      "runtime": "icons/ui/voyage-swap-roles.png",
+      "original": "source-43.png",
+      "sha256": "607b490c5b0cbb22c58df37d08786eee71385269c6035e32b6d565c4cd602586"
+    },
+    {
+      "name": "voyage-ready",
+      "source": 45,
+      "crop": null,
+      "runtime": "icons/ui/voyage-ready.png",
+      "original": "source-45.png",
+      "sha256": "3285820e1f04dab7dbdf59e7f4575ee7f4febcb9e1d6116a01f1dd3315367d8a"
+    },
+    {
+      "name": "quest-main",
+      "source": 7,
+      "crop": null,
+      "runtime": "icons/ui/quest-main.png",
+      "original": "source-07.png",
+      "sha256": "19074dafb11b78971932354509b3e7c5f4f520f8ad840f8128c6c81d6545af85"
+    },
+    {
+      "name": "quest-side",
+      "source": 11,
+      "crop": null,
+      "runtime": "icons/ui/quest-side.png",
+      "original": "source-11.png",
+      "sha256": "e94453d805030c7d897f6ead364687884ea2250ebc8d2403f93d38e34055053d"
+    },
+    {
+      "name": "quest-hunt",
+      "source": 15,
+      "crop": null,
+      "runtime": "icons/ui/quest-hunt.png",
+      "original": "source-15.png",
+      "sha256": "5d92cff9d14c537ee91661a31c48954098d9c2727b6f966118a04ee16e525514"
+    },
+    {
+      "name": "journal-clue",
+      "source": 17,
+      "crop": null,
+      "runtime": "icons/ui/journal-clue.png",
+      "original": "source-17.png",
+      "sha256": "df3843629f8a44ed7b3174173dd61596506b617ae6068236975aa1c76f5e4e39"
+    },
+    {
+      "name": "quest-puzzle",
+      "source": 20,
+      "crop": null,
+      "runtime": "icons/ui/quest-puzzle.png",
+      "original": "source-20.png",
+      "sha256": "99215402a5d7c1aa3c4160b047b41a39889a705dabf985af716c77701dd527b1"
+    },
+    {
+      "name": "quest-item",
+      "source": 22,
+      "crop": null,
+      "runtime": "icons/ui/quest-item.png",
+      "original": "source-22.png",
+      "sha256": "b36df6008885329411c500f8c8b10f663aa0f95f6f742ec5bb994ab431c959ff"
+    },
+    {
+      "name": "settings-controls",
+      "source": 37,
+      "crop": null,
+      "runtime": "icons/ui/settings-controls.png",
+      "original": "source-37.png",
+      "sha256": "4d5a0fde0d604c57cf2b7533cabad757f86ed5d47bf23fc17052d73b7e60680d"
+    },
+    {
+      "name": "settings-graphics",
+      "source": 39,
+      "crop": null,
+      "runtime": "icons/ui/settings-graphics.png",
+      "original": "source-39.png",
+      "sha256": "293bc7c6cd19238303bf23ee7a94b6189409d349e6064d59238b3b8328a86e6f"
+    },
+    {
+      "name": "settings-audio-voices",
+      "source": 42,
+      "crop": null,
+      "runtime": "icons/ui/settings-audio-voices.png",
+      "original": "source-42.png",
+      "sha256": "ffe1690d35538a0c0c24e605873c7f9e27ea927895735dd3208eeea6007791e0"
+    },
+    {
+      "name": "settings-accessibility",
+      "source": 44,
+      "crop": null,
+      "runtime": "icons/ui/settings-accessibility.png",
+      "original": "source-44.png",
+      "sha256": "ad236533089a014afd3a56df7b1cf99cd4a5a2f2d216aa4404cdcbf6d725181a"
+    },
+    {
+      "name": "settings-help",
+      "source": 47,
+      "crop": null,
+      "runtime": "icons/ui/settings-help.png",
+      "original": "source-47.png",
+      "sha256": "2cd661e0665c33eabb018a9a98612d980d4988be0543c9944e89aee77a0640ed"
+    },
+    {
+      "name": "emote-wave",
+      "source": 34,
+      "crop": null,
+      "runtime": "icons/ui/emote-wave.png",
+      "original": "source-34.png",
+      "sha256": "352da75d1e5c32585a93a68a1517d0fb1abe6bc72f7e1387b558ff4c2a96f231"
+    },
+    {
+      "name": "emote-point",
+      "source": 36,
+      "crop": null,
+      "runtime": "icons/ui/emote-point.png",
+      "original": "source-36.png",
+      "sha256": "0a964116de2d249449fadff3c8ed964976fe8c913d016e6cab2d5809a4f30584"
+    },
+    {
+      "name": "emote-cheer",
+      "source": 38,
+      "crop": null,
+      "runtime": "icons/ui/emote-cheer.png",
+      "original": "source-38.png",
+      "sha256": "291bc91ea75eb2caa116e881e2872e6428a08953f2d0b13f1574dd7b837007c9"
+    },
+    {
+      "name": "emote-bow",
+      "source": 41,
+      "crop": null,
+      "runtime": "icons/ui/emote-bow.png",
+      "original": "source-41.png",
+      "sha256": "e3fb3b03f40bc5a3fa33b22718ba9ab8ab624577254222fc14b0701168695639"
+    },
+    {
+      "name": "emote-dance",
+      "source": 46,
+      "crop": null,
+      "runtime": "icons/ui/emote-dance.png",
+      "original": "source-46.png",
+      "sha256": "48ba3aee8b945404f3c21a3988b1b65ee34c47f78b10281a880f8374a21fd3d9"
+    },
+    {
+      "name": "equipment-pirate",
+      "source": 9,
+      "crop": null,
+      "runtime": "icons/ui/equipment-pirate.png",
+      "original": "source-09.png",
+      "sha256": "79a18fa2d9ad00fae4bb79e9a9451017a592e01f00e0ac121414bc45552c98aa"
+    },
+    {
+      "name": "equipment-monk",
+      "source": 19,
+      "crop": null,
+      "runtime": "icons/ui/equipment-monk.png",
+      "original": "source-19.png",
+      "sha256": "1ea1ce9f4e4a03afd5ae803c0765a77007577ecb771465b10796364895cecb28"
+    },
+    {
+      "name": "equipment-reaper",
+      "source": 21,
+      "crop": null,
+      "runtime": "icons/ui/equipment-reaper.png",
+      "original": "source-21.png",
+      "sha256": "b0a876195b858d557c85dabd924dc9d3bf41671165c227848505237cfde84881"
+    },
+    {
+      "name": "destination-briar-town",
+      "source": 5,
+      "crop": [
+        0,
+        0,
+        546,
+        724
+      ],
+      "runtime": "icons/ui/destination-briar-town.png",
+      "original": "source-05.png",
+      "sha256": "5dfcc9f0c6d0ec720752df00c2c5406d7c03c5d366f2ca6ade07bcdf26e2bdd5"
+    },
+    {
+      "name": "destination-frostfell",
+      "source": 5,
+      "crop": [
+        546,
+        0,
+        1085,
+        724
+      ],
+      "runtime": "icons/ui/destination-frostfell.png",
+      "original": "source-05.png",
+      "sha256": "5dfcc9f0c6d0ec720752df00c2c5406d7c03c5d366f2ca6ade07bcdf26e2bdd5"
+    },
+    {
+      "name": "destination-sunspire",
+      "source": 5,
+      "crop": [
+        1085,
+        0,
+        1622,
+        724
+      ],
+      "runtime": "icons/ui/destination-sunspire.png",
+      "original": "source-05.png",
+      "sha256": "5dfcc9f0c6d0ec720752df00c2c5406d7c03c5d366f2ca6ade07bcdf26e2bdd5"
+    },
+    {
+      "name": "destination-emberdeep",
+      "source": 5,
+      "crop": [
+        1622,
+        0,
+        2172,
+        724
+      ],
+      "runtime": "icons/ui/destination-emberdeep.png",
+      "original": "source-05.png",
+      "sha256": "5dfcc9f0c6d0ec720752df00c2c5406d7c03c5d366f2ca6ade07bcdf26e2bdd5"
+    }
+  ]
+}

@@ -2191,3 +2191,7 @@ Browser QA passed unique defaults, old-default migration, custom V/Tab preservat
 
 ## [Codex | 2026-09-28] 2.086.0 — Pyromancer icon import
 Shipped all 19 corrected semi-pixelated icons (8 skills, 10 passives, class emblem); originals and mapping manifest preserved. Browser verified every icon, rank choice and skill bar variant, class tree, and pre-change save preservation. No gameplay changes.
+
+## [Codex | 2026-09-29] 2.087.0 — Approved UI icon artwork
+Imported 33 new subjects plus four refreshed destinations from the pinned Bladefall icons chat. Selected consistent alternate settings/emotes; archived 44 original images/sheets, source hashes and crop mapping. Exported 37 transparent 256px PNGs with even padding (1.96 MB combined runtime assets). Applied to travel and entry cards, journal/clues/tasks/shards, five settings groups, six voyage HUD cues, five emotes, stat allocation, class appearances, party teleport and three signature weapon portraits. Labels remain readable beside icons. Fixed duplicate empty nav-card ID that prevented Rift Hall travel handler binding.
+Validation: inline/module syntax and diff checks; all 37 PNG alpha/dimension checks; Chrome real-game QA passed image decoding, travel menu, settings, emotes, signature weapons, stats, appearances, journal and six voyage HUD images. Previous-build save retained class/rank/choices/gold/name/pets. Destination layout visually reviewed. This was an artwork rollout, not a multiplayer gameplay retest.

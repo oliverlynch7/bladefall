@@ -832,3 +832,7 @@ Removed shared-generator Treasure Sprint portal from beginner trials. Browser ch
 
 ## [Codex | 2026-09-28] Guided onboarding and minimap — 2.064.0
 New characters receive 18 short lessons after starting tutorial practice: four movement directions, held jump (>=0.3s), dodge, attack, interaction/bag/journal/pause keys, highlighted health/mana, quest goal, character level vs class rank, skills and minimap. Reading/waiting freezes simulation; action practice briefly resumes with protection. Skip lessons remains available. First unlocked skill follow-up waits for a real cooldown-producing cast and permits movement/aiming with protection. Six-kill exit reminder explains exploration. New local north-up circular map shows nearby ground/enemies/open exit, no secrets or distant objectives. Mouse capture disabled during guide to keep Continue usable. Browser full sequence, tap rejected/hold accepted, actual Skill 1 cast, six kill-event exit trigger, pre-change save and syntax checks passed. Evidence: docs/qa/guided-tutorial-2026-09-28.json. Physical touch/controller devices and full beginner combat playthrough remain for human testing.
+
+
+## [Codex | 2026-09-28] Compact shard discovery — 2.065.0
+First-shard explanation moved from centered 400px/18s card to right-side 280px card, expires after 6 wall-clock seconds. Short goal/save reminder and configured journal key; full journal help unchanged. Narrow screens use a short lower strip. Browser measured right-side card and expiry; old-save fixture and syntax passed. Evidence: docs/qa/shard-notice-2026-09-28.json.

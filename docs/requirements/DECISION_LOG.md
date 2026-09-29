@@ -448,3 +448,7 @@ User requests comprehensive action-gated onboarding: movement, jump, dash, first
 
 ## [Codex | 2026-09-28] Held jump lesson clarification
 User specifically requests press-and-hold jump instruction. Guided jump practice requires at least 0.3 seconds held; a tap demonstrates a short jump but does not complete the lesson.
+
+
+## [Codex | 2026-09-28] Compact first Rift Shard notice
+User says first-shard explanation lasts too long and blocks the character. Replace centered 18-second card with a compact side notice lasting 6 real-time seconds, brief essentials and bound Journal key. Full existing journal explanation retained; narrow screens use a short lower strip.

@@ -967,6 +967,7 @@
     #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:36px}.progbox{height:52px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:22px}#skillframe{bottom:8px;height:104px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
 .baginventory .achlist{display:block}.bagequip .bagslots{width:42%;max-width:245px}.bagequip .bagdoll3d{width:50%;height:380px}
+@media(max-width:700px){#riftDiscovery{right:14px!important;bottom:175px!important;width:calc(100vw - 28px)!important;font-size:12px!important;line-height:1.35!important}}
 details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
 
 #bosshpwrap.officer-team{top:calc(env(safe-area-inset-top) + 294px);width:min(580px,82vw)}
@@ -1095,7 +1096,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.064.0-guided-tutorial';
+const VERSION3D='2.065.0-shard-notice';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5538,10 +5539,11 @@ function drawRiftShardDiscovery(t){
  const r=G?.riftReveal,age=r?G.time-r.start:99;
  if(r&&age<1.1&&!window.__riftShard3dDrawn?.has('pickup')){const f=age/1.1;drawRiftShardCrystal({x:r.x,z:r.z,y:r.y+f*55},t,false,1-f*.8);}
  let card=document.getElementById('riftDiscovery');
- if(!card){card=document.createElement('aside');card.id='riftDiscovery';card.setAttribute('role','status');card.style.cssText='position:fixed;left:50%;bottom:125px;transform:translateX(-50%);width:min(400px,calc(100vw - 28px));box-sizing:border-box;padding:15px 18px;border:1px solid #b582de;border-radius:12px;background:rgba(27,17,40,.96);color:#ecddff;font:14px/1.5 system-ui;z-index:35;pointer-events:none;box-shadow:0 0 28px #a258c544';document.body.appendChild(card);}
- const visible=!!r&&r.first&&age<18&&mode==='play'&&isCampaignAdventure();
+ if(!card){card=document.createElement('aside');card.id='riftDiscovery';card.setAttribute('role','status');card.style.cssText='position:fixed;right:18px;bottom:185px;width:min(280px,calc(100vw - 28px));box-sizing:border-box;padding:10px 12px;border:1px solid #b582de;border-radius:12px;background:rgba(27,17,40,.96);color:#ecddff;font:14px/1.5 system-ui;z-index:35;pointer-events:none;box-shadow:0 0 28px #a258c544';document.body.appendChild(card);}
+ if(r&&r.noticeAt==null)r.noticeAt=performance.now();
+ const visible=!!r&&r.first&&performance.now()-r.noticeAt<6000&&mode==='play'&&isCampaignAdventure();
  card.style.display=visible?'block':'none';
- if(visible&&card._reveal!==r){card._reveal=r;card.innerHTML='<strong style="display:block;font-size:19px;color:#dfb5ff">You found a Rift Shard</strong><p style="margin:7px 0">Five matching shards rebuild a training rift and open a path to a new fighting style.</p><p style="margin:7px 0"><b>Finish this part to save it.</b> Dying or leaving first loses unsaved shards.</p><small>Visit the Rift Hall in the Waystation with five saved shards. Read more in your Journal.</small>';}
+ if(visible&&card._reveal!==r){card._reveal=r;card.innerHTML='<strong style="color:#dfb5ff">Rift Shard found</strong><div>Collect 5 matching shards for a class trial.</div><div><b>Finish this part to save it.</b></div><small>Details: Journal ('+htmlSafe(controlHint('journal'))+')</small>';}
 }
 function riftShardJournal(){
  if(!isCampaignAdventure())return '';

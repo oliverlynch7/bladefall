@@ -1099,7 +1099,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.077.0-safe-unseen-strike';
+const VERSION3D='2.078.0-boss-free-trials';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8870,7 +8870,7 @@ function applyEditsNow(){
   } catch(e){ console.warn('[editor] apply failed, level left as generated:', e.message); }
 }
 function loadStageRaw(i){
-  const s=STAGES[i]; G.stageIndex=i;
+  const s=G.trial?{...STAGES[i],type:'normal',boss:null}:STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
@@ -9322,6 +9322,7 @@ function syncCampaignPartyHealth(){
 
 
 function spawnEnemy(type,x,z,isBoss){
+  if(G.trial&&ENEMY[type]?.boss){type='grunt';isBoss=false;} // Training never inherits campaign bosses.
   const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1)*partyHpMul();   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale); partyHpMul is 1 solo
   const e={partyHealthMul:partyHpMul(),type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,

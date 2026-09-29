@@ -2150,3 +2150,6 @@ Portals now run counterclockwise from Briar at entrance-right, up right wall and
 
 ## [Codex | 2026-09-28] Safe Unseen Strike — 2.077.0
 Ninja basic Unseen rear blink validates map bounds, full footprint support, target-height support and body clearance, rejecting spike fields. Tries rear arc alternatives; no safe destination means strike without relocating. Successful blink snaps to support, clears velocity and updates lastSafe/warp serial. Browser checks: rear landing, edge rejection, void fallback, elevated platform, solid wall; pre-change save preserved.
+
+## [Codex | 2026-09-28] Boss-free trials — 2.078.0
+Trial stage generation strips inherited boss/miniboss template settings. Shared enemy spawn substitutes regular grunts for boss archetypes while G.trial is active. All 10 implemented tutorials/class trials browser-checked for no bosses, sufficient targets, and forced boss-spawn substitution. Campaign boss spawning and pre-change saves pass.

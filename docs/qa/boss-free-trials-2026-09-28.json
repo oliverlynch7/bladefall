@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "id": "warrior",
+      "goal": 6,
+      "enemies": 31,
+      "noBoss": true
+    },
+    {
+      "id": "ranger",
+      "goal": 6,
+      "enemies": 22,
+      "noBoss": true
+    },
+    {
+      "id": "mage",
+      "goal": 6,
+      "enemies": 25,
+      "noBoss": true
+    },
+    {
+      "id": "reaper",
+      "goal": 30,
+      "enemies": 62,
+      "noBoss": true
+    },
+    {
+      "id": "paladin",
+      "goal": 26,
+      "enemies": 39,
+      "noBoss": true
+    },
+    {
+      "id": "necromancer",
+      "goal": 34,
+      "enemies": 45,
+      "noBoss": true
+    },
+    {
+      "id": "ninja",
+      "goal": 18,
+      "enemies": 30,
+      "noBoss": true
+    },
+    {
+      "id": "berserker",
+      "goal": 14,
+      "enemies": 25,
+      "noBoss": true
+    },
+    {
+      "id": "pirate",
+      "goal": 20,
+      "enemies": 31,
+      "noBoss": true
+    },
+    {
+      "id": "chronomancer",
+      "goal": 24,
+      "enemies": 36,
+      "noBoss": true
+    }
+  ],
+  "campaignBoss": true,
+  "note": "Goal count checked before injected boss-archetype probes; reported enemy counts include substituted probe enemies."
+}

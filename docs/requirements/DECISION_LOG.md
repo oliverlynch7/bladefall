@@ -504,3 +504,6 @@ User requests portals in campaign order counterclockwise, Briar Town first at en
 
 ## [Codex | 2026-09-28] Safe Ninja Unseen landing
 User requires Unseen Strike never teleport off-map and always land on solid ground. Plan: validate footprint, bounds, height and blocking geometry; try nearby rear positions; keep original position when none is safe.
+
+## [Codex | 2026-09-28] No trial bosses
+User requires tutorials and class trials never spawn bosses. Plan: strip inherited boss/miniboss stage type in trial generation; substitute regular enemy at shared spawn boundary for boss archetypes. Verify all trials retain sufficient kill targets and campaign boss spawning survives.

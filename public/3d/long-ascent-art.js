@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {buildDeep} from './deep-art.js?v=2017';
+import {buildDeep} from './deep-art.js?v=2074';
 export function buildLongAscent(scene,w){
  const result=buildDeep(scene,{...w,portalProfile:{name:'Castle Duskmoor · Long Ascent',palette:['#655f6b','#696370','#625d68','#706875'],fog:'#252937',sky:[.12,.14,.20],sun:'#dcd4e2',body:'#373a47',lamp:'#deb179',hazard:['#202631','#414c63'],sunGlow:[.03,.02,.04]}});
  result.group.traverse(o=>{if(o.isInstancedMesh&&['castle ring','castle rune'].includes(o.name))o.visible=false;});

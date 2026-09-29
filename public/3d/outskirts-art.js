@@ -33,7 +33,7 @@ function builder(root){
   }
   function solid(o,c='#726754',wood=false){
     const w=o.w||20,d=o.d||w,b=o.y0||0,h=o.kind==='plat'?Math.max(1,o.h-b):(o.h||1),top=b+h;
-    add(wood?'timber':'tile',o.x,b+h/2,o.z,w,h,d,wood&&w>100&&d>80?'#988362':c);
+    add(wood?'timber':'tile',o.x,b+(h-.6)/2,o.z,Math.max(1,w-.8),Math.max(.4,h-.6),Math.max(1,d-.8),wood&&w>100&&d>80?'#988362':c);
     if(h<18)return;
     const rows=Math.min(7,Math.max(1,Math.round(h/17))),rh=h/rows;
     if(wood){
@@ -53,7 +53,7 @@ function builder(root){
         }
       }
     }
-    add('tile',o.x,top-.6,o.z,w,1.2,d,'#9a8a6b');
+    add('tile',o.x,top-.6,o.z,Math.max(1,w-.4),1.2,Math.max(1,d-.4),'#9a8a6b');
   }
   return {add,solid,lamps,structures,
     structure(o,fn){destination='s'+structures.length;structures.push({id:destination,o});fn();destination=null},
@@ -98,16 +98,17 @@ export function buildOutskirts(scene,w){
       if(hash(x,z)<.30)add('grass',x-side*18,2,z,28,32,28,woods?'#777546':null);
     }
   }
-  const obstacles=new WeakSet(),deco=w.deco||[];
+  const obstacles=new WeakSet(),deco=w.deco||[],platformSurfaces=new Map();
   for(const o of w.obstacles||[]){
     if(o.autoCol||o.treeCol||o.pillarCol||o.invisible||o.h<=0)continue;
     // A structure deco is the visible owner of this matching collider.
     if(o.structure){obstacles.add(o);continue;}
-    B.structure(o,()=>{if(o.earth){
+    const pieces=o.kind==='plat'?claimSurface(platformSurfaces,o,'top:'+o.h):[o];
+    B.structure(o,()=>{for(const o of pieces){if(o.earth){
       const base=o.y0||0,h=o.h-base;
-      add('tile',o.x,base+h/2,o.z,o.w,h,o.d,'#665b40');
+      add('tile',o.x,base+h/2,o.z,o.w-.8,h,o.d-.8,'#665b40');
       add('tile',o.x,o.h+.4,o.z,o.w,1.5,o.d,o.path?'#a3916c':'#777747');
-    }else B.solid(o,woods?'#67694f':'#756950',!!(o.root||o.canopy||o.interior));});
+    }else B.solid(o,woods?'#67694f':'#756950',!!(o.root||o.canopy||o.interior));}});
     obstacles.add(o);
   }
   for(const d of deco){
@@ -168,9 +169,7 @@ export function updateOutskirts(w){
   for(const g of st.groups){let x,z,r=CHUNK*.72;const ob=g.userData.obstacle;
     if(ob){x=ob.x;z=ob.z;r=Math.max(ob.w||10,ob.d||10)*.6}else{const a=g.userData.cell.split(',').map(Number);x=(a[0]+.5)*CHUNK;z=(a[1]+.5)*CHUNK}
     g.visible=Math.hypot(x-p.x,z-p.z)<distance+r;
-    if(g.visible&&ob&&w.eye&&window.__BF_META?.().camMode!=='fps'&&(ob.h||0)>40&&p.y<(ob.y0||0)+(ob.h||0)-3){
-      for(let t=.08;t<.94;t+=.08){const xx=w.eye.x+(p.x-w.eye.x)*t,zz=w.eye.z+(p.z-w.eye.z)*t;if(Math.abs(xx-ob.x)<(ob.w||10)/2+5&&Math.abs(zz-ob.z)<(ob.d||10)/2+5){g.visible=false;break}}
-    }
+    if(g.visible&&ob){const base=ob.y0||0,top=ob.kind==='plat'?ob.h:base+(ob.h||0);if(window.BFCameraOcclusion.blocks(w,ob,base,top,window.__BF_META?.().camMode,5))g.visible=false;}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri||0;calls++}
   }
   st.stats.visibleTriangles=tris;st.stats.visibleDrawCalls=calls;

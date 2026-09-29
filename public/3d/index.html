@@ -1043,6 +1043,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./dialogue-speech.js?v=2033"></script>
 <script src="./hub-dialogue.js?v=2070"></script>
 <script src="./emotes.js?v=2071"></script>
+<script src="./camera-occlusion.js?v=2074"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2001"></script>
 <script src="./brute-encounter.js?v=2000"></script>
@@ -1098,7 +1099,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.073.0-bag-portrait';
+const VERSION3D='2.074.0-solid-surfaces';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3379,7 +3380,7 @@ function rebuildHomefieldsVillage(){
   detail(x,z,0,w+12,12,d+12,'#6b705f');
   for(const dx of [-w/2+5,w/2-5])for(const dz of [-d/2+4,d/2-4])detail(x+dx,z+dz,10,11,h,11,'#55412e');
   for(const dz of [-d/2-2,d/2+2])for(const y of [25,h-12])detail(x,z+dz,y,w,7,5,'#68503a');
-  for(let k=0;k<6;k++)detail(x,z,h+k*8,w+34-k*(w/7),9,d+32,roof);
+  for(let k=0;k<6;k++)detail(x,z,h+k*8,w+34-k*(w/7),8,d+32,roof);
   detail(x+w*.28,z-d*.2,h+28,25,50,24,'#8b8771');detail(x+w*.28,z-d*.2,h+78,32,8,32,'#b2ab91');
   detail(x,z+d/2+4,12,38,65,7,'#453a2c');detail(x,z+d/2+9,10,50,5,24,'#a29c7d');
   for(const dx of [-w*.3,w*.3]){detail(x+dx,z+d/2+5,49,27,30,6,'#473f32');detail(x+dx,z+d/2+9,53,21,22,3,'#cdbb76');detail(x+dx,z+d/2+12,53,3,22,3,'#705c3c');}
@@ -19010,14 +19011,8 @@ const LATE=[]; // near-front walls/doors deferred to a translucent pass so they 
    this naturally never fires there. Samples height too, so a band only fades when its y-span
    actually crosses the sightline. */
 function occRay(o,m,y0,hh){
-  if(!G||!G.p||meta.camMode==='fps') return false;
-  const E=G.eye||G.cam; if(!E) return false;
-  const cx=E.x,cy=(E.y==null?60:E.y),cz=E.z, px=G.p.x, py=(G.p.y||0)+34, pz=G.p.z;
-  if(Math.abs(cx-px)<1&&Math.abs(cz-pz)<1) return false;
-  const bt=(y0||0), tp=bt+(hh==null?(o.h==null?96:o.h):hh);
-  for(let t2=0.05;t2<0.95;t2+=0.05){ const x=cx+(px-cx)*t2, y=cy+(py-cy)*t2, z=cz+(pz-cz)*t2;
-    if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m && y>bt-6 && y<tp+8) return true; }
-  return false;
+ const base=y0||0,top=base+(hh==null?(o.h==null?96:o.h):hh);
+ return BFCameraOcclusion.blocks(G,o,base,top,meta.camMode,m);
 }
 let shadowEps=0;
 // world-space sun azimuth for cast shadows: shadows fall opposite the sun and stretch along its axis (stays fixed as the camera orbits)
@@ -19206,8 +19201,7 @@ function drawCourse(s,t){
   const noFade=meta.camMode==='fps';   // first-person: the camera IS the eye, so NOTHING should ever go see-through (fixes platforms turning translucent when you jump off them)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
   // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
-  const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
-    if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
+  const rayHits=(o,m)=>BFCameraOcclusion.blocks(G,o,o.y0||0,o.h??96,meta.camMode,m);
   // the surface you're STANDING on must never fade — the floor underfoot stays solid
   /* THE GROUND BENEATH YOU NEVER FADES - standing on it OR in the air above it.
      Oliver: "when I jumped off of a surface that's at all elevated, it makes it transparent
@@ -22451,7 +22445,7 @@ window.__BF3={releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHeal
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2073"></script>
+<script type="module" src="./hero3d.js?v=2074"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

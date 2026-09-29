@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {buildDeep} from './deep-art.js?v=2017';
+import {buildDeep} from './deep-art.js?v=2074';
 export function buildCastleGates(scene,w){
  const result=buildDeep(scene,{...w,portalProfile:{name:'Castle Duskmoor · Castle Gates',palette:['#68636c','#6d6670','#615e69','#706974'],fog:'#353643',sky:[.19,.20,.26],sun:'#d8d3df',body:'#3d3f49',lamp:'#deb179',hazard:['#303745','#4c5661'],sunGlow:[.04,.03,.055]}});
  const materials=[new T.MeshStandardMaterial({color:'#393c45',roughness:.7,metalness:.5}),new T.MeshStandardMaterial({color:'#928072',roughness:.7}),new T.MeshStandardMaterial({color:'#a68a5d',roughness:.5,metalness:.5})],geometries=[];

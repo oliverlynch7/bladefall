@@ -39,7 +39,7 @@ export function buildKeep(scene,w){
   function rawSurface(o,base,top,wood=false,facade=true){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
     if(o.water){add('stone',o.x,-5,o.z,ww,10,dd,'#263f42');for(let i=0;i<Math.floor(dd/110);i++)block(o.x,.8,o.z-dd/2+i*110,ww*.7,.6,2,'#3d5d60');return;}
-    add(wood?'timber':'stone',o.x,base+h/2,o.z,ww,h,dd,wood?'#493a28':'#444b45');cap({...o,w:ww,d:dd},top,wood);
+    add(wood?'timber':'stone',o.x,base+(h-.4)/2,o.z,Math.max(1,ww-.6),Math.max(.5,h-.4),Math.max(1,dd-.6),wood?'#493a28':'#444b45');cap({...o,w:ww,d:dd},top,wood);
     if(h<35||!facade)return;const rows=Math.min(10,Math.ceil(h/30)),rh=h/rows;
     for(let row=0;row<rows;row++)for(const side of [-1,1])for(const axis of [0,1]){
       const len=axis?dd:ww,cols=Math.max(1,Math.ceil(len/55)),bw=len/cols;
@@ -162,9 +162,7 @@ export function updateKeep(w){
   }
   for(const f of a.occluders.values()){
     const o=f.o,top=o.h||0,base=o.y0??Math.min(0,top-18);let hidden=false;
-    if(w.eye&&window.__BF_META?.().camMode!=='fps'&&p.y<top-8&&Math.hypot(o.x-p.x,o.z-p.z)<600)for(let t=.04;t<.96;t+=.06){
-      const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t,y=w.eye.y+(p.y+30-w.eye.y)*t;
-      if(y>base-2&&y<top+4&&Math.abs(x-o.x)<o.w/2+6&&Math.abs(z-o.z)<o.d/2+6){hidden=true;break;}}
+    hidden=window.BFCameraOcclusion.blocks(w,o,base,top,window.__BF_META?.().camMode,6);
     if(hidden!==f.hidden){for(const q of f.parts){q.mesh.setMatrixAt(q.index,hidden?a.zero:q.matrix);q.mesh.instanceMatrix.needsUpdate=true;}f.hidden=hidden;window.__KEEP_SHADOW_DIRTY=true;}
   }
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;

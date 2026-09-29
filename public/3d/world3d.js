@@ -1,19 +1,19 @@
 import {claimSurface} from './surface-regions.js?v=1972';
-import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2057';
-import {buildLongAscent} from './long-ascent-art.js?v=2045';
-import {buildCastleGates} from './castle-gates-art.js?v=2020';
-import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2019';
-import {buildSkyLibrary} from './sky-library-art.js?v=2018';
-import {buildPalaceCourt} from './palace-courtyard-art.js?v=2017';
+import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2074';
+import {buildLongAscent} from './long-ascent-art.js?v=2074';
+import {buildCastleGates} from './castle-gates-art.js?v=2074';
+import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2074';
+import {buildSkyLibrary} from './sky-library-art.js?v=2074';
+import {buildPalaceCourt} from './palace-courtyard-art.js?v=2074';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2033';
 import {buildStorm,updateStorm} from './storm-art.js?v=2015';
-import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2017';
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2000';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2074';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2074';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2072';
-import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2017';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2031';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2031';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2004';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2074';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2074';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2074';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2074';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -2039,7 +2039,7 @@ export function syncWorld(scene){
   } catch(e){
     WORLD3D.err = String(e && e.message || e);
     WORLD3D.on = false;            // never let a world fault take the game down
-    console.warn('[world3d] build failed, falling back to voxels:', WORLD3D.err);
+    console.warn('[world3d] build failed, falling back to voxels:', e?.stack||WORLD3D.err);
     return false;
   }
   return true;

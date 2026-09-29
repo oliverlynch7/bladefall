@@ -116,7 +116,7 @@ export function buildDeep(scene,w){
 export function updateDeep(w){
   if(!active||!w.p)return;const a=active,p=w.p,meta=window.__BF_META?.(),low=meta?.quality==='low',range=a.palaceCourt?(low?1400:2200):(low?780:1200),fps=meta?.camMode==='fps';let tris=0,calls=0;
   for(const [cell,g] of a.groups){const [cx,cz]=cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}}
-  for(const f of a.fade){const o=f.o;let hidden=false;if(!fps&&w.eye&&p.y<o.h-12&&Math.hypot(o.x-p.x,o.z-p.z)<500){for(let t=.05;t<.94;t+=.1){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t,y=w.eye.y+(p.y+28-w.eye.y)*t;if(y<o.h+5&&Math.abs(x-o.x)<o.w/2+8&&Math.abs(z-o.z)<o.d/2+8){hidden=true;break;}}}if(hidden!==f.hidden){f.mesh.setMatrixAt(f.index,hidden?zero:f.matrix);f.mesh.instanceMatrix.needsUpdate=true;f.hidden=hidden;}}
+  for(const f of a.fade){const o=f.o;const hidden=window.BFCameraOcclusion.blocks(w,o,o.y0??Math.min(0,o.h-18),o.h,window.__BF_META?.().camMode,8);if(hidden!==f.hidden){f.mesh.setMatrixAt(f.index,hidden?zero:f.matrix);f.mesh.instanceMatrix.needsUpdate=true;f.hidden=hidden;}}
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;
   const near=a.glows.map(v=>({v,d:(v.x-p.x)**2+(v.y-p.y)**2+(v.z-p.z)**2})).sort((x,y)=>x.d-y.d);a.lights.forEach((l,i)=>{l.visible=!low&&near[i]?.d<330**2;if(l.visible)l.position.copy(near[i].v)});
   const x=Math.round(p.x/250)*250,z=Math.round(p.z/250)*250,y=Math.round((p.y||0)/200)*200,key=x+','+y+','+z+','+low;if(a.shadow!==key){a.sun.position.set(x-450,y+1200,z+500);a.sun.target.position.set(x,y,z);a.sun.target.updateMatrixWorld();a.shadow=key;window.__DEEP_SHADOW_DIRTY=true;}

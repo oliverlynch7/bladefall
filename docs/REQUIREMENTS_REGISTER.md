@@ -743,3 +743,7 @@ User requests a much larger, intricate, epic and ethereal hub Waystone resemblin
 
 ## [Codex | 2026-09-28] Isolated inventory portrait
 User reports lag, moving world character and NPC contamination in bag preview. Requests independent still equipped hero/pet, companion behind and to side, centered hero, wider equipment area. Plan: replace main-canvas capture/readback with dedicated on-demand renderer and cloned idle rig; independent companion clone; deterministic staging and resource cleanup. Expand equipment column and verify no world/NPC content, pose stability, drag and saves.
+
+
+## [Codex | 2026-09-28] Persistent walkable surfaces and facade flicker
+User reports vertical house-side flicker, first mimic terrace flicker, and Black Woods canopy platforms disappearing underfoot; requests global fix. Inspection: Outskirts cutaway double-counts plat y0+h and uses XZ-only rays, unlike other region renderers. Plan: shared height-aware camera-to-torso AABB occlusion with top-under-feet immunity, used by all regional/voxel cutaways; separate coplanar trim/base and roof layers; browser sweep actual campaign surfaces, explicit canopy support and occluding wall positive controls, geometry audit and saves.

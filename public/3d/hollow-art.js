@@ -147,10 +147,7 @@ export function updateHollow(w){
   // Cut away only the cliff pieces between the camera and hero. The collider never changes.
   for(const f of a.occluders.values()){
     const o=f.o,top=o.h||0,base=o.y0??Math.min(0,top-18);let hidden=false;
-    if(w.eye&&window.__BF_META?.().camMode!=='fps'&&p.y<top-8&&Math.hypot(o.x-p.x,o.z-p.z)<600){
-      for(let t=.04;t<.96;t+=.06){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t,y=w.eye.y+(p.y+30-w.eye.y)*t;
-        if(y>base-2&&y<top+4&&Math.abs(x-o.x)<o.w/2+6&&Math.abs(z-o.z)<o.d/2+6){hidden=true;break;}}
-    }
+    hidden=window.BFCameraOcclusion.blocks(w,o,base,top,window.__BF_META?.().camMode,6);
     if(hidden!==f.hidden){for(const q of f.parts){q.mesh.setMatrixAt(q.index,hidden?a.zero:q.matrix);q.mesh.instanceMatrix.needsUpdate=true;}f.hidden=hidden;window.__HOLLOW_SHADOW_DIRTY=true;}
   }
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;

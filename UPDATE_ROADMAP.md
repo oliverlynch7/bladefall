@@ -2103,3 +2103,7 @@ New characters receive 18 short lessons after starting tutorial practice: four m
 
 ## [Codex | 2026-09-28] Compact shard discovery — 2.065.0
 First-shard explanation moved from centered 400px/18s card to right-side 280px card, expires after 6 wall-clock seconds. Short goal/save reminder and configured journal key; full journal help unchanged. Narrow screens use a short lower strip. Browser measured right-side card and expiry; old-save fixture and syntax passed. Evidence: docs/qa/shard-notice-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Co-op nameplate spacing — 2.066.0
+Removed duplicate in-view friend navigation caption; edge guidance retained. Peer class/level, name, wider HP bar and ping use separated DPR-scaled rows. Browser synthetic-peer rendering confirms one name position and visible half-health bar; old-save fixture and syntax passed. No networking changes. Evidence: docs/qa/party-nameplates-2026-09-28.json.

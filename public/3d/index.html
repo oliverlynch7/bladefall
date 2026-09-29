@@ -1096,7 +1096,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.065.0-shard-notice';
+const VERSION3D='2.066.0-party-nameplates';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -21094,21 +21094,18 @@ function drawHpBars(){
   hpCanvas.width=VW; hpCanvas.height=VH;
   const c=hpCanvas.getContext('2d');
   for(const b of hpBars){
-    if(b.peer){   // ally: class tag + name label above a green (grey if downed) bar
-      c.textAlign='center'; c.textBaseline='alphabetic';
+    if(b.peer){
+      c.save();c.translate(b.x,b.y);c.scale(DPR,DPR);c.textAlign='center';c.textBaseline='alphabetic';
       const tag=(b.cls?b.cls.toUpperCase():'')+(b.lvl?(b.cls?' · ':'')+'LV '+b.lvl:'');
-      if(tag){ c.font='bold 8px system-ui,sans-serif';
-        c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(tag, b.x+0.6, b.y-16.4);
-        c.fillStyle='#d7b8ff'; c.fillText(tag, b.x, b.y-17); }
-      c.font='bold 10px system-ui,sans-serif';
-      c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(b.name, b.x+0.7, b.y-5.4);
-      c.fillStyle=b.col||'#cfe3ff'; c.fillText(b.name, b.x, b.y-6);
-      c.fillStyle='rgba(0,0,0,0.66)'; c.fillRect(b.x-18,b.y,36,5);
-      c.fillStyle=b.downed?'#8a8f9a':'#54d06a'; c.fillRect(b.x-17,b.y+1,34*b.f,3);
-      if(b.ping!=null){ const pc=b.ping<60?'#54d06a':b.ping<130?'#e8c23d':'#e8453d';   // ping indicator: green<60 / amber<130 / red
-        c.beginPath(); c.arc(b.x-13,b.y+13,2.4,0,Math.PI*2); c.fillStyle=pc; c.fill();
-        c.font='bold 9px system-ui,sans-serif'; c.textAlign='left'; c.fillText(b.ping+'ms', b.x-8, b.y+16); c.textAlign='center'; }
-      continue; }
+      c.strokeStyle='#101521';c.lineWidth=3;c.lineJoin='round';
+      if(tag){c.font='bold 9px system-ui';c.strokeText(tag,0,-27);c.fillStyle='#d7b8ff';c.fillText(tag,0,-27);}
+      c.font='bold 12px system-ui';c.strokeText(b.name,0,-12);c.fillStyle=b.col||'#cfe3ff';c.fillText(b.name,0,-12);
+      c.fillStyle='#101521';c.fillRect(-29,-2,58,10);
+      c.fillStyle='#343c46';c.fillRect(-27,0,54,6);
+      c.fillStyle=b.downed?'#8a8f9a':'#54d06a';c.fillRect(-27,0,54*b.f,6);
+      if(b.ping!=null){c.font='9px system-ui';c.fillStyle=b.ping<60?'#54d06a':b.ping<130?'#e8c23d':'#e8453d';c.fillText(b.ping+'ms',0,20);}
+      c.restore();continue;
+    }
     if(b.elite){
       const w=104*DPR,h=8*DPR;c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(12*DPR)+'px system-ui,sans-serif';
       c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText('◆ '+b.name,b.x,b.y-7*DPR);c.fillStyle='#f0c36c';c.fillText('◆ '+b.name,b.x,b.y-7*DPR);
@@ -21178,11 +21175,12 @@ function drawNavigation(c){
  if(!G||mode!=='play')return;
  const main=meta.objectiveArrows!==false?BFPartyNavigation.target(G):null;
  const friends=meta.friendArrows!==false?partyPeers():[];
- const markers=[...(main?[{o:main,color:'#ffe07a',label:main.navLabel||'Main objective'}]:[]),...friends.map(q=>({o:q,color:'#75ddff',label:q.name+(q.downed?' · Needs help':'')}))];
- for(const {o,color,label}of markers){
+ const markers=[...(main?[{o:main,color:'#ffe07a',label:main.navLabel||'Main objective'}]:[]),...friends.map(q=>({o:q,friend:true,color:'#75ddff',label:q.name+(q.downed?' · Needs help':'')}))];
+ for(const {o,color,label,friend}of markers){
   const sp=project(o.x,(o.y??o.y0??0)+65,o.z),cx=VW/2,cy=VH/2,mx=Math.max(50,cx-150*DPR),my=Math.max(50,cy-175*DPR);
   let dx,dy;if(sp){dx=sp[0]-cx;dy=sp[1]-cy;}else{const rel=Math.atan2(o.x-G.p.x,o.z-G.p.z)-(G.camYaw??Math.PI);dx=Math.sin(rel);dy=Math.cos(rel)>0?-1:1;}
   const inside=sp&&Math.abs(dx)<mx&&Math.abs(dy)<my,scale=inside?1:Math.min(mx/Math.max(.001,Math.abs(dx)),my/Math.max(.001,Math.abs(dy)));
+  if(friend&&inside)continue; // Visible allies already have a name and health bar.
   const x=cx+dx*scale,y=cy+dy*scale,ang=inside?Math.PI/2:Math.atan2(dy,dx);
   c.save();c.translate(x,y);c.rotate(ang);c.fillStyle=color;c.strokeStyle='#101521';c.lineWidth=2*DPR;c.beginPath();c.moveTo(10*DPR,0);c.lineTo(-7*DPR,-6*DPR);c.lineTo(-7*DPR,6*DPR);c.closePath();c.fill();c.stroke();c.restore();
   c.save();c.font='600 '+11*DPR+'px system-ui';c.textAlign='center';c.strokeStyle='#101521';c.lineWidth=4*DPR;c.fillStyle=color;

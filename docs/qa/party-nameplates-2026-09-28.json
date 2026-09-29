@@ -1,0 +1,138 @@
+{
+  "render": {
+    "draws": [
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      },
+      {
+        "x": 0,
+        "y": -12,
+        "scale": 1
+      }
+    ],
+    "peers": [
+      "qa"
+    ]
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "scope": "Synthetic peer through actual multiplayer draw path, fixed transport tick for stable render; no network code changed."
+}

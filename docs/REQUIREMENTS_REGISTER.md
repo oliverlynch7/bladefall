@@ -707,3 +707,7 @@ User specifically requests press-and-hold jump instruction. Guided jump practice
 
 ## [Codex | 2026-09-28] Compact first Rift Shard notice
 User says first-shard explanation lasts too long and blocks the character. Replace centered 18-second card with a compact side notice lasting 6 real-time seconds, brief essentials and bound Journal key. Full existing journal explanation retained; narrow screens use a short lower strip.
+
+
+## [Codex | 2026-09-28] Co-op name and health overlap
+User reports friend names blocking health bars. Found duplicate friend navigation caption near the existing overhead nameplate, plus unscaled peer text/bar offsets. Suppress navigation marker when peer is inside the view, retain edge guidance, and give name/class/HP/ping distinct DPR-scaled rows.

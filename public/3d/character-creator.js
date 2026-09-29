@@ -8,7 +8,7 @@ function open(api){active?.();let step=0,yaw=.45,drag=null,raf=0,ended=false;
  api.show(`<div class="card ccwizard"><header><p class="ccsteps" id="ccSteps"></p><h2 id="ccTitle"></h2></header><div class="ccgrid"><aside><h3 id="ccPreviewName"></h3><div class="ccprev" id="ccPrev"><canvas id="ccPrevC" aria-label="Your chosen character and weapon"></canvas><small id="ccPreviewHint">Loading preview...</small></div><div class="ccviews"><button id="ccFull">Full character</button><button id="ccFace">Face close-up</button></div><p id="ccWeapon"></p></aside><section class="ccpane" id="ccPane"></section></div><footer><button class="bigbtn ghost" id="ccBack">Back</button><button class="bigbtn" id="ccNext">Next</button></footer></div>`);
  const root=document.querySelector('.ccwizard'),canvas=document.getElementById('ccPrevC'),pane=document.getElementById('ccPane'),next=document.getElementById('ccNext');
  const el=id=>document.getElementById(id),safe=api.safe;
- function cleanup(){if(ended)return;ended=true;cancelAnimationFrame(raf);observer.disconnect();window.__hero3dPreviewDispose?.();if(active===cleanup)active=null;}
+ function cleanup(){if(ended)return;ended=true;cancelAnimationFrame(raf);observer.disconnect();window.__hero3dPreviewDispose?.(canvas);if(active===cleanup)active=null;}
  const observer=new MutationObserver(()=>{if(!root.isConnected)cleanup();});observer.observe(document.body,{childList:true,subtree:true});active=cleanup;
  function label(){el('ccPreviewName').textContent=st.name.trim()||'Nameless';el('ccWeapon').textContent='Starting weapon: '+api.weapon(st.cls).name;}
  function faceButtons(items,key){return items.map(([id,name])=>`<button class="ccpick" data-${key}="${id}" aria-pressed="${st[key]===id}">${name}</button>`).join('');}

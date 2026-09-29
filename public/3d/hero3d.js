@@ -1,3 +1,4 @@
+import {syncClassLook,clearClassLook} from './class-look3d.js?v=2084';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
@@ -1401,7 +1402,7 @@ function paintClassBody(root,cls,packOriginal=false,override=null){
   let painted=0;
   root.traverse(o=>{
     const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls]);
-    if(!o.isMesh||o.userData._disguisePart||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
+    if(!o.isMesh||o.userData.classLookPart||o.userData._disguisePart||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
     // Skeleton clones share source materials. Always isolate before touching a palette.
     if(o.userData._paletteOwner!==o.uuid){
       // Material.clone JSON-copies userData. Preserve the real source Texture for same-body allies.
@@ -1422,11 +1423,12 @@ function paintClassBody(root,cls,packOriginal=false,override=null){
 }
 function applyClassSkin(){
   if(!actor)return null;
-  const cls=window.__BF_META?.()?.classId||'warrior',skin=CLASS_SKINS[cls];if(!skin)return null;
+  const meta=window.__BF_META?.(),cls=meta?.classId||'warrior',tier=window.BFClassLooks?.tier(meta,cls)||0,skin=tier?BFClassLooks.palette(cls,tier):CLASS_SKINS[cls];if(!skin)return null;
   const packOriginal=HERO3D.skinId==='pack-original';
-  const disguised=castleDisguise(),painted=paintClassBody(actor,disguised?"warrior":cls,disguised?false:packOriginal,disguised?LEGION_UNIFORM:null);
+  const disguised=castleDisguise(),painted=paintClassBody(actor,disguised?"warrior":cls,disguised?false:packOriginal,disguised?LEGION_UNIFORM:tier?skin:null);
+  syncClassLook(actor,cls,disguised?0:tier,headMetrics({root:actor,model:HERO3D.model}));
   castleHelmet(actor,disguised);
-  HERO3D.skin={classId:cls,disguised,skinId:packOriginal?'pack-original':skin.id,metal:skin.metal,painted};return HERO3D.skin;
+  HERO3D.skin={classId:cls,tier,disguised,skinId:packOriginal?'pack-original':skin.id,metal:skin.metal,painted};return HERO3D.skin;
 }
 
 /* The player's class, from the game's own state. */
@@ -1471,7 +1473,7 @@ function syncClass(){
   const want = modelForClass();
   if(actor){const m=window.__BF_META?.()||{};if(actor.userData.faceStyle!==(m.mouthStyle||'line')+'|'+(m.browStyle||'natural'))buildFace();}
   if(actor){const color=window.__BF_META?.()?.eyeColor;if(color&&actor.userData.eyeColor!==color){actor.traverse(o=>{if(o.userData?._iris)o.material.color.set(color);});actor.userData.eyeColor=color;}}
-  if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId||HERO3D.skin?.disguised!==castleDisguise())applyClassSkin();syncLocalEquipment();return;}
+  if(want === _classNow){if(HERO3D.skin?.classId!==window.__BF_META?.()?.classId||HERO3D.skin?.disguised!==castleDisguise()||HERO3D.skin?.tier!==(window.BFClassLooks?.tier(window.__BF_META?.(),window.__BF_META?.()?.classId)||0))applyClassSkin();syncLocalEquipment();return;}
   const g = _loaded[want];
   if(!g) return;
   _classNow = want;
@@ -1822,7 +1824,7 @@ function peerModelFor(p){
 }
 
 function disposeRig(rec){
-  if(!rec) return;disposeCosmetics(rec.wrap);castleHelmet(rec.node,false);
+  if(!rec) return;clearClassLook(rec.node);disposeCosmetics(rec.wrap);castleHelmet(rec.node,false);
   if(rec.mixer) try { rec.mixer.stopAllAction(); rec.mixer.uncacheRoot(rec.node); } catch(e){}
   if(rec.node){clearWeapon(rec.holder);rec.node.traverse(o=>{if(o.userData._paletteOwner===o.uuid)for(const m of (Array.isArray(o.material)?o.material:[o.material]))m?.dispose();});if(rec.node.parent)rec.node.parent.remove(rec.node);}
 }
@@ -1868,7 +1870,7 @@ function peerRig(p, key){
             art: undefined, rar: undefined, arming: false, seen: _frameNo };
     _peerRigs.set(key, rec);
   }
-  if(rec.palette!==p.cid||rec.disguise!==!!p.disguise){paintClassBody(rec.node,p.disguise?'warrior':p.cid||'warrior',false,p.disguise?LEGION_UNIFORM:null);castleHelmet(rec.node,!!p.disguise);rec.palette=p.cid;rec.disguise=!!p.disguise;}
+  if(rec.palette!==p.cid||rec.disguise!==!!p.disguise||rec.lookTier!==p.lookTier){paintClassBody(rec.node,p.disguise?'warrior':p.cid||'warrior',false,p.disguise?LEGION_UNIFORM:p.lookTier?window.BFClassLooks?.palette(p.cid,p.lookTier):null);rec.lookTier=p.lookTier;castleHelmet(rec.node,!!p.disguise);rec.palette=p.cid;rec.disguise=!!p.disguise;}
   rec.seen = _frameNo;
   return rec;
 }
@@ -2008,6 +2010,7 @@ export function drawHero3D(p, t){
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;
+    const lookRoot=rec?rec.node:actor,lookTier=cosmeticLocal?(window.BFClassLooks?.tier(cosmeticMeta,cosmeticClass)||0):(p.lookTier||0);syncClassLook(lookRoot,cosmeticClass,(cosmeticLocal?castleDisguise():p.disguise)?0:lookTier,headMetrics({root:lookRoot,model:rec?rec.model:HERO3D.model}),performance.now()/1000,!cosmeticMeta?.reduceMotion);
     const cosmeticIds=cosmeticLocal?window.__BF3?.cosmeticAppearance?.():p.cosmetics||{};
     syncCosmetics(wrap,p,['play','mirror'].includes(window.__BF3?.mode)?dt:0,{...cosmeticIds,model:rec?rec.model:HERO3D.model,accent:CLASS_SKINS[cosmeticClass]?.metal||'#ae9671',particles:cosmeticMeta?.particles!==false,hidden:!!p.dead||!!p.downed,sceneKey:[window.__BF3?.G?.runSeed,window.__BF3?.G?.zone,window.__BF3?.G?.area,window.__BF3?.G?.trial,window.__BF3?.G?.hub,window.__BF3?.G?.riftHall].join('|')});
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
@@ -2100,8 +2103,9 @@ window.__hero3dScene = () => scene;
    level behind it, and borrowing the game's canvas would mean fighting whatever it is drawing.
    The model is a SkeletonUtils clone for the same reason the mirror's is - one actor cannot be in
    two places, and the game may already be using it. */
+function disposePreviewMaterials(root){root?.traverse(o=>{if(o.userData._paletteOwner===o.uuid)for(const m of (Array.isArray(o.material)?o.material:[o.material]))m?.dispose();});}
 let _pv = null;
-window.__hero3dPreviewDispose=()=>{if(!_pv)return;const rec=_pv;_pv=null;rec.face?.dispose();if(rec.holder){rec.holder._weapSeq=(rec.holder._weapSeq||0)+1;clearWeapon(rec.holder);}rec.mixer?.stopAllAction();if(rec.holder)rec.mixer?.uncacheRoot(rec.holder.root);rec.wrap.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});rec.renderer.dispose();rec.renderer.forceContextLoss();};
+window.__hero3dPreviewDispose=(canvas)=>{if(!_pv||(canvas&&_pv.canvas!==canvas))return;const rec=_pv;_pv=null;rec.face?.dispose();if(rec.holder)clearClassLook(rec.holder.root);if(rec.holder){rec.holder._weapSeq=(rec.holder._weapSeq||0)+1;clearWeapon(rec.holder);}rec.mixer?.stopAllAction();if(rec.holder)rec.mixer?.uncacheRoot(rec.holder.root);rec.wrap.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});disposePreviewMaterials(rec.holder?.root);rec.renderer.dispose();rec.renderer.forceContextLoss();};
 window.__hero3dPreview = (canvas, opts={}) => {
  if(!canvas)return false;
  try{
@@ -2117,16 +2121,17 @@ window.__hero3dPreview = (canvas, opts={}) => {
   const rec=_pv,want=opts.model||'Warrior';
   if(rec.model!==want){
    const g=_loaded[want];if(!g)return false;
-   rec.face?.dispose();if(rec.holder){clearWeapon(rec.holder);rec.mixer?.stopAllAction();rec.mixer?.uncacheRoot(rec.holder.root);rec.holder.root.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});}rec.wrap.clear();
+   rec.face?.dispose();if(rec.holder){clearClassLook(rec.holder.root);disposePreviewMaterials(rec.holder.root);clearWeapon(rec.holder);rec.mixer?.stopAllAction();rec.mixer?.uncacheRoot(rec.holder.root);rec.holder.root.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});}rec.wrap.clear();
    const clone=SkeletonUtils.clone(g.scene);
-   const remove=[];clone.traverse(o=>{if(o.userData?._eye||o.userData?._mouth||o.userData?._weap)remove.push(o);if(o.isMesh){o.frustumCulled=false;o.castShadow=false;}});remove.forEach(o=>o.removeFromParent());
+   const remove=[];clone.traverse(o=>{if(o.userData?.classLookRoot||o.userData?._eye||o.userData?._mouth||o.userData?._weap)remove.push(o);if(o.isMesh){o.frustumCulled=false;o.castShadow=false;}});remove.forEach(o=>o.removeFromParent());
    rec.wrap.add(clone);rec.model=want;rec.holder={root:clone,model:want};
    rec.face=window.__npcBuildFace(clone,want,opts.eyeColor,opts);rec.eye=opts.eyeColor;rec.faceStyle=opts.mouthStyle+'|'+opts.browStyle;
-   paintClassBody(clone,opts.classId||'warrior');
+   paintClassBody(clone,opts.classId||'warrior');rec.lookKey=null;
    rec.mixer=new THREE.AnimationMixer(clone);const idle=g.animations?.find(a=>/idle/i.test(a.name));if(idle){rec.mixer.clipAction(idle).play();rec.mixer.update(.01);}
    queueEquip(()=>_pv===rec?equipWeapon(rec.holder,{model:want,weapon:opts.weapon||null}):null).then(()=>{if(_pv===rec){poseWeaponGrip({weapon:opts.weapon,onGround:true},rec.wrap,{},want,1);rec.wrap.updateMatrixWorld(true);rec.wrap.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});rec.bounds=null;}}).catch(e=>console.warn('Creator weapon preview',e));
   }
   if(rec.eye!==opts.eyeColor||rec.faceStyle!==opts.mouthStyle+'|'+opts.browStyle){rec.face?.dispose();rec.face=window.__npcBuildFace(rec.holder.root,want,opts.eyeColor,opts);rec.eye=opts.eyeColor;rec.faceStyle=opts.mouthStyle+'|'+opts.browStyle;}
+  const lt=opts.lookTier||0,lk=(opts.classId||'warrior')+':'+lt;if(rec.lookKey!==lk){paintClassBody(rec.holder.root,opts.classId||'warrior',false,lt?window.BFClassLooks?.palette(opts.classId,lt):null);rec.lookKey=lk;rec.bounds=null;}syncClassLook(rec.holder.root,opts.classId||'warrior',lt,headMetrics({root:rec.holder.root,model:want}),performance.now()/1000,!window.__BF_META?.()?.reduceMotion);
   const w=canvas.clientWidth||400,h=canvas.clientHeight||440;
   if(rec.w!==w||rec.h!==h){rec.renderer.setSize(w,h,false);rec.w=w;rec.h=h;rec.cam.aspect=w/h;rec.cam.updateProjectionMatrix();}
   // Precise bounds sample deformed vertices, not stale bind-space boxes.
@@ -2141,7 +2146,7 @@ window.__hero3dPreview = (canvas, opts={}) => {
   rec.wrap.rotation.y=opts.yaw||0;rec.wrap.updateMatrixWorld(true);
   rec.renderer.render(rec.scene,rec.cam);
   window.__creatorPreviewRoot=rec.wrap;
-  window.__creatorPreviewState={model:want,eye:rec.eye,mouth:opts.mouthStyle,brow:opts.browStyle,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face};
+  window.__creatorPreviewState={model:want,lookTier:opts.lookTier||0,eye:rec.eye,mouth:opts.mouthStyle,brow:opts.browStyle,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face};
   return true;
  }catch(e){console.warn('Character preview',e);return false;}
 };

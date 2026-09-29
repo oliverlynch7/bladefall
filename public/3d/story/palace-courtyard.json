@@ -16,7 +16,7 @@
   },
   "nodes": {
     "pc.grace.hello": {
-      "text": "Mind the broken tiles. The Legion took the palace, and somehow I am still the one warning people about the floor.",
+      "text": "The Legion holds the palace. Watch the broken tiles.",
       "choices": [
         {
           "id": "help",
@@ -62,12 +62,13 @@
         "scene": "Palace Courtyard",
         "order": 1,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.orb": {
-      "text": "Then you need the Sky Library. Its doors are shut, and the Legion holds the balconies. Help us keep this court safe first. Knowledge is worth saving. So are the people who dust it.",
+      "text": "The orb is beyond the Sky Library's locked doors. Help secure the courtyard first.",
       "choices": [
         {
           "id": "water",
@@ -95,12 +96,13 @@
         "scene": "Palace Courtyard",
         "order": 2,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.water": {
-      "text": "The waterworks are down the west steps. Pull off the iron clamp before you turn the wheel. Please leave the pipes in one piece. I have enough buckets in my life.",
+      "text": "Go down the west steps. Remove the iron clamp, then turn the water wheel.",
       "choices": [
         {
           "id": "go",
@@ -128,12 +130,13 @@
         "scene": "Palace Courtyard",
         "order": 3,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.curt": {
-      "text": "Those pipes feed our healing station. There are people behind me who cannot walk. Open the wheel, then we can discuss your hurry.",
+      "text": "The wheel supplies our healing station. Open it so we can help the wounded.",
       "choices": [
         {
           "id": "sorry",
@@ -161,12 +164,13 @@
         "scene": "Palace Courtyard",
         "order": 4,
         "emotion": "Firm",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.wait": {
-      "text": "West steps, iron clamp, water wheel. Victor is watching the next terrace. He will know a way past the guards.",
+      "text": "West steps: clamp, then wheel. Afterward, find Victor on the next terrace.",
       "choices": [
         {
           "id": "garden",
@@ -209,12 +213,13 @@
         "scene": "Palace Courtyard",
         "order": 5,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.restored": {
-      "text": "There. A place to breathe. This large healing pad will keep working for as long as you need it. The small ones on the paths run out. Stay a moment, if you can.",
+      "text": "This large healing pad won't run out. Smaller pads along the paths have limited healing.",
       "choices": [
         {
           "id": "route",
@@ -247,12 +252,13 @@
         "scene": "Palace Courtyard",
         "order": 6,
         "emotion": "Relieved",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.route": {
-      "text": "Victor is beyond the fountain, on the next terrace. The Legion holds both balconies. He has been counting their steps. I think it is how he stops himself from worrying.",
+      "text": "Find Victor beyond the fountain. He knows the guarded balconies.",
       "choices": [
         {
           "id": "garden",
@@ -285,12 +291,13 @@
         "scene": "Palace Courtyard",
         "order": 7,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.garden": {
-      "text": "The east greenhouse still has dry seeds. Open the garden channel, then bring me the seed tin. We can grow food here again. Take some home too. A village needs more than walls.",
+      "text": "Open the east greenhouse's water channel, then bring me the seed tin. We'll grow food again.",
       "choices": [
         {
           "id": "accept",
@@ -385,12 +392,13 @@
         "scene": "Palace Courtyard",
         "order": 8,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.garden.curt": {
-      "text": "People eat during invasions too. You do not have to help. Just do not laugh at the few things we can still put right.",
+      "text": "Food still matters during an invasion. You can decline without mocking us.",
       "choices": [
         {
           "id": "repair",
@@ -428,12 +436,13 @@
         "scene": "Palace Courtyard",
         "order": 9,
         "emotion": "Hurt, restrained",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.garden.wait": {
-      "text": "A tin of seeds. One clear channel. Not much against an army, perhaps. Enough for a start.",
+      "text": "Clear the garden channel and bring the seed tin.",
       "choices": [
         {
           "id": "deliver",
@@ -497,24 +506,26 @@
         "scene": "Palace Courtyard",
         "order": 10,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.grace.thanks": {
-      "text": "I found this purple piece under a broken planter. It belongs with the other Rift Shards. Take it. And take these seeds home when the way is clear. Let something there grow because of this trip.",
+      "text": "Take this Rift Shard and seeds for home. Thank you.",
       "choices": [],
       "voice": {
         "speaker": "grace",
         "scene": "Palace Courtyard",
         "order": 11,
         "emotion": "Warm gratitude",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.hello": {
-      "text": "Sergeant Victor. Last of the courtyard watch still standing. Before you ask, yes, I have tried shouting at the gates. Excellent echoes. No result.",
+      "text": "Sergeant Victor. I'm holding what's left of the courtyard watch.",
       "choices": [
         {
           "id": "route",
@@ -560,12 +571,13 @@
         "scene": "Palace Courtyard",
         "order": 12,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.people": {
-      "text": "Good. The workers have somewhere safe to gather. The Legion forced everyone out of the halls and put guards on the records. They came for what this place knows.",
+      "text": "The workers are safe. The Legion seized the palace for its knowledge.",
       "choices": [
         {
           "id": "route",
@@ -593,12 +605,13 @@
         "scene": "Palace Courtyard",
         "order": 13,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.route": {
-      "text": "Two balconies, two locks. The direct route means fighting their guards. The lower gardens reach the water controls underneath. Drain a lock and its barrier drops. Your choice. I recommend coming back alive.",
+      "text": "Two balconies, two locks. Fight through their guards, or use the lower gardens' water controls to drain each lock and lower its barrier.",
       "choices": [
         {
           "id": "mirror",
@@ -633,12 +646,13 @@
         "scene": "Palace Courtyard",
         "order": 14,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.stranger": {
-      "text": "You came up from the sea when everyone here was trying to get away. I can work with that. I will keep the route behind you clear.",
+      "text": "You came to help when everyone else was leaving. I'll keep your way back clear.",
       "choices": [
         {
           "id": "go",
@@ -653,12 +667,13 @@
         "scene": "Palace Courtyard",
         "order": 15,
         "emotion": "Sincere",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.mirrors": {
-      "text": "Three mirrors send light to the door. Match each beam to the sun mark in front of it. When all three beams reach their marks, the door opens. The old keepers made even their doors into lessons.",
+      "text": "Aim each of the three mirrors at its sun mark. All three beams must connect to open the door.",
       "choices": [
         {
           "id": "go",
@@ -681,12 +696,13 @@
         "scene": "Palace Courtyard",
         "order": 16,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.wait": {
-      "text": "I will hold the fountain side. If a plan goes wrong, try the other path. No medal for making the same mistake twice.",
+      "text": "I'll hold the fountain. If one route fails, try the other.",
       "choices": [
         {
           "id": "remind",
@@ -720,20 +736,22 @@
         "scene": "Palace Courtyard",
         "order": 17,
         "emotion": "Conversational",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "pc.victor.done": {
-      "text": "Then go. Find someone who knows how to end this. We will keep this court open for whoever follows you.",
+      "text": "Go find how to stop the King. We'll hold the courtyard.",
       "choices": [],
       "voice": {
         "speaker": "victor",
         "scene": "Palace Courtyard",
         "order": 18,
         "emotion": "Hope, held in check",
-        "direction": "Speak clearly and naturally; let the humor come from the situation.",
-        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+        "status": "script-revised"
       }
     }
   },

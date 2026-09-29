@@ -39,7 +39,7 @@
   },
   "nodes": {
     "rv.pattern.offer": {
-      "text": "The Legion kept a pattern for strong tool heads in the western stores. With that, I can make tools that last. We need to build homes again, not just sharper swords.",
+      "text": "Recover the Legion's tool-head pattern from the western stores. We need good tools to rebuild homes.",
       "choices": [
         {
           "id": "help",
@@ -69,13 +69,13 @@
         "speaker": "anvil",
         "scene": "Tools for Tomorrow",
         "order": 1,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.pattern.later": {
-      "text": "Then do that first. This can wait. I am asking for a favor, not sending you to your doom on a shopping trip.",
+      "text": "This can wait. Come back when you're ready.",
       "choices": [
         {
           "id": "help",
@@ -99,37 +99,37 @@
         "speaker": "anvil",
         "scene": "Tools for Tomorrow",
         "order": 2,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.pattern.accepted": {
-      "text": "The pattern box is in the western stores of Iron Halls. Its plate should explain the cooling wheel and clamp. Reach the Great Furnace before you head home; that gives us a safe route to carry it out.",
+      "text": "Western stores, Iron Halls. Read the box's cooling-wheel and clamp plate. Reach the Great Furnace before returning with the pattern.",
       "choices": [],
       "voice": {
         "speaker": "anvil",
         "scene": "Tools for Tomorrow",
         "order": 3,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.pattern.wait": {
-      "text": "Still looking? Western stores, Iron Halls. Cool the box before you open it. Finish that half, then bring the pattern here.",
+      "text": "Cool the pattern box in Iron Halls' western stores. Finish that half, then return here.",
       "choices": [],
       "voice": {
         "speaker": "anvil",
         "scene": "Tools for Tomorrow",
         "order": 4,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.pattern.deliver": {
-      "text": "Is that the pattern? Let me see. Yes. A proper working edge. These tools will be useful long after the fighting stops.",
+      "text": "That's the pattern. Now we can make better tools.",
       "choices": [
         {
           "id": "give",
@@ -163,25 +163,25 @@
         "speaker": "anvil",
         "scene": "Tools for Tomorrow",
         "order": 5,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.pattern.thanks": {
-      "text": "Look beside the forge. The first tools are already laid out. Take 450 gold for the trip. You brought back something that helps people live.",
+      "text": "The new tools are beside the forge. Here's 450 gold.",
       "choices": [],
       "voice": {
         "speaker": "anvil",
         "scene": "Tools for Tomorrow",
         "order": 6,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after ember. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.supplies.offer": {
-      "text": "The rescued prisoners marked a sealed store in the western chamber. There is food inside. Good food, if the rats have not learned to use a hoist. I would rather our neighbors got it.",
+      "text": "Recover food from Broken Walls' sealed western chamber. Our neighbors need it.",
       "choices": [
         {
           "id": "help",
@@ -211,13 +211,13 @@
         "speaker": "quartermaster",
         "scene": "Food for the Refuge",
         "order": 7,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.supplies.later": {
-      "text": "Then do that first. This can wait. I am asking for a favor, not sending you to your doom on a shopping trip.",
+      "text": "This can wait. Come back when you're ready.",
       "choices": [
         {
           "id": "help",
@@ -241,37 +241,37 @@
         "speaker": "quartermaster",
         "scene": "Food for the Refuge",
         "order": 8,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.supplies.accepted": {
-      "text": "Go to the western sealed chamber in Broken Walls. Check the hoist plate, then lower the supplies. Reach the Dungeons before heading home so the load can get out safely.",
+      "text": "Use the hoist plate in Broken Walls' sealed western chamber to lower the supplies. Reach the Dungeons before returning.",
       "choices": [],
       "voice": {
         "speaker": "quartermaster",
         "scene": "Food for the Refuge",
         "order": 9,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.supplies.wait": {
-      "text": "Western chamber, Broken Walls. The hoist needs the right balance. Finish that half, then bring the supplies here.",
+      "text": "Balance the western chamber's hoist. Finish Broken Walls, then bring the supplies here.",
       "choices": [],
       "voice": {
         "speaker": "quartermaster",
         "scene": "Food for the Refuge",
         "order": 10,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.supplies.deliver": {
-      "text": "You got it here in one piece. So did the food. An excellent day for everyone except the rats.",
+      "text": "The supplies arrived safely. Thank you.",
       "choices": [
         {
           "id": "give",
@@ -305,25 +305,25 @@
         "speaker": "quartermaster",
         "scene": "Food for the Refuge",
         "order": 11,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.supplies.thanks": {
-      "text": "The shelves are stocked again. Take 300 gold. And if anyone asks, yes, I did count every sack. Twice.",
+      "text": "The shelves are stocked. Here's 300 gold.",
       "choices": [],
       "voice": {
         "speaker": "quartermaster",
         "scene": "Food for the Refuge",
         "order": 12,
-        "status": "recording-ready",
-        "direction": "Plain, practical, warm. Let the small joke land without turning the request into a gag.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return request after keep. This helps ordinary people rebuild. No new Bladeborn revelation."
       }
     },
     "rv.tracks.offer": {
-      "text": "You brought one frightened creature home. I reckon you have room to help two more. Fresh paw marks lead west from the old grove in Black Woods. There are abandoned traps out there. Nobody has gone back to check them.",
+      "text": "Paw prints lead west from Black Woods' old grove. Check the abandoned traps and rescue both animals.",
       "choices": [
         {
           "id": "help",
@@ -353,13 +353,13 @@
         "speaker": "beastkeeper",
         "scene": "A Kinder Trail",
         "order": 40,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
       }
     },
     "rv.tracks.later": {
-      "text": "They are off the main path. Keep it in mind when you have a safe chance. I will put clean bedding aside. Hope is useful. Dry bedding is better.",
+      "text": "They're off the main path. Help when you can safely return.",
       "choices": [
         {
           "id": "help",
@@ -383,37 +383,37 @@
         "speaker": "beastkeeper",
         "scene": "A Kinder Trail",
         "order": 41,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
       }
     },
     "rv.tracks.accepted": {
-      "text": "Follow the paw marks west of the old grove. One trail climbs the low logs. The other stays near the roots. Free both animals, finish Black Woods, then tell me what you found.",
+      "text": "Follow both trails west of the grove: low logs and roots. Free both animals, finish Black Woods, then return.",
       "choices": [],
       "voice": {
         "speaker": "beastkeeper",
         "scene": "A Kinder Trail",
         "order": 42,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
       }
     },
     "rv.tracks.wait": {
-      "text": "Look for round pads with four toes. A split hoof belongs to a deer. Check the roots and the old raised cage. You do not need to take your own companion into danger.",
+      "text": "Follow four-toed paw prints, not split hooves. Check the roots and raised cage. Your own companion isn't required.",
       "choices": [],
       "voice": {
         "speaker": "beastkeeper",
         "scene": "A Kinder Trail",
         "order": 43,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
       }
     },
     "rv.tracks.deliver": {
-      "text": "Both free? Good. I will get them settled and teach our companions a little better care. A dry shelter, clean dressings, a proper meal. Heroes need those too, despite the rumors.",
+      "text": "Both animals are free. I'll prepare their shelter and improve our companion care.",
       "choices": [
         {
           "id": "give",
@@ -447,25 +447,25 @@
         "speaker": "beastkeeper",
         "scene": "A Kinder Trail",
         "order": 44,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
       }
     },
     "rv.tracks.thanks": {
-      "text": "The care shelter is ready. Every companion you equip now has ten percent more maximum health. No bill. You did the hard part.",
+      "text": "The care shelter is ready. All equipped companions now gain 10% maximum health.",
       "choices": [],
       "voice": {
         "speaker": "beastkeeper",
         "scene": "A Kinder Trail",
         "order": 45,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Practical animal care, with dry humor. Keep the concern sincere.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Abandoned traps threaten living animals. This is not a Hollowing or mount quest."
       }
     },
     "rv.keepsake.offer": {
-      "text": "Word reached me about the people you helped at the Keep. I came to see for myself that you still have all your limbs. If you go home again, would you look for that little wooden bird? The one you carved with the crooked beak.",
+      "text": "If you return home, find the little wooden bird you carved. I'd like something of ours here.",
       "choices": [
         {
           "id": "help",
@@ -488,7 +488,8 @@
           "id": "worry",
           "text": "Are you still worried about me?",
           "next": "rv.keepsake.worry",
-          "effects": []
+          "effects": [],
+          "optional": true
         },
         {
           "id": "later",
@@ -501,13 +502,13 @@
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 40,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
       }
     },
     "rv.keepsake.later": {
-      "text": "It can wait. I want you back more than I want a bit of wood. Just promise me you are eating something that did not come out of a monster.",
+      "text": "It can wait. I want you safe more than I want the bird.",
       "choices": [
         {
           "id": "help",
@@ -531,37 +532,37 @@
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 41,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
       }
     },
     "rv.keepsake.accepted": {
-      "text": "Our old house is southwest of the village yard. You always hid things where rain could not reach, but muddy boots could. Look behind the house. Finish Homefields before bringing it back here.",
+      "text": "Look behind our old house, southwest of the village yard—somewhere sheltered from rain. Finish Homefields before returning.",
       "choices": [],
       "voice": {
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 42,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
       }
     },
     "rv.keepsake.wait": {
-      "text": "Behind our old house, southwest of the yard. I remember a plant pot that was always in the way. You called that security. I called it a bruised toe.",
+      "text": "Behind our old house, southwest of the yard. Remember that awkward plant pot?",
       "choices": [],
       "voice": {
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 43,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
       }
     },
     "rv.keepsake.deliver": {
-      "text": "You found it. Still crooked. Still my favorite bird. Let me put it here, where I can see it while I wait for you.",
+      "text": "Still crooked. Still my favorite bird. Thank you.",
       "choices": [
         {
           "id": "give",
@@ -595,38 +596,40 @@
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 44,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
       }
     },
     "rv.keepsake.thanks": {
-      "text": "There. A small piece of home, even here. Take these coins I set aside. And when this is over, perhaps we can sit down long enough for you to carve another.",
+      "text": "A little piece of home. Take these coins. When this is over, carve me another.",
       "choices": [
         {
           "id": "home",
           "text": "What will you do now?",
           "next": "rv.keepsake.home",
-          "effects": []
+          "effects": [],
+          "optional": true
         },
         {
           "id": "reports",
           "text": "What have people been saying?",
           "next": "rv.keepsake.reports",
-          "effects": []
+          "effects": [],
+          "optional": true
         }
       ],
       "voice": {
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 45,
-        "status": "recording-ready",
-        "direction": "Warm, plain speech. Quietly proud and worried; never imply adoption or Bladeborn knowledge.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional return visit. Thomas is the player’s father as far as the player knows; the keepsake is an ordinary childhood carving."
       }
     },
     "rv.keepsake.worry": {
-      "text": "Of course I am. You could walk in carrying a mountain and I would ask whether you hurt your back. But people came home because you refused to give up. I am proud of you. Both things can be true.",
+      "text": "I'm worried, and I'm proud. You brought people home. Both feelings can be true.",
       "choices": [
         {
           "id": "help",
@@ -656,13 +659,13 @@
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 46,
-        "status": "recording-ready",
-        "direction": "A father holding worry and pride together. A small smile, no grand speech.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional conversation after Keep. No bloodline, adoption or final-battle revelation."
       }
     },
     "rv.keepsake.home": {
-      "text": "Mend what I can. Make sure the new arrivals have a seat and a hot meal. You are not the only stubborn person in this family.",
+      "text": "I'll mend what I can and feed the new arrivals. You're not the only stubborn one here.",
       "choices": [
         {
           "id": "back",
@@ -675,13 +678,13 @@
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 47,
-        "status": "recording-ready",
-        "direction": "A father holding worry and pride together. A small smile, no grand speech.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional conversation after Keep. No bloodline, adoption or final-battle revelation."
       }
     },
     "rv.keepsake.reports": {
-      "text": "They tell me about doors you opened and people you brought back. Some of the stories get taller every time I hear them. The part I believe is that you stopped to help.",
+      "text": "People tell me how you helped them. That's the part of every story I believe.",
       "choices": [
         {
           "id": "back",
@@ -694,8 +697,8 @@
         "speaker": "thomas",
         "scene": "A Small Piece of Home",
         "order": 48,
-        "status": "recording-ready",
-        "direction": "A father holding worry and pride together. A small smile, no grand speech.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional conversation after Keep. No bloodline, adoption or final-battle revelation."
       }
     }

@@ -50,7 +50,7 @@
   },
   "nodes": {
     "briar.thomas.first": {
-      "text": "I know that look. You think you're going out there. The Legion is at our fields, and half the village is holding tools instead of weapons.",
+      "text": "The Legion has reached our fields. You're going to fight, aren't you?",
       "choices": [
         {
           "id": "protect",
@@ -78,8 +78,8 @@
         "speaker": "thomas",
         "scene": "Before You Go",
         "order": 1,
-        "status": "recording-ready",
-        "direction": "Trying to sound firm while quietly frightened for your child. Practical, familiar warmth. No hint about adoption.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
       }
     },
@@ -195,19 +195,19 @@
       }
     },
     "briar.thomas.ready": {
-      "text": "Go to Mara. She has wounded people arriving and barely enough supplies for the ones already there. I'll help the neighbors pack. We're not leaving anyone behind.",
+      "text": "Go to Mara. She needs help treating the wounded. I'll help our neighbors pack.",
       "choices": [],
       "voice": {
         "speaker": "thomas",
         "scene": "Before You Go",
         "order": 5,
-        "status": "recording-ready",
-        "direction": "You have accepted they will go. Give clear, useful directions, then steady resolve about the neighbors.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare."
       }
     },
     "briar.mara.first": {
-      "text": "Good. Someone still on their feet. I need tangle roots to bring down the fevers and clean dressings for the wounds. We can't move these people safely yet.",
+      "text": "I need tangle roots for fevers and clean dressings for wounds. Help me get these people ready to leave.",
       "choices": [
         {
           "id": "help",
@@ -221,7 +221,8 @@
           "text": "Will this help us hold the village?",
           "next": "briar.mara.why",
           "effects": [],
-          "when": []
+          "when": [],
+          "optional": true
         },
         {
           "id": "joke",
@@ -235,13 +236,13 @@
         "speaker": "mara",
         "scene": "Room for the Wounded",
         "order": 6,
-        "status": "recording-ready",
-        "direction": "Tired but capable. Busy treating neighbors; glad to see someone who can help. Dry warmth, not despair.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
     },
     "briar.mara.why": {
-      "text": "These are our neighbors. Some can help hold the lane once they're treated. The rest need to be well enough to leave it. Both matter.",
+      "text": "The wounded need treatment before they can fight or escape.",
       "choices": [
         {
           "id": "help",
@@ -255,8 +256,8 @@
         "speaker": "mara",
         "scene": "Room for the Wounded",
         "order": 7,
-        "status": "recording-ready",
-        "direction": "Explain why caring for ordinary neighbors matters. Compassionate and direct, not a speech.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
     },
@@ -281,7 +282,7 @@
       }
     },
     "briar.mara.supplies": {
-      "text": "Three tangle roots from the overgrown garden, and a bundle of clean dressings from the shuttered store. The front is blocked. Look around the back for a way inside.",
+      "text": "Bring three tangle roots from the garden and clean dressings from the shuttered store. Try the store's back entrance.",
       "choices": [
         {
           "id": "accept",
@@ -308,13 +309,13 @@
         "speaker": "mara",
         "scene": "Room for the Wounded",
         "order": 9,
-        "status": "recording-ready",
-        "direction": "Clear directions with natural breathing between each location. This is the player’s first delivery request.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
     },
     "briar.mara.wait": {
-      "text": "Roots from the garden. Dressings from the store. And if you're thinking of tasting a root, I'd rather not find you a bed.",
+      "text": "Three roots from the garden. Clean dressings from the store.",
       "choices": [
         {
           "id": "deliver",
@@ -386,13 +387,13 @@
         "speaker": "mara",
         "scene": "Room for the Wounded",
         "order": 10,
-        "status": "recording-ready",
-        "direction": "A useful reminder followed by gentle teasing. Do not sound irritated when the player returns early.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
     },
     "briar.mara.heal": {
-      "text": "That's enough. Give me a moment... There. The large healing pad is working again. Stand on it whenever you need to heal. It won't run out. The small pads you'll find out there only hold a little healing, so use them wisely.",
+      "text": "The large healing pad works again. Stand on it to heal; it never runs out. Small pads have limited healing.",
       "choices": [
         {
           "id": "next",
@@ -419,25 +420,25 @@
         "speaker": "mara",
         "scene": "Room for the Wounded",
         "order": 11,
-        "status": "recording-ready",
-        "direction": "Relief at receiving supplies. Brief working pause at “Give me a moment.” Then explain both healing-pad types clearly.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
     },
     "briar.mara.next": {
-      "text": "The mill crossing is stuck. Gus was checking the wheel. See what's caught in it, and make a way through. I'll get these people ready to move.",
+      "text": "Clear the jammed mill crossing. Gus was checking the wheel.",
       "choices": [],
       "voice": {
         "speaker": "mara",
         "scene": "Room for the Wounded",
         "order": 12,
-        "status": "recording-ready",
-        "direction": "Focused encouragement. You are staying with the wounded while the player clears the escape route.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad."
       }
     },
     "briar.gus.first": {
-      "text": "I put my best tools in the loft. Safe from thieves, damp, and apparently me. Now the Legion is outside and I can't make my legs climb the ladder.",
+      "text": "My tools are in the loft. I can't climb up while the Legion is outside.",
       "choices": [
         {
           "id": "help",
@@ -451,7 +452,8 @@
           "text": "Why stay here?",
           "next": "briar.gus.home",
           "effects": [],
-          "when": []
+          "when": [],
+          "optional": true
         },
         {
           "id": "mock",
@@ -470,13 +472,13 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 1,
-        "status": "recording-ready",
-        "direction": "Dry humor covering real fear. The joke is on yourself, not the people in danger.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
     "briar.gus.home": {
-      "text": "I built half these doors. Fixed the other half after Thomas tried. These are my neighbors. I'm not leaving them with nowhere to hide.",
+      "text": "These are my neighbors. I'm staying to help.",
       "choices": [
         {
           "id": "help",
@@ -502,13 +504,13 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 2,
-        "status": "recording-ready",
-        "direction": "Warm pride, then embarrassment. Thomas is a familiar friend; tease him kindly.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
     "briar.gus.request": {
-      "text": "My tool roll is upstairs, by the little window. Bring it down and I can unstick the workshop's back door. There's a narrow way through to the other side. I've got something purple you can have, too. Found it in the roof. Nearly broke my saw.",
+      "text": "Bring my tool roll from the loft window. I'll open the workshop shortcut and give you a purple shard.",
       "choices": [
         {
           "id": "accept",
@@ -535,13 +537,13 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 3,
-        "status": "recording-ready",
-        "direction": "Practical, relieved to have a plan. Curious about the purple piece, with no knowledge of its origin.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
     "briar.gus.waiting": {
-      "text": "The roll by the loft window. Please bring the whole thing. Last time someone borrowed my hammer, I got a spoon back.",
+      "text": "The tool roll is by the loft window.",
       "choices": [
         {
           "id": "deliver",
@@ -592,13 +594,13 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 4,
-        "status": "recording-ready",
-        "direction": "A little lighter now someone has offered help. Let the spoon joke land without exaggerating it.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
     "briar.gus.thanks": {
-      "text": "Still got all ten fingers? Good. Better than my first week. Here, take the purple piece. I'll get this door open. If the street gets rough, come through my workshop.",
+      "text": "Thanks. Take this shard. The workshop shortcut is open if the street gets dangerous.",
       "choices": [
         {
           "id": "care",
@@ -612,8 +614,8 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 5,
-        "status": "recording-ready",
-        "direction": "Genuine gratitude with a small joke. Tools restored; he can contribute again.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
@@ -630,7 +632,7 @@
       }
     },
     "briar.gus.hurt": {
-      "text": "Yes. I'm scared. That sign outside has had our village name on it since I was little. They knocked it into the mud. I couldn't even stand it back up. You don't need to make me feel smaller.",
+      "text": "I'm scared. They knocked our village sign into the mud. Please don't make this worse.",
       "choices": [
         {
           "id": "repair",
@@ -684,13 +686,13 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 7,
-        "status": "recording-ready",
-        "direction": "No comic delivery. Hurt and ashamed, with affection for the village sign. This is the clue to a possible repair.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
     "briar.gus.sorry": {
-      "text": "All right. I heard you. Just... give me a minute. I hate looking out there and seeing our name in the dirt.",
+      "text": "All right. Give me a moment. Seeing our village name in the dirt hurt.",
       "choices": [
         {
           "id": "repair",
@@ -713,13 +715,13 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 8,
-        "status": "recording-ready",
-        "direction": "Apology acknowledged, still bruised. The sign matters to him; do not sound like a quest checklist.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
     "briar.gus.repair": {
-      "text": "You put it back. Even with all this going on. Thank you. Maybe my legs will remember their job if my hands get to work. Could you fetch those tools?",
+      "text": "You fixed the sign. Thank you. Fetch my tools and I'll help with the door.",
       "choices": [
         {
           "id": "help",
@@ -739,8 +741,8 @@
         "speaker": "gus",
         "scene": "Gus's Good Tools",
         "order": 9,
-        "status": "recording-ready",
-        "direction": "Surprised warmth. The player acted with care, and his trust begins to return.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape."
       }
     },
@@ -757,7 +759,7 @@
       }
     },
     "briar.lewis.first": {
-      "text": "Keep your voice down. Their signal post is ahead. If that horn sounds, every patrol in these woods will know where our neighbors are.",
+      "text": "Their signal post is ahead. Silence the horn before it brings patrols to our neighbors.",
       "choices": [
         {
           "id": "route",
@@ -771,20 +773,21 @@
           "text": "What are they doing out here?",
           "next": "briar.lewis.prisoners",
           "effects": [],
-          "when": []
+          "when": [],
+          "optional": true
         }
       ],
       "voice": {
         "speaker": "lewis",
         "scene": "Black Woods arrival",
         "order": 1,
-        "status": "recording-ready",
-        "direction": "Quiet urgency. You are watching the tree line while helping someone you know.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
       }
     },
     "briar.lewis.routes": {
-      "text": "The low path runs through their camp. Or climb the roots on the right and cross the old hunting platforms. Stop the crank below the horn, or cut its cable from above. Either works. I would take the high path. My knees voted against it.",
+      "text": "Go through the camp or climb the roots on the right. Stop the crank below the horn, or cut its cable from above.",
       "choices": [
         {
           "id": "go",
@@ -810,13 +813,13 @@
         "speaker": "lewis",
         "scene": "Black Woods arrival",
         "order": 2,
-        "status": "recording-ready",
-        "direction": "Useful directions, then a small dry joke. Keep the danger believable.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
       }
     },
     "briar.lewis.prisoners": {
-      "text": "They marched prisoners north, toward Hollow Pass. I saw one guard call a woman by name. She thought he knew her. Then he tied her hands. We cannot let them catch our people.",
+      "text": "They took prisoners north toward Hollow Pass. The guards know their names, but show no mercy.",
       "choices": [
         {
           "id": "route",
@@ -830,13 +833,13 @@
         "speaker": "lewis",
         "scene": "Black Woods arrival",
         "order": 3,
-        "status": "recording-ready",
-        "direction": "Controlled anger. A witness describing what happened, not a lore lecture.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
       }
     },
     "briar.lewis.waiting": {
-      "text": "I’ll keep the neighbors behind us. Once the horn is quiet, use the north clearing. And watch the old platforms. The wood is older than my excuses.",
+      "text": "Silence the horn, then reach the north clearing. I'll watch the neighbors.",
       "choices": [
         {
           "id": "clear",
@@ -855,26 +858,26 @@
         "speaker": "lewis",
         "scene": "Black Woods arrival",
         "order": 4,
-        "status": "recording-ready",
-        "direction": "Steady support. Let the last sentence release a little tension.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely."
       }
     },
     "briar.lewis.clear": {
-      "text": "No horn. No patrol rushing after us. That is the best thing I have heard all day. The others are resting here. Something large is blocking the way ahead. I wish that was another joke.",
+      "text": "The horn is quiet. Our neighbors are safe here, but something large blocks the way ahead.",
       "choices": [],
       "voice": {
         "speaker": "lewis",
         "scene": "Black Woods arrival",
         "order": 5,
-        "status": "recording-ready",
-        "direction": "Relief first, then sober warning. Keep the last line quiet.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "The signal is disabled and the neighbors have reached shelter. The Brute still blocks their escape."
       }
     },
     "briar.beth.first": {
       "npc": "beth",
-      "text": "My brother went after the sheep. Then the bridge broke. I heard him shout once. Now all I can hear is those beasts. Please tell me you’re better at climbing than I am.",
+      "text": "My brother followed our sheep across the bridge. It broke. He's trapped beyond those beasts.",
       "choices": [
         {
           "id": "help",
@@ -915,7 +918,8 @@
               "flag": "beth.rescued",
               "is": false
             }
-          ]
+          ],
+          "optional": true
         },
         {
           "id": "safe",
@@ -933,15 +937,15 @@
         "character": "Beth",
         "scene": "Nobody left behind",
         "order": 1,
-        "status": "recording-ready",
-        "direction": "Worried, trying to stay steady. Relief should come later.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "beth"
       }
     },
     "briar.beth.sheep": {
       "npc": "beth",
-      "text": "They’re our winter food, our wool, half our living. He wasn’t being foolish. Well, he was being a little foolish. But for a good reason.",
+      "text": "Those sheep are our food and wool. He was trying to save them.",
       "choices": [
         {
           "id": "help",
@@ -989,15 +993,15 @@
         "character": "Beth",
         "scene": "Nobody left behind",
         "order": 2,
-        "status": "recording-ready",
-        "direction": "Defend him warmly; a tiny rueful smile on the last sentence.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "beth"
       }
     },
     "briar.beth.trail": {
       "npc": "beth",
-      "text": "His boots leave a crooked heel print. Follow them east. The old bridge has a few beams left, and there’s a dry path below if you slip. Please bring him back. I can shout at him myself.",
+      "text": "Follow his crooked heel prints east. Cross the remaining bridge beams; there's a lower dry path if you slip.",
       "choices": [
         {
           "id": "safe",
@@ -1015,29 +1019,29 @@
         "character": "Beth",
         "scene": "Nobody left behind",
         "order": 3,
-        "status": "recording-ready",
-        "direction": "Practical directions, then affectionate worry.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "beth"
       }
     },
     "briar.beth.relief": {
       "npc": "beth",
-      "text": "There he is. Both legs. That’s a good start. Our dog has been trying to follow you since you got here. Once we’re safely out of these woods, let him come with you. He knows who keeps people safe.",
+      "text": "He's safe! Once we leave the woods, our dog can travel with you.",
       "choices": [],
       "voice": {
         "character": "Beth",
         "scene": "Nobody left behind",
         "order": 4,
-        "status": "recording-ready",
-        "direction": "Deep relief. Brief dry humor; offer the dog with trust, not a sales pitch.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "beth"
       }
     },
     "briar.bethBrother.first": {
       "npc": "bethBrother",
-      "text": "Don’t come straight at the tree! The trunk will roll. That rope lift can take its weight, but those beasts won’t let anyone near it.",
+      "text": "The fallen tree could roll. Clear the beasts, then use the rope lift to raise it.",
       "choices": [
         {
           "id": "ready",
@@ -1060,15 +1064,15 @@
         "character": "Beth’s brother",
         "scene": "Nobody left behind",
         "order": 1,
-        "status": "recording-ready",
-        "direction": "Urgent but clear. He is stuck behind the fallen tree, not mortally wounded.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "bethBrother"
       }
     },
     "briar.bethBrother.wait": {
       "npc": "bethBrother",
-      "text": "I can walk. I just need a way out. Beth is going to be furious. If she asks, this was a very sensible plan until the bridge part.",
+      "text": "I can walk once the path is clear.",
       "choices": [
         {
           "id": "safe",
@@ -1086,22 +1090,22 @@
         "character": "Beth’s brother",
         "scene": "Nobody left behind",
         "order": 2,
-        "status": "recording-ready",
-        "direction": "Nervous joke. Keep the danger believable.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "bethBrother"
       }
     },
     "briar.bethBrother.safe": {
       "npc": "bethBrother",
-      "text": "You lifted the tree and fixed the crossing? Right. I’m going before you find a third thing I broke. Thank you. Really.",
+      "text": "The tree's up and the crossing is fixed. I'm heading back. Thank you.",
       "choices": [],
       "voice": {
         "character": "Beth’s brother",
         "scene": "Nobody left behind",
         "order": 3,
-        "status": "recording-ready",
-        "direction": "Starts sheepish, ends with sincere gratitude.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
         "speaker": "bethBrother"
       }

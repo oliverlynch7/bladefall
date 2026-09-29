@@ -86,7 +86,7 @@
       }
     },
     "lc.ward.rules": {
-      "text": "The written orders decide. Not your coat. Not your face. The written orders. The records desk is west of this post.",
+      "text": "Orders decide who passes. Check the records desk west of here.",
       "choices": [
         {
           "id": "back",
@@ -104,8 +104,9 @@
         "scene": "Learning how to pass",
         "order": 2,
         "emotion": "Matter-of-fact. He is applying instructions, not offering a favor.",
-        "direction": "Matter-of-fact. He is applying instructions, not offering a favor.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Learning how to pass"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Learning how to pass",
+        "status": "script-revised"
       }
     },
     "lc.ward.families": {
@@ -199,7 +200,7 @@
       }
     },
     "lc.ruth.first": {
-      "text": "Caleb made it, then. Good. I told him to run, and he spent half the night apologizing for doing it. I'm Ruth. There are people in both cage yards, and that winch above us calls the next guard shift. We need a way out, not another brave last stand.",
+      "text": "Caleb escaped? Good. Free both cage yards. The winch above calls more guards.",
       "choices": [
         {
           "id": "help",
@@ -260,12 +261,13 @@
         "scene": "A rescue with people behind it",
         "order": 8,
         "emotion": "Female voice, tired but firm. Dry affection when mentioning Caleb. Practical, not helpless.",
-        "direction": "Female voice, tired but firm. Dry affection when mentioning Caleb. Practical, not helpless.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A rescue with people behind it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A rescue with people behind it",
+        "status": "script-revised"
       }
     },
     "lc.ruth.curt": {
-      "text": "The crossing is beyond the north shelter. You still need these gates open to reach it. Help with that much, at least. I'll handle the people you haven't got time for.",
+      "text": "You need the gates open to reach the north crossing. Help with those; I'll help the people.",
       "choices": [
         {
           "id": "back",
@@ -278,12 +280,13 @@
         "scene": "A selfish answer has a social cost",
         "order": 9,
         "emotion": "Keep the anger quiet. She gives the required directions anyway.",
-        "direction": "Keep the anger quiet. She gives the required directions anyway.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A selfish answer has a social cost"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A selfish answer has a social cost",
+        "status": "script-revised"
       }
     },
     "lc.ruth.plan": {
-      "text": "Each yard has its own lock. The guards won't let you work on one for long. Cut the alarm cable first if you want a quieter rescue. Once both groups are free, we'll lay a short crossing beside the rock spine and wait in the shelter. You can open the escape gate from there.",
+      "text": "Each yard has a lock. Cut the alarm cable for fewer interruptions. Free both groups, reach the shelter, then open the escape gate.",
       "choices": [
         {
           "id": "others",
@@ -368,12 +371,13 @@
         "scene": "Clear plan, free choice of task order",
         "order": 10,
         "emotion": "Steady, concise directions. No artificial countdown.",
-        "direction": "Steady, concise directions. No artificial countdown.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Clear plan, free choice of task order"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Clear plan, free choice of task order",
+        "status": "script-revised"
       }
     },
     "lc.ruth.extra": {
-      "text": "There's an older cage up on the west shelf. They put the slow walkers there, as if being tired was a crime. We heard them last night. Please don't let the guards' head count be the last time anyone counts them.",
+      "text": "More prisoners are in the old cage on the west shelf. Please rescue them too.",
       "choices": [
         {
           "id": "back",
@@ -386,12 +390,13 @@
         "scene": "Optional rescue of overlooked prisoners",
         "order": 11,
         "emotion": "Compassion with restrained anger. Do not reveal the freight puzzle.",
-        "direction": "Compassion with restrained anger. Do not reveal the freight puzzle.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Optional rescue of overlooked prisoners"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Optional rescue of overlooked prisoners",
+        "status": "script-revised"
       }
     },
     "lc.ruth.repair": {
-      "text": "One of the boys can barely swallow. We passed a clean spring beyond the loaded wagon, but they wouldn't let us stop. I keep looking at these empty flasks. It's hard to make small talk.",
+      "text": "A prisoner needs water. Fill these flasks at the clean spring beyond the loaded wagon.",
       "choices": [
         {
           "id": "water",
@@ -440,12 +445,13 @@
         "scene": "A natural clue for repairing trust",
         "order": 12,
         "emotion": "Low, distracted concern for the child. No demand for an apology quest.",
-        "direction": "Low, distracted concern for the child. No demand for an apology quest.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A natural clue for repairing trust"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A natural clue for repairing trust",
+        "status": "script-revised"
       }
     },
     "lc.ruth.water": {
-      "text": "Thank you. He's been trying not to ask. Look... I know you can't carry everyone. Just don't decide who is worth saving before you've met them.",
+      "text": "Thank you. He needed that water badly.",
       "choices": [
         {
           "id": "back",
@@ -465,12 +471,13 @@
         "scene": "Trust repaired by an actual helpful act",
         "order": 13,
         "emotion": "Relief first. Honest, gentle correction, not a lecture.",
-        "direction": "Relief first. Honest, gentle correction, not a lecture.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Trust repaired by an actual helpful act"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Trust repaired by an actual helpful act",
+        "status": "script-revised"
       }
     },
     "lc.ruth.reward": {
-      "text": "All of them. You went back for all of them. One of the workers gave me this purple piece to keep safe. Said he found it caught in his cart wheel. Take it. I'd rather it help someone than spend another night hidden in my shoe.",
+      "text": "Everyone's free. Take this Rift Shard as thanks.",
       "choices": [
         {
           "id": "back",
@@ -483,12 +490,13 @@
         "scene": "Optional rescue earns a Rift Shard",
         "order": 14,
         "emotion": "Warm, deeply relieved. Small laugh at the shoe after the emotion lands.",
-        "direction": "Warm, deeply relieved. Small laugh at the shoe after the emotion lands.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Optional rescue earns a Rift Shard"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Optional rescue earns a Rift Shard",
+        "status": "script-revised"
       }
     },
     "lc.ruth.safe": {
-      "text": "We'll wait under cover until the last crossing is safe. No one gets left behind this time. And if Caleb apologizes again, tell him I said to carry a blanket and be useful.",
+      "text": "We'll wait under cover until the crossing is safe.",
       "choices": [
         {
           "id": "back",
@@ -501,12 +509,13 @@
         "scene": "After the optional reward",
         "order": 15,
         "emotion": "Hopeful and grounded. A fond joke about Caleb, not ridicule.",
-        "direction": "Hopeful and grounded. A fond joke about Caleb, not ridicule.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. After the optional reward"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. After the optional reward",
+        "status": "script-revised"
       }
     },
     "lc.ruth.marksman": {
-      "text": "A Hollowed marksman watches the last crossing. Open ground is his advantage. Ours is that he can't watch every path at once. Get us through, and we can follow the holding records toward Ruined Keep.",
+      "text": "A Hollowed marksman guards the last crossing. Use cover and alternate paths. Beyond it, follow the records to Ruined Keep.",
       "choices": [
         {
           "id": "back",
@@ -519,8 +528,9 @@
         "scene": "Sets up the next boss without spoiling its exact mechanics",
         "order": 16,
         "emotion": "Serious, useful warning. No claim that the King is at the Keep.",
-        "direction": "Serious, useful warning. No claim that the King is at the Keep.",
-        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Sets up the next boss without spoiling its exact mechanics"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. Sets up the next boss without spoiling its exact mechanics",
+        "status": "script-revised"
       }
     }
   },

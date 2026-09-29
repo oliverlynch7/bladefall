@@ -6,7 +6,7 @@ window.BFVoiceContent={async apply(book){
   const data=await r.json();
   for(const [id,line]of Object.entries(data.lines||{})){
    if(!Object.prototype.hasOwnProperty.call(book.nodes,id)||typeof line.text!=='string'||!line.audio?.startsWith('/voice-api/published/'))continue;
-   book.nodes[id].text=line.text;book.nodes[id].recordedAudio=line.audio;book.nodes[id].voiceRevision=line.revision;
+   if(book.nodes[id].text.trim()!==line.text.trim())continue;book.nodes[id].recordedAudio=line.audio;book.nodes[id].voiceRevision=line.revision;
   }
  }catch(_){/* Text-only play remains available when audio storage is offline. */}
  return book;

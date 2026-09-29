@@ -16,7 +16,7 @@
   },
   "nodes": {
     "rk.grant.first": {
-      "text": "Keep your head down. That bow above the wall covers the gate. I'm Grant. There are people hiding on the other side, and more locked below. Clear the arrow post, cut its bow cord, then lift this gate. We can still get them out.",
+      "text": "Clear the arrow post, cut its bow cord, then raise the gate. People are trapped beyond it and in the cells below.",
       "choices": [
         {
           "id": "help",
@@ -40,7 +40,8 @@
         {
           "id": "who",
           "text": "Are these your soldiers?",
-          "next": "rk.grant.people"
+          "next": "rk.grant.people",
+          "optional": true
         }
       ],
       "voice": {
@@ -48,12 +49,13 @@
         "scene": "A guard speaks through a damaged wall",
         "order": 1,
         "emotion": "Male. Worn, practical, quietly urgent. Never a grand speech.",
-        "direction": "Male. Worn, practical, quietly urgent. Never a grand speech.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. A guard speaks through a damaged wall"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. A guard speaks through a damaged wall",
+        "status": "script-revised"
       }
     },
     "rk.grant.people": {
-      "text": "Two carried grain. One repaired boots. The Legion put a rope around them and called it a work detail. I tried to stop the cart. As rescue plans go, mine needs a second draft.",
+      "text": "The Legion seized ordinary workers. Help me get them out.",
       "choices": [
         {
           "id": "back",
@@ -66,12 +68,13 @@
         "scene": "Who is being rescued",
         "order": 2,
         "emotion": "Dry self-blame, then resolve. The joke does not dismiss their danger.",
-        "direction": "Dry self-blame, then resolve. The joke does not dismiss their danger.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Who is being rescued"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Who is being rescued",
+        "status": "script-revised"
       }
     },
     "rk.grant.plan": {
-      "text": "Once the gate is open, ring the bell at the breach when you're ready. I'll move the group through the middle. You can meet the attackers at either gap or hold the narrow opening between the fallen walls. Stay nearby until we're clear. If we have to pull back, we try again.",
+      "text": "Ring the breach bell when ready. Stay nearby and defend either gap until everyone crosses. If we retreat, we can try again.",
       "choices": [
         {
           "id": "below",
@@ -95,12 +98,13 @@
         "scene": "Preparing a thirty-second escape",
         "order": 3,
         "emotion": "Firm, reassuring instructions. No fragile escort or threat of permanent failure.",
-        "direction": "Firm, reassuring instructions. No fragile escort or threat of permanent failure.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Preparing a thirty-second escape"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Preparing a thirty-second escape",
+        "status": "script-revised"
       }
     },
     "rk.grant.cells": {
-      "text": "The guards keep a jail key at the lower post. Or climb the eastern wall and turn the old gate wheel. Either opens the stairs. We're drawing enough attention up here; leave the gate until the others are across.",
+      "text": "After the rescue, take the lower guard post's jail key or climb east and turn the gate wheel. Either opens the stairs.",
       "choices": [
         {
           "id": "back",
@@ -113,12 +117,13 @@
         "scene": "Two routes into the prison",
         "order": 4,
         "emotion": "Useful directions, delivered like a guard who knows this place.",
-        "direction": "Useful directions, delivered like a guard who knows this place.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Two routes into the prison"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Two routes into the prison",
+        "status": "script-revised"
       }
     },
     "rk.grant.safe": {
-      "text": "They're all here. Even the man who swore he couldn't run. I'll get them to shelter. Go find the people below. The Legion keeps records of everyone it takes. If you're following a missing person, those papers are worth more than their silver.",
+      "text": "Everyone is safe. Search the cells below. The Legion's prisoner records may tell you where the missing people went.",
       "choices": [
         {
           "id": "back",
@@ -131,12 +136,13 @@
         "scene": "The rescue points toward the next half",
         "order": 5,
         "emotion": "Relief, then serious purpose. Do not name or reveal the location of Ellis yet.",
-        "direction": "Relief, then serious purpose. Do not name or reveal the location of Ellis yet.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. The rescue points toward the next half"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. The rescue points toward the next half",
+        "status": "script-revised"
       }
     },
     "rk.felix.first": {
-      "text": "Don't mind the shaking. My hands only do that when there's nothing useful in them. I'm Felix. They took my tools to that workshop on the east side. Its latch still moves with the old clock. Bring my tools back, and I can open the barred chamber on the west side. You can keep my spare dagger, too.",
+      "text": "Recover my tools from the east workshop. I'll open the west chamber and give you a dagger.",
       "choices": [
         {
           "id": "help",
@@ -168,12 +174,13 @@
         "scene": "An optional trade, not a required rescue",
         "order": 6,
         "emotion": "Male. Nervous quick start, but clear technical directions. A little embarrassed by his own joke.",
-        "direction": "Male. Nervous quick start, but clear technical directions. A little embarrassed by his own joke.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. An optional trade, not a required rescue"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. An optional trade, not a required rescue",
+        "status": "script-revised"
       }
     },
     "rk.felix.plan": {
-      "text": "Watch the notch above the workshop latch. Green means the pin is lined up. Press it then. Forcing it won't help; I tried that with a chair. The chair lost.",
+      "text": "Watch the latch's notch. Press when it turns green.",
       "choices": [
         {
           "id": "return",
@@ -226,12 +233,13 @@
         "scene": "Workshop timing clue",
         "order": 7,
         "emotion": "A small defeated laugh about the chair. Keep the timing clue clear.",
-        "direction": "A small defeated laugh about the chair. Keep the timing clue clear.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Workshop timing clue"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Workshop timing clue",
+        "status": "script-revised"
       }
     },
     "rk.felix.chamber": {
-      "text": "A shield on a stand. Armed figures around it. I wouldn't assume they're decorations. There's a bar on the far side, too. Someone with a head for heights might reach it from the broken western wall. Mine is mostly a head for worrying.",
+      "text": "The west chamber holds a shield and armed figures. The broken western wall may offer another entrance.",
       "choices": [
         {
           "id": "back",
@@ -251,12 +259,13 @@
         "scene": "Hints at a separate route without solving it",
         "order": 8,
         "emotion": "Uneasy honesty, not a sales pitch. He does not know where the shard is.",
-        "direction": "Uneasy honesty, not a sales pitch. He does not know where the shard is.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Hints at a separate route without solving it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Hints at a separate route without solving it",
+        "status": "script-revised"
       }
     },
     "rk.felix.reward": {
-      "text": "Oh, that's better. Something my fingers understand. There: the west chamber is open. And here's the Lockpick. Yes, it's a dagger. Sometimes a lock needs a very strong opinion.",
+      "text": "Tools returned. The west chamber is open. Take this dagger—the Lockpick.",
       "choices": [
         {
           "id": "thanks",
@@ -269,12 +278,13 @@
         "scene": "Tools returned; reward and shortcut",
         "order": 9,
         "emotion": "Visible relief, pride in his work. Let the joke land lightly.",
-        "direction": "Visible relief, pride in his work. Let the joke land lightly.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Tools returned; reward and shortcut"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Tools returned; reward and shortcut",
+        "status": "script-revised"
       }
     },
     "rk.felix.done": {
-      "text": "I will. From behind this very solid piece of wall. Mind the guards in that chamber. If they wake up, give yourself room before you swing.",
+      "text": "Watch the chamber's guards. Give yourself room if they wake.",
       "choices": [
         {
           "id": "back",
@@ -287,8 +297,9 @@
         "scene": "Brief follow-up after reward",
         "order": 10,
         "emotion": "Calmer now, sincerely concerned.",
-        "direction": "Calmer now, sincerely concerned.",
-        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Brief follow-up after reward"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. Brief follow-up after reward",
+        "status": "script-revised"
       }
     }
   },

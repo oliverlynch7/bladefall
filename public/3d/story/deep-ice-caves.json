@@ -28,7 +28,7 @@
   },
   "nodes": {
     "ic.ellis.first": {
-      "text": "They found me just before you arrived. I thought I could hide until the search moved on. They weren't taking me to a prison. They were taking me to the Gate. Please—my pack fell onto the shelf below the west tunnel. The sealed notes are still in it.",
+      "text": "They caught me and were taking me to the Gate. Recover my sealed notes from the pack below the west tunnel.",
       "choices": [
         {
           "id": "help",
@@ -59,12 +59,13 @@
         "scene": "Ellis has just been freed in his laboratory",
         "order": 1,
         "emotion": "Shaken older male voice, trying to sound useful through fear.",
-        "direction": "Shaken older male voice, trying to sound useful through fear.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis has just been freed in his laboratory"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis has just been freed in his laboratory",
+        "status": "script-revised"
       }
     },
     "ic.ellis.press": {
-      "text": "Because I helped with the work that made their army possible. I can explain. But those notes show where the search parties are getting their weapons. Without them, all I have left is an apology, and I know how little that buys.",
+      "text": "I helped with the King's research. My notes show where the Legion gets its weapons.",
       "choices": [
         {
           "id": "firm",
@@ -108,12 +109,13 @@
         "scene": "Ellis is pressed about his past",
         "order": 2,
         "emotion": "Ashamed and honest. No theatrical villain voice.",
-        "direction": "Ashamed and honest. No theatrical villain voice.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis is pressed about his past"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis is pressed about his past",
+        "status": "script-revised"
       }
     },
     "ic.ellis.wait": {
-      "text": "The low shelf west of this room. Brown pack, red seal. The ice beneath it has held for years; you don't need to rush. I kept the notes because I thought I might find a way to make things right. Then I spent rather too long hiding beside them.",
+      "text": "Brown pack, red seal. Look on the low shelf west of this room.",
       "choices": [
         {
           "id": "return",
@@ -139,7 +141,8 @@
         {
           "id": "work",
           "text": "What were you trying to build?",
-          "next": "ic.ellis.motive"
+          "next": "ic.ellis.motive",
+          "optional": true
         }
       ],
       "voice": {
@@ -147,12 +150,13 @@
         "scene": "Directions to the fallen research pack",
         "order": 3,
         "emotion": "More steady. The practical details keep him from panicking.",
-        "direction": "More steady. The practical details keep him from panicking.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Directions to the fallen research pack"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Directions to the fallen research pack",
+        "status": "script-revised"
       }
     },
     "ic.ellis.motive": {
-      "text": "A way to stop people growing old. To keep disease from taking someone who still had a life to live. That was the work I agreed to. It wasn't a foolish hope. That makes what we did with it harder to bear.",
+      "text": "We wanted to stop aging and disease. That was the work I agreed to.",
       "choices": [
         {
           "id": "back",
@@ -165,17 +169,19 @@
         "scene": "The original goal of the research",
         "order": 4,
         "emotion": "Quiet conviction about the original hope, followed by regret.",
-        "direction": "Quiet conviction about the original hope, followed by regret.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The original goal of the research"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The original goal of the research",
+        "status": "script-revised"
       }
     },
     "ic.ellis.truth": {
-      "text": "The Gate worked. People came through alive. They could speak, remember, recognize their families. Then he gave one of them an order, and they obeyed. Every order. No protest. We should have stopped there. I should have stopped there.",
+      "text": "The Gate stopped aging. But those who returned obeyed every order he gave. We should have stopped the research then.",
       "choices": [
         {
           "id": "judge",
           "text": "But you kept working.",
-          "next": "ic.ellis.guilt"
+          "next": "ic.ellis.guilt",
+          "optional": true
         },
         {
           "id": "hope",
@@ -201,12 +207,13 @@
         "scene": "Ellis opens the recovered notes",
         "order": 5,
         "emotion": "Measured confession. Give each short sentence room.",
-        "direction": "Measured confession. Give each short sentence room.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis opens the recovered notes"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis opens the recovered notes",
+        "status": "script-revised"
       }
     },
     "ic.ellis.guilt": {
-      "text": "Yes. I kept looking for a harmless explanation. By the time I admitted there wasn't one, people I'd worked beside were repeating his orders. I ran. You don't owe me forgiveness. Let me give you something useful instead.",
+      "text": "I ignored the warnings. Then my colleagues began obeying him too. I ran. Let me help now.",
       "choices": [
         {
           "id": "useful",
@@ -232,12 +239,13 @@
         "scene": "The player holds Ellis accountable",
         "order": 6,
         "emotion": "Accepts blame without asking the player to comfort him.",
-        "direction": "Accepts blame without asking the player to comfort him.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The player holds Ellis accountable"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The player holds Ellis accountable",
+        "status": "script-revised"
       }
     },
     "ic.ellis.lead": {
-      "text": "Emberdeep. These are supply records: blades, armor, wagon after wagon. The Legion keeps its hunting parties armed from that forge. Shut it down and the people they're chasing get a chance. Three of their officers hold the north cavern. I heard them ordering the others back to that exit.",
+      "text": "Emberdeep arms the Legion. Shut its forge down. Three officers guard this cavern's north exit.",
       "choices": [
         {
           "id": "path",
@@ -247,7 +255,8 @@
         {
           "id": "people",
           "text": "What about the people who went through?",
-          "next": "ic.ellis.unknown"
+          "next": "ic.ellis.unknown",
+          "optional": true
         }
       ],
       "voice": {
@@ -255,12 +264,13 @@
         "scene": "The notes reveal the Emberdeep arms route",
         "order": 7,
         "emotion": "Purpose returning. He can finally offer a concrete next step.",
-        "direction": "Purpose returning. He can finally offer a concrete next step.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The notes reveal the Emberdeep arms route"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The notes reveal the Emberdeep arms route",
+        "status": "script-revised"
       }
     },
     "ic.ellis.unknown": {
-      "text": "I don't know how to bring them back. I won't pretend I do. But I know they were people before he gave them orders. Please remember that, even when you have to fight them.",
+      "text": "I don't know how to restore them. Remember: they were people before they were his soldiers.",
       "choices": [
         {
           "id": "path",
@@ -273,12 +283,13 @@
         "scene": "A question Ellis cannot yet answer",
         "order": 8,
         "emotion": "Gentle, troubled honesty. Do not imply that he knows the ending.",
-        "direction": "Gentle, troubled honesty. Do not imply that he knows the ending.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. A question Ellis cannot yet answer"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. A question Ellis cannot yet answer",
+        "status": "script-revised"
       }
     },
     "ic.ellis.water": {
-      "text": "The old waterworks opens the crossing. Its plate shows the order: fill the channel, freeze the top, then drain the water underneath. You can use the controls whatever weapon you carry. If you get it wrong, it drains safely. I tested that part rather thoroughly.",
+      "text": "The crossing's plate shows the order: fill, freeze, then drain. Any class can use the controls. Mistakes reset it safely.",
       "choices": [
         {
           "id": "leave",
@@ -291,12 +302,13 @@
         "scene": "Opening the path toward the officers",
         "order": 9,
         "emotion": "Practical explanation, a small dry smile on the last sentence.",
-        "direction": "Practical explanation, a small dry smile on the last sentence.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Opening the path toward the officers"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Opening the path toward the officers",
+        "status": "script-revised"
       }
     },
     "ic.ellis.ready": {
-      "text": "I'll gather what can still help. You've given me a chance to do more than hide. I intend to use it.",
+      "text": "I'll gather my research. It's time I helped instead of hiding.",
       "choices": [
         {
           "id": "remind",
@@ -309,12 +321,13 @@
         "scene": "Ellis waits safely in the laboratory",
         "order": 10,
         "emotion": "Sincere and restrained.",
-        "direction": "Sincere and restrained.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis waits safely in the laboratory"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis waits safely in the laboratory",
+        "status": "script-revised"
       }
     },
     "ic.hugo.first": {
-      "text": "Good! A person with rope. You do have rope, don't you? I came down here to prove this shelf was safe. I now have a very clear answer, and no useful way to deliver it.",
+      "text": "I fell through the ice. Can you help me out?",
       "choices": [
         {
           "id": "help",
@@ -345,12 +358,13 @@
         "scene": "Calling across a broken ice shelf",
         "order": 1,
         "emotion": "Male explorer, embarrassed humor covering real fear.",
-        "direction": "Male explorer, embarrassed humor covering real fear.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Calling across a broken ice shelf"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Calling across a broken ice shelf",
+        "status": "script-revised"
       }
     },
     "ic.hugo.tease": {
-      "text": "It wasn't even in my top five. There was a sign. I thought it meant the OTHER thin ice. You can tell everyone about this if you get me out. I would prefer a version where I was taller.",
+      "text": "Yes, I saw the warning sign. You can laugh once I'm out.",
       "choices": [
         {
           "id": "help",
@@ -376,12 +390,13 @@
         "scene": "The player teases Hugo about the accident",
         "order": 2,
         "emotion": "Self-mocking, then hopeful.",
-        "direction": "Self-mocking, then hopeful.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The player teases Hugo about the accident"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. The player teases Hugo about the accident",
+        "status": "script-revised"
       }
     },
     "ic.hugo.wait": {
-      "text": "There should be spare rope along the lower eastern path. Secure that wooden frame before you lower anything. I'd hate to survive my mistake and then be finished off by yours.",
+      "text": "Find spare rope on the lower eastern path. Secure the wooden frame before lowering it.",
       "choices": [
         {
           "id": "safe",
@@ -428,12 +443,13 @@
         "scene": "Preparing the rescue",
         "order": 3,
         "emotion": "Still nervous. The joke is a request to be careful, not cruelty.",
-        "direction": "Still nervous. The joke is a request to be careful, not cruelty.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Preparing the rescue"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Preparing the rescue",
+        "status": "script-revised"
       }
     },
     "ic.hugo.ice": {
-      "text": "A sealed side chamber below the waterworks. And a waterfall frozen all the way to a high ledge. I meant to look at both. Then I got distracted by falling through the floor.",
+      "text": "There's a sealed chamber below the waterworks and a high ledge above the frozen waterfall.",
       "choices": [
         {
           "id": "back",
@@ -446,12 +462,13 @@
         "scene": "Hugo shares what he saw while exploring",
         "order": 4,
         "emotion": "Matter-of-fact clues, then rueful humor.",
-        "direction": "Matter-of-fact clues, then rueful humor.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Hugo shares what he saw while exploring"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Hugo shares what he saw while exploring",
+        "status": "script-revised"
       }
     },
     "ic.hugo.thanks": {
-      "text": "My knees are still arguing with each other, but I'm out. Take this purple shard. I found it before the floor found me. And if you're heading for that side chamber: empty the old water first. There's a plate by the controls. I recommend reading this one.",
+      "text": "Take this shard. For the side chamber, drain the old water first. Check the plate by the controls.",
       "choices": [
         {
           "id": "good",
@@ -469,12 +486,13 @@
         "scene": "Hugo gives the shared rescue reward",
         "order": 5,
         "emotion": "Relief, genuine gratitude, one last joke.",
-        "direction": "Relief, genuine gratitude, one last joke.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Hugo gives the shared rescue reward"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Hugo gives the shared rescue reward",
+        "status": "script-revised"
       }
     },
     "ic.hugo.home": {
-      "text": "I'd like that. Somewhere with chairs. Chairs rarely require a rescue plan. I'll wait by the waterworks, out of everyone's way.",
+      "text": "I'll wait safely by the waterworks. Somewhere without thin ice.",
       "choices": [
         {
           "id": "done",
@@ -487,8 +505,9 @@
         "scene": "An invitation to return with the survivors",
         "order": 6,
         "emotion": "Warm and a little touched.",
-        "direction": "Warm and a little touched.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. An invitation to return with the survivors"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. An invitation to return with the survivors",
+        "status": "script-revised"
       }
     },
     "ic.hugo.safe": {
@@ -510,7 +529,7 @@
       }
     },
     "ic.hugo.remind": {
-      "text": "Below the waterworks, to the west. Drain first, then follow the marks. The high waterfall ledge is on the other side, east. I leave choosing between them to someone with a better recent record.",
+      "text": "The chamber is west, below the waterworks. Drain first and follow the marks. The waterfall ledge is east.",
       "choices": [
         {
           "id": "done",
@@ -523,8 +542,9 @@
         "scene": "Repeating useful exploration directions",
         "order": 8,
         "emotion": "Clear directions with dry self-mockery.",
-        "direction": "Clear directions with dry self-mockery.",
-        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Repeating useful exploration directions"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Repeating useful exploration directions",
+        "status": "script-revised"
       }
     }
   },

@@ -16,7 +16,7 @@
   },
   "nodes": {
     "sl.hugh.hello": {
-      "text": "Stop there. These halls hold knowledge that can hurt people. I used to think a locked door was enough to keep it safe.",
+      "text": "These halls hold dangerous knowledge. A locked door didn't keep the Legion out.",
       "choices": [
         {
           "id": "help",
@@ -65,11 +65,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.hugh.need": {
-      "text": "Grace told me what happened below. People came here for shelter, not a lesson in patience. I cannot keep the door shut and call that protection.",
+      "text": "You helped our people. Keeping this door shut won't protect them now.",
       "choices": [
         {
           "id": "open",
@@ -101,11 +102,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.hugh.cold": {
-      "text": "Yes. The rule about not handing dangerous knowledge to people who demand it loudly. That one has aged quite well.",
+      "text": "Demanding dangerous knowledge won't earn my trust.",
       "choices": [
         {
           "id": "sorry",
@@ -139,11 +141,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.hugh.wait": {
-      "text": "The service workers never needed my permission to fix a broken door. I may have been too proud to notice what that says about my permission.",
+      "text": "The service workers know how to get past broken doors without my permission.",
       "choices": [
         {
           "id": "help",
@@ -162,11 +165,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.hugh.records": {
-      "text": "The east records room has a broken window. Lift the loose pages onto the dry desk before the rain gets in. No grand test. Just leave something better than you found it.",
+      "text": "Move the loose pages onto the dry desk in the east records room, away from the broken window.",
       "choices": [
         {
           "id": "go",
@@ -216,11 +220,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.hugh.open": {
-      "text": "Take the central aisle. The Legion moved its orders into the reading hall. Beyond that is the guardian. It no longer knows the difference between a thief and someone trying to save us.",
+      "text": "Follow the central aisle through the reading hall. The guardian beyond still attacks anyone who approaches.",
       "choices": [
         {
           "id": "orb",
@@ -239,11 +244,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.hugh.orb": {
-      "text": "Ask what you came to learn. One clear question. The orb does not care how many titles you have. I spent years checking titles at the door. I wish I had noticed that sooner.",
+      "text": "The orb allows one clear question. Ask what you came to learn.",
       "choices": [
         {
           "id": "go",
@@ -263,11 +269,12 @@
       ],
       "voice": {
         "speaker": "hugh",
-        "direction": "Natural, clear speech. Senior keeper; careful, proud, slowly learning to trust outsiders"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.hello": {
-      "text": "Welcome to the restricted shelves. We have rules for reading, rules for borrowing, and, until yesterday, a rule against running from armed invaders.",
+      "text": "Welcome to the restricted shelves. The Legion has made a mess of our rules.",
       "choices": [
         {
           "id": "shelf",
@@ -287,7 +294,8 @@
           "text": "Why did they take the library?",
           "next": "sl.simon.legion",
           "effects": [],
-          "when": []
+          "when": [],
+          "optional": true
         },
         {
           "id": "stands",
@@ -335,11 +343,12 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.shelf": {
-      "text": "A shard landed behind the turning shelves. The handles move the shelves and their small bridges together. Look at the arrows on the guide. We designed it for readers, not acrobats.",
+      "text": "A shard is behind the turning shelves. Handles move shelves and bridges together. Read the guide's arrows.",
       "choices": [
         {
           "id": "go",
@@ -366,11 +375,12 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.hint": {
-      "text": "The first handle points toward the sunrise. The next points back toward Hugh. The last points away from the rising sun. Start with the little gold tips, not the book spines.",
+      "text": "First toward sunrise. Next toward Hugh. Last away from sunrise. Follow the gold tips, not the book spines.",
       "choices": [
         {
           "id": "go",
@@ -390,18 +400,20 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.legion": {
-      "text": "Maps, old spells, ways to break a city without touching its walls. Knowledge is power. It is also meant to be shared. We remembered the first part and forgot the second.",
+      "text": "The Legion wants our maps and spells. We should have shared this knowledge before they seized it.",
       "choices": [
         {
           "id": "rifts",
           "text": "What happened to the empty displays?",
           "next": "sl.simon.frames",
           "effects": [],
-          "when": []
+          "when": [],
+          "optional": true
         },
         {
           "id": "back",
@@ -413,11 +425,12 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.frames": {
-      "text": "One of our senior scholars threw the training rifts from the palace before the Legion could take them. They broke in the fall. Somewhere down there, people can still put those lessons back together.",
+      "text": "A senior scholar threw the training rifts from Sunspire to save them. Their scattered shards can restore the lessons inside.",
       "choices": [
         {
           "id": "go",
@@ -437,11 +450,12 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.stands": {
-      "text": "The Legion left a spell on those archive stands. Wake one seal at a time. Its guards will try to drain it. Defeat them and secure the stand before the gold marks fade. If it fails, try that stand again.",
+      "text": "Activate one archive seal at a time. Defeat its guards and secure the stand before the gold marks fade. Failed attempts can be retried.",
       "choices": [
         {
           "id": "go",
@@ -468,11 +482,12 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "sl.simon.reward": {
-      "text": "Yes. We kept it inside the archive seal. Save the records and it is yours to collect. Please do not file it under purple. That is how we lost a whole week.",
+      "text": "Save the records, then collect the shard inside the archive seal.",
       "choices": [
         {
           "id": "go",
@@ -484,11 +499,12 @@
       ],
       "voice": {
         "speaker": "simon",
-        "direction": "Natural, clear speech. Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-revised"
       }
     },
     "dr.simon.nest": {
-      "text": "The Legion caught a young dragon on the western terraces. They want it alive. I would rather they had neither the dragon nor a working net. Follow the ledge beyond the empty displays.",
+      "text": "A young dragon is trapped on the western terraces. Follow the ledge beyond the empty displays.",
       "choices": [
         {
           "id": "safe",
@@ -513,13 +529,13 @@
         "speaker": "simon",
         "scene": "Wings Above the Clouds",
         "order": 30,
-        "status": "recording-ready",
-        "direction": "Worried, speaking quietly. He cares about the animal; the dry joke comes second.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
       }
     },
     "dr.simon.safe": {
-      "text": "The frame is cracked. Brace it before you turn the winch, or the whole thing could fall. There are spare beams and dried meat on the lower supply ledge. Once the net is loose, go up and unfasten it.",
+      "text": "Get spare beams and dried meat from the lower supply ledge. Brace the cracked frame before turning the winch, then climb up and release the net.",
       "choices": [
         {
           "id": "back",
@@ -532,13 +548,13 @@
         "speaker": "simon",
         "scene": "Wings Above the Clouds",
         "order": 31,
-        "status": "recording-ready",
-        "direction": "Practical instructions; stress brace BEFORE winch. No poetry or magical explanation.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
       }
     },
     "dr.simon.joke": {
-      "text": "Only if they return their books. This one ate a corner of the rules, which has made it very popular with the staff.",
+      "text": "It ate part of the rulebook. The staff liked that.",
       "choices": [
         {
           "id": "safe",
@@ -557,13 +573,13 @@
         "speaker": "simon",
         "scene": "Wings Above the Clouds",
         "order": 32,
-        "status": "recording-ready",
-        "direction": "Fond, dry humor. Smile on the last phrase without making the danger a joke.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
       }
     },
     "dr.simon.free": {
-      "text": "It is watching you instead of the sky. That means something. Give it room, and get through the reading halls together. I suspect the Beastkeeper will have a very good day.",
+      "text": "The dragon trusts you. Give it room and finish the reading halls together. The Beastkeeper can help afterward.",
       "choices": [
         {
           "id": "back",
@@ -576,8 +592,8 @@
         "speaker": "simon",
         "scene": "Wings Above the Clouds",
         "order": 33,
-        "status": "recording-ready",
-        "direction": "Relieved and warm. No riding promise; no lineage or final-cut revelations.",
+        "status": "script-revised",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
         "context": "Optional Sky Library nesting rescue. The living dragon is not Hollowed. The player helps before expecting a reward."
       }
     }

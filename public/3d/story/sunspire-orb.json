@@ -95,7 +95,7 @@
       }
     },
     "mc.orb.souls": {
-      "text": "Look. These are the people taken through the Hollow Gate. Their souls are still in the Abyssal Void. Their bodies obey the King, but the people themselves are trapped here, apart from everything they love.",
+      "text": "These souls were taken through the Hollow Gate. They remain trapped in the Abyssal Void while their bodies obey the King.",
       "choices": [
         {
           "id": "listen",
@@ -114,12 +114,13 @@
       ],
       "voice": {
         "speaker": "sunspire_orb",
-        "direction": "Let the sight carry the horror. Slow down slightly at “still.” The orb shows a vision, not a new Gate.",
-        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known.",
+        "status": "script-revised"
       }
     },
     "mc.orb.anchor": {
-      "text": "His own soul holds the Gate under his control. You must defeat him to break that control. While he lives, he can keep taking people from Aerth. Those already trapped cannot reach freedom while he holds them.",
+      "text": "His soul anchors the Gate's control. Defeat him to break that control. While he lives, he can keep taking people.",
       "choices": [
         {
           "id": "listen",
@@ -138,12 +139,13 @@
       ],
       "voice": {
         "speaker": "sunspire_orb",
-        "direction": "Clear and firm. Necessary first action, no final-cut explanation and no guaranteed instant restoration.",
-        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known.",
+        "status": "script-revised"
       }
     },
     "mc.orb.route": {
-      "text": "Castle Duskmoor. Far beyond the familiar paths. See the shore, the narrow landing, then the climb beneath the western wall. Remember this route. The King has hidden his home, but a hidden place is still a place.",
+      "text": "Castle Duskmoor. Remember this vision: the shore, the narrow landing, then the climb beneath the western wall. This is his hidden home.",
       "choices": [
         {
           "id": "remember",
@@ -167,12 +169,13 @@
       ],
       "voice": {
         "speaker": "sunspire_orb",
-        "direction": "The vision shows a usable approach. Precise directions, measured confidence. Do not imply a second question.",
-        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known.",
+        "status": "script-revised"
       }
     },
     "mc.orb.farewell": {
-      "text": "You came here for a way forward. Now you have one. Go with care for the people you mean to save.",
+      "text": "You know the way. Go help the people you came to save.",
       "choices": [
         {
           "id": "leave",
@@ -183,8 +186,9 @@
       ],
       "voice": {
         "speaker": "sunspire_orb",
-        "direction": "Warm but restrained. The player remains an ordinary person in their own understanding.",
-        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known.",
+        "status": "script-revised"
       }
     },
     "mc.orb.quiet": {

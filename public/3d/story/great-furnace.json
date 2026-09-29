@@ -183,7 +183,7 @@
       }
     },
     "gf.martin.first": {
-      "text": "You stopped the hammers. We heard the silence all the way down here. Best thing this place has made in years. Now help me get everyone out before someone decides we should fix it.",
+      "text": "The weapon line has stopped. Help me get the workers out.",
       "choices": [
         {
           "id": "help",
@@ -219,12 +219,13 @@
         "scene": "Worker break room",
         "order": 7,
         "emotion": "Warm male voice, tired but quick. A little smile at the joke.",
-        "direction": "Warm male voice, tired but quick. A little smile at the joke.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Worker break room"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Worker break room",
+        "status": "script-revised"
       }
     },
     "gf.martin.plan": {
-      "text": "Open the worker passage first. Then choose: ring the work bell and the shelter bell to get everyone out now, or climb west and stop the transport chain. That pulls patrols away. If you do that, ring the shelter bell first so we know to leave quietly.",
+      "text": "Open the worker passage. For a direct rescue, ring work then shelter. For a quiet rescue, stop the transport chain first.",
       "choices": [
         {
           "id": "early",
@@ -270,12 +271,13 @@
         "scene": "Two evacuation routes",
         "order": 8,
         "emotion": "Practical, protective. Neither choice is foolish.",
-        "direction": "Practical, protective. Neither choice is foolish.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Two evacuation routes"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Two evacuation routes",
+        "status": "script-revised"
       }
     },
     "gf.martin.early": {
-      "text": "Then open the passage west of the worker floor. Work bell first, shelter bell second. They will run when they hear it. You keep the guards busy. No one has to be a hero twice today.",
+      "text": "Open the west passage. Ring work bell, then shelter bell. Hold off the guards while we escape.",
       "choices": [
         {
           "id": "ready",
@@ -298,12 +300,13 @@
         "scene": "Direct evacuation",
         "order": 9,
         "emotion": "Firm and grateful, not sentimental.",
-        "direction": "Firm and grateful, not sentimental.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Direct evacuation"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Direct evacuation",
+        "status": "script-revised"
       }
     },
     "gf.martin.quiet": {
-      "text": "The brake is above the west loading floor. Expect guards. Once the chain stops, shelter bell first, work bell second. The noise should cover our feet. Most of us are very good at leaving work.",
+      "text": "Use the brake above the west loading floor. Then ring shelter bell, followed by work bell, to cover our escape.",
       "choices": [
         {
           "id": "ready",
@@ -318,8 +321,9 @@
         "scene": "Quiet evacuation",
         "order": 10,
         "emotion": "A quick dry joke, then back to work.",
-        "direction": "A quick dry joke, then back to work.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Quiet evacuation"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Quiet evacuation",
+        "status": "script-revised"
       }
     },
     "gf.martin.wait": {
@@ -399,7 +403,7 @@
       }
     },
     "gf.martin.cool": {
-      "text": "Round tank, square channel, triangle tray. The old signs still show the order. Cool the crossing and it will rise. That gets you to the Colossus. Its armor drinks heat from this place. Cooling should do more than make the walk pleasant.",
+      "text": "Round tank, square channel, triangle tray. Cool the crossing to raise it. Cooling may also weaken the Colossus's heated armor.",
       "choices": [
         {
           "id": "office",
@@ -421,12 +425,13 @@
         "scene": "The Colossus approach",
         "order": 12,
         "emotion": "Calm technical advice in everyday words.",
-        "direction": "Calm technical advice in everyday words.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The Colossus approach"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The Colossus approach",
+        "status": "script-revised"
       }
     },
     "gf.martin.office": {
-      "text": "Seized papers. The guards carry them up the east gallery and lock them away. I know which stairs they use. I do not know what the papers say. If the Legion hides something that carefully, I would like a look.",
+      "text": "The Legion locks seized papers above the east gallery. Search there.",
       "choices": [
         {
           "id": "back",
@@ -449,12 +454,13 @@
         "scene": "The high office",
         "order": 13,
         "emotion": "Curious, with a sharp edge of resentment.",
-        "direction": "Curious, with a sharp edge of resentment.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The high office"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The high office",
+        "status": "script-revised"
       }
     },
     "gf.martin.pages": {
-      "text": "A palace above the sea cliffs. And an orb that answers one question? I thought these were shipping papers. I know sailors on Storm Coast. They will know the crossing. Get us past that giant, and I will send word. You will not have to find the way alone.",
+      "text": "Sunspire Palace has an orb that answers one question. My Storm Coast contacts can help you reach it once we escape.",
       "choices": [
         {
           "id": "one",
@@ -476,12 +482,13 @@
         "scene": "The writings reveal the next destination",
         "order": 14,
         "emotion": "Genuine surprise. He learns the secret from the papers now.",
-        "direction": "Genuine surprise. He learns the secret from the papers now.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The writings reveal the next destination"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The writings reveal the next destination",
+        "status": "script-revised"
       }
     },
     "gf.martin.hope": {
-      "text": "You came here to stop their weapons. You are leaving with people willing to help you. I think that is the better trade. We will keep the way back open.",
+      "text": "You stopped their weapons and rescued us. We'll help you reach Sunspire.",
       "choices": [
         {
           "id": "back",
@@ -496,12 +503,13 @@
         "scene": "A growing circle of help",
         "order": 15,
         "emotion": "Quiet hope; no prophecy or knowledge of the player’s bloodline.",
-        "direction": "Quiet hope; no prophecy or knowledge of the player’s bloodline.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. A growing circle of help"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. A growing circle of help",
+        "status": "script-revised"
       }
     },
     "gf.martin.cage": {
-      "text": "They use its heat to move the cage. It snaps because they keep hurting it. Close the heat feed, open the little air vent, then release the lock. It might bite you anyway. But at least it will be an honest bite.",
+      "text": "The heat is hurting that creature. Close the heat feed, open the small air vent, then release the lock.",
       "choices": [
         {
           "id": "back",
@@ -516,8 +524,9 @@
         "scene": "The captive fire creature",
         "order": 16,
         "emotion": "Compassionate, with a wry ending.",
-        "direction": "Compassionate, with a wry ending.",
-        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The captive fire creature"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. The captive fire creature",
+        "status": "script-revised"
       }
     }
   },

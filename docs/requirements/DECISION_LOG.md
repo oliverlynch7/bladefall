@@ -507,3 +507,9 @@ User requires Unseen Strike never teleport off-map and always land on solid grou
 
 ## [Codex | 2026-09-28] No trial bosses
 User requires tutorials and class trials never spawn bosses. Plan: strip inherited boss/miniboss stage type in trial generation; substitute regular enemy at shared spawn boundary for boss archetypes. Verify all trials retain sufficient kill targets and campaign boss spawning survives.
+
+## [Codex | 2026-09-28] Guided hub tour and less reading
+User requests mandatory first-visit hub camera tour with always-available skip, overhead overview followed by each shop/NPC/portal/interactable; minimal text explaining purpose and when useful. Also requests concise dialogue throughout game, fewer cumbersome options, reduced reading fatigue while preserving lore and mechanics. Plan: actual hub-position tour, completion/skip persistence and replay, instant dialogue visibility, services first, editorial shortening without changing effects or puzzle solutions.
+
+## [Codex | 2026-09-28] Player-level stat allocation
+User wants additional player-level stat points for meaningful customization, balanced to avoid overpowering or lengthy interruptions. Interpreted “too many” as “not too many” from explicit stated intent. Proposed, not yet tuned: one point per character level using proposed Health/Attack/Defense/Speed/Mana choices; allow spending later and rebalance automatic growth instead of stacking extra power. Preserve as queued work while completing active hub/dialogue task.

@@ -30,7 +30,7 @@
   },
   "nodes": {
     "cg.roland.hello": {
-      "text": "Stop there. You are walking toward the most guarded door in Aerth wearing a very clear statement of intent.",
+      "text": "Stop. You need a disguise to get through that guarded door.",
       "choices": [
         {
           "id": "help",
@@ -88,12 +88,13 @@
         "scene": "Castle Gates",
         "order": 1,
         "emotion": "Quiet, practical",
-        "direction": "Low voice, looking out for patrols. Dry rather than silly.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.menu": {
-      "text": "I repair their armor. I do not repair their cause. Bring me a supply coat, a sound helmet and the crew papers. I can make you look expected. You will still need to sound expected.",
+      "text": "Bring a supply coat, a sound helmet and crew papers. I'll fit the disguise. You'll still need convincing answers.",
       "choices": [
         {
           "id": "fit",
@@ -186,12 +187,13 @@
         "scene": "Castle Gates",
         "order": 2,
         "emotion": "Quiet, practical",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.fitted": {
-      "text": "There. Dark steel, dull cloth, no hero shining through the seams. It sits over your own gear. Keep your answers short. Cross was never fond of chatter, even before they took his soul.",
+      "text": "The disguise covers your gear. Keep your answers short when Cross questions you.",
       "choices": [
         {
           "id": "ready",
@@ -206,12 +208,13 @@
         "scene": "Castle Gates",
         "order": 3,
         "emotion": "Small satisfaction, then sober",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.bridge": {
-      "text": "Two catches below the bell post. One wheel on the far bank. They built it so one tired worker could use it. A rare moment of kindness, entirely by accident.",
+      "text": "Two catches below the bell post. One wheel across the bridge.",
       "choices": [
         {
           "id": "go",
@@ -226,12 +229,13 @@
         "scene": "Castle Gates",
         "order": 4,
         "emotion": "Quiet, practical",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.personal": {
-      "text": "My old chest piece is in the seized goods room, east of the wagon yard. My name is stamped inside. I made it when I still chose who wore my work. Bring it back, and I have something strange you may want.",
+      "text": "My chest piece is in the seized goods room, east of the wagon yard. Return it for a reward.",
       "choices": [
         {
           "id": "look",
@@ -340,8 +344,9 @@
         "scene": "Castle Gates",
         "order": 5,
         "emotion": "Quiet, practical",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.warning": {
@@ -390,7 +395,7 @@
       }
     },
     "cg.roland.refused": {
-      "text": "Then we are finished discussing what belongs to me. I will fit the uniform. Too many people above us need you to get through that door.",
+      "text": "I'll still fit your disguise. But we're done discussing my armor.",
       "choices": [
         {
           "id": "back",
@@ -405,12 +410,13 @@
         "scene": "Castle Gates",
         "order": 7,
         "emotion": "Cold, restrained",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.kept": {
-      "text": "It will stop a blade. I hope that is worth more to you than giving an old man his own name back. Our deal is finished. The uniform is a separate matter.",
+      "text": "Keep it, then. You get no reward for returning it. The disguise is a separate matter.",
       "choices": [
         {
           "id": "back",
@@ -425,12 +431,13 @@
         "scene": "Castle Gates",
         "order": 8,
         "emotion": "Hurt, without begging",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.roland.thanks": {
-      "text": "There it is. My name, still mine. Take this shard. It fell from a crate that came from the palace. I kept it because they wanted it thrown away. That seemed a fine reason.",
+      "text": "My name is still stamped inside. Thank you. Take this shard from the palace shipment.",
       "choices": [
         {
           "id": "back",
@@ -445,8 +452,9 @@
         "scene": "Castle Gates",
         "order": 9,
         "emotion": "Warm relief, tiny spark of defiance",
-        "direction": "Natural speech. Leave space around important instructions; no grand fantasy voice.",
-        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+        "status": "script-revised"
       }
     },
     "cg.cross.hello": {

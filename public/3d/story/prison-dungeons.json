@@ -16,7 +16,7 @@
   },
   "nodes": {
     "kd.walter.first": {
-      "text": "You're not wearing their colors. That will upset the management. I'm Walter. I used to mend these walls. Now I sleep beside them. Read the list at the stairs, then look in the west cells. The guards' numbers don't match the beds.",
+      "text": "Read the prisoner list at the stairs, then search the west cells. The guard count doesn't match the beds.",
       "choices": [
         {
           "id": "help",
@@ -48,12 +48,13 @@
         "scene": "A builder notices what the guards tried to hide",
         "order": 1,
         "emotion": "Male. Older, steady, dry humor. Observant rather than mysterious.",
-        "direction": "Male. Older, steady, dry humor. Observant rather than mysterious.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A builder notices what the guards tried to hide"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A builder notices what the guards tried to hide",
+        "status": "script-revised"
       }
     },
     "kd.walter.marks": {
-      "text": "They built a false wall behind the empty cells. Old service marks still show where the passage ran. Follow those. Stone can hide a doorway, but it can't explain why the floor keeps going through it.",
+      "text": "Follow the old service marks behind the empty cells. They lead through a false wall.",
       "choices": [
         {
           "id": "lift",
@@ -77,12 +78,13 @@
         "scene": "An optional clue to the hidden holding room",
         "order": 2,
         "emotion": "Matter-of-fact pride in knowing his trade. Clear directions without naming every turn.",
-        "direction": "Matter-of-fact pride in knowing his trade. Clear directions without naming every turn.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. An optional clue to the hidden holding room"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. An optional clue to the hidden holding room",
+        "status": "script-revised"
       }
     },
     "kd.walter.lift": {
-      "text": "The lift carries people to the upper shelter. Its load plate shows four. Hook weights that add up to four; leave the others off. Free the people first. They'll gather on the platform while you work. The eastern service stairs let you follow or come back down.",
+      "text": "Free the prisoners, then hook lift weights totaling four. Leave the others off. Use the eastern service stairs to follow them.",
       "choices": [
         {
           "id": "back",
@@ -106,12 +108,13 @@
         "scene": "The required puzzle and return route",
         "order": 3,
         "emotion": "Patient, like explaining a tool to someone who needs it now.",
-        "direction": "Patient, like explaining a tool to someone who needs it now.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. The required puzzle and return route"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. The required puzzle and return route",
+        "status": "script-revised"
       }
     },
     "kd.walter.ellis": {
-      "text": "Ellis worked on the King's early research. They wanted him back, badly. He escaped north before the last transport. The people you found heard the guards arguing about the frozen mountains. Frostfell. If he knows how this began, he might know what we can do next.",
+      "text": "Ellis helped with the King's research. He escaped to Frostfell. Find him; he may know how to stop this.",
       "choices": [
         {
           "id": "king",
@@ -129,12 +132,13 @@
         "scene": "The next destination comes from rescued people and papers",
         "order": 4,
         "emotion": "Hope, cautiously earned. No claim that Ellis knows the final answer.",
-        "direction": "Hope, cautiously earned. No claim that Ellis knows the final answer.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. The next destination comes from rescued people and papers"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. The next destination comes from rescued people and papers",
+        "status": "script-revised"
       }
     },
     "kd.walter.unknown": {
-      "text": "I don't know. Neither do the guards who work down here. But someone who helped with the first experiments knows more than a stoneworker with a cracked hammer. Start with what we have.",
+      "text": "I don't know more. Ellis knows the experiments better than I do.",
       "choices": [
         {
           "id": "hall",
@@ -147,12 +151,13 @@
         "scene": "Keeps the castle location a secret",
         "order": 5,
         "emotion": "Honest uncertainty. No coy refusal or invented hidden knowledge.",
-        "direction": "Honest uncertainty. No coy refusal or invented hidden knowledge.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Keeps the castle location a secret"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Keeps the castle location a secret",
+        "status": "script-revised"
       }
     },
     "kd.walter.fallen": {
-      "text": "The Fallen guards the release hall. Used to be a champion. Now it stands there waiting for orders. We'll stay in the upper shelter until the hall is clear. You've done enough carrying for one day; let us keep ourselves out of trouble.",
+      "text": "The Fallen guards the release hall. A champion, now Hollowed. We'll wait in the upper shelter until you defeat it.",
       "choices": [
         {
           "id": "back",
@@ -165,12 +170,13 @@
         "scene": "Warns of the final obstacle",
         "order": 6,
         "emotion": "Serious, then quiet gratitude. Never identify the champion as Bladeborn.",
-        "direction": "Serious, then quiet gratitude. Never identify the champion as Bladeborn.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Warns of the final obstacle"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Warns of the final obstacle",
+        "status": "script-revised"
       }
     },
     "kd.sly.first": {
-      "text": "A rescue? Lovely. I was starting to think my appeal had been filed under 'never.' Call me Sly. Before we leave, I may need help returning something. A small something. With a chain on it.",
+      "text": "I'm Sly. Before we leave, help me return something I stole.",
       "choices": [
         {
           "id": "ask",
@@ -188,12 +194,13 @@
         "scene": "A thief tests the waters",
         "order": 7,
         "emotion": "Male. Quick charm covering shame; do not make him a cartoon villain.",
-        "direction": "Male. Quick charm covering shame; do not make him a cartoon villain.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A thief tests the waters"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A thief tests the waters",
+        "status": "script-revised"
       }
     },
     "kd.sly.busy": {
-      "text": "So am I, in a less useful way. Walter knows these walls. I know which guards kick first. His knowledge is probably more helpful just now.",
+      "text": "Walter knows the way out. Speak to him first.",
       "choices": [
         {
           "id": "back",
@@ -206,12 +213,13 @@
         "scene": "Main rescue remains independent",
         "order": 8,
         "emotion": "A quick dry joke, then back off.",
-        "direction": "A quick dry joke, then back off.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Main rescue remains independent"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Main rescue remains independent",
+        "status": "script-revised"
       }
     },
     "kd.sly.truth": {
-      "text": "A man in the hidden cells kept a little picture of his family on it. I took that and a purple shard while he slept. Thought I could trade them for a way out. Turns out there's a price for being that sort of person, too.",
+      "text": "I stole a family locket and purple shard from a man in the hidden cells. I hoped to buy my escape.",
       "choices": [
         {
           "id": "quiet",
@@ -291,12 +299,13 @@
         "scene": "A meaningful choice about making amends",
         "order": 9,
         "emotion": "The charm drops. Quiet shame, no demand for pity.",
-        "direction": "The charm drops. Quiet shame, no demand for pity.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A meaningful choice about making amends"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A meaningful choice about making amends",
+        "status": "script-revised"
       }
     },
     "kd.sly.quiet": {
-      "text": "All right. Put the picture back in his bundle once he's free. I'll carry his things out and tell him I owe him a favor. Several favors. If you're going to let me be better, I'd better actually do it.",
+      "text": "Once he's free, return the locket to his bundle. I'll help carry his things out.",
       "choices": [
         {
           "id": "returned",
@@ -341,12 +350,13 @@
         "scene": "A quiet restitution route",
         "order": 10,
         "emotion": "Reluctant sincerity. The player is not excusing the theft.",
-        "direction": "Reluctant sincerity. The player is not excusing the theft.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A quiet restitution route"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A quiet restitution route",
+        "status": "script-revised"
       }
     },
     "kd.sly.open": {
-      "text": "You're right. Horrible habit, being right. Put it in his bundle and I'll tell him who took it. Then he can decide whether I carry his pack or walk well ahead of him.",
+      "text": "Return it to his bundle. I'll confess and let him decide what I owe.",
       "choices": [
         {
           "id": "returned",
@@ -391,12 +401,13 @@
         "scene": "An open apology route",
         "order": 11,
         "emotion": "Wry resignation, then commitment.",
-        "direction": "Wry resignation, then commitment.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. An open apology route"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. An open apology route",
+        "status": "script-revised"
       }
     },
     "kd.sly.angry": {
-      "text": "I was hoping you were better than me. He's still reaching for that empty chain around his neck. Funny, the things your hands remember. I haven't much else to say to you.",
+      "text": "He keeps reaching for his missing locket. I hoped you'd help me put this right.",
       "choices": [
         {
           "id": "repair",
@@ -436,12 +447,13 @@
         "scene": "Selfish choice closes cooperation until actual repair",
         "order": 12,
         "emotion": "Disappointed and curt. The empty-chain observation is the repair clue, not a task demand.",
-        "direction": "Disappointed and curt. The empty-chain observation is the repair clue, not a task demand.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Selfish choice closes cooperation until actual repair"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Selfish choice closes cooperation until actual repair",
+        "status": "script-revised"
       }
     },
     "kd.sly.repair": {
-      "text": "You went back. Good. Then I'll stop using your bad answer as an excuse for mine. I'll tell him. And you should take the shard somewhere it can do some good.",
+      "text": "You returned it. I'll confess. Take the shard somewhere useful.",
       "choices": [
         {
           "id": "accept",
@@ -473,12 +485,13 @@
         "scene": "Repair through action, before departure",
         "order": 13,
         "emotion": "Surprised relief. A small chance to be decent again.",
-        "direction": "Surprised relief. A small chance to be decent again.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Repair through action, before departure"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Repair through action, before departure",
+        "status": "script-revised"
       }
     },
     "kd.sly.quiet.reward": {
-      "text": "Here's the purple piece. No trade this time. I helped him onto the lift and he thanked me. That felt worse than being shouted at. Maybe it was supposed to.",
+      "text": "Here's the shard. I helped him onto the lift. He thanked me. I wish he knew why that hurt.",
       "choices": [
         {
           "id": "back",
@@ -491,12 +504,13 @@
         "scene": "Quiet route reward",
         "order": 14,
         "emotion": "Soft, thoughtful. Do not turn the moment into a punchline.",
-        "direction": "Soft, thoughtful. Do not turn the moment into a punchline.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Quiet route reward"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Quiet route reward",
+        "status": "script-revised"
       }
     },
     "kd.sly.open.reward": {
-      "text": "He knows. Told me to carry the heavy pack. Then gave me half his bread. I had a whole speech ready and everything. Here's the shard. Let's see if I can earn the bread.",
+      "text": "He knows. He made me carry his pack, then shared his bread. Take this shard.",
       "choices": [
         {
           "id": "back",
@@ -509,12 +523,13 @@
         "scene": "Open apology or repaired route reward",
         "order": 15,
         "emotion": "A little stunned by kindness. Warm, understated humor.",
-        "direction": "A little stunned by kindness. Warm, understated humor.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Open apology or repaired route reward"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Open apology or repaired route reward",
+        "status": "script-revised"
       }
     },
     "kd.sly.done": {
-      "text": "I'll stay with the others. No wandering hands. You can stop checking your pockets now. Well... after we leave this prison.",
+      "text": "I'll stay with the others. No more stealing.",
       "choices": [
         {
           "id": "back",
@@ -527,8 +542,9 @@
         "scene": "Brief repeat interaction",
         "order": 16,
         "emotion": "A cautious return of humor. No second reward.",
-        "direction": "A cautious return of humor. No second reward.",
-        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Brief repeat interaction"
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. Brief repeat interaction",
+        "status": "script-revised"
       }
     }
   },

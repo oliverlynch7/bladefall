@@ -16,7 +16,7 @@
   },
   "nodes": {
     "tc.abe.hello": {
-      "text": "You crossed in that little boat? I was about to wave you away. Then I saw you wave back. Hard to argue with that much confidence.",
+      "text": "You crossed safely. Good. The climb to Sunspire starts here.",
       "choices": [
         {
           "id": "palace",
@@ -49,12 +49,13 @@
         "scene": "Thunder Cliffs",
         "order": 1,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.abe.path": {
-      "text": "The Legion broke our cargo lift. Fit the spare brake wheel below, then climb the steps to release the catch above. You can ride it after that. The climb is steep. The steps have not betrayed me yet.",
+      "text": "Fit the spare brake wheel below the cargo lift. Climb the steps and release its upper catch. Then you can ride it.",
       "choices": [
         {
           "id": "beast",
@@ -82,12 +83,13 @@
         "scene": "Thunder Cliffs",
         "order": 2,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.abe.wait": {
-      "text": "I will watch the boat. Go on. If you need me, I will be the one pretending not to worry.",
+      "text": "I'll watch the boat. Take care on the climb.",
       "choices": [
         {
           "id": "beast",
@@ -115,12 +117,13 @@
         "scene": "Thunder Cliffs",
         "order": 3,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.abe.beast": {
-      "text": "A sea hydra. The Legion dragged it here and chained its necks across the climb. It snaps at anyone who comes close. Not because it serves them. Because every step pulls those chains tight.",
+      "text": "The Legion chained a hydra across the climb. It attacks because the chains hurt it—not because it serves them.",
       "choices": [
         {
           "id": "free",
@@ -155,12 +158,13 @@
         "scene": "Thunder Cliffs",
         "order": 4,
         "emotion": "Concerned",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.abe.reason": {
-      "text": "I have had arguments at home that felt much the same. But this one is in pain. Give it a way out before you decide it has to die.",
+      "text": "Free it before deciding it has to die.",
       "choices": [
         {
           "id": "free",
@@ -188,12 +192,13 @@
         "scene": "Thunder Cliffs",
         "order": 5,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.abe.chains": {
-      "text": "There is an old shackle beside the middle ledge. Look at the joint, where the neck would rub. If you can break the new ones while it rests, it might finally leave us both alone.",
+      "text": "Inspect the old shackle on the middle ledge. Break the new neck shackles while the hydra rests. It may leave once free.",
       "choices": [
         {
           "id": "go",
@@ -208,12 +213,13 @@
         "scene": "Thunder Cliffs",
         "order": 6,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.abe.farewell": {
-      "text": "You came looking for a palace and stopped to help an animal that could swallow you. Whatever you find up there, do not lose that part of yourself.",
+      "text": "You helped a creature that could have killed you. Remember that kindness when you reach the palace.",
       "choices": [
         {
           "id": "repeat",
@@ -228,12 +234,13 @@
         "scene": "Thunder Cliffs",
         "order": 7,
         "emotion": "Warm",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.dash.hello": {
-      "text": "Careful! This is a serious treasure claim. I have marked it with my best stick. Legally, I think that makes me very important.",
+      "text": "This is my treasure claim. The stick makes it official. Probably.",
       "choices": [
         {
           "id": "claim",
@@ -266,12 +273,13 @@
         "scene": "Thunder Cliffs",
         "order": 8,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.dash.offer": {
-      "text": "A wreck cave. Two stuck catches. I can show you how to open them if we split the coins. Or beat my cliff route and keep the lot. I am judging from here. Better view. Nothing to do with the height.",
+      "text": "Help open the wreck cave and split the coins. Or beat my cliff race to keep them all.",
       "choices": [
         {
           "id": "help",
@@ -331,12 +339,13 @@
         "scene": "Thunder Cliffs",
         "order": 9,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.dash.help": {
-      "text": "Hold the lower catch open, then turn the upper wheel. I put a brace by the lower one. That lets one person do it. I did contribute something besides the stick.",
+      "text": "Brace the lower catch open, then turn the upper wheel. One person can do it.",
       "choices": [
         {
           "id": "back",
@@ -351,12 +360,13 @@
         "scene": "Thunder Cliffs",
         "order": 10,
         "emotion": "Conversational",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.dash.race": {
-      "text": "Touch the three numbered flags in order, then the bell by the cave. Two minutes. If you miss it, come back and try again. No jumping off cliffs to save time. That is not winning. That is falling with ambition.",
+      "text": "Touch flags 1, 2 and 3, then ring the cave bell within two minutes. Return here to retry.",
       "choices": [
         {
           "id": "retry",
@@ -388,12 +398,13 @@
         "scene": "Thunder Cliffs",
         "order": 11,
         "emotion": "Playful",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     },
     "tc.dash.done": {
-      "text": "The coins were nice. Watching you make that climb was better. Do not quote me. I am trying to build a reputation for greed.",
+      "text": "You earned those coins. That climb was worth watching.",
       "choices": [
         {
           "id": "bye",
@@ -408,8 +419,9 @@
         "scene": "Thunder Cliffs",
         "order": 12,
         "emotion": "Warm",
-        "direction": "Speak clearly. Dry humor should sound sincere, not like a punchline.",
-        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+        "status": "script-revised"
       }
     }
   },

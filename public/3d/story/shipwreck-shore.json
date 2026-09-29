@@ -16,7 +16,7 @@
   },
   "nodes": {
     "sc.otto.hello": {
-      "text": "Martin sent you? Then the forge really has gone quiet. Good. I was getting tired of fixing boats for people who planned to steal them.",
+      "text": "Martin sent you? Good. Let's get you to Sunspire.",
       "choices": [
         {
           "id": "palace",
@@ -49,12 +49,13 @@
         "scene": "Shipwreck Shore",
         "order": 1,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.plan": {
-      "text": "Sunspire is beyond the island cliffs. This boat can get you there. It needs a rudder, sailcloth and rope. The sea has been kind enough to scatter all three within walking distance. Its first helpful act in years.",
+      "text": "Sunspire lies beyond the island cliffs. Repair this boat with a rudder, sailcloth and rope.",
       "choices": [
         {
           "id": "work",
@@ -69,12 +70,13 @@
         "scene": "Shipwreck Shore",
         "order": 2,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.work": {
-      "text": "What have you found? I can fit one piece while you look for the others. Or bring the whole lot. I charge the same either way: please come back alive.",
+      "text": "Bring the parts together or one at a time. I'll fit whatever you've found.",
       "choices": [
         {
           "id": "deliver.rudder",
@@ -201,12 +203,13 @@
         "scene": "Shipwreck Shore",
         "order": 3,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.rudder": {
-      "text": "A little split, but straight. That will do. Now we can choose which rock we hit. Ideally, none.",
+      "text": "The rudder fits. Now we can steer.",
       "choices": [
         {
           "id": "more",
@@ -221,12 +224,13 @@
         "scene": "Shipwreck Shore",
         "order": 4,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.sail": {
-      "text": "Good cloth. The Legion used it to cover their supplies. Apparently keeping stolen bread dry matters more than letting people leave.",
+      "text": "Good sailcloth. That will hold.",
       "choices": [
         {
           "id": "more",
@@ -241,12 +245,13 @@
         "scene": "Shipwreck Shore",
         "order": 5,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.rope": {
-      "text": "Dry enough, strong enough. Two things I can rarely say about myself after a day here.",
+      "text": "Strong rope. Just what we need.",
       "choices": [
         {
           "id": "more",
@@ -261,12 +266,13 @@
         "scene": "Shipwreck Shore",
         "order": 6,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.routes": {
-      "text": "The tilted hull lies west of here. Its deck rises toward the broken stern. Sailcloth is on the east lookout. The storage cave is below that ridge; open its drain before lifting the inside latch.",
+      "text": "Rudder: western wreck's raised stern. Sailcloth: eastern lookout. Rope: cave below that ridge; drain it before lifting the inside latch.",
       "choices": [
         {
           "id": "back",
@@ -281,12 +287,13 @@
         "scene": "Shipwreck Shore",
         "order": 7,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.ready": {
-      "text": "She floats. That is the first test. Keep clear of the marked rocks. If anyone boards you, hold a safe course and clear the deck. There is sheltered water halfway across where you can patch the hull and trade the helm.",
+      "text": "Avoid marked rocks and clear boarding enemies. Sheltered water halfway across lets you repair the hull and swap steering roles.",
       "choices": [
         {
           "id": "depart",
@@ -309,12 +316,13 @@
         "scene": "Shipwreck Shore",
         "order": 8,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.otto.farewell": {
-      "text": "Take a last look around before you leave. Boats are good at going places. Less good at popping back for something you forgot.",
+      "text": "Check the shore before departing. You may still have unfinished tasks.",
       "choices": [
         {
           "id": "check",
@@ -329,12 +337,13 @@
         "scene": "Shipwreck Shore",
         "order": 9,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.hello": {
-      "text": "That wreck was mine. Bell still hangs inside, I expect. I keep meaning to fetch it. Funny how a short walk can get longer every morning.",
+      "text": "That wreck was my ship. Its bell should still be inside. Would you fetch it?",
       "choices": [
         {
           "id": "help",
@@ -374,12 +383,13 @@
         "scene": "Shipwreck Shore",
         "order": 10,
         "emotion": "Quiet pride with grief under the surface",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.memory": {
-      "text": "Storm drove us ashore. I stayed with the wheel. They took the small boat. I never saw where it landed. A captain is supposed to know where everyone is.",
+      "text": "I stayed at the wheel. The others took the small boat. I never learned where they landed.",
       "choices": [
         {
           "id": "help",
@@ -412,8 +422,9 @@
         "scene": "Shipwreck Shore",
         "order": 11,
         "emotion": "Guarded, regretful",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.wait": {
@@ -531,7 +542,7 @@
       }
     },
     "sc.rose.truth": {
-      "text": "Together. That is more than I knew yesterday. Thank you for telling it straight. Take this strange purple piece. Pulled it from our deck after the palace fell silent. It deserves a better journey than mine.",
+      "text": "Together. Thank you for telling me honestly. Take this Rift Shard from our deck.",
       "choices": [
         {
           "id": "advice",
@@ -546,12 +557,13 @@
         "scene": "Shipwreck Shore",
         "order": 13,
         "emotion": "Relief, restrained rather than cheerful",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.kind": {
-      "text": "I have spent so long remembering who I could not see that I forgot who got away. Keep this purple piece. And keep your head when the sea starts shouting.",
+      "text": "Some escaped. I needed that reminder. Take this Rift Shard, and stay safe at sea.",
       "choices": [
         {
           "id": "advice",
@@ -566,12 +578,13 @@
         "scene": "Shipwreck Shore",
         "order": 14,
         "emotion": "Warm, moved",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.advice": {
-      "text": "Watch the water beside a rock, not the rock itself. That is where you need to go. And never argue with a wave. It has heard every good argument and sunk all of them.",
+      "text": "Watch the clear water beside each rock. That's your route through.",
       "choices": [
         {
           "id": "thanks",
@@ -586,12 +599,13 @@
         "scene": "Shipwreck Shore",
         "order": 15,
         "emotion": "Conversational",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.angry": {
-      "text": "Their names are still on that little board beside the wreck. Someone ought to straighten it before the tide takes it. I have nothing else to say to you.",
+      "text": "Straighten the crew's name board beside the wreck before the tide takes it. Then leave me alone.",
       "choices": [
         {
           "id": "sorry",
@@ -630,8 +644,9 @@
         "scene": "Shipwreck Shore",
         "order": 16,
         "emotion": "Hurt, controlled anger",
-        "direction": "Natural, clear speech. Leave a short beat around the joke or emotional turn.",
-        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+        "status": "script-revised"
       }
     },
     "sc.rose.repair": {

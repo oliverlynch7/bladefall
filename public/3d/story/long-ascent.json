@@ -36,7 +36,7 @@
       }
     },
     "la.miles.menu": {
-      "text": "The King is above us. My friends are locked below him. I know which problem I would solve first.",
+      "text": "The King is above. My friends are in the cells below him. Please free them.",
       "choices": [
         {
           "id": "stairs",
@@ -99,12 +99,13 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 2,
         "emotion": "dry, hushed",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "la.miles.stairs": {
-      "text": "Two catches hold the upper doors. One is on the first great turn, the other on the second. They stay released. You will not need three hands.",
+      "text": "Release the catches on the first and second great turns. They stay open.",
       "choices": [
         {
           "id": "back",
@@ -117,12 +118,13 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 3,
         "emotion": "dry, hushed",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "la.miles.workers": {
-      "text": "They carried food to a prisoner. That was enough. The cells are on the next turn. Clear the guards and pull the release wheel. I can get them out through the service passage.",
+      "text": "Clear the guards on the next turn and pull the cell wheel. I'll lead the prisoners through the service passage.",
       "choices": [
         {
           "id": "accept",
@@ -159,12 +161,13 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 4,
         "emotion": "worried, practical",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "la.miles.safe": {
-      "text": "They are moving. No marching. No orders. Just people choosing where to go. I had forgotten what that looked like.",
+      "text": "They're free. I'll guide them out.",
       "choices": [
         {
           "id": "refuge",
@@ -182,12 +185,13 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 5,
         "emotion": "relieved, sincere",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "la.miles.refuge": {
-      "text": "Then we will put our hands to something better. You have given us a way out. We can give your people a stronger wall.",
+      "text": "We'll help rebuild your village. You've given us a future.",
       "choices": [
         {
           "id": "back",
@@ -200,12 +204,13 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 6,
         "emotion": "quiet hope",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "la.miles.vault": {
-      "text": "The cell lock holds the service wheels shut. Free my friends first. Then check the repair tally beside the linen shelves. The wheels have four marks each. They need the repair settings, not matching marks.",
+      "text": "Free the prisoners to unlock the service wheels. Check the repair tally beside the linen shelves; use those settings, not matching marks.",
       "choices": [
         {
           "id": "back",
@@ -225,8 +230,9 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 7,
         "emotion": "dry, hushed",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     },
     "la.miles.joke": {
@@ -248,7 +254,7 @@
       }
     },
     "la.miles.refuse": {
-      "text": "Then keep climbing. The stairs will not ask you for a favor. If you change your mind, the cell wheel is still there.",
+      "text": "Keep climbing, then. If you change your mind, the cell wheel is still there.",
       "choices": [
         {
           "id": "sorry",
@@ -273,8 +279,9 @@
         "scene": "Long Ascent — castle service rooms",
         "order": 9,
         "emotion": "hurt, restrained",
-        "direction": "Speak plainly, with a tired servant’s sharp timing. Keep the humor small; trapped friends are in danger.",
-        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn."
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+        "status": "script-revised"
       }
     }
   },

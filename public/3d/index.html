@@ -1084,6 +1084,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./combat-art.js?v=2037"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
+<script src="./guided-tutorial.js?v=2064"></script>
 <script>
 (function(){
 "use strict";
@@ -1094,7 +1095,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.063.0-tutorial-portal';
+const VERSION3D='2.064.0-guided-tutorial';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5261,7 +5262,7 @@ function startTrial(cid,fromZone,opts={}){
   if(opts.session){G.trialSession=opts.session;G.trialPartySize=Math.max(1,Math.min(8,opts.partySize||1));G.runSeed=opts.runSeed;MP.zone=MP.TRIAL;MP.rseed=opts.runSeed;}
   meta.run=null; persist();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
-  if(!T.earned && !meta.tutDone){ meta.tutDone=true; persistGlobal(); showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
+  if(!T.earned && !hadHero && !Object.keys(meta.classUnlocked||{}).length){ showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
   else if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
@@ -5269,7 +5270,7 @@ function controlHint(id){const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>
 function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag','B'],['Pause / release mouse','Esc']];}
 function showTutorial(cid){mode='menu';
  showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Practice here before your adventure. You can take your time.</p><div style="text-align:left;line-height:1.65"><p><strong>Your goal:</strong> defeat the enemies, then walk into the exit portal to reach the Waystation.</p><div class="beginner-controls">${beginnerControls().slice(0,5).map(([a,b])=>`<p><strong>${a}:</strong> ${htmlSafe(b)}</p>`).join('')}</div><p>Hold jump for a higher jump. Move away from enemy attack warnings, or dodge through a strike.</p><p>On touch screens, use the movement stick and labeled action buttons. Press <strong>Esc</strong> or the pause button whenever you need a break or want to change the camera.</p><p>You will unlock skills as your class rank increases. We will explain them when they become available.</p></div><button class="bigbtn" id="tutGo">Start practicing</button><button class="bigbtn ghost" id="tutSkip">Skip practice — keep my class</button></div>`);
- document.getElementById('tutGo').onclick=resumePlay;
+ document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
  document.getElementById('tutSkip').onclick=()=>{showOverlayHTML(`<div class="card"><h2 class="ovh">Skip the practice area?</h2><p class="ovsub">You will keep your chosen class and go to the Waystation. You can find the controls again in Pause → Help.</p><button class="bigbtn" id="skipYes">Skip and go to the Waystation</button><button class="bigbtn ghost" id="skipNo">Return to practice instructions</button></div>`);document.getElementById('skipYes').onclick=skipTrial;document.getElementById('skipNo').onclick=()=>showTutorial(cid);};
 }
 // second-stage onboarding: how the hub works, shown once after the first trial is done
@@ -9650,7 +9651,7 @@ function acquireCameraLock(event){
      hides the cursor and feeds the movement straight to the camera - so in edit mode you could not
      see where you were clicking, could not press a palette button, and could not drag to look.
      An editor is a cursor-driven tool; the lock has to be off for the whole time it is open. */
-  if(_edOpen()||meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
+  if(BFGuidedTutorial.state||_edOpen()||meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
   showGameUI(true); try{ const q=canvas.requestPointerLock(); if(q&&q.catch) q.catch(()=>{}); }catch(e){}
 }
 window.addEventListener('pointerdown',acquireCameraLock,true);
@@ -11817,12 +11818,12 @@ function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tu
     <p class="ovkicker">Skill Unlocked</p><h2 class="ovh">${s.n}</h2>
     <div class="tutbody"><div class="tuticon">${art}</div>
       <div class="tutcopy"><p class="tutdesc">${s.d}</p>
-        <div class="tutkeyrow"><span class="tutkey">1</span><span class="tutkeymsg">Press <b>1</b> — or tap the first skill button — to unleash ${s.n}.</span></div>
+        <div class="tutkeyrow"><span class="tutkey">${htmlSafe(controlHint('skill1'))}</span><span class="tutkeymsg">Press <b>${htmlSafe(controlHint('skill1'))}</b> — or tap the first skill button — to unleash ${s.n}.</span></div>
         <p class="tuthint"><b>Why use it:</b> skills are your strongest tools — far bigger than a basic attack. Save them for the moments that matter: a tough foe, a crowd to clear, or getting out of trouble.</p>
         <p class="tuthint"><b>The cost:</b> after you use it, it recharges over ${s.cd}s${meta.classId==='mage'||meta.classId==='reaper'?' and spends mana':''}, so you can\'t spam it — time it well.</p>
         <p class="tuthint"><b>What\'s next:</b> keep fighting to rank up. Each rank lets you pick another <b>skill or passive</b>, filling out combat slots <b>1–4</b> — you\'re building your own kit as you grow.</p></div></div>
     <button class="bigbtn" id="tutGo">Got it — try it out</button></div>`);
-  document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); };
+  document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); if(inBeginnerTrial())BFGuidedTutorial.skill(G); };
 }
 function c2def(id){ return CLASS2[id||meta.classId]; }
 function c2ch(id){ const cs=classState(id||meta.classId); if(!cs.ch||typeof cs.ch!=='object') cs.ch={}; return cs.ch; }
@@ -15001,6 +15002,7 @@ function update(dt){
   pollGamepad(dt);   // controller input (auto-detected; feeds the same input channels as touch/keyboard)
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
+  if(BFGuidedTutorial.tick(G,mode,dt,input,{hint:controlHint,release:releaseKeyboard}))return;
   if(mode!=='play') return;
   if(G?.kingFinal&&finalKingTick(dt))return;
   if(G?.p?.saberSwingT>0)G.p.saberSwingT=Math.max(0,G.p.saberSwingT-dt);
@@ -16163,7 +16165,7 @@ function randomLoot(rid){ const r=Math.random();
   return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
 // Re-capture the mouse for the shoulder/fps camera the instant a menu closes, so a normal menu
 // interaction never costs you camera control — only Esc releases it. (Runs inside the closing click = a valid gesture.)
-function regrabCam(){ if(!_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ const request=canvas.requestPointerLock();request?.catch?.(()=>{}); }catch(e){} } }
+function regrabCam(){ if(!BFGuidedTutorial.state && !_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ const request=canvas.requestPointerLock();request?.catch?.(()=>{}); }catch(e){} } }
 // The single menu-to-game boundary. Active play must always have the full HUD restored;
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; musicForScene(); showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
@@ -21868,6 +21870,7 @@ function frame(ts){
   flushHero3D();                      // 3D hero/world/mobs go on top of the COMPOSITED frame
   flushDeferred();                    // ...then the entities, depth-tested against what it just drew
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
+  BFGuidedTutorial.map(G,mode);
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

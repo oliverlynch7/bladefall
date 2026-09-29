@@ -828,3 +828,7 @@ First starter-trial deaths offer Retry tutorial instead of class selection or ba
 
 ## [Codex | 2026-09-28] Tutorial bonus portal — 2.063.0
 Removed shared-generator Treasure Sprint portal from beginner trials. Browser checks confirm no bonus portal and retained completion exit for Warrior/Ranger/Mage; hub Sprint remains available. Pre-change save fixture and syntax pass. Evidence: docs/qa/tutorial-portal-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Guided onboarding and minimap — 2.064.0
+New characters receive 18 short lessons after starting tutorial practice: four movement directions, held jump (>=0.3s), dodge, attack, interaction/bag/journal/pause keys, highlighted health/mana, quest goal, character level vs class rank, skills and minimap. Reading/waiting freezes simulation; action practice briefly resumes with protection. Skip lessons remains available. First unlocked skill follow-up waits for a real cooldown-producing cast and permits movement/aiming with protection. Six-kill exit reminder explains exploration. New local north-up circular map shows nearby ground/enemies/open exit, no secrets or distant objectives. Mouse capture disabled during guide to keep Continue usable. Browser full sequence, tap rejected/hold accepted, actual Skill 1 cast, six kill-event exit trigger, pre-change save and syntax checks passed. Evidence: docs/qa/guided-tutorial-2026-09-28.json. Physical touch/controller devices and full beginner combat playthrough remain for human testing.

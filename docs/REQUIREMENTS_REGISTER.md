@@ -695,3 +695,11 @@ User requests that a new player dying in their first tutorial retries and respaw
 
 ## [Codex | 2026-09-28] Remove tutorial Treasure Sprint portal
 User requests no Treasure Sprint portal in tutorial trials. Generator currently adds bonus portals at shared stage indices even during beginner trials. Guard this generation with !inBeginnerTrial(); keep normal exits and hub sprint.
+
+
+## [Codex | 2026-09-28] Guided tutorial and local minimap
+User requests comprehensive action-gated onboarding: movement, jump, dash, first skill, enemy danger, six kills then exploration for exit; HUD health/mana, quest tracker, character level versus class rank; small circular minimap. Plan: paused bite-size lessons with actual bound control prompts and brief action practice, highlighted HUD explanations, first-skill follow-up after unlock, skip-guide option, and north-up local terrain/enemy/open-exit radar. No hidden secret markers. Keep existing trial difficulty and six-kill goal.
+
+
+## [Codex | 2026-09-28] Held jump lesson clarification
+User specifically requests press-and-hold jump instruction. Guided jump practice requires at least 0.3 seconds held; a tap demonstrates a short jump but does not complete the lesson.

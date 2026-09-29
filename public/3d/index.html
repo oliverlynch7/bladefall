@@ -346,6 +346,17 @@
   .ico-item-key{background-image:url('icons/item-key.png');}
   .ico-class-warrior{background-image:url('icons/class-warrior.png');}
   .ico-class-ranger{background-image:url('icons/class-ranger.png');}
+
+  /* Approved pixel-art Pyromancer set. */
+  .ico-class-pyromancer{background-image:url('icons/class-pyromancer.png');}
+  .ico-skill-pyromancer-flame-lance{background-image:url('icons/skill-pyromancer-flame-lance.png');}
+  .ico-skill-pyromancer-flame-ring{background-image:url('icons/skill-pyromancer-flame-ring.png');}
+  .ico-skill-pyromancer-inferno{background-image:url('icons/skill-pyromancer-inferno.png');}
+  .ico-skill-pyromancer-sunburst{background-image:url('icons/skill-pyromancer-sunburst.png');}
+  .ico-skill-pyromancer-firebolt{background-image:url('icons/skill-pyromancer-firebolt.png');}
+  .ico-skill-pyromancer-cinder-fan{background-image:url('icons/skill-pyromancer-cinder-fan.png');}
+  .ico-skill-pyromancer-backdraft{background-image:url('icons/skill-pyromancer-backdraft.png');}
+  .ico-skill-pyromancer-ember-shield{background-image:url('icons/skill-pyromancer-ember-shield.png');}
   .ico-class-mage{background-image:url('icons/class-mage.png');}
   .ico-class-reaper{background-image:url('icons/class-reaper.png');}
   .ico-skill-cleave{background-image:url('icons/skill-cleave.png');}
@@ -1105,7 +1116,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.085.0-controls';
+const VERSION3D='2.086.0-pyromancer-icons';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2001,7 +2012,7 @@ const MELEE={
    subclass passive strengthens at rank 10. Off-family weapons: -40% damage and
    abilities lose their bonus effects (rider). */
 const CLASSES={
-  pyromancer:{disp:'Pyromancer',icon:'🔥',attackStyle:'mage',earned:true,family:[],subs:[],skills:[]},
+  pyromancer:{disp:'Pyromancer',icon:classIcon('pyromancer'),attackStyle:'mage',earned:true,family:[],subs:[],skills:[]},
   warrior:{disp:'Warrior',icon:classIcon('warrior'),attackStyle:'warrior',family:['sword','great','axe','hammer'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
           {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Guard Up, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:skillIcon('warrior-shield-bash'),cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:skillIcon('warrior-execution'),cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
@@ -2178,7 +2189,7 @@ const STARTER_FEEL = {
 const CLASS2={
 pyromancer:{
   "disp": "Pyromancer",
-  "icon": "🔥",
+  "icon": classIcon('pyromancer'),
   "innate": {
     "name": "Kindled Weapons",
     "d": "Every third basic hit deals 25% extra damage. Works with magic and ranged weapons."
@@ -2546,6 +2557,7 @@ pyromancer:{
   }
 };
 const PASSIVE_ART={
+  py_power:'pyromancer-hotter-flame',py_quick:'pyromancer-quick-hands',py_guard:'pyromancer-fireproof-training',py_mana:'pyromancer-careful-casting',py_innate:'pyromancer-kindled-weapons',py_cap:'pyromancer-master-of-flame',py_heal:'pyromancer-second-wind',py_flow:'pyromancer-steady-flame',py_finish:'pyromancer-last-ember',py_sustain:'pyromancer-fuel-the-fire',
   berserker:'warrior-berserker',guardian:'warrior-guardian',
   sorcerer:'mage-sorcerer',wizard:'mage-wizard',
   harvester:'reaper-harvester',executioner:'reaper-executioner',
@@ -2590,7 +2602,7 @@ const PASSIVE_ART={
   bst_scent:'beastmaster-blood-scent',bst_wildkeeper:'beastmaster-wildkeeper',bst_authority:'beastmaster-alphas-authority',bst_handler:'beastmaster-master-handler',
   bst_innate:'beastmaster-bonded-companion',bst_cap:'beastmaster-one-pack'
 };
-function passiveIcon(id){if(id?.startsWith('py_'))return '🔥'; const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
+function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
 const C2_INNATE_ICON={pyromancer:'py_innate',warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',warlock:'war_innate',skylancer:'sky_innate',bladedancer:'bd_innate',beastmaster:'bst_innate'};
 const C2_CAP_ICON={pyromancer:'py_cap',warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',monk:'mon_cap',stormcaller:'st_cap',warlock:'war_cap',skylancer:'sky_cap',bladedancer:'bd_cap',beastmaster:'bst_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
@@ -12645,7 +12657,7 @@ function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
       const n=b.querySelector('.sk-cd'); if(n) n.textContent=cd.toFixed(1); if(!b.classList.contains('cooling')) b.classList.add('cooling'); }
     else if(b.classList.contains('cooling')){ b.classList.remove('cooling'); b.style.setProperty('--cdf','0'); finished=true; } }
   auxCoolPaint(p); if(finished) skillbarUpdate(); }
-const C2_ICON={py_bolt:'🔥',py_fan:'☄️',py_blast:'💥',py_ward:'🛡️',py_lance:'🔱',py_nova:'☀️',py_inferno:'🌋',py_sun:'🌞',
+const C2_ICON={py_lance:skillIcon('pyromancer-flame-lance'),py_nova:skillIcon('pyromancer-flame-ring'),py_inferno:skillIcon('pyromancer-inferno'),py_sun:skillIcon('pyromancer-sunburst'),py_bolt:skillIcon('pyromancer-firebolt'),py_fan:skillIcon('pyromancer-cinder-fan'),py_blast:skillIcon('pyromancer-backdraft'),py_ward:skillIcon('pyromancer-ember-shield'),
   w_cleave:skillIcon('cleave'),w_bash:skillIcon('warrior-shield-bash'),w_charge:skillIcon('charge'),w_whirl:skillIcon('warrior-whirlwind'),w_guard:skillIcon('warrior-iron-guard'),w_stomp:skillIcon('stomp'),w_berserk:skillIcon('berserk'),w_execute:skillIcon('warrior-execution'),
   r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:skillIcon('ranger-quickshot'),r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:skillIcon('ranger-rapid-fire'),
   m_bolt:skillIcon('mage-elemental-bolt'),m_beam:skillIcon('mage-elemental-beam'),m_blink:skillIcon('mage-blink'),m_nova:skillIcon('mage-nova'),m_gravity:skillIcon('mage-gravity-well'),m_barrier:skillIcon('mage-rune-barrier'),m_tempest:skillIcon('mage-arcane-tempest'),m_overload:skillIcon('mage-elemental-overload'),

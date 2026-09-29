@@ -1,0 +1,177 @@
+{
+  "sourceChat": "https://chatgpt.com/c/6a5ae262-191c-83e8-b64d-f96a1e3ba64c",
+  "selection": "Corrected semi-pixelated batches only. Mapping verified against explanatory messages and visual subjects.",
+  "icons": [
+    {
+      "id": "py_power",
+      "name": "hotter-flame",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-hotter-flame.png",
+      "runtime": "icons/passives/passive-pyromancer-hotter-flame.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_32_42 PM-1.png",
+      "sha256": "4a7e7784088bc7ab3afd2b16bedb2d1bef1e260ddbe6bc477158b12e647b3895"
+    },
+    {
+      "id": "py_quick",
+      "name": "quick-hands",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-quick-hands.png",
+      "runtime": "icons/passives/passive-pyromancer-quick-hands.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_32_44 PM-2.png",
+      "sha256": "7dc0906495069957ad191e0adaedc3ac319dccf6f8e947b147a462d3d8548248"
+    },
+    {
+      "id": "py_guard",
+      "name": "fireproof-training",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-fireproof-training.png",
+      "runtime": "icons/passives/passive-pyromancer-fireproof-training.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_32_46 PM-3.png",
+      "sha256": "698e48341f4a5865ebe2e65c3f2a0bc5e2e64eafa19f4b89560aa4484f0a0aaf"
+    },
+    {
+      "id": "py_mana",
+      "name": "careful-casting",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-careful-casting.png",
+      "runtime": "icons/passives/passive-pyromancer-careful-casting.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_32_47 PM-4.png",
+      "sha256": "14279945b9c2e4a78e79c95cda3973a5b29e71a235fe4829c9ed7b1018ad7733"
+    },
+    {
+      "id": "py_innate",
+      "name": "kindled-weapons",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-kindled-weapons.png",
+      "runtime": "icons/passives/passive-pyromancer-kindled-weapons.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_12 PM-1.png",
+      "sha256": "9c4bf9ffca7d9212ee99a0d460b37a2b3c537c15e1f56d6c3ce7474b34d2d2ed"
+    },
+    {
+      "id": "py_cap",
+      "name": "master-of-flame",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-master-of-flame.png",
+      "runtime": "icons/passives/passive-pyromancer-master-of-flame.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_14 PM-2.png",
+      "sha256": "d14889634c10774acc280f5fe5c7899ee15b3869d615cbb782d17d77cc09f8d3"
+    },
+    {
+      "id": "pyromancer",
+      "name": "class-emblem",
+      "kind": "class",
+      "source": "assets/source/pyromancer-icons/pyromancer-class-emblem.png",
+      "runtime": "icons/class-pyromancer.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_15 PM-3.png",
+      "sha256": "304a3eabd52d8fa6470f329b0731ac0f7ef58203dabb9de113e5e7a902943c44"
+    },
+    {
+      "id": "py_lance",
+      "name": "flame-lance",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-flame-lance.png",
+      "runtime": "icons/skill-pyromancer-flame-lance.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_41 PM-1.png",
+      "sha256": "d4d139391d5149ef0b3891c3d2cd5f94eab6c958403ddaf1411dd049562ae5d4"
+    },
+    {
+      "id": "py_nova",
+      "name": "flame-ring",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-flame-ring.png",
+      "runtime": "icons/skill-pyromancer-flame-ring.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_43 PM-2.png",
+      "sha256": "507abb0e5902501b03db1f2d9527e6fd8700c3859c86255833a00e17e0f84c2b"
+    },
+    {
+      "id": "py_inferno",
+      "name": "inferno",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-inferno.png",
+      "runtime": "icons/skill-pyromancer-inferno.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_44 PM-3.png",
+      "sha256": "90f2898d5566de74835f7d95e6294c1e5318120b12088a2cec198a3307012e2e"
+    },
+    {
+      "id": "py_sun",
+      "name": "sunburst",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-sunburst.png",
+      "runtime": "icons/skill-pyromancer-sunburst.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_33_45 PM-4.png",
+      "sha256": "354c20575ec02a424c8a1c4f347d333a261b4253475f98685c9edb4804b2eb67"
+    },
+    {
+      "id": "py_bolt",
+      "name": "firebolt",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-firebolt.png",
+      "runtime": "icons/skill-pyromancer-firebolt.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_34_27 PM-1.png",
+      "sha256": "22aa8daa59893621fbe82632b6c0076db296214686bcefc076606af8b9a8901e"
+    },
+    {
+      "id": "py_fan",
+      "name": "cinder-fan",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-cinder-fan.png",
+      "runtime": "icons/skill-pyromancer-cinder-fan.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_34_28 PM-2.png",
+      "sha256": "bc2b5bf3d6c5dceca39bb0c6897b9a9e6d842992d84e41345796b7638204aa44"
+    },
+    {
+      "id": "py_blast",
+      "name": "backdraft",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-backdraft.png",
+      "runtime": "icons/skill-pyromancer-backdraft.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_34_30 PM-3.png",
+      "sha256": "0deecffa697cf306d89824daba1550a134739be1d089e6a52e7e713ea9edecff"
+    },
+    {
+      "id": "py_ward",
+      "name": "ember-shield",
+      "kind": "skill",
+      "source": "assets/source/pyromancer-icons/pyromancer-ember-shield.png",
+      "runtime": "icons/skill-pyromancer-ember-shield.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_34_31 PM-4.png",
+      "sha256": "f7224d3f1638c1650719a647070a607d928a4e775784449f9856643d99e8039b"
+    },
+    {
+      "id": "py_heal",
+      "name": "second-wind",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-second-wind.png",
+      "runtime": "icons/passives/passive-pyromancer-second-wind.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_36_04 PM-1.png",
+      "sha256": "8c18076a593cee4449ce0ddf390ada97cf7dd09baec261db558648c952cd6712"
+    },
+    {
+      "id": "py_flow",
+      "name": "steady-flame",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-steady-flame.png",
+      "runtime": "icons/passives/passive-pyromancer-steady-flame.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_36_06 PM-2.png",
+      "sha256": "617cdc7652a37c9cab753a81350d5663683e0dc25b63fe898e64a851ded2ef20"
+    },
+    {
+      "id": "py_finish",
+      "name": "last-ember",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-last-ember.png",
+      "runtime": "icons/passives/passive-pyromancer-last-ember.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_36_08 PM-3.png",
+      "sha256": "74570569b153e8514478f01249f0cb29452817af52c94222d36fb241a3b712e7"
+    },
+    {
+      "id": "py_sustain",
+      "name": "fuel-the-fire",
+      "kind": "passive",
+      "source": "assets/source/pyromancer-icons/pyromancer-fuel-the-fire.png",
+      "runtime": "icons/passives/passive-pyromancer-fuel-the-fire.png",
+      "download": "ChatGPT Image Sep 28, 2026, 09_36_09 PM-4.png",
+      "sha256": "d24432ce2f0fe1e352680c7ef975fa55711abc4309fe93fa5376b2e1d972c410"
+    }
+  ]
+}

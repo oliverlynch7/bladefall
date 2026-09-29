@@ -1,0 +1,69 @@
+{
+  "geometry": {
+    "triangles": 3898,
+    "height": 197.01946188661418,
+    "collider": {
+      "x": 0,
+      "z": 30,
+      "w": 76,
+      "d": 76,
+      "h": 195,
+      "invisible": true,
+      "hubFixture": "waystone"
+    },
+    "owned": 54,
+    "hub": true,
+    "renderer": true
+  },
+  "save": {
+    "before": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "introduced": true,
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "run": true,
+      "checkpoint": true
+    },
+    "after": {
+      "pets": [
+        "shepherd",
+        "cinder"
+      ],
+      "returnVisits": {
+        "pattern": "done"
+      },
+      "gold": 0,
+      "rank": {
+        "xp": 0,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      },
+      "introduced": true,
+      "speechOff": true,
+      "saved": true,
+      "clue": "This clue was stored before the update.",
+      "queued": 0
+    }
+  },
+  "interaction": {
+    "interaction": true
+  }
+}

@@ -735,3 +735,7 @@ User requests larger main hub service buttons with matching icons. Apply shared 
 
 ## [Codex | 2026-09-28] Moving attack legs and shared emotes
 User reports bowed/glitched legs while moving and attacking; requests M mouse-direction wheel of 4–5 universal emotes visible in co-op. Grounded plan: include locomotion parent bones in lower-body overlay; add Wave/Point/Cheer/Bow/Dance wheel, cancel on action/damage, synchronize validated visual-only state through existing motion packets. Test browser input, rig transforms, peer snapshots and saves.
+
+
+## [Codex | 2026-09-28] Crystal Waystone centerpiece
+User requests a much larger, intricate, epic and ethereal hub Waystone resembling a sorcerer’s transportation crystal. Plan: replace the tiny octahedron/old pillar with a faceted floating central crystal, smaller satellite crystals, luminous etched rings and restrained particles over an ornate stone-and-gold base. Preserve its interaction, healing/banking/travel and clear approach; retain reduced-motion and low-quality support.

@@ -1,6 +1,7 @@
 /* The Waystation: original, instanced Blender scenery. The layout is owned by
    rebuildWaystationSanctum; service callbacks and portal unlocks stay in the game. */
 import * as THREE from './three.module.js';
+import {buildWaystone,animateWaystone} from './hub-waystone.js?v=2072';
 import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2033';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
 
@@ -73,10 +74,7 @@ export function buildHubArt(scene,w){
   }
   // Compass arms are flush floor inlays, never raised steps in the arrival route.
   for(let i=0;i<8;i++){const a=i*Math.PI/4;block(Math.sin(a)*114,1.07,30+Math.cos(a)*114,5,.18,40,'#c2a769',a)}
-  add('waystone',0,1,30,23);
-  const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(13,0),new THREE.MeshBasicMaterial({color:HU.gild?0xffe5a3:0xeec687}));
-  crystal.position.set(0,66,30);root.add(crystal);animated.push(crystal);owned.push(crystal.geometry,crystal.material);
-  // The central crystal is its own sign; keep the sightline to the gates open above it.
+  const waystone=buildWaystone(THREE,owned,!!HU.gild);root.add(waystone);
 
   // Low side walls and a northern cloister. Every arch opens toward its existing interaction point.
   wall(0,-635,1840,112);wall(-910,110,1460,68,Math.PI/2);wall(910,110,1460,68,Math.PI/2);
@@ -185,8 +183,9 @@ export function buildHubArt(scene,w){
   const key=new THREE.DirectionalLight('#ffddaa',2.15);key.position.set(-700,1300,500);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-1150,right:1150,top:1150,bottom:-1150,near:1,far:2900});key.shadow.normalBias=1.4;key.shadow.bias=-.0001;root.add(key,key.target);
   key.shadow.camera.updateProjectionMatrix();
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffc478',700,190,1.6);root.add(l);return l});
-  const counts={hub:true,hubArt:true,floorTiles:1833,gatehouse:8,hubAnvil:1,drawCalls:batches.size+owned.filter(o=>o.isMaterial).length+1,triangles,instances};
-  active={root,lamps,lights,animated,counts,quality:null};window.__HUB_ART_ACTIVE=true;window.__HUB_SHADOW_DIRTY=true;
+  let waystoneTriangles=0;waystone.traverse(o=>{if(o.isMesh)waystoneTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3});triangles+=waystoneTriangles;
+  const counts={waystoneTriangles,hub:true,hubArt:true,floorTiles:1833,gatehouse:8,hubAnvil:1,drawCalls:batches.size+owned.filter(o=>o.isMaterial).length+1,triangles,instances};
+  active={root,lamps,lights,animated,waystone,counts,quality:null};window.__HUB_ART_ACTIVE=true;window.__HUB_SHADOW_DIRTY=true;
   root.userData.dispose=()=>{scene.fog=oldFog;key.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HUB_ART_ACTIVE=false;};
   return {group:root,counts};
 }
@@ -196,5 +195,6 @@ export function updateHubArt(w,t){
   const low=window.__BF_META?.().quality==='low';if(active.quality!==low){active.quality=low;window.__HUB_SHADOW_DIRTY=true;}
   const nearest=active.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);
   active.lights.forEach((l,i)=>{l.visible=!low&&!!nearest[i]&&nearest[i].d<360**2;if(l.visible)l.position.copy(nearest[i].v)});
+  animateWaystone(active.waystone,t,window.__BF_META?.()||{});
   for(const m of active.animated){m.rotation.y=t*.25;m.position.y=66+Math.sin(t*1.1)*2;}
 }

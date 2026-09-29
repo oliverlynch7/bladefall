@@ -1098,7 +1098,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.071.0-emotes';
+const VERSION3D='2.072.0-crystal-waystone';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17138,7 +17138,7 @@ function rebuildWaystationSanctum(){
   G.deco=[{x:0,z:120,w:1840,d:1540,h:1,y0:-4,c:'#82765e',kind:'hubArt'}];
   G.hubArt={version:1,lamps:[],sideIcons:ZONES.map(Z=>Z.side?.id||'thornwood')};
   const solid=(x,z,w,d,h,id)=>G.walls.push({x,z,w,d,h,invisible:true,hubFixture:id});
-  solid(0,30,76,76,75,'waystone');
+  solid(0,30,76,76,195,'waystone');
   for(const g of G.gates){const scale=g.side?10:34,z=g.z-(g.side?12:34);
     for(const s of [-1,1])solid(g.x+s*1.5*scale,z,.7*scale,.8*scale,5*scale,'gate-'+g.zi);
   }
@@ -22527,7 +22527,7 @@ window.__BF3={releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHeal
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2071"></script>
+<script type="module" src="./hero3d.js?v=2072"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

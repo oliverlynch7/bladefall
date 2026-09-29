@@ -16,7 +16,7 @@ const lessons=[
 
  ['Basic attack','Left-click or press J to attack. Hold to keep attacking.','attack'],
 
- ['Dodge / dash','Right-click or press K to dodge. You can also dash in the air.','dodge'],
+ ['Dodge / dash','Press Left Shift or right-click to dodge. You can also dash in the air.','dodge'],
 
  ['Your health and mana','Red is health. Blue is mana for skills. Keep an eye on both.','#hud'],
 
@@ -26,7 +26,7 @@ const lessons=[
 
  ['Your skills','Press 1 for your first skill once it unlocks. Skills use mana and need time to recharge.','#skillframe'],
 
- ['Your bag and journal','B opens your bag. N opens your journal for saved clues. E talks or interacts; Esc pauses.'],
+ ['Your bag and journal','Tab or B opens your bag. N opens your journal for saved clues. E talks or interacts; Esc pauses.'],
 
  ['Find your way','The map turns with you. Red dots are enemies; the gold diamond is the nearby exit.','#localMap']
 
@@ -48,7 +48,7 @@ function next(){if(!guide)return;clearFocus();guide.i++;guide.hold=0;guide.run=0
 
 let placedAt=0;function position(){if(performance.now()-placedAt<150)return;placedAt=performance.now();if(!guide||!panel||panel.hidden)return;const a=guide.steps[guide.i]?.[2],target=a?.startsWith('#')?document.querySelector(a):null;panel.style.transform='none';const w=panel.offsetWidth,h=panel.offsetHeight;let x=(innerWidth-w)/2,y=70;document.getElementById('lessonArrow')?.remove();if(target&&!target.hidden){const r=target.getBoundingClientRect();if(r.width&&r.height){target.classList.add('lessonFocus');x=r.left<innerWidth/2?r.right+18:r.left-w-18;y=Math.max(64,r.top);x=Math.max(12,Math.min(innerWidth-w-12,x));y=Math.max(12,Math.min(innerHeight-h-12,y));if(x<r.right&&x+w>r.left&&y<r.bottom&&y+h>r.top)y=r.top>h+24?r.top-h-14:r.bottom+14;const tx=r.left+r.width/2,ty=r.top+r.height/2,sx=Math.max(x,Math.min(x+w,tx)),sy=Math.max(y,Math.min(y+h,ty));const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.id='lessonArrow';svg.innerHTML=`<defs><marker id="lessonHead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#ffe047"/></marker></defs><line x1="${sx}" y1="${sy}" x2="${tx}" y2="${ty}" stroke="#ffe047" stroke-width="3" marker-end="url(#lessonHead)"/>`;document.body.append(svg);}}panel.style.left=x+'px';panel.style.top=Math.max(12,Math.min(innerHeight-h-12,y))+'px';}
 
-function draw(hint){if(guide.rendered===guide.i)return;guide.rendered=guide.i;const [title,text,a]=guide.steps[guide.i];if(!panel){panel=document.createElement('section');panel.id='guidedLesson';panel.setAttribute('aria-live','polite');document.body.append(panel);}const core=['move','jump','attack','dodge'].includes(a);panel.innerHTML='';const small=document.createElement('small');small.textContent=core?'SAFE PRACTICE':'QUICK TIP';const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=text;panel.append(small,h,p);if(core){const k=document.createElement('p');k.textContent=a==='move'?['up','left','down','right'].map(hint).join(' · '):hint(a);panel.append(k);}else{const b=document.createElement('button');b.textContent='Continue · E';b.onclick=next;panel.append(b);}const skip=document.createElement('button');skip.className='skip';skip.textContent='Skip lessons · Q';skip.onclick=stop;panel.append(skip);position();}
+function draw(hint){if(guide.rendered===guide.i)return;guide.rendered=guide.i;const [title,text,a]=guide.steps[guide.i];if(!panel){panel=document.createElement('section');panel.id='guidedLesson';panel.setAttribute('aria-live','polite');document.body.append(panel);}const core=['move','jump','attack','dodge'].includes(a);panel.innerHTML='';const small=document.createElement('small');small.textContent=core?'SAFE PRACTICE':'QUICK TIP';const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=title==='Your bag and journal'?hint('bag')+' opens your bag. '+hint('journal')+' opens saved clues. '+hint('interact')+' interacts; Esc pauses.':a==='attack'?'Hold your attack control to keep attacking.':a==='dodge'?'Dodge attacks or dash in the air using your dodge control.':text;panel.append(small,h,p);if(core){const k=document.createElement('p');k.textContent=a==='move'?['up','left','down','right'].map(hint).join(' · '):hint(a);panel.append(k);}else{const b=document.createElement('button');b.textContent='Continue · E';b.onclick=next;panel.append(b);}const skip=document.createElement('button');skip.className='skip';skip.textContent='Skip lessons · Q';skip.onclick=stop;panel.append(skip);position();}
 
 window.addEventListener('keydown',e=>{if(!guide||!panel||panel.hidden||e.repeat)return;if(e.code==='KeyQ'||e.code==='KeyE'&&!['move','jump','attack','dodge'].includes(guide.steps[guide.i]?.[2])){e.preventDefault();e.stopImmediatePropagation();e.code==='KeyQ'?stop():next();}},true);
 

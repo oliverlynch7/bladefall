@@ -1048,7 +1048,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./character-stats.js?v=2081"></script>
 <script src="./class-looks.js?v=2084"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2084"></script>
-<script src="./emotes.js?v=2071"></script>
+<script src="./emotes.js?v=2085"></script>
 <script src="./camera-occlusion.js?v=2074"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
@@ -1094,7 +1094,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./combat-art.js?v=2081"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
-<script src="./guided-tutorial.js?v=2082"></script>
+<script src="./guided-tutorial.js?v=2085"></script>
 <script>
 (function(){
 "use strict";
@@ -1105,7 +1105,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.084.0-class-looks';
+const VERSION3D='2.085.0-controls';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5399,7 +5399,7 @@ function startTrial(cid,fromZone,opts={}){
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
 function controlHint(id){const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Not assigned — set in Key Bindings';}
-function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag','B'],['Pause / release mouse','Esc']];}
+function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Auto-loot mode',controlHint('loot')],['Pause / release mouse','Esc']];}
 function showTutorial(cid){mode='menu';
  showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · E</button><button class="bigbtn ghost" id="tutSkip">Skip practice · Q</button></div>`);
  document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
@@ -9625,13 +9625,13 @@ const KEYACTIONS=[
   {id:'right',   label:'Move Right',        def:['KeyD','ArrowRight']},
   {id:'jump',    label:'Jump',              def:['Space']},
   {id:'attack',  label:'Attack',            def:['Mouse0','KeyJ']},
-  {id:'dodge',   label:'Dodge / Dash',      def:['Mouse2','KeyK']},
+  {id:'dodge',   label:'Dodge / Dash',      def:['ShiftLeft','Mouse2']},
   {id:'skill1',  label:'Skill 1',           def:['Digit1']},
   {id:'skill2',  label:'Skill 2',           def:['Digit2']},
   {id:'skill3',  label:'Skill 3',           def:['Digit3']},
   {id:'skill4',  label:'Skill 4',           def:['Digit4']},
   {id:'interact',label:'Interact / Talk',   def:['KeyE']},
-  {id:'loot',     label:'Auto-loot: Sell / Bag / Off', def:['Tab']},
+  {id:'loot',     label:'Auto-loot: Sell / Bag / Off', def:['KeyV']},
   {id:'lootEquip',label:'Equip Dropped Item', def:['KeyF']},
   {id:'lootBag',  label:'Send Dropped Item to Bag', def:['KeyR']},
   {id:'lootSell', label:'Sell Dropped Item',  def:['KeyQ']},
@@ -9642,23 +9642,26 @@ const KEYACTIONS=[
   {id:'partyTeleport',label:'Hold to teleport to friend',def:['KeyT']},
   {id:'partyNext',label:'Select next friend',def:['KeyY']},
   {id:'journal', label:'Open Journal', def:['KeyN']},
+  {id:'bag',label:'Open Bag',def:['Tab','KeyB']},
+  {id:'emote',label:'Emote Wheel',def:['KeyM']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
-function ensureKeybinds(){ if(!meta.keybinds||typeof meta.keybinds!=='object') meta.keybinds=defaultKeybinds();
-  for(const a of KEYACTIONS){ if(!Array.isArray(meta.keybinds[a.id])) meta.keybinds[a.id]=a.def.slice(); }   // fill any newly-added action
-  // Save-safe migration from the original one-key attack and K/Shift dodge defaults.
-  // Custom player bindings are preserved; only untouched legacy defaults receive the new mouse partners.
-  if(meta.keybinds.attack.length===1&&meta.keybinds.attack[0]==='KeyJ') meta.keybinds.attack=['Mouse0','KeyJ'];
-  if((meta.keybinds.dodge.length===1&&meta.keybinds.dodge[0]==='KeyK')||
-     (meta.keybinds.dodge.length===2&&meta.keybinds.dodge[0]==='KeyK'&&meta.keybinds.dodge[1]==='ShiftLeft')) meta.keybinds.dodge=['Mouse2','KeyK'];
-  if(Array.isArray(meta.keybinds.loot)&&meta.keybinds.loot.includes('KeyQ')&&!meta.keybinds.loot.includes('Tab')) meta.keybinds.loot=meta.keybinds.loot.map(c=>c==='KeyQ'?'Tab':c);   // migrate: Q now sells a drop; auto-loot cycle moved to Tab
-  rebuildKeyLookup(); try{ updateHudKeys(); }catch(e){} }
+function ensureKeybinds(){
+ if(!meta.keybinds||typeof meta.keybinds!=='object')meta.keybinds=defaultKeybinds();
+ const kb=meta.keybinds,free=(code,id)=>!KEYACTIONS.some(a=>a.id!==id&&kb[a.id]?.includes(code)),same=(id,arr)=>JSON.stringify(kb[id])===JSON.stringify(arr);
+ if(same('attack',['KeyJ'])&&free('Mouse0','attack'))kb.attack=['Mouse0','KeyJ'];
+ if((same('dodge',['Mouse2','KeyK'])||same('dodge',['KeyK'])||same('dodge',['KeyK','ShiftLeft']))&&free('ShiftLeft','dodge'))kb.dodge=free('Mouse2','dodge')?['ShiftLeft','Mouse2']:['ShiftLeft','KeyK'];
+ if((same('loot',['Tab'])||same('loot',['KeyQ']))&&free('KeyV','loot'))kb.loot=['KeyV'];
+ for(const a of KEYACTIONS)if(!Array.isArray(kb[a.id]))kb[a.id]=a.def.filter(c=>free(c,a.id));
+ rebuildKeyLookup();try{updateHudKeys();}catch(e){}
+}
 let _codeToAction={};
 const heldKeyboard=new Map();
 function releaseKeyboard(){for(const act of Object.keys(MOVE_ACTS))input[act]=false;input.jx=0;input.jz=0;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
 window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
-function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } try{ updateHudKeys(); }catch(e){} }
+function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||_codeToAction[code]||['Escape','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
+function resetKeyAction(id){const a=KEYACTIONS.find(a=>a.id===id);if(!a)return;for(const other of KEYACTIONS)meta.keybinds[other.id]=(meta.keybinds[other.id]||[]).filter(c=>!a.def.includes(c));meta.keybinds[id]=a.def.slice();rebuildKeyLookup();}
 function keyAction(code){ return _codeToAction[code]||null; }
 ensureKeybinds();
 /* Is the level editor open? Read in the pointer-lock paths and the key handler. A function rather
@@ -9666,6 +9669,7 @@ ensureKeybinds();
 function _edOpen(){ return !!(window.__bfEd && window.__bfEd.EDITOR && window.__bfEd.EDITOR.on); }
 window.addEventListener('keydown',e=>{
   if(typeof _rebindState!=='undefined'&&_rebindState)return;
+  if(e.ctrlKey||e.metaKey||e.altKey||document.getElementById('emoteWheel'))return;
   const test=document.getElementById('keyboardTest');if(test&&!e.metaKey&&!e.ctrlKey){const code=BFPartyNavigation.keyCode(e);test.textContent='Received '+code+' → '+(keyAction(code)||'not bound');}
   /* EDIT MODE OWNS THE KEYBOARD. Oliver, testing the editor: "when I try to press some of the keys,
      it moves my character around while I'm trying to do things." Nudging a platform with the arrow
@@ -9692,8 +9696,8 @@ window.addEventListener('keydown',e=>{
     // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
     // so holding J to attack can't accidentally equip the moment a popup opens.
     const fresh=!e.repeat && (Date.now()-_offerT)>250;
-    if(e.code==='Enter'||(e.code==='KeyJ'&&fresh)){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; }
-    if(e.code==='Backspace'||e.code==='Delete'||(e.code==='KeyK'&&fresh)){ e.preventDefault(); const kb=document.getElementById('sellBtn'); if(kb) kb.click(); return; }
+    if(e.code==='Enter'&&fresh){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; }
+    if((e.code==='Backspace'||e.code==='Delete')&&fresh){ e.preventDefault(); const kb=document.getElementById('sellBtn'); if(kb) kb.click(); return; }
     if(e.code==='KeyJ'||e.code==='KeyK'){ e.preventDefault(); return; }
   }
   if(mode==='upgrade'){
@@ -9707,6 +9711,8 @@ window.addEventListener('keydown',e=>{
   const code=BFPartyNavigation.keyCode(e),act=keyAction(code); if(!act) return;
   if(act==='partyTeleport'){e.preventDefault();if(mode==='play'&&!e.repeat){partyHeld=true;partyNeedsRelease=false;}return;}
   if(act==='partyNext'){e.preventDefault();if(mode==='play'&&!e.repeat){partyCancel();const a=partyFriends(),q=partySelected();partyChoice=a[(a.indexOf(q)+1)%a.length]?.id||null;}return;}
+  if(act==='bag'){if(!e.repeat&&mode==='play'){e.preventDefault();releaseKeyboard();openBag(resumePlay);}return;}
+  if(act==='emote')return;
   if(act==='journal'){if(!e.repeat&&(mode==='play'||mode==='pause')){e.preventDefault();openJournal();}return;}
   if(MOVE_ACTS[act]){ if(mode!=='play')return;heldKeyboard.set(code,act);e.preventDefault(); initAudio();
     if(act==='jump'&&!input.jump) input.jumpEdge=true; if(act==='dodge'&&!input.dodge) input.dodgeEdge=true; input[act]=true; return; }
@@ -9714,10 +9720,10 @@ window.addEventListener('keydown',e=>{
   if(act==='lootEquip'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootEquipCurrent(); } return; }
   if(act==='lootBag'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootToBag(false); } return; }
   if(act==='lootSell'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootSellCurrent(); } return; }
-  if(act==='loot'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); cycleLootMode(); } return; }
-  if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
+  if(act==='loot'){ if(mode==='play'&&!e.repeat){ e.preventDefault(); initAudio(); cycleLootMode(); } return; }
+  if(act==='auto'){if(mode==='play'&&!e.repeat){e.preventDefault();initAudio();toggleAuto();}return;}
   if(act==='ping'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); dropPing(); } return; }
-  if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } },true);
+  if(act==='interact'){if(mode==='play'&&!e.repeat){e.preventDefault();initAudio();doInteract();}return;} },true);
 window.addEventListener('keyup',e=>{const code=BFPartyNavigation.keyCode(e),act=heldKeyboard.get(code)||keyAction(code);heldKeyboard.delete(code);if(act==='partyTeleport'){partyHeld=false;partyNeedsRelease=false;partyCancel();}if(act&&MOVE_ACTS[act])input[act]=[...heldKeyboard.values()].includes(act);},true);   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
 // ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
 //    LB/RB/LT/RT = skills 1-4, Start = pause, right stick = camera (shoulder/first-person). Auto-detected. ──
@@ -9751,6 +9757,7 @@ canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='p
   const act=keyAction('Mouse'+e.button); if(!act) return;
   e.preventDefault(); initAudio();
   if(MOVE_ACTS[act]){
+    heldKeyboard.set('Mouse'+e.button,act);
     if(act==='jump'&&!input.jump) input.jumpEdge=true;
     if(act==='dodge'&&!input.dodge) input.dodgeEdge=true;
     input[act]=true; return;
@@ -9759,11 +9766,14 @@ canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='p
   else if(act==='lootEquip'&&G.lootCard) lootEquipCurrent();
   else if(act==='lootBag'&&G.lootCard) lootToBag(false);
   else if(act==='lootSell'&&G.lootCard) lootSellCurrent();
+  else if(act==='bag'){releaseKeyboard();openBag(resumePlay);}
+  else if(act==='journal')openJournal();
+  else if(act==='emote')BFEmotes.open();
   else if(act==='loot') cycleLootMode();
   else if(act==='auto') toggleAuto();
   else if(act==='interact') doInteract(); });
 window.addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse') return;
-  const act=keyAction('Mouse'+e.button); if(act&&MOVE_ACTS[act]) input[act]=false; });
+  const code='Mouse'+e.button,act=heldKeyboard.get(code)||keyAction(code);heldKeyboard.delete(code);if(act&&MOVE_ACTS[act])input[act]=[...heldKeyboard.values()].includes(act); });
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 /* ---- shoulder-cam camera control (only in 'shoulder' mode) ----
    Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
@@ -18993,7 +19003,7 @@ function openKeybinds(back){
   const rerender=()=>openKeybinds(back);
   document.getElementById('kbDone').onclick=()=>{ _rebindState=null; back(); };
   document.getElementById('kbResetAll').onclick=()=>{ meta.keybinds=defaultKeybinds(); rebuildKeyLookup(); persistGlobal(); if(SFX&&SFX.pickup)SFX.pickup(); rerender(); };
-  document.querySelectorAll('.kbreset').forEach(b=>b.onclick=()=>{ const id=b.dataset.r, A=KEYACTIONS.find(x=>x.id===id); meta.keybinds[id]=A.def.slice(); rebuildKeyLookup(); persistGlobal(); rerender(); });
+  document.querySelectorAll('.kbreset').forEach(b=>b.onclick=()=>{ const id=b.dataset.r;resetKeyAction(id); persistGlobal(); rerender(); });
   document.querySelectorAll('.kbcap').forEach(b=>b.onclick=()=>startRebind(b.dataset.a,+b.dataset.s,rerender));
 }
 function startRebind(id,slot,rerender){
@@ -19006,7 +19016,7 @@ function startRebind(id,slot,rerender){
     _rebindState=null; rebuildKeyLookup(); persistGlobal(); if(SFX&&SFX.pickup)SFX.pickup(); rerender(); };
   const onKey=(e)=>{ e.preventDefault(); e.stopPropagation();
     if(e.code==='Escape'){ cleanup(); _rebindState=null; rerender(); return; }                    // Esc cancels; menu keys stay fixed
-    bindCode(BFPartyNavigation.keyCode(e)); };
+    if(e.ctrlKey||e.metaKey||e.altKey||['F2','F5','F11','F12'].includes(e.code))return;bindCode(BFPartyNavigation.keyCode(e)); };
   const onPointer=(e)=>{ if(e.pointerType!=='mouse') return; e.preventDefault(); e.stopPropagation(); bindCode('Mouse'+e.button); };
   const onContext=(e)=>{ if(_rebindState){ e.preventDefault(); e.stopPropagation(); } };
   window.addEventListener('keydown',onKey,true);
@@ -22613,7 +22623,7 @@ window.__BF3={openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,
   openCharCreate,   /* so character creation can be photographed - its preview IS the feature */
   openDiffSelect,   /* so the difficulty menu can be PHOTOGRAPHED - its art is the thing being changed */
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */
-  openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
+  get rebinding(){return !!_rebindState;},resetKeyAction,controlHint,openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatResetRanks, cheatOpenEverything, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,

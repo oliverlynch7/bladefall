@@ -4,7 +4,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=2030';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2057';
+import {syncNpcs} from './npc3d.js?v=2081';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
 import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -291,7 +291,7 @@ const CLASS_TO_MODEL = {
   paladin:'Cleric',
   monk:'Monk',
   ranger:'Ranger', beastmaster:'Ranger', skylancer:'Ranger',
-  mage:'Wizard', stormcaller:'Wizard', warlock:'Wizard',
+  pyromancer:'Wizard', mage:'Wizard', stormcaller:'Wizard', warlock:'Wizard',
   necromancer:'Wizard', chronomancer:'Wizard',
 };
 

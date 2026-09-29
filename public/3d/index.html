@@ -1040,11 +1040,12 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./loading.js?v=1981s"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2079">
 <script src="./voice-content.js?v=2079"></script>
-<script src="./dialogue-speech.js?v=2033"></script>
+<script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2079"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2079">
 <script src="./hub-tour.js?v=2079"></script>
 <script src="./controller.js?v=2080"></script>
+<script src="./character-stats.js?v=2081"></script>
 <script src="./emotes.js?v=2071"></script>
 <script src="./camera-occlusion.js?v=2074"></script>
 <script src="./rift-shards.js?v=1992"></script>
@@ -1088,7 +1089,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./party-navigation.js?v=2039"></script>
-<script src="./combat-art.js?v=2037"></script>
+<script src="./combat-art.js?v=2081"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script src="./guided-tutorial.js?v=2067"></script>
@@ -1102,7 +1103,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.080.0-controller-setup';
+const VERSION3D='2.081.0-pyromancer-stats';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1998,6 +1999,7 @@ const MELEE={
    subclass passive strengthens at rank 10. Off-family weapons: -40% damage and
    abilities lose their bonus effects (rider). */
 const CLASSES={
+  pyromancer:{disp:'Pyromancer',icon:'🔥',attackStyle:'mage',earned:true,family:[],subs:[],skills:[]},
   warrior:{disp:'Warrior',icon:classIcon('warrior'),attackStyle:'warrior',family:['sword','great','axe','hammer'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
           {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Guard Up, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:skillIcon('warrior-shield-bash'),cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:skillIcon('warrior-execution'),cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
@@ -2137,7 +2139,7 @@ const CLASSES={
 };
 // Broad access families; attack geometry remains specific to each weapon.
 const WEAPON_GROUPS={martial:['sword','great','axe','hammer'],ranged:['bow','cross','dagger','javelin'],magic:['staff','wand','spellblade']};
-const CLASS_GROUPS={warrior:['martial'],berserker:['martial'],paladin:['martial','magic'],ninja:['martial','ranged'],ranger:['ranged'],pirate:['martial','ranged'],mage:['magic'],necromancer:['magic'],chronomancer:['magic'],stormcaller:['magic'],warlock:['magic'],skylancer:['ranged'],bladedancer:['martial','ranged'],beastmaster:['ranged'],monk:[],reaper:[]};
+const CLASS_GROUPS={pyromancer:['magic','ranged'],warrior:['martial'],berserker:['martial'],paladin:['martial','magic'],ninja:['martial','ranged'],ranger:['ranged'],pirate:['martial','ranged'],mage:['magic'],necromancer:['magic'],chronomancer:['magic'],stormcaller:['magic'],warlock:['magic'],skylancer:['ranged'],bladedancer:['martial','ranged'],beastmaster:['ranged'],monk:[],reaper:[]};
 for(const [id,C] of Object.entries(CLASSES)) C.family=[...new Set((CLASS_GROUPS[id]||[]).flatMap(g=>WEAPON_GROUPS[g]))];
 CLASSES.monk.family=['fist']; CLASSES.reaper.family=['scythe']; CLASSES.pirate.family.push('flintlock');
 const CLASSIDS=Object.keys(CLASSES);
@@ -2172,6 +2174,174 @@ const STARTER_FEEL = {
    subclass kit until they're converted (then the legacy path is removed).
    ============================================================================ */
 const CLASS2={
+pyromancer:{
+  "disp": "Pyromancer",
+  "icon": "🔥",
+  "innate": {
+    "name": "Kindled Weapons",
+    "d": "Every third basic hit deals 25% extra damage. Works with magic and ranged weapons."
+  },
+  "cap": {
+    "name": "Master of Flame",
+    "d": "Deal 12% more damage and reduce skill cooldowns by 8%."
+  },
+  "r2": {
+    "kind": "skill",
+    "a": {
+      "id": "py_bolt",
+      "n": "Firebolt",
+      "role": "Aimed Damage",
+      "d": "Fire a fast bolt for 2.2 times weapon damage.",
+      "icon": "🔥",
+      "cd": 4,
+      "fx": "py_bolt"
+    },
+    "b": {
+      "id": "py_fan",
+      "n": "Cinder Fan",
+      "role": "Spread",
+      "d": "Fire three flames, each dealing 1.1 times weapon damage.",
+      "icon": "🔥",
+      "cd": 7,
+      "fx": "py_fan"
+    },
+    "slot": 0
+  },
+  "r3": {
+    "kind": "passive",
+    "a": {
+      "id": "py_power",
+      "n": "Hotter Flame",
+      "role": "Damage",
+      "d": "Deal 10% more damage with attacks and skills.",
+      "icon": "🔥"
+    },
+    "b": {
+      "id": "py_quick",
+      "n": "Quick Hands",
+      "role": "Speed",
+      "d": "Basic attacks are 12% faster.",
+      "icon": "🔥"
+    }
+  },
+  "r4": {
+    "kind": "skill",
+    "a": {
+      "id": "py_blast",
+      "n": "Backdraft",
+      "role": "Escape",
+      "d": "Blast nearby enemies for 1.3 times damage and push them back.",
+      "icon": "🔥",
+      "cd": 10,
+      "fx": "py_blast"
+    },
+    "b": {
+      "id": "py_ward",
+      "n": "Ember Shield",
+      "role": "Defense",
+      "d": "Gain a shield worth 25% of maximum health for 5 seconds.",
+      "icon": "🔥",
+      "cd": 14,
+      "fx": "py_ward"
+    },
+    "slot": 1
+  },
+  "r5": {
+    "kind": "passive",
+    "a": {
+      "id": "py_guard",
+      "n": "Fireproof Training",
+      "role": "Defense",
+      "d": "Take 10% less damage from all attacks.",
+      "icon": "🔥"
+    },
+    "b": {
+      "id": "py_mana",
+      "n": "Careful Casting",
+      "role": "Mana",
+      "d": "Skills cost 15% less mana.",
+      "icon": "🔥"
+    }
+  },
+  "r6": {
+    "kind": "skill",
+    "a": {
+      "id": "py_lance",
+      "n": "Flame Lance",
+      "role": "Piercing",
+      "d": "Fire a piercing flame for 3 times weapon damage.",
+      "icon": "🔥",
+      "cd": 12,
+      "fx": "py_lance"
+    },
+    "b": {
+      "id": "py_nova",
+      "n": "Flame Ring",
+      "role": "Area",
+      "d": "Strike nearby enemies for 2.4 times weapon damage.",
+      "icon": "🔥",
+      "cd": 13,
+      "fx": "py_nova"
+    },
+    "slot": 2
+  },
+  "r7": {
+    "kind": "passive",
+    "a": {
+      "id": "py_heal",
+      "n": "Second Wind",
+      "role": "Recovery",
+      "d": "Defeating an enemy restores 3% of maximum health.",
+      "icon": "🔥"
+    },
+    "b": {
+      "id": "py_flow",
+      "n": "Steady Flame",
+      "role": "Cooldowns",
+      "d": "Skill cooldowns are 10% shorter.",
+      "icon": "🔥"
+    }
+  },
+  "r8": {
+    "kind": "skill",
+    "a": {
+      "id": "py_inferno",
+      "n": "Inferno",
+      "role": "Area",
+      "d": "Burn nearby foes once per second for 4 seconds. Each pulse deals weapon damage.",
+      "icon": "🔥",
+      "cd": 24,
+      "fx": "py_inferno"
+    },
+    "b": {
+      "id": "py_sun",
+      "n": "Sunburst",
+      "role": "Focused",
+      "d": "Strike your aimed enemy and nearby foes for 4 times weapon damage.",
+      "icon": "🔥",
+      "cd": 22,
+      "fx": "py_sun"
+    },
+    "slot": 3
+  },
+  "r9": {
+    "kind": "passive",
+    "a": {
+      "id": "py_finish",
+      "n": "Last Ember",
+      "role": "Damage",
+      "d": "Deal 12% more damage with attacks and skills.",
+      "icon": "🔥"
+    },
+    "b": {
+      "id": "py_sustain",
+      "n": "Fuel the Fire",
+      "role": "Mana",
+      "d": "Defeating an enemy restores 8 mana.",
+      "icon": "🔥"
+    }
+  }
+},
   warrior:{ disp:'Warrior', icon:classIcon('warrior'),
     innate:{name:'Battle Ready', d:"Every third basic hit on the same enemy briefly staggers it. Switching targets restarts the count."},
     cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Casting a skill restores 2% max HP.'},
@@ -2418,13 +2588,14 @@ const PASSIVE_ART={
   bst_scent:'beastmaster-blood-scent',bst_wildkeeper:'beastmaster-wildkeeper',bst_authority:'beastmaster-alphas-authority',bst_handler:'beastmaster-master-handler',
   bst_innate:'beastmaster-bonded-companion',bst_cap:'beastmaster-one-pack'
 };
-function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',warlock:'war_innate',skylancer:'sky_innate',bladedancer:'bd_innate',beastmaster:'bst_innate'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',monk:'mon_cap',stormcaller:'st_cap',warlock:'war_cap',skylancer:'sky_cap',bladedancer:'bd_cap',beastmaster:'bst_cap'};
+function passiveIcon(id){if(id?.startsWith('py_'))return '🔥'; const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
+const C2_INNATE_ICON={pyromancer:'py_innate',warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',warlock:'war_innate',skylancer:'sky_innate',bladedancer:'bd_innate',beastmaster:'bst_innate'};
+const C2_CAP_ICON={pyromancer:'py_cap',warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',monk:'mon_cap',stormcaller:'st_cap',warlock:'war_cap',skylancer:'sky_cap',bladedancer:'bd_cap',beastmaster:'bst_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
 const TRIALS={
+ pyromancer:{cls:'pyromancer',stage:9,seed:511,name:'Trial of the Flame',kills:26,earned:true,tier:5,tips:['Aim flames from a safe distance.','Defeat 26 foes, speak to your mentor, then take the exit.']},
   warrior:{cls:'warrior',stage:0,seed:501,name:'Trial of the Blade',kills:6,
     tips:['Move with the stick (or WASD).','Tap SLASH to attack — hold it to keep swinging.','DODGE rolls you out of danger. Learn it.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
   ranger:{cls:'ranger',stage:1,seed:502,name:'Trial of the Bow',kills:6,
@@ -2613,7 +2784,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=11; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['axe','Notched Axe'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade'],beastmaster:['bow','Weathered Hunting Bow']};
+const CLASSSTART={pyromancer:['firestaff','Splintered Cinder Staff'],warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['axe','Notched Axe'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade'],beastmaster:['bow','Weathered Hunting Bow']};
 function isIntrinsicLoot(w){ return !!(w&&(w.intrinsic||['scythe','fist','flintlock'].includes(w.art)||['scythe','voidscythe','fist','flintlock'].includes(w.arche))); }
 function intrinsicWeapon(cid){
   const spec={monk:['fist','Bare Fists'],reaper:['scythe',"Reaper’s Scythe"],pirate:['flintlock','Flintlock & Saber']}[cid];
@@ -2646,7 +2817,7 @@ function classStartWeapon(cid){
 }
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
    Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
-const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',pirate:'bow',ninja:'knives',paladin:'sword',berserker:'axe',necromancer:'firestaff',chronomancer:'firestaff',stormcaller:'firestaff',warlock:'firestaff',skylancer:'javelin',bladedancer:'sword',beastmaster:'bow'};   // archetype ids, not arts
+const SHOPWEAP={pyromancer:'firestaff',warrior:'sword',ranger:'bow',mage:'firestaff',pirate:'bow',ninja:'knives',paladin:'sword',berserker:'axe',necromancer:'firestaff',chronomancer:'firestaff',stormcaller:'firestaff',warlock:'firestaff',skylancer:'javelin',bladedancer:'sword',beastmaster:'bow'};   // archetype ids, not arts
 const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Reliable'};
 function shopWeapon(cid,rid){
   const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
@@ -2976,7 +3147,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2079').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2081').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -4567,16 +4738,19 @@ function applyPerks(p){
 function upgradeStoredHeroPerk(id,newLv){
   if(!meta.hero) return;
   const p=freshFromSnapshot(meta.hero); applyPerkRank(p,id,newLv); recomputeArmor(p); p.hp=effMaxHp(p); meta.hero=snapOf(p);
-}function freshPlayer(){
+}
+let creationAllocation=null;
+function freshPlayer(){
   const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
   const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
     hp:100,maxHp:100,mana:100,maxMana:100,level:1,xp:0,xpNext:CHARACTER_XP(1),weapon:classStartWeapon(meta.classId),gear:freshGear(),armorMods:null,
+    allocation:BFCharacterStats.normalize(creationAllocation),tunedLevels:0,
     stats:{power:1.0,magPower:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,defense:0,cdr:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
     skillCd:[0,0,0,0],skillCdMax:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0,
     guardT:0,reflectT:0,shieldHp:0,shieldT:0,stormT:0,stormAcc:0};
-  applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
+  applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p); p.mana=p.maxMana;
   return p;
 }
 function recomputeArmor(p){
@@ -4591,7 +4765,7 @@ function recomputeArmor(p){
     for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a){ normArmor(a); fold(a); } } }
   m.defense=(total+defBonus)/((total+defBonus)+200);
   p.armorMods=m;
-  p.maxMana=classMaxMana();                         // per-class mana pool (see CLASS_MANA)
+  p.maxMana=classMaxMana()+BFCharacterStats.value(p,'mana')*3+(meta.classId==='mage'?10:0);                         // per-class mana pool (see CLASS_MANA)
   if(p.mana!=null && p.mana>p.maxMana) p.mana=p.maxMana;
 }
 /* Per-class mana ECONOMY. pool = max-mana ×, regen = idle-regen ×, cost = skill-mana-cost ×.
@@ -4600,6 +4774,7 @@ function recomputeArmor(p){
    Embrace, Time loops). Martials (Warrior/Berserker/Ninja/Pirate/Ranger) get SMALL, fast-refilling
    pools + cheap skills — skills are utility, they live on basic attacks, no magical sustain. */
 const CLASS_MANA={
+  pyromancer:{pool:1.15,regen:1,cost:1},
   monk:       {pool:0.80, regen:1.25, cost:0.80},   // martial: small pool, cheap skills, fast recovery
   stormcaller:{pool:1.15, regen:1.00, cost:1.05},   // caster, but leaner than pure mage (lightning is spammy)
   warrior:    {pool:0.75, regen:1.15, cost:0.85},
@@ -4619,10 +4794,10 @@ const CLASS_MANA={
 };
 function classManaCfg(){ return CLASS_MANA[meta.classId]||{pool:1,regen:1,cost:1}; }
 function classMaxMana(){ return Math.round(100*classManaCfg().pool); }
-function effMagPower(p,includeLevel=false){ return (p.stats.magPower||1)*(includeLevel?Math.pow(1.045,Math.max(0,(p.level||1)-1)):1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
+function effMagPower(p,includeLevel=false){ return (includeLevel?1+BFCharacterStats.value(p,'attack')*.015:1)*(p.stats.magPower||1)*(includeLevel?Math.pow(1.045,Math.max(0,(p.level||1)-1-(p.tunedLevels||0)))*Math.pow(1.035,p.tunedLevels||0):1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
-  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul;  if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
+  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)+(meta.classId==='warrior'?10:0))*(1+BFCharacterStats.value(p,'health')*.02); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul;  if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
 /* THE INNATE FOLD. Fourteen of sixteen innate traits opened with a flat +8-12% damage - a bonus
    every class had, which therefore distinguished none of them, while burying each class's actual
    mechanic behind an identical opening clause. The percentages are stripped from the class blocks
@@ -4631,7 +4806,7 @@ function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one 
    its class instead of restating the baseline. This is the deletion half of the class rewrite -
    the identities that replace them ship in CLASS_BASIC. */
 const INNATE_FOLD = 1.09;
-function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*INNATE_FOLD; const sp=skinP(p);
+function effPower(p){ let v=(1+BFCharacterStats.value(p,'attack')*.015)*p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*INNATE_FOLD; const sp=skinP(p);
   if(p.armorMods&&p.weapon&&p.weapon.sch==='mag') v*=p.armorMods.magPowerMul;   // Mystic gear boosts magic weapons specifically
   if(sp){ if(sp.power) v*=sp.power;
     if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
@@ -4689,10 +4864,11 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
   if(meta.classId==='ranger'&&c2Passive('r_elem')&&p.weapon?.el)v*=1.12;
   if(meta.classId==='pirate'&&c2Passive('pir_greed'))v*=1.12;
   if(meta.classId==='skylancer'&&c2Passive('sky_high')&&!p.onGround)v*=1.15;
+  if(meta.classId==='pyromancer'){if(c2Passive('py_power'))v*=1.10;if(c2Passive('py_finish'))v*=1.12;if(classState('pyromancer').rank>=10)v*=1.12;}
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+.5*(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.15;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=((p.slowT||0)>0?.75:1)*p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(classState('pirate').rank>=10)v*=1.10;if(c2Passive('pir_swagger'))v*=1.12;}   /* SWAGGER (r5 b): "while your pistol is loaded you move noticeably faster" — wired 2026-08-11, one of docs/SKILL_TRIAGE.md section E's dead passives. Nothing invented: 1.10 is the Dread Captain step one clause to the left, and `_loaded` is the pistol state the class already keeps (spent 11267, reloaded on a kill 10939) and that Cutthroat already reads at 11265. `!==false` rather than truthiness because a pirate ARRIVES loaded with the flag still undefined (12851) — the same reading CLASS_BASIC.pirate's own guard takes. */ if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+.5*(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.15;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(meta.classId==='pyromancer'&&c2Passive('py_quick'))v*=1.12;if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=(1+BFCharacterStats.value(p,'speed')*.005)*(meta.classId==='ranger'?1.04:1)*((p.slowT||0)>0?.75:1)*p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(classState('pirate').rank>=10)v*=1.10;if(c2Passive('pir_swagger'))v*=1.12;}   /* SWAGGER (r5 b): "while your pistol is loaded you move noticeably faster" — wired 2026-08-11, one of docs/SKILL_TRIAGE.md section E's dead passives. Nothing invented: 1.10 is the Dread Captain step one clause to the left, and `_loaded` is the pistol state the class already keeps (spent 11267, reloaded on a kill 10939) and that Cutthroat already reads at 11265. `!==false` rather than truthiness because a pirate ARRIVES loaded with the flag still undefined (12851) — the same reading CLASS_BASIC.pirate's own guard takes. */ if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;}
@@ -4716,8 +4892,9 @@ function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p
      That rider is LEFT ALONE on purpose: taking a bonus off a class people have played for weeks is
      a balance change, so it is Oliver's. See docs/SKILL_TRIAGE.md section S. */
   if(meta.classId==='stormcaller'&&c2def('stormcaller')){if(classState('stormcaller').rank>=10)v+=.10;}
+  if(meta.classId==='pyromancer'){if(c2Passive('py_flow'))v+=.10;if(classState('pyromancer').rank>=10)v+=.08;}
   return Math.min(0.5,v); }
-function defenseR(p){ if(isGod(p)) return 0.85; return Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)); }
+function defenseR(p){ if(isGod(p)) return 0.85; return 1-(1-Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)+BFCharacterStats.value(p,'defense')*.005+(meta.classId==='warrior'?.02:0)))*(meta.classId==='pyromancer'&&c2Passive('py_guard')?.9:1); }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
 /* ARMOR RATING (0-100) — a gear-completeness score, NOT damage reduction (that stays defenseR, capped 0.5).
@@ -4744,12 +4921,13 @@ function computeNgScales(p){ // softened (v1.3): sub-linear tracking + smaller m
            dmg:Math.min(5.0,Math.max(tuf*1.05,(meta.lastNgDmg||1)*1.08)) };
 }
 function cloneGear(g){ const o=freshGear(); if(g) for(const s of GEARSLOTS){ if(g[s]) o[s]=JSON.parse(JSON.stringify(g[s])); } return o; }
-function snapOf(p){ return {hp:p.hp,maxHp:p.maxHp,mana:p.mana,maxMana:p.maxMana,level:p.level,xp:p.xp,xpNext:p.xpNext,
+function snapOf(p){ return {allocation:BFCharacterStats.normalize(p.allocation,p.level),tunedLevels:p.tunedLevels||0,hp:p.hp,maxHp:p.maxHp,mana:p.mana,maxMana:p.maxMana,level:p.level,xp:p.xp,xpNext:p.xpNext,
   weapon:JSON.parse(JSON.stringify(p.weapon)),gear:cloneGear(p.gear),
   stats:JSON.parse(JSON.stringify(p.stats)),maxJumps:p.maxJumps,skin:p.skin}; }
 function freshFromSnapshot(snap){
   const p=freshPlayer();
   p.stats=Object.assign(p.stats,snap.stats);
+  p.allocation=BFCharacterStats.normalize(snap.allocation,snap.level);p.tunedLevels=Math.max(0,Math.min((snap.level||1)-1,Number(snap.tunedLevels)||0));
   p.weapon=snap.weapon&&!isIntrinsicLoot(snap.weapon)?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):classStartWeapon(meta.classId);
   p.gear=cloneGear(snap.gear);
   p.maxHp=snap.maxHp||100; p.maxMana=snap.maxMana||100;
@@ -4866,6 +5044,20 @@ function bagFullPrompt(newItem,onDone){ mode='menu';
   if(lo) document.getElementById('sellLow').onclick=()=>{ const g=sellItem(lo); meta.stash.splice(li,1); meta.stash.push(newItem); persist(); SFX.pickup(); toast('Sold '+lo.name+' +'+g+'g · kept '+no.name); onDone(); };
   document.getElementById('skipNew').onclick=()=>{ toast(no.name+' left behind'); onDone(); };
 }
+
+function openCharacterStats(back,respec=false){
+ if(IN_ARENA){toast('Character stat allocation is disabled in the practice arena.');return;}
+ const p=G?.p|| (meta.hero?freshFromSnapshot(meta.hero):null);if(!p){toast('Create a character first.');return;}
+ const original=BFCharacterStats.normalize(p.allocation,p.level),draft={...original};mode='pause';showGameUI(false);document.getElementById('toast')?.classList.remove('show');
+ const draw=()=>{
+  showOverlayHTML(`<style>#ovcard:has(.statAllocation){max-width:600px;padding:0;border:0;background:none;box-shadow:none}#ovcard:has(.statAllocation)::before{display:none}[data-stat]{min-width:36px;min-height:36px;background:#292c36;color:#ffe1a5;border:1px solid #776448;border-radius:7px;font-size:18px}[data-stat]:disabled{opacity:.35}[data-stat]:focus-visible{outline:3px solid #ffd485}</style><div class="card statAllocation" style="max-width:560px;max-height:90dvh;overflow:auto;text-align:left"><h2>Character Stats</h2><p class="ovsub">${BFCharacterStats.foundation(meta.classId)}</p><p class="ovsub">Attack helps all weapons and skills. Class rank unlocks abilities; player level earns stat points. Each stat can hold 20 points.</p><div id="statChoices">${BFCharacterStats.markup(draft,BFCharacterStats.budget(p))}</div><p class="ovsub">${respec?'Reassign your points freely.':'Spend now or save points for later. Reassign spent points for free at the Drillmaster.'}</p><div style="display:flex;gap:10px"><button class="bigbtn" id="statApply">Apply</button><button class="bigbtn ghost" id="statBack">Back</button></div></div>`);
+  if(!respec)document.querySelectorAll('#statChoices [data-delta="-1"]').forEach(b=>{b.disabled=draft[b.dataset.stat]<=original[b.dataset.stat];});
+  document.querySelectorAll('#statChoices [data-stat]').forEach(b=>b.onclick=()=>{const k=b.dataset.stat,d=+b.dataset.delta;if(d<0&&draft[k]<=(respec?0:original[k])||d>0&&(draft[k]>=20||BFCharacterStats.used(draft)>=BFCharacterStats.budget(p)))return;draft[k]+=d;draw();});
+  document.getElementById('statBack').onclick=back;
+  document.getElementById('statApply').onclick=()=>{p.allocation=BFCharacterStats.normalize(draft,p.level);recomputeArmor(p);p.hp=Math.min(p.hp,effMaxHp(p));if(G?.hub||!G)meta.hero=snapOf(p);autosaveRun();persist();hudUpdate();toast('Character stats applied.');back();};
+ };draw();
+}
+
 let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
 /* Independent inventory portrait: still hero and companion, rendered on demand. */
 let bagDoll=null;
@@ -4940,8 +5132,9 @@ function openBag(back,keepOpen=false){
     <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
       <div class="achlist">${rows}</div></section>
       <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
-    <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+    <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn ghost" id="charStatsBtn">Character Stats${HR?` · ${BFCharacterStats.available(HR)} points`:""}</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
   setupBagDoll(HR);
+  document.getElementById('charStatsBtn').onclick=()=>openCharacterStats(()=>openBag(back));
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back,true); };
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
@@ -5396,7 +5589,7 @@ function trialComplete(remote=false){
     if(G.p.weapon&&!sameTrialItem(G.p.weapon,G.trialIssuedWeapon)) keepTrialFind({weapon:JSON.parse(JSON.stringify(G.p.weapon))});
     for(const slot of GEARSLOTS){ const it=G.p.gear&&G.p.gear[slot]; if(it) keepTrialFind({[TRINKETIDS.includes(slot)?'trinket':'armor']:JSON.parse(JSON.stringify(it))}); }
     // Keep all character growth earned in the chamber, but restore every pre-trial equipment slot exactly.
-    for(const k of ['hp','maxHp','mana','maxMana','level','xp','xpNext','stats','maxJumps','skin']) if(trialHero[k]!=null) escrow[k]=JSON.parse(JSON.stringify(trialHero[k]));
+    for(const k of ['hp','maxHp','mana','maxMana','level','xp','xpNext','stats','maxJumps','skin','allocation','tunedLevels']) if(trialHero[k]!=null) escrow[k]=JSON.parse(JSON.stringify(trialHero[k]));
     meta.hero=escrow;
   } else meta.hero=trialHero;                              // first-ever class trial establishes the initial loadout normally
   if(T.earned){const source=ZONES.find(z=>z.side?.trial===cid);if(source)meta.sideDone[source.side.id]=true;}
@@ -11802,6 +11995,7 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
 }
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
+ if(meta.classId==='pyromancer'&&p.pyInfernoT>0){p.pyInfernoT=Math.max(0,p.pyInfernoT-dt);p.pyPulse-=dt;while(p.pyPulses>0&&p.pyPulse<=0){p.pyPulse+=1;p.pyPulses--;pyroArea(p,190,1,0);}}
   for(const key of ['_controlResist','slowT','rageKillT','escapeGuardT','counterGuardT','_attuneT','_noRetreatT'])p[key]=Math.max(0,(p[key]||0)-dt);
   if(!p.rageKillT)p.rageKills=0;
   if(meta.classId==='monk'&&c2Passive('mon_still')&&(p._stillT||0)>=1.5&&!p.dead)p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*.02*dt);
@@ -11906,6 +12100,7 @@ function rangerDmgMul(p){ // Clear Aim damage bonus (Perfect Hunt +3%, Patient H
   const cap=classState('ranger').rank>=10; let b=c2Passive('r_patient')?0.18:0.10; if(cap) b+=0.03; return 1+b;
 }
 function c2OnKill(p,e){
+ if(meta.classId==='pyromancer'){if(c2Passive('py_heal'))classHeal(p,effMaxHp(p)*.03);if(c2Passive('py_sustain'))gainMana(p,8,false);}
   if(meta.classId==='berserker'){
     if(c2Passive('bsk_reckless')){p.rageKills=Math.min(5,(p.rageKills||0)+1);p.rageKillT=6;addText(p.x,p.y+p.h+24,p.z,'+'+(p.rageKills*4)+'% DAMAGE','#ffad77');}
     if(c2Passive('bsk_blood'))p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*.04);
@@ -12255,6 +12450,7 @@ function skillManaCost(i,s){
   if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
   if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;}
   if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))v*=.85;
+  if(meta.classId==='pyromancer'&&c2Passive('py_mana'))v*=.85;
   v*=classManaCfg().cost;   // per-class mana economy: casters pay more, martials less
   return Math.max(1,Math.round(v));
 }
@@ -12440,7 +12636,7 @@ function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
       const n=b.querySelector('.sk-cd'); if(n) n.textContent=cd.toFixed(1); if(!b.classList.contains('cooling')) b.classList.add('cooling'); }
     else if(b.classList.contains('cooling')){ b.classList.remove('cooling'); b.style.setProperty('--cdf','0'); finished=true; } }
   auxCoolPaint(p); if(finished) skillbarUpdate(); }
-const C2_ICON={
+const C2_ICON={py_bolt:'🔥',py_fan:'☄️',py_blast:'💥',py_ward:'🛡️',py_lance:'🔱',py_nova:'☀️',py_inferno:'🌋',py_sun:'🌞',
   w_cleave:skillIcon('cleave'),w_bash:skillIcon('warrior-shield-bash'),w_charge:skillIcon('charge'),w_whirl:skillIcon('warrior-whirlwind'),w_guard:skillIcon('warrior-iron-guard'),w_stomp:skillIcon('stomp'),w_berserk:skillIcon('berserk'),w_execute:skillIcon('warrior-execution'),
   r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:skillIcon('ranger-quickshot'),r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:skillIcon('ranger-rapid-fire'),
   m_bolt:skillIcon('mage-elemental-bolt'),m_beam:skillIcon('mage-elemental-beam'),m_blink:skillIcon('mage-blink'),m_nova:skillIcon('mage-nova'),m_gravity:skillIcon('mage-gravity-well'),m_barrier:skillIcon('mage-rune-barrier'),m_tempest:skillIcon('mage-arcane-tempest'),m_overload:skillIcon('mage-elemental-overload'),
@@ -12574,6 +12770,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     burst(e.x,(e.y||0)+(e.h||30)*.5,e.z,'#ff8a62',4);SFX.hit();
     return;
   }
+  if(src===G.p&&!G._desig&&meta.classId==='pyromancer')dmg=CLASS_BASIC.pyromancer(G.p,e,dmg);
   // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
   // but never reduce hp or kill locally — the host applies it and drives death for everyone.
   // Player-owned companions/summons use {pet:true} as their damage source. Guests must relay
@@ -12664,7 +12861,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     G._tetherHit=0;
   }
   if(src===G.p && !(G&&G._desig)){
-    const _bh = CLASS_BASIC[meta.classId];
+    const _bh = meta.classId==='pyromancer'?null:CLASS_BASIC[meta.classId];
     if(_bh){ try { const r = _bh(G.p, e, dmg); if(typeof r === 'number') dmg = r; } catch(err){} }
   }
   /* The Abyss King's ward: while any of his court still stands he takes a fifth of the damage, so
@@ -12996,7 +13193,7 @@ function rollDrop(e){
 }
 // Phase 9: no more roguelite pick-3. Every level bakes in automatic stat growth (folds the old
 // upgrade pool's power in), so the game is stronger — not weaker — for losing the menu.
-function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=1.018; p.stats.speed*=1.006; p.stats.lifesteal+=0.002; }
+function autoLevelGrow(p){ p.maxHp+=11; p.stats.power*=1.035; p.stats.atkSpeed*=1.018; p.stats.speed*=1.004; p.tunedLevels=(p.tunedLevels||0)+1; }
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){
   const p=G.p; p.xp+=Math.round(n*(isCampaignAdventure()?1.5:1));
@@ -13010,7 +13207,8 @@ function gainXp(n){
     const unlocked=rarityUnlockedAt(p.level);
     if(unlocked) storyToast('Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.','item-key');
     else if(p.level%5===0) storyToast('▲ Level '+p.level+' — markedly stronger.');
-    else toast('Level '+p.level+' · +HP +Power',null,'event-level-up'); }
+    else toast('Level '+p.level+' · +HP +Power',null,'event-level-up');
+    if(p.level<=91)toast('Stat point earned — spend it in Bag → Character Stats.','#ffd485'); }
   checkAchievements(); hudUpdate(); autosaveRun();
 }
 function checkStageClear(){ if(G?.kingFinal)return;
@@ -13068,6 +13266,7 @@ function ninjaEvade(p,sx,sz){                               // a dodge: MISS tex
    flat "+8% damage" innates, which every class had and which therefore distinguished none of them.
    Returning a number replaces the damage; returning nothing keeps it. */
 const CLASS_BASIC = {
+ pyromancer(p,e,dmg){p.pyHits=(p.pyHits||0)+1;return dmg*(p.pyHits%3===0?1.25:1);},
   /* MOMENTUM. Hitting the SAME target builds up; the third staggers it. Rewards committing to one
      enemy rather than spreading damage around, which is what a warrior does. */
   warrior(p, e, dmg){
@@ -17171,7 +17370,7 @@ function trialMentorSpot(origin){
  return {x:origin.x,z:origin.z,y:highestSurfaceAt(origin.x,origin.z,12)};
 }
 function setupTrialMentor(){
- const id='mentor_'+G.trial;if(!['berserker','ninja','reaper','chronomancer','pirate','paladin','necromancer'].includes(G.trial))return;
+ const id='mentor_'+G.trial;if(!['berserker','ninja','reaper','chronomancer','pyromancer','pirate','paladin','necromancer'].includes(G.trial))return;
  G.riftMentor=id;G.storyState=BFStoryState.create();G.storyObjects=[];G.npc=null;
  G.storyNpcs=[{id,name:CLASSES[G.trial].disp+' Mentor',...trialMentorSpot({x:G.p.x+65,z:G.p.z-70})}];
 }
@@ -17205,7 +17404,7 @@ function requestPartyTrial(cid,requester){
  if(MP.guest()){MP.hostConn?.send({t:'trialRequest',cid});toast('Asking the party to begin '+f.className+' training.');return false;}
  for(const c of MP.conns.filter(c=>c.open)){const q=MP.peers[c._pid];if(!q||q.zone!==MP.HUB||!q.hall||q.hp<=0||q.downed||!q.trialAccess?.includes(cid)){tell((q?.name||'A teammate')+' must open this class rift and join you in the Rift Hall.');return false;}}
  if(G.p.dead||G.p.downed||G.p.hp<=0)return false;
- const zi=ZONES.findIndex(z=>z.side?.trial===cid),session=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),runSeed=(Math.random()*0x7fffffff)|0;
+ const zi=f.index,session=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),runSeed=(Math.random()*0x7fffffff)|0;
  MP.trialReceipt=null;MP._wiped=false;MP._killed={};MP.kills=[];MP._gotEn=false;
  startTrial(cid,Math.max(0,zi),{remote:true,session,runSeed,partySize:1+MP.conns.filter(c=>c.open).length});MP.onEnter(MP.TRIAL);return true;
 }
@@ -17241,7 +17440,7 @@ function openRiftFrame(id){
  const btn=document.getElementById('hallTrial');if(btn)btn.onclick=()=>{
   if(MP.active){requestPartyTrial(f.classId);return;}
   const now=riftHallFrames().find(x=>x.id===id);if(!now?.open)return;
-  const zi=ZONES.findIndex(z=>z.side?.trial===now.classId);startTrial(now.classId,Math.max(0,zi));
+  startTrial(now.classId,now.index);
  };
 }
 function buildRiftHall(){
@@ -17982,7 +18181,7 @@ function openCharCreate(){
   mode='menu'; showGameUI(false); _offerT=Date.now();
   const eyes=[['Sky blue','#8fd0ff'],['Turquoise','#5affc8'],['Gold','#ffd24a'],['Amber','#ff7a3a'],['Violet','#c47bff'],['Silver','#e8e8e8'],['Rose','#ff4a8a'],['Green','#4be08a']];
   const guide={warrior:{tag:'Close combat · Tough',text:'Fight up close with a sword. Repeated hits on one enemy build toward a stagger, giving you room to keep attacking.',tip:'A good first choice if you are learning. Stay close enough to hit, but move away from enemy attack warnings.'},ranger:{tag:'Ranged combat · Mobile',text:'Shoot enemies from a distance with a bow. Move to keep space between you and enemies, then pause briefly when it is safe to improve your aim.',tip:'Good if you enjoy aiming and moving. Watch for enemies approaching from the sides.'},mage:{tag:'Ranged magic · Powerful but fragile',text:'Launch magic with a staff. Standing still builds power, but your lower health makes positioning important.',tip:'Good if you enjoy powerful spells. Find a safe opening to cast, then move before enemies reach you.'}};
-  const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff',face:false};
+  const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff',face:false,allocation:BFCharacterStats.roll(STARTERS[0])};
   let yaw=.55,drag=null,raf=0;
   function render(){
     cancelAnimationFrame(raf);
@@ -18004,16 +18203,17 @@ function openCharCreate(){
     <section><div class="ccname"><label for="ccName">1. Name your character</label><input id="ccName" maxlength="20" autocomplete="off" placeholder="Type your character’s name" value="${htmlSafe(st.name)}"><p class="ccsmall">Shown on your save and above your character in co-op. Up to 20 characters.</p></div>
     <fieldset><legend>2. Choose your starting class</legend><div class="ccrow">${STARTERS.map(cid=>`<button class="ccpick" data-cls="${cid}" aria-pressed="${st.cls===cid}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('')}</div><div class="ccdetail"><h3>${F.tag}</h3><p>${F.text}</p><p class="ccsmall">${F.tip}</p>${inn?`<p class="ccsmall"><strong>Class bonus:</strong> ${htmlSafe(inn.d)}</p>`:''}</div></fieldset>
     <fieldset><legend>3. Choose your eye color</legend><div class="ccrow">${eyes.map(([name,c])=>`<button class="ccsw" data-eye="${c}" title="${name}" aria-label="${name} eyes" aria-pressed="${st.eye===c}" style="background:${c}"></button>`).join('')}</div><p class="ccsmall">Select a color to see it in the face close-up.</p></fieldset>
-    <p class="ccreassure">You can change classes later at the Waystation and unlock more through class trials.</p><div class="ccactions"><button class="bigbtn" id="ccBegin">Start ${C.disp} tutorial</button><button class="bigbtn ghost" id="ccBack">Back</button></div><p class="ccsmall" id="ccNameError" role="status"></p></section></div></div>`);
+    <details><summary style="cursor:pointer;color:#ffdc99;font-weight:bold">Customize starting stats · optional</summary><p class="ccsmall">${BFCharacterStats.foundation(st.cls)} These bonuses stay with the equipped class.</p><div id="ccStats">${BFCharacterStats.markup(st.allocation,10,4)}</div><button class="ccpick" id="ccRoll" type="button">🎲 Roll stats</button><p class="ccsmall">Every roll has the same 10 points. Keep this roll or move points yourself. Attack helps every weapon and skill.</p></details><p class="ccreassure">You can change classes later at the Waystation and unlock more through class trials.</p><div class="ccactions"><button class="bigbtn" id="ccBegin">Start ${C.disp} tutorial</button><button class="bigbtn ghost" id="ccBack">Back</button></div><p class="ccsmall" id="ccNameError" role="status"></p></section></div></div>`);
     const ni=document.getElementById('ccName');ni.oninput=()=>{st.name=ni.value;document.getElementById('ccNameError').textContent='';};
-    document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{st.cls=b.dataset.cls;render();});
+    document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{st.cls=b.dataset.cls;st.allocation=BFCharacterStats.roll(st.cls);render();});
     document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{st.eye=b.dataset.eye;st.face=true;yaw=.12;render();});
     document.getElementById('ccFull').onclick=()=>{st.face=false;yaw=.55;render();};document.getElementById('ccFace').onclick=()=>{st.face=true;yaw=.12;render();};
     const pv=document.getElementById('ccPrev'),canvas=document.getElementById('ccPrevC');
     pv.onpointerdown=e=>{drag=e.clientX;pv.setPointerCapture(e.pointerId);};pv.onpointermove=e=>{if(drag===null)return;yaw+=(e.clientX-drag)*.012;drag=e.clientX;};pv.onpointerup=pv.onpointercancel=()=>{drag=null;};
     const spin=()=>{if(!canvas.isConnected){window.__hero3dPreviewDispose?.();return;}const ready=window.__hero3dPreview?.(canvas,{model:window.__hero3dClassModel?.(st.cls)||'Warrior',classId:st.cls,eyeColor:st.eye,weapon:w,yaw,face:st.face});document.getElementById('ccPreviewHint').textContent=ready?'Drag to turn your character':'Loading your character…';raf=requestAnimationFrame(spin);};spin();
+    const statRoot=document.getElementById('ccStats');const redrawStats=()=>{statRoot.innerHTML=BFCharacterStats.markup(st.allocation,10,4);BFCharacterStats.wire(statRoot,st.allocation,10,4,redrawStats);};redrawStats();document.getElementById('ccRoll').onclick=()=>{st.allocation=BFCharacterStats.roll(st.cls);redrawStats();};
     document.getElementById('ccBack').onclick=titleScreen;
-    document.getElementById('ccBegin').onclick=()=>{const name=st.name.trim();if(!name){document.getElementById('ccNameError').textContent='Give your character a name to begin.';ni.focus();return;}initAudio();meta.heroName=name.slice(0,20);meta.eyeColor=st.eye;persist();startTrial(st.cls);};
+    document.getElementById('ccBegin').onclick=()=>{const name=st.name.trim();if(!name){document.getElementById('ccNameError').textContent='Give your character a name to begin.';ni.focus();return;}initAudio();meta.heroName=name.slice(0,20);meta.eyeColor=st.eye;persist();creationAllocation=st.allocation;try{startTrial(st.cls);}finally{creationAllocation=null;}};
   }render();
 }
 /* Classes & Skills viewer — see every class, its rank, path, and skill tree with
@@ -18076,7 +18276,7 @@ function openClasses(back){
   const tabs=CLASSIDS.filter(c=>meta.classUnlocked[c]||c===meta.classId);
   const view=openClasses._sel&&tabs.includes(openClasses._sel)?openClasses._sel:meta.classId;
   const C=CLASSES[view], cs=classState(view), def=c2def(view);
-  const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[view]||'#c98cff';
+  const classCol={pyromancer:'#ff963d',warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[view]||'#c98cff';
   const tabRow=tabs.map(c=>`<button class="ctab ${c===view?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`).join('')
     +CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(c=>`<button class="ctab lock" disabled title="Locked — unlock at the Drillmaster">🔒<span>${CLASSES[c].disp}</span></button>`).join('');
   const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
@@ -18115,7 +18315,7 @@ function openRespecTree(cid,back){
   mode='menu'; showGameUI(false);
   const _baseSub=cs.sub||(C.subs&&C.subs[0]&&C.subs[0].id);
   let staged=def?Object.assign({},cs.ch||{}):{1:(cs.mix&&cs.mix[1])||_baseSub,2:(cs.mix&&cs.mix[2])||_baseSub,3:(cs.mix&&cs.mix[3])||_baseSub};
-  const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[cid]||'#c98cff';
+  const classCol={pyromancer:'#ff963d',warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[cid]||'#c98cff';
   const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
   function render(){
     const changeCount=def?CLASS2_CHOICE_RANKS.filter(r=>(staged[r]||null)!==((cs.ch||{})[r]||null)).length:[1,2,3].filter(i=>(staged[i]||null)!==(((cs.mix&&cs.mix[i])||cs.sub)||null)).length;
@@ -18193,7 +18393,7 @@ function openTrainer(back){
   mode='menu';
   if(masteredStarters() && !meta.masterSealSeen){ meta.masterSealSeen=true; persist(); sealCongrats(()=>openTrainer(back)); return; }   // one-time congratulation on total mastery
   menuTip('tip_trainer','the <b>Drillmaster</b>. Switch your active class, take another class\'s <b>Trial</b> to unlock it, and <b>Respec</b> — re-pick every skill and passive choice you have made, for gold. This is where you reshape your build whenever you like.');
-  const ACC={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
+  const ACC={pyromancer:'#ff963d',warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
   /* C3: the Drillmaster teaches the weapon matrix. The class cards already listed families - what
      they could not do is NAME the newer types, so a Pirate's defining weapon rendered as a blank
      and the Monk's card looked empty. Any art missing from this map is silently invisible, which
@@ -18228,7 +18428,8 @@ function openTrainer(back){
       ${meta.masterSeal?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button>':`<button class="bigbtn sealbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${meta.gold>=SEAL_COST?'':'opacity:.5'}">${actionIcon('buy')}${SEAL_COST.toLocaleString()}g</button>`}</div></div>`:'';
   showOverlayHTML(`<div class="card trainercard"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
     <p class="ovsub">${meta.masterSeal?'Switch and respec here or, with the Seal, from the pause menu anywhere.':'Switch freely here. Never mid-zone.'}</p>
-    <div class="trainergrid">${rows}</div>${sealRow}<button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <button class="bigbtn ghost" id="statRespec">Reassign character stats · Free</button><div class="trainergrid">${rows}</div>${sealRow}<button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('statRespec').onclick=()=>openCharacterStats(()=>openTrainer(back),true);
   { const sb=document.querySelector('.sealbuy'); if(sb) sb.onclick=()=>{ if(meta.masterSeal) return; if(meta.gold<SEAL_COST){ toast('Not enough gold'); return; }
       meta.gold-=SEAL_COST; meta.masterSeal=true; if(SFX&&SFX.achieve) SFX.achieve(); persist(); toast('🎖️ The Drillmaster\'s Seal — switch class & respec anywhere, from the pause menu','#f0d78a'); openTrainer(back); }; }
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ if(!trainerEquipClass(b.dataset.eq)) return; SFX.pickup(); openTrainer(back); });
@@ -22344,6 +22545,29 @@ const BOSS_PHASE2 = {
   },
 };
 
+
+// Fire discipline: shared targeting/hit pipeline includes PvP and confirmed lifesteal.
+function pyroArea(p,r,m,kb,x=p.x,z=p.z,y=p.y){
+ const dmg=(p.weapon?.dmg||10)*effPower(p)*m;
+ const was=G._desig;G._desig=true;
+ try{for(const e of combatTargets()){if(e.dead||Math.hypot(e.x-x,e.z-z)>r+(e.r||0)||Math.abs((e.y||0)-y)>100||losBlocked(x,z,e.x,e.z))continue;hitEnemy(e,dmg,p,kb,effLifesteal(p),'fire');}}finally{G._desig=was;}
+ skillRing(x,z,'#ff963d','#ffdb81',r);burst(x,y+20,z,'#ff862f',12);
+}
+function pyroShot(p,m,spread=0,pierce=0){
+ const t=projectileAimTarget(p,950),sp=820,oy=p.y+26;if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+ const a=p.yaw+spread,d=t?Math.max(30,dXZ(p.x,p.z,t.x,t.z)):500;
+ G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(a)*sp,vz:Math.cos(a)*sp,vy:t?((t.y+t.h*.5)-oy)*sp/d:0,gravity:0,size:pierce?10:7,color:'#ff913b',shape:pierce?'lance':'orb',glow:1,trail:'#ffd17a',dmg:(p.weapon?.dmg||10)*effPower(p)*m,kb:80,pierce,el:'fire',life:1.3,hitSet:[],desig:true});p.atkTimer=.2;
+}
+SKILL_FX.py_bolt=(p,ok,am=1)=>pyroShot(p,2.2*am);
+SKILL_FX.py_fan=(p,ok,am=1)=>{for(const a of [-.22,0,.22])pyroShot(p,1.1*am,a);};
+SKILL_FX.py_lance=(p,ok,am=1)=>pyroShot(p,3*am,0,5);
+SKILL_FX.py_blast=(p,ok,am=1)=>pyroArea(p,155,1.3*am,400);
+SKILL_FX.py_nova=(p,ok,am=1)=>pyroArea(p,225,2.4*am,80);
+SKILL_FX.py_ward=p=>{p.shieldHp=Math.max(p.shieldHp||0,effMaxHp(p)*.25);p.shieldT=Math.max(p.shieldT||0,5);skillRing(p.x,p.z,'#ff963d','#ffe2a2',65);};
+SKILL_FX.py_inferno=p=>{p.pyInfernoT=3;p.pyPulse=1;p.pyPulses=3;pyroArea(p,190,1,0);};
+SKILL_FX.py_sun=(p,ok,am=1)=>{const t=projectileAimTarget(p,800);if(!t)return 'refund';pyroArea(p,115,4*am,120,t.x,t.z,t.y||0);};
+Object.assign(SKILL_MANA,{py_bolt:12,py_fan:18,py_blast:18,py_ward:22,py_lance:24,py_nova:26,py_inferno:38,py_sun:34});
+
 // Root skill dispatch stays cosmetic: original return values and gameplay state are preserved.
 if(window.BF_COMBAT_ART){
   const art=window.BF_COMBAT_ART; art.configure(CLASS2); let depth=0;
@@ -22375,7 +22599,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
@@ -22504,7 +22728,7 @@ window.__BF3={hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:eff
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2074"></script>
+<script type="module" src="./hero3d.js?v=2081"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

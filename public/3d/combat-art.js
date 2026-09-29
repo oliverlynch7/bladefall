@@ -1,14 +1,14 @@
 /* Cosmetic combat events. Gameplay remains owned by index.html. */
 (function(root){
 'use strict';
-const themes={
+const themes={pyromancer:['#ff8735','#ffefb1','flame'],
  warrior:['#f1bd68','#fff0cd','steel'],ranger:['#9ed882','#efffcd','leaf'],mage:['#c18aff','#e5dbff','rune'],reaper:['#a778ea','#dfccff','soul'],
  paladin:['#ffd36c','#fff8d3','sun'],necromancer:['#9bd196','#ebebcb','bone'],ninja:['#bd9fdd','#f2e6ff','star'],berserker:['#ed6545','#ffc787','fang'],
  pirate:['#ffb365','#fff0c4','powder'],chronomancer:['#65dbcc','#fff0b5','clock'],monk:['#edc784','#ffffdf','flow'],stormcaller:['#78c9ff','#e4fbff','bolt'],
  warlock:['#cd648f','#f4b3df','rift'],skylancer:['#87dcca','#f4ffe8','feather'],bladedancer:['#eca1d0','#fff0fc','twin'],beastmaster:['#c5ad6b','#e7f5b7','claw']
 };
 // Each row follows the actual a/b choices in slots 1,2,3,4; no name-based guessing.
-const forms={warrior:'slash bash dash spiral ward quake roar execute',ranger:'fan lance dash slash trap smoke mark mark',mage:'bolt beam blink nova vortex ward crown nova',reaper:'slash slash blink ghost vortex tether siphon vortex',paladin:'bash execute roar heal ward nova ward execute',necromancer:'summon bolt summon nova wall tether summon storm',ninja:'slash fan blink smoke mark lance spiral ghost',berserker:'slash bash dash quake spiral execute roar ward',pirate:'lance fan slash dash smoke crown storm trap',chronomancer:'bolt beam nova blink vortex ward storm vortex',monk:'flurry bash ward dash spiral bash flurry dash',stormcaller:'bolt beam blink nova orb ward storm nova',warlock:'bolt beam nova siphon blink orb storm mark',skylancer:'rise lance dive rise dash storm dive vortex',bladedancer:'ward cross slash dash ward cross spiral ward',beastmaster:'claw cross ward dash heal roar storm crown'};
+const forms={pyromancer:'bolt fan nova ward beam nova storm nova',warrior:'slash bash dash spiral ward quake roar execute',ranger:'fan lance dash slash trap smoke mark mark',mage:'bolt beam blink nova vortex ward crown nova',reaper:'slash slash blink ghost vortex tether siphon vortex',paladin:'bash execute roar heal ward nova ward execute',necromancer:'summon bolt summon nova wall tether summon storm',ninja:'slash fan blink smoke mark lance spiral ghost',berserker:'slash bash dash quake spiral execute roar ward',pirate:'lance fan slash dash smoke crown storm trap',chronomancer:'bolt beam nova blink vortex ward storm vortex',monk:'flurry bash ward dash spiral bash flurry dash',stormcaller:'bolt beam blink nova orb ward storm nova',warlock:'bolt beam nova siphon blink orb storm mark',skylancer:'rise lance dive rise dash storm dive vortex',bladedancer:'ward cross slash dash ward cross spiral ward',beastmaster:'claw cross ward dash heal roar storm crown'};
 const profiles={}; let serial=0;
 function configure(classes){
  for(const [cls,c] of Object.entries(classes)){

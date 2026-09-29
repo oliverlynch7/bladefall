@@ -1,6 +1,6 @@
 /* Device voices vary by OS. Keep assignments stable for each available voice list. */
 (function(root){'use strict';
- const women=new Set(['mara','beth','ruth','grace','rose']);
+ const women=new Set(['mentor_pyromancer','mara','beth','ruth','grace','rose']);
  const calm=new Set(['thomas','ellis','ian','hugh','walter','riftkeeper','mentor_chronomancer','mentor_paladin']);
  const stern=new Set(['abyss_king','cross','ward','pike','anvil','flint','mentor_reaper']);
  const quick=new Set(['gus','felix','skip','jack','sly','dash','mentor_pirate']);

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "region": "rift-hall",
-  "status": "Recording-ready Rift Keeper and seven class mentors; trial arena redesigns pending",
+  "status": "Recording-ready Rift Keeper and eight class mentors",
   "npcs": {
     "riftkeeper": {
       "name": "Rift Keeper",
@@ -42,6 +42,11 @@
       "name": "Necromancer Mentor",
       "role": "Teaches the Necromancer discipline",
       "start": "trial.necromancer.intro"
+    },
+    "mentor_pyromancer": {
+      "name": "Pyromancer Mentor",
+      "role": "Teaches the Pyromancer discipline",
+      "start": "trial.pyromancer.intro"
     }
   },
   "nodes": {
@@ -761,6 +766,76 @@
         "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
         "direction": "Speak naturally and clearly. Use the current concise wording.",
         "status": "script-revised"
+      }
+    },
+    "trial.pyromancer.intro": {
+      "text": "Fire is useful when you control where it goes. Clear this chamber and show me.",
+      "choices": [
+        {
+          "id": "lesson",
+          "text": "What should I focus on?",
+          "next": "trial.pyromancer.lesson"
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_pyromancer",
+        "scene": "Meeting the teacher",
+        "order": 1,
+        "emotion": "Warm, steady female teacher. Direct and encouraging.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-ready"
+      }
+    },
+    "trial.pyromancer.lesson": {
+      "text": "Keep moving between casts. Use your shield or blast when enemies get close.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_pyromancer",
+        "scene": "Training advice",
+        "order": 2,
+        "emotion": "Warm, steady female teacher. Direct and encouraging.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-ready"
+      }
+    },
+    "trial.pyromancer.proved": {
+      "text": "The chamber is clear. Come finish your lesson.",
+      "choices": [
+        {
+          "id": "learn",
+          "text": "I am listening.",
+          "next": "trial.pyromancer.learn",
+          "effects": [
+            {
+              "type": "flag",
+              "id": "trial.taught"
+            }
+          ]
+        }
+      ],
+      "voice": {
+        "speaker": "mentor_pyromancer",
+        "scene": "After the trial",
+        "order": 3,
+        "emotion": "Warm, steady female teacher. Direct and encouraging.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-ready"
+      }
+    },
+    "trial.pyromancer.learn": {
+      "text": "You've earned the Pyromancer discipline. Take the exit. Keep your flame under control.",
+      "choices": [],
+      "voice": {
+        "speaker": "mentor_pyromancer",
+        "scene": "The discipline is earned",
+        "order": 4,
+        "emotion": "Warm, steady female teacher. Direct and encouraging.",
+        "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+        "direction": "Speak naturally and clearly. Use the current concise wording.",
+        "status": "script-ready"
       }
     }
   },

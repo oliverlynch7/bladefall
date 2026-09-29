@@ -15,3 +15,12 @@ const moved=Math.hypot(a.x-r.x,a.z-r.z)>Math.max(.03,dt*2);r.x=a.x;r.z=a.z;if((a
 drawn.add(a);}
 window.__companionStats={actors:actors.size,pending:pending.size,types:[...actors.values()].map(r=>r.file)};}
 window.__companion3dDrawn=a=>drawn.has(a);
+// Independent inventory companion; never touches the live companion registry or scene.
+export async function companionPortrait(id){
+ const a={id},file=fileFor(a);if(id!=='sunwing'&&id!=='shepherd'&&!kitModel(file))await loadKitModel(file);
+ const src=id==='sunwing'?sunwingAsset:id==='shepherd'?shepherdAsset:kitModel(file);if(!src)return null;
+ const root=SkeletonUtils.clone(src.scene),materials=[];
+ root.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material=o.material.clone();materials.push(o.material);if(id==='cinder'){o.material.color.set(0xf4b465);o.material.emissive.set(0x5b2307);}}if(o.isSkinnedMesh)o.skeleton.pose();});
+ const mixer=new T.AnimationMixer(root),idle=src.animations.find(c=>c.name==='Idle');if(idle){mixer.clipAction(idle).play();mixer.update(.01);}if(id==='shepherd')animateShepherd(root,0,false,false);if(id==='sunwing')animateSunwing(root,0,false,false,false);
+ root.userData.portraitDispose=()=>{mixer.stopAllAction();mixer.uncacheRoot(root);materials.forEach(m=>m.dispose());root.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});};return root;
+}

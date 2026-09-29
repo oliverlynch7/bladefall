@@ -739,3 +739,7 @@ User reports bowed/glitched legs while moving and attacking; requests M mouse-di
 
 ## [Codex | 2026-09-28] Crystal Waystone centerpiece
 User requests a much larger, intricate, epic and ethereal hub Waystone resembling a sorcerer’s transportation crystal. Plan: replace the tiny octahedron/old pillar with a faceted floating central crystal, smaller satellite crystals, luminous etched rings and restrained particles over an ornate stone-and-gold base. Preserve its interaction, healing/banking/travel and clear approach; retain reduced-motion and low-quality support.
+
+
+## [Codex | 2026-09-28] Isolated inventory portrait
+User reports lag, moving world character and NPC contamination in bag preview. Requests independent still equipped hero/pet, companion behind and to side, centered hero, wider equipment area. Plan: replace main-canvas capture/readback with dedicated on-demand renderer and cloned idle rig; independent companion clone; deterministic staging and resource cleanup. Expand equipment column and verify no world/NPC content, pose stability, drag and saves.

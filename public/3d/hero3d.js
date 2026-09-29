@@ -6,7 +6,7 @@ import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeapon
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2057';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
-import {syncCompanions} from './companion3d.js?v=2060';
+import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 
@@ -2362,3 +2362,33 @@ window.__hero3dProbe = () => {
 };
 
 boot();
+/* Inventory portrait owns its canvas, scene and posed skeleton. No world capture or readback. */
+let bagPortrait=null;
+window.__hero3dBagPreview=(canvas,opts)=>{
+ if(!canvas||!actor||!HERO3D.ready)return false;
+ if(bagPortrait?.canvas!==canvas){
+  bagPortrait?.dispose();
+  const render=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});render.setPixelRatio(Math.min(1.5,devicePixelRatio||1));
+  const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xe5f4ff,0x454057,2));const key=new THREE.DirectionalLight(0xffebd5,2.4);key.position.set(80,110,130);sc.add(key);const rim=new THREE.DirectionalLight(0x8fcfff,1.4);rim.position.set(-80,70,-70);sc.add(rim);
+  const stage=new THREE.Group(),hero=SkeletonUtils.clone(actor);sc.add(stage);stage.add(hero);hero.name='Inventory hero';hero.position.set(0,0,0);hero.rotation.set(0,0,0);hero.scale.setScalar(HERO3D.scale);
+  hero.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.pose();if(n.isMesh){n.frustumCulled=false;n.castShadow=false;}});
+  const mixer=new THREE.AnimationMixer(hero);if(clips.Idle){mixer.clipAction(clips.Idle).play();mixer.update(.01);}
+  const holder={root:hero,model:HERO3D.model};clearWeapon(holder,false);
+  const rec={canvas,render,scene:sc,stage,hero,holder,cam:new THREE.PerspectiveCamera(32,1,.1,2000),opts,frames:0,disposed:false};bagPortrait=rec;
+  rec.draw=()=>{
+   if(rec.disposed||!canvas.isConnected)return;const w=canvas.clientWidth||300,h=canvas.clientHeight||440;if(rec.w!==w||rec.h!==h){render.setSize(w,h,false);rec.w=w;rec.h=h;rec.cam.aspect=w/h;rec.cam.updateProjectionMatrix();}
+   stage.rotation.y=0;stage.updateMatrixWorld(true);hero.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.update();});
+   const hb=new THREE.Box3().setFromObject(hero,true),size=hb.getSize(new THREE.Vector3()),center=hb.getCenter(new THREE.Vector3());
+   const height=Math.max(45,size.y),width=Math.max(size.x,size.z)*1.25;
+   // Frame around the hero; the companion fits in the margin rather than shifting the center.
+   const distance=Math.max(height*.62,width/(2*rec.cam.aspect))/Math.tan(16*Math.PI/180)+25;
+   rec.cam.position.set(0,center.y+4,distance);rec.cam.lookAt(0,center.y,0);stage.rotation.y=rec.opts.yaw||0;stage.updateMatrixWorld(true);render.render(sc,rec.cam);rec.frames++;
+   window.__bagPortraitState={isolated:true,frames:rec.frames,hero:hero.uuid,pet:!!rec.pet,petPosition:rec.pet?.position.toArray(),children:sc.children.map(o=>o.name||o.type),size:[w,h],idle:true};
+  };
+  rec.dispose=()=>{if(rec.disposed)return;rec.disposed=true;rec.observer.disconnect();rec.resize.disconnect();holder._weapSeq=(holder._weapSeq||0)+1;clearWeapon(holder);rec.pet?.userData.portraitDispose?.();mixer.stopAllAction();mixer.uncacheRoot(hero);hero.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.dispose();});render.dispose();render.forceContextLoss();if(bagPortrait===rec){bagPortrait=null;window.__bagPortraitState={...window.__bagPortraitState,disposed:true};}};
+  rec.observer=new MutationObserver(()=>{if(!canvas.isConnected)rec.dispose()});rec.observer.observe(document.body,{childList:true,subtree:true});rec.resize=new ResizeObserver(()=>rec.draw());rec.resize.observe(canvas);
+  queueEquip(()=>rec.disposed?null:equipWeapon(holder,{model:HERO3D.model,weapon:opts.player.weapon})).then(()=>{if(rec.disposed)return;poseWeaponGrip({...opts.player,vx:0,vz:0,onGround:true,atkTimer:0,combatPose:null,emote:null},hero,{},holder.model,1);colorWeapon(holder,opts.player.weapon);rec.draw();}).catch(e=>console.warn('Inventory weapon',e));
+  if(opts.pet)companionPortrait(opts.pet.id).then(pet=>{if(!pet)return;if(rec.disposed){pet.userData.portraitDispose?.();return}rec.pet=pet;stage.add(pet);pet.updateMatrixWorld(true);const pb=new THREE.Box3().setFromObject(pet,true),ps=pb.getSize(new THREE.Vector3());const scale=25/Math.max(1,ps.y);pet.scale.multiplyScalar(scale);pet.position.set(27,-pb.min.y*scale,-16);pet.rotation.y=-.2;rec.draw();});
+ }
+ bagPortrait.opts=opts;bagPortrait.draw();return true;
+};

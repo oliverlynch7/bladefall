@@ -864,3 +864,7 @@ Locomotion overlay now includes Root/Body/Hips with leg tracks so moving attack 
 
 ## [Codex | 2026-09-28] Crystal Waystone — 2.072.0
 Replaced the small hub centerpiece with a 197-unit tall faceted blue crystal, six floating satellite shards, tilted gold orbital rings, luminous facet seams, crown prongs, engraved base and drifting motes. Roughly 3,898 mesh triangles, no additional dynamic lights; reduced motion freezes decorative movement, low quality/particles-off hides motes. Ground footprint and E range preserved; center collider height matches larger landmark. Browser render inspected, geometry/settings validated, actual E travel menu opened, and pre-change save passed. Evidence: docs/qa/waystone-2026-09-28.json.
+
+
+## [Codex | 2026-09-28] Isolated bag portrait — 2.073.0
+Replaced main WebGL canvas capture, gl.finish and pixel readback/keying with a dedicated on-demand inventory scene. Cloned equipped character reset to Idle; separate companion clone staged at side/behind, smaller than hero. Scene contains only preview actors and lights, with cleanup on canvas removal. Drag uses pointer capture and frame-coalesced redraw instead of leaked window listeners. Wider equipment column and 56%-width portrait. Browser verified still frame count across idle interval, redraw on drag, separate scene content and pet placement; screenshot inspected; pre-change save and syntax passed. Evidence: docs/qa/bag-portrait-2026-09-28.json.

@@ -1044,6 +1044,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./hub-dialogue.js?v=2079"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2079">
 <script src="./hub-tour.js?v=2079"></script>
+<script src="./controller.js?v=2080"></script>
 <script src="./emotes.js?v=2071"></script>
 <script src="./camera-occlusion.js?v=2074"></script>
 <script src="./rift-shards.js?v=1992"></script>
@@ -1101,7 +1102,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.079.0-guided-hub';
+const VERSION3D='2.080.0-controller-setup';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1162,7 +1163,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
 const MODE_FIELDS=['hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -9525,33 +9526,23 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>{const code=BFPartyNavigation.keyCode(e),act=heldKeyboard.get(code)||keyAction(code);heldKeyboard.delete(code);if(act==='partyTeleport'){partyHeld=false;partyNeedsRelease=false;partyCancel();}if(act&&MOVE_ACTS[act])input[act]=[...heldKeyboard.values()].includes(act);},true);   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
 // ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
 //    LB/RB/LT/RT = skills 1-4, Start = pause, right stick = camera (shoulder/first-person). Auto-detected. ──
-let _padPrev=[], _padSeen=false;
-window.addEventListener('gamepadconnected',()=>{ if(!_padSeen){ _padSeen=true; if(!meta.padOff) toast('🎮 Controller connected — A jump · X attack · B dodge · bumpers/triggers skills · Start pause','#8fd56d'); } });
+let _padOwned=false;
 function pollGamepad(dt){
-  if(meta.padOff) return;
-  let pads; try{ pads=navigator.getGamepads&&navigator.getGamepads(); }catch(e){ return; }
-  if(!pads) return;
-  let gp=null; for(const g of pads){ if(g&&g.connected&&g.buttons&&g.buttons.length){ gp=g; break; } }
-  if(!gp){ _padPrev=[]; return; }
-  const Bt=gp.buttons, Ax=gp.axes||[];
-  const on=i=>!!(Bt[i]&&Bt[i].pressed), edge=i=>on(i)&&!_padPrev[i];
-  const DZ=0.28, dz=v=>Math.abs(v)<DZ?0:v;
-  if(edge(9)){ if(mode==='play') openPause(); else if(mode==='pause'){ resumeGameAudio(true); resumePlay(); } }   // Start = pause/resume
-  if(mode==='play'){
-    initAudio();
-    let ax=dz(Ax[0]||0), az=dz(Ax[1]||0);
-    if(on(14)) ax-=1; if(on(15)) ax+=1; if(on(12)) az-=1; if(on(13)) az+=1;                 // D-pad
-    input.jx=Math.max(-1,Math.min(1,ax)); input.jz=Math.max(-1,Math.min(1,az));
-    input.attack=on(2);                                                                      // X = attack
-    if(edge(0)&&!input.jump) input.jumpEdge=true; input.jump=on(0);                           // A = jump
-    if(edge(1)&&!input.dodge) input.dodgeEdge=true; input.dodge=on(1);                        // B = dodge
-    if(edge(3)) doInteract();                                                                 // Y = interact
-    if(edge(4)) useSkill(0); if(edge(5)) useSkill(1); if(edge(6)) useSkill(2); if(edge(7)) useSkill(3);   // LB/RB/LT/RT = skills 1-4
-    if(meta.camMode!=='far'){ const rx=dz(Ax[2]||0), ry=dz(Ax[3]||0);                         // right stick = look
-      if(rx) G.camYaw=(G.camYaw==null?Math.PI:G.camYaw)+rx*2.7*dt*(meta.lookSens||1);
-      if(ry) G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)-ry*2.0*dt*(meta.lookSens||1))); }
-  }
-  _padPrev=Bt.map(b=>b.pressed);
+ BFController.setup(meta,persistGlobal);
+ const release=()=>{if(!_padOwned)return;input.jx=input.jz=0;for(const a of ['attack','jump','dodge'])input[a]=[...heldKeyboard.values()].includes(a);partyHeld=false;_padOwned=false;};
+ const p=BFController.read(mode+':'+BFController.active);
+ if(!p||meta.padOff||BFController.active||mode!=='play'){release();if(p&&(!meta.padOff||BFController.active)){if(p.edge('pause')&&mode==='pause'&&!BFController.active){resumeGameAudio(true);resumePlay();}else BFController.menu(p);}return;}
+ if(p.edge('pause')){release();openPause();return;}
+ if(p.edge('bag')){release();openBag(openPause);return;}
+ if(p.edge('journal')){release();openJournal();return;}
+ _padOwned=true;
+ input.jx=Math.max(-1,Math.min(1,p.x+(p.buttons[15]?1:0)-(p.buttons[14]?1:0)));
+ input.jz=Math.max(-1,Math.min(1,p.z+(p.buttons[13]?1:0)-(p.buttons[12]?1:0)));
+ for(const a of ['attack','jump','dodge']){if(p.edge(a)&&a!=='attack')input[a+'Edge']=true;input[a]=p.on(a)||[...heldKeyboard.values()].includes(a);}
+ partyHeld=p.on('partyTeleport');if(!partyHeld)partyNeedsRelease=false;
+ if(p.edge('interact'))doInteract();
+ for(let i=1;i<=4;i++)if(p.edge('skill'+i))useSkill(i-1);
+ if(meta.camMode!=='far'&&G){const c=BFController.config,v=c.sensitivity||1;G.camYaw=(G.camYaw??Math.PI)+p.rx*2.7*dt*v;G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)-p.ry*2*dt*v*(c.invert?-1:1)));}
 }
 // Mouse buttons share the same two-slot binding map as keyboard keys.
 // Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.
@@ -15033,9 +15024,10 @@ function update(dt){
   if(!G?.kingFinal)document.getElementById('finalCharge')?.remove();
   if(G?.voyage||document.getElementById('voyagehud'))voyageHud();
   if(briarPending&&performance.now()-briarPending.sent>650)briarSendPending();
+  pollGamepad(dt);
   if(mode==='hubtour'){if(MP.active)MP.tick(dt);if(!G?.hub||G.riftHall)BFHubTour.close();return;}
   if(mode==='npc'&&G?.storyState?.conversation){if(MP.active)MP.tick(dt);return;}
-  pollGamepad(dt);   // controller input (auto-detected; feeds the same input channels as touch/keyboard)
+
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(BFGuidedTutorial.tick(G,mode,dt,input,{hint:controlHint,release:releaseKeyboard}))return;
@@ -18884,7 +18876,7 @@ function openPause(){
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="particlesBtn">✨ Particles: ${meta.particles!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
-      <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="padBtn">🎮 Controller setup</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
@@ -18915,7 +18907,7 @@ function openPause(){
   { const _qb=document.getElementById('qualBtn'); if(_qb) _qb.onclick=()=>{ cycleQuality(); openPause(); }; }
   { const _pt=document.getElementById('particlesBtn'); if(_pt) _pt.onclick=()=>{ meta.particles=(meta.particles===false); persistGlobal(); openPause(); }; }
   { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
-  { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPause(); }; }
+  { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ BFController.open(meta,persistGlobal); }; }
   { const _sk=document.getElementById('shakeBtn'); if(_sk) _sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPause(); }; }
   { const _rm=document.getElementById('reduceMoBtn'); if(_rm) _rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPause(); }; }
   { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
@@ -18959,7 +18951,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="objectiveArrowsBtn">Main objective arrows: ${meta.objectiveArrows!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="friendArrowsBtn">Friend arrows: ${meta.friendArrows!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
-      <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="padBtn">🎮 Controller setup</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
@@ -18985,7 +18977,7 @@ function openPauseSettingsV2(){
   { const qb=document.getElementById('qualBtn'); if(qb) qb.onclick=()=>{ cycleQuality(); toast('🎬 Graphics: '+qLabel()+(meta.quality==='low'?' — lightest (old PCs)':meta.quality==='medium'?' — balanced':' — full effects')); openPauseSettingsV2(); }; }
   { const pt=document.getElementById('particlesBtn'); if(pt) pt.onclick=()=>{ meta.particles=(meta.particles===false); persistGlobal(); toast(meta.particles!==false?'✨ Particles: On':'✨ Particles: Off'); openPauseSettingsV2(); }; }
   { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
-  { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPauseSettingsV2(); }; }
+  { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ BFController.open(meta,persistGlobal); }; }
   { const sk=document.getElementById('shakeBtn'); if(sk) sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPauseSettingsV2(); }; }
   { const rm=document.getElementById('reduceMoBtn'); if(rm) rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPauseSettingsV2(); }; }
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);

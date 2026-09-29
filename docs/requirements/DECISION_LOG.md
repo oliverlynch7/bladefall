@@ -513,3 +513,7 @@ User requests mandatory first-visit hub camera tour with always-available skip, 
 
 ## [Codex | 2026-09-28] Player-level stat allocation
 User wants additional player-level stat points for meaningful customization, balanced to avoid overpowering or lengthy interruptions. Interpreted “too many” as “not too many” from explicit stated intent. Proposed, not yet tuned: one point per character level using proposed Health/Attack/Defense/Speed/Mana choices; allow spending later and rebalance automatic growth instead of stacking extra power. Preserve as queued work while completing active hub/dialogue task.
+
+## [Codex | 2026-09-28] Controller setup
+User: "could we also add controller compatability to the settings for pc player who perfer contrller tyo play. Make it an easy to setup and universally adaptable controller mapping for both ps and Xbox controllers. It should be easy for a controller player to rebind buttons if needed. Feel free to copy another successful game around this setup or do any research online you need to do it right the first time."
+Plan: extend existing standard Gamepad API controls with persistent button rebinding, automatic/manual labels, stick/deadzone settings and live diagnostics. Release owned inputs on disconnect. Add controller menu navigation. Browser simulation plus pre-change save verification; physical device compatibility remains hardware-dependent.

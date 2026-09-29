@@ -1,0 +1,1 @@
+async page=>{await page.goto('http://127.0.0.1:4331/3d/?mute=1');await page.waitForFunction(()=>window.__BF3);await page.evaluate(()=>BFController.open(__BF3.meta,__BF3.persist));await page.screenshot({path:'tmp/controller-settings.png'});return await page.locator('dialog').isVisible();}

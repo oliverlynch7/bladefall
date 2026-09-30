@@ -942,3 +942,7 @@ Chrome QA: 425 rendered combinations (17x5x5), actual eyebrow mesh counts and se
 
 ## [Codex | 2026-09-29] Controller invert default
 Implemented the requested controller camera behavior: missing controller settings now default to inverted right-stick Y camera movement, while an explicitly saved false setting remains false. The setup checkbox reflects that effective state.
+
+
+## [Codex | 2026-09-29] Independent controller camera inversion
+The setup UI exposes separate left/right and up/down inversion controls. New defaults are horizontal off and vertical on.

@@ -2208,3 +2208,7 @@ Chrome QA: 425 rendered combinations (17x5x5), actual eyebrow mesh counts and se
 
 ## [Codex | 2026-09-29] 2.090.0 — Controller invert fix
 The controller right-stick Y camera axis now uses an explicit invert branch. Missing controller settings migrate to inverted camera controls by default; existing false selections remain false. The setup checkbox reflects the effective default, and the controller script/version cache was bumped. Syntax and browser-simulated axis-sign checks passed.
+
+
+## [Codex | 2026-09-29] 2.091.0 — Independent controller axis inversion
+Added independent right-stick horizontal and vertical camera inversion toggles, migrated the legacy invert setting to vertical inversion, and preserved existing save behavior.

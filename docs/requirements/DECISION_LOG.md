@@ -590,3 +590,7 @@ Add shared optional position/tilt sliders (horizontal, vertical, tilt for eyes a
 
 ## [Codex | 2026-09-29] Controller invert default
 User reports the controller right-stick invert toggle does not actually invert the camera and requests invert be enabled by default. Use an explicit sign branch for the right-stick Y camera delta; migrate missing settings to `invert: true` while preserving an existing false choice. Keep the setting persistent and visible in Controller setup.
+
+
+## [Codex | 2026-09-29] Independent controller camera inversion
+Controller camera inversion is now modeled as `invertX` and `invertY`; the prior `invert` value migrates to Y so existing saves retain their behavior.

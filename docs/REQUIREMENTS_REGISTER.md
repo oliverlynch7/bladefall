@@ -845,3 +845,7 @@ User requests mouth/eyebrow variations across character models, including No eye
 ## [Codex | 2026-09-29] Facial position, tilt and randomization
 User: "You should also add the ability for the player to adjust the position and tilt of mouth and eyes for more customization. And add a randomize feature too for fun."
 Add shared optional position/tilt sliders (horizontal, vertical, tilt for eyes and mouth), bounded relative to each fitted model. Randomize face changes only eye color, mouth, eyebrows and gentle offsets; never name/class/stats. Creator and Stylist share the controls, reset and normalization. Persist faceAdjust per character, zero defaults for existing saves, same 25g total Stylist fee.
+
+
+## [Codex | 2026-09-29] Controller invert default
+User reports the controller right-stick invert toggle does not actually invert the camera and requests invert be enabled by default. Use an explicit sign branch for the right-stick Y camera delta; migrate missing settings to `invert: true` while preserving an existing false choice. Keep the setting persistent and visible in Controller setup.

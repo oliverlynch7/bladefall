@@ -1055,7 +1055,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./hub-dialogue.js?v=2079"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
 <script src="./hub-tour.js?v=2082"></script>
-<script src="./controller.js?v=2080"></script>
+<script src="./controller.js?v=2090"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2089"></script>
 <script src="./stylist.js?v=2089"></script>
@@ -1119,7 +1119,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.089.0-face-options';
+const VERSION3D='2.090.0-controller-invert';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9758,7 +9758,7 @@ function pollGamepad(dt){
  partyHeld=p.on('partyTeleport');if(!partyHeld)partyNeedsRelease=false;
  if(p.edge('interact'))doInteract();
  for(let i=1;i<=4;i++)if(p.edge('skill'+i))useSkill(i-1);
- if(meta.camMode!=='far'&&G){const c=BFController.config,v=c.sensitivity||1;G.camYaw=(G.camYaw??Math.PI)+p.rx*2.7*dt*v;G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)-p.ry*2*dt*v*(c.invert?-1:1)));}
+ if(meta.camMode!=='far'&&G){const c=BFController.config,v=c.sensitivity||1;G.camYaw=(G.camYaw??Math.PI)+p.rx*2.7*dt*v;const pitchInput=p.ry*(c.invert===false?-1:1);G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)+pitchInput*2*dt*v));}
 }
 // Mouse buttons share the same two-slot binding map as keyboard keys.
 // Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.

@@ -861,3 +861,7 @@ User reports every Pyromancer attack/skill crashes, possibly following cheat unl
 
 ## [Codex | 2026-10-03] Class audit execution
 Approved: audit all class skills/passives for working effects, clear descriptions, healing/lifesteal and PvP. Grounded fixes: prevent rejected/refunded casts from triggering bonuses; scale Mage echoes relative to their original cast; remove duplicate PvP mark/curse countdowns. Preserve choice IDs. Run existing healing/choice regressions and all-class browser runtime smoke coverage; report untested conditional/network cases honestly.
+
+
+## [Codex | 2026-10-03] Projectile visual overhaul approved
+User requests distinct, attractive Mage skill projectiles; replacement of candy-like staff shots; improved projectiles across classes and relevant skills; thrown charge weapons must visibly match the equipped weapon. Grounded plan: replace striped orb shader with directional faceted spell bodies/trails and class skill signatures; propagate cosmetic identifiers through skill dispatch and co-op packets; render real equipped weapon assets for dagger/javelin/axe/scythe throws using existing weapon loader/palette. Preserve hitboxes, damage, speed, cooldowns and SFX. Browser-check appearance, throws, co-op packet round-trip, low quality and previous saves.

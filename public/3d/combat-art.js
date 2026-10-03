@@ -170,6 +170,7 @@ function render(g,d){
  // Projectile trails follow velocity and height; they are never collision volumes.
  let projectileCount=0;
  for(const pr of (d.particles===false?[]:g.projectiles)||[]){
+  if(root.HERO3D?.on&&root.__projectile3dDrawn?.(pr))continue; // the dedicated renderer owns its silhouette and wake
   if(pr.owner!=='player'||++projectileCount>32)continue;
   const speed=Math.hypot(pr.vx,pr.vy||0,pr.vz);if(speed<1)continue;
   const length=Math.min(58,speed*.055),col=pr.color||'#ffe2af',size=Math.max(1,Math.min(5,(pr.size||4)*.32));

@@ -1105,7 +1105,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./party-navigation.js?v=2039"></script>
-<script src="./combat-art.js?v=2092"></script>
+<script src="./combat-art.js?v=2094"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script src="./guided-tutorial.js?v=2085"></script>
@@ -1119,7 +1119,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.093.0-class-audit';
+const VERSION3D='2.094.0-projectile-art';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12332,7 +12332,7 @@ SKILL_FX.nin_barrage=function(p,ok,am){ const w=p.weapon;
   const one=()=>{ if(mode!=='play'||!G||!G.p) return; const pp=G.p, t=projectileAimTarget(pp,720); if(t) pp.yaw=Math.atan2(t.x-pp.x,t.z-pp.z);
     const oy=pp.y+24,N=6,sp=780,dmg=(w?w.dmg:8)*effPower(pp)*0.9*am*(ok?1:OFFCLASS_MUL);
     for(let i=0;i<N;i++){ const a=pp.yaw+(i-(N-1)/2)*0.14;
-      G.projectiles.push({owner:'player',x:pp.x+Math.sin(a)*16,y:oy,z:pp.z+Math.cos(a)*16,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,gravity:0,size:6,color:'#e6e6ec',shape:'orb',glow:1,dmg,kb:90,pierce:1,el:ok?(w&&w.el):null,life:660/sp,hitSet:[]}); }
+      G.projectiles.push({owner:'player',x:pp.x+Math.sin(a)*16,y:oy,z:pp.z+Math.cos(a)*16,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,gravity:0,size:6,color:'#e6e6ec',shape:'orb',fxClass:'ninja',fxSkill:'nin_barrage',glow:1,dmg,kb:90,pierce:1,el:ok?(w&&w.el):null,life:660/sp,hitSet:[]}); }
     burst(pp.x,oy,pp.z,'#e8354a',5); SFX.shoot&&SFX.shoot(); };
   one(); setTimeout(one,150); setTimeout(one,300); p.atkTimer=0.2; };
 SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
@@ -14454,7 +14454,7 @@ const MP={
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null, art=null;
     for(const e of G.combatArt||[])if(!e._mp&&!e.visual){e._mp=1;(art=art||[]).push(BF_COMBAT_ART.packet(e));}
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
-      [Math.round(pr.x),Math.round(pr.y),Math.round(pr.z),Math.round(pr.vx),Math.round(pr.vy),Math.round(pr.vz),pr.size||6,pr.color||'#fff',pr.shape||'orb',pr.el||0,pr.gravity||0,+(pr.life||1.4).toFixed(2),pr.glow?1:0,pr.trail||0,pr.spin||0]); } }
+      [Math.round(pr.x),Math.round(pr.y),Math.round(pr.z),Math.round(pr.vx),Math.round(pr.vy),Math.round(pr.vz),pr.size||6,pr.color||'#fff',pr.shape||'orb',pr.el||0,pr.gravity||0,+(pr.life||1.4).toFixed(2),pr.glow?1:0,pr.trail||0,pr.spin||0,pr.fxClass||null,pr.fxSkill||null,pr.weapon?this.wsnap(pr.weapon):null]); } }
     if(G.shockwaves) for(const s of G.shockwaves){ if(s._mp||s.visual||s.orchardId||(G.duel&&s.foeBot)) continue; s._mp=1; (sw=sw||[]).push(
       [Math.round(s.x),Math.round(s.z),Math.round(s.r),Math.round(s.maxR),Math.round(s.spd||270),s.col||'#ffd24a',s.col2||'#c33',s.arc?+(s.arc.toFixed(2)):0,s.arc?+((s.dirX||0).toFixed(2)):0,s.arc?+((s.dirZ||0).toFixed(2)):0,s.y||0,s.delay||0,s.fxType||null]); }
     if(!proj&&!sw&&!art) return; const m={t:'cfx',by:this.myId,seq:(this._fxSeq=(this._fxSeq||0)+1),scene:this.combatScene()}; if(proj)m.proj=proj;if(sw)m.sw=sw;if(art)m.art=art;
@@ -14481,7 +14481,7 @@ const MP={
     if(d.by===this.myId||(d.scene&&d.scene!==this.combatScene()))return;
     if(d.by&&Number.isSafeInteger(d.seq)){const key=d.by+':'+d.seq,seen=G._combatSeen||(G._combatSeen=new Set());if(seen.has(key))return;seen.add(key);if(seen.size>256)seen.delete(seen.values().next().value);}
     BF_COMBAT_ART.receive(G,d.art);
-    if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0,spin:a[14]||0}); }
+    if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0,spin:a[14]||0,fxClass:typeof a[15]==='string'?a[15].slice(0,24):null,fxSkill:typeof a[16]==='string'?a[16].slice(0,32):null,weapon:a[17]&&typeof a[17]==='object'?this.wsnap(a[17]):null}); }
     if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0,y:a[10]||0,delay:a[11]||0,fxType:a[12]||undefined}); }
     // host relays a guest's combat FX to the OTHER guests so everyone sees it
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
@@ -21836,6 +21836,7 @@ function drawProjectile3(pr,t){
   drawShadow(pr.x,pr.z,pr.size*0.7,0.16);
   const yaw=Math.atan2(pr.vx,pr.vz), pitch=Math.atan2(-(pr.vy||0),Math.hypot(pr.vx,pr.vz));
   pushM(); mv(pr.x,pr.y,pr.z); rotY(yaw); rotX(pitch);
+  if(pr.weapon&&['axe','javelin','dagger','scythespin'].includes(pr.shape)){rotX(Math.PI/2);if(pr.shape==='axe'||pr.shape==='scythespin')rotZ(pr.spin||t*9);weaponMesh(pr.weapon,0);popM();return;}
   if(pr.shape==='javelin'){                            // charged javelin: the full spear visibly leaves the Warden's hand
     const c=pr.color||'#d8c27a';
     box(2.5,2.5,46,'#5a4025');
@@ -22581,10 +22582,10 @@ if(window.BF_COMBAT_ART){
     SKILL_FX[id]=function(p,...args){
       const root=depth===0, origin={x:p.x,y:p.y||0,z:p.z}; let result;
       const marks=root?combatTargets().map(e=>[e,e.markT,e.warBurstT]):[];
-      const capture=root?{rings:[],hits:[]}:G._artCast;
+      const capture=root?{rings:[],hits:[]}:G._artCast,shots=root?new Set(G.projectiles):null;
       if(root)G._artCast=capture;
       depth++;
-      try{ result=original.call(this,p,...args); }finally{depth--;if(root)delete G._artCast;}
+      try{ result=original.call(this,p,...args); }finally{depth--;if(root){delete G._artCast;for(const pr of G.projectiles)if(!shots.has(pr)&&pr.owner==='player'){pr.fxClass=art.profiles[id].cls;pr.fxSkill=id;}}}
       if(root&&result!=='refund'){
         let targets=marks.filter(([e,m,w])=>e.markT!==m||e.warBurstT!==w).map(([e])=>e);
         if(!targets.length&&['claw','execute','siphon','tether'].includes(art.profiles[id].form))targets=capture.hits;
@@ -22601,7 +22602,7 @@ if(window.BF_COMBAT_ART){
   const attack=playerAttack;
   playerAttack=function(...args){ const p=G.p,serial=p.swingId; const result=attack(...args);if(p.swingId!==serial)art.weapon(G,p,meta.classId,false);return result; };
   const charge=chargeRelease;
-  chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
+  chargeRelease=function(p,w,amt){const shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
 window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
@@ -22733,7 +22734,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2092b"></script>
+<script type="module" src="./hero3d.js?v=2094"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

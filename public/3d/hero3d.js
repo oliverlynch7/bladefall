@@ -6,7 +6,7 @@ import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=20
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2092';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2081';
-import {syncProjectiles} from './projectile3d.js?v=1981s';
+import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
@@ -1306,6 +1306,24 @@ function applyEmotePose(p,wrap,A){
  // Hide attachments only; never the hand bones or skin. Restore original visibility next frame.
  wrap.traverse(node=>{if(node.userData?._weap||(!node.isBone&&node.parent?.isBone&&/^weapon[lr]$/i.test(node.parent.name))){A.emoteWeapons.push([node,node.visible]);node.visible=false;}});
 }
+// Build a render-only thrown copy through the SAME asset/grip/palette path as equipped gear.
+window.__makeThrownWeapon=async w=>{
+ if(!w||!['axe','dagger','javelin','scythe'].includes(w.art))return null;
+ const root=new THREE.Group(),bone=new THREE.Bone();bone.name='WeaponR';root.add(bone);
+ const holder={root};await equipWeapon(holder,{model:'Warrior',weapon:w});
+ if(!holder._weap)return null;
+ colorWeapon(holder,w);
+ holder._weap.position.set(0,0,0);holder._weap.rotation.set(0,0,0);root.updateMatrixWorld(true);
+ const out=new THREE.Group();out.name='Thrown '+holder.fit?.name;
+ holder._weap.traverse(node=>{if(!node.isMesh||!node.visible)return;
+  const geometry=node.geometry.clone().applyMatrix4(node.matrixWorld);geometry.scale(HERO3D.scale,HERO3D.scale,HERO3D.scale);geometry.rotateX(Math.PI/2);
+  const materials=(Array.isArray(node.material)?node.material:[node.material]).map(m=>m.clone());
+  const mesh=new THREE.Mesh(geometry,materials.length===1?materials[0]:materials);mesh.frustumCulled=false;out.add(mesh);
+ });
+ const center=new THREE.Box3().setFromObject(out).getCenter(new THREE.Vector3());for(const node of out.children)node.position.sub(center);
+ out.userData.weapon={...w};out.userData.disposeProjectile=()=>{out.traverse(n=>{if(!n.isMesh)return;n.geometry.dispose();for(const m of (Array.isArray(n.material)?n.material:[n.material]))m.dispose();});};
+ clearWeapon(holder);return out;
+};
 
 function movingCombatLegs(p,A,dt){
  if(A.local)HERO3D.locomotionOverlay=null;

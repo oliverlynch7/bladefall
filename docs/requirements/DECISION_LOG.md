@@ -598,3 +598,7 @@ Controller camera inversion is now modeled as `invertX` and `invertY`; the prior
 
 ## [Codex | 2026-09-29] Pyromancer crash and human emotes
 User reports every Pyromancer attack/skill crashes, possibly following cheat unlock. Browser reproduction identifies missing flame motif in combat-art.js. Fix the actual renderer and test basic/charged/all eight skills with cheat unlock and normal unlock state. User approves hiding weapons during emotes and requires restoration on finish/cancel; preserve the good bow motion, rework wave/point/cheer/dance with anatomical limb targets, verify local and peer rigs.
+
+
+## [Codex | 2026-10-03] Class audit approved
+User approved auditing actual class skills and passives against descriptions, including healing, lifesteal, damage, cooldowns and PvP. Fix confirmed bugs, preserve saved choice IDs, simplify unclear descriptions and document playtest-dependent balance questions.

@@ -857,3 +857,7 @@ User requests separate controller setup toggles for right-stick horizontal and v
 
 ## [Codex | 2026-09-29] Pyromancer crash and human emotes
 User reports every Pyromancer attack/skill crashes, possibly following cheat unlock. Browser reproduction identifies missing flame motif in combat-art.js. Fix the actual renderer and test basic/charged/all eight skills with cheat unlock and normal unlock state. User approves hiding weapons during emotes and requires restoration on finish/cancel; preserve the good bow motion, rework wave/point/cheer/dance with anatomical limb targets, verify local and peer rigs.
+
+
+## [Codex | 2026-10-03] Class audit execution
+Approved: audit all class skills/passives for working effects, clear descriptions, healing/lifesteal and PvP. Grounded fixes: prevent rejected/refunded casts from triggering bonuses; scale Mage echoes relative to their original cast; remove duplicate PvP mark/curse countdowns. Preserve choice IDs. Run existing healing/choice regressions and all-class browser runtime smoke coverage; report untested conditional/network cases honestly.

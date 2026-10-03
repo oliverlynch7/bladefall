@@ -3,7 +3,7 @@ const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
-import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip} from './weapon-grips.js?v=2030';
+import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2092';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2081';
 import {syncProjectiles} from './projectile3d.js?v=1981s';
@@ -1290,16 +1290,21 @@ function colorWeapon(holder,w){
  if(src?.image?.width){const k=src.uuid+'|'+tint+'|'+accentSurface+'|'+(o.userData.elementUvTriangles?.length?holder.fit?.name:'');let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint),head=weaponTint(w)?weaponHeadMask(o,canvas.width,canvas.height,src.flipY):null;for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if((head?.[i+3]>0&&h[2]>.1)||(h[2]>.35&&(accentSurface||h[1]<.28||h[0]>65))){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if((accentSurface&&hsv[2]>.1)||(elementGold&&hsv[0]>=30&&hsv[0]<=65&&hsv[2]>.25))out.color.set(tint).multiplyScalar(.55+.45*hsv[2]);else if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
 }
 
-function restoreEmotePose(A){for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];}
+function restoreEmotePose(A){for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];for(const [node,visible] of A.emoteWeapons||[])node.visible=visible;A.emoteWeapons=[];}
 function applyEmotePose(p,wrap,A){
  const e=p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
- const t=e.t,blend=Math.min(1,t/.18,(4-t)/.25),s=Math.sin(t*7);
+ const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5)),s=Math.sin(t*Math.PI*2);
  const turn=(name,x=0,y=0,z=0)=>{const b=wrap.getObjectByName(name);if(!b)return;A.emoteBones.push([b,b.quaternion.clone()]);b.rotateX(x*blend);b.rotateY(y*blend);b.rotateZ(z*blend);};
- if(e.id==='wave'){turn('UpperArmR',0,0,-2);turn('LowerArmR',0,.3*s,-.35);}
- if(e.id==='point'){turn('UpperArmR',-1.4,0,-.15);turn('LowerArmR',.15);}
- if(e.id==='cheer'){turn('UpperArmR',0,0,-2.4);turn('UpperArmL',0,0,2.4);turn('Torso',.06*s);}
- if(e.id==='bow'){turn('Torso',.65*Math.sin(Math.PI*Math.min(1,t/3.6)));turn('Head',.2);}
- if(e.id==='dance'){turn('Hips',0,.15*s,.08*s);turn('Torso',0,-.18*s);turn('UpperArmR',.35*s,0,-.65);turn('UpperArmL',-.35*s,0,.65);turn('LowerArmR',-.4);turn('LowerArmL',-.4);turn('UpperLegR',.12*s);turn('UpperLegL',-.12*s);}
+ // Model-space hand targets keep elbows outside the torso on every shared skeleton.
+ const arm=(side,target,hint)=>{for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+side);if(b)A.emoteBones.push([b,b.quaternion.clone()]);}armTo(wrap,side,wrap.localToWorld(new THREE.Vector3(...target)),wrap.localToWorld(new THREE.Vector3(...hint)),null,blend);};
+ if(e.id==='wave'){arm('R',[-.57+.06*s,2.30,.18],[-.82,1.86,.12]);turn('FistR',0,0,.12*s);}
+ if(e.id==='point'){arm('R',[-.35,1.82,.76],[-.65,1.65,.30]);turn('Head',0,-.08);}
+ if(e.id==='cheer'){for(const side of ['R','L']){const sign=side==='R'?-1:1;arm(side,[sign*.60,2.48+.025*s,.15],[sign*.86,2.02,.12]);}turn('Head',-.06);}
+ if(e.id==='bow'){const oldBlend=Math.min(1,t/.18,(4-t)/.25);const b=wrap.getObjectByName('Torso'),h=wrap.getObjectByName('Head');for(const [bone,x] of [[b,.65*Math.sin(Math.PI*Math.min(1,t/3.6))],[h,.2]])if(bone){A.emoteBones.push([bone,bone.quaternion.clone()]);bone.rotateX(x*oldBlend);}}
+ // A grounded shoulder groove: planted feet, soft counter-rotation, hands clear of hips.
+ if(e.id==='dance'){turn('Torso',.025, .09*s,.035*s);turn('Head',0,-.06*s);arm('R',[-.49,1.48+.07*s,.30],[-.73,1.42,.08]);arm('L',[.49,1.48-.07*s,.30],[.73,1.42,.08]);}
+ // Hide attachments only; never the hand bones or skin. Restore original visibility next frame.
+ wrap.traverse(node=>{if(node.userData?._weap||(!node.isBone&&node.parent?.isBone&&/^weapon[lr]$/i.test(node.parent.name))){A.emoteWeapons.push([node,node.visible]);node.visible=false;}});
 }
 
 function movingCombatLegs(p,A,dt){
@@ -2022,8 +2027,10 @@ export function drawHero3D(p, t){
         const q=l.quaternion.clone();l.quaternion.set(r.quaternion.x,-r.quaternion.y,-r.quaternion.z,r.quaternion.w);r.quaternion.set(q.x,-q.y,-q.z,q.w);
       }
     }
-    pirateWeaponPose(p,wrap,anim,dt);
-    poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
+    if(!p.emote||p.emote.id==='bow'||p.emote.t>=4){
+      pirateWeaponPose(p,wrap,anim,dt);
+      poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
+    }
     applyEmotePose(p,wrap,anim);
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);

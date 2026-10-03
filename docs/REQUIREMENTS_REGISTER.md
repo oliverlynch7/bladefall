@@ -853,3 +853,7 @@ User reports the controller right-stick invert toggle does not actually invert t
 
 ## [Codex | 2026-09-29] Independent controller camera inversion
 User requests separate controller setup toggles for right-stick horizontal and vertical camera inversion. Preserve legacy Y inversion choices, default new/missing settings to Y inverted and X non-inverted, and persist both axes independently.
+
+
+## [Codex | 2026-09-29] Pyromancer crash and human emotes
+User reports every Pyromancer attack/skill crashes, possibly following cheat unlock. Browser reproduction identifies missing flame motif in combat-art.js. Fix the actual renderer and test basic/charged/all eight skills with cheat unlock and normal unlock state. User approves hiding weapons during emotes and requires restoration on finish/cancel; preserve the good bow motion, rework wave/point/cheer/dance with anatomical limb targets, verify local and peer rigs.

@@ -82,7 +82,7 @@ export function captureGripPose(root,A){
   for(const [bone,q] of A.gripPoseBase)q.copy(bone.quaternion);
   A.gripPoseApplied=true;
 }
-function armTo(root,side,target,hint,wristQ,weight){
+export function armTo(root,side,target,hint,wristQ,weight){
   const upper=root.getObjectByName('UpperArm'+side),lower=root.getObjectByName('LowerArm'+side),wrist=root.getObjectByName('Fist'+side);
   if(!upper||!lower||!wrist)return;
   root.updateMatrixWorld(true);

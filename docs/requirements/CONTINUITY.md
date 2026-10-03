@@ -946,3 +946,8 @@ Implemented the requested controller camera behavior: missing controller setting
 
 ## [Codex | 2026-09-29] Independent controller camera inversion
 The setup UI exposes separate left/right and up/down inversion controls. New defaults are horizontal off and vertical on.
+
+
+## [Codex | 2026-10-03] 2.092.0 — Pyromancer crash and emote repair
+Reproduced the reported Pyromancer crash in Chrome: combat-art motif attempted points.length for the missing flame shape. Added fire outline plus safe fallback; the failure was independent of cheat progression. Preserved bow motion, replaced other emote arm rotations with shared two-bone hand-target solving and outward elbow hints, eased entry/exit, grounded dance without twisting legs. Skip weapon grip overlays for these gestures. Hide attached/native weapons during all emotes and restore original visibility before the next pose, including cancellation and peer rigs.
+Validation: real Chrome on isolated localhost passed pre-change save fields, cheat unlock/rank10 basic and charged attacks, all eight skill choices through update/render/hero flush with target damage and shield state; 40 emote/class combinations across all six body rigs plus Pirate/Reaper, six time samples each, finite bones, hand-height checks, hidden/restored weapons, expiry, movement/attack/damage/jump cancellation, and co-op packet round-trip. Screenshot poses reviewed. No page exceptions in the regression; localhost voice API 404s remain expected. Physical two-device co-op and exhaustive mesh intersection clearance were not tested. Test: scripts/qa-pyromancer-emotes.cjs.

@@ -4,7 +4,12 @@ const VERSION=1,BASE=['warrior','ranger','mage'];
 const offers=[{id:'berserker',tier:1,cost:300,goal:8,key:'elites',name:'Break the guards',desc:'Defeat 8 optional prison elites across runs.'},{id:'ninja',tier:2,cost:600,goal:3,key:'seals',name:'Hidden routes',desc:'Recover 3 hidden seals in Tier 2 or higher.'},{id:'reaper',tier:3,cost:1000,goal:1,key:'warden',name:'Last gate',desc:'Defeat the final Tier 3 warden.'}];
 const upgrades=[{id:'health',name:'Endurance',desc:'+6 starting health',base:60,cap:10},{id:'armor',name:'Reinforced armor',desc:'+1% damage reduction',base:80,cap:10},{id:'weapon',name:'Weapon training',desc:'+4% starting weapon damage',base:90,cap:10}];
 const copy=x=>JSON.parse(JSON.stringify(x));
-function profile(v={}){const n=(x,max)=>Math.max(0,Math.min(max,Math.floor(Number(x)||0)));return {version:VERSION,gold:n(v.gold,1e9),tier:Math.max(1,n(v.tier,3)),classes:[...new Set([...BASE,...(Array.isArray(v.classes)?v.classes:[]).filter(x=>offers.some(o=>o.id===x))])],upgrades:Object.fromEntries(upgrades.map(u=>[u.id,n(v.upgrades?.[u.id],u.cap)])),progress:{elites:n(v.progress?.elites,1e6),seals:n(v.progress?.seals,1e6),warden:n(v.progress?.warden,1e6)},receipts:Array.isArray(v.receipts)?v.receipts.filter(x=>typeof x==='string').slice(-1500):[],checkpoint:v.checkpoint?.version===VERSION?copy(v.checkpoint):null};}
+function validCheckpoint(c){return !!(c&&c.version===VERSION&&typeof c.id==='string'&&Number.isFinite(c.seed)&&[1,2,3].includes(c.section)&&[1,2,3].includes(c.tier)&&[...BASE,...offers.map(o=>o.id)].includes(c.cid)&&c.p&&Number.isFinite(c.p.hp)&&c.p.hp>0&&c.p.gear&&c.p.stats&&c.p.weapon&&c.classes&&c.states&&c.safe&&Number.isFinite(c.safe.x)&&Number.isFinite(c.safe.z));}
+function profile(v={}){v=v&&typeof v==='object'?v:{};const n=(x,max)=>Math.max(0,Math.min(max,Math.floor(Number(x)||0)));return {version:VERSION,gold:n(v.gold,1e9),tier:Math.max(1,n(v.tier,3)),classes:[...new Set([...BASE,...(Array.isArray(v.classes)?v.classes:[]).filter(x=>offers.some(o=>o.id===x))])],upgrades:Object.fromEntries(upgrades.map(u=>[u.id,n(v.upgrades?.[u.id],u.cap)])),progress:{elites:n(v.progress?.elites,1e6),seals:n(v.progress?.seals,1e6),warden:n(v.progress?.warden,1e6)},receipts:Array.isArray(v.receipts)?v.receipts.filter(x=>typeof x==='string').slice(-1500):[],checkpoint:validCheckpoint(v.checkpoint)?copy(v.checkpoint):null};}
+function saves(v,legacy){
+ if(v&&v.version===1&&Array.isArray(v.slots))return {version:1,active:[0,1,2].includes(v.active)?v.active:0,slots:Array.from({length:3},(_,i)=>v.slots[i]&&typeof v.slots[i]==='object'?profile(v.slots[i]):null)};
+ return {version:1,active:0,slots:[legacy&&typeof legacy==='object'?profile(legacy):null,null,null]};
+}
 function credit(p,id,gold,kind){if(p.receipts.includes(id))return false;p.receipts.push(id);if(p.receipts.length>1500)p.receipts.shift();p.gold+=Math.max(0,Math.floor(gold));if(kind&&kind in p.progress)p.progress[kind]++;return true;}
 function price(p,id){const u=upgrades.find(u=>u.id===id);return u?u.base*(1+p.upgrades[id]):offers.find(o=>o.id===id)?.cost||0;}
 function buy(p,id){const u=upgrades.find(u=>u.id===id),o=offers.find(o=>o.id===id),cost=price(p,id);if(!cost||p.gold<cost)return false;if(u){if(p.upgrades[id]>=u.cap)return false;p.upgrades[id]++;}else{if(!o||p.classes.includes(id)||p.tier<o.tier||p.progress[o.key]<o.goal)return false;p.classes.push(id);}p.gold-=cost;return true;}
@@ -41,5 +46,5 @@ function layout(seed,section,tier){
  return {version:VERSION,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
-window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,credit,price,buy,layout,roomAt,copy};
+window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,roomAt,copy};
 })();

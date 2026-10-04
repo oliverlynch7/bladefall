@@ -889,3 +889,7 @@ Implementation correction: actual Endless Dungeon is G.delve/startDelve and alre
 
 ## [Codex | 2026-10-03] Prison Break first playable slice
 Implemented initial Delve-only roguelite, campaign escrow, permanent wallet/shop, three tiers, optional class qualifications, enclosed room kit, checkpoints and co-op authority. Full implementation/validation limits and remaining room/encounter expansion recorded in ENDLESS_DUNGEON_REWORK.md and requirements/CONTINUITY.md.
+
+
+## [Codex | 2026-10-03] Endless Dungeon save selection approved
+User requests entrance interface with three save slots, a How it works button, and Back to hub; verify save logic. Implement three independent dungeon profiles per current campaign character/mode, migrate existing single profile to slot 1, independent wallet/upgrades/classes/checkpoint, explicit delete and replace-run confirmation. Co-op guests choose their local dungeon profile before joining; host checkpoint ownership remains unchanged. Verify migration, reload, slot isolation, delete/cancel, failed writes, campaign escrow and co-op selection.

@@ -1,0 +1,35 @@
+async page=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>{window.requestAnimationFrame=()=>0;});await page.route('**/*',r=>r.continue());
+ const load=async path=>{await page.goto('http://127.0.0.1:4338/3d/'+path+'?mute=1');await page.waitForFunction(()=>window.__BF3&&HERO3D?.ready,null,{polling:100});};
+ await load('_qa-prechange.html');
+ const legacy=await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.hubTutDone=true;b.meta.introSeen=true;b.meta.heroName='Slot QA';b.meta.gold=4321;b.openHub();b.meta.prisonProfile=BFPrisonDungeon.profile({gold:900,tier:2,upgrades:{health:2},classes:['berserker']});b.startDelve('mage');b.G.p.hp=31;BFPrisonRun.checkpoint();b.delveExit();b.persist();return JSON.stringify(b.meta.prisonProfile);});
+ await load('');
+ const migration=await page.evaluate(async legacy=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.openHub();b.openDelveGate();const v=BFPrisonRun.library();if(JSON.stringify(v.slots[0])!==legacy||v.slots[1]||v.slots[2])throw Error('Migration changed old progress');return true;},legacy);
+ await page.locator('#prhelp').click();if(!await page.getByText('What you keep',{exact:true}).isVisible())throw Error('Help missing');await page.locator('#prclosehelp').click();
+ await page.screenshot({path:'output/playwright/dungeon-slots-desktop.png'});
+ await page.locator('[data-pr-slot="0"]').click();await page.locator('#prresume').click();
+ await page.evaluate(()=>{if(__BF3.G.p.hp!==31||__BF3.meta.classId!=='mage')throw Error('Resume changed health/class');__BF3.delveExit();__BF3.openDelveGate();});
+ await page.locator('[data-pr-slot="1"]').click();
+ await page.evaluate(()=>{const p=BFPrisonRun.profile();if(p.gold||p.tier!==1||p.checkpoint)throw Error('New slot inherited progress');p.gold=200;__BF3.persist();});
+ await page.locator('#prsaves').click();await page.locator('[data-pr-slot="1"]').click();await page.getByText('Permanent upgrades',{exact:true}).click();await page.locator('[data-prbuy="health"]').click();
+ await page.evaluate(()=>{if(BFPrisonRun.profile().gold!==140||BFPrisonRun.library().slots[0].gold!==900)throw Error('Shop leaked across slots');});
+ await page.locator('#prclass').selectOption('ranger');await page.locator('#prstart').click();
+ await page.evaluate(()=>{__BF3.G.p.hp=22;__BF3.delveExit();__BF3.openDelveGate();});
+ await page.locator('[data-pr-slot="1"]').click();await page.locator('#prstart').click();await page.locator('#prcancel').click();
+ await page.evaluate(()=>{if(BFPrisonRun.profile().checkpoint.p.hp!==22)throw Error('Cancel replaced run');});
+ await page.locator('#prsaves').click();await page.locator('[data-pr-delete="1"]').click();await page.locator('#prcancel').click();
+ await page.evaluate(()=>{if(!BFPrisonRun.library().slots[1])throw Error('Cancel deleted save');});
+ await page.locator('[data-pr-delete="1"]').click();await page.locator('#prconfirm').click();
+ await page.reload();await page.waitForFunction(()=>window.BFPrisonRun,null,{polling:100});
+ await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.openHub();__BF3.openDelveGate();const v=BFPrisonRun.library();if(v.slots[1]||v.slots[0].gold!==900||__BF3.meta.gold!==4321)throw Error('Delete/reload/campaign isolation failed');});
+ await page.locator('[data-pr-slot="1"]').click();await page.locator('#prsaves').click();await page.locator('[data-pr-slot="2"]').click();await page.locator('#prsaves').click();
+ const before=await page.evaluate(()=>{window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(){throw new DOMException('QA full','QuotaExceededError');};return JSON.stringify(BFPrisonRun.library());});
+ await page.locator('[data-pr-delete="0"]').click();await page.locator('#prconfirm').click();
+ await page.evaluate(before=>{if(JSON.stringify(BFPrisonRun.library())!==before)throw Error('Failed write deleted save');},before);
+ await page.locator('[data-pr-slot="0"]').click();await page.evaluate(before=>{if(JSON.stringify(BFPrisonRun.library())!==before)throw Error('Failed selection changed active slot');Storage.prototype.setItem=window.__storageSet;},before);
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'output/playwright/dungeon-slots-phone.png'});await page.setViewportSize({width:1280,height:720});
+ await page.locator('[data-pr-slot="0"]').click();await page.locator('#prstart').click();await page.locator('#prconfirm').click();
+ await page.evaluate(()=>{if(!__BF3.G.escape||__BF3.G.p.hp===31)throw Error('Replace did not start fresh');__BF3.delveExit();__BF3.openDelveGate();});
+ await page.locator('#prback').click();const hub=await page.evaluate(()=>__BF3.G.hub&&__BF3.meta.gold===4321);if(!hub||errors.length)throw Error(JSON.stringify({hub,errors}));
+ return {migration,threeSlots:true,shopIsolation:true,resume:true,replaceConfirmation:true,deleteCancelAndReload:true,failedWriteRollback:true,hubReturn:true,errors};
+}

@@ -1,0 +1,19 @@
+async page=>{
+ await page.addInitScript(()=>{window.requestAnimationFrame=()=>0;});await page.route('**/*',r=>r.continue());
+ const reload=async()=>{await page.goto('http://127.0.0.1:4338/3d/?mute=1');await page.waitForFunction(()=>window.BFPrisonRun&&HERO3D?.ready,null,{polling:100});};await reload();
+ const baseline=await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.hubTutDone=true;b.meta.introSeen=true;b.openHub();b.openDelveGate();BFPrisonRun.selectSlot(0);b.startDelve('warrior');b.G.p.hp=41;b.delveExit();const own=JSON.stringify(BFPrisonRun.library().slots[0]);const host={...BFPrisonRun.library().slots[0].checkpoint,id:'other-host',events:[{id:'guest-slots-'+Date.now(),gold:55,members:['guest']}],stamp:0};b.MP.active=true;b.MP.isHost=false;b.MP.myId='guest';b.MP.zone=b.MP.HUB;b.MP.onGuestData({t:'special',kind:'prison',prison:host});if(b.G.escape)throw Error('Entered without selection');return {own,host};});
+ await page.locator('[data-pr-slot="2"]').click();
+ await page.evaluate(({own,host})=>{const b=__BF3;if(b.G.escape.saveSlot!==2||!b.G.escape.remote)throw Error('Wrong guest slot');if(BFPrisonRun.library().slots[2].gold!==55)throw Error('Guest reward wrong slot');if(JSON.stringify(BFPrisonRun.library().slots[0])!==own)throw Error('Other checkpoint overwritten');b.MP.onGuestData({t:'special',kind:'prison',prison:host});if(BFPrisonRun.profile().gold!==55)throw Error('Receipt duplicated');b.MP.leave();if(!b.G.hub)throw Error('Disconnect failed');b.openDelveGate();},baseline);
+ await page.screenshot({path:'output/playwright/dungeon-slots-desktop.png'});
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>__BF3.resize());
+ const fits=await page.evaluate(()=>{const r=document.querySelector('.prison-menu').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1;});if(!fits)throw Error('Mobile menu overflows');await page.screenshot({path:'output/playwright/dungeon-slots-phone.png'});await page.setViewportSize({width:1280,height:720});
+ const original=await page.evaluate(()=>({library:JSON.stringify(BFPrisonRun.library()),gold:__BF3.meta.gold,slot:localStorage.getItem('bf3_slot')}));
+ const other=await page.evaluate(slot=>{const alt=slot==='2'?'1':'2',key='bladefall3d_s'+alt+'_rl',saved=localStorage.getItem(key);localStorage.removeItem(key);localStorage.setItem('bf3_slot',alt);return {key,saved};},original.slot);await reload();
+ await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');if(BFPrisonRun.library().slots.some(Boolean))throw Error('Campaign character inherited dungeon saves');b.meta.gold=2468;b.meta.hubTutDone=true;b.meta.introSeen=true;b.openHub();b.openDelveGate();BFPrisonRun.selectSlot(1);BFPrisonRun.profile().gold=123;b.persist();});
+ await page.evaluate(({key,saved})=>{if(saved===null)localStorage.removeItem(key);else localStorage.setItem(key,saved);},other);
+ await page.evaluate(slot=>{if(slot===null)localStorage.removeItem('bf3_slot');else localStorage.setItem('bf3_slot',slot);},original.slot);await reload();
+ await page.evaluate(original=>{__BF3.loadMode('rl');if(JSON.stringify(BFPrisonRun.library())!==original.library||__BF3.meta.gold!==original.gold)throw Error('Campaign character switch leaked');__BF3.openHub();__BF3.openDelveGate();},original);
+ for(const i of [0,1,2]){if(await page.locator('[data-pr-delete="'+i+'"]').count()){await page.locator('[data-pr-delete="'+i+'"]').click();await page.locator('#prconfirm').click();}}
+ await reload();await page.evaluate(()=>{__BF3.loadMode('rl');__BF3.openHub();__BF3.openDelveGate();if(BFPrisonRun.library().slots.some(Boolean))throw Error('Deleted saves resurrected');});
+ return {guestSlotChoice:true,guestRewardIsolation:true,checkpointPreserved:true,campaignCharacterIsolation:true,deleteAllReload:true,mobileFits:true};
+}

@@ -9,3 +9,6 @@ const p=D.profile();assert(!D.buy(p,'reaper'));D.credit(p,'a',500);assert(!D.cre
 for(let i=0;i<8;i++)D.credit(p,'elite'+i,0,'elites');assert(D.buy(p,'berserker'));assert(p.classes.includes('berserker'));assert(!D.buy(p,'berserker'));
 assert.equal(D.profile({tier:99,upgrades:{armor:99}}).upgrades.armor,10);assert.equal(D.profile({tier:99}).tier,3);
 console.log('300 deterministic connected layouts; economy, class qualification, duplicate receipts and caps passed.');
+const legacy=D.profile({gold:123,tier:2,classes:['ninja']});const book=D.saves(null,legacy);assert.equal(book.slots.length,3);assert.equal(book.slots[0].gold,123);assert.equal(book.slots[1],null);book.slots[0]=null;assert.equal(D.saves(book,legacy).slots[0],null);assert.equal(D.saves({version:1,active:90,slots:[null,null,null]}).active,0);
+assert.equal(D.profile({gold:99,checkpoint:{version:1,p:{}}}).gold,99);assert.equal(D.profile({gold:99,checkpoint:{version:1,p:{}}}).checkpoint,null);assert.equal(D.profile(null).gold,0);
+console.log('Save migration, empty-slot tombstones and malformed checkpoint fallback passed.');

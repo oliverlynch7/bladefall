@@ -1128,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.108.0-hammer-carry';
+const VERSION3D='2.109.0-weapon-glows';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3114,8 +3114,8 @@ const COSMETICS={
 const COSSLOTS=[{k:'cape',label:'Cape'},{k:'trail',label:'Trail'},{k:'glow',label:'Weapon Glow'}];
 function cosOwned(slot,id){ const c=COSMETICS[slot].find(x=>x.id===id); return !!(c&&c.has()); }
 function cosEquipped(slot){ const id=meta.cosEquipped&&meta.cosEquipped[slot]; return (id&&cosOwned(slot,id))?COSMETICS[slot].find(x=>x.id===id):null; }
-function cosmeticAppearance(){return {cape:cosEquipped('cape')?.id||null,trail:cosEquipped('trail')?.id||null};}
-function validCosmeticAppearance(v){return {cape:COSMETICS.cape.some(c=>c.id===v?.cape)?v.cape:null,trail:COSMETICS.trail.some(c=>c.id===v?.trail)?v.trail:null};}
+function cosmeticAppearance(){return {cape:cosEquipped('cape')?.id||null,trail:cosEquipped('trail')?.id||null,glow:cosEquipped('glow')?.id||null};}
+function validCosmeticAppearance(v){return {cape:COSMETICS.cape.some(c=>c.id===v?.cape)?v.cape:null,trail:COSMETICS.trail.some(c=>c.id===v?.trail)?v.trail:null,glow:COSMETICS.glow.some(c=>c.id===v?.glow)?v.glow:null};}
 function checkCosmetics(){ let n=0;
   for(const s of COSSLOTS) for(const c of COSMETICS[s.k]){
     const key=s.k+':'+c.id;
@@ -23033,7 +23033,7 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2108"></script>
+<script type="module" src="./hero3d.js?v=2109"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

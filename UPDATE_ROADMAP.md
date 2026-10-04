@@ -2317,3 +2317,7 @@ Validation: 29-menu state regression including old cursor histories, no-effect n
 
 ## [Codex | 2026-10-04]
 Shipped 2.108.0-hammer-carry: dedicated lower forward hammer ready pose clears Warrior face instead of using upright heavy-weapon carry. Palm anchors, support-hand IK and authored attacks retained. Browser: all three hammer models, 21 idle/walk/run/charge/attack pose checks passed, support grip errors within .04 rig units; screenshot visually reviewed. Syntax gate and prior-version 17-class save check passed.
+
+
+## [Codex | 2026-10-04]
+2.109.0-weapon-glows: all five cosmetic glows now use isolated emissive materials and depth-tested edge highlights on current 3D weapons, including pirate pair. Shared player/mirror/peer rendering and isolated bag portrait hooked up. Validated glow ID added to co-op appearance snapshots. Weapon disposal cleans outline resources. Browser checks: 36 color/removal checks across hammer/sword/bow/staff/scythe/pirate; independent actor materials and restored original emission; previous save intact (17 classes); syntax gate passed. Visual hammer screenshot reviewed. Full two-client co-op not re-run for this cosmetic patch.

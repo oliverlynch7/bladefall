@@ -676,3 +676,7 @@ Forge: prevent single and batch merges above the active character equipment rari
 
 ## [Codex | 2026-10-04]
 User: Warrior warhammer blocks the face. Give hammers a lower forward ready carry, keeping palm grip and two-handed support through movement/attacks.
+
+
+## [Codex | 2026-10-04]
+Apply all five weapon glow cosmetics to current 3D weapons, previews and co-op; preserve weapon detail and restore materials when removed.

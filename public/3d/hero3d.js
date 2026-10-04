@@ -1,3 +1,4 @@
+import {syncWeaponGlow} from './weapon-glow.js?v=2109';
 import {syncClassLook,clearClassLook} from './class-look3d.js?v=2084';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
@@ -954,7 +955,7 @@ function clearWeapon(actor,dispose=true){
   const paintMaterials=new Set();
   for(const o of strays){for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m?.userData?._weaponPaint)paintMaterials.add(m);if(o.parent)o.parent.remove(o);}
   if(dispose)for(const m of paintMaterials)m.dispose();
-  if(dispose)for(const o of strays){if(o.userData.gripGeometryOwned)o.geometry?.dispose();if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
+  if(dispose)for(const o of strays){if(o.userData.weaponGlowEdge){o.geometry?.dispose();o.material?.dispose();}if(o.userData.gripGeometryOwned)o.geometry?.dispose();if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
@@ -2055,6 +2056,7 @@ export function drawHero3D(p, t){
     const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;
     const lookRoot=rec?rec.node:actor,lookTier=cosmeticLocal?(window.BFClassLooks?.tier(cosmeticMeta,cosmeticClass)||0):(p.lookTier||0);syncClassLook(lookRoot,cosmeticClass,(cosmeticLocal?castleDisguise():p.disguise)?0:lookTier,headMetrics({root:lookRoot,model:rec?rec.model:HERO3D.model}),performance.now()/1000,!cosmeticMeta?.reduceMotion);
     const cosmeticIds=cosmeticLocal?window.__BF3?.cosmeticAppearance?.():p.cosmetics||{};
+    syncWeaponGlow(rec?rec.holder:localWeaponHolder(),cosmeticIds.glow);
     syncCosmetics(wrap,p,['play','mirror'].includes(window.__BF3?.mode)?dt:0,{...cosmeticIds,model:rec?rec.model:HERO3D.model,accent:CLASS_SKINS[cosmeticClass]?.metal||'#ae9671',particles:cosmeticMeta?.particles!==false,hidden:!!p.dead||!!p.downed,sceneKey:[window.__BF3?.G?.runSeed,window.__BF3?.G?.zone,window.__BF3?.G?.area,window.__BF3?.G?.trial,window.__BF3?.G?.hub,window.__BF3?.G?.riftHall].join('|')});
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
        shared context its internal state cache is reset every frame, so being explicit removes a
@@ -2441,7 +2443,7 @@ window.__hero3dBagPreview=(canvas,opts)=>{
   };
   rec.dispose=()=>{if(rec.disposed)return;rec.disposed=true;rec.observer.disconnect();rec.resize.disconnect();holder._weapSeq=(holder._weapSeq||0)+1;clearWeapon(holder);rec.pet?.userData.portraitDispose?.();mixer.stopAllAction();mixer.uncacheRoot(hero);hero.traverse(n=>{if(n.isSkinnedMesh)n.skeleton.dispose();});render.dispose();render.forceContextLoss();if(bagPortrait===rec){bagPortrait=null;window.__bagPortraitState={...window.__bagPortraitState,disposed:true};}};
   rec.observer=new MutationObserver(()=>{if(!canvas.isConnected)rec.dispose()});rec.observer.observe(document.body,{childList:true,subtree:true});rec.resize=new ResizeObserver(()=>rec.draw());rec.resize.observe(canvas);
-  queueEquip(()=>rec.disposed?null:equipWeapon(holder,{model:HERO3D.model,weapon:opts.player.weapon})).then(()=>{if(rec.disposed)return;poseWeaponGrip({...opts.player,vx:0,vz:0,onGround:true,atkTimer:0,combatPose:null,emote:null},hero,{},holder.model,1);colorWeapon(holder,opts.player.weapon);rec.draw();}).catch(e=>console.warn('Inventory weapon',e));
+  queueEquip(()=>rec.disposed?null:equipWeapon(holder,{model:HERO3D.model,weapon:opts.player.weapon})).then(()=>{if(rec.disposed)return;poseWeaponGrip({...opts.player,vx:0,vz:0,onGround:true,atkTimer:0,combatPose:null,emote:null},hero,{},holder.model,1);colorWeapon(holder,opts.player.weapon);syncWeaponGlow(holder,window.__BF3?.cosmeticAppearance?.().glow);rec.draw();}).catch(e=>console.warn('Inventory weapon',e));
   if(opts.pet)companionPortrait(opts.pet.id).then(pet=>{if(!pet)return;if(rec.disposed){pet.userData.portraitDispose?.();return}rec.pet=pet;stage.add(pet);pet.updateMatrixWorld(true);const pb=new THREE.Box3().setFromObject(pet,true),ps=pb.getSize(new THREE.Vector3());const scale=25/Math.max(1,ps.y);pet.scale.multiplyScalar(scale);pet.position.set(27,-pb.min.y*scale,-16);pet.rotation.y=-.2;rec.draw();});
  }
  bagPortrait.opts=opts;bagPortrait.draw();return true;

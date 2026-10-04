@@ -23,10 +23,10 @@ window.BFController=(()=>{
   return {gp,on,edge,buttons,edges,x:dead(gp.axes[config.moveX??(config.swap?2:0)]||0),z:dead(gp.axes[config.moveY??(config.swap?3:1)]||0),rx:dead(gp.axes[config.lookX??(config.swap?0:2)]||0),ry:dead(gp.axes[config.lookY??(config.swap?1:3)]||0)};
  }
  function menu(p){
-  if(!p)return;const root=dialog||document;const els=[...root.querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(e=>!e.disabled&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
-  const focused=document.activeElement;if(focused?.type==='range'&&(p.edges[14]||p.edges[15])){focused.value=+focused.value+(p.edges[15]?1:-1)*Number(focused.step||1);focused.dispatchEvent(new Event('change'));return;}
+  if(!p)return;const root=dialog||(document.getElementById('overlay')?.getClientRects().length?document.getElementById('ovcard'):null)||document;const els=[...root.querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(e=>!e.disabled&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+  const focused=document.activeElement;if(focused?.type==='range'&&(p.edges[14]||p.edges[15])){focused.value=+focused.value+(p.edges[15]?1:-1)*Number(focused.step||1);focused.dispatchEvent(new Event('input',{bubbles:true}));focused.dispatchEvent(new Event('change',{bubbles:true}));return;}
   const t=performance.now(),dir=p.buttons[13]||p.buttons[15]||p.z>.55||p.x>.55?1:p.buttons[12]||p.buttons[14]||p.z<-.55||p.x<-.55?-1:0;
-  if(dir&&t>navAt){navAt=t+220;const i=els.indexOf(document.activeElement);els[(i+dir+els.length)%els.length]?.focus();document.activeElement?.scrollIntoView({block:'nearest'});}
+  if(dir&&t>navAt){navAt=t+220;const i=els.indexOf(document.activeElement);els[(i<0?(dir>0?0:els.length-1):(i+dir+els.length)%els.length)]?.focus();document.activeElement?.scrollIntoView({block:'nearest'});}
   if(p.edges[0]){const e=document.activeElement;if(els.includes(e)){if(e.tagName==='SELECT'){e.selectedIndex=(e.selectedIndex+1)%e.options.length;e.dispatchEvent(new Event('change'));}else e.click();}else els[0]?.focus();}
   if(p.edges[1]){if(dialog){dialog.close();return;}window.dispatchEvent(new KeyboardEvent('keydown',{code:'Escape',key:'Escape',bubbles:true}));}
  }
@@ -38,7 +38,7 @@ window.BFController=(()=>{
  bind('padEnabled',e=>meta.padOff=!e.checked);bind('padLabels',e=>config.labels=e.value);bind('padDead',e=>config.deadzone=+e.value);bind('padSens',e=>config.sensitivity=+e.value);bind('padInvertX',e=>config.invertX=e.checked);bind('padInvertY',e=>{config.invertY=e.checked;config.invert=e.checked;});bind('padSwap',e=>config.swap=e.checked);
  dialog.querySelectorAll('[data-axis]').forEach(e=>e.onchange=()=>{config[e.dataset.axis]=Math.max(0,Math.min(15,+e.value||0));save();});
  dialog.querySelectorAll('[data-bind]').forEach(b=>b.onclick=()=>{capture=b.dataset.bind;blocked=true;refresh();});
- dialog.querySelector('#padCancel').onclick=()=>{capture=null;refresh();};dialog.querySelector('#padReset').onclick=()=>{config.bindings={...defaults};capture=null;save();refresh();};dialog.querySelector('#padClose').onclick=()=>dialog.close();
+ dialog.querySelector('#padCancel').onclick=()=>{capture=null;refresh();};dialog.querySelector('#padReset').onclick=()=>{meta.controller={bindings:{...defaults},invertX:false,invertY:true};capture=null;save();dialog.addEventListener('close',()=>open(meta,persist),{once:true});dialog.close();};dialog.querySelector('#padClose').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>{dialog.remove();dialog=null;capture=null;blocked=true;});refresh();
  }
  return {setup,read,menu,open,label,get active(){return !!dialog;},get config(){return config;},defaults};

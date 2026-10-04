@@ -648,3 +648,7 @@ Continue approved original dungeon combat: Bell Keeper shelter pillars, Iron Maw
 
 ## [Codex | 2026-10-04] Approved inter-boss dungeon pass
 User approved varied encounters, room layouts/traversal, optional risk rewards, fair scarce-healing pacing and full-run/save checks. Implement revision 4 room templates, original shield guard, authored mixed encounter positions, wave breathing room, optional elevated gold route. Preserve revisions 1-3 and campaign isolation; no SFX changes.
+
+
+## [Codex | 2026-10-04] General usability/reliability pass approved
+User approved all six proposed areas: journal/clue clarity, quest interaction feedback, class/equipment explanations, controller usability, campaign progression checks, accessibility settings. Audit existing implementations first; fix concrete gaps without changing combat balance or final art direction. Grounded changes: journal all-level scope/location labels, accurate next-task feedback, numeric equipment comparisons, controller slider/focus fixes, adjustable reading text, and campaign regression coverage.

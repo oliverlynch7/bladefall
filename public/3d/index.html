@@ -996,6 +996,10 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 .openingCopy button:disabled{opacity:.4;cursor:default}#openingNext{background:#dfbf79;color:#19170f;font-weight:bold}.openingCopy button:focus-visible{outline:3px solid #fff;outline-offset:3px}.openingCopy small{display:block;color:#b9c1cf;margin-top:12px}
 @media(max-width:600px){#openingArt{flex:0 0 auto;height:auto;aspect-ratio:16/9;margin-top:auto}.openingCopy{padding:18px 18px max(20px,env(safe-area-inset-bottom));margin-bottom:auto}.openingCopy button{padding:10px 13px}}
 
+body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,body.reading-large .journal-task span,body.reading-large .jn-reading p,body.reading-large .setrow label,body.reading-large .setrow small{font-size:var(--reading-size)!important;line-height:1.5!important}
+#ovcard :focus-visible{outline:3px solid #ffd275;outline-offset:3px}
+@media(max-width:600px){.classviewer .buildhead{max-height:45%;overflow:auto;flex-shrink:0}.classviewer .buildhead .ovkicker{font-size:12px!important;letter-spacing:.04em!important}.classviewer .buildhead .ovh{font-size:26px!important;line-height:1.2}.classviewer .ctabs{max-height:130px;overflow:auto}.classviewer .buildscroll{min-height:100px}.classviewer .viewerfoot{flex-shrink:0}}
+.journal-clue small{display:block;margin-top:4px}
 </style>
 </head>
 <body>
@@ -1123,7 +1127,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.101.0-dungeon-encounters';
+const VERSION3D='2.102.0-adventure-clarity';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1181,7 +1185,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -3218,7 +3222,7 @@ function briarReceive(request,actor,position){
  const s=adventureStoryState(),party=MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];
  if(!party.includes(actor))return false;
  const r=BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:mode==='play',npcs:G.storyNpcs||[],objects:briarObjects(),party});
- if(r.changed){journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=r.state.revision;}G.storyState=r.state;briarSync();
+ if(r.changed){journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;briarSync();
   if(request.event.type==='world'){
    const key=request.event.key,event=briarBook.events[key],notesChanged=JSON.stringify(s.notes)!==JSON.stringify(r.state.notes);
    if(notesChanged){const note=Object.entries(r.state.notes).filter(([id,n])=>JSON.stringify(n)!==JSON.stringify(s.notes[id])).at(-1)?.[1];if(note)toast('Journal updated · '+note.title);}
@@ -3226,8 +3230,8 @@ function briarReceive(request,actor,position){
    if(puzzle)presentStoryNotice(puzzle);
    else if(!notesChanged){const gains=(event?.effects||[]).filter(e=>e.type==='item'&&e.amount>0&&!/^(mc\.screen\.|sl\.attempt\.)|(?:attempts?|tries)$|^fc\.cool$/.test(e.id));
     if(gains.length)SFX.pickup();
-    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:((inBriar()?({'briar.root.1':'Tangle root collected for Mara.','briar.root.2':'Tangle root collected for Mara.','briar.root.3':'Tangle root collected for Mara.','briar.dressings':'Clean dressings collected. Bring them and three tangle roots to Mara.','briar.gus.tools':'Gus’s tools collected. Return the tool roll to him at the workshop.'})[key]:null)||BFPuzzleFeedback.outcome(key)||areaQuests()[0]?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
-    else presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:BFPuzzleFeedback.outcome(key)||areaQuests()[0]?.d||'Your progress has been updated.'});
+    if(gains.length)presentStoryNotice({id:request.event.id,kind:'Quest item collected',title:'Collected · '+(o?.label||'Quest item').replace(/^(Take|Gather|Collect|Recover|Pick up)\s+/i,''),text:((inBriar()?({'briar.root.1':'Tangle root collected for Mara.','briar.root.2':'Tangle root collected for Mara.','briar.root.3':'Tangle root collected for Mara.','briar.dressings':'Clean dressings collected. Bring them and three tangle roots to Mara.','briar.gus.tools':'Gus’s tools collected. Return the tool roll to him at the workshop.'})[key]:null)||BFPuzzleFeedback.outcome(key)||areaQuests().find(q=>!questDone(q))?.d||'Your quest items are kept in the journal.')+'\nQuest items do not use bag space.'});
+    else presentStoryNotice({id:request.event.id,kind:'World updated',title:o?.label||'Progress made',text:BFPuzzleFeedback.outcome(key)||areaQuests().find(q=>!questDone(q))?.d||'Your progress has been updated.'});
    }
   }
  }
@@ -3847,7 +3851,7 @@ function journalNoticeSync(seed=false){
 BFJournalNotice.configure(id=>openJournal(id));
 function addJournalNote(id,title,text){
   if(!isCampaignAdventure()||typeof id!=='string'||!id||['__proto__','constructor','prototype'].includes(id))return false;
-  const state=adventureStoryState();journalNoticeSync();state.notes[id]={region:curZone().id,part:G.area,order:state.revision+1,title:String(title),text:String(text)};journalNoticeSync();return true;
+  const state=adventureStoryState();journalNoticeSync();state.notes[id]={region:curZone().id,part:G.area,order:Math.max(state.revision,...Object.values(state.notes).map(n=>Number(n.order)||0))+1,title:String(title),text:String(text)};journalNoticeSync();return true;
 }
 const journalEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let _journalFrom='play';
@@ -3895,18 +3899,18 @@ function openJournal(focusId){
   const row=(title,progress,done,kind)=>`<li class="journal-task ${done?'done':''}"><strong>${kind==='hunt'?uiIcon('quest-hunt'):''}${done?'✓ ':''}${esc(title)}</strong>${progress?`<span>${esc(progress)}</span>`:''}</li>`;
   const main=campaign?(G.area<0?[{title:'Defeat '+region.boss.name,done:!!G.boss?.dead}]:areaQuests().map(q=>({title:q.d,progress:questProgressText(q),done:questDone(q)}))):[];
   const optional=discoveredOptionalTasks(),active=main.filter(q=>!q.done),finished=main.concat(optional).filter(q=>q.done);
-  const notes=Object.entries(state.notes).filter(([id,n])=>n.region===region.id).map(([id,n],i)=>({id,...n,sort:n.order||i})).sort((a,b)=>b.sort-a.sort);
-  const current=notes.filter(n=>n.part==null||n.part===G.area),earlier=notes.filter(n=>n.part!=null&&n.part!==G.area);
+  const notes=Object.entries(state.notes).map(([id,n],i)=>({id,...n,sort:n.order||i})).sort((a,b)=>b.sort-a.sort);
+  const current=notes.filter(n=>n.region===region.id&&(n.part==null||n.part===G.area));
   if(typeof focusId!=='string'&&state.notes[BFJournalNotice.queue.current?.id])focusId=BFJournalNotice.queue.current.id;
   const relatedId=typeof focusId==='string'&&state.notes[focusId]?focusId:BFJournalClues.related(G,BFPartyNavigation.target(G)),related=notes.find(n=>n.id===relatedId);
-  const note=n=>`<article class="journal-clue" data-note-id="${esc(n.id)}"><strong>${uiIcon('journal-clue')}${esc(n.title)}</strong><p>${esc(n.text)}</p></article>`;
+  const note=n=>`<article class="journal-clue" data-note-id="${esc(n.id)}"><strong>${uiIcon('journal-clue')}${esc(n.title)}</strong><small class="journal-muted">${esc(ZONES.find(z=>z.id===n.region)?.name||'Adventure')}${n.part>=0?' · Part '+(n.part+1):''}</small><p>${esc(n.text)}</p></article>`;
   const fold=(title,body,count)=>`<details class="journal-fold"><summary>${({'Other main tasks':uiIcon('quest-main'),'Optional tasks':uiIcon('quest-side'),'Quest items':uiIcon('quest-item'),'Rift shards':uiIcon('item-rift-shard')})[title]||''}${esc(title)} <small>${count}</small></summary>${body}</details>`;
   const items=Object.entries(state.items).filter(([id,n])=>n>0&&(!id.includes('.')||/^(cg\.(coat|helmet|papers|personal)|pc\.seeds|sc\.(rudder|sail|rope|bell))$/.test(id)));
   const names={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll','cg.coat':'Legion coat','cg.helmet':'Legion helmet','cg.papers':'Patrol papers','cg.personal':'Roland’s armor','pc.seeds':'Seed tin','sc.rudder':'Rudder','sc.sail':'Sail','sc.rope':'Ship rope','sc.bell':'Ship bell'};
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
-  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">${uiIcon('journal')} JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Your next step, nearby puzzle clues, and every clue you have found in this level.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>${uiIcon('quest-main')} Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',active.length-1):''}${related?'<section class="journal-next" id="journalRelevant"><h3>'+uiIcon('quest-puzzle')+((typeof focusId==='string'&&focusId===relatedId)?'The clue you opened':'Clue for this puzzle')+'</h3>'+note(related)+'</section>':''}<label for="journalSearch"><strong>Find a clue</strong></label><input id="journalSearch" type="search" placeholder="Search a place, object or word…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0;padding:12px;background:#171e2c;color:#f6ecd6;border:1px solid #8c7958;border-radius:8px"><div id="journalClueResults"></div>${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true,q.kind)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
-  const renderClues=()=>{const query=document.getElementById('journalSearch').value.trim(),found=BFJournalClues.search(notes,query),recent=current.filter(n=>n.id!==relatedId);document.getElementById('journalClueResults').innerHTML=query?'<h3>'+found.length+' matching clues</h3>'+found.map(note).join('')+(found.length?'':'<p class="journal-muted">No matching clues. Try a shorter word.</p>'):'<h3>Latest discoveries</h3>'+recent.slice(0,3).map(note).join('')+(recent.length?'':'<p class="journal-muted">No other clues found in this part yet.</p>')+fold('All clues in this level',notes.map(note).join('')||'<p>No clues found yet.</p>',notes.length);};
-  document.getElementById('journalSearch').oninput=renderClues;renderClues();
+  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">${uiIcon('journal')} JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Your next step, nearby puzzle clues, and every clue you have found in this level.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>${uiIcon('quest-main')} Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',active.length-1):''}${related?'<section class="journal-next" id="journalRelevant"><h3>'+uiIcon('quest-puzzle')+((typeof focusId==='string'&&focusId===relatedId)?'The clue you opened':'Clue for this puzzle')+'</h3>'+note(related)+'</section>':''}<label for="journalScope">Show clues from <select id="journalScope"><option value="here">This level</option><option value="all">All visited levels</option></select></label><br><label for="journalSearch"><strong>Find a clue</strong></label><input id="journalSearch" type="search" placeholder="Search a place, object or word…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0;padding:12px;background:#171e2c;color:#f6ecd6;border:1px solid #8c7958;border-radius:8px"><div id="journalClueResults"></div>${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true,q.kind)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
+  const renderClues=()=>{const query=document.getElementById('journalSearch').value.trim(),scope=document.getElementById('journalScope').value,visible=scope==='all'?notes:notes.filter(n=>n.region===region.id),found=BFJournalClues.search(visible,query),recent=visible.filter(n=>n.id!==relatedId);document.getElementById('journalClueResults').innerHTML=query?'<h3>'+found.length+' matching clues</h3>'+found.map(note).join('')+(found.length?'':'<p class="journal-muted">No matching clues. Try a shorter word.</p>'):'<h3>Latest discoveries</h3>'+recent.slice(0,3).map(note).join('')+(recent.length?'':'<p class="journal-muted">No other clues found in this part yet.</p>')+fold(scope==='all'?'All collected clues':'All clues in this level',visible.map(note).join('')||'<p>No clues found yet.</p>',visible.length);};
+  document.getElementById('journalScope').value=campaign?'here':'all';document.getElementById('journalScope').onchange=renderClues;document.getElementById('journalSearch').oninput=renderClues;renderClues();
   document.getElementById('journalClose').onclick=closeJournal;
   document.getElementById('journalClose').focus({preventScroll:true});
 }
@@ -16374,21 +16378,22 @@ function showNextLoot(){ if(!G) return; const q=G.lootQueue||[], el=document.get
   const drop=q.shift(); drop.expire=(G.time||0)+LOOT_CARD_SEC; drop.max=LOOT_CARD_SEC; G.lootCard=drop; _lootCSS(); renderLootCard(); }
 function renderLootCard(){ const d=G&&G.lootCard, el=document.getElementById('lootcard'); if(!d||!el) return;
   const it=d.item, kind=d.kind, rar=RARITY[it.rarity]||RARITY.common, col=rar.color, p=G.p;
-  const arr=(a,b,low)=>a===b?'<span class="same">=</span>':((low?b<a:b>a)?'<span class="up">▲</span>':'<span class="down">▼</span>');
-  const numRow=(lbl,a,b,low)=>`<div class="lcrow"><span>${lbl}</span><span><b>${a}</b> → <b class="${a===b?'same':((low?b<a:b>a)?'up':'down')}">${b}</b> ${arr(a,b,low)}</span></div>`;
+  const arr=(a,b,low)=>Number(a)===Number(b)?'<span class="same">=</span>':((low?Number(b)<Number(a):Number(b)>Number(a))?'<span class="up">▲</span>':'<span class="down">▼</span>');
+  const numRow=(lbl,a,b,low)=>`<div class="lcrow"><span>${lbl}</span><span><b>${a}</b> → <b class="${Number(a)===Number(b)?'same':((low?Number(b)<Number(a):Number(b)>Number(a))?'up':'down')}">${b}</b> ${arr(a,b,low)}</span></div>`;
   let rows='',aff='',typ='';
   if(kind==='weapon'){ const cur=p.weapon||{dmg:0,cd:.4,range:0}; typ=weapFamily(it)+' · '+weapClassName(it);
-    rows=numRow('Damage',cur.dmg,it.dmg)+numRow('Speed',(+(cur.cd||0)).toFixed(2),(+(it.cd||0)).toFixed(2),true)+numRow('Range',cur.range||0,it.range||0);
-    rows+=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b class="up">${a.label}</b></div>`).join('');
+    rows=numRow('Base damage',cur.dmg,it.dmg)+numRow('Attack delay (s)',(+(cur.cd||0)).toFixed(2),(+(it.cd||0)).toFixed(2),true)+numRow('Range',cur.proj?.range||cur.range||0,it.proj?.range||it.range||0);
+    rows+=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b>${journalEscape(a.label)}</b></div>`).join('');
     const e2=normEl(it.el); if(e2) aff=`<div class="lcaff" style="color:${elementColor(e2)}">${affIcon(e2)} ${affName(e2)} · ${affStatus(e2)}</div>`; if(it.lifesteal) aff+=`<div class="lcaff" style="color:#ff9ab0">🩸 ${Math.round(it.lifesteal*100)}% lifesteal</div>`; }
   else if(kind==='armor'){ const cur=(p.gear&&p.gear[it.slot])||{defense:0}; typ=((SLOTS&&SLOTS[it.slot]?SLOTS[it.slot].label:it.slot)||'armor');
-    rows=numRow('Defense',cur.defense||0,it.defense||0)+(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b class="up">${a.label}</b></div>`).join(''); }
-  else { typ=(TRINKETS&&TRINKETS[it.slot]?TRINKETS[it.slot].label:'trinket'); rows=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Passive</span><b class="up">${a.label}</b></div>`).join('')||'<div class="lcrow"><span>bonus</span></div>'; }
+    rows=numRow('Defense points',cur.defense||0,it.defense||0)+(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b>${journalEscape(a.label)}</b></div>`).join(''); }
+  else { typ=(TRINKETS&&TRINKETS[it.slot]?TRINKETS[it.slot].label:'trinket'); rows=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Passive</span><b>${journalEscape(a.label)}</b></div>`).join('')||'<div class="lcrow"><span>bonus</span></div>'; }
+  const equipped=kind==='weapon'?p.weapon:p.gear?.[it.slot];if(equipped?.affixes?.length)rows+='<div class="lcaff same">Equipped bonuses: '+equipped.affixes.map(a=>journalEscape(a.label)).join(' · ')+'</div>';
   const lock=(typeof canWield==='function'&&!canWield(it))?` 🔒Lv${rarityReq(it.rarity)}`:'';
   el.style.setProperty('--lc',col);
   const _ic=(()=>{ try{ return itemAv(it); }catch(e){ return ''; } })();
   el.innerHTML=`<div class="lchead">${_ic?`<img class="lcicon" src="${_ic}" alt="">`:''}<div class="lchtext"><div class="lcrar">${rar.name}${(G.lootQueue&&G.lootQueue.length)?' · +'+G.lootQueue.length+' waiting':''}</div><div class="lcname">${it.name}${lock}</div></div></div>`
-   +`<div class="lctyp">${typ}</div>${rows}${aff}`
+   +`<div class="lctyp">${typ}</div><div class="lctyp">Equipped → Found${kind==='weapon'?' · lower delay is faster':''}</div>${rows}${aff}`
    +`<div class="lckeys"><div class="lckey"><b>${lootLabel('lootEquip')}</b> Equip</div><div class="lckey"><b>${lootLabel('lootBag')}</b> Bag</div><div class="lckey"><b>${lootLabel('lootSell')}</b> Sell +${itemGold(it)}g</div></div>`
    +`<div class="lctyp" style="text-align:center;margin:6px 0 0;opacity:.65">wait → bag automatically</div><div class="lcbar"><i id="lcbarfill" style="width:100%"></i></div>`;
   el.className=''; }
@@ -17050,7 +17055,12 @@ function enhanceMenuShell(){
   card.querySelectorAll('.bigbtn').forEach(b=>{ const t=(b.textContent||'').trim().toLowerCase();
     if(/^(back|leave|cancel|not now|keep old|return|close|remove|title screen)/.test(t)||/back$/i.test(b.id||'')) b.classList.add('utility','ghost'); });
 }
+function applyReadingSize(){
+ const scale=[1,1.15,1.3].includes(meta.readingSize)?meta.readingSize:1;
+ document.body.classList.toggle('reading-large',scale>1);document.documentElement.style.setProperty('--reading-size',(16*scale)+'px');
+}
 function showOverlayHTML(html){
+  applyReadingSize();
   if(typeof stopAllLoops==='function') stopAllLoops();   // opening any menu silences looping sfx (footsteps/heartbeat) that would otherwise hang while paused
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
   // Preserve scroll across a re-render for EVERY scrollable box in the menu — not just .achlist —
@@ -18318,7 +18328,7 @@ function openClasses(back){
   if(def){
     tree=`<div class="buildroot"><div class="bticon">${passiveIcon(C2_INNATE_ICON[view])}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE · ACTIVE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
     tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, picked=(cs.ch||{})[rank], isSkill=R.kind==='skill';
-      const line=o=>(isSkill?`Skill ${R.slot+1} · ${o.cd}s · ${skillManaCost(R.slot,o)} mana`:'Passive')+` · ${o.role||'Build'}`;
+      const line=o=>(isSkill?`Skill ${R.slot+1} · ${o.cd}s cooldown · ${skillManaCost(R.slot,o)} mana`:'Passive')+` · ${o.role||'Build'}`;
       const kind=isSkill?'Skill':'Passive'; return `<div class="buildrank ${reached?'reached':''}">${option(R.a,line(R.a),picked,reached,kind,rank)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${option(R.b,line(R.b),picked,reached,kind,rank)}</div><div class="buildspine"></div>`; }).join('');
     tree+=cs.rank>=10?`<div class="buildcap"><div class="bticon">${passiveIcon(C2_CAP_ICON[view])}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE · ACTIVE</span></div><div class="sdesc">${def.cap.d}</div></div>`:`<div class="buildcap locked"><div class="bticon">🔒</div><div class="stitle">Locked Capstone <span class="srank">UNLOCKS AT RANK 10</span></div><div class="sdesc">Reach rank 10 to reveal this capstone.</div></div>`;
   }else{
@@ -18332,7 +18342,7 @@ function openClasses(back){
       tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(b,pB)}</div><div class="buildspine"></div>`; }
     tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE${cs.rank>=10?' · ACTIVE':''}</span></div><div class="sdesc">Your chosen discipline's defining passive reaches its final strength.</div></div>`;
   }
-  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · ${meta.masterSeal?'Your <b style="color:#f0d78a">Drillmaster\'s Seal</b> lets you equip &amp; respec right here.':'Chosen skills and passives are highlighted. Changes are made only with the Drillmaster.'}</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="viewerfoot">${meta.masterSeal?`${(meta.classUnlocked[view]&&view!==meta.classId)?`<button class="bigbtn" id="clsEquip">${C.icon} Equip ${C.disp}</button>`:''}${(cs.rank>=2&&(cs.sub||c2def(view)))?`<button class="bigbtn ghost" id="clsRespec">✚ Respec</button>`:''}`:''}<button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
+  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · ${meta.masterSeal?'Your <b style="color:#f0d78a">Drillmaster\'s Seal</b> lets you equip &amp; respec right here.':'Chosen options are highlighted. Visit the Drillmaster to change them.'}</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="viewerfoot">${meta.masterSeal?`${(meta.classUnlocked[view]&&view!==meta.classId)?`<button class="bigbtn" id="clsEquip">${C.icon} Equip ${C.disp}</button>`:''}${(cs.rank>=2&&(cs.sub||c2def(view)))?`<button class="bigbtn ghost" id="clsRespec">✚ Respec</button>`:''}`:''}<button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
   document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
   if(meta.masterSeal){
     const eq=document.getElementById('clsEquip'); if(eq) eq.onclick=()=>{ if(trainerEquipClass(view)){ SFX.pickup(); toast('⚔️ Now playing as '+C.disp,'#f0d78a'); openClasses(back); } };
@@ -18368,7 +18378,7 @@ function openRespecTree(cid,back){
         tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA.id,pA.disp)}<div class="rankorb"><span>SKILL</span><b>${i+2}</b></div>${opt(b,pB.id,pB.disp)}</div><div class="buildspine"></div>`; }
       tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your build's defining passives reach their final strength.</div></div>`;
     }
-    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · ${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
+    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · ${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
     document.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.rank]=b.dataset.pick; SFX.pickup(); render(); });
     document.querySelectorAll('[data-mixslot]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.mixslot]=b.dataset.mixpath; SFX.pickup(); render(); });
     document.getElementById('treeBack').onclick=back;
@@ -18755,7 +18765,7 @@ function shopCompare(w,cost,back){
     <div class="statgrid">
       ${row('Damage',cur?cur.dmg:null,w.dmg)}
       ${row('Range',cur?rA:null,rB)}
-      ${row('Attack speed',cur?cur.cd:null,w.cd,'low')}
+      ${row('Attack delay (seconds; lower is faster)',cur?cur.cd:null,w.cd,'low')}
       ${row('Knockback',cur?cur.kb:null,w.kb)}
       <div class="vsrow"><span>Element</span><b style="color:${elementColor(w.el)||'#cfd6df'};text-transform:capitalize">${w.el||'Neutral'}</b></div>
       ${row('Lifesteal %',cur?(cur.lifesteal*100):null,(w.lifesteal||0)*100)}
@@ -19167,7 +19177,7 @@ function organizePauseSettings(){
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider']],
     ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn']],
     ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS']],
-    ['Accessibility & guidance',['shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
+    ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
   ];
   for(const [title,ids]of groups){const section=document.createElement('details');section.className='settingsSection';section.open=(openPauseSettingsV2.section||groups[0][0])===title;const summary=document.createElement('summary');summary.innerHTML=uiIcon(['settings-controls','settings-graphics','settings-audio-voices','settings-accessibility','settings-help'][groups.findIndex(g=>g[0]===title)])+' '+title;section.append(summary);const contents=document.createElement('div');contents.className='settingsContents';section.append(contents);card.insertBefore(section,back);
@@ -19203,6 +19213,8 @@ function openPauseSettingsV2(){
     <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
+  const reading=document.createElement('button');reading.id='readingSizeBtn';reading.className='bigbtn ghost';reading.textContent='Reading text: '+({1:'Standard',1.15:'Larger',1.3:'Largest'}[meta.readingSize||1]||'Standard');document.getElementById('settingsBack').before(reading);
+  reading.onclick=()=>{const sizes=[1,1.15,1.3];meta.readingSize=sizes[(sizes.indexOf(meta.readingSize||1)+1)%sizes.length];persistGlobal();openPauseSettingsV2();document.getElementById('readingSizeBtn').focus();};
   organizePauseSettings();
   for(const key of ['objectiveArrows','friendArrows'])document.getElementById(key+'Btn').onclick=()=>{meta[key]=meta[key]===false;persistGlobal();openPauseSettingsV2();};
   document.getElementById('settingsBack').onclick=openPauseV2;

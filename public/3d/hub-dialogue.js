@@ -19,7 +19,8 @@
  }
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  if(el('hubTopics'))el('hubTopics').onclick=landing;
   if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();el('hubLeave').focus({preventScroll:true});
  }
  function line(id,lastChoice='',topic='intro'){

@@ -927,3 +927,7 @@ User approved continuing from 2.103 into distinctive enemy attack animations. Gr
 
 ## [Codex | 2026-10-04] Dungeon playtest corrections
 User requests stable close dungeon camera near walls; immediate equipment bagging (sell only when full); harder parkour and faster, more challenging enemies; larger, more varied and longer floors; fewer chests with explicit rarity and conservative common rewards; substantial dungeon visual upgrade. Preserve existing saved runs and campaign grinding mode. Camera/pickup correctness first, then versioned layout and presentation improvements; human difficulty/art acceptance remains playtest-dependent.
+
+
+## [Codex | 2026-10-04] Side quests remain accessible after core dialogue
+User: "if there are side quests that are available with an NPC, if I click on their main dialogue, I shouldn’t then be blocked out from the side quest. I should still be able to ask them about that even if I’ve gone through the core dialogue with them." Plan: mark audited quest-giver topic menus; add validated return-to-topics navigation from later lines and saved cursors. Keep authored conditions, refusal consequences, unique rewards, co-op speaker ownership and Leave conversation. Prior campaign/escort feedback is also retained as pending design work: protect a human/animal with its own damageable health bar; purposeful campaign layouts and less tedious, more varied quests. Ellis escort remains a proposal, not implemented.

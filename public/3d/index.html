@@ -1048,13 +1048,14 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
+<script src="./prison-dungeon.js?v=2096"></script>
 <script src="./loading.js?v=2083"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2079">
 <script src="./voice-content.js?v=2079"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2079"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
-<script src="./hub-tour.js?v=2082"></script>
+<script src="./hub-tour.js?v=2096"></script>
 <script src="./controller.js?v=2091"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2089"></script>
@@ -1119,7 +1120,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.095.0-camera-interiors';
+const VERSION3D='2.096.0-prison-break';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13239,7 +13240,7 @@ function gainXp(n){
   gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // Campaign training supports learning multiple classes; other modes retain their pace.
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);
     autoLevelGrow(p); recomputeArmor(p);
-    p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
+    p.hp=Math.min(effMaxHp(p),p.hp+(G.escape?0:20));      // Prison Break preserves health attrition across level-ups.
     SFX.levelup(); playFx('levelcheer'); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
     addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true); burst(p.x,p.y+30,p.z,'#ffd24a',16); G.slowmo=Math.max(G.slowmo||0,0.12);
     const unlocked=rarityUnlockedAt(p.level);
@@ -13249,7 +13250,7 @@ function gainXp(n){
     if(p.level<=91)toast('Stat point earned — spend it in Bag → Character Stats.','#ffd485'); }
   checkAchievements(); hudUpdate(); autosaveRun();
 }
-function checkStageClear(){ if(G?.kingFinal)return;
+function checkStageClear(){ if(G?.kingFinal||G?.escape)return;
   // normal courses: the portal exists from the start — reaching the end IS the goal.
   // boss stages: the portal opens when the boss falls.
   if(G.portal) return;
@@ -14270,10 +14271,10 @@ const MP={
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
   mkPeer(s){ return {lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
-    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
+    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  applyPos(q,s){q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn;q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
   snap(q){ return {lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
@@ -14317,6 +14318,7 @@ const MP={
       else if(d.t==='mark'){ this.recvMark(d,c); }          // a guest's world ping — draw + relay to the rest of the party
       else if(d.t==='campaignAdvance'&&isCampaignAdventure()&&G.portal&&d.zone===G.zone&&d.area===G.area){nextArea();}
       else if(d.t==='campaignRetry'&&isCampaignAdventure()&&d.zone===G.zone&&d.area===G.area&&(mode==='dead'||mode==='dying'||this._wiped)){restartCampaignCheckpoint();}
+      else if(d.t==='specialAdvance'&&d.kind==='prison'&&G?.escape&&G.floorCleared&&this.peers[c._pid]?.zone===this.zone){const q=this.peers[c._pid];if(G.portal&&dXZ(q.x,q.z,G.portal.x,G.portal.z)<120)delveDescend();}
       else if(d.t==='specialAdvance'&&d.kind==='endless'&&G&&G.endless&&G.floorCleared){ endlessDescend(); }
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
       else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); }
@@ -14325,7 +14327,7 @@ const MP={
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
-    const msg={t:'state',players:all, en:this.enemySnap(), ek};if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
+    const msg={t:'state',players:all, en:this.enemySnap(), ek};if(G?.escape)msg.prison=BFPrisonRun.packet();if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
     const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -14624,7 +14626,7 @@ const MP={
     // revive a nearby downed ally by standing close for ~2.5s
     if(!G.p.downed && !G.p.dead && this.hasZone()){
       for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone){ q._rev=0; continue; }
-        if(q.downed){ const d=Math.hypot((q.x||0)-G.p.x,(q.z||0)-G.p.z);
+        if(q.downed){ if(G.escape&&q.prisonRevives>=1){q._rev=0;continue;}const d=Math.hypot((q.x||0)-G.p.x,(q.z||0)-G.p.z);
           if(d<72){ q._rev=(q._rev||0)+dt; if(q._rev>=2.5){ q._rev=0; this.doRevive(q.id); try{ toast('🤝 You revived '+(q.name||'an ally')+'!'); }catch(e){} } }
           else q._rev=0; }
         else q._rev=0; } }
@@ -15320,6 +15322,7 @@ function update(dt){
   if(G.trial) trialTeachTick(dt);                              // tutorial level: just-in-time verb teaching
   if(G.dashTut && !meta.tutOff && !(meta.tut&&meta.tut.dash) && mode==='play' && dXZ(G.p.x,G.p.z,G.dashTut.x,G.dashTut.z)<G.dashTut.r){ openDashTutorial(); }   // mid-air dash lesson at the required chasm
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
+  if(G.escape)BFPrisonRun.tick(dt);
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(G.bossRush) bossRushTick(dt);                                // The Gauntlet: advance to the next boss on kill; win after the last
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); }
@@ -17646,7 +17649,7 @@ function enterWaystation(riftHall=false){
     /* The Endless Dungeon's way in. Placed beside the Abyss on purpose - they are the two endless
        modes and belonging together makes the difference between them legible: one is a descent you
        fight through, the other one you navigate. */
-    {id:'delve',ic:'🗝️',name:'The Endless Dungeon',role:'Endless exploration',prop:'abyss',verb:'Enter the Dungeon',x:-95,z:660,c1:'#0e1a2a',c2:'#7fd6ff',open:()=>openDelveGate(),needZones:1},   // pulled in off the annex divider wall (was -300, clipped the x:-330 screen wall)
+    {id:'delve',ic:'🗝️',name:'The Endless Dungeon',role:'Prison Break roguelite',prop:'abyss',verb:'Enter the Dungeon',x:-95,z:660,c1:'#0e1a2a',c2:'#7fd6ff',open:()=>openDelveGate(),needZones:1},   // pulled in off the annex divider wall (was -300, clipped the x:-330 screen wall)
     {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:235,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
     {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena(),needZones:1},
     {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:185,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}   // was x:340 (SAT ON the x:330 divider wall) → pulled inside the bay, beside the Arena
@@ -22720,6 +22723,128 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
     goblin:G&&G.enemies.some(e=>e.kind==='goblin'&&!e.dead),
     queued:queueLevelUp, ngPlus:G&&G.ngPlus, combo:G&&G.combo,
     unlockedSkins:meta.unlockedSkins.length, godUnlocked:meta.unlockedSkins.includes('god'), achievements:Object.keys(meta.achievements).length, totalKills:meta.totalKills }; } };
+/* Delve-only adapter. Campaign save fields are escrowed for the entire attempt. */
+(()=>{'use strict';
+const D=BFPrisonDungeon,clone=D.copy,old={persist,loadMode,restoreBank,autosaveRun,openHub,awardGold,questUpdate,drawCourse,loadDelveFloor,delveDescend,delveDie,delveExit,startDelve,openDelveGate};
+if(!MODE_FIELDS.includes('prisonProfile'))MODE_FIELDS.push('prisonProfile');
+const profile=()=>meta.prisonProfile||(meta.prisonProfile=D.profile(loadJSON(MKEY(MODE))?.prisonProfile));
+loadMode=function(m){old.loadMode(m);meta.prisonProfile=D.profile(loadJSON(MKEY(m))?.prisonProfile);};
+persist=function(){
+ if(!meta.bank?.prison)return old.persist();
+ if(!saveGenerationCurrent()||!MODE)return;
+ const saved={...clone(meta.bank.modeState),prisonProfile:clone(profile())};
+ try{localStorage.setItem(MKEY(MODE),JSON.stringify(saved));window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){window.__saveStatus={ok:false,error:e.name};toast('Dungeon progress could not be saved. Keep this tab open.');}
+};
+restoreBank=function(){if(!meta.bank?.prison)return old.restoreBank();const state=meta.bank.modeState,pr=profile();for(const k of MODE_FIELDS)if(k!=='prisonProfile')meta[k]=clone(state[k]??null);meta.bank=null;meta.prisonProfile=pr;persist();return true;};
+function checkpoint(){if(!G?.escape||G.escape.finished||G.escape.remote||G.p.dead||G.p.hp<=0)return;const r=G.escape;profile().checkpoint={version:D.VERSION,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,cid:meta.classId,p:snapOf(G.p),classes:clone(meta.classes),stash:clone(meta.stash),states:clone(r.states),events:clone(r.events),safe:clone(r.safe),pickups:clone(G.pickups),chests:clone(G.chests),revives:r.revives||0};persist();}
+autosaveRun=function(){if(G?.escape){checkpoint();return;}old.autosaveRun();};
+openHub=function(){if(G?.escape){checkpoint();restoreBank();G.escape=null;document.getElementById('prisonhud')?.remove();}return old.openHub();};
+awardGold=function(n){return G?.escape?0:old.awardGold(n);}; // room receipts, never replayable kill/sale farming
+function receipts(events){const p=profile();let changed=false;for(const e of events||[]){if(e.members&&!e.members.includes(MP.active?MP.myId:'solo'))continue;changed=D.credit(p,e.id,e.gold,e.kind)||changed;}if(changed){meta.gold=p.gold;persist();hudUpdate();}return changed;}
+function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r.events.some(e=>e.id===id))return;const members=MP.active?[MP.myId,...Object.values(MP.peers).filter(q=>q.zone===MP.zone).map(q=>q.id)]:['solo'];const e={id,gold,kind,members};r.events.push(e);receipts([e]);toast('+'+gold+' dungeon gold'+(kind?' · unlock progress saved':''));}
+function packet(){const r=G?.escape;return r?{version:D.VERSION,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,stamp:G.time,states:r.states,events:r.events,safe:r.safe,finished:r.finished||null}:null;}
+function receive(s){if(!s||s.version!==D.VERSION)return;if(G?.escape?.id===s.id&&(G.escape.finished||s.section<G.floor||(s.section===G.floor&&(s.stamp||0)<(G.escape.lastStamp||0))))return;if(!G?.escape||G.escape.id!==s.id)startDelve(profile().classes.includes(meta.classId)?meta.classId:'warrior',{remote:true,state:s});else if(G.floor!==s.section){loadDelveFloor(s.section,s);}
+ const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const id of [1,3,4])if(r.states[id]?.cleared&&!r.chestRooms[id]){const q=r.plan.rooms[id];G.chests.push({x:q.x-150,z:q.z+180,y:0,opened:false,bob:0});r.chestRooms[id]=true;}openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
+function openExit(){const r=G.escape;if([1,3,4].every(id=>r.states[id]?.cleared)&&!G.portal){G.portal={x:0,z:-3050,y:0,t:0};G.floorCleared=true;}}
+function start(cid,opts={}){
+ const pr=profile(),saved=opts.resume?pr.checkpoint:null,state=opts.state||saved;
+ if(MP.active&&!MP.isHost&&!opts.remote){toast('The host starts the prison expedition.');return;}
+ cid=saved?.cid||cid;if(!pr.classes.includes(cid))cid='warrior';
+ if(meta.bank)restoreBank();const modeState={};for(const k of MODE_FIELDS)if(k!=='prisonProfile')modeState[k]=clone(meta[k]??null);
+ meta.bank={prison:true,modeState};meta.classes={};meta.stash=[];meta.perks={};meta.socks=false;meta.petActive=null;meta.classUnlocked={[cid]:true};meta.classId=cid;meta.gold=pr.gold;meta.run=null;creationAllocation=null;
+ const cs=classState(cid);cs.ch={};cs.rank=1;let p=freshPlayer();p.skin='knight';p.maxJumps=1;
+ p.maxHp+=pr.upgrades.health*6;p.stats.defense+=pr.upgrades.armor*.01;p.weapon.dmg*=1+pr.upgrades.weapon*.04;
+ if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
+ else p.hp=effMaxHp(p);
+ G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
+ G.escape={id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
+ if(MP.active&&!opts.remote)MP.enterSpecial('prison');
+}
+startDelve=start;
+loadDelveFloor=function(n,saved){
+ const r=G.escape;if(!r)return old.loadDelveFloor(n);
+ const plan=D.layout(G.runSeed,n,r.tier);r.plan=plan;r.chestRooms={};r.states=clone(saved?.states||{});for(const st of Object.values(r.states))if(st&&typeof st==='object'&&!st.cleared){st.started=false;st.wave=0;st.spawnTime=0;}r.safe=clone(saved?.safe||{x:0,z:180,y:0});r.finished=null;
+ G.floor=n;G.stageIndex=5;G.zone=2;G.area=0;G.zoneTier=1+n;G.ngHp=1+(n-1)*.18+(r.tier-1)*.25;G.ngDmg=1+(n-1)*.1+(r.tier-1)*.12;G.haz=null;G.boss=null;
+ for(const k of ['enemies','pickups','projectiles','particles','ambient','movers','pads','healpads','chests','deco','crumbles','geysers','springs','shockwaves','trails','spikefields','collapse','doors','plates','keys','torches','qmarks','dens','fx','combatArt','hostileArt','marks','meteors','gates','hubNpcs'])G[k]=[];
+ G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o,y0:o.y0-24}));G.portal=null;G.portalPos={x:0,z:-3050};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={minX:-1100,maxX:1100,minZ:-3200,maxZ:300};G.progressEnd=-3100;G.floorCleared=false;
+ G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;
+ if(n===2&&!r.states.healed)G.springs.push({x:plan.rooms[5].x+100,z:-560,y:0});
+ if(saved&&!r.remote){G.pickups=clone(saved.pickups||[]);G.chests=clone(saved.chests||[]);}G.kills=0;G.killGoal=999;G.stageBanner=2;G.areaName=plan.title;document.getElementById('stagetag').textContent='PRISON BREAK · TIER '+r.tier+' · '+n+'/3';document.getElementById('bosshpwrap').classList.remove('on');
+ openExit();checkpoint();questUpdate();window.__world3dRebuild?.();
+};
+function finish(result,remote=false){const r=G.escape;if(!r||r.finished)return;r.finished=result;
+ if(result==='escaped'){profile().tier=Math.min(3,Math.max(profile().tier,r.tier+1));if(!remote)reward('escape',200*r.tier,r.tier===3?'warden':null);}
+ if(!r.remote)profile().checkpoint=null;if(MP.active&&MP.isHost&&!remote)MP.enterSpecial('prison');
+ const tier=r.tier,gold=profile().gold;restoreBank();mode='menu';showGameUI(false);showOverlayHTML(`<div class="card"><h2 class="ovh">${result==='escaped'?'You escaped!':'The escape ends'}</h2><p class="ovsub">Prison Break · Tier ${tier}</p><p class="ovsub">${gold} dungeon gold saved. Temporary gear resets.</p><button class="bigbtn" id="prisonAgain">Prepare another attempt</button><button class="bigbtn ghost" id="prisonHome">Return to hub</button></div>`);
+ document.getElementById('prisonAgain').onclick=()=>{G.escape=null;document.getElementById('prisonhud')?.remove();openDelveGate();};document.getElementById('prisonHome').onclick=()=>{G.escape=null;document.getElementById('prisonhud')?.remove();openHub();};persist();
+}
+delveDie=function(){if(G?.escape)return finish('defeated');return old.delveDie();};
+delveDescend=function(){if(!G?.escape)return old.delveDescend();if(!G.floorCleared)return;if(MP.guest()){MP.requestSpecialAdvance('prison');return;}if(G.floor===3){finish('escaped');return;}loadDelveFloor(G.floor+1);if(MP.active)MP.enterSpecial('prison');};
+delveExit=function(){if(G?.escape){checkpoint();return openHub();}return old.delveExit();};
+openDelveGate=function(){
+ if(G?.escape){checkpoint();restoreBank();G.escape=null;}const p=profile();mode='menu';showGameUI(false);
+ const choices=p.classes.map(c=>`<option value="${c}">${CLASSES[c].disp}</option>`).join('');
+ const shop=D.upgrades.map(u=>`<button class="bigbtn ghost" data-prbuy="${u.id}" ${p.gold<D.price(p,u.id)||p.upgrades[u.id]>=u.cap?'disabled':''}>${u.name} ${p.upgrades[u.id]}/${u.cap} · ${D.price(p,u.id)}g<br><small>${u.desc}</small></button>`).join('');
+ const classes=D.offers.map(o=>`<button class="bigbtn ghost" data-prbuy="${o.id}" ${p.classes.includes(o.id)||p.tier<o.tier||p.progress[o.key]<o.goal||p.gold<o.cost?'disabled':''}>${CLASSES[o.id].disp} · Tier ${o.tier} · ${p.classes.includes(o.id)?'Owned':o.cost+'g'}<br><small>${o.desc} (${Math.min(o.goal,p.progress[o.key])}/${o.goal})</small></button>`).join('');
+ showOverlayHTML(`<div class="card" style="max-height:90vh;overflow:auto"><h2 class="ovh">Prison Break</h2><p class="ovsub">Escape the cells, cross the underworks, defeat the gate warden.</p><p class="hint">${p.gold} dungeon gold · Earnings and purchases survive death.</p><label>Class <select id="prclass">${choices}</select></label> <label>Tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Health carries between rooms. Each player gets one ally revival per attempt. Gold is spent here between attempts. Starting a new escape replaces your checkpoint.</p><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
+ document.getElementById('prstart').onclick=()=>startDelve(document.getElementById('prclass').value,{tier:+document.getElementById('prtier').value});document.getElementById('prresume')?.addEventListener('click',()=>startDelve(p.checkpoint.cid,{resume:true}));document.getElementById('prback').onclick=openHub;
+ document.querySelectorAll('[data-prbuy]').forEach(el=>el.onclick=()=>{if(D.buy(p,el.dataset.prbuy)){persist();openDelveGate();}});
+};
+function spawnRoom(room,state){
+ const r=G.escape,tier=r.tier,wave=state.wave||0,n=room.kind==='boss'?1:room.kind==='vault'?2:3+tier+wave;
+ state.members=[];state.party=1+.6*(Math.max(1,partySize())-1);
+ for(let i=0;i<n;i++){const a=i*2.399,type=room.kind==='boss'?(G.floor===3?'warden':'brute'):room.kind==='vault'&&i===0?'revenant':i%3===1?'caster':(tier>1&&i%3===2?'sentinel':'grunt');
+  const e=spawnEnemy(type,room.x+Math.cos(a)*160,room.z-70+Math.sin(a)*100);e.active=true;e.dropT=1.3;e.prisonRoom=room.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*state.party);e.partyHealthMul=state.party;
+  if(room.kind==='vault'&&i===0)makeElite(e);state.members.push(e.mid);if(room.kind==='boss'){e.label=G.floor===3?'GATE WARDEN':'PRISON ENFORCER';e.hp=e.maxHp=Math.round(e.maxHp*(G.floor===3?.65:.4));G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
+ }state.started=true;state.spawnTime=G.time;toast(room.kind==='waves'?'Guards approaching — two waves!':room.kind==='vault'?'Optional elite: risk health for unlock progress.':'Guards ahead!');
+}
+function tick(dt){
+ const r=G?.escape;if(!r||r.finished||mode!=='play')return;
+ const room=D.roomAt(r.plan,G.p);if(room)r.current=room.id;
+ if(!r.remote&&!MP.guest()){
+  for(const q of r.plan.rooms.filter(q=>['fight','waves','vault','boss'].includes(q.kind))){const st=r.states[q.id]||(r.states[q.id]={});if(st.cleared)continue;
+   const present=[G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===MP.zone):[])].some(p=>!p.dead&&!p.downed&&Math.abs(p.x-q.x)<240&&Math.abs(p.z-q.z)<240);
+   if(!st.started&&present)spawnRoom(q,st);
+   if(st.started&&G.time-st.spawnTime>1.4&&!G.enemies.some(e=>e.prisonRoom===q.id&&!e.dead)){
+    if(q.kind==='waves'&&!st.wave){st.wave=1;st.started=false;continue;}
+    st.cleared=true;r.safe={x:q.x,y:0,z:q.z+190};reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
+    if(q.kind!=='vault'){G.chests.push({x:q.x-150,z:q.z+180,y:0,opened:false,bob:0});}
+    checkpoint();openExit();questUpdate();
+   }
+  }
+  const vault=r.plan.rooms[5];if(r.states[5]?.cleared&&!r.states.seal&&[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone):[])].some(p=>dXZ(p.x,p.z,vault.x+20,vault.z-80)<45&&p.y>=65)){
+   r.states.seal=true;reward('seal',80,r.tier>=2?'seals':null);checkpoint();toast('Hidden seal recovered!');
+  }
+ }
+ if(G.springs.some(s=>s.used)&&!r.states.healed){r.states.healed=true;checkpoint();}
+ if(G.boss&&!G.boss.dead)updateBossBar(G.boss);
+ let hud=document.getElementById('prisonhud');if(!hud){hud=document.createElement('div');hud.id='prisonhud';hud.style='position:fixed;right:18px;top:112px;max-width:260px;pointer-events:none;background:#141922df;color:#f4e0ad;padding:9px 18px;border:1px solid #816944;border-radius:8px;z-index:12;font:14px sans-serif';document.body.append(hud);}
+ hud.textContent=(room?.name||'Passage')+' · '+(G.floorCleared?(G.floor===3?'Reach the exit to escape':'Reach the stairs'):'Find and defeat the guards')+' · '+profile().gold+'g';
+}
+questUpdate=function(){if(G?.escape){document.getElementById('questbox')?.classList.add('hide');return;}old.questUpdate();};
+drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.escape.plan;
+ const box=(o,c)=>bx(o.x,(o.y0+o.h)/2,o.z,o.w,o.h-o.y0,o.d,c);
+ for(const o of plan.floors){box(o,'#55545a');for(let x=o.x-o.w/2+32;x<o.x+o.w/2;x+=96)bx(x,.3,o.z,2,.5,o.d-4,'#36363d');}
+ for(const o of plan.walls){if(o.collisionOnly)continue;box(o,o.room===0&&o.h===160?'#26242a':['#484953','#3e5055','#57505c'][G.floor-1]);for(let y=40;y<o.h;y+=48)bx(o.x,y,o.z,o.w+.3,2,o.d+.3,'#34353d');}
+ for(const o of plan.roofs){box(o,'#292b34');if(o.w>300){for(const dz of [-180,180])bx(o.x,o.y0-12,o.z+dz,o.w-24,24,22,'#37313a');}}for(const o of plan.plats)box(o,'#77716a');for(const o of plan.decor)box(o,o.bar?'#26242a':'#62616a');
+ for(const room of plan.rooms){for(const sign of [-1,1]){bx(room.x+sign*260,85,room.z+130,9,36,9,'#443629');bx(room.x+sign*260,110,room.z+130,12,18,12,'#ffd591','#ed992c');}}
+ const v=plan.rooms[5];if(!G.escape.states.seal){bx(v.x+20,106,v.z-80,14,18,14,'#71d8cf','#71d8cf');}
+ for(const sp of G.springs)if(!sp.used)bx(sp.x,2,sp.z,42,4,42,'#4ba58b','#74e6ba');
+};
+const spec=MP.specialMsg,enter=MP.enterSpecial,guestData=MP.onGuestData;
+MP.specialMsg=function(kind){return G?.escape?{t:'special',kind:'prison',prison:packet()}:spec.call(this,kind);};
+MP.enterSpecial=function(kind){if(kind!=='prison')return enter.call(this,kind);this.zone=-304;this.pvp=false;this._wiped=false;this._gotEn=false;if(this.isHost)for(const c of this.conns)if(c.open)c.send(this.specialMsg(kind));};
+MP.onGuestData=function(d){if(d.t==='special'&&d.kind==='prison'){this.zone=-304;this.pvp=false;receive(d.prison);return;}guestData.call(this,d);if(d.t==='state'&&d.prison&&G?.escape?.id===d.prison.id)receive(d.prison);};
+const self=MP.selfState,snap=MP.snap;MP.selfState=function(){return {...self.call(this),prisonRevives:G?.escape?.revives||0};};MP.snap=function(q){return {...snap.call(this,q),prisonRevives:q.prisonRevives||0};};
+const rev=MP.reviveSelf;MP.reviveSelf=function(msg){if(G?.escape){if(!G.p.downed||G.escape.revives>=1)return;G.escape.revives++;rev.call(this,msg);G.p.hp=Math.round(effMaxHp(G.p)*.25);return;}rev.call(this,msg);};
+const leave=MP.leave;MP.leave=function(msg){const remote=G?.escape?.remote;leave.call(this,msg);if(remote)openHub();};
+const wipe=wipeMode;wipeMode=function(m){wipe(m);meta.prisonProfile=D.profile();};
+const previousWorld=window.__BF_WORLD;window.__BF_WORLD=()=>({...previousWorld(),escape:G?.escape?.id||null});
+window.BFPrisonRun={tick,packet,receive,profile,checkpoint,finish,prepare:openDelveGate};
+Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delveExit,openDelveGate,openHub,persist,loadMode,restoreBank,autosaveRun,awardGold});
+})();
+
 })();
 </script>
 <!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
@@ -22739,7 +22864,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2095"></script>
+<script type="module" src="./hero3d.js?v=2096"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -2000,6 +2000,7 @@ export function syncWorld(scene){
   let world = null;
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
+  if(world.escape){if(WORLD3D.built!=='escape:'+world.escape+':'+world.floor){clearWorld(scene);clearMobs();clearProps();WORLD3D.built='escape:'+world.escape+':'+world.floor;WORLD3D.counts={};for(const k of ['__OUTSKIRTS_ACTIVE','__HUB_ART_ACTIVE','__HOLLOW_ART_ACTIVE','__KEEP_ART_ACTIVE','__FROST_ART_ACTIVE','__DEEP_ART_ACTIVE'])window[k]=false;}WORLD3D.ready=true;return true;}
   const sig = signature(world);
   if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.

@@ -893,3 +893,7 @@ Implemented initial Delve-only roguelite, campaign escrow, permanent wallet/shop
 
 ## [Codex | 2026-10-03] Endless Dungeon save selection approved
 User requests entrance interface with three save slots, a How it works button, and Back to hub; verify save logic. Implement three independent dungeon profiles per current campaign character/mode, migrate existing single profile to slot 1, independent wallet/upgrades/classes/checkpoint, explicit delete and replace-run confirmation. Co-op guests choose their local dungeon profile before joining; host checkpoint ownership remains unchanged. Verify migration, reload, slot isolation, delete/cancel, failed writes, campaign escrow and co-op selection.
+
+
+## [Codex | 2026-10-03] Dungeon room expansion
+Continue approved enclosed roguelite variety: branching optional elite chambers, turning routes, distinct encounter formations and traversable parkour. Preserve existing checkpoints with an explicit layout revision; verify campaign/save isolation and co-op synchronization. No SFX changes.

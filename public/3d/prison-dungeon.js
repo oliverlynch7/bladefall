@@ -14,11 +14,17 @@ function credit(p,id,gold,kind){if(p.receipts.includes(id))return false;p.receip
 function price(p,id){const u=upgrades.find(u=>u.id===id);return u?u.base*(1+p.upgrades[id]):offers.find(o=>o.id===id)?.cost||0;}
 function buy(p,id){const u=upgrades.find(u=>u.id===id),o=offers.find(o=>o.id===id),cost=price(p,id);if(!cost||p.gold<cost)return false;if(u){if(p.upgrades[id]>=u.cap)return false;p.upgrades[id]++;}else{if(!o||p.classes.includes(id)||p.tier<o.tier||p.progress[o.key]<o.goal)return false;p.classes.push(id);}p.gold-=cost;return true;}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
-function layout(seed,section,tier){
+function layout(seed,section,tier,revision=2){
  const random=rng(seed+section*997+tier*71),side=random()<.5?-1:1;
  const names=[['Cell block','Guard hall','Broken crossing','Watch post','Cell keeper','Hidden store'],['Lower cells','Supply hall','Drain crossing','Barracks','Iron checkpoint','Sealed store'],['Gate cells','Patrol hall','Broken stairwell','Last watch','Outer gate','Warden’s store']][section-1]||['Cell block','Guard hall','Broken crossing','Watch post','Outer gate','Hidden store'];
  const rooms=names.map((name,i)=>({id:i,name,x:i===5?side*720:0,z:i===5?-720:-i*720,w:600,d:600,h:i===2?300:240,kind:['start','fight','bridge','waves','boss','vault'][i],optional:i===5}));
- const links=[[0,1],[1,2],[2,3],[3,4],[1,5]],walls=[],floors=[],plats=[],roofs=[],decor=[];
+ if(revision>=2){
+  rooms[4].x=side*720;rooms[4].z=-2160;
+  rooms.push({id:6,name:['Guard armory','Forgotten workshop','Sealed treasury'][section-1],x:-side*720,z:-2160,w:600,d:600,h:300,kind:'vault',optional:true});
+  rooms[1].formation=['patrol','crossfire','charge'][(seed+section)%3];
+  rooms[3].formation=['crossfire','charge','patrol'][(seed+section+1)%3];
+ }
+ const links=[[0,1],[1,2],[2,3],[3,4],[1,5],...(revision>=2?[[3,6]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
   const dirs=new Set(links.filter(l=>l.includes(r.id)).map(l=>{const q=rooms[l.find(i=>i!==r.id)];return Math.abs(q.x-r.x)>10?(q.x>r.x?'E':'W'):(q.z>r.z?'S':'N');}));
@@ -28,10 +34,16 @@ function layout(seed,section,tier){
   roofs.push(box(r.x,r.z,624,624,r.h,r.h+18,{room:r.id}));
   if(r.kind==='bridge'){
    floors.push(box(r.x,r.z+235,576,130,-20,0),box(r.x,r.z-235,576,130,-20,0));
-   for(let k=0;k<3;k++)plats.push(box(r.x+(k===1?side*55:0),r.z+125-k*125,110,85,0,k===1?44:18,{room:r.id}));
+   const variant=revision>=2?(seed+section)%3:0;
+   for(let k=0;k<3;k++)plats.push(box(r.x+(variant===2?(k===1?-side*45:side*30):(k===1?side*55:0)),r.z+125-k*125,variant===1?140:110,variant===1?95:85,0,k===1?(variant===1?62:44):18,{room:r.id}));
+   r.crossing=variant;r.waypoints=[{x:r.x,z:r.z+225,y:0},...plats.filter(p=>p.room===r.id).map(p=>({x:p.x,z:p.z,y:p.h})),{x:r.x,z:r.z-225,y:0}];
   }else floors.push(box(r.x,r.z,576,576,-20,0));
-  if(r.kind==='vault')for(let k=0;k<3;k++)plats.push(box(r.x-120+k*70,r.z-80,70,95,0,28+k*28,{room:r.id}));
+  if(r.kind==='vault'&&r.id===5)for(let k=0;k<3;k++)plats.push(box(r.x-120+k*70,r.z-80,70,95,0,28+k*28,{room:r.id}));
   if(r.kind==='fight'||r.kind==='waves')for(const s of [-1,1])plats.push(box(r.x+s*(170+Math.floor(random()*35)),r.z+(random()<.5?-60:60),44,74,0,100,{room:r.id}));
+  if(revision>=2&&r.id===6){
+   for(let k=0;k<4;k++)plats.push(box(r.x-175+k*100,r.z-170,65,85,0,24+k*24,{room:r.id,cacheStep:true}));
+  }
+  if(revision>=2&&r.kind==='boss')for(const s of [-1,1])plats.push(box(r.x+s*185,r.z-150,65,65,0,110,{room:r.id}));
   for(const s of [-1,1])decor.push(box(r.x+s*260,r.z-260,24,24,0,r.h,{room:r.id,pillar:true}));
   if(r.kind==='start')for(const s of [-1,1]){
    for(let k=0;k<8;k++)decor.push(box(r.x+s*210,r.z-130+k*28,8,8,0,160,{room:r.id,bar:true}));
@@ -43,7 +55,9 @@ function layout(seed,section,tier){
   floors.push(box(x,z,horizontal?144:180,horizontal?180:144,-20,0));roofs.push(box(x,z,horizontal?144:204,horizontal?204:144,200,218));
   for(const s of [-1,1])walls.push(box(x+(horizontal?0:s*90),z+(horizontal?s*90:0),horizontal?144:24,horizontal?24:144,0,200));
  }
- return {version:VERSION,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
+ const exit={x:rooms[4].x,z:rooms[4].z-170,y:0};
+ const bounds={minX:Math.min(...rooms.map(r=>r.x-320)),maxX:Math.max(...rooms.map(r=>r.x+320)),minZ:Math.min(...rooms.map(r=>r.z-320)),maxZ:320};
+ return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
 window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,roomAt,copy};

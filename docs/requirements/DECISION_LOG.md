@@ -652,3 +652,7 @@ User approved varied encounters, room layouts/traversal, optional risk rewards, 
 
 ## [Codex | 2026-10-04] General usability/reliability pass approved
 User approved all six proposed areas: journal/clue clarity, quest interaction feedback, class/equipment explanations, controller usability, campaign progression checks, accessibility settings. Audit existing implementations first; fix concrete gaps without changing combat balance or final art direction. Grounded changes: journal all-level scope/location labels, accurate next-task feedback, numeric equipment comparisons, controller slider/focus fixes, adjustable reading text, and campaign regression coverage.
+
+
+## [Codex | 2026-10-04] Approved enemy reliability and feedback pass
+User approved campaign pursuit/cover/recovery review, followed by enemy animation and hit feedback. Implement bounded local ground routing and cover-aware melee first; preserve authored boss movement, safe ledges, saves, and existing SFX. Improve readable attack timing and restrained hit reactions without a roster/art redesign. Verify actual browser combat and report remaining co-op/boss limitations honestly.

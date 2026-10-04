@@ -1079,6 +1079,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./story-state.js?v=2046"></script>
 <script src="./campaign-patrols.js?v=2044"></script>
 <script src="./campaign-elites.js?v=2057"></script>
+<script src="./enemy-navigation.js?v=2103"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
 <script src="./lost-canyon.js?v=2044"></script>
 <script src="./broken-walls.js?v=2044"></script>
@@ -1127,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.102.0-adventure-clarity';
+const VERSION3D='2.103.0-enemy-pursuit';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10745,6 +10746,53 @@ function enemySupport(e){
   for(const ob of G.obstacles){ if((ob.h<=e.y+ECLIMB) && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
+// A short local route respects the same collision/climb rules as actual enemy movement.
+function enemyRouteEdge(e,a,b){
+ const length=Math.hypot(b.x-a.x,b.z-a.z),steps=Math.max(1,Math.ceil(length/12));let y=a.y;
+ for(let i=1;i<=steps;i++){
+  const x=a.x+(b.x-a.x)*i/steps,z=a.z+(b.z-a.z)*i/steps,q={x,z,y,r:e.r,hh:e.hh||e.h||56};
+  const floor=enemySupport(q);if(!Number.isFinite(floor)||floor>y+ECLIMB||floor<y-80)return null;
+  // Require support beneath the feet, rather than the generous edge recovery tolerance.
+  for(const [dx,dz]of [[e.r*.6,0],[-e.r*.6,0],[0,e.r*.6],[0,-e.r*.6]]){
+   const f=enemySupport({x:x+dx,z:z+dz,y:floor,r:0});if(!Number.isFinite(f)||f<floor-44)return null;
+  }
+  q.y=Math.max(y,floor);resolveObstacles(q,e.r,null,ECLIMB);
+  if(Math.hypot(q.x-x,q.z-z)>.1)return null;y=floor;
+ }return {x:b.x,z:b.z,y};
+}
+function moveGroundEnemy(e,dx,dz,speed,dt,range=300){
+ if(speed<=0)return;const length=Math.hypot(dx,dz);if(length<.001)return;dx/=length;dz/=length;
+ const reach=Math.max(1,Math.min(300,range)),look=Math.min(reach,Math.max(48,speed*dt));
+ const goal={x:e.x+dx*reach,z:e.z+dz*reach,y:e.y},ahead={x:e.x+dx*look,z:e.z+dz*look};
+ const direct=enemyRouteEdge(e,e,ahead);let node;
+ if(direct){e._route=null;node=ahead;}
+ else {
+  if(e._route&&Math.hypot(goal.x-e._routeGoal.x,goal.z-e._routeGoal.z)>180)e._route=null;
+  if((!e._route||!e._route.length)&&(e._routeAt||0)<=G.time){
+   if(G._navTime!==G.time){G._navTime=G.time;G._navCount=0;}
+   if(G._navCount<2){G._navCount++;e._route=BFEnemyNavigation.route(e,goal,(a,b)=>enemyRouteEdge(e,a,b));e._routeGoal=goal;e._routeAt=G.time+.6;}
+  }
+  while(e._route?.length&&Math.hypot(e._route[0].x-e.x,e._route[0].z-e.z)<8)e._route.shift();
+  node=e._route?.[0];
+ }
+ if(!node)return;
+ const d=Math.hypot(node.x-e.x,node.z-e.z),step=Math.min(speed*dt,d);if(d<.001)return;
+ const next={x:e.x+(node.x-e.x)/d*step,z:e.z+(node.z-e.z)/d*step};
+ if(enemyRouteEdge(e,e,next)){e.x=next.x;e.z=next.z;}
+ else {e._route=null;e._routeAt=Math.min(e._routeAt||0,G.time+.15);}
+}
+function syncedMelee(e){return e.kind==='walk'&&!e.boss&&!e.ceKind&&!e.prisonFoe&&!e.spec;}
+function enemyPartyTarget(e,p){
+ let target=p;
+ if(MP.host_())for(const q of Object.values(MP.peers)){
+  if(q.zone!==MP.zone||q.area!==G.area||q.hp<=0||q.downed||!Number.isFinite(q.x)||!Number.isFinite(q.z))continue;
+  if(target.hp<=0||target.downed||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z))target=q;
+ }return target;
+}
+function enemyMeleeClear(e,target){
+ const a={x:e.x,z:e.z,y:(e.y||0)+Math.min(e.h||40,48)*.55},b={x:target.x,z:target.z,y:(target.y||0)+Math.min(target.h||40,48)*.55};
+ return !BFEnemyNavigation.blocked(a,b,[...(G.obstacles||[]),...(G.walls||[]).map(w=>w.courtWall?{...w,h:(w.y0||0)+w.h}:w),...(G.doors||[])]);
+}
 // true if a wall (or a closed door) blocks the straight line a->b — used so melee can't reach through walls
 function losBlocked(x0,z0,x1,z1){
   const steps=Math.ceil(Math.hypot(x1-x0,z1-z0)/8);
@@ -12953,7 +13001,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     e.hitFlash=.12;return;
   }
   const dealt=Math.min(Math.max(0,e.hp),dmg);
-  e.hp-=dmg; e.hitFlash=0.12;
+  e.hp-=dmg; e.hitFlash=0.12; e.hitYaw=Math.atan2(e.x-(src?.x??e.x),e.z-(src?.z??e.z));
   if(healRatio>0)classHeal(G.p,dealt*healRatio);
   if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
@@ -14604,7 +14652,9 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
+      const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
+      if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0};
+      out.push(row); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -14618,7 +14668,7 @@ const MP={
     for(const a of en){ const mid=a[0]; seen[mid]=1; if(this._killed[mid]) continue; let e=this.byMid(mid);
       if(!e){ const type=this.ekey(a[1]); if(!type) continue; let ne=null; try{ ne=spawnEnemy(type,a[2],a[3]); }catch(err){ continue; }
         if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; if(ne.boss)G.boss=ne; } }
-      else { if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); if(e.boss)G.boss=e;
+      else { if(a[4]<e.hp)e.hitFlash=.12; if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); if(e.boss)G.boss=e;
         /* The host's position becomes a TARGET the update lerps toward, never a teleport — a snapshot
            lands between frames and a 14 Hz jump of a charging body is visible. Only when slot 6 says
            the host has this enemy AWAKE: for a mob the host has not woken, x,z is an untouched spawn
@@ -14626,7 +14676,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
-    for(const a of en)if(a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.normalMelee||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -15694,7 +15744,7 @@ function update(dt){
     if(!MP.guest()&&G.zone===0&&G.area>=0&&isCampaignAdventure())BFCampaignElites.briar(e);
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
-    const wakeDistance=e.briarRole&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===G.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
+    const wakeDistance=(e.briarRole||syncedMelee(e))&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
     if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
@@ -15711,17 +15761,23 @@ function update(dt){
        respects a stun respects this. */
     if((G._freezeT||0)>0)eff=0;
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
-    const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)); let dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
-    e.yaw=Math.atan2(dirX,dirZ);
+    const meleeTarget=syncedMelee(e)?enemyPartyTarget(e,p):p;
+    const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
+    if(!(MP.guest()&&e.normalMelee))e.yaw=Math.atan2(dirX,dirZ);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}
     const contactOnly=e.dmg>0&&!e.boss&&e.kind!=='charger'&&e.kind!=='goblin';
     if(contactOnly){
       e.meleeCd=Math.max(0,(e.meleeCd||0)-dt);e.meleeActive=Math.max(0,(e.meleeActive||0)-dt);
-      if(e.meleeW>0){eff=0;e.meleeW=Math.max(0,e.meleeW-dt);if(e.meleeW===0){e.meleeActive=.18;e.meleeCd=.9;}}
-      else if(e.meleeCd===0&&d<e.r+p.r+45&&Math.abs(e.y-p.y)<75){e.meleeW=.65;eff=0;}
-      if(e.meleeActive>0)eff=0;
+      const mirror=MP.guest()&&e.normalMelee;
+      if(e.meleeW>0){
+        if(e._meleeSeenSerial!==e.meleeSerial){e._meleeSeenSerial=e.meleeSerial;e._meleeSeen=0;}
+        e._meleeSeen=(e._meleeSeen||0)+dt;eff=0;e.meleeW=Math.max(0,e.meleeW-dt);
+        if(e.meleeW===0&&!mirror){e.meleeActive=.18;e.meleeCd=.9;}
+      }
+      else if(!mirror&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+45&&Math.abs(e.y-meleeTarget.y)<75&&enemyMeleeClear(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
+      if(e.meleeActive>0||mirror)eff=0;
     }
     if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
       if(e.role==='flanker' && d>90){ const s=e._fs||(e._fs=Math.random()<0.5?1:-1), rx=-dirZ*s, rz=dirX*s;
@@ -15761,21 +15817,22 @@ function update(dt){
       e.x+=fx/fl2*eff*dt; e.z+=fz/fl2*eff*dt; e.y=6+Math.abs(Math.sin(G.time*8))*4; e.yaw=Math.atan2(fx,fz);
       if(Math.random()<0.2) G.particles.push({x:e.x,y:e.y+20,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#ffd24a',sz:2});
     }
-    else if(e.kind==='walk'){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
+    else if(e.kind==='walk'){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
       if(e.look==='slime'){ e.bob+=dt*6; } }
     else if(e.kind==='caster'){ // robed lobber: keeps range, hurls element orbs
       const want=250;
-      if(d<want-40){ e.x-=dirX*eff*dt; e.z-=dirZ*eff*dt; }
-      else if(d>want+70){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt; }
+      if(!enemyMeleeClear(e,p)){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d); }
+      else if(d<want-40){ moveGroundEnemy(e,-dirX,-dirZ,eff,dt); }
+      else if(d>want+70){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d); }
       if(e.shootT>0) e.shootT-=dt;
-      if(e.shootT<=0 && d<560){ bossShoot(e,p); e.shootT=e.shootCd; }
+      if(e.shootT<=0 && d<560&&enemyMeleeClear(e,p)){ bossShoot(e,p); e.shootT=e.shootCd; }
     }
     else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
       if(e.atkTimer>0) e.atkTimer-=dt;
       if(e.chargeT>0){ e.chargeT-=dt;e.yaw=Math.atan2(e.cdx,e.cdz); e.x+=e.cdx*e.speed*3.4*dt; e.z+=e.cdz*e.speed*3.4*dt; }
       else if(e.windT>0){ e.windMax=e.windMax||e.windT; if(e.windT>.22){e.teleX=dirX;e.teleZ=dirZ;} e.windT-=dt;   // track aim so the danger-line follows you during the tell
         if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=e.teleX; e.cdz=e.teleZ; } }
-      else { e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
+      else { moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
         if(d<300 && e.atkTimer<=0){ e.windT=G.trial?(e.elite?0.42:0.55):.7; e.windMax=e.windT;e.teleX=dirX;e.teleZ=dirZ; e.atkTimer=e.elite?1.8:2.8; playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
@@ -15799,9 +15856,9 @@ function update(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dead && !e.ceKind && !e.prisonFoe && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
-      if(petClose) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
-      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
+    if(!e.dead && !e.ceKind && !e.prisonFoe && !(MP.guest()&&e.normalMelee&&(e._meleeSeenSerial!==e.meleeSerial||(e._meleeSeen||0)<.4)) && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+      if(petClose&&enemyMeleeClear(e,G.pet)) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
+      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)&&enemyMeleeClear(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
   }
   // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
   for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }
@@ -22665,7 +22722,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemySupport,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemyPartyTarget,syncedMelee,enemySupport,enemyRouteEdge,moveGroundEnemy,enemyMeleeClear,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
@@ -22957,7 +23014,7 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2096"></script>
+<script type="module" src="./hero3d.js?v=2103"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

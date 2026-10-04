@@ -1,7 +1,7 @@
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2007';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2103';
 import { enemyActionState } from './enemy-action-state.js?v=2057';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
@@ -52,7 +52,7 @@ function demetalise(root, label){
       if(m.metalness > 0.5 && !m.metalnessMap){ m.metalness = 0; m.needsUpdate = true; fixed++; }
     }
   });
-  if(fixed) console.log('[3d] ' + label + ': ' + fixed + ' material(s) were metalness=1 with no ORM map — lit as diffuse instead of black');
+  if(fixed) console.log('[3d] ' + label + ': ' + fixed + ' material(s) were metalness=1 with no ORM map â€” lit as diffuse instead of black');
 }
 
 /* Exported because prop3d casts the world's OBJECTS (chests, keys) out of the same kits and needs
@@ -174,12 +174,17 @@ function syncMobsInner(scene,dt){
     rec.root.scale.set(s*(e.briarRole==='guard'?1.12:e.briarRole==='runner'?.92:1),s,s*(e.briarRole==='guard'?1.12:1));
     rec.root.position.set(e.x,(e.y||0)-rec.src._baseY*s-(e.dropT||0)*(e.h||38)*.22,e.z);
     rec.root.rotation.y=e.yaw||0;rec.root.visible=true;
+    // Cosmetic only: never displace the collider or interrupt a committed attack tell.
+    const hit=Math.max(0,Math.min(1,(e.hitFlash||0)/.12));
+    const recoil=window.__BF3?.meta?.reduceMotion?0:Math.sin((1-hit)*Math.PI)*hit*(e.boss?.025:.065);
+    const away=(e.hitYaw??e.yaw??0)-(e.yaw||0);
+    rec.root.rotation.x=Math.cos(away)*recoil;rec.root.rotation.z=-Math.sin(away)*recoil;
     for(const m of rec.materials){
       if(e.finalKing&&!m.userData.kingPhase){m.userData.kingPhase={value:0};const previous=m.onBeforeCompile;m.onBeforeCompile=shader=>{previous?.(shader);shader.uniforms.kingPhase=m.userData.kingPhase;shader.vertexShader='varying vec3 vKingLocal;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvKingLocal = position;');shader.fragmentShader='uniform float kingPhase; varying vec3 vKingLocal;\n'+shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\nif(kingPhase > 0.5 && (kingPhase > 1.5 || vKingLocal.x < 0.0)){float crack=step(0.94,sin(vKingLocal.y*13.0+vKingLocal.z*9.0));diffuseColor.rgb=mix(vec3(0.055,0.035,0.10),vec3(0.62,0.42,0.86),crack);}');};m.customProgramCacheKey=()=> 'final-king-infusion-v1';m.needsUpdate=true;}
       if(m.userData.kingPhase)m.userData.kingPhase.value=e.finalKing?e.phase:0;
       m.opacity=e.untargetable&&!e.finalKing ? .28 : 1;m.depthWrite=!e.untargetable;
       m.color.set(e.slowT>0?0xb6ddff:({runner:0xffd4a6,guard:0xb1d2ee,hex:0xe0b9ff}[e.briarRole]||0xffffff));
-      m.emissive.set(0xffffff);m.emissiveIntensity=e.hitFlash>0 ? .65 : 0;
+      m.emissive.set(0xffffff);m.emissiveIntensity=hit*hit*.48;
     }
     const speed=dt>0?Math.hypot(e.x-rec.x,e.z-rec.z)/dt:0;rec.x=e.x;rec.z=e.z;
     const state=enemyActionState(e),wind=state.phase==='Windup'?state.remaining:0;

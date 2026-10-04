@@ -2,7 +2,7 @@ import {sunwingAsset,animateSunwing} from './sunwing3d.js?v=2024';
 import {shepherdAsset,animateShepherd} from './shepherd3d.js?v=1999';
 import * as T from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
-import {loadKitModel,kitModel} from './mob3d.js?v=2057';
+import {loadKitModel,kitModel} from './mob3d.js?v=2103';
 import {enemyAsset} from './enemy-motion.js?v=1980';
 const actors=new Map(),pending=new Set();let drawn=new WeakSet(),group;const ringGeometry=new T.TorusGeometry(1,.035,4,24),ringMaterial=new T.MeshBasicMaterial({color:0x79d9b0,transparent:true,opacity:.5,depthWrite:false});
 function fileFor(a){return a.sourceType?enemyAsset(a.sourceType).replace(/^\.\//,'').replace(/\.glb$/,''):'enemy-assets/companions/'+(a.summon?'skeleton':a.id==='cinder'?'emberpup':a.id);}

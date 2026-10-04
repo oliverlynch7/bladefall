@@ -982,6 +982,7 @@
 .settingsSection{text-align:left;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}.settingsSection>summary{cursor:pointer;font-weight:800;color:var(--amber);padding:5px}.settingsContents{display:grid;gap:8px;margin-top:12px}.settingsContents .bigbtn{margin:0;text-align:left}.settingsContents .setrow{margin:4px 0}
 details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
 
+@media(min-width:840px){#bosshpwrap.prison-boss{top:22px;left:auto;right:76px;transform:none;width:min(480px,40vw)}}
 #bosshpwrap.officer-team{top:calc(env(safe-area-inset-top) + 294px);width:min(580px,82vw)}
 @media(min-width:840px) and (pointer:fine){#bosshpwrap.officer-team{top:202px}}
 
@@ -1048,7 +1049,8 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2098"></script>
+<script src="./prison-dungeon.js?v=2099"></script>
+<script src="./prison-combat.js?v=2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2097"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2083"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2079">
@@ -1121,7 +1123,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.098.0-dungeon-rooms';
+const VERSION3D='2.099.0-prison-roster';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8002,6 +8004,28 @@ function buildBruteOrchard(ctx){
  Object.assign(G.p,{x:0,z:850,y:0,vx:0,vy:0,vz:0,yaw:Math.PI,onGround:true});if(G.cam)G.cam.y=0;G.camYaw=Math.PI;G.camPitch=.12;
  snapWorldInteractables();document.getElementById('stagetag').textContent='The Brute · Trampled Orchard';questUpdate();hudUpdate();return true;
 }
+function updatePrisonFoe(e,dt,p,eff){
+ const C=BFPrisonCombat,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ if(!MP.guest()){
+  let target=p.hp>0&&!p.dead&&!p.downed?p:null;
+  for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===MP.zone&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+  const busy=G.enemies.filter(o=>o!==e&&!o.dead&&o.prisonRoom===e.prisonRoom&&['wind','strike'].includes(o.pcState)).length;
+  C.step(e,dt,target,eff,busy<2&&!!target&&!losBlocked(e.x,e.z,target.x,target.z));
+  const room=G.escape?.plan.rooms[e.prisonRoom];if(room){e.x=clamp(e.x,room.x-room.w/2+e.r+14,room.x+room.w/2-e.r-14);e.z=clamp(e.z,room.z-room.d/2+e.r+14,room.z+room.d/2-e.r-14);}
+ }
+ if(['wind','strike','recover'].includes(e.pcState))e.yaw=Math.atan2(e.pcDX,e.pcDZ);
+ if(e.pcState==='wind'){
+  if(e._pcWarn!==e.pcSerial){e._pcWarn=e.pcSerial;e._pcSeen=0;G._prisonHints=G._prisonHints||{};if(!G._prisonHints[e.prisonFoe]){G._prisonHints[e.prisonFoe]=true;if(G.escape)G.escape.combatHint={text:C.roster[e.prisonFoe].hint,until:G.time+5};}}
+  e._pcSeen=(e._pcSeen||0)+dt;
+ }
+ // Guest-local damage uses host attack geometry; never punish a missed network warning.
+ if(e.pcState==='strike'&&(!MP.guest()||(e._pcWarn===e.pcSerial&&e._pcSeen>=.45))){
+  const blocked=q=>losBlocked(e.x,e.z,q.x,q.z)||BFCampaignElites.blocked({ceX:e.x,ceZ:e.z,ceY:e.y},q,G.obstacles);
+  if(e._pcHit!==e.pcSerial&&C.contains(e,p)&&!blocked(p)){e._pcHit=e.pcSerial;hurtPlayer(e.dmg,e.x,e.z,foeHit(e,e.pcMove));}
+  if(G.pet&&!G.pet.dead&&e._pcPetHit!==e.pcSerial&&C.contains(e,G.pet)&&!blocked(G.pet)){e._pcPetHit=e.pcSerial;hurtPet(e.dmg,e.x,e.z);}
+ }
+ if(e.boss)updateBossBar(e);
+}
 function updateCampaignElite(e,dt,p,eff){
  const kit=BFCampaignElites.kits[e.ceKind];if(!kit)return;
  if(!MP.guest()&&Math.hypot(e.hurtKbX||0,e.hurtKbZ||0)>30&&['wind','strike'].includes(e.ceState)){e.ceState='recover';e.ceClock=kit.recover;}
@@ -9577,6 +9601,7 @@ function spawnEnemy(type,x,z,isBoss){
   if(e.spec==='shell'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; e.shellHp=Math.round(e.maxHp*0.55); }   // frontal block until the shell cracks
   if(e.type==='siegeknight'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }
   if(e.spec==='sunpriest'){ e.role='healer'; e.roleCol='#7de08a'; }
+  if(window.BFPrisonCombat?.roster[type])BFPrisonCombat.setup(e);
   snapEnemyToSurface(e); G.enemies.push(e); return e;
 }
 
@@ -13264,7 +13289,7 @@ function checkStageClear(){ if(G?.kingFinal||G?.escape)return;
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if((e?.briarRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
+function foeName(e){ if(e?.prisonFoe)return e.label;if((e?.briarRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -14573,7 +14598,7 @@ const MP={
      a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
@@ -14595,7 +14620,7 @@ const MP={
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
-    for(const a of en)if(a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -15683,7 +15708,7 @@ function update(dt){
     const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)); let dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
     e.yaw=Math.atan2(dirX,dirZ);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
-    if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
+    if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}
     const contactOnly=e.dmg>0&&!e.boss&&e.kind!=='charger'&&e.kind!=='goblin';
     if(contactOnly){
@@ -15768,7 +15793,7 @@ function update(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dead && !e.ceKind && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+    if(!e.dead && !e.ceKind && !e.prisonFoe && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
       if(petClose) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
       else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
   }
@@ -15931,6 +15956,7 @@ function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
   for(let i=0;i<n;i++){const a=base-arc+(i+.5)*step;pushM();mv(x+Math.cos(a)*r,y+4,z+Math.sin(a)*r);rotY(-a);box(4,2,Math.max(2,r*step*.82),color,color,alpha);popM();}
 }
 function drawEnemyDanger(e){
+  if(e.prisonFoe){BFPrisonCombat.danger(e,{mark:(x,y,z,c)=>{const f=floorAt(x,z,2,y+65);if(Number.isFinite(f)&&f>=y-45)bx(x,f+4,z,5,2,5,c,c,.9);}});return;}
   if(e.ceKind){drawCampaignEliteDanger(e);return;}
   if(e.marbleGuardian)return;
   if(e.blinkFx>0&&e.blinkTarget)dangerRing(e.blinkTarget.x,e.y,e.blinkTarget.z,e.r+20,'#c49bff',.9);
@@ -20593,6 +20619,7 @@ function drawEnemyRole3(e,t){
   popM();
 }
 function drawEnemy3(e,t){if(e.hydraChain)return;
+  if(e.prisonFoe){BFPrisonCombat.draw(e,t,{push:pushM,pop:popM,mv,rx:rotX,ry:rotY,rz:rotZ,bx,scale:(x,y,z)=>{CURM=mMul(CURM,mS(x,y,z));}});return;}
   const col=e.hitFlash>0?'#ffffff':(e.slowT>0?tint(e.color,'#9fe0ff',0.35):e.color);
   const en=e.lunge>0||e.phase>=2;
   const eyeC=e.boss?(en?'#ff3b3b':(e.shot?(e.shot.color||'#ff9a3b'):'#ff9a3b')):(e.element?elementColor(e.element):'#eaffd0');
@@ -21548,10 +21575,17 @@ function render(t){
     PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 4600);   // tighter far + bigger near = far better depth precision across the big hub (no z-fighting)
     gl.uniform2f(U.uFogNF, 3000, 6500);
   }
+  // Enclosed dungeon overview: a steeper, shorter boom fits below the roof.
+  // The long outdoor boom otherwise collapses against the rear wall into the hero's back.
+  if(G?.escape&&meta.camMode==='far'){
+    G.eye={x:p.x,y:p.y+190,z:p.z+80};
+    VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[p.x,p.y+34,p.z-90],[0,1,0]);
+    PROJ=mPersp(70*Math.PI/180,VW/VH,3,2400);
+  }
   if(G?.p&&G.eye&&meta.camMode!=='fps'&&!G.hub&&!_ed?.on){
     const target={x:p.x,y:p.y+34,z:p.z},eye=BFCameraOcclusion.constrain(G,target,G.eye);
     G.cameraObstruction=1-eye.fraction;
-    if(eye.fraction<1){G.eye=eye;VIEW=mLookAt([eye.x,eye.y,eye.z],[target.x,target.y,target.z],[0,1,0]);PROJ=mPersp((meta.camMode==='far'?50:62)*Math.PI/180,VW/VH,3,2400);}
+    if(eye.fraction<1){G.eye=eye;VIEW=mLookAt([eye.x,eye.y,eye.z],[target.x,target.y,target.z-(G.escape&&meta.camMode==='far'?90:0)],[0,1,0]);PROJ=mPersp((G.escape&&meta.camMode==='far'?70:meta.camMode==='far'&&!G.escape?50:62)*Math.PI/180,VW/VH,3,2400);}
   }
   const talkFocus=window.BFHubDialogue?.focus();
   if(talkFocus){
@@ -21580,6 +21614,9 @@ function render(t){
     const s0=STAGES[0]; G0BACKDROP(s0,t); return; }
   setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
   G._occN=0;                 // per-frame count of deco boxes ghosted off the hero's sightline (test hook)
+  // Prison architecture has no Three replacement: replay its depth with the actors.
+  // Otherwise the Three pass clears wall depth and reveals enemies through solid rooms.
+  if(G.escape)deferOn();
   drawCourse(s,t);
   /* Everything from here is a live ENTITY, not architecture, so it is recorded and replayed after
      the 3D layer instead of being painted out by it. See the DEFERRED ENTITY PASS note above.
@@ -22654,7 +22691,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
      you just assigned, which passes just as happily against the single-SLOT version whose bug
      ("I turned invisible on my screen") is the entire reason the queue exists. With these, the
      test drives the game's own queueing and its own flush. */
-  drawHero3, flushHero3D, get HERO3D_MAX(){ return HERO3D_MAX; },
+  drawHero3, flushHero3D, renderFrame(){PostFX.begin();render(G?G.time:1);deferOff();flushBatch();PostFX.end();flushHero3D();flushDeferred();}, get HERO3D_MAX(){ return HERO3D_MAX; },
   /* THE LIST useSkill ACTUALLY CASTS FROM. curSkills() is the legacy CLASSES kit; useSkill(i)
      branches on c2def() and, since all sixteen classes now have a CLASS2 tree, ALWAYS casts
      c2CurSkills()[i] instead. The two lists disagree - warrior index 2 reads "Charge" and casts
@@ -22726,6 +22763,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
     unlockedSkins:meta.unlockedSkins.length, godUnlocked:meta.unlockedSkins.includes('god'), achievements:Object.keys(meta.achievements).length, totalKills:meta.totalKills }; } };
 /* Delve-only adapter. Campaign save fields are escrowed for the entire attempt. */
 (()=>{'use strict';
+Object.assign(ENEMY,BFPrisonCombat.roster);
 const D=BFPrisonDungeon,clone=D.copy,old={persist,loadMode,restoreBank,autosaveRun,openHub,awardGold,questUpdate,drawCourse,loadDelveFloor,delveDescend,delveDie,delveExit,startDelve,openDelveGate};
 for(const f of ['prisonProfile','prisonSaves'])if(!MODE_FIELDS.includes(f))MODE_FIELDS.push(f);
 let pendingJoin=null;
@@ -22747,7 +22785,7 @@ function editSaves(change){
 }
 function checkpoint(){if(!G?.escape||G.escape.finished||G.escape.remote||G.p.dead||G.p.hp<=0)return;const r=G.escape;profile().checkpoint={version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,cid:meta.classId,p:snapOf(G.p),classes:clone(meta.classes),stash:clone(meta.stash),states:clone(r.states),events:clone(r.events),safe:clone(r.safe),pickups:clone(G.pickups),chests:clone(G.chests),revives:r.revives||0};persist();}
 autosaveRun=function(){if(G?.escape){checkpoint();return;}old.autosaveRun();};
-openHub=function(){if(G?.escape){checkpoint();restoreBank();G.escape=null;document.getElementById('prisonhud')?.remove();}return old.openHub();};
+openHub=function(){document.getElementById('bosshpwrap').classList.remove('prison-boss');if(G?.escape){checkpoint();restoreBank();G.escape=null;document.getElementById('prisonhud')?.remove();}return old.openHub();};
 awardGold=function(n){return G?.escape?0:old.awardGold(n);}; // room receipts, never replayable kill/sale farming
 function receipts(events){const p=profile();let changed=false;for(const e of events||[]){if(e.members&&!e.members.includes(MP.active?MP.myId:'solo'))continue;changed=D.credit(p,e.id,e.gold,e.kind)||changed;}if(changed){meta.gold=p.gold;persist();hudUpdate();}return changed;}
 function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r.events.some(e=>e.id===id))return;const members=MP.active?[MP.myId,...Object.values(MP.peers).filter(q=>q.zone===MP.zone).map(q=>q.id)]:['solo'];const e={id,gold,kind,members};r.events.push(e);receipts([e]);toast('+'+gold+' dungeon gold'+(kind?' · unlock progress saved':''));}
@@ -22775,7 +22813,7 @@ startDelve=start;
 loadDelveFloor=function(n,saved){
  const r=G.escape;if(!r)return old.loadDelveFloor(n);
  const plan=D.layout(G.runSeed,n,r.tier,r.layoutVersion);r.plan=plan;r.chestRooms={};r.states=clone(saved?.states||{});for(const st of Object.values(r.states))if(st&&typeof st==='object'&&!st.cleared){st.started=false;st.wave=0;st.spawnTime=0;}r.safe=clone(saved?.safe||{x:0,z:180,y:0});r.finished=null;
- G.floor=n;G.stageIndex=5;G.zone=2;G.area=0;G.zoneTier=1+n;G.ngHp=1+(n-1)*.18+(r.tier-1)*.25;G.ngDmg=1+(n-1)*.1+(r.tier-1)*.12;G.haz=null;G.boss=null;
+ G.floor=n;G.stageIndex=5;G.zone=2;G.area=0;G.zoneTier=1+n;G.ngHp=1+(n-1)*.18+(r.tier-1)*.25;G.ngDmg=1+(n-1)*.1+(r.tier-1)*.12;G.haz=null;G.boss=null;document.getElementById('bosshpwrap').classList.add('prison-boss');
  for(const k of ['enemies','pickups','projectiles','particles','ambient','movers','pads','healpads','chests','deco','crumbles','geysers','springs','shockwaves','trails','spikefields','collapse','doors','plates','keys','torches','qmarks','dens','fx','combatArt','hostileArt','marks','meteors','gates','hubNpcs'])G[k]=[];
  G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o,y0:o.y0-24}));G.portal=null;G.portalPos={...plan.exit};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={...plan.bounds};G.progressEnd=plan.bounds.minZ;G.floorCleared=false;
  G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;
@@ -22819,16 +22857,16 @@ function openPreparation(){
  document.querySelectorAll('[data-prbuy]').forEach(el=>el.onclick=()=>{editSaves(book=>D.buy(book.slots[book.active],el.dataset.prbuy));openPreparation();});
 };
 function spawnRoom(room,state){
- const r=G.escape,tier=r.tier,wave=state.wave||0,n=room.kind==='boss'?1:room.kind==='vault'?2:3+tier+wave;
+ const r=G.escape,tier=r.tier,wave=state.wave||0,n=room.kind==='boss'?1:room.kind==='vault'?2:2+tier+wave;
  state.members=[];state.party=1+.6*(Math.max(1,partySize())-1);
  for(let i=0;i<n;i++){const a=i*2.399,formation=room.formation||(r.layoutVersion>=2&&room.kind==='vault'?'patrol':null);
-  const roster=formation==='charge'?['charger','grunt','charger','caster']:formation==='crossfire'?['sentinel','caster','grunt','caster']:['grunt','grunt','caster','revenant'];
-  const type=room.kind==='boss'?(G.floor===3?'warden':'brute'):room.kind==='vault'&&i===0?'revenant':formation?roster[(i+wave)%roster.length]:i%3===1?'caster':(tier>1&&i%3===2?'sentinel':'grunt');
+  const roster=formation==='charge'?['prison_hound','prison_pike','prison_hound','prison_vessel']:formation==='crossfire'?['prison_pike','prison_vessel','prison_pike','prison_vessel']:['prison_pike','prison_hound','prison_vessel','prison_pike'];
+  const type=room.kind==='boss'?['prison_bell','prison_maw','prison_unbound'][G.floor-1]:room.kind==='vault'&&i===0?'prison_pike':roster[(i+wave)%roster.length];
   // Spawn in clear lanes, away from pillars and the elevated optional reward.
-  const sx=formation?(i%2?-1:1)*(80+(i%3)*20):Math.cos(a)*160,sz=formation?(type==='caster'?-180:40+wave*30):Math.sin(a)*100-70;
+  const sx=room.kind==='boss'?0:formation?(i%2?-1:1)*(80+(i%3)*20):Math.cos(a)*160,sz=formation?(type==='prison_vessel'?-180:40+wave*30):Math.sin(a)*100-70;
   const e=spawnEnemy(type,room.x+sx,room.z+sz);e.active=true;e.dropT=1.3;e.prisonRoom=room.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*state.party);e.partyHealthMul=state.party;
-  if(room.kind==='vault'&&i===0)makeElite(e);state.members.push(e.mid);if(room.kind==='boss'){e.label=G.floor===3?'GATE WARDEN':'PRISON ENFORCER';e.hp=e.maxHp=Math.round(e.maxHp*(G.floor===3?.65:.4));G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
- }state.started=true;state.spawnTime=G.time;toast(room.kind==='waves'?'Guards approaching — two waves!':room.kind==='vault'?'Optional elite: risk health for unlock progress.':'Guards ahead!');
+  if(room.kind==='vault'&&i===0){makeElite(e);e.label='Elite '+BFPrisonCombat.roster[type].label;}state.members.push(e.mid);if(room.kind==='boss'){e.hp=e.maxHp=Math.round((250+G.floor*75)*G.ngHp*state.party);e.dmg=BFPrisonCombat.roster[type].dmg*G.ngDmg*DIFFICULTY;G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
+ }state.started=true;state.spawnTime=G.time;if(room.kind!=='boss')toast(room.kind==='waves'?'Guards approaching — two waves!':room.kind==='vault'?'Optional elite: risk health for unlock progress.':'Guards ahead!');
 }
 function tick(dt){
  const r=G?.escape;if(!r||r.finished||mode!=='play')return;
@@ -22856,7 +22894,7 @@ function tick(dt){
  let hud=document.getElementById('prisonhud');if(!hud){hud=document.createElement('div');hud.id='prisonhud';hud.style='position:fixed;right:18px;top:112px;max-width:260px;pointer-events:none;background:#141922df;color:#f4e0ad;padding:9px 18px;border:1px solid #816944;border-radius:8px;z-index:12;font:14px sans-serif';document.body.append(hud);}
  const cleared=[1,3,4].filter(id=>r.states[id]?.cleared).length;
  const hint=room?.optional?(r.states[room.id]?.cleared?(room.id===6?(r.states.cache?'Gold collected':'Climb for hidden gold'):(r.states.seal?'Seal collected':'Climb for the hidden seal')):'Optional elite — risk health for rewards'):room?.kind==='bridge'?'Hold jump to cross the broken floor':G.floorCleared?(G.floor===3?'Reach the exit to escape':'Reach the stairs'):cleared+'/3 guard rooms cleared';
- hud.textContent=(room?.name||'Passage')+' · '+hint+' · '+profile().gold+'g';
+ hud.textContent=(room?.name||'Passage')+' · '+hint+' · '+profile().gold+'g'+(r.combatHint?.until>G.time?' — '+r.combatHint.text:'');
 }
 questUpdate=function(){if(G?.escape){document.getElementById('questbox')?.classList.add('hide');return;}old.questUpdate();};
 drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.escape.plan;

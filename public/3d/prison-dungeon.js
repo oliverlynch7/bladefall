@@ -1,7 +1,7 @@
 /* Pure dungeon content and progression. No campaign state and no network side effects. */
 (()=>{'use strict';
 const VERSION=1,BASE=['warrior','ranger','mage'];
-const offers=[{id:'berserker',tier:1,cost:300,goal:8,key:'elites',name:'Break the guards',desc:'Defeat 8 optional prison elites across runs.'},{id:'ninja',tier:2,cost:600,goal:3,key:'seals',name:'Hidden routes',desc:'Recover 3 hidden seals in Tier 2 or higher.'},{id:'reaper',tier:3,cost:1000,goal:1,key:'warden',name:'Last gate',desc:'Defeat the final Tier 3 warden.'}];
+const offers=[{id:'berserker',tier:1,cost:300,goal:8,key:'elites',name:'Break the guards',desc:'Defeat 8 optional prison elites across runs.'},{id:'ninja',tier:2,cost:600,goal:3,key:'seals',name:'Hidden routes',desc:'Recover 3 hidden seals in Tier 2 or higher.'},{id:'reaper',tier:3,cost:1000,goal:1,key:'warden',name:'Last gate',desc:'Defeat the final Tier 3 boss.'}];
 const upgrades=[{id:'health',name:'Endurance',desc:'+6 starting health',base:60,cap:10},{id:'armor',name:'Reinforced armor',desc:'+1% damage reduction',base:80,cap:10},{id:'weapon',name:'Weapon training',desc:'+4% starting weapon damage',base:90,cap:10}];
 const copy=x=>JSON.parse(JSON.stringify(x));
 function validCheckpoint(c){return !!(c&&c.version===VERSION&&typeof c.id==='string'&&Number.isFinite(c.seed)&&[1,2,3].includes(c.section)&&[1,2,3].includes(c.tier)&&[...BASE,...offers.map(o=>o.id)].includes(c.cid)&&c.p&&Number.isFinite(c.p.hp)&&c.p.hp>0&&c.p.gear&&c.p.stats&&c.p.weapon&&c.classes&&c.states&&c.safe&&Number.isFinite(c.safe.x)&&Number.isFinite(c.safe.z));}
@@ -19,7 +19,7 @@ function layout(seed,section,tier,revision=2){
  const names=[['Cell block','Guard hall','Broken crossing','Watch post','Cell keeper','Hidden store'],['Lower cells','Supply hall','Drain crossing','Barracks','Iron checkpoint','Sealed store'],['Gate cells','Patrol hall','Broken stairwell','Last watch','Outer gate','Warden’s store']][section-1]||['Cell block','Guard hall','Broken crossing','Watch post','Outer gate','Hidden store'];
  const rooms=names.map((name,i)=>({id:i,name,x:i===5?side*720:0,z:i===5?-720:-i*720,w:600,d:600,h:i===2?300:240,kind:['start','fight','bridge','waves','boss','vault'][i],optional:i===5}));
  if(revision>=2){
-  rooms[4].x=side*720;rooms[4].z=-2160;
+  rooms[4].x=side*720;rooms[4].z=-2160;rooms[4].name=['Bell chamber','Iron den','Last seal'][section-1];
   rooms.push({id:6,name:['Guard armory','Forgotten workshop','Sealed treasury'][section-1],x:-side*720,z:-2160,w:600,d:600,h:300,kind:'vault',optional:true});
   rooms[1].formation=['patrol','crossfire','charge'][(seed+section)%3];
   rooms[3].formation=['crossfire','charge','patrol'][(seed+section+1)%3];

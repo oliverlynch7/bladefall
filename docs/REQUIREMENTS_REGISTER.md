@@ -897,3 +897,9 @@ User requests entrance interface with three save slots, a How it works button, a
 
 ## [Codex | 2026-10-03] Dungeon room expansion
 Continue approved enclosed roguelite variety: branching optional elite chambers, turning routes, distinct encounter formations and traversable parkour. Preserve existing checkpoints with an explicit layout revision; verify campaign/save isolation and co-op synchronization. No SFX changes.
+
+
+## [Codex | 2026-10-03] Original dungeon combat roster approved
+User grants total creative freedom for new dungeon bosses unrelated to the main story and explicitly wants original enemies made from scratch. Wants a Dark Souls feeling, informed by successful enemy/fight design research; campaign combat remains a broader dissatisfaction. Implement dungeon-first original silhouettes, readable committed attacks, dodge/positioning responses, recovery openings and limited simultaneous aggression; do not silently replace campaign lore bosses. No new SFX work.
+Grounded pass: three ordinary enemies (Pike Watcher, Chain Hound, Cinder Vessel) and three section bosses (Bell Keeper, Iron Maw, Unbound), original procedural models and pose animation, authoritative co-op tells with missed-warning protection. Keep existing geometry/save revisions and campaign escrow intact.
+Research: PlayStation Demon’s Souls beginner guide (2020-11-12) emphasizes learning enemy patterns; Santa Monica Your Greatest Challenges: Valkyries emphasizes fair response tests. Adapt principles, no copied characters/assets.

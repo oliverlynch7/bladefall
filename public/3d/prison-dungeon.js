@@ -14,7 +14,7 @@ function credit(p,id,gold,kind){if(p.receipts.includes(id))return false;p.receip
 function price(p,id){const u=upgrades.find(u=>u.id===id);return u?u.base*(1+p.upgrades[id]):offers.find(o=>o.id===id)?.cost||0;}
 function buy(p,id){const u=upgrades.find(u=>u.id===id),o=offers.find(o=>o.id===id),cost=price(p,id);if(!cost||p.gold<cost)return false;if(u){if(p.upgrades[id]>=u.cap)return false;p.upgrades[id]++;}else{if(!o||p.classes.includes(id)||p.tier<o.tier||p.progress[o.key]<o.goal)return false;p.classes.push(id);}p.gold-=cost;return true;}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
-function layout(seed,section,tier,revision=2){
+function layout(seed,section,tier,revision=3){
  const random=rng(seed+section*997+tier*71),side=random()<.5?-1:1;
  const names=[['Cell block','Guard hall','Broken crossing','Watch post','Cell keeper','Hidden store'],['Lower cells','Supply hall','Drain crossing','Barracks','Iron checkpoint','Sealed store'],['Gate cells','Patrol hall','Broken stairwell','Last watch','Outer gate','Warden’s store']][section-1]||['Cell block','Guard hall','Broken crossing','Watch post','Outer gate','Hidden store'];
  const rooms=names.map((name,i)=>({id:i,name,x:i===5?side*720:0,z:i===5?-720:-i*720,w:600,d:600,h:i===2?300:240,kind:['start','fight','bridge','waves','boss','vault'][i],optional:i===5}));
@@ -43,7 +43,29 @@ function layout(seed,section,tier,revision=2){
   if(revision>=2&&r.id===6){
    for(let k=0;k<4;k++)plats.push(box(r.x-175+k*100,r.z-170,65,85,0,24+k*24,{room:r.id,cacheStep:true}));
   }
-  if(revision>=2&&r.kind==='boss')for(const s of [-1,1])plats.push(box(r.x+s*185,r.z-150,65,65,0,110,{room:r.id}));
+  if(revision===2&&r.kind==='boss')for(const s of [-1,1])plats.push(box(r.x+s*185,r.z-150,65,65,0,110,{room:r.id}));
+  if(revision>=3&&r.kind==='boss'){
+   r.arena=['shelter','charge','steps'][section-1];
+   const solid=(x,z,w,d,h,color)=>plats.push(box(r.x+x,r.z+z,w,d,0,h,{room:r.id,color,arena:true}));
+   if(section===1){
+    // Four narrow shelters leave the middle and side entrance open for circling.
+    for(const x of [-180,180])for(const z of [-130,130]){
+     solid(x,z,44,52,150,'#8b7860');
+     decor.push(box(r.x+x,r.z+z,54,62,150,162,{room:r.id,color:'#b29865'}));
+    }
+   }else if(section===2){
+    // Broad unobstructed charging lane; low rubble can be jumped, never a safe perch.
+    for(const x of [-218,218])for(const z of [-165,165])solid(x,z,70,110,24,'#635a50');
+    for(const x of [-110,110])decor.push(box(r.x+x,r.z,5,470,.6,1.2,{room:r.id,color:'#ab7845'}));
+   }else{
+    // Shallow terraces vary movement while remaining inside every attack's height range.
+    for(const x of [-190,190])for(const z of [-150,150]){
+     solid(x,z,130,130,18,'#635d79');
+     solid(x,z,90,90,36,'#847599');
+    }
+    for(const x of [-265,265])decor.push(box(r.x+x,r.z-240,18,18,0,190,{room:r.id,color:'#ac8ed2'}));
+   }
+  }
   for(const s of [-1,1])decor.push(box(r.x+s*260,r.z-260,24,24,0,r.h,{room:r.id,pillar:true}));
   if(r.kind==='start')for(const s of [-1,1]){
    for(let k=0;k<8;k++)decor.push(box(r.x+s*210,r.z-130+k*28,8,8,0,160,{room:r.id,bar:true}));

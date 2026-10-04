@@ -1123,7 +1123,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.099.0-prison-roster';
+const VERSION3D='2.100.0-prison-arenas';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -22791,7 +22791,7 @@ function receipts(events){const p=profile();let changed=false;for(const e of eve
 function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r.events.some(e=>e.id===id))return;const members=MP.active?[MP.myId,...Object.values(MP.peers).filter(q=>q.zone===MP.zone).map(q=>q.id)]:['solo'];const e={id,gold,kind,members};r.events.push(e);receipts([e]);toast('+'+gold+' dungeon gold'+(kind?' · unlock progress saved':''));}
 function packet(){const r=G?.escape;return r?{version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,stamp:G.time,states:r.states,events:r.events,safe:r.safe,finished:r.finished||null}:null;}
 function receive(s){if(!s||s.version!==D.VERSION)return;if(G?.escape?.id===s.id&&(G.escape.finished||s.section<G.floor||(s.section===G.floor&&(s.stamp||0)<(G.escape.lastStamp||0))))return;if(!G?.escape||G.escape.id!==s.id)startDelve(profile().classes.includes(meta.classId)?meta.classId:'warrior',{remote:true,state:s});else if(G.floor!==s.section){loadDelveFloor(s.section,s);}
- const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const id of [1,3,4])if(r.states[id]?.cleared&&!r.chestRooms[id]){const q=r.plan.rooms[id];G.chests.push({x:q.x-150,z:q.z+180,y:0,opened:false,bob:0});r.chestRooms[id]=true;}openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
+ const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const id of [1,3,4])if(r.states[id]?.cleared&&!r.chestRooms[id]){const q=r.plan.rooms[id];G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,opened:false,bob:0});r.chestRooms[id]=true;}openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
 function openExit(){const r=G.escape;if([1,3,4].every(id=>r.states[id]?.cleared)&&!G.portal){G.portal={...r.plan.exit,t:0};G.floorCleared=true;}}
 function start(cid,opts={}){
  const pr=profile(),saved=opts.resume?pr.checkpoint:null,state=opts.state||saved;
@@ -22805,7 +22805,7 @@ function start(cid,opts={}){
  if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
  else p.hp=effMaxHp(p);
  G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
- G.escape={layoutVersion:state?(state.layoutVersion||1):2,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ G.escape={layoutVersion:state?(state.layoutVersion||1):3,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
  MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
  if(MP.active&&!opts.remote)MP.enterSpecial('prison');
 }
@@ -22878,7 +22878,7 @@ function tick(dt){
    if(st.started&&G.time-st.spawnTime>1.4&&!G.enemies.some(e=>e.prisonRoom===q.id&&!e.dead)){
     if(q.kind==='waves'&&!st.wave){st.wave=1;st.started=false;continue;}
     st.cleared=true;r.safe={x:q.x,y:0,z:q.z+190};reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
-    if(q.kind!=='vault'){G.chests.push({x:q.x-150,z:q.z+180,y:0,opened:false,bob:0});}
+    if(q.kind!=='vault'){G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,opened:false,bob:0});}
     checkpoint();openExit();questUpdate();
    }
   }
@@ -22901,7 +22901,7 @@ drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.e
  const box=(o,c)=>bx(o.x,(o.y0+o.h)/2,o.z,o.w,o.h-o.y0,o.d,c);
  for(const o of plan.floors){box(o,'#55545a');for(let x=o.x-o.w/2+32;x<o.x+o.w/2;x+=96)bx(x,.3,o.z,2,.5,o.d-4,'#36363d');}
  for(const o of plan.walls){if(o.collisionOnly)continue;box(o,o.room===0&&o.h===160?'#26242a':['#484953','#3e5055','#57505c'][G.floor-1]);for(let y=40;y<o.h;y+=48)bx(o.x,y,o.z,o.w+.3,2,o.d+.3,'#34353d');}
- for(const o of plan.roofs){box(o,'#292b34');if(o.w>300){for(const dz of [-180,180])bx(o.x,o.y0-12,o.z+dz,o.w-24,24,22,'#37313a');}}for(const o of plan.plats)box(o,'#77716a');for(const o of plan.decor)box(o,o.bar?'#26242a':'#62616a');
+ for(const o of plan.roofs){box(o,'#292b34');if(o.w>300){for(const dz of [-180,180])bx(o.x,o.y0-12,o.z+dz,o.w-24,24,22,'#37313a');}}for(const o of plan.plats)box(o,o.color||'#77716a');for(const o of plan.decor)box(o,o.color||(o.bar?'#26242a':'#62616a'));
  for(const room of plan.rooms){for(const sign of [-1,1]){bx(room.x+sign*260,85,room.z+130,9,36,9,'#443629');bx(room.x+sign*260,110,room.z+130,12,18,12,'#ffd591','#ed992c');}}
  const v=plan.rooms[5];if(!G.escape.states.seal){bx(v.x+20,106,v.z-80,14,18,14,'#71d8cf','#71d8cf');}
  if(plan.revision>=2&&!G.escape.states.cache){const q=plan.rooms[6];bx(q.x+125,110,q.z-170,20,20,20,'#edbb52','#cf922d');}

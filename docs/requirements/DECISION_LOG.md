@@ -660,3 +660,7 @@ User approved campaign pursuit/cover/recovery review, followed by enemy animatio
 
 ## [Codex | 2026-10-04] Approved distinct enemy choreography
 User approved continuing from 2.103 into distinctive enemy attack animations. Grounded pass: differentiated sword/shield/caster/thrower/beast poses on existing rigs, explicit visual recovery, and eliminate false release animation after interrupted structured wind-ups. Preserve authored boss clips, weapon attachments, damage/balance, saves and SFX. Browser pose/phase checks and prior-save regression before shipping.
+
+
+## [Codex | 2026-10-04] Dungeon playtest corrections
+User requests stable close dungeon camera near walls; immediate equipment bagging (sell only when full); harder parkour and faster, more challenging enemies; larger, more varied and longer floors; fewer chests with explicit rarity and conservative common rewards; substantial dungeon visual upgrade. Preserve existing saved runs and campaign grinding mode. Camera/pickup correctness first, then versioned layout and presentation improvements; human difficulty/art acceptance remains playtest-dependent.

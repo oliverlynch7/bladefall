@@ -21,6 +21,9 @@ const roster={
  prison_unbound:{label:'THE UNBOUND',hp:66,dmg:23,speed:48,r:29,h:105,color:'#8b79b7',kind:'prison',xp:210,boss:true,sequence:['cross','mark','toll'],second:['mark','cross','mark','toll'],hint:'Stand between the cross beams. Move out of marked circles.'},
  prison_guard:{label:'Shield Guard',hp:38,dmg:12,speed:52,r:22,h:78,color:'#99805b',kind:'prison',xp:30,sequence:['bash'],hint:'Flank the shield, or strike after its bash.'}
 };
+// Faster commitments, with readable tells and a punish window after every strike.
+for(const m of Object.values(moves)){m.wind=+(m.wind*.76).toFixed(3);m.strike=+(m.strike*.78).toFixed(3);m.recover=+(m.recover*.78).toFixed(3);}
+for(const k of Object.values(roster))k.speed=Math.round(k.speed*1.18);
 function setup(e){const k=roster[e.type];if(!k)return;e.prisonFoe=e.type;e.pcState='approach';e.pcClock=.55;e.pcSerial=0;e.pcCount=0;e.pcMove=k.sequence[0];e.role=null;e.spec=null;e.shot=null;e.speed=k.speed;e.label=k.label;}
 function step(e,dt,target,speed,canAttack=true){
  const k=roster[e.prisonFoe];if(!k||!target||e.dead)return;const m=moves[e.pcMove];

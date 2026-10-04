@@ -185,7 +185,7 @@
     max-width:min(78vw,520px);text-align:center;color:#eae4d6;font-size:clamp(14px,2.4vw,19px);line-height:1.55;
     font-style:italic;letter-spacing:.01em;text-shadow:0 2px 14px #000;opacity:0;transition:opacity .8s ease;}
   #storycard.show{opacity:1;}
-  #bKeep,#bBag{width:78px;}
+  #bKeep,#bBag{display:none!important;}
   #bKeep{top:calc(38% + 38px);}
   #bBag{top:calc(38% + 76px);}
   #bPing{top:calc(38% + 114px);width:78px;}   /* co-op only — shown by syncPingBtn while a party is live */
@@ -1053,8 +1053,8 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2099"></script>
-<script src="./prison-combat.js?v=2099"></script>
+<script src="./prison-dungeon.js?v=2105-2099"></script>
+<script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2097"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2083"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2079">
@@ -1128,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.104.0-enemy-choreography';
+const VERSION3D='2.105.0-dungeon-playtest';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1199,7 +1199,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 }
 _g.legacyHubDialogue=_g.legacyHubDialogue||_g.hubDialogue||{};
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'shoulder',lookSens:1,fpsFov:92,renderDist:1,silhouette:true,dmgNumbers:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,camMode:'shoulder',lookSens:1,fpsFov:92,renderDist:1,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -5338,7 +5338,7 @@ function newG(p,extra){
 function enterZone(zi){
   const Z=zoneOf(zi);
   initAudio(); queueLevelUp=0; queueSubclass=false;
-  meta.autoKeep=false; meta.autoBag=false; persistGlobal();   // loot mode DEFAULTS to OFF each level — the player opts into auto-sell/bag with Q
+  meta.autoKeep=false; meta.autoBag=true; persistGlobal();   // Equipment pickups always enter the bag; overflow is sold.
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
@@ -5790,7 +5790,7 @@ function showGameUI(v){
   else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
   // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
   const hideHubLoot=!v||!!(G&&G.hub);
-  ['bKeep','bBag'].forEach(id=>document.getElementById(id).classList.toggle('hide',hideHubLoot));
+  ['bKeep','bBag'].forEach(id=>document.getElementById(id).classList.add('hide'));
 }
 function mulberry(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^(seed>>>15),1|seed);
   t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
@@ -9651,16 +9651,11 @@ function updateHudKeys(){ if(typeof keyLabel!=='function'||!meta.keybinds) retur
   const lbl=id=>{ const c=meta.keybinds[id]&&meta.keybinds[id][0]; return keyLabel(c||''); };
   const a=document.getElementById('bAuto'); if(a){ a.classList.add('tog'); a.innerHTML='AUTO <span class="togkey" style="opacity:.75">'+lbl('auto')+'</span>'; }
   const lk=lbl('loot'); document.querySelectorAll('#bKeep .togkey,#bBag .togkey').forEach(s=>{ s.textContent=lk; });
-  const k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(k)k.title=lk+': cycle auto-loot (Off / Sell / Bag)'; if(bg)bg.title=lk+': cycle auto-loot (Off / Sell / Bag)'; }
+  const k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(k)k.title='Equipment is bagged automatically'; if(bg)bg.title='Equipment is bagged automatically'; }
 function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
-function toggleKeep(){ meta.autoKeep=!meta.autoKeep; if(meta.autoKeep) meta.autoBag=false; persist(); updateToggles(); toast('Auto-sell '+(meta.autoKeep?'ON':'OFF')); }   // auto-sell + auto-bag are mutually exclusive
-function toggleBag(){ meta.autoBag=!meta.autoBag; if(meta.autoBag) meta.autoKeep=false; persist(); updateToggles(); toast('Auto-bag '+(meta.autoBag?'ON':'OFF')); }
-function cycleLootMode(){
-  if(meta.autoKeep){ meta.autoKeep=false; meta.autoBag=true; }
-  else if(meta.autoBag){ meta.autoBag=false; meta.autoKeep=false; }
-  else { meta.autoKeep=true; meta.autoBag=false; }
-  persist(); updateToggles(); toast(meta.autoKeep?'Auto-sell ON':meta.autoBag?'Auto-bag ON':'Auto loot OFF');
-}
+function toggleKeep(){toast('Equipment goes straight into your bag. Full bag items are sold.');}
+function toggleBag(){toggleKeep();}
+function cycleLootMode(){toggleKeep();}
 [['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag],['bPing',()=>dropPing()]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
 updateToggles();
 // ── REMAPPABLE CONTROLS. Each action holds up to 2 physical keys (e.code — keyboard-layout independent, so KeyW is
@@ -13273,15 +13268,17 @@ function openChest(ch){
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
   if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
   else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
-  const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
+  const drops=ch.bonus?2:1; // bonus vault always holds two
   for(let i=0;i<drops;i++){
-    const rid=bandedRarity(ch.bonus?1:0);      // chests stay random, but only within this zone tier's band
+    const roll=Math.random(),grade=ch.rarity||(ch.bonus?'rare':'common');
+    const rid=grade==='common'?(roll<.92?'common':'uncommon'):grade==='uncommon'?(roll<.85?'uncommon':'rare'):grade==='rare'?(roll<.94?'rare':'epic'):grade==='epic'?(roll<.98?'epic':'legendary'):'legendary';      // Chest grade controls its reward; common chests never roll rare gear.
     const item=randomLoot(rid);
     pushLoot(ch.x+(i?28:-28),ch.z+20,ch.y,item);
   }
 }
 // every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
 function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, tier=o?RARITY[o.rarity].tier:0, col=o?RARITY[o.rarity].color:'#fff';
+  if(G.escape&&o&&!o.prisonLootKey)o.prisonLootKey='loot-'+(++G.escape.lootSerial);
   y0=Math.max(y0||0,highestSurfaceAt(x,z)); G.pickups.push(Object.assign({x,z,y0,bob:Math.random()*3},item));
   SFX.drop(tier);
   burst(x,(y0||0)+18,z,col,7+tier*7);
@@ -15942,7 +15939,9 @@ function update(dt){
       else if(pk.localItem){ addText(pk.x,26,pk.z,'+ '+pk.localItem.name,'var(--amber)'); if((G.optionalMissions||[]).some(m=>m.id===pk.localItem.id)) optionalBump(pk.localItem.id,1); else localBump(pk.localItem.id,1); }
       else { playFx('lootpickup'); if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); }
       pk.taken=true; } }
+  const collectedLoot=G.pickups.some(pk=>pk.taken);
   G.pickups=G.pickups.filter(pk=>!pk.taken);
+  if(collectedLoot&&G.escape)BFPrisonRun.checkpoint();
   // quest waystone: touch it to complete a "find" objective
   if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
     if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ const q=areaQuests().find(q=>q.id===w.q);const waiting=(q?.requires||[]).some(id=>!questDone(areaQuests().find(q=>q.id===id)));if(waiting){if(!w.warned){w.warned=true;toast('The Waystone sleeps. Survey the Watchpost and break both thorn nests first.');}}else {w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } } }
@@ -16468,23 +16467,16 @@ function lootEquipCurrent(){ const d=G&&G.lootCard; if(!d) return; const it=d.it
 function lootSellCurrent(){ const d=G&&G.lootCard; if(!d) return; const g=sellItem(d.item); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); showNextLoot(); }
 function lootToBag(auto){ const d=G&&G.lootCard; if(!d) return; const it=d.item, box=d.kind==='weapon'?{weapon:it}:(d.kind==='armor'?{armor:it}:{trinket:it});
   if(stashItem(box)){ if(!auto) toast('🎒 '+it.name+' → bag'); } else { const g=sellItem(it); toast('Bag full — sold '+it.name+' · +'+g+'g'); } hudUpdate(); showNextLoot(); }
-function offerWeapon(nw){
-  if(meta.autoBag){ if(stashItem({weapon:nw})) toast('🎒 Bagged · '+nw.name); else { const g=sellItem(nw); toast('Bag full — sold '+nw.name+' · +'+g+'g'); } hudUpdate(); return; }
-  if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
-  teachOnce('firstloot','Your first drop! Read the ▲/▼ arrows to compare it to what you carry, then Equip, Stash it in your bag, or Sell for gold.',{icon:'🎁'});
-  if(nw&&RARITY[nw.rarity]&&RARITY[nw.rarity].tier>=1) teachOnce('firstrare','Gear colour is its rarity: grey → green → blue → purple → gold. Stronger gear needs a higher character level to wield — a 🔒 shows the requirement.',{icon:'💎'});
-  queueLoot({kind:'weapon',item:nw});   // non-blocking HUD card (F equip / R bag / Q sell / wait -> bag)
+// Picking up equipment is a completed inventory action, never a timed decision card.
+function bagGroundEquipment(kind,item){
+  if(!item||!G)return;
+  if(stashItem({[kind]:item}))toast('Bagged · '+item.name);
+  else {const gold=G.escape?BFPrisonRun.overflow(item):sellItem(item);persist();toast('Bag full — sold '+item.name+' · +'+gold+'g');}
+  hudUpdate();
 }
-function offerArmor(na){
-  if(meta.autoBag){ if(stashItem({armor:na})) toast('🎒 Bagged · '+na.name); else { const g=sellItem(na); toast('Bag full — sold '+na.name+' · +'+g+'g'); } hudUpdate(); return; }
-  if(meta.autoKeep){ const g=sellItem(na); toast('Sold · '+na.name+' · +'+g+'g'); hudUpdate(); return; }
-  queueLoot({kind:'armor',item:na});
-}
-function offerTrinket(nt){
-  if(meta.autoBag){ if(stashItem({trinket:nt})) toast('🎒 Bagged · '+nt.name); else { const g=sellItem(nt); toast('Bag full — sold '+nt.name+' · +'+g+'g'); } hudUpdate(); return; }
-  if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
-  queueLoot({kind:'trinket',item:nt});
-}
+function offerWeapon(item){bagGroundEquipment('weapon',item);}
+function offerArmor(item){bagGroundEquipment('armor',item);}
+function offerTrinket(item){bagGroundEquipment('trinket',item);}
 /* one random loot item (weapon / armor / trinket) at a given rarity */
 function randomLoot(rid){ const r=Math.random();
   if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
@@ -21651,14 +21643,24 @@ function render(t){
   // Enclosed dungeon overview: a steeper, shorter boom fits below the roof.
   // The long outdoor boom otherwise collapses against the rear wall into the hero's back.
   if(G?.escape&&meta.camMode==='far'){
-    G.eye={x:p.x,y:p.y+190,z:p.z+80};
-    VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[p.x,p.y+34,p.z-90],[0,1,0]);
+    G.eye={x:cx,y:cyy+190,z:cz+80};
+    VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[cx,cyy+34,cz-90],[0,1,0]);
     PROJ=mPersp(70*Math.PI/180,VW/VH,3,2400);
   }
   if(G?.p&&G.eye&&meta.camMode!=='fps'&&!G.hub&&!_ed?.on){
-    const target={x:p.x,y:p.y+34,z:p.z},eye=BFCameraOcclusion.constrain(G,target,G.eye);
-    G.cameraObstruction=1-eye.fraction;
-    if(eye.fraction<1){G.eye=eye;VIEW=mLookAt([eye.x,eye.y,eye.z],[target.x,target.y,target.z-(G.escape&&meta.camMode==='far'?90:0)],[0,1,0]);PROJ=mPersp((G.escape&&meta.camMode==='far'?70:meta.camMode==='far'&&!G.escape?50:62)*Math.PI/180,VW/VH,3,2400);}
+    const target={x:p.x,y:p.y+34,z:p.z},desired=G.eye;
+    const now=performance.now(),last=G._cameraBoom;
+    const limit=BFCameraOcclusion.constrain(G,target,desired);
+    const dt=last?Math.min(.05,Math.max(0,(now-last.time)/1000)):0;
+    // Retract for safety immediately; extend gradually instead of popping out at an edge.
+    const fraction=last&&last.mode===meta.camMode?Math.min(limit.fraction,last.fraction+(limit.fraction-last.fraction)*(1-Math.exp(-dt*7))):limit.fraction;
+    G._cameraBoom={time:now,fraction,mode:meta.camMode};G.cameraObstruction=1-fraction;
+    const eye={x:target.x+(desired.x-target.x)*fraction,y:target.y+(desired.y-target.y)*fraction,z:target.z+(desired.z-target.z)*fraction};
+    G.eye=eye;
+    const cy=G.camYaw??0,pit=Math.max(-.5,Math.min(.9,G.camPitch??.12));
+    const look=meta.camMode==='shoulder'?[cx+Math.sin(cy)*120,50-Math.sin(pit)*72+cyy,cz+Math.cos(cy)*120]:[cx,cyy+(G.escape?34:26),cz-(G.escape?90:4)];
+    if(G.escape||fraction<.999){VIEW=mLookAt([eye.x,eye.y,eye.z],look,[0,1,0]);
+    PROJ=mPersp((meta.camMode==='shoulder'?62:G.escape?70:50)*Math.PI/180,VW/VH,3,2400);}
   }
   const talkFocus=window.BFHubDialogue?.focus();
   if(talkFocus){
@@ -22082,6 +22084,7 @@ function drawChest(ch,t){
   if(!ch.opened){ const g=0.6+0.35*Math.sin(t*4+ch.bob);
     // the mimic's TELL (Phase 18): identical at a glance, but up close it BREATHES — the lid
     // rises a hair on a slow rhythm, it shudders once in a while, and the lock burns warmer.
+    const chestColor=RARITY[ch.rarity||(ch.bonus?'rare':'common')]?.color||'#b9b9b9';
     const mim=!!ch.mimic, br=mim?Math.max(0,Math.sin(t*0.8+ch.bob))*1.1:0;
     const shove=(mim && Math.sin(t*0.47+ch.bob*2)>0.988)?(Math.random()-0.5)*1.4:0;
     /* The tell is decided HERE, once, and stashed for prop3d to pose the model with. Recomputing
@@ -22095,9 +22098,9 @@ function drawChest(ch,t){
     }
     // front face of whatever body was actually drawn, plus a hair so it can never z-fight it
     const fz=p3?p3.d/2+1.4:11.2, ly=p3?p3.h*0.5:12.5, sy=p3?p3.h+8:26;
-    bx(0,ly,fz-0.4, 5,6.5,1.8, mim?'#ffb84a':'#ffd24a', mim?'#ff9a3a':'#ffd24a', g);   // glowing lock (a shade warmer on a liar)
+    bx(0,ly,fz-0.4, 5,6.5,1.8, mim?'#ffb84a':chestColor, mim?'#ff9a3a':chestColor, g);   // glowing lock (a shade warmer on a liar)
     bx(0,ly-1.5,fz, 1.6,2.4,1, '#1a0a0e');                                                     // keyhole
-    bx(0,sy,0, 4,4,4,'#ffd24a','#ffd24a',g*0.6);                  // sparkle
+    bx(0,sy,0, 4,4,4,chestColor,chestColor,g*0.6);                  // sparkle
   } else if(!p3){
     bx(0,7,0, 30,12,22,'#5a3d22');
     pushM(); mv(0,14,-10); rotX(-2.1); bx(0,3.4,0, 30,7,22,'#6b4a2a'); popM(); // open lid
@@ -22856,7 +22859,7 @@ function editSaves(change){
  const before=clone(library());change(library());syncProfiles();window.__saveStatus={ok:false};persist();
  if(!window.__saveStatus?.ok){meta.prisonSaves=before;syncProfiles();toast('Save failed. Nothing was changed. Free browser storage and try again.');return false;}return true;
 }
-function checkpoint(){if(!G?.escape||G.escape.finished||G.escape.remote||G.p.dead||G.p.hp<=0)return;const r=G.escape;profile().checkpoint={version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,cid:meta.classId,p:snapOf(G.p),classes:clone(meta.classes),stash:clone(meta.stash),states:clone(r.states),events:clone(r.events),safe:clone(r.safe),pickups:clone(G.pickups),chests:clone(G.chests),revives:r.revives||0};persist();}
+function checkpoint(){if(!G?.escape||G.escape.finished||G.escape.remote||G.p.dead||G.p.hp<=0)return;const r=G.escape;profile().checkpoint={version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,cid:meta.classId,p:snapOf(G.p),classes:clone(meta.classes),stash:clone(meta.stash),states:clone(r.states),events:clone(r.events),lootSerial:r.lootSerial||0,safe:clone(r.safe),pickups:clone(G.pickups.filter(pk=>!pk.taken)),chests:clone(G.chests),revives:r.revives||0};persist();}
 autosaveRun=function(){if(G?.escape){checkpoint();return;}old.autosaveRun();};
 openHub=function(){document.getElementById('bosshpwrap').classList.remove('prison-boss');if(G?.escape){checkpoint();restoreBank();G.escape=null;document.getElementById('prisonhud')?.remove();}return old.openHub();};
 awardGold=function(n){return G?.escape?0:old.awardGold(n);}; // room receipts, never replayable kill/sale farming
@@ -22865,7 +22868,7 @@ function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r
 function packet(){const r=G?.escape;return r?{version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,stamp:G.time,states:r.states,events:r.events,safe:r.safe,finished:r.finished||null}:null;}
 function receive(s){if(!s||s.version!==D.VERSION)return;if(G?.escape?.id===s.id&&(G.escape.finished||s.section<G.floor||(s.section===G.floor&&(s.stamp||0)<(G.escape.lastStamp||0))))return;if(!G?.escape||G.escape.id!==s.id)startDelve(profile().classes.includes(meta.classId)?meta.classId:'warrior',{remote:true,state:s});else if(G.floor!==s.section){loadDelveFloor(s.section,s);}
  const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const id of [1,3,4])if(r.states[id]?.cleared&&!r.chestRooms[id]){const q=r.plan.rooms[id];G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,opened:false,bob:0});r.chestRooms[id]=true;}openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
-function openExit(){const r=G.escape;if([1,3,4].every(id=>r.states[id]?.cleared)&&!G.portal){G.portal={...r.plan.exit,t:0};G.floorCleared=true;}}
+function openExit(){const r=G.escape;if(r.plan.rooms.filter(q=>!q.optional&&['fight','waves','boss'].includes(q.kind)).every(q=>r.states[q.id]?.cleared)&&!G.portal){G.portal={...r.plan.exit,t:0};G.floorCleared=true;}}
 function start(cid,opts={}){
  const pr=profile(),saved=opts.resume?pr.checkpoint:null,state=opts.state||saved;
  if(opts.resume&&!D.validCheckpoint(saved)){toast('No valid saved escape. Your gold and upgrades are safe.');openDelveGate();return;}
@@ -22878,7 +22881,7 @@ function start(cid,opts={}){
  if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
  else p.hp=effMaxHp(p);
  G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
- G.escape={layoutVersion:state?(state.layoutVersion||1):4,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ G.escape={layoutVersion:state?(state.layoutVersion||1):5,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
  MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
  if(MP.active&&!opts.remote)MP.enterSpecial('prison');
 }
@@ -22888,9 +22891,9 @@ loadDelveFloor=function(n,saved){
  const plan=D.layout(G.runSeed,n,r.tier,r.layoutVersion);r.plan=plan;r.chestRooms={};r.states=clone(saved?.states||{});for(const st of Object.values(r.states))if(st&&typeof st==='object'&&!st.cleared){st.started=false;st.wave=0;st.spawnTime=0;delete st.nextWaveAt;}r.safe=clone(saved?.safe||{x:0,z:180,y:0});r.finished=null;
  G.floor=n;G.stageIndex=5;G.zone=2;G.area=0;G.zoneTier=1+n;G.ngHp=1+(n-1)*.18+(r.tier-1)*.25;G.ngDmg=1+(n-1)*.1+(r.tier-1)*.12;G.haz=null;G.boss=null;document.getElementById('bosshpwrap').classList.add('prison-boss');
  for(const k of ['enemies','pickups','projectiles','particles','ambient','movers','pads','healpads','chests','deco','crumbles','geysers','springs','shockwaves','trails','spikefields','collapse','doors','plates','keys','torches','qmarks','dens','fx','combatArt','hostileArt','marks','meteors','gates','hubNpcs'])G[k]=[];
- G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o,y0:o.y0-24}));G.portal=null;G.portalPos={...plan.exit};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={...plan.bounds};G.progressEnd=plan.bounds.minZ;G.floorCleared=false;
- G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;
- if(n===2&&!r.states.healed)G.springs.push({x:plan.rooms[5].x+100,z:-560,y:0});
+ G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o}));G.portal=null;G.portalPos={...plan.exit};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={...plan.bounds};G.progressEnd=plan.bounds.minZ;G.floorCleared=false;
+ G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;delete G._cameraBoom;
+ if(n===2&&!r.states.healed)G.springs.push({x:plan.rooms[5].x+100,z:plan.rooms[5].z+160,y:0});
  if(saved&&!r.remote){G.pickups=clone(saved.pickups||[]);G.chests=clone(saved.chests||[]);}G.kills=0;G.killGoal=999;G.stageBanner=2;G.areaName=plan.title;document.getElementById('stagetag').textContent='PRISON BREAK · TIER '+r.tier+' · '+n+'/3';document.getElementById('bosshpwrap').classList.remove('on');
  openExit();checkpoint();questUpdate();window.__world3dRebuild?.();
 };
@@ -22952,11 +22955,11 @@ function tick(dt){
    if(st.started&&G.time-st.spawnTime>1.4&&!G.enemies.some(e=>e.prisonRoom===q.id&&!e.dead)){
     if(q.kind==='waves'&&!st.wave){st.wave=1;st.started=false;st.nextWaveAt=G.time+3;toast('Next wave in 3 seconds');continue;}
     st.cleared=true;r.safe={x:q.x,y:0,z:q.z+190};reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
-    if(q.kind!=='vault'){G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,opened:false,bob:0});}
+    if(q.kind==='boss'||(r.layoutVersion<5&&q.kind!=='vault')||(r.layoutVersion>=5&&q.id===3)){G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,rarity:q.kind==='boss'?'uncommon':'common',opened:false,bob:0});}
     checkpoint();openExit();questUpdate();
    }
   }
-  const vault=r.plan.rooms[5];if(r.states[5]?.cleared&&!r.states.seal&&[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone):[])].some(p=>dXZ(p.x,p.z,vault.x+20,vault.z-80)<45&&p.y>=65)){
+  const vault=r.plan.rooms[5];if(r.states[5]?.cleared&&!r.states.seal&&[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone):[])].some(p=>dXZ(p.x,p.z,vault.x+(r.layoutVersion>=5?25:20),vault.z-(r.layoutVersion>=5?100:80))<45&&p.y>=65)){
    r.states.seal=true;reward('seal',80,r.tier>=2?'seals':null);checkpoint();toast('Hidden seal recovered!');
   }
  }
@@ -22966,18 +22969,20 @@ function tick(dt){
  if(G.springs.some(s=>s.used)&&!r.states.healed){r.states.healed=true;checkpoint();}
  if(G.boss&&!G.boss.dead)updateBossBar(G.boss);
  let hud=document.getElementById('prisonhud');if(!hud){hud=document.createElement('div');hud.id='prisonhud';hud.style='position:fixed;right:18px;top:112px;max-width:260px;pointer-events:none;background:#141922df;color:#f4e0ad;padding:9px 18px;border:1px solid #816944;border-radius:8px;z-index:12;font:14px sans-serif';document.body.append(hud);}
- const cleared=[1,3,4].filter(id=>r.states[id]?.cleared).length;
- const hint=room?.optional?(r.states[room.id]?.cleared?(room.id===6?(r.states.cache?'Gold collected':'Climb for hidden gold'):(r.states.seal?'Seal collected':'Climb for the hidden seal')):'Optional elite — risk health for rewards'):room?.kind==='bridge'?'Hold jump to cross the broken floor':G.floorCleared?(G.floor===3?'Reach the exit to escape':'Reach the stairs'):cleared+'/3 guard rooms cleared';
+ const required=r.plan.rooms.filter(q=>!q.optional&&['fight','waves','boss'].includes(q.kind));const cleared=required.filter(q=>r.states[q.id]?.cleared).length;
+ const hint=room?.optional?(r.states[room.id]?.cleared?(room.id===6?(r.states.cache?'Gold collected':'Climb for hidden gold'):(r.states.seal?'Seal collected':'Climb for the hidden seal')):'Optional elite — risk health for rewards'):room?.kind==='bridge'?'Hold jump to cross the broken floor':G.floorCleared?(G.floor===3?'Reach the exit to escape':'Reach the stairs'):cleared+'/'+required.length+' guard rooms cleared';
  hud.textContent=(room?.name||'Passage')+' · '+hint+' · '+profile().gold+'g'+(r.combatHint?.until>G.time?' — '+r.combatHint.text:'');
 }
 questUpdate=function(){if(G?.escape){document.getElementById('questbox')?.classList.add('hide');return;}old.questUpdate();};
 drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.escape.plan;
- const box=(o,c)=>bx(o.x,(o.y0+o.h)/2,o.z,o.w,o.h-o.y0,o.d,c);
- for(const o of plan.floors){box(o,'#55545a');for(let x=o.x-o.w/2+32;x<o.x+o.w/2;x+=96)bx(x,.3,o.z,2,.5,o.d-4,'#36363d');}
- for(const o of plan.walls){if(o.collisionOnly)continue;box(o,o.room===0&&o.h===160?'#26242a':['#484953','#3e5055','#57505c'][G.floor-1]);for(let y=40;y<o.h;y+=48)bx(o.x,y,o.z,o.w+.3,2,o.d+.3,'#34353d');}
- for(const o of plan.roofs){box(o,'#292b34');if(o.w>300){for(const dz of [-180,180])bx(o.x,o.y0-12,o.z+dz,o.w-24,24,22,'#37313a');}}for(const o of plan.plats)box(o,o.color||'#77716a');for(const o of plan.decor)box(o,o.color||(o.bar?'#26242a':'#62616a'));
- for(const room of plan.rooms){for(const sign of [-1,1]){bx(room.x+sign*260,85,room.z+130,9,36,9,'#443629');bx(room.x+sign*260,110,room.z+130,12,18,12,'#ffd591','#ed992c');}}
- const v=plan.rooms[5];if(!G.escape.states.seal){bx(v.x+20,106,v.z-80,14,18,14,'#71d8cf','#71d8cf');}
+ if(!(three3DLive()&&window.__PRISON_ART_ACTIVE&&window.__world3d?.().on)){
+ const solidBox=(o,c)=>bx(o.x,(o.y0+o.h)/2,o.z,o.w,o.h-o.y0,o.d,c);
+ for(const o of plan.floors){solidBox(o,'#55545a');for(let x=o.x-o.w/2+32;x<o.x+o.w/2;x+=96)bx(x,.3,o.z,2,.5,o.d-4,'#36363d');}
+ for(const o of plan.walls){if(o.collisionOnly)continue;solidBox(o,o.room===0&&o.h===160?'#26242a':['#484953','#3e5055','#57505c'][G.floor-1]);for(let y=40;y<o.h;y+=48)bx(o.x,y,o.z,o.w+.3,2,o.d+.3,'#34353d');}
+ for(const o of plan.roofs){solidBox(o,'#292b34');if(o.w>300){for(const dz of [-180,180])bx(o.x,o.y0-12,o.z+dz,o.w-24,24,22,'#37313a');}}for(const o of plan.plats)solidBox(o,o.color||'#77716a');for(const o of plan.decor)solidBox(o,o.color||(o.bar?'#26242a':'#62616a'));
+ for(const room of plan.rooms)for(const sign of [-1,1]){bx(room.x+sign*(room.w/2-40),85,room.z+130,9,36,9,'#443629');bx(room.x+sign*(room.w/2-40),110,room.z+130,12,18,12,'#ffd591','#ed992c');}
+ }
+ const v=plan.rooms[5];if(!G.escape.states.seal){bx(v.x+(plan.revision>=5?25:20),106,v.z-(plan.revision>=5?100:80),14,18,14,'#71d8cf','#71d8cf');}
  if(plan.revision>=2&&!G.escape.states.cache){const q=plan.rooms[6],cache=q.cache||{x:125,z:-170,y:96};bx(q.x+cache.x,cache.y+14,q.z+cache.z,20,20,20,'#edbb52','#cf922d');}
  for(const sp of G.springs)if(!sp.used)bx(sp.x,2,sp.z,42,4,42,'#4ba58b','#74e6ba');
 };
@@ -22992,8 +22997,8 @@ const self=MP.selfState,snap=MP.snap;MP.selfState=function(){return {...self.cal
 const rev=MP.reviveSelf;MP.reviveSelf=function(msg){if(G?.escape){if(!G.p.downed||G.escape.revives>=1)return;G.escape.revives++;rev.call(this,msg);G.p.hp=Math.round(effMaxHp(G.p)*.25);return;}rev.call(this,msg);};
 const leave=MP.leave;MP.leave=function(msg){const remote=G?.escape?.remote,waiting=!!pendingJoin;pendingJoin=null;leave.call(this,msg);if(remote||waiting)openHub();};
 const wipe=wipeMode;wipeMode=function(m){wipe(m);meta.prisonSaves=D.saves();syncProfiles();pendingJoin=null;};
-const previousWorld=window.__BF_WORLD;window.__BF_WORLD=()=>({...previousWorld(),escape:G?.escape?.id||null});
-window.BFPrisonRun={tick,packet,receive,profile,library,selectSlot,checkpoint,finish,prepare:openDelveGate};
+const previousWorld=window.__BF_WORLD;window.__BF_WORLD=()=>({...previousWorld(),escape:G?.escape?.id||null,prisonPlan:G?.escape?.plan||null});
+window.BFPrisonRun={overflow(item){const key=item.prisonLootKey||(item.prisonLootKey='loot-'+(++G.escape.lootSerial));const gold=itemGold(item),id=G.escape.id+':'+G.floor+':overflow:'+(MP.active?MP.myId:'solo')+':'+key;const credited=D.credit(profile(),id,gold);meta.gold=profile().gold;persist();return credited?gold:0;},tick,packet,receive,profile,library,selectSlot,checkpoint,finish,prepare:openDelveGate};
 Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delveExit,openDelveGate,openHub,persist,loadMode,restoreBank,autosaveRun,awardGold});
 })();
 
@@ -23016,7 +23021,7 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2104"></script>
+<script type="module" src="./hero3d.js?v=2105"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

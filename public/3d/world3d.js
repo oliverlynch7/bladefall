@@ -1,3 +1,4 @@
+import {buildPrisonArt} from './prison-art3d.js?v=2105';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2074';
 import {buildLongAscent} from './long-ascent-art.js?v=2074';
@@ -1969,7 +1970,7 @@ export function clearWorld(scene){
     if(o.isLight && o.userData._w3dOrig != null){ o.intensity = o.userData._w3dOrig; }
   });
   if(group?.userData.dispose) group.userData.dispose();
-  window.__OUTSKIRTS_ACTIVE=false;
+  window.__OUTSKIRTS_ACTIVE=false;window.__PRISON_ART_ACTIVE=false;
   if(group && group.parent) group.parent.remove(group);
   if(group){
     group.traverse(o => { if(o.isInstancedMesh){ o.dispose && o.dispose(); } });
@@ -2000,7 +2001,15 @@ export function syncWorld(scene){
   let world = null;
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
-  if(world.escape){if(WORLD3D.built!=='escape:'+world.escape+':'+world.floor){clearWorld(scene);clearMobs();clearProps();WORLD3D.built='escape:'+world.escape+':'+world.floor;WORLD3D.counts={};for(const k of ['__OUTSKIRTS_ACTIVE','__HUB_ART_ACTIVE','__HOLLOW_ART_ACTIVE','__KEEP_ART_ACTIVE','__FROST_ART_ACTIVE','__DEEP_ART_ACTIVE'])window[k]=false;}WORLD3D.ready=true;return true;}
+  if(world.escape){
+    const key='escape:'+world.escape+':'+world.floor+':'+world.prisonPlan?.revision;
+    if(WORLD3D.built!==key){
+      clearWorld(scene);clearMobs();clearProps();
+      for(const k of ['__OUTSKIRTS_ACTIVE','__HUB_ART_ACTIVE','__HOLLOW_ART_ACTIVE','__KEEP_ART_ACTIVE','__FROST_ART_ACTIVE','__DEEP_ART_ACTIVE'])window[k]=false;
+      const art=buildPrisonArt(world.prisonPlan||window.__BF3?.G?.escape?.plan);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.built=key;
+    }
+    window.__PRISON_ART_ACTIVE=true;WORLD3D.ready=true;return true;
+  }
   const sig = signature(world);
   if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.

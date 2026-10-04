@@ -14,7 +14,7 @@ function credit(p,id,gold,kind){if(p.receipts.includes(id))return false;p.receip
 function price(p,id){const u=upgrades.find(u=>u.id===id);return u?u.base*(1+p.upgrades[id]):offers.find(o=>o.id===id)?.cost||0;}
 function buy(p,id){const u=upgrades.find(u=>u.id===id),o=offers.find(o=>o.id===id),cost=price(p,id);if(!cost||p.gold<cost)return false;if(u){if(p.upgrades[id]>=u.cap)return false;p.upgrades[id]++;}else{if(!o||p.classes.includes(id)||p.tier<o.tier||p.progress[o.key]<o.goal)return false;p.classes.push(id);}p.gold-=cost;return true;}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
-function layout(seed,section,tier,revision=4){
+function layout(seed,section,tier,revision=5){
  const random=rng(seed+section*997+tier*71),side=random()<.5?-1:1;
  const names=[['Cell block','Guard hall','Broken crossing','Watch post','Cell keeper','Hidden store'],['Lower cells','Supply hall','Drain crossing','Barracks','Iron checkpoint','Sealed store'],['Gate cells','Patrol hall','Broken stairwell','Last watch','Outer gate','Warden’s store']][section-1]||['Cell block','Guard hall','Broken crossing','Watch post','Outer gate','Hidden store'];
  const rooms=names.map((name,i)=>({id:i,name,x:i===5?side*720:0,z:i===5?-720:-i*720,w:600,d:600,h:i===2?300:240,kind:['start','fight','bridge','waves','boss','vault'][i],optional:i===5}));
@@ -28,7 +28,12 @@ function layout(seed,section,tier,revision=4){
   for(const id of [1,3]){const r=rooms[id];r.template=['gallery','kennels','barricades'][(seed+section+id)%3];r.name={gallery:'Split gallery',kennels:'Chain kennels',barricades:'Guard barricades'}[r.template];}
   rooms[6].name='Broken treasury';rooms[6].cache={x:125,z:-205,y:128};
  }
- const links=[[0,1],[1,2],[2,3],[3,4],[1,5],...(revision>=2?[[3,6]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
+ if(revision>=5){
+  rooms[4].x=side*2160;
+  rooms.push({id:7,name:'Prison refectory',x:side*720,z:-2160,w:600,d:600,h:300,kind:'fight',template:'refectory'}, {id:8,name:'Flooded watch gallery',x:side*1440,z:-2160,w:600,d:600,h:320,kind:'waves',template:'cistern'});
+  for(const r of rooms)r.h+=60;
+ }
+ const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],[7,8],[8,4]]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
   const dirs=new Set(links.filter(l=>l.includes(r.id)).map(l=>{const q=rooms[l.find(i=>i!==r.id)];return Math.abs(q.x-r.x)>10?(q.x>r.x?'E':'W'):(q.z>r.z?'S':'N');}));
@@ -56,6 +61,13 @@ function layout(seed,section,tier,revision=4){
    }else if(r.template==='kennels'){
     // Low raised runs let charging beasts and players traverse the same terrain.
     for(const x of [-205,205]){solid(x,-75,105,190,24,'#756452');solid(x,-75,65,110,42,'#87755e');}
+   }else if(r.template==='refectory'){
+    // Long dining tables create parallel lanes and jumpable cross routes.
+    for(const x of [-165,165]){solid(x,0,85,280,42,'#766047');solid(x+Math.sign(x)*66,0,25,260,21,'#554434');}
+   }else if(r.template==='cistern'){
+    // Three staggered low islands interrupt straight charges without sealing a lane.
+    for(const [x,z] of [[-155,-110],[155,30],[-110,155]])solid(x,z,135,100,28,'#547a79');
+    for(const x of [-250,250])solid(x,-165,32,70,160,'#5d9391');
    }else{
     for(const x of [-170,170]){solid(x,40,65,95,32,'#807162');solid(x,-125,38,48,120,'#66616d');}
    }
@@ -96,12 +108,26 @@ function layout(seed,section,tier,revision=4){
   floors.push(box(x,z,horizontal?144:180,horizontal?180:144,-20,0));roofs.push(box(x,z,horizontal?144:204,horizontal?204:144,200,218));
   for(const s of [-1,1])walls.push(box(x+(horizontal?0:s*90),z+(horizontal?s*90:0),horizontal?144:24,horizontal?24:144,0,200));
  }
+ if(revision>=5){
+  // Scale the architecture, not the hero or attack ranges. Old revisions remain exact.
+  for(const group of [rooms,walls,floors,plats,roofs,decor])for(const o of group){
+   o.x*=1.25;o.z*=1.25;o.w*=1.25;o.d*=1.25;
+   if(o.waypoints)for(const pt of o.waypoints){pt.x*=1.25;pt.z*=1.25;}
+   if(o.cache){o.cache.x*=1.25;o.cache.z*=1.25;}
+  }
+  for(const o of plats){
+   if(o.room===2){o.x=rooms[2].x+(o.x-rooms[2].x)*.5;o.w=78;o.d=66;o.h=o.h>30?56:24;}
+   if(o.cacheStep){o.w=58;o.d=68;}
+  }
+  const bridge=rooms[2];bridge.waypoints=[{x:bridge.x,z:bridge.z+281,y:0},...plats.filter(o=>o.room===2).map(o=>({x:o.x,z:o.z,y:o.h})),{x:bridge.x,z:bridge.z-281,y:0}];
+ }
  const exit={x:rooms[4].x,z:rooms[4].z-170,y:0};
- const bounds={minX:Math.min(...rooms.map(r=>r.x-320)),maxX:Math.max(...rooms.map(r=>r.x+320)),minZ:Math.min(...rooms.map(r=>r.z-320)),maxZ:320};
+ const bounds={minX:Math.min(...rooms.map(r=>r.x-r.w/2-20)),maxX:Math.max(...rooms.map(r=>r.x+r.w/2+20)),minZ:Math.min(...rooms.map(r=>r.z-r.d/2-20)),maxZ:revision>=5?395:320};
  return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
 function encounter(room,tier,wave=0){
  const packs={gallery:[['prison_guard','prison_vessel','prison_pike'],['prison_vessel','prison_hound','prison_pike']],kennels:[['prison_hound','prison_hound','prison_pike'],['prison_guard','prison_hound','prison_hound']],barricades:[['prison_guard','prison_pike','prison_vessel'],['prison_hound','prison_vessel','prison_guard']]};
+ packs.refectory=packs.barricades;packs.cistern=[['prison_vessel','prison_pike','prison_hound'],['prison_hound','prison_guard','prison_vessel']];
  const pack=(packs[room.template]||packs.barricades)[wave%2],count=room.kind==='vault'?2:2+tier;
  const positions=room.kind==='vault'?[[-80,60],[90,70]]:[[-75,-35],[85,-170],[65,95],[-80,-190],[0,140]];
  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));

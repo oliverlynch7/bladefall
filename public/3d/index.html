@@ -1063,7 +1063,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
 <script src="./class-looks.js?v=2084"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2089"></script>
 <script src="./emotes.js?v=2087"></script>
-<script src="./camera-occlusion.js?v=2074"></script>
+<script src="./camera-occlusion.js?v=2095"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
 <script src="./brute-encounter.js?v=2000"></script>
@@ -1119,7 +1119,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.094.0-projectile-art';
+const VERSION3D='2.095.0-camera-interiors';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -21512,7 +21512,7 @@ function render(t){
        fills the screen with the inside of a skull; nudging it past the face puts the body behind
        the camera and leaves the weapon arm in front of you, which is the whole point of seeing
        yourself hold what you are wielding. */
-    const EYE_FWD=26;
+    const EYE_FWD=three3DLive()?4:26;
     const ex=p.x+fx*EYE_FWD, ey=p.y+42+fy*EYE_FWD, ez=p.z+fz*EYE_FWD;
     PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
     VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
@@ -21543,6 +21543,11 @@ function render(t){
     const near = meta.camMode==='fps'?3:meta.camMode==='shoulder'?18:45;
     PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 4600);   // tighter far + bigger near = far better depth precision across the big hub (no z-fighting)
     gl.uniform2f(U.uFogNF, 3000, 6500);
+  }
+  if(G?.p&&G.eye&&meta.camMode!=='fps'&&!G.hub&&!_ed?.on){
+    const target={x:p.x,y:p.y+34,z:p.z},eye=BFCameraOcclusion.constrain(G,target,G.eye);
+    G.cameraObstruction=1-eye.fraction;
+    if(eye.fraction<1){G.eye=eye;VIEW=mLookAt([eye.x,eye.y,eye.z],[target.x,target.y,target.z],[0,1,0]);PROJ=mPersp((meta.camMode==='far'?50:62)*Math.PI/180,VW/VH,3,2400);}
   }
   const talkFocus=window.BFHubDialogue?.focus();
   if(talkFocus){
@@ -21775,7 +21780,7 @@ function render(t){
       bx(sway*0.7,11,-13-lift*1.6, 14,18,2.2, C, C, 0.78);             // lower taper, kicks out when running
       if(cp.id==='sail'){bx(sway*.4,25,-12.4-lift,4,20,.3,'#366c7c');bx(sway*.7,11,-14.3-lift*1.6,3,16,.3,'#366c7c');bx(sway*.7,3,-14.4-lift*1.6,14,2,.3,'#987b45');}
       popM(); } }
-  if(meta.camMode!=='fps'||talkFocus) drawHero3(p,t,false);
+  if(meta.camMode!=='fps'||talkFocus||three3DLive()) drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
   if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
   if(G.arena){ drawArenaProps(t); drawArenaPickups(t); }        // arena master + door, then powerup orbs
@@ -22734,7 +22739,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2094"></script>
+<script type="module" src="./hero3d.js?v=2095"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

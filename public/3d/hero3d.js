@@ -2076,7 +2076,11 @@ export function drawHero3D(p, t){
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
     if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
-    try{renderer.render(scene, cam);}finally{for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    // Hide only the local head for this draw, never the rig in saved/peer/portrait state.
+    const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!window.BFHubDialogue?.active;
+    const head=fp?findHeadBone({root:actor}):null,headScale=head?.scale.clone();
+    if(head){head.scale.setScalar(.001);wrap.updateMatrixWorld(true);}
+    try{renderer.render(scene, cam);}finally{if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;

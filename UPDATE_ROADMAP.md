@@ -2313,3 +2313,7 @@ Validation: 29-menu state regression including old cursor histories, no-effect n
 
 ## [Codex | 2026-10-04]
 2.107.0-forge-levels: forge level cap and color-coded rarity guide implemented. Single/batch merges, all rarity thresholds, and old-save compatibility passed browser QA.
+
+
+## [Codex | 2026-10-04]
+Shipped 2.108.0-hammer-carry: dedicated lower forward hammer ready pose clears Warrior face instead of using upright heavy-weapon carry. Palm anchors, support-hand IK and authored attacks retained. Browser: all three hammer models, 21 idle/walk/run/charge/attack pose checks passed, support grip errors within .04 rig units; screenshot visually reviewed. Syntax gate and prior-version 17-class save check passed.

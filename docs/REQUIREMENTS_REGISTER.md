@@ -935,3 +935,7 @@ User: "if there are side quests that are available with an NPC, if I click on th
 
 ## [Codex | 2026-10-04]
 Forge: prevent single and batch merges above the active character equipment rarity requirement. Show a compact color-coded rarity/character-level guide, including locked tiers. Use the same requirements as equipping gear.
+
+
+## [Codex | 2026-10-04]
+User: Warrior warhammer blocks the face. Give hammers a lower forward ready carry, keeping palm grip and two-handed support through movement/attacks.

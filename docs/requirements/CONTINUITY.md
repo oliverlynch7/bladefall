@@ -1057,3 +1057,7 @@ Validation: 29-menu state regression including old cursor histories, no-effect n
 
 ## [Codex | 2026-10-04]
 2.107.0-forge-levels: single and batch forge upgrades now respect canonical character-level equipment requirements (1/5/12/20/30). Locked pairs remain visible; Forge All skips them. Compact color-coded guide shows current level and unlocked/locked tiers. Browser QA passed 12 category/tier boundary cases, single merge, mixed batch and cascade cap; previous-version save preserved across 17 classes. JS gate passed.
+
+
+## [Codex | 2026-10-04]
+Shipped 2.108.0-hammer-carry: dedicated lower forward hammer ready pose clears Warrior face instead of using upright heavy-weapon carry. Palm anchors, support-hand IK and authored attacks retained. Browser: all three hammer models, 21 idle/walk/run/charge/attack pose checks passed, support grip errors within .04 rig units; screenshot visually reviewed. Syntax gate and prior-version 17-class save check passed.

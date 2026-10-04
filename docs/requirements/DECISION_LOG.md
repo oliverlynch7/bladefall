@@ -656,3 +656,7 @@ User approved all six proposed areas: journal/clue clarity, quest interaction fe
 
 ## [Codex | 2026-10-04] Approved enemy reliability and feedback pass
 User approved campaign pursuit/cover/recovery review, followed by enemy animation and hit feedback. Implement bounded local ground routing and cover-aware melee first; preserve authored boss movement, safe ledges, saves, and existing SFX. Improve readable attack timing and restrained hit reactions without a roster/art redesign. Verify actual browser combat and report remaining co-op/boss limitations honestly.
+
+
+## [Codex | 2026-10-04] Approved distinct enemy choreography
+User approved continuing from 2.103 into distinctive enemy attack animations. Grounded pass: differentiated sword/shield/caster/thrower/beast poses on existing rigs, explicit visual recovery, and eliminate false release animation after interrupted structured wind-ups. Preserve authored boss clips, weapon attachments, damage/balance, saves and SFX. Browser pose/phase checks and prior-save regression before shipping.

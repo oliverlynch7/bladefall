@@ -1,8 +1,8 @@
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2103';
-import { enemyActionState } from './enemy-action-state.js?v=2057';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2104';
+import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2104';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -119,17 +119,19 @@ function acquireMob(type,e){
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
     const clips=src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
-    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||['Attack','Hit','Death','Windup','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
+    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||['Attack','Recover','Hit','Death','Windup','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
-  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,attack:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});
+  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});
   rec.mixer.stopAllAction();rec.root.visible=true;_actors.set(e,rec);return rec;
 }
 function play(rec,name,duration){
   const a=rec.actions[name]||rec.actions.Idle;if(!a)return;
-  if(rec.cur===name)return;
-  const old=rec.actions[rec.cur];if(old)old.fadeOut(.08);
-  a.reset().setEffectiveTimeScale(duration ? a.getClip().duration/Math.max(.08,duration) : 1).setEffectiveWeight(1).fadeIn(.08).play();rec.cur=name;
+  if(rec.cur===name&&!rec.restart)return;
+  rec.restart=false;
+  const blend=name==='Attack'?.025:.08;
+  const old=rec.actions[rec.cur];if(old)old.fadeOut(blend);
+  a.reset().setEffectiveTimeScale(duration ? a.getClip().duration/Math.max(.08,duration) : 1).setEffectiveWeight(1).fadeIn(blend).play();rec.cur=name;
 }
 function release(rec){
   _actors.delete(rec.enemy);rec.enemy=null;rec.root.visible=false;rec.mixer.stopAllAction();
@@ -188,23 +190,27 @@ function syncMobsInner(scene,dt){
     }
     const speed=dt>0?Math.hypot(e.x-rec.x,e.z-rec.z)/dt:0;rec.x=e.x;rec.z=e.z;
     const state=enemyActionState(e),wind=state.phase==='Windup'?state.remaining:0;
-    rec.attack=Math.max(0,rec.attack-dt);
-    // A release follows the actual wind-up, never mere proximity or cooldown reset.
-    const released=rec.wind>0&&wind<=0;
-    const started=state.phase==='Attack'&&rec.phase!=='Attack';
-    if(released||started){rec.attack=state.phase==='Attack'?state.remaining:.42;rec.cur=null;}
-    if(state.phase==='Windup'&&(rec.phase!=='Windup'||rec.phaseKey!==state.key||wind>rec.wind+.05))rec.cur=null;
+    const held=e.stunT>0||(window.__BF3?.G?._freezeT||0)>0,animDt=held?0:dt;
+    const wasAttacking=rec.phase==='Attack'||rec.attack>0;
+    rec.attack=Math.max(0,rec.attack-animDt);rec.recover=Math.max(0,rec.recover-animDt);
+    const released=instantEnemyRelease(rec,state,e);
+    const started=state.phase==='Attack'&&(rec.phase!=='Attack'||rec.phaseKey!==state.key);
+    if(released){rec.attack=.42;rec.restart=true;}
+    if(started){rec.restart=true;rec.recover=0;}
+    if(wasAttacking&&state.phase!=='Attack'&&state.phase!=='Windup'&&rec.attack===0&&rec.actions.Recover){rec.recover=rec.actions.Recover.getClip().duration;rec.restart=true;}
+    if(state.phase==='Windup'){rec.recover=0;if(rec.phase!=='Windup'||rec.phaseKey!==state.key||wind>rec.wind+.05)rec.restart=true;}
     const orchard=e.bruteOrchard?{wind:'BruteBrace',charge:'BruteRush',stagger:'BruteStagger'}[e.bruteState]:null;
     const fallen=e.fallenDuel?{feint:'FallenFeint',stagger:'FallenStagger'}[e.fallState]:null;
     if(fallen)play(rec,fallen,e.fallClock);
     else if(orchard)play(rec,orchard,orchard==='BruteBrace'?wind:undefined);
     else if(wind>0)play(rec,'Windup',wind);
     else if(rec.attack>0||state.phase==='Attack')play(rec,'Attack',state.phase==='Attack'?state.remaining:rec.attack);
-    else if((e.hitFlash||0)>rec.hit+.025){rec.cur=null;play(rec,'Hit');}
+    else if(rec.recover>0)play(rec,'Recover');
+    else if((e.hitFlash||0)>rec.hit+.025){rec.restart=true;play(rec,'Hit');}
     else if(rec.cur!=='Hit'||!rec.actions.Hit?.isRunning())play(rec,speed>3&&speed<1600?'Move':'Idle');
     if(rec.cur==='Move'&&rec.actions.Move)rec.actions.Move.setEffectiveTimeScale(Math.max(.65,Math.min(1.7,speed/(e.speed||60))));
     rec.phase=state.phase;rec.phaseKey=state.key;
-    rec.mixer.update((e.stunT>0)?0:dt);
+    rec.mixer.update(animDt);
     rec.wind=wind;rec.shoot=e.shootT||0;rec.hit=e.hitFlash||0;
     _drawn.add(e);live++;
   }
@@ -223,4 +229,4 @@ export function clearMobs(){
 }
 export function mobDrawn(e){return MOB3D.on&&!!e&&typeof e==='object'&&_drawn.has(e);}
 window.__mob3dDrawn=mobDrawn;
-window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead,opacity:r.materials[0]?.opacity,flash:r.materials[0]?.emissiveIntensity}))});
+window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,time:r.actions[r.cur]?.time,weights:Object.fromEntries(Object.entries(r.actions).filter(([,a])=>a.getEffectiveWeight()>.01&&a.enabled&&a.isScheduled()).map(([k,a])=>[k,a.getEffectiveWeight()])),phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead,opacity:r.materials[0]?.opacity,flash:r.materials[0]?.emissiveIntensity}))});

@@ -1128,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.103.0-enemy-pursuit';
+const VERSION3D='2.104.0-enemy-choreography';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -15765,6 +15765,7 @@ function update(dt){
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
     if(!(MP.guest()&&e.normalMelee))e.yaw=Math.atan2(dirX,dirZ);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
+    e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
     if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}
     const contactOnly=e.dmg>0&&!e.boss&&e.kind!=='charger'&&e.kind!=='goblin';
@@ -16037,6 +16038,7 @@ function bossShoot(e,p){
   e.shotW=0.7;e.shotAim={x:p.x,y:p.y,z:p.z,h:p.h};
 }
 function releaseEnemyShot(e,p){
+  e.shotReleaseT=.22; // Explicit visual release; cancelled wind-ups must not cast.
   const cfg=e.shot, oy=e.y+e.h*0.62;
   const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)), t=Math.max(0.25,d/cfg.speed);
   const baseAng=Math.atan2(p.x-e.x,p.z-e.z);
@@ -23014,7 +23016,7 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2103"></script>
+<script type="module" src="./hero3d.js?v=2104"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

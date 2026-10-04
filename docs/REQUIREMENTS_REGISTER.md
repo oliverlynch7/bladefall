@@ -907,3 +907,7 @@ Research: PlayStation Demon’s Souls beginner guide (2020-11-12) emphasizes lea
 
 ## [Codex | 2026-10-04] Distinct Prison Break boss arenas
 Continue approved original dungeon combat: Bell Keeper shelter pillars, Iron Maw open charge lanes with low rubble, and Unbound stepped chamber. New geometry revision 3; existing checkpoints retain revisions 1/2. Preserve campaign, scarce healing, co-op and save isolation.
+
+
+## [Codex | 2026-10-04] Approved inter-boss dungeon pass
+User approved varied encounters, room layouts/traversal, optional risk rewards, fair scarce-healing pacing and full-run/save checks. Implement revision 4 room templates, original shield guard, authored mixed encounter positions, wave breathing room, optional elevated gold route. Preserve revisions 1-3 and campaign isolation; no SFX changes.

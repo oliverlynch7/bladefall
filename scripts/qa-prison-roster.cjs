@@ -7,4 +7,6 @@ for(const type of Object.keys(C.roster)){
  for(const state of ['approach','wind','strike','recover']){e.pcState=state;e.pcClock=.2;let depth=0,n=0;const check=(...v)=>{for(const q of v)if(typeof q==='number')assert(Number.isFinite(q));};C.draw(e,2,{push:()=>depth++,pop:()=>depth--,mv:check,rx:check,ry:check,rz:check,scale:check,bx:(...v)=>{check(...v);n++;}});assert.equal(depth,0);assert(n>0);}
 }
 const e={pcState:'strike',pcX:0,pcY:0,pcZ:0,pcDX:0,pcDZ:1,x:0,z:0,r:20},p={x:0,y:0,z:100,hp:100,r:12};e.pcMove='thrust';assert(C.contains(e,p));assert(!C.contains(e,{...p,x:80}));assert(!C.contains(e,{...p,z:-50}));e.pcMove='toll';assert(!C.contains(e,{...p,z:0}));assert(C.contains(e,p));e.pcMove='cross';assert(C.contains(e,p));assert(!C.contains(e,{...p,x:100}));assert(!C.contains(e,{...p,y:90}));
-console.log('Six original foes: committed tells, recovery, boss move variation, finite articulated poses, snapshots and attack hit geometry passed.');
+console.log('All original foes: committed tells, recovery, boss move variation, finite articulated poses, snapshots and attack hit geometry passed.');
+
+const guard={prisonFoe:'prison_guard',x:0,z:0,yaw:0,pcState:'wind'};assert.equal(C.guardDamage(guard,{x:0,z:100},100),40);assert.equal(C.guardDamage(guard,{x:100,z:0},100),100);guard.pcState='recover';assert.equal(C.guardDamage(guard,{x:0,z:100},100),100);

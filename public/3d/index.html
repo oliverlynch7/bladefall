@@ -1123,7 +1123,7 @@ details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visib
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.100.0-prison-arenas';
+const VERSION3D='2.101.0-dungeon-encounters';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12851,12 +12851,14 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      effect of a netcode fix. A separate marker keeps the two apart. */
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
     MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
+    if(e.prisonFoe)dmg=BFPrisonCombat.guardDamage(e,src,dmg);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
     if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3; classHeal(G.p,Math.min(dmg,Math.max(0,e.hp))*lifesteal*lsMul); }
     if(healRatio>0)classHeal(G.p,Math.min(dmg,Math.max(0,e.hp))*healRatio);
     return;
   }
+  if(e.prisonFoe){const guarded=BFPrisonCombat.guardDamage(e,src,dmg);if(guarded<dmg&&(e._guardHint||0)<G.time){e._guardHint=G.time+1;addText(e.x,e.y+90,e.z,'FLANK THE SHIELD','#dfc78e');}dmg=guarded;}
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
   if(src===G.p){
     if(meta.classId==='ranger'){
@@ -14603,7 +14605,7 @@ const MP={
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
   hostApplyHit(d){ if(!this.host_()||!G||G.storyState?.conversation) return; const e=this.byMid(d.m); if(!e||e.dead) return;   // apply a guest's relayed hit authoritatively
-    const src={x:d.sx||e.x,z:d.sz||e.z,_guest:true};
+    const src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true};
     try{ hitEnemy(e, d.d||1, src, d.kb||0, 0, d.el||null); }catch(err){} },
   sendHit(mid,dmg,kb,el,sx,sz){ if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'hit',m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0)}); }catch(e){} } },
   // guest: reconcile local enemy list to the host's authoritative set + process kills
@@ -22805,14 +22807,14 @@ function start(cid,opts={}){
  if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
  else p.hp=effMaxHp(p);
  G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
- G.escape={layoutVersion:state?(state.layoutVersion||1):3,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ G.escape={layoutVersion:state?(state.layoutVersion||1):4,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
  MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
  if(MP.active&&!opts.remote)MP.enterSpecial('prison');
 }
 startDelve=start;
 loadDelveFloor=function(n,saved){
  const r=G.escape;if(!r)return old.loadDelveFloor(n);
- const plan=D.layout(G.runSeed,n,r.tier,r.layoutVersion);r.plan=plan;r.chestRooms={};r.states=clone(saved?.states||{});for(const st of Object.values(r.states))if(st&&typeof st==='object'&&!st.cleared){st.started=false;st.wave=0;st.spawnTime=0;}r.safe=clone(saved?.safe||{x:0,z:180,y:0});r.finished=null;
+ const plan=D.layout(G.runSeed,n,r.tier,r.layoutVersion);r.plan=plan;r.chestRooms={};r.states=clone(saved?.states||{});for(const st of Object.values(r.states))if(st&&typeof st==='object'&&!st.cleared){st.started=false;st.wave=0;st.spawnTime=0;delete st.nextWaveAt;}r.safe=clone(saved?.safe||{x:0,z:180,y:0});r.finished=null;
  G.floor=n;G.stageIndex=5;G.zone=2;G.area=0;G.zoneTier=1+n;G.ngHp=1+(n-1)*.18+(r.tier-1)*.25;G.ngDmg=1+(n-1)*.1+(r.tier-1)*.12;G.haz=null;G.boss=null;document.getElementById('bosshpwrap').classList.add('prison-boss');
  for(const k of ['enemies','pickups','projectiles','particles','ambient','movers','pads','healpads','chests','deco','crumbles','geysers','springs','shockwaves','trails','spikefields','collapse','doors','plates','keys','torches','qmarks','dens','fx','combatArt','hostileArt','marks','meteors','gates','hubNpcs'])G[k]=[];
  G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o,y0:o.y0-24}));G.portal=null;G.portalPos={...plan.exit};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={...plan.bounds};G.progressEnd=plan.bounds.minZ;G.floorCleared=false;
@@ -22858,12 +22860,13 @@ function openPreparation(){
 };
 function spawnRoom(room,state){
  const r=G.escape,tier=r.tier,wave=state.wave||0,n=room.kind==='boss'?1:room.kind==='vault'?2:2+tier+wave;
+ const schedule=r.layoutVersion>=4&&room.kind!=='boss'?D.encounter(room,tier,wave):null;
  state.members=[];state.party=1+.6*(Math.max(1,partySize())-1);
- for(let i=0;i<n;i++){const a=i*2.399,formation=room.formation||(r.layoutVersion>=2&&room.kind==='vault'?'patrol':null);
+ for(let i=0;i<(schedule?schedule.length:n);i++){const a=i*2.399,formation=room.formation||(r.layoutVersion>=2&&room.kind==='vault'?'patrol':null);
   const roster=formation==='charge'?['prison_hound','prison_pike','prison_hound','prison_vessel']:formation==='crossfire'?['prison_pike','prison_vessel','prison_pike','prison_vessel']:['prison_pike','prison_hound','prison_vessel','prison_pike'];
-  const type=room.kind==='boss'?['prison_bell','prison_maw','prison_unbound'][G.floor-1]:room.kind==='vault'&&i===0?'prison_pike':roster[(i+wave)%roster.length];
+  const type=schedule?schedule[i].type:room.kind==='boss'?['prison_bell','prison_maw','prison_unbound'][G.floor-1]:room.kind==='vault'&&i===0?'prison_pike':roster[(i+wave)%roster.length];
   // Spawn in clear lanes, away from pillars and the elevated optional reward.
-  const sx=room.kind==='boss'?0:formation?(i%2?-1:1)*(80+(i%3)*20):Math.cos(a)*160,sz=formation?(type==='prison_vessel'?-180:40+wave*30):Math.sin(a)*100-70;
+  const sx=schedule?schedule[i].x:room.kind==='boss'?0:formation?(i%2?-1:1)*(80+(i%3)*20):Math.cos(a)*160,sz=schedule?schedule[i].z:formation?(type==='prison_vessel'?-180:40+wave*30):Math.sin(a)*100-70;
   const e=spawnEnemy(type,room.x+sx,room.z+sz);e.active=true;e.dropT=1.3;e.prisonRoom=room.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*state.party);e.partyHealthMul=state.party;
   if(room.kind==='vault'&&i===0){makeElite(e);e.label='Elite '+BFPrisonCombat.roster[type].label;}state.members.push(e.mid);if(room.kind==='boss'){e.hp=e.maxHp=Math.round((250+G.floor*75)*G.ngHp*state.party);e.dmg=BFPrisonCombat.roster[type].dmg*G.ngDmg*DIFFICULTY;G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
  }state.started=true;state.spawnTime=G.time;if(room.kind!=='boss')toast(room.kind==='waves'?'Guards approaching — two waves!':room.kind==='vault'?'Optional elite: risk health for unlock progress.':'Guards ahead!');
@@ -22874,9 +22877,9 @@ function tick(dt){
  if(!r.remote&&!MP.guest()){
   for(const q of r.plan.rooms.filter(q=>['fight','waves','vault','boss'].includes(q.kind))){const st=r.states[q.id]||(r.states[q.id]={});if(st.cleared)continue;
    const present=[G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===MP.zone):[])].some(p=>!p.dead&&!p.downed&&Math.abs(p.x-q.x)<240&&Math.abs(p.z-q.z)<240);
-   if(!st.started&&present)spawnRoom(q,st);
+   if(!st.started&&present&&(!st.nextWaveAt||G.time>=st.nextWaveAt))spawnRoom(q,st);
    if(st.started&&G.time-st.spawnTime>1.4&&!G.enemies.some(e=>e.prisonRoom===q.id&&!e.dead)){
-    if(q.kind==='waves'&&!st.wave){st.wave=1;st.started=false;continue;}
+    if(q.kind==='waves'&&!st.wave){st.wave=1;st.started=false;st.nextWaveAt=G.time+3;toast('Next wave in 3 seconds');continue;}
     st.cleared=true;r.safe={x:q.x,y:0,z:q.z+190};reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
     if(q.kind!=='vault'){G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,opened:false,bob:0});}
     checkpoint();openExit();questUpdate();
@@ -22887,7 +22890,7 @@ function tick(dt){
   }
  }
  if(!r.remote&&!MP.guest()&&r.plan.revision>=2&&r.states[6]?.cleared&&!r.states.cache){
-  const q=r.plan.rooms[6];if([G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===MP.zone):[])].some(p=>!p.dead&&!p.downed&&dXZ(p.x,p.z,q.x+125,q.z-170)<40&&p.y>=90)){r.states.cache=true;reward('high-cache',70*r.tier);checkpoint();toast('Hidden gold recovered!');}
+  const q=r.plan.rooms[6],cache=q.cache||{x:125,z:-170,y:96};if([G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===MP.zone):[])].some(p=>!p.dead&&!p.downed&&dXZ(p.x,p.z,q.x+cache.x,q.z+cache.z)<40&&p.y>=cache.y-6)){r.states.cache=true;reward('high-cache',(r.layoutVersion>=4?100:70)*r.tier);checkpoint();toast('Hidden gold recovered!');}
  }
  if(G.springs.some(s=>s.used)&&!r.states.healed){r.states.healed=true;checkpoint();}
  if(G.boss&&!G.boss.dead)updateBossBar(G.boss);
@@ -22904,7 +22907,7 @@ drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.e
  for(const o of plan.roofs){box(o,'#292b34');if(o.w>300){for(const dz of [-180,180])bx(o.x,o.y0-12,o.z+dz,o.w-24,24,22,'#37313a');}}for(const o of plan.plats)box(o,o.color||'#77716a');for(const o of plan.decor)box(o,o.color||(o.bar?'#26242a':'#62616a'));
  for(const room of plan.rooms){for(const sign of [-1,1]){bx(room.x+sign*260,85,room.z+130,9,36,9,'#443629');bx(room.x+sign*260,110,room.z+130,12,18,12,'#ffd591','#ed992c');}}
  const v=plan.rooms[5];if(!G.escape.states.seal){bx(v.x+20,106,v.z-80,14,18,14,'#71d8cf','#71d8cf');}
- if(plan.revision>=2&&!G.escape.states.cache){const q=plan.rooms[6];bx(q.x+125,110,q.z-170,20,20,20,'#edbb52','#cf922d');}
+ if(plan.revision>=2&&!G.escape.states.cache){const q=plan.rooms[6],cache=q.cache||{x:125,z:-170,y:96};bx(q.x+cache.x,cache.y+14,q.z+cache.z,20,20,20,'#edbb52','#cf922d');}
  for(const sp of G.springs)if(!sp.used)bx(sp.x,2,sp.z,42,4,42,'#4ba58b','#74e6ba');
 };
 const spec=MP.specialMsg,enter=MP.enterSpecial,guestData=MP.onGuestData;

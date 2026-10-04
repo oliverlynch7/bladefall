@@ -1,6 +1,7 @@
 /* Original Prison Break roster. Pure attack geometry/state; rendering never deals damage. */
 (()=>{'use strict';
 const moves={
+ bash:{shape:'cone',reach:100,wind:.95,strike:.25,recover:1.45,range:95},
  thrust:{shape:'lane',reach:145,width:18,wind:.85,strike:.22,recover:1.05,range:135},
  rush:{shape:'rush',reach:230,width:23,wind:.95,strike:.65,recover:1.4,range:260},
  ember:{shape:'disk',reach:68,wind:1.2,strike:.3,recover:1.6,range:340,target:true},
@@ -17,7 +18,8 @@ const roster={
  prison_vessel:{label:'Cinder Vessel',hp:28,dmg:13,speed:43,r:23,h:48,color:'#aa5938',kind:'prison',xp:26,sequence:['ember'],hint:'Leave the glowing circle before it bursts.'},
  prison_bell:{label:'BELL KEEPER',hp:48,dmg:20,speed:50,r:38,h:130,color:'#ae9257',kind:'prison',xp:140,boss:true,sequence:['sweep','toll','sweep'],second:['sweep','toll','toll'],hint:'Dodge the arm sweep. The bell ring has a safe center.'},
  prison_maw:{label:'IRON MAW',hp:58,dmg:22,speed:63,r:42,h:64,color:'#7a807e',kind:'prison',xp:170,boss:true,sequence:['rush','maul','crush'],second:['rush','crush','maul','rush'],hint:'Sidestep its rush, then punish the recovery. Back away from its stomp.'},
- prison_unbound:{label:'THE UNBOUND',hp:66,dmg:23,speed:48,r:29,h:105,color:'#8b79b7',kind:'prison',xp:210,boss:true,sequence:['cross','mark','toll'],second:['mark','cross','mark','toll'],hint:'Stand between the cross beams. Move out of marked circles.'}
+ prison_unbound:{label:'THE UNBOUND',hp:66,dmg:23,speed:48,r:29,h:105,color:'#8b79b7',kind:'prison',xp:210,boss:true,sequence:['cross','mark','toll'],second:['mark','cross','mark','toll'],hint:'Stand between the cross beams. Move out of marked circles.'},
+ prison_guard:{label:'Shield Guard',hp:38,dmg:12,speed:52,r:22,h:78,color:'#99805b',kind:'prison',xp:30,sequence:['bash'],hint:'Flank the shield, or strike after its bash.'}
 };
 function setup(e){const k=roster[e.type];if(!k)return;e.prisonFoe=e.type;e.pcState='approach';e.pcClock=.55;e.pcSerial=0;e.pcCount=0;e.pcMove=k.sequence[0];e.role=null;e.spec=null;e.shot=null;e.speed=k.speed;e.label=k.label;}
 function step(e,dt,target,speed,canAttack=true){
@@ -50,7 +52,12 @@ function contains(e,p){
  if(m.shape==='cross')return (Math.abs(f)<m.reach+r&&Math.abs(s)<m.width+r)||(Math.abs(s)<m.reach+r&&Math.abs(f)<m.width+r);
  return f>=-r&&f<=m.reach+r&&Math.abs(s)<=m.width+r&&(m.shape!=='rush'||Math.hypot(p.x-e.x,p.z-e.z)<=e.r+r+18);
 }
-function snapshot(e){const o={};for(const k of ['prisonFoe','pcState','pcClock','pcSerial','pcCount','pcMove','pcDX','pcDZ','pcX','pcY','pcZ','label','y','r','h','dmg','speed','elite','boss','prisonRoom'])if(e[k]!=null)o[k]=e[k];return o;}
+function guardDamage(e,src,dmg){
+ if(e.prisonFoe!=='prison_guard'||!src||e.pcState==='recover'||e.stunT>0||e.staggerT>0)return dmg;
+ const dx=src.x-e.x,dz=src.z-e.z,d=Math.hypot(dx,dz);
+ return d>0&&(dx*Math.sin(e.yaw)+dz*Math.cos(e.yaw))/d>.5?dmg*.4:dmg;
+}
+function snapshot(e){const o={};for(const k of ['prisonFoe','pcState','pcClock','pcSerial','pcCount','pcMove','pcDX','pcDZ','pcX','pcY','pcZ','label','stunT','y','r','h','dmg','speed','elite','boss','prisonRoom'])if(e[k]!=null)o[k]=e[k];return o;}
 function danger(e,api){
  if(!['wind','strike'].includes(e.pcState))return;const m=moves[e.pcMove],c=e.pcState==='strike'?'#fff1c4':'#f3a353',x=e.pcX,z=e.pcZ;
  const mark=(x,z)=>api.mark(x,e.pcY,z,c),point=(f,s)=>[x+e.pcDX*f+e.pcDZ*s,z+e.pcDZ*f-e.pcDX*s];
@@ -72,13 +79,16 @@ function draw(e,t,a){
  const part=(x,y,z,w,h,d,c)=>bx(x,y,z,w,h,d,c,c===glow?glow:null);
  const limb=(x,y,z,angle,len,w,c)=>{push();mv(x,y,z);rx(angle);part(0,-len/2,0,w,len,w,c);pop();};
  push();mv(e.x,e.y,e.z);ry(e.yaw);if(e.elite)a.scale(1.12,1.12,1.12);
- if(e.type==='prison_pike'){
+ if(e.type==='prison_pike'||e.type==='prison_guard'){
   limb(-9,32,0,gait*.45,30,9,dark);limb(9,32,0,-gait*.45,30,9,dark);
   part(0,48,0,25,33,16,metal);part(0,53,9,19,17,4,trim);part(0,33,0,29,5,20,dark);part(0,69,0,16,18,16,dark);part(0,70,9,12,3,2,glow);part(0,80,-2,4,13,8,trim);
   const arm=wind?-.45-phase*.35:strike?-1.5:recover?-1.1:-.65;
   limb(-18,59,0,arm,25,8,metal);limb(18,59,0,arm,25,8,metal);
-  push();mv(15,40,wind?-10:strike?42:12);part(0,0,24,4,4,80,trim);part(0,0,69,8,3,16,metal);pop();
-  part(-19,47,7,9,25,5,trim);
+  if(e.type==='prison_guard'){
+   push();mv(-13,44,recover?-3:18);rz(recover?-.6:0);part(0,0,0,29,48,8,metal);part(0,0,5,5,39,3,trim);pop();
+   part(18,40,strike?35:16,8,8,35,dark);part(18,40,strike?52:33,15,14,12,trim);
+  }else{push();mv(15,40,wind?-10:strike?42:12);part(0,0,24,4,4,80,trim);part(0,0,69,8,3,16,metal);pop();
+  part(-19,47,7,9,25,5,trim);}
  }else if(e.type==='prison_hound'||e.type==='prison_maw'){
   const big=e.boss,S=big?1.65:1;push();a.scale(S,S,S);
   const crouch=wind?phase*5:0;part(0,24-crouch,0,30,23,53,metal);part(0,33-crouch,-8,24,9,36,dark);
@@ -109,5 +119,5 @@ function draw(e,t,a){
  }
  pop();
 }
-window.BFPrisonCombat={roster,moves,setup,step,contains,snapshot,danger,draw};
+window.BFPrisonCombat={roster,moves,setup,step,contains,snapshot,guardDamage,danger,draw};
 })();

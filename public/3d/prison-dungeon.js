@@ -14,7 +14,7 @@ function credit(p,id,gold,kind){if(p.receipts.includes(id))return false;p.receip
 function price(p,id){const u=upgrades.find(u=>u.id===id);return u?u.base*(1+p.upgrades[id]):offers.find(o=>o.id===id)?.cost||0;}
 function buy(p,id){const u=upgrades.find(u=>u.id===id),o=offers.find(o=>o.id===id),cost=price(p,id);if(!cost||p.gold<cost)return false;if(u){if(p.upgrades[id]>=u.cap)return false;p.upgrades[id]++;}else{if(!o||p.classes.includes(id)||p.tier<o.tier||p.progress[o.key]<o.goal)return false;p.classes.push(id);}p.gold-=cost;return true;}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
-function layout(seed,section,tier,revision=3){
+function layout(seed,section,tier,revision=4){
  const random=rng(seed+section*997+tier*71),side=random()<.5?-1:1;
  const names=[['Cell block','Guard hall','Broken crossing','Watch post','Cell keeper','Hidden store'],['Lower cells','Supply hall','Drain crossing','Barracks','Iron checkpoint','Sealed store'],['Gate cells','Patrol hall','Broken stairwell','Last watch','Outer gate','Warden’s store']][section-1]||['Cell block','Guard hall','Broken crossing','Watch post','Outer gate','Hidden store'];
  const rooms=names.map((name,i)=>({id:i,name,x:i===5?side*720:0,z:i===5?-720:-i*720,w:600,d:600,h:i===2?300:240,kind:['start','fight','bridge','waves','boss','vault'][i],optional:i===5}));
@@ -23,6 +23,10 @@ function layout(seed,section,tier,revision=3){
   rooms.push({id:6,name:['Guard armory','Forgotten workshop','Sealed treasury'][section-1],x:-side*720,z:-2160,w:600,d:600,h:300,kind:'vault',optional:true});
   rooms[1].formation=['patrol','crossfire','charge'][(seed+section)%3];
   rooms[3].formation=['crossfire','charge','patrol'][(seed+section+1)%3];
+ }
+ if(revision>=4){
+  for(const id of [1,3]){const r=rooms[id];r.template=['gallery','kennels','barricades'][(seed+section+id)%3];r.name={gallery:'Split gallery',kennels:'Chain kennels',barricades:'Guard barricades'}[r.template];}
+  rooms[6].name='Broken treasury';rooms[6].cache={x:125,z:-205,y:128};
  }
  const links=[[0,1],[1,2],[2,3],[3,4],[1,5],...(revision>=2?[[3,6]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
@@ -37,11 +41,26 @@ function layout(seed,section,tier,revision=3){
    const variant=revision>=2?(seed+section)%3:0;
    for(let k=0;k<3;k++)plats.push(box(r.x+(variant===2?(k===1?-side*45:side*30):(k===1?side*55:0)),r.z+125-k*125,variant===1?140:110,variant===1?95:85,0,k===1?(variant===1?62:44):18,{room:r.id}));
    r.crossing=variant;r.waypoints=[{x:r.x,z:r.z+225,y:0},...plats.filter(p=>p.room===r.id).map(p=>({x:p.x,z:p.z,y:p.h})),{x:r.x,z:r.z-225,y:0}];
-  }else floors.push(box(r.x,r.z,576,576,-20,0));
+  }else if(revision>=4&&r.id===6)floors.push(box(r.x,r.z+85,576,406,-20,0));
+  else floors.push(box(r.x,r.z,576,576,-20,0));
   if(r.kind==='vault'&&r.id===5)for(let k=0;k<3;k++)plats.push(box(r.x-120+k*70,r.z-80,70,95,0,28+k*28,{room:r.id}));
-  if(r.kind==='fight'||r.kind==='waves')for(const s of [-1,1])plats.push(box(r.x+s*(170+Math.floor(random()*35)),r.z+(random()<.5?-60:60),44,74,0,100,{room:r.id}));
+  if(revision<4&&(r.kind==='fight'||r.kind==='waves'))for(const s of [-1,1])plats.push(box(r.x+s*(170+Math.floor(random()*35)),r.z+(random()<.5?-60:60),44,74,0,100,{room:r.id}));
   if(revision>=2&&r.id===6){
-   for(let k=0;k<4;k++)plats.push(box(r.x-175+k*100,r.z-170,65,85,0,24+k*24,{room:r.id,cacheStep:true}));
+   for(let k=0;k<4;k++)plats.push(box(r.x-175+k*100,r.z-(revision>=4?205:170),65,85,0,(revision>=4?32:24)*(k+1),{room:r.id,cacheStep:true}));
+  }
+  if(revision>=4&&r.template){
+   const solid=(x,z,w,d,h,color)=>plats.push(box(r.x+x,r.z+z,w,d,0,h,{room:r.id,color}));
+   if(r.template==='gallery'){
+    // Two columns split sightlines without sealing either flank or the center route.
+    for(const x of [-155,155]){solid(x,-45,42,110,140,'#637580');solid(x,115,110,55,22,'#626872');}
+   }else if(r.template==='kennels'){
+    // Low raised runs let charging beasts and players traverse the same terrain.
+    for(const x of [-205,205]){solid(x,-75,105,190,24,'#756452');solid(x,-75,65,110,42,'#87755e');}
+   }else{
+    for(const x of [-170,170]){solid(x,40,65,95,32,'#807162');solid(x,-125,38,48,120,'#66616d');}
+   }
+   // Clear threshold markings identify encounters before the player commits.
+   decor.push(box(r.x,r.z+245,140,5,.6,1.2,{room:r.id,color:r.optional?'#d3a451':'#a3aab8'}));
   }
   if(revision===2&&r.kind==='boss')for(const s of [-1,1])plats.push(box(r.x+s*185,r.z-150,65,65,0,110,{room:r.id}));
   if(revision>=3&&r.kind==='boss'){
@@ -81,6 +100,12 @@ function layout(seed,section,tier,revision=3){
  const bounds={minX:Math.min(...rooms.map(r=>r.x-320)),maxX:Math.max(...rooms.map(r=>r.x+320)),minZ:Math.min(...rooms.map(r=>r.z-320)),maxZ:320};
  return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
+function encounter(room,tier,wave=0){
+ const packs={gallery:[['prison_guard','prison_vessel','prison_pike'],['prison_vessel','prison_hound','prison_pike']],kennels:[['prison_hound','prison_hound','prison_pike'],['prison_guard','prison_hound','prison_hound']],barricades:[['prison_guard','prison_pike','prison_vessel'],['prison_hound','prison_vessel','prison_guard']]};
+ const pack=(packs[room.template]||packs.barricades)[wave%2],count=room.kind==='vault'?2:2+tier;
+ const positions=room.kind==='vault'?[[-80,60],[90,70]]:[[-75,-35],[85,-170],[65,95],[-80,-190],[0,140]];
+ return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
+}
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
-window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,roomAt,copy};
+window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,roomAt,copy};
 })();

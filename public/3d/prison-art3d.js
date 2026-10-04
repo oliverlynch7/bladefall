@@ -27,6 +27,14 @@ export function buildPrisonArt(plan){
  for(const o of plan.walls){box(o,'wall');if(o.collisionOnly)continue;block(o.x,7,o.z,o.w+3,14,o.d+3,'trim');block(o.x,o.h-12,o.z,o.w+5,16,o.d+5,'trim');}
  for(const o of plan.roofs)box(o,'wall');
  for(const o of plan.plats){
+  const room=plan.rooms.find(r=>r.id===o.room);
+  if(room?.template==='refectory'){
+   // Furniture stays inside the authored solid obstacle, with a readable tabletop and legs.
+   block(o.x,o.h-5,o.z,o.w,10,o.d,'wood');
+   for(const sx of [-1,1])for(const sz of [-1,1])block(o.x+sx*(o.w/2-8),o.h/2-5,o.z+sz*(o.d/2-12),10,Math.max(4,o.h-10),12,'wood');
+   for(const sz of [-1,1])block(o.x,Math.max(5,o.h*.35),o.z+sz*(o.d/2-12),o.w-10,5,8,'iron');
+   continue;
+  }
   const bevel=Math.min(2,(o.h-o.y0)/4),shape=new T.Shape(),w=o.w/2-bevel,d=o.d/2-bevel;shape.moveTo(-w,-d);shape.lineTo(w,-d);shape.lineTo(w,d);shape.lineTo(-w,d);shape.closePath();
   add(new T.ExtrudeGeometry(shape,{depth:o.h-o.y0-2*bevel,bevelEnabled:true,bevelSize:bevel,bevelThickness:bevel,bevelSegments:1,curveSegments:1,steps:1}),'floor',o.x,o.y0+bevel,o.z,-Math.PI/2);
  }
@@ -45,6 +53,67 @@ export function buildPrisonArt(plan){
   }
   if(room.kind==='start')for(const sx of [-1,1]){block(room.x+sx*285,26,room.z-140,70,12,110,'wood');block(room.x+sx*285,34,room.z-140,65,5,100,'cloth');}
   if(room.template==='cistern'){for(const sx of [-1,1])block(room.x+sx*245,.7,room.z+80,100,1,260,'water');}
+  // Large room-specific landmarks stay above headroom or inside existing solids.
+  // Nothing placed here silently creates a new platform or walking obstacle.
+  if(room.template==='refectory'){
+   for(const table of plan.plats.filter(p=>p.room===room.id&&p.w>60)){
+    block(table.x,table.h+1,table.z,table.w*.44,1.5,table.d*.82,'cloth');
+    for(const dz of [-85,0,85]){
+     add(new T.CylinderGeometry(9,7,3,12),'iron',table.x-18,table.h+3,table.z+dz);
+     add(new T.CylinderGeometry(4,4,9,8),'wood',table.x+18,table.h+6,table.z+dz);
+    }
+   }
+   block(room.x,room.h-30,room.z,room.w-35,18,20,'wood');
+   for(const dx of [-105,105]){add(new T.CylinderGeometry(2,2,42,6),'iron',room.x+dx,room.h-50,room.z);add(new T.TorusGeometry(23,3,6,12),'iron',room.x+dx,room.h-74,room.z,Math.PI/2);}
+  }
+  if(room.template==='kennels'){
+   for(const sx of [-1,1]){
+    const x=room.x+sx*(half+5);
+    // Bars are inset against the side wall, clear of its central doorway.
+    for(const dz of [-230,-200,-170,170,200,230])add(new T.CylinderGeometry(3,3,112,6),'iron',x,64,room.z+dz);
+    for(const dz of [-200,200]){block(x,122,room.z+dz,10,9,90,'iron');block(x,8,room.z+dz,10,9,90,'iron');}
+   }
+  }
+  if(room.template==='gallery'){
+   for(const pillar of plan.plats.filter(p=>p.room===room.id&&p.h>100)){
+    block(pillar.x,pillar.h+4,pillar.z,pillar.w+4,8,pillar.d+4,'trim');
+    block(pillar.x,pillar.h*.6,pillar.z+pillar.d/2+1,pillar.w*.65,pillar.h*.5,2,'cloth');
+   }
+  }
+  if(room.template==='cistern'){
+   for(const sx of [-1,1]){
+    const x=room.x+sx*(half-8);
+    add(new T.CylinderGeometry(14,14,room.d-80,10),'iron',x,room.h-28,room.z,Math.PI/2);
+    for(const dz of [-230,0,230])add(new T.TorusGeometry(17,3,6,10),'trim',x,room.h-28,room.z+dz);
+    // Wall drains and water channels visually explain the stepping islands.
+    block(x,55,room.z-220,10,70,65,'iron');
+    for(const dz of [-240,-220,-200])block(x-sx*7,55,room.z+dz,3,54,5,'trim');
+   }
+  }
+  if(room.kind==='bridge'){
+   for(const sx of [-1,1])block(room.x+sx*(half+5),80,room.z,8,18,room.d-45,'wood');
+   // Collapsed joists remain below the platforms, marking the depth of the gap.
+   for(const dz of [-80,70])block(room.x,-48,room.z+dz,room.w-50,20,20,'wood');
+  }
+  if(room.kind==='boss'){
+   if(plan.section===1){
+    const y=room.h-45;
+    add(new T.CylinderGeometry(27,53,58,16,1,true),'iron',room.x,y,room.z);
+    add(new T.TorusGeometry(53,5,8,20),'trim',room.x,y-29,room.z,Math.PI/2);
+    add(new T.SphereGeometry(9,10,6),'iron',room.x,y-28,room.z);
+    block(room.x,room.h-9,room.z,180,14,22,'wood');
+   }else if(plan.section===2){
+    // Reinforced wall braces frame the Maw's open charging lane.
+    for(const sx of [-1,1])for(const dz of [-210,210]){
+     block(room.x+sx*(half+5),room.h/2,room.z+dz,12,room.h-20,18,'iron');
+     for(const y of [50,130,210])add(new T.SphereGeometry(5,6,4),'trim',room.x+sx*(half-3),y,room.z+dz);
+    }
+   }else{
+    // A suspended seal frames the last arena without creating an unreachable safe ledge.
+    for(const radius of [65,100])add(new T.TorusGeometry(radius,5,6,24),'trim',room.x,room.h-24,room.z,Math.PI/2);
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;add(new T.OctahedronGeometry(8),'glow',room.x+Math.cos(a)*100,room.h-24,room.z+Math.sin(a)*100);}
+   }
+  }
   // Wall-hung standards identify the three sections, above walking space.
   for(const sx of [-1,1]){block(room.x+sx*(room.w/2-18),room.h-84,room.z-180,5,102,45,'cloth');}
  }

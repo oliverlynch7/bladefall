@@ -943,3 +943,7 @@ User: Warrior warhammer blocks the face. Give hammers a lower forward ready carr
 
 ## [Codex | 2026-10-04]
 Apply all five weapon glow cosmetics to current 3D weapons, previews and co-op; preserve weapon detail and restore materials when removed.
+
+
+## [Codex | 2026-10-04]
+Continue approved dungeon pass: give existing room templates functional visual identity (dining furniture, kennel partitions, waterworks, distinct boss landmarks), preserving routes and saved layouts. Correct guest chest rewards to share host rarity/count policy. Further large topology/enemy art and campaign escort work remain pending.

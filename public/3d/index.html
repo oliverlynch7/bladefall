@@ -1053,7 +1053,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2105-2099"></script>
+<script src="./prison-dungeon.js?v=2110"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2097"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2083"></script>
@@ -1128,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.109.0-weapon-glows';
+const VERSION3D='2.110.0-dungeon-identity';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -19714,6 +19714,7 @@ function drawCourse(s,t){
        hand-written tree and pillar columns have always used, which is exactly the precedent I
        should have followed when adding these. */
     if(ob.autoCol||ob.invisible) continue;
+    if(_w3dOn&&window.__PRISON_ART_ACTIVE&&G.escape?.plan.plats.includes(ob))continue;
     if(_w3dOn && window.__outskirtsObstacleDrawn?.(ob)) continue;
     if(_w3dOn && window.__hollowObstacleDrawn?.(ob)) continue;
     if(_w3dOn && window.__keepObstacleDrawn?.(ob)) continue;
@@ -22879,7 +22880,12 @@ function receipts(events){const p=profile();let changed=false;for(const e of eve
 function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r.events.some(e=>e.id===id))return;const members=MP.active?[MP.myId,...Object.values(MP.peers).filter(q=>q.zone===MP.zone).map(q=>q.id)]:['solo'];const e={id,gold,kind,members};r.events.push(e);receipts([e]);toast('+'+gold+' dungeon gold'+(kind?' · unlock progress saved':''));}
 function packet(){const r=G?.escape;return r?{version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,stamp:G.time,states:r.states,events:r.events,safe:r.safe,finished:r.finished||null}:null;}
 function receive(s){if(!s||s.version!==D.VERSION)return;if(G?.escape?.id===s.id&&(G.escape.finished||s.section<G.floor||(s.section===G.floor&&(s.stamp||0)<(G.escape.lastStamp||0))))return;if(!G?.escape||G.escape.id!==s.id)startDelve(profile().classes.includes(meta.classId)?meta.classId:'warrior',{remote:true,state:s});else if(G.floor!==s.section){loadDelveFloor(s.section,s);}
- const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const id of [1,3,4])if(r.states[id]?.cleared&&!r.chestRooms[id]){const q=r.plan.rooms[id];G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,opened:false,bob:0});r.chestRooms[id]=true;}openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
+ const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const q of r.plan.rooms)if(r.states[q.id]?.cleared)addRoomChest(q);openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
+function addRoomChest(q){
+ const r=G.escape,rarity=D.chestRarity(q,r.layoutVersion);
+ if(!rarity||r.chestRooms[q.id])return;
+ G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,rarity,prisonRoom:q.id,opened:false,bob:0});r.chestRooms[q.id]=true;
+}
 function openExit(){const r=G.escape;if(r.plan.rooms.filter(q=>!q.optional&&['fight','waves','boss'].includes(q.kind)).every(q=>r.states[q.id]?.cleared)&&!G.portal){G.portal={...r.plan.exit,t:0};G.floorCleared=true;}}
 function start(cid,opts={}){
  const pr=profile(),saved=opts.resume?pr.checkpoint:null,state=opts.state||saved;
@@ -22906,7 +22912,7 @@ loadDelveFloor=function(n,saved){
  G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o}));G.portal=null;G.portalPos={...plan.exit};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={...plan.bounds};G.progressEnd=plan.bounds.minZ;G.floorCleared=false;
  G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;delete G._cameraBoom;
  if(n===2&&!r.states.healed)G.springs.push({x:plan.rooms[5].x+100,z:plan.rooms[5].z+160,y:0});
- if(saved&&!r.remote){G.pickups=clone(saved.pickups||[]);G.chests=clone(saved.chests||[]);}G.kills=0;G.killGoal=999;G.stageBanner=2;G.areaName=plan.title;document.getElementById('stagetag').textContent='PRISON BREAK · TIER '+r.tier+' · '+n+'/3';document.getElementById('bosshpwrap').classList.remove('on');
+ if(saved&&!r.remote){G.pickups=clone(saved.pickups||[]);G.chests=clone(saved.chests||[]);for(const q of plan.rooms)if(r.states[q.id]?.cleared&&D.chestRarity(q,r.layoutVersion))r.chestRooms[q.id]=true;}G.kills=0;G.killGoal=999;G.stageBanner=2;G.areaName=plan.title;document.getElementById('stagetag').textContent='PRISON BREAK · TIER '+r.tier+' · '+n+'/3';document.getElementById('bosshpwrap').classList.remove('on');
  openExit();checkpoint();questUpdate();window.__world3dRebuild?.();
 };
 function finish(result,remote=false){const r=G.escape;if(!r||r.finished)return;r.finished=result;
@@ -22967,7 +22973,7 @@ function tick(dt){
    if(st.started&&G.time-st.spawnTime>1.4&&!G.enemies.some(e=>e.prisonRoom===q.id&&!e.dead)){
     if(q.kind==='waves'&&!st.wave){st.wave=1;st.started=false;st.nextWaveAt=G.time+3;toast('Next wave in 3 seconds');continue;}
     st.cleared=true;r.safe={x:q.x,y:0,z:q.z+190};reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
-    if(q.kind==='boss'||(r.layoutVersion<5&&q.kind!=='vault')||(r.layoutVersion>=5&&q.id===3)){G.chests.push({x:q.x+(r.layoutVersion>=3&&q.kind==='boss'?70:-150),z:q.z+180,y:0,rarity:q.kind==='boss'?'uncommon':'common',opened:false,bob:0});}
+    addRoomChest(q);
     checkpoint();openExit();questUpdate();
    }
   }
@@ -23033,7 +23039,7 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2109"></script>
+<script type="module" src="./hero3d.js?v=2110"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -132,6 +132,7 @@ function encounter(room,tier,wave=0){
  const positions=room.kind==='vault'?[[-80,60],[90,70]]:[[-75,-35],[85,-170],[65,95],[-80,-190],[0,140]];
  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
 }
+function chestRarity(room,revision){if(room.kind==='boss')return 'uncommon';if(revision>=5)return room.id===3?'common':null;return ['fight','waves'].includes(room.kind)?'common':null;}
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
-window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,roomAt,copy};
+window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAt,copy};
 })();

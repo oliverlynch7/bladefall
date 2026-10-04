@@ -1128,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.106.0-quest-topics';
+const VERSION3D='2.107.0-forge-levels';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5221,6 +5221,14 @@ function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
   if(g.kind==='t') return {trinket:makeTrinket(nr,g.cat)};
   return {armor:makeArmor(nr,g.cat)};   // makeArmor picks a random set for the slot
 }
+function forgeNextRarity(g){ return RORDER[RARITY[g.rarity].tier+1]; }
+function canForgeGroup(g){ return !!g && !!forgeNextRarity(g) && canWieldRid(forgeNextRarity(g)); }
+function forgeRarityGuide(){
+  return `<section aria-label="Forge rarity level guide" style="margin:10px 0 14px;padding:10px;border:1px solid #555;border-radius:8px">
+    <div style="font-size:13px;margin-bottom:8px"><b>Character level ${heroLevel()}</b> · Forge only what you can equip.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${RORDER.map(r=>`<div style="flex:1;min-width:78px;border-top:3px solid ${RARITY[r].color};padding:5px 3px;font-size:12px"><b style="color:${RARITY[r].color}">${RARITY[r].name}</b><br>Level ${rarityReq(r)}<br><small>${canWieldRid(r)?'Unlocked':'Locked'}</small></div>`).join('')}</div>
+    <div style="font-size:11px;opacity:.8;margin-top:6px">Applies to weapons, armor, rings and amulets. Class rank does not count.</div></section>`;
+}
 function openForge(back){
   mode='menu'; playFx('forgedone');   // Phase 20: the metal clang opens the forge (swapped with the sharpening)
   menuTip('tip_forge','the <b>Forge</b>. Give the Smith <b>two pieces of the same type and rarity</b> and he fuses them into one random piece of the next rarity up. It is the main way to climb your gear — a gold-free upgrade path.');
@@ -5229,12 +5237,13 @@ function openForge(back){
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn">2× <span style="color:${rc}">${RARITY[g.rarity].name}</span> ${kind}</div>
         <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
-      <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${actionIcon('forge-fuse')}Forge</button></div>`; }).join('')
+      <button class="bigbtn buybtn" ${canForgeGroup(g)?'':'disabled'} data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${canForgeGroup(g)?actionIcon('forge-fuse')+'Forge':'Requires level '+rarityReq(nr)}</button></div>`; }).join('')
     :'<p class="hint">Bring me two pieces of the same CATEGORY and rarity — two Rare melee weapons, two Epic helmets — and I\'ll gamble them into a random one of the next rarity. Legendaries are already the peak.</p>';
-  const totalPairs=fuseable.reduce((n,g)=>n+Math.floor(g.idxs.length/2),0);
+  const totalPairs=fuseable.filter(canForgeGroup).reduce((n,g)=>n+Math.floor(g.idxs.length/2),0);
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh">${actionIcon('forge-fuse')}The Forge</h2>
     <p class="ovsub">Two same-category, same-rarity pieces → a random one of the next rarity.</p>
-    ${totalPairs>1?`<button class="bigbtn" id="forgeAllBtn" style="margin:2px 0 12px">${actionIcon('forge-fuse')}Forge All · ${totalPairs} pair${totalPairs>1?'s':''}</button>`:''}
+    ${forgeRarityGuide()}
+    ${totalPairs>1?`<button class="bigbtn" id="forgeAllBtn" style="margin:2px 0 12px">${actionIcon('forge-fuse')}Forge All Unlocked · ${totalPairs} pair${totalPairs>1?'s':''}</button>`:''}
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const g=fuseGroups()[+b.dataset.g]; if(!g) return; forgeSpin(g,back); });
@@ -5245,8 +5254,8 @@ function openForge(back){
 // Smart handling: each group fuses floor(count/2) pairs; an ODD leftover simply stays in the bag; different
 // categories are each handled independently. Results land in the bag — click Forge All again to cascade a tier up.
 function forgeAll(back){
-  const groups=fuseGroups();
-  if(!groups.length){ toast('Nothing to forge — bring me matching pairs'); return; }
+  const groups=fuseGroups().filter(canForgeGroup);
+  if(!groups.length){ toast('No unlocked pairs. Check the forge level guide.'); return; }
   const toRemove=[], toAdd=[], gained={}; let n=0;
   for(const g of groups){ const pairs=Math.floor(g.idxs.length/2);
     for(const idx of g.idxs.slice(0,pairs*2)) toRemove.push(idx);   // consume 2 per pair; a leftover odd one is untouched
@@ -5300,6 +5309,9 @@ function gambleSpin(back){
   setTimeout(step,delay);
 }
 function forgeSpin(g,back){
+  // Re-resolve current inventory and eligibility before consuming anything.
+  g=g&&fuseGroups().find(q=>q.kind===g.kind&&q.cat===g.cat&&q.rarity===g.rarity);
+  if(!canForgeGroup(g)){ toast('Cannot forge this rarity yet. Check the level guide.'); return; }
   mode='menu'; playFx('forgespin');
   const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
   const result=forgeResult(g), ro=result.weapon||result.armor||result.trinket;

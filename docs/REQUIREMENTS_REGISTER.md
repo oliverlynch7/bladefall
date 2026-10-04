@@ -931,3 +931,7 @@ User requests stable close dungeon camera near walls; immediate equipment baggin
 
 ## [Codex | 2026-10-04] Side quests remain accessible after core dialogue
 User: "if there are side quests that are available with an NPC, if I click on their main dialogue, I shouldn’t then be blocked out from the side quest. I should still be able to ask them about that even if I’ve gone through the core dialogue with them." Plan: mark audited quest-giver topic menus; add validated return-to-topics navigation from later lines and saved cursors. Keep authored conditions, refusal consequences, unique rewards, co-op speaker ownership and Leave conversation. Prior campaign/escort feedback is also retained as pending design work: protect a human/animal with its own damageable health bar; purposeful campaign layouts and less tedious, more varied quests. Ellis escort remains a proposal, not implemented.
+
+
+## [Codex | 2026-10-04]
+Forge: prevent single and batch merges above the active character equipment rarity requirement. Show a compact color-coded rarity/character-level guide, including locked tiers. Use the same requirements as equipping gear.

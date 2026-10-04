@@ -2309,3 +2309,7 @@ Validation: syntax gate; 900 generated new plans and 3600 old-plan comparisons; 
 ## [Codex | 2026-10-04] Shipped 2.106.0-quest-topics
 Available side quests remain reachable after core dialogue. Marked 29 audited campaign/Rift Hall topic menus and added an authoritative Other questions / quests action from later lines. Authored returns to those menus no longer become forced conversation exits. Saved cursors recover their previous topic menus without replaying effects. Hub service conversations expose the same route back to services and available requests. Existing authored prerequisite/refusal/reward conditions and co-op conversation ownership stay enforced; Leave conversation remains available. No voice line text changed.
 Validation: 29-menu state regression including old cursor histories, no-effect navigation, Simon dragon-side-quest access after core dialogue, Roland refusal preservation and invalid navigation rejection; existing story/authority/Gus/prison tests; actual browser Heath core-to-side-topic, close/reopen and hub return button; previous-version 17-class save; syntax gate. Escort gameplay and broad campaign layout/quest redesign remain pending; this patch addresses dialogue access.
+
+
+## [Codex | 2026-10-04]
+2.107.0-forge-levels: forge level cap and color-coded rarity guide implemented. Single/batch merges, all rarity thresholds, and old-save compatibility passed browser QA.

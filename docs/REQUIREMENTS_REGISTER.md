@@ -947,3 +947,7 @@ Apply all five weapon glow cosmetics to current 3D weapons, previews and co-op; 
 
 ## [Codex | 2026-10-04]
 Continue approved dungeon pass: give existing room templates functional visual identity (dining furniture, kennel partitions, waterworks, distinct boss landmarks), preserving routes and saved layouts. Correct guest chest rewards to share host rarity/count policy. Further large topology/enemy art and campaign escort work remain pending.
+
+
+## [Codex | 2026-10-04]
+Continue dungeon layout pass: versioned new-run route variants, an additional required raised crossing, and distinct encounter formations. Preserve revision 1-5 checkpoints exactly; keep current chest frequency and co-op encounter scaling. Validate reachability with actual jump physics.

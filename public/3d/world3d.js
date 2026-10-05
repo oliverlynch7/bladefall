@@ -1,4 +1,4 @@
-import {buildPrisonArt} from './prison-art3d.js?v=2110';
+import {buildPrisonArt} from './prison-art3d.js?v=2111';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2074';
 import {buildLongAscent} from './long-ascent-art.js?v=2074';

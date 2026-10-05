@@ -92,8 +92,12 @@ export function buildPrisonArt(plan){
   }
   if(room.kind==='bridge'){
    for(const sx of [-1,1])block(room.x+sx*(half+5),80,room.z,8,18,room.d-45,'wood');
-   // Collapsed joists remain below the platforms, marking the depth of the gap.
-   for(const dz of [-80,70])block(room.x,-48,room.z+dz,room.w-50,20,20,'wood');
+   // A deep masonry shaft replaces the visible sky beneath broken floors.
+   // It stays below the game's fall recovery plane; stepping tops keep their exact colliders.
+   block(room.x,-205,room.z,room.w,12,room.d,'iron');
+   for(const sx of [-1,1])block(room.x+sx*(room.w/2-10),-100,room.z,20,200,room.d,'wall');
+   for(const sz of [-1,1])block(room.x,-100,room.z+sz*(room.d/2-10),room.w,200,20,'wall');
+   for(const step of plan.plats.filter(p=>p.room===room.id))block(step.x,-100,step.z,step.w,200,step.d,'wall');
   }
   if(room.kind==='boss'){
    if(plan.section===1){

@@ -951,3 +951,7 @@ Continue approved dungeon pass: give existing room templates functional visual i
 
 ## [Codex | 2026-10-04]
 Continue dungeon layout pass: versioned new-run route variants, an additional required raised crossing, and distinct encounter formations. Preserve revision 1-5 checkpoints exactly; keep current chest frequency and co-op encounter scaling. Validate reachability with actual jump physics.
+
+
+## [Codex | 2026-10-04] Ruined Keep isolated beta design packet
+User approved map-first design packet before new construction. Created docs/design/ruined-keep-beta/design-packet.html plus overhead.svg and elevation.svg. Inspected current keep/prison story and confirmed Walter directs player to competing eastern stairs. Packet proposes a separated lift/service route, counterweight bridge puzzle, short damageable-captive escort, purposeful asset placement and gated playtesting. These specific designs remain proposals for review, not new canon or implemented gameplay. No playable level/save changes. HTML desktop/mobile overflow checks passed; overhead map visually reviewed.

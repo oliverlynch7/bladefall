@@ -696,3 +696,7 @@ User approved map-first design packet before new construction. Created docs/desi
 
 ## [Codex | 2026-10-04]
 User requests title-screen Dev button to access design documents on phone. Add a save-independent preview menu linking published Ruined Keep packet and maps.
+
+
+## [Codex | 2026-10-04] Playable isolated Ruined Keep beta approved
+User approves generating the map-first design as a playable level reachable from Dev Previews, with selectable character level, class and related test loadout. Implement a disposable solo test session, explicit reset/exit, lift/counterweight traversal and prisoner rescue. Do not replace campaign geometry or persist beta rewards into campaign saves. This is a playtest slice, not a finished campaign replacement.

@@ -2001,6 +2001,10 @@ export function syncWorld(scene){
   let world = null;
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
+  if(world.devKeep){
+    if(WORLD3D.built!=='keep-beta'){clearWorld(scene);clearMobs();clearProps();for(const k of ['__OUTSKIRTS_ACTIVE','__HUB_ART_ACTIVE','__HOLLOW_ART_ACTIVE','__KEEP_ART_ACTIVE','__FROST_ART_ACTIVE','__DEEP_ART_ACTIVE','__PRISON_ART_ACTIVE'])window[k]=false;WORLD3D.counts={};WORLD3D.built='keep-beta';}
+    WORLD3D.ready=true;return true;
+  }
   if(world.escape){
     const key='escape:'+world.escape+':'+world.floor+':'+world.prisonPlan?.revision;
     if(WORLD3D.built!==key){

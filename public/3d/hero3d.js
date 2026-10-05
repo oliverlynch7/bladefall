@@ -6,7 +6,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2081';
+import {syncNpcs} from './npc3d.js?v=2113';
 import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2111';
+import { WORLD3D, syncWorld } from './world3d.js?v=2113';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2104';
 import { PROP3D, syncProps } from './prop3d.js?v=2057';
 

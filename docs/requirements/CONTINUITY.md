@@ -1079,3 +1079,7 @@ Validation: 1350 deterministic nonoverlapping connected new plans, 6750 legacy c
 
 ## [Codex | 2026-10-04] Ruined Keep isolated beta design packet
 User approved map-first design packet before new construction. Created docs/design/ruined-keep-beta/design-packet.html plus overhead.svg and elevation.svg. Inspected current keep/prison story and confirmed Walter directs player to competing eastern stairs. Packet proposes a separated lift/service route, counterweight bridge puzzle, short damageable-captive escort, purposeful asset placement and gated playtesting. These specific designs remain proposals for review, not new canon or implemented gameplay. No playable level/save changes. HTML desktop/mobile overflow checks passed; overhead map visually reviewed.
+
+
+## [Codex | 2026-10-04]
+2.112.0-dev-previews: title-screen Dev Previews menu links public Ruined Keep packet, overhead map and elevation; no character load required. Packet has Back to Bladefall link. Phone-sized browser navigation/overflow, prior-save and syntax checks passed.

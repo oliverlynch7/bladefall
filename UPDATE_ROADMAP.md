@@ -2331,3 +2331,7 @@ Validation: 900 layouts and 3600 unchanged legacy layouts; actual browser 12 phy
 ## [Codex | 2026-10-04]
 2.111.0-dungeon-routes: new Prison Break runs use revision 6 with ten rooms, six mirrored/turning arrangements and a second required five-step raised crossing. Encounter compositions/clear-floor spawn positions vary deterministically; no enemies placed inside authored cover. Five combat rooms and two chests per floor retained. Deep masonry shafts beneath both crossings replace visible sky/floating platforms. Revisions 1-5 keep exact saved geometry.
 Validation: 1350 deterministic nonoverlapping connected new plans, 6750 legacy comparisons; browser 60 measured jumps, 162 doorway traversals, all three section completion/chest tests; new checkpoint preserves topology and HP, guest receives matching topology, revision-5 resume remains nine rooms; previous-version campaign save (17 classes); visual shaft screenshot and syntax gate. Further irregular room footprints, bespoke enemy art, campaign escort quests and human balance/physical co-op playtests remain pending.
+
+
+## [Codex | 2026-10-04]
+2.112.0-dev-previews: title-screen Dev Previews menu links public Ruined Keep packet, overhead map and elevation; no character load required. Packet has Back to Bladefall link. Phone-sized browser navigation/overflow, prior-save and syntax checks passed.

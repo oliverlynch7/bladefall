@@ -955,3 +955,7 @@ Continue dungeon layout pass: versioned new-run route variants, an additional re
 
 ## [Codex | 2026-10-04] Ruined Keep isolated beta design packet
 User approved map-first design packet before new construction. Created docs/design/ruined-keep-beta/design-packet.html plus overhead.svg and elevation.svg. Inspected current keep/prison story and confirmed Walter directs player to competing eastern stairs. Packet proposes a separated lift/service route, counterweight bridge puzzle, short damageable-captive escort, purposeful asset placement and gated playtesting. These specific designs remain proposals for review, not new canon or implemented gameplay. No playable level/save changes. HTML desktop/mobile overflow checks passed; overhead map visually reviewed.
+
+
+## [Codex | 2026-10-04]
+User requests title-screen Dev button to access design documents on phone. Add a save-independent preview menu linking published Ruined Keep packet and maps.

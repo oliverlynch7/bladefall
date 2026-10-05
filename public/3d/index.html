@@ -1128,7 +1128,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.111.0-dungeon-routes';
+const VERSION3D='2.112.0-dev-previews';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17264,6 +17264,7 @@ function titleScreen(){ musicPlay('village_vigil');   // the home theme introduc
       <button class="mmbtn" id="mmMP"><span class="mmtx">Multiplayer <span style="font-size:.7em;opacity:.7;letter-spacing:.1em">BETA</span></span><span class="mmsub">Play a zone co-op with a friend</span></button>
       <button class="mmbtn" id="mmSet"><span class="mmtx">Settings</span><span class="mmsub">Audio, controls &amp; skins</span></button>
       <button class="mmbtn" id="mmStudio"><span class="mmtx">Design Studio</span><span class="mmsub">Preview every voxel model &amp; weapon</span></button>
+      <button class="mmbtn" id="mmDev"><span class="mmtx">Dev Previews</span><span class="mmsub">Design plans &amp; beta proposals</span></button>
       <button class="mmbtn mmexit" id="mmExit"><span class="mmtx">Exit</span></button>
     </div>
     <div class="tver">v${VERSION3D}</div>
@@ -17293,8 +17294,19 @@ function titleScreen(){ musicPlay('village_vigil');   // the home theme introduc
   document.getElementById('mmLoad').onclick=()=>{ try{SFX.pickup();}catch(e){} openSlots(); };
   document.getElementById('mmMP').onclick=()=>{ try{SFX.pickup();}catch(e){} openMPLobby(); };
   document.getElementById('mmSet').onclick=()=>{ try{SFX.pickup();}catch(e){} openTitleOptions(); };
+  document.getElementById('mmDev').onclick=openDevPreviews;
   document.getElementById('mmStudio').onclick=()=>{ try{SFX.pickup();}catch(e){} openDesignStudio(titleScreen); };   // unified turntable: weapons + pets + bosses + mobs + cast, to preview before greenlighting
   document.getElementById('mmExit').onclick=()=>{ try{SFX.pickup();}catch(e){} titleScreen(); };   // back to the attract logo (web has no OS-quit)
+}
+function openDevPreviews(){
+ mode='menu';showGameUI(false);
+ showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Development</p><h2 class="ovh">Design Previews</h2><p class="ovsub">Read plans and maps. No character required.</p>
+ <a class="bigbtn" style="display:block;text-decoration:none" href="/design/ruined-keep-beta/">Ruined Keep · Design packet</a>
+ <p class="hint">Proposal only — not a playable beta yet.</p>
+ <a class="bigbtn ghost" style="display:block;text-decoration:none" href="/design/ruined-keep-beta/overhead.svg">Overhead map</a>
+ <a class="bigbtn ghost" style="display:block;text-decoration:none" href="/design/ruined-keep-beta/elevation.svg">Side-view diagram</a>
+ <button class="bigbtn ghost" id="devBack">Back to title</button></div>`);
+ document.getElementById('devBack').onclick=titleScreen;
 }
 function openTitleOptions(){
   mode='menu'; showGameUI(false);

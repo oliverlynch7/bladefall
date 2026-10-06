@@ -89,7 +89,8 @@ export function buildHubArt(scene,w){
     at(g.x,g.z,0,()=>{
       add('arch',0,1,-34,34);block(0,2,14,106,3,55,'#80775e');
       // The open portal reads as a luminous destination painting within the arch.
-      panel(texture('./icons/destinations/'+icons[g.zi]+'.png'),0,75,-28,76,98,g.open?1:.52);
+      const mural=g.zi===5?'./icons/ui/destination-storm-coast.png':'./icons/destinations/'+icons[g.zi]+'.png';
+      panel(texture(mural),0,75,-28,g.zi===5?84:76,g.zi===5?84:98,g.open?1:.52);
       label(g.name,0,191,-31,172,g.open?'#e5c78e':'#b7b4a5');
       beam(0,183,-35,9,33,7,'#655638');
       block(0,177,-34,24,10,32,g.done?'#91bb84':col);

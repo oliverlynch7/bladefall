@@ -2397,3 +2397,6 @@ Validation: 200,000 exact probability samples and all depth boundaries; real-bro
 
 ## [Codex | 2026-10-06] 2.123.0-briar-watch
 Added one guarded, six-jump optional watch route and relocated the fifth shard in the isolated Briar beta. Existing campaign levels and the mill mechanism remain unchanged. Real browser: continuous-input watch climb/shard pickup with no fall; watch guards spawned and damaged the player; fresh-context beta storage isolation passed. Normal-camera inspection moved two occluding trees. See docs/design/briar-beta-qa.md for screenshots and limits. This is a Sol-medium trial slice, not a full level-quality verdict.
+
+## [Codex | 2026-10-06] 2.123.1-storm-coast-icon
+Storm Coast's physical Waystation campaign portal now uses the supplied storm-cliff artwork, matching the existing transparent icon on its entry card and Waystone destination. The separate Abyssal Descent art remains unchanged.

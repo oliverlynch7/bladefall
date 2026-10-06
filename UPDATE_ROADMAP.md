@@ -2400,3 +2400,6 @@ Added one guarded, six-jump optional watch route and relocated the fifth shard i
 
 ## [Codex | 2026-10-06] 2.123.1-storm-coast-icon
 Storm Coast's physical Waystation campaign portal now uses the supplied storm-cliff artwork, matching the existing transparent icon on its entry card and Waystone destination. The separate Abyssal Descent art remains unchanged.
+
+## [Codex | 2026-10-06] Sol Forge Brute visual prototype
+Built an isolated Blender character to test Sol-medium art quality against the supplied Hollow Legion concept. Eight mesh objects, eight materials, 23,076 triangles, 1.49 MB GLB; three Cycles renders and a working browser rotation preview are in prototypes/sol-forge-brute. Better silhouette/material identity than the earlier Holy Guardian prototype, but still visibly geometric relative to the concept art. No game model replaced; rigging, animation, texture craft and in-game crowd profiling remain untested.

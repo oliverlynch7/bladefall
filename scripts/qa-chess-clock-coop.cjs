@@ -16,13 +16,14 @@ await page.locator('#chessReady').click();ok('one ready does not start clock',aw
 await guest.locator('#chessReady').click();await flush();ok('both ready starts white clock',await page.evaluate(()=>BFSocial.snapshot().clock.running==='w'));
 ok('settings locked once started',await page.evaluate(()=>!BFSocial.receive('h',{type:'configure',config:{enabled:false}})));
 await page.evaluate(()=>{qaNow+=3000;__BF3.renderFrame();});
-const clickSquare=async sq=>{const p=await page.evaluate(s=>__BF_SOCIAL_API.project(300+(+s[1]-4.5)*2.5,23.1,390+(s.charCodeAt(0)-100.5)*2.5),sq);await page.mouse.click(p.x,p.y);await page.evaluate(()=>__BF3.renderFrame());};
+const clickSquare=async sq=>{const p=await page.evaluate(s=>__BF_SOCIAL_API.project(300+(+s[1]-4.5)*1.8,23.1,390+(s.charCodeAt(0)-100.5)*1.8),sq);await page.mouse.click(p.x,p.y);await page.evaluate(()=>__BF3.renderFrame());};
 await clickSquare('e2');await clickSquare('e4');ok('world board click makes legal move',await page.evaluate(()=>BFSocial.snapshot().motion?.to==='e4'));
 ok('thinking time charged before animation',await page.evaluate(()=>BFSocial.snapshot().clock.left.w===12));
 ok('cannot move during choreography',await page.evaluate(()=>!BFSocial.receive('g',{type:'move',from:'e7',to:'e5',rev:BFSocial.snapshot().rev})));
 await page.evaluate(()=>{qaNow+=650;__BF3.update(.016);__BF3.renderFrame();});
 await guest.evaluate(s=>{BFSocial.apply(s);__BF3.renderFrame();},await page.evaluate(()=>BFSocial.snapshot()));
 await page.evaluate(()=>__BF3.MP.broadcast());await flush();await guest.evaluate(()=>{for(let i=0;i<30;i++){__BF3.update(.016);__BF3.renderFrame();}});
+ok('white sees own ranks at bottom',await page.evaluate(()=>{const p=__BF_SOCIAL_API.project;return p(293.7,23,390).y>p(306.3,23,390).y;}));ok('black sees own ranks at bottom',await guest.evaluate(()=>{const p=__BF_SOCIAL_API.project;return p(306.3,23,390).y>p(293.7,23,390).y;}));ok('no solo opponent in co-op',await guest.evaluate(()=>!document.getElementById('chessDifficulty')&&BFSocial.npcPose('thomas')===null));
 ok('guest sees same movement sequence',await guest.evaluate(()=>document.getElementById('chessStatus').textContent==='Moving piece…'&&'e4'==='e4'));
 await page.screenshot({path:'output/playwright/chess-coop-host.png'});await guest.screenshot({path:'output/playwright/chess-coop-guest.png'});
 await page.evaluate(()=>{qaNow+=1250;BFSocial.tick();});ok('increment credited once and clock handed over',await page.evaluate(()=>{BFSocial.tick();const c=BFSocial.snapshot().clock;return c.left.w===14&&c.left.b===15&&c.running==='b'}));

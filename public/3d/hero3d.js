@@ -6,7 +6,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2113';
+import {syncNpcs} from './npc3d.js?v=2119';
 import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1292,6 +1292,8 @@ function colorWeapon(holder,w){
 }
 
 function restoreEmotePose(A){if(A.sitRoot){A.sitRoot[0].position.copy(A.sitRoot[1]);A.sitRoot=null;}for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];for(const [node,visible] of A.emoteWeapons||[])node.visible=visible;A.emoteWeapons=[];}
+window.__restoreChessNpc=restoreEmotePose;
+window.__poseChessNpc=(p,root,anim)=>applyEmotePose(p,root,anim);
 function applyEmotePose(p,wrap,A){
  const e=p.sitting?{id:'sit',t:2}:p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
  const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5)),s=Math.sin(t*Math.PI*2);
@@ -1300,7 +1302,12 @@ function applyEmotePose(p,wrap,A){
  const arm=(side,target,hint)=>{for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+side);if(b)if(!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);}armTo(wrap,side,wrap.localToWorld(new THREE.Vector3(...target)),wrap.localToWorld(new THREE.Vector3(...hint)),null,blend);};
  if(e.id==='sit'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.45);turn('LowerLeg'+side,1.45);arm(side,[side==='R'?-.36:.36,1.05,.45],[side==='R'?-.62:.62,1.35,.12]);}const body=wrap.getObjectByName('Body');if(body){A.sitRoot=[body,body.position.clone()];body.position.y-=.4;}}
  const chess=p.sitting&&window.BFSocial?.poseFor(p);
- if(chess){const body=wrap.getObjectByName('Body'),target=new THREE.Vector3(chess.target.x,chess.target.y,chess.target.z),local=wrap.worldToLocal(target.clone());const lean=Math.max(0,Math.min(.72,(local.z-.35)*.65))*chess.weight;const lateral=Math.max(-.5,Math.min(.5,-local.x*.6))*chess.weight;turn('Body',lean,0,lateral);for(const side of ['R','L'])turn('UpperLeg'+side,-lean,0,-lateral);if(body){body.position.z+=(.20+Math.max(0,local.z-1.1)*.55)*chess.weight;body.position.x+=Math.max(-.25,Math.min(.25,local.x*.3))*chess.weight;}wrap.updateMatrixWorld(true);for(const name of ['UpperArmR','LowerArmR','FistR','Fist1R','Fist2R']){const b=wrap.getObjectByName(name);if(b&&!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);}armTo(wrap,'R',target,wrap.localToWorld(new THREE.Vector3(-.8,1.4,.4)),null,chess.weight);}
+ if(chess){const target=new THREE.Vector3(chess.target.x,chess.target.y,chess.target.z);
+ // Keep the seated hips and head stable: a small torso lean, never a whole-body reach.
+ turn('Body',.25*chess.weight);for(const side of ['R','L'])turn('UpperLeg'+side,-.25*chess.weight);const seatedBody=wrap.getObjectByName('Body');if(seatedBody)seatedBody.position.z+=.10*chess.weight;turn('Head',-.12*chess.weight);wrap.updateMatrixWorld(true);
+ const hand=chess.arm||'R';for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+hand);if(b&&!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);}
+ armTo(wrap,hand,target,wrap.localToWorld(new THREE.Vector3(hand==='R'?-.8:.8,1.4,.4)),null,chess.weight);}
+
  if(e.id==='wave'){arm('R',[-.57+.06*s,2.30,.18],[-.82,1.86,.12]);turn('FistR',0,0,.12*s);}
  if(e.id==='point'){arm('R',[-.35,1.82,.76],[-.65,1.65,.30]);turn('Head',0,-.08);}
  if(e.id==='cheer'){for(const side of ['R','L']){const sign=side==='R'?-1:1;arm(side,[sign*.60,2.48+.025*s,.15],[sign*.86,2.02,.12]);}turn('Head',-.06);}
@@ -2034,6 +2041,8 @@ export function drawHero3D(p, t){
     wrap.rotation.y = (p.yaw || 0) + HERO3D.yawOff;
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
+
+
     if(_isLocal&&window.BFHubDialogue?.active)wrap.visible=false;
 
     restoreEmotePose(anim);
@@ -2082,10 +2091,18 @@ export function drawHero3D(p, t){
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
     if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
     // Hide only the local head for this draw, never the rig in saved/peer/portrait state.
-    const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!window.BFHubDialogue?.active;
+    const fp=_isLocal&&!p._portrait&&(window.__BF3?.meta.camMode==='fps'||p.sitting&&!!window.BFSocial?.camera())&&!window.BFHubDialogue?.active;
     const head=fp?findHeadBone({root:actor}):null,headScale=head?.scale.clone();
     if(head){head.scale.setScalar(.001);wrap.updateMatrixWorld(true);}
-    try{renderer.render(scene, cam);}finally{if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    const chessArms=[],chessHidden=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera(),chessHand=chessLocal?window.BFSocial.poseFor(p)?.arm:null,wrapVisible=wrap.visible;
+    if(chessLocal&&!chessHand)wrap.visible=false;
+    if(chessLocal&&chessHand)wrap.traverse(n=>{if(!n.isMesh)return;
+      if(!n.isSkinnedMesh){let parent=n.parent,arm=false;while(parent&&parent!==wrap){if(new RegExp('(Arm|Fist|Thumb|Weapon).*'+chessHand+'$').test(parent.name))arm=true;parent=parent.parent;}if(!arm&&n.visible){chessHidden.push(n);n.visible=false;}return;}
+      const g=n.geometry,si=g.attributes.skinIndex,sw=g.attributes.skinWeight;if(!si||!sw||!g.index)return;const key='chessArmGeometry'+chessHand;
+      if(!n.userData[key]){const ids=new Set(n.skeleton.bones.map((b,i)=>new RegExp('(Arm|Fist|Thumb|Weapon).*'+chessHand+'$').test(b.name)?i:-1));const keep=v=>{let w=0;for(let k=0;k<4;k++)if(ids.has(si.getComponent(v,k)))w+=sw.getComponent(v,k);return w>.35;};const idx=[];for(let i=0;i<g.index.count;i+=3){const a=g.index.getX(i),b=g.index.getX(i+1),c=g.index.getX(i+2);if(keep(a)&&keep(b)&&keep(c))idx.push(a,b,c);}const arms=g.clone();arms.setIndex(idx);n.userData[key]=arms;}
+      chessArms.push([n,g]);n.geometry=n.userData[key];
+    });
+    try{renderer.render(scene, cam);}finally{wrap.visible=wrapVisible;for(const n of chessHidden)n.visible=true;for(const [n,g]of chessArms)n.geometry=g;if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;

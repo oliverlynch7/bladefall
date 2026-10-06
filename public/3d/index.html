@@ -1132,7 +1132,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.118.0-class-audit';
+const VERSION3D='2.119.0-chess-thomas';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -15704,8 +15704,8 @@ function updateWorld(dt){
     for(const cr of (G.crumbles||[])){ if(cr.state!==2&&within(cr.h||0)&&near(cr,cr.w,cr.d)) st=Math.max(st,cr.h||0); }
     if(st>-1e8){ p.y=st; if(p.vy<0)p.vy=0; p.onGround=true; p.jumps=0; stepped=true; }
   }
-  resolveObstacles(p,p.r, stepped?p.y:yPrev);    // walls: obstacles whose top was above your feet (a mounted step isn't a wall)
-  const floor=floorAt(p.x,p.z,p.r, stepped?p.y:yPrev);
+  if(!p.sitting)resolveObstacles(p,p.r, stepped?p.y:yPrev);    // walls: obstacles whose top was above your feet (a mounted step isn't a wall)
+  const floor=p.sitting?p.y:floorAt(p.x,p.z,p.r, stepped?p.y:yPrev);
   if(!p.onGround && p.vy<=0 && floor>-1e8 && p.y<=floor){ if(p.vy<-640) playFx('bigland'); p.y=floor; p.vy=0; burst(p.x,p.y+2,p.z,'#888',4); SFX.land(); p.onGround=true; p.jumps=0; }
   else if(p.onGround && (floor<-1e8 || p.y>floor+0.5)){ p.onGround=false; if(p.vy>0) p.vy=0; } // walked off an edge
   else if(p.onGround) p.y=floor;
@@ -23143,8 +23143,8 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2117"></script>
-<script type="module" src="./social-hub.js?v=2117"></script>
+<script type="module" src="./hero3d.js?v=2119"></script>
+<script type="module" src="./social-hub.js?v=2119"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

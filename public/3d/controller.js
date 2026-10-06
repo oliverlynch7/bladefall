@@ -23,7 +23,7 @@ window.BFController=(()=>{
   return {gp,on,edge,buttons,edges,x:dead(gp.axes[config.moveX??(config.swap?2:0)]||0),z:dead(gp.axes[config.moveY??(config.swap?3:1)]||0),rx:dead(gp.axes[config.lookX??(config.swap?0:2)]||0),ry:dead(gp.axes[config.lookY??(config.swap?1:3)]||0)};
  }
  function menu(p){
-  if(!p)return;const root=dialog||(document.getElementById('overlay')?.getClientRects().length?document.getElementById('ovcard'):null)||document;const els=[...root.querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(e=>!e.disabled&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+  if(!p)return;const root=dialog||document.getElementById('socialBoard')||document.getElementById('inspectionLab')||document.getElementById('hubDialogue')||(document.getElementById('overlay')?.getClientRects().length?document.getElementById('ovcard'):null)||document;const els=[...root.querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(e=>!e.disabled&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
   const focused=document.activeElement;if(focused?.type==='range'&&(p.edges[14]||p.edges[15])){focused.value=+focused.value+(p.edges[15]?1:-1)*Number(focused.step||1);focused.dispatchEvent(new Event('input',{bubbles:true}));focused.dispatchEvent(new Event('change',{bubbles:true}));return;}
   const t=performance.now(),dir=p.buttons[13]||p.buttons[15]||p.z>.55||p.x>.55?1:p.buttons[12]||p.buttons[14]||p.z<-.55||p.x<-.55?-1:0;
   if(dir&&t>navAt){navAt=t+220;const i=els.indexOf(document.activeElement);els[(i<0?(dir>0?0:els.length-1):(i+dir+els.length)%els.length)]?.focus();document.activeElement?.scrollIntoView({block:'nearest'});}

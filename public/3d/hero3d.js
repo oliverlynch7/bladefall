@@ -1291,13 +1291,14 @@ function colorWeapon(holder,w){
  if(src?.image?.width){const k=src.uuid+'|'+tint+'|'+accentSurface+'|'+(o.userData.elementUvTriangles?.length?holder.fit?.name:'');let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint),head=weaponTint(w)?weaponHeadMask(o,canvas.width,canvas.height,src.flipY):null;for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if((head?.[i+3]>0&&h[2]>.1)||(h[2]>.35&&(accentSurface||h[1]<.28||h[0]>65))){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if((accentSurface&&hsv[2]>.1)||(elementGold&&hsv[0]>=30&&hsv[0]<=65&&hsv[2]>.25))out.color.set(tint).multiplyScalar(.55+.45*hsv[2]);else if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
 }
 
-function restoreEmotePose(A){for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];for(const [node,visible] of A.emoteWeapons||[])node.visible=visible;A.emoteWeapons=[];}
+function restoreEmotePose(A){if(A.sitRoot){A.sitRoot[0].position.copy(A.sitRoot[1]);A.sitRoot=null;}for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];for(const [node,visible] of A.emoteWeapons||[])node.visible=visible;A.emoteWeapons=[];}
 function applyEmotePose(p,wrap,A){
- const e=p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
+ const e=p.sitting?{id:'sit',t:2}:p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
  const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5)),s=Math.sin(t*Math.PI*2);
  const turn=(name,x=0,y=0,z=0)=>{const b=wrap.getObjectByName(name);if(!b)return;A.emoteBones.push([b,b.quaternion.clone()]);b.rotateX(x*blend);b.rotateY(y*blend);b.rotateZ(z*blend);};
  // Model-space hand targets keep elbows outside the torso on every shared skeleton.
  const arm=(side,target,hint)=>{for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+side);if(b)A.emoteBones.push([b,b.quaternion.clone()]);}armTo(wrap,side,wrap.localToWorld(new THREE.Vector3(...target)),wrap.localToWorld(new THREE.Vector3(...hint)),null,blend);};
+ if(e.id==='sit'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.45);turn('LowerLeg'+side,1.45);arm(side,[side==='R'?-.36:.36,1.05,.45],[side==='R'?-.62:.62,1.35,.12]);}const body=wrap.getObjectByName('Body');if(body){A.sitRoot=[body,body.position.clone()];body.position.y-=.4;}}
  if(e.id==='wave'){arm('R',[-.57+.06*s,2.30,.18],[-.82,1.86,.12]);turn('FistR',0,0,.12*s);}
  if(e.id==='point'){arm('R',[-.35,1.82,.76],[-.65,1.65,.30]);turn('Head',0,-.08);}
  if(e.id==='cheer'){for(const side of ['R','L']){const sign=side==='R'?-1:1;arm(side,[sign*.60,2.48+.025*s,.15],[sign*.86,2.02,.12]);}turn('Head',-.06);}
@@ -1726,7 +1727,7 @@ function playFor(p, A){
 
   const cast = p.combatPose?.remaining > 0 && !(p.dodgeTimer > 0) && !airborne;
   const want = p.dead ? 'Death'
-             : p.emote && p.emote.t<4 ? 'Idle'
+             : p.sitting || p.emote && p.emote.t<4 ? 'Idle'
              : cast ? p.combatPose.clip
              : charging ? CHG
              /* p.atkTimer, NOT p.attackTimer. The picker has tested `p.attackTimer > 0 ||
@@ -2046,7 +2047,7 @@ export function drawHero3D(p, t){
         const q=l.quaternion.clone();l.quaternion.set(r.quaternion.x,-r.quaternion.y,-r.quaternion.z,r.quaternion.w);r.quaternion.set(q.x,-q.y,-q.z,q.w);
       }
     }
-    if(!p.emote||p.emote.id==='bow'||p.emote.t>=4){
+    if(!p.sitting&&(!p.emote||p.emote.id==='bow'||p.emote.t>=4)){
       pirateWeaponPose(p,wrap,anim,dt);
       poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     }

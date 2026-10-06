@@ -28,7 +28,7 @@ const lessons=[
 
  ['Your bag and journal','Tab or B opens your bag. N opens your journal for saved clues. E talks or interacts; Esc pauses.'],
 
- ['Find your way','The map turns with you. Red dots are enemies; the gold diamond is the nearby exit.','#localMap']
+ ['Find your way','Gold: your objective. Blue: teammates. Cyan: their pings. Red: enemies. The map turns smoothly with your camera.','#localMap']
 
 ];
 
@@ -74,8 +74,25 @@ function tick(g,mode,dt,input,api){if(!guide&&mode==='play'&&g?._guidedUsed&&g.p
 
 }
 
-function map(g,mode){if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=252;mapCanvas.height=252;mapCanvas.setAttribute('aria-label','Nearby map: white player, red enemies, gold exit. Player facing is up. N marks north on the rim.');document.body.append(mapCanvas);}mapCanvas.hidden=!g||mode!=='play'||g.hub||g.bonusActive;const now=performance.now();if(mapCanvas.hidden||now-lastMap<30)return;const elapsed=Math.min(.1,(now-lastMap)/1000);lastMap=now;const target=g.p.yaw||0;if(mapOwner!==g){mapOwner=g;mapHeading=target;}else{const delta=Math.atan2(Math.sin(target-mapHeading),Math.cos(target-mapHeading));mapHeading+=delta*(1-Math.exp(-elapsed*14));}const turn=mapHeading+Math.PI;const c=mapCanvas.getContext('2d'),p=g.p,scale=116/650;c.clearRect(0,0,252,252);c.save();c.beginPath();c.arc(126,126,123,0,Math.PI*2);c.clip();c.fillStyle='#101923';c.fillRect(0,0,252,252);c.save();c.translate(126,126);c.rotate(turn);c.translate(-126,-126);const xy=o=>[126+(o.x-p.x)*scale,126+(o.z-p.z)*scale];c.fillStyle='#465746';for(const s of g.segments||[]){const [x,y]=xy(s);c.fillRect(x-(s.w||80)*scale/2,y-(s.d||80)*scale/2,(s.w||80)*scale,(s.d||80)*scale);}c.fillStyle='#ff7470';for(const e of g.enemies||[]){if(e.dead||e.hp<=0||e.dummy)continue;const [x,y]=xy(e);if(Math.hypot(x-126,y-126)>115)continue;c.beginPath();c.arc(x,y,e.boss?6:3,0,7);c.fill();}if(g.portal){const [x,y]=xy(g.portal);if(Math.hypot(x-126,y-126)<115){c.fillStyle='#ffe047';c.beginPath();c.moveTo(x,y-7);c.lineTo(x+7,y);c.lineTo(x,y+7);c.lineTo(x-7,y);c.fill();}}c.restore();c.translate(126,126);c.fillStyle='white';c.beginPath();c.moveTo(0,-9);c.lineTo(-6,6);c.lineTo(0,3);c.lineTo(6,6);c.fill();c.restore();c.fillStyle='#fff0c7';c.font='bold 19px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('N',126+Math.sin(turn)*105,126-Math.cos(turn)*105);}
+function map(g,mode){
+ if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. Camera direction is up.');document.body.append(mapCanvas);}
+ mapCanvas.hidden=!g||mode!=='play'||g.bonusActive;if(mapCanvas.hidden)return;
+ const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-lastMap)/1000));lastMap=now;
+ const heading=window.__BF_MAP_PARTY?.().heading,target=Number.isFinite(heading)?heading:g.p.yaw||0;if(mapOwner!==g){mapOwner=g;mapHeading=target;}else{const delta=Math.atan2(Math.sin(target-mapHeading),Math.cos(target-mapHeading));mapHeading+=Math.max(-dt*3.5,Math.min(dt*3.5,delta*(1-Math.exp(-dt*7))));}
+ const turn=mapHeading+Math.PI,c=mapCanvas.getContext('2d'),p=g.p,scale=145/800,mid=160;
+ c.clearRect(0,0,320,320);c.save();c.beginPath();c.arc(mid,mid,156,0,Math.PI*2);c.clip();c.fillStyle='#101923';c.fillRect(0,0,320,320);c.translate(mid,mid);c.rotate(turn);
+ const xy=o=>[(o.x-p.x)*scale,(o.z-p.z)*scale];c.fillStyle='#435747';for(const o of g.segments||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
+ for(const o of g.obstacles||[]){c.fillStyle=o.kind==='plat'?'#819488':'#56636a';const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
+ c.fillStyle='#26302d';for(const o of g.walls||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
+ const marker=(o,color,r,edge=false)=>{if(!o||!Number.isFinite(o.x)||!Number.isFinite(o.z))return;let [x,y]=xy(o);const d=Math.hypot(x,y);if(d>138){if(!edge)return;x*=138/d;y*=138/d;}c.fillStyle=color;c.strokeStyle='#101923';c.lineWidth=2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.stroke();};
+ for(const e of g.enemies||[])if(!e.dead&&e.hp>0&&!e.dummy)marker(e,'#ff7470',e.boss?7:3);
+ const nav=window.__BF_MAP_PARTY?.()||{};for(const q of nav.peers||[])marker(q,'#67baff',6,true);for(const m of g.marks||[])marker(m,'#72fff0',6,true);
+ marker(window.BFPartyNavigation?.target?.(g)||g.portal,'#ffe047',7,true);
+ c.restore();c.save();c.translate(mid,mid);c.rotate(mapHeading-(p.yaw||0));c.fillStyle='white';c.beginPath();c.moveTo(0,-11);c.lineTo(-7,7);c.lineTo(0,3);c.lineTo(7,7);c.fill();c.restore();
+ c.fillStyle='#fff0c7';c.font='bold 18px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('N',mid+Math.sin(turn)*148,mid-Math.cos(turn)*148);
+}
 
+const mapStyle=document.createElement('style');mapStyle.textContent='#localMap{width:176px!important;height:176px!important}@media(max-width:650px){#localMap{width:128px!important;height:128px!important}}';document.head.append(mapStyle);
 window.BFGuidedTutorial={start,skill,tick,map,stop,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,title:guide.steps[guide.i]?.[0]}:null}};
 
 })();

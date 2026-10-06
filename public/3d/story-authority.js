@@ -5,9 +5,9 @@
   const fail=()=>({state,changed:false});
   if(!request||request.epoch!==context.epoch||!context.actor||!context.alive)return fail();
   const event=request.event;if(!event)return fail();
-  if(event.type==='choose'&&state.conversation?.owner!==context.actor)return fail();
+  if(['choose','close'].includes(event.type)&&state.conversation?.owner!==context.actor)return fail();
   if(event.type==='open'||event.type==='world'){
-   if(state.conversation||!context.canInteract)return fail();
+   if((event.type==='open'&&state.conversation)||!context.canInteract)return fail();
    const target=event.type==='open'?context.npcs.find(n=>n.id===event.npc):context.objects.find(o=>o.key===event.key);
    if(!target||target.available===false)return fail();
    if(target.bounds){const b=target.bounds,p=context.position;if(!p||p.x<b.minX||p.x>b.maxX||p.z<b.minZ||p.z>b.maxZ)return fail();}

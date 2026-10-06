@@ -12,7 +12,7 @@ window.BFBriarBeta=(()=>{'use strict';
  }
  function exit(){location.assign('/3d/');}
  function start(){progress=fresh();part=0;build();}
- function pause(){panel('Beta controls','Your campaign is untouched. Completed tasks survive a chapter retry; a new loadout starts over.',[['Continue',resume],['Route map',map],['Current clues',journal],['Retry this chapter',()=>build()],['Change loadout / restart',setup],['Back to title',exit]]);}
+ function pause(){panel('Beta controls','Your campaign is untouched. Completed tasks survive a chapter retry; a new loadout starts over.',[['Continue',resume],['Test torn transport map',()=>BFInspection.open('map')],['Inspect painting clue',()=>BFInspection.open('painting')],['Route map',map],['Current clues',journal],['Retry this chapter',()=>build()],['Change loadout / restart',setup],['Back to title',exit]]);}
  function journal(){panel('Current clues',part?'The Legion signal is above the timber scaffold. Cut its cable to protect the refuge. West: captive pen and logging patrol. East: two dogs. The transport order is beyond the warbeast.':'The medical satchel is in the granary loft. The loading scaffold leads up to the loft. At the mill, weight on the broad plate diverts the water. Leave the grain crate there while you climb to the jammed timber.',[['Back to the adventure',resume],['Route map',map]]);}
  function map(){panel(part?'Black Woods routes':'Homefields routes',part?'Refuge → broken timber walk → signal scaffold → warbeast clearing. West: captive pen and logging patrol. East: dog pen and high shard route. Five shards across both chapters.':'Home lane → Mara → granary roof supplies → mill sluice and scaffold → far-bank guards → woods. The river divides the village from the escape gate. Gold edges mark climbable timber.',[['Continue',resume],['Open overhead plan',()=>window.open('/design/briar-beta/','_blank','noopener')],['Test controls',pause]]);}
  function build(){
@@ -31,6 +31,7 @@ window.BFBriarBeta=(()=>{'use strict';
   floor(0,0,1900,1500);floor(0,-1450,1900,900); // real river gap, no hidden ground under the water
   path(0,180,190,1100);path(-330,-120,650,150);path(370,-130,600,150);path(0,-1440,210,850);
   house(-600,390,280,240,145,'red');house(470,390,260,240,145,'ochre');house(710,-230,310,300,235,'green');house(-790,-515,250,300,210,'red');
+  g.obstacles.push({kind:'col',x:-470,z:-240,w:55,d:40,h:27,invisible:true});
   actor('thomas','Thomas',60,400);actor('mara','Mara',-360,220);actor('gus','Gus',-500,-270);
   s.props.push({kind:'medical',x:-400,z:120},{kind:'cart',x:160,z:390},{kind:'well',x:210,z:80},{kind:'mill',x:-575,z:-710});
   // Usable roof route: broad teaching landings, then a turning loft approach.
@@ -102,6 +103,7 @@ window.BFBriarBeta=(()=>{'use strict';
  function releaseJam(){if(S().plate<.8){A.toast('The turning wheel strains the catch. Weigh down the sluice plate to stop the waterwheel.');return;}progress.bridge=true;S().events.push({kind:'bridge',time:G().time});A.toast('Timber freed! The crossing is lowering.');}
  function collect(id){if(progress.shards.includes(id))return;progress.shards.push(id);A.toast(`Rift Shard ${progress.shards.length}/5 · Five shards open the Berserker trial in the Rift Hall. Beta collection stays here.`);}
  function interact(){if(!S())return null;const s=S(),list=[];const add=(o,label,act,r=90)=>{if(near(o,r))list.push({...o,label,act});};
+ if(!part){add({x:-470,z:-240,y:0},'Examine the torn transport map',()=>BFInspection.open('map',{x:-470,y:40,z:-240}));add({x:470,z:248,y:0},'Examine the granary painting',()=>BFInspection.open('painting',{x:470,y:60,z:248}));}
  if(!part){add(s.actors[0],'Talk to Thomas',thomas);add(s.actors[1],progress.medicine&&!progress.healing?'Deliver Mara’s supplies':'Talk to Mara',mara);
  add(s.actors[2],'Ask Gus about the mill',()=>panel('Gus','“That plate lowers the sluice. Your weight works—but who holds it while you climb? There’s a grain crate right beside it.”',[['Leave conversation',resume]]));
  if(!progress.medicine)add(s.med,'Take the medical satchel',()=>{progress.medicine=true;A.toast('Medical satchel collected · Bring it to Mara.');},75);
@@ -160,6 +162,8 @@ window.BFBriarBeta=(()=>{'use strict';
  function target(e,p){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac'))return p;const n=s.actors.reduce((a,b)=>dist(e,a)<dist(e,b)?a:b);n.hp=s.evac.hp;n.r=13;n.h=58;return dist(e,n)<dist(e,p)?n:p;}
  function captiveHit(e,blocked){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac')||e._bbHit===e.pcSerial)return;for(const n of s.actors)if(BFPrisonCombat.contains(e,{...n,r:13,h:58})&&!blocked(n)){e._bbHit=e.pcSerial;s.evac.hp=Math.max(0,s.evac.hp-8*config.strength);A.toast('A villager was hit!');break;}}
  function draw(t){const s=S();if(!s)return;const b=A.box;
+ if(!part){b(-470,25,-240,55,5,40,'#795936');b(-470,28,-240,42,1,28,'#cdb77c');for(const x of [-490,-450])b(x,12,-240,5,24,5,'#59452d');b(470,60,248,65,48,3,'#6b4e31');b(470,60,245,56,39,1,'#a4b7a1');b(470,59,244,29,19,1,'#cfaf7b');b(470,73,244,37,8,1,'#46684f');b(470,80,243,4,5,1,'#ad7fe3');}
+
  if(!window.__BRIAR_BETA_ART){for(const f of G().segments)b(f.x,-15,f.z,f.w,30,f.d,part?'#435d3b':'#6f884b');for(const q of s.plats)b(q.x,q.h-11,q.z,q.w,22,q.d,q.color);for(const q of s.solids)if(q.briarKind!=='crate')b(q.x,(q.y0+q.h)/2,q.z,q.w,q.h-q.y0,q.d,q.color);}
  if(!part){
   const c=s.crate;b(c.x,32,c.z,64,64,64,'#9e713e');for(const x of [-25,25])b(c.x+x,33,c.z,6,68,67,'#493b2d');

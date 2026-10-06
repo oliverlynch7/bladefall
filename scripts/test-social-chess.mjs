@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {Chess} from '../public/3d/vendor/chess-1.4.0.mjs';
+const c=new Chess();assert.throws(()=>c.move('e5'));for(const m of ['f3','e5','g4','Qh4#'])c.move(m);assert(c.isCheckmate());
+const castle=new Chess('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');castle.move('O-O');assert.equal(castle.get('f1').type,'r');assert.equal(castle.get('g1').type,'k');
+const ep=new Chess();for(const m of ['e4','a6','e5','d5','exd6'])ep.move(m);assert.equal(ep.get('d5'),undefined);assert.equal(ep.get('d6').type,'p');
+const promo=new Chess('7k/P7/8/8/8/8/8/7K w - - 0 1');promo.move({from:'a7',to:'a8',promotion:'n'});assert.equal(promo.get('a8').type,'n');assert(promo.isInsufficientMaterial());
+const stale=new Chess('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1');assert(stale.isStalemate());
+const rep=new Chess();for(let i=0;i<2;i++)for(const m of ['Nf3','Nf6','Ng1','Ng8'])rep.move(m);assert(rep.isThreefoldRepetition());
+const fifty=new Chess('7k/8/8/8/8/8/R7/7K w - - 100 51');assert(fifty.isDrawByFiftyMoves());
+console.log('PASS: illegal move, checkmate, castling, en passant, underpromotion, insufficient material, stalemate, repetition, fifty-move claim');

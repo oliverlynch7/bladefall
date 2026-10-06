@@ -59,7 +59,7 @@ export function buildBriarBetaArt(world){
   // The linkage makes the weight-operated gate legible from the yard.
   beam([-475,8,-490],[-600,8,-700],3,'#c4aa6c');
  }else{sign(0,160,-2820,'HOLLOW PASS →');sign(-600,130,-1100,'LOGGING CAMP');}
- g.userData.tick=p=>{if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=d>160&&d<650;}};
+ g.userData.tick=p=>{if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
  g.userData.dispose=()=>{for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry))o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
  // Static art shares geometry/material batches. Complexity should not imply hundreds of draw calls.
  const batches=new Map();for(const o of [...g.children])if(o.isMesh&&!o.isInstancedMesh){o.updateMatrix();const key=o.geometry.uuid+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}

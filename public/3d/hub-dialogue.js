@@ -19,7 +19,7 @@
  }
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&!active.spectator&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
   if(el('hubTopics'))el('hubTopics').onclick=landing;
   if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();el('hubLeave').focus({preventScroll:true});
  }
@@ -73,7 +73,14 @@
   const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;active.signature=signature;
   showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>({...c,optional:!!source.nodes[view.lineId].choices.find(o=>o.id===c.id)?.optional}))},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Return to the path',canChoose);
  }
- function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0),len=Math.hypot(p.x-x,p.z-z)||1;return {x,y:n.y||0,z,dx:(p.x-x)/len,dz:(p.z-z)/len,blend:a.meta.reduceMotion?1:Math.min(1,(performance.now()-active.start)/550),from:active.eye}}
+ function listen(n,a,lineId){
+ if(!book)return;const same=active?.spectator&&active.n.id===n.id;
+ if(!same){if(active)close(false,true);active={n,a,spectator:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
+ if(same&&active.lineId===lineId)return;
+ if(lineId&&book.nodes[lineId])showLine(lineId,book.nodes[lineId],'',()=>{},()=>close(),'Leave conversation',false);
+ else{active.lineId=null;shell('<p class="hub-dialogue-line">Your teammate is browsing '+esc(book.npcs[n.id]?.service||'services')+'.</p><p>You are listening. They control this conversation.</p>');}
+}
+function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0),len=Math.hypot(p.x-x,p.z-z)||1;return {x,y:n.y||0,z,dx:(p.x-x)/len,dz:(p.z-z)/len,blend:a.meta.reduceMotion?1:Math.min(1,(performance.now()-active.start)/550),from:active.eye}}
  document.addEventListener('keydown',e=>{if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(e=>e.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);
- window.BFHubDialogue={open,close,present,focus,ready,hasNews,known:id=>!!book?.npcs[id],get active(){return active},get speaking(){return speaking}};
+ window.BFHubDialogue={open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id],get active(){return active},get speaking(){return speaking}};
 })();

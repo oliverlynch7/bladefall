@@ -1054,7 +1054,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2111"></script>
+<script src="./prison-dungeon.js?v=2122-2111"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2097"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2083"></script>
@@ -1117,6 +1117,9 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./party-navigation.js?v=2115"></script>
 <script src="./combat-art.js?v=2094"></script>
 <script src="./hostile-art.js?v=1978"></script>
+<link rel="stylesheet" href="./chest-reveal.css?v=2122">
+<script src="./chest-rules.js?v=2122"></script>
+<script src="./chest-reveal.js?v=2122"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <script src="./guided-tutorial.js?v=2116"></script>
@@ -1134,7 +1137,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.121.0-hub-upgrades';
+const VERSION3D='2.122.0-chest-rewards';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1196,7 +1199,7 @@ const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDi
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
@@ -1251,6 +1254,7 @@ function autosaveRun(){ try{
     persist();
   }catch(e){} }
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
+  meta.chestRecords=mv.chestRecords&&typeof mv.chestRecords==='object'?mv.chestRecords:{};
   meta.hubDialogue=checkpointClone(mv.hubDialogue||(Object.keys(mv).length?(meta.legacyHubDialogue||loadJSON(GKEY)?.hubDialogue||{}):{}));meta.returnVisits=BFReturnVisits.normalize(mv.returnVisits);
   // Preview migration: early arcade prototypes stored ownership per save. Promote any
   // such flag to the global profile so the cabinet truly follows every character/mode.
@@ -1291,7 +1295,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
   migrateClassEquipment();
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
+function wipeMode(m){ meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -5027,7 +5031,7 @@ function retainCampaignEarnings(){
  for(const key of ['level','xp','xpNext','maxHp','maxMana','stats','allocation','tunedLevels'])hero[key]=checkpointClone(earned[key]);
  // Preserve the checkpoint's gear and healthy retry resources, but use the earned level.
  hero.hp=hero.maxHp;hero.mana=hero.maxMana;
- for(const key of ['gold','classes','classUnlocked','returnVisits','petOwned','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
+ for(const key of ['chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
  meta.run.p=checkpointClone(hero);return true;
 }
 function restoreCampaignState(){
@@ -5387,6 +5391,7 @@ function enterZone(zi){
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
+  BFChestReveal.clear();
  G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
   G.kingFinal=null;document.getElementById('finalCharge')?.remove();G.ascent=null;G.ascentWorkers=[];G.castleGates=null;G.library=null;G.court=null;G.thunder=null;G.shore=null;G.voyage=null;G.voyageLanded=false;document.getElementById("voyagehud")?.remove();G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;G.peaks=null;G.iceCaves=null;G.iron=null;G.furnace=null;G.ironWorkers=[];
   const Z=curZone();
@@ -9143,6 +9148,7 @@ const BOSS_ARENAS={
    than called at each `return` inside loadStage: that function has three early exits today and a
    fourth would silently skip the edits, which would look like the editor losing his work. */
 function loadStage(i){
+  BFChestReveal.clear();
   G.marbleArena=null;G.bruteArena=null; G.marksmanArena=null; G.fallenArena=null; G.frostOfficers=null;G.colossusArena=null;G.hydraArena=null;G._hydraPaid=false;G._hydraIntro=false;G._hydraHit=-1;document.getElementById('bosshpwrap').classList.remove('officer-team'); loadStageRaw(i); applyEditsNow(); }
 function applyEditsNow(){
   try {
@@ -10670,7 +10676,7 @@ function reconcileWorldHeights(){ if(!G) return;
   const lift=(o,r=16)=>{ if(o&&!o.taken&&!o.done) o.y=Math.max(o.y||0, (G.ascent?floorAt(o.x,o.z,r,(Number(o.y??o.y0)||0)+30):highestSurfaceAt(o.x,o.z,r))); };
   lift(G.portal); lift(G.bonusPortal); lift(G.waystone); if(G.qmarks) for(const qm of G.qmarks) lift(qm); lift(G.secret); lift(G.secretTrigger);   // exits, find-objectives, secrets/vaults never sit buried under a mesa
   for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, (G.ascent?floorAt(pk.x,pk.z,8,(pk.y0||0)+30):highestSurfaceAt(pk.x,pk.z)));
-  for(const ch of (G.chests||[])) if(!ch.opened) seatChest(ch);
+  for(const ch of (G.chests||[])){prepareChest(ch);if(!ch.opened)seatChest(ch);}
 }
 /* ── E1: COLLISION NORMALISATION ───────────────────────────────────────────
    Oliver: "four green lamps by the Waystation have collision; the taller ones around them do not.
@@ -13276,7 +13282,35 @@ function mimicReveal(ch){
   G.shake=Math.min(G.shake+12,18); G.slowmo=Math.max(G.slowmo||0,0.18);
   toast('It was never a chest','var(--danger)','event-mimic');
 }
+function prepareChest(ch){
+ if(!ch)return null;if(ch._rewardRecord)return ch._rewardRecord;
+ const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=layout.rarity;ch.challenge=layout.challenge;
+ if(ch.challenge)ch.mimic=false;
+ const scene=[G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex,G.bonusActive?G.bonusCourse?.seed||G.bonusVisits||0:0].join(':');
+ const key=scene+':'+Math.round(ch.x)+','+Math.round(ch.z);
+ const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
+ const records=owner.chestRecords||(owner.chestRecords={});
+ let rec=records[key];
+ if(!rec){const rid=BFChestRules.reward(ch.rarity,ch.challenge,BFChestRules.hash(key+':reward'));rec=records[key]={rarity:ch.rarity,challenge:ch.challenge,item:randomLoot(rid),claimed:!!ch.opened};
+  // Keep recent expeditions bounded; an old discarded run is not resumable through normal saves.
+  const keys=Object.keys(records);if(keys.length>2048)for(const k of keys.slice(0,keys.length-2048))delete records[k];
+  persist();
+ }
+ ch.rarity=rec.rarity;ch.challenge=rec.challenge;ch.opened=!!rec.claimed;
+ Object.defineProperty(ch,'_rewardRecord',{value:rec,writable:true,configurable:true,enumerable:false});return rec;
+}
+function revealChestReward(ch,item,result){
+ const describe=box=>{const o=box.weapon||box.armor||box.trinket;return {name:o.name,rarity:o.rarity,color:RARITY[o.rarity].color,icon:itemStaticAv(o)};};
+ const cards=[];for(let i=0;i<24;i++)cards.push(describe(i===20?item:randomLoot(BFChestRules.reward(ch.rarity,ch.challenge,Math.random()))));
+ BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,result,cards,winner:20,reduceMotion:meta.reduceMotion||matchMedia('(prefers-reduced-motion: reduce)').matches});
+}
+function descentRewardChest(){
+ if(!G.endless||G.chests.some(c=>c.descentReward))return;
+ const rarity=BFChestRules.depth(G.floor,BFChestRules.hash(G.runSeed+':floor:'+G.floor));
+ const ch={x:0,z:-160,y:0,rarity,descentReward:true,opened:false,bob:0};G.chests.push(ch);prepareChest(ch);
+}
 function openChest(ch){
+  if(!ch||ch.opened)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;record.claimed=true;
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
      2026-08-12. It was NOT one of docs/SKILL_TRIAGE.md section E's dead passives — the audit has
@@ -13301,15 +13335,19 @@ function openChest(ch){
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
-  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
+  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot bagged — take the exit','#ffd24a','event-treasure-chest'); }
   else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
-  const drops=ch.bonus?2:1; // bonus vault always holds two
-  for(let i=0;i<drops;i++){
-    const roll=Math.random(),grade=ch.rarity||(ch.bonus?'rare':'common');
-    const rid=grade==='common'?(roll<.92?'common':'uncommon'):grade==='uncommon'?(roll<.85?'uncommon':'rare'):grade==='rare'?(roll<.94?'rare':'epic'):grade==='epic'?(roll<.98?'epic':'legendary'):'legendary';      // Chest grade controls its reward; common chests never roll rare gear.
-    const item=randomLoot(rid);
-    pushLoot(ch.x+(i?28:-28),ch.z+20,ch.y,item);
-  }
+  const item=checkpointClone(record.item),kind=item.weapon?'weapon':item.armor?'armor':'trinket',gear=item[kind];
+  if(G.escape)gear.prisonLootKey='chest-'+G.runSeed+'-'+G.floor+'-'+ch.x+'-'+ch.z;
+  let result;
+  if(!Array.isArray(meta.stash))meta.stash=[];
+  if(meta.stash.length<STASH_CAP){meta.stash.push(item);result='Added to bag';
+    // A claimed chest and its equipment must commit together, including mid-campaign reloads.
+    const cp=campaignCheckpoint();if(cp&&G._earningsCheckpoint===cp)cp.state.stash.push(checkpointClone(item));
+  }else{const gold=G.escape?BFPrisonRun.overflow(gear):sellItem(gear);result='Bag full · sold for '+gold+' gold';}
+  if(gear.rarity==='legendary')meta.legendaryFound=(meta.legendaryFound||0)+1;
+  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();revealChestReward(ch,item,result);
+
 }
 // every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
 function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, tier=o?RARITY[o.rarity].tier:0, col=o?RARITY[o.rarity].color:'#fff';
@@ -14547,7 +14585,7 @@ const MP={
       this.zone=this.ENDLESS;
       if(!(G&&G.endless)) startEndless({remote:true,floor:d.floor||1,runSeed:d.runSeed});
       else if((G.floor||1)!==(d.floor||1)){ if(d.runSeed!=null)G.runSeed=d.runSeed; loadEndlessArena(d.floor||1); }
-      if(G&&G.endless&&d.cleared&&!G.portal){ G.floorCleared=true; G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0}; questUpdate(); }
+      if(G&&G.endless&&d.cleared&&!G.portal){ G.floorCleared=true; descentRewardChest(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0}; questUpdate(); }
     } else if(d.kind==='sprint'){
       this.zone=this.SPRINT;
       const same=G&&G.sprintFun&&G.bonusActive&&G.bonusCourse&&G.bonusCourse.seed===d.seed;
@@ -15990,7 +16028,7 @@ function updateWorld(dt){
     if(p.throwHideT<=0){ p.throwHideReturn=false; p.throwHideArche=null; }
   }
   // chests
-  for(const ch of G.chests){ if(ch.opened) continue; ch.bob+=dt*3;
+  for(const ch of G.chests){ prepareChest(ch); if(ch.opened) continue; ch.bob+=dt*3;
     if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36){ if(ch.mimic){ mimicReveal(ch); break; } openChest(ch); } }   // a mimic SNAPS the moment you reach for it (break: reveal splices the list)
   // pickups
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
@@ -16562,6 +16600,7 @@ function regrabCam(){ if(!BFGuidedTutorial.blocksPointerLock && !_edOpen() && me
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; musicForScene(); showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
 function die(){
+  BFChestReveal.clear();
   window.BFInspection?.close();window.BFSocial?.close();if(BFHubDialogue.active)BFHubDialogue.close(false,true);
   if(G?.devKeep){devBeta().death();return;}
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
@@ -16966,6 +17005,7 @@ function startEndless(opts){
   if(MP.active&&!opts.remote) MP.enterSpecial('endless');
 }
 function loadEndlessArena(n){
+  BFChestReveal.clear();
   const stageIdx=endlessStageFor(n), s=STAGES[stageIdx];
   G.floor=n; G.stageIndex=stageIdx; G.haz=null;
   G.zoneTier=Math.min(7,1+Math.floor((n-1)/3));          // faster tier climb feeds the loot band + enemy scaling
@@ -17006,11 +17046,6 @@ function loadEndlessArena(n){
   G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
   G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
-  // reward beat: a loot cache every third floor (rarity still gated by character level via bandedRarity)
-  if(n>1 && n%3===0) G.chests.push(chestMaybeMimic({x:0,z:-40,y:0,opened:false,bob:0}));   // even the Abyss's gifts can lie
-  // MIMIC FLOORS: every 6th floor is a vault — three caches, each with the standard mimic rate (the bonus-vault exemption stays)
-  if(n>1 && n%6===0){ for(const cx of [-150,0,150]) G.chests.push(chestMaybeMimic({x:cx,z:-40,y:0,opened:false,bob:0}));
-    addText(0,90,-40,'A HOARD — or a trap','#ffd24a',true); }
   G.stageBanner=2.2; G.areaName='Floor '+n;
   document.getElementById('stagetag').textContent='🕳️ FLOOR '+n+(G.endEliteFloor?' ⚔ ELITE':'');
   endModsHUD(); questUpdate(); hudUpdate();
@@ -17045,7 +17080,7 @@ function endlessTick(dt){
       G.endSpawnT=G.endInt;
     }
   } else if(alive===0 && !G.portal){
-    G.floorCleared=true; snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
+    G.floorCleared=true; descentRewardChest(); snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY DOWN OPENS','#c47bff',true);
     toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('portalopen'); SFX.win(); questUpdate();
     if(MP.active) MP.enterSpecial('endless');                    // mirror the opened descent portal for every guest
@@ -17290,7 +17325,8 @@ function openSlots(){
     document.getElementById('delNo').onclick=openSlots; });
   document.getElementById('backBtn').onclick=titleScreen;
 }
-function titleScreen(){window.BFSocial?.reset();liveMenuWorld=null; musicPlay('village_vigil');   // the home theme introduces the ordinary person at the story's center
+function titleScreen(){
+  BFChestReveal.clear();window.BFSocial?.reset();liveMenuWorld=null; musicPlay('village_vigil');   // the home theme introduces the ordinary person at the story's center
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   const currentSlot=slotSummary(SLOT);
   const savedSlots=[0,1,2].filter(sl=>!slotSummary(sl).empty), hasSave=savedSlots.length>0;
@@ -17421,6 +17457,7 @@ function openDiffSelect(){
    THE WAYSTATION — the walkable hub (Firelink, not a menu)
    ============================================================ */
 function openHub(){
+  BFChestReveal.clear();
   if(G?.trialSession)document.getElementById('deathfade')?.remove();
   if(MP.active&&G?.trialSession){if(MP.guest()&&MP._trialExitSession!==G.trialSession){MP.hostConn?.send({t:'trialExit',session:G.trialSession});toast('Asking the party to return together.');return;}if(MP.isHost)MP.trialReceipt={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted,story:briarPacket()};}
   document.getElementById('bosshpwrap').classList.remove('on');
@@ -22178,6 +22215,8 @@ function drawPingMarks(t){
   }
 }
 function drawChest(ch,t){
+  prepareChest(ch);
+  if(deferArmed()&&window.__prop3dChestDrawn?.()){const mim=!!ch.mimic;ch._br=!ch.opened&&mim?Math.max(0,Math.sin(t*.8+ch.bob))*1.1:0;ch._shove=0;return;}
   /* prop3d draws the real wooden chest as a 3D model. When it does, the BODY is skipped here but
      the lock, keyhole and sparkle are not: they glow, they pulse every frame, and two of them are
      the mimic's tell. They are placed against the model's own fitted box (__prop3dChest()) rather
@@ -22847,7 +22886,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
   surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy, partySize, partyHpMul,
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
-  canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
+  prepareChest, descentRewardChest, canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   briarReady, briarRequest, briarReceive, briarApply, briarPacket, briarSync, briarObjects, briarInteract, buildBriarOpening,
   openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
@@ -23165,7 +23204,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2121"></script>
+<script type="module" src="./hero3d.js?v=2122"></script>
 <script type="module" src="./social-hub.js?v=2119"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

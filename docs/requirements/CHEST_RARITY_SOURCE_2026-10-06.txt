@@ -1,0 +1,217 @@
+**Yes—your instinct is good: the chest’s rarity should tell the player, pretty reliably, what they’re about to get.** Finding an Epic chest should already feel exciting, before opening it.
+
+I would separate this into two decisions:
+
+**What rarity of chest appears?** That changes with the location, challenge, and dungeon depth.
+
+**What rarity of gear comes out?** That follows a consistent rule players can learn.
+
+Here’s the starting system I’d propose for BLADEFALL. **These are prototype percentages—not approved changes or numbers I can call balanced without knowing your current reward frequency.**
+
+# 1. Gear rarity inside each chest
+
+For the middle rarities, I’d start with:
+
+> **90% matching rarity · 8% one rarity higher · 2% one rarity lower**
+
+That makes pleasant surprises four times more likely than disappointing ones, while keeping the chest’s identity reliable.
+
+| Chest rarity | Common gear | Uncommon gear | Rare gear | Epic gear | Legendary gear |
+|---|---:|---:|---:|---:|---:|
+| **Common** | **92%** | 8% | 0% | 0% | 0% |
+| **Uncommon** | 2% | **90%** | 8% | 0% | 0% |
+| **Rare** | 0% | 2% | **90%** | 8% | 0% |
+| **Epic** | 0% | 0% | 2% | **90%** | 8% |
+| **Legendary** | 0% | 0% | 0% | 0% | **100%** |
+
+Each row totals 100%. These percentages apply to **one primary equipment reward**, not to gold, materials, or every object that spills out.
+
+### Why I’d make Legendary guaranteed
+
+The lucky moment should be **finding the Legendary chest**, not finding it and then hoping it actually contains a Legendary.
+
+I would rather make Legendary chests scarcer than have them disappoint.
+
+There’s a relevant precedent: in an official *Path of Exile 2* loot rework, Grinding Gear Games made Magic and Rare chests guarantee at least matching-rarity equipment, while reducing their appearance rates. The stated goal was to make those chests exciting to find. That supports the distinction between **rarity of discovery** and **reliability of reward**. [Path of Exile](https://www.pathofexile.com/forum/view-thread/3774647)
+
+### One additional exception: rewards for substantial effort
+
+For a chest at the end of difficult optional parkour, a significant puzzle, or a major one-time challenge, I would **remove the 2% downgrade chance**.
+
+A guaranteed Rare-or-better challenge chest would therefore be:
+
+**92% Rare / 8% Epic.**
+
+That preserves your little surprise without allowing:
+
+> “I finally completed that difficult route, and its Rare chest gave me an Uncommon.”
+
+For ordinary repeatable chests, the 90/8/2 rule is reasonable. For a prominently advertised challenge reward, I’d protect the minimum.
+
+# 2. Abyssal Descent: better chests as you go deeper
+
+**Yes, chest rarity should improve with depth.** That gives players another reason to push onward rather than repeatedly farm the easiest floors.
+
+For the first test, I would make the floor reward predictable:
+
+> **Clear a combat floor → receive one reward chest → roll its rarity based on depth.**
+
+That means a **100% chest appearance chance after a qualifying floor clear**, assuming that matches the reward cadence you want. Rest rooms, shops, and other noncombat floors would not automatically need another equipment chest.
+
+Then use a table like this:
+
+| Cleared floor | Common chest | Uncommon chest | Rare chest | Epic chest | Legendary chest |
+|---|---:|---:|---:|---:|---:|
+| **1–5** | 70% | 25% | 5% | 0% | 0% |
+| **6–10** | 45% | 40% | 14% | 1% | 0% |
+| **11–20** | 20% | 45% | 30% | 5% | 0% |
+| **21–30** | 10% | 30% | 49% | 10% | 1% |
+| **31+** | 0% | 15% | 63% | 20% | 2% |
+
+**These floor bands are illustrative.** If a typical good run only reaches floor 12, I’d compress them. If runs regularly reach floor 100, I’d spread them out.
+
+The intended progression is:
+
+**Early:** Mostly basic equipment, with occasional better finds.
+
+**Middle:** Rare equipment becomes attainable and Epic chests start attracting attention.
+
+**Deep:** Rare becomes the dependable reward, Epic becomes a meaningful possibility, and Legendary remains special.
+
+I would cap the rarity progression rather than eventually making every deep-floor chest Legendary. Further depth could improve eligible equipment strength, gold, materials, or other existing rewards without making the rarity labels meaningless.
+
+## The important math: Legendary chests aren’t the only source
+
+At floor 31+, the proposed table gives:
+
+- A **2%** chance of a Legendary chest, which guarantees Legendary gear.
+- A **20%** chance of an Epic chest, which has an **8%** chance of upgrading its gear to Legendary.
+
+Therefore:
+
+**Actual Legendary gear chance = 2% + (20% × 8%) = 3.6% per chest.**
+
+That is approximately **one Legendary per 28 deep-floor chests on average**, not a guarantee every 28.
+
+Likewise, an early floor with a 0% Legendary-*chest* chance can still produce Legendary *gear* if Epic chests are available.
+
+**We should balance the final item outcomes, not just the colors of the chests.**
+
+# 3. Reward frequency matters as much as percentages
+
+The missing piece is how quickly players earn these rolls.
+
+With the deep-floor example:
+
+| Reward pace | Expected Legendary gear from these chests |
+|---|---:|
+| 10 chests per hour | 0.36 per hour |
+| 20 chests per hour | 0.72 per hour |
+| 30 chests per hour | 1.08 per hour |
+
+Those are calculated averages from the proposed **3.6%** rate, assuming one primary item per chest and no extra bonuses.
+
+If each chest instead gives **three equally eligible equipment rolls**, expected Legendary output triples. That is why I wouldn’t finalize rarity rates without checking chest contents and floor-clear times.
+
+**My starting preference would be one meaningful equipment reward plus gold or materials, rather than several mostly disposable items.**
+
+Also, these calculations cover chest rewards only. Enemy drops, bosses, shops, and quests all contribute to the overall rate at which players acquire good equipment.
+
+# 4. Campaign chests: mostly deliberate, partly random
+
+For the main campaign, I would **not** randomly assign every chest’s location and rarity.
+
+That could undermine the exploration direction you liked: seeing a desirable reward and working out how to reach it.
+
+My proposed starting split is approximately:
+
+> **80% deliberately placed chests with fixed rarity · 20% optional randomized discoveries**
+
+That’s a level-design guideline, not a roll the game needs to perform for every chest.
+
+| Campaign chest type | Placement | Rarity | Contents |
+|---|---|---|---|
+| **Ordinary exploration chest** | Usually fixed | Set for that area and effort | Random eligible gear |
+| **Hard parkour or substantial puzzle reward** | Fixed | Fixed minimum, clearly communicated | Random gear at that minimum or better |
+| **Major quest or special challenge reward** | Fixed | Authored for the achievement | Guaranteed relevant reward or controlled pool |
+| **Bonus discovery chest** | Random among approved locations | Weighted random rarity | Random eligible gear |
+
+### Fixed rarity does not mean identical loot
+
+A particular Epic chest can always sit above a difficult climb, while containing a different eligible Epic item each legitimate repeat.
+
+That lets the player remember:
+
+> “There’s a good reward up there.”
+
+without knowing exactly what they’ll receive.
+
+For unique discoveries and special progression items, fixed contents can be appropriate. **Rift shards and other required progression pieces should not depend on winning a random chest roll.**
+
+### Where randomness belongs
+
+I’d use randomness for **additional opportunities**, not for deciding whether a carefully built challenge was worth doing.
+
+For example, a region might have several approved bonus-chest locations. A playthrough or legitimate replay selects a few of them. Their quality is drawn from a region-appropriate table.
+
+That creates discovery without randomly placing a Legendary chest beside the entrance while a difficult climb gets nothing.
+
+# 5. Campaign rarity should follow progress *and* effort
+
+I wouldn’t use one chest distribution across all of Aerth.
+
+As a proposal—not a description of the current levels—I’d aim for:
+
+| Campaign stage | Ordinary discoveries | Substantial optional challenges |
+|---|---|---|
+| **Early regions** | Mostly Common and Uncommon | Rare; occasional carefully placed Epic |
+| **Middle regions** | Mostly Uncommon and Rare | Rare and Epic |
+| **Late regions** | Mostly Rare, with some Uncommon | Epic; exceptional Legendary opportunities |
+
+**Legendary campaign chests should usually feel like authored discoveries or major accomplishments**, rather than something scattered uniformly across the map.
+
+And rarity must stay separate from equipment strength. Where your equipment system supports level or regional scaling, an early Epic can be exciting without giving it endgame stats.
+
+Similarly:
+
+> **“Legendary” does not mean “anything in the game can drop.”**
+
+Ian’s Blade must remain outside generic chest pools, along with other items reserved for their own unlock paths. Class signature equipment should keep its existing acquisition rules.
+
+# 6. Make repeat farming intentional
+
+This matters particularly with fixed high-quality campaign chests.
+
+I would distinguish **first-discovery rewards** from **repeatable farming rewards**.
+
+A difficult secret could offer a guaranteed Epic on its first completion per character. If you want it farmable afterward, its repeat rewards should require repeating the actual challenge—not simply leaving and reentering the area.
+
+For randomized chests, I’d save the generated result with the encounter or run so reloading cannot repeatedly reroll the same unopened chest.
+
+The goal is:
+
+> **Repeat the adventure to earn another reward—not reload until the color changes.**
+
+For co-op, preserve the existing loot-ownership rules and ensure reconnecting or reopening a chest cannot create duplicate claims.
+
+# 7. Difficulty should not change what a chest’s color means
+
+I would keep the **inside-the-chest percentages consistent across Casual, Normal, Hardcore, and Hitless**.
+
+An Epic chest should mean the same thing to everyone.
+
+My preference would also be not to force players into Hardcore or Hitless simply to access good equipment. Those modes can recognize their additional demands through records, achievements, or explicitly designed rewards.
+
+If higher-difficulty reward bonuses already exist, we should inspect those before changing anything. They would need to be included in the overall loot-rate calculations.
+
+# What I would test first
+
+I’d begin with the **90/8/2 contents table, guaranteed Legendary chests, depth-weighted Descent chests, and mostly fixed campaign rewards**—without adding extra luck systems or complicated modifiers yet.
+
+Then check whether players actually equip what they find. A chest can technically produce an Epic and still feel unrewarding if its contents are consistently obsolete or irrelevant.
+
+The core principle is:
+
+> **Be random about the surprise, but reliable about the value of the effort.**
+
+Before locking the numbers: **roughly how long does a typical Abyssal Descent floor take, and how many pieces of gear does a chest currently give?**

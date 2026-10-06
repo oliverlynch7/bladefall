@@ -14,7 +14,7 @@ window.BFBriarBeta=(()=>{'use strict';
  function start(){progress=fresh();part=0;build();}
  function pause(){panel('Beta controls','Your campaign is untouched. Completed tasks survive a chapter retry; a new loadout starts over.',[['Continue',resume],['Test torn transport map',()=>BFInspection.open('map')],['Inspect painting clue',()=>BFInspection.open('painting')],['Route map',map],['Current clues',journal],['Retry this chapter',()=>build()],['Change loadout / restart',setup],['Back to title',exit]]);}
  function journal(){panel('Current clues',part?'The Legion signal is above the timber scaffold. Cut its cable to protect the refuge. West: captive pen and logging patrol. East: two dogs. The transport order is beyond the warbeast.':'The medical satchel is in the granary loft. The loading scaffold leads up to the loft. At the mill, weight on the broad plate diverts the water. Leave the grain crate there while you climb to the jammed timber.',[['Back to the adventure',resume],['Route map',map]]);}
- function map(){panel(part?'Black Woods routes':'Homefields routes',part?'Refuge → broken timber walk → signal scaffold → warbeast clearing. West: captive pen and logging patrol. East: dog pen and high shard route. Five shards across both chapters.':'Home lane → Mara → granary roof supplies → mill sluice and scaffold → far-bank guards → woods. The river divides the village from the escape gate. Gold edges mark climbable timber.',[['Continue',resume],['Open overhead plan',()=>window.open('/design/briar-beta/','_blank','noopener')],['Test controls',pause]]);}
+ function map(){panel(part?'Black Woods routes':'Homefields routes',part?'Refuge → broken timber walk → signal scaffold → warbeast clearing. West: captive pen and logging patrol. East: dog pen and high shard route. An old watch stands off the northern trail. Five shards across both chapters.':'Home lane → Mara → granary roof supplies → mill sluice and scaffold → far-bank guards → woods. The river divides the village from the escape gate. Gold edges mark climbable timber.',[['Continue',resume],['Open overhead plan',()=>window.open('/design/briar-beta/','_blank','noopener')],['Test controls',pause]]);}
  function build(){
  const g=A.create(config);g.zone=0;g.area=part;g.stageIndex=part;g.areaName=part?'Briar Beta · Black Woods':'Briar Beta · Homefields';
  const s=g.devBriar=g.devKeep={id:++serial,part,actors:[],houses:[],trees:[],rocks:[],paths:[],props:[],plats:[],solids:[],groups:[],shards:[],plate:0,water:1,bridgeT:progress.bridge?1:0,drag:false,safe:part?{x:0,z:420,y:0}:{x:0,z:480,y:0},elapsed:0,huntClock:0,events:[],healingT:0};
@@ -65,7 +65,11 @@ window.BFBriarBeta=(()=>{'use strict';
   plat('tower0',0,-1500,45,110,115);plat('tower1',150,-1580,100,100,110);plat('tower2',250,-1730,150,105,110);plat('tower3',115,-1860,205,115,110);plat('tower-top',-40,-1900,255,150,160);s.signal={x:-40,z:-1920,y:255};
   plat('canopy0',440,-1680,195,85,95);plat('canopy1',605,-1750,245,85,85);plat('canopy2',700,-1900,300,100,100);shard('woods-canopy',700,-1900,300);
   plat('pen-roof0',-500,-950,55,100,100);plat('pen-roof1',-630,-820,110,95,95);plat('pen-roof2',-780,-730,160,100,110);shard('woods-pen',-780,-730,160);
-  plat('lookout0',-550,-2500,50,105,105,'stone');plat('lookout1',-710,-2550,105,95,105,'stone');plat('lookout2',-760,-2710,160,110,110,'stone');shard('woods-lookout',-760,-2710,160);
+  // The north watch is a deliberate side route: guards below, then rising and
+  // turning jumps to a visible shard. It does not duplicate the mill's plate.
+  plat('watch0',390,-3260,48,125,115,'stone');plat('watch1',505,-3350,92,92,90);plat('watch2',635,-3430,138,82,88);
+  plat('watch3',705,-3565,180,88,84);plat('watch4',590,-3665,218,82,82);plat('watch-top',730,-3740,255,120,115);
+  shard('woods-lookout',730,-3740,255);
   for(const [x,z,h]of [[-640,500,220],[640,520,230],[-610,50,290],[620,-180,260],[-680,-430,250],[790,-850,290],[-910,-1280,260],[900,-1690,260],[-910,-1980,280],[850,-2170,290],[-910,-2630,250],[770,-2850,230]])tree(x,z,h,28);
   for(const [x,z]of [[-300,-2400],[350,-2590]]){solid(x,z,110,130,90);s.props.push({kind:'stone',x,z});}
   s.heal={x:260,z:-1100,y:0};s.exit={x:0,z:-2820,y:0};
@@ -94,7 +98,8 @@ window.BFBriarBeta=(()=>{'use strict';
   Object.assign(s.groups.find(q=>q.id==='boss'),{x:0,z:-4220,foes:[['prison_maw',0,-4220]],r:470});
   group('north-patrol',-350,-3100,[['prison_pike',-370,-3100],['prison_hound',-210,-3230]],320);
   group('north-guard',300,-3750,[['prison_guard',420,-3750],['prison_pike',130,-3810]],300);
-  for(const [x,z]of [[-780,-2950],[480,-3010],[-750,-3310],[720,-3380],[-740,-3650],[770,-3760],[-890,-3990],[920,-4130],[-830,-4450],[750,-4530],[-450,-4720],[460,-4750]])tree(x,z,340+Math.abs(x)%70,18);
+  group('watch-guard',455,-3300,[['prison_pike',420,-3290],['prison_guard',540,-3390]],275);
+  for(const [x,z]of [[-780,-2950],[480,-3010],[-750,-3310],[990,-3380],[-740,-3650],[1020,-3760],[-890,-3990],[920,-4130],[-830,-4450],[750,-4530],[-450,-4720],[460,-4750]])tree(x,z,340+Math.abs(x)%70,18);
   for(const [x,z]of [[-500,-4100],[530,-4390]])solid(x,z,140,160,100);
  }
  for(const q of s.trees){q.y=s.terrain.height(q.x,q.z);q.variant=part?(q.z< -2900?2:1):(q.z< -1800?1:0);q.rotation=(q.x+q.z)*.01;}

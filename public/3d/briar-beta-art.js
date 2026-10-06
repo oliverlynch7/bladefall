@@ -28,7 +28,18 @@ export function buildBriarBetaArt(world){
  box(0,-135,rz,2050,40,rw+40,'#435a58');box(0,-38,rz,2050,3,rw,'#357e8c');
  for(const z of [rz-rw/2-22,rz+rw/2+22])box(0,-45,z,1900,90,40,'#727e65');
  for(const q of s.solids){if(['house','tree','crate','prop'].includes(q.briarKind))continue;box(q.x,(q.h+q.y0)/2,q.z,q.w,q.h-q.y0,q.d,q.color);}
- for(const q of s.plats){const wood=q.briarKind==='wood';box(q.x,q.h-12,q.z,q.w,24,q.d,wood?'#66523a':'#6e7e74');box(q.x,q.h-2,q.z,q.w-4,4,q.d-4,wood?'#bd9d67':'#a0ab96');if(wood){for(let x=q.x-q.w/2+12;x<q.x+q.w/2;x+=24)box(x,q.h+1,q.z,2,2,q.d-6,'#655640');for(const dx of [-1,1])cylinder(q.x+dx*(q.w/2-10),(q.h-80)/2,q.z,7,q.h+80,'#5e4934');}else sphere(q.x,q.h-70,q.z,q.w*.55,70,q.d*.52,'#65776b');}
+ for(const q of s.plats){const wood=q.briarKind==='wood',watch=q.id.startsWith('watch');
+  if(q.id==='watch0'){
+   // A weathered stone outcrop conceals the functional rectangular landing.
+   sphere(q.x,q.h-24,q.z,q.w*.78,48,q.d*.70,'#52665a');
+   sphere(q.x-28,q.h-43,q.z+20,58,42,48,'#435c50');
+   box(q.x,q.h-5,q.z,q.w-8,10,q.d-8,'#718473');
+   for(const dx of [-38,0,38])box(q.x+dx,q.h+1,q.z-36,28,2,14,'#738f6c');
+  }else{
+   box(q.x,q.h-12,q.z,q.w,24,q.d,watch?'#594638':wood?'#66523a':'#6e7e74');
+   box(q.x,q.h-2,q.z,q.w-4,4,q.d-4,watch?'#9f835c':wood?'#bd9d67':'#a0ab96');
+  }
+  if(wood){for(let x=q.x-q.w/2+12;x<q.x+q.w/2;x+=24)box(x,q.h+1,q.z,2,2,q.d-6,watch?'#564635':'#655640');for(const dx of [-1,1])cylinder(q.x+dx*(q.w/2-10),(q.h-80)/2,q.z,7,q.h+80,'#5e4934');}else if(q.id!=='watch0')sphere(q.x,q.h-70,q.z,q.w*.55,70,q.d*.52,'#65776b');}
  // Brace each working scaffold visibly; the gaps are broken work decks, not floating blocks.
  for(const q of s.plats.filter(q=>q.briarKind==='wood')){
   const foot=Math.max(-65,Math.min(0,q.h-70));
@@ -70,7 +81,41 @@ export function buildBriarBetaArt(world){
  if(!s.part){sign(-180,130,240,'BRIAR TOWN');sign(730,295,-490,'GRANARY LOFT');sign(-475,80,-490,'SLUICE PLATE');sign(0,155,-4250,'TO THE BLACK WOODS');
   // The linkage makes the weight-operated gate legible from the yard.
   beam([-475,8,-490],[-600,8,-700],3,'#c4aa6c');
- }else{sign(0,160,-4620,'HOLLOW PASS →');sign(-600,130,-1100,'LOGGING CAMP');}
+ }else{
+  sign(0,160,-4620,'HOLLOW PASS →');sign(-600,130,-1100,'LOGGING CAMP');
+  // The abandoned timber watch gives the optional climb a visible destination
+  // from the northern trail. Its beams support the actual collision decks.
+  const watch=s.plats.filter(q=>q.id.startsWith('watch'));
+  if(watch.length){
+   const base=watch[0],top=watch[watch.length-1];
+   sign(base.x,125,base.z+115,'OLD WATCH');
+   // A short worn branch off the main trail points to the base without a
+   // floating objective marker or another arbitrary combination puzzle.
+   for(const [x,z]of [[155,-3070],[215,-3120],[280,-3165],[335,-3210]]){
+    const h=s.terrain.height(x,z);
+    sphere(x,h+1,z,25,3,16,'#857e62');
+   }
+   for(const q of watch){
+    const ground=s.terrain.height(q.x,q.z),half=q.w/2-14;
+    for(const side of [-1,1]){
+     beam([q.x+side*half,ground-5,q.z],[q.x+side*half,q.h-14,q.z],5,'#604d36');
+     beam([q.x+side*half,ground+22,q.z],[q.x-side*half,q.h-20,q.z],3,'#8a7047');
+    }
+    for(const dz of [-1,1])box(q.x,q.h+3,q.z+dz*(q.d/2-8),q.w-20,3,4,'#5d4835');
+   }
+   for(const side of [-1,1]){
+    beam([top.x+side*52,top.h,top.z-42],[top.x+side*52,top.h+115,top.z-42],5,'#584537');
+    beam([top.x+side*52,top.h+115,top.z-42],[top.x,top.h+135,top.z-42],4,'#75583c');
+   }
+   beam([top.x,top.h+135,top.z-42],[top.x,top.h+195,top.z-42],4,'#66513a');
+   box(top.x+19,top.h+170,top.z-42,38,34,2,'#824c3d');
+   box(top.x+19,top.h+153,top.z-42,38,3,3,'#c7a570');
+   box(top.x,top.h+93,top.z-42,90,43,3,'#6d5038');
+   box(top.x,top.h+95,top.z-39,74,31,2,'#765845');
+   box(top.x,top.h+95,top.z-37,8,18,2,'#b6a276');
+   for(const dx of [-22,22])box(top.x+dx,top.h+75,top.z-37,4,9,2,'#b6a276');
+  }
+ }
  g.userData.tick=p=>{reusedTrees?.userData.tick?.(p);if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
  g.userData.dispose=()=>{for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry)&&!o.isInstancedMesh)o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
  // Static art shares geometry/material batches. Complexity should not imply hundreds of draw calls.

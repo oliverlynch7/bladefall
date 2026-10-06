@@ -1,3 +1,4 @@
+import {buildBriarTrees} from './briar-trees.js?v=2120';
 import * as T from './three.module.js';
 // Authored landmarks and workspaces. No scatter algorithm places gameplay props.
 export function buildBriarBetaArt(world){
@@ -11,7 +12,16 @@ export function buildBriarBetaArt(world){
  const beam=(a,b,r,c)=>{const v=new T.Vector3(...b).sub(new T.Vector3(...a)),m=cylinder((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,r,v.length(),c);m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.normalize());return m;};
  function sign(x,y,z,text){const cv=document.createElement('canvas');cv.width=512;cv.height=96;const c=cv.getContext('2d');c.fillStyle='#202b23';c.fillRect(0,0,512,96);c.strokeStyle='#b8ac74';c.lineWidth=5;c.strokeRect(3,3,506,90);c.fillStyle='#fff1c8';c.font='bold 32px sans-serif';c.textAlign='center';c.fillText(text,256,60);const tex=new T.CanvasTexture(cv),m=new T.SpriteMaterial({map:tex,depthTest:true});const sp=new T.Sprite(m);sp.position.set(x,y,z);sp.scale.set(125,24,1);g.add(sp);g.userData.labels.push({tex,m,sp,x,z});}
  g.userData.labels=[];
- for(const f of world.segments){box(f.x,-22,f.z,f.w,42,f.d,s.part?'#435e3d':'#70874d');box(f.x,-48,f.z,f.w,12,f.d,'#706248');}
+ // Clip the shared heightfield's triangles to each authored land footprint.
+ const positions=[],colors=[],road=s.road||[],ground=new T.Color(s.part?'#435e3d':'#70874d'),dirt=new T.Color(s.part?'#857757':'#b29b6d');
+ const clip=(poly,axis,edge,sign)=>{const out=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],da=(a[axis]-edge)*sign,db=(b[axis]-edge)*sign;if(da>=0)out.push(a);if((da>=0)!==(db>=0)){const t=da/(da-db);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}}return out;};
+ const roadDistance=(x,z)=>{let best=Infinity;for(let i=1;i<road.length;i++){const a=road[i-1],b=road[i],dx=b.x-a.x,dz=b.z-a.z,t=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz)));best=Math.min(best,Math.hypot(x-a.x-t*dx,z-a.z-t*dz));}return best;};
+ for(const f of world.segments){const x0=f.x-f.w/2,x1=f.x+f.w/2,z0=f.z-f.d/2,z1=f.z+f.d/2,step=s.terrain.cell;
+ for(let x=Math.floor(x0/step)*step;x<x1;x+=step)for(let z=Math.floor(z0/step)*step;z<z1;z+=step)for(let poly of [[[x,z],[x,z+step],[x+step,z]],[[x+step,z+step],[x+step,z],[x,z+step]]]){
+ for(const [axis,edge,sign]of [[0,x0,1],[0,x1,-1],[1,z0,1],[1,z1,-1]]){if(!poly.length)break;poly=clip(poly,axis,edge,sign);}
+ for(let i=1;i<poly.length-1;i++)for(const [px,pz]of [poly[0],poly[i],poly[i+1]]){const y=s.terrain.height(px,pz),c=ground.clone().lerp(dirt,Math.max(0,Math.min(1,(105-roadDistance(px,pz))/35)));positions.push(px,y,pz);colors.push(c.r,c.g,c.b);}
+ }}
+ const terrainGeo=new T.BufferGeometry();terrainGeo.setAttribute('position',new T.Float32BufferAttribute(positions,3));terrainGeo.setAttribute('color',new T.Float32BufferAttribute(colors,3));terrainGeo.computeVertexNormals();const terrainMat=new T.MeshStandardMaterial({vertexColors:true,roughness:1});materials.set('terrain',terrainMat);const terrainMesh=new T.Mesh(terrainGeo,terrainMat);terrainMesh.receiveShadow=true;g.add(terrainMesh);
  for(const q of s.paths)box(q.x,.5,q.z,q.w,1,q.d,s.part?'#72734d':'#b49a67');
  // River with physical banks and a deep bed, beneath the actual gap in collision.
  const rz=s.part?-645:-875,rw=s.part?300:250;
@@ -41,12 +51,13 @@ export function buildBriarBetaArt(world){
   box(h.x-h.w*.3,h.h+48,h.z-40,33,125,38,'#847b69');
   box(h.x,5,h.z+h.d/2+35,85,10,65,'#90846e');
  }
- for(const t of s.trees){
+ const reusedTrees=buildBriarTrees(s.trees);if(reusedTrees)g.add(reusedTrees);
+ for(const t of reusedTrees?[]:s.trees){
   cylinder(t.x,t.h*.38,t.z,t.r,t.h*.76,'#634c34',t.r*.65);
   for(const a of [0,2.1,4.2]){const dx=Math.cos(a),dz=Math.sin(a);beam([t.x,5,t.z],[t.x+dx*60,2,t.z+dz*60],9,'#65553b');beam([t.x,t.h*.55,t.z],[t.x+dx*65,t.h*.77,t.z+dz*65],t.r*.4,'#715839');}
   sphere(t.x,t.h*.85,t.z,t.h*.43,t.h*.28,t.h*.39,s.part?'#315c3b':'#527843');sphere(t.x-35,t.h*.95,t.z+10,t.h*.30,t.h*.22,t.h*.29,'#648851');sphere(t.x+55,t.h*.81,t.z-20,t.h*.27,t.h*.21,t.h*.28,'#486d3c');
  }
- for(const p of s.props){const {x,z}=p;
+ for(const p of s.props){const {x,z}=p;const first=g.children.length;
   if(p.kind==='medical'){box(x,36,z,120,8,65,'#96724c');for(const dx of [-48,48])for(const dz of [-23,23])box(x+dx,17,z+dz,8,34,8,'#685139');for(let i=0;i<4;i++)cylinder(x-35+i*22,48,z,7,15,'#e4d6b4');beam([x-75,0,z-25],[x-75,145,z-25],5,'#5b4733');beam([x+75,0,z-25],[x+75,145,z-25],5,'#5b4733');box(x,140,z-10,160,8,100,'#b6bba0');sign(x,175,z,'MARA · MEDICAL');}
   if(p.kind==='well'){cylinder(x,28,z,45,56,'#827d68');cylinder(x,57,z,32,2,'#243f42');for(const dx of [-50,50])box(x+dx,62,z,9,124,9,'#6c5234');box(x,124,z,120,14,25,'#88633d');}
   if(p.kind==='cart'||p.kind==='bales'){box(x,35,z,110,20,65,'#886541');for(const dx of [-45,45])for(const dz of [-30,30]){const w=cylinder(x+dx,22,z+dz,20,8,'#473d30');w.rotation.x=Math.PI/2;}for(let i=0;i<3;i++)box(x-32+i*30,60,z,26,30,56,'#c3a45c');}
@@ -54,13 +65,14 @@ export function buildBriarBetaArt(world){
   if(p.kind==='camp'){box(x,40,z,160,80,100,'#676f4b');for(const dx of [-1,1]){const r=box(x+dx*43,97,z,105,9,135,'#92784d');r.rotation.z=-dx*.4;}sign(x,165,z,'LEWIS · REFUGE');}
   if(p.kind==='pen'||p.kind==='dogs'){for(const dx of [-125,125])for(let dz=-75;dz<=75;dz+=50)box(x+dx,55,z+dz,12,110,12,'#746243');for(const dx of [-125,125])for(const y of [30,75])box(x+dx,y,z,8,8,170,'#998459');for(const y of [30,75])box(x,y,z-80,250,8,8,'#998459');}
   if(p.kind==='signal'){for(const dx of [-80,80])beam([x+dx,0,z],[x+dx*.6,270,z],9,'#655238');beam([x-80,40,z],[x+55,210,z],7,'#a08658');sign(x,325,z,'LEGION SIGNAL');}
+  const base=s.terrain.height(x,z);for(const o of g.children.slice(first))o.position.y+=base;
  }
- if(!s.part){sign(-180,130,240,'BRIAR TOWN');sign(730,295,-490,'GRANARY LOFT');sign(-475,80,-490,'SLUICE PLATE');sign(0,155,-1770,'TO THE BLACK WOODS');
+ if(!s.part){sign(-180,130,240,'BRIAR TOWN');sign(730,295,-490,'GRANARY LOFT');sign(-475,80,-490,'SLUICE PLATE');sign(0,155,-4250,'TO THE BLACK WOODS');
   // The linkage makes the weight-operated gate legible from the yard.
   beam([-475,8,-490],[-600,8,-700],3,'#c4aa6c');
- }else{sign(0,160,-2820,'HOLLOW PASS →');sign(-600,130,-1100,'LOGGING CAMP');}
- g.userData.tick=p=>{if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
- g.userData.dispose=()=>{for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry))o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
+ }else{sign(0,160,-4620,'HOLLOW PASS →');sign(-600,130,-1100,'LOGGING CAMP');}
+ g.userData.tick=p=>{reusedTrees?.userData.tick?.(p);if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
+ g.userData.dispose=()=>{for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry)&&!o.isInstancedMesh)o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
  // Static art shares geometry/material batches. Complexity should not imply hundreds of draw calls.
  const batches=new Map();for(const o of [...g.children])if(o.isMesh&&!o.isInstancedMesh){o.updateMatrix();const key=o.geometry.uuid+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}
  for(const list of batches.values()){if(list.length<2)continue;const inst=new T.InstancedMesh(list[0].geometry,list[0].material,list.length);list.forEach((o,i)=>{inst.setMatrixAt(i,o.matrix);g.remove(o);});inst.computeBoundingSphere();g.add(inst);}

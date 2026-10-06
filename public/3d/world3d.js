@@ -1,4 +1,5 @@
-import {buildBriarBetaArt} from './briar-beta-art.js?v=2115';
+import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2120';
+import {buildBriarBetaArt} from './briar-beta-art.js?v=2120';
 import {buildPrisonArt} from './prison-art3d.js?v=2111';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2074';
@@ -2003,7 +2004,8 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   if(world.briarBeta){
-    const key='briar-beta:'+world.briarBeta.id;
+    if(!briarTreesReady())loadBriarTrees();
+    const key='briar-beta:'+world.briarBeta.id+':'+briarTreesReady();
     if(WORLD3D.built!==key){clearWorld(scene);clearMobs();clearProps();const art=buildBriarBetaArt(world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.built=key;}
     group?.userData.tick?.(world.p);window.__BRIAR_BETA_ART=true;WORLD3D.ready=true;return true;
   }

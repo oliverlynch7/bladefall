@@ -755,3 +755,11 @@ Plan: correct camera along board rank axis, constrain body movement and verify r
 
 ## [Codex | 2026-10-06] Solo chess opponent correction
 User supersedes ghost of Warden with Thomas, already in the hub. Seat the existing Thomas model at the table only during solo chess; restore him to his normal location on leaving. Keep three difficulty targets; no ghost or new character canon.
+
+
+## [Codex | 2026-10-06] Approved full-scale Briar beta rebuild
+User approves the five-step map/terrain/activity/verification/art sequence now, preserving the live campaign. Match the existing campaign's approximate traversal scale; retain the human-approved physical mill puzzle. Reuse good existing trees and other campaign assets after visual inspection; do not substitute simpler low-detail assets merely because they are newly generated. New terrain must support real traversal and intentionally placed districts, not a stretched flat prototype. This approval supersedes waiting for approval to expand the beta, but does not authorize replacing the main portal.
+
+
+## [Codex | 2026-10-06] Keep earned campaign progression on early exit or death
+Latest user decision: preserve earned character XP/levels, class XP/ranks/selected skills, gold, and completed hub-NPC quest work when leaving a campaign level early or dying. No quit confirmation or gold penalty. A hub request completed in either half may be turned in immediately without defeating the boss. Supersedes prior unfinished-half XP/gold rollback. Do not change separate Prison Break run progression, temporary class-trial escrow, arena state or explicit permadeath contracts. Gear and rift-shard rollback were not explicitly changed in this request.

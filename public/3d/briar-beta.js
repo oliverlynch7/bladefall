@@ -18,6 +18,7 @@ window.BFBriarBeta=(()=>{'use strict';
  function build(){
  const g=A.create(config);g.zone=0;g.area=part;g.stageIndex=part;g.areaName=part?'Briar Beta · Black Woods':'Briar Beta · Homefields';
  const s=g.devBriar=g.devKeep={id:++serial,part,actors:[],houses:[],trees:[],rocks:[],paths:[],props:[],plats:[],solids:[],groups:[],shards:[],plate:0,water:1,bridgeT:progress.bridge?1:0,drag:false,safe:part?{x:0,z:420,y:0}:{x:0,z:480,y:0},elapsed:0,huntClock:0,events:[],healingT:0};
+ s.terrain=BFBriarTerrain.make(part);
  const floor=(x,z,w,d)=>g.segments.push({x,z,w,d});
  const plat=(id,x,z,h,w,d,kind='wood')=>{const o={id,kind:'plat',x,z,h,w,d,slab:22,color:kind==='stone'?'#8d9785':'#a88b58',briarKind:kind};g.obstacles.push(o);s.plats.push(o);return o;};
  const solid=(x,z,w,d,h=140,y0=0,kind='stone')=>{const o={x,z,w,d,h:h+y0,y0,kind:'wall',color:kind==='wood'?'#68503a':'#6b7769',briarKind:kind};g.walls.push(o);s.solids.push(o);return o;};
@@ -75,31 +76,54 @@ window.BFBriarBeta=(()=>{'use strict';
   group('boss',0,-2390,[['prison_maw',0,-2430]],480);
   g.bounds={minX:-980,maxX:980,minZ:-2950,maxZ:750};
  }
+ // Full-size northern districts; the approved mill is deliberately not scaled.
+ if(!part){
+  floor(-180,-2190,1540,580);floor(30,-2850,2060,740);floor(120,-3690,1800,940);floor(0,-4290,920,260);
+  s.escortRoute=[{x:0,z:-580},{x:0,z:-1130},{x:-170,z:-1720},{x:-420,z:-2200},{x:30,z:-2700},{x:430,z:-3200},{x:160,z:-3770},{x:0,z:-4160}];
+  s.exit={x:0,z:-4250,y:0};g.bounds={minX:-1120,maxX:1120,minZ:-4480,maxZ:750};s.road=s.escortRoute.slice(1);
+  for(const x of [-830,-620,680,890])for(const z of [-1930,-2260,-2660,-3020,-3450,-3880])tree(x,z,280,15);
+  for(const [x,z]of [[-510,-2770],[710,-3710],[-600,-4110],[440,-4210]])tree(x,z,340,18);
+  for(const [x,z,w,d]of [[-800,-3220,280,32],[750,-2680,32,280],[-380,-3780,260,32]])solid(x,z,w,d,65,0,'stone');
+  s.props.push({kind:'cart',x:-680,z:-2390},{kind:'bales',x:720,z:-2950});
+  plat('bank2',575,-1300,145,85,95,'stone');plat('bank3',715,-1410,200,80,90,'stone');plat('bank4',635,-1570,245,85,95,'stone');plat('bank5',775,-1680,290,110,115,'stone');
+  Object.assign(s.shards.find(q=>q.id==='home-bank'),{x:775,z:-1680,y:290});
+ }else{
+  floor(-150,-3120,1450,400);floor(0,-3570,1770,500);floor(0,-4260,2100,880);floor(0,-4740,850,80);
+  s.road=[{x:0,z:-2720},{x:-350,z:-3050},{x:40,z:-3500},{x:340,z:-3830},{x:0,z:-4220},{x:0,z:-4620}];
+  s.exit={x:0,z:-4620,y:0};g.bounds={minX:-1120,maxX:1120,minZ:-4810,maxZ:750};
+  Object.assign(s.groups.find(q=>q.id==='boss'),{x:0,z:-4220,foes:[['prison_maw',0,-4220]],r:470});
+  group('north-patrol',-350,-3100,[['prison_pike',-370,-3100],['prison_hound',-210,-3230]],320);
+  group('north-guard',300,-3750,[['prison_guard',420,-3750],['prison_pike',130,-3810]],300);
+  for(const [x,z]of [[-780,-2950],[480,-3010],[-750,-3310],[720,-3380],[-740,-3650],[770,-3760],[-890,-3990],[920,-4130],[-830,-4450],[750,-4530],[-450,-4720],[460,-4750]])tree(x,z,340+Math.abs(x)%70,18);
+  for(const [x,z]of [[-500,-4100],[530,-4390]])solid(x,z,140,160,100);
+ }
+ for(const q of s.trees){q.y=s.terrain.height(q.x,q.z);q.variant=part?(q.z< -2900?2:1):(q.z< -1800?1:0);q.rotation=(q.x+q.z)*.01;}
+ for(const q of s.solids){const y=s.terrain.height(q.x,q.z);q.y0+=y;q.h+=y;}
  // Workstation/cart props have collision matching their visible footprint.
- for(const q of s.props)if(q.kind==='well')solid(q.x,q.z,86,86,56,0,'prop');else if(q.kind==='medical')solid(q.x,q.z,120,65,40,0,'prop');else if(q.kind==='cart')solid(q.x,q.z,110,65,72,0,'prop');else if(q.kind==='camp')solid(q.x,q.z,160,100,115,0,'prop');
+ for(const q of s.props)if(q.kind==='well')solid(q.x,q.z,86,86,56,0,'prop');else if(q.kind==='medical')solid(q.x,q.z,120,65,40,0,'prop');else if(q.kind==='cart')solid(q.x,q.z,110,65,72,s.terrain.height(q.x,q.z),'prop');else if(q.kind==='camp')solid(q.x,q.z,160,100,115,0,'prop');
  g.rooms=[{name:g.areaName,x:0,z:part?-1000:-500,y:0,w:1800,d:part?3500:2500,encounter:false,cleared:true,monsters:[]}];
- if(!part&&progress.bridge){s.safe={x:0,z:-1120,y:0};s.actors.forEach((n,i)=>Object.assign(n,{x:(i-1)*35,z:progress.evacuated?-1670:-580,exitStep:progress.evacuated?3:1}));}
+ if(!part&&progress.bridge){s.safe={x:0,z:-1120,y:0};s.actors.forEach((n,i)=>Object.assign(n,{x:(i-1)*35,z:progress.evacuated?-4160:-580,exitStep:progress.evacuated?s.escortRoute.length:1}));}
  else if(!part&&progress.healing)s.safe={x:-150,z:-380,y:0};else if(!part&&progress.medicine)s.safe={x:-260,z:220,y:0};
  Object.assign(g.p,{...s.safe,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});g.cam={x:g.p.x,y:g.p.y,z:g.p.z};g.camYaw=Math.PI;g.lastSafe={...s.safe};g.startPos={...s.safe};g.goalPos={...s.exit};g.progressEnd=s.exit.z;
  document.getElementById('stagetag').textContent=part?'BRIAR BETA · BLACK WOODS':'BRIAR BETA · HOMEFIELDS';
  A.rebuild();resume();A.toast(part?'Lewis’s refuge is ahead. The Legion signal must go dark.':'Your home is under attack. Mara needs the supplies in the granary loft.');
  }
- function spawn(id,type,x,z){if(progress.dead.includes(id))return;const e=A.spawn(type,x,z,type==='prison_maw');const f=(.85+config.level*.12)*config.strength;
+ function spawn(id,type,x,z){if(progress.dead.includes(id))return;const e=A.spawn(type,x,z,type==='prison_maw');e.y=S().terrain.height(x,z);e.betaAppearance=type==='prison_guard'?'sentinel':type==='prison_pike'?'grunt':'thornboar';e.h=type==='prison_maw'?125:type==='prison_hound'?42:72;const f=(.85+config.level*.12)*config.strength;
  Object.assign(e,{betaId:id,betaOrigin:{x,z},hp:Math.round((type==='prison_maw'?360:type==='prison_guard'?65:42)*f),maxHp:Math.round((type==='prison_maw'?360:type==='prison_guard'?65:42)*f),dmg:(type==='prison_maw'?24:6)*(.8+config.level*.10)*config.strength,active:true,dropT:0});
  e.label=type==='prison_maw'?'LEGION WARBEAST':type==='prison_guard'?'Hollowed Shieldbearer':type==='prison_hound'?'Legion Hound':'Hollowed Spearman';
  if(type==='prison_maw'){G().boss=e;e.boss=true;}return e;
  }
  function living(prefix){return G().enemies.some(e=>e.betaId?.startsWith(prefix)&&!e.dead&&e.hp>0);}
- function objective(){if(!part){if(!progress.medicine)return 'Reach the granary loft · Recover Mara’s supplies';if(!progress.healing)return 'Bring the supplies to Mara';if(!progress.bridge)return 'Restore the mill crossing · Divert water, then free the timber';if(living('bank')||!S().groups.find(g=>g.id==='bank').spawned)return 'Clear the far bank so the village can escape';if(!progress.evacuated)return 'Protect the villagers as they cross · Stop the incoming patrols';return 'Follow the escape lane into the Black Woods';}if(!progress.signal)return 'Reach the signal tower · Cut the cable';if(!progress.boss)return 'Defeat the Legion warbeast blocking the refuge route';return 'Read the transport order at the north gate';}
- function navigation(){const s=S();if(!s)return null;const t=!part?(!progress.medicine?s.med:!progress.healing?s.actors[1]:!progress.bridge?{x:-475,z:-550,y:0}:s.exit):!progress.signal?s.signal:!progress.boss?{x:0,z:-2400,y:0}:s.exit;return {...t,navLabel:!part?(!progress.medicine?'Granary loft':!progress.healing?'Mara':!progress.bridge?'Mill yard':'Escape lane'):!progress.signal?'Signal tower':!progress.boss?'Warbeast clearing':'Transport order'};}
+ function objective(){if(!part){if(!progress.medicine)return 'Reach the granary loft · Recover Mara’s supplies';if(!progress.healing)return 'Bring the supplies to Mara';if(!progress.bridge)return 'Restore the mill crossing · Divert water, then free the timber';if(living('bank')||!S().groups.find(g=>g.id==='bank').spawned)return 'Clear the far bank so the village can escape';if(!progress.evacuated)return 'Protect the villagers as they cross · Stay nearby; clear each ambush';return 'Follow the escape lane into the Black Woods';}if(!progress.signal)return 'Reach the signal tower · Cut the cable';if(!progress.boss)return 'Defeat the Legion warbeast blocking the refuge route';return 'Read the transport order at the north gate';}
+ function navigation(){const s=S();if(!s)return null;const t=!part?(!progress.medicine?s.med:!progress.healing?s.actors[1]:!progress.bridge?{x:-475,z:-550,y:0}:s.exit):!progress.signal?s.signal:!progress.boss?{x:0,z:-4220,y:0}:s.exit;return {...t,navLabel:!part?(!progress.medicine?'Granary loft':!progress.healing?'Mara':!progress.bridge?'Mill yard':'Escape lane'):!progress.signal?'Signal tower':!progress.boss?'Warbeast clearing':'Transport order'};}
  function hud(){let el=document.getElementById('briar-beta-hud');if(!el){el=document.createElement('div');el.id='briar-beta-hud';document.body.append(el);}if(!S())return;
- const text=`<b>${part?'BLACK WOODS':'HOMEFIELDS'} · BETA</b><span>${objective()}</span><small>Shards ${progress.shards.length}/5${part?` · Dogs ${progress.dogs?'safe':'missing'} · Captives ${progress.captive?'safe':'held'}`:''}${progress.hunt?` · Patrol ${Math.min(6,progress.huntKills)}/6`:''}</small>${S().drag?'<strong>Moving crate · Walk to position it · E to let go</strong>':''}<button id="boptions">Map / test controls</button>`;
- const html=text+(S().evac&&!progress.evacuated?`<small>Villagers’ safety: ${Math.ceil(S().evac.hp)} / 100</small><progress max="100" value="${S().evac.hp}"></progress>`:'');
+ const text=`<b>${part?'BLACK WOODS':'HOMEFIELDS'} · BETA</b><span>${objective()}</span><small>Shards ${progress.shards.length}/5${part?` · Dogs ${progress.dogs?'safe':'missing'} · Captives ${progress.captive?'safe':'held'}`:''}${progress.hunt?` · Patrol ${Math.min(12,progress.huntKills)}/12`:''}</small>${S().drag?'<strong>Moving crate · Walk to position it · E to let go</strong>':''}<button id="boptions">Map / test controls</button>`;
+ const html=text+(S().evac&&!progress.evacuated?`${S().actors.map(n=>`<small>${n.name}: ${Math.ceil(n.hp??100)} / 100</small><progress max="100" value="${n.hp??100}"></progress>`).join('')}`:'');
  if(el.innerHTML!==html){el.innerHTML=html;document.getElementById('boptions').onclick=pause;}document.getElementById('questbox')?.classList.add('hide');
  }
  function mara(){const done=progress.healing;panel('Mara',done?'“The large pad here keeps healing. Small pads on the road have limited charges.”':progress.medicine?'“You found them. Put the supplies here; I can treat everyone now.”':'“The dressings are in the granary loft. The street is blocked—climb the loading scaffold.”',[[progress.medicine&&!done?'Deliver supplies':'Leave conversation',()=>{if(progress.medicine&&!progress.healing){progress.healing=true;A.toast('Medical station opened · Large pad: unlimited healing. Small pads: limited charges.');}resume();}],...(done?[]:[['Leave conversation',resume]])]);}
  function thomas(){panel('Thomas',progress.bridge?'“The crossing is down. Clear the far bank, and we can get everyone into the woods.”':'“I know you won’t leave them. Help Mara, then get that mill crossing down. I’ll keep our neighbors together.”',[['Leave conversation',resume],['Where do I go?',map]]);}
- function lewis(){panel('Lewis',progress.signal?'“The signal is dark. The beast still holds the north trail. There are prisoners being taken through Hollow Pass—we need to find out where.”':'“That signal brings patrols to our refuge. Reach the tower and cut its cable.”',[['Leave conversation',resume],['Any other people missing?',()=>panel('The logging camp','“Beth and her brother are in the west pen. Two dogs were dragged east. Help them if you can.”',[['I’ll look',resume]])],[progress.hunt?'Patrol progress':'Help hold back the patrol',()=>{progress.hunt=true;if(progress.huntKills>=6&&!progress.huntPaid){progress.huntPaid=true;progress.smallHeals+=2;A.toast('Patrol held back · Two extra recovery charges earned.');}panel('Hold the logging camp',progress.huntPaid?'“You bought us time. Take those recovery supplies.”':`Defeat six enemies at the west logging camp. ${Math.min(6,progress.huntKills)}/6 defeated. Only two patrol enemies can be active at once.`,[['Leave conversation',resume]]);}]]);}
+ function lewis(){panel('Lewis',progress.signal?'“The signal is dark. The beast still holds the north trail. There are prisoners being taken through Hollow Pass—we need to find out where.”':'“That signal brings patrols to our refuge. Reach the tower and cut its cable.”',[['Leave conversation',resume],['Any other people missing?',()=>panel('The logging camp','“Beth and her brother are in the west pen. Two dogs were dragged east. Help them if you can.”',[['I’ll look',resume]])],[progress.hunt?'Patrol progress':'Help hold back the patrol',()=>{progress.hunt=true;if(progress.huntKills>=12&&!progress.huntPaid){progress.huntPaid=true;progress.smallHeals+=2;A.toast('Patrol held back · Two extra recovery charges earned.');}panel('Hold the logging camp',progress.huntPaid?'“You bought us time. Take those recovery supplies.”':`Defeat twelve enemies at the west logging camp. ${Math.min(12,progress.huntKills)}/12 defeated. Only two patrol enemies can be active at once.`,[['Leave conversation',resume]]);}]]);}
  function releaseJam(){if(S().plate<.8){A.toast('The turning wheel strains the catch. Weigh down the sluice plate to stop the waterwheel.');return;}progress.bridge=true;S().events.push({kind:'bridge',time:G().time});A.toast('Timber freed! The crossing is lowering.');}
  function collect(id){if(progress.shards.includes(id))return;progress.shards.push(id);A.toast(`Rift Shard ${progress.shards.length}/5 · Five shards open the Berserker trial in the Rift Hall. Beta collection stays here.`);}
  function interact(){if(!S())return null;const s=S(),list=[];const add=(o,label,act,r=90)=>{if(near(o,r))list.push({...o,label,act});};
@@ -138,29 +162,29 @@ window.BFBriarBeta=(()=>{'use strict';
  function tick(dt){const s=S(),g=G(),p=g.p;if(!s)return;s.elapsed+=dt;
  if(config.god){p.hp=A.maxHp();p.invuln=Math.max(p.invuln,.2);}
  if(p.y< -115){progress.falls++;Object.assign(p,{...s.safe,vx:0,vy:0,vz:0,onGround:true,jumps:0});p.hp=Math.max(1,p.hp-A.maxHp()*.06);s.drag=false;A.toast('Back to the last safe landing. Hold jump for more height.');}
- if(p.onGround&&p.y>=0&&!s.drag){const f=g.segments.find(o=>Math.abs(p.x-o.x)<o.w/2-35&&Math.abs(p.z-o.z)<o.d/2-35);if(f)s.safe={x:p.x,z:p.z,y:0};else{const q=s.plats.find(o=>Math.abs(p.y-o.h)<3&&Math.abs(p.x-o.x)<o.w/2-15&&Math.abs(p.z-o.z)<o.d/2-15);if(q)s.safe={x:q.x,z:q.z,y:q.h};}}
- for(const q of s.groups)if(!q.spawned&&dist(p,q)<q.r&&Math.abs(p.y)<80&&(q.id!=='boss'||progress.signal)){q.spawned=true;q.foes.forEach(([type,x,z],i)=>spawn(q.id+':'+i,type,x,z));}
+ if(p.onGround&&p.y>=0&&!s.drag){const f=g.segments.find(o=>Math.abs(p.x-o.x)<o.w/2-35&&Math.abs(p.z-o.z)<o.d/2-35);if(f)s.safe={x:p.x,z:p.z,y:s.terrain.height(p.x,p.z)};else{const q=s.plats.find(o=>Math.abs(p.y-o.h)<3&&Math.abs(p.x-o.x)<o.w/2-15&&Math.abs(p.z-o.z)<o.d/2-15);if(q)s.safe={x:q.x,z:q.z,y:q.h};}}
+ for(const q of s.groups)if(!q.spawned&&dist(p,q)<q.r&&Math.abs(p.y-s.terrain.height(p.x,p.z))<80&&(q.id!=='boss'||progress.signal)){q.spawned=true;q.foes.forEach(([type,x,z],i)=>spawn(q.id+':'+i,type,x,z));}
  for(const e of g.enemies){if(e.dead||e.hp<=0){if(e.betaId&&!progress.dead.includes(e.betaId)){progress.dead.push(e.betaId);if(e.betaId.startsWith('hunt:'))progress.huntKills++;if(e.betaId.startsWith('boss')){progress.boss=true;A.toast('The north trail is clear. Read the order by the gate.');}}continue;}
   // Keep encounters in their authored clearings. A full-map chase would erase pacing.
   if(e.betaOrigin&&dist(e,e.betaOrigin)>450){Object.assign(e,{x:e.betaOrigin.x,z:e.betaOrigin.z,pcState:'approach',pcClock:.8});}
  }
  if(!part&&progress.healing&&near({x:-360,z:220,y:0},95)){p.hp=Math.min(A.maxHp(),p.hp+A.maxHp()*.35*dt);}
  if(!part&&progress.bridge&&s.bridgeT===1&&s.groups.find(q=>q.id==='bank').spawned&&!living('bank')&&!progress.evacuated){
-  if(!s.evac){s.evac={hp:100,time:0,waves:0};A.toast('The villagers are crossing. Keep the patrols away from them.');}
+  if(!s.evac){s.evac={hp:100,time:0,waves:0};for(const n of s.actors)n.hp=100;A.toast('The villagers are crossing. Keep the patrols away from them.');}
   s.evac.time+=dt;
-  if(s.evac.waves<2&&s.evac.time>2+s.evac.waves*8){const w=s.evac.waves++;spawn('evac'+w+':0',w?'prison_guard':'prison_hound',w?-340:350,-1240);spawn('evac'+w+':1','prison_pike',w?-380:390,-1390);A.toast(w?'More Legion soldiers from the west!':'A patrol is coming from the east!');}
-  const route=[{x:0,z:-580},{x:0,z:-1080},{x:0,z:-1670}];
-  for(const [i,n]of s.actors.entries()){n.exitStep=n.exitStep||0;const q=route[n.exitStep];n.walking=!!q;if(!q)continue;const tx=q.x+(i-1)*35,d=Math.hypot(tx-n.x,q.z-n.z);if(d<8)n.exitStep++;else{n.x+=(tx-n.x)/d*95*dt;n.z+=(q.z-n.z)/d*95*dt;}}
-  if(s.actors.every(n=>n.exitStep===3)&&s.evac.waves===2&&!living('evac')){progress.evacuated=true;A.toast('Everyone is safe. Follow them into the Black Woods.');}
+  if(s.evac.waves<4&&!living('evac')&&s.actors[0].z<[-1100,-1980,-2830,-3660][s.evac.waves]){const w=s.evac.waves++,n=s.actors[0],side=w%2?-1:1;spawn('evac'+w+':0',w%2?'prison_guard':'prison_hound',n.x+side*250,n.z-120);spawn('evac'+w+':1','prison_pike',n.x+side*310,n.z-210);A.toast('Patrol approaching the escape lane!');}
+  const route=s.escortRoute;
+  for(const [i,n]of s.actors.entries()){n.exitStep=n.exitStep||0;const q=route[n.exitStep];n.walking=!!q&&(n.exitStep<2||dist(p,n)<360)&&!living('evac');if(!n.walking)continue;const tx=q.x+(i-1)*35,d=Math.hypot(tx-n.x,q.z-n.z);if(d<8)n.exitStep++;else{n.x+=(tx-n.x)/d*95*dt;n.z+=(q.z-n.z)/d*95*dt;n.y=s.terrain.height(n.x,n.z);}}
+  if(s.actors.every(n=>n.exitStep===s.escortRoute.length)&&s.evac.waves===4&&!living('evac')){progress.evacuated=true;A.toast('Everyone is safe. Follow them into the Black Woods.');}
   if(s.evac.hp<=0){progress.dead=progress.dead.filter(id=>!id.startsWith('evac'));panel('The escape route was overrun','Regroup at the repaired crossing. Supplies and discoveries stay collected.',[['Retry the crossing defense',build],['Test controls',pause]]);}
  }
- if(part&&progress.hunt&&progress.huntKills<6&&dist(p,{x:-550,z:-1250})<380){s.huntClock-=dt;const n=g.enemies.filter(e=>e.betaId?.startsWith('hunt:')&&!e.dead&&e.hp>0).length;if(n<2&&s.huntClock<=0){s.huntClock=4;spawn('hunt:'+serial+':'+Math.floor(s.elapsed*100),n?'prison_pike':'prison_hound',-580+n*140,-1260);}}
+ if(part&&progress.hunt&&progress.huntKills<12&&dist(p,{x:-550,z:-1250})<380){s.huntClock-=dt;const n=g.enemies.filter(e=>e.betaId?.startsWith('hunt:')&&!e.dead&&e.hp>0).length;if(n<2&&s.huntClock<=0){s.huntClock=4;spawn('hunt:'+serial+':'+Math.floor(s.elapsed*100),n?'prison_pike':'prison_hound',-580+n*140,-1260);}}
  if(part&&progress.captive)for(const [i,n]of s.actors.entries()){if(!i)continue;const tx=-470-i*60,tz=-900,d=Math.hypot(tx-n.x,tz-n.z);n.walking=d>5;if(d>5){n.x+=(tx-n.x)/d*55*dt;n.z+=(tz-n.z)/d*55*dt;}}
  hud();
  }
  function death(){progress.deaths++;panel('Try again','Completed tasks and discoveries stay done. This chapter’s surviving enemies reset; health is restored.',[['Retry this chapter',build],['Change loadout / restart',setup],['Exit',exit]]);}
- function target(e,p){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac'))return p;const n=s.actors.reduce((a,b)=>dist(e,a)<dist(e,b)?a:b);n.hp=s.evac.hp;n.r=13;n.h=58;return dist(e,n)<dist(e,p)?n:p;}
- function captiveHit(e,blocked){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac')||e._bbHit===e.pcSerial)return;for(const n of s.actors)if(BFPrisonCombat.contains(e,{...n,r:13,h:58})&&!blocked(n)){e._bbHit=e.pcSerial;s.evac.hp=Math.max(0,s.evac.hp-8*config.strength);A.toast('A villager was hit!');break;}}
+ function target(e,p){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac'))return p;const n=s.actors.reduce((a,b)=>dist(e,a)<dist(e,b)?a:b);n.r=13;n.h=58;return dist(e,n)<dist(e,p)?n:p;}
+ function captiveHit(e,blocked){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac')||e._bbHit===e.pcSerial)return;for(const n of s.actors)if(BFPrisonCombat.contains(e,{...n,r:13,h:58})&&!blocked(n)){e._bbHit=e.pcSerial;n.hp=Math.max(0,(n.hp??100)-8*config.strength);s.evac.hp=Math.min(...s.actors.map(a=>a.hp??100));A.toast('A villager was hit!');break;}}
  function draw(t){const s=S();if(!s)return;const b=A.box;
  if(!part){b(-470,25,-240,55,5,40,'#795936');b(-470,28,-240,42,1,28,'#cdb77c');for(const x of [-490,-450])b(x,12,-240,5,24,5,'#59452d');b(470,60,248,65,48,3,'#6b4e31');b(470,60,245,56,39,1,'#a4b7a1');b(470,59,244,29,19,1,'#cfaf7b');b(470,73,244,37,8,1,'#46684f');b(470,80,243,4,5,1,'#ad7fe3');}
 

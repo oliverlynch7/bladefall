@@ -1,0 +1,9 @@
+import * as T from './three.module.js';
+import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
+const names=['tree_oak','tree_detailed','tree_pineTallA'],cache=[];let pending;
+export function loadBriarTrees(){return pending||(pending=Promise.all(names.map(async name=>{try{const g=await new GLTFLoader().loadAsync('../slice3d/assets/nature/'+name+'.glb');g.scene.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(g.scene),height=bb.max.y-bb.min.y,parts=[];g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);geo.translate(0,-bb.min.y,0);parts.push({geo,mat:o.material});});cache.push({name,height,parts});}catch(e){console.warn('Briar tree unavailable',name,e.message);}})));}
+export function briarTreesReady(){return cache.length===names.length;}
+export function buildBriarTrees(trees){if(!cache.length)return null;const root=new T.Group(),pose=new T.Object3D();
+ const cells=new Map();for(const t of trees){const variant=t.variant||0,key=Math.floor(t.x/500)+','+Math.floor(t.z/500)+','+variant;if(!cells.has(key))cells.set(key,[]);cells.get(key).push(t);}
+ for(const [key,list]of cells){const rec=cache.find(c=>c.name===names[list[0].variant||0])||cache[0],cell=new T.Group();cell.userData.center={x:list[0].x,z:list[0].z};for(const p of rec.parts){const m=new T.InstancedMesh(p.geo,p.mat,list.length);list.forEach((t,i)=>{pose.position.set(t.x,t.y||0,t.z);pose.rotation.set(0,t.rotation||0,0);pose.scale.setScalar(t.h/rec.height);pose.updateMatrix();m.setMatrixAt(i,pose.matrix);});m.computeBoundingSphere();m.receiveShadow=true;cell.add(m);}root.add(cell);}
+ root.userData.sharedBriarAsset=true;root.userData.tick=p=>{for(const c of root.children)c.visible=Math.hypot(c.userData.center.x-p.x,c.userData.center.z-p.z)<1800;};return root;}

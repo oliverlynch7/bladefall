@@ -85,3 +85,19 @@ HUD: one current main objective, compact optional counts and readable interactio
 ## Implementation review
 
 The source plan was drafted before construction. The published SVGs below are coordinate diagrams reconciled to the implemented geometry, not a claim that the original drawings predicted every change. Platform labels show height. Tests shortened two optional canopy gaps; presentation testing fixed moving objects being painted over by static art and moved the wheel to meet its water channel. Village defense now includes two finite patrol waves and a recoverable shared civilian health bar. See briar-beta-qa.md for evidence and limitations.
+
+
+## [Codex | 2026-10-06] Full-scale terrain pass
+Grounded dimensions: live Homefields reaches approximately z=-4240; live Black Woods reaches z=-4400. Compact beta ended at -1770/-2820. New beta endpoints target -4250/-4620, retaining the proven mill workspace rather than scaling its jump distances.
+
+Homefields: village and granary → working mill → far-bank staging area → curving orchard escape lane → stone-walled farm bend → woodland gate. The escape follows the road, not a straight empty sprint. Orchard trees belong to cultivation rows; boundary trees frame bends and hide incoming patrol approaches. Four distance-triggered ambushes, capped until prior attackers are defeated, create a longer escort with recovery opportunities.
+
+Black Woods: refuge → broken stream crossing → logging/captive and dog branches → signal climb → winding northern woodland → defended choke → broad warbeast clearing → transport order. Optional paths return to main clearings. Keep the current climbing mechanisms while stronger optional traversal is built and measured separately.
+
+Terrain: shared triangulated height grid used by collision and rendered ground. Flat constrained workspaces protect the validated mill; hills on expanded land shape sightlines. No ground beneath river gaps. Terrain under all props/enemies/escorts must agree; slopes cannot turn into invisible steps or allow unsupported objects.
+
+Art: inspect campaign Blender tree kit in browser; reuse its geometry/material with authored positions and shared instances. Preserve fallback if loading fails. Do not dispose shared kit geometry during beta resets. Existing beta buildings remain provisional; do not claim all art is finished.
+
+Verification: actual movement up/down slopes, crossing-gap unchanged, beginning-to-end route walk, escort route and fail/retry, combat terrain support, tree render and trunk collision, asset failure fallback, storage isolation and previous save. This pass is not evidence of fun or finished overall campaign replacement. Future work includes class-opponent side fights, individually damageable escorts and deeper optional traversal/puzzles; report those plainly.
+
+Current status: individual escort HP is implemented. Hold-area and class-opponent quests remain pending. Tree selection uses the complete existing Nature Kit assets, not the bare Blender tree from the outskirts kit. This first pass retains original southern workspaces and expands northern terrain.

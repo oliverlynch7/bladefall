@@ -11,6 +11,7 @@ ok('host owns table',await page.evaluate(()=>BFSocial.owned));ok('first seat acc
 ok('wrong turn rejected',await page.evaluate(()=>!BFSocial.receive('g',{type:'move',from:'e7',to:'e5',rev:BFSocial.snapshot().rev})));
 ok('legal host move accepted',await page.evaluate(()=>BFSocial.receive('h',{type:'move',from:'e2',to:'e4',rev:BFSocial.snapshot().rev})));
 ok('stale move rejected',await page.evaluate(()=>!BFSocial.receive('g',{type:'move',from:'e7',to:'e5',rev:0})));
+await page.waitForTimeout(1450);await page.evaluate(()=>BFSocial.tick());
 ok('legal guest move accepted',await page.evaluate(()=>BFSocial.receive('g',{type:'move',from:'e7',to:'e5',rev:BFSocial.snapshot().rev})));
 await guest.evaluate(s=>BFSocial.apply(s),await page.evaluate(()=>BFSocial.snapshot()));ok('guest uses host ownership',await guest.evaluate(()=>BFSocial.owned));
 await page.evaluate(()=>{BFSocial.open();window.qaFen=BFSocial.snapshot().fen;BFSocial.close();BFSocial.open();});ok('position survives leaving table',await page.evaluate(()=>BFSocial.snapshot().fen===qaFen&&__BF3.G.p.sitting&&document.querySelectorAll('[data-square]').length===64));

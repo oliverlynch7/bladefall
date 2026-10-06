@@ -1132,7 +1132,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.116.0-social-play';
+const VERSION3D='2.117.0-chess-clock';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -21746,6 +21746,8 @@ function render(t){
   if(G?.voyage&&meta.camMode==='far'){const sailing=BFShipCrossing.current(G.voyage).kind==='steer',ey=sailing?2100:650,ez=sailing?1700:850,tz=sailing?-750:-30;PROJ=mPersp(58*Math.PI/180,VW/VH,30,24000);VIEW=mLookAt([0,ey,ez],[0,0,tz],[0,1,0]);G.eye={x:0,y:ey,z:ez};gl.uniform2f(U.uFogNF,4000,16000);}
   const tourCamera=window.BFHubTour?.camera();
   if(tourCamera&&G?.hub){const c=tourCamera;PROJ=mPersp(50*Math.PI/180,VW/VH,10,12000);PROJ[9]=innerWidth<650?-.6:-.35;VIEW=mLookAt([c.x,c.y,c.z],[c.tx,c.ty,c.tz],[0,1,0]);G.eye={x:c.x,y:c.y,z:c.z};gl.uniform2f(U.uFogNF,6000,12000);}
+  const chessCamera=window.BFSocial?.camera();
+  if(chessCamera&&G?.hub){const c=chessCamera;PROJ=mPersp(c.fov*Math.PI/180,VW/VH,1,4600);if(c.panel)PROJ[8]=c.panel/innerWidth;else PROJ[9]=-.36;VIEW=mLookAt([c.eye.x,c.eye.y,c.eye.z],[c.look.x,c.look.y,c.look.z],[0,1,0]);G.eye=c.eye;}
   // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
   // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and
   // whole walls of deco could hide the hero (the Hollow spawn bug). Every ray test uses G.eye now.
@@ -23078,7 +23080,7 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
 
 
 window.__BF_INSPECT_API={g:()=>G,enter:()=>{releaseKeyboard();mode='inspection';showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:()=>{resumePlay();const h=document.getElementById("briar-beta-hud");if(G?.devBriar&&h)h.style.display="block";}};
-window.__BF_SOCIAL_API={g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,openTalk:n=>openNpcTalk(n,true),
+window.__BF_SOCIAL_API={g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,project:(x,y,z)=>{const p=project(x,y,z);return p?{x:p[0]/DPR,y:p[1]/DPR}:null;},openTalk:n=>openNpcTalk(n,true),
  enter:m=>{releaseKeyboard();mode=m;showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:resumePlay,
  listen:(n,line)=>BFHubDialogue.listen(n,{meta,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line)};
 window.__BF_MAP_PARTY=()=>({heading:meta.camMode==='far'?G?.p?.yaw:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
@@ -23128,8 +23130,8 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2116"></script>
-<script type="module" src="./social-hub.js?v=2116"></script>
+<script type="module" src="./hero3d.js?v=2117"></script>
+<script type="module" src="./social-hub.js?v=2117"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {ChessClock} from '../public/3d/chess-clock.mjs';
+const c=new ChessClock({enabled:true,base:60,increment:3},1000);
+c.confirm('w','w',2000);assert.equal(c.running,null);c.confirm('b','w',3000);assert.equal(c.running,'w');
+assert.equal(c.view(8000).left.w,55);assert.equal(c.left.w,60);c.stop(8000);assert.equal(c.left.w,55);
+c.settle(9500);assert.equal(c.left.w,55);c.finishMove('w','b',10000);assert.equal(c.left.w,58);assert.equal(c.running,'b');
+assert.equal(c.settle(70000),'b');assert.equal(c.left.b,0);c.stop(70000);assert.equal(c.running,null);
+c.configure({enabled:false,base:60,increment:3},70000);c.finishMove('w','b',72000);c.settle(900000);assert.deepEqual(c.left,{w:60,b:60});
+c.configure({enabled:true,base:15,increment:0},0);c.confirm('w','w',0);c.confirm('b','w',0);c.suspend(5000);assert.equal(c.left.w,10);assert.equal(c.started,false);assert.equal(c.running,null);c.confirm('w','w',6000);c.confirm('b','w',7000);assert.equal(c.view(8000).left.w,9);
+for(const config of [{base:0},{increment:-1},{base:NaN},{base:60.1},{increment:121},{enabled:'true'}])assert.throws(()=>new ChessClock(config));
+console.log('PASS clock: readiness, monotonic time, projection, animation pause, increment, flag, untimed, disconnect resume, validation');

@@ -10,7 +10,7 @@ async page=>{
  const results=[];
  for(const item of catalog){
   const result=await page.evaluate(item=>{
-   const b=__BF3,g=b.G;b.meta.classId=item.cls;const cs=b.classState(item.cls);cs.rank=10;
+   const b=__BF3,g=b.G;b.meta.classId=item.cls;const cs=b.classState(item.cls);cs.rank=10;cs.ch={};
    for(let rank=2;rank<=9;rank++)cs.ch[rank]=b.CLASS2[item.cls]['r'+rank][item.side].id;
    g.p=JSON.parse(window.auditBase);const p=g.p;p.weapon=b.classStartWeapon(item.cls);p.hp=b.effMaxHp(p)*.5;p.maxMana=p.mana=1000;p.invuln=999;p.x=p.z=p.y=0;p.yaw=0;p.skillCd=[0,0,0,0];p.skillCdMax=[0,0,0,0];
    g.enemies=[];g.projectiles=[];g.minions=[];g.corpses=[];g.pet=null;g.petLost=false;g.combatArt=[];g._desig=false;g.camYaw=0;

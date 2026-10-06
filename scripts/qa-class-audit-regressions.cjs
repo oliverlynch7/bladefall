@@ -1,7 +1,7 @@
 async page=>{
  await page.route('**/*',r=>r.continue());
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:4338/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+ await page.goto('http://127.0.0.1:4338/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready,null,{polling:100});
  const report=await page.evaluate(async()=>{
   const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.hubTutDone=true;b.openHub();b.enterArena();
   const g=b.G,a=b.classAudit,m=b.MP,base=JSON.stringify(g.p),rows=[];

@@ -593,7 +593,7 @@
   .rpgmenu .bigbtn.utility{min-height:48px;color:#cfd4de}.rpgmenu .bigbtn:disabled{filter:grayscale(.45);box-shadow:none!important}
   .rpgmenu .gearrow,.rpgmenu .achrow,.rpgmenu .zrow,.rpgmenu .choice{border-color:#303543;background:linear-gradient(135deg,rgba(38,42,54,.72),rgba(14,16,23,.9));box-shadow:inset 0 1px rgba(255,255,255,.025);border-radius:11px}.rpgmenu .gearrow:hover,.rpgmenu .zrow:not(.zlock):hover,.rpgmenu .choice:not(.lockc):hover{border-color:color-mix(in srgb,var(--menu-accent) 48%,#3c4558);background:linear-gradient(135deg,rgba(var(--menu-rgb),.09),rgba(16,18,25,.94))}
   .rpgmenu .navcard{border-radius:13px;border-color:#343a4a;background:radial-gradient(circle at 50% 25%,rgba(var(--menu-rgb),.075),transparent 44%),linear-gradient(160deg,#252936,#101219 76%)}.rpgmenu .navcard:hover{border-color:var(--menu-accent);background:radial-gradient(circle at 50% 25%,rgba(var(--menu-rgb),.17),transparent 48%),linear-gradient(160deg,#2b2f3c,#11131a 76%);box-shadow:0 14px 30px rgba(0,0,0,.42),0 0 20px rgba(var(--menu-rgb),.15)}
-  .rpgmenu .navname,.rpgmenu .choice .cname{color:#f3ead7}.rpgmenu .navmeta,.rpgmenu a{color:var(--menu-accent)!important}.rpgmenu .hint{color:#949cad}.rpgmenu .statgrid{border-color:#303543;background:linear-gradient(145deg,rgba(var(--menu-rgb),.035),rgba(8,10,15,.42))}
+  .rpgmenu .navname,.rpgmenu .choice .cname{color:#f3ead7}.rpgmenu .navmeta,.rpgmenu a:not(.bigbtn){color:var(--menu-accent)!important}.rpgmenu .hint{color:#949cad}.rpgmenu .statgrid{border-color:#303543;background:linear-gradient(145deg,rgba(var(--menu-rgb),.035),rgba(8,10,15,.42))}
   .rpgmenu .achlist,.rpgmenu .buildscroll,.rpgmenu .petgrid{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--menu-accent) 55%,#343946) #101219}.rpgmenu input[type="range"]{accent-color:var(--menu-accent)}
   .rpgmenu .menuiconlead{width:46px;height:46px;display:block;margin:0 auto 6px;filter:drop-shadow(0 7px 8px rgba(0,0,0,.55))}
   @media(min-width:840px){.rpgmenu.menu-shop,.rpgmenu.menu-waystation{max-height:calc(100vh - 70px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--menu-accent) 55%,#343946) #101219}}
@@ -1132,7 +1132,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.117.0-chess-clock';
+const VERSION3D='2.118.0-class-audit';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2375,7 +2375,7 @@ pyromancer:{
     innate:{name:'Battle Ready', d:"Every third basic hit on the same enemy briefly staggers it. Switching targets restarts the count."},
     cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Casting a skill restores 2% max HP.'},
     r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:2,am:0.45,role:'Rapid · Group',fx:'w_cleave',d:"A quick sweep hits nearby enemies. Short cooldown and low damage per cast."},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
-    r3:{kind:'passive',a:{id:'w_heavy',n:"Heavy Hand",role:'Commitment',d:"Basic attacks deal 20% more damage."},b:{id:'w_swift',n:'Swift Steel',role:'Rhythm',d:"Attack 10% faster. Every fourth basic attack lets you attack again immediately; every fourth basic hit deals 25% more damage."}},
+    r3:{kind:'passive',a:{id:'w_heavy',n:"Heavy Hand",role:'Commitment',d:"Basic attacks deal 20% more damage."},b:{id:'w_swift',n:'Swift Steel',role:'Rhythm',d:"Attack 10% faster. Every fourth basic hit deals 25% more damage."}},
     r4:{kind:'skill',slot:1,a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush through enemies for 1.6x damage and stun them.'},b:{id:'w_whirl',n:'Whirlwind',cd:10,role:'Group Damage',fx:'w_whirl',d:"A full-circle sweep deals 2.2 times weapon damage to nearby enemies."}},
     r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:"Take 18% less damage while below half health."}},
     r6:{kind:'skill',slot:2,a:{id:'w_guard',n:'Iron Guard',cd:13,role:'Defense',fx:'w_guard',d:'Brace for 3s, reducing incoming damage by 60%.'},b:{id:'w_stomp',n:'Shockwave Stomp',cd:12,role:'Control',fx:'w_stomp',d:'Slam the ground for 1.5x damage and heavy knockback all around.'}},
@@ -2393,7 +2393,7 @@ pyromancer:{
     r4:{kind:'skill',slot:1, a:{id:'r_tumble',n:'Tumble',cd:8,role:'Movement',fx:'r_tumble',d:"Roll backward with brief invulnerability and fire a parting shot for 75% weapon damage."},
                              b:{id:'r_shadow',n:'Shadowstrike',cd:9,role:'Movement',fx:'r_shadow',d:'Dash through a target (2.0x) and appear behind it; tap again within 1s to return.'}},
     r5:{kind:'passive', a:{id:'r_escape',n:'Escape Artist',role:'Defense',d:"After dodging or using a movement skill, take 15% less damage for 2 seconds."},
-                        b:{id:'r_ambush',n:'Ambusher',role:'Damage',d:'After Tumble/Shadowstrike: next click within 3s +20% (once per 6s).'}},
+                        b:{id:'r_ambush',n:'Ambusher',role:'Damage',d:'After Tumble or Shadowstrike, your next basic hit within 3 seconds deals 20% more damage. Can trigger once every 6 seconds.'}},
     r6:{kind:'skill',slot:2, a:{id:'r_spike',n:'Spike Trap',cd:10,role:'Control',fx:'r_spike',d:"Place a trap for 5 seconds that repeatedly damages and slows enemies inside."},
                              b:{id:'r_smoke',n:'Smoke Bomb',cd:11,role:'Support',fx:'r_smoke',d:"Become briefly invulnerable and slow nearby enemies with smoke."}},
     r7:{kind:'passive', a:{id:'r_patient',n:'Patient Hunter',role:'Damage',d:"After 3 seconds without taking damage, your damage bonus rises from 10% to 18%."},
@@ -2425,7 +2425,7 @@ pyromancer:{
     r6:{kind:'skill',slot:2,a:{id:'x_pull',n:'Void Pull',cd:12,role:'Control',fx:'x_pull',d:'Implode nearby enemies toward a central point and stagger them.'},b:{id:'x_bind',n:'Soul Tether',cd:12,role:'Linkage',fx:'x_bind',d:'Bind enemies in front of you, rooting them for 2.5s.'}},
     r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:"Defeating an enemy while below half health restores 5% of your maximum health (at least 3 HP)."},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:"Enemies affected by your void weapon effect move 18% slower."}},
     r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:"A powerful draining sweep damages nearby enemies and heals 5% of your maximum health per enemy damaged. Healing is halved against players."},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
-    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Rupture',d:"Your void weapon effect builds 25% faster. When a charged attack or skill bursts a fully affected target, the burst deals 15% more damage and spreads the effect to nearby enemies."},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
+    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Rupture',d:"Your void weapon effect builds 25% faster. When a charged attack or skill bursts a fully affected target, the burst deals 15% more damage and spreads the effect to nearby enemies."},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Hitting an elite or boss restores 1 mana, at most once every 0.75 seconds. Defeating an elite restores 8% max HP.'}}
   },
   paladin:{ disp:'Paladin', icon:classIcon('paladin'),
     innate:{name:'Holy Warrior', d:"Your first basic-hit target takes 15% extra basic damage. While it lives, other enemies deal 33% less damage to you. Holy weapons heal 2% of health removed (1% against players)."},
@@ -2497,7 +2497,7 @@ pyromancer:{
     r6:{kind:'skill',slot:2, a:{id:'chr_gravity',n:'Time Warp',cd:13,role:'Control',fx:'chr_gravity',d:'Implode foes inward and deal damage.'}, b:{id:'chr_barrier',n:'Aegis',cd:14,role:'Defense',fx:'chr_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
     r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Stillness',d:"All skills have 10% shorter cooldowns."}, b:{id:'chr_slow',n:"Weak Point",role:'Decay',d:"Deal 20% more damage to slowed enemies."}},
     r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:"Stop Time",cd:22,role:'Group Damage',fx:'chr_tempest',d:"Stop enemies for 3 seconds. In PvP, slow opponents by 25% for up to 1.5 seconds instead of freezing their controls."}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
-    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Repeat',d:'Your last skill fires again, by itself, three seconds later.'}, b:{id:'chr_freeze',n:"Deep Chill",role:'Control',d:"Your skill hits slow enemies for 1.5 seconds. Bosses may resist slowing."}}
+    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Repeat',d:'Your latest skill repeats for free after 3 seconds. Casting another skill before then replaces the pending repeat.'}, b:{id:'chr_freeze',n:"Deep Chill",role:'Control',d:"Your skill hits slow enemies for 1.5 seconds. Bosses may resist slowing."}}
   },
   monk:{ disp:'Monk', icon:classIcon('monk'),
     innate:{name:'Focus', d:"Fists deal 15% more damage and attack 15% faster. Each hit builds 6% extra damage, up to 30%, ending after 4 seconds without a hit. Basic hits also shorten your remaining dodge cooldown by 0.35 seconds."},
@@ -11701,13 +11701,7 @@ function playerAttack(cdMul){
   if(partyChannel)return;
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
-  /* SWIFT STEEL, rewritten. Was "+10% attack speed" - invisible. Now every FOURTH swing costs no
-     time at all, so the class has a rhythm you can hear and play into rather than a number that
-     quietly shortens a timer. */
-  if(c2Passive('w_swift')){
-    p._swiftN = (p._swiftN||0) + 1;
-    if(p._swiftN >= 4){ p._swiftN = 0; p.atkCd = 0; addText(p.x, p.y+40, p.z, 'FREE', '#ffd24a'); }
-  } // auto-attack passes cdMul>1 (15% slower than manual)
+  // Swift Steel's fourth-hit bonus is applied on impact, not as a second attack-speed multiplier.
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
   const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
@@ -12120,6 +12114,7 @@ window.addEventListener('keydown',e=>{
 },true);
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
+ if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0)return;
  if(meta.classId==='pyromancer'&&p.pyInfernoT>0){p.pyInfernoT=Math.max(0,p.pyInfernoT-dt);p.pyPulse-=dt;while(p.pyPulses>0&&p.pyPulse<=0){p.pyPulse+=1;p.pyPulses--;pyroArea(p,190,1,0);}}
   for(const key of ['_controlResist','slowT','rageKillT','escapeGuardT','counterGuardT','_attuneT','_noRetreatT'])p[key]=Math.max(0,(p[key]||0)-dt);
   if(!p.rageKillT)p.rageKills=0;
@@ -12226,6 +12221,7 @@ function rangerDmgMul(p){ // Clear Aim damage bonus (Perfect Hunt +3%, Patient H
   const cap=classState('ranger').rank>=10; let b=c2Passive('r_patient')?0.18:0.10; if(cap) b+=0.03; return 1+b;
 }
 function c2OnKill(p,e){
+ if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0)return;
  if(meta.classId==='pyromancer'){if(c2Passive('py_heal'))classHeal(p,effMaxHp(p)*.03);if(c2Passive('py_sustain'))gainMana(p,8,false);}
   if(meta.classId==='berserker'){
     if(c2Passive('bsk_reckless')){p.rageKills=Math.min(5,(p.rageKills||0)+1);p.rageKillT=6;addText(p.x,p.y+p.h+24,p.z,'+'+(p.rageKills*4)+'% DAMAGE','#ffad77');}
@@ -12709,7 +12705,7 @@ function useSkill(i){
     /* A refunded cast never happened - it found no target and did not go on cooldown - so a soul
        spent on it is put back rather than paid out as mana the player never spent. */
     if(meta.classId==='paladin'&&c2Passive('pal_heal')){classHeal(p,effMaxHp(p)*.04);hudUpdate();}
-    /* ECHO (chronomancer r9 a): "Your last skill fires again, by itself, three seconds later."
+    /* ECHO (chronomancer r9 a): "Your latest skill repeats for free after 3 seconds. Casting another skill before then replaces the pending repeat."
        Wired 2026-08-11; it was one of the 33 in docs/SKILL_TRIAGE.md section E that the rank menu
        offers, describes, and no code has ever read.
        NOTHING IS INVENTED, and both halves already exist in this function. The MECHANISM is the
@@ -12876,7 +12872,7 @@ function resolveSwing(){
   if(MP.active&&MP.pvp) MP.pvpMelee(p,w,dmg);   // Phase 3 PvP: the same swing can strike a rival player
 }
 function classHeal(p,amount){
- if(!p||p.dead||p.downed||p._pvpDead||!Number.isFinite(amount)||amount<=0)return 0;
+ if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0||!Number.isFinite(amount)||amount<=0)return 0;
  const before=p.hp;p.hp=Math.min(effMaxHp(p),p.hp+amount);return p.hp-before;
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
@@ -12924,12 +12920,11 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      making projectiles satisfy THAT would ship the largest balance change in the game as a side
      effect of a netcode fix. A separate marker keeps the two apart. */
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
-    MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
+    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0});
     if(e.prisonFoe)dmg=BFPrisonCombat.guardDamage(e,src,dmg);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
-    if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3; classHeal(G.p,Math.min(dmg,Math.max(0,e.hp))*lifesteal*lsMul); }
-    if(healRatio>0)classHeal(G.p,Math.min(dmg,Math.max(0,e.hp))*healRatio);
+    // Healing follows the host's actual HP-loss receipt, never the predicted hit.
     return;
   }
   if(e.prisonFoe){const guarded=BFPrisonCombat.guardDamage(e,src,dmg);if(guarded<dmg&&(e._guardHint||0)<G.time){e._guardHint=G.time+1;addText(e.x,e.y+90,e.z,'FLANK THE SHIELD','#dfc78e');}dmg=guarded;}
@@ -13019,8 +13014,8 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
   if(e._peer){
-    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0,healRatio});
-    e.hitFlash=.12;return;
+    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0,refund:src===G.p?G.p._bloodOwed||0:0,healRatio});
+    if(src===G.p)G.p._bloodOwed=0;e.hitFlash=.12;return;
   }
   const dealt=Math.min(Math.max(0,e.hp),dmg);
   e.hp-=dmg; e.hitFlash=0.12; e.hitYaw=Math.atan2(e.x-(src?.x??e.x),e.z-(src?.z??e.z));
@@ -14405,7 +14400,7 @@ const MP={
       if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} if(IN_ARENA && this.teams) this.assignTeams();
         try{ mpHideBanner(); toast('⚔️ '+(d.p.name||'Your friend')+' joined the arena!','#7de08a'); }catch(e){} }
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
-      else if(d.t==='hit'){ this.hostApplyHit(d); }
+      else if(d.t==='hit'){ this.hostApplyHit(d,c); }
       else if(d.t==='trialRequest'){const q=this.peers[c._pid],f=riftHallFrames().find(f=>f.classId===d.cid),n=f&&G?.hubNpcs?.find(n=>n.id==='rift-'+f.id);if(G?.riftHall&&q?.hall&&n&&!q.downed&&q.hp>0&&Math.hypot(q.tx-n.x,q.tz-n.z)<150)requestPartyTrial(d.cid,c);}
       else if(d.t==='trialFinish'){const q=this.peers[c._pid];if(G?.trialSession===d.session&&q&&q.zone===this.TRIAL&&!q.downed&&q.hp>0&&G.portal&&Math.hypot(q.tx-G.portal.x,q.tz-G.portal.z)<170)finishPartyTrial();}
       else if(d.t==='trialExit'){if(G?.trialSession===d.session)abandonTrial();}
@@ -14507,6 +14502,7 @@ const MP={
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pcontrol'){if(d.id===this.myId)this.takePvpControl(d);}
+    else if(d.t==='hitResult'){this.takeHitResult(d);}
     else if(d.t==='presult'){if(d.id===this.myId)this.takePvpResult(d);}
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
     else if(d.t==='petdmg'){ if(d.id===this.myId) this.takePetPvpDamage(d); }
@@ -14684,10 +14680,27 @@ const MP={
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
-  hostApplyHit(d){ if(!this.host_()||!G) return; const e=this.byMid(d.m); if(!e||e.dead) return;   // apply a guest's relayed hit authoritatively
-    const src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true};
-    try{ hitEnemy(e, d.d||1, src, d.kb||0, 0, d.el||null); }catch(err){} },
-  sendHit(mid,dmg,kb,el,sx,sz){ if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'hit',m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0)}); }catch(e){} } },
+  hostApplyHit(d,c){
+    if(!this.host_()||!G||!Number.isFinite(d.d)||d.d<=0)return;
+    if(c){const q=this.peers[c._pid];if(!q||q.zone!==this.zone||q.downed||q.hp<=0)return;
+      c._hitReceipts=c._hitReceipts||new Map();for(const [k,v]of c._hitReceipts)if(performance.now()-v.at>10000)c._hitReceipts.delete(k);
+      if(d.token&&c._hitReceipts.has(d.token)){try{c.send(c._hitReceipts.get(d.token).packet);}catch{}return;}}
+    const e=this.byMid(d.m),before=e?Math.max(0,e.hp):0;
+    if(e&&!e.dead){const src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true};hitEnemy(e,d.d,src,d.kb||0,0,d.el||null);}
+    if(c&&d.token){const packet={t:'hitResult',token:d.token,dealt:e?Math.max(0,before-Math.max(0,e.hp)):0};c._hitReceipts.set(d.token,{at:performance.now(),packet});try{c.send(packet);}catch{}}
+  },
+  sendHit(mid,dmg,kb,el,sx,sz,effects={}){
+    if(!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
+    const token=this.myId+':e:'+((this._enemyHitSerial=(this._enemyHitSerial||0)+1));this._pendingEnemyHits=this._pendingEnemyHits||new Map();
+    for(const [k,h]of this._pendingEnemyHits)if(performance.now()-h.at>10000)this._pendingEnemyHits.delete(k);
+    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0)});
+    try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0)});}catch{this._pendingEnemyHits.delete(token);}
+  },
+  takeHitResult(d){
+    const h=this._pendingEnemyHits?.get(d.token);if(!h)return;this._pendingEnemyHits.delete(d.token);
+    if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt)||d.dealt<=0)return;
+    classHeal(G.p,d.dealt*h.rate+h.flat);hudUpdate();
+  },
   // guest: reconcile local enemy list to the host's authoritative set + process kills
   applyEnemies(en,ek){ if(!this.guest()||!G) return; this._gotEn=true;
     const seen={};
@@ -14749,7 +14762,7 @@ const MP={
       if(this.teams && this.teamOf(id)===this.teamOf(this.myId)) continue;   // no friendly fire
       const dx=(q.x||0)-p.x, dz=(q.z||0)-p.z, d=Math.hypot(dx,dz);
       if(d<=reach+16&&(d<=16||(dx*fx+dz*fz)/d>=0.35)&&q._pvpSwing!==p.swingId){
-        q._pvpSwing=p.swingId;q._peer=true;q._peerId=q.id;hitEnemy(q,dmg,p,w.kb||0,effLifesteal(p),w.el);try{addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a');}catch(e){}}
+        q._pvpSwing=p.swingId;q._peer=true;q._peerId=q.id;hitEnemy(q,dmg,p,w.kb||0,Math.max(w.lifesteal||0,effLifesteal(p)),w.el);try{addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a');}catch(e){}}
       const pet=q.pet;if(!pet||pet.dead||pet.hp<=0)continue;
       const px=pet.x-p.x,pz=pet.z-p.z,pd=Math.hypot(px,pz);if(pd>reach+14)continue;
       if(pd>14&&(px*fx+pz*fz)/pd<0.35)continue;
@@ -14760,7 +14773,7 @@ const MP={
     this._hitSerial=(this._hitSerial||0)+1;const token=this.myId+':'+this._hitSerial;
     this._pendingHits=this._pendingHits||new Map();
     for(const [k,v] of this._pendingHits)if(performance.now()-v.time>10000)this._pendingHits.delete(k);
-    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,healRatio:Math.max(0,Math.min(1,Number(effects.healRatio)||0)),element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId});
+    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,player:G.p,world:G,refund:Math.max(0,effects.refund||0),healRatio:Math.max(0,Math.min(1,Number(effects.healRatio)||0)),element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId});
     const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId,token,slow:Math.min(1.5,effects.slow||0),element:effects.element,reflected:!!this._receivingHit};
     this.routeCombatMessage(m);
   },
@@ -14777,10 +14790,10 @@ const MP={
   },
   takePvpResult(m){
     const hit=this._pendingHits?.get(m.token);if(!hit||hit.target!==m.by||performance.now()-hit.time>10000)return;
-    this._pendingHits.delete(m.token);if(hit.cls!==meta.classId)return;
+    this._pendingHits.delete(m.token);if(hit.cls!==meta.classId||hit.player!==G?.p||hit.world!==G)return;
     const dealt=Math.max(0,Math.min(hit.damage,Number(m.dealt)||0));
     classHeal(G.p,dealt*.5*(hit.ls*(meta.classId==='reaper'?.5:.3)+(hit.healRatio||0)));
-    if(dealt>0){classHeal(G.p,hit.flatHeal*.5);const target=this.peers[m.by];if(target){if(hit.element)applyElement(target,hit.element,dealt);if(hit.designated){consumeRunes(target);ruptureCorrupt(target,G.p);}}}
+    if(dealt>0){classHeal(G.p,hit.flatHeal*.5+(hit.refund||0));const target=this.peers[m.by];if(target){if(hit.element)applyElement(target,hit.element,dealt);if(hit.designated){consumeRunes(target);ruptureCorrupt(target,G.p);}}}
     if(m.killed&&dealt>0)c2OnKill(G.p,this.peers[m.by]||{x:0,z:0});
     hudUpdate();
   },

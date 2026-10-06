@@ -991,3 +991,11 @@ User requests clear board view while seeing opponent physically reach, grasp and
 
 ## [Codex | 2026-10-05] Chess enhancement delivery
 Implemented in 2.117.0-chess-clock. See docs/design/social-play-qa.md for verification and remaining human playtest limits.
+
+
+## [Codex | 2026-10-06] Class functionality and choice audit
+User approves auditing all class skills/passives against actual behavior, especially healing/life steal and PvP, simplifying unclear descriptions and correcting clearly inferior choices. Preserve existing choices/save identifiers and prior fixes; verify behavior rather than count source references. Grounded pass: inventory all 17 classes (136 skills, 136 passives); rerun runtime/quantitative baselines; probe confirmed missing weapon life steal in PvP melee, co-op healing before host confirmation, Harvest guest healing and dead/downed healing paths; make targeted fixes with regression evidence. Document limitations and avoid claiming every conditional build combination is proven balanced. Campaign/Briar layout playtests remain pending.
+
+
+## [Codex | 2026-10-06] Design preview button contrast
+User reports unreadable text matching button backgrounds in Dev Design Previews. Prioritize immediately: ordinary link accent styling must exclude button links so primary actions retain dark text and secondary actions retain light text. Verify actual menu states before returning to the class audit.

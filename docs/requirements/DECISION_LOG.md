@@ -731,3 +731,11 @@ Release follow-up: disconnected chess seats now release without resetting the bo
 
 ## [Codex | 2026-10-05] Chess camera, hands and optional clocks
 User requests clear board view while seeing opponent physically reach, grasp and move the chosen piece, then tap their own side of a working analog chess clock with the same arm. Provide adjustable starting time and increment and retain untimed games. Preserve host ownership, session board, legal move validation and co-op synchronization. Plan: dedicated oblique board camera with projected square hit targets and compact side controls; smaller reachable tabletop; shared host-authored move choreography for hands/pieces (including capture, castling and promotion); dual analog dial clock with exact digital remaining time, host-monotonic countdown, both-player ready confirmation, optional untimed default. Animation time is excluded from thinking time; increment and clock handover occur once per accepted completed move. Clock settings lock during active games. Verify clocks with injected time, two-page transport, real browser projected clicks and visual grasp/tap poses; no claims of all-model quality without evidence.
+
+
+## [Codex | 2026-10-06] Class functionality and choice audit
+User approves auditing all class skills/passives against actual behavior, especially healing/life steal and PvP, simplifying unclear descriptions and correcting clearly inferior choices. Preserve existing choices/save identifiers and prior fixes; verify behavior rather than count source references. Grounded pass: inventory all 17 classes (136 skills, 136 passives); rerun runtime/quantitative baselines; probe confirmed missing weapon life steal in PvP melee, co-op healing before host confirmation, Harvest guest healing and dead/downed healing paths; make targeted fixes with regression evidence. Document limitations and avoid claiming every conditional build combination is proven balanced. Campaign/Briar layout playtests remain pending.
+
+
+## [Codex | 2026-10-06] Design preview button contrast
+User reports unreadable text matching button backgrounds in Dev Design Previews. Prioritize immediately: ordinary link accent styling must exclude button links so primary actions retain dark text and secondary actions retain light text. Verify actual menu states before returning to the class audit.

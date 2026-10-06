@@ -1,3 +1,4 @@
+import {buildBriarBetaArt} from './briar-beta-art.js?v=2115';
 import {buildPrisonArt} from './prison-art3d.js?v=2111';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2074';
@@ -2001,6 +2002,12 @@ export function syncWorld(scene){
   let world = null;
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
+  if(world.briarBeta){
+    const key='briar-beta:'+world.briarBeta.id;
+    if(WORLD3D.built!==key){clearWorld(scene);clearMobs();clearProps();const art=buildBriarBetaArt(world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.built=key;}
+    group?.userData.tick?.(world.p);window.__BRIAR_BETA_ART=true;WORLD3D.ready=true;return true;
+  }
+  window.__BRIAR_BETA_ART=false;
   if(world.devKeep){
     if(WORLD3D.built!=='keep-beta'){clearWorld(scene);clearMobs();clearProps();for(const k of ['__OUTSKIRTS_ACTIVE','__HUB_ART_ACTIVE','__HOLLOW_ART_ACTIVE','__KEEP_ART_ACTIVE','__FROST_ART_ACTIVE','__DEEP_ART_ACTIVE','__PRISON_ART_ACTIVE'])window[k]=false;WORLD3D.counts={};WORLD3D.built='keep-beta';}
     WORLD3D.ready=true;return true;

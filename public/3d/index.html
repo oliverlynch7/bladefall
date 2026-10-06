@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<script src="./keep-beta-isolation.js?v=2113"></script>
+<script src="./keep-beta-isolation.js?v=2115"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>BLADEFALL 3D</title>
 <meta name="theme-color" content="#0b0c10">
@@ -1114,12 +1114,13 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=1990"></script>
 <script src="./skill-identity.js?v=1981s"></script>
-<script src="./party-navigation.js?v=2039"></script>
+<script src="./party-navigation.js?v=2115"></script>
 <script src="./combat-art.js?v=2094"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script src="./guided-tutorial.js?v=2085"></script>
 <script src="./keep-beta.js?v=2113"></script>
+<script src="./briar-beta.js?v=2115"></script>
 <script>
 (function(){
 "use strict";
@@ -1130,7 +1131,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.114.0-campaign-review';
+const VERSION3D='2.115.0-briar-beta';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3895,6 +3896,7 @@ function discoveredOptionalTasks(){
   return optional;
 }
 function openJournal(focusId){
+ if(G?.devBriar){BFBriarBeta.journal();return;}
   if(!G||!['play','pause'].includes(mode))return;
   _journalFrom=mode;mode='journal';showGameUI(false);document.getElementById('toast')?.classList.remove('show');for(const k in input)if(typeof input[k]==='boolean')input[k]=false;
   if(document.pointerLockElement)document.exitPointerLock();
@@ -4191,7 +4193,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {devKeep:!!G?.devKeep,finalStage:G?.kingFinal?(G.kingFinal.void?(['restored','home'].includes(G.boss.akStage)?'restored':'void'):'hall'):null,castleScene:inLongAscent()?'ascent:'+BFLongAscent.visualKey(adventureStoryState()):inCastleGates()?BFCastleGates.visualKey(adventureStoryState()):null,palaceScene:G.marbleArena?'guardian:'+!!G.boss?.dead:inSkyLibrary()?BFSkyLibrary.visualKey(adventureStoryState()):inPalaceCourtyard()?BFPalaceCourtyard.visualKey(adventureStoryState()):null,shipScene:G.hydraArena?'hydra':inThunderCliffs()?'cliffs:'+!!G.thunder?.lift+':'+!!G.thunder?.['cave.open']+':'+!!G.thunder?.['tide.open']+':'+!!G.thunder?.approach:inShipwreck()?(G.voyage?'voyage':'shore:'+!!G.shore?.hatchOpen+':'+!!G.shore?.rudderreturn+':'+!!G.shore?.sailreturn+':'+!!G.shore?.ropereturn):null,ironScene:inGreatFurnace()?'furnace:'+!!G.furnace?.access+':'+!!G.furnace?.cooled+':'+!!G.furnace?.evacuated+':'+!!G.furnace?.pressure:inIronHalls()?String(!!G.iron?.cart)+String(!!G.iron?.return):null,frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies.filter(e=>!e.hydraChain),gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {briarBeta:G?.devBriar||null,devKeep:!!G?.devKeep,finalStage:G?.kingFinal?(G.kingFinal.void?(['restored','home'].includes(G.boss.akStage)?'restored':'void'):'hall'):null,castleScene:inLongAscent()?'ascent:'+BFLongAscent.visualKey(adventureStoryState()):inCastleGates()?BFCastleGates.visualKey(adventureStoryState()):null,palaceScene:G.marbleArena?'guardian:'+!!G.boss?.dead:inSkyLibrary()?BFSkyLibrary.visualKey(adventureStoryState()):inPalaceCourtyard()?BFPalaceCourtyard.visualKey(adventureStoryState()):null,shipScene:G.hydraArena?'hydra':inThunderCliffs()?'cliffs:'+!!G.thunder?.lift+':'+!!G.thunder?.['cave.open']+':'+!!G.thunder?.['tide.open']+':'+!!G.thunder?.approach:inShipwreck()?(G.voyage?'voyage':'shore:'+!!G.shore?.hatchOpen+':'+!!G.shore?.rudderreturn+':'+!!G.shore?.sailreturn+':'+!!G.shore?.ropereturn):null,ironScene:inGreatFurnace()?'furnace:'+!!G.furnace?.access+':'+!!G.furnace?.cooled+':'+!!G.furnace?.evacuated+':'+!!G.furnace?.pressure:inIronHalls()?String(!!G.iron?.cart)+String(!!G.iron?.return):null,frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies.filter(e=>!e.hydraChain),gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -8028,7 +8030,7 @@ function updatePrisonFoe(e,dt,p,eff){
  if(!MP.guest()){
   let target=p.hp>0&&!p.dead&&!p.downed?p:null;
   for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===MP.zone&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
-  if(G.devKeep)target=BFKeepBeta.target(e,target);
+  if(G.devKeep)target=devBeta().target(e,target);
   const busy=G.enemies.filter(o=>o!==e&&!o.dead&&o.prisonRoom===e.prisonRoom&&['wind','strike'].includes(o.pcState)).length;
   C.step(e,dt,target,eff,busy<2&&!!target&&!losBlocked(e.x,e.z,target.x,target.z));
   const room=G.escape?.plan.rooms[e.prisonRoom];if(room){e.x=clamp(e.x,room.x-room.w/2+e.r+14,room.x+room.w/2-e.r-14);e.z=clamp(e.z,room.z-room.d/2+e.r+14,room.z+room.d/2-e.r-14);}
@@ -8041,7 +8043,7 @@ function updatePrisonFoe(e,dt,p,eff){
  // Guest-local damage uses host attack geometry; never punish a missed network warning.
  if(e.pcState==='strike'&&(!MP.guest()||(e._pcWarn===e.pcSerial&&e._pcSeen>=.45))){
   const blocked=q=>losBlocked(e.x,e.z,q.x,q.z)||BFCampaignElites.blocked({ceX:e.x,ceZ:e.z,ceY:e.y},q,G.obstacles);
-  if(G.devKeep)BFKeepBeta.captiveHit(e,blocked);
+  if(G.devKeep)devBeta().captiveHit(e,blocked);
   if(e._pcHit!==e.pcSerial&&C.contains(e,p)&&!blocked(p)){e._pcHit=e.pcSerial;hurtPlayer(e.dmg,e.x,e.z,foeHit(e,e.pcMove));}
   if(G.pet&&!G.pet.dead&&e._pcPetHit!==e.pcSerial&&C.contains(e,G.pet)&&!blocked(G.pet)){e._pcPetHit=e.pcSerial;hurtPet(e.dmg,e.x,e.z);}
  }
@@ -10836,7 +10838,7 @@ function updateGeysers(dt){
     }
   }
 }
-function updateMovers(dt){ if(G?.devKeep){BFKeepBeta.movePlatforms(dt);return;}for(const mv of G.movers){ if(mv.furnaceLift&&G.furnace){BFGreatFurnace.moveLift(G,mv);continue;}if(mv.prisonLift&&G.prison){BFPrison.moveLift(G,mv);continue;} mv.px=mv.x; mv.py=mv.h; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
+function updateMovers(dt){ if(G?.devKeep){devBeta().movePlatforms(dt);return;}for(const mv of G.movers){ if(mv.furnaceLift&&G.furnace){BFGreatFurnace.moveLift(G,mv);continue;}if(mv.prisonLift&&G.prison){BFPrison.moveLift(G,mv);continue;} mv.px=mv.x; mv.py=mv.h; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
   if(mv.vamp){ mv.h=mv.h0+Math.sin(G.time*(mv.vsp||1)+mv.vph)*mv.vamp; } } }
 function updateBonusPhasers(){ for(const ph of (G.bonusPhasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-.25; if(on!==ph.on){ ph.on=on; const ob=ph.ob,i=G.obstacles.indexOf(ob); if(on&&i<0)G.obstacles.push(ob); else if(!on&&i>=0)G.obstacles.splice(i,1); } } }   // Batch 5: vertical bob movers ride the player on y (via floorAt → p.y=floor)
 /* ---- Zone signature hazards (Phase 4): one per zone, applied every frame ---- */
@@ -15417,7 +15419,7 @@ function update(dt){
   if(G.trial) trialTeachTick(dt);                              // tutorial level: just-in-time verb teaching
   if(G.dashTut && !meta.tutOff && !(meta.tut&&meta.tut.dash) && mode==='play' && dXZ(G.p.x,G.p.z,G.dashTut.x,G.dashTut.z)<G.dashTut.r){ openDashTutorial(); }   // mid-air dash lesson at the required chasm
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
-  if(G.devKeep){BFKeepBeta.tick(dt);if(mode!=='play')return;}
+  if(G.devKeep){devBeta().tick(dt);if(mode!=='play')return;}
   if(G.escape)BFPrisonRun.tick(dt);
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(G.bossRush) bossRushTick(dt);                                // The Gauntlet: advance to the next boss on kill; win after the last
@@ -16017,7 +16019,7 @@ const AMBIENT={
 };
 function updateAmbient(dt,s){
   const cfg=AMBIENT[s.theme]; if(!cfg) return;
-  if(meta.particles!==false && G.ambient.length<80 && Math.random()<cfg.n*0.6){
+  if(!G.devBriar && meta.particles!==false && G.ambient.length<80 && Math.random()<cfg.n*0.6){
     G.ambient.push({x:G.p.x+(Math.random()-0.5)*760, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*760,
       vy:cfg.vy*(0.6+Math.random()*0.8), ph:Math.random()*6.28, sw:(cfg.g?7:14)+Math.random()*8, life:6+Math.random()*4,
       c:cfg.c, e:cfg.e?cfg.c:null, sz:1.4+Math.random()*(cfg.e?2.4:1.8), tw:cfg.e?Math.random()*6.28:0});
@@ -16506,7 +16508,7 @@ function regrabCam(){ if(!BFGuidedTutorial.blocksPointerLock && !_edOpen() && me
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; musicForScene(); showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
 function die(){
-  if(G?.devKeep){BFKeepBeta.death();return;}
+  if(G?.devKeep){devBeta().death();return;}
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
   if(G.delve){ delveDie(); return; }                          // The Endless Dungeon: the run ends and the escrow comes back
@@ -17307,6 +17309,8 @@ function titleScreen(){ musicPlay('village_vigil');   // the home theme introduc
 function openDevPreviews(){
  mode='menu';showGameUI(false);
  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Development</p><h2 class="ovh">Design Previews</h2><p class="ovsub">Try isolated beta levels or view their design maps.</p>
+ <a class="bigbtn" style="display:block;text-decoration:none" href="/3d/?devbriar=1">Play Briar Town remake beta</a>
+ <a class="bigbtn ghost" style="display:block;text-decoration:none" href="/design/briar-beta/">Briar remake plan &amp; map</a>
  <a class="bigbtn" style="display:block;text-decoration:none" href="/3d/?devkeep=1">Play Ruined Keep beta</a>
  <a class="bigbtn ghost" style="display:block;text-decoration:none" href="/design/ruined-keep-beta/">Design packet</a><p class="hint">Choose your class, level, rank and gear. Solo test · campaign saves untouched.</p>
  <a class="bigbtn ghost" style="display:block;text-decoration:none" href="/design/ruined-keep-beta/overhead.svg">Overhead map</a>
@@ -18136,7 +18140,7 @@ function openTrainingArena(back){ mode='menu';
 }
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
-  if(G?.devKeep){G.interact=BFKeepBeta.interact();updateInteractPrompt();return;}
+  if(G?.devKeep){G.interact=devBeta().interact();updateInteractPrompt();return;}
   let it=null; const p=G.p;
   if((G.hub||G.arena) && G.hubNpcs){   // interactables (keepers / arena master + door) work in the hub AND the arena room
     // Pick by what you're LOOKING AT, not just what's nearest: a big facing bonus lets the object you face
@@ -19321,7 +19325,7 @@ function openPauseSettingsV2(){
   bindAudioSettings();
 }
 function openPauseV2(){
-  if(G?.devKeep){BFKeepBeta.pause();return;}
+  if(G?.devKeep){devBeta().pause();return;}
   autosaveRun(); pauseGameAudio(true); mode='pause';
   showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <section class="pausegroup pausegameplay"><div class="pausegrouplabel">In-Game</div><div class="navgrid">
@@ -19426,7 +19430,7 @@ function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shado
   bx(0, y+0.06, 0, R*2.2, 0.24, R*2.2, '#000000',null, a*0.16); popM();
   popM(); }
 function drawCourse(s,t){
-  if(G?.devKeep){BFKeepBeta.draw(t);return;}
+  if(G?.devKeep){devBeta().draw(t);return;}
   if(G.bruteArena)s={...s,ground:'#596047'};
   const outskirtsArt=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   const hollowArt=!!window.__HOLLOW_ART_ACTIVE && three3DLive() && !!window.__world3d?.().on;
@@ -21598,11 +21602,11 @@ function render(t){
   const keepArtSky=window.__KEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const frostArtSky=window.__FROST_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const deepArtSky=window.__DEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
-  const sky=deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.49,.62,.70]:[.110,.208,.278]):keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
+  const sky=G?.devBriar?(G.devBriar.part?[.16,.25,.23]:[.38,.53,.62]):deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.49,.62,.70]:[.110,.208,.278]):keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
-  if(G){ const sc=deepArtSky?{z:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:.46,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:.48,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.48,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
+  if(G){ const sc=G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:deepArtSky?{z:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:.46,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:.48,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.48,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // STATIC skybox sun: the sun holds one fixed spot in the sky no matter how the camera turns, so the
     // scene's key light and ambience stay consistent (the world-space light direction uL is already fixed).
@@ -21726,7 +21730,7 @@ function render(t){
   G._occN=0;                 // per-frame count of deco boxes ghosted off the hero's sightline (test hook)
   // Prison architecture has no Three replacement: replay its depth with the actors.
   // Otherwise the Three pass clears wall depth and reveals enemies through solid rooms.
-  if(G.escape)deferOn();
+  if(G.escape||G.devBriar)deferOn();
   drawCourse(s,t);
   /* Everything from here is a live ENTITY, not architecture, so it is recorded and replayed after
      the 3D layer instead of being painted out by it. See the DEFERRED ENTITY PASS note above.
@@ -23043,10 +23047,11 @@ Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delv
 })();
 
 
-BFKeepBeta.install({
+function devBeta(){return G?.devBriar?BFBriarBeta:BFKeepBeta;}
+const betaApi={
  g:()=>G,classes:CLASSES,box:bx,spawn:spawnEnemy,toast,maxHp:()=>effMaxHp(G.p),
- menu:html=>{releaseKeyboard();mode='menu';document.getElementById('keep-beta-hud')?.style.setProperty('display','none');document.getElementById('toast')?.classList.remove('show');showOverlayHTML(html);},
- play:()=>{releaseKeyboard();mode='play';document.getElementById('keep-beta-hud')?.style.setProperty('display','block');showOverlay(false);showGameUI(true);},
+ menu:html=>{releaseKeyboard();mode='menu';document.getElementById('keep-beta-hud')?.style.setProperty('display','none');document.getElementById('briar-beta-hud')?.style.setProperty('display','none');document.getElementById('toast')?.classList.remove('show');showOverlayHTML(html);},
+ play:()=>{releaseKeyboard();mode='play';document.getElementById(G?.devBriar?'briar-beta-hud':'keep-beta-hud')?.style.setProperty('display','block');showOverlay(false);showGameUI(true);},
  refresh:()=>{hudUpdate();skillbarUpdate();},rebuild:()=>{G._obsDirty=true;window.__world3dRebuild?.();},
  person:(n,t,walking)=>{pushM();mv(n.x,n.y,n.z);hubNpcModel({id:'keeper',name:n.name,prop:'keeper'},walking?t:0);popM();},
  snapshot:()=>({p:snapOf(G.p),stash:JSON.parse(JSON.stringify(meta.stash||[])),gold:meta.gold}),
@@ -23065,8 +23070,9 @@ BFKeepBeta.install({
   Object.assign(G,{haz:null,canyonWind:null,thorns:[],vents:[],phasers:[],debris:[],lights:[],npc:null,secret:null,secretTrigger:null,waystone:null,dashSign:null,beam:null,collapse:[],_midSeq:0,portal:null,bonusPortal:null,bonusActive:false,killGoal:9999});
   Object.assign(p,{x:0,y:0,z:240,yaw:Math.PI,vx:0,vy:0,vz:0,onGround:true});G.cam={x:0,y:0,z:240};G.camYaw=Math.PI;G.camPitch=.35;queueLevelUp=0;queueSubclass=false;document.getElementById('stagetag').textContent='RUINED KEEP · DESIGN LAB';document.getElementById('bosshpwrap').classList.remove('on');return G;
  }
-});
-if(window.BF_KEEP_ISOLATED)setTimeout(()=>BFKeepBeta.setup(),150);
+};
+BFKeepBeta.install(betaApi);BFBriarBeta.install(betaApi);
+if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).get('devbriar')==='1'?BFBriarBeta.setup():BFKeepBeta.setup(),150);
 
 })();
 </script>
@@ -23087,7 +23093,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>BFKeepBeta.setup(),150);
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2113"></script>
+<script type="module" src="./hero3d.js?v=2115"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

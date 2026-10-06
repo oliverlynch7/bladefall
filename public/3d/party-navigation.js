@@ -1,6 +1,7 @@
 /* Main-story destinations only: never reveal optional shards or puzzle answers. */
 (function(root){'use strict';
 function target(g){
+ if(g?.devBriar)return window.BFBriarBeta?.navigation()||null;
  if(!g||g.hub||g.trial||g.side||g.voyage)return null;
  const s=g.storyState||{},f=s.flags||{},i=s.items||{},q=s.quests||{};
  const obj=k=>(g.storyObjects||[]).find(o=>o.key===k),npc=k=>(g.storyNpcs||[]).find(o=>o.id===k);

@@ -1,0 +1,10 @@
+async page=>{
+const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>window.requestAnimationFrame=()=>0);
+await page.setViewportSize({width:390,height:844});await page.goto('http://127.0.0.1:4338/design/briar-beta/');if(!await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))throw Error('Plan overflow');await page.screenshot({path:'output/playwright/briar-plan-phone.png'});await page.getByRole('link',{name:'Play the isolated beta',exact:true}).click();await page.waitForFunction(()=>document.getElementById('bstart'),null,{polling:100});if(!await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))throw Error('Setup overflow');await page.screenshot({path:'output/playwright/briar-setup-phone.png'});
+await page.setViewportSize({width:1365,height:768});await page.locator('#bstart').click();const shots=[];
+// Use the actual setup selector for each camera rather than guessing camera internals.
+for(const camera of ['shoulder','far','fps']){
+ await page.evaluate(()=>BFBriarBeta.setup());await page.locator('#bv').selectOption(camera);await page.locator('#bstart').click();await page.evaluate(()=>{for(let i=0;i<10;i++)__BF3.renderFrame();});await page.waitForTimeout(1200);await page.evaluate(()=>{for(let i=0;i<90;i++)__BF3.renderFrame();});await page.screenshot({path:'output/playwright/briar-home-'+camera+'.png'});
+ await page.evaluate(()=>{const b=__BF3,g=b.G;Object.assign(BFBriarBeta.progress,{medicine:true,healing:true,bridge:true,evacuated:true});Object.assign(g.p,{...g.devBriar.exit});b.updateInteract();b.doInteract();Object.assign(b.G.p,{x:70,z:-1220,y:0});b.updateInteract();for(let i=0;i<5;i++)b.renderFrame();});await page.waitForTimeout(1000);await page.evaluate(()=>{for(let i=0;i<90;i++)__BF3.renderFrame();});await page.screenshot({path:'output/playwright/briar-woods-'+camera+'.png'});shots.push(camera);
+}if(errors.length)throw Error(errors.join(';'));return {planMobile:true,setupMobile:true,cameras:shots,errors};
+}

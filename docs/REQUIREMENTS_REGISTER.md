@@ -975,3 +975,7 @@ User correction: differently named/story-framed puzzles still feel identical whe
 
 ## [Codex | 2026-10-05] Evidence standard for experiential design
 User identifies recurring failure: code/story descriptions made Codex treat substantially identical, unfun player interactions as differentiated. Adopt a player-action audit with story nouns removed, explicit similarity classification, normal-camera interaction recordings and human playtest gates. Separate implemented/code-inspected, visually verified and human-playtested; do not claim clarity, variety or fun from code alone. Treat user's observed sameness and weak visual feedback as primary experiential evidence. Prototype one interaction before multiplying it across levels.
+
+
+## [Codex | 2026-10-05] Briar Town / Outskirts complete isolated remake
+User authorizes an in-depth plan then execution of a from-scratch Outskirts/Briar Town beta, generally preserving the core storyline and improving quests, side quests, parkour, layouts, combat, feedback and environmental logic. Cover Homefields and Black Woods. Keep main portal and existing campaign unchanged until user likes beta. Latest approval supersedes waiting for Keep feedback for this isolated prototype only. Use player-action/normal-camera evidence standards; no claims of proven fun from code. Selectable class/level/rank retained; isolated solo test storage, reset/retry/exit. Research successful design principles, document failure modes and validate actual controls/physics.

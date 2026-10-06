@@ -1,0 +1,820 @@
+{
+  "flow": {
+    "jumps": [
+      "roof0",
+      "roof1",
+      "roof2",
+      "roof3",
+      "loft",
+      "ridge0",
+      "ridge1",
+      "ridge2",
+      "mill0",
+      "mill1",
+      "mill2",
+      "mill3",
+      "catch",
+      "bank0",
+      "bank1",
+      "stream0",
+      "stream1",
+      "stream2",
+      "stream3",
+      "tower0",
+      "tower1",
+      "tower2",
+      "tower3",
+      "tower-top",
+      "canopy0",
+      "canopy1",
+      "canopy2",
+      "pen-roof0",
+      "pen-roof1",
+      "pen-roof2",
+      "lookout0",
+      "lookout1",
+      "lookout2"
+    ],
+    "progress": {
+      "medicine": true,
+      "healing": true,
+      "bridge": true,
+      "evacuated": true,
+      "signal": true,
+      "captive": true,
+      "dogs": true,
+      "hunt": false,
+      "huntKills": 0,
+      "huntPaid": false,
+      "boss": false,
+      "shards": [
+        "home-roof",
+        "home-bank",
+        "woods-canopy",
+        "woods-pen",
+        "woods-lookout"
+      ],
+      "dead": [
+        "evac0:0",
+        "evac0:1",
+        "evac1:0",
+        "evac1:1"
+      ],
+      "deaths": 0,
+      "falls": 0,
+      "part": 1,
+      "smallHeals": 3,
+      "started": 1791250980503
+    },
+    "description": "Physics/state checks; per-jump starts positioned directly. Not an unassisted playthrough."
+  },
+  "recovery": {
+    "wrongSolution": true,
+    "crateReset": true,
+    "realVillagerHit": true,
+    "oneHitPerAttack": true,
+    "blockedHit": true,
+    "defenseRetry": true,
+    "fallRecovery": true,
+    "huntCap": 6,
+    "rewardOnce": true
+  },
+  "isolation": {
+    "allKeysUnchanged": true,
+    "retryRetainsProgress": true,
+    "resetClearsProgress": true
+  },
+  "prior-save": {
+    "previousVersionSavePreserved": true,
+    "classes": 17
+  },
+  "keep-regression": {
+    "errors": [],
+    "result": {
+      "jumps": 6,
+      "complete": true,
+      "prisoners": 3,
+      "playerY": 420
+    }
+  },
+  "presentation": {
+    "planMobile": true,
+    "setupMobile": true,
+    "cameras": [
+      "shoulder",
+      "far",
+      "fps"
+    ],
+    "errors": []
+  },
+  "walk": {
+    "completed": true,
+    "frames": 5884,
+    "simulationSeconds": 98,
+    "falls": 0,
+    "log": [
+      {
+        "t": 1,
+        "x": 0,
+        "y": 0,
+        "z": 311,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 2,
+        "x": 32,
+        "y": 0,
+        "z": 151,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 3,
+        "x": 220,
+        "y": 0,
+        "z": 143,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 4,
+        "x": 343,
+        "y": 0,
+        "z": 71,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 5,
+        "x": 286,
+        "y": 42,
+        "z": -107,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 6,
+        "x": 245,
+        "y": 0,
+        "z": -213,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 7,
+        "x": 270,
+        "y": 38,
+        "z": -91,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 8,
+        "x": 341,
+        "y": 0,
+        "z": 46,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 9,
+        "x": 356,
+        "y": 75,
+        "z": -104,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 10,
+        "x": 459,
+        "y": 172,
+        "z": -226,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 11,
+        "x": 486,
+        "y": 242,
+        "z": -379,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 12,
+        "x": 649,
+        "y": 295,
+        "z": -469,
+        "objective": "Reach the granary loft · Recover Mara’s supplies"
+      },
+      {
+        "t": 13,
+        "x": 627,
+        "y": 235,
+        "z": -521,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 14,
+        "x": 454,
+        "y": 0,
+        "z": -492,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 15,
+        "x": 294,
+        "y": 0,
+        "z": -392,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 16,
+        "x": 195,
+        "y": 0,
+        "z": -231,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 17,
+        "x": 99,
+        "y": 0,
+        "z": -68,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 18,
+        "x": 2,
+        "y": 0,
+        "z": 95,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 19,
+        "x": -168,
+        "y": 0,
+        "z": 170,
+        "objective": "Bring the supplies to Mara"
+      },
+      {
+        "t": 20,
+        "x": -293,
+        "y": 0,
+        "z": 184,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 21,
+        "x": -231,
+        "y": 0,
+        "z": 7,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 22,
+        "x": -167,
+        "y": 0,
+        "z": -171,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 23,
+        "x": -104,
+        "y": 0,
+        "z": -350,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 24,
+        "x": -239,
+        "y": 0,
+        "z": -456,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 25,
+        "x": -411,
+        "y": 0,
+        "z": -492,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 26,
+        "x": -342,
+        "y": 0,
+        "z": -506,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 27,
+        "x": -362,
+        "y": 50,
+        "z": -639,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 28,
+        "x": -517,
+        "y": 175,
+        "z": -731,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 29,
+        "x": -589,
+        "y": 210,
+        "z": -843,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 30,
+        "x": -438,
+        "y": 277,
+        "z": -942,
+        "objective": "Restore the mill crossing · Divert water, then free the timber"
+      },
+      {
+        "t": 31,
+        "x": -312,
+        "y": 205,
+        "z": -950,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 32,
+        "x": -312,
+        "y": 205,
+        "z": -950,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 33,
+        "x": -312,
+        "y": 205,
+        "z": -950,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 34,
+        "x": -200,
+        "y": 126,
+        "z": -1060,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 35,
+        "x": -40,
+        "y": 0,
+        "z": -1154,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 36,
+        "x": -107,
+        "y": 0,
+        "z": -1246,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 37,
+        "x": -130,
+        "y": 0,
+        "z": -1260,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 38,
+        "x": -57,
+        "y": 0,
+        "z": -1240,
+        "objective": "Clear the far bank so the village can escape"
+      },
+      {
+        "t": 39,
+        "x": -8,
+        "y": 0,
+        "z": -1393,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 40,
+        "x": 1,
+        "y": 0,
+        "z": -1460,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 41,
+        "x": 30,
+        "y": 0,
+        "z": -1455,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 42,
+        "x": 214,
+        "y": 0,
+        "z": -1422,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 43,
+        "x": 300,
+        "y": 0,
+        "z": -1379,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 44,
+        "x": 302,
+        "y": 0,
+        "z": -1398,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 45,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 46,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 47,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 48,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 49,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 50,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 51,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 52,
+        "x": 292,
+        "y": 0,
+        "z": -1458,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 53,
+        "x": 266,
+        "y": 0,
+        "z": -1445,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 54,
+        "x": 100,
+        "y": 0,
+        "z": -1359,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 55,
+        "x": -62,
+        "y": 0,
+        "z": -1275,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 56,
+        "x": -82,
+        "y": 0,
+        "z": -1187,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 57,
+        "x": -77,
+        "y": 0,
+        "z": -1158,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 58,
+        "x": -77,
+        "y": 0,
+        "z": -1155,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 59,
+        "x": -77,
+        "y": 0,
+        "z": -1155,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 60,
+        "x": -77,
+        "y": 0,
+        "z": -1155,
+        "objective": "Protect the villagers as they cross · Stop the incoming patrols"
+      },
+      {
+        "t": 61,
+        "x": -77,
+        "y": 0,
+        "z": -1248,
+        "objective": "Follow the escape lane into the Black Woods"
+      },
+      {
+        "t": 62,
+        "x": -49,
+        "y": 0,
+        "z": -1435,
+        "objective": "Follow the escape lane into the Black Woods"
+      },
+      {
+        "t": 63,
+        "x": -18,
+        "y": 0,
+        "z": -1622,
+        "objective": "Follow the escape lane into the Black Woods"
+      },
+      {
+        "t": 64,
+        "x": 0,
+        "y": 0,
+        "z": 351,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 65,
+        "x": 0,
+        "y": 0,
+        "z": 162,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 66,
+        "x": 0,
+        "y": 0,
+        "z": -27,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 67,
+        "x": 0,
+        "y": 0,
+        "z": -217,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 68,
+        "x": 0,
+        "y": 86,
+        "z": -406,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 69,
+        "x": 106,
+        "y": 80,
+        "z": -545,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 70,
+        "x": 42,
+        "y": 105,
+        "z": -678,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 71,
+        "x": -62,
+        "y": 94,
+        "z": -836,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 72,
+        "x": 7,
+        "y": 0,
+        "z": -982,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 73,
+        "x": 76,
+        "y": 0,
+        "z": -993,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 74,
+        "x": -26,
+        "y": 0,
+        "z": -959,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 75,
+        "x": -49,
+        "y": 0,
+        "z": -1067,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 76,
+        "x": -20,
+        "y": 0,
+        "z": -1254,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 77,
+        "x": -51,
+        "y": 0,
+        "z": -1412,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 78,
+        "x": -166,
+        "y": 0,
+        "z": -1479,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 79,
+        "x": -159,
+        "y": 0,
+        "z": -1554,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 80,
+        "x": -124,
+        "y": 0,
+        "z": -1543,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 81,
+        "x": -32,
+        "y": 0,
+        "z": -1397,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 82,
+        "x": -2,
+        "y": 59,
+        "z": -1498,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 83,
+        "x": 147,
+        "y": 100,
+        "z": -1580,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 84,
+        "x": 246,
+        "y": 150,
+        "z": -1734,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 85,
+        "x": 118,
+        "y": 205,
+        "z": -1856,
+        "objective": "Reach the signal tower · Cut the cable"
+      },
+      {
+        "t": 86,
+        "x": -42,
+        "y": 255,
+        "z": -1919,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 87,
+        "x": -2,
+        "y": 0,
+        "z": -2101,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 88,
+        "x": 2,
+        "y": 0,
+        "z": -2289,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 89,
+        "x": 2,
+        "y": 0,
+        "z": -2267,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 90,
+        "x": 2,
+        "y": 0,
+        "z": -2212,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 91,
+        "x": 2,
+        "y": 0,
+        "z": -2212,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 92,
+        "x": 2,
+        "y": 0,
+        "z": -2212,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 93,
+        "x": 2,
+        "y": 0,
+        "z": -2205,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 94,
+        "x": 2,
+        "y": 0,
+        "z": -2203,
+        "objective": "Defeat the Legion warbeast blocking the refuge route"
+      },
+      {
+        "t": 95,
+        "x": 2,
+        "y": 0,
+        "z": -2210,
+        "objective": "Read the transport order at the north gate"
+      },
+      {
+        "t": 96,
+        "x": 2,
+        "y": 0,
+        "z": -2377,
+        "objective": "Read the transport order at the north gate"
+      },
+      {
+        "t": 97,
+        "x": 2,
+        "y": 0,
+        "z": -2567,
+        "objective": "Read the transport order at the north gate"
+      },
+      {
+        "t": 98,
+        "x": 2,
+        "y": 0,
+        "z": -2756,
+        "objective": "Read the transport order at the north gate"
+      }
+    ],
+    "method": "Continuous movement/attack inputs from spawn; exploration invulnerability enabled; no position or quest flag assignment."
+  },
+  "mechanism": {
+    "crate": {
+      "x": -440.4895159263919,
+      "z": -471.63076877670113,
+      "y": 0,
+      "w": 64,
+      "d": 64
+    },
+    "plate": 0.9999980537006528,
+    "drag": false,
+    "p": [
+      -301.22097088523464,
+      -491.88667666930655
+    ]
+  }
+}

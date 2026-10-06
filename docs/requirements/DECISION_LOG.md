@@ -763,3 +763,7 @@ User approves the five-step map/terrain/activity/verification/art sequence now, 
 
 ## [Codex | 2026-10-06] Keep earned campaign progression on early exit or death
 Latest user decision: preserve earned character XP/levels, class XP/ranks/selected skills, gold, and completed hub-NPC quest work when leaving a campaign level early or dying. No quit confirmation or gold penalty. A hub request completed in either half may be turned in immediately without defeating the boss. Supersedes prior unfinished-half XP/gold rollback. Do not change separate Prison Break run progression, temporary class-trial escrow, arena state or explicit permadeath contracts. Gear and rift-shard rollback were not explicitly changed in this request.
+
+
+## [Codex | 2026-10-06] Waystation purchased upgrade presentation
+User requests remaking purchasable Waystation upgrades (braziers, banners and all others) for the current hub: each must be a clear cosmetic improvement, visually obvious after purchase, attractive and non-obstructive. Move the lamppost intersecting a chess chair. Grounded finding: braziers currently spawn lamp models at x=270,z=395, almost inside west chess seat x=279,z=390. Plan: shared fixture coordinates; replace lamps with detailed fire bowls at safe courtyard positions, larger heraldic wall banners, full northern parapet/caps, richer golden Waystone fittings. Keep prices/ownership IDs/save behavior and chess rules. Verify before/after in real browser, purchasing/reload, route clearance and chess seating.

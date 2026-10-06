@@ -1,0 +1,5 @@
+## [Codex | 2026-10-06] 2.121.0-hub-upgrades
+
+Rebuilt the four purchased Waystation decorations for Lantern Court: crowned fire bowls replace the old lamp props; tall cloth heraldic banners line the edges; restored north battlements rise above the existing wall; gilding changes the crystal and adds a luminous crown and fittings. Shared placement data supplies purchase-time and reload collision fixtures. The old brazier lamp at (270,395), which intersected the west chess chair, is removed. Prices and ownership IDs are unchanged.
+
+Validation: real browser purchased all five shop upgrades (including existing chess), deducted 26,500 gold correctly, retained ownership/gold/eight decoration colliders after reload, and reported no page exceptions. All existing shop/portal approach points remained clear of the new fixtures; west chess seating is clear. Reviewed before/after and chess-area screenshots. Previous-version save preserved name, gold, choices and all 17 classes. Syntax gate passes; 69 pre-existing duplicate names remain. Main campaign and beta terrain are unchanged by this release. Wider beta district rebuild remains pending.

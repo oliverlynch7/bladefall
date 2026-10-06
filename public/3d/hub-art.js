@@ -1,7 +1,8 @@
+import {buildHubUpgrades} from './hub-upgrades.js?v=2121';
 /* The Waystation: original, instanced Blender scenery. The layout is owned by
    rebuildWaystationSanctum; service callbacks and portal unlocks stay in the game. */
 import * as THREE from './three.module.js';
-import {buildWaystone,animateWaystone} from './hub-waystone.js?v=2072';
+import {buildWaystone,animateWaystone} from './hub-waystone.js?v=2121';
 import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2076';
 import {companionPortrait} from './companion3d.js?v=2073';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
@@ -97,7 +98,7 @@ export function buildHubArt(scene,w){
   }
   // Small matching buttresses create a rhythm; there is no imported gatehouse mass.
   for(const x of [-900,-800,-600,-400,-200,0,200,400,600,800,900]){
-    add('pillar',x,0,-622,22);if(HU.ramparts)block(x,136,-622,37,20,38,'#9b9477');
+    add('pillar',x,0,-622,22);
   }
 
   const stationArt={quartermaster:['Quartermaster','action_buy.png'],chest:['Your Bag','action_bag_stash.png'],anvil:['The Smith','action_forge_fuse.png'],keeper:['The Stylist','action_wardrobe_stylist.png'],drillmaster:['Drillmaster','class-core.png'],beastkeeper:['Beastkeeper','beastkeeper.png'],board:['Postings',null],mirror:['The Mirror',null],sparring:['Sparring Room',null]};
@@ -178,11 +179,9 @@ export function buildHubArt(scene,w){
     block(x,h+4,z,126,12,126,'#8b8a70');add('canopy',x,h+12,z,37,70,37);
   }
   // Owned upgrades and victories remain visible and rebuild only when those values change.
-  if(HU.banners)for(const side of [-1,1])for(const z of [-245,510])at(side*870,z,-side*Math.PI/2,()=>{
-    beam(0,146,0,74,6,7);block(0,108,0,62,73,2,'#78483f');block(0,113,2,4,47,1,'#bfa773');
-  });
+  const upgrades=buildHubUpgrades(root,owned,HU,lamps);
   for(const [i,id] of icons.entries())if(w.hubArt.zoneDone[id]){block(-847,64,-150+i*65,19,40,23,palette[i]);block(-847,39,-150+i*65,25,8,27,'#9b8966');}
-  if(HU.braziers)for(const x of [-270,270])for(const z of [-245,395]){add('lamp',x,0,z,27);lamps.push(new THREE.Vector3(x,105,z));}
+
 
   if(w.hubArt.riftDoor){const {x,z}=w.hubArt.riftDoor;at(x,z,Math.PI,()=>{
     block(0,3,0,164,6,76,'#8d8ca9');for(const side of [-1,1]){block(side*65,65,0,22,130,24,'#6c688c');block(side*65,132,0,29,8,31,'#d9bd86');block(side*65,70,14,4,100,3,'#c4a0ff');add('pillar',side*65,136,0,8,8,8,'#bca1f2');}
@@ -204,8 +203,9 @@ export function buildHubArt(scene,w){
   key.shadow.camera.updateProjectionMatrix();
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffc478',700,190,1.6);root.add(l);return l});
   let waystoneTriangles=0;waystone.traverse(o=>{if(o.isMesh)waystoneTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3});triangles+=waystoneTriangles;
-  const counts={waystoneTriangles,hub:true,hubArt:true,floorTiles:1833,gatehouse:8,hubAnvil:1,drawCalls:batches.size+owned.filter(o=>o.isMaterial).length+1,triangles,instances};
-  active={root,lamps,lights,animated,waystone,counts,quality:null};window.__HUB_ART_ACTIVE=true;window.__HUB_SHADOW_DIRTY=true;
+  let upgradeTriangles=0;upgrades.traverse(o=>{if(o.isMesh)upgradeTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3});triangles+=upgradeTriangles;
+  const counts={upgrades:upgrades.userData.counts,upgradeTriangles,waystoneTriangles,hub:true,hubArt:true,floorTiles:1833,gatehouse:8,hubAnvil:1,drawCalls:batches.size+owned.filter(o=>o.isMaterial).length+1,triangles,instances};
+  active={root,lamps,lights,animated,waystone,upgrades,counts,quality:null};window.__HUB_ART_ACTIVE=true;window.__HUB_SHADOW_DIRTY=true;
   root.userData.dispose=()=>{disposed=true;pets.forEach(p=>p.userData.portraitDispose?.());scene.fog=oldFog;key.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HUB_ART_ACTIVE=false;};
   return {group:root,counts};
 }
@@ -215,6 +215,7 @@ export function updateHubArt(w,t){
   const low=window.__BF_META?.().quality==='low';if(active.quality!==low){active.quality=low;window.__HUB_SHADOW_DIRTY=true;}
   const nearest=active.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);
   active.lights.forEach((l,i)=>{l.visible=!low&&!!nearest[i]&&nearest[i].d<360**2;if(l.visible)l.position.copy(nearest[i].v)});
+  active.upgrades.userData.tick(t,window.__BF_META?.()||{});
   animateWaystone(active.waystone,t,window.__BF_META?.()||{});
   for(const m of active.animated){if(m.userData.portal)m.material.uniforms.time.value=t*.6;else{m.rotation.y=t*.25;m.position.y=66+Math.sin(t*1.1)*2;}}
 }

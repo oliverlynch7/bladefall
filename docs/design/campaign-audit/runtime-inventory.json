@@ -1,0 +1,5618 @@
+{
+  "captured": "2026-10-05",
+  "sourceCommit": "1f46dd0",
+  "method": "Initial runtime state only; no reachability or gameplay simulation",
+  "areas": [
+    {
+      "zone": 0,
+      "area": 0,
+      "name": "Briar Town \u00b7 Homefields",
+      "zoneName": "Briar Town",
+      "side": {
+        "id": "thornwood",
+        "name": "The Thornwood",
+        "icon": "\ud83c\udf32",
+        "stage": 1,
+        "seed": 311,
+        "trial": "berserker",
+        "blurb": "Something older than the road grows in here."
+      },
+      "counts": {
+        "segments": 321,
+        "obstacles": 278,
+        "walls": 3,
+        "deco": 919,
+        "enemies": 26,
+        "storyNpcs": 3,
+        "storyObjects": 24,
+        "chests": 5,
+        "healpads": 4
+      },
+      "bounds": {
+        "minX": -3030,
+        "maxX": 2850,
+        "minZ": -4820,
+        "maxZ": 1100
+      },
+      "rooms": [
+        {
+          "name": "Briar Homes",
+          "x": 0,
+          "z": 400,
+          "y": 0,
+          "w": 520,
+          "d": 500
+        },
+        {
+          "name": "Overrun Fields",
+          "x": 140,
+          "z": -220,
+          "y": 0,
+          "w": 600,
+          "d": 560
+        },
+        {
+          "name": "Watchpost Approach",
+          "x": -180,
+          "z": -860,
+          "y": 0,
+          "w": 640,
+          "d": 620
+        },
+        {
+          "name": "Watchpost",
+          "x": -700,
+          "z": -1060,
+          "y": 140,
+          "w": 480,
+          "d": 460
+        },
+        {
+          "name": "Mill Commons",
+          "x": 120,
+          "z": -1660,
+          "y": 0,
+          "w": 820,
+          "d": 760
+        },
+        {
+          "name": "West Cornlands",
+          "x": -900,
+          "z": -1710,
+          "y": 0,
+          "w": 780,
+          "d": 780
+        },
+        {
+          "name": "Eastwood Orchard",
+          "x": 1110,
+          "z": -1840,
+          "y": 40,
+          "w": 740,
+          "d": 760
+        },
+        {
+          "name": "Flooded Hamlet",
+          "x": -1030,
+          "z": -2710,
+          "y": 0,
+          "w": 720,
+          "d": 660
+        },
+        {
+          "name": "Millrace Ford",
+          "x": 50,
+          "z": -2620,
+          "y": 0,
+          "w": 780,
+          "d": 640
+        },
+        {
+          "name": "Windmill Rise",
+          "x": 1080,
+          "z": -2800,
+          "y": 80,
+          "w": 620,
+          "d": 580
+        },
+        {
+          "name": "Old Stone Bridge",
+          "x": 230,
+          "z": -3490,
+          "y": 80,
+          "w": 720,
+          "d": 600
+        },
+        {
+          "name": "Secluded Grove",
+          "x": -1700,
+          "z": -2400,
+          "y": 0,
+          "w": 440,
+          "d": 440
+        },
+        {
+          "name": "Wagon Gate",
+          "x": -210,
+          "z": -4350,
+          "y": 160,
+          "w": 760,
+          "d": 620
+        },
+        {
+          "name": "West Farm Valley",
+          "x": -2300,
+          "z": -850,
+          "y": 0,
+          "w": 1200,
+          "d": 1100
+        },
+        {
+          "name": "Orchard Lookout",
+          "x": -2380,
+          "z": -1760,
+          "y": 0,
+          "w": 900,
+          "d": 700
+        },
+        {
+          "name": "East Pastures",
+          "x": 2030,
+          "z": -760,
+          "y": 0,
+          "w": 1050,
+          "d": 1050
+        },
+        {
+          "name": "Bell Tower Ridge",
+          "x": 2220,
+          "z": -1740,
+          "y": 0,
+          "w": 900,
+          "d": 800
+        }
+      ],
+      "npcs": [
+        {
+          "id": "thomas",
+          "name": "Thomas",
+          "x": 0,
+          "z": 350,
+          "y": 0
+        },
+        {
+          "id": "mara",
+          "name": "Mara",
+          "x": -190,
+          "z": 160,
+          "y": 0
+        },
+        {
+          "id": "gus",
+          "name": "Gus",
+          "x": -1460,
+          "z": -790,
+          "y": 0
+        }
+      ],
+      "objects": [
+        {
+          "key": "briar.root.1",
+          "label": "Gather tangle root",
+          "x": -410,
+          "z": -130,
+          "y": 0,
+          "kind": "root"
+        },
+        {
+          "key": "briar.root.2",
+          "label": "Gather tangle root",
+          "x": -505,
+          "z": -245,
+          "y": 0,
+          "kind": "root"
+        },
+        {
+          "key": "briar.root.3",
+          "label": "Gather tangle root",
+          "x": -370,
+          "z": -335,
+          "y": 0,
+          "kind": "root"
+        },
+        {
+          "key": "briar.dressings",
+          "label": "Take the clean dressings",
+          "x": 440,
+          "z": -255,
+          "y": 22,
+          "kind": "dressings",
+          "range": 70,
+          "bounds": {
+            "minX": 370,
+            "maxX": 510,
+            "minZ": -294,
+            "maxZ": -145
+          }
+        },
+        {
+          "key": "briar.water",
+          "label": "Close the water feed",
+          "x": 475,
+          "z": -1635,
+          "y": 0,
+          "kind": "water"
+        },
+        {
+          "key": "briar.jam",
+          "label": "Pull the timber from the wheel",
+          "x": 300,
+          "z": -1700,
+          "y": 0,
+          "kind": "jam"
+        },
+        {
+          "key": "briar.bridge",
+          "label": "Lower the mill crossing",
+          "x": 310,
+          "z": -2030,
+          "y": 0,
+          "kind": "handle"
+        },
+        {
+          "key": "briar.depart",
+          "label": "Open the wagon gate",
+          "x": -210,
+          "z": -4240,
+          "y": 160,
+          "kind": "gate"
+        },
+        {
+          "key": "home.bell.clue",
+          "label": "Read the worn tower stone",
+          "x": 2350,
+          "z": -1680,
+          "y": 168,
+          "kind": "bellstone"
+        },
+        {
+          "key": "home.bell.sun",
+          "label": "Ring the sun bell",
+          "x": 2200,
+          "z": -1830,
+          "y": 168,
+          "kind": "bell"
+        },
+        {
+          "key": "home.bell.water",
+          "label": "Ring the water bell",
+          "x": 2500,
+          "z": -1830,
+          "y": 168,
+          "kind": "bell"
+        },
+        {
+          "key": "home.bell.wheat",
+          "label": "Ring the wheat bell",
+          "x": 2350,
+          "z": -1940,
+          "y": 168,
+          "kind": "bell"
+        },
+        {
+          "key": "home.bell.cache",
+          "label": "Open the tower chest",
+          "x": 2350,
+          "z": -1810,
+          "y": 168,
+          "kind": "bellcache"
+        },
+        {
+          "key": "briar.gus.tools",
+          "label": "Take Gus\u2019s tool roll",
+          "x": -1460,
+          "z": -1270,
+          "y": 104,
+          "kind": "tools",
+          "range": 65,
+          "bounds": {
+            "minX": -1580,
+            "maxX": -1340,
+            "minZ": -1330,
+            "maxZ": -1190
+          }
+        },
+        {
+          "key": "briar.gus.sign",
+          "label": "Repair the village sign",
+          "x": -1170,
+          "z": -750,
+          "y": 0,
+          "kind": "villagesign"
+        },
+        {
+          "key": "home.farm.supplies",
+          "label": "Recover the wagon supplies",
+          "x": -2510,
+          "z": -630,
+          "y": 0,
+          "kind": "farmcart",
+          "range": 100
+        },
+        {
+          "key": "home.orchard.clue",
+          "label": "Read the fruit pickers\u2019 note",
+          "x": -2580,
+          "z": -1400,
+          "y": 0,
+          "kind": "orchardnote"
+        },
+        {
+          "key": "home.orchard.wheel",
+          "label": "Lower the orchard walkway",
+          "x": -2490,
+          "z": -1840,
+          "y": 136,
+          "kind": "orchardwheel",
+          "range": 70,
+          "bounds": {
+            "minX": -2570,
+            "maxX": -2410,
+            "minZ": -1910,
+            "maxZ": -1770
+          }
+        },
+        {
+          "key": "home.orchard.cache",
+          "label": "Open the lookout chest",
+          "x": -2490,
+          "z": -2370,
+          "y": 136,
+          "kind": "orchardcache",
+          "range": 65,
+          "bounds": {
+            "minX": -2615,
+            "maxX": -2365,
+            "minZ": -2465,
+            "maxZ": -2280
+          }
+        },
+        {
+          "key": "home.grain.clue",
+          "label": "Read the grain keeper\u2019s note",
+          "x": 1260,
+          "z": 255,
+          "y": 0,
+          "kind": "grainnote"
+        },
+        {
+          "key": "home.grain.weight.0",
+          "label": "Move the one-sack weight",
+          "x": 1050,
+          "z": 125,
+          "y": 0,
+          "kind": "grainweight",
+          "weight": 1,
+          "index": 0
+        },
+        {
+          "key": "home.grain.weight.1",
+          "label": "Move the two-sack weight",
+          "x": 1160,
+          "z": 30,
+          "y": 0,
+          "kind": "grainweight",
+          "weight": 2,
+          "index": 1
+        },
+        {
+          "key": "home.grain.weight.2",
+          "label": "Move the four-sack weight",
+          "x": 1300,
+          "z": 125,
+          "y": 0,
+          "kind": "grainweight",
+          "weight": 4,
+          "index": 2
+        },
+        {
+          "key": "home.grain.cache",
+          "label": "Open the grain keeper\u2019s chest",
+          "x": 1150,
+          "z": -260,
+          "y": 0,
+          "kind": "graincache",
+          "bounds": {
+            "minX": 1040,
+            "maxX": 1260,
+            "minZ": -335,
+            "maxZ": -150
+          }
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": 270,
+          "z": -220,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": 10,
+          "z": -220,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": -770,
+          "z": -1710,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": -965,
+          "z": -1614.7372055837118,
+          "y": 0
+        },
+        {
+          "type": "sporeback",
+          "x": -965,
+          "z": -1805.2627944162882,
+          "y": 0
+        },
+        {
+          "type": "sporeback",
+          "x": 1240,
+          "z": -1840,
+          "y": 40
+        },
+        {
+          "type": "thornboar",
+          "x": 1045,
+          "z": -1744.7372055837118,
+          "y": 40
+        },
+        {
+          "type": "flyer",
+          "x": 1045,
+          "z": -1935.2627944162882,
+          "y": 40
+        },
+        {
+          "type": "grunt",
+          "x": -900,
+          "z": -2710,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": -1095,
+          "z": -2614.737205583712,
+          "y": 0
+        },
+        {
+          "type": "sporeback",
+          "x": -1095,
+          "z": -2805.262794416288,
+          "y": 0
+        },
+        {
+          "type": "sporeback",
+          "x": 1210,
+          "z": -2800,
+          "y": 80
+        },
+        {
+          "type": "flyer",
+          "x": 950,
+          "z": -2800,
+          "y": 80
+        },
+        {
+          "type": "grunt",
+          "x": 360,
+          "z": -3490,
+          "y": 80
+        },
+        {
+          "type": "grunt",
+          "x": 165.00000000000003,
+          "z": -3394.737205583712,
+          "y": 80
+        },
+        {
+          "type": "grunt",
+          "x": 164.99999999999994,
+          "z": -3585.262794416288,
+          "y": 80
+        },
+        {
+          "type": "thornboar",
+          "x": -1570,
+          "z": -2400,
+          "y": 0
+        },
+        {
+          "type": "sporeback",
+          "x": -1830,
+          "z": -2400,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -2430,
+          "z": -800,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": -2190,
+          "z": -930,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -2040,
+          "z": -700,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -2380,
+          "z": -1060,
+          "y": 22
+        },
+        {
+          "type": "grunt",
+          "x": 2130,
+          "z": -860,
+          "y": 0
+        },
+        {
+          "type": "flyer",
+          "x": 2060,
+          "z": -550,
+          "y": 59.49504042179443
+        },
+        {
+          "type": "thornboar",
+          "x": -2480,
+          "z": -2130,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": -2200,
+          "z": -2300,
+          "y": 0
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 0,
+      "area": 1,
+      "name": "Briar Town \u00b7 Black Woods",
+      "zoneName": "Briar Town",
+      "side": {
+        "id": "thornwood",
+        "name": "The Thornwood",
+        "icon": "\ud83c\udf32",
+        "stage": 1,
+        "seed": 311,
+        "trial": "berserker",
+        "blurb": "Something older than the road grows in here."
+      },
+      "counts": {
+        "segments": 147,
+        "obstacles": 151,
+        "walls": 0,
+        "deco": 139,
+        "enemies": 12,
+        "storyNpcs": 3,
+        "storyObjects": 8,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2600,
+        "maxX": 3150,
+        "minZ": -4900,
+        "maxZ": 650
+      },
+      "rooms": [
+        {
+          "name": "Forest Arrival",
+          "x": 0,
+          "z": 200,
+          "y": 0,
+          "w": 750,
+          "d": 650
+        },
+        {
+          "name": "Split Roots",
+          "x": 0,
+          "z": -650,
+          "y": 0,
+          "w": 950,
+          "d": 750
+        },
+        {
+          "name": "Occupied Camp",
+          "x": -650,
+          "z": -1850,
+          "y": 0,
+          "w": 1100,
+          "d": 1000
+        },
+        {
+          "name": "Hunting Platforms",
+          "x": 850,
+          "z": -1650,
+          "y": 0,
+          "w": 1100,
+          "d": 1200
+        },
+        {
+          "name": "Track Grove",
+          "x": -1850,
+          "z": -2320,
+          "y": 0,
+          "w": 1000,
+          "d": 1000
+        },
+        {
+          "name": "Signal Clearing",
+          "x": 0,
+          "z": -3100,
+          "y": 0,
+          "w": 1250,
+          "d": 950
+        },
+        {
+          "name": "North Shelter",
+          "x": 0,
+          "z": -4400,
+          "y": 0,
+          "w": 1000,
+          "d": 900
+        }
+      ],
+      "npcs": [
+        {
+          "id": "lewis",
+          "name": "Lewis",
+          "x": -100,
+          "z": 180,
+          "y": 0
+        },
+        {
+          "id": "beth",
+          "name": "Beth",
+          "x": 1320,
+          "z": -940,
+          "y": 0
+        },
+        {
+          "id": "bethBrother",
+          "name": "Beth\u2019s brother",
+          "x": 2630,
+          "z": -1880,
+          "y": 0
+        }
+      ],
+      "objects": [
+        {
+          "key": "woods.signal.crank",
+          "label": "Stop the signal crank",
+          "x": 80,
+          "z": -3060,
+          "y": 0,
+          "kind": "signalcrank"
+        },
+        {
+          "key": "woods.signal.cable",
+          "label": "Cut the horn cable",
+          "x": 0,
+          "z": -3070,
+          "y": 220,
+          "kind": "signalcable"
+        },
+        {
+          "key": "woods.tracks.clue",
+          "label": "Read the old grove stone",
+          "x": -1770,
+          "z": -2050,
+          "y": 0,
+          "kind": "trackclue"
+        },
+        {
+          "key": "woods.tracks.bird",
+          "label": "Press the bird stone",
+          "x": -1800,
+          "z": -2480,
+          "y": 0,
+          "kind": "trackstone",
+          "animal": "bird"
+        },
+        {
+          "key": "woods.tracks.deer",
+          "label": "Press the deer stone",
+          "x": -1690,
+          "z": -2480,
+          "y": 0,
+          "kind": "trackstone",
+          "animal": "deer"
+        },
+        {
+          "key": "woods.tracks.wolf",
+          "label": "Press the wolf stone",
+          "x": -1580,
+          "z": -2480,
+          "y": 0,
+          "kind": "trackstone",
+          "animal": "wolf"
+        },
+        {
+          "key": "woods.rescue.tracks",
+          "label": "Inspect the crooked boot prints",
+          "kind": "bootprints",
+          "x": 1440,
+          "z": -1030,
+          "y": 0
+        },
+        {
+          "key": "woods.rescue.release",
+          "label": "Pull the rescue rope",
+          "kind": "rescuerope",
+          "x": 2480,
+          "z": -1790,
+          "y": 0,
+          "blockedLabel": "Drive off the beasts first",
+          "blockedText": "The beasts are too close to the rope lift. Drive them off first."
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -570,
+          "z": -1360,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -820,
+          "z": -1800,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": -400,
+          "z": -1870,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -650,
+          "z": -2220,
+          "y": 0
+        },
+        {
+          "type": "flyer",
+          "x": 1040,
+          "z": -2120,
+          "y": 42.131075887184686
+        },
+        {
+          "type": "thornboar",
+          "x": -1600,
+          "z": -2180,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": -1920,
+          "z": -2770,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -200,
+          "z": -2890,
+          "y": 220
+        },
+        {
+          "type": "caster",
+          "x": 240,
+          "z": -3100,
+          "y": 220
+        },
+        {
+          "type": "grunt",
+          "x": -170,
+          "z": -3600,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": 2370,
+          "z": -1550,
+          "y": 0
+        },
+        {
+          "type": "thornboar",
+          "x": 2740,
+          "z": -1600,
+          "y": 0
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 1,
+      "area": 0,
+      "name": "Hollow Pass \u00b7 Winding Cliffs",
+      "zoneName": "Hollow Pass",
+      "side": {
+        "id": "sunkenwash",
+        "name": "The Sunken Wash",
+        "icon": "\ud83e\uddb4",
+        "stage": 3,
+        "seed": 312,
+        "trial": "ninja",
+        "blurb": "The canyon floor gave way a long time ago."
+      },
+      "counts": {
+        "segments": 133,
+        "obstacles": 146,
+        "walls": 0,
+        "deco": 22,
+        "enemies": 9,
+        "storyNpcs": 2,
+        "storyObjects": 16,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2240,
+        "maxX": 2250,
+        "minZ": -5000,
+        "maxZ": 650
+      },
+      "rooms": [
+        {
+          "name": "Cliff Refuge",
+          "x": 0,
+          "z": 180,
+          "y": 0,
+          "w": 700,
+          "d": 750
+        },
+        {
+          "name": "Split Trail",
+          "x": 0,
+          "z": -400,
+          "y": 0,
+          "w": 750,
+          "d": 520
+        },
+        {
+          "name": "Broken Cart",
+          "x": -1000,
+          "z": -1450,
+          "y": 0,
+          "w": 620,
+          "d": 850
+        },
+        {
+          "name": "Climber\u2019s Rest",
+          "x": 850,
+          "z": -1150,
+          "y": 0,
+          "w": 560,
+          "d": 500
+        },
+        {
+          "name": "Bridge Works",
+          "x": 0,
+          "z": -2450,
+          "y": 0,
+          "w": 850,
+          "d": 600
+        },
+        {
+          "name": "Far Landing",
+          "x": 0,
+          "z": -3150,
+          "y": 0,
+          "w": 650,
+          "d": 420
+        },
+        {
+          "name": "Legion Lookout",
+          "x": -450,
+          "z": -3900,
+          "y": 0,
+          "w": 850,
+          "d": 760
+        },
+        {
+          "name": "Canyon Lift",
+          "x": 0,
+          "z": -4600,
+          "y": 0,
+          "w": 850,
+          "d": 550
+        }
+      ],
+      "npcs": [
+        {
+          "id": "caleb",
+          "name": "Caleb",
+          "x": -100,
+          "z": 210,
+          "y": 0
+        },
+        {
+          "id": "skip",
+          "name": "Skip",
+          "x": 940,
+          "z": -1140,
+          "y": 150
+        }
+      ],
+      "objects": [
+        {
+          "key": "hp.orders",
+          "label": "Read the transport orders",
+          "x": -1060,
+          "z": -1510,
+          "y": 0,
+          "kind": "orders"
+        },
+        {
+          "key": "hp.rope",
+          "label": "Take the lost rope",
+          "x": 1510,
+          "z": -1300,
+          "y": 0,
+          "kind": "rope"
+        },
+        {
+          "key": "hp.bridge.clue",
+          "label": "Read the freight plate",
+          "x": -110,
+          "z": -2400,
+          "y": 0,
+          "kind": "plate"
+        },
+        {
+          "key": "hp.weight.2",
+          "label": "Attach or remove the 2-mark weight",
+          "x": -170,
+          "z": -2570,
+          "y": 0,
+          "kind": "weight"
+        },
+        {
+          "key": "hp.weight.3",
+          "label": "Attach or remove the 3-mark weight",
+          "x": -20,
+          "z": -2570,
+          "y": 0,
+          "kind": "weight"
+        },
+        {
+          "key": "hp.weight.5",
+          "label": "Attach or remove the 5-mark weight",
+          "x": 130,
+          "z": -2570,
+          "y": 0,
+          "kind": "weight"
+        },
+        {
+          "key": "hp.brake.wrong",
+          "label": "Release the cart brake",
+          "x": -230,
+          "z": -2680,
+          "y": 0,
+          "kind": "lever"
+        },
+        {
+          "key": "hp.brake.right",
+          "label": "Release the bridge brake",
+          "x": 230,
+          "z": -2680,
+          "y": 0,
+          "kind": "lever"
+        },
+        {
+          "key": "hp.windbreak",
+          "label": "Tie the windbreak shut",
+          "x": 570,
+          "z": -880,
+          "y": 90,
+          "kind": "lever"
+        },
+        {
+          "key": "hp.quiet",
+          "label": "Tie the lookout rope",
+          "x": 790,
+          "z": -3900,
+          "y": 180,
+          "kind": "rope"
+        },
+        {
+          "key": "hp.lift",
+          "label": "Release the canyon lift",
+          "x": 40,
+          "z": -4600,
+          "y": 0,
+          "kind": "lever",
+          "blockedLabel": "Clear the lookout or tie the upper rope",
+          "blockedText": "The lower patrol controls the lift. Clear them or tie the rope behind the lookout."
+        },
+        {
+          "key": "hp.code.clue",
+          "label": "Read the chest lid",
+          "x": -1420,
+          "z": -2520,
+          "y": 0,
+          "kind": "plate"
+        },
+        {
+          "key": "hp.code.1",
+          "label": "Press 1 on the chest lock",
+          "x": -1475,
+          "z": -2630,
+          "y": 0,
+          "kind": "dial"
+        },
+        {
+          "key": "hp.code.2",
+          "label": "Press 2 on the chest lock",
+          "x": -1410,
+          "z": -2630,
+          "y": 0,
+          "kind": "dial"
+        },
+        {
+          "key": "hp.code.3",
+          "label": "Press 3 on the chest lock",
+          "x": -1345,
+          "z": -2630,
+          "y": 0,
+          "kind": "dial"
+        },
+        {
+          "key": "hp.code.claim",
+          "label": "Open the cliff chest",
+          "x": -1410,
+          "z": -2720,
+          "y": 0,
+          "kind": "chest"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "dustjackal",
+          "x": -630,
+          "z": -920,
+          "y": 0
+        },
+        {
+          "type": "dustjackal",
+          "x": -800,
+          "z": -1030,
+          "y": 0
+        },
+        {
+          "type": "cragspitter",
+          "x": -900,
+          "z": -1780,
+          "y": 0
+        },
+        {
+          "type": "galewisp",
+          "x": 910,
+          "z": -1700,
+          "y": 60.82631967513776
+        },
+        {
+          "type": "dustjackal",
+          "x": 1460,
+          "z": -1450,
+          "y": 0
+        },
+        {
+          "type": "bones",
+          "x": -1800,
+          "z": -2140,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -430,
+          "z": -3570,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -660,
+          "z": -3850,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": -380,
+          "z": -4100,
+          "y": 0
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 1,
+      "area": 1,
+      "name": "Hollow Pass \u00b7 Lost Canyon",
+      "zoneName": "Hollow Pass",
+      "side": {
+        "id": "sunkenwash",
+        "name": "The Sunken Wash",
+        "icon": "\ud83e\uddb4",
+        "stage": 3,
+        "seed": 312,
+        "trial": "ninja",
+        "blurb": "The canyon floor gave way a long time ago."
+      },
+      "counts": {
+        "segments": 125,
+        "obstacles": 179,
+        "walls": 0,
+        "deco": 75,
+        "enemies": 9,
+        "storyNpcs": 2,
+        "storyObjects": 17,
+        "chests": 0,
+        "healpads": 4
+      },
+      "bounds": {
+        "minX": -2880,
+        "maxX": 3010,
+        "minZ": -5500,
+        "maxZ": 660
+      },
+      "rooms": [
+        {
+          "name": "Lift Landing",
+          "x": 0,
+          "z": 220,
+          "y": 220,
+          "w": 750,
+          "d": 650
+        },
+        {
+          "name": "Gate Records",
+          "x": -650,
+          "z": -630,
+          "y": 120,
+          "w": 480,
+          "d": 480
+        },
+        {
+          "name": "South Holding Yard",
+          "x": 0,
+          "z": -1920,
+          "y": 0,
+          "w": 2200,
+          "d": 1350
+        },
+        {
+          "name": "North Cages",
+          "x": 640,
+          "z": -3540,
+          "y": 0,
+          "w": 900,
+          "d": 820
+        },
+        {
+          "name": "Ruth\u2019s Shelter",
+          "x": 0,
+          "z": -3990,
+          "y": 0,
+          "w": 900,
+          "d": 720
+        },
+        {
+          "name": "Old Cage",
+          "x": -2200,
+          "z": -2300,
+          "y": 90,
+          "w": 580,
+          "d": 570
+        },
+        {
+          "name": "Freight Store",
+          "x": -2050,
+          "z": -3580,
+          "y": 0,
+          "w": 900,
+          "d": 900
+        },
+        {
+          "name": "Hidden Canyon Floor",
+          "x": 2350,
+          "z": -3310,
+          "y": 0,
+          "w": 850,
+          "d": 900
+        },
+        {
+          "name": "High Return",
+          "x": 2000,
+          "z": -4380,
+          "y": 220,
+          "w": 720,
+          "d": 480
+        },
+        {
+          "name": "Last Crossing Approach",
+          "x": 0,
+          "z": -5000,
+          "y": 0,
+          "w": 780,
+          "d": 680
+        }
+      ],
+      "npcs": [
+        {
+          "id": "ward",
+          "name": "Captain Ward",
+          "x": -90,
+          "z": -630,
+          "y": 140
+        },
+        {
+          "id": "ruth",
+          "name": "Ruth",
+          "x": -440,
+          "z": -1450,
+          "y": 0
+        }
+      ],
+      "objects": [
+        {
+          "key": "lc.orders",
+          "label": "Read the shift orders",
+          "x": -650,
+          "z": -650,
+          "y": 120,
+          "kind": "orders"
+        },
+        {
+          "key": "lc.force",
+          "label": "Pull the locked gate chain",
+          "x": 50,
+          "z": -860,
+          "y": 90,
+          "kind": "chain"
+        },
+        {
+          "key": "lc.gate",
+          "label": "Open the front gate",
+          "x": 80,
+          "z": -880,
+          "y": 85,
+          "kind": "lever",
+          "blockedLabel": "Clear the gate guards first",
+          "blockedText": "The guards still control the gate handle."
+        },
+        {
+          "key": "lc.side",
+          "label": "Lower the side ladder",
+          "x": 820,
+          "z": -1520,
+          "y": 80,
+          "kind": "rope"
+        },
+        {
+          "key": "lc.cage.south",
+          "label": "Release the south cage",
+          "x": -780,
+          "z": -1985,
+          "y": 0,
+          "kind": "lock",
+          "guardGroup": "south",
+          "blockedLabel": "Drive off the cage guards first",
+          "blockedText": "The guards are too close to the cage door."
+        },
+        {
+          "key": "lc.cage.north",
+          "label": "Release the north cage",
+          "x": 640,
+          "z": -3415,
+          "y": 0,
+          "kind": "lock",
+          "guardGroup": "north",
+          "blockedLabel": "Drive off the cage guards first",
+          "blockedText": "The guards are too close to the cage door."
+        },
+        {
+          "key": "lc.cage.extra",
+          "label": "Release the old cage",
+          "x": -2200,
+          "z": -2165,
+          "y": 90,
+          "kind": "lock",
+          "guardGroup": "extra",
+          "blockedLabel": "Drive off the cage guards first",
+          "blockedText": "The guards are too close to the cage door."
+        },
+        {
+          "key": "lc.alarm",
+          "label": "Cut the alarm cable",
+          "x": 0,
+          "z": -2550,
+          "y": 180,
+          "kind": "winch"
+        },
+        {
+          "key": "lc.escape",
+          "label": "Open the escape gate",
+          "x": 90,
+          "z": -4520,
+          "y": 0,
+          "kind": "chain"
+        },
+        {
+          "key": "lc.wagon",
+          "label": "Unload the blocking wagon",
+          "x": 1350,
+          "z": -2460,
+          "y": 0,
+          "kind": "wagon"
+        },
+        {
+          "key": "lc.water",
+          "label": "Fill a clean water flask",
+          "x": 2200,
+          "z": -3040,
+          "y": 0,
+          "kind": "water"
+        },
+        {
+          "key": "lc.rail.clue",
+          "label": "Inspect the loaded cart",
+          "x": -1750,
+          "z": -3100,
+          "y": 0,
+          "kind": "cart"
+        },
+        {
+          "key": "lc.rail.north",
+          "label": "Turn the cart north",
+          "x": -2080,
+          "z": -3700,
+          "y": 0,
+          "kind": "rail"
+        },
+        {
+          "key": "lc.rail.west",
+          "label": "Turn the cart west",
+          "x": -1985,
+          "z": -3700,
+          "y": 0,
+          "kind": "rail"
+        },
+        {
+          "key": "lc.rail.south",
+          "label": "Turn the cart south",
+          "x": -1890,
+          "z": -3700,
+          "y": 0,
+          "kind": "rail"
+        },
+        {
+          "key": "lc.rail.east",
+          "label": "Turn the cart east",
+          "x": -1795,
+          "z": -3700,
+          "y": 0,
+          "kind": "rail"
+        },
+        {
+          "key": "lc.cache",
+          "label": "Open the cave supply chest",
+          "x": 2500,
+          "z": -3510,
+          "y": 0,
+          "kind": "chest"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -720,
+          "z": -1920,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": -1080,
+          "z": -2140,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": 710,
+          "z": -3320,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": 900,
+          "z": -3610,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -2020,
+          "z": -2240,
+          "y": 90
+        },
+        {
+          "type": "caster",
+          "x": -2380,
+          "z": -2390,
+          "y": 90
+        },
+        {
+          "type": "galewisp",
+          "x": 400,
+          "z": -2570,
+          "y": 70.3759224028437
+        },
+        {
+          "type": "dustjackal",
+          "x": 2320,
+          "z": -3180,
+          "y": 0
+        },
+        {
+          "type": "cragspitter",
+          "x": 2540,
+          "z": -3700,
+          "y": 83
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 2,
+      "area": 0,
+      "name": "Ruined Keep \u00b7 Broken Walls",
+      "zoneName": "Ruined Keep",
+      "side": {
+        "id": "oubliette",
+        "name": "The Oubliette",
+        "icon": "\u26d3\ufe0f",
+        "stage": 5,
+        "seed": 313,
+        "trial": "pirate",
+        "blurb": "A hole they threw people into and forgot."
+      },
+      "counts": {
+        "segments": 157,
+        "obstacles": 124,
+        "walls": 0,
+        "deco": 19,
+        "enemies": 10,
+        "storyNpcs": 2,
+        "storyObjects": 9,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2440,
+        "maxX": 1850,
+        "minZ": -4900,
+        "maxZ": 680
+      },
+      "rooms": [
+        {
+          "name": "Outer Wall",
+          "x": 0,
+          "z": 150,
+          "y": 0,
+          "w": 900,
+          "d": 900
+        },
+        {
+          "name": "Grant\u2019s Corner",
+          "x": -260,
+          "z": -450,
+          "y": 0,
+          "w": 700,
+          "d": 450
+        },
+        {
+          "name": "Arrow Post",
+          "x": 700,
+          "z": -1000,
+          "y": 150,
+          "w": 530,
+          "d": 470
+        },
+        {
+          "name": "Breach Court",
+          "x": 0,
+          "z": -2150,
+          "y": 0,
+          "w": 1650,
+          "d": 1400
+        },
+        {
+          "name": "Seized Workshop",
+          "x": 1430,
+          "z": -2930,
+          "y": 0,
+          "w": 620,
+          "d": 660
+        },
+        {
+          "name": "Old Bell Tower",
+          "x": -1680,
+          "z": -1600,
+          "y": 0,
+          "w": 850,
+          "d": 900
+        },
+        {
+          "name": "Bell Lookout",
+          "x": -1700,
+          "z": -1600,
+          "y": 320,
+          "w": 260,
+          "d": 270
+        },
+        {
+          "name": "Prison Gate",
+          "x": 0,
+          "z": -3710,
+          "y": 0,
+          "w": 1100,
+          "d": 850
+        },
+        {
+          "name": "Upper Wheel",
+          "x": 650,
+          "z": -3650,
+          "y": 200,
+          "w": 480,
+          "d": 480
+        },
+        {
+          "name": "Sealed Chamber",
+          "x": -1480,
+          "z": -3630,
+          "y": 80,
+          "w": 860,
+          "d": 780
+        },
+        {
+          "name": "Cell Stairs",
+          "x": 0,
+          "z": -4510,
+          "y": 0,
+          "w": 780,
+          "d": 650
+        }
+      ],
+      "npcs": [
+        {
+          "id": "grant",
+          "name": "Grant",
+          "x": -260,
+          "z": -440,
+          "y": 0
+        },
+        {
+          "id": "felix",
+          "name": "Felix",
+          "x": 700,
+          "z": -1750,
+          "y": 0
+        }
+      ],
+      "objects": [
+        {
+          "key": "rk.arrow",
+          "label": "Cut the arrow-post bow cord",
+          "x": 730,
+          "z": -1030,
+          "y": 150,
+          "kind": "bow",
+          "blockedLabel": "Clear the guards first",
+          "blockedText": "The guards still control this position."
+        },
+        {
+          "key": "rk.gate",
+          "label": "Open Grant\u2019s side gate",
+          "x": 0,
+          "z": -830,
+          "y": 0,
+          "kind": "gate"
+        },
+        {
+          "key": "rk.breach",
+          "label": "Ring the breach bell",
+          "x": 0,
+          "z": -1850,
+          "y": 0,
+          "kind": "bell"
+        },
+        {
+          "key": "rk.key",
+          "label": "Take the jail key",
+          "x": -320,
+          "z": -3650,
+          "y": 0,
+          "kind": "key",
+          "blockedLabel": "Clear the guards first",
+          "blockedText": "The guards still control this position."
+        },
+        {
+          "key": "rk.wheel",
+          "label": "Turn the dungeon gate wheel",
+          "x": 650,
+          "z": -3650,
+          "y": 200,
+          "kind": "wheel"
+        },
+        {
+          "key": "rk.timing",
+          "label": "Release the latch while the notch is green",
+          "x": 1450,
+          "z": -2680,
+          "y": 0,
+          "kind": "timing",
+          "blockedLabel": "Wait for the green notch",
+          "blockedText": "The pin is out of line. Wait for the green notch."
+        },
+        {
+          "key": "rk.tools",
+          "label": "Take Felix\u2019s tools",
+          "x": 1500,
+          "z": -3020,
+          "y": 0,
+          "kind": "tools"
+        },
+        {
+          "key": "rk.wall",
+          "label": "Unbar the chamber from the old wall",
+          "x": -1730,
+          "z": -3310,
+          "y": 80,
+          "kind": "bar"
+        },
+        {
+          "key": "rk.trial",
+          "label": "Lift the sealed chamber\u2019s shield",
+          "x": -1440,
+          "z": -3520,
+          "y": 80,
+          "kind": "shield"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "caster",
+          "x": 660,
+          "z": -980,
+          "y": 150
+        },
+        {
+          "type": "grunt",
+          "x": 850,
+          "z": -950,
+          "y": 150
+        },
+        {
+          "type": "grunt",
+          "x": -340,
+          "z": -3580,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": -520,
+          "z": -3770,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": 1250,
+          "z": -2190,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -1350,
+          "z": -1850,
+          "y": 0
+        },
+        {
+          "type": "bones",
+          "x": -2120,
+          "z": -2630,
+          "y": 170
+        },
+        {
+          "type": "grunt",
+          "x": -1630,
+          "z": -1800,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": -1840,
+          "z": -1830,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -1740,
+          "z": -1970,
+          "y": 0
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 2,
+      "area": 1,
+      "name": "Ruined Keep \u00b7 The Dungeons",
+      "zoneName": "Ruined Keep",
+      "side": {
+        "id": "oubliette",
+        "name": "The Oubliette",
+        "icon": "\u26d3\ufe0f",
+        "stage": 5,
+        "seed": 313,
+        "trial": "pirate",
+        "blurb": "A hole they threw people into and forgot."
+      },
+      "counts": {
+        "segments": 21,
+        "obstacles": 344,
+        "walls": 0,
+        "deco": 10,
+        "enemies": 12,
+        "storyNpcs": 2,
+        "storyObjects": 20,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -1800,
+        "maxX": 2800,
+        "minZ": -5150,
+        "maxZ": 700
+      },
+      "rooms": [
+        {
+          "name": "Stair Landing",
+          "x": 0,
+          "z": 220,
+          "y": 300,
+          "w": 680,
+          "d": 560
+        },
+        {
+          "name": "Cell List",
+          "x": 0,
+          "z": -650,
+          "y": 180,
+          "w": 650,
+          "d": 600
+        },
+        {
+          "name": "Empty Cells",
+          "x": -750,
+          "z": -950,
+          "y": 180,
+          "w": 780,
+          "d": 600
+        },
+        {
+          "name": "East Cells",
+          "x": 780,
+          "z": -1100,
+          "y": 180,
+          "w": 660,
+          "d": 700
+        },
+        {
+          "name": "Hidden Holding Room",
+          "x": -1040,
+          "z": -1940,
+          "y": 180,
+          "w": 700,
+          "d": 650
+        },
+        {
+          "name": "Lift Controls",
+          "x": 0,
+          "z": -1900,
+          "y": 180,
+          "w": 1100,
+          "d": 380
+        },
+        {
+          "name": "West Gallery",
+          "x": -420,
+          "z": -2550,
+          "y": 180,
+          "w": 360,
+          "d": 1150
+        },
+        {
+          "name": "East Gallery",
+          "x": 420,
+          "z": -2550,
+          "y": 180,
+          "w": 360,
+          "d": 1150
+        },
+        {
+          "name": "North Landing",
+          "x": 0,
+          "z": -3160,
+          "y": 180,
+          "w": 1100,
+          "d": 360
+        },
+        {
+          "name": "Upper Shelter",
+          "x": 0,
+          "z": -3440,
+          "y": 360,
+          "w": 780,
+          "d": 700
+        },
+        {
+          "name": "Release Hall Approach",
+          "x": 0,
+          "z": -4530,
+          "y": 360,
+          "w": 850,
+          "d": 620
+        },
+        {
+          "name": "Lower Works",
+          "x": 0,
+          "z": -2930,
+          "y": 0,
+          "w": 800,
+          "d": 860
+        }
+      ],
+      "npcs": [
+        {
+          "id": "walter",
+          "name": "Walter",
+          "x": -670,
+          "z": -980,
+          "y": 180
+        },
+        {
+          "id": "sly",
+          "name": "Sly",
+          "x": 770,
+          "z": -1280,
+          "y": 180
+        }
+      ],
+      "objects": [
+        {
+          "key": "kd.roster",
+          "label": "Read the cell list",
+          "x": 80,
+          "z": -620,
+          "y": 180,
+          "kind": "paper"
+        },
+        {
+          "key": "kd.marks",
+          "label": "Read the old service marks",
+          "x": -1020,
+          "z": -1190,
+          "y": 180,
+          "kind": "mark"
+        },
+        {
+          "key": "kd.hidden",
+          "label": "Push the loose service door",
+          "x": -1300,
+          "z": -1370,
+          "y": 180,
+          "kind": "door"
+        },
+        {
+          "key": "kd.free",
+          "label": "Free the hidden prisoners",
+          "x": -1050,
+          "z": -1930,
+          "y": 180,
+          "kind": "key",
+          "blockedLabel": "Clear the holding-room guards",
+          "blockedText": "The guards still control the cell locks."
+        },
+        {
+          "key": "kd.papers",
+          "label": "Read the confiscated papers",
+          "x": -1120,
+          "z": -2110,
+          "y": 180,
+          "kind": "paper"
+        },
+        {
+          "key": "kd.lift.note",
+          "label": "Read the lift\u2019s load plate",
+          "x": -180,
+          "z": -1900,
+          "y": 180,
+          "kind": "paper"
+        },
+        {
+          "key": "kd.latch",
+          "label": "Lock the lower safety bar",
+          "x": -240,
+          "z": -3110,
+          "y": 0,
+          "kind": "bar"
+        },
+        {
+          "key": "kd.depth.note",
+          "label": "Read the lower load plate",
+          "x": 260,
+          "z": -3220,
+          "y": 0,
+          "kind": "paper"
+        },
+        {
+          "key": "kd.return",
+          "label": "Return the family keepsake",
+          "x": -920,
+          "z": -2010,
+          "y": 180,
+          "kind": "keepsake"
+        },
+        {
+          "key": "kd.drain.note",
+          "label": "Read the marks beside the drain",
+          "x": 1500,
+          "z": -3240,
+          "y": 80,
+          "kind": "mark"
+        },
+        {
+          "key": "kd.cache",
+          "label": "Open the dry store chest",
+          "x": 2420,
+          "z": -3620,
+          "y": 80,
+          "kind": "chest"
+        },
+        {
+          "key": "kd.lift.0",
+          "label": "Hook or unhook weight 1",
+          "x": -150,
+          "z": -2030,
+          "y": 180,
+          "kind": "weight",
+          "value": 1,
+          "puzzle": "kd.lift",
+          "index": 0
+        },
+        {
+          "key": "kd.lift.1",
+          "label": "Hook or unhook weight 2",
+          "x": 0,
+          "z": -2030,
+          "y": 180,
+          "kind": "weight",
+          "value": 2,
+          "puzzle": "kd.lift",
+          "index": 1
+        },
+        {
+          "key": "kd.lift.2",
+          "label": "Hook or unhook weight 3",
+          "x": 150,
+          "z": -2030,
+          "y": 180,
+          "kind": "weight",
+          "value": 3,
+          "puzzle": "kd.lift",
+          "index": 2
+        },
+        {
+          "key": "kd.brace.0",
+          "label": "Set safety weight 2",
+          "x": -220,
+          "z": -3260,
+          "y": 0,
+          "kind": "weight",
+          "value": 2,
+          "puzzle": "kd.brace",
+          "index": 0
+        },
+        {
+          "key": "kd.brace.1",
+          "label": "Set safety weight 3",
+          "x": 0,
+          "z": -3260,
+          "y": 0,
+          "kind": "weight",
+          "value": 3,
+          "puzzle": "kd.brace",
+          "index": 1
+        },
+        {
+          "key": "kd.brace.2",
+          "label": "Set safety weight 5",
+          "x": 220,
+          "z": -3260,
+          "y": 0,
+          "kind": "weight",
+          "value": 5,
+          "puzzle": "kd.brace",
+          "index": 2
+        },
+        {
+          "key": "kd.deep.0",
+          "label": "Move weight 2: rack / left / right",
+          "x": -220,
+          "z": -2970,
+          "y": 0,
+          "kind": "balance",
+          "value": 2,
+          "puzzle": "kd.deep",
+          "index": 0
+        },
+        {
+          "key": "kd.deep.1",
+          "label": "Move weight 3: rack / left / right",
+          "x": 0,
+          "z": -2970,
+          "y": 0,
+          "kind": "balance",
+          "value": 3,
+          "puzzle": "kd.deep",
+          "index": 1
+        },
+        {
+          "key": "kd.deep.2",
+          "label": "Move weight 5: rack / left / right",
+          "x": 220,
+          "z": -2970,
+          "y": 0,
+          "kind": "balance",
+          "value": 5,
+          "puzzle": "kd.deep",
+          "index": 2
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -970,
+          "z": -1980,
+          "y": 180
+        },
+        {
+          "type": "caster",
+          "x": -1220,
+          "z": -2110,
+          "y": 180
+        },
+        {
+          "type": "grunt",
+          "x": -900,
+          "z": -2150,
+          "y": 180
+        },
+        {
+          "type": "bones",
+          "x": 500,
+          "z": -2700,
+          "y": 180
+        },
+        {
+          "type": "caster",
+          "x": 900,
+          "z": -3490,
+          "y": 270
+        },
+        {
+          "type": "siegeknight",
+          "x": 70,
+          "z": -3710,
+          "y": 360
+        },
+        {
+          "type": "bones",
+          "x": 1050,
+          "z": -3400,
+          "y": 120
+        },
+        {
+          "type": "bones",
+          "x": 2330,
+          "z": -3450,
+          "y": 80
+        },
+        {
+          "type": "caster",
+          "x": 2190,
+          "z": -4090,
+          "y": 80
+        },
+        {
+          "type": "grunt",
+          "x": -180,
+          "z": -2940,
+          "y": 0
+        },
+        {
+          "type": "caster",
+          "x": 180,
+          "z": -3060,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -120,
+          "z": -3200,
+          "y": 0
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 3,
+      "area": 0,
+      "name": "Frostfell \u00b7 Snowbound Peaks",
+      "zoneName": "Frostfell",
+      "side": {
+        "id": "glaciervault",
+        "name": "The Glacier Vault",
+        "icon": "\ud83e\uddca",
+        "stage": 7,
+        "seed": 314,
+        "trial": "chronomancer",
+        "blurb": "Frozen solid, and full of what the ice kept."
+      },
+      "counts": {
+        "segments": 2,
+        "obstacles": 263,
+        "walls": 0,
+        "deco": 56,
+        "enemies": 15,
+        "storyNpcs": 1,
+        "storyObjects": 13,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2900,
+        "maxX": 2080,
+        "minZ": -5680,
+        "maxZ": 730
+      },
+      "rooms": [
+        {
+          "name": "Mountain Foot",
+          "x": 0,
+          "z": 250,
+          "y": 0,
+          "w": 760,
+          "d": 750
+        },
+        {
+          "name": "Trail Shelter",
+          "x": -800,
+          "z": -750,
+          "y": 130,
+          "w": 590,
+          "d": 490
+        },
+        {
+          "name": "Abandoned Lift House",
+          "x": -2040,
+          "z": -1300,
+          "y": 220,
+          "w": 600,
+          "d": 640
+        },
+        {
+          "name": "Heath\u2019s Shelter",
+          "x": 0,
+          "z": -2020,
+          "y": 380,
+          "w": 720,
+          "d": 660
+        },
+        {
+          "name": "Far Landing",
+          "x": 0,
+          "z": -2670,
+          "y": 380,
+          "w": 550,
+          "d": 430
+        },
+        {
+          "name": "Snow Bowl",
+          "x": 1120,
+          "z": -3500,
+          "y": 540,
+          "w": 640,
+          "d": 700
+        },
+        {
+          "name": "Buried Camp",
+          "x": -920,
+          "z": -3950,
+          "y": 580,
+          "w": 680,
+          "d": 650
+        },
+        {
+          "name": "Signal Crown",
+          "x": 0,
+          "z": -4720,
+          "y": 740,
+          "w": 900,
+          "d": 640
+        },
+        {
+          "name": "Cave Mouth",
+          "x": -260,
+          "z": -5380,
+          "y": 740,
+          "w": 500,
+          "d": 440
+        }
+      ],
+      "npcs": [
+        {
+          "id": "heath",
+          "name": "Heath",
+          "x": 0,
+          "z": -1960,
+          "y": 380
+        }
+      ],
+      "objects": [
+        {
+          "key": "ff.trail",
+          "label": "Read the scratched trail sign",
+          "x": -790,
+          "z": -640,
+          "y": 130,
+          "kind": "sign"
+        },
+        {
+          "key": "ff.part",
+          "label": "Take the heater part",
+          "x": -2030,
+          "z": -1300,
+          "y": 220,
+          "kind": "part"
+        },
+        {
+          "key": "ff.lift",
+          "label": "Lower the return steps",
+          "x": -1470,
+          "z": -2190,
+          "y": 380,
+          "kind": "lever"
+        },
+        {
+          "key": "ff.reflect.clue",
+          "label": "Read the signal carving",
+          "x": 0,
+          "z": -4570,
+          "y": 740,
+          "kind": "sign"
+        },
+        {
+          "key": "ff.reflect.1",
+          "label": "Aim at the mountain",
+          "x": -140,
+          "z": -4790,
+          "y": 740,
+          "kind": "reflector"
+        },
+        {
+          "key": "ff.reflect.2",
+          "label": "Aim at the pine tree",
+          "x": 0,
+          "z": -4790,
+          "y": 740,
+          "kind": "reflector"
+        },
+        {
+          "key": "ff.reflect.3",
+          "label": "Aim at the split moon",
+          "x": 140,
+          "z": -4790,
+          "y": 740,
+          "kind": "reflector"
+        },
+        {
+          "key": "ff.cave",
+          "label": "Clear the loose snow from the entrance",
+          "x": -260,
+          "z": -5280,
+          "y": 740,
+          "kind": "entrance"
+        },
+        {
+          "key": "ff.camp",
+          "label": "Read the explorer\u2019s notebook",
+          "x": -930,
+          "z": -3800,
+          "y": 580,
+          "kind": "sign"
+        },
+        {
+          "key": "ff.marker.1",
+          "label": "Turn the one-notch marker",
+          "x": -1100,
+          "z": -4040,
+          "y": 580,
+          "kind": "marker"
+        },
+        {
+          "key": "ff.marker.2",
+          "label": "Turn the two-notch marker",
+          "x": -920,
+          "z": -4040,
+          "y": 580,
+          "kind": "marker"
+        },
+        {
+          "key": "ff.marker.3",
+          "label": "Turn the three-notch marker",
+          "x": -740,
+          "z": -4040,
+          "y": 580,
+          "kind": "marker"
+        },
+        {
+          "key": "ff.cache",
+          "label": "Open the buried explorer\u2019s chest",
+          "x": -920,
+          "z": -4170,
+          "y": 580,
+          "kind": "chest"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "frostling",
+          "x": -290,
+          "z": -340,
+          "y": 40
+        },
+        {
+          "type": "frostling",
+          "x": -350,
+          "z": -450,
+          "y": 55
+        },
+        {
+          "type": "grunt",
+          "x": -2200,
+          "z": -1210,
+          "y": 220
+        },
+        {
+          "type": "frostling",
+          "x": -2020,
+          "z": -1870,
+          "y": 290
+        },
+        {
+          "type": "frostling",
+          "x": -940,
+          "z": -3810,
+          "y": 580
+        },
+        {
+          "type": "frostling",
+          "x": 900,
+          "z": -3400,
+          "y": 535
+        },
+        {
+          "type": "grunt",
+          "x": -200,
+          "z": -4550,
+          "y": 740
+        },
+        {
+          "type": "frostling",
+          "x": -1110,
+          "z": -1250,
+          "y": 215
+        },
+        {
+          "type": "grunt",
+          "x": -1960,
+          "z": -1160,
+          "y": 220
+        },
+        {
+          "type": "caster",
+          "x": -2150,
+          "z": -1470,
+          "y": 254
+        },
+        {
+          "type": "frostling",
+          "x": 1050,
+          "z": -3320,
+          "y": 520
+        },
+        {
+          "type": "frostling",
+          "x": 1180,
+          "z": -3560,
+          "y": 540
+        },
+        {
+          "type": "caster",
+          "x": 1060,
+          "z": -3660,
+          "y": 540
+        },
+        {
+          "type": "grunt",
+          "x": 250,
+          "z": -4450,
+          "y": 700
+        },
+        {
+          "type": "caster",
+          "x": -150,
+          "z": -4750,
+          "y": 740
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 3,
+      "area": 1,
+      "name": "Frostfell \u00b7 Deep Ice Caves",
+      "zoneName": "Frostfell",
+      "side": {
+        "id": "glaciervault",
+        "name": "The Glacier Vault",
+        "icon": "\ud83e\uddca",
+        "stage": 7,
+        "seed": 314,
+        "trial": "chronomancer",
+        "blurb": "Frozen solid, and full of what the ice kept."
+      },
+      "counts": {
+        "segments": 2,
+        "obstacles": 321,
+        "walls": 18,
+        "deco": 23,
+        "enemies": 16,
+        "storyNpcs": 2,
+        "storyObjects": 15,
+        "chests": 0,
+        "healpads": 4
+      },
+      "bounds": {
+        "minX": -2660,
+        "maxX": 2750,
+        "minZ": -5800,
+        "maxZ": 700
+      },
+      "rooms": [
+        {
+          "name": "Cave Mouth",
+          "x": 0,
+          "z": 240,
+          "y": 340,
+          "w": 720,
+          "d": 700
+        },
+        {
+          "name": "Crystal Junction",
+          "x": 0,
+          "z": -1400,
+          "y": 240,
+          "w": 780,
+          "d": 600
+        },
+        {
+          "name": "Hidden Laboratory",
+          "x": -1350,
+          "z": -2240,
+          "y": 300,
+          "w": 1050,
+          "d": 650
+        },
+        {
+          "name": "Fallen Research Pack",
+          "x": -2250,
+          "z": -2820,
+          "y": 200,
+          "w": 540,
+          "d": 430
+        },
+        {
+          "name": "Broken Ice Shelf",
+          "x": 1450,
+          "z": -2490,
+          "y": 100,
+          "w": 560,
+          "d": 650
+        },
+        {
+          "name": "Waterworks",
+          "x": 0,
+          "z": -3570,
+          "y": 180,
+          "w": 860,
+          "d": 700
+        },
+        {
+          "name": "Lower Controls",
+          "x": -1350,
+          "z": -4210,
+          "y": 80,
+          "w": 590,
+          "d": 430
+        },
+        {
+          "name": "Sealed Channel",
+          "x": -1350,
+          "z": -5320,
+          "y": 80,
+          "w": 620,
+          "d": 560
+        },
+        {
+          "name": "North Junction",
+          "x": 0,
+          "z": -4790,
+          "y": 180,
+          "w": 740,
+          "d": 860
+        },
+        {
+          "name": "Officer Approach",
+          "x": 0,
+          "z": -5470,
+          "y": 180,
+          "w": 760,
+          "d": 450
+        }
+      ],
+      "npcs": [
+        {
+          "id": "ellis",
+          "name": "Professor Ellis",
+          "x": -1330,
+          "z": -2230,
+          "y": 300
+        },
+        {
+          "id": "hugo",
+          "name": "Hugo",
+          "x": 1450,
+          "z": -2680,
+          "y": 100,
+          "walking": false
+        }
+      ],
+      "objects": [
+        {
+          "key": "ic.pages",
+          "label": "Read the dropped research page",
+          "x": -80,
+          "z": -1020,
+          "y": 240,
+          "kind": "paper"
+        },
+        {
+          "key": "ic.free",
+          "label": "Release Professor Ellis",
+          "x": -1210,
+          "z": -2210,
+          "y": 300,
+          "kind": "lock",
+          "blockedLabel": "Clear the laboratory guards first",
+          "blockedText": "The guards still hold Ellis."
+        },
+        {
+          "key": "ic.notes",
+          "label": "Recover the sealed notes",
+          "x": -2250,
+          "z": -2820,
+          "y": 200,
+          "kind": "pack"
+        },
+        {
+          "key": "ic.lock.clue",
+          "label": "Read the waterworks plate",
+          "x": -170,
+          "z": -3670,
+          "y": 180,
+          "kind": "plate"
+        },
+        {
+          "key": "ic.hugo.find",
+          "label": "Call into the broken ice shelf",
+          "x": 1450,
+          "z": -2490,
+          "y": 100,
+          "kind": "call"
+        },
+        {
+          "key": "ic.hugo.brace",
+          "label": "Secure the rescue frame",
+          "x": 1330,
+          "z": -2540,
+          "y": 100,
+          "kind": "brace"
+        },
+        {
+          "key": "ic.rope",
+          "label": "Take the spare rope",
+          "x": 1450,
+          "z": -3260,
+          "y": 140,
+          "kind": "rope"
+        },
+        {
+          "key": "ic.hugo.rope",
+          "label": "Lower the rescue rope",
+          "x": 1500,
+          "z": -2580,
+          "y": 100,
+          "kind": "rope"
+        },
+        {
+          "key": "ic.channel.clue",
+          "label": "Read the lower channel marks",
+          "x": -1430,
+          "z": -4210,
+          "y": 80,
+          "kind": "plate"
+        },
+        {
+          "key": "ic.lock.1",
+          "label": "Fill the main channel",
+          "x": -160,
+          "z": -3850,
+          "y": 180,
+          "kind": "fill"
+        },
+        {
+          "key": "ic.lock.2",
+          "label": "Freeze the main channel",
+          "x": 0,
+          "z": -3850,
+          "y": 180,
+          "kind": "freeze"
+        },
+        {
+          "key": "ic.lock.3",
+          "label": "Drain the main channel",
+          "x": 160,
+          "z": -3850,
+          "y": 180,
+          "kind": "drain"
+        },
+        {
+          "key": "ic.channel.1",
+          "label": "Toggle spring inlet",
+          "x": -1510,
+          "z": -4380,
+          "y": 80,
+          "kind": "flow0"
+        },
+        {
+          "key": "ic.channel.2",
+          "label": "Toggle spill outlet",
+          "x": -1350,
+          "z": -4380,
+          "y": 80,
+          "kind": "flow1"
+        },
+        {
+          "key": "ic.channel.3",
+          "label": "Toggle chiller feed",
+          "x": -1190,
+          "z": -4380,
+          "y": 80,
+          "kind": "flow2"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "frostling",
+          "x": -100,
+          "z": -630,
+          "y": 280
+        },
+        {
+          "type": "frostling",
+          "x": 200,
+          "z": -1380,
+          "y": 240
+        },
+        {
+          "type": "frostling",
+          "x": -1100,
+          "z": -1200,
+          "y": 240
+        },
+        {
+          "type": "grunt",
+          "x": -1250,
+          "z": -2310,
+          "y": 300
+        },
+        {
+          "type": "caster",
+          "x": -1570,
+          "z": -2300,
+          "y": 300
+        },
+        {
+          "type": "grunt",
+          "x": -1100,
+          "z": -2100,
+          "y": 300
+        },
+        {
+          "type": "frostling",
+          "x": -2120,
+          "z": -2620,
+          "y": 220
+        },
+        {
+          "type": "frostling",
+          "x": 1100,
+          "z": -2010,
+          "y": 100
+        },
+        {
+          "type": "frostling",
+          "x": 1670,
+          "z": -2410,
+          "y": 100
+        },
+        {
+          "type": "frostlobber",
+          "x": 1430,
+          "z": -3130,
+          "y": 130
+        },
+        {
+          "type": "grunt",
+          "x": -100,
+          "z": -3500,
+          "y": 180
+        },
+        {
+          "type": "caster",
+          "x": 140,
+          "z": -3680,
+          "y": 180
+        },
+        {
+          "type": "frostling",
+          "x": -1310,
+          "z": -4130,
+          "y": 80
+        },
+        {
+          "type": "frostling",
+          "x": 1800,
+          "z": -4000,
+          "y": 255
+        },
+        {
+          "type": "frostlobber",
+          "x": 1750,
+          "z": -4530,
+          "y": 350
+        },
+        {
+          "type": "grunt",
+          "x": 120,
+          "z": -5020,
+          "y": 180
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 4,
+      "area": 0,
+      "name": "Emberdeep \u00b7 Iron Halls",
+      "zoneName": "Emberdeep",
+      "side": {
+        "id": "magmacore",
+        "name": "The Magma Core",
+        "icon": "\ud83d\udd25",
+        "stage": 9,
+        "seed": 315,
+        "trial": "paladin",
+        "blurb": "Straight down, into the heat that makes the mountain."
+      },
+      "counts": {
+        "segments": 0,
+        "obstacles": 249,
+        "walls": 14,
+        "deco": 30,
+        "enemies": 16,
+        "storyNpcs": 2,
+        "storyObjects": 10,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2440,
+        "maxX": 2410,
+        "minZ": -6450,
+        "maxZ": 850
+      },
+      "rooms": [
+        {
+          "name": "Receiving Yard",
+          "x": 0,
+          "z": 200,
+          "y": 100,
+          "w": 1150,
+          "d": 850
+        },
+        {
+          "name": "Worker Station",
+          "x": 0,
+          "z": -1400,
+          "y": 100,
+          "w": 950,
+          "d": 750
+        },
+        {
+          "name": "Worker Shelter",
+          "x": -600,
+          "z": -1730,
+          "y": 100,
+          "w": 600,
+          "d": 420
+        },
+        {
+          "name": "Western Stores",
+          "x": -1790,
+          "z": -2630,
+          "y": 160,
+          "w": 780,
+          "d": 800
+        },
+        {
+          "name": "Seized Work",
+          "x": 1840,
+          "z": -3120,
+          "y": 400,
+          "w": 450,
+          "d": 470
+        },
+        {
+          "name": "Service Cart",
+          "x": 0,
+          "z": -3520,
+          "y": 100,
+          "w": 1000,
+          "d": 640
+        },
+        {
+          "name": "Machine Controls",
+          "x": 0,
+          "z": -4080,
+          "y": 100,
+          "w": 850,
+          "d": 650
+        },
+        {
+          "name": "Casting Floor",
+          "x": -1240,
+          "z": -4520,
+          "y": 100,
+          "w": 680,
+          "d": 660
+        },
+        {
+          "name": "Furnace Approach",
+          "x": 0,
+          "z": -5940,
+          "y": 180,
+          "w": 850,
+          "d": 750
+        }
+      ],
+      "npcs": [
+        {
+          "id": "flint",
+          "name": "Flint",
+          "x": -120,
+          "z": 160,
+          "y": 100
+        },
+        {
+          "id": "jack",
+          "name": "Jack",
+          "x": -220,
+          "z": -3550,
+          "y": 100
+        }
+      ],
+      "objects": [
+        {
+          "key": "ih.workers",
+          "label": "Open the worker shelter",
+          "x": -300,
+          "z": -1480,
+          "y": 100,
+          "kind": "shelter",
+          "blockedLabel": "Clear the station guards first",
+          "blockedText": "The guards still control the shelter door."
+        },
+        {
+          "key": "ih.handles",
+          "label": "Take the insulated handles",
+          "x": -1730,
+          "z": -2770,
+          "y": 160,
+          "kind": "handles"
+        },
+        {
+          "key": "ih.blank",
+          "label": "Recover Flint\u2019s blade blank",
+          "x": 1870,
+          "z": -3200,
+          "y": 400,
+          "kind": "blade"
+        },
+        {
+          "key": "ih.plate",
+          "label": "Read the machine plate",
+          "x": 180,
+          "z": -4050,
+          "y": 100,
+          "kind": "plate"
+        },
+        {
+          "key": "ih.mold",
+          "label": "Open the cooled casting mold",
+          "x": -1310,
+          "z": -4710,
+          "y": 100,
+          "kind": "mold"
+        },
+        {
+          "key": "ih.return",
+          "label": "Lower the return steps",
+          "x": 1110,
+          "z": -3740,
+          "y": 80,
+          "kind": "steps"
+        },
+        {
+          "key": "ih.line.1",
+          "label": "Cut the metal feed",
+          "x": -350,
+          "z": -4220,
+          "y": 100,
+          "kind": "control0",
+          "blockedText": "The metal feed is already stopped. Move on to the pressure tank."
+        },
+        {
+          "key": "ih.line.2",
+          "label": "Vent the pressure tank",
+          "x": 300,
+          "z": -4020,
+          "y": 100,
+          "kind": "control1",
+          "blockedText": "Stop the feed first. Then wait for the needle to enter the pale band on the tank gauge."
+        },
+        {
+          "key": "ih.line.3",
+          "label": "Lock the raised hammer",
+          "x": 270,
+          "z": -4380,
+          "y": 100,
+          "kind": "control2",
+          "blockedText": "Vent the tank, pull the safety cable, then reach this lock before the cable releases."
+        },
+        {
+          "key": "ih.brace",
+          "label": "Pull the hammer safety cable",
+          "x": -350,
+          "z": -3700,
+          "y": 100,
+          "kind": "safetyCable",
+          "blockedText": "Stop the feed and vent the pressure tank before pulling this cable."
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": 0,
+          "z": -650,
+          "y": 100
+        },
+        {
+          "type": "grunt",
+          "x": -90,
+          "z": -1420,
+          "y": 100
+        },
+        {
+          "type": "caster",
+          "x": 200,
+          "z": -1550,
+          "y": 100
+        },
+        {
+          "type": "grunt",
+          "x": -290,
+          "z": -1710,
+          "y": 100
+        },
+        {
+          "type": "magmaskit",
+          "x": -680,
+          "z": -2150,
+          "y": 100
+        },
+        {
+          "type": "grunt",
+          "x": -650,
+          "z": -2730,
+          "y": 100
+        },
+        {
+          "type": "emberling",
+          "x": -1540,
+          "z": -2080,
+          "y": 150
+        },
+        {
+          "type": "grunt",
+          "x": -1900,
+          "z": -2650,
+          "y": 160
+        },
+        {
+          "type": "magmaskit",
+          "x": -1320,
+          "z": -3100,
+          "y": 120
+        },
+        {
+          "type": "caster",
+          "x": 940,
+          "z": -1990,
+          "y": 300
+        },
+        {
+          "type": "grunt",
+          "x": 930,
+          "z": -2870,
+          "y": 300
+        },
+        {
+          "type": "emberling",
+          "x": 1800,
+          "z": -2920,
+          "y": 400
+        },
+        {
+          "type": "grunt",
+          "x": -160,
+          "z": -3780,
+          "y": 100
+        },
+        {
+          "type": "caster",
+          "x": 170,
+          "z": -4050,
+          "y": 100
+        },
+        {
+          "type": "magmaskit",
+          "x": -980,
+          "z": -4360,
+          "y": 100
+        },
+        {
+          "type": "grunt",
+          "x": 130,
+          "z": -5620,
+          "y": 170
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 4,
+      "area": 1,
+      "name": "Emberdeep \u00b7 The Great Furnace",
+      "zoneName": "Emberdeep",
+      "side": {
+        "id": "magmacore",
+        "name": "The Magma Core",
+        "icon": "\ud83d\udd25",
+        "stage": 9,
+        "seed": 315,
+        "trial": "paladin",
+        "blurb": "Straight down, into the heat that makes the mountain."
+      },
+      "counts": {
+        "segments": 0,
+        "obstacles": 328,
+        "walls": 11,
+        "deco": 14,
+        "enemies": 16,
+        "storyNpcs": 2,
+        "storyObjects": 21,
+        "chests": 0,
+        "healpads": 4
+      },
+      "bounds": {
+        "minX": -2630,
+        "maxX": 2860,
+        "minZ": -7180,
+        "maxZ": 850
+      },
+      "rooms": [
+        {
+          "name": "Inspection Gate",
+          "x": 0,
+          "z": -850,
+          "y": 120,
+          "w": 800,
+          "d": 1600
+        },
+        {
+          "name": "Maintenance Bay",
+          "x": -1040,
+          "z": -1020,
+          "y": 150,
+          "w": 540,
+          "d": 700
+        },
+        {
+          "name": "Break Room",
+          "x": 0,
+          "z": -2220,
+          "y": 120,
+          "w": 1050,
+          "d": 650
+        },
+        {
+          "name": "Worker Floor",
+          "x": -940,
+          "z": -3410,
+          "y": 120,
+          "w": 750,
+          "d": 1350
+        },
+        {
+          "name": "Transport Brake",
+          "x": -1940,
+          "z": -3450,
+          "y": 220,
+          "w": 620,
+          "d": 700
+        },
+        {
+          "name": "East Gallery",
+          "x": 1320,
+          "z": -3630,
+          "y": 260,
+          "w": 650,
+          "d": 1100
+        },
+        {
+          "name": "Heat Cage",
+          "x": 2320,
+          "z": -3610,
+          "y": 140,
+          "w": 650,
+          "d": 620
+        },
+        {
+          "name": "Command Office",
+          "x": 2150,
+          "z": -4930,
+          "y": 400,
+          "w": 650,
+          "d": 650
+        },
+        {
+          "name": "Cooling Controls",
+          "x": 0,
+          "z": -4910,
+          "y": 120,
+          "w": 1000,
+          "d": 1080
+        },
+        {
+          "name": "Pressure Head",
+          "x": -1140,
+          "z": -5250,
+          "y": 480,
+          "w": 480,
+          "d": 380
+        },
+        {
+          "name": "Furnace Door",
+          "x": 0,
+          "z": -6570,
+          "y": 260,
+          "w": 900,
+          "d": 820
+        }
+      ],
+      "npcs": [
+        {
+          "id": "pike",
+          "name": "Foreman Pike",
+          "x": 220,
+          "z": -1310,
+          "y": 120
+        },
+        {
+          "id": "martin",
+          "name": "Martin",
+          "x": 210,
+          "z": -2120,
+          "y": 120
+        }
+      ],
+      "objects": [
+        {
+          "key": "gf.fault",
+          "label": "Inspect the leaking pressure pipe",
+          "x": -1090,
+          "z": -1150,
+          "y": 160,
+          "kind": "fault"
+        },
+        {
+          "key": "gf.schedule",
+          "label": "Read the maintenance schedule",
+          "x": -870,
+          "z": -730,
+          "y": 150,
+          "kind": "paper"
+        },
+        {
+          "key": "gf.gate",
+          "label": "Raise the worker gate",
+          "x": 230,
+          "z": -1580,
+          "y": 120,
+          "kind": "gate",
+          "blockedLabel": "Clear the gate patrol first",
+          "blockedText": "The patrol still controls the gate handle."
+        },
+        {
+          "key": "gf.passage",
+          "label": "Open the worker passage",
+          "x": -1190,
+          "z": -2880,
+          "y": 120,
+          "kind": "lever"
+        },
+        {
+          "key": "gf.transport",
+          "label": "Stop the transport chain",
+          "x": -2040,
+          "z": -3510,
+          "y": 220,
+          "kind": "brake"
+        },
+        {
+          "key": "gf.workbell",
+          "label": "Ring the work bell",
+          "x": -1130,
+          "z": -3740,
+          "y": 120,
+          "kind": "bell"
+        },
+        {
+          "key": "gf.shelterbell",
+          "label": "Ring the shelter bell",
+          "x": -240,
+          "z": -2220,
+          "y": 120,
+          "kind": "bell"
+        },
+        {
+          "key": "gf.pipes",
+          "label": "Read the cooling diagram",
+          "x": 260,
+          "z": -4750,
+          "y": 120,
+          "kind": "paper"
+        },
+        {
+          "key": "gf.writings",
+          "label": "Read the confiscated Sunspire writings",
+          "x": 2290,
+          "z": -5080,
+          "y": 400,
+          "kind": "book",
+          "blockedLabel": "Clear the office guards first",
+          "blockedText": "The guards still hold the seized writings."
+        },
+        {
+          "key": "gf.pressure",
+          "label": "Release the upper pressure valve",
+          "x": -1150,
+          "z": -5310,
+          "y": 480,
+          "kind": "valve"
+        },
+        {
+          "key": "gf.cache",
+          "label": "Read the sealed cooling-box plate",
+          "x": 420,
+          "z": -5040,
+          "y": 120,
+          "kind": "paper"
+        },
+        {
+          "key": "gf.cage",
+          "label": "Inspect the shaking work cage",
+          "x": 2300,
+          "z": -3650,
+          "y": 140,
+          "kind": "cage"
+        },
+        {
+          "key": "gf.cool.1",
+          "label": "Fill the round tank",
+          "x": -230,
+          "z": -5160,
+          "y": 120,
+          "kind": "cool0"
+        },
+        {
+          "key": "gf.cool.2",
+          "label": "Open the square channel",
+          "x": 0,
+          "z": -5160,
+          "y": 120,
+          "kind": "cool1",
+          "blockedLabel": "Clear the cooling-control guard",
+          "blockedText": "The Legion guard is holding the square-channel valve."
+        },
+        {
+          "key": "gf.cool.3",
+          "label": "Drain the triangle tray",
+          "x": 230,
+          "z": -5160,
+          "y": 120,
+          "kind": "cool2",
+          "blockedLabel": "Crossing still hot \u2014 watch the heat gauge",
+          "blockedText": "Keep water flowing until the needle reaches the pale lower band, then drain the tray."
+        },
+        {
+          "key": "gf.cache.1",
+          "label": "Press circle",
+          "x": 310,
+          "z": -5260,
+          "y": 120,
+          "kind": "shape0"
+        },
+        {
+          "key": "gf.cache.2",
+          "label": "Press square",
+          "x": 415,
+          "z": -5260,
+          "y": 120,
+          "kind": "shape1"
+        },
+        {
+          "key": "gf.cache.3",
+          "label": "Press triangle",
+          "x": 520,
+          "z": -5260,
+          "y": 120,
+          "kind": "shape2"
+        },
+        {
+          "key": "gf.pet.1",
+          "label": "Close the heat feed",
+          "x": 2070,
+          "z": -3830,
+          "y": 140,
+          "kind": "pet0"
+        },
+        {
+          "key": "gf.pet.2",
+          "label": "Open the small air vent",
+          "x": 2230,
+          "z": -3830,
+          "y": 140,
+          "kind": "pet1"
+        },
+        {
+          "key": "gf.pet.3",
+          "label": "Release the cage lock",
+          "x": 2390,
+          "z": -3830,
+          "y": 140,
+          "kind": "pet2"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -50,
+          "z": -1500,
+          "y": 120
+        },
+        {
+          "type": "caster",
+          "x": 90,
+          "z": -1460,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": -150,
+          "z": -1320,
+          "y": 120
+        },
+        {
+          "type": "magmaskit",
+          "x": -880,
+          "z": -2700,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": -1000,
+          "z": -3370,
+          "y": 120
+        },
+        {
+          "type": "caster",
+          "x": -980,
+          "z": -3910,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": -1790,
+          "z": -3020,
+          "y": 190
+        },
+        {
+          "type": "emberling",
+          "x": -1830,
+          "z": -4050,
+          "y": 220
+        },
+        {
+          "type": "grunt",
+          "x": 1180,
+          "z": -2910,
+          "y": 240
+        },
+        {
+          "type": "caster",
+          "x": 1250,
+          "z": -3810,
+          "y": 260
+        },
+        {
+          "type": "magmaskit",
+          "x": 2200,
+          "z": -3450,
+          "y": 140
+        },
+        {
+          "type": "grunt",
+          "x": 2170,
+          "z": -4730,
+          "y": 400
+        },
+        {
+          "type": "caster",
+          "x": 2340,
+          "z": -4880,
+          "y": 400
+        },
+        {
+          "type": "emberling",
+          "x": -1730,
+          "z": -4830,
+          "y": 400
+        },
+        {
+          "type": "magmaskit",
+          "x": 100,
+          "z": -4690,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": 300,
+          "z": -5010,
+          "y": 120
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 5,
+      "area": 0,
+      "name": "Storm Coast - Shipwreck Shore",
+      "zoneName": "Storm Coast",
+      "side": {
+        "id": "reapersgate",
+        "name": "The Reaper\u2019s Gate",
+        "icon": "\ud83d\udc80",
+        "stage": 11,
+        "seed": 316,
+        "trial": "reaper",
+        "blurb": "A scythe waits here for whoever can survive its keepers."
+      },
+      "counts": {
+        "segments": 0,
+        "obstacles": 353,
+        "walls": 8,
+        "deco": 35,
+        "enemies": 11,
+        "storyNpcs": 2,
+        "storyObjects": 18,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2900,
+        "maxX": 2950,
+        "minZ": -4400,
+        "maxZ": 900
+      },
+      "rooms": [
+        {
+          "name": "Work beach",
+          "x": 0,
+          "z": -450,
+          "y": 30,
+          "w": 820,
+          "d": 1900
+        },
+        {
+          "name": "Broken hull",
+          "x": -1510,
+          "z": -1830,
+          "y": 240,
+          "w": 500,
+          "d": 500
+        },
+        {
+          "name": "Rudder deck",
+          "x": -1370,
+          "z": -2320,
+          "y": 300,
+          "w": 520,
+          "d": 520
+        },
+        {
+          "name": "Occupied lookout",
+          "x": 1350,
+          "z": -1900,
+          "y": 350,
+          "w": 620,
+          "d": 600
+        },
+        {
+          "name": "Dry storage cave",
+          "x": 2300,
+          "z": -1380,
+          "y": 0,
+          "w": 650,
+          "d": 1550
+        },
+        {
+          "name": "Lower hatch",
+          "x": -1860,
+          "z": -1220,
+          "y": 40,
+          "w": 500,
+          "d": 500
+        },
+        {
+          "name": "Rose's wreck",
+          "x": -1320,
+          "z": -3400,
+          "y": 130,
+          "w": 750,
+          "d": 650
+        },
+        {
+          "name": "Lantern wreck",
+          "x": -2130,
+          "z": -3540,
+          "y": 200,
+          "w": 630,
+          "d": 660
+        },
+        {
+          "name": "Crew memorial",
+          "x": 0,
+          "z": -4050,
+          "y": 30,
+          "w": 650,
+          "d": 480
+        }
+      ],
+      "npcs": [
+        {
+          "id": "otto",
+          "name": "Otto",
+          "x": 170,
+          "z": -300,
+          "y": 30
+        },
+        {
+          "id": "rose",
+          "name": "Captain Rose",
+          "x": -160,
+          "z": -2680,
+          "y": 30
+        }
+      ],
+      "objects": [
+        {
+          "key": "sc.rudder",
+          "label": "Take the rudder",
+          "x": -1390,
+          "z": -2420,
+          "y": 300,
+          "kind": "rudder"
+        },
+        {
+          "key": "sc.sail",
+          "label": "Take the sailcloth",
+          "x": 1480,
+          "z": -1900,
+          "y": 350,
+          "kind": "sail",
+          "blockedLabel": "Clear the lookout patrol first",
+          "blockedText": "The patrol still controls the sailcloth."
+        },
+        {
+          "key": "sc.drain",
+          "label": "Open the outside drain",
+          "x": 2230,
+          "z": -690,
+          "y": 0,
+          "kind": "lever"
+        },
+        {
+          "key": "sc.latch",
+          "label": "Lift the dry-room latch",
+          "x": 2390,
+          "z": -1190,
+          "y": 0,
+          "kind": "lever"
+        },
+        {
+          "key": "sc.rope",
+          "label": "Take the dry rope",
+          "x": 2370,
+          "z": -1640,
+          "y": 0,
+          "kind": "rope"
+        },
+        {
+          "key": "sc.bell",
+          "label": "Take the ship bell",
+          "x": -1320,
+          "z": -3430,
+          "y": 130,
+          "kind": "bell"
+        },
+        {
+          "key": "sc.record",
+          "label": "Read the last crew entry",
+          "x": -1120,
+          "z": -3600,
+          "y": 130,
+          "kind": "book"
+        },
+        {
+          "key": "sc.memorial",
+          "label": "Set the crew board upright",
+          "x": 100,
+          "z": -4100,
+          "y": 30,
+          "kind": "memorial"
+        },
+        {
+          "key": "sc.hull.note",
+          "label": "Read the hull repair marks",
+          "x": -1220,
+          "z": -2130,
+          "y": 300,
+          "kind": "book"
+        },
+        {
+          "key": "sc.code.note",
+          "label": "Read the ship chest lid",
+          "x": -2140,
+          "z": -3400,
+          "y": 200,
+          "kind": "chest"
+        },
+        {
+          "key": "sc.board",
+          "label": "Board the repaired boat",
+          "x": -180,
+          "z": -210,
+          "y": 30,
+          "kind": "board"
+        },
+        {
+          "key": "sc.weight.1",
+          "label": "Move the 1 weight",
+          "x": -1540,
+          "z": -2150,
+          "y": 300,
+          "kind": "weight0"
+        },
+        {
+          "key": "sc.weight.2",
+          "label": "Move the 2 weight",
+          "x": -1415,
+          "z": -2150,
+          "y": 300,
+          "kind": "weight1"
+        },
+        {
+          "key": "sc.weight.3",
+          "label": "Move the 4 weight",
+          "x": -1290,
+          "z": -2150,
+          "y": 300,
+          "kind": "weight2"
+        },
+        {
+          "key": "sc.code.1",
+          "label": "Enter 1",
+          "x": -2215,
+          "z": -3680,
+          "y": 200,
+          "kind": "code1"
+        },
+        {
+          "key": "sc.code.2",
+          "label": "Enter 2",
+          "x": -2120,
+          "z": -3680,
+          "y": 200,
+          "kind": "code2"
+        },
+        {
+          "key": "sc.code.3",
+          "label": "Enter 3",
+          "x": -2025,
+          "z": -3680,
+          "y": 200,
+          "kind": "code3"
+        },
+        {
+          "key": "sc.code.4",
+          "label": "Enter 4",
+          "x": -1930,
+          "z": -3680,
+          "y": 200,
+          "kind": "code4"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -180,
+          "z": -1100,
+          "y": 30
+        },
+        {
+          "type": "caster",
+          "x": -1670,
+          "z": -1800,
+          "y": 240
+        },
+        {
+          "type": "grunt",
+          "x": -720,
+          "z": -2200,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": 1390,
+          "z": -1700,
+          "y": 350
+        },
+        {
+          "type": "caster",
+          "x": 1210,
+          "z": -1840,
+          "y": 350
+        },
+        {
+          "type": "grunt",
+          "x": 1550,
+          "z": -2040,
+          "y": 350
+        },
+        {
+          "type": "slime",
+          "x": 2350,
+          "z": -1030,
+          "y": 0
+        },
+        {
+          "type": "slime",
+          "x": 2250,
+          "z": -1810,
+          "y": 0
+        },
+        {
+          "type": "grunt",
+          "x": -1060,
+          "z": -3190,
+          "y": 115
+        },
+        {
+          "type": "caster",
+          "x": -2050,
+          "z": -3480,
+          "y": 200
+        },
+        {
+          "type": "grunt",
+          "x": 0,
+          "z": -3830,
+          "y": 30
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 5,
+      "area": 1,
+      "name": "Thunder Cliffs",
+      "zoneName": "Storm Coast",
+      "side": {
+        "id": "reapersgate",
+        "name": "The Reaper\u2019s Gate",
+        "icon": "\ud83d\udc80",
+        "stage": 11,
+        "seed": 316,
+        "trial": "reaper",
+        "blurb": "A scythe waits here for whoever can survive its keepers."
+      },
+      "counts": {
+        "segments": 0,
+        "obstacles": 433,
+        "walls": 8,
+        "deco": 24,
+        "enemies": 10,
+        "storyNpcs": 2,
+        "storyObjects": 16,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2800,
+        "maxX": 3000,
+        "minZ": -5350,
+        "maxZ": 950
+      },
+      "rooms": [
+        {
+          "name": "Landing",
+          "x": 0,
+          "z": 200,
+          "y": 40,
+          "w": 750,
+          "d": 1000
+        },
+        {
+          "name": "Middle ledge",
+          "x": -300,
+          "z": -1680,
+          "y": 340,
+          "w": 750,
+          "d": 650
+        },
+        {
+          "name": "Dash\u2019s arch",
+          "x": -2070,
+          "z": -2750,
+          "y": 450,
+          "w": 620,
+          "d": 540
+        },
+        {
+          "name": "Wreck cave",
+          "x": -2140,
+          "z": -3830,
+          "y": 340,
+          "w": 650,
+          "d": 570
+        },
+        {
+          "name": "Tide circle",
+          "x": -590,
+          "z": -4350,
+          "y": 300,
+          "w": 650,
+          "d": 440
+        },
+        {
+          "name": "Inland grotto",
+          "x": -1560,
+          "z": -4780,
+          "y": 300,
+          "w": 520,
+          "d": 480
+        },
+        {
+          "name": "High wind rest",
+          "x": 1260,
+          "z": -4530,
+          "y": 950,
+          "w": 500,
+          "d": 450
+        },
+        {
+          "name": "Upper approach",
+          "x": 300,
+          "z": -4700,
+          "y": 850,
+          "w": 720,
+          "d": 560
+        }
+      ],
+      "npcs": [
+        {
+          "id": "abe",
+          "name": "Abe",
+          "x": 190,
+          "z": 180,
+          "y": 40
+        },
+        {
+          "id": "dash",
+          "name": "Dash",
+          "x": -1980,
+          "z": -2710,
+          "y": 450
+        }
+      ],
+      "objects": [
+        {
+          "key": "tc.brake",
+          "label": "Fit the spare brake wheel",
+          "x": -230,
+          "z": -640,
+          "y": 40,
+          "kind": "lever"
+        },
+        {
+          "key": "tc.lift",
+          "label": "Release the upper lift catch",
+          "x": -240,
+          "z": -760,
+          "y": 340,
+          "kind": "lever"
+        },
+        {
+          "key": "tc.shackle",
+          "label": "Inspect the worn shackle",
+          "x": -420,
+          "z": -1660,
+          "y": 340,
+          "kind": "shackle"
+        },
+        {
+          "key": "tc.approach",
+          "label": "Open the upper barrier",
+          "x": 300,
+          "z": -4750,
+          "y": 850,
+          "kind": "lever"
+        },
+        {
+          "key": "tc.brace",
+          "label": "Brace the lower cave catch",
+          "x": -2200,
+          "z": -3020,
+          "y": 420,
+          "kind": "lever"
+        },
+        {
+          "key": "tc.cave.help",
+          "label": "Turn the upper cave wheel",
+          "x": -2300,
+          "z": -3400,
+          "y": 390,
+          "kind": "lever"
+        },
+        {
+          "key": "tc.race.finish",
+          "label": "Ring Dash\u2019s route bell",
+          "x": -2240,
+          "z": -3320,
+          "y": 390,
+          "kind": "bell"
+        },
+        {
+          "key": "tc.sail",
+          "label": "Take the sailcloth cape",
+          "x": -2180,
+          "z": -3980,
+          "y": 340,
+          "kind": "cape"
+        },
+        {
+          "key": "tc.tide.note",
+          "label": "Read the tide carving",
+          "x": -440,
+          "z": -4240,
+          "y": 300,
+          "kind": "book"
+        },
+        {
+          "key": "tc.wind.note",
+          "label": "Read the wind shelter sign",
+          "x": 1360,
+          "z": -3090,
+          "y": 720,
+          "kind": "book"
+        },
+        {
+          "key": "tc.race.1",
+          "label": "Touch route flag 1",
+          "x": -1430,
+          "z": -1890,
+          "y": 360,
+          "kind": "flag1"
+        },
+        {
+          "key": "tc.race.2",
+          "label": "Touch route flag 2",
+          "x": -1000,
+          "z": -2520,
+          "y": 460,
+          "kind": "flag2"
+        },
+        {
+          "key": "tc.race.3",
+          "label": "Touch route flag 3",
+          "x": -1850,
+          "z": -2830,
+          "y": 450,
+          "kind": "flag3"
+        },
+        {
+          "key": "tc.tide.1",
+          "label": "Press the 1-wave stone",
+          "x": -710,
+          "z": -4410,
+          "y": 300,
+          "kind": "wave1"
+        },
+        {
+          "key": "tc.tide.2",
+          "label": "Press the 2-wave stone",
+          "x": -570,
+          "z": -4410,
+          "y": 300,
+          "kind": "wave2"
+        },
+        {
+          "key": "tc.tide.3",
+          "label": "Press the 3-wave stone",
+          "x": -430,
+          "z": -4410,
+          "y": 300,
+          "kind": "wave3"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": 870,
+          "z": -1080,
+          "y": 205
+        },
+        {
+          "type": "caster",
+          "x": 580,
+          "z": -1670,
+          "y": 330
+        },
+        {
+          "type": "grunt",
+          "x": -980,
+          "z": -2290,
+          "y": 425
+        },
+        {
+          "type": "grunt",
+          "x": -450,
+          "z": -2950,
+          "y": 540
+        },
+        {
+          "type": "caster",
+          "x": 460,
+          "z": -3360,
+          "y": 650
+        },
+        {
+          "type": "grunt",
+          "x": -2310,
+          "z": -3370,
+          "y": 390
+        },
+        {
+          "type": "slime",
+          "x": -710,
+          "z": -4260,
+          "y": 330
+        },
+        {
+          "type": "slime",
+          "x": -50,
+          "z": -4090,
+          "y": 360
+        },
+        {
+          "type": "grunt",
+          "x": 870,
+          "z": -4000,
+          "y": 730
+        },
+        {
+          "type": "caster",
+          "x": 410,
+          "z": -4590,
+          "y": 850
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 6,
+      "area": 0,
+      "name": "Palace Courtyard",
+      "zoneName": "The Sunspire Palace",
+      "side": {
+        "id": "reliquary",
+        "name": "The Sealed Reliquary",
+        "icon": "\ud83d\udc8e",
+        "stage": 13,
+        "seed": 317,
+        "trial": "necromancer",
+        "blurb": "What a palace hides, it hides deep."
+      },
+      "counts": {
+        "segments": 0,
+        "obstacles": 327,
+        "walls": 27,
+        "deco": 257,
+        "enemies": 12,
+        "storyNpcs": 2,
+        "storyObjects": 14,
+        "chests": 0,
+        "healpads": 3
+      },
+      "bounds": {
+        "minX": -2570,
+        "maxX": 2290,
+        "minZ": -4880,
+        "maxZ": 850
+      },
+      "rooms": [
+        {
+          "name": "Entry terrace",
+          "x": 0,
+          "z": 70,
+          "y": 120,
+          "w": 1100,
+          "d": 1300
+        },
+        {
+          "name": "Fountain court",
+          "x": 0,
+          "z": -1400,
+          "y": 200,
+          "w": 1000,
+          "d": 750
+        },
+        {
+          "name": "West waterworks",
+          "x": -1260,
+          "z": -900,
+          "y": 80,
+          "w": 520,
+          "d": 800
+        },
+        {
+          "name": "Greenhouse",
+          "x": 1670,
+          "z": -1190,
+          "y": 160,
+          "w": 750,
+          "d": 900
+        },
+        {
+          "name": "West garden",
+          "x": -1400,
+          "z": -2140,
+          "y": 180,
+          "w": 500,
+          "d": 570
+        },
+        {
+          "name": "East lock garden",
+          "x": 740,
+          "z": -2250,
+          "y": 200,
+          "w": 520,
+          "d": 400
+        },
+        {
+          "name": "West balcony",
+          "x": -1050,
+          "z": -2450,
+          "y": 340,
+          "w": 680,
+          "d": 450
+        },
+        {
+          "name": "East balcony",
+          "x": 1050,
+          "z": -2070,
+          "y": 340,
+          "w": 680,
+          "d": 500
+        },
+        {
+          "name": "Mirror terrace",
+          "x": 0,
+          "z": -3850,
+          "y": 420,
+          "w": 1160,
+          "d": 920
+        },
+        {
+          "name": "Library door",
+          "x": 0,
+          "z": -4500,
+          "y": 460,
+          "w": 800,
+          "d": 480
+        },
+        {
+          "name": "Memorial roof",
+          "x": -1820,
+          "z": -3030,
+          "y": 540,
+          "w": 390,
+          "d": 340
+        }
+      ],
+      "npcs": [
+        {
+          "id": "grace",
+          "name": "Sister Grace",
+          "x": -220,
+          "z": -1320,
+          "y": 200
+        },
+        {
+          "id": "victor",
+          "name": "Sergeant Victor",
+          "x": 290,
+          "z": -1660,
+          "y": 230
+        }
+      ],
+      "objects": [
+        {
+          "key": "pc.clamp",
+          "label": "Remove the iron clamp",
+          "x": -1320,
+          "z": -720,
+          "y": 80,
+          "kind": "clamp"
+        },
+        {
+          "key": "pc.water",
+          "label": "Open the court water wheel",
+          "x": -1200,
+          "z": -1070,
+          "y": 80,
+          "kind": "wheel"
+        },
+        {
+          "key": "pc.west.lower",
+          "label": "Drain the west lock",
+          "x": -1390,
+          "z": -2370,
+          "y": 200,
+          "kind": "wheel"
+        },
+        {
+          "key": "pc.east.lower",
+          "label": "Drain the east lock",
+          "x": 770,
+          "z": -2280,
+          "y": 200,
+          "kind": "wheel"
+        },
+        {
+          "key": "pc.west.upper",
+          "label": "Release the west balcony",
+          "x": -1000,
+          "z": -2530,
+          "y": 340,
+          "kind": "lever",
+          "blockedLabel": "Defeat this balcony patrol first",
+          "blockedText": "The patrol controls this release. The lower garden offers another way."
+        },
+        {
+          "key": "pc.east.upper",
+          "label": "Release the east balcony",
+          "x": 1090,
+          "z": -2150,
+          "y": 340,
+          "kind": "lever",
+          "blockedLabel": "Defeat this balcony patrol first",
+          "blockedText": "The patrol controls this release. The lower garden offers another way."
+        },
+        {
+          "key": "pc.garden.water",
+          "label": "Open the garden channel",
+          "x": 1320,
+          "z": -1000,
+          "y": 160,
+          "kind": "wheel"
+        },
+        {
+          "key": "pc.seeds",
+          "label": "Take the dry seed tin",
+          "x": 1770,
+          "z": -1420,
+          "y": 160,
+          "kind": "seeds"
+        },
+        {
+          "key": "pc.memorial",
+          "label": "Read the garden keeper\u2019s stone",
+          "x": -1930,
+          "z": -2000,
+          "y": 370,
+          "kind": "book"
+        },
+        {
+          "key": "pc.mirror.note",
+          "label": "Read the sun marks",
+          "x": -420,
+          "z": -3650,
+          "y": 420,
+          "kind": "book"
+        },
+        {
+          "key": "pc.enter",
+          "label": "Open the library door",
+          "x": 0,
+          "z": -4240,
+          "y": 440,
+          "kind": "door"
+        },
+        {
+          "key": "pc.mirror.0",
+          "label": "Turn left mirror",
+          "x": -330,
+          "z": -3890,
+          "y": 420,
+          "kind": "mirror0"
+        },
+        {
+          "key": "pc.mirror.1",
+          "label": "Turn middle mirror",
+          "x": 330,
+          "z": -3890,
+          "y": 420,
+          "kind": "mirror1"
+        },
+        {
+          "key": "pc.mirror.2",
+          "label": "Turn right mirror",
+          "x": 330,
+          "z": -4120,
+          "y": 420,
+          "kind": "mirror2"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -920,
+          "z": -2380,
+          "y": 340
+        },
+        {
+          "type": "caster",
+          "x": -1160,
+          "z": -2520,
+          "y": 340
+        },
+        {
+          "type": "grunt",
+          "x": 960,
+          "z": -1930,
+          "y": 340
+        },
+        {
+          "type": "caster",
+          "x": 1200,
+          "z": -2170,
+          "y": 340
+        },
+        {
+          "type": "grunt",
+          "x": 600,
+          "z": -1050,
+          "y": 160
+        },
+        {
+          "type": "grunt",
+          "x": -1330,
+          "z": -1900,
+          "y": 180
+        },
+        {
+          "type": "caster",
+          "x": 1200,
+          "z": -2730,
+          "y": 260
+        },
+        {
+          "type": "slime",
+          "x": 1630,
+          "z": -1470,
+          "y": 160
+        },
+        {
+          "type": "grunt",
+          "x": -1730,
+          "z": -1730,
+          "y": 270
+        },
+        {
+          "type": "caster",
+          "x": -200,
+          "z": -3410,
+          "y": 390
+        },
+        {
+          "type": "grunt",
+          "x": -1330,
+          "z": -2100,
+          "y": 190
+        },
+        {
+          "type": "caster",
+          "x": -1490,
+          "z": -1930,
+          "y": 210
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 6,
+      "area": 1,
+      "name": "The Sky Library",
+      "zoneName": "The Sunspire Palace",
+      "side": {
+        "id": "reliquary",
+        "name": "The Sealed Reliquary",
+        "icon": "\ud83d\udc8e",
+        "stage": 13,
+        "seed": 317,
+        "trial": "necromancer",
+        "blurb": "What a palace hides, it hides deep."
+      },
+      "counts": {
+        "segments": 0,
+        "obstacles": 336,
+        "walls": 31,
+        "deco": 368,
+        "enemies": 13,
+        "storyNpcs": 2,
+        "storyObjects": 27,
+        "chests": 0,
+        "healpads": 4
+      },
+      "bounds": {
+        "minX": -4050,
+        "maxX": 2700,
+        "minZ": -5550,
+        "maxZ": 850
+      },
+      "rooms": [
+        {
+          "name": "Quiet entrance",
+          "x": 0,
+          "z": 50,
+          "y": 120,
+          "w": 950,
+          "d": 1050
+        },
+        {
+          "name": "Keeper desk",
+          "x": 0,
+          "z": -1200,
+          "y": 200,
+          "w": 850,
+          "d": 620
+        },
+        {
+          "name": "Lower passage",
+          "x": -1130,
+          "z": -1400,
+          "y": 60,
+          "w": 400,
+          "d": 550
+        },
+        {
+          "name": "Damaged records",
+          "x": 1120,
+          "z": -1870,
+          "y": 320,
+          "w": 620,
+          "d": 740
+        },
+        {
+          "name": "Reading hall",
+          "x": 0,
+          "z": -2800,
+          "y": 300,
+          "w": 1050,
+          "d": 1050
+        },
+        {
+          "name": "Shelf controls",
+          "x": 1490,
+          "z": -3640,
+          "y": 360,
+          "w": 580,
+          "d": 660
+        },
+        {
+          "name": "Restricted shelf",
+          "x": 2400,
+          "z": -4400,
+          "y": 420,
+          "w": 380,
+          "d": 380
+        },
+        {
+          "name": "Empty displays",
+          "x": -1330,
+          "z": -4000,
+          "y": 440,
+          "w": 930,
+          "d": 660
+        },
+        {
+          "name": "Hidden room",
+          "x": -1520,
+          "z": -4600,
+          "y": 480,
+          "w": 560,
+          "d": 520
+        },
+        {
+          "name": "Guardian approach",
+          "x": 0,
+          "z": -4810,
+          "y": 400,
+          "w": 950,
+          "d": 1000
+        },
+        {
+          "name": "Archive stands",
+          "x": 1320,
+          "z": -4600,
+          "y": 400,
+          "w": 1080,
+          "d": 1000
+        },
+        {
+          "name": "Broken nest sign",
+          "x": -1950,
+          "z": -3830,
+          "y": 460,
+          "w": 350,
+          "d": 340
+        },
+        {
+          "name": "Supply ledge",
+          "x": -2770,
+          "z": -2830,
+          "y": 540,
+          "w": 580,
+          "d": 460
+        },
+        {
+          "name": "Net winch terrace",
+          "x": -3210,
+          "z": -3450,
+          "y": 600,
+          "w": 740,
+          "d": 610
+        },
+        {
+          "name": "High nest",
+          "x": -3650,
+          "z": -3590,
+          "y": 690,
+          "w": 610,
+          "d": 570
+        }
+      ],
+      "npcs": [
+        {
+          "id": "hugh",
+          "name": "Master Hugh",
+          "x": -220,
+          "z": -1250,
+          "y": 200
+        },
+        {
+          "id": "simon",
+          "name": "Simon",
+          "x": 1470,
+          "z": -3510,
+          "y": 360
+        }
+      ],
+      "objects": [
+        {
+          "key": "sl.maintenance",
+          "label": "Open the service latch",
+          "x": -1110,
+          "z": -1600,
+          "y": 60,
+          "kind": "lever"
+        },
+        {
+          "key": "sl.records",
+          "label": "Lift the fallen records onto a dry desk",
+          "x": 1130,
+          "z": -1850,
+          "y": 320,
+          "kind": "book"
+        },
+        {
+          "key": "sl.orders",
+          "label": "Read the Legion orders",
+          "x": -220,
+          "z": -2930,
+          "y": 300,
+          "kind": "book"
+        },
+        {
+          "key": "sl.release",
+          "label": "Release the reading hall seal",
+          "x": 0,
+          "z": -4870,
+          "y": 400,
+          "kind": "lever",
+          "blockedLabel": "Defeat the reading hall patrol first",
+          "blockedText": "The occupied reading hall controls this seal."
+        },
+        {
+          "key": "sl.history",
+          "label": "Read the scholar\u2019s last note",
+          "x": -1300,
+          "z": -3860,
+          "y": 440,
+          "kind": "book"
+        },
+        {
+          "key": "sl.display.clue",
+          "label": "Inspect the broken display mounts",
+          "x": -1060,
+          "z": -3980,
+          "y": 440,
+          "kind": "book"
+        },
+        {
+          "key": "sl.shelf.clue",
+          "label": "Read the shelf handles",
+          "x": 1460,
+          "z": -3810,
+          "y": 360,
+          "kind": "book"
+        },
+        {
+          "key": "sl.shelf.0",
+          "label": "Turn shelf 1",
+          "x": 1320,
+          "z": -3650,
+          "y": 360,
+          "kind": "shelf0"
+        },
+        {
+          "key": "sl.display.0",
+          "label": "Press the sun mark",
+          "x": -1430,
+          "z": -4210,
+          "y": 440,
+          "kind": "mark0"
+        },
+        {
+          "key": "sl.vow.0",
+          "label": "Defend archive stand 1",
+          "x": 1000,
+          "z": -4610,
+          "y": 400,
+          "kind": "stand0"
+        },
+        {
+          "key": "sl.seal.0",
+          "label": "Secure archive stand 1",
+          "x": 1000,
+          "z": -4610,
+          "y": 400,
+          "kind": "seal0"
+        },
+        {
+          "key": "sl.shelf.1",
+          "label": "Turn shelf 2",
+          "x": 1490,
+          "z": -3650,
+          "y": 360,
+          "kind": "shelf1"
+        },
+        {
+          "key": "sl.display.1",
+          "label": "Press the wing mark",
+          "x": -1270,
+          "z": -4210,
+          "y": 440,
+          "kind": "mark1"
+        },
+        {
+          "key": "sl.vow.1",
+          "label": "Defend archive stand 2",
+          "x": 1300,
+          "z": -4610,
+          "y": 400,
+          "kind": "stand1"
+        },
+        {
+          "key": "sl.seal.1",
+          "label": "Secure archive stand 2",
+          "x": 1300,
+          "z": -4610,
+          "y": 400,
+          "kind": "seal1"
+        },
+        {
+          "key": "sl.shelf.2",
+          "label": "Turn shelf 3",
+          "x": 1660,
+          "z": -3650,
+          "y": 360,
+          "kind": "shelf2"
+        },
+        {
+          "key": "sl.display.2",
+          "label": "Press the sword mark",
+          "x": -1110,
+          "z": -4210,
+          "y": 440,
+          "kind": "mark2"
+        },
+        {
+          "key": "sl.vow.2",
+          "label": "Defend archive stand 3",
+          "x": 1600,
+          "z": -4610,
+          "y": 400,
+          "kind": "stand2"
+        },
+        {
+          "key": "sl.seal.2",
+          "label": "Secure archive stand 3",
+          "x": 1600,
+          "z": -4610,
+          "y": 400,
+          "kind": "seal2"
+        },
+        {
+          "key": "sl.shelf.reset",
+          "label": "Reset all shelf gears",
+          "x": 1510,
+          "z": -3740,
+          "y": 360,
+          "kind": "lever"
+        },
+        {
+          "key": "dr.clue",
+          "label": "Read the torn keeper notice",
+          "x": -1950,
+          "z": -3830,
+          "y": 460,
+          "kind": "notice",
+          "dragonObject": true
+        },
+        {
+          "key": "dr.tools",
+          "label": "Take the spare beam",
+          "x": -2790,
+          "z": -2910,
+          "y": 540,
+          "kind": "beam",
+          "dragonObject": true
+        },
+        {
+          "key": "dr.food",
+          "label": "Take the dried meat",
+          "x": -2700,
+          "z": -2790,
+          "y": 540,
+          "kind": "food",
+          "dragonObject": true
+        },
+        {
+          "key": "dr.brace",
+          "label": "Brace the cracked net frame",
+          "x": -3090,
+          "z": -3450,
+          "y": 600,
+          "kind": "brace",
+          "dragonObject": true
+        },
+        {
+          "key": "dr.winch",
+          "label": "Lower the net slowly",
+          "x": -3310,
+          "z": -3290,
+          "y": 600,
+          "kind": "winch",
+          "dragonObject": true
+        },
+        {
+          "key": "dr.release",
+          "label": "Unfasten the loose net",
+          "x": -3630,
+          "z": -3440,
+          "y": 690,
+          "kind": "release",
+          "dragonObject": true
+        },
+        {
+          "key": "dr.feed",
+          "label": "Offer food and step back",
+          "x": -3500,
+          "z": -3610,
+          "y": 690,
+          "kind": "feed",
+          "dragonObject": true
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": -1110,
+          "z": -1230,
+          "y": 60
+        },
+        {
+          "type": "caster",
+          "x": 1150,
+          "z": -1950,
+          "y": 320
+        },
+        {
+          "type": "grunt",
+          "x": -260,
+          "z": -2640,
+          "y": 300
+        },
+        {
+          "type": "caster",
+          "x": 290,
+          "z": -2940,
+          "y": 300
+        },
+        {
+          "type": "grunt",
+          "x": 100,
+          "z": -3150,
+          "y": 300
+        },
+        {
+          "type": "grunt",
+          "x": -1070,
+          "z": -3290,
+          "y": 420
+        },
+        {
+          "type": "caster",
+          "x": -1420,
+          "z": -4050,
+          "y": 440
+        },
+        {
+          "type": "grunt",
+          "x": 500,
+          "z": -4500,
+          "y": 400
+        },
+        {
+          "type": "grunt",
+          "x": -2990,
+          "z": -3460,
+          "y": 600
+        },
+        {
+          "type": "caster",
+          "x": -3240,
+          "z": -3560,
+          "y": 600
+        },
+        {
+          "type": "grunt",
+          "x": -3380,
+          "z": -3470,
+          "y": 600
+        },
+        {
+          "type": "grunt",
+          "x": -1220,
+          "z": -4010,
+          "y": 440
+        },
+        {
+          "type": "caster",
+          "x": -1500,
+          "z": -3900,
+          "y": 445
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 7,
+      "area": 0,
+      "name": "The Castle Gates",
+      "zoneName": "Castle Duskmoor",
+      "counts": {
+        "segments": 0,
+        "obstacles": 284,
+        "walls": 23,
+        "deco": 306,
+        "enemies": 9,
+        "storyNpcs": 2,
+        "storyObjects": 13,
+        "chests": 0,
+        "healpads": 4
+      },
+      "bounds": {
+        "minX": -2530,
+        "maxX": 2480,
+        "minZ": -6320,
+        "maxZ": 1050
+      },
+      "rooms": [
+        {
+          "name": "Western landing",
+          "x": 0,
+          "z": 510,
+          "y": 0,
+          "w": 660,
+          "d": 500
+        },
+        {
+          "name": "Repair yard",
+          "x": -850,
+          "z": -1010,
+          "y": 120,
+          "w": 900,
+          "d": 660
+        },
+        {
+          "name": "Armor wash",
+          "x": -1300,
+          "z": -1800,
+          "y": 140,
+          "w": 650,
+          "d": 600
+        },
+        {
+          "name": "Supply yard",
+          "x": 840,
+          "z": -1880,
+          "y": 120,
+          "w": 1120,
+          "d": 960
+        },
+        {
+          "name": "Bell post",
+          "x": 0,
+          "z": -2710,
+          "y": 200,
+          "w": 900,
+          "d": 650
+        },
+        {
+          "name": "Drain controls",
+          "x": -870,
+          "z": -3240,
+          "y": 100,
+          "w": 520,
+          "d": 740
+        },
+        {
+          "name": "Confiscation room",
+          "x": 1810,
+          "z": -2520,
+          "y": 220,
+          "w": 680,
+          "d": 820
+        },
+        {
+          "name": "Gate court",
+          "x": 0,
+          "z": -4530,
+          "y": 280,
+          "w": 1580,
+          "d": 1500
+        },
+        {
+          "name": "Tower entrance",
+          "x": 0,
+          "z": -5530,
+          "y": 280,
+          "w": 750,
+          "d": 580
+        },
+        {
+          "name": "Hidden supply balcony",
+          "x": -1770,
+          "z": -3450,
+          "y": 510,
+          "w": 420,
+          "d": 340
+        }
+      ],
+      "npcs": [
+        {
+          "id": "roland",
+          "name": "Roland",
+          "x": -760,
+          "z": -910,
+          "y": 120
+        },
+        {
+          "id": "cross",
+          "name": "Captain Cross",
+          "x": 150,
+          "z": -4940,
+          "y": 280
+        }
+      ],
+      "objects": [
+        {
+          "key": "cg.coat",
+          "label": "Take the matching coat",
+          "x": 980,
+          "z": -2080,
+          "y": 120,
+          "kind": "armor",
+          "blockedLabel": "Clear the supply patrol first"
+        },
+        {
+          "key": "cg.helmet",
+          "label": "Take the repaired helmet",
+          "x": -1290,
+          "z": -1930,
+          "y": 140,
+          "kind": "helmet"
+        },
+        {
+          "key": "cg.papers",
+          "label": "Read and take the supply papers",
+          "x": 1040,
+          "z": -1810,
+          "y": 120,
+          "kind": "book"
+        },
+        {
+          "key": "cg.orders",
+          "label": "Read the gate roster",
+          "x": -300,
+          "z": -2650,
+          "y": 200,
+          "kind": "book"
+        },
+        {
+          "key": "cg.bells",
+          "label": "Read the bell notice",
+          "x": 310,
+          "z": -2700,
+          "y": 200,
+          "kind": "book"
+        },
+        {
+          "key": "cg.catch.west",
+          "label": "Release the west bridge catch",
+          "x": -980,
+          "z": -3220,
+          "y": 100,
+          "kind": "wheel"
+        },
+        {
+          "key": "cg.catch.east",
+          "label": "Release the east bridge catch",
+          "x": -760,
+          "z": -3430,
+          "y": 100,
+          "kind": "wheel"
+        },
+        {
+          "key": "cg.bridge",
+          "label": "Lower the crossing bridge",
+          "x": -420,
+          "z": -3590,
+          "y": 180,
+          "kind": "wheel"
+        },
+        {
+          "key": "cg.personal",
+          "label": "Recover Roland\u2019s old armor",
+          "x": 1970,
+          "z": -2670,
+          "y": 220,
+          "kind": "armor",
+          "blockedLabel": "Clear the store guards first"
+        },
+        {
+          "key": "cg.store.note",
+          "label": "Read the seized goods list",
+          "x": 1620,
+          "z": -2310,
+          "y": 200,
+          "kind": "book"
+        },
+        {
+          "key": "cg.break",
+          "label": "Sound the challenge \u2014 fight the gate guard",
+          "x": -270,
+          "z": -4890,
+          "y": 280,
+          "kind": "bell"
+        },
+        {
+          "key": "cg.release",
+          "label": "Raise the inner gate",
+          "x": -350,
+          "z": -5150,
+          "y": 280,
+          "kind": "wheel",
+          "blockedLabel": "Defeat the gate guard first"
+        },
+        {
+          "key": "cg.balcony.note",
+          "label": "Read the loose supply tag",
+          "x": -1570,
+          "z": -2240,
+          "y": 240,
+          "kind": "book"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": 630,
+          "z": -1960,
+          "y": 120
+        },
+        {
+          "type": "caster",
+          "x": 1110,
+          "z": -2020,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": 940,
+          "z": -1510,
+          "y": 120
+        },
+        {
+          "type": "grunt",
+          "x": -1360,
+          "z": -1700,
+          "y": 140
+        },
+        {
+          "type": "royalarcanist",
+          "x": -1060,
+          "z": -2260,
+          "y": 180
+        },
+        {
+          "type": "grunt",
+          "x": 1870,
+          "z": -2570,
+          "y": 220
+        },
+        {
+          "type": "caster",
+          "x": 1710,
+          "z": -2720,
+          "y": 220
+        },
+        {
+          "type": "grunt",
+          "x": -840,
+          "z": -3310,
+          "y": 100
+        },
+        {
+          "type": "royalarcanist",
+          "x": -470,
+          "z": -3660,
+          "y": 180
+        }
+      ],
+      "invalidCoordinates": []
+    },
+    {
+      "zone": 7,
+      "area": 1,
+      "name": "The Long Ascent",
+      "zoneName": "Castle Duskmoor",
+      "counts": {
+        "segments": 0,
+        "obstacles": 1294,
+        "walls": 7,
+        "deco": 277,
+        "enemies": 16,
+        "storyNpcs": 1,
+        "storyObjects": 10,
+        "chests": 0,
+        "healpads": 6
+      },
+      "bounds": {
+        "minX": -2150,
+        "maxX": 2200,
+        "minZ": -1600,
+        "maxZ": 1650
+      },
+      "rooms": [
+        {
+          "name": "Tower foot",
+          "x": 0,
+          "z": 940,
+          "y": 0,
+          "w": 600,
+          "d": 500
+        },
+        {
+          "name": "Service landing",
+          "x": 940,
+          "z": 0,
+          "y": 250,
+          "w": 540,
+          "d": 520
+        },
+        {
+          "name": "Lower stair catch",
+          "x": 0,
+          "z": -940,
+          "y": 500,
+          "w": 620,
+          "d": 490
+        },
+        {
+          "name": "Locked workers",
+          "x": -1300,
+          "z": -180,
+          "y": 750,
+          "w": 740,
+          "d": 730
+        },
+        {
+          "name": "Broken flight",
+          "x": 0,
+          "z": 940,
+          "y": 1000,
+          "w": 600,
+          "d": 500
+        },
+        {
+          "name": "Upper stair catch",
+          "x": 0,
+          "z": -940,
+          "y": 1500,
+          "w": 650,
+          "d": 520
+        },
+        {
+          "name": "Throne approach",
+          "x": 0,
+          "z": 940,
+          "y": 2000,
+          "w": 760,
+          "d": 620
+        },
+        {
+          "name": "Linen room",
+          "x": 1390,
+          "z": -190,
+          "y": 250,
+          "w": 520,
+          "d": 650
+        },
+        {
+          "name": "Service vault",
+          "x": 1810,
+          "z": 30,
+          "y": 250,
+          "w": 410,
+          "d": 450
+        },
+        {
+          "name": "Old memorial",
+          "x": -1630,
+          "z": 350,
+          "y": 1800,
+          "w": 460,
+          "d": 400
+        }
+      ],
+      "npcs": [
+        {
+          "id": "miles",
+          "name": "Miles",
+          "x": 1420,
+          "z": -170,
+          "y": 250
+        }
+      ],
+      "objects": [
+        {
+          "key": "la.notice",
+          "label": "Read the stair notice",
+          "x": 110,
+          "z": 900,
+          "y": 0,
+          "kind": "book"
+        },
+        {
+          "key": "la.lower",
+          "label": "Release the lower stair catch",
+          "x": -350,
+          "z": -1190,
+          "y": 500,
+          "kind": "wheel"
+        },
+        {
+          "key": "la.upper",
+          "label": "Release the upper stair catch",
+          "x": 350,
+          "z": -1190,
+          "y": 1500,
+          "kind": "wheel"
+        },
+        {
+          "key": "la.cells",
+          "label": "Open the worker cells",
+          "x": -1400,
+          "z": -250,
+          "y": 750,
+          "kind": "wheel",
+          "blockedLabel": "Defeat the cell guards first"
+        },
+        {
+          "key": "la.vault.note",
+          "label": "Read the repair tally",
+          "x": 1490,
+          "z": 20,
+          "y": 250,
+          "kind": "book"
+        },
+        {
+          "key": "la.vault.left",
+          "label": "Turn the left service wheel",
+          "x": 1570,
+          "z": -320,
+          "y": 250,
+          "kind": "wheel",
+          "blockedLabel": "Release the worker cells to unlock the service wheels"
+        },
+        {
+          "key": "la.vault.right",
+          "label": "Turn the right service wheel",
+          "x": 1570,
+          "z": -170,
+          "y": 250,
+          "kind": "wheel",
+          "blockedLabel": "Release the worker cells to unlock the service wheels"
+        },
+        {
+          "key": "la.orders",
+          "label": "Read the King\u2019s urgent order",
+          "x": -120,
+          "z": -970,
+          "y": 1500,
+          "kind": "book"
+        },
+        {
+          "key": "la.memorial.note",
+          "label": "Read the old workers\u2019 names",
+          "x": -1630,
+          "z": 440,
+          "y": 1800,
+          "kind": "book"
+        },
+        {
+          "key": "la.summit",
+          "label": "Open the throne doors",
+          "x": 0,
+          "z": 1090,
+          "y": 2000,
+          "kind": "wheel",
+          "blockedLabel": "Release both stair catches and defeat the throne guards first"
+        }
+      ],
+      "enemies": [
+        {
+          "type": "grunt",
+          "x": 819,
+          "z": 290,
+          "y": 240
+        },
+        {
+          "type": "caster",
+          "x": 894,
+          "z": 290,
+          "y": 240
+        },
+        {
+          "type": "siegeknight",
+          "x": 215,
+          "z": -894,
+          "y": 500
+        },
+        {
+          "type": "royalarcanist",
+          "x": 290,
+          "z": -894,
+          "y": 500
+        },
+        {
+          "type": "grunt",
+          "x": -1015,
+          "z": 0,
+          "y": 750
+        },
+        {
+          "type": "caster",
+          "x": -940,
+          "z": 0,
+          "y": 750
+        },
+        {
+          "type": "grunt",
+          "x": -865,
+          "z": 0,
+          "y": 750
+        },
+        {
+          "type": "royalarcanist",
+          "x": -528,
+          "z": 824,
+          "y": 950
+        },
+        {
+          "type": "grunt",
+          "x": -453,
+          "z": 824,
+          "y": 950
+        },
+        {
+          "type": "grunt",
+          "x": 865,
+          "z": 0,
+          "y": 1250
+        },
+        {
+          "type": "caster",
+          "x": 940,
+          "z": 0,
+          "y": 1250
+        },
+        {
+          "type": "siegeknight",
+          "x": 215,
+          "z": -894,
+          "y": 1500
+        },
+        {
+          "type": "caster",
+          "x": 290,
+          "z": -894,
+          "y": 1500
+        },
+        {
+          "type": "siegeknight",
+          "x": -475,
+          "z": 851,
+          "y": 1960
+        },
+        {
+          "type": "royalarcanist",
+          "x": -400,
+          "z": 851,
+          "y": 1970
+        },
+        {
+          "type": "grunt",
+          "x": -325,
+          "z": 851,
+          "y": 2000
+        }
+      ],
+      "invalidCoordinates": []
+    }
+  ]
+}

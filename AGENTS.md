@@ -82,3 +82,7 @@ Deferred (needs Oliver): weapon 3D rebuild, `docs/ICON_ART_GPT_PROMPT.md` menu i
 
 ## Story authority (2026-09-19)
 Before story, quest, dialogue, faction or ending work, read docs/STORY_CANON.md and docs/STORY_CANON_MIGRATION.md. Oliver’s master lore brief overrides conflicting older story bibles and old directions above. Keep unresolved canon open. All player-facing writing must use clear, middle-school-readable language.
+
+
+## [Codex | 2026-10-05] Level-design verification standard
+Treat the user's reported experience of repetitive combination puzzles as primary evidence. Different lore, effect names or state machines do not prove different play. Strip story nouns from puzzle descriptions and classify actual inputs, decisions and visible consequences. Inspect an uncut normal-camera interaction including a mistake and recovery before calling presentation verified. Separate code-inspected, visually verified and human-playtested. A map or automated test cannot establish fun. Prototype one compact interaction before multiplying a design; await the Ruined Keep beta playtest before replacing more campaign maps. See docs/design/campaign-audit/index.html and requirements/DECISION_LOG.md for the revised review.

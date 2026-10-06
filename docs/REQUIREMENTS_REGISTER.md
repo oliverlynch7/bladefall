@@ -963,3 +963,15 @@ User requests title-screen Dev button to access design documents on phone. Add a
 
 ## [Codex | 2026-10-04] Playable isolated Ruined Keep beta approved
 User approves generating the map-first design as a playable level reachable from Dev Previews, with selectable character level, class and related test loadout. Implement a disposable solo test session, explicit reset/exit, lift/counterweight traversal and prisoner rescue. Do not replace campaign geometry or persist beta rewards into campaign saves. This is a playtest slice, not a finished campaign replacement.
+
+
+## [Codex | 2026-10-05] Campaign audit and next map-first packet
+User authorizes a long, usage-conscious session auditing current campaign environmental contradictions, repeated quests/puzzles and reward placement; draft the next level overhead plan. Keep current campaign levels and Ruined Keep beta unchanged pending human playtest. Produce source-grounded findings, distinguish confirmed code facts from design risks and proposals, and make the audit/next plan reachable from Dev Previews.
+
+
+## [Codex | 2026-10-05] Puzzle variety means different player actions
+User correction: differently named/story-framed puzzles still feel identical when they reduce to guessing three buttons in order. Current visual feedback does not distinguish them enough. Audit must classify the actual player interaction, information available before acting, visible physical result and reasoning required; do not count code/state differences as experiential variety. Prioritize spatial, traversal, observation and physical manipulation over reskinned sequence guessing. Revise Frostfell proposal accordingly; not approval to replace campaign before beta feedback.
+
+
+## [Codex | 2026-10-05] Evidence standard for experiential design
+User identifies recurring failure: code/story descriptions made Codex treat substantially identical, unfun player interactions as differentiated. Adopt a player-action audit with story nouns removed, explicit similarity classification, normal-camera interaction recordings and human playtest gates. Separate implemented/code-inspected, visually verified and human-playtested; do not claim clarity, variety or fun from code alone. Treat user's observed sameness and weak visual feedback as primary experiential evidence. Prototype one interaction before multiplying it across levels.

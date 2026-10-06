@@ -1,0 +1,437 @@
+{
+  "status": "Proposals, not implemented campaign changes",
+  "sourceCommit": "1f46dd0",
+  "areas": [
+    {
+      "name": "Homefields",
+      "current": "Help Thomas and Mara, restore the mill crossing, open the wagon gate.",
+      "keep": "The family stakes, healing introduction and water \u2192 jam \u2192 bridge cause-and-effect.",
+      "concern": "Supplies, several mill interactions and a return to Mara compete with the first-time learning load. More objects alone will not improve this opening.",
+      "proposal": "Make home, medical station, mill and escape gate visible parts of one village. Put dressings in a believable damaged home; roots at the stream. Let the mill reveal the next route. Keep Thomas and Mara central.",
+      "source": {
+        "path": "public/3d/index.html",
+        "sha256": "2be064a48cdb736a4e1fecaa10a47e80178440ec4b4e8685587492929d40a8b3",
+        "anchors": {
+          "function briarQuest": 3213,
+          "function quest": 3921,
+          "function sync": 3197,
+          "const paths": 3424
+        }
+      },
+      "runtimeCounts": {
+        "segments": 321,
+        "obstacles": 278,
+        "walls": 3,
+        "deco": 919,
+        "enemies": 26,
+        "storyNpcs": 3,
+        "storyObjects": 24,
+        "chests": 5,
+        "healpads": 4
+      }
+    },
+    {
+      "name": "Black Woods",
+      "current": "Meet Lewis, silence the signal by ground crank or upper cable, reach the shelter.",
+      "keep": "Two approaches to the signal and the captive/dog rescue opportunities.",
+      "concern": "The upper route must be readable as a deliberate alternative, not anonymous green platforms. Existing objective alternatives deserve more prominence than additional errands.",
+      "proposal": "Use the signal tower as a persistent landmark. Ground combat and canopy parkour converge at it. Put rescue pens beside the Legion camp, with a visible safe path toward the shelter.",
+      "source": {
+        "path": "public/3d/index.html",
+        "sha256": "2be064a48cdb736a4e1fecaa10a47e80178440ec4b4e8685587492929d40a8b3",
+        "anchors": {
+          "function briarQuest": 3213,
+          "function quest": 3921,
+          "function sync": 3197,
+          "const paths": 3424
+        }
+      },
+      "runtimeCounts": {
+        "segments": 147,
+        "obstacles": 151,
+        "walls": 0,
+        "deco": 139,
+        "enemies": 12,
+        "storyNpcs": 3,
+        "storyObjects": 8,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Winding Cliffs",
+      "current": "Follow prisoner-transport tracks, repair the freight crossing, bypass or fight the lookout, descend.",
+      "keep": "Evidence leads the player onward; an upper rope can avoid the lookout fight.",
+      "concern": "A weights/bridge objective risks reading as another arbitrary interaction gate unless the broken freight route and load are plainly visible.",
+      "proposal": "Build around a wrecked transport on a narrow trade ledge. Show the destination across the gap before the repair. Make the optional climber loop teach the upper approach.",
+      "source": {
+        "path": "public/3d/hollow-cliffs.js",
+        "sha256": "1531339c5af3637182488751e51154751f7c3760ac4782a5804e8929cdc2be0b",
+        "anchors": {
+          "function quest": 59,
+          "function sync": 50,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 133,
+        "obstacles": 146,
+        "walls": 0,
+        "deco": 22,
+        "enemies": 9,
+        "storyNpcs": 2,
+        "storyObjects": 16,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Lost Canyon",
+      "current": "Enter by papers, force or upper route; free two groups, stop the alarm and open escape.",
+      "keep": "Multiple entry methods, alarm control and rescuing an enslaved population.",
+      "concern": "Two prisoner groups can feel like repeating the same switch unless their positions create different tactical problems.",
+      "proposal": "One group sits beneath the lookout; another is exposed to the alarm route. Let reconnaissance reveal both. Rescue changes who occupies the yard; optional patrol hunting stays in a clearly marked reinforcement area.",
+      "source": {
+        "path": "public/3d/lost-canyon.js",
+        "sha256": "8aad057b5daee8e9f210c3d3cf1e30301e566bbf70f1975739d4754b6c4c51ea",
+        "anchors": {
+          "function quest": 19,
+          "function sync": 65,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 125,
+        "obstacles": 179,
+        "walls": 0,
+        "deco": 75,
+        "enemies": 9,
+        "storyNpcs": 2,
+        "storyObjects": 17,
+        "chests": 0,
+        "healpads": 4
+      }
+    },
+    {
+      "name": "Broken Walls",
+      "current": "Silence the arrow post, open the side gate, ring the breach bell, hold the breach, enter the prison.",
+      "keep": "A timed defense followed by key-or-battlement-wheel entry already changes the activity.",
+      "concern": "A timer plus remaining-enemy requirement can be unclear. Felix\u2019s tool return needs a credible workshop and a worthwhile shortcut/reward.",
+      "proposal": "Place the breach at a visibly damaged wall with defenders behind it and attackers outside. Show both timer and remaining attackers. Put the locksmith\u2019s chamber on a distinct optional battlement loop.",
+      "source": {
+        "path": "public/3d/broken-walls.js",
+        "sha256": "8a19e27cab849ad935b825186e38ef202d51d0b466975c0c358be6135b7cb4c1",
+        "anchors": {
+          "function quest": 8,
+          "function sync": 25,
+          "const paths": 3
+        }
+      },
+      "runtimeCounts": {
+        "segments": 157,
+        "obstacles": 124,
+        "walls": 0,
+        "deco": 19,
+        "enemies": 10,
+        "storyNpcs": 2,
+        "storyObjects": 9,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "The Dungeons",
+      "current": "Locate cells, free prisoners, recover papers, balance the lift and transfer the group.",
+      "keep": "Prisoner rescue, seized evidence and the optional stolen-locket restitution.",
+      "concern": "The authored service route climbs from the lower ring toward the upper exit, while Walter mentions eastern service stairs. This weakens the lift\u2019s necessity; a quest bypass itself has not been demonstrated.",
+      "proposal": "Test the isolated Keep beta before replacing this map. Its separate maintenance route is usable by the player while the wounded prisoners need the lift. Preserve that physical distinction in any final version.",
+      "source": {
+        "path": "public/3d/prison-dungeons.js",
+        "sha256": "4dc249e90b5f62a6f6913fa7b0486411075012d924f17988b711d587ea89ef8f",
+        "anchors": {
+          "function quest": 8,
+          "function sync": 34,
+          "const paths": 3
+        }
+      },
+      "runtimeCounts": {
+        "segments": 21,
+        "obstacles": 344,
+        "walls": 0,
+        "deco": 10,
+        "enemies": 12,
+        "storyNpcs": 2,
+        "storyObjects": 20,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Snowbound Peaks",
+      "current": "Find Heath, fetch and return the heater part, decode the signal carving and enter the cave.",
+      "keep": "Mountain ascent, wind shelter, a distant cave goal and optional buried-camp reward.",
+      "concern": "The heater has a valid purpose\u2014thawing the winch\u2014but the required return trip slows the ascent. The three-choice carving is mainly clue recognition.",
+      "proposal": "Proposed next prototype: repair the frozen crossing on the forward route, then navigate wind and an aligned signal beam. Keep the old lift as an optional shortcut loop. See the revised Frostfell maps below; existing sequences are not approved to carry forward unchanged.",
+      "source": {
+        "path": "public/3d/snowbound-peaks.js",
+        "sha256": "7bc30e01592147d5b12f7c546291dcab7aa3fa9558952f526cd297414c9737fc",
+        "anchors": {
+          "function quest": 59,
+          "function sync": 50,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 2,
+        "obstacles": 263,
+        "walls": 0,
+        "deco": 56,
+        "enemies": 15,
+        "storyNpcs": 1,
+        "storyObjects": 13,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Deep Ice Caves",
+      "current": "Follow pages, release Ellis, fetch his notes and return, build the ice crossing, confront three officers.",
+      "keep": "Ellis is captured just before transport. The water-and-ice setting suits a physical puzzle; Hugo\u2019s rope rescue already moves him along a route. The current three-control crossing is not yet sufficient variety.",
+      "concern": "The sealed-pack return repeats the mountain\u2019s errand. Three nearby Fill/Freeze/Drain controls still invite combination guessing; changing water height in code does not by itself make the experience satisfying.",
+      "proposal": "Rescue Ellis first; recover his records on the escape route ahead. Show the water basin and exit from the lab. Replace the three-control puzzle with spatial water manipulation. Keep the three officers as a coordinated exit fight and Hugo\u2019s rescue optional.",
+      "source": {
+        "path": "public/3d/deep-ice-caves.js",
+        "sha256": "2c2009a2233917cefdebfa87ece63d16ef3ea1e6bede66cea81cdfc1a64582e7",
+        "anchors": {
+          "function quest": 19,
+          "function sync": 48,
+          "const paths": 3
+        }
+      },
+      "runtimeCounts": {
+        "segments": 2,
+        "obstacles": 321,
+        "walls": 18,
+        "deco": 23,
+        "enemies": 16,
+        "storyNpcs": 2,
+        "storyObjects": 15,
+        "chests": 0,
+        "healpads": 4
+      }
+    },
+    {
+      "name": "Iron Halls",
+      "current": "Reach the workers, find Jack, retrieve insulated handles, operate machinery and bridge the cart gap.",
+      "keep": "The forge supplies the Legion; machinery and trapped workers belong here.",
+      "concern": "Another required component retrieval and NPC return follows Frostfell. Repeated dialogue approval can make visibly operable machinery feel artificial.",
+      "proposal": "Make the receiving yard, tool station, production line and furnace form one readable industrial process. Recover handles while crossing the active line; use them at the machine, with Jack providing optional help.",
+      "source": {
+        "path": "public/3d/iron-halls.js",
+        "sha256": "9115c5b2b422acabce37949bd2596e0e821857fa72554015d463b7b418698fc2",
+        "anchors": {
+          "function sync": 36,
+          "const paths": 3
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 249,
+        "walls": 14,
+        "deco": 30,
+        "enemies": 16,
+        "storyNpcs": 2,
+        "storyObjects": 10,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Great Furnace",
+      "current": "Evacuate workers, cool the crossing, find seized writings, consult Martin, face the colossus.",
+      "keep": "Quiet/loud evacuation paths, real cooling controls and written evidence that points toward Sunspire.",
+      "concern": "Many successive flags can hide the simple purpose: get workers out, shut production down and recover the records. The cooling gauge must be visible from its controls.",
+      "proposal": "Organize around the furnace chamber and a safe worker exit. Show pipes from tank to channel. Place the command office overlooking the operation; the writings\u2014not a convenient NPC rumor\u2014reveal the secret destination.",
+      "source": {
+        "path": "public/3d/great-furnace.js",
+        "sha256": "76834be80c10e3a6104abe9c74659be759c70f460d5a7912b23e427e82e6e1bd",
+        "anchors": {
+          "function sync": 41,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 328,
+        "walls": 11,
+        "deco": 14,
+        "enemies": 16,
+        "storyNpcs": 2,
+        "storyObjects": 21,
+        "chests": 0,
+        "healpads": 4
+      }
+    },
+    {
+      "name": "Shipwreck Shore",
+      "current": "Recover and install rudder, sail and rope, then steer the repaired ship across.",
+      "keep": "This fetch objective has a clear physical outcome and leads into a distinct playable crossing.",
+      "concern": "Three components still risk three identical pickups. Plenty of loot cannot substitute for different retrieval challenges.",
+      "proposal": "Rudder in a flooded hull, sail reached across rigging, rope taken from a guarded salvage winch. Show each installed piece on the ship. Preserve the crossing and the captain\u2019s optional personal story.",
+      "source": {
+        "path": "public/3d/shipwreck-shore.js",
+        "sha256": "25f63fef10ffca7ad8ae2db8d1324ea47743e387356711039451b0d6866c6c62",
+        "anchors": {
+          "function quest": 6,
+          "function sync": 41,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 353,
+        "walls": 8,
+        "deco": 35,
+        "enemies": 11,
+        "storyNpcs": 2,
+        "storyObjects": 18,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Thunder Cliffs",
+      "current": "Repair the cargo lift, release its catch via the eastern steps, inspect a shackle and reach the hydra.",
+      "keep": "Wind traversal and the discarded shackle prepare the merciful chain-breaking hydra encounter.",
+      "concern": "The steps already reach the lift\u2019s middle ledge. This can be a legitimate shortcut, but its mandatory repair needs a clearer reason than reaching a place the stairs already reach.",
+      "proposal": "Treat the lift as an optional return shortcut unless a necessary cargo purpose is established. Make the hydra\u2019s chains anchor into the ascent architecture, with safe ledges and distinct routes to each chain.",
+      "source": {
+        "path": "public/3d/thunder-cliffs.js",
+        "sha256": "f22f516e7421412168d3ec4ccecdf79662e649ba61dd95e01e09f9fbaf31c30f",
+        "anchors": {
+          "function quest": 6,
+          "function sync": 32,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 433,
+        "walls": 8,
+        "deco": 24,
+        "enemies": 10,
+        "storyNpcs": 2,
+        "storyObjects": 16,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Palace Courtyard",
+      "current": "Remove a clamp, run the waterwheel, release balcony locks and direct sunlight into the library door.",
+      "keep": "A visible reflected-light path could distinguish Sunspire, provided aiming and occlusion are readable from the play camera.",
+      "concern": "A clamp, wheel, two locks and mirrors can become too many serial gates before the payoff.",
+      "proposal": "Use the courtyard fountain and one visible light path as the organizing structure. Let the waterwheel restore the mirror mechanism; reserve one balcony for optional mastery instead of another compulsory latch.",
+      "source": {
+        "path": "public/3d/palace-courtyard.js",
+        "sha256": "7b32874134300c4099952a2fb51f61f13f5206c2a8c3fd14e0e303a12471d71b",
+        "anchors": {
+          "function quest": 14,
+          "function sync": 67,
+          "const paths": 12
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 327,
+        "walls": 27,
+        "deco": 257,
+        "enemies": 12,
+        "storyNpcs": 2,
+        "storyObjects": 14,
+        "chests": 0,
+        "healpads": 3
+      }
+    },
+    {
+      "name": "Sky Library",
+      "current": "Enter by Hugh or the lower passage, find Legion orders, open the reading-hall seal and face the guardian.",
+      "keep": "Navigable shelves, preserving records and the sacred orb after the guardian. Linked three-control rotation is still a combination puzzle until the player reasons about the physical route.",
+      "concern": "A giant library becomes generic if its paths are just corridors decorated with shelves. The orb\u2019s revelation must not spoil Ian or the final cut.",
+      "proposal": "Make shelves carry navigable bridges and change sightlines into the sacred chamber. Let the player see inaccessible knowledge above them. Place optional record rescue away from the critical route with an obvious return loop.",
+      "source": {
+        "path": "public/3d/sky-library.js",
+        "sha256": "018d073515950f02f41efcab28f6348a5011f7fc9158805fc41327e183bd3162",
+        "anchors": {
+          "function quest": 7,
+          "function sync": 44,
+          "const paths": 5
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 336,
+        "walls": 31,
+        "deco": 368,
+        "enemies": 13,
+        "storyNpcs": 2,
+        "storyObjects": 27,
+        "chests": 0,
+        "healpads": 4
+      }
+    },
+    {
+      "name": "Castle Gates",
+      "current": "Repair the approach, acquire disguise and papers or confront Cross, then enter the castle.",
+      "keep": "Disguise plus dialogue, with a difficult combat fallback, is a signature campaign payoff.",
+      "concern": "Two bridge catches before infiltration may dilute the unique encounter. Repeated wheel operation adds little here.",
+      "proposal": "Center the layout on reconnaissance, an occupied repair yard and the inspection lane. Place useful orders where the player can observe guards working. Failure triggers the existing combat route; it must not trap the quest.",
+      "source": {
+        "path": "public/3d/castle-gates.js",
+        "sha256": "633e43f79a3fb929bdb3826661b75190dd97d5da508944258f4a2c4feed112ca",
+        "anchors": {
+          "function quest": 7,
+          "function sync": 79,
+          "const paths": 4
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 284,
+        "walls": 23,
+        "deco": 306,
+        "enemies": 9,
+        "storyNpcs": 2,
+        "storyObjects": 13,
+        "chests": 0,
+        "healpads": 4
+      }
+    },
+    {
+      "name": "Long Ascent",
+      "current": "Release lower and upper catches, climb broken flights, defeat summit guards and enter the throne room.",
+      "keep": "The huge spiral climb, exposed gaps and the final approach to the King.",
+      "concern": "The route hint currently repeats its broken-flight explanation. Catch operations need visible architectural consequences. Freed workers are repositioned rather than shown making a full escape.",
+      "proposal": "Keep the tower\u2019s scale but break ascent into clear combat, traversal and quiet-view sections. Show bolts retracting where catches matter. Use a short safe departure for optional prisoners; avoid implying an escort that was not simulated.",
+      "source": {
+        "path": "public/3d/long-ascent.js",
+        "sha256": "4b6b4308b2264e59cdbe6933d7620bd607c6a2e8d8aa36849f98d862c47543f1",
+        "anchors": {
+          "function quest": 14,
+          "function sync": 51
+        }
+      },
+      "runtimeCounts": {
+        "segments": 0,
+        "obstacles": 1294,
+        "walls": 7,
+        "deco": 277,
+        "enemies": 16,
+        "storyNpcs": 1,
+        "storyObjects": 10,
+        "chests": 0,
+        "healpads": 6
+      }
+    }
+  ]
+}

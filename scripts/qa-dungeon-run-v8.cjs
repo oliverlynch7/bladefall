@@ -29,5 +29,3 @@ async page=>{
  });
  if(errors.length)throw Error(errors.join('; '));return result;
 }
-
-\n

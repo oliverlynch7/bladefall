@@ -33,7 +33,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2124';
+import { WORLD3D, syncWorld } from './world3d.js?v=2126';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2125';
 import { PROP3D, syncProps } from './prop3d.js?v=2122';
 
@@ -1303,10 +1303,13 @@ function applyEmotePose(p,wrap,A){
  if(e.id==='sit'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.45);turn('LowerLeg'+side,1.45);arm(side,[side==='R'?-.36:.36,1.05,.45],[side==='R'?-.62:.62,1.35,.12]);}const body=wrap.getObjectByName('Body');if(body){A.sitRoot=[body,body.position.clone()];body.position.y-=.4;}}
  const chess=p.sitting&&window.BFSocial?.poseFor(p);
  if(chess){const target=new THREE.Vector3(chess.target.x,chess.target.y,chess.target.z);
- // Keep the seated hips and head stable: a small torso lean, never a whole-body reach.
- turn('Body',.25*chess.weight);for(const side of ['R','L'])turn('UpperLeg'+side,-.25*chess.weight);const seatedBody=wrap.getObjectByName('Body');if(seatedBody)seatedBody.position.z+=.10*chess.weight;turn('Head',-.12*chess.weight);wrap.updateMatrixWorld(true);
+  // The seated pose stays planted. Only the reaching arm moves; rotating Body
+  // also dragged the head across the board and made the piece action look wrong.
+  wrap.updateMatrixWorld(true);
  const hand=chess.arm||'R';for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+hand);if(b&&!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);}
- armTo(wrap,hand,target,wrap.localToWorld(new THREE.Vector3(hand==='R'?-.8:.8,1.4,.4)),null,chess.weight);}
+  const shoulder=wrap.getObjectByName('UpperArm'+hand),elbow=wrap.getObjectByName('LowerArm'+hand),wrist=wrap.getObjectByName('Fist'+hand);
+  if(shoulder&&elbow&&wrist){const a=shoulder.getWorldPosition(new THREE.Vector3()),b=elbow.getWorldPosition(new THREE.Vector3()),c=wrist.getWorldPosition(new THREE.Vector3()),max=(a.distanceTo(b)+b.distanceTo(c))*.96;if(target.distanceTo(a)>max){const direction=target.clone().sub(a).normalize();target.copy(a).addScaledVector(direction,max);}}
+  armTo(wrap,hand,target,wrap.localToWorld(new THREE.Vector3(hand==='R'?-.95:.95,1.25,.55)),null,chess.weight);}
 
  if(e.id==='wave'){arm('R',[-.57+.06*s,2.30,.18],[-.82,1.86,.12]);turn('FistR',0,0,.12*s);}
  if(e.id==='point'){arm('R',[-.35,1.82,.76],[-.65,1.65,.30]);turn('Head',0,-.08);}
@@ -2091,18 +2094,13 @@ export function drawHero3D(p, t){
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
     if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
     // Hide only the local head for this draw, never the rig in saved/peer/portrait state.
-    const fp=_isLocal&&!p._portrait&&(window.__BF3?.meta.camMode==='fps'||p.sitting&&!!window.BFSocial?.camera())&&!window.BFHubDialogue?.active;
+    const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!p.sitting&&!window.BFHubDialogue?.active;
     const head=fp?findHeadBone({root:actor}):null,headScale=head?.scale.clone();
     if(head){head.scale.setScalar(.001);wrap.updateMatrixWorld(true);}
-    const chessArms=[],chessHidden=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera(),chessHand=chessLocal?window.BFSocial.poseFor(p)?.arm:null,wrapVisible=wrap.visible;
-    if(chessLocal&&!chessHand)wrap.visible=false;
-    if(chessLocal&&chessHand)wrap.traverse(n=>{if(!n.isMesh)return;
-      if(!n.isSkinnedMesh){let parent=n.parent,arm=false;while(parent&&parent!==wrap){if(new RegExp('(Arm|Fist|Thumb|Weapon).*'+chessHand+'$').test(parent.name))arm=true;parent=parent.parent;}if(!arm&&n.visible){chessHidden.push(n);n.visible=false;}return;}
-      const g=n.geometry,si=g.attributes.skinIndex,sw=g.attributes.skinWeight;if(!si||!sw||!g.index)return;const key='chessArmGeometry'+chessHand;
-      if(!n.userData[key]){const ids=new Set(n.skeleton.bones.map((b,i)=>new RegExp('(Arm|Fist|Thumb|Weapon).*'+chessHand+'$').test(b.name)?i:-1));const keep=v=>{let w=0;for(let k=0;k<4;k++)if(ids.has(si.getComponent(v,k)))w+=sw.getComponent(v,k);return w>.35;};const idx=[];for(let i=0;i<g.index.count;i+=3){const a=g.index.getX(i),b=g.index.getX(i+1),c=g.index.getX(i+2);if(keep(a)&&keep(b)&&keep(c))idx.push(a,b,c);}const arms=g.clone();arms.setIndex(idx);n.userData[key]=arms;}
-      chessArms.push([n,g]);n.geometry=n.userData[key];
-    });
-    try{renderer.render(scene, cam);}finally{wrap.visible=wrapVisible;for(const n of chessHidden)n.visible=true;for(const [n,g]of chessArms)n.geometry=g;if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    const chessFade=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera();
+    const fadeChessActor=root=>root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.16;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});
+    if(chessLocal){fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
+    try{renderer.render(scene, cam);}finally{for(const [n,m]of chessFade)n.material=m;if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;

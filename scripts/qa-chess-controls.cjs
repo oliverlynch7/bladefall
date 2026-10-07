@@ -1,0 +1,36 @@
+async page=>{
+ await page.goto('http://127.0.0.1:4338/3d/?mute=1');
+ await page.waitForFunction(()=>window.BFSocial&&window.HERO3D?.ready,null,{polling:100});
+ await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.classId='warrior';b.meta.classUnlocked.warrior=true;b.meta.hubTutDone=true;b.meta.introSeen=true;b.meta.hubUpgrades={chess:true};b.openHub();b.G.p.x=276;b.G.p.z=390;b.update(.016);BFSocial.open();b.renderFrame();});
+ const result={};
+ result.initial=await page.evaluate(()=>({side:BFSocial.snapshot().seats,kingSquare:document.querySelector('[data-flat="a1"]')?.style.background,clock:document.querySelector('#chessTimed')?.checked}));
+ if(result.initial.kingSquare!=='rgb(82, 100, 79)')throw Error('a1 should be dark: '+result.initial.kingSquare);
+ await page.selectOption('#chessColor','b');
+ result.black=await page.evaluate(()=>({seats:BFSocial.snapshot().seats,thomas:BFSocial.npcPose('thomas')}));
+ if(result.black.seats.b!=='solo'||result.black.seats.w!=='chess-thomas'||result.black.thomas.x!==279)throw Error('Black setup wrong '+JSON.stringify(result.black));
+ await page.selectOption('#chessColor','w');
+ await page.locator('#chessTimed').check();
+ if(!await page.evaluate(()=>BFSocial.snapshot().clock.enabled))throw Error('Clock did not enable');
+ await page.selectOption('#chessColor','b');
+ if(!await page.evaluate(()=>{const c=BFSocial.snapshot().clock;return c.ready.w&&!c.ready.b&&!c.started;}))throw Error('Switching to Black did not clear the player readiness');
+ await page.selectOption('#chessColor','w');
+ if(!await page.evaluate(()=>{const c=BFSocial.snapshot().clock;return c.ready.b&&!c.ready.w&&!c.started;}))throw Error('Switching back to White did not clear the player readiness');
+ await page.locator('#chessTimed').uncheck();
+ if(await page.evaluate(()=>BFSocial.snapshot().clock.enabled))throw Error('Clock did not disable');
+ await page.locator('#chessFlatToggle').check();
+ if(!await page.locator('#chessFlat').evaluate(e=>e.open))throw Error('Flat board not opened');
+ await page.locator('#chessFlatToggle').uncheck();
+ const start=await page.evaluate(()=>BFSocial.camera().eye);
+ await page.mouse.move(100,450);await page.mouse.down();await page.mouse.move(210,520,{steps:8});await page.mouse.up();
+ result.camera=await page.evaluate(()=>BFSocial.camera().eye);
+ if(Math.hypot(result.camera.x-start.x,result.camera.z-start.z)<5)throw Error('Camera did not orbit');
+ await page.evaluate(()=>{__BF3.renderFrame();});
+ const from=await page.locator('[data-square="e2"]').boundingBox(),to=await page.locator('[data-square="e4"]').boundingBox();
+ if(!from||!to)throw Error('Projected square missing');
+ await page.mouse.move(from.x+from.width/2,from.y+from.height/2);await page.mouse.down();await page.mouse.move(to.x+to.width/2,to.y+to.height/2,{steps:12});await page.mouse.up();
+ result.move=await page.evaluate(()=>({fen:BFSocial.snapshot().fen,motion:BFSocial.snapshot().motion?.to}));
+ if(result.move.motion!=='e4')throw Error('Drag did not make legal move '+JSON.stringify(result.move));
+ result.reach=await page.evaluate(()=>{window.qaNow=BFSocial.snapshot().motion.at+650;performance.now=()=>qaNow;__BF3.update(.016);__BF3.renderFrame();const p=BFSocial.poseFor(__BF3.G.p),w=HERO3D._wrap,b=w.getObjectByName('Fist'+p.arm),v=b.getWorldPosition(b.position.clone());return {pose:p,hand:{x:v.x,y:v.y,z:v.z},error:Math.hypot(v.x-p.target.x,v.y-p.target.y,v.z-p.target.z)};});
+ await page.screenshot({path:'output/playwright/chess-controls-new.png'});
+ return result;
+}

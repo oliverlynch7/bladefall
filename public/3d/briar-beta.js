@@ -2,7 +2,7 @@
 window.BFBriarBeta=(()=>{'use strict';
  let A,serial=0,part=0,progress,config={cid:'warrior',level:3,rank:2,rarity:'common',path:'a',strength:1,god:false,camera:'shoulder'};
  const G=()=>A.g(),S=()=>G()?.devBriar,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
- const fresh=()=>({medicine:false,healing:false,bridge:false,evacuated:false,signal:false,captive:false,dogs:false,hunt:false,huntKills:0,huntPaid:false,boss:false,shards:[],dead:[],deaths:0,falls:0,part:0,smallHeals:2,started:Date.now()});
+ const fresh=()=>({medicine:false,healing:false,bridge:false,evacuated:false,signal:false,captive:false,dogs:false,hunt:false,huntKills:0,huntPaid:false,hold:false,holdPaid:false,duel:false,duelPaid:false,relic:false,boss:false,shards:[],dead:[],deaths:0,falls:0,part:0,smallHeals:2,started:Date.now()});
  const near=(o,r=100)=>dist(G().p,o)<r&&Math.abs(G().p.y-(o.y||0))<65;
  function resume(){A.play();A.refresh();hud();}
  function panel(title,text,buttons){A.menu(`<div class="card narrow keep-menu"><p class="ovkicker">BRIAR TOWN · BETA</p><h2>${title}</h2><p class="ovsub">${text}</p>${buttons.map((b,i)=>`<button class="bigbtn ${i?'ghost':''}" id="bb${i}">${b[0]}</button>`).join('')}</div>`);buttons.forEach((b,i)=>document.getElementById('bb'+i).onclick=b[1]);}
@@ -13,11 +13,11 @@ window.BFBriarBeta=(()=>{'use strict';
  function exit(){location.assign('/3d/');}
  function start(){progress=fresh();part=0;build();}
  function pause(){panel('Beta controls','Your campaign is untouched. Completed tasks survive a chapter retry; a new loadout starts over.',[['Continue',resume],['Test torn transport map',()=>BFInspection.open('map')],['Inspect painting clue',()=>BFInspection.open('painting')],['Route map',map],['Current clues',journal],['Retry this chapter',()=>build()],['Change loadout / restart',setup],['Back to title',exit]]);}
- function journal(){panel('Current clues',part?'The Legion signal is above the timber scaffold. Cut its cable to protect the refuge. West: captive pen and logging patrol. East: two dogs. The transport order is beyond the warbeast.':'The medical satchel is in the granary loft. The loading scaffold leads up to the loft. At the mill, weight on the broad plate diverts the water. Leave the grain crate there while you climb to the jammed timber.',[['Back to the adventure',resume],['Route map',map]]);}
- function map(){panel(part?'Black Woods routes':'Homefields routes',part?'Refuge → broken timber walk → signal scaffold → warbeast clearing. West: captive pen and logging patrol. East: dog pen and high shard route. An old watch stands off the northern trail. Five shards across both chapters.':'Home lane → Mara → granary roof supplies → mill sluice and scaffold → far-bank guards → woods. The river divides the village from the escape gate. Gold edges mark climbable timber.',[['Continue',resume],['Open overhead plan',()=>window.open('/design/briar-beta/','_blank','noopener')],['Test controls',pause]]);}
+ function journal(){panel('Current clues',part?'The Legion signal is above the timber scaffold. Cut its cable to protect the refuge. West: captive pen and logging patrol. Farther north: defend the lumber wagon or challenge the ranger. The transport order is beyond the warbeast.':'The medical satchel is in the granary loft. The loading scaffold leads up to the loft. At the mill, weight on the broad plate diverts the water. Leave the grain crate there while you climb to the jammed timber. The village farm has a high supply loft.',[['Back to the adventure',resume],['Route map',map]]);}
+ function map(){panel(part?'Black Woods routes':'Homefields routes',part?'Refuge → broken timber walk → signal scaffold → warbeast clearing. West: captive pen and logging patrol. Farther north, guard the lumber wagon; east, challenge the ranger. The old watch holds a shard.':'Home lane → Mara → granary roof supplies → mill sluice and scaffold → far-bank guards → woods. An orchard, farm loft and escape gate mark the long northern route. Gold edges mark climbable timber.',[['Continue',resume],['Open overhead plan',()=>window.open('/design/briar-beta/','_blank','noopener')],['Test controls',pause]]);}
  function build(){
  const g=A.create(config);g.zone=0;g.area=part;g.stageIndex=part;g.areaName=part?'Briar Beta · Black Woods':'Briar Beta · Homefields';
- const s=g.devBriar=g.devKeep={id:++serial,part,actors:[],houses:[],trees:[],rocks:[],paths:[],props:[],plats:[],solids:[],groups:[],shards:[],plate:0,water:1,bridgeT:progress.bridge?1:0,drag:false,safe:part?{x:0,z:420,y:0}:{x:0,z:480,y:0},elapsed:0,huntClock:0,events:[],healingT:0};
+ const s=g.devBriar=g.devKeep={id:++serial,part,actors:[],houses:[],trees:[],rocks:[],paths:[],props:[],plats:[],solids:[],groups:[],shards:[],plate:0,water:1,bridgeT:progress.bridge?1:0,drag:false,safe:part?{x:0,z:420,y:0}:{x:0,z:480,y:0},elapsed:0,huntClock:0,events:[],healingT:0,hold:null,duelActive:false};
  s.terrain=BFBriarTerrain.make(part);
  const floor=(x,z,w,d)=>g.segments.push({x,z,w,d});
  const plat=(id,x,z,h,w,d,kind='wood')=>{const o={id,kind:'plat',x,z,h,w,d,slab:22,color:kind==='stone'?'#8d9785':'#a88b58',briarKind:kind};g.obstacles.push(o);s.plats.push(o);return o;};
@@ -88,7 +88,16 @@ window.BFBriarBeta=(()=>{'use strict';
   for(const x of [-830,-620,680,890])for(const z of [-1930,-2260,-2660,-3020,-3450,-3880])tree(x,z,280,15);
   for(const [x,z]of [[-510,-2770],[710,-3710],[-600,-4110],[440,-4210]])tree(x,z,340,18);
   for(const [x,z,w,d]of [[-800,-3220,280,32],[750,-2680,32,280],[-380,-3780,260,32]])solid(x,z,w,d,65,0,'stone');
-  s.props.push({kind:'cart',x:-680,z:-2390},{kind:'bales',x:720,z:-2950});
+  // The orchard belongs to the village: planted rows, a worked farmyard and
+  // a defended wagon gate make the long escape lane readable from the ground.
+  for(const z of [-2020,-2260,-2500,-2740])for(const x of [-710,-550])tree(x,z,215,17);
+  house(-610,-2890,245,210,130,'ochre');house(790,-3410,215,250,150,'red');
+  s.props.push({kind:'cart',x:-680,z:-2390},{kind:'bales',x:720,z:-2950},{kind:'orchard',x:-680,z:-2600},{kind:'farmyard',x:-520,z:-3440},{kind:'gate',x:0,z:-4130});
+  // A separate high route over the farm shed asks for turning, rising jumps.
+  // The reward is visible at the end; it never gates the escort.
+  plat('farm0',-320,-2940,45,118,114);plat('farm1',-225,-3055,92,90,90);plat('farm2',-325,-3165,140,85,88);
+  plat('farm3',-435,-3285,190,80,82);plat('farm4',-325,-3400,230,78,80);plat('farm-loft',-475,-3500,275,110,110);
+  s.relic={x:-475,z:-3500,y:275};
   plat('bank2',575,-1300,145,85,95,'stone');plat('bank3',715,-1410,200,80,90,'stone');plat('bank4',635,-1570,245,85,95,'stone');plat('bank5',775,-1680,290,110,115,'stone');
   Object.assign(s.shards.find(q=>q.id==='home-bank'),{x:775,z:-1680,y:290});
  }else{
@@ -101,8 +110,23 @@ window.BFBriarBeta=(()=>{'use strict';
   group('watch-guard',455,-3300,[['prison_pike',420,-3290],['prison_guard',540,-3390]],275);
   for(const [x,z]of [[-780,-2950],[480,-3010],[-750,-3310],[990,-3380],[-740,-3650],[1020,-3760],[-890,-3990],[920,-4130],[-830,-4450],[750,-4530],[-450,-4720],[460,-4750]])tree(x,z,340+Math.abs(x)%70,18);
   for(const [x,z]of [[-500,-4100],[530,-4390]])solid(x,z,140,160,100);
+  // The west lumber yard and eastern practice ring are purposeful side loops.
+  // Neither repeats the mill's pressure-plate input.
+  s.holdAt={x:-650,z:-3470,y:0};s.duelAt={x:670,z:-3020,y:0};
+  s.props.push({kind:'lumber',x:-670,z:-3520},{kind:'breach',x:-650,z:-3470},{kind:'duel',x:670,z:-3020},{kind:'warcamp',x:0,z:-4260});
+  // The yard fence has a real opening facing the incoming patrol. A solid
+  // continuous fence here trapped the wagon attacker outside its own arena.
+  for(const [x,z,w,d]of [[-890,-3510,28,310],[-500,-3680,28,100],[-500,-3450,28,80],[700,-2990,210,30]])solid(x,z,w,d,65,0,'wood');
  }
+ for(const q of s.props){if(q.kind==='gate')for(const side of [-1,1])solid(q.x+side*157,q.z,30,30,175,0,'prop');
+  if(q.kind==='breach')solid(q.x,q.z,120,75,75,0,'prop');
+  if(q.kind==='duel')for(const side of [-1,1])solid(q.x+side*245,q.z,10,10,210,0,'prop');
+  if(q.kind==='warcamp')for(const side of [-1,1]){solid(q.x+side*590,q.z+55,30,30,210,0,'prop');solid(q.x+side*390,q.z-240,150,115,48,0,'prop');solid(q.x+side*490,q.z+240,150,45,104,0,'prop');}}
+ if(s.holdAt)s.holdAt.y=s.terrain.height(s.holdAt.x,s.holdAt.z);
+ if(s.duelAt)s.duelAt.y=s.terrain.height(s.duelAt.x,s.duelAt.z);
+ for(const q of s.props)if(q.kind==='orchard')solid(q.x,q.z,90,100,68,0,'prop');else if(q.kind==='farmyard')solid(q.x,q.z,115,65,65,0,'prop');else if(q.kind==='lumber')solid(q.x-75,q.z-25,85,100,65,0,'prop');
  for(const q of s.trees){q.y=s.terrain.height(q.x,q.z);q.variant=part?(q.z< -2900?2:1):(q.z< -1800?1:0);q.rotation=(q.x+q.z)*.01;}
+ for(const h of s.houses)h.y=s.terrain.height(h.x,h.z);
  for(const q of s.solids){const y=s.terrain.height(q.x,q.z);q.y0+=y;q.h+=y;}
  // Workstation/cart props have collision matching their visible footprint.
  for(const q of s.props)if(q.kind==='well')solid(q.x,q.z,86,86,56,0,'prop');else if(q.kind==='medical')solid(q.x,q.z,120,65,40,0,'prop');else if(q.kind==='cart')solid(q.x,q.z,110,65,72,s.terrain.height(q.x,q.z),'prop');else if(q.kind==='camp')solid(q.x,q.z,160,100,115,0,'prop');
@@ -122,7 +146,7 @@ window.BFBriarBeta=(()=>{'use strict';
  function objective(){if(!part){if(!progress.medicine)return 'Reach the granary loft · Recover Mara’s supplies';if(!progress.healing)return 'Bring the supplies to Mara';if(!progress.bridge)return 'Restore the mill crossing · Divert water, then free the timber';if(living('bank')||!S().groups.find(g=>g.id==='bank').spawned)return 'Clear the far bank so the village can escape';if(!progress.evacuated)return 'Protect the villagers as they cross · Stay nearby; clear each ambush';return 'Follow the escape lane into the Black Woods';}if(!progress.signal)return 'Reach the signal tower · Cut the cable';if(!progress.boss)return 'Defeat the Legion warbeast blocking the refuge route';return 'Read the transport order at the north gate';}
  function navigation(){const s=S();if(!s)return null;const t=!part?(!progress.medicine?s.med:!progress.healing?s.actors[1]:!progress.bridge?{x:-475,z:-550,y:0}:s.exit):!progress.signal?s.signal:!progress.boss?{x:0,z:-4220,y:0}:s.exit;return {...t,navLabel:!part?(!progress.medicine?'Granary loft':!progress.healing?'Mara':!progress.bridge?'Mill yard':'Escape lane'):!progress.signal?'Signal tower':!progress.boss?'Warbeast clearing':'Transport order'};}
  function hud(){let el=document.getElementById('briar-beta-hud');if(!el){el=document.createElement('div');el.id='briar-beta-hud';document.body.append(el);}if(!S())return;
- const text=`<b>${part?'BLACK WOODS':'HOMEFIELDS'} · BETA</b><span>${objective()}</span><small>Shards ${progress.shards.length}/5${part?` · Dogs ${progress.dogs?'safe':'missing'} · Captives ${progress.captive?'safe':'held'}`:''}${progress.hunt?` · Patrol ${Math.min(12,progress.huntKills)}/12`:''}</small>${S().drag?'<strong>Moving crate · Walk to position it · E to let go</strong>':''}<button id="boptions">Map / test controls</button>`;
+  const text=`<b>${part?'BLACK WOODS':'HOMEFIELDS'} · BETA</b><span>${objective()}</span><small>Shards ${progress.shards.length}/5${part?` · Dogs ${progress.dogs?'safe':'missing'} · Captives ${progress.captive?'safe':'held'}`:''}${progress.hunt?` · Patrol ${Math.min(12,progress.huntKills)}/12`:''}</small>${S().hold?`<strong>Defend the lumber yard · ${Math.ceil(Math.max(0,S().hold.left))}s · ${Math.ceil(S().hold.hp)}% wagon · Stay in the clearing</strong>`:''}${S().duelActive?'<strong>The ranger fights with player-class skills. Defeat her to finish the challenge.</strong>':''}${S().drag?'<strong>Moving crate · Walk to position it · E to let go</strong>':''}<button id="boptions">Map / test controls</button>`;
  const html=text+(S().evac&&!progress.evacuated?`${S().actors.map(n=>`<small>${n.name}: ${Math.ceil(n.hp??100)} / 100</small><progress max="100" value="${n.hp??100}"></progress>`).join('')}`:'');
  if(el.innerHTML!==html){el.innerHTML=html;document.getElementById('boptions').onclick=pause;}document.getElementById('questbox')?.classList.add('hide');
  }
@@ -132,26 +156,29 @@ window.BFBriarBeta=(()=>{'use strict';
  function releaseJam(){if(S().plate<.8){A.toast('The turning wheel strains the catch. Weigh down the sluice plate to stop the waterwheel.');return;}progress.bridge=true;S().events.push({kind:'bridge',time:G().time});A.toast('Timber freed! The crossing is lowering.');}
  function collect(id){if(progress.shards.includes(id))return;progress.shards.push(id);A.toast(`Rift Shard ${progress.shards.length}/5 · Five shards open the Berserker trial in the Rift Hall. Beta collection stays here.`);}
  function interact(){if(!S())return null;const s=S(),list=[];const add=(o,label,act,r=90)=>{if(near(o,r))list.push({...o,label,act});};
- if(!part){add({x:-470,z:-240,y:0},'Examine the torn transport map',()=>BFInspection.open('map',{x:-470,y:40,z:-240}));add({x:470,z:248,y:0},'Examine the granary painting',()=>BFInspection.open('painting',{x:470,y:60,z:248}));}
+  if(!part){add({x:-470,z:-240,y:0},'Examine the torn transport map',()=>BFInspection.open('map',{x:-470,y:40,z:-240}));add({x:470,z:248,y:0},'Examine the granary painting',()=>BFInspection.open('painting',{x:470,y:60,z:248}));}
  if(!part){add(s.actors[0],'Talk to Thomas',thomas);add(s.actors[1],progress.medicine&&!progress.healing?'Deliver Mara’s supplies':'Talk to Mara',mara);
  add(s.actors[2],'Ask Gus about the mill',()=>panel('Gus','“That plate lowers the sluice. Your weight works—but who holds it while you climb? There’s a grain crate right beside it.”',[['Leave conversation',resume]]));
  if(!progress.medicine)add(s.med,'Take the medical satchel',()=>{progress.medicine=true;A.toast('Medical satchel collected · Bring it to Mara.');},75);
  add(s.crate,s.drag?'Let go of the grain crate':'Move the grain crate',()=>{s.drag=!s.drag;if(s.drag){s.dragOffset={x:s.crate.x-G().p.x,z:s.crate.z-G().p.z};A.toast('Walk to move the crate. E releases it.');}},125);
  add({x:-320,z:-380,y:0},'Reset the grain crate',()=>{s.drag=false;Object.assign(s.crate,{x:-260,z:-445});A.toast('Grain crate returned to the mill yard.');},65);
  if(!progress.bridge)add(s.jam,'Free the jammed timber',releaseJam,80);
- if(progress.healing&&progress.bridge)add(s.exit,'Enter the Black Woods',()=>{if(!progress.evacuated){A.toast('Keep the route clear until all three villagers reach safety.');return;}part=1;progress.part=1;build();});
- }else{
+  if(progress.healing&&progress.bridge)add(s.exit,'Enter the Black Woods',()=>{if(!progress.evacuated){A.toast('Keep the route clear until all three villagers reach safety.');return;}part=1;progress.part=1;build();});
+  if(!progress.relic)add(s.relic,'Take the farm loft supplies',()=>{progress.relic=true;progress.smallHeals+=2;A.toast('Farm loft found · Two recovery charges secured for the Black Woods.');},68);
+  }else{
  add(s.actors[0],'Talk to Lewis',lewis);
  if(!progress.signal)add(s.signal,'Cut the signal cable',()=>{progress.signal=true;A.toast('Signal silenced. The refuge is hidden from new patrols.');},85);
  if(!progress.captive)add({x:-690,z:-1030,y:0},'Open the captive pen',()=>{if(living('pen')||!s.groups.find(q=>q.id==='pen').spawned){A.toast('Defeat the pen guard first.');return;}progress.captive=true;A.toast('Beth and her brother are free. They are moving to shelter.');});
  if(!progress.dogs)add({x:690,z:-1410,y:0},'Release the two dogs',()=>{if(living('dogs')||!s.groups.find(q=>q.id==='dogs').spawned){A.toast('Clear the dog handlers first.');return;}progress.dogs=true;progress.smallHeals++;A.toast('Two dogs rescued · One recovery charge found in the handlers’ pack.');});
- add(s.heal,`Use recovery pad (${progress.smallHeals} charges)`,()=>{if(!progress.smallHeals){A.toast('This small pad is empty.');return;}if(G().p.hp>=A.maxHp()){A.toast('Health is already full.');return;}progress.smallHeals--;G().p.hp=A.maxHp();A.toast('Health restored · One charge used.');});
- if(progress.signal&&progress.boss)add(s.exit,'Read the transport order',finish);
+  add(s.heal,`Use recovery pad (${progress.smallHeals} charges)`,()=>{if(!progress.smallHeals){A.toast('This small pad is empty.');return;}if(G().p.hp>=A.maxHp()){A.toast('Health is already full.');return;}progress.smallHeals--;G().p.hp=A.maxHp();A.toast('Health restored · One charge used.');});
+  if(!progress.hold&&!s.hold)add(s.holdAt,'Defend the lumber wagon',()=>{s.hold={left:40,hp:100,wave:0,pause:0};A.toast('Hold the clearing for 40 seconds. Guard the wagon and stay close.');});
+  if(!progress.duel&&!s.duelActive)add(s.duelAt,'Challenge the ranger',()=>{const b=A.spawnClassBot('ranger',s.duelAt.x,s.duelAt.z-150);if(!b){A.toast('The challenge could not start. Try again.');return;}s.duelActive=true;A.toast('The ranger accepted. Watch her bow and class skills.');});
+  if(progress.signal&&progress.boss)add(s.exit,'Read the transport order',finish);
  }
  for(const q of s.shards)if(!progress.shards.includes(q.id))add(q,'Collect Rift Shard',()=>collect(q.id),65);
  list.sort((a,b)=>dist(a,G().p)-dist(b,G().p));return list[0]?{...list[0],y:(list[0].y||0)+85}:null;
  }
- function finish(){panel('Briar Town is safe—for now','“Move prisoners through Hollow Pass.” The order points beyond your home. Thomas and the neighbors have reached shelter. This ends the isolated beta.',[['Explore a little longer',resume],['Test summary',()=>panel('Your beta run',`Shards: ${progress.shards.length}/5. Captives: ${progress.captive?'rescued':'not rescued'}. Dogs: ${progress.dogs?'rescued':'not rescued'}. Falls: ${progress.falls}. Deaths: ${progress.deaths}. Nothing was added to your campaign save.`,[['Continue exploring',resume],['Exit to title',exit]])],['Exit to title',exit]]);}
+ function finish(){panel('Briar Town is safe—for now','“Move prisoners through Hollow Pass.” The order points beyond your home. Thomas and the neighbors have reached shelter. This ends the isolated beta.',[['Explore a little longer',resume],['Test summary',()=>panel('Your beta run',`Shards: ${progress.shards.length}/5. Captives: ${progress.captive?'rescued':'not rescued'}. Dogs: ${progress.dogs?'rescued':'not rescued'}. Wagon: ${progress.hold?'defended':'untested'}. Ranger: ${progress.duel?'defeated':'unchallenged'}. Falls: ${progress.falls}. Deaths: ${progress.deaths}. Nothing was added to your campaign save.`,[['Continue exploring',resume],['Exit to title',exit]])],['Exit to title',exit]]);}
  function movePlatforms(dt){const s=S();if(!s)return;const p=G().p;
  if(!part){if(s.drag){const x=p.x+s.dragOffset.x,z=p.z+s.dragOffset.z;
   // A movable floor prop must never enter a wall, water or upper platform.
@@ -169,10 +196,21 @@ window.BFBriarBeta=(()=>{'use strict';
  if(p.y< -115){progress.falls++;Object.assign(p,{...s.safe,vx:0,vy:0,vz:0,onGround:true,jumps:0});p.hp=Math.max(1,p.hp-A.maxHp()*.06);s.drag=false;A.toast('Back to the last safe landing. Hold jump for more height.');}
  if(p.onGround&&p.y>=0&&!s.drag){const f=g.segments.find(o=>Math.abs(p.x-o.x)<o.w/2-35&&Math.abs(p.z-o.z)<o.d/2-35);if(f)s.safe={x:p.x,z:p.z,y:s.terrain.height(p.x,p.z)};else{const q=s.plats.find(o=>Math.abs(p.y-o.h)<3&&Math.abs(p.x-o.x)<o.w/2-15&&Math.abs(p.z-o.z)<o.d/2-15);if(q)s.safe={x:q.x,z:q.z,y:q.h};}}
  for(const q of s.groups)if(!q.spawned&&dist(p,q)<q.r&&Math.abs(p.y-s.terrain.height(p.x,p.z))<80&&(q.id!=='boss'||progress.signal)){q.spawned=true;q.foes.forEach(([type,x,z],i)=>spawn(q.id+':'+i,type,x,z));}
- for(const e of g.enemies){if(e.dead||e.hp<=0){if(e.betaId&&!progress.dead.includes(e.betaId)){progress.dead.push(e.betaId);if(e.betaId.startsWith('hunt:'))progress.huntKills++;if(e.betaId.startsWith('boss')){progress.boss=true;A.toast('The north trail is clear. Read the order by the gate.');}}continue;}
+  for(const e of g.enemies){if(e.dead||e.hp<=0){if(e.betaId&&!progress.dead.includes(e.betaId)){progress.dead.push(e.betaId);if(e.betaId.startsWith('hunt:'))progress.huntKills++;if(e.betaId.startsWith('boss')){progress.boss=true;A.toast('The north trail is clear. Read the order by the gate.');}}continue;}
   // Keep encounters in their authored clearings. A full-map chase would erase pacing.
   if(e.betaOrigin&&dist(e,e.betaOrigin)>450){Object.assign(e,{x:e.betaOrigin.x,z:e.betaOrigin.z,pcState:'approach',pcClock:.8});}
- }
+  }
+  if(part&&s.hold){
+   const h=s.hold,inside=dist(p,s.holdAt)<260;if(inside)h.left=Math.max(0,h.left-dt);
+   if(!inside&&s.elapsed-(h.warn||0)>5){h.warn=s.elapsed;A.toast('Return to the lumber clearing to continue the defense.');}
+   const starts=[40,26,13];if(inside&&h.wave<3&&h.left<=starts[h.wave]&&!living('hold:')){const w=h.wave++,side=w%2?-1:1;
+    spawn('hold:'+w+':0',w===2?'prison_guard':'prison_pike',s.holdAt.x+side*260,s.holdAt.z-135);
+    spawn('hold:'+w+':1','prison_hound',s.holdAt.x-side*235,s.holdAt.z+165);
+    A.toast('Legion raiders are closing on the wagon!');}
+   if(h.hp<=0){for(const e of g.enemies)if(e.betaId?.startsWith('hold:')){e.dead=true;e.hp=0;}progress.dead=progress.dead.filter(id=>!id.startsWith('hold:'));s.hold=null;A.toast('The wagon was lost. Clear the yard and try again.');}
+   else if(h.left===0&&h.wave===3&&!living('hold:')){progress.hold=true;s.hold=null;if(!progress.holdPaid){progress.holdPaid=true;progress.smallHeals+=2;}A.toast('Wagon defended · Two recovery charges secured.');}
+  }
+  if(part&&s.duelActive&&!living('duel:')){s.duelActive=false;progress.duel=true;if(!progress.duelPaid){progress.duelPaid=true;progress.smallHeals++;}A.toast('Ranger defeated · One recovery charge earned.');}
  if(!part&&progress.healing&&near({x:-360,z:220,y:0},95)){p.hp=Math.min(A.maxHp(),p.hp+A.maxHp()*.35*dt);}
  if(!part&&progress.bridge&&s.bridgeT===1&&s.groups.find(q=>q.id==='bank').spawned&&!living('bank')&&!progress.evacuated){
   if(!s.evac){s.evac={hp:100,time:0,waves:0};for(const n of s.actors)n.hp=100;A.toast('The villagers are crossing. Keep the patrols away from them.');}
@@ -188,8 +226,11 @@ window.BFBriarBeta=(()=>{'use strict';
  hud();
  }
  function death(){progress.deaths++;panel('Try again','Completed tasks and discoveries stay done. This chapter’s surviving enemies reset; health is restored.',[['Retry this chapter',build],['Change loadout / restart',setup],['Exit',exit]]);}
- function target(e,p){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac'))return p;const n=s.actors.reduce((a,b)=>dist(e,a)<dist(e,b)?a:b);n.r=13;n.h=58;return dist(e,n)<dist(e,p)?n:p;}
- function captiveHit(e,blocked){const s=S();if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac')||e._bbHit===e.pcSerial)return;for(const n of s.actors)if(BFPrisonCombat.contains(e,{...n,r:13,h:58})&&!blocked(n)){e._bbHit=e.pcSerial;n.hp=Math.max(0,(n.hp??100)-8*config.strength);s.evac.hp=Math.min(...s.actors.map(a=>a.hp??100));A.toast('A villager was hit!');break;}}
+ // Aim at the near outer edge. The wagon itself has solid collision, so aiming
+ // at its centre would cause the line-of-sight check to block every hit.
+ function wagonEdge(e,s){const origin=e.betaOrigin||e,dx=origin.x-s.holdAt.x,dz=origin.z-s.holdAt.z;if(Math.abs(dx)/65>Math.abs(dz)/44)return {x:s.holdAt.x+Math.sign(dx||1)*66,z:s.holdAt.z,y:s.holdAt.y,r:27,h:65};return {x:s.holdAt.x,z:s.holdAt.z+Math.sign(dz||1)*45,y:s.holdAt.y,r:27,h:65};}
+ function target(e,p){const s=S();if(s?.hold&&e.betaId?.startsWith('hold:')){const wagon=wagonEdge(e,s);return e.betaId.endsWith(':0')||!p||dist(e,wagon)<dist(e,p)?wagon:p;}if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac'))return p;const n=s.actors.reduce((a,b)=>dist(e,a)<dist(e,b)?a:b);n.r=13;n.h=58;return !p||dist(e,n)<dist(e,p)?n:p;}
+ function captiveHit(e,blocked){const s=S();if(e._bbHit===e.pcSerial)return;if(s?.hold&&e.betaId?.startsWith('hold:')){const wagon=wagonEdge(e,s);if(BFPrisonCombat.contains(e,wagon)&&!blocked(wagon)){e._bbHit=e.pcSerial;s.hold.hp=Math.max(0,s.hold.hp-11*config.strength);A.toast('The lumber wagon was hit!');}return;}if(!s?.evac||progress.evacuated||!e.betaId?.startsWith('evac'))return;for(const n of s.actors)if(BFPrisonCombat.contains(e,{...n,r:13,h:58})&&!blocked(n)){e._bbHit=e.pcSerial;n.hp=Math.max(0,(n.hp??100)-8*config.strength);s.evac.hp=Math.min(...s.actors.map(a=>a.hp??100));A.toast('A villager was hit!');break;}}
  function draw(t){const s=S();if(!s)return;const b=A.box;
  if(!part){b(-470,25,-240,55,5,40,'#795936');b(-470,28,-240,42,1,28,'#cdb77c');for(const x of [-490,-450])b(x,12,-240,5,24,5,'#59452d');b(470,60,248,65,48,3,'#6b4e31');b(470,60,245,56,39,1,'#a4b7a1');b(470,59,244,29,19,1,'#cfaf7b');b(470,73,244,37,8,1,'#46684f');b(470,80,243,4,5,1,'#ad7fe3');}
 
@@ -204,11 +245,14 @@ window.BFBriarBeta=(()=>{'use strict';
   if(!progress.bridge){b(-320,230,-960,145,25,32,'#63442e');b(-320,250,-960,8,80,8,'#c3ab70');}
   if(!progress.medicine){b(s.med.x,s.med.y+15,s.med.z,35,30,24,'#d4d4b2');b(s.med.x,s.med.y+16,s.med.z-13,7,20,2,'#ab4e46');}
   if(progress.healing)b(-360,2,220,120,4,120,'#87c894','#80bb83',.7);
+  if(!progress.relic){b(s.relic.x,s.relic.y+17,s.relic.z,44,27,35,'#b5844d');b(s.relic.x,s.relic.y+34,s.relic.z,24,9,8,'#e7cb79');}
  }else{
   if(!progress.signal){b(s.signal.x,s.signal.y+70,s.signal.z,8,130,8,'#b7663d');b(s.signal.x,s.signal.y+140,s.signal.z,42,28,42,'#f1a256','#f1a256');}else b(s.signal.x,s.signal.y+55,s.signal.z,8,100,8,'#594633');
   b(s.heal.x,3,s.heal.z,90,6,90,progress.smallHeals?'#86bec1':'#5c6464');
   if(!progress.captive)for(let x=-855;x<-650;x+=25)b(x,60,-965,5,120,5,'#68694e');
   for(let i=0;i<2;i++){const x=progress.dogs?410+i*60:650+i*75,z=progress.dogs?-1190:-1460;b(x,22,z,28,26,50,i?'#a38a64':'#665846');b(x,38,z-22,25,24,23,'#b6a17b');for(const dx of [-10,10])for(const dz of [-15,15])b(x+dx,8,z+dz,7,16,7,'#514539');}
+  if(!progress.hold){const h=s.holdAt.y;b(s.holdAt.x,h+3,s.holdAt.z,210,5,205,'#748260','#748260',.3);b(s.holdAt.x,h+4,s.holdAt.z,65,7,65,'#bc8652');}
+  if(!progress.duel){const h=s.duelAt.y;b(s.duelAt.x,h+3,s.duelAt.z,190,4,190,'#6d775c','#6d775c',.24);b(s.duelAt.x,h+6,s.duelAt.z,70,7,70,'#a5a182');}
  }
  for(const q of s.shards)if(!progress.shards.includes(q.id)){b(q.x,q.y+28+Math.sin(t*2)*4,q.z,14,32,14,'#b78af0','#a577d1');b(q.x,q.y+3,q.z,40,4,40,'#544669');}
  for(const n of s.actors)if(!window.__npc3dDrawn?.(n.id))A.person(n,t,n.walking);

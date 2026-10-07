@@ -1125,7 +1125,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./guided-tutorial.js?v=2116"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
-<script src="./briar-beta.js?v=2123"></script>
+<script src="./briar-beta.js?v=2126"></script>
 <script src="./inspection-lab.js?v=2116"></script>
 <script>
 (function(){
@@ -1137,7 +1137,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.124.1-keep-depth';
+const VERSION3D='2.125.0-chess-briar-beta';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13142,7 +13142,8 @@ function killEnemy(e,weaponKill){
   } catch(err){}
 
   if(e.dead) return;
-  if(e.bot && G.duel){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,14); }catch(_){} return; }   // DUEL: death is final — no respawn, no scoring
+   if(e.bot && e.betaClassOpponent){e.dead=true;try{burst(e.x,e.y+e.h*0.5,e.z,e.color,18);SFX.enemyDie();addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true);}catch(_){}return;}
+   if(e.bot && G.duel){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,14); }catch(_){} return; }   // DUEL: death is final — no respawn, no scoring
   if(e.bot){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,18); SFX.enemyDie(); addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true); }catch(_){}
     G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.p++;
     try{ updateArenaHud(); }catch(_){}
@@ -15267,7 +15268,7 @@ function botAI(e,dt){ const p=(G&&G.duel&&e.foe)?e.foe:(G&&G.p); if(!p||p.dead) 
   if(G.arenaLava && gy<15){ for(const L of G.arenaLava){ if(Math.abs(e.x-L.x)<L.w/2 && Math.abs(e.z-L.z)<L.d/2){ onLava=true; break; } } }
   if(onLava){ e._lavaT=(e._lavaT||0)+dt; if(e._lavaT>=0.4){ e._lavaT=0; e.hp-=Math.max(4,Math.round(e.maxHp*0.05)); e.hitFlash=0.3; try{burst(e.x,4,e.z,'#ff7a3a',5);}catch(_){} if(e.hp<=0){ if(G.duel){ e.dead=true; return; } botRespawn(e); return; } } } else e._lavaT=0;
   // LOW HP: turtle — prioritise defence + self-heal (stands in for a defensive/healing skill) and fall back to safe ground
-  const low=e.hp<e.maxHp*0.30 && D.flee && !G.duel; e._def=low;   // in a DUEL: no turtle/flee/self-heal — fight to the death (else both bots stalemate forever)
+   const low=e.hp<e.maxHp*0.30 && D.flee && !G.duel && !e.betaClassOpponent; e._def=low;   // in a DUEL: no turtle/flee/self-heal — fight to the death (else both bots stalemate forever)
   if(low){ e.hp=Math.min(e.maxHp, e.hp+e.maxHp*0.03*dt); }
   // reactive dodge when the player is swinging close
   if(D.dodge>0 && e.dodgeCd<=0 && d<reach+50 && p.atkTimer>0 && Math.random()<D.dodge){ e.dodgeTimer=0.26; e.dodgeCd=D.dodgeCdT; e.invuln=0.22;
@@ -15302,7 +15303,8 @@ function botAI(e,dt){ const p=(G&&G.duel&&e.foe)?e.foe:(G&&G.p); if(!p||p.dead) 
     if(closing)    spd*=(foeRanged?1.45:1.15);        // ANTI-KITE: a melee bot runs a fleeing ranged foe down instead of chasing forever
     e.x+=(mvx/ml)*spd*dt; e.z+=(mvz/ml)*spd*dt; e.runAnim=(e.runAnim||0)+dt*11;
   }
-  if(G.bounds){ const m=70; e.x=Math.max(G.bounds.minX+m,Math.min(G.bounds.maxX-m,e.x)); e.z=Math.max(G.bounds.minZ+m,Math.min(G.bounds.maxZ-m,e.z)); }   // never wander to the far edges
+   if(G.bounds){ const m=70; e.x=Math.max(G.bounds.minX+m,Math.min(G.bounds.maxX-m,e.x)); e.z=Math.max(G.bounds.minZ+m,Math.min(G.bounds.maxZ-m,e.z)); }   // never wander to the far edges
+   if(e.betaClassOpponent){const o=e.betaOrigin,r=390,dd=Math.hypot(e.x-o.x,e.z-o.z);if(dd>r){e.x=o.x+(e.x-o.x)*r/dd;e.z=o.z+(e.z-o.z)*r/dd;}}
   // attack: telegraph (reaction delay) then land the hit if still in range and the player isn't i-framed
   if(d<reach && e.atkCd<=0 && e._pendingHit==null){ e.atkCd=D.atkCd; e.atkTimer=0.3; e._pendingHit=D.react; try{ SFX.slash&&SFX.slash(); }catch(_){} }
   if(e._pendingHit!=null){ e._pendingHit-=dt; if(e._pendingHit<=0){ e._pendingHit=null;
@@ -23160,7 +23162,7 @@ window.__BF_SOCIAL_API={g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,project:(x,y,z)=>
 window.__BF_MAP_PARTY=()=>({heading:meta.camMode==='far'?G?.p?.yaw:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
 function devBeta(){return G?.devBriar?BFBriarBeta:BFKeepBeta;}
 const betaApi={
- g:()=>G,classes:CLASSES,box:bx,spawn:spawnEnemy,toast,maxHp:()=>effMaxHp(G.p),
+  g:()=>G,classes:CLASSES,box:bx,spawn:spawnEnemy,spawnClassBot:(cls,x,z)=>{const old=ARENA_LOADOUT.botClass;ARENA_LOADOUT.botClass=cls;const b=spawnBot('normal');ARENA_LOADOUT.botClass=old;if(b){Object.assign(b,{x,z,y:G.devBriar?.terrain.height(x,z)||0,betaClassOpponent:true,betaId:'duel:challenger',betaOrigin:{x,z},hp:Math.round(b.hp*.78),maxHp:Math.round(b.hp*.78)});}return b;},toast,maxHp:()=>effMaxHp(G.p),
  menu:html=>{releaseKeyboard();mode='menu';document.getElementById('keep-beta-hud')?.style.setProperty('display','none');document.getElementById('briar-beta-hud')?.style.setProperty('display','none');document.getElementById('toast')?.classList.remove('show');showOverlayHTML(html);},
  play:()=>{releaseKeyboard();mode='play';document.getElementById(G?.devBriar?'briar-beta-hud':'keep-beta-hud')?.style.setProperty('display','block');showOverlay(false);showGameUI(true);},
  refresh:()=>{hudUpdate();skillbarUpdate();},rebuild:()=>{G._obsDirty=true;window.__world3dRebuild?.();},
@@ -23204,8 +23206,8 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2125"></script>
-<script type="module" src="./social-hub.js?v=2119"></script>
+<script type="module" src="./hero3d.js?v=2126"></script>
+<script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

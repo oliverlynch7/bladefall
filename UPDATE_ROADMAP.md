@@ -2410,3 +2410,9 @@ Validation: browser rig has eight skinned meshes, 14 bones, seven usable runtime
 
 ## [Codex | 2026-10-06] 2.124.1-keep-depth
 Fixed the isolated Ruined Keep beta showing prisoners and enemies through solid walls. Its voxel architecture had no Three replacement, but was drawn before the Three pass cleared depth, so later actors appeared over the walls. The beta now replays its walls before actors in the shared deferred pass, matching the already-correct isolated prison and Briar beta paths. Reproduced with three captives visibly over the cell wall; after the fix the captives and a staged guard behind it are hidden while a guard in front remains visible. Reviewed shoulder, overhead, and first-person camera frames. Campaign layouts and save logic unchanged.
+
+## [Codex | 2026-10-07] 2.125.0-chess-briar-beta
+
+Continued saved work after restart. Chess now supports mouse orbit, world-piece drag/drop and click moves, an optional flat board, host-controlled clock setup and pregame color choice, corrected dark a1, planted one-arm piece/clock reach, translucent seated actors during local board view, visible check/mate effects, and original move/capture/check/mate/illegal cues. Fixed clock readiness when colors swap. Solo Thomas and host-authoritative co-op remain.
+
+The isolated Briar beta gained a six-jump farm supply route, authored orchard/farm/lumber/wagon/ring detail, a three-wave damageable-wagon hold, and a Ranger-class duel. A fence blocked wagon attackers in the first pass; the gap and near-edge targeting now allow real enemy damage. Main campaign layouts and saves remain untouched. Browser checks covered world and flat chess moves, camera, hand contact, clock/co-op, mate, sound generation, both Briar chapters' continuous route, farm jumps, wagon damage and duel combat. Human playtesting is still needed for difficulty, discoverability and whether the enlarged beta has enough visual richness.

@@ -3,7 +3,7 @@ async page=>{
  await page.goto('http://127.0.0.1:4339/3d/?mute=1');await page.waitForFunction(()=>window.BFPrisonRun&&window.HERO3D?.ready,null,{polling:100});
  const result=await page.evaluate(async()=>{
   const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.hubTutDone=true;b.meta.tutOff=true;b.meta.introSeen=true;b.meta.bank=null;b.openHub();
-  const campaignGold=b.meta.gold;b.startDelve('warrior',{tier:1});b.G.escape.layoutVersion=7;b.loadDelveFloor(1);let g=b.G;const floors=[];
+  const campaignGold=b.meta.gold;b.startDelve('warrior',{tier:1});if(b.G.escape.layoutVersion!==8||b.G.escape.plan.rooms.length!==11)throw Error('New run layout');let g=b.G;const floors=[];
   for(let section=1;section<=3;section++){
    g=b.G;if(g.floor!==section)throw Error('Wrong section transition');const p=g.p;const rooms=g.escape.plan.rooms.filter(q=>!q.optional&&['fight','waves','boss'].includes(q.kind));
    const startGold=BFPrisonRun.profile().gold;
@@ -29,3 +29,4 @@ async page=>{
  });
  if(errors.length)throw Error(errors.join('; '));return result;
 }
+

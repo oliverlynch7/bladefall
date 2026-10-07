@@ -1185,3 +1185,7 @@ Version 2.132.0 rebuilds hub and campaign Treasure Sprint as a deterministic thr
 ## [Codex | 2026-10-07] Endless Dungeon quality pass shipped
 
 Version 2.133.0 improves the separate Prison Break roguelite with revision-7 room layouts, distinct environmental workspaces and enemy packs, a Tier-2+ Watch Captain, route/art cues, and preparation/run UI. Older checkpoint revisions and the campaign/Descent modes are preserved. Tested 1,080 generated plans, 6,480 historical-plan hashes, 43,200 spawn sockets, 60 real jumps, full three-section escape, old-build checkpoint resume, co-op scaling and reward isolation. Human playtesting remains needed for difficulty, duration and visual quality. See docs/design/ENDLESS_DUNGEON_QUALITY_2026-10-07.md.
+
+## [Codex | 2026-10-07] Endless Dungeon revision-8 extension
+
+Version 2.134.0 adds an optional five-jump side room to each section of fresh Prison Break runs. The visible cache grants one persistent gold reward and, from Tier 2 onward, a class qualification seal. Main rooms, two chests per section, co-op ownership and revisions 1-7 are preserved. Browser tests completed 108 jumps and a full three-section run; old-layout jump/resume and co-op checks passed. Human playtesting still decides challenge, pacing and final art quality. See docs/design/ENDLESS_DUNGEON_QUALITY_2026-10-07.md.

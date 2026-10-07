@@ -50,7 +50,11 @@ function layout(seed,section,tier,revision=6){
   if((seed+section)%2===0){rooms[1].template='armory';rooms[1].name='Shield store';}
   else {rooms[3].template='watchpost';rooms[3].name='High guard post';}
  }
- const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),[8,4]]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
+ if(revision>=8){
+  const sign=rooms[7].x===0?side:Math.sign(rooms[7].x);
+  rooms.push({id:10,name:['Broken rafters','Pipe gantry','Sealed catwalk'][section-1],x:rooms[7].x+sign*720,z:rooms[7].z,w:600,d:600,h:480,kind:'cache',optional:true,approachSign:sign});
+ }
+ const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),[8,4]]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[]),...(revision>=8?[[7,10]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
   const dirs=new Set(links.filter(l=>l.includes(r.id)).map(l=>{const q=rooms[l.find(i=>i!==r.id)];return Math.abs(q.x-r.x)>10?(q.x>r.x?'E':'W'):(q.z>r.z?'S':'N');}));
@@ -58,7 +62,14 @@ function layout(seed,section,tier,revision=6){
    for(const [offset,length] of dirs.has(dir)?[[-195,210],[195,210]]:[[0,600]])walls.push(box(r.x+(ns?offset:sign*300),r.z+(ns?sign*300:offset),ns?length:24,ns?24:length,0,r.h,{room:r.id}));
   }
   roofs.push(box(r.x,r.z,624,624,r.h,r.h+18,{room:r.id}));
-  if(r.kind==='bridge'){
+  if(r.kind==='cache'){
+   const s=r.approachSign;
+   floors.push(box(r.x-s*235,r.z,130,576,-20,0),box(r.x+s*235,r.z,130,576,-20,0));
+   const xs=[-155,-78,0,78,155],zs=[-45,32,-28,35,-30],heights=[25,55,84,55,25];
+   for(let i=0;i<5;i++)plats.push(box(r.x+s*xs[i],r.z+zs[i],82,72,0,heights[i],{room:r.id,cacheStep:true}));
+   r.waypoints=[{x:r.x-s*250,z:r.z,y:0},...xs.map((x,i)=>({x:r.x+s*x,z:r.z+zs[i],y:heights[i]})),{x:r.x+s*250,z:r.z,y:0}];
+   r.cacheGoal={x:r.x+s*245,z:r.z,y:0};
+  }else if(r.kind==='bridge'){
    floors.push(box(r.x,r.z+235,576,130,-20,0),box(r.x,r.z-235,576,130,-20,0));
    const variant=revision>=2?(seed+section)%3:0;
    for(let k=0;k<3;k++)plats.push(box(r.x+(variant===2?(k===1?-side*45:side*30):(k===1?side*55:0)),r.z+125-k*125,variant===1?140:110,variant===1?95:85,0,k===1?(variant===1?62:44):18,{room:r.id}));
@@ -146,6 +157,7 @@ function layout(seed,section,tier,revision=6){
    o.x*=1.25;o.z*=1.25;o.w*=1.25;o.d*=1.25;
    if(o.waypoints)for(const pt of o.waypoints){pt.x*=1.25;pt.z*=1.25;}
    if(o.cache){o.cache.x*=1.25;o.cache.z*=1.25;}
+   if(o.cacheGoal){o.cacheGoal.x*=1.25;o.cacheGoal.z*=1.25;}
   }
   for(const o of plats){
    if(o.room===2){o.x=rooms[2].x+(o.x-rooms[2].x)*.5;o.w=78;o.d=66;o.h=o.h>30?56:24;}

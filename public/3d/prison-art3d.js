@@ -143,6 +143,19 @@ export function buildPrisonArt(plan){
    for(const sz of [-1,1])block(room.x,-100,room.z+sz*(room.d/2-10),room.w,200,20,'wall');
    for(const step of plan.plats.filter(p=>p.room===room.id))block(step.x,-100,step.z,step.w,200,step.d,'wall');
   }
+  if(room.kind==='cache'){
+   // The optional side walk is a real gap, with visible masonry below its
+   // five stepping stones. A miss is recoverable, but loses the approach.
+   block(room.x,-205,room.z,room.w,12,room.d,'iron');
+   for(const sz of [-1,1])block(room.x,-95,room.z+sz*(room.d/2-10),room.w,190,18,'wall');
+   for(const step of plan.plats.filter(p=>p.room===room.id)){
+    const material=['wood','iron','trim'][plan.section-1];
+    block(step.x,-98,step.z,Math.max(16,step.w-18),190,Math.max(16,step.d-18),'wall');
+    block(step.x,step.h+5,step.z,step.w+7,8,step.d+7,material);
+    for(const side of [-1,1])block(step.x+side*(step.w/2-5),step.h-13,step.z,5,20,step.d-10,material);
+   }
+   for(const sign of [-1,1])block(room.x+sign*(room.w/2-18),room.h-95,room.z,6,100,room.d-40,'iron');
+  }
   if(room.kind==='boss'){
    if(plan.section===1){
     const y=room.h-45;
@@ -170,22 +183,22 @@ export function buildPrisonArt(plan){
   for(const room of [r,s]){
    const toward=room===r?sgn:-sgn,x=room.x+(horizontal?toward*room.w/2:0),z=room.z+(horizontal?0:toward*room.d/2);
    const radius=plan.revision>=5?122:100,base=72,rotation=horizontal?Math.PI/2:0;
+   const sideDoor=plan.revision>=8&&(room.optional||s.optional||r.optional);
    if(plan.revision>=7){
     // Wall posts read clearly from a distance. Earlier half-ring arches had
     // floating ends from some camera angles; old saved art is kept.
     for(const sign of [-1,1]){
      const px=x+(horizontal?0:sign*radius),pz=z+(horizontal?sign*radius:0);
-     add(new T.CylinderGeometry(9,11,room.h-26,10),'iron',px,(room.h-26)/2,pz);
+     add(new T.CylinderGeometry(9,11,room.h-26,10),sideDoor?'optional':'iron',px,(room.h-26)/2,pz);
      add(new T.CylinderGeometry(16,14,9,10),'trim',px,room.h-30,pz);
     }
    }else{
-    add(new T.TorusGeometry(radius,8,6,24,Math.PI),'trim',x,base,z,0,rotation);
-    for(const sign of [-1,1])add(new T.CylinderGeometry(8,10,base,10),'trim',x+(horizontal?0:sign*radius),base/2,z+(horizontal?sign*radius:0));
+     add(new T.TorusGeometry(radius,8,6,24,Math.PI),'trim',x,base,z,0,rotation);
+     for(const sign of [-1,1])add(new T.CylinderGeometry(8,10,base,10),'trim',x+(horizontal?0:sign*radius),base/2,z+(horizontal?sign*radius:0));
    }
-   if(plan.revision>=7){
-    // A small lintel color-codes side vaults without covering the doorway.
-    const sideDoor=room.optional||s.optional||r.optional;
-    block(x,base+69,z,horizontal?14:92,8,horizontal?92:14,sideDoor?'optional':'route');
+   if(plan.revision===7){
+    const oldSideDoor=room.optional||s.optional||r.optional;
+    block(x,base+69,z,horizontal?14:92,8,horizontal?92:14,oldSideDoor?'optional':'route');
    }
   }
  }

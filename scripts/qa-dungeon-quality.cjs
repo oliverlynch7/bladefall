@@ -4,7 +4,7 @@ async page=>{
  await page.goto('http://127.0.0.1:4339/3d/?mute=1');
  await page.waitForFunction(()=>window.BFPrisonRun&&window.HERO3D?.ready,null,{polling:100});
  const result=await page.evaluate(async()=>{
-  const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.hubTutDone=true;b.meta.tutOff=true;b.meta.introSeen=true;b.meta.bank=null;b.openHub();b.startDelve('warrior');
+  const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.hubTutDone=true;b.meta.tutOff=true;b.meta.introSeen=true;b.meta.bank=null;b.openHub();b.startDelve('warrior');b.G.escape.layoutVersion=7;b.loadDelveFloor(1);
   const assert=(yes,what)=>{if(!yes)throw Error(what);};let g=b.G;
   assert(g.escape.layoutVersion===7,'new attempt revision');assert(g.escape.plan.rooms.length===10,'room count');
   const names=[],art=[];const {buildPrisonArt}=await import('./prison-art3d.js?v=2136');

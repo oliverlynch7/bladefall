@@ -804,3 +804,7 @@ Latest user instruction is to substantially improve Treasure Sprint. Inspection 
 ## [Codex | 2026-10-07] Endless Dungeon quality pass
 
 Current authorization is a broad Prison Break roguelite improvement, retaining the already approved prison escape, persistent economy, multiple tiers, class qualifications, scarce healing and co-op. Implement a versioned new-run room/art/encounter/wayfinding pass based on the existing code, and protect pre-change checkpoint geometry. Abyssal Descent is separate and unchanged. Do not add SFX; the user reserved that work. Human playtesting remains the acceptance gate for pacing and difficulty.
+
+## [Codex | 2026-10-07] Endless Dungeon revision-8 side route
+
+Implementation choice within the authorized quality pass: add a genuinely optional traversal challenge in each section rather than another encounter reskin. It branches from a late guard room, pays one persistent cache, and grants a Tier-2+ class qualification seal. Use layout versioning so existing runs remain on revisions 1-7. Retain host-authoritative co-op rewards and the current main-route and chest progression. Browser physics verifies reachability; human playtesting remains necessary for enjoyment and challenge.

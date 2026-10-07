@@ -12,7 +12,7 @@ export function buildPrisonArt(plan){
   const tex=new T.CanvasTexture(c);tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;textures.push(tex);return tex;
  }
  const wallMap=stoneTexture(),floorMap=stoneTexture(true),palette=[['#c5b4a2','#9a9290','#83604c'],['#9fb7b3','#819a99','#568986'],['#b3a7c5','#9690ab','#8d739f']][plan.section-1];
- const mats={wall:new T.MeshStandardMaterial({color:palette[0],map:wallMap,bumpMap:wallMap,bumpScale:1.8,roughness:.94}),floor:new T.MeshStandardMaterial({color:palette[1],map:floorMap,bumpMap:floorMap,bumpScale:1.1,roughness:.9}),trim:new T.MeshStandardMaterial({color:'#b4a18b',roughness:.8}),iron:new T.MeshStandardMaterial({color:'#39424b',metalness:.72,roughness:.48}),wood:new T.MeshStandardMaterial({color:'#69513a',roughness:.85}),cloth:new T.MeshStandardMaterial({color:palette[2],roughness:1}),glow:new T.MeshStandardMaterial({color:'#ffe3a8',emissive:'#ffb04e',emissiveIntensity:1.5}),water:new T.MeshStandardMaterial({color:'#285b60',metalness:.45,roughness:.23})};
+ const mats={wall:new T.MeshStandardMaterial({color:palette[0],map:wallMap,bumpMap:wallMap,bumpScale:1.8,roughness:.94}),floor:new T.MeshStandardMaterial({color:palette[1],map:floorMap,bumpMap:floorMap,bumpScale:1.1,roughness:.9}),trim:new T.MeshStandardMaterial({color:'#b4a18b',roughness:.8}),iron:new T.MeshStandardMaterial({color:'#39424b',metalness:.72,roughness:.48}),wood:new T.MeshStandardMaterial({color:'#69513a',roughness:.85}),cloth:new T.MeshStandardMaterial({color:palette[2],roughness:1}),glow:new T.MeshStandardMaterial({color:'#ffe3a8',emissive:'#ffb04e',emissiveIntensity:1.5}),water:new T.MeshStandardMaterial({color:'#285b60',metalness:.45,roughness:.23}),route:new T.MeshStandardMaterial({color:'#a9b8c5',emissive:'#607e97',emissiveIntensity:.48,roughness:.7}),optional:new T.MeshStandardMaterial({color:'#dfb265',emissive:'#8e5c21',emissiveIntensity:.55,roughness:.62})};
  const matrix=new T.Matrix4(),q=new T.Quaternion(),euler=new T.Euler();
  function add(geo,mat,x,y,z,rx=0,ry=0,rz=0){
   if(geo.index){const source=geo;geo=source.toNonIndexed();source.dispose();}
@@ -38,7 +38,7 @@ export function buildPrisonArt(plan){
   const bevel=Math.min(2,(o.h-o.y0)/4),shape=new T.Shape(),w=o.w/2-bevel,d=o.d/2-bevel;shape.moveTo(-w,-d);shape.lineTo(w,-d);shape.lineTo(w,d);shape.lineTo(-w,d);shape.closePath();
   add(new T.ExtrudeGeometry(shape,{depth:o.h-o.y0-2*bevel,bevelEnabled:true,bevelSize:bevel,bevelThickness:bevel,bevelSegments:1,curveSegments:1,steps:1}),'floor',o.x,o.y0+bevel,o.z,-Math.PI/2);
  }
- for(const o of plan.decor){if(o.bar)add(new T.CylinderGeometry(3,3,o.h-o.y0,8),'iron',o.x,(o.h+o.y0)/2,o.z);else if(!o.pillar)box(o,'trim');}
+ for(const o of plan.decor){if(o.bar)add(new T.CylinderGeometry(3,3,o.h-o.y0,8),'iron',o.x,(o.h+o.y0)/2,o.z);else if(!o.pillar)box(o,plan.revision>=7&&o.h<=2&&o.color?(o.color==='#d3a451'?'optional':'route'):'trim');}
  for(const room of plan.rooms){
   const half=room.w/2-24;
   for(const sx of [-1,1]){
@@ -90,6 +90,50 @@ export function buildPrisonArt(plan){
     for(const dz of [-240,-220,-200])block(x-sx*7,55,room.z+dz,3,54,5,'trim');
    }
   }
+  if(room.template==='armory'){
+   // Empty racks, confiscated shields and a barred inventory rail tell the
+   // player why the cover sits here. All pieces fit above or against solids.
+   for(const sx of [-1,1]){
+    const x=room.x+sx*205;
+    for(const dz of [-175,-120,-65]){
+     block(x,61,room.z+dz,62,5,7,'wood');
+     add(new T.CylinderGeometry(15,15,4,10),'iron',x,78,room.z+dz,Math.PI/2);
+     add(new T.SphereGeometry(4,8,6),'trim',x,80,room.z+dz);
+    }
+    for(const dz of [92,128,164])block(room.x+sx*(room.w/2-16),94,room.z+dz,5,116,6,'iron');
+   }
+   block(room.x,room.h-22,room.z-130,210,8,12,'iron');
+  }
+  if(room.template==='liftbay'){
+   // The suspended load is overhead; the two low platforms are the only
+   // climbable parts and are already represented by collision geometry.
+   for(const sx of [-1,1]){
+    const x=room.x+sx*205;
+    block(x,room.h-34,room.z+12,6,56,6,'iron');
+    block(x,room.h-62,room.z+12,102,8,178,'wood');
+    for(const dz of [-68,92])block(x,room.h-54,room.z+dz,88,14,35,'iron');
+   }
+   add(new T.CylinderGeometry(21,21,12,14),'iron',room.x,room.h-36,room.z-95,Math.PI/2);
+   for(const sx of [-1,1])block(room.x+sx*112,room.h-34,room.z-95,7,38,7,'iron');
+  }
+  if(room.template==='watchpost'){
+   for(const sx of [-1,1]){
+    const x=room.x+sx*185;
+    block(x,56,room.z-105,94,8,94,'wood');
+    for(const dz of [-146,-64])block(x,79,room.z+dz,92,39,7,'iron');
+    block(room.x+sx*(room.w/2-14),room.h-115,room.z+175,6,95,54,'cloth');
+   }
+   for(const dx of [-85,0,85])block(room.x+dx,room.h-31,room.z-120,7,62,7,'iron');
+  }
+  if(room.template==='infirmary'){
+   for(const sx of [-1,1]){
+    const x=room.x+sx*200;
+    block(x,39,room.z-95,88,5,162,'wood');
+    block(x,42,room.z-95,76,3,144,'cloth');
+    for(const dz of [-165,-25])block(x,21,room.z+dz,7,38,7,'iron');
+    block(room.x+sx*(room.w/2-12),room.h-98,room.z+110,6,115,78,'cloth');
+   }
+  }
   if(room.kind==='bridge'){
    for(const sx of [-1,1])block(room.x+sx*(half+5),80,room.z,8,18,room.d-45,'wood');
    // A deep masonry shaft replaces the visible sky beneath broken floors.
@@ -126,8 +170,23 @@ export function buildPrisonArt(plan){
   for(const room of [r,s]){
    const toward=room===r?sgn:-sgn,x=room.x+(horizontal?toward*room.w/2:0),z=room.z+(horizontal?0:toward*room.d/2);
    const radius=plan.revision>=5?122:100,base=72,rotation=horizontal?Math.PI/2:0;
-   add(new T.TorusGeometry(radius,8,6,24,Math.PI),'trim',x,base,z,0,rotation);
-   for(const sign of [-1,1])add(new T.CylinderGeometry(8,10,base,10),'trim',x+(horizontal?0:sign*radius),base/2,z+(horizontal?sign*radius:0));
+   if(plan.revision>=7){
+    // Wall posts read clearly from a distance. Earlier half-ring arches had
+    // floating ends from some camera angles; old saved art is kept.
+    for(const sign of [-1,1]){
+     const px=x+(horizontal?0:sign*radius),pz=z+(horizontal?sign*radius:0);
+     add(new T.CylinderGeometry(9,11,room.h-26,10),'iron',px,(room.h-26)/2,pz);
+     add(new T.CylinderGeometry(16,14,9,10),'trim',px,room.h-30,pz);
+    }
+   }else{
+    add(new T.TorusGeometry(radius,8,6,24,Math.PI),'trim',x,base,z,0,rotation);
+    for(const sign of [-1,1])add(new T.CylinderGeometry(8,10,base,10),'trim',x+(horizontal?0:sign*radius),base/2,z+(horizontal?sign*radius:0));
+   }
+   if(plan.revision>=7){
+    // A small lintel color-codes side vaults without covering the doorway.
+    const sideDoor=room.optional||s.optional||r.optional;
+    block(x,base+69,z,horizontal?14:92,8,horizontal?92:14,sideDoor?'optional':'route');
+   }
   }
  }
  let triangles=0;

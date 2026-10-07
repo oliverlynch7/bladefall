@@ -1058,9 +1058,9 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2122-2111"></script>
+<script src="./prison-dungeon.js?v=2133"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
-<link rel="stylesheet" href="./prison-menu.css?v=2097"><script src="./prison-menu.js?v=2097"></script>
+<link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2083"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2079">
 <script src="./voice-content.js?v=2079"></script>
@@ -1141,7 +1141,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.132.0-sprint-rebuild';
+const VERSION3D='2.133.0-dungeon-quality';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -23257,7 +23257,7 @@ function start(cid,opts={}){
  if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
  else p.hp=effMaxHp(p);
  G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
- G.escape={layoutVersion:state?(state.layoutVersion||1):6,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ G.escape={layoutVersion:state?(state.layoutVersion||1):7,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
  MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
  if(MP.active&&!opts.remote)MP.enterSpecial('prison');
 }
@@ -23304,7 +23304,7 @@ function openPreparation(){
  const choices=p.classes.map(c=>`<option value="${c}">${CLASSES[c].disp}</option>`).join('');
  const shop=D.upgrades.map(u=>`<button class="bigbtn ghost" data-prbuy="${u.id}" ${p.gold<D.price(p,u.id)||p.upgrades[u.id]>=u.cap?'disabled':''}>${u.name} ${p.upgrades[u.id]}/${u.cap} · ${D.price(p,u.id)}g<br><small>${u.desc}</small></button>`).join('');
  const classes=D.offers.map(o=>`<button class="bigbtn ghost" data-prbuy="${o.id}" ${p.classes.includes(o.id)||p.tier<o.tier||p.progress[o.key]<o.goal||p.gold<o.cost?'disabled':''}>${CLASSES[o.id].disp} · Tier ${o.tier} · ${p.classes.includes(o.id)?'Owned':o.cost+'g'}<br><small>${o.desc} (${Math.min(o.goal,p.progress[o.key])}/${o.goal})</small></button>`).join('');
- showOverlayHTML(`<div class="card prison-menu"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2><p class="ovsub">Escape the cells, cross the underworks, defeat the gate warden.</p><p class="hint">${p.gold} dungeon gold · Earnings and purchases survive death.</p><label>Class <select id="prclass">${choices}</select></label> <label>Tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Health carries between rooms. Each player gets one ally revival per attempt. Gold is spent here between attempts. Starting a new escape replaces your checkpoint.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
+ showOverlayHTML(`<div class="card prison-menu"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2><div class="pr-itinerary"><span>1 · Prison cells</span><span>2 · Underworks</span><span>3 · Escape gate</span></div><p class="hint pr-wallet">${p.gold} dungeon gold · Kept after death · Spend between runs</p><label>Starting class <select id="prclass">${choices}</select></label> <label>Difficulty tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Your health carries between rooms. Side paths offer gold and class progress, but risk your run. A new escape replaces the unfinished one.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
  document.getElementById('prstart').onclick=()=>{const cid=document.getElementById('prclass').value,tier=+document.getElementById('prtier').value;const go=()=>startDelve(cid,{tier});if(p.checkpoint)confirmAction('Replace this escape?', 'Only the unfinished run in Save '+(library().active+1)+' will be replaced. Keep your gold, upgrades and unlocked classes.',go,openPreparation);else go();};document.getElementById('prresume')?.addEventListener('click',()=>startDelve(p.checkpoint.cid,{resume:true}));document.getElementById('prback').onclick=openHub;document.getElementById('prsaves').onclick=openDelveGate;
  document.querySelectorAll('[data-prbuy]').forEach(el=>el.onclick=()=>{editSaves(book=>D.buy(book.slots[book.active],el.dataset.prbuy));openPreparation();});
 };
@@ -23318,8 +23318,10 @@ function spawnRoom(room,state){
   // Spawn in clear lanes, away from pillars and the elevated optional reward.
   const sx=schedule?schedule[i].x:room.kind==='boss'?0:formation?(i%2?-1:1)*(80+(i%3)*20):Math.cos(a)*160,sz=schedule?schedule[i].z:formation?(type==='prison_vessel'?-180:40+wave*30):Math.sin(a)*100-70;
   const e=spawnEnemy(type,room.x+sx,room.z+sz);e.active=true;e.dropT=1.3;e.prisonRoom=room.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*state.party);e.partyHealthMul=state.party;
-  if(room.kind==='vault'&&i===0){makeElite(e);e.label='Elite '+BFPrisonCombat.roster[type].label;}state.members.push(e.mid);if(room.kind==='boss'){e.hp=e.maxHp=Math.round((250+G.floor*75)*G.ngHp*state.party);e.dmg=BFPrisonCombat.roster[type].dmg*G.ngDmg*DIFFICULTY;G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
- }state.started=true;state.spawnTime=G.time;if(room.kind!=='boss')toast(room.kind==='waves'?'Guards approaching — two waves!':room.kind==='vault'?'Optional elite: risk health for unlock progress.':'Guards ahead!');
+  if(room.kind==='vault'&&i===0){makeElite(e);e.label='Elite '+BFPrisonCombat.roster[type].label;}
+  if(r.layoutVersion>=7&&room.id===8&&wave===1&&i===0&&r.tier>=2){makeElite(e);e.label='Watch Captain';}
+  state.members.push(e.mid);if(room.kind==='boss'){e.hp=e.maxHp=Math.round((250+G.floor*75)*G.ngHp*state.party);e.dmg=BFPrisonCombat.roster[type].dmg*G.ngDmg*DIFFICULTY;G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
+ }state.started=true;state.spawnTime=G.time;if(room.kind!=='boss')toast(room.kind==='waves'?(room.id===8&&wave?'Watch Captain leads the final wave!':'Guards approaching — two waves!'):room.kind==='vault'?'Optional elite: risk health for unlock progress.':r.layoutVersion>=7?D.roomAdvice(room):'Guards ahead!');
 }
 function tick(dt){
  const r=G?.escape;if(!r||r.finished||mode!=='play')return;
@@ -23344,10 +23346,22 @@ function tick(dt){
  }
  if(G.springs.some(s=>s.used)&&!r.states.healed){r.states.healed=true;checkpoint();}
  if(G.boss&&!G.boss.dead)updateBossBar(G.boss);
- let hud=document.getElementById('prisonhud');if(!hud){hud=document.createElement('div');hud.id='prisonhud';hud.style='position:fixed;right:18px;top:112px;max-width:260px;pointer-events:none;background:#141922df;color:#f4e0ad;padding:9px 18px;border:1px solid #816944;border-radius:8px;z-index:12;font:14px sans-serif';document.body.append(hud);}
+ let hud=document.getElementById('prisonhud');if(!hud){hud=document.createElement('div');hud.id='prisonhud';hud.setAttribute('aria-live','off');document.body.append(hud);}
  const required=r.plan.rooms.filter(q=>!q.optional&&['fight','waves','boss'].includes(q.kind));const cleared=required.filter(q=>r.states[q.id]?.cleared).length;
- const hint=room?.optional?(r.states[room.id]?.cleared?(room.id===6?(r.states.cache?'Gold collected':'Climb for hidden gold'):(r.states.seal?'Seal collected':'Climb for the hidden seal')):'Optional elite — risk health for rewards'):room?.kind==='bridge'?'Hold jump to cross the broken floor':G.floorCleared?(G.floor===3?'Reach the exit to escape':'Reach the stairs'):cleared+'/'+required.length+' guard rooms cleared';
- hud.textContent=(room?.name||'Passage')+' · '+hint+' · '+profile().gold+'g'+(r.combatHint?.until>G.time?' — '+r.combatHint.text:'');
+ const active=room&&r.states[room.id],alive=room?G.enemies.filter(e=>e.prisonRoom===room.id&&!e.dead&&e.hp>0).length:0;
+ const next=required.find(q=>!r.states[q.id]?.cleared),health=Math.max(0,Math.ceil(G.p.hp)),maxHealth=Math.ceil(effMaxHp(G.p));
+ // The existing objective arrow and minimap should point to the next fight,
+ // rather than the exit beyond still-uncleared chambers.
+ G.goalPos=next?{x:next.x,y:0,z:next.z}:{...r.plan.exit};
+ const hint=room?.optional?(active?.cleared?(room.id===6?(r.states.cache?'Gold collected':'Climb to the gold cache'):(r.states.seal?'Seal collected':'Climb to the hidden seal')):'Optional elite: risk health for gold and class progress')
+  :room?.kind==='bridge'?'Hold jump; aim for the visible stone steps'
+  :active?.started?(room.kind==='waves'&&active.wave?'Final wave · ':'')+(alive?alive+' foes remain':'Hold the room for reinforcements')
+  :G.floorCleared?(G.floor===3?'Go to the exit to escape':'Go to the stairs')
+  :next?'Reach '+next.name:'Explore the passage';
+ const warning=r.combatHint?.until>G.time?r.combatHint.text:null;
+ const side=room?.id===1&&!r.states[5]?.cleared?'Side route: '+r.plan.rooms[5].name:room?.id===3&&!r.states[6]?.cleared?'Side route: '+r.plan.rooms[6].name:null;
+ const state=[room?.name||'Passage',hint,side,cleared,required.length,profile().gold,health,maxHealth,warning].join('|');
+ if(hud.dataset.state!==state){hud.dataset.state=state;hud.innerHTML=`<div class="pr-run-head"><b>PRISON BREAK</b><span>Tier ${r.tier} · ${G.floor}/3</span></div><strong class="pr-room">${room?.name||'Passage'}</strong><div class="pr-objective">${hint}</div>${side?`<div class="pr-side">${side}</div>`:''}<div class="pr-run-foot"><span>${cleared}/${required.length} guard rooms</span><span>${health}/${maxHealth} HP</span><span>${profile().gold}g</span></div>${warning?`<div class="pr-combat-hint">${warning}</div>`:''}`;}
 }
 questUpdate=function(){if(G?.escape){document.getElementById('questbox')?.classList.add('hide');return;}old.questUpdate();};
 drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.escape.plan;
@@ -23430,7 +23444,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2135"></script>
+<script type="module" src="./hero3d.js?v=2136"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

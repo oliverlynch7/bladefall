@@ -41,6 +41,15 @@ function layout(seed,section,tier,revision=6){
   rooms[8].x=rooms[7].x;rooms[8].z=rooms[7].z-1440;
   rooms[4].x=rooms[8].x+(route===1?-side:side)*720;rooms[4].z=rooms[8].z;
  }
+ if(revision>=7){
+  // Each section now has a different work space on the main route. The room graph,
+  // entrances and required jump spans stay the same, so solo/co-op paths remain valid.
+  const work=['refectory','liftbay','armory'][section-1],last=['cistern','watchpost','infirmary'][section-1];
+  const titles={refectory:'Prison refectory',liftbay:'Chain-lift bay',armory:'Confiscated armory',cistern:'Flooded watch gallery',watchpost:'High guard post',infirmary:'Abandoned infirmary'};
+  rooms[7].template=work;rooms[7].name=titles[work];rooms[8].template=last;rooms[8].name=titles[last];
+  if((seed+section)%2===0){rooms[1].template='armory';rooms[1].name='Shield store';}
+  else {rooms[3].template='watchpost';rooms[3].name='High guard post';}
+ }
  const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),[8,4]]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
@@ -81,6 +90,16 @@ function layout(seed,section,tier,revision=6){
     // Three staggered low islands interrupt straight charges without sealing a lane.
     for(const [x,z] of [[-155,-110],[155,30],[-110,155]])solid(x,z,135,100,28,'#547a79');
     for(const x of [-250,250])solid(x,-165,32,70,160,'#5d9391');
+   }else if(r.template==='armory'){
+    // Shield racks are low enough to vault; the central fighting lane stays open.
+    for(const x of [-205,205]){solid(x,-105,72,165,45,'#72675c');solid(x,125,58,88,32,'#615b56');}
+   }else if(r.template==='liftbay'){
+    // Two accessible loading platforms make a flank, not an impassable lift puzzle.
+    for(const x of [-205,205]){solid(x,10,105,190,40,'#736551');solid(x,-115,66,85,66,'#60574d');}
+   }else if(r.template==='watchpost'){
+    for(const x of [-185,185]){solid(x,-105,100,100,48,'#707176');solid(x,115,85,100,22,'#5c6368');}
+   }else if(r.template==='infirmary'){
+    for(const x of [-200,200]){solid(x,-95,90,170,30,'#726d6a');solid(x,145,60,75,45,'#77736e');}
    }else{
     for(const x of [-170,170]){solid(x,40,65,95,32,'#807162');solid(x,-125,38,48,120,'#66616d');}
    }
@@ -154,11 +173,16 @@ function layout(seed,section,tier,revision=6){
 function encounter(room,tier,wave=0){
  const packs={gallery:[['prison_guard','prison_vessel','prison_pike'],['prison_vessel','prison_hound','prison_pike']],kennels:[['prison_hound','prison_hound','prison_pike'],['prison_guard','prison_hound','prison_hound']],barricades:[['prison_guard','prison_pike','prison_vessel'],['prison_hound','prison_vessel','prison_guard']]};
  packs.refectory=packs.barricades;packs.cistern=[['prison_vessel','prison_pike','prison_hound'],['prison_hound','prison_guard','prison_vessel']];
+ packs.armory=[['prison_guard','prison_pike','prison_guard'],['prison_hound','prison_pike','prison_vessel']];
+ packs.liftbay=[['prison_pike','prison_vessel','prison_hound'],['prison_hound','prison_hound','prison_guard']];
+ packs.watchpost=[['prison_pike','prison_pike','prison_vessel'],['prison_hound','prison_guard','prison_pike']];
+ packs.infirmary=[['prison_vessel','prison_vessel','prison_guard'],['prison_hound','prison_pike','prison_vessel']];
  const pack=(packs[room.template]||packs.barricades)[(wave+(room.encounterVariant||0))%2],count=room.kind==='vault'?2:2+tier;
  const positions=room.spawnPoints?.length>=count?room.spawnPoints:room.kind==='vault'?[[-80,60],[90,70]]:[[-75,-35],[85,-170],[65,95],[-80,-190],[0,140]];
  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
 }
 function chestRarity(room,revision){if(room.kind==='boss')return 'uncommon';if(revision>=5)return room.id===3?'common':null;return ['fight','waves'].includes(room.kind)?'common':null;}
+function roomAdvice(room){return {armory:'Shield racks break the guards’ line of attack.',liftbay:'Use the loading platforms to flank the guards.',watchpost:'Pike guards watch the long lane. Use the side cover.',infirmary:'Vessels set the floor alight. Keep moving.',cistern:'The islands interrupt a straight charge.',refectory:'Tables divide the room into two fighting lanes.',kennels:'Hounds rush in a straight line. Step aside.',gallery:'The split gallery has more than one approach.',barricades:'Use the barricades to break line of sight.'}[room.template]||'Watch each enemy before you commit.';}
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
-window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAt,copy};
+window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAdvice,roomAt,copy};
 })();

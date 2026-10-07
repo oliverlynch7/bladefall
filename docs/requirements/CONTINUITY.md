@@ -1181,3 +1181,7 @@ Version 2.131.0 replaces Descent's repeated square with four authored floor shap
 ## [Codex | 2026-10-07] Treasure Sprint rebuild shipped
 
 Version 2.132.0 rebuilds hub and campaign Treasure Sprint as a deterministic three-section parkour course with slim suspended stone, readable dynamic hazards, section checkpoints, next-landing guidance, movement-start timer and non-HP fall recovery. Solo hub runs have result/retry and continue to award no loot; the campaign vault still awards one item plus gold. The previously unsaved personal best now persists globally. Browser QA: 100 seeds, baseline jumps, fall/result/chest flows, prior-version save, camera/phone and co-op seed reconstruction. Remaining gate is Oliver's human pacing and visual feedback. Details: docs/design/TREASURE_SPRINT_REBUILD_2026-10-07.md.
+
+## [Codex | 2026-10-07] Endless Dungeon quality pass shipped
+
+Version 2.133.0 improves the separate Prison Break roguelite with revision-7 room layouts, distinct environmental workspaces and enemy packs, a Tier-2+ Watch Captain, route/art cues, and preparation/run UI. Older checkpoint revisions and the campaign/Descent modes are preserved. Tested 1,080 generated plans, 6,480 historical-plan hashes, 43,200 spawn sockets, 60 real jumps, full three-section escape, old-build checkpoint resume, co-op scaling and reward isolation. Human playtesting remains needed for difficulty, duration and visual quality. See docs/design/ENDLESS_DUNGEON_QUALITY_2026-10-07.md.

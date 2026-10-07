@@ -800,3 +800,7 @@ Oliver requests a comprehensive improvement of the Abyssal Descent levels. Keep 
 ## [Codex | 2026-10-07] Treasure Sprint quality rebuild
 
 Latest user instruction is to substantially improve Treasure Sprint. Inspection found the shared generator's overlong shuffled route, white void and full-height box art, unrelated quest tracker/arrow, HUD-overlapping timer, HP loss despite no-risk hub wording and instant hub return with no solo result. Implement a shorter three-part seeded parkour course, suspended palace masonry and gold path tells, sprint-specific guidance, timed checkpoint recovery and clear solo retry/results. Maintain the existing hub/campaign reward split and co-op seed contract; test real browser physics and legacy saves. See docs/design/TREASURE_SPRINT_REBUILD_2026-10-07.md.
+
+## [Codex | 2026-10-07] Endless Dungeon quality pass
+
+Current authorization is a broad Prison Break roguelite improvement, retaining the already approved prison escape, persistent economy, multiple tiers, class qualifications, scarce healing and co-op. Implement a versioned new-run room/art/encounter/wayfinding pass based on the existing code, and protect pre-change checkpoint geometry. Abyssal Descent is separate and unchanged. Do not add SFX; the user reserved that work. Human playtesting remains the acceptance gate for pacing and difficulty.

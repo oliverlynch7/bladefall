@@ -62,7 +62,7 @@ export function buildDeep(scene,w){
   // Their original renderer must remain the sole owner of their visible surface.
   for(const s of w.segments||[])if(!s.nofloor&&!s.phaseable&&!s.phase)surface(s,abyss?-45:-24,0);
   const solids=(w.obstacles||[]).filter(o=>!o.phase&&!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol&&!(w.portalMode==='descent'&&o.descentCover));
-    for(const o of solids){const top=o.h??1,base=o.y0??(o.kind==='plat'?Math.min(0,top-16):0);surface(o,base,top,o);obstacles.add(o);}
+    for(const o of solids){const top=o.h??1,base=w.portalMode==='sprint'&&o.kind==='plat'?top-22:o.y0??(o.kind==='plat'?Math.min(0,top-16):0);surface(o,base,top,o);obstacles.add(o);}
   for(const o of w.walls||[]){if(o.invisible)continue;surface(o,o.y0||0,(o.y0||0)+(o.h||1),o);walls.add(o);}
   // Exposed island edges get masonry courses; shared interior edges are left untouched.
   const terrain=solids.filter(o=>o.kind==='plat'&&o.terrain);

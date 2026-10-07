@@ -1,5 +1,5 @@
 // Secondary modes share the authored architecture, but have their own art identity.
-import {wantsDeep,deepReady,loadDeep,buildDeep} from './deep-art.js?v=2134';
+import {wantsDeep,deepReady,loadDeep,buildDeep} from './deep-art.js?v=2135';
 const accents={plains:'#abc77c',forest:'#91bd8a',badlands:'#e1a96c',canyon:'#dbbc83',ruins:'#d88169',dungeon:'#b98a79',frost:'#9adfee',volcano:'#ff994d',void:'#c397f1',marble:'#edce86',apex:'#bca0e1'};
 const descentStone={
  plains:['#55565c','#595b61','#51535a','#5d5e63'],forest:['#4b5554','#515c58','#48514f','#57615b'],
@@ -8,14 +8,15 @@ const descentStone={
  void:['#514c60','#574f66','#4e495c','#5c526a'],marble:['#64646e','#6b6b74','#60616b','#70707a'],
  apex:['#474451','#4c4856','#43404e','#514b5b']
 };
-export function portalMode(w){return w.endless?'descent':w.bossRush?'gauntlet':w.arena?'arena':w.bonus&&w.sprintFun?'sprint':null;}
+export function portalMode(w){return w.endless?'descent':w.bossRush?'gauntlet':w.arena?'arena':w.bonus?'sprint':null;}
 function adapt(w){
  const mode=portalMode(w),zone=mode==='descent'?'abyss':mode==='sprint'?'palace':w.arenaLava?'ember':'castle';
  const lamp=mode==='sprint'?'#ffdc83':accents[w.theme]||'#dd976c';
  const names={descent:'Abyssal Descent · The Sunken Orrery',gauntlet:'The Gauntlet · Court of Crowns',arena:'The Arena · The Ashen Lists',sprint:'Treasure Sprint · The Gilded Run'};
  return {...w,zone,hub:false,trial:false,arena:false,bonus:false,delve:false,endless:false,bossRush:false,portalMode:mode,
-  portalProfile:{name:names[mode],lamp,sun:mode==='descent'?'#cfbfe8':mode==='sprint'?'#fff0cc':'#dfd3d6',
-   ...(mode==='descent'?{palette:descentStone[w.theme]||descentStone.void,body:'#4c4854',hazard:['#080711','#291a3b']}:{})},
+  portalProfile:{name:names[mode],lamp,sun:mode==='descent'?'#cfbfe8':mode==='sprint'?'#f4d69a':'#dfd3d6',
+   ...(mode==='descent'?{palette:descentStone[w.theme]||descentStone.void,body:'#4c4854',hazard:['#080711','#291a3b']}:{}),
+   ...(mode==='sprint'?{palette:['#6a656b','#777178','#5c5963','#898078'],body:'#46414e',fog:'#24263d',sky:[.12,.14,.23],sunGlow:[.11,.08,.05],hazard:['#14152b','#303054'],emissive:'#080914'}:{})},
   // The arena's y=0 segment is lava, not a safe stone platform.
   segments:w.arenaLava?[]:w.segments};
 }
@@ -77,10 +78,30 @@ export function buildPortal(scene,w){
    part('glow',wall.x,(wall.y0||0)+(wall.h||120)+3,wall.z,Math.max(4,wall.w-8),3,Math.max(4,wall.d-8),a.portalProfile.lamp);deco[deco.length-1].portalObstacle=wall;
   }
  }else if(mode==='sprint'){
-  // Distant guide pylons follow the course. Moving platforms, timers and rewards stay owned by gameplay.
-  const platforms=(w.obstacles||[]).filter(o=>o.kind==='plat'&&!o.invisible);
-  for(let i=0;i<platforms.length;i+=Math.max(1,Math.ceil(platforms.length/14))){const p=platforms[i],x=p.x+(i%2?1:-1)*((p.w||80)/2+100),y=(p.h||0)-160;
-   part('pillar',x,y,p.z,24,150,24);part('glow',x,y+146,p.z,24,7,24,'#ffdf92');}
+  // Every safe landing gets a visible gilded edge. The gold path is a navigational language;
+  // moving, crumbling and phase platforms retain their native animation and never get false static rails.
+  const path=w.course||[],staticSteps=path.filter(p=>!p.mover&&!p.crumble&&!p.phase);
+  for(let i=0;i<staticSteps.length;i++){
+   const p=staticSteps[i],top=p.y+1.8,wid=p.w-8,dep=p.d-8;
+   for(const sx of [-1,1])part('glow',p.x+sx*(p.w/2-5),top,p.z,5,3,dep,'#d5a652');
+   for(const sz of [-1,1])part('glow',p.x,top,p.z+sz*(p.d/2-5),wid,3,5,'#d5a652');
+   if(i%3===0||p.checkpoint){part('rune',p.x,p.y+2,p.z,Math.min(46,p.w*.42),2,Math.min(46,p.d*.42),p.checkpoint?'#fff0b9':'#b38a50');}
+   if(p.checkpoint){const x=p.x+p.w/2+27;part('pillar',x,p.y-34,p.z,16,68,16);part('glow',x,p.y+9,p.z,21,8,21,'#ffe6a0');}
+  }
+  const peak=staticSteps.reduce((a,p)=>Math.max(a,p.y),0),center=(b.minX+b.maxX)/2;
+  // A paired gateway at each section transition makes the climb, hazard crossing and descent
+  // readable from a distance without enclosing the route or putting collision in the landing.
+  for(const [index,section] of (w.sprintSections||[]).entries()){
+   if(index===0)continue; // keep the launch view open and the first jump visible
+   const p=path[section.from],previous=path[Math.max(0,section.from-1)];if(!p)continue;
+   const z=(p.z+previous.z)/2,span=Math.max(190,p.w+80),color=['#f4d781','#bd9cf5','#80d3dc'][index];
+   for(const side of [-1,1]){const x=p.x+side*span/2;part('pillar',x,p.y-80,z,26,150,26);part('glow',x,p.y+1,z,35,9,35,color);}
+   part('rune',p.x,p.y+135,z,88,88,88,color);
+  }
+  for(const x of [b.minX+48,b.maxX-48])for(const z of [b.minZ+220,(b.minZ+b.maxZ)/2,b.maxZ-190]){
+   part('pillar',x,peak*.35-210,z,34,420,34);part('glow',x,peak*.35+6,z,30,9,30,'#e8c781');part('crag',x,peak*.35+42,z,42,68,42);
+  }
+  part('ring',center,peak+135,b.minZ-75,145,145,145);part('rune',center,peak+135,b.minZ-75,145,145,145,'#f3d47a');
  }
  a.deco=deco;const result=buildDeep(scene,a);result.counts.portalArt=mode;return result;
 }

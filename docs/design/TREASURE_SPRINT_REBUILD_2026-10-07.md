@@ -1,0 +1,19 @@
+# Treasure Sprint rebuild
+
+## Grounded findings
+
+The hub time trial and campaign bonus vault share `loadBonus`. It currently shuffles five to seven small platform families, often stacking more than a thousand units upward. The visual pass extrudes most elevated platforms into full-height beige columns over a near-white void. At the entrance the timer partly sits behind the desktop HUD, the quest tracker can show an unrelated campaign quest, and the main objective arrow can point at the player. Falls subtract 22% HP even though the hub entry describes the mode as no risk. The finish immediately returns to the hub, so a solo player has no clear result or quick retry. Seeded guest entry, the campaign reward chest and the hub no-loot rule already exist and must remain.
+
+## Build plan
+
+1. Generate a readable three-part course: an ascent, a moving or timed crossing, and a descent toward the vault. Randomize one authored family in each part and a finale from a deterministic seed, with stable landings between them. Keep normal jumps viable for every base class; optional fast cuts may reward air-dash. Set time from actual route length, not a flat constant.
+2. Replace full-height platform boxes with slim suspended masonry and a darker sky. Give path tiles a consistent gold edge, dynamic tiles a different tell, and each section a distinct landmark. Reuse the existing palace stone kit instead of introducing low-detail substitute models.
+3. Show a Sprint-specific tracker, legible timer and next landing guidance. Begin the clock on the first purposeful movement so load and camera setup do not consume the run. Falling returns to the latest stable checkpoint with a time penalty rather than HP loss.
+4. Give solo hub runs an explicit finish/failure result with Retry and Return. Preserve no loot/no gold in the hub trial, the campaign bonus chest reward and return, deterministic co-op seeds and the saved best time.
+5. Browser-check generated seeds, base-stat jumps and dynamic sections, timer/fall/retry/chest flows, desktop/phone/three camera modes, co-op seed reconstruction and a previous-version save. Human playtesting remains the measure of pacing and challenge.
+
+## Implementation and QA
+
+Version 2.132.0 uses three seeded sections (ascent, dynamic crossing, descent) and a finale. Every section has a stable checkpoint. The hub run keeps its no-reward time-trial contract; the campaign vault still awards one equipment item plus gold and opens its exit. Both use the same suspended stone and gold-edge art. Moving platforms have violet markings, crumble tiles show cracks, and section thresholds have distant colored landmarks. The objective tracker and arrow now lead to the next landing, then the chest; a fall costs three seconds without reducing HP. Solo hub runs show a result with retry and return choices. Personal best is now actually serialized in the global save.
+
+Real-browser checks: 100 seeds included every authored family and produced no unpadded rise above 82 or center gap above 190, with a stable checkpoint in each section. A level-1 Warrior physically landed the first switchback and shaft jumps using base controls. Idle clock stayed still, movement started it, a fall returned to a raised checkpoint at unchanged HP, and timeout/finish/retry screens worked. The hub chest awarded no equipment or gold; the campaign chest awarded exactly one item and gold and opened an exit. The co-op special packet rebuilt a byte-identical route from its seed. Desktop, phone, far, shoulder and first-person captures were inspected, and first landing spacing was adjusted after the first-person check. A save written by the previous build loaded its hero and gold in the new build; a new personal best survived reload. Remaining human checks are course pacing, timer pressure, visual preference and network latency in a real co-op session.

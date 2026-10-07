@@ -1059,3 +1059,7 @@ Oliver requests a comprehensive improvement to every part of the Sparring Room. 
 ## [Codex | 2026-10-07] Abyssal Descent floor rebuild
 
 Oliver requests a comprehensive improvement of the Abyssal Descent levels. Keep this as the campaign gold/XP/equipment grind, separate from the Endless Dungeon roguelite. Grounded finding: current floors repeat the same boxed arena and random trickle spawns despite themed colors and scaling. Approved scope is to rebuild floor layouts, tactical cover, paced enemy waves, varied existing bestiary pressure, visual identity and route feedback while preserving the established chest reward, pact, death retention, co-op host authority and difficulty curve. See docs/design/ABYSSAL_DESCENT_REBUILD_2026-10-07.md. Verify representative floors and prior saves in a browser; do not claim human fun/balance proof from automation.
+
+## [Codex | 2026-10-07] Treasure Sprint quality rebuild
+
+User requests that the Treasure Sprint levels be much better in every way. Rebuild the shared hub time-trial and campaign bonus course for readable, varied, physically reachable parkour; improve visual identity, timer/objective guidance, recovery and result flow. Preserve the hub's no-loot/no-gold contract, campaign bonus reward chest, co-op deterministic seed and old saves. Detailed grounded plan: docs/design/TREASURE_SPRINT_REBUILD_2026-10-07.md.

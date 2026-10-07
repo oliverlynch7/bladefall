@@ -1041,6 +1041,10 @@ Briar: continue the approved large isolated beta second pass after interrupted w
 ## [Codex | 2026-10-07] Enemy roster visual upgrade active
 
 Latest user authorization: begin the existing enemy-roster upgrade plan now. Scope is visual-model quality across bosses, elites, common enemies and summons, with distinct silhouettes and performance-conscious Blender assets. This is an active multi-asset effort; only Forge Colossus and the first Marble Colossus production pass are integrated as of v2.126.0. Existing combat, story, rewards, collision and saves remain authoritative. See docs/design/ENEMY_MODEL_UPGRADE_2026-10-06.md and docs/requirements/DECISION_LOG.md.
+
+## [Codex | 2026-10-07] Complete visual roster authorization
+
+Oliver explicitly asks to fulfill the graphical improvement for **all** enemies and to work through the whole roster. Include every production enemy appearance, the Frost officers, and the separate Hydra, retaining existing mechanics, collision, rewards, and save IDs. Use docs/design/ENEMY_ROSTER_RELEASE_2026-10-07.md as the grounded implementation and release plan; report visual QA and any remaining limits honestly.
 ## [Codex | 2026-10-07] Finish Briar beta to a publication-standard review candidate
 
 Oliver asked to finish the full-scale Briar Town beta thoroughly, as if preparing it for publication. Preserve the approved mill, current campaign story, larger terrain, varied quest types, existing stronger tree/enemy assets, five shard routes and separate Dev preview. Resolve visible terrain seams, empty stretches, impractical encounter placement, misleading wayfinding and stale preview maps; verify gameplay, saves and visuals in a real browser. The prior explicit direction to keep the main campaign portal intact pending Oliver's beta review still applies. Automated checks support a review candidate, not proof of fun, broad class balance or final visual approval.

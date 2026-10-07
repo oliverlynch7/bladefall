@@ -3,13 +3,27 @@ import * as T from './three.module.js';
 export function createHydra(parent){
  const root=new T.Group();parent.add(root);const geos=[],mats=[],parts=[],necks=[];
  const mat=c=>{const m=new T.MeshStandardMaterial({color:c,roughness:.75,metalness:c==='#829997'?.6:0,flatShading:true});mats.push(m);return m;};
- const skin=mat('#346a6c'),belly=mat('#91b1a2'),ridge=mat('#193e4a'),iron=mat('#829997'),eye=mat('#e3ca76'),tooth=mat('#d9d2aa');
+ const skin=mat('#346a6c'),belly=mat('#91b1a2'),ridge=mat('#193e4a'),iron=mat('#829997'),eye=mat('#e3ca76'),tooth=mat('#d9d2aa'),scale=mat('#497d79'),shadow=mat('#102d36');
+ eye.emissive=new T.Color('#9d7836');eye.emissiveIntensity=.45;
  const make=(g,m,p=root)=>{geos.push(g);const o=new T.Mesh(g,m);p.add(o);return o;};
  const ell=(x,y,z,a,b,c,m,p=root)=>{const o=make(new T.IcosahedronGeometry(1,1),m,p);o.position.set(x,y,z);o.scale.set(a,b,c);return o;};
  ell(0,-50,-940,360,220,540,skin);for(let i=0;i<8;i++){const fin=make(new T.ConeGeometry(45,140,4),ridge);fin.position.set(0,110-i*9,-650-i*95);fin.rotation.x=-.35;}
+ for(const side of [-1,1])for(let j=0;j<5;j++){const plate=ell(side*(250-j*19),60-j*9,-1150+j*145,92,24,125,scale);plate.rotation.z=side*.27;}
+ const neckScaleGeo=new T.IcosahedronGeometry(1,0);geos.push(neckScaleGeo);const neckScales=new T.InstancedMesh(neckScaleGeo,scale,60);root.add(neckScales);const neckPose=new T.Object3D();
  for(let i=0;i<3;i++){const g=new T.Group();root.add(g);const segs=[];for(let j=0;j<10;j++)segs.push(make(new T.CylinderGeometry(43-j*1.1,48-j*1.1,1,9),skin,g));
  const head=new T.Group();g.add(head);ell(0,10,0,73,57,100,skin,head);ell(0,-20,60,59,25,85,belly,head);ell(0,5,72,63,26,85,skin,head);
- for(const s of [-1,1]){ell(s*59,27,36,9,6,16,eye,head);ell(s*66,38,-8,21,16,45,ridge,head);const horn=make(new T.ConeGeometry(16,85,5),tooth,head);horn.position.set(s*44,66,-35);horn.rotation.z=-s*.35;for(let j=0;j<4;j++){const t=make(new T.ConeGeometry(6,25,4),tooth,head);t.rotation.x=Math.PI;t.position.set(s*43,-14,48+j*23);}}
+ ell(0,-10,144,42,20,62,ridge,head);ell(0,17,102,48,28,68,scale,head);
+ for(const s of [-1,1]){
+  ell(s*59,27,36,9,6,16,eye,head);ell(s*66,38,-8,21,16,45,ridge,head);
+  const horn=make(new T.ConeGeometry(16,85,5),tooth,head);horn.position.set(s*44,66,-35);horn.rotation.z=-s*.35;
+  const cheek=ell(s*53,-1,62,30,12,62,scale,head);cheek.rotation.z=s*.24;
+  ell(s*24,29,150,8,4,10,shadow,head);
+  for(let j=0;j<5;j++){const t=make(new T.ConeGeometry(6-j*.45,30-j*2,5),tooth,head);t.rotation.x=Math.PI;t.position.set(s*(29+j*6),-16,35+j*31);}
+  for(let j=0;j<3;j++){const whisker=make(new T.ConeGeometry(4,74-j*12,4),ridge,head);whisker.position.set(s*(59+j*9),-23,104+j*15);whisker.rotation.z=s*(.80+j*.19);}
+  for(let j=0;j<3;j++){const frill=make(new T.ConeGeometry(22-j*3,68-j*9,5),ridge,head);frill.position.set(s*(59+j*15),42-j*11,-65-j*29);frill.rotation.z=-s*.70;}
+ }
+ for(let j=0;j<4;j++){const dorsal=make(new T.ConeGeometry(13-j*2,67-j*8,5),ridge,head);dorsal.position.set(0,67-j*5,-95+j*44);dorsal.rotation.x=-.28;}
+ const jaw=ell(0,-37,89,55,10,88,shadow,head);jaw.rotation.x=.07;
  const cuff=make(new T.TorusGeometry(59,10,6,12),iron,g);cuff.material=iron.clone();mats.push(cuff.material);cuff.rotation.x=Math.PI/2;const links=[];for(let j=0;j<10;j++){const l=make(new T.TorusGeometry(15,4,5,8),iron,g);links.push(l);}
  necks.push({g,segs,head,cuff,links});}
  const jet=make(new T.CylinderGeometry(1,1,1,8),new T.MeshBasicMaterial({color:0x9adee9,transparent:true,opacity:.78,depthWrite:false}));mats.push(jet.material);jet.name='Hydra water jet';jet.visible=false;
@@ -21,9 +35,13 @@ export function createHydra(parent){
  if(active&&h.state==='strike'&&h.kind==='sweep'){x=Math.sin((.45-h.clock)/.45*Math.PI-Math.PI/2)*800;y=190;z=100;}
  if(active&&h.state==='strike'&&h.kind==='bite'){x=h.x;y=h.y+58;z=h.z;}
  y+=Math.sin(t*1.6+i*2)*9;n.head.position.set(x,y,z);n.head.rotation.y=Math.atan2(h.x-x,h.z-z)*.25;
- const point=u=>new T.Vector3(x*u,20+(y-20)*u+Math.sin(u*Math.PI)*200,-850+(z+850)*u);for(let j=0;j<10;j++){const a=point(j/10),b=point((j+1)/10),d=b.clone().sub(a),m=n.segs[j];m.position.copy(a.add(b).multiplyScalar(.5));m.scale.y=d.length()+5;m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());}
+ const point=u=>new T.Vector3(x*u,20+(y-20)*u+Math.sin(u*Math.PI)*200,-850+(z+850)*u);for(let j=0;j<10;j++){const a=point(j/10),b=point((j+1)/10),d=b.clone().sub(a),m=n.segs[j];m.position.copy(a.add(b).multiplyScalar(.5));m.scale.y=d.length()+5;m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());
+  for(let side=0;side<2;side++){const angle=(side?1:-1)*.63;
+   neckPose.position.copy(m.position).add(new T.Vector3(Math.sin(angle)*43,Math.cos(angle)*32,0));neckPose.quaternion.copy(m.quaternion);neckPose.scale.set(32,13,58);neckPose.updateMatrix();neckScales.setMatrixAt(i*20+j*2+side,neckPose.matrix);
+  }
+ }
  n.cuff.position.set(x,y-65,z-12);n.cuff.visible=!broken;n.cuff.material.color.set(active&&h.state==='recover'?'#f0efc8':'#829997');for(let j=0;j<10;j++){const u=j/9,l=n.links[j];l.visible=!broken;l.position.set(x+(anchor.x+(i-1)*55-x)*u,y-65+(125-y+65)*u,z-12+(anchor.z+65-z+12)*u+35*Math.sin(u*Math.PI));l.rotation.y=j%2*Math.PI/2;}
- });
+ });neckScales.instanceMatrix.needsUpdate=true;
  }
  function dispose(){for(const g of geos)g.dispose();for(const m of mats)m.dispose();root.removeFromParent();}
  return {root,update,dispose};

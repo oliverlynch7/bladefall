@@ -11,6 +11,22 @@ import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 // the shared kit loader below; unknown enemies retain the legacy rendering fallback.
 const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+(['archer','brute','warden'].includes(type)?type+'-v1980':type)}]));
 MOB_CAST['officer-shield']={file:'enemy-assets/officers/shield'};MOB_CAST['officer-spear']={file:'enemy-assets/officers/spear'};
+// Versioned visual-only replacement. Old GLBs remain in place for rollback;
+// gameplay type IDs, collision dimensions and attack state are unchanged.
+const ROSTER_BEASTS=new Set('charger dustjackal cragspitter thornboar sporeback frostshell magmaskit'.split(' '));
+const ROSTER_FLOATS=new Set('flyer shadeling sparkling galewisp voidtether'.split(' '));
+const ROSTER_SMALL=new Set('slime slimelet mimic dummy bosscrystal embertotem'.split(' '));
+const ROSTER_LEAN=new Set('emberling frostling toxling blinkstalker goblin bones'.split(' '));
+for(const type of Object.keys(MOB_CAST))if(type!=='colossus'&&type!=='marblecolossus'){
+  // Fit the BODY to its existing gameplay height. Spear tips, antlers and
+  // airborne fins extend above it; measuring their full bounds made enemies
+  // tiny next to the player, especially the Hollow Marksman and spear guard.
+  const fitHeight=ROSTER_BEASTS.has(type)?.82:ROSTER_FLOATS.has(type)?.86:
+    ROSTER_SMALL.has(type)?(type==='slimelet'?.48:type==='slime'?.56:.88):
+    ROSTER_LEAN.has(type)?.99:
+    ['king','tyrant','brute','warden','archer','sorcerer'].includes(type)?1.22:1.10;
+  MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2128',fitHeight};
+}
 MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
 MOB_CAST.marblecolossus={file:'enemy-assets/articulated/marblecolossus-v2126'};
 const ASSETS_DIR = '../slice3d/assets/';
@@ -179,7 +195,7 @@ function syncMobsInner(scene,dt){
     }
     // Training targets and resurrected skeletons can reuse the same gameplay object.
     if(rec.wasDead){rec.wasDead=false;rec.cur=null;rec.mixer.stopAllAction();}
-    const s=(e.h||38)/rec.src._nativeH;
+    const s=(e.h||38)/(cast.fitHeight||rec.src._nativeH);
     rec.root.scale.set(s*(e.briarRole==='guard'?1.12:e.briarRole==='runner'?.92:1),s,s*(e.briarRole==='guard'?1.12:1));
     rec.root.position.set(e.x,(e.y||0)-rec.src._baseY*s-(e.dropT||0)*(e.h||38)*.22,e.z);
     rec.root.rotation.y=e.yaw||0;rec.root.visible=true;

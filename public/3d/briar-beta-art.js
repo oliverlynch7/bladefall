@@ -1,4 +1,4 @@
-import {buildBriarTrees} from './briar-trees.js?v=2120';
+import {buildBriarTrees,buildBriarDressing} from './briar-trees.js?v=2127';
 import * as T from './three.module.js';
 // Authored landmarks and workspaces. No scatter algorithm places gameplay props.
 export function buildBriarBetaArt(world){
@@ -13,16 +13,37 @@ export function buildBriarBetaArt(world){
  function sign(x,y,z,text){const cv=document.createElement('canvas');cv.width=512;cv.height=96;const c=cv.getContext('2d');c.fillStyle='#202b23';c.fillRect(0,0,512,96);c.strokeStyle='#b8ac74';c.lineWidth=5;c.strokeRect(3,3,506,90);c.fillStyle='#fff1c8';c.font='bold 32px sans-serif';c.textAlign='center';c.fillText(text,256,60);const tex=new T.CanvasTexture(cv),m=new T.SpriteMaterial({map:tex,depthTest:true});const sp=new T.Sprite(m);sp.position.set(x,y,z);sp.scale.set(125,24,1);g.add(sp);g.userData.labels.push({tex,m,sp,x,z});}
  g.userData.labels=[];
  // Clip the shared heightfield's triangles to each authored land footprint.
- const positions=[],colors=[],road=s.road||[],ground=new T.Color(s.part?'#435e3d':'#70874d'),dirt=new T.Color(s.part?'#857757':'#b29b6d');
+ const positions=[],colors=[],uvs=[],road=s.road||[],ground=new T.Color(s.part?'#435e3d':'#70874d'),dirt=new T.Color(s.part?'#857757':'#b29b6d');
  const clip=(poly,axis,edge,sign)=>{const out=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],da=(a[axis]-edge)*sign,db=(b[axis]-edge)*sign;if(da>=0)out.push(a);if((da>=0)!==(db>=0)){const t=da/(da-db);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}}return out;};
- const roadDistance=(x,z)=>{let best=Infinity;for(let i=1;i<road.length;i++){const a=road[i-1],b=road[i],dx=b.x-a.x,dz=b.z-a.z,t=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz)));best=Math.min(best,Math.hypot(x-a.x-t*dx,z-a.z-t*dz));}return best;};
- for(const f of world.segments){const x0=f.x-f.w/2,x1=f.x+f.w/2,z0=f.z-f.d/2,z1=f.z+f.d/2,step=s.terrain.cell;
- for(let x=Math.floor(x0/step)*step;x<x1;x+=step)for(let z=Math.floor(z0/step)*step;z<z1;z+=step)for(let poly of [[[x,z],[x,z+step],[x+step,z]],[[x+step,z+step],[x+step,z],[x,z+step]]]){
- for(const [axis,edge,sign]of [[0,x0,1],[0,x1,-1],[1,z0,1],[1,z1,-1]]){if(!poly.length)break;poly=clip(poly,axis,edge,sign);}
- for(let i=1;i<poly.length-1;i++)for(const [px,pz]of [poly[0],poly[i],poly[i+1]]){const y=s.terrain.height(px,pz),c=ground.clone().lerp(dirt,Math.max(0,Math.min(1,(105-roadDistance(px,pz))/35)));positions.push(px,y,pz);colors.push(c.r,c.g,c.b);}
- }}
- const terrainGeo=new T.BufferGeometry();terrainGeo.setAttribute('position',new T.Float32BufferAttribute(positions,3));terrainGeo.setAttribute('color',new T.Float32BufferAttribute(colors,3));terrainGeo.computeVertexNormals();const terrainMat=new T.MeshStandardMaterial({vertexColors:true,roughness:1});materials.set('terrain',terrainMat);const terrainMesh=new T.Mesh(terrainGeo,terrainMat);terrainMesh.receiveShadow=true;g.add(terrainMesh);
- for(const q of s.paths)box(q.x,.5,q.z,q.w,1,q.d,s.part?'#72734d':'#b49a67');
+ const roadDistance=(x,z)=>{let best=Infinity;for(let i=1;i<road.length;i++){const a=road[i-1],b=road[i],dx=b.x-a.x,dz=b.z-a.z,t=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz)));best=Math.min(best,Math.hypot(x-a.x-t*dx,z-a.z-t*dz));}for(const p of s.paths){const dx=Math.max(0,Math.abs(x-p.x)-p.w/2),dz=Math.max(0,Math.abs(z-p.z)-p.d/2);best=Math.min(best,Math.hypot(dx,dz));}return best;};
+ // Split the union of land rectangles into disjoint cells. Previously each
+ // segment drew its own triangles, so overlapping footprints fought for depth.
+ const extent=f=>({x0:f.x-f.w/2,x1:f.x+f.w/2,z0:f.z-f.d/2,z1:f.z+f.d/2});
+ const floors=world.segments.map(extent),xs=[...new Set(floors.flatMap(f=>[f.x0,f.x1]))].sort((a,b)=>a-b),zs=[...new Set(floors.flatMap(f=>[f.z0,f.z1]))].sort((a,b)=>a-b);
+ for(let xi=0;xi<xs.length-1;xi++)for(let zi=0;zi<zs.length-1;zi++){
+  const x0=xs[xi],x1=xs[xi+1],z0=zs[zi],z1=zs[zi+1],mx=(x0+x1)/2,mz=(z0+z1)/2;
+  if(!floors.some(f=>mx>=f.x0&&mx<=f.x1&&mz>=f.z0&&mz<=f.z1))continue;
+  const step=s.terrain.cell;
+  for(let x=Math.floor(x0/step)*step;x<x1;x+=step)for(let z=Math.floor(z0/step)*step;z<z1;z+=step)for(let poly of [[[x,z],[x,z+step],[x+step,z]],[[x+step,z+step],[x+step,z],[x,z+step]]]){
+   for(const [axis,edge,sign]of [[0,x0,1],[0,x1,-1],[1,z0,1],[1,z1,-1]]){if(!poly.length)break;poly=clip(poly,axis,edge,sign);}
+   for(let i=1;i<poly.length-1;i++)for(const [px,pz]of [poly[0],poly[i],poly[i+1]]){
+    const y=s.terrain.height(px,pz),track=Math.max(0,Math.min(1,(113-roadDistance(px,pz))/45));
+    const variation=(Math.sin(px*.013+pz*.006)*Math.sin(pz*.018-px*.004)+1)*.025;
+    const c=ground.clone().multiplyScalar(.96+variation).lerp(dirt,track);
+    positions.push(px,y,pz);colors.push(c.r,c.g,c.b);uvs.push(px/320,pz/320);
+   }
+  }
+ }
+ const terrainGeo=new T.BufferGeometry();terrainGeo.setAttribute('position',new T.Float32BufferAttribute(positions,3));terrainGeo.setAttribute('color',new T.Float32BufferAttribute(colors,3));terrainGeo.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));terrainGeo.computeVertexNormals();
+ // A small, deterministic tile adds ground grain without a large bitmap or
+ // separate coplanar grass planes. Vertex colors still define paths and fields.
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const ctx=canvas.getContext('2d');ctx.fillStyle='#f0f0f0';ctx.fillRect(0,0,128,128);
+ let seed=19391;const rand=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+ for(let i=0;i<1650;i++){const n=221+Math.floor(rand()*34),px=Math.floor(rand()*128),py=Math.floor(rand()*128),r=1+Math.floor(rand()*3);ctx.fillStyle=`rgb(${n},${n},${n})`;ctx.fillRect(px,py,r,r);}
+ const groundTex=new T.CanvasTexture(canvas);groundTex.wrapS=groundTex.wrapT=T.RepeatWrapping;groundTex.colorSpace=T.SRGBColorSpace;groundTex.anisotropy=4;
+ const terrainMat=new T.MeshStandardMaterial({map:groundTex,vertexColors:true,roughness:1});materials.set('terrain',terrainMat);const terrainMesh=new T.Mesh(terrainGeo,terrainMat);terrainMesh.receiveShadow=true;g.add(terrainMesh);
+ // Paths are now colored into the shared heightfield instead of hovering as
+ // flat slabs across rolling ground.
  // River with physical banks and a deep bed, beneath the actual gap in collision.
  const rz=s.part?-645:-875,rw=s.part?300:250;
  box(0,-135,rz,2050,40,rw+40,'#435a58');box(0,-38,rz,2050,3,rw,'#357e8c');
@@ -83,6 +104,68 @@ export function buildBriarBetaArt(world){
   for(const a of [0,2.1,4.2]){const dx=Math.cos(a),dz=Math.sin(a);beam([t.x,5,t.z],[t.x+dx*60,2,t.z+dz*60],9,'#65553b');beam([t.x,t.h*.55,t.z],[t.x+dx*65,t.h*.77,t.z+dz*65],t.r*.4,'#715839');}
   sphere(t.x,t.h*.85,t.z,t.h*.43,t.h*.28,t.h*.39,s.part?'#315c3b':'#527843');sphere(t.x-35,t.h*.95,t.z+10,t.h*.30,t.h*.22,t.h*.29,'#648851');sphere(t.x+55,t.h*.81,t.z-20,t.h*.27,t.h*.21,t.h*.28,'#486d3c');
  }
+ // Small, placed ground detail belongs to each district's work or ecology.
+ // It is low enough to step over; gameplay-sized objects are in s.solids.
+ const groundY=(x,z)=>s.terrain.height(x,z);
+ const fence=(x0,z0,x1,z1,c='#806747')=>{
+  const y0=groundY(x0,z0),y1=groundY(x1,z1),len=Math.hypot(x1-x0,z1-z0),n=Math.ceil(len/105);
+  for(let i=0;i<=n;i++){const t=i/n,x=x0+(x1-x0)*t,z=z0+(z1-z0)*t,y=groundY(x,z);box(x,y+37,z,7,74,7,c);}
+  for(const h of [28,56])beam([x0,y0+h,z0],[x1,y1+h,z1],3,'#aa8859');
+ };
+ const stump=(x,z,r=18)=>{const y=groundY(x,z);cylinder(x,y+13,z,r,26,'#614b36');cylinder(x,y+27,z,r*.9,3,'#b99966');sphere(x+r*.55,y+2,z-r*.3,r*.65,5,r*.55,'#657454');};
+ const rocklet=(x,z,r=18)=>{const y=groundY(x,z);sphere(x,y+5,z,r,10,r*.75,s.part?'#647368':'#7b8271');};
+ const flowerbed=(x,z,n=5)=>{const y=groundY(x,z);for(let i=0;i<n;i++){const dx=(i-(n-1)/2)*9,dy=groundY(x+dx,z);cylinder(x+dx,dy+9,z+(i%2)*8,2,18,'#4e713d');sphere(x+dx,dy+19,z+(i%2)*8,4,4,4,i%3?'#ead190':'#d9a98e');}};
+ if(!s.part){
+  // Homes have usable gardens and boundaries rather than free-floating props.
+  fence(-825,535,-475,535);fence(320,535,610,535);
+  for(const [x,z]of [[-780,495],[-725,495],[-670,495],[-610,495],[355,510],[415,510],[480,510],[540,510]])flowerbed(x,z,4);
+  for(const [x,z]of [[-840,210],[-635,130],[640,155],[790,-95],[-680,-1030],[630,-1200]])rocklet(x,z,22);
+  // The orchard follows planted rows; shallow furrows visually anchor the trees.
+  for(const x of [-710,-550])for(const z of [-2020,-2260,-2500,-2740]){
+   const y=groundY(x,z);sphere(x,y+1,z,62,4,75,'#78694c');
+   for(const dz of [-32,27])sphere(x+38,y+6,z+dz,12,9,12,dz<0?'#ba563e':'#c9914a');
+  }
+  fence(-900,-1885,-900,-2735);fence(-370,-2060,-370,-2690);
+  for(const [x,z]of [[-900,-2910],[-790,-3080],[-720,-3480],[680,-3360],[810,-3850]])stump(x,z,17);
+  // Worked farm: rows stop short of the escorted escape lane.
+  for(const x of [-885,-835,-785,-735])for(const z of [-3410,-3340,-3270,-3200]){
+   const y=groundY(x,z);sphere(x,y+2,z,15,4,34,'#766449');
+   for(const dz of [-10,10])sphere(x,y+8,z+dz,7,8,7,'#688048');
+  }
+  fence(-960,-3480,-960,-3140);fence(-960,-3140,-650,-3140);
+ }else{
+  // Logging activity gathers at the camp; stumps thin toward the war camp.
+  for(const [x,z]of [[-430,-1010],[-790,-1230],[-460,-1450],[-740,-1650],[-480,-2890],[-780,-3150],[-905,-3660],[-650,-3840],[500,-3780],[780,-4050]])stump(x,z,20);
+  for(const [x,z]of [[-535,-930],[-430,-890],[-595,-1410],[-820,-1520],[-750,-3360],[-780,-3450]]){
+   const y=groundY(x,z),log=cylinder(x,y+14,z,15,95,'#6c5138');log.rotation.z=Math.PI/2;
+   for(const dx of [-47,47]){const end=cylinder(x+dx,y+14,z,14,2,'#b38c5d');end.rotation.z=Math.PI/2;}
+  }
+  // Foot-worn north road is lined with rock outcrops and occasional fern beds.
+  for(const [x,z]of [[-410,-2620],[220,-2860],[-680,-3000],[710,-3200],[-430,-3380],[510,-3570],[-750,-3800],[780,-3910],[-810,-4270],[700,-4490]])rocklet(x,z,26);
+  for(const [x,z]of [[-535,-2700],[510,-2960],[-620,-3250],[780,-3520],[-625,-4030],[540,-4510]])flowerbed(x,z,7);
+  fence(-850,-3740,-850,-3960);fence(850,-3950,850,-4170);
+ }
+ // The kit's complete grass and flower meshes soften authored
+ // edges. Clusters mark field rows, the stream, logging cuts and forest bends;
+ // the walking and jumping footprints are deliberately kept clear.
+ const dressing=[];
+ const addKit=(name,x,z,h,rotation=0)=>dressing.push({name,x,z,y:groundY(x,z),h,rotation});
+ if(!s.part){
+  for(const x of [-865,-785,-635,-435,420,550,635])for(const z of [540,485])addKit('grass_large',x,z,25);
+  for(const x of [-760,-645,-510])for(const z of [-2070,-2300,-2530,-2740]){
+   addKit('grass_large',x-65,z+60,32);addKit('flower_redA',x+60,z-47,22);
+  }
+  for(const z of [-3420,-3330,-3240,-3150])for(const x of [-895,-805,-715])addKit('grass_large',x,z,23);
+ }else{
+  for(const z of [410,225,0,-250,-920,-1180,-1460,-2050,-2640,-2920,-3400,-3790,-4510])for(const x of [-590,590]){
+   addKit('grass_large',x+55,z+48,26);
+  }
+  for(const [x,z]of [[-430,-980],[-625,-1280],[570,-1350],[750,-1650],[-690,-3150],[710,-3550],[-800,-4240],[690,-4480]]){
+   addKit('flower_yellowA',x+30,z+42,24);
+  }
+  for(const z of [-3040,-3210,-3390,-3610,-3870,-4070,-4320])for(const x of [-760,760])addKit('grass_large',x,z,40);
+ }
+ const reusedDressing=buildBriarDressing(dressing);if(reusedDressing)g.add(reusedDressing);
  for(const p of s.props){const {x,z}=p;const first=g.children.length;
   if(p.kind==='medical'){box(x,36,z,120,8,65,'#96724c');for(const dx of [-48,48])for(const dz of [-23,23])box(x+dx,17,z+dz,8,34,8,'#685139');for(let i=0;i<4;i++)cylinder(x-35+i*22,48,z,7,15,'#e4d6b4');beam([x-75,0,z-25],[x-75,145,z-25],5,'#5b4733');beam([x+75,0,z-25],[x+75,145,z-25],5,'#5b4733');box(x,140,z-10,160,8,100,'#b6bba0');sign(x,175,z,'MARA · MEDICAL');}
   if(p.kind==='well'){cylinder(x,28,z,45,56,'#827d68');cylinder(x,57,z,32,2,'#243f42');for(const dx of [-50,50])box(x+dx,62,z,9,124,9,'#6c5234');box(x,124,z,120,14,25,'#88633d');}
@@ -116,6 +199,20 @@ export function buildBriarBetaArt(world){
     beam([x-125,210,z],[x+125,210,z],9,'#76583c');
     sign(x,251,z,'WOODS GATE');
    }
+   if(p.kind==='roadblock'){
+    // An occupied ridge explains the patrol here; the centre stays open for
+    // dodging and for a clean escorted route in future reuse.
+    for(const side of [-1,1]){
+     const px=x+side*230;
+     for(const dx of [-30,0,30]){
+      const log=cylinder(px+dx,38,z,13,76,'#70513b');log.rotation.x=Math.PI/2;
+     }
+     beam([px,0,z-35],[px,155,z-35],7,'#514333');
+     box(px+side*32,116,z-35,63,72,3,'#673f39');
+     box(px+side*32,149,z-32,48,5,3,'#aa8151');
+    }
+    for(const [dx,dz]of [[-345,-90],[340,75]])sphere(x+dx,8,z+dz,35,13,30,'#69766a');
+   }
    if(p.kind==='lumber'){
     for(const dz of [-42,-5,32])for(const dy of [16,42]){
      const log=cylinder(x-75,dy,z+dz,17,94,'#735337');log.rotation.z=Math.PI/2;
@@ -138,14 +235,18 @@ export function buildBriarBetaArt(world){
     sign(x,164,z+196,'DEFEND THE WAGON');
    }
    if(p.kind==='duel'){
-    for(let i=0;i<12;i++){const a=i*Math.PI/6;sphere(x+Math.sin(a)*180,4,z+Math.cos(a)*180,24,8,18,'#8e9988');}
+    for(let i=0;i<16;i++){const a=i*Math.PI/8;sphere(x+Math.sin(a)*180,5,z+Math.cos(a)*180,28,11,20,'#a0a493');}
+    for(const dx of [-160,160])for(const dz of [-160,160]){
+     beam([x+dx,0,z+dz],[x+dx,115,z+dz],6,'#765a3c');
+     const flag=box(x+dx+17,92,z+dz,34,38,3,'#6b865c');flag.rotation.z=dx<0?-.1:.1;
+    }
     for(const side of [-1,1]){box(x+side*245,105,z,10,210,10,'#69533d');box(x+side*245,185,z,60,90,5,'#49634a');}
     for(const [dx,dz]of [[-145,-130],[160,-90]]){
      beam([x+dx,0,z+dz],[x+dx,105,z+dz],5,'#70583b');
      for(const radius of [42,30,18,7]){const disk=cylinder(x+dx,110,z+dz,radius,2,radius===7?'#cba95a':radius===18?'#445f48':radius===30?'#d4c5a1':'#55483a');disk.rotation.x=Math.PI/2;}
     }
     for(let i=0;i<6;i++){const a=i*Math.PI/3;box(x+Math.sin(a)*125,2,z+Math.cos(a)*125,20,2,7,'#a69b75');}
-    sign(x,205,z+225,'RANGER CHALLENGE');
+    sign(x,205,z-225,'RANGER CHALLENGE');
    }
    if(p.kind==='warcamp'){
     for(const side of [-1,1]){
@@ -195,8 +296,8 @@ export function buildBriarBetaArt(world){
    for(const dx of [-22,22])box(top.x+dx,top.h+75,top.z-37,4,9,2,'#b6a276');
   }
  }
- g.userData.tick=p=>{reusedTrees?.userData.tick?.(p);if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
- g.userData.dispose=()=>{for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry)&&!o.isInstancedMesh)o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
+ g.userData.tick=p=>{reusedTrees?.userData.tick?.(p);reusedDressing?.userData.tick?.(p);if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
+ g.userData.dispose=()=>{groundTex.dispose();for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry)&&!o.isInstancedMesh)o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
  // Static art shares geometry/material batches. Complexity should not imply hundreds of draw calls.
  const batches=new Map();for(const o of [...g.children])if(o.isMesh&&!o.isInstancedMesh){o.updateMatrix();const key=o.geometry.uuid+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}
  for(const list of batches.values()){if(list.length<2)continue;const inst=new T.InstancedMesh(list[0].geometry,list[0].material,list.length);list.forEach((o,i)=>{inst.setMatrixAt(i,o.matrix);g.remove(o);});inst.computeBoundingSphere();g.add(inst);}

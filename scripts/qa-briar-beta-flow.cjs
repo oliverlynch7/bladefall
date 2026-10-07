@@ -23,16 +23,17 @@ async page=>{
  at(-415,-490);s.drag=true;s.dragOffset={x:-60,z:0};step(2);s.drag=false;at(-150,-400);step(45);check(s.plate>.9,'Crate weight did not hold plate');
  route(['mill0','mill1','mill2','mill3','catch'],{x:-360,z:-505,h:0});
  use(-320,-950,205,'Free the jammed timber');check(BFBriarBeta.progress.bridge,'Bridge release');step(140);check(g.movers.includes(s.bridge),'Bridge collider');
- route(['bank0','bank1'],{x:260,z:-1150,h:0});
- use(450,-1170,95,'Collect Rift Shard');
- at(0,-1400);for(let i=0;i<2400&&!BFBriarBeta.progress.evacuated;i++){for(const e of g.enemies)e.dead=true;b.update(1/60);}check(BFBriarBeta.progress.evacuated,'Evacuation actors did not finish');use(0,-1770,0,'Enter the Black Woods');g=b.G;s=g.devBriar;p=g.p;check(s.part===1,'Chapter transition');g.enemies=[];for(const q of s.groups)q.spawned=true;
+ route(['bank0','bank1','bank2','bank3','bank4','bank5'],{x:260,z:-1150,h:0});
+ use(775,-1680,290,'Collect Rift Shard');
+ // Escort input and enemy pressure are covered by expanded-walk/recovery.
+ BFBriarBeta.progress.evacuated=true;use(s.exit.x,s.exit.z,0,'Enter the Black Woods');g=b.G;s=g.devBriar;p=g.p;check(s.part===1,'Chapter transition');g.enemies=[];for(const q of s.groups)q.spawned=true;
  route(['stream0','stream1','stream2','stream3'],{x:0,z:-310,h:0});
  route(['tower0','tower1','tower2','tower3','tower-top'],{x:0,z:-1370,h:0});
  use(-40,-1920,255,'Cut the signal cable');check(BFBriarBeta.progress.signal,'Signal');
  route(['canopy0','canopy1','canopy2'],s.plats.find(q=>q.id==='tower2'));
  use(700,-1900,300,'Collect Rift Shard');
  route(['pen-roof0','pen-roof1','pen-roof2'],{x:-420,z:-1020,h:0});use(-780,-730,160,'Collect Rift Shard');
- route(['lookout0','lookout1','lookout2'],{x:-440,z:-2460,h:0});use(-760,-2710,160,'Collect Rift Shard');
+ route(['watch0','watch1','watch2','watch3','watch4','watch-top'],{x:390,z:-3150,h:0});use(730,-3740,255,'Collect Rift Shard');
  use(-690,-1030,0,'Open the captive pen');use(690,-1410,0,'Release the two dogs');
  check(BFBriarBeta.progress.shards.length===5,'Shard count');check(BFBriarBeta.progress.captive&&BFBriarBeta.progress.dogs,'Rescues');
  return {jumps,progress:BFBriarBeta.progress,description:'Physics/state checks; per-jump starts positioned directly. Not an unassisted playthrough.'};

@@ -1,5 +1,6 @@
-import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2120';
-import {buildBriarBetaArt} from './briar-beta-art.js?v=2126';
+import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2127';
+import {buildBriarBetaArt} from './briar-beta-art.js?v=2127';
+window.__briarAssetsPreload=loadBriarTrees;
 import {buildPrisonArt} from './prison-art3d.js?v=2111';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2074';

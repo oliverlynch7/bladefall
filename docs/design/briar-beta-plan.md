@@ -34,10 +34,10 @@ Main route is readable; optional loops reconnect. No objective requires reading 
 | Mara's supplies | Climb damaged granary, fight through raiders, take satchel, deliver once | Satchel disappears, quest changes, medical pad lights | Can collect before dialogue; death cannot delete it |
 | Mill water | Move grain crate onto broad pressure plate, or stand on it | Plate lowers; sluice closes; waterwheel slows and stops | Crate constrained to safe ground, reset available nearby |
 | Crossing | Climb scaffold and free timber while the waterwheel is stopped | Log shifts, bridge lowers and becomes walkable | No guessing; water pressure explains failed release; fall returns locally |
-| Escape | Clear far-bank guards, then protect three walking villagers against two flanking patrol waves | Villagers cross the restored bridge; shared safety bar responds to real attack volumes | Overrun offers a crossing retry; supplies, bridge repair and discoveries remain done |
+| Escape | Clear far-bank guards, then protect three walking villagers against four paced flanking ambushes along the full escape lane | Villagers travel through orchard and farm bends; each has visible HP and responds to real attack volumes | Overrun offers a crossing retry; supplies, bridge repair and discoveries remain done |
 | Forest traversal | Jump uneven fallen timber and scaffold landings | Access to new vantage and the signal | Actual jump physics; catch ledges and local checkpoints |
 | Captive / dogs | Defeat enclosure guards, open pen, return optionally | Occupants leave confinement; side objective completes | Topics remain available, no hostage softlock |
-| Hunting | Defeat six at designated logging camp | Explicit count and test reward | Two-active cap, bounded respawn, no infinite quest reward |
+| Hunting | Defeat twelve at the designated logging camp | Explicit count and test reward | Two-active cap, bounded respawn, no infinite quest reward |
 | Signal | Reach apparatus and sever its cable | Beam stops; refuge is no longer marked | Not another three-button lock |
 | Blocker | Dodge committed rush, move behind the attacker, punish recovery | Telegraph, hit feedback, boss health, exit cleared | Nearby retry retains exploration, restores encounter fairly |
 
@@ -101,3 +101,6 @@ Art: inspect campaign Blender tree kit in browser; reuse its geometry/material w
 Verification: actual movement up/down slopes, crossing-gap unchanged, beginning-to-end route walk, escort route and fail/retry, combat terrain support, tree render and trunk collision, asset failure fallback, storage isolation and previous save. This pass is not evidence of fun or finished overall campaign replacement. Future work includes class-opponent side fights, individually damageable escorts and deeper optional traversal/puzzles; report those plainly.
 
 Current status: individual escort HP is implemented. Hold-area and class-opponent quests remain pending. Tree selection uses the complete existing Nature Kit assets, not the bare Blender tree from the outskirts kit. This first pass retains original southern workspaces and expands northern terrain.
+## [Codex | 2026-10-07] Current review candidate
+
+The initial table above is the interaction contract. The playable full-scale beta now extends both chapters to campaign-length routes, adds four escort ambushes with individual villager HP, a twelve-kill capped logging patrol, a defended lumber wagon, a Ranger duel, a guarded northern ridge, a six-jump farm supply climb and a six-jump old-watch shard climb. The previously approved crate/plate mill is unchanged. The published expansion maps are north-up diagrams of the current routes. See briar-beta-qa.md for verification and outstanding human review. No beta progress writes to campaign saves; no live campaign portal was replaced.

@@ -7,6 +7,7 @@ window.BFBriarBeta=(()=>{'use strict';
  function resume(){A.play();A.refresh();hud();}
  function panel(title,text,buttons){A.menu(`<div class="card narrow keep-menu"><p class="ovkicker">BRIAR TOWN · BETA</p><h2>${title}</h2><p class="ovsub">${text}</p>${buttons.map((b,i)=>`<button class="bigbtn ${i?'ghost':''}" id="bb${i}">${b[0]}</button>`).join('')}</div>`);buttons.forEach((b,i)=>document.getElementById('bb'+i).onclick=b[1]);}
  function setup(){if(!window.BF_KEEP_ISOLATED||new URLSearchParams(location.search).get('devbriar')!=='1'){location.assign('/3d/?devbriar=1');return;}
+ window.__briarAssetsPreload?.();
  A.menu(`<div class="card keep-menu"><p class="ovkicker">ISOLATED SOLO REMAKE · TWO CHAPTERS</p><h2>Briar Town · Hold on to home</h2><p class="ovsub">Climb the rooftops. Restore the crossing. Lead the fight into the Black Woods.</p><div class="keep-fields"><label>Class<select id="bc">${Object.entries(A.classes).map(([k,v])=>`<option value="${k}" ${config.cid===k?'selected':''}>${v.disp}</option>`).join('')}</select></label><label>Player level<input id="bl" type="number" min="1" max="50" value="${config.level}"></label><label>Class rank<input id="br" type="number" min="1" max="10" value="${config.rank}"></label><label>Gear<select id="bg">${['common','uncommon','rare','epic','legendary'].map(k=>`<option ${config.rarity===k?'selected':''}>${k}</option>`).join('')}</select></label><label>Skill branch<select id="bp"><option value="a">First choices</option><option value="b" ${config.path==='b'?'selected':''}>Second choices</option></select></label><label>Enemy strength<select id="be"><option value="0.65" ${config.strength===.65?'selected':''}>Relaxed</option><option value="1" ${config.strength===1?'selected':''}>Standard</option><option value="1.5" ${config.strength===1.5?'selected':''}>Hard</option></select></label><label>Camera<select id="bv">${[['shoulder','Over the shoulder'],['far','Overhead'],['fps','First person']].map(([k,n])=>`<option value="${k}" ${config.camera===k?'selected':''}>${n}</option>`).join('')}</select></label></div><label class="keep-check"><input id="bi" type="checkbox" ${config.god?'checked':''}> Invulnerable exploration</label><p class="hint">No real saves or unlocks are read or changed. Rank/XP stays fixed for encounter comparison. Death retries this chapter with completed tasks retained. This beta is solo; reload resets it.</p><button class="bigbtn" id="bstart">Start Homefields beta</button><button class="bigbtn ghost" id="bexit">Back to title</button></div>`);
  document.getElementById('bstart').onclick=()=>{config={cid:document.getElementById('bc').value,level:clamp(+document.getElementById('bl').value||1,1,50)|0,rank:clamp(+document.getElementById('br').value||1,1,10)|0,rarity:document.getElementById('bg').value,path:document.getElementById('bp').value,strength:+document.getElementById('be').value,camera:document.getElementById('bv').value,god:document.getElementById('bi').checked};start();};document.getElementById('bexit').onclick=exit;
  }
@@ -49,7 +50,8 @@ window.BFBriarBeta=(()=>{'use strict';
   plat('bank0',300,-1070,45,115,115,'stone');plat('bank1',450,-1170,95,100,100,'stone');shard('home-bank',450,-1170,95);
   for(const x of [-865,-680,-495])for(const z of [-1480,-1690])tree(x,z,165,20);
   for(const [x,z]of [[-900,670],[870,660],[-915,-80],[890,-1280],[820,-1690]])tree(x,z,240,25);
-  for(const [x,z]of [[240,-1320],[-230,-1510]]){solid(x,z,90,120,55);s.props.push({kind:'bales',x,z});}
+  // Keep the far-bank supply carts outside the escort's flanking combat lane.
+  for(const [x,z]of [[460,-1320],[-460,-1510]]){solid(x,z,90,120,55);s.props.push({kind:'bales',x,z});}
   group('raiders',290,-210,[['prison_pike',220,-280],['prison_hound',120,-400]],310);
   group('bank',0,-1390,[['prison_guard',-90,-1280],['prison_pike',150,-1470],['prison_hound',-100,-1620]],410);
   g.bounds={minX:-980,maxX:1080,minZ:-1900,maxZ:750};s.exit={x:0,z:-1770,y:0};
@@ -101,22 +103,23 @@ window.BFBriarBeta=(()=>{'use strict';
   plat('bank2',575,-1300,145,85,95,'stone');plat('bank3',715,-1410,200,80,90,'stone');plat('bank4',635,-1570,245,85,95,'stone');plat('bank5',775,-1680,290,110,115,'stone');
   Object.assign(s.shards.find(q=>q.id==='home-bank'),{x:775,z:-1680,y:290});
  }else{
-  floor(-150,-3120,1450,400);floor(0,-3570,1770,500);floor(0,-4260,2100,880);floor(0,-4740,850,80);
+  floor(-150,-3120,1450,400);floor(680,-3070,560,640);floor(0,-3570,1770,500);floor(0,-4260,2100,880);floor(0,-4740,850,80);
   s.road=[{x:0,z:-2720},{x:-350,z:-3050},{x:40,z:-3500},{x:340,z:-3830},{x:0,z:-4220},{x:0,z:-4620}];
   s.exit={x:0,z:-4620,y:0};g.bounds={minX:-1120,maxX:1120,minZ:-4810,maxZ:750};
   Object.assign(s.groups.find(q=>q.id==='boss'),{x:0,z:-4220,foes:[['prison_maw',0,-4220]],r:470});
   group('north-patrol',-350,-3100,[['prison_pike',-370,-3100],['prison_hound',-210,-3230]],320);
+  group('ridge-guard',0,-2560,[['prison_guard',-260,-2550],['prison_hound',240,-2630]],350);
   group('north-guard',300,-3750,[['prison_guard',420,-3750],['prison_pike',130,-3810]],300);
   group('watch-guard',455,-3300,[['prison_pike',420,-3290],['prison_guard',540,-3390]],275);
-  for(const [x,z]of [[-780,-2950],[480,-3010],[-750,-3310],[990,-3380],[-740,-3650],[1020,-3760],[-890,-3990],[920,-4130],[-830,-4450],[750,-4530],[-450,-4720],[460,-4750]])tree(x,z,340+Math.abs(x)%70,18);
+  for(const [x,z]of [[-780,-2950],[930,-3180],[-750,-3310],[990,-3380],[-740,-3650],[1020,-3760],[-890,-3990],[920,-4130],[-830,-4450],[750,-4530],[-450,-4720],[460,-4750]])tree(x,z,340+Math.abs(x)%70,18);
   for(const [x,z]of [[-500,-4100],[530,-4390]])solid(x,z,140,160,100);
   // The west lumber yard and eastern practice ring are purposeful side loops.
   // Neither repeats the mill's pressure-plate input.
   s.holdAt={x:-650,z:-3470,y:0};s.duelAt={x:670,z:-3020,y:0};
-  s.props.push({kind:'lumber',x:-670,z:-3520},{kind:'breach',x:-650,z:-3470},{kind:'duel',x:670,z:-3020},{kind:'warcamp',x:0,z:-4260});
+  s.props.push({kind:'roadblock',x:0,z:-2560},{kind:'lumber',x:-670,z:-3520},{kind:'breach',x:-650,z:-3470},{kind:'duel',x:670,z:-3020},{kind:'warcamp',x:0,z:-4260});
   // The yard fence has a real opening facing the incoming patrol. A solid
   // continuous fence here trapped the wagon attacker outside its own arena.
-  for(const [x,z,w,d]of [[-890,-3510,28,310],[-500,-3680,28,100],[-500,-3450,28,80],[700,-2990,210,30]])solid(x,z,w,d,65,0,'wood');
+  for(const [x,z,w,d]of [[-230,-2560,90,35],[230,-2560,90,35],[-890,-3510,28,310],[-500,-3680,28,100],[-500,-3450,28,80],[600,-2990,70,30],[800,-2990,70,30]])solid(x,z,w,d,65,0,'wood');
  }
  for(const q of s.props){if(q.kind==='gate')for(const side of [-1,1])solid(q.x+side*157,q.z,30,30,175,0,'prop');
   if(q.kind==='breach')solid(q.x,q.z,120,75,75,0,'prop');
@@ -137,14 +140,20 @@ window.BFBriarBeta=(()=>{'use strict';
  document.getElementById('stagetag').textContent=part?'BRIAR BETA · BLACK WOODS':'BRIAR BETA · HOMEFIELDS';
  A.rebuild();resume();A.toast(part?'Lewis’s refuge is ahead. The Legion signal must go dark.':'Your home is under attack. Mara needs the supplies in the granary loft.');
  }
- function spawn(id,type,x,z){if(progress.dead.includes(id))return;const e=A.spawn(type,x,z,type==='prison_maw');e.y=S().terrain.height(x,z);e.betaAppearance=type==='prison_guard'?'sentinel':type==='prison_pike'?'grunt':'thornboar';e.h=type==='prison_maw'?125:type==='prison_hound'?42:72;const f=(.85+config.level*.12)*config.strength;
- Object.assign(e,{betaId:id,betaOrigin:{x,z},hp:Math.round((type==='prison_maw'?360:type==='prison_guard'?65:42)*f),maxHp:Math.round((type==='prison_maw'?360:type==='prison_guard'?65:42)*f),dmg:(type==='prison_maw'?24:6)*(.8+config.level*.10)*config.strength,active:true,dropT:0});
+ function spawn(id,type,x,z){if(progress.dead.includes(id))return;const e=A.spawn(type,x,z,type==='prison_maw');e.y=S().terrain.height(x,z);e.betaAppearance=type==='prison_guard'?'sentinel':type==='prison_pike'?'grunt':'thornboar';e.h=type==='prison_maw'?125:type==='prison_hound'?42:72;const boss=type==='prison_maw',f=(.85+config.level*.12)*config.strength;
+ // A direct attack-spam route previously finished both chapters with most HP
+ // and without a dodge. Slightly longer exchanges give telegraphs a purpose.
+ const hp=Math.round((boss?360:type==='prison_guard'?65:42)*f*(boss?1.25:1.18));
+ Object.assign(e,{betaId:id,betaOrigin:{x,z},hp,maxHp:hp,dmg:(boss?24:6)*(.8+config.level*.10)*config.strength*(boss?1.3:1.2),active:true,dropT:0});
  e.label=type==='prison_maw'?'LEGION WARBEAST':type==='prison_guard'?'Hollowed Shieldbearer':type==='prison_hound'?'Legion Hound':'Hollowed Spearman';
  if(type==='prison_maw'){G().boss=e;e.boss=true;}return e;
  }
  function living(prefix){return G().enemies.some(e=>e.betaId?.startsWith(prefix)&&!e.dead&&e.hp>0);}
  function objective(){if(!part){if(!progress.medicine)return 'Reach the granary loft · Recover Mara’s supplies';if(!progress.healing)return 'Bring the supplies to Mara';if(!progress.bridge)return 'Restore the mill crossing · Divert water, then free the timber';if(living('bank')||!S().groups.find(g=>g.id==='bank').spawned)return 'Clear the far bank so the village can escape';if(!progress.evacuated)return 'Protect the villagers as they cross · Stay nearby; clear each ambush';return 'Follow the escape lane into the Black Woods';}if(!progress.signal)return 'Reach the signal tower · Cut the cable';if(!progress.boss)return 'Defeat the Legion warbeast blocking the refuge route';return 'Read the transport order at the north gate';}
- function navigation(){const s=S();if(!s)return null;const t=!part?(!progress.medicine?s.med:!progress.healing?s.actors[1]:!progress.bridge?{x:-475,z:-550,y:0}:s.exit):!progress.signal?s.signal:!progress.boss?{x:0,z:-4220,y:0}:s.exit;return {...t,navLabel:!part?(!progress.medicine?'Granary loft':!progress.healing?'Mara':!progress.bridge?'Mill yard':'Escape lane'):!progress.signal?'Signal tower':!progress.boss?'Warbeast clearing':'Transport order'};}
+ function navigation(){const s=S();if(!s)return null;
+  if(!part&&s.evac&&!progress.evacuated){const lead=s.actors[0],step=s.escortRoute[lead.exitStep]||s.exit;return {...step,y:s.terrain.height(step.x,step.z),navLabel:'Lead the villagers · stay close'};}
+  const t=!part?(!progress.medicine?s.med:!progress.healing?s.actors[1]:!progress.bridge?{x:-475,z:-550,y:0}:s.exit):!progress.signal?s.signal:!progress.boss?{x:0,z:-4220,y:0}:s.exit;
+  return {...t,navLabel:!part?(!progress.medicine?'Granary loft':!progress.healing?'Mara':!progress.bridge?'Mill yard':'Escape lane'):!progress.signal?'Signal tower':!progress.boss?'Warbeast clearing':'Transport order'};}
  function hud(){let el=document.getElementById('briar-beta-hud');if(!el){el=document.createElement('div');el.id='briar-beta-hud';document.body.append(el);}if(!S())return;
   const text=`<b>${part?'BLACK WOODS':'HOMEFIELDS'} · BETA</b><span>${objective()}</span><small>Shards ${progress.shards.length}/5${part?` · Dogs ${progress.dogs?'safe':'missing'} · Captives ${progress.captive?'safe':'held'}`:''}${progress.hunt?` · Patrol ${Math.min(12,progress.huntKills)}/12`:''}</small>${S().hold?`<strong>Defend the lumber yard · ${Math.ceil(Math.max(0,S().hold.left))}s · ${Math.ceil(S().hold.hp)}% wagon · Stay in the clearing</strong>`:''}${S().duelActive?'<strong>The ranger fights with player-class skills. Defeat her to finish the challenge.</strong>':''}${S().drag?'<strong>Moving crate · Walk to position it · E to let go</strong>':''}<button id="boptions">Map / test controls</button>`;
  const html=text+(S().evac&&!progress.evacuated?`${S().actors.map(n=>`<small>${n.name}: ${Math.ceil(n.hp??100)} / 100</small><progress max="100" value="${n.hp??100}"></progress>`).join('')}`:'');
@@ -251,8 +260,8 @@ window.BFBriarBeta=(()=>{'use strict';
   b(s.heal.x,3,s.heal.z,90,6,90,progress.smallHeals?'#86bec1':'#5c6464');
   if(!progress.captive)for(let x=-855;x<-650;x+=25)b(x,60,-965,5,120,5,'#68694e');
   for(let i=0;i<2;i++){const x=progress.dogs?410+i*60:650+i*75,z=progress.dogs?-1190:-1460;b(x,22,z,28,26,50,i?'#a38a64':'#665846');b(x,38,z-22,25,24,23,'#b6a17b');for(const dx of [-10,10])for(const dz of [-15,15])b(x+dx,8,z+dz,7,16,7,'#514539');}
-  if(!progress.hold){const h=s.holdAt.y;b(s.holdAt.x,h+3,s.holdAt.z,210,5,205,'#748260','#748260',.3);b(s.holdAt.x,h+4,s.holdAt.z,65,7,65,'#bc8652');}
-  if(!progress.duel){const h=s.duelAt.y;b(s.duelAt.x,h+3,s.duelAt.z,190,4,190,'#6d775c','#6d775c',.24);b(s.duelAt.x,h+6,s.duelAt.z,70,7,70,'#a5a182');}
+  // The wagon and practice ring themselves identify these interactions. Large
+  // flat glowing pads looked like leftover prototype geometry on the terrain.
  }
  for(const q of s.shards)if(!progress.shards.includes(q.id)){b(q.x,q.y+28+Math.sin(t*2)*4,q.z,14,32,14,'#b78af0','#a577d1');b(q.x,q.y+3,q.z,40,4,40,'#544669');}
  for(const n of s.actors)if(!window.__npc3dDrawn?.(n.id))A.person(n,t,n.walking);

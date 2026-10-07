@@ -13,7 +13,7 @@ async page=>{
  const safe={...s.safe};g.p.y=-200;BFBriarBeta.tick(.016);ok(prog.falls===1&&g.p.y===safe.y,'Fall recovery');
  prog.evacuated=true;use(s.exit,'Enter the Black Woods');g=b.G;s=g.devBriar;g.enemies=[];s.groups.forEach(q=>q.spawned=true);prog.hunt=true;at({x:-550,z:-1250});
  for(let i=0;i<10;i++)BFBriarBeta.tick(4.1);ok(g.enemies.filter(e=>e.betaId?.startsWith('hunt:')&&!e.dead).length===2,'Hunt cap');
- for(let j=0;j<6;j++){for(const e of g.enemies)e.dead=true;BFBriarBeta.tick(4.1);}ok(prog.huntKills===6,'Hunt not capped at six');const before=prog.smallHeals;
+ for(let j=0;j<11;j++){for(const e of g.enemies)e.dead=true;BFBriarBeta.tick(4.1);}ok(prog.huntKills===12,'Hunt did not reach twelve kills: '+prog.huntKills);const before=prog.smallHeals;
  use(s.actors[0],'Talk to Lewis');document.getElementById('bb2').click();document.getElementById('bb0').click();use(s.actors[0],'Talk to Lewis');document.getElementById('bb2').click();document.getElementById('bb0').click();ok(prog.smallHeals===before+2,'Duplicate reward');
  return {wrongSolution:true,crateReset:true,realVillagerHit:true,oneHitPerAttack:true,blockedHit:true,defenseRetry:true,fallRecovery:true,huntCap:prog.huntKills,rewardOnce:true};
  });

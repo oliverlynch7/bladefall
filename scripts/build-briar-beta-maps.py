@@ -61,7 +61,7 @@ draw(
      ("Captives / patrol", -760, -1030, "side", "right"), ("Dogs", 690, -1450, "side", "left"),
      ("Signal tower", -40, -1850, "main", "left"), ("Ridge guard", 0, -2560, "main", "right"),
      ("Ranger", 670, -3020, "side", "left"), ("Lumber wagon", -650, -3470, "side", "right"),
-     ("Old watch shard", 730, -3740, "shard", "left"), ("Warbeast", 0, -4220, "main", "left"),
+     ("Old watch shard", 730, -3740, "shard", "left"), ("Warbeast / braced posts", 0, -4220, "main", "left"),
      ("Transport order", 0, -4620, "main", "right")],
     [[(0, -1010), (-760, -1030)], [(0, -1450), (690, -1450)],
      [(-350, -3050), (670, -3020)], [(40, -3500), (-650, -3470)], [(40, -3500), (730, -3740)]],

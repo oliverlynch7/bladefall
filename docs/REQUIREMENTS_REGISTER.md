@@ -1048,3 +1048,7 @@ Oliver explicitly asks to fulfill the graphical improvement for **all** enemies 
 ## [Codex | 2026-10-07] Finish Briar beta to a publication-standard review candidate
 
 Oliver asked to finish the full-scale Briar Town beta thoroughly, as if preparing it for publication. Preserve the approved mill, current campaign story, larger terrain, varied quest types, existing stronger tree/enemy assets, five shard routes and separate Dev preview. Resolve visible terrain seams, empty stretches, impractical encounter placement, misleading wayfinding and stale preview maps; verify gameplay, saves and visuals in a real browser. The prior explicit direction to keep the main campaign portal intact pending Oliver's beta review still applies. Automated checks support a review candidate, not proof of fun, broad class balance or final visual approval.
+
+## [Codex | 2026-10-07] High-effort Briar beta completion pass
+
+Oliver now asks for a fully built, very high-quality Briar Town level. Continue improving the isolated full-scale Homefields and Black Woods beta, keeping the approved mill and campaign portal unchanged until his playtest. Close experiential gaps with distinct, readable environmental cause/effect, purposeful art and collision, stronger boss-arena identity, clear guidance and actual browser-controlled verification. Do not multiply quests that only rename the same button sequence. The recent complete enemy-model upgrades are available to the beta; prefer them to simpler replacement models. Report the implementation and human-review boundary honestly.

@@ -1,5 +1,5 @@
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2127';
-import {buildBriarBetaArt} from './briar-beta-art.js?v=2127';
+import {buildBriarBetaArt} from './briar-beta-art.js?v=2132';
 window.__briarAssetsPreload=loadBriarTrees;
 import {buildPrisonArt} from './prison-art3d.js?v=2111';
 import {claimSurface} from './surface-regions.js?v=1972';

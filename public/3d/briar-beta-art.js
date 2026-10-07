@@ -63,22 +63,40 @@ export function buildBriarBetaArt(world){
   }
   box(q.x,(q.h+q.y0)/2,q.z,q.w,q.h-q.y0,q.d,q.color);
  }
- for(const q of s.plats){const wood=q.briarKind==='wood',watch=q.id.startsWith('watch');
+ for(const q of s.plats){const wood=q.briarKind==='wood',watch=q.id.startsWith('watch'),stream=q.id.startsWith('stream'),tower=q.id.startsWith('tower'),canopy=q.id.startsWith('canopy');
   if(q.id==='watch0'){
    // A weathered stone outcrop conceals the functional rectangular landing.
    sphere(q.x,q.h-24,q.z,q.w*.78,48,q.d*.70,'#52665a');
    sphere(q.x-28,q.h-43,q.z+20,58,42,48,'#435c50');
    box(q.x,q.h-5,q.z,q.w-8,10,q.d-8,'#718473');
    for(const dx of [-38,0,38])box(q.x+dx,q.h+1,q.z-36,28,2,14,'#738f6c');
-  }else{
-   box(q.x,q.h-12,q.z,q.w,24,q.d,watch?'#594638':wood?'#66523a':'#6e7e74');
-   box(q.x,q.h-2,q.z,q.w-4,4,q.d-4,watch?'#9f835c':wood?'#bd9d67':'#a0ab96');
-  }
-  if(wood){for(let x=q.x-q.w/2+12;x<q.x+q.w/2;x+=24)box(x,q.h+1,q.z,2,2,q.d-6,watch?'#564635':'#655640');for(const dx of [-1,1])cylinder(q.x+dx*(q.w/2-10),(q.h-80)/2,q.z,7,q.h+80,'#5e4934');}else if(q.id!=='watch0')sphere(q.x,q.h-70,q.z,q.w*.55,70,q.d*.52,'#65776b');}
+   }else{
+    box(q.x,q.h-12,q.z,q.w,24,q.d,stream?'#524b3d':canopy?'#4e5844':watch?'#594638':wood?'#66523a':'#6e7e74');
+    box(q.x,q.h-2,q.z,q.w-4,4,q.d-4,stream?'#8b7755':canopy?'#738364':watch?'#9f835c':wood?'#bd9d67':'#a0ab96');
+   }
+   if(wood){
+    for(let x=q.x-q.w/2+12;x<q.x+q.w/2;x+=24)box(x,q.h+1,q.z,stream?5:2,stream?4:2,q.d-6,stream?'#6f6048':watch?'#564635':'#655640');
+    for(const dx of [-1,1])cylinder(q.x+dx*(q.w/2-10),stream?(q.h-45)/2:(q.h-80)/2,q.z,stream?11:7,stream?q.h+45:q.h+80,stream?'#745b40':'#5e4934');
+    if(stream){
+     // Four broad, ragged timbers make the river crossing read as a damaged
+     // logging walk. The continuous collision deck remains the actual floor.
+     for(const side of [-1,1]){
+      const log=cylinder(q.x+side*(q.w/2-5),q.h-6,q.z,7,q.d+22,'#6e5039');log.rotation.x=Math.PI/2;
+      box(q.x+side*(q.w/2-2),q.h+2,q.z-12,7,5,q.d*.45,'#69725a');
+     }
+    }
+    if(tower){
+     for(const side of [-1,1])box(q.x+side*(q.w/2-10),q.h+12,q.z,8,22,8,'#937553');
+     for(const dz of [-1,1])box(q.x,q.h+8,q.z+dz*(q.d/2-8),q.w-22,5,5,'#7c603e');
+    }
+    if(canopy)for(const side of [-1,1]){
+     beam([q.x+side*(q.w/2-5),q.h-22,q.z],[q.x+side*(q.w/2+44),q.h-58,q.z+36],8,'#5a4d35');
+    }
+   }else if(q.id!=='watch0')sphere(q.x,q.h-70,q.z,q.w*.55,70,q.d*.52,'#65776b');}
  // Brace each working scaffold visibly; the gaps are broken work decks, not floating blocks.
  for(const q of s.plats.filter(q=>q.briarKind==='wood')){
   const foot=Math.max(-65,Math.min(0,q.h-70));
-  for(const side of [-1,1])beam([q.x+side*(q.w/2-10),foot,q.z],[q.x-side*(q.w/2-10),q.h-25,q.z],4,'#846b45');
+  if(!q.id.startsWith('stream'))for(const side of [-1,1])beam([q.x+side*(q.w/2-10),foot,q.z],[q.x-side*(q.w/2-10),q.h-25,q.z],4,'#846b45');
   // Nail heads and short end boards stay within the tested landing footprint.
   for(const dx of [-1,1])for(const dz of [-1,1])cylinder(q.x+dx*(q.w/2-14),q.h+2,q.z+dz*(q.d/2-14),2,2,'#514c43');
  }
@@ -249,14 +267,68 @@ export function buildBriarBetaArt(world){
     sign(x,205,z-225,'RANGER CHALLENGE');
    }
    if(p.kind==='warcamp'){
-    for(const side of [-1,1]){
-     box(x+side*590,100,z+55,30,200,30,'#626b5b');box(x+side*590,206,z+55,49,13,49,'#968a6b');
-     box(x+side*390,24,z-240,150,47,115,'#665f4d');
-     box(x+side*490,56,z+240,150,96,45,'#594d3c');
+     for(const side of [-1,1]){
+      box(x+side*590,100,z+55,30,200,30,'#626b5b');box(x+side*590,206,z+55,49,13,49,'#968a6b');
+      box(x+side*390,24,z-240,150,47,115,'#665f4d');
+      box(x+side*490,56,z+240,150,96,45,'#594d3c');
+      // Cut timber, chained beams and old damage say why this beast is here.
+      for(let j=0;j<3;j++){
+       const px=x+side*(365+j*76),pz=z-130+j*95;
+       const log=cylinder(px,26,pz,16,100,'#73543c');log.rotation.z=Math.PI/2;
+       for(const end of [-1,1])cylinder(px+end*49,26,pz,14,3,'#b89460').rotation.z=Math.PI/2;
+      }
+      for(const dz of [-215,-155,-95])beam([x+side*570,34,z+dz],[x+side*570,119,z+dz],8,'#735f45');
+      beam([x+side*570,95,z-225],[x+side*570,95,z-80],5,'#98825d');
+      const flag=box(x+side*590,161,z+40,4,74,48,'#6d4038');flag.rotation.z=side*.07;
+     }
+     for(const dz of [-230,215]){
+      box(x,5,z+dz,310,9,19,'#514c3e');
+      for(const dx of [-135,-45,45,135])box(x+dx,12,z+dz,13,24,12,'#7d6545');
+     }
+     sign(x,205,z+370,'WARBEAST LOGGING YARD');
     }
-    sign(x,205,z+370,'WARBEAST CLEARING');
-   }
   const base=s.terrain.height(x,z);for(const o of g.children.slice(first))o.position.y+=base;
+ }
+ if(s.signal){
+  // The sight line runs from the signal to Lewis's refuge. Cutting the cable
+  // removes it in the world, so the player's objective has a visible result.
+  const a=new T.Vector3(s.signal.x,s.signal.y+151,s.signal.z),b=new T.Vector3(-230,133,440),v=b.clone().sub(a);
+  const rig=new T.Group();
+  for(const [radius,opacity,color]of [[18,.12,'#d74448'],[5,.48,'#ed7463']]){
+   const material=new T.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,blending:T.AdditiveBlending});
+   materials.set('signalBeam'+radius,material);
+   const tube=new T.Mesh(geom('signalBeamCylinder',()=>new T.CylinderGeometry(1,1,1,8)),material);
+   tube.position.copy(a).add(b).multiplyScalar(.5);tube.scale.set(radius,v.length(),radius);
+   tube.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.clone().normalize());rig.add(tube);
+  }
+  const lens=new T.Mesh(geom('signalLens',()=>new T.OctahedronGeometry(1,0)),mat('#e99162'));
+  lens.position.copy(a);lens.scale.set(28,37,28);rig.add(lens);g.add(rig);g.userData.signalBeam=rig;
+ }
+ if(s.snarePosts){
+  for(const post of s.snarePosts){
+   const {x,z}=post,y=s.terrain.height(x,z),first=g.children.length;
+   box(x,y+7,z,88,14,88,'#6f715e');
+   for(const dx of [-25,25])for(const dz of [-25,25])cylinder(x+dx,y+14,z+dz,3,3,'#c5ab71');
+   box(x,y+67,z,40,110,39,'#765437');box(x,y+120,z,54,13,54,'#99764b');
+   for(const side of [-1,1]){
+    beam([x+side*33,y+10,z+25],[x+side*18,y+105,z+10],7,'#aa875a');
+    beam([x+side*32,y+10,z-25],[x+side*18,y+105,z-10],7,'#aa875a');
+    box(x+side*23,y+68,z+22,6,31,5,'#565d5a');
+   }
+   for(const h of [52,90])box(x,y+h,z+22,46,8,8,'#c9984e');
+   // Bright crossed braces distinguish these breakable targets from the
+   // nearby plain fence and let players read the arena while dodging.
+   beam([x-19,y+46,z+28],[x+19,y+96,z+28],3,'#ead192');
+   beam([x+19,y+46,z+28],[x-19,y+96,z+28],3,'#ead192');
+   box(x,y+109,z+24,28,13,3,'#b79b64');
+   const parts=g.children.slice(first),rig=new T.Group();g.add(rig);g.updateMatrixWorld(true);
+   for(const o of parts)rig.attach(o);post.art=rig;
+  }
+  // The wreck before the arena teaches what a shattered brace looks like.
+  const x=-125,z=-3920,y=s.terrain.height(x,z);
+  const fallen=cylinder(x,y+16,z,19,130,'#76553a');fallen.rotation.z=Math.PI/2;
+  for(const dx of [-64,64]){const end=cylinder(x+dx,y+16,z,18,3,'#b18b5c');end.rotation.z=Math.PI/2;}
+  box(x+36,y+8,z-38,19,14,72,'#636b60');
  }
  if(!s.part){sign(-180,130,240,'BRIAR TOWN');sign(730,295,-490,'GRANARY LOFT');sign(-475,80,-490,'SLUICE PLATE');sign(0,155,-4250,'TO THE BLACK WOODS');
   // The linkage makes the weight-operated gate legible from the yard.
@@ -296,7 +368,7 @@ export function buildBriarBetaArt(world){
    for(const dx of [-22,22])box(top.x+dx,top.h+75,top.z-37,4,9,2,'#b6a276');
   }
  }
- g.userData.tick=p=>{reusedTrees?.userData.tick?.(p);reusedDressing?.userData.tick?.(p);if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
+ g.userData.tick=p=>{reusedTrees?.userData.tick?.(p);reusedDressing?.userData.tick?.(p);if(g.userData.wheel)g.userData.wheel.rotation.z=s.wheelAngle||0;if(g.userData.signalBeam)g.userData.signalBeam.visible=!s.signalOff;for(const post of s.snarePosts||[])post.art.visible=!post.used;for(const l of g.userData.labels){const d=Math.hypot(p.x-l.x,p.z-l.z);l.sp.visible=!window.BFInspection?.active&&d>160&&d<650;}};
  g.userData.dispose=()=>{groundTex.dispose();for(const m of materials.values())m.dispose();for(const geo of geometries.values())geo.dispose();g.traverse(o=>{if(o.geometry&&!Array.from(geometries.values()).includes(o.geometry)&&!o.isInstancedMesh)o.geometry.dispose();});for(const l of g.userData.labels){l.tex.dispose();l.m.dispose();}};
  // Static art shares geometry/material batches. Complexity should not imply hundreds of draw calls.
  const batches=new Map();for(const o of [...g.children])if(o.isMesh&&!o.isInstancedMesh){o.updateMatrix();const key=o.geometry.uuid+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}

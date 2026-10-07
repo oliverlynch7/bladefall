@@ -1189,3 +1189,7 @@ Version 2.133.0 improves the separate Prison Break roguelite with revision-7 roo
 ## [Codex | 2026-10-07] Endless Dungeon revision-8 extension
 
 Version 2.134.0 adds an optional five-jump side room to each section of fresh Prison Break runs. The visible cache grants one persistent gold reward and, from Tier 2 onward, a class qualification seal. Main rooms, two chests per section, co-op ownership and revisions 1-7 are preserved. Browser tests completed 108 jumps and a full three-section run; old-layout jump/resume and co-op checks passed. Human playtesting still decides challenge, pacing and final art quality. See docs/design/ENDLESS_DUNGEON_QUALITY_2026-10-07.md.
+
+## [Codex | 2026-10-07] Endless Dungeon art follow-up
+
+Version 2.135.0 improves revision-8 cache-room stepping-stone art: tapered supports, iron collars, section-specific tops and warm edge cues. Collision, rewards and previous checkpoint geometry are unchanged. Browser traversal and one-time reward tests passed; visual acceptance still needs Oliver's playtest.

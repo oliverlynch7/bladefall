@@ -2465,3 +2465,7 @@ QA: 1,080 deterministic new layouts; 6,480 historical-layout hash checks; 43,200
 ## [Codex | 2026-10-07] 2.134.0-dungeon-rafters
 
 Fresh Prison Break runs now include a distinct optional five-jump cache room per section: broken rafters, pipe gantry and sealed catwalk. The side-route HUD and distant marker show where to go, and the one-time reward adds permanent dungeon gold plus a Tier-2+ class qualification seal. Revision-7 and older layouts remain available for existing saves. Tested 1,080 revision-8 plans, 108 real jumps, one-time claims, full three-section completion, legacy revision-7 traversal/resume, co-op health/reward/checkpoint ownership and bounded 11-room art. No SFX work. Human playtesting remains needed for difficulty, pacing and visual preference.
+
+## [Codex | 2026-10-07] 2.135.0-dungeon-art
+
+The optional Prison Break cache room now uses tapered piers instead of square support stacks, with section-specific platform tops, hanging supports and subtle warm landing edges. The underlying five-jump collision route is unchanged. Real-browser checks again passed 108 jumps and 18 one-time claims; 11-room art remains at 9-10 draw calls and below 24k triangles. A desktop view was inspected. Human feedback remains the final art and difficulty check.

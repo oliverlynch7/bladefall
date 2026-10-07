@@ -808,3 +808,7 @@ Current authorization is a broad Prison Break roguelite improvement, retaining t
 ## [Codex | 2026-10-07] Endless Dungeon revision-8 side route
 
 Implementation choice within the authorized quality pass: add a genuinely optional traversal challenge in each section rather than another encounter reskin. It branches from a late guard room, pays one persistent cache, and grants a Tier-2+ class qualification seal. Use layout versioning so existing runs remain on revisions 1-7. Retain host-authoritative co-op rewards and the current main-route and chest progression. Browser physics verifies reachability; human playtesting remains necessary for enjoyment and challenge.
+
+## [Codex | 2026-10-07] Endless Dungeon art refinement
+
+After inspecting the shipped cache room in a normal camera, its square plinth supports still read as crude blocks. Replace art-only support meshes with narrow tapered stone piers, restrained iron collars and section-specific stepping surfaces; keep physical colliders and revision-8 plans fixed. The change raises art detail within the existing draw-call budget but does not claim to settle the final aesthetic.

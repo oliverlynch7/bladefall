@@ -1075,3 +1075,7 @@ Version 2.133.0 introduces revision-7 floors for fresh Prison Break attempts: si
 ## [Codex | 2026-10-07] Endless Dungeon optional parkour extension
 
 Version 2.134.0 adds an optional five-jump side route to each section of new revision-8 Prison Break runs. Reaching its cache gives one persistent gold reward; Tier 2+ also gives a class qualification seal. Preserve revisions 1-7 for existing checkpoints, maintain the main-route progression and two-chest-per-section economy, and keep rewards host-authoritative in co-op. The route is grounded in a separate physical gap and visible stepping stones, not a three-button combination. Automated/browser reachability and save/co-op checks passed; human difficulty and art judgment remain open.
+
+## [Codex | 2026-10-07] Endless Dungeon cache-room art
+
+Version 2.135.0 improves the optional room's visible supports and step materials without changing collision, rewards or old checkpoint layouts. Narrow pier and edge details keep the floor gap readable. Browser jumps and art budget passed; human art evaluation remains open.

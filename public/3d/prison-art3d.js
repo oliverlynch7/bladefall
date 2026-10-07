@@ -144,15 +144,32 @@ export function buildPrisonArt(plan){
    for(const step of plan.plats.filter(p=>p.room===room.id))block(step.x,-100,step.z,step.w,200,step.d,'wall');
   }
   if(room.kind==='cache'){
-   // The optional side walk is a real gap, with visible masonry below its
-   // five stepping stones. A miss is recoverable, but loses the approach.
+   // Art follows the five real colliders. Narrow, tapered piers reveal the
+   // depth of the shaft without reading as another broad, walkable floor.
    block(room.x,-205,room.z,room.w,12,room.d,'iron');
    for(const sz of [-1,1])block(room.x,-95,room.z+sz*(room.d/2-10),room.w,190,18,'wall');
-   for(const step of plan.plats.filter(p=>p.room===room.id)){
-    const material=['wood','iron','trim'][plan.section-1];
-    block(step.x,-98,step.z,Math.max(16,step.w-18),190,Math.max(16,step.d-18),'wall');
-    block(step.x,step.h+5,step.z,step.w+7,8,step.d+7,material);
-    for(const side of [-1,1])block(step.x+side*(step.w/2-5),step.h-13,step.z,5,20,step.d-10,material);
+   if(plan.section===2)block(room.x,-197,room.z,room.w-35,2,room.d-35,'water');
+   for(const [i,step] of plan.plats.filter(p=>p.room===room.id).entries()){
+    const pierHeight=step.h+199,pierY=(step.h-199)/2;
+    add(new T.CylinderGeometry(17,29,pierHeight,10),'wall',step.x,pierY,step.z);
+    for(const y of [-140,-60])add(new T.TorusGeometry(22,3,6,10),'iron',step.x,y,step.z,Math.PI/2);
+    if(plan.section===1){
+     for(const dz of [-22,0,22])block(step.x,step.h+5,step.z+dz,step.w+5,6,17,'wood');
+     for(const sx of [-1,1])block(step.x+sx*(step.w/2-4),step.h-5,step.z,5,17,step.d-6,'iron');
+    }else{
+     block(step.x,step.h+4,step.z,step.w+5,6,step.d+5,plan.section===2?'iron':'trim');
+     for(const dz of [-20,0,20])block(step.x,step.h+9,step.z+dz,step.w-7,2,3,plan.section===2?'trim':'iron');
+    }
+    for(const sx of [-1,1])block(step.x+sx*(step.w/2-1),step.h+10,step.z,2,2,step.d-16,'optional');
+    if(i===0||i===4)for(const sx of [-1,1]){
+     const x=step.x+sx*(step.w/2-10),height=room.h-step.h-58;
+     add(new T.CylinderGeometry(2.2,2.2,height,6),'iron',x,step.h+30+height/2,step.z);
+     add(new T.TorusGeometry(7,2.2,6,8),'trim',x,room.h-26,step.z,Math.PI/2);
+    }
+   }
+   for(const sx of [-1,1]){
+    const x=room.x+sx*(room.w/2-25);
+    for(const dz of [-160,160])add(new T.CylinderGeometry(18,24,room.h-25,10),'wall',x,(room.h-25)/2,room.z+dz);
    }
    for(const sign of [-1,1])block(room.x+sign*(room.w/2-18),room.h-95,room.z,6,100,room.d-40,'iron');
   }

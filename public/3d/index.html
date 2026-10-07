@@ -46,6 +46,7 @@
   #armortag{font-size:11px;font-weight:700;color:#aeb9c6;display:flex;align-items:center;gap:4px;}
   #armortag .pip{width:7px;height:7px;border-radius:2px;display:inline-block;background:#333;}
   #stagetag{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+  @media(max-width:560px){#stagetag.descent-floor{display:none}}
   #hudbag{position:relative;z-index:2;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:max-content;margin:-2px 0 8px;padding:4px 8px;border:1px solid #5d4729;border-radius:5px;background:#090a0dcc;color:#d9ccb4;font:800 10px Georgia,serif;letter-spacing:.05em;font-variant-numeric:tabular-nums;box-shadow:inset 0 1px #ffffff0a,0 3px 9px #0006}
   #hudbag .ico{width:17px;height:17px;flex:none;filter:drop-shadow(0 2px 3px #000)}
   #hudbag.full{border-color:#a34b3f;color:#ff9b8f;box-shadow:inset 0 0 9px #7b211f33,0 3px 9px #0006}
@@ -1139,7 +1140,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.130.0-sparring-hall';
+const VERSION3D='2.131.0-descent-floors';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4058,10 +4059,10 @@ function questUpdate(){
   const el=document.getElementById('questbox'); if(!el) return;
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
   if(document.body.classList.contains('briefing')){ el.classList.add('hide'); return; }   // don't collide with a zone briefing overlay
-  if(G.endless){ const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length, killed=Math.max(0,(G.endSpawned||0)-alive);
-      const rows=qrow(false,'▼',`<b>Floor ${G.floor||1}</b>${meta.endlessBest?` · <span style="opacity:.7">Best ${meta.endlessBest}</span>`:''}`,null)
-        + qrow(G.floorCleared,G.floorCleared?'☑':'⚔', G.floorCleared?'The way opens — take the portal':'Clear the floor', G.floorCleared?null:`${Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`);
-      applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`,G.floorCleared); return; }
+  if(G.endless){ const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length, killed=Math.max(0,(G.endSpawned||0)-alive),guest=MP.active&&!MP.isHost;
+      const rows=qrow(false,'▼',`<b>Floor ${G.floor||1} · ${htmlSafe(G.endLayout?.name||'The Descent')}</b>`,null)
+        + qrow(G.floorCleared,G.floorCleared?'☑':'⚔',G.floorCleared?(G.endLayout?.id==='span'?'Jump the broken crossing':'Take the portal'):guest?'Fight with your party':`Wave ${Math.min(3,G.endWave||1)}/3 · clear the floor`,G.floorCleared||guest?null:`${Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`);
+      applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.endWave||1}|${G.floorCleared?'c':guest?'g':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`,G.floorCleared); return; }
   const Z=curZone();
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
     const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐',(G.riftMentor&&!G.storyState?.flags['trial.taught']?'Speak to your mentor at the exit':'Take the portal'),null):'');
@@ -4210,7 +4211,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {briarBeta:G?.devBriar||null,devKeep:!!G?.devKeep,finalStage:G?.kingFinal?(G.kingFinal.void?(['restored','home'].includes(G.boss.akStage)?'restored':'void'):'hall'):null,castleScene:inLongAscent()?'ascent:'+BFLongAscent.visualKey(adventureStoryState()):inCastleGates()?BFCastleGates.visualKey(adventureStoryState()):null,palaceScene:G.marbleArena?'guardian:'+!!G.boss?.dead:inSkyLibrary()?BFSkyLibrary.visualKey(adventureStoryState()):inPalaceCourtyard()?BFPalaceCourtyard.visualKey(adventureStoryState()):null,shipScene:G.hydraArena?'hydra':inThunderCliffs()?'cliffs:'+!!G.thunder?.lift+':'+!!G.thunder?.['cave.open']+':'+!!G.thunder?.['tide.open']+':'+!!G.thunder?.approach:inShipwreck()?(G.voyage?'voyage':'shore:'+!!G.shore?.hatchOpen+':'+!!G.shore?.rudderreturn+':'+!!G.shore?.sailreturn+':'+!!G.shore?.ropereturn):null,ironScene:inGreatFurnace()?'furnace:'+!!G.furnace?.access+':'+!!G.furnace?.cooled+':'+!!G.furnace?.evacuated+':'+!!G.furnace?.pressure:inIronHalls()?String(!!G.iron?.cart)+String(!!G.iron?.return):null,frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies.filter(e=>!e.hydraChain),gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {briarBeta:G?.devBriar||null,devKeep:!!G?.devKeep,finalStage:G?.kingFinal?(G.kingFinal.void?(['restored','home'].includes(G.boss.akStage)?'restored':'void'):'hall'):null,castleScene:inLongAscent()?'ascent:'+BFLongAscent.visualKey(adventureStoryState()):inCastleGates()?BFCastleGates.visualKey(adventureStoryState()):null,palaceScene:G.marbleArena?'guardian:'+!!G.boss?.dead:inSkyLibrary()?BFSkyLibrary.visualKey(adventureStoryState()):inPalaceCourtyard()?BFPalaceCourtyard.visualKey(adventureStoryState()):null,shipScene:G.hydraArena?'hydra':inThunderCliffs()?'cliffs:'+!!G.thunder?.lift+':'+!!G.thunder?.['cave.open']+':'+!!G.thunder?.['tide.open']+':'+!!G.thunder?.approach:inShipwreck()?(G.voyage?'voyage':'shore:'+!!G.shore?.hatchOpen+':'+!!G.shore?.rudderreturn+':'+!!G.shore?.sailreturn+':'+!!G.shore?.ropereturn):null,ironScene:inGreatFurnace()?'furnace:'+!!G.furnace?.access+':'+!!G.furnace?.cooled+':'+!!G.furnace?.evacuated+':'+!!G.furnace?.pressure:inIronHalls()?String(!!G.iron?.cart)+String(!!G.iron?.return):null,frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridge)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,endlessLayout:G.endless?G.endLayout?.id:null,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies.filter(e=>!e.hydraChain),gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -17017,6 +17018,7 @@ function startEndless(opts){
   initAudio(); queueLevelUp=0; queueSubclass=false;
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{endless:true,floor:0,zone:11,area:0,zoneTier:1});
+  G.endBestAtStart=meta.endlessBest||0;
   if(opts.runSeed!=null) G.runSeed=opts.runSeed;
   G.endGold0=meta.gold||0; G.endKillsTotal=0;
   endModsReset(); G.p._prevMaxHp=effMaxHp(G.p); endModsHUD();
@@ -17025,6 +17027,59 @@ function startEndless(opts){
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate(); questUpdate();
   if(!startEndless._greeted){ startEndless._greeted=true; storyToast('The Abyss has no floor. See how far you can fall.'); }
   if(MP.active&&!opts.remote) MP.enterSpecial('endless');
+}
+const ENDLESS_FLOORS=[
+  {id:'court',name:'Fallen Court'},
+  {id:'cross',name:'Four-Way Ruin'},
+  {id:'march',name:'Narrow March'},
+  {id:'span',name:'Broken Span'}
+];
+function buildEndlessFloor(n){
+  const layout=ENDLESS_FLOORS[(n-1)%ENDLESS_FLOORS.length];G.endLayout=layout;
+  const seg=(x,z,w,d)=>G.segments.push({x,z,w,d});
+  const wall=(x,z,w,d,h=115)=>G.walls.push({x,z,w,d,h});
+  const cover=(x,z,w,d,h)=>G.obstacles.push({kind:'col',x,z,w,d,h,descentCover:true});
+  const perch=(x,z,w,d,h)=>G.obstacles.push({kind:'plat',x,z,w,d,h});
+  const vent=(x,z,r=25)=>G.geysers.push({x,z,r,period:3.9,phase:(n+x*.01+z*.007)%3.9});
+  let start={x:0,z:220},exit={x:0,z:-330},bounds,spawns=[];
+  if(layout.id==='court'){
+    seg(0,0,1040,900);bounds={minX:-500,maxX:500,minZ:-430,maxZ:430};
+    wall(0,-450,1060,26);wall(0,450,1060,26);wall(-520,0,26,920);wall(520,0,26,920);
+    for(const x of [-220,220])for(const z of [-95,95])cover(x,z,62,62,112);
+    for(const x of [-410,410])for(const z of [-335,335])G.torches.push({x,z,ph:(x+z)*.01});
+    spawns=[[-340,-280],[0,-280],[340,-280],[-340,0],[340,0],[-320,210],[320,210]];
+  }else if(layout.id==='cross'){
+    seg(0,0,650,950);seg(-460,0,270,380);seg(460,0,270,380);
+    bounds={minX:-595,maxX:595,minZ:-475,maxZ:475};start={x:0,z:265};exit={x:0,z:-365};
+    wall(0,-485,650,22);wall(0,485,650,22);
+    wall(-605,0,20,380);wall(605,0,20,380);
+    perch(-450,0,155,135,46);perch(450,0,155,135,46);
+    for(const x of [-565,565])for(const z of [-140,140])G.torches.push({x,z,ph:(x+z)*.01});
+    if(n>=3){vent(-155,-115);vent(155,85);}
+    spawns=[[-425,-115],[425,-115],[-425,135],[425,135],[-170,-280],[170,-280],[-180,215],[180,215]];
+  }else if(layout.id==='march'){
+    seg(0,0,820,1280);bounds={minX:-390,maxX:390,minZ:-620,maxZ:620};start={x:0,z:410};exit={x:0,z:-515};
+    wall(0,-640,840,24);wall(0,640,840,24);wall(-410,0,24,1300);wall(410,0,24,1300);
+    cover(-125,255,205,35,85);cover(125,-15,205,35,85);cover(-125,-285,205,35,85);
+    for(const z of [-500,-210,75,365])for(const x of [-365,365])G.torches.push({x,z,ph:(x+z)*.01});
+    if(n>=3){vent(195,170);vent(-205,-165);}
+    spawns=[[-245,-450],[245,-450],[-235,-220],[235,-220],[-230,45],[230,45],[-230,320],[230,320]];
+  }else{
+    // The foe wave remains on the broad south floor. Only the player crosses the gap to leave.
+    seg(0,120,980,760);seg(0,-600,430,280);bounds={minX:-490,maxX:490,minZ:-740,maxZ:500};
+    start={x:0,z:295};exit={x:0,z:-610};
+    wall(0,510,1000,22);wall(-500,120,22,780);wall(500,120,22,780);
+    wall(0,-750,450,22);wall(-225,-600,20,280);wall(225,-600,20,280);
+    for(const [x,z] of [[-85,-320],[85,-405]])G.crumbles.push({x,z,w:96,d:96,h:0,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    cover(-310,70,65,65,95);cover(310,70,65,65,95);
+    for(const [x,z] of [[-440,-165],[440,-165],[-440,410],[440,410],[-175,-680],[175,-680]])G.torches.push({x,z,ph:(x+z)*.01});
+    spawns=[[-300,-165],[0,-185],[300,-165],[-190,70],[190,70],[-270,290],[270,290]];
+  }
+  G.endSpawnPads=spawns.map(([x,z])=>({x,z}));G.bounds=bounds;G.progressEnd=exit.z;
+  G.portalPos=exit;G.startPos=start;G.goalPos=exit;G.lastSafe={...start,y:0};
+  Object.assign(G.p,{x:start.x,z:start.z,y:0,vx:0,vy:0,vz:0,yaw:Math.PI,onGround:true});
+  if(G.cam)G.cam.y=0;G.camYaw=Math.PI;G.camPitch=.14;
+  return layout;
 }
 function loadEndlessArena(n){
   BFChestReveal.clear();
@@ -17045,6 +17100,7 @@ function loadEndlessArena(n){
   G.endBatch=Math.min(6,2+Math.floor(n/3));              // batch 2 from the very start; grows faster
   G.endInt=Math.max(0.22,0.85-n*0.05);                   // ~0.8s at floor 1, shrinking hard
   G.endSpawned=0; G.endSpawnT=0.5; G.floorCleared=false;
+  G.endWave=1;G.endWaveSize=Math.ceil(G.endTarget/3);G.endWavePause=0;
   meta.endlessBest=Math.max(meta.endlessBest||0,n); persistGlobal();   // deepest floor REACHED is the personal best
   // ---- reset scene arrays (mirrors loadStage) ----
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
@@ -17055,34 +17111,28 @@ function loadEndlessArena(n){
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.hostileArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   document.getElementById('bosshpwrap').classList.remove('on');
-  // ---- a boxed arena: one broad platform ringed by walls, themed torches + deco ----
-  const R=470;
-  G.segments.push({x:0,z:0,w:R*2,d:R*2});
-  G.walls.push({x:0,z:-R,w:R*2+40,d:26,h:120},{x:0,z:R,w:R*2+40,d:26,h:120},{x:-R,z:0,w:26,d:R*2+40,h:120},{x:R,z:0,w:26,d:R*2+40,h:120});
-  for(const [tx,tz] of [[-R+40,-R+40],[R-40,-R+40],[-R+40,R-40],[R-40,R-40],[0,-R+40],[0,R-40]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});
-  const dc=tint(s.ground,'#000',0.25);
-  for(let k=0;k<20;k++){ const a=k/20*6.283, rr=R-70; G.deco.push({x:Math.cos(a)*rr,z:Math.sin(a)*rr,y0:0,w:40+Math.random()*30,h:90+Math.random()*80,c:tint(dc,'#000',Math.random()*0.2),theme:s.theme}); }
-  G.bounds={minX:-R+30,maxX:R-30,minZ:-R+30,maxZ:R-30}; G.progressEnd=-R;
-  G.portalPos={x:0,z:-R+110};                          // the way down sits at the far (north) edge
-  G.startPos={x:0,z:R-140}; G.goalPos={x:0,z:-R+110}; G.lastSafe={x:0,z:R-140,y:0};
-  G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
-  if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
+  const layout=buildEndlessFloor(n);
   G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
-  G.stageBanner=2.2; G.areaName='Floor '+n;
-  document.getElementById('stagetag').textContent='🕳️ FLOOR '+n+(G.endEliteFloor?' ⚔ ELITE':'');
+  G.stageBanner=2.2; G.areaName='Floor '+n+' · '+layout.name;
+  document.getElementById('stagetag').textContent='🕳️ FLOOR '+n+(G.endEliteFloor?' · ELITE':'');
   endModsHUD(); questUpdate(); hudUpdate();
   // BOON/BANE SHRINE: every 5th floor opens with a binding pact choice
   if(n>0 && n%5===0 && !(MP.active&&!MP.isHost)) offerShrine(n);
 }
 function spawnEndlessMob(n,s){
   const pool=(THEMEMOBS[s.theme]||['grunt']).filter(m=>ENEMY[m]&&!ENEMY[m].boss);
-  const type=pool.length?pool[Math.floor(Math.random()*pool.length)]:'grunt';
-  // Batch 3: bias spawns toward the player as you fall deeper — no safe corner
-  const near=Math.random()<Math.min(0.55,0.2+n*0.02);
-  const a=Math.random()*6.283, rad=near?(180+Math.random()*130):(360+Math.random()*90);
-  const cx=near?G.p.x:0, cz=near?G.p.z:0;
-  let x=cx+Math.cos(a)*rad, z=cz+Math.sin(a)*rad;
-  if(G.bounds){ x=Math.max(G.bounds.minX,Math.min(G.bounds.maxX,x)); z=Math.max(G.bounds.minZ,Math.min(G.bounds.maxZ,z)); }
+  const emphasis=G.endLayout?.id,offbeat=G.endSpawned%3===0;
+  let focus=pool;
+  if(offbeat&&emphasis==='cross')focus=pool.filter(m=>ENEMY[m].kind==='charger'||ENEMY[m].speed>=75);
+  if(offbeat&&emphasis==='march')focus=pool.filter(m=>ENEMY[m].kind==='caster'||ENEMY[m].kind==='fly');
+  if(offbeat&&emphasis==='span')focus=pool.filter(m=>ENEMY[m].hp>=45&&ENEMY[m].kind==='walk');
+  if(!focus.length)focus=pool;
+  const type=(focus.length?focus:pool)[Math.floor(Math.random()*(focus.length||pool.length))]||'grunt';
+  // Pads belong to stable combat ground; the exit shelf and jump stones never hold an unreachable foe.
+  const pads=G.endSpawnPads||[{x:0,z:-200}],first=(G.endSpawned*3+Math.floor(Math.random()*pads.length))%pads.length;
+  let pad=pads[first],best=-1;
+  for(let i=0;i<pads.length;i++){const p=pads[(first+i)%pads.length],distance=dXZ(p.x,p.z,G.p.x,G.p.z);if(distance>best){best=distance;pad=p;}if(distance>=190){pad=p;break;}}
+  const x=pad.x+(Math.random()-.5)*28,z=pad.z+(Math.random()-.5)*28;
   const m=spawnEnemy(type,x,z); m.active=true; G.endSpawned++;
   m.speed*=(G.endSpd||1)*(G.endESpdMul||1);                    // Phase 19 + Batch 3: floor-scaled + pact quickness
   if(m.shootCd) m.shootCd=Math.max(0.55,m.shootCd/(G.endAtkQuick||1));   // deeper casters fire faster (telegraph stays readable via the floor)
@@ -17095,9 +17145,16 @@ function endlessTick(dt){
   if(MP.active&&!MP.isHost) return;                              // host owns all Abyss spawns; guests receive the authoritative enemy mirror
   const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length;
   if(G.endSpawned<G.endTarget){
+    const waveLimit=Math.min(G.endTarget,(G.endWave||1)*G.endWaveSize);
+    if(G.endSpawned>=waveLimit){
+      if(alive>0){G.endWavePause=0;return;}
+      G.endWavePause+=dt;if(G.endWavePause<1.5)return;
+      G.endWave++;G.endWavePause=0;G.endSpawnT=.25;
+      toast('Wave '+G.endWave+'/3 · '+G.endLayout.name,'#caa5f3');questUpdate();return;
+    }
     G.endSpawnT-=dt;
     if(alive<G.endCap && G.endSpawnT<=0){
-      const batch=Math.min(G.endBatch,G.endTarget-G.endSpawned,G.endCap-alive);
+      const batch=Math.min(G.endBatch,waveLimit-G.endSpawned,G.endCap-alive);
       for(let i=0;i<batch;i++) spawnEndlessMob(G.floor,STAGES[G.stageIndex]);
       G.endSpawnT=G.endInt;
     }
@@ -17118,7 +17175,7 @@ function endlessDie(){
   mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
   { const em=document.getElementById('endmods'); if(em) em.style.display='none'; }   // pacts reset on death/exit
   const floor=G.floor||1, kills=G.endKillsTotal||0, goldEarned=Math.max(0,(meta.gold||0)-(G.endGold0||0));
-  const newBest=floor>(meta.endlessBest||0);
+  const newBest=floor>(G.endBestAtStart||0);
   meta.hero=snapOf(G.p); meta.bank=null; meta.endlessBest=Math.max(meta.endlessBest||0,floor);
   persist(); persistGlobal(); checkAchievements();
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:40px;color:#c47bff">THE ABYSS TOOK YOU</h2>
@@ -19535,6 +19592,7 @@ openPause=openPauseV2;
 document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(mode==='play') openPause(); });
 function hudUpdate(){
   if(!G) return; const p=G.p;
+  document.getElementById('stagetag')?.classList.toggle('descent-floor',!!G.endless);
   hudBagUpdate();
   const maxHp=effMaxHp(p), maxMana=p.maxMana||100; if(p.mana==null) p.mana=maxMana;
   document.getElementById('hpfill').style.width=Math.max(0,p.hp/maxHp*100)+'%';
@@ -19922,7 +19980,7 @@ function drawCourse(s,t){
     if(_w3dOn && window.__hollowObstacleDrawn?.(ob)) continue;
     if(_w3dOn && window.__keepObstacleDrawn?.(ob)) continue;
     if(_w3dOn && window.__frostObstacleDrawn?.(ob)) continue;
-    if(_w3dOn && (inStormCampaign()||window.__deepObstacleDrawn?.(ob))) continue;
+    if(_w3dOn && (inStormCampaign()||G.endless&&ob.descentCover||window.__deepObstacleDrawn?.(ob))) continue;
     /* DERIVED COLLIDERS ARE INVISIBLE. E1 gives every solid prop a collision box sized to it - and
        obstacles are DRAWN, so every tree, rock and tuft of grass sprouted a beige box around it.
        The collision was the point; the box was never meant to be seen. This is the same skip the
@@ -21921,6 +21979,13 @@ function render(t){
     VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[cx,cyy+34,cz-90],[0,1,0]);
     PROJ=mPersp(70*Math.PI/180,VW/VH,3,2400);
   }
+  if(G?.endless&&meta.camMode==='far'){
+    // Every Descent floor has a rear wall. Keep the overview boom inside it,
+    // or the shared wall-collision solver retracts the camera into the hero.
+    G.eye={x:cx,y:cyy+335,z:cz+115};
+    VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[cx,cyy+28,cz-100],[0,1,0]);
+    PROJ=mPersp(58*Math.PI/180,VW/VH,12,2400);
+  }
   if(G?.p&&G.eye&&meta.camMode!=='fps'&&(!G.hub||G.sparringRoom)&&!_ed?.on){
     const target={x:p.x,y:p.y+34,z:p.z},desired=G.eye;
     const now=performance.now(),last=G._cameraBoom;
@@ -23339,7 +23404,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2132"></script>
+<script type="module" src="./hero3d.js?v=2134"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

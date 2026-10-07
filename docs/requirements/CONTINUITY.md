@@ -1173,3 +1173,7 @@ The PC restart interrupted an in-progress chess/Briar task but did not erase loc
 ## [Codex | 2026-10-07] Sparring Room improvement
 
 Version 2.130.0 rebuilds the Sparring Room as a detailed training hall, with a clear arrival, training desk and exit, searchable unlocked-opponent selection, chosen bout size, real practice damage and knockback, safe defeat reset, and a live results panel. Existing campaign progression and rewards remain separate. A prior-version save, camera modes, phone layout, normal foes, seven bosses, dummy damage, victory/defeat and exit were checked in Chrome. See docs/design/SPARRING_ROOM_2026-10-07.md. Human combat feel and visual preference still need review.
+
+## [Codex | 2026-10-07] Abyssal Descent floor rebuild
+
+Version 2.131.0 replaces Descent's repeated square with four authored floor shapes, safe encounter pads, differentiated pressure, three-wave pacing, a post-fight crumbling crossing, restrained theme-aware architecture, a safe overhead camera, and a clearer phone tracker. Descent remains the campaign XP/gold/gear grind, separate from the Prison Break roguelite. Prior pacts, depth difficulty, single post-clear chest, retained rewards and co-op host authority stay intact. Browser tests checked eight floors, spawn grounding, three complete encounters, portal crossing, guest sync and a previous-version save. Human pacing/difficulty and art judgement remain open. Details: docs/design/ABYSSAL_DESCENT_REBUILD_2026-10-07.md.

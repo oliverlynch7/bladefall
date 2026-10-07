@@ -31,7 +31,14 @@ export function buildDeep(scene,w){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
     for(const p of pieces){const step=w.portalMode&&w.portalMode!=='sprint'&&top===0?65:115,nx=Math.max(1,Math.ceil((p.b-p.a)/step)),nz=Math.max(1,Math.ceil((p.d-p.c)/step)),tw=(p.b-p.a)/nx,td=(p.d-p.c)/nz;
       for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*tw,z=p.c+(iz+.5)*td;let color=w.ironScene?'#6b6054':palette[Math.floor(hash(x,z)*4)];
-        if(w.portalMode&&w.portalMode!=='sprint'&&top===0){const r=Math.hypot(x,z),spoke=Math.abs(Math.sin(Math.atan2(z,x)*4));if(Math.abs(r-285)<28||r<55||(r>70&&r<260&&spoke<.13))color=cfg.body;}
+        if(w.portalMode==='descent'&&top===0){
+          const r=Math.hypot(x,z),layout=w.endlessLayout;
+          const inlay=layout==='court'?Math.abs(r-295)<24||Math.abs(x)<26&&Math.abs(z)<260
+            :layout==='cross'?Math.abs(x)<22&&Math.abs(z)<430||Math.abs(z)<22&&Math.abs(x)<560
+            :layout==='march'?Math.abs((z+625)%270)<27&&Math.abs(x)<340
+            :Math.abs(x)>300&&Math.abs(x)<345&&z>-250;
+          color=inlay?cfg.body:palette[hash(x,z)>.78?1:0];
+        }else if(w.portalMode&&w.portalMode!=='sprint'&&top===0){const r=Math.hypot(x,z),spoke=Math.abs(Math.sin(Math.atan2(z,x)*4));if(Math.abs(r-285)<28||r<55||(r>70&&r<260&&spoke<.13))color=cfg.body;}
         add('cap',x,top+.55,z,Math.max(.1,tw-.7),1.1,Math.max(.1,td-.7),color,0,source);floors++;}laid.push(p);
     }
   }
@@ -54,7 +61,7 @@ export function buildDeep(scene,w){
   // Phaseable segments are removed/reinserted by gameplay without a scene rebuild.
   // Their original renderer must remain the sole owner of their visible surface.
   for(const s of w.segments||[])if(!s.nofloor&&!s.phaseable&&!s.phase)surface(s,abyss?-45:-24,0);
-  const solids=(w.obstacles||[]).filter(o=>!o.phase&&!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
+  const solids=(w.obstacles||[]).filter(o=>!o.phase&&!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol&&!(w.portalMode==='descent'&&o.descentCover));
     for(const o of solids){const top=o.h??1,base=o.y0??(o.kind==='plat'?Math.min(0,top-16):0);surface(o,base,top,o);obstacles.add(o);}
   for(const o of w.walls||[]){if(o.invisible)continue;surface(o,o.y0||0,(o.y0||0)+(o.h||1),o);walls.add(o);}
   // Exposed island edges get masonry courses; shared interior edges are left untouched.

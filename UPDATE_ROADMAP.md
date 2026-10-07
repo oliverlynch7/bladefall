@@ -2443,3 +2443,9 @@ Browser QA covered boss charge and post collision/art, beam shutdown, dog moveme
 ## [Codex | 2026-10-07] 2.130.0-sparring-hall
 
 Rebuilt the Sparring Room layout and art with a clear entrance, ring, viewing rail, equipment racks, training desk and exit. Removed its phantom Waystone prompt and camera-blocking door. Added searchable unlocked-foe selection, 1-3 foe bouts or solo bosses, heal/end controls, real practice hits and knockback, a no-penalty defeat reset, and live damage/time feedback including a dummy test. No campaign XP, gold, loot or save changes from practice. Browser QA covered a prior-version save, desktop/phone and three cameras, opponent selection, normal and boss foes, damage boundaries, victory/defeat, and hub exit; syntax passed. Human review of combat feel and art remains.
+
+## [Codex | 2026-10-07] 2.131.0-descent-floors
+
+Rebuilt Abyssal Descent around four authored floor layouts, distinct stone architecture, safe encounter pads, themed enemy pressure and three-wave clears. Broken Span adds a short crumbling-stone crossing after its fight. Moved entrances and shortened the mode's overhead camera boom to stop rear-wall camera collapse; kept the mobile floor name in the objective tracker. Existing pacts, depth scaling, post-clear single chest, progression retention and host-owned co-op combat remain. The personal-best result now compares against the best from the start of the run.
+
+Browser QA: eight floor layouts, 560 spawn samples, full floor 1/4/7 wave clears and one reward/exit each, elite floor 7, live movement across the broken stones, guest floor/clear packet flow, prior-version save, desktop/phone camera and HUD captures. Syntax and diff checks passed. Human playtesting is still needed for pacing, challenge and visual taste; see docs/design/ABYSSAL_DESCENT_REBUILD_2026-10-07.md.

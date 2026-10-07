@@ -23,4 +23,10 @@ For each candidate: make an isolated Blender source and render, review at game-c
 
 ## Current result and limits
 
-The Ember Colossus is the first upgraded production appearance. The prototype source and rig are in `prototypes/sol-forge-brute/`; the deployed art lives in `public/3d/enemy-assets/articulated/forge-colossus-v2125.glb`. Existing gameplay values and the separate Marble Colossus appearance are unchanged. Browser checks show the new GLB loads with 14 bones and the six runtime clips, and the enemy renderer retains the authored iron, cloth and ember colors. The broader roster remains to be modeled and human visual/gameplay QA remains necessary.
+The Ember Colossus is the first upgraded production appearance. The prototype source and rig are in `prototypes/sol-forge-brute/`; the deployed art lives in `public/3d/enemy-assets/articulated/forge-colossus-v2125.glb`. Browser checks show the GLB loads with 14 bones and the six runtime clips, and the enemy renderer retains the authored iron, cloth and ember colors.
+
+## [Codex | 2026-10-07] Marble Colossus first production pass
+
+The second boss now has its own Sunspire guardian model: fractured blue-grey and ivory stone, an exposed sky-light heart, engraved gold sun, open stone hands, and a broken five-pronged crown. Source, three Blender renders, metrics, and the editable rig are in `prototypes/marble-colossus/`. The production file is `public/3d/enemy-assets/articulated/marblecolossus-v2126.glb`; the prior file remains untouched. It is 10,984 triangles, eight skinned meshes/materials, 14 bones, and 968 KB. Existing boss mechanics, collider, rewards, and saves are unchanged.
+
+The browser animation preview loaded all six clips with finite transforms at 18 sampled phases. A Palace Courtyard rendering smoke check selected the new file and showed the model at boss scale. This is code and visual smoke verification, not a human playtest of the authored boss arena or a mobile frame-rate measurement. The rest of the roster remains to be modeled; the Hollow Marksman is next in the written production order.

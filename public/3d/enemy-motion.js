@@ -4,7 +4,7 @@ import {orchardClips} from './brute-motion.js?v=2000';
 import * as THREE from './three.module.js';
 import {bakeWeaponContacts} from './weapon-choreography.js?v=1980';
 export const articulatedTypes=new Set(["grunt","emberling","frostling","toxling","goblin","caster","sentinel","revenant","frostlobber","blinkstalker","sunpriest","marblestatue","siegeknight","royalarcanist","brute","warden","archer","sorcerer","colossus","king","tyrant","marblecolossus"]);
-export function enemyAsset(type,original=false){if(type==='colossus'&&!original)return './enemy-assets/articulated/forge-colossus-v2125.glb';return './enemy-assets/'+(!original&&articulatedTypes.has(type)?'articulated/':'')+(!original&&['archer','brute','warden'].includes(type)?type+'-v1980':type)+'.glb';}
+export function enemyAsset(type,original=false){if(!original&&type==='colossus')return './enemy-assets/articulated/forge-colossus-v2125.glb';if(!original&&type==='marblecolossus')return './enemy-assets/articulated/marblecolossus-v2126.glb';return './enemy-assets/'+(!original&&articulatedTypes.has(type)?'articulated/':'')+(!original&&['archer','brute','warden'].includes(type)?type+'-v1980':type)+'.glb';}
 export function motionFamily(type){if(/brute|colossus|siegeknight|embertotem/.test(type))return 'heavy';if(/archer|cragspitter|frostlobber/.test(type))return 'ranged';if(/caster|sorcerer|king|tyrant|priest|arcanist|wisp|tether/.test(type))return 'cast';if(/jackal|boar|sporeback|slime|flyer|shell|magmaskit/.test(type))return 'beast';return 'blade';}
 // Angles are offsets in each bone's bind-local frame. Translation stays anchored.
 function pose(family,phase,u,type){const p={body:[0,0,0],head:[0,0,0],armL:[0,0,0],armR:[0,0,0],legL:[0,0,0],legR:[0,0,0],tail:[0,0,0],rearL:[0,0,0],rearR:[0,0,0]};

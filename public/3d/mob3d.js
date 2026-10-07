@@ -12,6 +12,7 @@ import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+(['archer','brute','warden'].includes(type)?type+'-v1980':type)}]));
 MOB_CAST['officer-shield']={file:'enemy-assets/officers/shield'};MOB_CAST['officer-spear']={file:'enemy-assets/officers/spear'};
 MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
+MOB_CAST.marblecolossus={file:'enemy-assets/articulated/marblecolossus-v2126'};
 const ASSETS_DIR = '../slice3d/assets/';
 const MOBS_DIR = ASSETS_DIR + 'monsters/';
 const _mobModels = new Map();

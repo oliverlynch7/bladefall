@@ -2469,3 +2469,7 @@ Fresh Prison Break runs now include a distinct optional five-jump cache room per
 ## [Codex | 2026-10-07] 2.135.0-dungeon-art
 
 The optional Prison Break cache room now uses tapered piers instead of square support stacks, with section-specific platform tops, hanging supports and subtle warm landing edges. The underlying five-jump collision route is unchanged. Real-browser checks again passed 108 jumps and 18 one-time claims; 11-room art remains at 9-10 draw calls and below 24k triangles. A desktop view was inspected. Human feedback remains the final art and difficulty check.
+
+## [Codex | 2026-10-07] 2.136.0-bestiary
+
+Added a searchable 52-entry bestiary at the Waystation Sparring Room entrance and inside the hall. Cards use cropped screenshots of actual enemy models, including Prison Break foes; entries show specific campaign areas or special encounter locations, base HP/damage/speed/XP, attack style, element, attack tell and brief lore. Base values are marked as scaling with region, difficulty and co-op. The existing practice selector remains separate. Browser QA verified search/filters/navigation, all portrait requests, desktop and phone presentation and a previous-build save; no new save fields or SFX. Human portrait/art review remains welcome.

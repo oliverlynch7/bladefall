@@ -1193,3 +1193,7 @@ Version 2.134.0 adds an optional five-jump side room to each section of fresh Pr
 ## [Codex | 2026-10-07] Endless Dungeon art follow-up
 
 Version 2.135.0 improves revision-8 cache-room stepping-stone art: tapered supports, iron collars, section-specific tops and warm edge cues. Collision, rewards and previous checkpoint geometry are unchanged. Browser traversal and one-time reward tests passed; visual acceptance still needs Oliver's playtest.
+
+## [Codex | 2026-10-07] Sparring bestiary shipped
+
+Version 2.136.0 adds 52 entries and 51 distinct model screenshot crops (one portrait is shared by an officer variant). It covers the campaign, special encounters and Prison Break, with searchable locations and combat tells. Bestiary stands are by the Sparring Room and inside it. Existing sparring practice remains separate. Browser checks passed for catalog interactions, all asset requests, desktop/phone layouts, and a previous-build save with its name/gold/zone retained. User visual judgment remains open.

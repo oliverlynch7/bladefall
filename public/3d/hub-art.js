@@ -108,6 +108,13 @@ export function buildHubArt(scene,w){
     if(n.id==='thomas'){at(n.x,n.z,0,()=>{for(const x of [-25,25])beam(x,12,-38,7,24,7);beam(0,25,-38,75,7,28);beam(0,40,-53,75,24,6);if(HU.homeBird){beam(58,18,-32,24,36,24);block(58,42,-32,17,12,12,'#c09d63');block(67,48,-32,8,9,8,'#c09d63');block(73,47,-32,5,3,4,'#e3c78c');block(50,44,-32,10,3,8,'#876437',-.3);for(const dz of [-7,7]){block(57,43,-32+dz,10,6,2,'#927143');block(68,50,-32+dz*.6,2,2,1,'#34291c');}for(const dx of [55,62])beam(dx,35,-32,2,5,2,'#72512e');}label('Thomas',0,96,-42,100);});continue;}
 
     if(n.id==='arcade'){at(n.x,n.z,Math.PI,()=>{beam(0,38,0,45,76,30,'#354439');block(0,48,16,32,31,2,'#75a28c');beam(0,24,22,42,6,16);label(n.name,0,87,13,100);});continue;}
+    if(n.id==='bestiary'){at(n.x,n.z,-Math.PI/2,()=>{
+      for(const s of [-1,1])beam(s*16,32,0,7,64,7,'#765532');
+      beam(0,64,0,49,6,36,'#9b7142');block(0,69,-3,45,3,30,'#52392c');
+      block(-11,72,-2,21,3,27,'#eee0b8');block(11,72,-2,21,3,27,'#d8c7a0');
+      block(0,75,-2,2,2,28,'#d4a853');for(const s of [-1,1])block(s*10,76,-5,14,1,2,'#a1754c');
+      beam(0,80,-19,48,5,5,'#d2aa69');label('Bestiary',0,115,0,112);
+    });continue;}
     if(n.district==='undercroft'){
       at(n.x,n.z,Math.PI,()=>{
         add('arch',0,0,-20,25);block(0,1,14,110,2,64,'#66566c');

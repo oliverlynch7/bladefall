@@ -252,6 +252,9 @@
   .bestportrait .bpeye{position:absolute;top:34px;width:7px;height:5px;background:#fff6c8;box-shadow:0 0 7px #fff;}.bestportrait .bpeye.l{left:34px}.bestportrait .bpeye.r{right:34px}
   .bestportrait.fly .bphead{top:27px;transform:rotate(45deg);}.bestportrait.fly:before,.bestportrait.fly:after{content:'';position:absolute;top:31px;width:24px;height:34px;border:2px solid var(--mob);opacity:.7}.bestportrait.fly:before{left:10px;transform:skewY(-22deg)}.bestportrait.fly:after{right:10px;transform:skewY(22deg)}
   .bestportrait.boss .bphead{left:20px;top:15px;width:52px;height:48px}.bestportrait.boss .bpeye.l{left:29px}.bestportrait.boss .bpeye.r{right:29px}
+  .bestportrait.photo{overflow:hidden;background:#252832}.bestportrait.photo img{width:100%;height:100%;object-fit:cover;display:block}.bestportrait.photo.large{width:180px;height:180px;margin:0 0 10px;border-radius:16px}
+  .bestmenu{max-width:min(1050px,96vw)!important;text-align:left}.besthead{display:flex;align-items:center;justify-content:space-between;gap:12px}.besthead .ovh{margin:4px 0 8px}.bestlayout{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(0,1.35fr);gap:16px}.bestmenu input{box-sizing:border-box;width:100%;padding:11px;background:#101920;color:#fff;border:1px solid #688092;border-radius:8px;margin:4px 0 8px}.bestlist{max-height:min(56vh,570px);overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;align-content:start}.bestrow{display:flex;align-items:center;gap:8px;min-width:0;padding:7px;border:1px solid #405064;border-radius:9px;background:#19222b;color:#f3f5f4;text-align:left;cursor:pointer}.bestrow[aria-selected="true"]{border-color:#e8b85e;background:#393020}.bestrow .bestportrait{flex:none;width:52px;height:52px;margin:0;border-radius:8px}.bestrow span{min-width:0;font-weight:800;font-size:12px}.bestrow small{display:block;color:#bbc7d0;font-size:10px;font-weight:500;margin-top:3px}.bestdetail{background:#171f29;border:1px solid #52616f;border-radius:13px;padding:18px;min-height:380px}.bestdetail h3{font-size:22px;color:#f4d08a;margin:0 0 8px}.bestdetail p{color:#d8e0e4;font-size:13px;line-height:1.5}.bestdetail .statgrid{margin:12px 0}.bestdetail .vsrow{font-size:12px}.bestnote{font-size:11px!important;color:#aebdc8!important}
+  @media(max-width:720px){.bestlayout{grid-template-columns:1fr}.bestlist{grid-template-columns:1fr;max-height:180px}.bestdetail{min-height:0}.bestportrait.photo.large{width:125px;height:125px}}
   .bestiaryrow .gi{width:12px}.bestiaryrow{gap:7px;padding-left:10px}.bestiaryrow .bigbtn{flex:0 0 auto;}.bestiaryrow>div:nth-child(2){min-width:0}
   .sparmenu{max-width:min(820px,96vw)!important}.sparlayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.9fr);gap:14px;text-align:left}.sparmenu .sparlist{max-height:min(31vh,220px)!important;display:block!important;margin:0!important}.sparrow{width:100%;display:flex;align-items:center;gap:8px;text-align:left;margin:0 0 6px;padding:10px 12px;border:1px solid #384554;border-radius:9px;background:#1b232b;color:#e9edf0;cursor:pointer;font-weight:800}.sparrow[aria-selected="true"]{border-color:#e6b75c;background:#343026;box-shadow:inset 3px 0 #e6b75c}.sparrow small{display:block;font-size:11px;font-weight:500;color:#b8c4cf}.sparfilters,.sparcounts,.sparactions{display:flex;gap:6px;flex-wrap:wrap}.sparfilters button,.sparcounts button{border:1px solid #566477;background:#222d36;color:#f2f4f4;border-radius:7px;padding:7px 10px;cursor:pointer;font-weight:800}.sparfilters button[aria-pressed="true"],.sparcounts button[aria-pressed="true"]{border-color:#f0ba5f;background:#584020;color:#fff2d3}.sparinfo{background:#1a222c;border:1px solid #52616f;border-radius:12px;padding:15px;min-height:230px}.sparinfo h3{margin:3px 0 8px;color:#f5d18a}.sparinfo p{font-size:13px;line-height:1.45;color:#dbe4e8}.sparactions .bigbtn{flex:1;min-width:135px;margin:0}.sparfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.sparfoot .bigbtn{width:auto;flex:1;margin:0;font-size:13px;padding:10px}#sparringHud{position:fixed;right:18px;top:78px;z-index:8;width:245px;padding:10px 12px;border:1px solid #8b6c39;border-radius:10px;background:rgba(14,19,25,.89);box-shadow:0 8px 24px #0009;color:#f3efe3;font-size:12px;pointer-events:none}#sparringHud b{display:block;color:#f5d18a;font-size:13px;margin-bottom:4px}#sparringHud span{color:#bccbd3}
   @media(max-width:650px){.sparlayout{grid-template-columns:1fr;gap:7px}.sparmenu .sparlist{max-height:12vh!important}.sparinfo{min-height:0;padding:10px}.sparinfo p{margin:6px 0;font-size:12px}.sparinfo h3{margin:2px 0 5px}.sparmenu{padding:12px!important}.sparmenu .ovh{font-size:25px;margin:4px 0}.sparmenu .ovsub{margin:5px 0 9px;font-size:12px}.sparrow{padding:7px 9px}.sparactions{margin-top:7px!important}.sparactions .bigbtn{padding:9px;font-size:13px}.sparfoot{margin-top:7px}.sparfoot .bigbtn{padding:7px;font-size:11px;min-width:78px}#sparringHud{right:7px;top:198px;width:185px;font-size:10px;padding:7px 9px}}
@@ -1141,7 +1144,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.135.0-dungeon-art';
+const VERSION3D='2.136.0-bestiary';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17615,6 +17618,7 @@ function rebuildWaystationCitadel(){
     take('drillmaster',610,-110,{district:'warden'}), take('beastkeeper',610,65,{district:'warden'}),
     take('mirror',610,425,{district:'warden'}),
     take('sparring',610,245,{district:'warden'}),
+    take('bestiary',820,350,{district:'warden'}),
     take('abyss',-400,710,{district:'undercroft'}), take('delve',-200,710,{district:'undercroft'}),
     take('arena',0,710,{district:'undercroft'}), take('gauntlet',200,710,{district:'undercroft'}),
     take('sprint',400,710,{district:'undercroft'})
@@ -17668,7 +17672,7 @@ function rebuildWaystationCitadel(){
 
   // Fixture collision follows the actual records, never a second hard-coded coordinate table.
   const sizes={quartermaster:[90,55],chest:[54,44],anvil:[58,58],keeper:[52,52],drillmaster:[84,58],
-    beastkeeper:[58,58],board:[72,28],mirror:[70,28],sparring:[82,30],abyss:[64,38],delve:[64,38],
+    beastkeeper:[58,58],board:[72,28],mirror:[70,28],sparring:[82,30],bestiary:[44,34],abyss:[64,38],delve:[64,38],
     arena:[64,38],gauntlet:[64,38],sprint:[64,38],arcade:[66,46]};
   G.walls.push({x:0,z:30,w:76,d:76,h:108,invisible:true});
   for(const n of G.hubNpcs){ const s=sizes[n.id]||[58,58]; G.walls.push({x:n.x,z:n.z,w:s[0],d:s[1],h:108,invisible:true}); }
@@ -17702,6 +17706,7 @@ function rebuildWaystationSanctum(){
     const ry=n.district==='undercroft'?Math.PI:-(n.x<0?-1:1)*Math.PI/2;
     const box=(x,z,w,d,h)=>{const a=Math.cos(ry),b=Math.sin(ry);solid(n.x+a*x+b*z,n.z-b*x+a*z,Math.abs(a)*w+Math.abs(b)*d,Math.abs(b)*w+Math.abs(a)*d,h,n.id)};
     if(n.id==='arcade'){box(0,0,45,36,86);continue;}
+    if(n.id==='bestiary'){box(0,0,44,34,68);continue;}
     if(n.district==='undercroft'||n.id==='sparring'){
       const sc=n.id==='sparring'?22:25;for(const s of [-1,1])box(s*1.5*sc,n.id==='sparring'?-17:-20,.7*sc,.8*sc,5*sc);
       continue;
@@ -17970,6 +17975,7 @@ function enterWaystation(riftHall=false){
     {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
     {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
+    {id:'bestiary',ic:'📖',name:'Bestiary',role:'Enemy field guide',prop:'bestiary',verb:'Read the bestiary',direct:true,x:660,z:450,open:()=>openBestiary(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-235,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate(),needZones:1},
@@ -17992,6 +17998,7 @@ function enterWaystation(riftHall=false){
     {x:548,z:-60,w:78,d:54},   // Drillmaster's booth
     {x:548,z:150,w:54,d:54},   // Beastkeeper
     {x:560,z:500,w:74,d:28},   // Sparring Room door (SE court)
+    {x:660,z:450,w:44,d:34},   // Bestiary lectern beside the Sparring Room
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-607,z:45,w:48,d:40},   // Your Bag chest — pushed back near the west wall (small gap, not flush), between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30},     // The Arena gate (deep-centre annex plaza)
@@ -18261,16 +18268,18 @@ function enterSparringRoom(){
   for(const [tx,tz] of [[-660,-560],[660,-560],[-660,560],[660,560]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});
   G.hubNpcs=[
     {id:'sparringcontrol',ic:'⚔️',name:'Training Desk',role:'Choose a bout',prop:'sparring',verb:'Set up a practice bout',direct:true,x:-155,z:335,open:()=>openTrainingArena(wsResume)},
+    {id:'bestiary',ic:'📖',name:'Bestiary',role:'Enemy field guide',prop:'bestiary',verb:'Read the bestiary',direct:true,x:155,z:335,open:()=>openBestiary(wsResume)},
     {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:435,z:470,open:()=>enterWaystation()}
   ];
   G.walls.push({x:-155,z:335,w:104,d:58,h:44,invisible:true});
+  G.walls.push({x:155,z:335,w:44,d:34,h:68,invisible:true});
   for(const z of [-350,-50,225])for(const x of [-520,520])G.walls.push({x,z,w:94,d:18,h:112,invisible:true});
   for(const x of [383,487])G.walls.push({x,z:515,w:20,d:30,h:144,invisible:true});
   G.trainSpawn={x:0,z:-125};G.trainState={name:'No bout',start:0,hits:0,dealt:0,taken:0,defeats:0,active:false,result:'Training desk: ahead on the left'};
   {const d=spawnEnemy('dummy',-470,-185);d.dummy=true;d.active=true;d.dropT=0;d.range=true;}
   G.lastSafe={x:0,z:420};G.startPos={x:0,z:420};G.goalPos={x:0,z:RZ};G.bounds={minX:-560,maxX:560,minZ:-560,maxZ:560};G.progressEnd=RZ;
   p.x=0;p.z=420;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
-  document.getElementById('stagetag').textContent='SPARRING HALL';questUpdate();toast('Training desk ahead on the left. Practice has no penalties or rewards.');
+  document.getElementById('stagetag').textContent='SPARRING HALL';questUpdate();toast('Training desk on the left; bestiary on the right. Practice has no penalties or rewards.');
 }
 const BESTIARY_INFO={
   grunt:{name:'Hollowed Soldier',tell:'Closes in, then pauses before striking. Step away during the warning.',lore:'A living soldier forced to obey the Abyss King. Their empty eyes reveal the Hollowing.'},
@@ -18309,21 +18318,65 @@ const BESTIARY_INFO={
   king:{name:'Abyss King',tell:'Relentless close pressure backed by the power of the deep.',lore:'The sleeping source of the dream that has poisoned every layer above him.'},
   tyrant:{name:'Abyss King, Awakened',tell:'Combines crushing attacks with a five-bolt Void spread.',lore:'The King fully awake: not the dreamer beneath the world, but the dream given a body.'}
 };
-function bestiaryName(m){ const E=ENEMY[m], B=BESTIARY_INFO[m]; return (B&&B.name)||(E.label?E.label.replace(/^THE /,'The '):m.replace(/([a-z])([A-Z])/g,'$1 $2').replace(/^./,c=>c.toUpperCase())); }
-function bestiaryPortrait(m){ const E=ENEMY[m], cls=E.boss?'boss':(E.kind==='fly'?'fly':''); return `<div class="bestportrait ${cls}" style="--mob:${E.color||'#cfd6df'}" aria-label="${bestiaryName(m)} portrait"><span class="bphead"></span><span class="bpeye l"></span><span class="bpeye r"></span></div>`; }
-function openBestiaryEntry(m,back){
-  const E=ENEMY[m], B=BESTIARY_INFO[m]||{}, el=normEl(E.element), weak=el&&WEAK[el], ranged=!!(E.ranged||E.shot||E.kind==='caster');
-  mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker">Bestiary Entry</p><h2 class="ovh">${bestiaryName(m)}</h2>${bestiaryPortrait(m)}
-    <p class="ovsub" style="margin-top:0">${B.lore||'A creature shaped by the spreading nightmare beneath the world.'}</p>
-    <div class="statgrid"><div class="vsrow"><span>Health</span><b>${E.hp}</b></div><div class="vsrow"><span>Damage</span><b>${E.dmg}</b></div>
-      <div class="vsrow"><span>Speed</span><b>${E.speed}</b></div><div class="vsrow"><span>Attack</span><b>${ranged?'Ranged':'Melee'}</b></div>
-      <div class="vsrow"><span>Element</span><b style="color:${elementColor(el)||'#cfd6df'}">${el?affName(el):'None'}</b></div>
-      <div class="vsrow"><span>Weak to</span><b style="color:${elementColor(weak)||'#cfd6df'}">${weak?affName(weak):'No elemental weakness'}</b></div></div>
-    <p style="text-align:left;color:#cfd6df;font-size:13px;line-height:1.55"><b style="color:var(--amber)">Watch for:</b> ${B.tell||'Watch its movement and strike after it commits.'}</p>
-    <button class="bigbtn ghost" id="bestBack">Back to practice menu</button></div>`);
-  document.getElementById('bestBack').onclick=()=>openTrainingArena(back);
+const BESTIARY_SPECIAL={
+  hydra:{name:'Storm Coast Hydra',where:'Storm Coast · Thunder Cliffs',portrait:'hydra',health:'Three chains',damage:'Varies by attack',speed:'Stationary',xp:'Story encounter',style:'Bites, waves and lightning',tell:'Attack the three restraints while avoiding its heads. You free the creature rather than kill it.',lore:'A chained sea beast driven to defend the cliff passage.'},
+  marblecolossus:{name:'Marble Colossus',where:'Sunspire Palace · Inner Court',portrait:'marblecolossus',source:'colossus',damage:'Varies by strike',element:'',shotCd:null,style:'Heavy stone blows and shockwaves',tell:'Watch its windup and move outside the marked impact.',lore:'The palace guardian turned against those it once protected.'},
+  officer_caster:{name:'Hollowed Frost Caster',where:'Frostfell · Officer battle',portrait:'sorcerer',source:'sorcerer',health:'Phase-scaled',damage:'Phase-scaled',speed:125,xp:81,shotCd:null,tell:'Keep moving around its freezing volley.',lore:'One of three officers holding the route through Frostfell.'},
+  officer_shield:{name:'Hollowed Shield Officer',where:'Frostfell · Officer battle',portrait:'officer-shield',source:'warden',health:'Phase-scaled',damage:'Phase-scaled',speed:125,xp:97,element:'',shotCd:null,tell:'Circle its shield and strike during its recovery.',lore:'One of three officers holding the route through Frostfell.'},
+  officer_spear:{name:'Hollowed Spear Officer',where:'Frostfell · Officer battle',portrait:'officer-spear',source:'sentinel',health:'Phase-scaled',damage:'Phase-scaled',speed:125,xp:73,element:'',shotCd:null,tell:'Step sideways from the committed spear thrust.',lore:'One of three officers holding the route through Frostfell.'}
+};
+const BESTIARY_PLACES={
+  dummy:'Sparring Hall · Waystation training court',goblin:'Abyssal Descent · treasure rooms',mimic:'Campaign · disguised chests',slimelet:'Wherever a Slime splits',bosscrystal:'Boss arenas · shield phases',
+  brute:'Briar Town · Black Woods',archer:'Hollow Pass · boss arena',warden:'Ruined Keep · boss arena',sorcerer:'Frostfell · officer battle',colossus:'Emberdeep · boss arena',king:'Special boss encounters',tyrant:'Castle Duskmoor · tower peak',
+  prison_pike:'Endless Dungeon · Prison Break',prison_hound:'Endless Dungeon · Prison Break',prison_vessel:'Endless Dungeon · Prison Break',prison_guard:'Endless Dungeon · Prison Break',
+  prison_bell:'Endless Dungeon · tier 1 boss',prison_maw:'Endless Dungeon · tier 2 boss',prison_unbound:'Endless Dungeon · tier 3 boss'
+};
+const BESTIARY_PRISON_LORE={
+  prison_pike:'A prison watcher whose long spear controls a narrow lane.',prison_hound:'A chained hunter bred to run down escaping prisoners.',prison_vessel:'A living furnace used to seal routes with bursts of fire.',
+  prison_guard:'A shield bearer posted across the prison complex.',prison_bell:'The keeper who calls the first prison block to order.',prison_maw:'An iron-plated hunter guarding the deeper cells.',prison_unbound:'The final threat waiting beyond the prison locks.'
+};
+const BESTIARY_PRISON_STYLE={prison_pike:'Long spear thrust',prison_hound:'Rushing bite',prison_vessel:'Marked fire burst',prison_guard:'Shield bash',prison_bell:'Arm sweep / bell shockwave',prison_maw:'Rush / maul / stomp',prison_unbound:'Cross beams / marked ground'};
+function bestiaryName(m){ const E=ENEMY[m]||{}, B=BESTIARY_SPECIAL[m]||BESTIARY_INFO[m]||{}; return B.name||(E.label?(E.label===E.label.toUpperCase()?E.label.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()):E.label):m.replace(/_/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2').replace(/^./,c=>c.toUpperCase())); }
+function bestiaryEntry(m){
+  const extra=BESTIARY_SPECIAL[m]||{}, E=ENEMY[m]||ENEMY[extra.source]||{}, B=BESTIARY_INFO[m]||{};
+  const zones=[],areas=[];
+  for(const z of ZONES){
+    for(const a of [...(z.areas||[]),...(z.side?[z.side]:[])]){
+      const st=STAGES[a.stage];if(st&&((THEMEMOBS[st.theme]||[]).includes(m)||st.mix?.[m])){zones.push(z.name);areas.push(z.name+' · '+a.name);}
+    }
+  }
+  const where=extra.where||BESTIARY_PLACES[m]||([...new Set(areas)].join('; ')||'Special encounters'),region=extra.where||BESTIARY_PLACES[m]||([...new Set(zones)].join(' · ')||'Special encounters');
+  const ranged=!!(E.ranged||E.shot||E.kind==='caster');
+  return {id:m,E,name:bestiaryName(m),where,region,portrait:extra.portrait||m,health:extra.health??E.hp??'—',damage:extra.damage??E.dmg??'—',speed:extra.speed??E.speed??'—',xp:extra.xp??E.xp??'—',shotCd:Object.hasOwn(extra,'shotCd')?extra.shotCd:E.shootCd,style:extra.style||BESTIARY_PRISON_STYLE[m]||(E.kind==='fly'?'Flying'+(ranged?' / ranged':' / dive'):ranged?'Ranged':'Close combat'),element:Object.hasOwn(extra,'element')?extra.element:normEl(E.element),tell:extra.tell||B.tell||E.hint||'Watch its attack warning and move before striking back.',lore:extra.lore||B.lore||BESTIARY_PRISON_LORE[m]||'A threat encountered on your journey.',boss:!!E.boss||m==='hydra'||m.startsWith('officer_')};
 }
+function bestiaryPortrait(m,large=false){ const entry=bestiaryEntry(m); return `<div class="bestportrait photo${large?' large':''}" role="img" aria-label="${htmlSafe(entry.name)} portrait"><img src="bestiary-portraits/${entry.portrait}.webp?v=${VERSION3D}" alt="" loading="lazy"></div>`; }
+function bestiaryDetail(m){const b=bestiaryEntry(m), E=b.E;
+  const row=(label,value)=>`<div class="vsrow"><span>${label}</span><b>${htmlSafe(String(value))}</b></div>`;
+  return `<div style="display:flex;gap:17px;flex-wrap:wrap;align-items:start">${bestiaryPortrait(m,true)}<div style="flex:1;min-width:180px"><span class="ovkicker">${b.boss?'Major threat':'Field entry'}</span><h3>${htmlSafe(b.name)}</h3><p><b style="color:#f4d08a">Found:</b> ${htmlSafe(b.where)}</p><p>${htmlSafe(b.lore)}</p></div></div>
+    <div class="statgrid">${row('Base health',b.health)}${row('Base damage',b.damage)}${row('Base speed',b.speed)}${row('Base XP',b.xp)}${row('Attack style',b.style)}${row('Element',b.element?affName(b.element):'None')}${b.shotCd?row('Shot interval',b.shotCd+' s'):''}</div>
+    <p><b style="color:#f4d08a">How to fight it:</b> ${htmlSafe(b.tell)}</p><p class="bestnote">These are roster starting values. Region tier, difficulty, boss phases and co-op can change the actual fight.</p>`;
+}
+const BESTIARY_UI={query:'',filter:'all',selected:'grunt'};
+function bestiaryRoster(){return [...Object.keys(ENEMY),...Object.keys(BESTIARY_SPECIAL)].filter((m,i,a)=>a.indexOf(m)===i);}
+function openBestiary(back){
+  mode='menu'; const roster=bestiaryRoster();if(!roster.includes(BESTIARY_UI.selected))BESTIARY_UI.selected=roster[0];
+  document.getElementById('toast')?.classList.remove('show');
+  showOverlayHTML(`<div class="card bestmenu"><div class="besthead"><div><p class="ovkicker">Sparring Hall · Field Guide</p><h2 class="ovh">Bestiary</h2></div><button class="bigbtn ghost" id="bestExit" style="width:auto;margin:0">Back</button></div>
+    <p class="ovsub" style="text-align:left;margin:0 0 12px">Enemies, bosses and special encounters. Select a portrait for locations, stats and combat tips.</p>
+    <div class="bestlayout"><div><input id="bestSearch" aria-label="Search enemies" placeholder="Search enemies or locations"><div class="sparfilters" id="bestFilters"></div><div class="bestlist" id="bestList"></div></div><div class="bestdetail" id="bestDetail"></div></div></div>`);
+  const list=document.getElementById('bestList'),detail=document.getElementById('bestDetail'),search=document.getElementById('bestSearch'),filters=document.getElementById('bestFilters');search.value=BESTIARY_UI.query;
+  const draw=()=>{const q=BESTIARY_UI.query.trim().toLowerCase(),f=BESTIARY_UI.filter;
+    const shown=roster.filter(m=>{const b=bestiaryEntry(m);return (f==='all'||f==='boss'&&b.boss||f==='prison'&&m.startsWith('prison_')||f==='common'&&!b.boss&&!m.startsWith('prison_'))&&(!q||(b.name+' '+b.where+' '+b.style).toLowerCase().includes(q));});
+    if(!shown.includes(BESTIARY_UI.selected))BESTIARY_UI.selected=shown[0]||null;
+    filters.innerHTML=['all','common','boss','prison'].map(v=>`<button data-filter="${v}" aria-pressed="${v===f}">${{all:'All',common:'Regular',boss:'Bosses',prison:'Prison Break'}[v]}</button>`).join('');
+    filters.querySelectorAll('button').forEach(b=>b.onclick=()=>{BESTIARY_UI.filter=b.dataset.filter;draw();});
+    list.innerHTML=shown.length?shown.map(m=>{const b=bestiaryEntry(m);return `<button class="bestrow" data-entry="${m}" aria-selected="${m===BESTIARY_UI.selected}">${bestiaryPortrait(m)}<span>${htmlSafe(b.name)}<small>${htmlSafe(b.region)}</small></span></button>`;}).join(''):'<p class="hint">No entries match your search.</p>';
+    list.querySelectorAll('[data-entry]').forEach(b=>b.onclick=()=>{BESTIARY_UI.selected=b.dataset.entry;draw();});
+    detail.innerHTML=BESTIARY_UI.selected?bestiaryDetail(BESTIARY_UI.selected):'<p>Search for an enemy to read its entry.</p>';
+  };
+  search.oninput=()=>{BESTIARY_UI.query=search.value;draw();};document.getElementById('bestExit').onclick=back;draw();
+}
+function openBestiaryEntry(m,back){mode='menu';showOverlayHTML(`<div class="card bestmenu"><p class="ovkicker">Bestiary Entry</p><div class="bestdetail">${bestiaryDetail(m)}</div><button class="bigbtn ghost" id="bestBack">Back</button></div>`);document.getElementById('bestBack').onclick=back;}
 const TRAIN_UI={selected:null,filter:'all',query:'',count:1};
 function trainingClear(result='Bout ended'){
   if(!G?.sparringRoom)return;
@@ -18379,7 +18432,7 @@ function openTrainingArena(back){
       <div class="sparactions" style="margin-top:13px"><button class="bigbtn buybtn" id="sparStart">Start bout</button><button class="bigbtn ghost" id="sparRead">Full entry</button></div>`;
     info.querySelectorAll('[data-count]').forEach(b=>b.onclick=()=>{TRAIN_UI.count=Number(b.dataset.count);drawInfo();});
     document.getElementById('sparStart').onclick=()=>trainingBegin(m,TRAIN_UI.count);
-    document.getElementById('sparRead').onclick=()=>openBestiaryEntry(m,back);
+    document.getElementById('sparRead').onclick=()=>openBestiaryEntry(m,()=>openTrainingArena(back));
   };
   const drawList=()=>{const q=TRAIN_UI.query.trim().toLowerCase(),f=TRAIN_UI.filter;
     const shown=mobs.filter(m=>{const e=ENEMY[m];return (f==='all'||f==='boss'&&e.boss||f==='ranged'&&!e.boss&&(e.ranged||e.kind==='caster'||e.kind==='fly')||f==='close'&&!e.boss&&!e.ranged&&e.kind!=='caster'&&e.kind!=='fly')&&(!q||(bestiaryName(m)+' '+m).toLowerCase().includes(q));});
@@ -19331,6 +19384,10 @@ const DESIGNS=[
  'slimelet','caster','charger','mimic','thornboar','sporeback','dustjackal','cragspitter','galewisp','revenant',
  'sentinel','frostshell','frostlobber','magmaskit','embertotem','blinkstalker','voidtether','marblestatue','sunpriest','siegeknight','royalarcanist']
   .filter(k=>ENEMY[k]).forEach(k=>DESIGNS.push({g:'Mobs',k:(BESTIARY_INFO[k]&&BESTIARY_INFO[k].name)||k,d:(t,s)=>{ const e=designEnemy(k,0); e.yaw=s; drawEnemy3(e,t); }}));
+for(const [k,v] of Object.entries(BFPrisonCombat.roster))DESIGNS.push({g:v.boss?'Bosses':'Mobs',k:v.label,cam:{h:Math.max(24,v.h*.56),d:Math.max(160,v.h*3.4)},d:(t,s)=>{
+  const e={...v,type:k,prisonFoe:k,pcMove:v.sequence[0],pcState:'recover',pcClock:0,x:0,y:0,z:0,yaw:s,hitFlash:0,maxHp:v.hp,hp:v.hp};
+  drawEnemy3(e,t);
+}});
 // opens the Weapon/Design studio straight onto a design category (used by __BF3 tooling)
 function openDesignStudio(back,cat){ openWeaponStudio(back); studioSetCat(cat||'Cast'); }
 function designSet(i){ if(!studio) return; studio.di=i; const e=DESIGNS[i]; const nm=document.getElementById('wsName'); if(nm) nm.textContent=e.g+' · '+e.k;
@@ -19338,7 +19395,7 @@ function designSet(i){ if(!studio) return; studio.di=i; const e=DESIGNS[i]; cons
   document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
 function designUpdate(dt){ if(!studio) return; studio.t+=dt; if(G) G.time+=dt; }
 function renderDesign(t){
-  const e=DESIGNS[studio.di]||DESIGNS[0], cam=DGROUP_CAM[e.g]||{h:34,d:150};
+  const e=DESIGNS[studio.di]||DESIGNS[0], cam=e.cam||DGROUP_CAM[e.g]||{h:34,d:150};
   gl.clearColor(0.05,0.055,0.075,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   setFlatLights();
   PROJ=mPersp(40*Math.PI/180,VW/VH,5,1600);
@@ -20945,6 +21002,14 @@ function drawWaystation(t){
       bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
       bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target
       continue; }
+    if(n.prop==='bestiary'){ drawShadow(n.x,n.z,25,0.25);
+      for(const s of [-1,1]) bx(n.x+s*17,34,n.z,7,68,7,'#54402b','#a77a42',0.18);
+      bx(n.x,65,n.z+4,50,7,37,'#704d30','#d5a862',0.24);
+      bx(n.x-12,70,n.z+4,23,4,29,'#eee1bd','#fff0c9',0.18);
+      bx(n.x+12,70,n.z+4,23,4,29,'#ddd0a9','#fff0c9',0.18);
+      bx(n.x,73,n.z+4,2,2,30,'#c69848','#ffe1a1',0.24);
+      bx(n.x,82,n.z-8,46,12,5,'#47362c','#c69848',0.28);
+      continue; }
     if(n.prop==='counter'){ drawShadow(n.x,n.z,24,0.24);   // Quartermaster's shop stall
       bx(n.x,44,n.z-16, 84,64,8,'#4a3826'); for(let i=0;i<3;i++) bx(n.x-28+i*28,52+((i%2)?8:0),n.z-13, 18,4,5,'#3a2c1c');   // back shelf + shelves
       for(let i=0;i<6;i++){ const c=['#c9a24a','#8b93a8','#b06bff','#e8453d','#5affc8','#ffd24a'][i]; bx(n.x-32+i*13,56+((i%2)?7:0),n.z-11, 6,8,4, c, c, 0.55); }   // colourful wares
@@ -21708,7 +21773,7 @@ hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;
 document.body.appendChild(hpCanvas);
 /* Hub nameplates: nearby projected pills over keepers/interactables, hidden across the plaza. */
 const HUB_TAG_REVEAL=230, HUB_TAG_NEAR=72;
-const HUB_TAG_HEIGHT={board:92,chest:66,anvil:108,mirror:134,sparring:104,sparringdoor:138,abyss:122,beast:108,arcade:150};
+const HUB_TAG_HEIGHT={board:92,chest:66,anvil:108,mirror:134,sparring:104,bestiary:116,sparringdoor:138,abyss:122,beast:108,arcade:150};
 function hubTagAnchor(n){
   // Station labels belong above the visible character/prop silhouette—not at its world origin.
   // The Smith stands left of his anvil, so his label follows his actual head as well.
@@ -23452,7 +23517,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2138"></script>
+<script type="module" src="./hero3d.js?v=2139"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

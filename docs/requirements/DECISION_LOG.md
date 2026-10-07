@@ -812,3 +812,7 @@ Implementation choice within the authorized quality pass: add a genuinely option
 ## [Codex | 2026-10-07] Endless Dungeon art refinement
 
 After inspecting the shipped cache room in a normal camera, its square plinth supports still read as crude blocks. Replace art-only support meshes with narrow tapered stone piers, restrained iron collars and section-specific stepping surfaces; keep physical colliders and revision-8 plans fixed. The change raises art detail within the existing draw-call budget but does not claim to settle the final aesthetic.
+
+## [Codex | 2026-10-07] Sparring bestiary
+
+The user requested a full bestiary by the Sparring Room with model-face portraits, encounter locations and stats. Implemented as a free-standing, searchable catalog by the Waystation entrance and inside the hall, separate from bout selection. The complete roster is visible immediately because discovery gating was not requested. Baseline numbers are explicitly distinguished from scaled in-run values. No save-schema change or SFX work.

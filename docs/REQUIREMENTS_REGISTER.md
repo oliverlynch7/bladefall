@@ -1079,3 +1079,7 @@ Version 2.134.0 adds an optional five-jump side route to each section of new rev
 ## [Codex | 2026-10-07] Endless Dungeon cache-room art
 
 Version 2.135.0 improves the optional room's visible supports and step materials without changing collision, rewards or old checkpoint layouts. Narrow pier and edge details keep the floor gap readable. Browser jumps and art budget passed; human art evaluation remains open.
+
+## [Codex | 2026-10-07] Full Sparring Room bestiary
+
+Oliver requests a full bestiary beside the Sparring Room, with a real enemy-face screenshot on each portrait card, where to encounter each foe, and their stats. Extend the existing small training entry into a separate searchable catalog accessible at the Waystation entrance and inside the hall. Ground locations and baseline numbers in the current campaign/Prison Break registries, label scaled combat values honestly, and use crops from actual in-game model renders rather than invented face art. Include bosses, special encounters and the distinct Prison Break roster. Preserve old saves and retain the sparring bout selector as its own quick flow.

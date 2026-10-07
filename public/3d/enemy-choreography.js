@@ -27,7 +27,10 @@ const profiles={
   strike:{body:[-.08,0,0],head:[-.2,0,0],tail:[-.1,0,0]}},
  cragspitter:{label:'Braced spit',recover:.32,
   wind:{body:[-.08,0,0],head:[-.2,0,0]},
-  strike:{body:[.1,0,0],head:[.3,0,0]}}
+  strike:{body:[.1,0,0],head:[.3,0,0]}},
+ colossus:{label:'Forge hammer slam',recover:.55,
+  wind:{body:[-.15,-.12,0],head:[.04,.09,0],armR:[-2.55,-.12,.1],forearmR:[.12,0,0],armL:[-.28,0,-.1],forearmL:[.12,0,0]},
+  strike:{body:[.28,.16,0],head:[-.12,-.10,0],armR:[-.38,.1,.08],forearmR:[.16,0,0],armL:[-.25,0,-.14],forearmL:[.1,0,0]}}
 };
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
 export function choreographyProfile(type){return profiles[type]||null;}

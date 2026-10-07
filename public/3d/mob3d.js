@@ -1,7 +1,7 @@
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2104';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2125';
 import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2120';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
@@ -11,6 +11,7 @@ import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 // the shared kit loader below; unknown enemies retain the legacy rendering fallback.
 const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+(['archer','brute','warden'].includes(type)?type+'-v1980':type)}]));
 MOB_CAST['officer-shield']={file:'enemy-assets/officers/shield'};MOB_CAST['officer-spear']={file:'enemy-assets/officers/spear'};
+MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
 const ASSETS_DIR = '../slice3d/assets/';
 const MOBS_DIR = ASSETS_DIR + 'monsters/';
 const _mobModels = new Map();
@@ -19,6 +20,7 @@ const _pending = new Map();
 const _actors = new Map();
 let _drawn = new WeakSet();
 let _mobGroup = null;
+const MOB_TINTS={normal:new THREE.Color(0xffffff),slow:new THREE.Color(0xb6ddff),runner:new THREE.Color(0xffd4a6),guard:new THREE.Color(0xb1d2ee),hex:new THREE.Color(0xe0b9ff)};
 
 export const MOB3D = { on:true, live:0, pooled:0, missing:[], err:null };
 try {
@@ -115,7 +117,11 @@ function acquireMob(type,e){
     const root=SkeletonUtils.clone(src.scene);root.name='enemy:'+type;
     const materials=[];
     root.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=false;
-      o.material=o.material.clone();o.material.transparent=true;o.material.forceSinglePass=true;materials.push(o.material);
+      o.material=o.material.clone();o.material.transparent=true;o.material.forceSinglePass=true;
+      o.material.userData.baseColor=o.material.color.clone();
+      o.material.userData.baseEmissive=o.material.emissive.clone();
+      o.material.userData.baseEmissiveIntensity=o.material.emissiveIntensity;
+      materials.push(o.material);
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
     const clips=src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
@@ -185,8 +191,9 @@ function syncMobsInner(scene,dt){
       if(e.finalKing&&!m.userData.kingPhase){m.userData.kingPhase={value:0};const previous=m.onBeforeCompile;m.onBeforeCompile=shader=>{previous?.(shader);shader.uniforms.kingPhase=m.userData.kingPhase;shader.vertexShader='varying vec3 vKingLocal;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvKingLocal = position;');shader.fragmentShader='uniform float kingPhase; varying vec3 vKingLocal;\n'+shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\nif(kingPhase > 0.5 && (kingPhase > 1.5 || vKingLocal.x < 0.0)){float crack=step(0.94,sin(vKingLocal.y*13.0+vKingLocal.z*9.0));diffuseColor.rgb=mix(vec3(0.055,0.035,0.10),vec3(0.62,0.42,0.86),crack);}');};m.customProgramCacheKey=()=> 'final-king-infusion-v1';m.needsUpdate=true;}
       if(m.userData.kingPhase)m.userData.kingPhase.value=e.finalKing?e.phase:0;
       m.opacity=e.untargetable&&!e.finalKing ? .28 : 1;m.depthWrite=!e.untargetable;
-      m.color.set(e.slowT>0?0xb6ddff:({runner:0xffd4a6,guard:0xb1d2ee,hex:0xe0b9ff}[e.briarRole]||0xffffff));
-      m.emissive.set(0xffffff);m.emissiveIntensity=hit*hit*.48;
+      m.color.copy(m.userData.baseColor).multiply(e.slowT>0?MOB_TINTS.slow:(MOB_TINTS[e.briarRole]||MOB_TINTS.normal));
+      m.emissive.copy(m.userData.baseEmissive).lerp(MOB_TINTS.normal,hit*hit);
+      m.emissiveIntensity=m.userData.baseEmissiveIntensity+hit*hit*.48;
     }
     const speed=dt>0?Math.hypot(e.x-rec.x,e.z-rec.z)/dt:0;rec.x=e.x;rec.z=e.z;
     const state=enemyActionState(e),wind=state.phase==='Windup'?state.remaining:0;

@@ -6,12 +6,13 @@ body{margin:0;background:#11131a;color:#e9e6df;font:16px system-ui,sans-serif}
 main{max-width:1180px;margin:auto;padding:20px}h1{font-size:1.5rem;margin:0 0 8px}
 p{color:#b9b8bb;line-height:1.5;margin:0 0 15px}#stage{height:min(76vh,800px);min-height:420px;border:1px solid #544b45;border-radius:12px;overflow:hidden;position:relative;background:radial-gradient(circle at 50% 70%,#3b3434,#11131a 70%)}canvas{display:block;width:100%;height:100%}
 #status{position:absolute;top:16px;left:16px;background:#1119;padding:7px 11px;border-radius:6px;font-size:13px}
-.hint{font-size:13px;margin-top:10px}a{color:#ffb27b}
-</style></head><body><main><h1>Bladefall · Sol Forge Brute test</h1><p>Drag to rotate; scroll to zoom. This is an isolated static Blender model, not a production enemy or animation test.</p><div id="stage"><div id="status">Loading model…</div></div><p class="hint">23,076 triangles · 8 mesh objects · 8 materials · 1.49 MB GLB. <a href="front.png">Front render</a> · <a href="back.png">Back render</a> · <a href="detail.png">Detail render</a></p></main>
+.hint{font-size:13px;margin-top:10px}a{color:#ffb27b}select{margin:0 0 12px;background:#252935;color:#f5eee9;border:1px solid #736154;border-radius:5px;padding:7px}
+</style></head><body><main><h1>Bladefall · Sol Forge Brute test</h1><p>Drag to rotate; scroll to zoom. This is an isolated Blender art test.</p><label id="motionLabel" hidden>Animation: <select id="motion"></select></label><div id="stage"><div id="status">Loading model…</div></div><p class="hint">23,076 triangles · 8 mesh objects · 8 materials. <a href="front.png">Front render</a> · <a href="back.png">Back render</a> · <a href="detail.png">Detail render</a> · <a href="?rigged=1">Rigged animation test</a></p></main>
 <script type="importmap">{"imports":{"three":"../../public/3d/three.module.js","three/addons/":"../../public/3d/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import {GLTFLoader} from '../../public/3d/jsm/loaders/GLTFLoader.js';
+import {revisedClips} from '../../public/3d/enemy-motion.js';
 const host=document.getElementById('stage'),status=document.getElementById('status');
 const scene=new THREE.Scene();scene.background=new THREE.Color('#17171b');
 const camera=new THREE.PerspectiveCamera(40,1,.05,100);const renderer=new THREE.WebGLRenderer({antialias:true});
@@ -22,13 +23,28 @@ scene.add(new THREE.HemisphereLight(0xc8dbff,0x47332c,2.2));
 const key=new THREE.DirectionalLight(0xffe8d0,3);key.position.set(-3,5,5);scene.add(key);
 const rim=new THREE.DirectionalLight(0xff7e48,2);rim.position.set(3,3,-4);scene.add(rim);
 const floor=new THREE.Mesh(new THREE.CircleGeometry(3,48),new THREE.MeshBasicMaterial({color:0x29252a}));floor.rotation.x=-Math.PI/2;floor.position.y=-.03;scene.add(floor);
-let angle=.46,elevation=.21,distance=7.1,drag=false,lastX=0,lastY=0,model;
+let angle=.46,elevation=.21,distance=7.1,drag=false,lastX=0,lastY=0,model,mixer;
+const rigged=new URLSearchParams(location.search).has('rigged'),clock=new THREE.Clock();
 function aim(){camera.position.set(Math.sin(angle)*distance*Math.cos(elevation),1.7+Math.sin(elevation)*distance*.7,Math.cos(angle)*distance*Math.cos(elevation));camera.lookAt(0,1.7,0)}
 function size(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}size();new ResizeObserver(size).observe(host);
 host.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;host.setPointerCapture(e.pointerId)});
 host.addEventListener('pointerup',()=>drag=false);
 host.addEventListener('pointermove',e=>{if(!drag)return;angle+=(e.clientX-lastX)*.008;elevation=Math.max(-.35,Math.min(.75,elevation+(e.clientY-lastY)*.005));lastX=e.clientX;lastY=e.clientY});
 host.addEventListener('wheel',e=>{distance=Math.max(4,Math.min(11,distance+e.deltaY*.006));e.preventDefault()},{passive:false});
-new GLTFLoader().load('./sol-forge-brute.glb',g=>{model=g.scene;scene.add(model);status.textContent='Drag to rotate · Scroll to zoom';},undefined,e=>{status.textContent='Model failed to load: '+e.message;console.error(e)});
-function frame(){requestAnimationFrame(frame);aim();renderer.render(scene,camera)}frame();
+new GLTFLoader().load(rigged?'./forge-colossus-rigged.glb':'./sol-forge-brute.glb',g=>{
+  model=g.scene;if(rigged)model.scale.setScalar(3.5);scene.add(model);
+  model.traverse(o=>{if(o.isMesh){for(const mat of (Array.isArray(o.material)?o.material:[o.material]))if(mat.metalness>.5&&!mat.metalnessMap){mat.metalness=.2;mat.needsUpdate=true}}});
+  if(rigged){
+    mixer=new THREE.AnimationMixer(model);
+    const clips=revisedClips(model,'colossus',g.animations);
+    window.__forgePreview={model,mixer,animations:clips};
+    const select=document.getElementById('motion');document.getElementById('motionLabel').hidden=false;
+    for(const clip of clips){const option=document.createElement('option');option.value=clip.name;option.textContent=clip.name;select.append(option)}
+    select.value='Idle';
+    select.onchange=()=>{mixer.stopAllAction();const clip=clips.find(a=>a.name===select.value);if(clip)mixer.clipAction(clip).reset().play()};
+    select.onchange();
+  }
+  status.textContent=rigged?'Existing boss rig · Choose a clip':'Drag to rotate · Scroll to zoom';
+},undefined,e=>{status.textContent='Model failed to load: '+e.message;console.error(e)});
+function frame(){requestAnimationFrame(frame);if(mixer)mixer.update(clock.getDelta());aim();renderer.render(scene,camera)}frame();
 </script></body></html>

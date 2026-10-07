@@ -34,7 +34,7 @@ import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { WORLD3D, syncWorld } from './world3d.js?v=2124';
-import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2120';
+import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2125';
 import { PROP3D, syncProps } from './prop3d.js?v=2122';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated

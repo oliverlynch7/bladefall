@@ -1137,7 +1137,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.124.0-forge-colossus';
+const VERSION3D='2.124.1-keep-depth';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -21831,9 +21831,9 @@ function render(t){
     const s0=STAGES[0]; G0BACKDROP(s0,t); return; }
   setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
   G._occN=0;                 // per-frame count of deco boxes ghosted off the hero's sightline (test hook)
-  // Prison architecture has no Three replacement: replay its depth with the actors.
-  // Otherwise the Three pass clears wall depth and reveals enemies through solid rooms.
-  if(G.escape||G.devBriar)deferOn();
+  // These isolated scenes have no Three replacement for their voxel architecture.
+  // Replay walls before actors after the Three depth clear, or enemies and NPCs show through rooms.
+  if(G.escape||G.devBriar||G.devKeep)deferOn();
   drawCourse(s,t);
   /* Everything from here is a live ENTITY, not architecture, so it is recorded and replayed after
      the 3D layer instead of being painted out by it. See the DEFERRED ENTITY PASS note above.

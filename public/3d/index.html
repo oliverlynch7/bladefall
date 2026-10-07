@@ -252,6 +252,8 @@
   .bestportrait.fly .bphead{top:27px;transform:rotate(45deg);}.bestportrait.fly:before,.bestportrait.fly:after{content:'';position:absolute;top:31px;width:24px;height:34px;border:2px solid var(--mob);opacity:.7}.bestportrait.fly:before{left:10px;transform:skewY(-22deg)}.bestportrait.fly:after{right:10px;transform:skewY(22deg)}
   .bestportrait.boss .bphead{left:20px;top:15px;width:52px;height:48px}.bestportrait.boss .bpeye.l{left:29px}.bestportrait.boss .bpeye.r{right:29px}
   .bestiaryrow .gi{width:12px}.bestiaryrow{gap:7px;padding-left:10px}.bestiaryrow .bigbtn{flex:0 0 auto;}.bestiaryrow>div:nth-child(2){min-width:0}
+  .sparmenu{max-width:min(820px,96vw)!important}.sparlayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.9fr);gap:14px;text-align:left}.sparmenu .sparlist{max-height:min(31vh,220px)!important;display:block!important;margin:0!important}.sparrow{width:100%;display:flex;align-items:center;gap:8px;text-align:left;margin:0 0 6px;padding:10px 12px;border:1px solid #384554;border-radius:9px;background:#1b232b;color:#e9edf0;cursor:pointer;font-weight:800}.sparrow[aria-selected="true"]{border-color:#e6b75c;background:#343026;box-shadow:inset 3px 0 #e6b75c}.sparrow small{display:block;font-size:11px;font-weight:500;color:#b8c4cf}.sparfilters,.sparcounts,.sparactions{display:flex;gap:6px;flex-wrap:wrap}.sparfilters button,.sparcounts button{border:1px solid #566477;background:#222d36;color:#f2f4f4;border-radius:7px;padding:7px 10px;cursor:pointer;font-weight:800}.sparfilters button[aria-pressed="true"],.sparcounts button[aria-pressed="true"]{border-color:#f0ba5f;background:#584020;color:#fff2d3}.sparinfo{background:#1a222c;border:1px solid #52616f;border-radius:12px;padding:15px;min-height:230px}.sparinfo h3{margin:3px 0 8px;color:#f5d18a}.sparinfo p{font-size:13px;line-height:1.45;color:#dbe4e8}.sparactions .bigbtn{flex:1;min-width:135px;margin:0}.sparfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.sparfoot .bigbtn{width:auto;flex:1;margin:0;font-size:13px;padding:10px}#sparringHud{position:fixed;right:18px;top:78px;z-index:8;width:245px;padding:10px 12px;border:1px solid #8b6c39;border-radius:10px;background:rgba(14,19,25,.89);box-shadow:0 8px 24px #0009;color:#f3efe3;font-size:12px;pointer-events:none}#sparringHud b{display:block;color:#f5d18a;font-size:13px;margin-bottom:4px}#sparringHud span{color:#bccbd3}
+  @media(max-width:650px){.sparlayout{grid-template-columns:1fr;gap:7px}.sparmenu .sparlist{max-height:12vh!important}.sparinfo{min-height:0;padding:10px}.sparinfo p{margin:6px 0;font-size:12px}.sparinfo h3{margin:2px 0 5px}.sparmenu{padding:12px!important}.sparmenu .ovh{font-size:25px;margin:4px 0}.sparmenu .ovsub{margin:5px 0 9px;font-size:12px}.sparrow{padding:7px 9px}.sparactions{margin-top:7px!important}.sparactions .bigbtn{padding:9px;font-size:13px}.sparfoot{margin-top:7px}.sparfoot .bigbtn{padding:7px;font-size:11px;min-width:78px}#sparringHud{right:7px;top:198px;width:185px;font-size:10px;padding:7px 9px}}
   @media(max-width:480px){.bestiaryrow{gap:5px;padding:8px 7px}.bestiaryrow .spawnword{display:none}.bestiaryrow .bigbtn{padding:8px 9px!important}.bestiaryrow .gn{font-size:13px}}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
@@ -1137,7 +1139,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.129.0-briar-yard';
+const VERSION3D='2.130.0-sparring-hall';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13041,10 +13043,16 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     if(src===G.p)G.p._bloodOwed=0;e.hitFlash=.12;return;
   }
   const dealt=Math.min(Math.max(0,e.hp),dmg);
+  if(G.sparringRoom&&(e.practice||e.dummy&&!G.trainState?.active)&&G.trainState){
+    if(e.dummy&&G.trainState.name!=='Training Dummy'){
+      G.trainState={name:'Training Dummy',start:G.time,hits:0,dealt:0,taken:0,defeats:0,active:false,result:'Damage test'};
+    }
+    G.trainState.dealt+=dealt;G.trainState.hits++;
+  }
   e.hp-=dmg; e.hitFlash=0.12; e.hitYaw=Math.atan2(e.x-(src?.x??e.x),e.z-(src?.z??e.z));
   if(healRatio>0)classHeal(G.p,dealt*healRatio);
   if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
-  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
+  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.immobile)?0:kb)*(e.boss?0.25:1);   // Stationary targets stay fixed; sparring opponents react like campaign foes.
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
   addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
@@ -13159,7 +13167,7 @@ function killEnemy(e,weaponKill){
   // (MP._authKill is set only when the guest is applying a host-sanctioned kill).
   if(MP.active && !MP.isHost && !MP._authKill && !e.dummy && !e.practice) return;
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
-  if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
+  if(e.practice){ e.dead=true; if(G.sparringRoom&&G.trainState){G.trainState.defeats++;if(G.boss===e)G.boss=null;} burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; } // No XP, gold or loot.
   if(e.crackWall){ e.dead=true;                                                                                        // a breakable wall shatters, opening the way (no XP/kill credit)
     if(e.wallRef){ const wi=G.walls.indexOf(e.wallRef); if(wi>=0) G.walls.splice(wi,1); }
     for(let i=0;i<24;i++) burst(e.x+(Math.random()-0.5)*(e.cw||60),e.y+Math.random()*(e.h||120),e.z,'#b8a888',2);
@@ -13790,7 +13798,8 @@ function hurtPlayer(dmg,sx,sz,by){
   /* THE OATH pays out here rather than where it is sworn: while your Sworn target lives, everything
      ELSE hits you for a third less. That is what makes swapping off it a real cost. */
   if(meta.classId==='paladin' && G.p._oath && !G.p._oath.dead && by && attackerOf(by)!==G.p._oath) dmg*=0.67;
-  if(G.hub&&!by?.pvp) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
+  if(G.hub&&!G.sparringRoom&&!by?.pvp) return;                         // Waystation sanctuary does not disable defensive practice.
+  if(G.sparringRoom&&G.pit&&(G.p.x<G.pit.minX||G.p.x>G.pit.maxX||G.p.z<G.pit.minZ||G.p.z>G.pit.maxZ))return;
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='bladedancer'&&c2def('bladedancer')&&(p.bdParryT||0)>0){
@@ -13889,7 +13898,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(!by?.reflected&&p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
-  dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;if(backgroundMenuMode||['pause','menu','npc','journal','inspection','chess'].includes(mode))menuDamageWarning();
+  dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;if(G.sparringRoom&&G.trainState)G.trainState.taken+=dmg;if(backgroundMenuMode||['pause','menu','npc','journal','inspection','chess'].includes(mode))menuDamageWarning();
   if(by?.src&&by.attack!=='a ranged attack')window.BF_HOSTILE_ART?.impact(G,{owner:'enemy',src:by.src,x:p.x,y:p.y+p.h*.5,z:p.z});
   /* THICK HIDE is "once per FIGHT", and this file already has a definition of a fight: pal_thick
      above rearms after five seconds without being hit. Stamped HERE, past every early return, so
@@ -13937,7 +13946,7 @@ function hurtPlayer(dmg,sx,sz,by){
   }
   G.tookDamage=true; G.combo=0; G.comboT=0;
   addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();
-  if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
+  if(G.hub&&!G.sparringRoom){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // The main Waystation stays safe.
   /* REWIND. Once per area, a killing blow instead returns you to where you stood three seconds ago,
      at that moment's health. Not a death save with extra steps: you come back THERE, so the ground
      you lost is lost, and the three seconds that killed you are the three seconds you have to play
@@ -13991,6 +14000,7 @@ function hurtPlayer(dmg,sx,sz,by){
     return;
   }
   if(p.hp<=0){
+    if(G.sparringRoom){p.hp=0;p.dead=true;die();return;}
     if(by?.pvp){p.hp=0;return;}
     if(MP.active && !MP.pvp && MP.anyAllyUp()){ MP.goDown(); return; }   // co-op: go DOWN (revivable) instead of dying while an ally still stands
     p.hp=0; p.dead=true; die();
@@ -16608,6 +16618,12 @@ function resumePlay(){ mode='play'; musicForScene(); showOverlay(false); showGam
 function die(){
   BFChestReveal.clear();
   window.BFInspection?.close();window.BFSocial?.close();if(BFHubDialogue.active)BFHubDialogue.close(false,true);
+  if(G?.sparringRoom){
+    const p=G.p;for(const e of G.enemies)if(e.practice)e.dead=true;G.enemies=G.enemies.filter(e=>!e.practice);G.boss=null;G.projectiles.length=0;
+    p.dead=false;p.downed=false;p.hp=effMaxHp(p);p.mana=p.maxMana||100;p.invuln=2;p.x=0;p.z=420;p.y=0;p.vx=p.vy=p.vz=0;p.onGround=true;
+    if(G.trainState){G.trainState.result='Bout lost · no penalty';G.trainState.active=false;G.trainState.end=G.time;}
+    hudUpdate();toast('Bout over. You are healed; choose another opponent when ready.','#9ed8ea');return;
+  }
   if(G?.devKeep){devBeta().death();return;}
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
@@ -18147,32 +18163,33 @@ function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-
   return out; }
 function enterSparringRoom(){
   initAudio(); const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  Object.assign(TRAIN_UI,{selected:null,filter:'all',query:'',count:1});
   G=newG(p,{hub:true,sparringRoom:true,zone:0,area:0,zoneTier:1}); G.stageIndex=0;
-  // ===== A BIG SUNKEN BOXING RING =====
-  // The whole hall floor sits at y=0; a raised spectator BOWL of tiered platforms rings it, so the fighting
-  // floor reads as sunken beneath the surrounding ground. Everything functional (spawn, controls, exit, foes)
-  // stays on the sunken floor at y=0 — the bowl is what makes it look dug-in.
+  // A sunken training court: the ring, arrival apron and practice fixtures have distinct jobs and clear routes.
   G.segments=[{x:0,z:0,w:1560,d:1380}]; G.rooms=[{x:0,z:0,w:1560,d:1380,monsters:[],encounter:false,cleared:true}];
   G.walls=[{x:0,z:-690,w:1580,d:30,h:190},{x:0,z:690,w:1580,d:30,h:190},{x:-780,z:0,w:30,d:1380,h:190},{x:780,z:0,w:30,d:1380,h:190}];
   G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.portalPos=null;G.haz=null;G.gates=[];
-  // THE SUNKEN BOWL — two tiers of raised bleachers frame the pit on all four sides (leaving a clear play floor
-  // roughly x:[-540,540] z:[-560,560]). Their height is what the fighting floor sits below.
+  // Tiered stone viewing ledges stay outside the fight lane; their collision matches their visible outline.
   const bowl=(x,z,w,d,h)=>{ G.obstacles.push({kind:'plat',x,z,w,d,h}); G.deco.push({x,z,y0:h-3,w:w-8,h:3,d:d-8,c:h>50?'#2c333f':'#39414f'}); G.deco.push({x,z,y0:0,w,h:Math.max(6,h-6),d,c:'#20252f'}); };
   for(const s of [[0,-620,1520,120,34],[0,620,1520,120,34],[-620,0,120,1000,34],[620,0,120,1000,34]]) bowl(...s);   // inner rim
   for(const s of [[0,-680,1560,70,66],[0,680,1560,70,66],[-700,0,70,1120,66],[700,0,70,1120,66]]) bowl(...s);       // outer bleacher
-  // THE RING: a proper SQUARE, ropes drawn as continuous rails around the perimeter (see drawWaystation).
   const RH=330, RZ=-60; G.ring={cx:0,cz:RZ,hx:RH,hz:RH};
-  G.pit={minX:-RH,maxX:RH,minZ:RZ-RH,maxZ:RZ+RH};   // practice foes wake + stay inside the ropes
-  G.deco.push({x:0,z:RZ,y0:0,w:RH*2+34,h:2.5,d:RH*2+34,c:'#6c5137'});                     // ring canvas (raised mat lip)
-  G.deco.push({x:0,z:RZ,y0:2.5,w:RH*2+8,h:1,d:RH*2+8,c:'#8b6a46'});
-  for(const [tx,tz] of [[-660,-560],[660,-560],[-660,560],[660,560]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});   // corner braziers up on the rim
+  G.pit={minX:-RH,maxX:RH,minZ:RZ-RH,maxZ:RZ+RH};
+  G.deco.push({x:0,z:RZ,y0:0,w:RH*2+34,h:2.5,d:RH*2+34,c:'#50443a'});
+  G.deco.push({x:0,z:RZ,y0:2.5,w:RH*2+8,h:1,d:RH*2+8,c:'#796a55'});
+  for(const [tx,tz] of [[-660,-560],[660,-560],[-660,560],[660,560]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});
   G.hubNpcs=[
-    {id:'sparringcontrol',ic:'⚔️',name:'Sparring Controls',role:'Choose practice foes',prop:'sparring',verb:'Choose practice foes',direct:true,x:0,z:360,open:()=>openTrainingArena(wsResume)},
-    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:0,z:470,open:()=>enterWaystation()}
+    {id:'sparringcontrol',ic:'⚔️',name:'Training Desk',role:'Choose a bout',prop:'sparring',verb:'Set up a practice bout',direct:true,x:-155,z:335,open:()=>openTrainingArena(wsResume)},
+    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:435,z:470,open:()=>enterWaystation()}
   ];
-  G.trainSpawn={x:0,z:RZ};G.lastSafe={x:0,z:280};G.startPos={x:0,z:280};G.goalPos={x:0,z:RZ};G.bounds={minX:-560,maxX:560,minZ:-560,maxZ:560};G.progressEnd=RZ;
-  p.x=0;p.z=300;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
-  document.getElementById('stagetag').textContent='SPARRING ROOM';questUpdate();toast('Sparring Room — practice foes give no XP, gold, or loot.');
+  G.walls.push({x:-155,z:335,w:104,d:58,h:44,invisible:true});
+  for(const z of [-350,-50,225])for(const x of [-520,520])G.walls.push({x,z,w:94,d:18,h:112,invisible:true});
+  for(const x of [383,487])G.walls.push({x,z:515,w:20,d:30,h:144,invisible:true});
+  G.trainSpawn={x:0,z:-125};G.trainState={name:'No bout',start:0,hits:0,dealt:0,taken:0,defeats:0,active:false,result:'Training desk: ahead on the left'};
+  {const d=spawnEnemy('dummy',-470,-185);d.dummy=true;d.active=true;d.dropT=0;d.range=true;}
+  G.lastSafe={x:0,z:420};G.startPos={x:0,z:420};G.goalPos={x:0,z:RZ};G.bounds={minX:-560,maxX:560,minZ:-560,maxZ:560};G.progressEnd=RZ;
+  p.x=0;p.z=420;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
+  document.getElementById('stagetag').textContent='SPARRING HALL';questUpdate();toast('Training desk ahead on the left. Practice has no penalties or rewards.');
 }
 const BESTIARY_INFO={
   grunt:{name:'Hollowed Soldier',tell:'Closes in, then pauses before striking. Step away during the warning.',lore:'A living soldier forced to obey the Abyss King. Their empty eyes reveal the Hollowing.'},
@@ -18223,25 +18240,78 @@ function openBestiaryEntry(m,back){
       <div class="vsrow"><span>Element</span><b style="color:${elementColor(el)||'#cfd6df'}">${el?affName(el):'None'}</b></div>
       <div class="vsrow"><span>Weak to</span><b style="color:${elementColor(weak)||'#cfd6df'}">${weak?affName(weak):'No elemental weakness'}</b></div></div>
     <p style="text-align:left;color:#cfd6df;font-size:13px;line-height:1.55"><b style="color:var(--amber)">Watch for:</b> ${B.tell||'Watch its movement and strike after it commits.'}</p>
-    <button class="bigbtn ghost" id="bestBack">Back to Training &amp; Bestiary</button></div>`);
+    <button class="bigbtn ghost" id="bestBack">Back to practice menu</button></div>`);
   document.getElementById('bestBack').onclick=()=>openTrainingArena(back);
 }
-function openTrainingArena(back){ mode='menu';
-  const mobs=trainRoster();
-  const rows=mobs.map(m=>{ const E=ENEMY[m]; return `<div class="gearrow bestiaryrow"><div class="gi" style="color:${E.color||'#cfd6df'}">●</div>
-    <div style="flex:1"><div class="gn">${bestiaryName(m)}</div><div class="gd">${E.boss?'boss':E.kind}${E.ranged?' · ranged':''}${E.element?' · '+affName(E.element):''}</div></div>
-    <button class="bigbtn ghost" data-info="${m}" style="width:auto;margin:0 4px 0 0;padding:8px 10px;font-size:12px">Info</button>
-    <button class="bigbtn buybtn" data-trainmob="${m}" style="width:auto;margin:0;padding:8px 10px;font-size:12px"><span class="spawnword">Spawn </span>×${E.boss?1:2}</button></div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">Sparring Room</p><h2 class="ovh">Training &amp; Bestiary</h2>
-    <p class="ovsub">Study discovered foes or summon real fighters. Practice gives no death penalty, XP, gold, or loot.</p>
-    <div class="achlist" style="max-height:min(44vh,300px)">${rows||'<p class="hint">Clear a zone to unlock foes to spar with.</p>'}</div>
-    <button class="bigbtn ghost" id="clearBtn">Clear practice foes</button>
-    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
-  document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>openBestiaryEntry(b.dataset.info,back));
-  document.querySelectorAll('[data-trainmob]').forEach(b=>b.onclick=()=>{ const m=b.dataset.trainmob, sp=G.trainSpawn||{x:300,z:60}, count=ENEMY[m].boss?1:2;
-    for(let i=0;i<count;i++){ const e=spawnEnemy(m,sp.x+(count===1?0:(i?46:-46)),sp.z); e.active=true; e.dropT=0; e.practice=true; if(G.pit){e.x=Math.max(G.pit.minX+20,Math.min(G.pit.maxX-20,e.x));e.z=Math.max(G.pit.minZ+20,Math.min(G.pit.maxZ-20,e.z));e.sx=e.x;e.sz=e.z;} } SFX.pickup(); toast('Practice foes summoned — enter the ring to spar'); openTrainingArena(back); });   // menu stays OPEN until you close it
-  document.getElementById('clearBtn').onclick=()=>{ let n=0; for(const e of G.enemies){ if(e.practice&&!e.dead){ e.dead=true; n++; } } toast(n?'Cleared '+n:'Nothing to clear'); openTrainingArena(back); };
-  document.getElementById('backBtn').onclick=back;
+const TRAIN_UI={selected:null,filter:'all',query:'',count:1};
+function trainingClear(result='Bout ended'){
+  if(!G?.sparringRoom)return;
+  const n=G.enemies.filter(e=>e.practice&&!e.dead).length;
+  G.enemies=G.enemies.filter(e=>!e.practice);G.projectiles.length=0;G.boss=null;
+  if(G.trainState){G.trainState.active=false;G.trainState.result=result;G.trainState.end=G.time;}
+  return n;
+}
+function trainingHeal(){
+  if(!G?.sparringRoom)return;
+  G.p.hp=effMaxHp(G.p);G.p.mana=G.p.maxMana||100;G.p.invuln=1;
+  hudUpdate();toast('Health and mana restored.','#9ed8ea');
+}
+function trainingBegin(type,count){
+  if(!G?.sparringRoom||!trainRoster().includes(type))return;
+  trainingClear();const E=ENEMY[type],n=E.boss?1:Math.max(1,Math.min(3,count||1));
+  // Match the foe's original campaign tier, rather than silently making late bosses zone-one weak.
+  const origin=ZONES.find(z=>{const stages=[...(z.areas||[]).map(a=>a.stage),z.boss?.stage];return stages.some(id=>id!=null&&(STAGES[id]?.boss===type||(THEMEMOBS[STAGES[id]?.theme]||[]).includes(type)));});
+  G.zoneTier=origin?.tier||1;
+  G.trainState={name:bestiaryName(type),start:G.time,hits:0,dealt:0,taken:0,defeats:0,active:true,result:'Enter the ring'};
+  G.p.hp=effMaxHp(G.p);G.p.mana=G.p.maxMana||100;G.p.invuln=.8;
+  const sp=G.trainSpawn;
+  for(let i=0;i<n;i++){const e=spawnEnemy(type,sp.x+(i-(n-1)/2)*130,sp.z);e.practice=true;e.active=false;e.dropT=0;e.sx=e.x;e.sz=e.z;}
+  G.p.x=0;G.p.z=190;G.p.y=0;G.p.vx=G.p.vy=G.p.vz=0;G.p.yaw=Math.PI;
+  resumePlay();toast(n+' '+bestiaryName(type)+(n===1?'':'s')+' ready. Watch the tell, then strike.','#f3c879');
+}
+function updateSparringHud(){
+  let el=document.getElementById('sparringHud');
+  if(!G?.sparringRoom||mode!=='play'){if(el)el.remove();return;}
+  if(!el){el=document.createElement('div');el.id='sparringHud';document.body.appendChild(el);}
+  if((G._sparHudAt||0)>G.time&&G._sparHudState===G.trainState?.result)return;
+  G._sparHudAt=G.time+.15;const s=G.trainState;
+  if(s?.active&&!G.enemies.some(e=>e.practice&&!e.dead)){s.active=false;s.end=G.time;s.result='Bout won · no rewards';G.p.hp=effMaxHp(G.p);G.p.mana=G.p.maxMana||100;hudUpdate();}
+  else if(s?.active&&s.result==='Enter the ring'&&G.p.x>=G.pit.minX&&G.p.x<=G.pit.maxX&&G.p.z>=G.pit.minZ&&G.p.z<=G.pit.maxZ)s.result='Fight!';
+  G._sparHudState=s?.result;
+  el.innerHTML=`<b>⚔ ${htmlSafe(s?.name||'Training hall')}</b><span>${htmlSafe(s?.result||'Choose a bout')}</span>${s&&s.name!=='No bout'?`<br>${Math.max(0,Math.floor((s.end??G.time)-s.start))}s · ${s.defeats} defeated · ${s.hits} hits<br><span>${Math.round(s.dealt)} dealt · ${Math.round(s.taken)} taken</span>`:''}`;
+}
+function openTrainingArena(back){
+  if(!G?.sparringRoom)return;
+  mode='menu';const mobs=trainRoster();if(!mobs.includes(TRAIN_UI.selected))TRAIN_UI.selected=mobs[0]||null;
+  showOverlayHTML(`<div class="card sparmenu"><p class="ovkicker">Sparring Hall</p><h2 class="ovh">Choose a practice bout</h2>
+    <p class="ovsub">Fight the real foe. If you fall, you recover here. No XP, gold, loot or save changes.</p>
+    <div class="sparlayout"><div><input id="sparSearch" aria-label="Find an opponent" placeholder="Find an opponent" style="box-sizing:border-box;width:100%;padding:11px;background:#101920;color:#fff;border:1px solid #688092;border-radius:8px;margin-bottom:8px">
+    <div class="sparfilters" id="sparFilters"></div><div class="achlist sparlist" id="sparList"></div></div>
+    <div class="sparinfo" id="sparInfo"></div></div>
+    <div class="sparfoot"><button class="bigbtn ghost" id="sparHeal">Heal</button><button class="bigbtn ghost" id="sparClear">End bout</button><button class="bigbtn ghost" id="sparBack">Back to hall</button></div></div>`);
+  const list=document.getElementById('sparList'),info=document.getElementById('sparInfo'),filters=document.getElementById('sparFilters'),search=document.getElementById('sparSearch');search.value=TRAIN_UI.query;
+  const drawInfo=()=>{const m=TRAIN_UI.selected,E=ENEMY[m],B=BESTIARY_INFO[m]||{};
+    if(!m){info.innerHTML='<h3>No opponents yet</h3><p>Clear a campaign zone to add its foes here.</p>';return;}
+    info.innerHTML=`<span style="color:${E.color||'#e7c277'}">● ${E.boss?'BOSS':E.kind==='fly'?'FLYING':E.ranged||E.kind==='caster'?'RANGED':'CLOSE COMBAT'}</span><h3>${htmlSafe(bestiaryName(m))}</h3><p><b style="color:#f5d18a">Watch for:</b> ${htmlSafe(B.tell||'Watch the windup and dodge before the strike.')}</p>
+      <p>${E.element?htmlSafe(affName(E.element))+' · ':''}${E.boss?'Solo opponent':'Choose how many opponents to face.'}</p>
+      <div class="sparcounts" id="sparCounts">${(E.boss?[1]:[1,2,3]).map(n=>`<button data-count="${n}" aria-pressed="${TRAIN_UI.count===n||E.boss&&n===1}">${n} foe${n>1?'s':''}</button>`).join('')}</div>
+      <div class="sparactions" style="margin-top:13px"><button class="bigbtn buybtn" id="sparStart">Start bout</button><button class="bigbtn ghost" id="sparRead">Full entry</button></div>`;
+    info.querySelectorAll('[data-count]').forEach(b=>b.onclick=()=>{TRAIN_UI.count=Number(b.dataset.count);drawInfo();});
+    document.getElementById('sparStart').onclick=()=>trainingBegin(m,TRAIN_UI.count);
+    document.getElementById('sparRead').onclick=()=>openBestiaryEntry(m,back);
+  };
+  const drawList=()=>{const q=TRAIN_UI.query.trim().toLowerCase(),f=TRAIN_UI.filter;
+    const shown=mobs.filter(m=>{const e=ENEMY[m];return (f==='all'||f==='boss'&&e.boss||f==='ranged'&&!e.boss&&(e.ranged||e.kind==='caster'||e.kind==='fly')||f==='close'&&!e.boss&&!e.ranged&&e.kind!=='caster'&&e.kind!=='fly')&&(!q||(bestiaryName(m)+' '+m).toLowerCase().includes(q));});
+    if(!shown.includes(TRAIN_UI.selected)){TRAIN_UI.selected=shown[0]||null;TRAIN_UI.count=1;}
+    list.innerHTML=shown.length?shown.map(m=>`<button class="sparrow" data-foe="${m}" aria-selected="${m===TRAIN_UI.selected}"><span style="color:${ENEMY[m].color||'#fff'};font-size:23px">●</span><span>${htmlSafe(bestiaryName(m))}<small>${ENEMY[m].boss?'Boss':ENEMY[m].ranged?'Ranged':ENEMY[m].kind==='fly'?'Flying':'Close combat'}</small></span></button>`).join(''):'<p class="hint">No foes match. Try another filter.</p>';
+    list.querySelectorAll('[data-foe]').forEach(b=>b.onclick=()=>{TRAIN_UI.selected=b.dataset.foe;drawList();drawInfo();});
+    filters.innerHTML=['all','close','ranged','boss'].map(f=>`<button data-filter="${f}" aria-pressed="${f===TRAIN_UI.filter}">${{all:'All',close:'Close',ranged:'Air/Range',boss:'Bosses'}[f]}</button>`).join('');
+    filters.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{TRAIN_UI.filter=b.dataset.filter;drawList();drawInfo();});
+  };
+  search.oninput=()=>{TRAIN_UI.query=search.value;drawList();drawInfo();};drawList();drawInfo();
+  document.getElementById('sparHeal').onclick=()=>{trainingHeal();openTrainingArena(back);};
+  document.getElementById('sparClear').onclick=()=>{const n=trainingClear();toast(n?`Ended the bout and cleared ${n} foe${n===1?'':'s'}.`:'No active bout.');openTrainingArena(back);};
+  document.getElementById('sparBack').onclick=back;
 }
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
@@ -18256,9 +18326,9 @@ function updateInteract(){
       const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
       if(eff<best){ best=eff; it=make(); } };
     for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.y||0)+(n.direct?155:142),service:n.role||'',label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
-    if(!G.riftHall)consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
+    if(!G.riftHall&&!G.sparringRoom)consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
-    if(!G.riftHall)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
+    if(!G.riftHall&&!G.sparringRoom)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner
   }
   else if(G.qmarks && G.qmarks.some(function(m){ return !m.done && (m.k==='kindle'||m.k==='purge'); })){
     const fy=playerAimYaw(p), fx=Math.sin(fy), fz=Math.cos(fy); let best=1e9;
@@ -19537,6 +19607,7 @@ function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shado
   popM(); }
 function drawCourse(s,t){
   if(G?.devKeep){devBeta().draw(t);return;}
+  if(G.sparringRoom)s={...s,ground:'#3f4a50'};
   if(G.bruteArena)s={...s,ground:'#596047'};
   const outskirtsArt=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   const hollowArt=!!window.__HOLLOW_ART_ACTIVE && three3DLive() && !!window.__world3d?.().on;
@@ -20506,28 +20577,79 @@ function drawWaystation(t){
      again around themselves. */
   deferOn();
   if(G.sparringRoom){
-    // A proper SQUARE boxing ring: four corner posts joined by CONTINUOUS rope rails on every side (three
-    // stacked ropes), with a rope gap on the south edge you step through. Sits down in the sunken bowl.
+    // The clear fight lane is surrounded by an authored training hall, not scattered generic crates.
     const R=G.ring||{cx:0,cz:-60,hx:330,hz:330}, cx=R.cx, cz=R.cz, hx=R.hx, hz=R.hz;
+    const gold='#d8b568', stone='#45525b', dark='#26323b', wood='#614832', pale='#b8c4bd';
+    // Wall piers, panel bays, lintels and upper gallery: detailed enough to read as a built hall.
+    for(const x of [-720,-480,-240,0,240,480,720]){
+      bx(x,96,-675,26,192,33,dark);bx(x,195,-675,37,18,42,stone);bx(x,101,675,26,202,33,dark);bx(x,195,675,37,18,42,stone);
+      bx(x,110,-650,4,134,5,gold,gold,.1);bx(x,110,650,4,134,5,gold,gold,.1);
+    }
+    for(const z of [-590,-350,-110,130,370,590])for(const x of [-765,765]){
+      bx(x,98,z,34,196,26,dark);bx(x,197,z,44,15,34,stone);
+      bx(x-Math.sign(x)*8,108,z,5,130,4,gold,gold,.1);
+    }
+    for(const z of [-663,663]){bx(0,208,z,1530,19,37,dark);bx(0,218,z,1500,5,40,gold,gold,.08);}
+    for(const x of [-753,753]){bx(x,208,0,36,19,1290,dark);bx(x,218,0,38,5,1260,gold,gold,.08);}
+    // High wall banners carry the Waystation crest without obscuring the training floor.
+    for(const x of [-360,0,360]){
+      bx(x,152,-647,138,92,7,x===0?'#4e7481':'#684239');
+      bx(x,185,-641,150,8,10,gold);bx(x,149,-638,8,50,9,gold,gold,.16);
+      bx(x,151,-636,55,8,10,gold,gold,.16);bx(x,120,-640,34,4,10,pale);
+    }
+    // Stone approach to the ring, with branching paths to the training desk and the exit.
+    for(let z=300;z<=540;z+=42)bx(0,1.4,z,112,1.6,35,'#536068');
+    for(const x of [-180,-135,-90,90,135,180,225,270,315,360,405])bx(x,1.2,405,37,1.6,72,'#536068');
+    for(const z of [318,360,402,444,486]){bx(-155,2,z,6,2,33,gold,gold,.09);bx(435,2,z,6,2,33,gold,gold,.09);}
+    // Training floor: a worn canvas, edge binding, quadrant marks and a simple brass target at centre.
+    bx(cx,3.9,cz,658,1.1,658,'#81745e');
+    for(const o of [-1,1]){
+      bx(cx+o*300,4.6,cz,8,1,610,gold);bx(cx,4.6,cz+o*300,610,1,8,gold);
+      bx(cx+o*165,4.6,cz,4,1,500,'#a39881');bx(cx,4.6,cz+o*165,500,1,4,'#a39881');
+    }
+    bx(cx,4.8,cz,130,1,10,dark);bx(cx,4.8,cz,10,1,130,dark);
+    for(const a of [0,Math.PI/2,Math.PI,Math.PI*1.5]){const sx=Math.sin(a),sz=Math.cos(a);bx(cx+sx*88,5,cz+sz*88,22,1,22,gold,gold,.15);}
+    // Tier fronts and gallery railings have visible joinery rather than blank slabs.
+    for(const z of [-555,555]){bx(0,42,z,1000,10,14,wood);for(let x=-490;x<=490;x+=70)bx(x,64,z,8,42,9,stone);bx(0,87,z,1000,8,10,gold);}
+    for(const x of [-555,555]){bx(x,42,0,14,10,880,wood);for(let z=-435;z<=435;z+=72)bx(x,64,z,9,42,8,stone);bx(x,87,0,10,8,880,gold);}
     const corners=[[cx-hx,cz-hz],[cx+hx,cz-hz],[cx+hx,cz+hz],[cx-hx,cz+hz]];
-    for(const [px,pz] of corners){ bx(px,46,pz,15,92,15,'#241b22','#3a2c34',0.4); bx(px,95,pz,22,11,22,'#caa23a','#ffd24a',.5); }   // corner posts + gold caps
-    // three stacked ropes: RED / BLUE / RED — bold SOLID colours (alpha 1) with a matching emissive glow so
-    // they stand out against the warm floor instead of blending in (the old alpha-0 made them nearly invisible).
-    const ropeCol=['#e8453d','#3a7bd8','#e8453d'], ropeGlow=['#ff6a5a','#6aa6ff','#ff6a5a'], ropeY=[34,58,82];
+    for(const [px,pz] of corners){
+      bx(px,8,pz,31,16,31,dark);bx(px,49,pz,18,86,18,wood);bx(px,95,pz,28,9,28,gold,gold,.3);
+      bx(px,56,pz,10,39,22,px<0?'#577889':'#815546');bx(px,57,pz+12,5,28,4,gold);
+    }
+    const ropeCol=['#d4bd89','#7599a7','#d4bd89'], ropeGlow=['#f1d7a1','#a7d4db','#f1d7a1'], ropeY=[32,55,78];
     for(let e=0;e<4;e++){ const a=corners[e], b=corners[(e+1)%4], mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2;
       const horiz=Math.abs(b[0]-a[0])>Math.abs(b[1]-a[1]), len=Math.hypot(b[0]-a[0],b[1]-a[1]);
-      const south=mz>cz+hz-2;                                                              // south edge = the entrance; leave a gap in the middle
+      const south=mz>cz+hz-2;
       for(let ri=0;ri<3;ri++){
-        if(south){ for(const sgn of [-1,1]){ const seg=hx*0.9, sc=cx+sgn*(hx*0.53);
-          bx(sc,ropeY[ri],mz, seg,6,7, ropeCol[ri],ropeGlow[ri],1); } }
-        else bx(mx,ropeY[ri],mz, horiz?len:7, 6, horiz?7:len, ropeCol[ri],ropeGlow[ri],1);
+        if(south){ for(const sgn of [-1,1])bx(cx+sgn*220,ropeY[ri],mz,210,5,6,ropeCol[ri],ropeGlow[ri],.38); }
+        else bx(mx,ropeY[ri],mz,horiz?len:6,5,horiz?6:len,ropeCol[ri],ropeGlow[ri],.38);
       }
     }
-    // banners high on the north wall
-    for(const x of [-260,0,260]){bx(x,150,-672,130,80,6,x===0?'#6c2438':'#343c50');bx(x,150,-665,60,32,3,'#d6aa42','#ffd47a',.35);}
-    // control post (target dummy silhouette) + heavy return door, both on the sunken floor
-    drawShadow(0,360,18,.25);bx(0,26,360,10,52,10,'#5a4426');bx(0,58,360,42,42,6,'#caa23a','#ffd24a',.45);bx(0,58,364,18,18,5,'#e8453d','#ff7967',.65);
-    bx(-48,64,470,14,128,20,'#36313a');bx(48,64,470,14,128,20,'#36313a');bx(0,132,470,112,14,20,'#46414c');bx(0,62,463,82,116,10,'#56381f');bx(26,62,456,7,7,5,'#e8a33d','#ffd24a',.65);
+    // Weapon racks are arranged along a side wall; the live dummy is beside them, outside the ring.
+    for(const z of [-350,-50,225]){
+      bx(-520,31,z,95,12,18,wood);bx(-555,56,z-34,10,95,10,dark);bx(-555,56,z+34,10,95,10,dark);
+      for(const dz of [-25,0,25]){bx(-519,65,z+dz,4,93,4,'#8c9da4');bx(-519,113,z+dz,22,9,7,gold);}
+      bx(520,35,z,90,12,18,wood);bx(520,70,z,80,63,5,'#4b6472');
+      bx(520,70,z,56,48,6,wood);bx(520,70,z,9,43,8,gold);bx(520,70,z,47,8,8,gold);
+    }
+    // Warm braziers on the rim, with hanging lamp collars and visible pools of light.
+    for(const [x,z] of [[-650,-535],[650,-535],[-650,515],[650,515]]){
+      bx(x,18,z,42,10,42,dark);bx(x,43,z,14,44,14,stone);bx(x,68,z,51,10,51,gold);
+      bx(x,74,z,31,7,31,'#802f20','#f28e4d',.65+.17*Math.sin(t*7+x));
+      for(const sx of [-1,1])bx(x+sx*12,88+Math.sin(t*5+sx)*5,z,8,27,8,'#e8a354','#ffda79',.65);
+    }
+    // Service desk and route back are separated so the door cannot sit inside the default camera.
+    const dx=-155,dz=335;
+    bx(dx,18,dz,104,36,58,wood);bx(dx,39,dz,114,8,65,gold);bx(dx,65,dz+20,75,42,10,stone);
+    bx(dx,68,dz+27,62,20,4,dark);bx(dx,70,dz+30,25,6,5,gold,gold,.5);
+    for(const sx of [-1,1]){bx(dx+sx*39,87,dz+20,8,33,8,gold);bx(dx+sx*39,108,dz+20,12,10,12,gold,gold,.22);}
+    const ex=435,ez=515;
+    bx(ex-52,72,ez,20,144,30,dark);bx(ex+52,72,ez,20,144,30,dark);bx(ex,149,ez,125,18,35,stone);
+    bx(ex,71,ez+2,83,125,11,wood);bx(ex,71,ez+10,67,104,6,'#42545e');
+    bx(ex,139,ez+9,93,9,12,gold);bx(ex,113,ez+15,41,7,8,gold,gold,.2);
+    bx(ex+25,72,ez+18,8,8,6,gold,gold,.5);
+    for(const x of [ex-45,ex+45]){bx(x,18,ez-42,16,33,16,stone);bx(x,41,ez-42,22,12,22,gold);}
     return;
   }
   const pu=0.72+0.28*Math.sin(t*2.2);
@@ -21709,11 +21831,11 @@ function render(t){
   const keepArtSky=window.__KEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const frostArtSky=window.__FROST_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const deepArtSky=window.__DEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
-  const sky=G?.devBriar?(G.devBriar.part?[.16,.25,.23]:[.38,.53,.62]):deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.49,.62,.70]:[.110,.208,.278]):keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
+  const sky=G?.sparringRoom?[.075,.105,.12]:G?.devBriar?(G.devBriar.part?[.16,.25,.23]:[.38,.53,.62]):deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.49,.62,.70]:[.110,.208,.278]):keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
-  if(G){ const sc=G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:deepArtSky?{z:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:.46,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:.48,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.48,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
+  if(G){ const sc=G.sparringRoom?{z:1,p:[.72,.22],c:[0,0,0]}:G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:deepArtSky?{z:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:.46,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:.48,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.48,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // STATIC skybox sun: the sun holds one fixed spot in the sky no matter how the camera turns, so the
     // scene's key light and ambience stay consistent (the world-space light direction uL is already fixed).
@@ -21786,6 +21908,12 @@ function render(t){
     PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 4600);   // tighter far + bigger near = far better depth precision across the big hub (no z-fighting)
     gl.uniform2f(U.uFogNF, 3000, 6500);
   }
+  if(G?.sparringRoom&&meta.camMode==='far'){
+    // The open-world boom used to sit behind the hall's south gallery and hide the player.
+    G.eye={x:cx,y:cyy+345,z:cz+150};
+    VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[cx,cyy+30,cz-65],[0,1,0]);
+    PROJ=mPersp(56*Math.PI/180,VW/VH,12,4600);
+  }
   // Enclosed dungeon overview: a steeper, shorter boom fits below the roof.
   // The long outdoor boom otherwise collapses against the rear wall into the hero's back.
   if(G?.escape&&meta.camMode==='far'){
@@ -21793,7 +21921,7 @@ function render(t){
     VIEW=mLookAt([G.eye.x,G.eye.y,G.eye.z],[cx,cyy+34,cz-90],[0,1,0]);
     PROJ=mPersp(70*Math.PI/180,VW/VH,3,2400);
   }
-  if(G?.p&&G.eye&&meta.camMode!=='fps'&&!G.hub&&!_ed?.on){
+  if(G?.p&&G.eye&&meta.camMode!=='fps'&&(!G.hub||G.sparringRoom)&&!_ed?.on){
     const target={x:p.x,y:p.y+34,z:p.z},desired=G.eye;
     const now=performance.now(),last=G._cameraBoom;
     const limit=BFCameraOcclusion.constrain(G,target,desired);
@@ -22335,7 +22463,8 @@ function frame(ts){
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
   musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);
   window.BF_LOADING?.tick(G,mode);
-  if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
+   if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
+   updateSparringHud();
   PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
   render((G?G.time:ts/1000));
   deferOff();                         // belt and braces: an early return inside render must never leave the batch globals swapped

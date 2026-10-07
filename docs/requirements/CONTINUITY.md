@@ -1169,3 +1169,7 @@ QA: scripts/test-chest-rules.cjs, qa-chest-rewards.cjs, qa-chest-coop.cjs, qa-ch
 ## [Codex | 2026-10-07] Restart recovery and current beta state
 
 The PC restart interrupted an in-progress chess/Briar task but did not erase local edits. Version 2.125.0 contains the chess usability pass and an isolated second Briar beta pass. New focused browser checks cover flat/world moves, camera, host/co-op clocks, audio cues, checkmate, farm jumps, actual wagon damage and Ranger duel. The continuous two-chapter Briar route still completes with test invulnerability. Live campaign map not replaced. Future work: human blind playtest, terrain/environment art refinement and difficulty tuning before considering promotion to main portal. Full notes in UPDATE_ROADMAP and docs/design/briar-beta-qa.md.
+
+## [Codex | 2026-10-07] Sparring Room improvement
+
+Version 2.130.0 rebuilds the Sparring Room as a detailed training hall, with a clear arrival, training desk and exit, searchable unlocked-opponent selection, chosen bout size, real practice damage and knockback, safe defeat reset, and a live results panel. Existing campaign progression and rewards remain separate. A prior-version save, camera modes, phone layout, normal foes, seven bosses, dummy damage, victory/defeat and exit were checked in Chrome. See docs/design/SPARRING_ROOM_2026-10-07.md. Human combat feel and visual preference still need review.

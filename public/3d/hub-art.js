@@ -5,6 +5,7 @@ import * as THREE from './three.module.js';
 import {buildWaystone,animateWaystone} from './hub-waystone.js?v=2121';
 import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2076';
 import {companionPortrait} from './companion3d.js?v=2073';
+import {loadBriarTrees,buildBriarTrees,buildBriarDressing} from './briar-trees.js?v=2127';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
 
 const meshes=new Map(),loader=new GLTFLoader(),dummy=new THREE.Object3D();
@@ -15,7 +16,7 @@ export const wantsHubArt=w=>!!(w?.hub&&w.hubArt&&!w.arena&&!w.trial&&!failed);
 export const hubArtReady=()=>meshes.size===13;
 export function loadHubArt(){
   if(pending)return pending;
-  pending=new Promise(resolve=>loader.load('./hub-assets/waystation-kit.glb',g=>{
+  pending=Promise.all([new Promise(resolve=>loader.load('./hub-assets/waystation-kit.glb',g=>{
     try{
       g.scene.updateMatrixWorld(true);
       g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);
@@ -26,7 +27,7 @@ export function loadHubArt(){
       if(!hubArtReady())throw new Error('Incomplete Waystation kit');
     }catch(e){failed=true;console.warn('[hub-art] Using the original hub renderer:',e)}
     resolve();
-  },undefined,e=>{failed=true;console.warn('[hub-art] Kit unavailable:',e);resolve()}));
+  },undefined,e=>{failed=true;console.warn('[hub-art] Kit unavailable:',e);resolve()})),loadBriarTrees()]).then(()=>{});
   return pending;
 }
 const surface=new THREE.MeshLambertMaterial({vertexColors:true});
@@ -66,16 +67,35 @@ export function buildHubArt(scene,w){
   })}
   function lamp(x,z){add('lamp',x,1.5,z,22);lamps.push(new THREE.Vector3(x,87,z))}
 
-  // A single level court, with narrow alternating joints and an inlaid procession path.
+  // Districts are part of the actual paving, so direction changes never create steps or
+  // floating decals. The warm middle links the campaign, two service streets and challenges.
   for(let iz=0;iz<39;iz++)for(let ix=0;ix<47;ix++){
     const x=-920+(ix+.5)*1840/47,z=-650+(iz+.5)*1540/39;
-    const radial=Math.hypot(x,z-30),road=Math.abs(x)<82||Math.abs(z+420)<64||Math.abs(z-540)<42;
-    const ring=radial>107&&radial<146,service=Math.abs(x)>515&&Math.abs(x)<730&&z>-235&&z<500;
-    const pal=ring?['#a98b53','#b49a60']:road?['#a39576','#b1a17f','#a69778']:service?['#a28c6b','#b39a72']:['#81917c','#8e9a82','#9b9f85'];
+    const radial=Math.hypot(x,z-30),spine=Math.abs(x)<98&&z<615&&z>-385;
+    const ring=radial>107&&radial<157,campaign=z<-374,challenge=z>598;
+    const market=x<-265&&z>-275&&z<532,warden=x>265&&z>-275&&z<532;
+    const crosswalk=(Math.abs(z+167)<37||Math.abs(z-390)<37)&&Math.abs(x)<785;
+    const pal=ring?['#d2bc86','#c5a976']:
+      spine?['#bca275','#c6ad80','#b39a70']:
+      crosswalk?['#baad90','#c6b99b']:
+      campaign?['#9baaa7','#aab6af','#95a6a4']:
+      challenge?['#6d697d','#797187','#716d81']:
+      market?['#b09173','#a8886e','#af967d']:
+      warden?['#899ca0','#94a7a9','#82969c']:
+      ['#a3a997','#aeb39f','#9ba594'];
     block(x,.25,z,1840/47-.55,1.5,1540/39-.55,pal[Math.floor(hash(x,z)*pal.length)]);
   }
-  // Compass arms are flush floor inlays, never raised steps in the arrival route.
+  // Thin brass seams mark streets and the central compass without becoming obstacles.
+  for(const x of [-263,263])for(let z=-259;z<500;z+=84)block(x,1.08,z,3,.18,74,x<0?'#dfbc80':'#b8ced0');
+  for(const z of [-374,599])for(let x=-866;x<860;x+=86)block(x,1.08,z,77,.18,3,z<0?'#d7c294':'#b8a6c6');
   for(let i=0;i<8;i++){const a=i*Math.PI/4;block(Math.sin(a)*114,1.07,30+Math.cos(a)*114,5,.18,40,'#c2a769',a)}
+  for(let i=0;i<32;i++){const a=i*Math.PI/16;block(Math.sin(a)*160,1.08,30+Math.cos(a)*160,3,.18,27,'#e2cb94',-a)}
+  // Two floor seals make the side streets recognizable from the first-visit overhead view.
+  for(const [x,color] of [[-355,'#e6b789'],[355,'#aad4db']]){
+    for(let i=0;i<12;i++){const a=i*Math.PI/6;block(x+Math.sin(a)*71,1.09,245+Math.cos(a)*71,3,.2,37,color,-a)}
+    for(const s of [-1,1])block(x+s*15,1.1,245,6,.2,91,color,s*.58);
+    block(x,1.1,245,67,.2,5,color);
+  }
   const waystone=buildWaystone(THREE,owned,!!HU.gild);root.add(waystone);
 
   // Low side walls and a northern cloister. Every arch opens toward its existing interaction point.
@@ -88,6 +108,8 @@ export function buildHubArt(scene,w){
     const col=palette[g.zi%8];
     at(g.x,g.z,0,()=>{
       add('arch',0,1,-34,34);block(0,2,14,106,3,55,'#80775e');
+      block(0,1.16,77,93,.2,11,g.open?col:'#828481');
+      for(const s of [-1,1]){block(s*48,1.17,80,5,.2,70,'#e5d1a1');block(s*52,124,-31,7,112,8,g.open?col:'#747b79');}
       // The open portal reads as a luminous destination painting within the arch.
       const mural=g.zi===5?'./icons/ui/destination-storm-coast.png':'./icons/destinations/'+icons[g.zi]+'.png';
       panel(texture(mural),0,75,-28,g.zi===5?84:76,g.zi===5?84:98,g.open?1:.52);
@@ -97,10 +119,20 @@ export function buildHubArt(scene,w){
       for(const s of [-1,1]){block(s*51,52,-14,4,76,2,g.open?col:'#575b54');}
     });
   }
+  label('Main Adventure',0,256,-615,296,'#f5dfac');
+  label('Start Here',-700,233,-585,120,'#ffe2a0');
   // Small matching buttresses create a rhythm; there is no imported gatehouse mass.
   for(const x of [-900,-800,-600,-400,-200,0,200,400,600,800,900]){
     add('pillar',x,0,-622,22);
   }
+  // One lintel ties the optional challenge doors together; it sits above all route and
+  // portal clearances. The activity lane remains open to the Rift Hall and arcade.
+  at(0,775,Math.PI,()=>{
+    for(const x of [-515,515]){add('pillar',x,1,0,20);block(x,138,0,25,13,32,'#c9b89b');}
+    beam(0,173,0,1070,13,28,'#8e8294');beam(0,185,0,1070,5,34,'#d0bd9d');
+    for(const x of [-500,-300,-100,100,300,500])block(x,197,0,22,24,30,'#a69bad');
+    label('Challenges',0,223,16,233,'#f2dfb5');
+  });
 
   const stationArt={quartermaster:['Quartermaster','action_buy.png'],chest:['Your Bag','action_bag_stash.png'],anvil:['The Smith','action_forge_fuse.png'],keeper:['The Stylist','action_wardrobe_stylist.png'],drillmaster:['Drillmaster','class-core.png'],beastkeeper:['Beastkeeper','beastkeeper.png'],board:['Postings',null],mirror:['The Mirror',null],sparring:['Sparring Room',null]};
   for(const n of w.hubNpcs||[]){
@@ -133,6 +165,9 @@ export function buildHubArt(scene,w){
         for(let row=0;row<4;row++)for(let j=0;j<3;j++)block((j-1)*36,12+row*24,-59,35,23,11,['#8a8069','#968a71','#a09276'][(row+j)%3]);
         for(const s of [-1,1])beam(s*53,62,-40,7,124,7);
         add('canopy',0,125,-35,32,32,32,n.c2||'#547c91');
+        // The stations share a build language, but each gets a different strong fascia.
+        block(0,139,-39,119,8,13,n.id==='keeper'?'#674267':n.id==='anvil'?'#706451':n.id==='drillmaster'?'#854b43':n.id==='beastkeeper'?'#607d59':n.id==='mirror'?'#61899c':'#947651');
+        for(const s of [-1,1]){block(s*55,87,-52,7,70,7,'#d4bd8c');block(s*55,48,-48,12,9,11,'#806d52');}
         for(const side of [-1,1]){beam(side*53,65,-40,3,118,3,'#d9b86c');block(side*45,102,-39,11,31,3,n.c2||'#b24b37');block(side*45,87,-39,12,3,4,'#edc76e');}
         block(0,2,13,116,3,65,'#b7a487');
         const spec=stationArt[n.id];label(spec?.[0]||n.name,0,110,0,119);
@@ -152,7 +187,10 @@ export function buildHubArt(scene,w){
           beam(0,15,23,10,30,10);beam(0,33,23,65,5,33,'#8e633d');block(0,36,23,49,1,26,'#eee0ae');
           for(let j=0;j<4;j++)block(-16+j*11,39,23+(j%2?5:-5),4,5,4,j%2?'#bd4433':'#397aaf');
         }
-      }else if(n.id==='chest')add('chest',0,1,0,27);
+      }else if(n.id==='chest'){
+        add('chest',0,1,0,27);
+        for(const s of [-1,1]){beam(s*34,28,-37,27,4,23,'#775941');block(s*34,33,-36,24,7,19,'#ad8257');block(s*34,39,-36,17,4,15,'#d8ba76');}
+      }
       else if(n.id==='anvil'){
         if(HU.returnForge){beam(60,34,-15,40,6,36);for(let j=0;j<3;j++){block(47+j*12,57,-15,4,43,4,'#a78655');block(47+j*12,79,-15,14,10,9,'#c2c9c4');}}
         add('anvil',0,1,6,23);block(-29,20,-28,35,38,28,'#655744');block(-29,29,-12,21,21,2,'#d08742');
@@ -162,22 +200,34 @@ export function buildHubArt(scene,w){
         add('mirror',0,1,-6,30,30,30,null,Math.PI);panel(null,0,41,-2,35,73,.16);
       }else if(n.id==='keeper'){
         beam(28,12,0,23,24,24,'#70468c');beam(28,31,-10,23,36,5,'#70468c');for(let j=0;j<4;j++){block(-33+j*15,26,-18,12,45,7,['#c84d67','#427db4','#d6b752','#54866a'][j]);block(-33+j*15,52,-18,13,5,8,'#e6c983');}beam(-11,56,-18,64,4,5,'#b79563');
+        for(const x of [-38,-23,-8,7]){beam(x,76,-19,2,35,2,'#cdbb95');block(x,59,-19,7,4,7,'#e8c887');}
       }else if(n.id==='beastkeeper'){
         if(HU.companionCare){for(const dx of [-95,-55])beam(dx,30,-15,6,60,6);beam(-75,60,-15,52,7,56,'#657b5c');block(-75,8,-15,42,12,44,'#b9a577');block(-75,17,-15,32,6,32,'#dad0ad');block(-110,17,23,18,34,20,'#867552');block(-110,35,23,20,4,22,'#bfae83');}
 
         for(const side of [-1,1]){const x=side*76;block(x,3,-12,45,6,55,'#9b7443');block(x,7,-12,40,2,50,'#d1bd68');for(const dx of [-21,21]){beam(x+dx,31,-12,3,55,55,'#354e49');for(let j=0;j<5;j++)beam(x+dx,31,-34+j*11,2,55,2,'#b0a06d');}for(const z of [-38,14]){beam(x,56,z,45,4,4,'#b99b64');for(let j=0;j<5;j++)beam(x-20+j*10,31,z,2,49,2,'#60746d');}const pos=point(x,-12),angle=origin.ry;companionPortrait(side<0?'shepherd':'cinder').then(pet=>{if(!pet)return;if(disposed){pet.userData.portraitDispose?.();return;}pet.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(pet),size=b.getSize(new THREE.Vector3()),sc=32/Math.max(1,size.y);pet.scale.multiplyScalar(sc);pet.position.set(pos.x,8-b.min.y*sc,pos.z);pet.rotation.y=angle;root.add(pet);pets.push(pet);});}
       }else if(n.id==='sparring'){
         add('arch',0,0,-17,22);block(0,48,-21,44,90,8,'#344957');for(const x of [-15,15]){block(x,49,-15,4,68,3,'#cdb06e');}label('Sparring',0,120,-5,119);for(const x of [-50,50]){beam(x,58,-17,6,115,6);block(x,89,-14,21,40,3,'#a34434');block(x,90,-11,3,29,2,'#e4bb66');}
+        beam(0,143,-19,126,9,25,'#a28963');for(const x of [-57,57])block(x,147,-19,17,17,27,'#cdb789');
       }
     });
   }
-  // Side gardens have their own space beyond the service approaches.
-  for(const s of [-1,1])for(const z of [-310,590]){
-    block(s*800,8,z,126,16,118,'#6d715d');block(s*800,17,z,113,2,104,'#434b39');
-    add('tree',s*800,18,z,41);
-    const leafGeo=new THREE.IcosahedronGeometry(1,0);owned.push(leafGeo);for(let j=0;j<5;j++){const mat=new THREE.MeshLambertMaterial({color:['#688b3d','#80a74c','#9dbb56'][j%3]}),leaf=new THREE.Mesh(leafGeo,mat);leaf.position.set(s*800+Math.sin(j*2.4)*35,100+(j%2)*26,z+Math.cos(j*2.4)*28);leaf.scale.set(40,28,38);leaf.castShadow=true;root.add(leaf);owned.push(mat);}for(let j=0;j<7;j++){const x=s*800-46+j*15;block(x,26,z+44,2,17,2,'#5d8c43');block(x,35,z+44,8,6,8,j%2?'#e8ac5d':'#b69ee0');}
-    for(let i=0;i<14;i++)add('grass',s*800+(hash(i,z)-.5)*105,18,z+(hash(z,i)-.5)*98,28);
+  // Reuse the detailed campaign trees rather than constructing crude clumps of blocks.
+  const planted=[],flowers=[];
+  for(const x of [-445,445]){
+    block(x,6,-325,132,12,95,'#9d977e');block(x,13,-325,117,3,80,'#4b674d');
+    for(const edge of [-1,1]){block(x+edge*63,17,-325,7,9,94,'#cfbea0');block(x,17,-325+edge*44,131,9,7,'#cfbea0');}
+    for(let i=0;i<24;i++)flowers.push({name:i%4?'flower_yellowA':'flower_redA',x:x+(hash(i,x)-.5)*105,y:15,z:-325+(hash(x,i)-.5)*67,h:17+i%5*3});
   }
+  for(const s of [-1,1])for(const z of [-310,590]){
+    block(s*800,8,z,126,16,118,'#777e67');block(s*800,17,z,113,2,104,'#4f6b48');
+    for(const edge of [-1,1]){block(s*800+edge*59,21,z,8,11,118,'#b9ab8b');block(s*800,21,z+edge*55,126,11,8,'#b9ab8b');}
+    planted.push({x:s*800,y:18,z,h:z<0?185:205,variant:z<0?0:1});
+    for(let i=0;i<16;i++){const x=s*800+(hash(i+3,z)-.5)*94,zz=z+(hash(z,i+9)-.5)*86;
+      flowers.push({name:i%3?'flower_yellowA':'flower_redA',x,y:18,z:zz,h:18+i%4*3});}
+  }
+  for(const [x,z,h,v] of [[-1080,-180,240,0],[1080,-180,240,1],[-1080,520,230,0],[1080,520,230,1]])planted.push({x,y:0,z,h,variant:v});
+  const grove=buildBriarTrees(planted),blooms=buildBriarDressing(flowers);
+  if(grove)root.add(grove);if(blooms)root.add(blooms);
   if(HU.sunspireGarden)for(const side of [-1,1])for(let i=0;i<12;i++){const x=side*800+(i%4-1.5)*23,z=590+(Math.floor(i/4)-1)*25;block(x,35,z,5,34,5,'#729267');block(x,53,z,17,8,17,i%3?'#f0ddae':'#b5bfd9');}
   for(const p of w.hubArt.lamps)lamp(p.x,p.z);
   add('chest',-806,1,670,24);
@@ -205,16 +255,19 @@ export function buildHubArt(scene,w){
     }
     m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='grass';m.receiveShadow=true;root.add(m);triangles+=list.length*rec.tri;instances+=list.length;
   }
-  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.9:.25)}});
-  const oldFog=scene.fog;scene.fog=new THREE.Fog('#b6c8d1',3000,6800);
+  const adjustedLights=[];
+  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;adjustedLights.push(o);o.intensity=o.userData._w3dOrig*(o.isAmbientLight?1.12:.4)}});
+  const oldFog=scene.fog;scene.fog=new THREE.Fog('#c6d6d2',3100,7000);
   const key=new THREE.DirectionalLight('#ffddaa',2.15);key.position.set(-700,1300,500);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-1150,right:1150,top:1150,bottom:-1150,near:1,far:2900});key.shadow.normalBias=1.4;key.shadow.bias=-.0001;root.add(key,key.target);
   key.shadow.camera.updateProjectionMatrix();
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffc478',700,190,1.6);root.add(l);return l});
   let waystoneTriangles=0;waystone.traverse(o=>{if(o.isMesh)waystoneTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3});triangles+=waystoneTriangles;
   let upgradeTriangles=0;upgrades.traverse(o=>{if(o.isMesh)upgradeTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3});triangles+=upgradeTriangles;
-  const counts={upgrades:upgrades.userData.counts,upgradeTriangles,waystoneTriangles,hub:true,hubArt:true,floorTiles:1833,gatehouse:8,hubAnvil:1,drawCalls:batches.size+owned.filter(o=>o.isMaterial).length+1,triangles,instances};
+  let plantedTriangles=0,plantedDraws=0;for(const group of [grove,blooms])group?.traverse(o=>{if(o.isInstancedMesh){plantedTriangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3*o.count;plantedDraws++;}});
+  triangles+=plantedTriangles;
+  const counts={upgrades:upgrades.userData.counts,upgradeTriangles,waystoneTriangles,plantedTriangles,hub:true,hubArt:true,floorTiles:1833,gatehouse:8,hubAnvil:1,drawCalls:batches.size+owned.filter(o=>o.isMaterial).length+plantedDraws+1,triangles,instances};
   active={root,lamps,lights,animated,waystone,upgrades,counts,quality:null};window.__HUB_ART_ACTIVE=true;window.__HUB_SHADOW_DIRTY=true;
-  root.userData.dispose=()=>{disposed=true;pets.forEach(p=>p.userData.portraitDispose?.());scene.fog=oldFog;key.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HUB_ART_ACTIVE=false;};
+  root.userData.dispose=()=>{disposed=true;pets.forEach(p=>p.userData.portraitDispose?.());scene.fog=oldFog;for(const light of adjustedLights)light.intensity=light.userData._w3dOrig;key.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HUB_ART_ACTIVE=false;};
   return {group:root,counts};
 }
 export function updateHubArt(w,t){

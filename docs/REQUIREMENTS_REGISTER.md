@@ -1083,3 +1083,6 @@ Version 2.135.0 improves the optional room's visible supports and step materials
 ## [Codex | 2026-10-07] Full Sparring Room bestiary
 
 Oliver requests a full bestiary beside the Sparring Room, with a real enemy-face screenshot on each portrait card, where to encounter each foe, and their stats. Extend the existing small training entry into a separate searchable catalog accessible at the Waystation entrance and inside the hall. Ground locations and baseline numbers in the current campaign/Prison Break registries, label scaled combat values honestly, and use crops from actual in-game model renders rather than invented face art. Include bosses, special encounters and the distinct Prison Break roster. Preserve old saves and retain the sparring bout selector as its own quick flow.
+
+## [Codex | 2026-10-07] Waystation quality pass
+Oliver requests improving the current hub world broadly. Preserve services, campaigns, Rift Hall, chess, purchased upgrades, progression and authored interactions. Grounded visual audit: oversized uniform floor, weak district cues, crude garden tree clumps, dark sanctuary sky and unframed challenge edge. Implement an authored paving/architecture/planting/navigation/lighting pass using existing detailed assets, with collider and browser QA. Plan: docs/design/WAYSTATION_QUALITY_2026-10-07.md.

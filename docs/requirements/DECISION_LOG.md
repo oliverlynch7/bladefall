@@ -816,3 +816,6 @@ After inspecting the shipped cache room in a normal camera, its square plinth su
 ## [Codex | 2026-10-07] Sparring bestiary
 
 The user requested a full bestiary by the Sparring Room with model-face portraits, encounter locations and stats. Implemented as a free-standing, searchable catalog by the Waystation entrance and inside the hall, separate from bout selection. The complete roster is visible immediately because discovery gating was not requested. Baseline numbers are explicitly distinguished from scaled in-run values. No save-schema change or SFX work.
+
+## [Codex | 2026-10-07] Waystation visual redesign scope
+The user's broad hub improvement request authorizes a cohesive quality pass on the existing Lantern Court. Keep existing functional locations and unlock/save semantics; use real-browser views and interaction clearance to guide the visual changes. Human judgment of final artistic quality remains open to Oliver's playtest.

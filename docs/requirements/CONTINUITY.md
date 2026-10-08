@@ -1197,3 +1197,7 @@ Version 2.135.0 improves revision-8 cache-room stepping-stone art: tapered suppo
 ## [Codex | 2026-10-07] Sparring bestiary shipped
 
 Version 2.136.0 adds 52 entries and 51 distinct model screenshot crops (one portrait is shared by an officer variant). It covers the campaign, special encounters and Prison Break, with searchable locations and combat tells. Bestiary stands are by the Sparring Room and inside it. Existing sparring practice remains separate. Browser checks passed for catalog interactions, all asset requests, desktop/phone layouts, and a previous-build save with its name/gold/zone retained. User visual judgment remains open.
+
+## [Codex | 2026-10-07] Waystation hub quality
+
+Oliver requested a broad hub improvement without losing existing services. Version 2.137.0 strengthens the current Lantern Court with district-colored flat paving, inlaid floor seals and compass, forecourt gardens, reused Briar trees and flowers, more distinct stations, a framed challenge edge, campaign signs, brighter sky and more useful minimap landmarks. Lamp art/colliders move together. All 24 interaction approaches remain reachable and labeled; purchases/reload, tour, desktop/phone and old-save checks passed. No gameplay/save progression rules changed. Final visual acceptance awaits Oliver's playtest. Details: docs/design/WAYSTATION_QUALITY_2026-10-07.md.

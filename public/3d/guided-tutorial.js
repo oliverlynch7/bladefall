@@ -75,7 +75,7 @@ function tick(g,mode,dt,input,api){if(!guide&&mode==='play'&&g?._guidedUsed&&g.p
 }
 
 function map(g,mode){
- if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. Camera direction is up.');document.body.append(mapCanvas);}
+ if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. Camera direction is up.');document.body.append(mapCanvas);}
  mapCanvas.hidden=!g||mode!=='play'||g.bonusActive;if(mapCanvas.hidden)return;
  const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-lastMap)/1000));lastMap=now;
  const heading=window.__BF_MAP_PARTY?.().heading,target=Number.isFinite(heading)?heading:g.p.yaw||0;if(mapOwner!==g){mapOwner=g;mapHeading=target;}else{const delta=Math.atan2(Math.sin(target-mapHeading),Math.cos(target-mapHeading));mapHeading+=Math.max(-dt*3.5,Math.min(dt*3.5,delta*(1-Math.exp(-dt*7))));}
@@ -85,6 +85,15 @@ function map(g,mode){
  for(const o of g.obstacles||[]){c.fillStyle=o.kind==='plat'?'#819488':'#56636a';const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
  c.fillStyle='#26302d';for(const o of g.walls||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
  const marker=(o,color,r,edge=false)=>{if(!o||!Number.isFinite(o.x)||!Number.isFinite(o.z))return;let [x,y]=xy(o);const d=Math.hypot(x,y);if(d>138){if(!edge)return;x*=138/d;y*=138/d;}c.fillStyle=color;c.strokeStyle='#101923';c.lineWidth=2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.stroke();};
+ if(g.hub&&!g.hubArt?.riftHall){
+   const landmark=(o,color,glyph)=>{if(!o)return;let [x,y]=xy(o);const d=Math.hypot(x,y);if(d>136){x*=136/d;y*=136/d;}c.fillStyle='#111c24';c.beginPath();c.arc(x,y,11,0,Math.PI*2);c.fill();c.fillStyle=color;c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();c.fillStyle='#182126';c.font='bold 12px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(glyph,x,y+.5);};
+   landmark(g.gates?.find(q=>q.zi===0&&!q.side),'#e9c77c','1');
+   landmark({x:-610,z:145},'#e7af76','$');
+   landmark({x:610,z:145},'#91c5da','★');
+   landmark({x:0,z:710},'#ba9bcf','C');
+   landmark({x:-610,z:710},'#d3a8f2','R');
+   landmark({x:0,z:30},'#a4e8e8','◆');
+ }
  for(const e of g.enemies||[])if(!e.dead&&e.hp>0&&!e.dummy)marker(e,'#ff7470',e.boss?7:3);
  const nav=window.__BF_MAP_PARTY?.()||{};for(const q of nav.peers||[])marker(q,'#67baff',6,true);for(const m of g.marks||[])marker(m,'#72fff0',6,true);
  marker(window.BFPartyNavigation?.target?.(g)||g.portal,'#ffe047',7,true);

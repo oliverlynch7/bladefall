@@ -54,7 +54,24 @@ function layout(seed,section,tier,revision=6){
   const sign=rooms[7].x===0?side:Math.sign(rooms[7].x);
   rooms.push({id:10,name:['Broken rafters','Pipe gantry','Sealed catwalk'][section-1],x:rooms[7].x+sign*720,z:rooms[7].z,w:600,d:600,h:480,kind:'cache',optional:true,approachSign:sign});
  }
- const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),[8,4]]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[]),...(revision>=8?[[7,10]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
+ if(revision>=9){
+  // A new connected wing follows the old final watch. The earlier rooms and
+  // every revision-8 checkpoint keep their exact positions and geometry.
+  const last=rooms[8],direction=Math.sign(rooms[4].x-last.x)||side,bend=(seed+section)%2===1;
+  // Alternate between a deep straight wing and a side-turn wing. The new
+  // crossing always has a north/south approach, matching its physical steps.
+  const wingX=last.x+(bend?direction*720:0),wingZ=last.z-(bend?0:720);
+  rooms[4].x=wingX+direction*720;rooms[4].z=wingZ-1440;
+  rooms.push(
+   {id:11,name:['Registry hall','Copper pump house','Beacon workshop'][section-1],x:wingX,z:wingZ,w:600,d:600,h:340,kind:'fight',template:['registry','pumps','beacon'][section-1],dungeonSection:section},
+   {id:12,name:['Collapsed gallery','Waterwheel gap','Broken crane walk'][section-1],x:wingX,z:wingZ-720,w:600,d:600,h:470,kind:'bridge',crossingStyle:'expedition'},
+   {id:13,name:['Holding yard','Drain depot','Final guard muster'][section-1],x:wingX,z:wingZ-1440,w:600,d:600,h:340,kind:'waves',template:['yard','depot','muster'][section-1],dungeonSection:section},
+   {id:14,name:['Confiscated stores','Locked supply bay','Sealed reliquary'][section-1],x:wingX+(bend?direction:-direction)*720,z:wingZ,w:600,d:600,h:340,kind:'vault',optional:true,template:'stores',dungeonSection:section},
+   {id:15,name:['High cell walk','Floodgate gantry','Beacon rafters'][section-1],x:wingX-direction*720,z:wingZ-1440,w:600,d:600,h:480,kind:'cache',optional:true,approachSign:-direction,challenge:true}
+  );
+  for(const r of rooms)if(['fight','waves','vault'].includes(r.kind))r.dungeonSection=section;
+ }
+ const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),...(revision>=9?[[8,11],[11,12],[12,13],[13,4]]:[[8,4]])]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[]),...(revision>=8?[[7,10]]:[]),...(revision>=9?[[11,14],[13,15]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
   const dirs=new Set(links.filter(l=>l.includes(r.id)).map(l=>{const q=rooms[l.find(i=>i!==r.id)];return Math.abs(q.x-r.x)>10?(q.x>r.x?'E':'W'):(q.z>r.z?'S':'N');}));
@@ -65,18 +82,18 @@ function layout(seed,section,tier,revision=6){
   if(r.kind==='cache'){
    const s=r.approachSign;
    floors.push(box(r.x-s*235,r.z,130,576,-20,0),box(r.x+s*235,r.z,130,576,-20,0));
-   const xs=[-155,-78,0,78,155],zs=[-45,32,-28,35,-30],heights=[25,55,84,55,25];
-   for(let i=0;i<5;i++)plats.push(box(r.x+s*xs[i],r.z+zs[i],82,72,0,heights[i],{room:r.id,cacheStep:true}));
+   const xs=r.challenge?[-175,-115,-55,5,65,125,185]:[-155,-78,0,78,155],zs=r.challenge?[-40,42,-35,42,-35,42,-40]:[-45,32,-28,35,-30],heights=r.challenge?[24,46,72,94,72,46,24]:[25,55,84,55,25];
+   for(let i=0;i<xs.length;i++)plats.push(box(r.x+s*xs[i],r.z+zs[i],r.challenge?70:82,r.challenge?66:72,0,heights[i],{room:r.id,cacheStep:true}));
    r.waypoints=[{x:r.x-s*250,z:r.z,y:0},...xs.map((x,i)=>({x:r.x+s*x,z:r.z+zs[i],y:heights[i]})),{x:r.x+s*250,z:r.z,y:0}];
    r.cacheGoal={x:r.x+s*245,z:r.z,y:0};
   }else if(r.kind==='bridge'){
    floors.push(box(r.x,r.z+235,576,130,-20,0),box(r.x,r.z-235,576,130,-20,0));
    const variant=revision>=2?(seed+section)%3:0;
    for(let k=0;k<3;k++)plats.push(box(r.x+(variant===2?(k===1?-side*45:side*30):(k===1?side*55:0)),r.z+125-k*125,variant===1?140:110,variant===1?95:85,0,k===1?(variant===1?62:44):18,{room:r.id}));
-   if(r.crossingStyle==='raised'){
+   if(r.crossingStyle==='raised'||r.crossingStyle==='expedition'){
     for(let i=plats.length-1;i>=0;i--)if(plats[i].room===r.id)plats.splice(i,1);
-    const heights=[22,52,84,52,22],offsets=[-45,30,-35,35,-25];
-    for(let k=0;k<5;k++)plats.push(box(r.x+side*offsets[k],r.z+180-k*90,80,66,0,heights[k],{room:r.id,raisedCrossing:true}));
+    const heights=r.crossingStyle==='expedition'?[24,52,80,102,80,52,24]:[22,52,84,52,22],offsets=r.crossingStyle==='expedition'?[-65,50,-60,55,-50,45,-55]:[-45,30,-35,35,-25];
+    for(let k=0;k<heights.length;k++)plats.push(box(r.x+side*offsets[k],r.z+(r.crossingStyle==='expedition'?205-k*68:180-k*90),r.crossingStyle==='expedition'?72:80,66,0,heights[k],{room:r.id,raisedCrossing:true}));
    }
    r.crossing=variant;r.waypoints=[{x:r.x,z:r.z+225,y:0},...plats.filter(p=>p.room===r.id).map(p=>({x:p.x,z:p.z,y:p.h})),{x:r.x,z:r.z-225,y:0}];
   }else if(revision>=4&&r.id===6)floors.push(box(r.x,r.z+85,576,406,-20,0));
@@ -111,6 +128,20 @@ function layout(seed,section,tier,revision=6){
     for(const x of [-185,185]){solid(x,-105,100,100,48,'#707176');solid(x,115,85,100,22,'#5c6368');}
    }else if(r.template==='infirmary'){
     for(const x of [-200,200]){solid(x,-95,90,170,30,'#726d6a');solid(x,145,60,75,45,'#77736e');}
+   }else if(r.template==='registry'){
+    for(const x of [-190,190]){solid(x,-90,92,160,46,'#a47750');solid(x,135,68,90,26,'#c7ad78');}
+   }else if(r.template==='pumps'){
+    for(const x of [-190,190]){solid(x,-95,96,145,52,'#548f98');solid(x,120,70,100,32,'#9c8157');}
+   }else if(r.template==='beacon'){
+    for(const x of [-190,190]){solid(x,-95,90,170,48,'#8f7eae');solid(x,135,82,95,30,'#d3aa67');}
+   }else if(r.template==='yard'){
+    for(const x of [-210,210]){solid(x,-75,95,190,32,'#9da883');solid(x,150,70,92,25,'#b3986d');}
+   }else if(r.template==='depot'){
+    for(const x of [-205,205]){solid(x,-85,90,170,42,'#5b8790');solid(x,145,86,90,28,'#ba8e60');}
+   }else if(r.template==='muster'){
+    for(const x of [-205,205]){solid(x,-95,85,165,45,'#837699');solid(x,135,80,105,32,'#c2a770');}
+   }else if(r.template==='stores'){
+    for(const x of [-190,190]){solid(x,-95,85,160,40,'#a88761');solid(x,130,75,90,35,'#776d78');}
    }else{
     for(const x of [-170,170]){solid(x,40,65,95,32,'#807162');solid(x,-125,38,48,120,'#66616d');}
    }
@@ -166,6 +197,7 @@ function layout(seed,section,tier,revision=6){
   const bridge=rooms[2];bridge.waypoints=[{x:bridge.x,z:bridge.z+281,y:0},...plats.filter(o=>o.room===2).map(o=>({x:o.x,z:o.z,y:o.h})),{x:bridge.x,z:bridge.z-281,y:0}];
  }
  if(revision>=6){const bridge=rooms[9];bridge.waypoints=[{x:bridge.x,z:bridge.z+281,y:0},...plats.filter(o=>o.room===9).map(o=>({x:o.x,z:o.z,y:o.h})),{x:bridge.x,z:bridge.z-281,y:0}];}
+ if(revision>=9){const bridge=rooms[12];bridge.waypoints=[{x:bridge.x,z:bridge.z+281,y:0},...plats.filter(o=>o.room===12).map(o=>({x:o.x,z:o.z,y:o.h})),{x:bridge.x,z:bridge.z-281,y:0}];}
 
  if(revision>=6){
   for(const room of rooms.filter(r=>['fight','waves','vault'].includes(r.kind))){
@@ -180,9 +212,21 @@ function layout(seed,section,tier,revision=6){
 
  const exit={x:rooms[4].x,z:rooms[4].z-170,y:0};
  const bounds={minX:Math.min(...rooms.map(r=>r.x-r.w/2-20)),maxX:Math.max(...rooms.map(r=>r.x+r.w/2+20)),minZ:Math.min(...rooms.map(r=>r.z-r.d/2-20)),maxZ:revision>=5?395:320};
- return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
+ return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,...(revision>=9?{mainRoute:[1,3,7,8,11,13,4]}:{}),title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
 function encounter(room,tier,wave=0){
+ if(room.dungeonSection){
+  // Familiar campaign enemies keep their normal AI and silhouettes. The
+  // prison guards remain the connective tissue rather than a sole roster.
+  const sections={
+   1:{default:[['prison_guard','revenant','prison_pike'],['sentinel','prison_hound','bones']],registry:[['caster','prison_pike','revenant'],['prison_guard','sentinel','caster']],yard:[['prison_hound','dustjackal','prison_guard'],['sentinel','revenant','prison_pike']],stores:[['prison_pike','revenant'],['prison_guard','sentinel']]},
+   2:{default:[['prison_vessel','frostlobber','prison_hound'],['magmaskit','prison_guard','frostshell']],pumps:[['magmaskit','prison_pike','frostlobber'],['prison_guard','frostshell','prison_vessel']],depot:[['prison_hound','magmaskit','frostshell'],['frostlobber','prison_guard','prison_vessel']],stores:[['prison_pike','frostshell'],['prison_hound','magmaskit']]},
+   3:{default:[['prison_guard','blinkstalker','prison_pike'],['royalarcanist','prison_hound','prison_vessel']],beacon:[['sunpriest','prison_pike','blinkstalker'],['prison_guard','royalarcanist','prison_hound']],muster:[['siegeknight','prison_vessel','prison_hound'],['royalarcanist','blinkstalker','prison_guard']],stores:[['prison_pike','blinkstalker'],['prison_guard','siegeknight']]}
+  };
+  const groups=sections[room.dungeonSection],pack=(groups[room.template]||groups.default)[(wave+(room.encounterVariant||0))%2];
+  const count=room.kind==='vault'?2:2+tier,positions=room.spawnPoints?.length>=count?room.spawnPoints:[[-245,-185],[245,-185],[-235,115],[235,115],[0,-210],[0,115]];
+  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
+ }
  const packs={gallery:[['prison_guard','prison_vessel','prison_pike'],['prison_vessel','prison_hound','prison_pike']],kennels:[['prison_hound','prison_hound','prison_pike'],['prison_guard','prison_hound','prison_hound']],barricades:[['prison_guard','prison_pike','prison_vessel'],['prison_hound','prison_vessel','prison_guard']]};
  packs.refectory=packs.barricades;packs.cistern=[['prison_vessel','prison_pike','prison_hound'],['prison_hound','prison_guard','prison_vessel']];
  packs.armory=[['prison_guard','prison_pike','prison_guard'],['prison_hound','prison_pike','prison_vessel']];
@@ -194,7 +238,7 @@ function encounter(room,tier,wave=0){
  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
 }
 function chestRarity(room,revision){if(room.kind==='boss')return 'uncommon';if(revision>=5)return room.id===3?'common':null;return ['fight','waves'].includes(room.kind)?'common':null;}
-function roomAdvice(room){return {armory:'Shield racks break the guards’ line of attack.',liftbay:'Use the loading platforms to flank the guards.',watchpost:'Pike guards watch the long lane. Use the side cover.',infirmary:'Vessels set the floor alight. Keep moving.',cistern:'The islands interrupt a straight charge.',refectory:'Tables divide the room into two fighting lanes.',kennels:'Hounds rush in a straight line. Step aside.',gallery:'The split gallery has more than one approach.',barricades:'Use the barricades to break line of sight.'}[room.template]||'Watch each enemy before you commit.';}
+function roomAdvice(room){return {registry:'Use the record desks as cover from casters.',pumps:'The pumps split the room into two lanes.',beacon:'Arcane guards and fast stalkers share this room.',yard:'Sidestep chargers and use the low barriers.',depot:'The supply racks make cover between waves.',muster:'The heavy guard is slow; circle around it.',stores:'An optional elite guards the supplies.',armory:'Shield racks break the guards’ line of attack.',liftbay:'Use the loading platforms to flank the guards.',watchpost:'Pike guards watch the long lane. Use the side cover.',infirmary:'Vessels set the floor alight. Keep moving.',cistern:'The islands interrupt a straight charge.',refectory:'Tables divide the room into two fighting lanes.',kennels:'Hounds rush in a straight line. Step aside.',gallery:'The split gallery has more than one approach.',barricades:'Use the barricades to break line of sight.'}[room.template]||'Watch each enemy before you commit.';}
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
 window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAdvice,roomAt,copy};
 })();

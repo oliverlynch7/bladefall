@@ -819,3 +819,7 @@ The user requested a full bestiary by the Sparring Room with model-face portrait
 
 ## [Codex | 2026-10-07] Waystation visual redesign scope
 The user's broad hub improvement request authorizes a cohesive quality pass on the existing Lantern Court. Keep existing functional locations and unlock/save semantics; use real-browser views and interaction clearance to guide the visual changes. Human judgment of final artistic quality remains open to Oliver's playtest.
+
+## [Codex | 2026-10-07] Larger roguelite and colorful art direction
+
+User-approved: expand the Endless Dungeon/Prison Break substantially and incorporate main-campaign enemies. This supersedes the earlier original-only enemy constraint for this mode. Preserve its unique bosses and foes alongside campaign enemies. The brighter hub palette sets the direction for future environments: colorful and legible, with AQW as a reference, while each location keeps its own story identity. Implementation must version fresh layouts and preserve saved runs.

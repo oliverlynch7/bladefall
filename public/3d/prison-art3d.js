@@ -7,12 +7,12 @@ export function buildPrisonArt(plan){
   const c=document.createElement('canvas');c.width=c.height=256;const a=c.getContext('2d');a.fillStyle='#353439';a.fillRect(0,0,256,256);
   let seed=floor?331:917;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const row=floor?64:32,col=floor?64:96;
-  for(let y=0;y<256;y+=row)for(let x=-col;x<256;x+=col){const xx=x+((y/row)%2)*col/2,v=112+Math.floor(rand()*38);a.fillStyle=`rgb(${v+8},${v+5},${v})`;a.fillRect(xx+2,y+2,col-4,row-4);a.fillStyle='rgba(240,230,205,.15)';a.fillRect(xx+3,y+3,col-6,2);a.fillStyle='rgba(5,10,20,.18)';a.fillRect(xx+col-5,y+3,2,row-6);}
+  for(let y=0;y<256;y+=row)for(let x=-col;x<256;x+=col){const xx=x+((y/row)%2)*col/2,v=(plan.revision>=9?158:112)+Math.floor(rand()*(plan.revision>=9?52:38));a.fillStyle=`rgb(${v+8},${v+5},${v})`;a.fillRect(xx+2,y+2,col-4,row-4);a.fillStyle='rgba(240,230,205,.15)';a.fillRect(xx+3,y+3,col-6,2);a.fillStyle='rgba(5,10,20,.18)';a.fillRect(xx+col-5,y+3,2,row-6);}
   for(let i=0;i<9000;i++){const v=rand()>.5?255:0;a.fillStyle=`rgba(${v},${v},${v},.045)`;a.fillRect(rand()*256,rand()*256,1+rand()*3,1);}
   const tex=new T.CanvasTexture(c);tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;textures.push(tex);return tex;
  }
- const wallMap=stoneTexture(),floorMap=stoneTexture(true),palette=[['#c5b4a2','#9a9290','#83604c'],['#9fb7b3','#819a99','#568986'],['#b3a7c5','#9690ab','#8d739f']][plan.section-1];
- const mats={wall:new T.MeshStandardMaterial({color:palette[0],map:wallMap,bumpMap:wallMap,bumpScale:1.8,roughness:.94}),floor:new T.MeshStandardMaterial({color:palette[1],map:floorMap,bumpMap:floorMap,bumpScale:1.1,roughness:.9}),trim:new T.MeshStandardMaterial({color:'#b4a18b',roughness:.8}),iron:new T.MeshStandardMaterial({color:'#39424b',metalness:.72,roughness:.48}),wood:new T.MeshStandardMaterial({color:'#69513a',roughness:.85}),cloth:new T.MeshStandardMaterial({color:palette[2],roughness:1}),glow:new T.MeshStandardMaterial({color:'#ffe3a8',emissive:'#ffb04e',emissiveIntensity:1.5}),water:new T.MeshStandardMaterial({color:'#285b60',metalness:.45,roughness:.23}),route:new T.MeshStandardMaterial({color:'#a9b8c5',emissive:'#607e97',emissiveIntensity:.48,roughness:.7}),optional:new T.MeshStandardMaterial({color:'#dfb265',emissive:'#8e5c21',emissiveIntensity:.55,roughness:.62})};
+ const wallMap=stoneTexture(),floorMap=stoneTexture(true),palette=(plan.revision>=9?[['#e8cda7','#c9b995','#c9785e'],['#a6ddda','#94c7c0','#e4a65c'],['#ceb8ec','#b5a8d8','#f0c273']]:[['#c5b4a2','#9a9290','#83604c'],['#9fb7b3','#819a99','#568986'],['#b3a7c5','#9690ab','#8d739f']])[plan.section-1];
+ const mats={wall:new T.MeshStandardMaterial({color:palette[0],map:wallMap,bumpMap:wallMap,bumpScale:1.8,roughness:.94}),floor:new T.MeshStandardMaterial({color:palette[1],map:floorMap,bumpMap:floorMap,bumpScale:1.1,roughness:.9}),trim:new T.MeshStandardMaterial({color:plan.revision>=9?'#ebcb8e':'#b4a18b',roughness:.8}),iron:new T.MeshStandardMaterial({color:plan.revision>=9?'#516875':'#39424b',metalness:.72,roughness:.48}),wood:new T.MeshStandardMaterial({color:plan.revision>=9?'#9a6744':'#69513a',roughness:.85}),cloth:new T.MeshStandardMaterial({color:palette[2],roughness:1}),glow:new T.MeshStandardMaterial({color:'#ffe3a8',emissive:plan.section===2?'#56d9db':plan.section===3?'#c49cff':'#ffb04e',emissiveIntensity:1.5}),water:new T.MeshStandardMaterial({color:plan.revision>=9?'#4ba7ad':'#285b60',metalness:.45,roughness:.23}),route:new T.MeshStandardMaterial({color:'#a9b8c5',emissive:'#607e97',emissiveIntensity:.48,roughness:.7}),optional:new T.MeshStandardMaterial({color:'#dfb265',emissive:'#8e5c21',emissiveIntensity:.55,roughness:.62})};
  const matrix=new T.Matrix4(),q=new T.Quaternion(),euler=new T.Euler();
  function add(geo,mat,x,y,z,rx=0,ry=0,rz=0){
   if(geo.index){const source=geo;geo=source.toNonIndexed();source.dispose();}
@@ -134,6 +134,43 @@ export function buildPrisonArt(plan){
     block(room.x+sx*(room.w/2-12),room.h-98,room.z+110,6,115,78,'cloth');
    }
   }
+  if(plan.revision>=9&&['registry','pumps','beacon','yard','depot','muster','stores'].includes(room.template)){
+   // Each new workspace has a clear silhouette visible from its entrance.
+   // Small pieces sit on existing solid cover or high on the walls.
+   const cover=plan.plats.filter(p=>p.room===room.id&&p.h>=24);
+   for(const o of cover){
+    block(o.x,o.h+3,o.z,o.w*.72,6,Math.min(22,o.d*.35),room.template==='pumps'||room.template==='depot'?'iron':'wood');
+    if(room.template==='registry'||room.template==='stores')for(const dz of [-18,18])block(o.x,o.h+8,o.z+dz,o.w*.45,3,12,'trim');
+    if(room.template==='pumps'||room.template==='beacon')add(new T.CylinderGeometry(12,15,12,10),'glow',o.x,o.h+13,o.z);
+   }
+   for(const side of [-1,1]){
+    const x=room.x+side*(room.w/2-14);
+    block(x,room.h-95,room.z+100,5,118,55,'cloth');
+    block(x,room.h-36,room.z-150,9,48,85,'iron');
+    if(room.template==='yard'||room.template==='muster')for(const z of [-190,190])block(room.x+side*235,room.h-45,room.z+z,11,90,11,'wood');
+    if(room.template==='pumps'||room.template==='depot'){
+     add(new T.CylinderGeometry(11,11,180,10),'iron',x,room.h-28,room.z,Math.PI/2);
+     for(const z of [-160,0,160])add(new T.TorusGeometry(15,3,6,10),'trim',x,room.h-28,room.z+z);
+    }
+   }
+   if(room.template==='registry')for(const x of [-130,0,130])block(room.x+x,room.h-18,room.z-210,80,12,50,'wood');
+   if(room.template==='beacon')add(new T.TorusGeometry(48,7,8,24),'glow',room.x,room.h-38,room.z,Math.PI/2);
+   // Heraldic color and a broad wall frieze make the next wing legible from
+   // the doorway. They are inset against solid walls and cannot hide combat.
+   for(const sx of [-1,1]){
+    const x=room.x+sx*165,z=room.z-room.d/2+16;
+    block(x,room.h*.51,z,92,room.h*.58,5,'cloth');
+    block(x,room.h*.80,z+4,105,9,7,'trim');
+    block(x,room.h*.28,z+4,105,9,7,'trim');
+    add(new T.OctahedronGeometry(17,0),'glow',x,room.h*.56,z+11,0,Math.PI/4);
+   }
+   for(const sx of [-1,1]){
+    const x=room.x+sx*(room.w/2-18),z=room.z-25;
+    block(x,115,z,7,100,105,'cloth');
+    block(x-sx*9,115,z,4,106,111,'trim');
+    add(new T.SphereGeometry(12,12,8),'glow',x-sx*20,122,z);
+   }
+  }
   if(room.kind==='bridge'){
    for(const sx of [-1,1])block(room.x+sx*(half+5),80,room.z,8,18,room.d-45,'wood');
    // A deep masonry shaft replaces the visible sky beneath broken floors.
@@ -149,7 +186,8 @@ export function buildPrisonArt(plan){
    block(room.x,-205,room.z,room.w,12,room.d,'iron');
    for(const sz of [-1,1])block(room.x,-95,room.z+sz*(room.d/2-10),room.w,190,18,'wall');
    if(plan.section===2)block(room.x,-197,room.z,room.w-35,2,room.d-35,'water');
-   for(const [i,step] of plan.plats.filter(p=>p.room===room.id).entries()){
+   const steps=plan.plats.filter(p=>p.room===room.id);
+   for(const [i,step] of steps.entries()){
     const pierHeight=step.h+199,pierY=(step.h-199)/2;
     add(new T.CylinderGeometry(17,29,pierHeight,10),'wall',step.x,pierY,step.z);
     for(const y of [-140,-60])add(new T.TorusGeometry(22,3,6,10),'iron',step.x,y,step.z,Math.PI/2);
@@ -161,7 +199,7 @@ export function buildPrisonArt(plan){
      for(const dz of [-20,0,20])block(step.x,step.h+9,step.z+dz,step.w-7,2,3,plan.section===2?'trim':'iron');
     }
     for(const sx of [-1,1])block(step.x+sx*(step.w/2-1),step.h+10,step.z,2,2,step.d-16,'optional');
-    if(i===0||i===4)for(const sx of [-1,1]){
+    if(i===0||i===steps.length-1)for(const sx of [-1,1]){
      const x=step.x+sx*(step.w/2-10),height=room.h-step.h-58;
      add(new T.CylinderGeometry(2.2,2.2,height,6),'iron',x,step.h+30+height/2,step.z);
      add(new T.TorusGeometry(7,2.2,6,8),'trim',x,room.h-26,step.z,Math.PI/2);

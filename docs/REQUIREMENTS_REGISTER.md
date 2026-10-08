@@ -1086,3 +1086,7 @@ Oliver requests a full bestiary beside the Sparring Room, with a real enemy-face
 
 ## [Codex | 2026-10-07] Waystation quality pass
 Oliver requests improving the current hub world broadly. Preserve services, campaigns, Rift Hall, chess, purchased upgrades, progression and authored interactions. Grounded visual audit: oversized uniform floor, weak district cues, crude garden tree clumps, dark sanctuary sky and unframed challenge edge. Implement an authored paving/architecture/planting/navigation/lighting pass using existing detailed assets, with collider and browser QA. Plan: docs/design/WAYSTATION_QUALITY_2026-10-07.md.
+
+## [Codex | 2026-10-07] Endless Dungeon expansion and color direction
+
+Oliver requests a much larger, better Endless Dungeon roguelite, with enemies from the main campaign added to its encounters. This applies to Prison Break (G.escape), while Abyssal Descent remains the campaign grind. Keep original Prison Break foes and bosses where useful, and mix in distinct campaign enemies with their actual combat behavior. Fresh attempts may use a new layout revision; existing checkpoint geometry, independent saves, permanent gold/upgrades, sparse healing and co-op ownership must remain compatible. The brighter, colorful new hub is Oliver's preferred visual direction for future level design, inspired by AQW. Use clear, varied palettes rather than making every area uniformly dark; this does not request a retroactive recolor of every existing level.

@@ -38,7 +38,7 @@
               "id": "sc.boat",
               "region": "storm",
               "title": "Something that floats",
-              "text": "Otto can repair the boat. Find a rudder in the tilted wreck, sailcloth at the lookout, and rope in the storage cave. Bring back any supplies together."
+              "text": "Find a rudder in the tilted wreck, sailcloth at the lookout, and dry rope in the storage cave. Fit each part at Otto’s workbench, or ask him to help."
             }
           ],
           "when": []
@@ -77,7 +77,7 @@
     },
     "sc.otto.work": {
       "topicMenu": true,
-      "text": "Bring the parts together or one at a time. I'll fit whatever you've found.",
+      "text": "Fit what you find at my workbench. I can help if you prefer.",
       "choices": [
         {
           "id": "deliver.rudder",
@@ -93,6 +93,19 @@
               "type": "flag",
               "id": "sc.installed.rudder",
               "value": true
+            },
+            {
+              "type": "conditional",
+              "id": "sc.otto.rudder.complete",
+              "when": [
+                { "flag": "sc.installed.rudder", "is": true },
+                { "flag": "sc.installed.sail", "is": true },
+                { "flag": "sc.installed.rope", "is": true }
+              ],
+              "effects": [
+                { "type": "flag", "id": "sc.boat.ready", "value": true },
+                { "type": "quest", "id": "sc.boat", "value": "complete" }
+              ]
             }
           ],
           "when": [
@@ -120,6 +133,19 @@
               "type": "flag",
               "id": "sc.installed.sail",
               "value": true
+            },
+            {
+              "type": "conditional",
+              "id": "sc.otto.sail.complete",
+              "when": [
+                { "flag": "sc.installed.rudder", "is": true },
+                { "flag": "sc.installed.sail", "is": true },
+                { "flag": "sc.installed.rope", "is": true }
+              ],
+              "effects": [
+                { "type": "flag", "id": "sc.boat.ready", "value": true },
+                { "type": "quest", "id": "sc.boat", "value": "complete" }
+              ]
             }
           ],
           "when": [
@@ -147,6 +173,19 @@
               "type": "flag",
               "id": "sc.installed.rope",
               "value": true
+            },
+            {
+              "type": "conditional",
+              "id": "sc.otto.rope.complete",
+              "when": [
+                { "flag": "sc.installed.rudder", "is": true },
+                { "flag": "sc.installed.sail", "is": true },
+                { "flag": "sc.installed.rope", "is": true }
+              ],
+              "effects": [
+                { "type": "flag", "id": "sc.boat.ready", "value": true },
+                { "type": "quest", "id": "sc.boat", "value": "complete" }
+              ]
             }
           ],
           "when": [
@@ -162,7 +201,7 @@
         },
         {
           "id": "ready",
-          "text": "Is the boat ready?",
+          "text": "What should I know before crossing?",
           "next": "sc.otto.ready",
           "effects": [
             {
@@ -1097,6 +1136,58 @@
               "kind": "stormshot",
               "amount": 1
             }
+          ]
+        }
+      ]
+    },
+    "sc.fit": {
+      "when": [
+        { "flag": "sc.met", "is": true }
+      ],
+      "effects": [
+        {
+          "type": "conditional", "id": "sc.fit.rudder",
+          "when": [
+            { "item": "sc.rudder", "count": 1 },
+            { "flag": "sc.installed.rudder", "is": false }
+          ],
+          "effects": [
+            { "type": "item", "id": "sc.rudder", "amount": -1 },
+            { "type": "flag", "id": "sc.installed.rudder", "value": true }
+          ]
+        },
+        {
+          "type": "conditional", "id": "sc.fit.sail",
+          "when": [
+            { "item": "sc.sail", "count": 1 },
+            { "flag": "sc.installed.sail", "is": false }
+          ],
+          "effects": [
+            { "type": "item", "id": "sc.sail", "amount": -1 },
+            { "type": "flag", "id": "sc.installed.sail", "value": true }
+          ]
+        },
+        {
+          "type": "conditional", "id": "sc.fit.rope",
+          "when": [
+            { "item": "sc.rope", "count": 1 },
+            { "flag": "sc.installed.rope", "is": false }
+          ],
+          "effects": [
+            { "type": "item", "id": "sc.rope", "amount": -1 },
+            { "type": "flag", "id": "sc.installed.rope", "value": true }
+          ]
+        },
+        {
+          "type": "conditional", "id": "sc.fit.complete",
+          "when": [
+            { "flag": "sc.installed.rudder", "is": true },
+            { "flag": "sc.installed.sail", "is": true },
+            { "flag": "sc.installed.rope", "is": true }
+          ],
+          "effects": [
+            { "type": "flag", "id": "sc.boat.ready", "value": true },
+            { "type": "quest", "id": "sc.boat", "value": "complete" }
           ]
         }
       ]

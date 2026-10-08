@@ -38,7 +38,7 @@
               "id": "tc.ascent",
               "region": "storm",
               "title": "The path above the sea",
-              "text": "Sunspire stands beyond the upper cliffs. Repair the cargo lift brake below, then climb the eastern steps and release its top catch. Abe waits near the landing."
+              "text": "Sunspire stands beyond the upper cliffs. Climb the eastern steps to the middle ledge and inspect the old hydra shackle. The broken cargo lift is an optional shortcut for the return trip."
             }
           ],
           "when": []
@@ -55,7 +55,7 @@
       }
     },
     "tc.abe.path": {
-      "text": "Fit the spare brake wheel below the cargo lift. Climb the steps and release its upper catch. Then you can ride it.",
+      "text": "The eastern steps reach the middle ledge. The broken cargo lift is a shortcut if you want to repair it. Look for an old hydra shackle above.",
       "choices": [
         {
           "id": "beast",
@@ -72,7 +72,7 @@
         },
         {
           "id": "go",
-          "text": "I will fix the lift.",
+          "text": "I’ll take the steps.",
           "next": "tc.abe.wait",
           "effects": [],
           "when": []
@@ -440,7 +440,7 @@
           "id": "tc.lift",
           "region": "storm",
           "title": "The broken lift",
-          "text": "The brake wheel is fitted. Climb the eastern steps and release the catch at the upper landing."
+          "text": "The brake wheel is fitted. Release the upper catch to make this lift a return shortcut. The eastern steps already reach the middle ledge."
         }
       ],
       "when": [],
@@ -513,10 +513,6 @@
         }
       ],
       "when": [
-        {
-          "flag": "tc.lift",
-          "is": true
-        },
         {
           "flag": "tc.shackle",
           "is": true

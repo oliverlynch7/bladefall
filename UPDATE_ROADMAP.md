@@ -2496,3 +2496,9 @@ Rebuilt and shipped 48 versioned standard/Frost/Prison Break enemy models, updat
 
 ## [Codex | 2026-10-08] v2.142.0 - enemy art and motion second pass
 Refined all 48 versioned enemy models with brighter midtones, species-shaped beast faces and bodies, role-specific soldier and boss silhouettes, and material values compatible with game lighting. Updated idle and movement to plant resting feet and carry small weight shifts; named Prison Break and Colossus moves now have matching recoveries after their strikes. Rebuilt bestiary portraits and retained the 2.141 GLBs for rollback. All 50 skinned rigs loaded in browser with finite motion; 136 attack joins, live boss variants, 12-enemy phone rendering, previous-version save and Prison Break co-op checks passed. Final art and animation feel await Oliver playtesting; no SFX work.
+
+## [Codex | 2026-10-08] Existing campaign route quality (SHIPPED v2.143.0)
+
+- [x] Repaired six environmental/story contradictions and return errands in the existing full-scale Keep, Thunder Cliffs, Deep Ice Caves, Snowbound Peaks, Iron Halls and Shipwreck Shore maps. Preserved optional branches, previous quest flags and alternate NPC help.
+- [x] Aligned objective arrows, journal text and pickup feedback with the direct routes; added visible winch/cart/boat responses and kept Snowbound's elevated shard floor solid when stood upon.
+- [x] Passed level regressions, static gate, muted real-browser route and boat tests, two-player progression/lift test, pre-change save load and normal-camera screenshot review. Broader pacing and final art quality still require human playtesting; this is a first pass, not a completed whole-campaign redesign.

@@ -406,7 +406,7 @@
       }
     },
     "ih.jack.first": {
-      "text": "Bring insulated brake handles from the western stores. I'll lock this cart across the gap as a bridge.",
+      "text": "The western stores have insulated brake handles. Fit them to this cart, or bring them to me. Then its deck can bridge the gap.",
       "choices": [
         {
           "id": "help",
@@ -422,7 +422,7 @@
               "id": "ih.cart",
               "region": "ember",
               "title": "A cart that stays put",
-              "text": "Recover insulated handles from the western stores, then return to Jack beside the cart. He can lock its deck across the gap to the Great Furnace."
+              "text": "Recover insulated handles in the western stores. Fit them at the service cart ahead, or ask Jack to do it. The cart will span the gap to the Great Furnace."
             }
           ]
         },
@@ -459,7 +459,7 @@
               "id": "ih.cart",
               "region": "ember",
               "title": "A cart that stays put",
-              "text": "Get insulated handles from the western stores and return them to Jack."
+              "text": "Get insulated handles from the western stores. Fit them to the cart or ask Jack for help."
             }
           ]
         }
@@ -475,11 +475,11 @@
     },
     "ih.jack.wait": {
       "topicMenu": true,
-      "text": "Western stores. Look for thick wrapped grips.",
+      "text": "Western stores. Look for thick wrapped grips. Fit them into the cart or bring them to me.",
       "choices": [
         {
           "id": "return",
-          "text": "Here are the insulated handles.",
+          "text": "Can you fit these handles for me?",
           "next": "ih.jack.fixed",
           "effects": [
             {
@@ -618,6 +618,25 @@
         {
           "type": "flag",
           "id": "ih.handles"
+        }
+      ]
+    },
+    "ih.cart": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.cart"
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.handles",
+          "is": true
+        },
+        {
+          "flag": "ih.cart",
+          "is": false
         }
       ]
     },

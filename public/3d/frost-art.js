@@ -68,6 +68,12 @@ export function buildFrost(scene,w){
       add('trunk',d.x,y+hh*.4,d.z,ww,hh*.8,dd,'#756348');
       for(let j=0;j<3;j++){add('pine',d.x,y+hh*(.45+j*.2),d.z,ww*(1-j*.2),hh*.55,dd*(1-j*.2),'#48686a');add('pine',d.x,y+hh*(.47+j*.2),d.z,ww*(.86-j*.18),hh*.51,dd*(.86-j*.18),'#d6e4df');}continue;
     }
+    if(d.kind==='mountainAwning'){
+      target='roof'+roofs.size;roofs.set(target,d);
+      add('slab',d.x,y+hh/2,d.z,ww,hh,dd,d.c||'#ad9c7f');
+      add('snow',d.x,y+hh+.5,d.z,ww,1,dd,'#e1e6df');
+      target=null;continue;
+    }
     if(d.kind==='caveroof'){
       target='roof'+roofs.size;roofs.set(target,d);add('roof',d.x,y+hh/2,d.z,ww,hh,dd);target=null;
       // Ice ribs echo the destination arch at a few narrow, low-floor passages.
@@ -101,10 +107,10 @@ export function buildFrost(scene,w){
 export function updateFrost(w){
   if(!active||!w.p)return;const a=active,p=w.p,meta=window.__BF_META?.(),low=meta?.quality==='low',range=low?720:1080,fps=meta?.camMode==='fps';let tris=0,calls=0;
   for(const [cell,g] of a.groups){const roof=g.userData.roof,[cx,cz]=roof?[roof.x,roof.z]:cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;
-    if(g.visible&&roof&&!fps&&w.eye&&w.eye.y>roof.y0-30&&Math.abs(p.x-roof.x)<roof.w/2+180&&Math.abs(p.z-roof.z)<roof.d/2+230)g.visible=false;
+    if(g.visible&&roof&&!fps&&w.eye&&w.eye.y>roof.y0-30&&(!roof.underPlayerOnly||p.y<roof.y0-10)&&Math.abs(p.x-roof.x)<roof.w/2+180&&Math.abs(p.z-roof.z)<roof.d/2+230)g.visible=false;
     if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}
   }
-  for(const f of a.fade){const o=f.o;const hidden=window.BFCameraOcclusion.blocks(w,o,o.y0??Math.min(0,o.h-18),o.h,window.__BF_META?.().camMode,8);if(hidden!==f.hidden){f.mesh.setMatrixAt(f.index,hidden?zero:f.matrix);f.mesh.instanceMatrix.needsUpdate=true;f.hidden=hidden;}}
+  for(const f of a.fade){const o=f.o;const underShard=o.roofShard&&p.y<o.h-50&&Math.abs(p.x-o.x)<o.w/2+90&&Math.abs(p.z-o.z)<o.d/2+130;const hidden=underShard||window.BFCameraOcclusion.blocks(w,o,o.y0??Math.min(0,o.h-18),o.h,window.__BF_META?.().camMode,8);if(hidden!==f.hidden){f.mesh.setMatrixAt(f.index,hidden?zero:f.matrix);f.mesh.instanceMatrix.needsUpdate=true;f.hidden=hidden;}}
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;
   const near=a.glows.map(v=>({v,d:(v.x-p.x)**2+(v.y-p.y)**2+(v.z-p.z)**2})).sort((x,y)=>x.d-y.d);a.lights.forEach((l,i)=>{l.visible=!low&&near[i]?.d<300**2;if(l.visible)l.position.copy(near[i].v)});
   const x=Math.round(p.x/250)*250,z=Math.round(p.z/250)*250,y=Math.round(p.y/200)*200,key=x+','+z+','+low+','+y;if(a.shadow!==key){a.sun.position.set(x-450,y+1200,z+500);a.sun.target.position.set(x,y,z);a.sun.target.updateMatrixWorld();a.shadow=key;window.__FROST_SHADOW_DIRTY=true;}

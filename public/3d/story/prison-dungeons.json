@@ -85,7 +85,7 @@
       }
     },
     "kd.walter.lift": {
-      "text": "Free the prisoners, then hook lift weights totaling four. Leave the others off. Use the eastern service stairs to follow them.",
+      "text": "Free the prisoners, then hook lift weights totaling four. The old stairs have collapsed, so board the lift with them. It keeps running after they reach shelter.",
       "choices": [
         {
           "id": "back",
@@ -608,7 +608,7 @@
           "id": "kd.rescue",
           "region": "keep",
           "title": "Get them to the lift",
-          "text": "The hidden prisoners are free. They will gather at the central lift. Its marked weights need a total of four. Read their confiscated papers before leaving."
+          "text": "The hidden prisoners are free. The old service stair has collapsed, so they need the central lift. Hook weights totaling four and board with them. Read their confiscated papers before leaving."
         }
       ],
       "when": [
@@ -649,7 +649,7 @@
           "id": "kd.lift",
           "region": "keep",
           "title": "Lift load plate",
-          "text": "UPPER SHELTER: 4. Hook weights that add up to four. A hooked weight is raised and pale green; a loose one stays dark. The eastern service stairs connect both landings."
+          "text": "UPPER SHELTER: 4. Hook weights that add up to four. A hooked weight is raised and pale green; a loose one stays dark. Board the lift once the load is right. It cycles after the group reaches shelter."
         }
       ]
     },

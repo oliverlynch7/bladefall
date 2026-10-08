@@ -27,7 +27,7 @@
               "id": "ff.heater",
               "region": "frost",
               "title": "Shelter before the storm",
-              "text": "Heath needs the heater part from the abandoned lift house west of his shelter. Bring it back to him. The sheltered ridge avoids the exposed crossing."
+              "text": "The heater coil has fallen loose beside the frozen crossing. Fit it into the winch by Heath’s shelter. The western lift-house ridge is an optional sheltered route."
             }
           ]
         },
@@ -64,7 +64,7 @@
               "id": "ff.heater",
               "region": "frost",
               "title": "Shelter before the storm",
-              "text": "Heath needs the heater part from the abandoned lift house west of his shelter. Bring it back to him. The sheltered ridge avoids the exposed crossing."
+              "text": "The heater coil has fallen loose beside the frozen crossing. Fit it into the winch by Heath’s shelter. The western lift-house ridge is an optional sheltered route."
             }
           ]
         }
@@ -81,11 +81,11 @@
     },
     "ff.heath.prepare": {
       "topicMenu": true,
-      "text": "Bring a heater part from the old lift house. I'll thaw the crossing winch. Ellis's cave is above the signal crown. The longer ridge shelters you from wind.",
+      "text": "The heater coil fell out beside the crossing. Fit it in the winch, then climb to the signal crown. The western ridge shelters you from the wind.",
       "choices": [
         {
           "id": "return",
-          "text": "Here is the heater part.",
+          "text": "Can you fit this coil for me?",
           "next": "ff.heath.repaired",
           "effects": [
             {
@@ -325,8 +325,27 @@
           "type": "note",
           "id": "ff.part",
           "region": "frost",
-          "title": "The heater part",
-          "text": "A heavy metal part survived inside the abandoned lift house. Heath may be able to use it."
+          "title": "The heater coil",
+          "text": "The heater coil fell loose from the crossing winch. Put it back in the empty socket beside Heath’s shelter."
+        }
+      ]
+    },
+    "ff.heater": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ff.heater"
+        }
+      ],
+      "when": [
+        {
+          "flag": "ff.part",
+          "is": true
+        },
+        {
+          "flag": "ff.heater",
+          "is": false
         }
       ]
     },

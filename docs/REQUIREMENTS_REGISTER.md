@@ -1110,3 +1110,13 @@ Implemented in version 2.141.0. All 48 standard/Frost/Prison Break appearances a
 ## [Codex | 2026-10-08] Further enemy art and animation refinement
 
 Oliver asks to spend more time making the newly upgraded enemy roster better (source U-2026-10-08-ENEMY-ART-FOLLOWUP). Improve the whole cast's readable silhouettes, material response, gait and attack follow-through within the current browser budget; preserve the 2.141 files as rollback, gameplay timing, identifiers, saves and co-op. Version 2.142 adds role-shaped beast heads and armored contours, material values compatible with the actual game lighting, planted idle feet and body weight travel, and move-specific boss recoveries. All 48 versioned appearances and 50 skinned animation sets passed automated/browser checks; art and combat feel still require Oliver's playtest. See docs/design/ENEMY_ART_MOTION_SECOND_PASS_2026-10-08.md.
+
+## [Codex | 2026-10-08] Improve the existing campaign levels
+
+Oliver approves a substantial campaign playability/reliability pass and now prefers adjusting the existing full-scale levels over replacing them. Prioritize observed player-action repetition, nonsensical geography, empty travel and progression failures. Use the separate Briar/Keep betas as tested design references, retaining approved interactions, story and strong existing assets. First grounded fixes and their verification contract are in docs/design/CAMPAIGN_EXISTING_LEVEL_PASS_2026-10-08.md. This authorizes live-map changes but does not turn automated evidence into a claim of fun or justify a one-shot replacement of every level.
+
+The same existing-level pass extends to Snowbound Peaks' compulsory heater-part return: keep the optional western lift-house loop, put the needed coil at the forward crossing winch, and allow player installation with an immediate visible result. Preserve previous-save flags and Heath's optional guidance/repair route. See the updated campaign pass packet.
+
+Iron Halls' insulated handles should likewise work as an object found on the west-stores route and installed at the service cart ahead; Jack's conversation remains available and can repair it too. This preserves the worker safety and machine shutdown story while removing the forced meet-fetch-return pattern. See the same campaign pass packet.
+
+The Shipwreck Shore supplies should visibly complete Otto's boat without requiring another conversation for each part or a separate verbal approval once all three are fitted. The player may fit carried parts at Otto's workbench, while Otto's existing help remains usable for older saves and players who prefer speaking to him. Keep the three distinct retrieval routes, the sea crossing, co-op authority, and existing quest item/flag IDs.

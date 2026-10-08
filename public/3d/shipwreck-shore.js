@@ -3,7 +3,7 @@
 const f=(s,k)=>!!s.flags['sc.'+k];
 const paths={beach:[[0,500,30],[0,-350,30],[0,-1400,30],[0,-2550,30]],wreck:[[-100,-500,30],[-800,-650,50],[-1350,-1250,110],[-1750,-1820,240],[-1370,-2320,300],[-760,-2320,130],[0,-2200,30]],lookout:[[0,-800,30],[850,-650,100],[1400,-1150,220],[1350,-1900,350],[950,-2440,200],[0,-2550,30]],cave:[[850,-650,100],[1840,-440,30],[2350,-1100,0],[2230,-1950,0],[1780,-2250,200],[950,-2440,200]],rose:[[0,-2550,30],[-750,-2820,50],[-1320,-3400,130],[-850,-3970,80],[0,-4050,30],[0,-2550,30]],cache:[[-1320,-3400,130],[-2130,-3540,200],[-2370,-2870,100],[-1750,-1820,240]]};
 function code(seed){return [1+(seed>>>0)%4,1+((seed>>>3)%4),1+((seed>>>7)%4)];}
-function quest(s){return !f(s,'met')?'Speak to Otto beside the boat':!f(s,'boat.ready')?'Repair the boat: rudder '+(+f(s,'installed.rudder'))+'/1, sail '+(+f(s,'installed.sail'))+'/1, rope '+(+f(s,'installed.rope'))+'/1':!f(s,'depart')?'Finish exploring, then board beside Otto':'Survive the crossing to Thunder Cliffs';}
+function quest(s){return !f(s,'met')?'Speak to Otto beside the boat':!f(s,'boat.ready')?(['rudder','sail','rope'].some(k=>(s.items['sc.'+k]||0)>0)?'Fit recovered parts at Otto’s workbench':!f(s,'installed.rudder')?'Find a rudder in the tilted wreck':!f(s,'installed.sail')?'Take sailcloth from the occupied lookout':'Find dry rope in the storage cave'):!f(s,'depart')?'Board the repaired boat beside Otto':'Survive the crossing to Thunder Cliffs';}
 function status(G){return {guards:G.enemies.filter(e=>e.shoreLookout&&!e.dead&&e.hp>0).length,clock:G.shore.clock};}
 function available(key,G,remote){return key!=='sc.sail'||!(remote||status(G)).guards;}
 function build({G,plat,spawn}){
@@ -30,7 +30,7 @@ function build({G,plat,spawn}){
  for(const d of G.deco)d.c=d.kind==='shoreRock'?'#405359':'#98734c';
  G.storyNpcs=[{id:'otto',name:'Otto',x:170,z:-300,y:30},{id:'rose',name:'Captain Rose',x:-160,z:-2680,y:30}];
  const obj=(key,label,x,z,y,kind)=>({key:'sc.'+key,label,x,z,y,kind});
- G.storyObjects=[obj('rudder','Take the rudder',-1390,-2420,300,'rudder'),obj('sail','Take the sailcloth',1480,-1900,350,'sail'),obj('drain','Open the outside drain',2230,-690,0,'lever'),obj('latch','Lift the dry-room latch',2390,-1190,0,'lever'),obj('rope','Take the dry rope',2370,-1640,0,'rope'),obj('bell','Take the ship bell',-1320,-3430,130,'bell'),obj('record','Read the last crew entry',-1120,-3600,130,'book'),obj('memorial','Set the crew board upright',100,-4100,30,'memorial'),obj('hull.note','Read the hull repair marks',-1220,-2130,300,'book'),obj('code.note','Read the ship chest lid',-2140,-3400,200,'chest'),obj('board','Board the repaired boat',-180,-210,30,'board')];
+ G.storyObjects=[obj('rudder','Take the rudder',-1390,-2420,300,'rudder'),obj('sail','Take the sailcloth',1480,-1900,350,'sail'),obj('drain','Open the outside drain',2230,-690,0,'lever'),obj('latch','Lift the dry-room latch',2390,-1190,0,'lever'),obj('rope','Take the dry rope',2370,-1640,0,'rope'),obj('fit','Fit recovered parts at Otto’s workbench',300,-320,30,'workbench'),obj('bell','Take the ship bell',-1320,-3430,130,'bell'),obj('record','Read the last crew entry',-1120,-3600,130,'book'),obj('memorial','Set the crew board upright',100,-4100,30,'memorial'),obj('hull.note','Read the hull repair marks',-1220,-2130,300,'book'),obj('code.note','Read the ship chest lid',-2140,-3400,200,'chest'),obj('board','Board the repaired boat',-180,-210,30,'board')];
  for(let i=0;i<3;i++)G.storyObjects.push(obj('weight.'+(i+1),'Move the '+[1,2,4][i]+' weight',-1540+i*125,-2150,300,'weight'+i));
  for(let i=1;i<=4;i++)G.storyObjects.push(obj('code.'+i,'Enter '+i,-2310+i*95,-3680,200,'code'+i));
  G.storyObjects.find(o=>o.key==='sc.sail').blockedLabel='Clear the lookout patrol first';G.storyObjects.find(o=>o.key==='sc.sail').blockedText='The patrol still controls the sailcloth.';
@@ -45,7 +45,7 @@ function sync({G,state:s,plat}){if(s.notes['sc.hull'])s.notes['sc.hull'].text='C
 }
 function shards(s){return f(s,'hull.open')?[{id:'SC-01',x:-1930,z:-1230,y:40}]:[];}
 function draw({G,state:s,bx},t){
- for(const o of G.storyObjects){if(s.flags['event.'+o.key]&&!['memorial'].includes(o.kind))continue;const y=o.y;
+ for(const o of G.storyObjects){if(o.kind==='workbench'||s.flags['event.'+o.key]&&!['memorial'].includes(o.kind))continue;const y=o.y;
   if(o.kind==='book'){bx(o.x,y+24,o.z,70,45,50,'#64513b');bx(o.x,y+49,o.z,60,4,40,'#ddcca3');}
   else if(o.kind==='rope'){for(let i=0;i<3;i++){bx(o.x,y+10+i*9,o.z,60-i*5,7,48-i*5,'#c3a775');}}
   else if(o.kind==='sail'){bx(o.x,y+16,o.z,90,25,55,'#dbcca8');for(const x of [-30,30])bx(o.x+x,y+30,o.z,8,5,57,'#5a695e');}

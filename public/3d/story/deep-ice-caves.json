@@ -28,7 +28,7 @@
   },
   "nodes": {
     "ic.ellis.first": {
-      "text": "They caught me and were taking me to the Gate. Recover my sealed notes from the pack below the west tunnel.",
+      "text": "They caught me and were taking me to the Gate. My sealed notes fell near the west tunnel. Read them when you find the pack.",
       "choices": [
         {
           "id": "help",
@@ -44,7 +44,7 @@
               "id": "ic.notes.quest",
               "region": "frost",
               "title": "What Ellis left behind",
-              "text": "Recover the sealed notes from the fallen pack on the low western shelf, then return them to Ellis. The pack is stable; there is no time limit."
+              "text": "Find the red-sealed notes in the pack on the low western shelf. Read them there for a lead on the Legion’s weapons. Ellis can tell you more if you return."
             }
           ]
         },
@@ -81,7 +81,7 @@
               "id": "ic.notes.quest",
               "region": "frost",
               "title": "What Ellis left behind",
-              "text": "Recover the sealed notes from the fallen pack on the low western shelf, then return them to Ellis. The pack is stable; there is no time limit."
+              "text": "Find the red-sealed notes in the pack on the low western shelf. Read them there for a lead on the Legion’s weapons. Ellis can tell you more if you return."
             }
           ]
         },
@@ -99,7 +99,7 @@
               "id": "ic.notes.quest",
               "region": "frost",
               "title": "What Ellis left behind",
-              "text": "Recover the sealed notes from the fallen pack on the low western shelf, then return them to Ellis. The pack is stable; there is no time limit."
+              "text": "Find the red-sealed notes in the pack on the low western shelf. Read them there for a lead on the Legion’s weapons. Ellis can tell you more if you return."
             }
           ]
         }
@@ -589,6 +589,17 @@
         {
           "type": "flag",
           "id": "ic.notes"
+        },
+        {
+          "type": "flag",
+          "id": "ic.ellis.lead"
+        },
+        {
+          "type": "note",
+          "id": "ic.emberdeep",
+          "region": "frost",
+          "title": "The next target: Emberdeep",
+          "text": "Ellis’s sealed notes trace the Legion’s weapon shipments to Emberdeep. Stop the forge supplying its hunting parties. Three Hollowed officers guard the north exit from these caves."
         }
       ]
     },

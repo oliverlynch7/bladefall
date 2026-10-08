@@ -1,9 +1,9 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
- 'sc.rudder':'Rudder recovered. Bring it to Otto at the boatbuilding site.',
- 'sc.sail':'Sail recovered. Otto needs it to prepare your crossing.',
- 'sc.rope':'Rope recovered. Bring it to Otto with the sail and rudder.',
+ 'sc.rudder':'Rudder recovered. Fit it at Otto’s workbench beside the boat.',
+ 'sc.sail':'Sailcloth recovered. Fit it at Otto’s workbench beside the boat.',
+ 'sc.rope':'Dry rope recovered. Fit it at Otto’s workbench beside the boat.',
  'sc.bell':'Ship bell recovered. Keep it for the shore memorial.',
  'cg.coat':'Legion coat collected. Your disguise also needs a helmet and travel papers.',
  'cg.helmet':'Legion helmet collected. Your disguise also needs a coat and travel papers.',
@@ -16,6 +16,10 @@ const outcomes={
 };
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
+ if(event?.effects?.some(e=>e.id==='sc.fit.rudder')){
+  const fitted=['rudder','sail','rope'].filter(k=>!before.flags['sc.installed.'+k]&&after.flags['sc.installed.'+k]);
+  if(fitted.length)return {id,replaceKey:'boat:assembly',kind:after.flags['sc.boat.ready']?'Boat ready':'Boat repair',title:after.flags['sc.boat.ready']?'The boat is ready':fitted.map(k=>k[0].toUpperCase()+k.slice(1)).join(' and ')+' fitted',text:after.flags['sc.boat.ready']?'All three parts are fitted. Board beside Otto when you are ready to cross.':'The '+fitted.join(' and ')+' '+(fitted.length===1?'is':'are')+' now fitted to the boat. Find the remaining supplies or ask Otto for help.'};
+ }
  if(event?.effects?.some(e=>e.id==='ih.braces'))return {id,replaceKey:'puzzle:ih.line',kind:'Machine safety',title:'Safety cable pulled',text:'Eight lights are counting down. Reach the hammer lock before they go out. You can pull this cable again if you miss it.'};
  const e=event?.effects?.find(e=>['counterweight','rotatePuzzle','sequence','resetPuzzle','balanceBeam','waterworks','flowSwitch','linkedRotate'].includes(e.type));
  if(!e)return null;

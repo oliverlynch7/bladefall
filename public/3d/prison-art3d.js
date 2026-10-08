@@ -171,6 +171,33 @@ export function buildPrisonArt(plan){
     add(new T.SphereGeometry(12,12,8),'glow',x-sx*20,122,z);
    }
   }
+  if(plan.revision>=10&&room.mechanic==='wards'){
+   // The ward sockets are floor inlays, not invisible barriers. The actual
+   // destructible crystals use the existing enemy model and combat collision.
+   for(const [dx,dz] of room.wardSockets){
+    const x=room.x+dx,z=room.z+dz;
+    for(const radius of [25,38])add(new T.TorusGeometry(radius,3,6,20),'route',x,1.6,z,Math.PI/2);
+    for(let k=0;k<8;k++){const a=k*Math.PI/4;add(new T.OctahedronGeometry(4,0),'glow',x+Math.cos(a)*38,2.8,z+Math.sin(a)*38);}
+    block(x,room.h-18,z,8,22,8,'iron');
+    add(new T.TorusGeometry(30,4,6,20),'trim',x,room.h-25,z,Math.PI/2);
+   }
+   for(const sx of [-1,1]){
+    const x=room.x+sx*(room.w/2-13);
+    for(const dz of [-150,0,150]){block(x,room.h*.45,room.z+dz,6,room.h*.62,15,'iron');add(new T.OctahedronGeometry(7,0),'glow',x-sx*12,room.h*.67,room.z+dz);}
+   }
+  }
+  if(plan.revision>=10&&room.mechanic==='hold'){
+   // A full circular floor glyph marks exactly the playable charging radius.
+   // Progress fills in the runtime overlay; this architecture never occludes it.
+   for(const radius of [room.holdRadius-14,room.holdRadius])add(new T.TorusGeometry(radius,3,6,48),'route',room.x,1.5,room.z,Math.PI/2);
+   for(let k=0;k<12;k++){const a=k*Math.PI/6,x=room.x+Math.cos(a)*(room.holdRadius+11),z=room.z+Math.sin(a)*(room.holdRadius+11);add(new T.OctahedronGeometry(6,0),'trim',x,2,z);}
+   add(new T.TorusGeometry(31,3,6,20),'optional',room.x,1.6,room.z,Math.PI/2);
+   for(const sx of [-1,1]){
+    const x=room.x+sx*(room.w/2-15);
+    block(x,room.h*.51,room.z,7,room.h*.68,68,'iron');
+    add(new T.TorusGeometry(26,4,6,20),'glow',x-sx*6,room.h*.63,room.z,0,Math.PI/2);
+   }
+  }
   if(room.kind==='bridge'){
    for(const sx of [-1,1])block(room.x+sx*(half+5),80,room.z,8,18,room.d-45,'wood');
    // A deep masonry shaft replaces the visible sky beneath broken floors.

@@ -823,3 +823,7 @@ The user's broad hub improvement request authorizes a cohesive quality pass on t
 ## [Codex | 2026-10-07] Larger roguelite and colorful art direction
 
 User-approved: expand the Endless Dungeon/Prison Break substantially and incorporate main-campaign enemies. This supersedes the earlier original-only enemy constraint for this mode. Preserve its unique bosses and foes alongside campaign enemies. The brighter hub palette sets the direction for future environments: colorful and legible, with AQW as a reference, while each location keeps its own story identity. Implementation must version fresh layouts and preserve saved runs.
+
+## [Codex | 2026-10-07] Endless Dungeon objective variety
+
+Further improvement request follows the 16-room expansion. Grounded finding: the new workroom and yard still shared the ordinary clear-all loop. For revision-10 fresh runs, the workroom has two breakable wards that call capped reinforcements until destroyed; the yard charges while either living co-op player holds a visible center circle, with groups arriving at charge milestones. The former creates target priority; the latter creates positional pressure and a pause/recovery decision. Old runs retain their previous rules and geometry. No SFX work.

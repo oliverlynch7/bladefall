@@ -71,6 +71,11 @@ function layout(seed,section,tier,revision=6){
   );
   for(const r of rooms)if(['fight','waves','vault'].includes(r.kind))r.dungeonSection=section;
  }
+ if(revision>=10){
+  // These rooms have different player inputs, not merely different enemy names.
+  rooms[11].mechanic='wards';rooms[11].wardSockets=[[-95,-140],[95,-140]];
+  rooms[13].mechanic='hold';rooms[13].holdRadius=145;rooms[13].holdSeconds=18;
+ }
  const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),...(revision>=9?[[8,11],[11,12],[12,13],[13,4]]:[[8,4]])]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[]),...(revision>=8?[[7,10]]:[]),...(revision>=9?[[11,14],[13,15]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
@@ -238,7 +243,7 @@ function encounter(room,tier,wave=0){
  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
 }
 function chestRarity(room,revision){if(room.kind==='boss')return 'uncommon';if(revision>=5)return room.id===3?'common':null;return ['fight','waves'].includes(room.kind)?'common':null;}
-function roomAdvice(room){return {registry:'Use the record desks as cover from casters.',pumps:'The pumps split the room into two lanes.',beacon:'Arcane guards and fast stalkers share this room.',yard:'Sidestep chargers and use the low barriers.',depot:'The supply racks make cover between waves.',muster:'The heavy guard is slow; circle around it.',stores:'An optional elite guards the supplies.',armory:'Shield racks break the guards’ line of attack.',liftbay:'Use the loading platforms to flank the guards.',watchpost:'Pike guards watch the long lane. Use the side cover.',infirmary:'Vessels set the floor alight. Keep moving.',cistern:'The islands interrupt a straight charge.',refectory:'Tables divide the room into two fighting lanes.',kennels:'Hounds rush in a straight line. Step aside.',gallery:'The split gallery has more than one approach.',barricades:'Use the barricades to break line of sight.'}[room.template]||'Watch each enemy before you commit.';}
+function roomAdvice(room){if(room.mechanic==='wards')return 'Destroy both glowing wards to stop the guards arriving.';if(room.mechanic==='hold')return 'Stand in the marked circle to charge the gate. Guard waves will interrupt you.';return {registry:'Use the record desks as cover from casters.',pumps:'The pumps split the room into two lanes.',beacon:'Arcane guards and fast stalkers share this room.',yard:'Sidestep chargers and use the low barriers.',depot:'The supply racks make cover between waves.',muster:'The heavy guard is slow; circle around it.',stores:'An optional elite guards the supplies.',armory:'Shield racks break the guards’ line of attack.',liftbay:'Use the loading platforms to flank the guards.',watchpost:'Pike guards watch the long lane. Use the side cover.',infirmary:'Vessels set the floor alight. Keep moving.',cistern:'The islands interrupt a straight charge.',refectory:'Tables divide the room into two fighting lanes.',kennels:'Hounds rush in a straight line. Step aside.',gallery:'The split gallery has more than one approach.',barricades:'Use the barricades to break line of sight.'}[room.template]||'Watch each enemy before you commit.';}
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
 window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAdvice,roomAt,copy};
 })();

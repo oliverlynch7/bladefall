@@ -291,7 +291,7 @@
       }
     },
     "ic.ellis.water": {
-      "text": "The crossing's plate shows the order: fill, freeze, then drain. Any class can use the controls. Mistakes reset it safely.",
+      "text": "The water lifts an old platform. Pump it up to the middle marks, jump over to freeze the channel, then reach the drain on the far bank.",
       "choices": [
         {
           "id": "leave",
@@ -615,7 +615,7 @@
           "id": "ic.lock",
           "region": "frost",
           "title": "The main waterworks",
-          "text": "The middle notch lines up with both banks. Each pull adds one notch of water. Freeze at the bank height, then drain beneath the ice. Draining a bad sheet clears it safely; you can try again."
+          "text": "The middle marks meet both banks. Pump until the float reaches them, jump aboard, freeze the water, then cross to the drain on the far bank. Draining at the wrong height clears the channel safely."
         }
       ],
       "when": [
@@ -702,6 +702,16 @@
           "flag": "ic.lock.open",
           "is": false
         }
+      ]
+    },
+    "ic.lock.reset": {
+      "once": false,
+      "effects": [
+        { "type": "waterworks", "id": "ic.lock", "action": "drain", "target": 2 }
+      ],
+      "when": [
+        { "flag": "ic.lock.clue", "is": true },
+        { "flag": "ic.lock.open", "is": false }
       ]
     },
     "ic.channel.1": {

@@ -16,13 +16,32 @@ const paths={
  exit:[[0,-4450,180],[0,-4900,180],[0,-5460,180]]
 };
 const flag=(s,k)=>!!s.flags[k],ready=s=>flag(s,'ic.ellis.lead')&&flag(s,'ic.lock.open');
-function quest(s){return !flag(s,'ic.pages')?'Follow the dropped pages into the caves':!flag(s,'ic.free')?'Reach the hidden laboratory and release Ellis':!flag(s,'ic.ellis.met')?'Speak to Professor Ellis in the laboratory':!flag(s,'ic.notes')?'Recover Ellis’s sealed notes from the fallen research pack':!flag(s,'ic.ellis.lead')?'Bring the sealed notes back to Ellis':!flag(s,'ic.lock.open')?(flag(s,'event.ic.lock.clue')?'Use the water controls to build the ice crossing':'Read the waterworks plate and open the ice crossing'):'Reach the north cavern — three Legion officers guard the exit';}
+function quest(s){
+ if(!flag(s,'ic.pages'))return 'Follow the dropped pages into the caves';
+ if(!flag(s,'ic.free'))return 'Reach the hidden laboratory and release Ellis';
+ if(!flag(s,'ic.ellis.met'))return 'Speak to Professor Ellis in the laboratory';
+ if(!flag(s,'ic.notes'))return 'Recover Ellis’s sealed notes from the fallen research pack';
+ if(!flag(s,'ic.ellis.lead'))return 'Bring the sealed notes back to Ellis';
+ if(flag(s,'ic.lock.open'))return 'Reach the north cavern — three Legion officers guard the exit';
+ if(!flag(s,'event.ic.lock.clue'))return 'Read the waterworks plate and open the ice crossing';
+ const level=s.items['ic.lock.level']||0,frozen=flag(s,'ic.lock.frozen');
+ if(level>=3||frozen&&level!==2)return 'Release excess water at the near sluice';
+ if(frozen)return 'Cross the frozen sheet and open the far drain';
+ return level<2?'Raise the floating platform to the middle bank marks':'Jump to the float and freeze the channel';
+}
 function status(G){return {guards:G.enemies.filter(e=>e.iceGuard&&!e.dead&&e.hp>0).length,rescueT:G.iceCaves.rescueT};}
-function available(key,G,remote){return key!=='ic.free'||!(remote||status(G)).guards;}
+function available(key,G,remote){
+ if(key==='ic.free')return !(remote||status(G)).guards;
+ const s=G.storyState||{},level=s.items?.['ic.lock.level']||0,frozen=!!s.flags?.['ic.lock.frozen'];
+ if(key==='ic.lock.1')return !frozen&&level<3;
+ if(key==='ic.lock.2')return !frozen&&level===2;
+ if(key==='ic.lock.reset')return level>=3||frozen&&level!==2;
+ return true;
+}
 function build({G,seg,plat,solid,spawn}){
  for(const k of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','pads','shockwaves','trails','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[k]=[];
  Object.assign(G,{haz:null,canyonWind:null,thorns:[],vents:[],phasers:[],debris:[],lights:[],npc:null,secret:null,secretTrigger:null,waystone:null,dashSign:null,beam:null,collapse:[],optionalMissions:[],_midSeq:0,portal:null,bonusPortal:null,bonusActive:false,vertical:true});
- G.iceCaves={walks:{},rescueT:0,water:0,sideWater:0,wet:0};G.areaName='Frostfell · Deep Ice Caves';G.campaignLayout={revision:2009,zone:'frost',area:1};
+ G.iceCaves={walks:{},rescueT:0,water:0,sideWater:0,wet:0};G.areaName='Frostfell · Deep Ice Caves';G.campaignLayout={revision:2010,zone:'frost',area:1};
  const floor=(x,z,y,w,d)=>plat(x,z,y,w,d,{slab:24,checkpoint:true,iceCaveFloor:true});
  for(const [id,p]of Object.entries(paths)){const walk=[];for(let j=1;j<p.length;j++){const a=p[j-1],b=p[j],n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/(id==='ledge'?145:85),Math.abs(b[2]-a[2])/(id==='ledge'?35:13)));for(let k=0;k<=n;k++){const q=a.map((v,i)=>v+(b[i]-v)*k/n);floor(q[0],q[1],q[2],id==='ledge'?100:id==='channels'?200:270,id==='ledge'?100:id==='channels'?200:270);walk.push(q);}}G.iceCaves.walks[id]=walk;}
  const rooms=[['Cave Mouth',0,240,340,720,700],['Crystal Junction',0,-1400,240,780,600],['Hidden Laboratory',-1350,-2240,300,1050,650],['Fallen Research Pack',-2250,-2820,200,540,430],['Broken Ice Shelf',1450,-2490,100,560,650],['Waterworks',0,-3570,180,860,700],['Lower Controls',-1350,-4210,80,590,430],['Sealed Channel',-1350,-5320,80,620,560],['North Junction',0,-4790,180,740,860],['Officer Approach',0,-5470,180,760,450]];
@@ -37,8 +56,14 @@ function build({G,seg,plat,solid,spawn}){
  const obj=(key,label,x,z,y,kind='lever')=>({key,label,x,z,y,kind});
  G.storyNpcs=[{id:'ellis',name:'Professor Ellis',x:-1330,z:-2230,y:300},{id:'hugo',name:'Hugo',x:1450,z:-2680,y:100}];
  G.storyObjects=[obj('ic.pages','Read the dropped research page',-80,-1020,240,'paper'),obj('ic.free','Release Professor Ellis',-1210,-2210,300,'lock'),obj('ic.notes','Recover the sealed notes',-2250,-2820,200,'pack'),obj('ic.lock.clue','Read the waterworks plate',-170,-3670,180,'plate'),obj('ic.hugo.find','Call into the broken ice shelf',1450,-2490,100,'call'),obj('ic.hugo.brace','Secure the rescue frame',1330,-2540,100,'brace'),obj('ic.rope','Take the spare rope',1450,-3260,140,'rope'),obj('ic.hugo.rope','Lower the rescue rope',1500,-2580,100,'rope'),obj('ic.channel.clue','Read the lower channel marks',-1430,-4210,80,'plate')];
- for(const [prefix,x,z,y]of [['ic.lock',0,-3850,180],['ic.channel',-1350,-4380,80]])for(const [i,name]of ['Fill','Freeze','Drain'].entries())G.storyObjects.push(obj(prefix+'.'+(i+1),name+' the '+(prefix==='ic.lock'?'main':'lower')+' channel',x-160+i*160,z,y,['fill','freeze','drain'][i]));
+ for(const [i,name,x,z]of [[1,'Pump water into the float',-160,-3850],[2,'Freeze the channel from the float',85,-4110],[3,'Open the far drain gate',120,-4500]])G.storyObjects.push({...obj('ic.lock.'+i,name,x,z,180,['fill','freeze','drain'][i-1]),blockedText:i===1?'The channel is frozen. Open the far drain to clear it.':i===2?'Raise the float to the middle bank marks before freezing.':'Read the waterworks plate first.'});
+ G.storyObjects.push({...obj('ic.lock.reset','Release excess water',130,-3840,180,'drain'),blockedText:'Use this sluice if the float rises above the middle marks.'});
+ for(const [i,name]of ['Fill','Freeze','Drain'].entries())G.storyObjects.push(obj('ic.channel.'+(i+1),name+' the lower channel',-1510+i*160,-4380,80,['fill','freeze','drain'][i]));
  for(const o of G.storyObjects)if(o.key.startsWith('ic.channel.')&&o.kind!=='plate'){const i=+o.key.split('.').pop()-1;o.label=['Toggle spring inlet','Toggle spill outlet','Toggle chiller feed'][i];o.kind='flow'+i;}
+ // A real floating work platform and temporary sheet turn the water puzzle into a crossing.
+ G.iceCaves.float={iceFloat:true,x:0,x0:0,z:-4095,w:210,d:210,h:0,px:0,py:0,amp:0,sp:0,ph:0};
+ G.iceCaves.sheet={iceSheet:true,x:0,x0:0,z:-4290,w:220,d:260,h:-80,px:0,py:-80,amp:0,sp:0,ph:0};
+ G.movers.push(G.iceCaves.float,G.iceCaves.sheet);
  for(const [x,z,y]of [[190,-1280,240],[-990,-2300,300],[230,-3450,180],[180,-4750,180]])G.healpads.push({x,z,y,r:31,charge:1,_acc:0});
  for(const [type,x,z,y,guard]of [['frostling',-100,-630,280],['frostling',200,-1380,240],['frostling',-1100,-1200,240],['grunt',-1250,-2310,300,true],['caster',-1570,-2300,300,true],['grunt',-1100,-2100,300,true],['frostling',-2120,-2620,220],['frostling',1100,-2010,100],['frostling',1670,-2410,100],['frostlobber',1430,-3130,130],['grunt',-100,-3500,180],['caster',140,-3680,180],['frostling',-1310,-4130,80],['frostling',1800,-4000,255],['frostlobber',1750,-4530,350],['grunt',120,-5020,180]]){const e=spawn(type,x,z,false);e.y=y;e.iceGuard=!!guard;}
  seg(0,-4200,500,640,{icePool:true});seg(-1350,-4680,400,590,{icePool:true});
@@ -46,13 +71,13 @@ function build({G,seg,plat,solid,spawn}){
 }
 function actors(G,s){const h=G.storyNpcs.find(n=>n.id==='hugo');if(!h)return;if(!flag(s,'ic.hugo.free')){Object.assign(h,{x:1450,z:-2680,y:100,walking:false});return;}const p=[[1450,-2680,100],...paths.rope],lengths=p.slice(1).map((q,i)=>Math.hypot(q[0]-p[i][0],q[1]-p[i][1])),total=lengths.reduce((a,b)=>a+b,0);let distance=Math.min(total,G.iceCaves.rescueT*155);for(let i=0;i<lengths.length;i++){if(distance<=lengths[i]){const t=distance/lengths[i],a=p[i],b=p[i+1];Object.assign(h,{x:a[0]+(b[0]-a[0])*t,z:a[1]+(b[1]-a[1])*t,y:a[2]+(b[2]-a[2])*t,walking:G.iceCaves.rescueT*155<total,_yaw:Math.atan2(b[0]-a[0],b[1]-a[1])});break;}distance-=lengths[i];}}
 function sync({G,state:s,plat,openWay,toast,sound}){const k=G.iceCaves,f=s.flags;if(!k)return;
- if(s.notes['ic.lock'])s.notes['ic.lock'].text="The middle notch lines up with both banks. Each pull adds one notch of water. Freeze at the bank height, then drain beneath the ice. Draining a bad sheet clears it safely; you can try again.";if(s.notes['ic.channel'])s.notes['ic.channel'].text="The spring feeds the chiller through the outer pipes. The middle pipe spills water away. Open a path from the spring to the chiller without feeding the spill. Watch where the water actually runs.";
+ if(s.notes['ic.lock'])s.notes['ic.lock'].text="The middle marks meet both banks. Pump until the float reaches them, jump aboard, freeze the water, then cross to the drain on the far bank. Draining at the wrong height clears the channel safely.";if(s.notes['ic.channel'])s.notes['ic.channel'].text="The spring feeds the chiller through the outer pipes. The middle pipe spills water away. Open a path from the spring to the chiller without feeding the spill. Watch where the water actually runs.";
  for(const [id,x,z,y,w,d]of [['ic.lock.open',0,-4180,180,270,730],['ic.channel.open',-1350,-4680,80,250,680]])if(f[id]&&!k[id]){k[id]=true;plat(x,z,y,w,d,{slab:26,checkpoint:true,iceBridge:true});}
- for(const [id,msg]of [['ic.pages','The page names Ellis’s laboratory to the west. A boot print cuts across the writing. Clue added to your journal.'],['ic.free','Ellis is free. Speak to him before leaving the laboratory.'],['ic.notes',f['ic.ellis.lead']?'The notes reveal Emberdeep’s weapon shipments. The waterworks are ahead; Ellis can explain more if you return.':'Sealed notes recovered. Show them to Ellis for the next lead.'],['ic.lock.clue','Watch the water against the middle notch. Each fill adds one notch; drain clears a bad sheet.'],['ic.channel.clue','Trace the outer pipes from spring to chiller. The middle pipe is a spill outlet.'],['ic.hugo.brace','Rescue frame secured. Find rope before lowering it.'],['ic.rope','Spare rope recovered. Return to the broken ice shelf.'],['ic.hugo.free','Hugo is climbing out. He will meet you at the waterworks junction.'],['ic.lock.open','The main ice crossing is stable. The north cavern is open.'],['ic.channel.open','The side channel is frozen. Follow it to the sealed chamber.']])if(f[id]&&!k[id+'.seen']){k[id+'.seen']=true;toast?.(msg);}
+ for(const [id,msg]of [['ic.pages','The page names Ellis’s laboratory to the west. A boot print cuts across the writing. Clue added to your journal.'],['ic.free','Ellis is free. Speak to him before leaving the laboratory.'],['ic.notes',f['ic.ellis.lead']?'The notes reveal Emberdeep’s weapon shipments. The waterworks are ahead; Ellis can explain more if you return.':'Sealed notes recovered. Show them to Ellis for the next lead.'],['ic.lock.clue','Pump until the float meets the middle marks, then cross it to reach the freeze valve. The drain is on the far bank.'],['ic.channel.clue','Trace the outer pipes from spring to chiller. The middle pipe is a spill outlet.'],['ic.hugo.brace','Rescue frame secured. Find rope before lowering it.'],['ic.rope','Spare rope recovered. Return to the broken ice shelf.'],['ic.hugo.free','Hugo is climbing out. He will meet you at the waterworks junction.'],['ic.lock.open','The main ice crossing is stable. The north cavern is open.'],['ic.channel.open','The side channel is frozen. Follow it to the sealed chamber.']])if(f[id]&&!k[id+'.seen']){k[id+'.seen']=true;toast?.(msg);}
  actors(G,s);if(ready(s)){G.qs['ic.caves']=1;openWay();}
 }
 function tick({G,state:s,host,toast},dt){const k=G.iceCaves;if(flag(s,'ic.hugo.free'))k.rescueT=Math.min(30,k.rescueT+dt);actors(G,s);
- const main=flag(s,'ic.lock.open')?0:(s.items['ic.lock.level']||0)*88,side=flag(s,'ic.channel.open')?0:((s.items['ic.channel.mask']||0)&1?52:0);k.water+=(main-k.water)*Math.min(1,dt*2);k.sideWater+=(side-k.sideWater)*Math.min(1,dt*2);
+ const level=s.items['ic.lock.level']||0,main=flag(s,'ic.lock.open')?0:level*88,side=flag(s,'ic.channel.open')?0:((s.items['ic.channel.mask']||0)&1?52:0);k.water+=(main-k.water)*Math.min(1,dt*2);k.sideWater+=(side-k.sideWater)*Math.min(1,dt*2);k.float.h=flag(s,'ic.lock.open')?180:k.water+8;k.sheet.h=flag(s,'ic.lock.open')?180:flag(s,'ic.lock.frozen')?level*88+8:-80;
  const p=G.p,wet=p.hp>0&&!p.downed&&p.y<35&&((Math.abs(p.x)<250&&p.z<-3900&&p.z>-4470)||(Math.abs(p.x+1350)<200&&p.z<-4410&&p.z>-4970));k.wet=wet?k.wet+dt:0;
  if(k.wet>1){const side=p.x<-600;Object.assign(p,{x:side?-1350:0,z:side?-4200:-3620,y:side?80:180,vy:0,vx:0,vz:0,onGround:true});k.wet=0;toast?.('The safety steps bring you back to the dry controls.');}
 }

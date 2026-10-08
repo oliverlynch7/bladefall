@@ -28,6 +28,16 @@ async page => {
     await load(3);
     await act(['ff.trail','ff.part','ff.heater']);await flush();
     ok('direct winch repair reaches guest',await guest.evaluate(()=>__BF3.G.storyState.flags['ff.heater']&&__BF3.G.peaks.crossing));
+    await load(3,1);
+    await page.evaluate(()=>{for(const e of __BF3.G.enemies){e.hp=0;e.dead=true;}});
+    await act(['ic.pages','ic.free']);
+    await page.evaluate(()=>{const b=__BF3,p=b.G.p,n=b.G.storyNpcs.find(n=>n.id==='ellis');Object.assign(p,{x:n.x,y:n.y,z:n.z});b.briarRequest('open',{npc:'ellis'});for(const choice of ['press','firm'])b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice});b.briarRequest('close');});
+    await act(['ic.notes','ic.lock.clue','ic.lock.1','ic.lock.1']);await flush();
+    ok('raised ice float reaches guest',await guest.evaluate(()=>{const b=__BF3;for(let i=0;i<180;i++)b.update(.016);return b.G.storyState.items['ic.lock.level']===2&&b.G.iceCaves.float.h>180;}));
+    await act(['ic.lock.2']);await flush();
+    ok('frozen crossing reaches guest',await guest.evaluate(()=>{const b=__BF3;for(let i=0;i<15;i++)b.update(.016);return !!b.G.storyState.flags['ic.lock.frozen']&&b.G.iceCaves.sheet.h>180;}));
+    await act(['ic.lock.3']);await flush();
+    ok('permanent ice bridge reaches guest',await guest.evaluate(()=>__BF3.G.storyState.flags['ic.lock.open']&&__BF3.G.iceCaves['ic.lock.open']));
     await load(4);
     await page.evaluate(()=>{for(const e of __BF3.G.enemies){e.hp=0;e.dead=true;}const b=__BF3,p=b.G.p,n=b.G.storyNpcs.find(n=>n.id==='flint');Object.assign(p,{x:n.x,y:n.y,z:n.z});b.briarRequest('open',{npc:'flint'});for(const choice of ['smash','agree','ready'])b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice});b.briarRequest('close');});
     await act(['ih.workers','ih.handles','ih.cart']);await flush();

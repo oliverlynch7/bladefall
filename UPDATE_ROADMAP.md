@@ -2502,3 +2502,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Repaired six environmental/story contradictions and return errands in the existing full-scale Keep, Thunder Cliffs, Deep Ice Caves, Snowbound Peaks, Iron Halls and Shipwreck Shore maps. Preserved optional branches, previous quest flags and alternate NPC help.
 - [x] Aligned objective arrows, journal text and pickup feedback with the direct routes; added visible winch/cart/boat responses and kept Snowbound's elevated shard floor solid when stood upon.
 - [x] Passed level regressions, static gate, muted real-browser route and boat tests, two-player progression/lift test, pre-change save load and normal-camera screenshot review. Broader pacing and final art quality still require human playtesting; this is a first pass, not a completed whole-campaign redesign.
+
+## [Codex | 2026-10-08] Frostfell waterworks spatial puzzle (SHIPPED v2.144.0)
+
+- [x] Turned the existing Deep Ice Caves crossing from three nearby button pulls into a physical basin puzzle: pump raises a floating work platform, jump to its freeze valve, cross temporary ice, then open the far-bank drain for the permanent bridge.
+- [x] Added a near-bank overflow reset for overpumping and previous partial saves frozen at a wrong height; retained IDs, Ellis/Hugo progression, the optional lower pipe puzzle and co-op authority.
+- [x] Passed static gate, Ice Caves regression, real-browser jump/crossing/recovery, visual review, broader route regression and two-player state propagation. Difficulty and enjoyment remain for human playtest.

@@ -1094,3 +1094,7 @@ Oliver requests a much larger, better Endless Dungeon roguelite, with enemies fr
 ## [Codex | 2026-10-07] Further Endless Dungeon improvement
 
 Oliver asks to improve the expanded Prison Break mode further. Prioritize mechanical variety and visible cause/effect, not renamed versions of clearing enemy packs. Preserve the three-section roguelite contract, old save layouts, co-op authority, sparse healing and the colorful, readable environment direction. This pass adds destructible reinforcement wards and a hold-the-circle encounter to the new wing on fresh revision-10 runs. See docs/design/ENDLESS_DUNGEON_OBJECTIVES_2026-10-07.md.
+
+## [Codex | 2026-10-07] Normal-speed Prison Break pacing
+
+Oliver approved a normal-speed playthrough and fixes before further expansion (source U-2026-10-07-PRISON-PACING). Browser evidence showed a player could pass the first required guard room as its enemies spawned, leaving the objective pointing backward. For fresh attempts, start encounters at the room approach and visibly block the outgoing route until that required room clears. Preserve historical checkpoint layouts and host-authoritative co-op state. See docs/design/ENDLESS_DUNGEON_PACING_2026-10-07.md. **Verified for implementation:** revision-11 deterministic layout test (1,080 plans, 6,480 gates, 10,800 older layouts unchanged), normal-speed browser gate collision/open/resume, three-section clear, revision-10 browser resume, guest state changes and desktop/phone rendering. Human fun/balance review remains open.

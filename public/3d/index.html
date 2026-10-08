@@ -1061,7 +1061,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2139"></script>
+<script src="./prison-dungeon.js?v=2140"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2083"></script>
@@ -1144,7 +1144,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.139.0-dungeon-objectives';
+const VERSION3D='2.140.0-dungeon-pacing';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -19983,7 +19983,7 @@ function drawCourse(s,t){
   }
   // doors: sealed slabs glow by type; open ones become archways. ori 'z' = opening along z (side wall)
   const doorCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
-  if(G.doors) for(const dr of G.doors){ if(cull(dr.x,dr.z)) continue; const zd=dr.ori==='z';
+  if(G.doors) for(const dr of G.doors){ if(dr.prisonGate||cull(dr.x,dr.z)) continue; const zd=dr.ori==='z';
     if(zd){ bx(dr.x,48,dr.z-dr.d/2-8, 20,96,16, stone); bx(dr.x,48,dr.z+dr.d/2+8, 20,96,16, stone); bx(dr.x,92,dr.z, 20,10,dr.d+32, stoneTop); }
     else { bx(dr.x-dr.w/2-8,48,dr.z, 16,96,20, stone); bx(dr.x+dr.w/2+8,48,dr.z, 16,96,20, stone); bx(dr.x,92,dr.z, dr.w+32,10,20, stoneTop); }
     if(!dr.open){
@@ -23306,8 +23306,9 @@ awardGold=function(n){return G?.escape?0:old.awardGold(n);}; // room receipts, n
 function receipts(events){const p=profile();let changed=false;for(const e of events||[]){if(e.members&&!e.members.includes(MP.active?MP.myId:'solo'))continue;changed=D.credit(p,e.id,e.gold,e.kind)||changed;}if(changed){meta.gold=p.gold;persist();hudUpdate();}return changed;}
 function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r.events.some(e=>e.id===id))return;const members=MP.active?[MP.myId,...Object.values(MP.peers).filter(q=>q.zone===MP.zone).map(q=>q.id)]:['solo'];const e={id,gold,kind,members};r.events.push(e);receipts([e]);toast('+'+gold+' dungeon gold'+(kind?' · unlock progress saved':''));}
 function packet(){const r=G?.escape;return r?{version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,stamp:G.time,states:r.states,events:r.events,safe:r.safe,finished:r.finished||null}:null;}
+function syncBarriers(){if(!G?.escape?.plan?.barriers)return;for(const gate of G.doors)if(gate.prisonGate)gate.open=!!G.escape.states[gate.from]?.cleared;}
 function receive(s){if(!s||s.version!==D.VERSION)return;if(G?.escape?.id===s.id&&(G.escape.finished||s.section<G.floor||(s.section===G.floor&&(s.stamp||0)<(G.escape.lastStamp||0))))return;if(!G?.escape||G.escape.id!==s.id)startDelve(profile().classes.includes(meta.classId)?meta.classId:'warrior',{remote:true,state:s});else if(G.floor!==s.section){loadDelveFloor(s.section,s);}
- const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);receipts(r.events);for(const q of r.plan.rooms)if(r.states[q.id]?.cleared)addRoomChest(q);openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
+ const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);syncBarriers();receipts(r.events);for(const q of r.plan.rooms)if(r.states[q.id]?.cleared)addRoomChest(q);openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
 function addRoomChest(q){
  const r=G.escape,rarity=D.chestRarity(q,r.layoutVersion);
  if(!rarity||r.chestRooms[q.id])return;
@@ -23326,7 +23327,7 @@ function start(cid,opts={}){
  if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
  else p.hp=effMaxHp(p);
  G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
- G.escape={layoutVersion:state?(state.layoutVersion||1):10,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ G.escape={layoutVersion:state?(state.layoutVersion||1):11,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
  MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
  if(MP.active&&!opts.remote)MP.enterSpecial('prison');
 }
@@ -23336,6 +23337,7 @@ loadDelveFloor=function(n,saved){
  const plan=D.layout(G.runSeed,n,r.tier,r.layoutVersion);r.plan=plan;r.chestRooms={};r.states=clone(saved?.states||{});for(const st of Object.values(r.states))if(st&&typeof st==='object'&&!st.cleared){st.started=false;st.wave=0;st.spawnTime=0;st.holdTime=0;st.anchors=[];delete st.nextWaveAt;delete st.nextReinforce;}r.safe=clone(saved?.safe||{x:0,z:180,y:0});r.finished=null;
  G.floor=n;G.stageIndex=5;G.zone=2;G.area=0;G.zoneTier=1+n;G.ngHp=1+(n-1)*.18+(r.tier-1)*.25;G.ngDmg=1+(n-1)*.1+(r.tier-1)*.12;G.haz=null;G.boss=null;document.getElementById('bosshpwrap').classList.add('prison-boss');
  for(const k of ['enemies','pickups','projectiles','particles','ambient','movers','pads','healpads','chests','deco','crumbles','geysers','springs','shockwaves','trails','spikefields','collapse','doors','plates','keys','torches','qmarks','dens','fx','combatArt','hostileArt','marks','meteors','gates','hubNpcs'])G[k]=[];
+ G.doors=(plan.barriers||[]).map(gate=>({...gate,prisonGate:true,open:!!r.states[gate.from]?.cleared}));
  G.rooms=[];G.segments=plan.floors.map(o=>({x:o.x,z:o.z,w:o.w,d:o.d}));G.walls=plan.walls;G.obstacles=plan.plats;G.cameraSolids=plan.roofs.map(o=>({...o}));G.portal=null;G.portalPos={...plan.exit};G.bonusPortal=null;G.secret=null;G.secretTrigger=null;G.npc=null;G.optionalMissions=[];G.bounds={...plan.bounds};G.progressEnd=plan.bounds.minZ;G.floorCleared=false;
  G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;delete G._cameraBoom;
  if(n===2&&!r.states.healed)G.springs.push({x:plan.rooms[5].x+100,z:plan.rooms[5].z+160,y:0});
@@ -23402,7 +23404,8 @@ function tick(dt){
  const room=D.roomAt(r.plan,G.p);if(room)r.current=room.id;
  if(!r.remote&&!MP.guest()){
   for(const q of r.plan.rooms.filter(q=>['fight','waves','vault','boss'].includes(q.kind))){const st=r.states[q.id]||(r.states[q.id]={});if(st.cleared)continue;
-   const present=[G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===MP.zone):[])].some(p=>!p.dead&&!p.downed&&Math.abs(p.x-q.x)<240&&Math.abs(p.z-q.z)<240);
+   const approach=r.layoutVersion>=11&&['fight','waves'].includes(q.kind)?420:240;
+   const present=[G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===MP.zone):[])].some(p=>!p.dead&&!p.downed&&Math.abs(p.x-q.x)<approach&&Math.abs(p.z-q.z)<approach);
    if(!st.started&&present&&(!st.nextWaveAt||G.time>=st.nextWaveAt))spawnRoom(q,st);
    if(st.started&&q.mechanic==='wards'){
     const anchors=(st.anchors||[]).filter(mid=>G.enemies.some(e=>e.mid===mid&&!e.dead&&e.hp>0));
@@ -23423,7 +23426,7 @@ function tick(dt){
    const living=G.enemies.some(e=>e.prisonRoom===q.id&&!e.dead&&e.hp>0);
    if(st.started&&G.time-st.spawnTime>1.4&&!living&&(!q.mechanic||q.mechanic==='wards'&&!st.wardsLeft||q.mechanic==='hold'&&st.holdTime>=q.holdSeconds)){
     if(q.kind==='waves'&&!st.wave&&!q.mechanic){st.wave=1;st.started=false;st.nextWaveAt=G.time+3;toast('Next wave in 3 seconds');continue;}
-    st.cleared=true;r.safe={x:q.x,y:0,z:q.z+190};G.lastSafe=clone(r.safe);reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
+    st.cleared=true;syncBarriers();r.safe={x:q.x,y:0,z:q.z+190};G.lastSafe=clone(r.safe);reward('room'+q.id,(q.kind==='boss'?100:40)*r.tier,q.kind==='vault'?'elites':null);
     addRoomChest(q);
     checkpoint();openExit();questUpdate();
    }
@@ -23463,6 +23466,7 @@ function tick(dt){
   :room?.mechanic==='hold'&&!active?.cleared?'Hold the center circle · '+Math.floor(active?.holdTime||0)+'/'+room.holdSeconds+'s'+(active?.holding?' · charging':' · step inside')
   :active?.started?(room.kind==='waves'&&active.wave?'Final wave · ':'')+(alive?alive+' foes remain':'Hold the room for reinforcements')
   :G.floorCleared?(G.floor===3?'Go to the exit to escape':'Go to the stairs')
+  :next&&r.states[next.id]?.started?'Exit sealed · clear '+next.name
   :next?'Reach '+next.name:'Explore the passage';
  const warning=r.combatHint?.until>G.time?r.combatHint.text:null;
  const side=room?.id===1&&!r.states[5]?.cleared?'Side route: '+r.plan.rooms[5].name:room?.id===3&&!r.states[6]?.cleared?'Side route: '+r.plan.rooms[6].name:room?.id===7&&r.plan.revision>=8&&!r.states.rafters?'Side route: '+r.plan.rooms[10].name:room?.id===11&&r.plan.revision>=9&&!r.states[14]?.cleared?'Side route: '+r.plan.rooms[14].name:room?.id===13&&r.plan.revision>=9&&!r.states.highWalk?'Side route: '+r.plan.rooms[15].name:null;
@@ -23485,6 +23489,13 @@ drawCourse=function(s,t){if(!G?.escape)return old.drawCourse(s,t);const plan=G.e
  if(plan.revision>=10){
   const ward=plan.rooms[11],st=G.escape.states[ward.id];for(const [dx,dz] of ward.wardSockets){const live=!st?.started||st.anchors?.some(mid=>G.enemies.some(e=>e.mid===mid&&!e.dead&&e.hp>0));const color=live?'#7ce9ec':'#657b81';bx(ward.x+dx,2,ward.z+dz,44,3,44,color,color,live ? .92 : .35);}
   const hold=plan.rooms[13],hs=G.escape.states[hold.id],charge=Math.floor((hs?.holdTime||0)/hold.holdSeconds*12);for(let i=0;i<12;i++){const a=i*Math.PI/6,x=hold.x+Math.cos(a)*hold.holdRadius,z=hold.z+Math.sin(a)*hold.holdRadius;bx(x,1.8,z,20,2,7,i<charge?'#edca65':'#5f9bab',i<charge?'#ffdf89':'#90cdd1',i<charge?1:.75);}
+ }
+ for(const gate of G.doors)if(gate.prisonGate){
+  const acrossX=gate.w>gate.d,frame='#755b3e',bar='#455867',glow=gate.open?'#83d9b1':'#efa558';
+  for(const side of [-1,1]){const x=gate.x+(acrossX?side*112:0),z=gate.z+(acrossX?0:side*112);bx(x,98,z,14,196,18,frame);}
+  bx(gate.x,196,gate.z,acrossX?240:18,18,acrossX?18:240,frame);
+  bx(gate.x,189,gate.z,acrossX?38:18,20,acrossX?18:38,glow,glow,.9);
+  if(!gate.open){for(let offset=-90;offset<=90;offset+=30)bx(gate.x+(acrossX?offset:0),98,gate.z+(acrossX?0:offset),acrossX?8:16,190,acrossX?16:8,bar);bx(gate.x,70,gate.z,acrossX?216:12,10,acrossX?12:216,frame);}
  }
  for(const sp of G.springs)if(!sp.used)bx(sp.x,2,sp.z,42,4,42,'#4ba58b','#74e6ba');
 };

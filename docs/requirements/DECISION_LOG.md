@@ -827,3 +827,7 @@ User-approved: expand the Endless Dungeon/Prison Break substantially and incorpo
 ## [Codex | 2026-10-07] Endless Dungeon objective variety
 
 Further improvement request follows the 16-room expansion. Grounded finding: the new workroom and yard still shared the ordinary clear-all loop. For revision-10 fresh runs, the workroom has two breakable wards that call capped reinforcements until destroyed; the yard charges while either living co-op player holds a visible center circle, with groups arriving at charge milestones. The former creates target priority; the latter creates positional pressure and a pause/recovery decision. Old runs retain their previous rules and geometry. No SFX work.
+
+## [Codex | 2026-10-07] Normal-speed Prison Break pacing | U-2026-10-07-PRISON-PACING
+
+Oliver authorized the proposed normal-speed playthrough and fixes. Browser observation: walking through the first guard room left newly spawned enemies behind and pointed the objective backward. Revision-11 fresh attempts therefore spawn required guards on approach and visibly seal each required room's outgoing corridor until that room clears. This is a route-pacing correction, not a new enemy or reward rule. Revisions 1-10, optional paths, save slot economy and co-op host authority remain unchanged. Automated/browser checks establish the implementation, while human combat feel remains open. See docs/design/ENDLESS_DUNGEON_PACING_2026-10-07.md.

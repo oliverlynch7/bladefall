@@ -217,7 +217,12 @@ function layout(seed,section,tier,revision=6){
 
  const exit={x:rooms[4].x,z:rooms[4].z-170,y:0};
  const bounds={minX:Math.min(...rooms.map(r=>r.x-r.w/2-20)),maxX:Math.max(...rooms.map(r=>r.x+r.w/2+20)),minZ:Math.min(...rooms.map(r=>r.z-r.d/2-20)),maxZ:revision>=5?395:320};
- return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,...(revision>=9?{mainRoute:[1,3,7,8,11,13,4]}:{}),title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
+ // Only fresh runs get the encounter gates. Old checkpoint geometry is immutable.
+ const barriers=revision>=11?[[1,2],[3,7],[7,9],[8,11],[11,12],[13,4]].map(([from,to])=>{
+  const a=rooms[from],b=rooms[to],alongX=Math.abs(a.x-b.x)>10;
+  return {from,to,x:(a.x+b.x)/2,z:(a.z+b.z)/2,w:alongX?24:225,d:alongX?225:24,h:220,ori:alongX?'z':'x',type:'combat'};
+ }):null;
+ return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,...(revision>=9?{mainRoute:[1,3,7,8,11,13,4]}:{}),...(barriers?{barriers}:{}),title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
 function encounter(room,tier,wave=0){
  if(room.dungeonSection){

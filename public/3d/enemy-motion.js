@@ -1,11 +1,11 @@
-import {choreographyProfile,choreographyPose} from './enemy-choreography.js?v=2141';
+import {choreographyProfile,choreographyPose} from './enemy-choreography.js?v=2142';
 import {fallenClips} from './fallen-motion.js?v=2007';
 import {orchardClips} from './brute-motion.js?v=2000';
 import * as THREE from './three.module.js';
 import {bakeWeaponContacts} from './weapon-choreography.js?v=1980';
 export const articulatedTypes=new Set(["grunt","emberling","frostling","toxling","goblin","caster","sentinel","revenant","frostlobber","blinkstalker","sunpriest","marblestatue","siegeknight","royalarcanist","brute","warden","archer","sorcerer","colossus","king","tyrant","marblecolossus"]);
 export const upgradedTypes=new Set('grunt flyer emberling frostling toxling shadeling sparkling goblin bones slime slimelet caster charger mimic dustjackal cragspitter galewisp thornboar sporeback sentinel revenant dummy bosscrystal frostshell frostlobber magmaskit embertotem blinkstalker voidtether sunpriest marblestatue siegeknight royalarcanist brute warden archer sorcerer king tyrant officer-shield officer-spear prison_pike prison_guard prison_hound prison_vessel prison_bell prison_maw prison_unbound'.split(' '));
-export function enemyAsset(type,original=false){if(original&&type.startsWith('prison_')){const base={prison_pike:'grunt',prison_guard:'sentinel',prison_hound:'dustjackal',prison_vessel:'embertotem',prison_bell:'siegeknight',prison_maw:'charger',prison_unbound:'tyrant'}[type];return './enemy-assets/upgraded/'+base+'-v2128.glb';}if(original&&type.startsWith('officer-'))return './enemy-assets/officers/'+type.slice(8)+'.glb';if(!original&&type==='colossus')return './enemy-assets/articulated/forge-colossus-v2125.glb';if(!original&&type==='marblecolossus')return './enemy-assets/articulated/marblecolossus-v2126.glb';if(!original&&upgradedTypes.has(type))return './enemy-assets/upgraded/'+type+'-v2141.glb';return './enemy-assets/'+(!original&&articulatedTypes.has(type)?'articulated/':'')+(!original&&['archer','brute','warden'].includes(type)?type+'-v1980':type)+'.glb';}
+export function enemyAsset(type,original=false){if(original&&type.startsWith('prison_')){const base={prison_pike:'grunt',prison_guard:'sentinel',prison_hound:'dustjackal',prison_vessel:'embertotem',prison_bell:'siegeknight',prison_maw:'charger',prison_unbound:'tyrant'}[type];return './enemy-assets/upgraded/'+base+'-v2128.glb';}if(original&&type.startsWith('officer-'))return './enemy-assets/officers/'+type.slice(8)+'.glb';if(!original&&type==='colossus')return './enemy-assets/articulated/forge-colossus-v2125.glb';if(!original&&type==='marblecolossus')return './enemy-assets/articulated/marblecolossus-v2126.glb';if(!original&&upgradedTypes.has(type))return './enemy-assets/upgraded/'+type+'-v2142.glb';return './enemy-assets/'+(!original&&articulatedTypes.has(type)?'articulated/':'')+(!original&&['archer','brute','warden'].includes(type)?type+'-v1980':type)+'.glb';}
 export function motionFamily(type){if(/brute|colossus|siegeknight|embertotem|prison_bell|prison_vessel/.test(type))return 'heavy';if(/archer|cragspitter|frostlobber|prison_pike/.test(type))return 'ranged';if(/caster|sorcerer|king|tyrant|priest|arcanist|wisp|tether|prison_unbound/.test(type))return 'cast';if(/jackal|hound|boar|sporeback|slime|flyer|shell|magmaskit|prison_maw|charger/.test(type))return 'beast';return 'blade';}
 const QUAD_MOTION=new Set('charger dustjackal cragspitter thornboar sporeback frostshell magmaskit prison_hound prison_maw'.split(' '));
 const HOVER_MOTION=new Set('flyer shadeling sparkling galewisp voidtether'.split(' '));
@@ -30,31 +30,65 @@ function lifePose(type,phase,u){
   else{p.body=[-.30*pulse,.13*pulse,.10*pulse];p.head=[.26*pulse,-.13*pulse,0];p.armL=[-.31*pulse,0,-.12*pulse];p.armR=[-.25*pulse,0,.18*pulse];}
   return p;
  }
- const move=phase==='Move',amp=move?1:.14;
+ const move=phase==='Move',double=Math.sin(4*Math.PI*u),heavy=HEAVY_MOTION.has(type);
  if(QUAD_MOTION.has(type)){
-  // Diagonal pairs contact the ground together. Rear legs have their own bones.
-  p.body=[.035*amp*wave,0,.045*amp*wave];p.head=[-.055*amp*wave,.045*amp*other,0];
-  p.armL=[.33*amp*wave,0,0];p.armR=[.33*amp*other,0,0];
-  p.rearL=[.28*amp*other,0,0];p.rearR=[.28*amp*wave,0,0];p.tail=[.10*amp*wave,.17*amp*other,0];
+  // Opposite front/rear pairs alternate. A lifted paw bends during swing;
+  // stance paws stay nearly straight instead of pedaling through the floor.
+  const bound=type==='prison_hound'||type==='dustjackal',reach=bound?.43:.31;
+  p.body=[move?-.065+.055*double:.012*breath,move?.025*wave:0,move?.025*other:0];
+  p.head=[move?.035-.085*double:.035*breath,move?.045*other:.025*breath,0];
+  p.armL=[move?reach*wave:0,0,0];p.armR=[move?reach*other:0,0,0];
+  p.rearL=[move?reach*.88*other:0,0,0];p.rearR=[move?reach*.88*wave:0,0,0];
+  p.tail=[move?.10*wave:.025*breath,move?.20*other:.07*breath,0];
  }else if(HOVER_MOTION.has(type)){
-  p.body=[.055*amp*wave,.10*amp*wave,.055*amp*other];p.head=[-.035*amp*wave,-.045*amp*wave,0];
-  const wings=type==='flyer'?.48:.16;p.armL=[.12*amp*wave,0,-wings*amp*wave];p.armR=[.12*amp*wave,0,wings*amp*wave];
-  p.tail=[.10*amp*other,0,0];
+  const wing=type==='flyer'?.52:type==='shadeling'?.22:.13;
+  p.body=[move?.06*wave:.025*breath,move?.11*wave:.025*breath,move?.05*other:0];
+  p.head=[move?-.055*wave:-.014*breath,move?-.06*wave:0,0];
+  p.armL=[move?.17*wave:0,0,-wing*(move?wave:.25*breath)];
+  p.armR=[move?.17*wave:0,0,wing*(move?wave:.25*breath)];
+  p.tail=[move?.12*other:.035*breath,0,0];
  }else if(OBJECT_MOTION.has(type)){
-  const jiggle=(type==='slime'||type==='slimelet') ? .13 : .055;
-  p.body=[jiggle*amp*wave,.07*amp*wave,.04*amp*other];p.head=[-.09*amp*wave,0,0];
-  if(type==='mimic')p.head=[-.24*amp*Math.max(0,wave),0,0];
+  const jelly=type==='slime'||type==='slimelet',snap=type==='mimic';
+  p.body=[move?(jelly?.17:.08)*wave:.025*breath,move?.045*other:0,move?.035*wave:0];
+  p.head=[snap?(move?-.27*Math.max(0,wave):-.04*Math.max(0,breath)):
+    move?-.10*wave:-.02*breath,0,0];
+ }else if(move){
+  const stride=heavy?.30:SCOUT_MOTION.has(type)?.47:.38;
+  const scout=SCOUT_MOTION.has(type),caster=CAST_MOTION.has(type);
+  const spear=type==='grunt'||type==='officer-spear'||type==='prison_pike';
+  const shield=type==='sentinel'||type==='siegeknight'||type==='officer-shield'||type==='prison_guard';
+  p.body=[heavy?-.055+.025*double:-.035+.020*double,.038*wave,(heavy?.045:.060)*other];
+  p.head=[.035-.026*double,-.035*wave,0];
+  p.legL=[stride*wave,0,scout?-.045:0];p.legR=[stride*other,0,scout?.045:0];
+  p.shinL=[Math.max(0,-wave)*stride*.83,0,0];
+  p.shinR=[Math.max(0,wave)*stride*.83,0,0];
+  const armSwing=heavy?.12:caster?.11:.22;
+  p.armL=[shield?-.38+.035*other:caster?-.36+.04*other:armSwing*other,0,-.055];
+  p.armR=[spear?-.32+.025*wave:caster?-.21+.03*wave:armSwing*.68*wave,0,.055];
+  p.forearmL=[shield?.55:caster?.38:.15+.05*wave,0,0];
+  p.forearmR=[spear?.38:caster?.24:.17+.05*other,0,0];
  }else{
-  const stride=HEAVY_MOTION.has(type)?.27:SCOUT_MOTION.has(type)?.42:.34;
-  p.body=[.035*amp*wave,.055*amp*wave,.055*amp*other];p.head=[-.025*amp*wave,-.045*amp*wave,0];
-  p.legL=[stride*amp*wave,0,0];p.legR=[stride*amp*other,0,0];
-  p.shinL=[Math.max(0,-wave)*stride*.62*amp,0,0];p.shinR=[Math.max(0,wave)*stride*.62*amp,0,0];
-  const armSwing=CAST_MOTION.has(type)?.10:HEAVY_MOTION.has(type)?.10:.19;
-  p.armL=[armSwing*amp*other,0,-.045];p.armR=[armSwing*.58*amp*wave,0,.045];
-  p.forearmL=[.12+.055*amp*wave,0,0];p.forearmR=[.16+.04*amp*other,0,0];
+  // A resting enemy breathes and scans; its feet stay planted.
+  p.body=[.018*breath,.014*breath,0];p.head=[-.018*breath,.035*breath,0];
+  p.armL=[CAST_MOTION.has(type)?-.26:0,0,-.025];
+  p.armR=[CAST_MOTION.has(type)?-.16:0,0,.025];
+  p.forearmL=[CAST_MOTION.has(type)?.32:.10,0,0];
+  p.forearmR=[.16,0,0];
  }
- if(!move){p.body[0]+=.018*breath;p.head=(p.head||[0,0,0]).map((v,i)=>v+(i===1?.035*breath:0));}
  return p;
+}
+function rootTravel(type,phase,u){
+ const heavy=HEAVY_MOTION.has(type),quad=QUAD_MOTION.has(type);
+ if(phase==='Move'){
+  if(HOVER_MOTION.has(type))return [0,.035+.035*Math.sin(2*Math.PI*u),0];
+  if(OBJECT_MOTION.has(type))return [0,.014+.018*Math.max(0,Math.sin(2*Math.PI*u)),0];
+  return [quad?.008*Math.sin(2*Math.PI*u):.009*Math.sin(2*Math.PI*u),
+   (heavy?.013:quad?.025:.019)*(1-Math.cos(4*Math.PI*u))*.5,0];
+ }
+ if(phase==='Idle')return [0,HOVER_MOTION.has(type)?.025*Math.sin(2*Math.PI*u):.005*Math.sin(2*Math.PI*u),0];
+ if(phase==='Hit')return [0,0,.025*Math.sin(Math.PI*u)];
+ if(phase==='Death')return [0,-(heavy?.10:quad?.08:.075)*Math.min(1,u*1.4),0];
+ return [0,0,0];
 }
 // Angles are offsets in each bone's bind-local frame. Translation stays anchored.
 function pose(family,phase,u,type){const p={body:[0,0,0],head:[0,0,0],armL:[0,0,0],armR:[0,0,0],legL:[0,0,0],legR:[0,0,0],tail:[0,0,0],rearL:[0,0,0],rearR:[0,0,0]};
@@ -76,8 +110,9 @@ function jointPose(key,phase,u,family,type){
 }
 export function revisedClips(root,type,original){const family=motionFamily(type),bones={};root.traverse(o=>{if(o.isBone)bones[o.name]=o;});const replace=new Set(['Idle','Move','Windup','Attack','Hit','Death','Recover']);const clips=original.filter(c=>!replace.has(c.name));
  const names=[['Idle',2.4],['Move',QUAD_MOTION.has(type)?.55:HEAVY_MOTION.has(type)?.90:.68],['Windup',1],['Attack',.5],['Hit',.32],['Death',.78],...(choreographyProfile(type)?[['Recover',choreographyProfile(type).recover]]:[])];
- for(const move of ACTION_VARIANTS[type]||[])names.push(['Windup_'+move,1],['Attack_'+move,.5]);
+ for(const move of ACTION_VARIANTS[type]||[])names.push(['Windup_'+move,1],['Attack_'+move,.5],['Recover_'+move,choreographyProfile(type,move)?.recover||.38]);
  for(const [name,duration] of names){const tracks=[],times=Array.from({length:25},(_,i)=>i/24*duration),phase=name.split('_')[0],move=name.includes('_')?name.slice(name.indexOf('_')+1):null;
+  if(bones.root){const values=[];for(let i=0;i<25;i++){const travel=rootTravel(type,phase,i/24);values.push(bones.root.position.x+travel[0],bones.root.position.y+travel[1],bones.root.position.z+travel[2]);}tracks.push(new THREE.VectorKeyframeTrack('root.position',times,values));}
   for(const [key,bone]of Object.entries(bones)){if(key==='root')continue;const values=[];for(let i=0;i<25;i++){const u=i/24,custom=choreographyPose(type,phase,u,move),angles=['Idle','Move','Hit','Death'].includes(phase)?lifePose(type,phase,u)[key]||[0,0,0]:custom?(custom[key]||[0,0,0]):jointPose(key,phase,u,family,type)||pose(family,phase,u,type)[key]||[0,0,0];const q=bone.quaternion.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(...angles)));values.push(q.x,q.y,q.z,q.w);}tracks.push(new THREE.QuaternionKeyframeTrack(bone.name+'.quaternion',times,values));}
   clips.push(new THREE.AnimationClip(name,duration,tracks));
  }

@@ -87,7 +87,9 @@ export function choreographyPose(type,phase,u,move){
  for(const key of new Set([...Object.keys(p.wind),...Object.keys(p.strike)])){
   const a=p.wind[key]||[0,0,0],b=p.strike[key]||[0,0,0];
   result[key]=a.map((angle,i)=>phase==='Windup'?angle*smooth(u/.85):
-   phase==='Recover'?b[i]*.65*(1-smooth(u)):
-   u<.16?angle+(b[i]-angle)*smooth(u/.16):b[i]*(1-.35*smooth((u-.65)/.35)));
+   phase==='Recover'?b[i]*.35*(1-smooth(u)):
+   u<.16?angle+(b[i]-angle)*smooth(u/.16):
+   u<.38?b[i]*(1+.07*Math.sin(Math.PI*(u-.16)/.22)):
+   b[i]*(1-.65*smooth((u-.38)/.62)));
  }return result;
 }

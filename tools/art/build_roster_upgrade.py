@@ -127,11 +127,21 @@ def material(label,hexcode,metal=0,rough=.76,glow=0):
  if glow:p.inputs['Emission Color'].default_value=c;p.inputs['Emission Strength'].default_value=glow
  return m
 
+def lift(code,factor):
+ return '#'+''.join(f'{min(255,round(int(code[i:i+2],16)*factor)):02x}' for i in (1,3,5))
+
 def make_palette(name):
  p=list(COLORS[THEME_OF[name]])
  p[1:5]=['#'+value for value in IDENTITY[name]]
- return [material('%s %s'%(name,i),c,.76 if i in (1,3) else .05,
-                  .42 if i in (1,3) else .81,1.1 if i==4 else 0) for i,c in enumerate(p)]
+ # Keep the dark recesses, but lift the midtone so a figure remains legible at
+ # the normal combat camera. Organic skin/hide must not shine like plate steel.
+ p[1]=lift(p[1],1.22);p[2]=lift(p[2],1.10)
+ design=PRISON_BASE.get(name,name)
+ organic=design in QUAD|FLOAT|{'slime','slimelet','goblin','bones','emberling','frostling','toxling','blinkstalker'}
+ return [material('%s %s'%(name,i),c,
+                  (.12 if i==1 else .46 if i==3 else .02) if organic else (.46 if i in (1,3) else .04),
+                  (.78 if i in (0,1,2) else .52) if organic else (.49 if i in (1,3) else .79),
+                  1.25 if i==4 else 0) for i,c in enumerate(p)]
 
 def source(name):
  if name in PRISON_BASE:return OUT/(PRISON_BASE[name]+'-v2128.glb') if not PRISON_BASE[name].startswith('officer-') else ASSETS/'officers'/(PRISON_BASE[name][8:]+'.glb')
@@ -197,7 +207,7 @@ def eyes(name,z=.92,y=-.155,width=.055,mat=4):
 def foundation_humanoid(name):
  heavy=name in BOSSES|{'siegeknight','sentinel','marblestatue'}
  lean=name in {'goblin','blinkstalker','toxling','emberling','frostling','archer','caster','sorcerer'}
- w=.25 if heavy else .19 if lean else .22
+ w=.33 if name=='brute' else .275 if name in {'warden','siegeknight','prison_bell'} else .25 if heavy else .18 if lean else .22
  ico('layered torso',(0,.015,.63),(w,.145,.23),1,'body',2)
  taper('waist taper',(0,0,.43),(0,0,.66),w*.73,w*.96,0,'body',10)
  ico('hip socket',(0,.018,.43),(.155,.13,.095),0,'body',2)
@@ -315,13 +325,33 @@ def scavenger_body():
 
 def foundation_beast(name):
  long=name in {'dustjackal','charger','thornboar'}
- ico('long muscular body',(0,.035,.43),(.25 if long else .30,.46 if long else .36,.20),1,'body',2)
- ico('ribcage',(0,-.16,.46),(.27,.26,.22),1,'body',2)
- ico('haunches',(0,.26,.42),(.25,.22,.20),0,'body',2)
- taper('forward neck',(0,-.15,.49),(0,-.34,.45),.17,.12,1,'head',10)
- ico('predator skull',(0,-.36,.47),(.165,.19,.145),1,'head',2)
- taper('tapered muzzle',(0,-.43,.39),(0,-.61,.33),.11,.055,2,'head',8)
- ico('nose',(0,-.615,.34),(.072,.043,.051),0,'head',2)
+ body={
+  'dustjackal':(.23,.49,.18),'charger':(.34,.40,.24),
+  'thornboar':(.37,.40,.25),'cragspitter':(.37,.32,.17),
+  'sporeback':(.31,.39,.18),'frostshell':(.34,.33,.17),
+  'magmaskit':(.29,.31,.16),
+ }.get(name,(.28,.39,.19))
+ ico('creature trunk',(0,.035,.43),body,1,'body',2)
+ ico('ribcage',(0,-.16,.46),(body[0]*.92,.23,body[2]*1.08),1,'body',2)
+ ico('haunches',(0,.26,.42),(body[0]*.88,.21,body[2]),0,'body',2)
+ neck=(.14,.14) if name in {'cragspitter','frostshell','magmaskit'} else (.20,.13) if name in {'charger','thornboar'} else (.16,.11)
+ taper('forward neck',(0,-.15,.49),(0,-.34,.45),neck[0],neck[1],1,'head',10)
+ skull={
+  'dustjackal':(.14,.19,.13),'charger':(.23,.16,.18),
+  'thornboar':(.21,.19,.17),'cragspitter':(.25,.15,.12),
+  'sporeback':(.20,.16,.13),'frostshell':(.19,.14,.12),
+  'magmaskit':(.18,.12,.10),
+ }.get(name,(.17,.18,.14))
+ ico('species skull',(0,-.36,.47),skull,1,'head',2)
+ muzzle={
+  'dustjackal':(.10,.61,.34),'charger':(.14,.54,.31),
+  'thornboar':(.18,.60,.28),'cragspitter':(.21,.52,.27),
+  'sporeback':(.15,.53,.31),'frostshell':(.13,.49,.32),
+  'magmaskit':(.10,.48,.30),
+ }.get(name,(.11,.59,.33))
+ taper('species muzzle',(0,-.40,.39),(0,-muzzle[1],muzzle[2]),muzzle[0],muzzle[0]*.58,2,'head',8)
+ if name not in {'cragspitter','magmaskit','frostshell'}:
+  ico('nose',(0,-muzzle[1]-.009,muzzle[2]),(.072,.043,.051),0,'head',2)
  for side in (-1,1):
   for rear in (False,True):
    y=.27 if rear else -.21;b=('rear' if rear else 'leg')+('L' if side<0 else 'R')
@@ -798,6 +828,75 @@ def identity_finish(name,design):
  elif design not in {'slime','slimelet'}:
   ring('core identity seal',(0,-.17,.58),.095,4,'body',(math.pi/2,0,0))
 
+def silhouette_finish(name,design):
+ # Large, functional contours survive the normal gameplay camera. Each group
+ # is built from the enemy's actual role, not a decorative random selection.
+ if name in {'grunt','prison_pike','officer-spear'}:
+  plate('spear pennant',[(.36,.025,1.05),(.53,.02,.98),(.45,.03,.84),(.36,.025,.85)],
+        4 if name=='officer-spear' else 2,'forearmR',.012)
+  ring('spear counterweight',(.36,-.11,.22),.055,3,'forearmR')
+ if name in {'sentinel','siegeknight','prison_guard','officer-shield'}:
+  for side in (-1,1):
+   taper('shield wall shoulder spike',(side*.31,.07,.77),
+         (side*(.44 if name=='siegeknight' else .39),.12,.96),.06,.002,3,
+         'armL' if side<0 else 'armR',5)
+  plate('raised shield identity', [(-.49,-.224,.63),(-.40,-.23,.74),
+       (-.31,-.224,.63),(-.40,-.23,.43)],4,'forearmL',.009)
+ if name in {'caster','royalarcanist','sorcerer','frostlobber'}:
+  for side in (-1,1):
+   plate('deep scholar collar',[(side*.08,-.09,.80),(side*.23,.04,.87),
+      (side*.27,.17,.66),(side*.12,.12,.70)],0,'body',.013)
+  if name=='caster':
+   ring('conjurer shoulder focus',(-.28,-.01,.78),.09,4,'armL',(math.pi/2,0,0))
+  if name=='frostlobber':
+   for i in range(3):taper('ice satchel vial',(-.23+i*.09,.18,.55),
+        (-.23+i*.09,.20,.72),.036,.022,4,'body',6)
+ if name in {'brute','warden','prison_bell'}:
+  for side in (-1,1):
+   plate('boss asymmetrical battle damage',[(side*.13,-.19,.76),
+      (side*.29,-.16,.72),(side*.18,-.21,.51)],0 if side<0 else 3,'body',.013)
+  if name=='prison_bell':
+   for x in (-.15,0,.15):taper('bell crown spike',(x,.01,1.04),
+         (x*1.3,.04,1.27),.045,.003,3,'head',5)
+ if name in {'king','tyrant','prison_unbound'}:
+  for side in (-1,1):
+   taper('void mantle outward fang',(side*.25,.15,.78),
+      (side*(.58 if name!='tyrant' else .72),.23,1.12),.07,.002,4,'body',6)
+  if name=='prison_unbound':
+   for i in range(5):
+    a=i*math.tau/5
+    ico('floating captive spark',(.25*math.sin(a),.16,.68+.28*math.cos(a)),
+        (.035,.032,.045),4,'body',1)
+ if design in QUAD:
+  # A shared canine jaw was the strongest repeated form in the first pass.
+  jaw_width=.18 if design in {'charger','thornboar'} else .13
+  plate('species lower jaw',[(-jaw_width,-.50,.31),(jaw_width,-.50,.31),
+        (jaw_width*.70,-.58,.22),(-jaw_width*.70,-.58,.22)],
+        0 if design in {'magmaskit','frostshell'} else 2,'head',.018)
+  if design in {'dustjackal','prison_hound','prison_maw','charger'}:
+   for side in (-1,1):
+    for j in range(3):
+     x=side*(.06+j*.045)
+     taper('exposed predator tooth',(x,-.55,.32),(x,-.56,.23),
+           .019,.002,5,'head',5)
+  elif design=='thornboar':
+   ico('broad rooting snout',(0,-.63,.29),(.19,.07,.095),2,'head',2)
+  elif design=='cragspitter':
+   ico('bulging spitter throat',(0,-.29,.30),(.18,.14,.14),4,'head',2)
+  elif design=='sporeback':
+   for side in (-1,1):
+    ico('hanging fungal gill',(side*.16,-.45,.36),(.09,.055,.07),4,'head',2)
+  elif design=='frostshell':
+   taper('hard crystal beak',(0,-.45,.39),(0,-.62,.29),.10,.002,5,'head',5)
+  elif design=='magmaskit':
+   for side in (-1,1):
+    taper('insect mandible',(side*.13,-.44,.33),(side*.08,-.62,.20),
+          .045,.002,0,'head',5)
+ if name in {'flyer','shadeling','galewisp'}:
+  for side in (-1,1):
+   taper('trailing spirit point',(side*.09,.10,.44),
+         (side*.16,.15,.02),.045,.002,2,'tail',5)
+
 def build(name):
  global RIG,PAL,PARTS
  design=PRISON_BASE.get(name,name)
@@ -836,6 +935,7 @@ def build(name):
   foundation_object(design)
   object_enemy(design);RIG.scale=(1.07,1.07,1.10)
  identity_finish(name,design)
+ silhouette_finish(name,design)
  # Old low-detail meshes were useful scaffolds for rigging, but leaving them
  # visible makes a double body and the same toy-soldier face under new armor.
  for old in EXISTING:bpy.data.objects.remove(old,do_unlink=True)
@@ -865,7 +965,7 @@ def build(name):
  bpy.ops.object.select_all(action='DESELECT');RIG.select_set(True)
  for o in meshes:o.select_set(True)
  bpy.context.view_layer.objects.active=RIG
- path=OUT/(name+'-v2141.glb')
+ path=OUT/(name+'-v2142.glb')
  bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,
      export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=True,
      export_frame_range=False,export_materials='EXPORT',export_yup=True)
@@ -879,5 +979,5 @@ def build(name):
 for name in NAMES:
  if name not in THEME_OF:raise ValueError('Missing design category for '+name)
  MANIFEST.append(build(name))
-(OUT/('manifest-v2141.json' if not ARGS else 'sample-manifest-v2141.json')).write_text(json.dumps(MANIFEST,indent=2))
+(OUT/('manifest-v2142.json' if not ARGS else 'sample-manifest-v2142.json')).write_text(json.dumps(MANIFEST,indent=2))
 print('ROSTER_COMPLETE',len(MANIFEST),sum(x['bytes'] for x in MANIFEST),flush=True)

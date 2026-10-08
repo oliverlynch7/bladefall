@@ -1,17 +1,17 @@
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2141';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2142';
 import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2141';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
-// Original Blender roster: one vertex-colored skinned mesh and ten bones per appearance.
-// The renderer mirrors gameplay objects and never changes combat state. Props still use
-// the shared kit loader below; unknown enemies retain the legacy rendering fallback.
+// Versioned Blender roster: rigged enemy appearances mirrored from gameplay state.
+// This renderer never changes combat state. Props still use the shared kit loader
+// below; unknown enemies retain the legacy rendering fallback.
 const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+(['archer','brute','warden'].includes(type)?type+'-v1980':type)}]));
 MOB_CAST['officer-shield']={file:'enemy-assets/officers/shield'};MOB_CAST['officer-spear']={file:'enemy-assets/officers/spear'};
-for(const type of ['prison_pike','prison_guard','prison_hound','prison_vessel','prison_bell','prison_maw','prison_unbound'])MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2141'};
+for(const type of ['prison_pike','prison_guard','prison_hound','prison_vessel','prison_bell','prison_maw','prison_unbound'])MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2142'};
 // Versioned visual-only replacement. Old GLBs remain in place for rollback;
 // gameplay type IDs, collision dimensions and attack state are unchanged.
 const ROSTER_BEASTS=new Set('charger dustjackal cragspitter thornboar sporeback frostshell magmaskit prison_hound prison_maw'.split(' '));
@@ -26,7 +26,7 @@ for(const type of Object.keys(MOB_CAST))if(type!=='colossus'&&type!=='marblecolo
     ROSTER_SMALL.has(type)?(type==='slimelet'?.48:type==='slime'?.56:.88):
     ROSTER_LEAN.has(type)?.99:
     ['king','tyrant','brute','warden','archer','sorcerer','prison_bell','prison_unbound'].includes(type)?1.22:1.10;
-  MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2141',fitHeight};
+  MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2142',fitHeight};
 }
 MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
 MOB_CAST.marblecolossus={file:'enemy-assets/articulated/marblecolossus-v2126'};
@@ -143,10 +143,10 @@ function acquireMob(type,e){
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
     const clips=src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
-    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||/^(Attack|Windup)(_|$)/.test(c.name)||['Recover','Hit','Death','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
+    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||/^(Attack|Windup|Recover)(_|$)/.test(c.name)||['Hit','Death','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
-  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});
+  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null,lastAttackKey:null});
   rec.mixer.stopAllAction();rec.root.visible=true;_actors.set(e,rec);return rec;
 }
 function play(rec,name,duration){
@@ -220,9 +220,10 @@ function syncMobsInner(scene,dt){
     rec.attack=Math.max(0,rec.attack-animDt);rec.recover=Math.max(0,rec.recover-animDt);
     const released=instantEnemyRelease(rec,state,e);
     const started=state.phase==='Attack'&&(rec.phase!=='Attack'||rec.phaseKey!==state.key);
-    if(released){rec.attack=.42;rec.restart=true;}
-    if(started){rec.restart=true;rec.recover=0;}
-    if(wasAttacking&&state.phase!=='Attack'&&state.phase!=='Windup'&&rec.attack===0&&rec.actions.Recover){rec.recover=rec.actions.Recover.getClip().duration;rec.restart=true;}
+    if(released){rec.attack=.42;rec.restart=true;rec.lastAttackKey=state.key||rec.phaseKey;}
+    if(started){rec.restart=true;rec.recover=0;rec.lastAttackKey=state.key;}
+    const recoverClip=rec.actions['Recover_'+rec.lastAttackKey]||rec.actions.Recover;
+    if(wasAttacking&&state.phase!=='Attack'&&state.phase!=='Windup'&&rec.attack===0&&recoverClip){rec.recover=recoverClip.getClip().duration;rec.restart=true;}
     if(state.phase==='Windup'){rec.recover=0;if(rec.phase!=='Windup'||rec.phaseKey!==state.key||wind>rec.wind+.05)rec.restart=true;}
     const orchard=e.bruteOrchard?{wind:'BruteBrace',charge:'BruteRush',stagger:'BruteStagger'}[e.bruteState]:null;
     const fallen=e.fallenDuel?{feint:'FallenFeint',stagger:'FallenStagger'}[e.fallState]:null;
@@ -230,7 +231,7 @@ function syncMobsInner(scene,dt){
     else if(orchard)play(rec,orchard,orchard==='BruteBrace'?wind:undefined);
     else if(wind>0)play(rec,rec.actions['Windup_'+state.key]?'Windup_'+state.key:'Windup',wind);
     else if(rec.attack>0||state.phase==='Attack')play(rec,rec.actions['Attack_'+state.key]?'Attack_'+state.key:'Attack',state.phase==='Attack'?state.remaining:rec.attack);
-    else if(rec.recover>0)play(rec,'Recover');
+    else if(rec.recover>0)play(rec,rec.actions['Recover_'+rec.lastAttackKey]?'Recover_'+rec.lastAttackKey:'Recover');
     else if((e.hitFlash||0)>rec.hit+.025){rec.restart=true;play(rec,'Hit');}
     else if(rec.cur!=='Hit'||!rec.actions.Hit?.isRunning())play(rec,speed>3&&speed<1600?'Move':'Idle');
     if(rec.cur==='Move'&&rec.actions.Move)rec.actions.Move.setEffectiveTimeScale(Math.max(.65,Math.min(1.7,speed/(e.speed||60))));

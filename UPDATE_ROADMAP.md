@@ -2492,3 +2492,7 @@ A normal-speed browser walk exposed a bypass: the player could run past the firs
 
 ## [Codex | 2026-10-08] v2.141.0 - complete enemy art and motion pass
 Rebuilt and shipped 48 versioned standard/Frost/Prison Break enemy models, updated bestiary portraits, and generated anatomy-aware idle/move/attack/hit/death clips for all 50 skinned appearances including the two bespoke Colossi. Prison Break and Colossi now have move-specific boss poses; the Hydra bite follows an eased neck arc. Preserved gameplay/collisions/saves and earlier model assets. Roster budget, full animation browser audit, live Prison/Briar, 12-enemy phone rendering, Hydra motion, and previous-version save checks passed. Human feel/art review remains open.
+
+
+## [Codex | 2026-10-08] v2.142.0 - enemy art and motion second pass
+Refined all 48 versioned enemy models with brighter midtones, species-shaped beast faces and bodies, role-specific soldier and boss silhouettes, and material values compatible with game lighting. Updated idle and movement to plant resting feet and carry small weight shifts; named Prison Break and Colossus moves now have matching recoveries after their strikes. Rebuilt bestiary portraits and retained the 2.141 GLBs for rollback. All 50 skinned rigs loaded in browser with finite motion; 136 attack joins, live boss variants, 12-enemy phone rendering, previous-version save and Prison Break co-op checks passed. Final art and animation feel await Oliver playtesting; no SFX work.

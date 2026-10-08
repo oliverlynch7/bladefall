@@ -3,7 +3,7 @@ from PIL import Image, ImageOps, ImageDraw
 import json
 ROOT=Path(__file__).resolve().parents[1]
 SRC=ROOT/'public/3d/art-previews/enemies'
-UP=ROOT/'output/enemy-roster-upgrade-v2141'
+UP=ROOT/'output/enemy-roster-upgrade-v2142'
 OUT=ROOT/'public/3d/bestiary-portraits'
 OUT.mkdir(parents=True,exist_ok=True)
 names=[r['type'] for r in json.loads((ROOT/'public/3d/enemy-assets/manifest.json').read_text())]

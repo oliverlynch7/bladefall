@@ -2508,3 +2508,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Turned the existing Deep Ice Caves crossing from three nearby button pulls into a physical basin puzzle: pump raises a floating work platform, jump to its freeze valve, cross temporary ice, then open the far-bank drain for the permanent bridge.
 - [x] Added a near-bank overflow reset for overpumping and previous partial saves frozen at a wrong height; retained IDs, Ellis/Hugo progression, the optional lower pipe puzzle and co-op authority.
 - [x] Passed static gate, Ice Caves regression, real-browser jump/crossing/recovery, visual review, broader route regression and two-player state propagation. Difficulty and enjoyment remain for human playtest.
+
+## [Codex | 2026-10-08] Live Ruined Keep escort defense (SHIPPED v2.145.0)
+
+- [x] Made the three prisoners crossing Broken Walls individually vulnerable to targeted Legion melee attacks, with visible health bars, a clear retreat and safe retry on loss.
+- [x] Directed later waves toward the moving group, kept the caster on the player, hid the spent bell prompt, and made the objective arrow follow the group only while the player is far away.
+- [x] Preserved story flags and optional content. Passed static gate, story tests, solo attack/retry/completion browser tests, full existing Keep route browser test, and host/guest state and enemy-focus checks. Human playtesting is still needed to tune escort difficulty.

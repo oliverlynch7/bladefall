@@ -4,7 +4,7 @@ async page => {
   for(const p of [page,guest])p.on('pageerror',e=>errors.push(e.message));
   try{
     for(const p of [page,guest]){
-      await p.goto('http://127.0.0.1:4331/3d/?mute=1&qa=2153');
+      await p.goto('http://127.0.0.1:4331/3d/?mute=1&qa=2161');
       await p.waitForFunction(()=>window.__BF3&&HERO3D?.ready);
       await p.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.riftShards=[];b.openHub();window.qaPackets=[];});
     }
@@ -25,6 +25,13 @@ async page => {
       await page.evaluate(()=>{__BF3.G.p.invuln=999;for(const e of __BF3.G.enemies)e.stunT=999;});
     };
     const act=async keys=>page.evaluate(keys=>{const b=__BF3,G=b.G;for(const key of keys){const o=G.storyObjects.find(o=>o.key===key);if(!o)throw Error('Missing '+key);Object.assign(G.p,{x:o.x,y:o.y,z:o.z,vy:0});b.briarRequest('world',{key});}},keys);
+    await load(2);
+    const escort=await page.evaluate(()=>{const b=__BF3,G=b.G;Object.assign(G.storyState.flags,{'rk.help':true,'rk.arrow':true,'rk.gate':true,'rk.breach.start':true});G.keep.escortHp=[54,90,90];G.keep.elapsed=8;b.briarSync();return b.briarPacket();});
+    await guest.evaluate(packet=>{const b=__BF3;b.briarApply(packet);BFBrokenWalls.actors(b.G,b.G.storyState,b.G.keep.remote);},escort);
+    ok('host escort health and position reach guest',await guest.evaluate(()=>__BF3.G.keepPrisoners[0].hp===54&&__BF3.G.keepPrisoners[0].z<-1900));
+    const escortEnemies=await page.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:0,z:-2150,y:0});for(let i=0;i<10;i++)b.update(.016);return b.MP.enemySnap();});
+    await guest.evaluate(rows=>__BF3.MP.applyEnemies(rows,[]),escortEnemies);
+    ok('guest sees which Legion fighters are pursuing prisoners',await guest.evaluate(()=>__BF3.G.enemies.some(e=>e.keepGuard==='breach'&&e.keepEscort)));
     await load(3);
     await act(['ff.trail','ff.part','ff.heater']);await flush();
     ok('direct winch repair reaches guest',await guest.evaluate(()=>__BF3.G.storyState.flags['ff.heater']&&__BF3.G.peaks.crossing));

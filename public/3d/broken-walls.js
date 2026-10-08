@@ -1,13 +1,26 @@
-/* Ruined Keep part one: the breach is a place to defend, not an escort health bar. */
+/* Ruined Keep part one: protect the escaping prisoners through the breach. */
 (function(root){'use strict';
 const paths={arrival:[[0,450,0],[0,-250,0],[-260,-450,0],[0,-900,0],[0,-1450,0]],arrow:[[0,-250,0],[550,-450,0],[850,-800,150],[700,-1050,150]],west:[[0,-1450,0],[-650,-1800,0],[-650,-2450,0],[0,-3000,0]],east:[[0,-1450,0],[650,-1800,0],[650,-2450,0],[0,-3000,0]],exit:[[0,-3000,0],[0,-3650,0],[0,-4500,0]],wall:[[650,-2450,0],[1030,-3200,180],[650,-3650,200],[180,-4020,0]],workshop:[[650,-1800,0],[1150,-2050,0],[1450,-2650,0],[1450,-3000,0]],bell:[[-650,-1800,0],[-1300,-1900,0],[-1850,-1850,110],[-1850,-1400,220],[-1550,-1400,320],[-1700,-1600,320]],oldwall:[[-1850,-1850,110],[-2180,-2300,170],[-2100,-2920,170],[-1750,-3240,80],[-1480,-3500,80]],chamber:[[0,-3000,0],[-650,-3080,0],[-1050,-3400,80],[-1480,-3500,80]]};
+const ESCORT_HP=90;
 const live=(G,group)=>(G.enemies||[]).filter(e=>e.keepGuard===group&&!e.dead&&e.hp>0).length;
-function status(G){const k=G.keep;return {clock:k.clock,elapsed:k.elapsed,away:k.away,waves:k.waves,arrow:live(G,'arrow'),post:live(G,'post'),breach:live(G,'breach'),trial:live(G,'trial'),trialSpawned:k.trialSpawned,trialWarn:k.trialWarn||0};}
+function status(G){const k=G.keep;return {clock:k.clock,elapsed:k.elapsed,away:k.away,waves:k.waves,escortHp:[...(k.escortHp||[ESCORT_HP,ESCORT_HP,ESCORT_HP])],retryT:k.retryT||0,escortHitT:k.escortHitT||0,arrow:live(G,'arrow'),post:live(G,'post'),breach:live(G,'breach'),trial:live(G,'trial'),trialSpawned:k.trialSpawned,trialWarn:k.trialWarn||0};}
 function available(key,G,remote){const s=remote||status(G);if(key==='rk.arrow')return !s.arrow;if(key==='rk.key')return !s.post;if(key==='rk.timing'){const t=s.clock%5;return t>.15&&t<2.25;}return true;}
 function ready(s){return s.flags['rk.breach.done']&&s.flags['rk.cells'];}
-function quest(s,k){const f=s.flags;return !f['rk.help']?'Speak to Grant through the broken outer wall':!f['rk.arrow']?'Clear the upper arrow post and cut its bow cord':!f['rk.gate']?'Open the side gate to free Grant':!f['rk.breach.start']?'Ring the breach bell when you are ready':!f['rk.breach.done']?'Hold the breach · '+Math.floor(k?.elapsed||0)+' / 30 seconds'+((k?.elapsed||0)>=30?' · Clear the remaining attackers':''):!f['rk.cells']?'Open the dungeon gate: guard-post key or battlement wheel':'Head down to the cells';}
+function quest(s,k){const f=s.flags;return !f['rk.help']?'Speak to Grant through the broken outer wall':!f['rk.arrow']?'Clear the upper arrow post and cut its bow cord':!f['rk.gate']?'Open the side gate to free Grant':!f['rk.breach.start']?'Ring the breach bell when you are ready':!f['rk.breach.done']?(k?.retryT>0?'The group fell back. Defend the breach to try again':'Protect the escaping group · '+Math.floor(k?.elapsed||0)+' / 30 seconds'+((k?.elapsed||0)>=30?' · Clear the remaining attackers':'')):!f['rk.cells']?'Open the dungeon gate: guard-post key or battlement wheel':'Head down to the cells';}
+function target(G,e,fallback){
+ if(!e.keepEscort||!G.storyState?.flags?.['rk.breach.start']||G.storyState.flags['rk.breach.done']||(G.keep?.remote||G.keep)?.retryT>0)return fallback;
+ let chosen=null,dist=900;
+ for(const n of G.keepPrisoners||[]){if((n.hp||0)<=0)continue;const d=Math.hypot(n.x-e.x,n.z-e.z);if(d<dist){dist=d;chosen=n;}}
+ return chosen||fallback;
+}
+function hitEscort(G,e){
+ const n=target(G,e,null),k=G.keep;
+ if(!n||!k||e._escortHitSerial===e.meleeSerial||Math.abs((e.y||0)-n.y)>85||Math.hypot(e.x-n.x,e.z-n.z)>e.r+(n.r||18)+40)return false;
+ e._escortHitSerial=e.meleeSerial;k.escortHp[n.escortIndex]=Math.max(0,k.escortHp[n.escortIndex]-Math.max(14,Math.round((e.dmg||10)*1.1)));n.hp=k.escortHp[n.escortIndex];k.escortHitT=.35;
+ return true;
+}
 function build(a){const {G,seg,plat,solid,spawn}=a;for(const k of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','pads','shockwaves','trails','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[k]=[];Object.assign(G,{haz:null,canyonWind:null,thorns:[],vents:[],phasers:[],debris:[],lights:[],npc:null,secret:null,secretTrigger:null,waystone:null,dashSign:null,beam:null,collapse:[],optionalMissions:[],_midSeq:0,portal:null,bonusPortal:null,bonusActive:false,vertical:true});
-G.keep={clock:0,elapsed:0,away:0,waves:0,trialSpawned:false,walks:{}};G.keepPrisoners=[0,1,2].map(i=>({id:'keep_escape'+i,name:'Freed prisoner',x:-340-i*48,z:-1650,y:0}));
+G.keep={clock:0,elapsed:0,away:0,waves:0,escortHp:[ESCORT_HP,ESCORT_HP,ESCORT_HP],retryT:0,escortHitT:0,trialSpawned:false,walks:{}};G.keepPrisoners=[0,1,2].map(i=>({id:'keep_escape'+i,name:'Freed prisoner',escortIndex:i,x:-340-i*48,z:-1650,y:0,r:18,h:105,hp:ESCORT_HP,maxHp:ESCORT_HP}));
 G.areaName='Ruined Keep · Broken Walls';G.campaignLayout={revision:2005,zone:'keep',area:0};
 for(const [name,x,z,w,d,y]of [['Outer Wall',0,150,900,900,0],['Grant’s Corner',-260,-450,700,450,0],['Arrow Post',700,-1000,530,470,150],['Breach Court',0,-2150,1650,1400,0],['Seized Workshop',1430,-2930,620,660,0],['Old Bell Tower',-1680,-1600,850,900,0],['Bell Lookout',-1700,-1600,260,270,320],['Prison Gate',0,-3710,1100,850,0],['Upper Wheel',650,-3650,480,480,200],['Sealed Chamber',-1480,-3630,860,780,80],['Cell Stairs',0,-4510,780,650,0]]){G.rooms.push({name,x,z,w,d,y,encounter:false,cleared:true,monsters:[]});if(y)plat(x,z,y,w,d,{checkpoint:true});else seg(x,z,w,d);}
 for(const [name,p]of Object.entries(paths)){const out=[];for(let j=1;j<p.length;j++){const u=p[j-1],v=p[j],jump=name==='bell'&&j>=2,n=Math.ceil(Math.max(Math.hypot(v[0]-u[0],v[1]-u[1])/(jump?140:95),Math.abs(v[2]-u[2])/(jump?42:16)));for(let i=0;i<=n;i++){const q=u.map((x,k)=>x+(v[k]-x)*i/n),width=name==='bell'?(jump?90:155):name==='oldwall'?210:330;if(q[2])plat(q[0],q[1],q[2],width,width,{checkpoint:true});else seg(q[0],q[1],width,width);out.push(q);}}G.keep.walks[name]=out;}
@@ -24,11 +37,30 @@ G.bounds={minX:-2440,maxX:1850,minZ:-4900,maxZ:680};G.progressEnd=-4800;G.startP
 }
 function sync(a){const {G,state:s,openWay}=a,f=s.flags,k=G.keep;if(!k)return;const opened={gate:f['rk.gate'],cells:f['rk.cells'],workshop:f['rk.workshop'],chamber:f['rk.chamber']};G.obstacles=G.obstacles.filter(o=>!o.keepBlock||!opened[o.keepBlock]);if(f['rk.gate'])Object.assign(G.storyNpcs.find(n=>n.id==='grant'),{x:-180,z:f['rk.breach.done']?-3100:-1760,y:0});if(ready(s)){G.qs['rk.keep']=1;openWay();}}
 function tick(a,dt){const {G,state:s,host,spawn,complete,toast,players}=a,k=G.keep;if(!k)return;k.clock+=dt;if(!host){if(k.remote){k.remote.clock=k.clock;k.remote.trialWarn=Math.max(0,(k.remote.trialWarn||0)-dt);}return;}const f=s.flags;
-if(f['rk.breach.start']&&!f['rk.breach.done']){const inside=players.some(p=>p.hp>0&&!p.downed&&Math.hypot(p.x,p.z+2150)<800);k.away=inside?0:k.away+dt;if(k.away>4&&(k.elapsed>0||k.waves>0)){k.away=0;k.elapsed=0;k.waves=0;for(const e of G.enemies)if(e.keepGuard==='breach')e.dead=true;toast('The group pulled back to cover. Return to the breach to try again.');}
-if(inside){k.elapsed=Math.min(30,k.elapsed+dt);const wave=k.elapsed>=21?3:k.elapsed>=11?2:k.elapsed>=1.5?1:0;if(wave>k.waves){k.waves=wave;const side=wave%2?-1:1;for(let i=0;i<(wave===1?3:2);i++){const e=spawn(i===1?'caster':'grunt',side*(400+i*75),-2680-i*35,false);e.keepGuard='breach';e.active=true;e.dropT=0;}toast('Attackers at the '+(side<0?'west':'east')+' gap!');}if(k.elapsed>=30&&!live(G,'breach'))complete('rk.breach.complete');}}
+k.escortHp ||= [ESCORT_HP,ESCORT_HP,ESCORT_HP];k.escortHitT=Math.max(0,(k.escortHitT||0)-dt);
+if(f['rk.breach.start']&&!f['rk.breach.done']){
+ if(k.retryT<=0&&k.escortHp.some(h=>h<=0)){
+  k.retryT=3;k.elapsed=0;k.away=0;k.waves=0;
+  for(const e of G.enemies)if(e.keepGuard==='breach')e.dead=true;
+  toast('A prisoner was hurt. The group has retreated to cover. Try the breach again.');
+ }
+ if(k.retryT>0){k.retryT=Math.max(0,k.retryT-dt);if(k.retryT===0)k.escortHp.fill(ESCORT_HP);}
+ else {
+  const inside=players.some(p=>p.hp>0&&!p.downed&&Math.hypot(p.x,p.z+2150)<800);k.away=inside?0:k.away+dt;
+  if(k.away>4&&(k.elapsed>0||k.waves>0)){k.away=0;k.elapsed=0;k.waves=0;k.escortHp.fill(ESCORT_HP);k.retryT=2;for(const e of G.enemies)if(e.keepGuard==='breach')e.dead=true;toast('The group pulled back to cover. Return to the breach to try again.');}
+  else if(inside){
+   k.elapsed=Math.min(30,k.elapsed+dt);const wave=k.elapsed>=21?3:k.elapsed>=11?2:k.elapsed>=1.5?1:0;
+   if(wave>k.waves){k.waves=wave;const side=wave%2?-1:1,groupZ=-1650-k.elapsed/30*1250,entryZ=Math.max(-2900,Math.min(-1850,groupZ-250));
+    for(let i=0;i<(wave===1?3:2);i++){const e=spawn(i===1?'caster':'grunt',side*(360+i*70),entryZ-i*32,false);e.keepGuard='breach';e.keepEscort=i!==1;e.active=true;e.dropT=0;}
+    toast('Attackers at the '+(side<0?'west':'east')+' gap! Protect the group.');
+   }
+   if(k.elapsed>=30&&!live(G,'breach'))complete('rk.breach.complete');
+  }
+ }
+}
 if(f['rk.trial.start']&&!f['rk.trial.done']&&!k.trialSpawned){k.trialSpawned=true;k.trialWarn=1.5;toast('The chamber guards are waking. Make room to dodge.');}if(k.trialWarn>0){k.trialWarn-=dt;if(k.trialWarn<=0)for(const [i,type]of ['siegeknight','caster','grunt','caster'].entries()){const e=spawn(type,-1720+i*160,-3770,false);e.y=80;e.keepGuard='trial';e.active=true;e.dropT=0;}}else if(k.trialSpawned&&!f['rk.trial.done']&&!live(G,'trial'))complete('rk.trial.complete');
 }
-function actors(G,s,remote){const k=remote||G.keep,f=s.flags,t=f['rk.breach.done']?1:Math.min(1,(k.elapsed||0)/30);for(const [i,n]of G.keepPrisoners.entries()){n.x=-60+i*60;n.z=-1650-t*1250;n.walking=t>0&&t<1;n._yaw=Math.PI;}}
+function actors(G,s,remote){const k=remote||G.keep,f=s.flags,t=f['rk.breach.done']?1:k.retryT>0?0:Math.min(1,(k.elapsed||0)/30);for(const [i,n]of G.keepPrisoners.entries()){n.x=-60+i*60;n.z=-1650-t*1250;n.walking=t>0&&t<1;n._yaw=Math.PI;n.hp=(k.escortHp||[])[i]??ESCORT_HP;n.maxHp=ESCORT_HP;}}
 function shards(s){return [{id:'RK-01',x:-1710,z:-1640,y:320},...(s.flags['rk.trial.done']?[{id:'RK-02',x:-1470,z:-3890,y:80}]:[])];}
 function draw(a,t){const {G,state:s,bx,remote}=a;if(!G.keep)return;const f=s.flags,k=remote||G.keep;for(const [id,x,z,y,w,h]of [['gate',0,-930,0,440,180],['cells',0,-4100,0,450,220],['workshop',1450,-2770,0,300,150]]){for(const dx of [-w/2,w/2])bx(x+dx,y+h/2,z,18,h,20,'#565b50');bx(x,y+h,z,w+20,14,25,'#b5a17c');if(!f['rk.'+(id==='gate'?'gate':id)])for(let i=0;i<10;i++)bx(x-w/2+20+i*(w-40)/9,y+h/2,z,8,h,8,'#50574e');}
 if(!f['rk.chamber']){for(let i=0;i<9;i++)bx(-1050,160,-3540+i*35,8,160,8,'#50574e');bx(-1050,244,-3400,24,16,330,'#b5a17c');}
@@ -40,5 +72,5 @@ if(f['rk.breach.start']&&!f['rk.breach.done']){for(const x of [-250,250])bx(x,3,
 if(k.trialWarn>0)for(let i=0;i<4;i++)bx(-1720+i*160,84,-3770,75,5,75,'#bc9074');
 for(const n of G.storyNpcs){const active=n.id==='grant'?!f['rk.help']||f['rk.gate']&&!f['rk.breach.start']:!f['rk.felix.returned'];if(active){bx(n.x,n.y+86,n.z,5,15,5,'#ddc185');bx(n.x,n.y+74,n.z,5,4,5,'#ddc185');}}
 }
-root.BFBrokenWalls={build,sync,tick,status,available,actors,ready,quest,shards,draw,paths};if(typeof module!=='undefined')module.exports=root.BFBrokenWalls;
+root.BFBrokenWalls={build,sync,tick,status,available,actors,ready,quest,shards,draw,target,hitEscort,paths};if(typeof module!=='undefined')module.exports=root.BFBrokenWalls;
 })(typeof window!=='undefined'?window:globalThis);

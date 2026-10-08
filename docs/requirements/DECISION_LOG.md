@@ -847,3 +847,7 @@ Oliver prefers a thorough quality pass on the existing full-scale campaign level
 ## [Codex | 2026-10-08] Deep Ice Caves waterworks spatial follow-up | U-2026-10-08-ICE-FLOAT
 
 Within the existing-level quality authorization, replace the main waterworks' adjacent fill/freeze/drain inputs with a physically staged crossing while keeping its state IDs and the cave's geography. Pumping raises a float to the bank marks, a normal jump reaches the float's freeze valve, temporary ice supports the traverse, and the far-bank drain completes it. Overfill and old wrongly frozen states must have a near-bank reset. The lower optional pipe puzzle stays independent. Verify actual movement and co-op state rather than inferring from code-level flag differences.
+
+## [Codex | 2026-10-08] Protecting the Broken Walls prisoners | U-2026-10-08-KEEP-ESCORT
+
+Within Oliver's existing-campaign quality pass, the Keep breach now uses individually vulnerable prisoners rather than a purely timed hold. Some attackers pursue the group and others threaten the player; if one prisoner falls, the party can retry without resetting the rest of the level. This is a distinct combat/escort action in the existing map and follows Oliver's prior request for escorts with health. Keep the host authoritative in co-op, preserve the main quest flags and optional chamber, and judge final balance by human playtesting rather than code checks alone.

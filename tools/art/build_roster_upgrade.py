@@ -1,4 +1,4 @@
-"""Rebuild Bladefall's remaining enemy appearances on their production rigs.
+"""Rebuild Bladefall's complete standard and Prison Break enemy art on production rigs.
 
 Run: blender -b -t 4 --python tools/art/build_roster_upgrade.py -- [type ...]
 The legacy GLBs remain untouched. The named pieces and bone assignments in this
@@ -28,6 +28,14 @@ THEME = {
  'royal':'siegeknight royalarcanist tyrant',
 }
 THEME_OF={n:k for k,v in THEME.items() for n in v.split()}
+PRISON_BASE={
+ 'prison_pike':'grunt','prison_guard':'sentinel','prison_hound':'dustjackal',
+ 'prison_vessel':'embertotem','prison_bell':'siegeknight',
+ 'prison_maw':'charger','prison_unbound':'tyrant'
+}
+PRISON_THEME={'prison_pike':'ruin','prison_guard':'ruin','prison_hound':'sand',
+ 'prison_vessel':'fire','prison_bell':'royal','prison_maw':'ruin','prison_unbound':'void'}
+THEME_OF.update(PRISON_THEME)
 COLORS={
  # Blender interprets these as linear values, so restraint here is essential:
  # mid-grey hex codes become pale plastic under the game's lighting.
@@ -40,13 +48,67 @@ COLORS={
  'sun':('#20252d','#52585b','#a49c82','#dfd6b3','#e1a933','#fff0ad'),
  'royal':('#161825','#30344e','#5e6079','#9e8b8d','#9e5bc6','#e5caef'),
 }
+# Four hand-authored identity colours per appearance: armor/hide, secondary,
+# trim, and exposed magic/eye. Shared bone/mesh construction no longer means
+# every foe from one region wears the same skin. The dark base and highlight
+# still come from the region so a pack reads together at normal camera height.
+IDENTITY={
+ 'grunt':('27352f','526859','b49d72','bde08d'),
+ 'flyer':('283748','536d7f','83b7b7','a4e6ee'),
+ 'emberling':('422820','a44d2a','d89450','ff8d33'),
+ 'frostling':('264b67','5f9cb6','b7dbe0','7ce8ff'),
+ 'toxling':('35442a','718c39','b4a064','b9eb53'),
+ 'shadeling':('29233c','53456d','8b70a0','c48aff'),
+ 'sparkling':('334e72','7399b3','c0c9d8','85dafa'),
+ 'goblin':('394630','736b42','d0a75a','c9e67b'),
+ 'bones':('494037','a79e82','d3c6a2','e3b46d'),
+ 'slime':('20534f','378f80','7ac4a2','b0eecb'),
+ 'slimelet':('326c60','5aaf8e','abe0b3','dbf6d0'),
+ 'caster':('372e37','625568','b99070','d27aef'),
+ 'charger':('4f4339','897765','b99d69','efa66e'),
+ 'mimic':('573b2b','9a7051','dbb369','e27950'),
+ 'dustjackal':('75533b','a37b54','e2b87d','e8cb94'),
+ 'cragspitter':('494944','837967','b9a176','81d7cf'),
+ 'galewisp':('385568','65a0b0','c3d8cc','a0f2ec'),
+ 'thornboar':('32422e','697b4c','ac9a62','bce070'),
+ 'sporeback':('4b3659','826994','b8999a','d6afeb'),
+ 'sentinel':('303c50','596d7c','c1a57c','79bfe5'),
+ 'revenant':('423637','79635b','c4a487','e5806b'),
+ 'dummy':('604d35','b4945c','e0c580','dd7152'),
+ 'bosscrystal':('373861','6769aa','b7a4df','b999ff'),
+ 'frostshell':('344e65','7399a7','c5d8dc','8cedfa'),
+ 'frostlobber':('315c67','74adb9','bfddd6','89ecf3'),
+ 'magmaskit':('43372f','7f5941','d58e55','ff7830'),
+ 'embertotem':('49302b','8e5243','c28c64','f78938'),
+ 'blinkstalker':('272b46','4a5078','9e95ba','b685eb'),
+ 'voidtether':('30233e','614a76','af8ac2','cf88ff'),
+ 'sunpriest':('6b6452','b7a780','e6cb82','fff1a4'),
+ 'marblestatue':('626b70','b5b7ac','e9dcb3','f6d783'),
+ 'siegeknight':('30364c','5e6478','c69b70','e17a64'),
+ 'royalarcanist':('383b68','6969a1','c7aacb','b9a5f4'),
+ 'brute':('383231','68514a','bc8f65','f9814d'),
+ 'warden':('3e3e46','787275','bca49a','e78672'),
+ 'archer':('434e45','818466','c5a879','a4ce8d'),
+ 'sorcerer':('2a4a67','5d8da2','bdd6e0','8de9ff'),
+ 'king':('302543','624477','ad83bd','cd85ff'),
+ 'tyrant':('38203f','794a7c','c992ae','eb7de2'),
+ 'officer-shield':('304358','627990','c6b18b','8edcf2'),
+ 'officer-spear':('364a5d','718f9f','d4bf91','89e8fa'),
+ 'prison_pike':('303941','677f85','c0ae86','8dd6dc'),
+ 'prison_guard':('393b3b','706858','caab77','f0bb63'),
+ 'prison_hound':('493d38','8c6a57','c7a68a','e8a075'),
+ 'prison_vessel':('422c28','93634a','d5a05e','ff9b51'),
+ 'prison_bell':('3d3440','7b6170','d0a86e','e5b96e'),
+ 'prison_maw':('343d3c','71817b','b9a888','ea9b70'),
+ 'prison_unbound':('342b4e','796192','c2a6c3','d799fb'),
+}
 HUMANOID=set('grunt goblin bones caster sentinel revenant frostling frostlobber emberling toxling blinkstalker sunpriest marblestatue siegeknight royalarcanist brute warden archer sorcerer king tyrant'.split())
 QUAD=set('charger dustjackal cragspitter thornboar sporeback frostshell magmaskit'.split())
 FLOAT=set('flyer shadeling sparkling galewisp voidtether'.split())
 SMALL=set('slime slimelet mimic dummy bosscrystal embertotem'.split())
-BOSSES=set('brute warden archer sorcerer king tyrant'.split())
+BOSSES=set('brute warden archer sorcerer king tyrant prison_bell prison_maw prison_unbound'.split())
 ARGS=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else []
-NAMES=ARGS or [n for n in ROSTER if n not in {'colossus','marblecolossus'}]+['officer-shield','officer-spear']
+NAMES=ARGS or [n for n in ROSTER if n not in {'colossus','marblecolossus'}]+['officer-shield','officer-spear']+list(PRISON_BASE)
 MANIFEST=[]
 
 def color(code):
@@ -66,11 +128,13 @@ def material(label,hexcode,metal=0,rough=.76,glow=0):
  return m
 
 def make_palette(name):
- p=COLORS[THEME_OF[name]]
+ p=list(COLORS[THEME_OF[name]])
+ p[1:5]=['#'+value for value in IDENTITY[name]]
  return [material('%s %s'%(name,i),c,.76 if i in (1,3) else .05,
                   .42 if i in (1,3) else .81,1.1 if i==4 else 0) for i,c in enumerate(p)]
 
 def source(name):
+ if name in PRISON_BASE:return OUT/(PRISON_BASE[name]+'-v2128.glb') if not PRISON_BASE[name].startswith('officer-') else ASSETS/'officers'/(PRISON_BASE[name][8:]+'.glb')
  if name.startswith('officer-'):return ASSETS/'officers'/(('shield' if name.endswith('shield') else 'spear')+'.glb')
  if name in {'brute','warden','archer'}:return ASSETS/'articulated'/(name+'-v1980.glb')
  if (ASSETS/'articulated'/(name+'.glb')).exists():return ASSETS/'articulated'/(name+'.glb')
@@ -644,8 +708,99 @@ def object_enemy(name):
    cube('heat vent',(0,-.166,z),(.17,.025,.052),4,'body',.004)
   for side in (-1,1):taper('idol horn',(side*.09,.02,.82),(side*.20,.07,1.03),.073,.003,0,'head')
 
+def discard_named(*fragments):
+ global PARTS
+ keep=[]
+ for obj in PARTS:
+  if any(fragment in obj.name for fragment in fragments):bpy.data.objects.remove(obj,do_unlink=True)
+  else:keep.append(obj)
+ PARTS=keep
+
+def prison_finish(name):
+ # These seven encounters used to be immediate-mode boxes. Their armatures
+ # inherit a compatible roster rig, but their equipment and faces are new.
+ if name=='prison_pike':
+  discard_named('Legion shield','shield iron face','shield oath mark')
+  for side in (-1,1):
+   plate('striped prison shoulder',[(side*.16,-.11,.83),(side*.34,-.12,.81),
+    (side*.39,.08,.64),(side*.22,-.13,.68)],1,'armL' if side<0 else 'armR',.018)
+  for z in (.44,.56,.68):cube('watcher chest strap',(0,-.19,z),(.39,.025,.025),3,'body',.004)
+  plate('watcher cage visor',[(-.11,-.191,.98),(.11,-.191,.98),(.13,-.20,.82),(-.13,-.20,.82)],0,'head',.014)
+  for x in (-.07,0,.07):rod('watcher visor bar',[(x,-.21,.98),(x,-.22,.83)],.008,3,'head')
+  taper('watcher signal spike',(0,.07,1.02),(0,.08,1.27),.045,.003,3,'head',6)
+  taper('iron pike tip',(.36,-.11,1.39),(.36,-.11,1.61),.073,.001,5,'forearmR',5)
+ elif name=='prison_guard':
+  discard_named('shield spear')
+  cube('heavy shield rim',(-.43,-.185,.52),(.34,.035,.61),3,'forearmL',.012)
+  for z in (.37,.55,.72):cube('shield cross brace',(-.43,-.215,z),(.28,.027,.025),2,'forearmL',.004)
+  taper('guard short mace',(.37,-.11,.28),(.37,-.11,.75),.027,.021,0,'forearmR')
+  ico('guard mace head',(.37,-.11,.78),(.105,.10,.13),3,'forearmR',1)
+  for side in (-1,1):taper('helmet cheek spike',(side*.11,-.15,.88),(side*.20,-.19,.78),.044,.003,3,'head',5)
+ elif name=='prison_hound':
+  for side in (-1,1):
+   rod('broken neck chain',[(side*.13,-.34,.53),(side*.22,-.25,.49),(side*.23,-.14,.45)],.021,3,'head')
+   taper('hound torn ear',(side*.12,-.30,.57),(side*.25,-.30,.78),.067,.003,0,'head',5)
+  for z in (.37,.45):rod('hound iron collar',[(-.18,-.27,z),(0,-.40,z),(.18,-.27,z)],.017,2,'head')
+ elif name=='prison_vessel':
+  for side in (-1,1):
+   plate('cracked furnace wing',[(side*.15,.06,.77),(side*.36,.13,.85),
+    (side*.39,.17,.41),(side*.18,.12,.36)],0,'body',.022)
+   rod('vessel molten seam',[(side*.16,-.17,.36),(side*.13,-.18,.59),(side*.09,-.15,.82)],.012,4,'body')
+  ico('captive fire',(0,-.19,.54),(.12,.055,.17),4,'body',2)
+ elif name=='prison_bell':
+  discard_named('tower shield','shield crest','shield spear')
+  for side in (-1,1):
+   plate('bell keeper apron',[(side*.04,-.23,.59),(side*.20,-.21,.57),
+    (side*.24,-.24,.13),(side*.03,-.25,.16)],2,'body',.014)
+   rod('bell chain',[(side*.21,.09,.83),(side*.31,.08,.67),(side*.29,.06,.39)],.019,3,'body')
+  taper('great bell haft',(.40,-.12,.23),(.40,-.12,1.17),.036,.026,0,'forearmR')
+  taper('bronze bell body',(.40,-.12,.96),(.40,-.12,1.22),.19,.115,1,'forearmR',12)
+  ring('bell iron lip',(.40,-.12,.96),.19,3,'forearmR')
+  ring('bell crown seam',(.40,-.12,1.19),.124,3,'forearmR')
+  ico('bell hollow mouth',(.40,-.12,.95),(.145,.145,.024),0,'forearmR',1)
+  ico('bell clapper',(.40,-.12,.91),(.065,.065,.08),4,'forearmR',2)
+  for side in (-1,1):
+   rod('bell engraved oath',[(.40+side*.14,-.18,1.15),(.40+side*.16,-.18,1.03)],.011,3,'forearmR')
+ elif name=='prison_maw':
+  for side in (-1,1):
+   plate('iron maw cheek',[(side*.06,-.42,.40),(side*.23,-.43,.43),
+    (side*.27,-.61,.23),(side*.09,-.67,.22)],0,'head',.022)
+   for j in range(3):taper('maw tooth',(side*(.08+j*.048),-.64,.28),
+    (side*(.08+j*.048),-.67,.16),.027,.003,5,'head',5)
+   taper('shoulder barbed chain',(side*.20,-.10,.57),(side*.41,.01,.73),.065,.004,3,'body',5)
+  cube('iron jaw bridge',(0,-.62,.35),(.36,.10,.08),3,'head',.012)
+ elif name=='prison_unbound':
+  discard_named('king blade')
+  for side in (-1,1):
+   plate('unbound mantle',[(side*.16,.10,.81),(side*.42,.18,.92),
+    (side*.46,.26,.29),(side*.24,.21,.18)],1,'body',.015)
+   for z in (.43,.55,.68):ico('soul lantern',(side*.36,-.10,z),(.048,.046,.06),4,'forearmL' if side<0 else 'forearmR',2)
+  ring('prison seal halo',(0,.08,1.24),.27,3,'head',(math.pi/2,0,0))
+  ico('unbound face void',(0,-.20,.89),(.077,.026,.095),4,'head',2)
+
+def identity_finish(name,design):
+ # Repeated small marks sit on the existing rig, so regional enemies share a
+ # visual language without becoming one reskinned toy soldier at game scale.
+ if name.startswith('prison_'):prison_finish(name);return
+ if design in HUMANOID or name.startswith('officer-'):
+  for side in (-1,1):
+   b='armL' if side<0 else 'armR'
+   cube('faction cuff',(side*.30,-.10,.48),(.15,.16,.032),3,b,.005)
+  if design not in {'bones','goblin'}:
+   plate('rank chest emblem',[(-.055,-.205,.70),(.055,-.205,.70),
+    (.075,-.209,.61),(0,-.22,.56),(-.075,-.209,.61)],4,'body',.006)
+ elif design in QUAD:
+  for side in (-1,1):
+   for y in (-.25,.19):
+    taper('creature back crest',(side*.10,y,.61),(side*.16,y+.06,.75),.048,.003,3,'body',5)
+ elif design in FLOAT:
+  for side in (-1,1):ico('floating eye jewel',(side*.13,-.12,.70),(.032,.025,.047),4,'head',1)
+ elif design not in {'slime','slimelet'}:
+  ring('core identity seal',(0,-.17,.58),.095,4,'body',(math.pi/2,0,0))
+
 def build(name):
  global RIG,PAL,PARTS
+ design=PRISON_BASE.get(name,name)
  bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
  for act in list(bpy.data.actions):bpy.data.actions.remove(act)
  bpy.ops.import_scene.gltf(filepath=str(source(name)))
@@ -656,11 +811,11 @@ def build(name):
   b.rotation_mode='XYZ';b.rotation_euler=(0,0,0);b.location=(0,0,0);b.scale=(1,1,1)
  bpy.context.scene.frame_set(1)
  PAL=make_palette(name);PARTS=[]
- if name in HUMANOID or name.startswith('officer-'):
-  if name=='bones':bare_bones()
-  elif name=='goblin':scavenger_body()
-  elif name in {'emberling','frostling','toxling','blinkstalker'}:elemental_body(name)
-  else:foundation_humanoid(name)
+ if design in HUMANOID or name.startswith('officer-'):
+  if design=='bones':bare_bones()
+  elif design=='goblin':scavenger_body()
+  elif design in {'emberling','frostling','toxling','blinkstalker'}:elemental_body(design)
+  else:foundation_humanoid(design)
   if name.startswith('officer-'):
    armor(name)
    if name.endswith('shield'):
@@ -669,17 +824,18 @@ def build(name):
    else:
     taper('long ice spear',(.40,-.10,.13),(.40,-.10,1.43),.026,.012,2,'forearmR')
     taper('ice spear tip',(.40,-.10,1.40),(.40,-.10,1.63),.061,.003,5,'forearmR',5)
-  else:humanoid(name)
+  else:humanoid(design)
   RIG.scale=(.88,.88,1.25 if name not in BOSSES else 1.17)
- elif name in QUAD:
-  foundation_beast(name)
-  beast(name);RIG.scale=(1.07,1.20,1.06)
- elif name in FLOAT:
-  foundation_float(name)
-  hovering(name);RIG.scale=(1.06,1.06,1.08)
+ elif design in QUAD:
+  foundation_beast(design)
+  beast(design);RIG.scale=(1.07,1.20,1.06)
+ elif design in FLOAT:
+  foundation_float(design)
+  hovering(design);RIG.scale=(1.06,1.06,1.08)
  else:
-  foundation_object(name)
-  object_enemy(name);RIG.scale=(1.07,1.07,1.10)
+  foundation_object(design)
+  object_enemy(design);RIG.scale=(1.07,1.07,1.10)
+ identity_finish(name,design)
  # Old low-detail meshes were useful scaffolds for rigging, but leaving them
  # visible makes a double body and the same toy-soldier face under new armor.
  for old in EXISTING:bpy.data.objects.remove(old,do_unlink=True)
@@ -709,7 +865,7 @@ def build(name):
  bpy.ops.object.select_all(action='DESELECT');RIG.select_set(True)
  for o in meshes:o.select_set(True)
  bpy.context.view_layer.objects.active=RIG
- path=OUT/(name+'-v2128.glb')
+ path=OUT/(name+'-v2141.glb')
  bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,
      export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=True,
      export_frame_range=False,export_materials='EXPORT',export_yup=True)
@@ -723,5 +879,5 @@ def build(name):
 for name in NAMES:
  if name not in THEME_OF:raise ValueError('Missing design category for '+name)
  MANIFEST.append(build(name))
-(OUT/('manifest.json' if not ARGS else 'sample-manifest.json')).write_text(json.dumps(MANIFEST,indent=2))
+(OUT/('manifest-v2141.json' if not ARGS else 'sample-manifest-v2141.json')).write_text(json.dumps(MANIFEST,indent=2))
 print('ROSTER_COMPLETE',len(MANIFEST),sum(x['bytes'] for x in MANIFEST),flush=True)

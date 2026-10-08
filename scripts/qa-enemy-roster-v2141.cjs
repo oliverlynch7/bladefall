@@ -1,0 +1,34 @@
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const folder=path.join(root,'public/3d/enemy-assets/upgraded');
+const manifest=JSON.parse(fs.readFileSync(path.join(folder,'manifest-v2141.json')));
+const roster=Object.keys(JSON.parse(fs.readFileSync(path.join(root,'tools/art/enemy-roster.json'))));
+const prison='prison_pike prison_guard prison_hound prison_vessel prison_bell prison_maw prison_unbound'.split(' ');
+const expected=new Set([...roster.filter(t=>!['colossus','marblecolossus'].includes(t)),'officer-shield','officer-spear',...prison]);
+assert.equal(manifest.length,expected.size,'Full roster coverage');
+let bytes=0,maxTriangles=0;const appearances=new Set(),palettes=new Set();
+for(const row of manifest){
+ assert(expected.delete(row.type),'Missing or duplicate: '+row.type);
+ const buffer=fs.readFileSync(path.join(folder,row.file));
+ assert(row.file===row.type+'-v2141.glb','Versioned export '+row.type);
+ assert.equal(buffer.readUInt32LE(0),0x46546c67,'GLB magic '+row.type);
+ const gltf=JSON.parse(buffer.subarray(20,20+buffer.readUInt32LE(12)));
+ assert(gltf.skins?.length===1,'Rig '+row.type);
+ assert(gltf.meshes?.length>=1,'Mesh '+row.type);
+ assert(row.triangles>=300&&row.triangles<8000,'Browser triangle budget '+row.type);
+ assert.equal(buffer.length,row.bytes,'Manifest bytes '+row.type);
+ for(const clip of ['Idle','Move','Windup','Attack','Hit','Death'])assert(gltf.animations?.some(a=>a.name===clip),'Clip '+clip+' '+row.type);
+ assert(gltf.materials?.length>=3,'Material breakup '+row.type);
+ const palette=gltf.materials.map(m=>m.pbrMetallicRoughness?.baseColorFactor?.slice(0,3).map(v=>Math.round(v*255)).join(',')).join('|');
+ palettes.add(palette);appearances.add(row.file);bytes+=buffer.length;maxTriangles=Math.max(maxTriangles,row.triangles);
+}
+assert.equal(expected.size,0,'Missing '+[...expected]);
+assert.equal(appearances.size,manifest.length);
+assert(palettes.size>=40,'Distinct skin palettes');
+assert(bytes<24_000_000,'Total browser model budget');
+const mob=fs.readFileSync(path.join(root,'public/3d/mob3d.js'),'utf8');
+assert(mob.includes("file:'enemy-assets/upgraded/'+type+'-v2141',fitHeight"),'Game runtime uses exports');
+for(const name of prison)assert(mob.includes("'"+name+"'"),'Prison runtime cast '+name);
+const action=fs.readFileSync(path.join(root,'public/3d/enemy-action-state.js'),'utf8');
+assert(action.includes('if(e.prisonFoe)return'),'Prison attack state connected');
+console.log(JSON.stringify({appearances:manifest.length,distinctPalettes:palettes.size,totalBytes:bytes,maxTriangles,prison:prison.length,bespoke:['colossus','marblecolossus','hydra']}));

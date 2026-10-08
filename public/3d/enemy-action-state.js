@@ -1,6 +1,6 @@
 // Read-only animation phase selection from authoritative gameplay timers.
 export function enemyActionState(e){
- if(e.betaAppearance&&e.prisonFoe)return {phase:e.pcState==='wind'?'Windup':e.pcState==='strike'?'Attack':null,key:e.pcMove,remaining:e.pcClock||0};
+ if(e.prisonFoe)return {phase:e.pcState==='wind'?'Windup':e.pcState==='strike'?'Attack':null,key:e.pcMove,remaining:e.pcClock||0};
  for(const [flag,prefix] of [['furnaceColossus','fc'],['marbleGuardian','mc']])if(e[flag]){
   const phase=e[prefix+'State'];return {phase:phase==='wind'?'Windup':phase==='strike'?'Attack':null,key:e[prefix+'Kind'],remaining:e[prefix+'Clock']||0};
  }

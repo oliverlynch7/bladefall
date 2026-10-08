@@ -1,8 +1,8 @@
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2125';
-import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2120';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2141';
+import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2141';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -11,11 +11,12 @@ import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 // the shared kit loader below; unknown enemies retain the legacy rendering fallback.
 const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+(['archer','brute','warden'].includes(type)?type+'-v1980':type)}]));
 MOB_CAST['officer-shield']={file:'enemy-assets/officers/shield'};MOB_CAST['officer-spear']={file:'enemy-assets/officers/spear'};
+for(const type of ['prison_pike','prison_guard','prison_hound','prison_vessel','prison_bell','prison_maw','prison_unbound'])MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2141'};
 // Versioned visual-only replacement. Old GLBs remain in place for rollback;
 // gameplay type IDs, collision dimensions and attack state are unchanged.
-const ROSTER_BEASTS=new Set('charger dustjackal cragspitter thornboar sporeback frostshell magmaskit'.split(' '));
+const ROSTER_BEASTS=new Set('charger dustjackal cragspitter thornboar sporeback frostshell magmaskit prison_hound prison_maw'.split(' '));
 const ROSTER_FLOATS=new Set('flyer shadeling sparkling galewisp voidtether'.split(' '));
-const ROSTER_SMALL=new Set('slime slimelet mimic dummy bosscrystal embertotem'.split(' '));
+const ROSTER_SMALL=new Set('slime slimelet mimic dummy bosscrystal embertotem prison_vessel'.split(' '));
 const ROSTER_LEAN=new Set('emberling frostling toxling blinkstalker goblin bones'.split(' '));
 for(const type of Object.keys(MOB_CAST))if(type!=='colossus'&&type!=='marblecolossus'){
   // Fit the BODY to its existing gameplay height. Spear tips, antlers and
@@ -24,8 +25,8 @@ for(const type of Object.keys(MOB_CAST))if(type!=='colossus'&&type!=='marblecolo
   const fitHeight=ROSTER_BEASTS.has(type)?.82:ROSTER_FLOATS.has(type)?.86:
     ROSTER_SMALL.has(type)?(type==='slimelet'?.48:type==='slime'?.56:.88):
     ROSTER_LEAN.has(type)?.99:
-    ['king','tyrant','brute','warden','archer','sorcerer'].includes(type)?1.22:1.10;
-  MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2128',fitHeight};
+    ['king','tyrant','brute','warden','archer','sorcerer','prison_bell','prison_unbound'].includes(type)?1.22:1.10;
+  MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2141',fitHeight};
 }
 MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
 MOB_CAST.marblecolossus={file:'enemy-assets/articulated/marblecolossus-v2126'};
@@ -121,7 +122,7 @@ export async function loadKitModel(file){
 export function kitModel(file){ return _mobModels.get(file); }
 
 // Actor identity survives list reordering; skinned clones share immutable geometry/materials.
-function appearance(e, w){if(w.briarBeta&&e.betaAppearance)return e.betaAppearance;const elite={forge:'siegeknight',shore:'archer',tower:'royalarcanist'}[e.ceKind];if(elite)return elite;if(e.frostOfficer&&e.frostOfficer!=='caster')return 'officer-'+e.frostOfficer;return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
+function appearance(e, w){if(e.prisonFoe)return e.prisonFoe;if(w.briarBeta&&e.betaAppearance)return e.betaAppearance;const elite={forge:'siegeknight',shore:'archer',tower:'royalarcanist'}[e.ceKind];if(elite)return elite;if(e.frostOfficer&&e.frostOfficer!=='caster')return 'officer-'+e.frostOfficer;return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
 function requestModel(file){
   if(!_mobModels.has(file) && !_pending.has(file)){
     const p=loadKitModel(file);_pending.set(file,p);p.finally(()=>_pending.delete(file));
@@ -142,7 +143,7 @@ function acquireMob(type,e){
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
     const clips=src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
-    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||['Attack','Recover','Hit','Death','Windup','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
+    for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||/^(Attack|Windup)(_|$)/.test(c.name)||['Recover','Hit','Death','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
   Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});
@@ -152,7 +153,7 @@ function play(rec,name,duration){
   const a=rec.actions[name]||rec.actions.Idle;if(!a)return;
   if(rec.cur===name&&!rec.restart)return;
   rec.restart=false;
-  const blend=name==='Attack'?.025:.08;
+  const blend=name.startsWith('Attack')?.025:.08;
   const old=rec.actions[rec.cur];if(old)old.fadeOut(blend);
   a.reset().setEffectiveTimeScale(duration ? a.getClip().duration/Math.max(.08,duration) : 1).setEffectiveWeight(1).fadeIn(blend).play();rec.cur=name;
 }
@@ -227,8 +228,8 @@ function syncMobsInner(scene,dt){
     const fallen=e.fallenDuel?{feint:'FallenFeint',stagger:'FallenStagger'}[e.fallState]:null;
     if(fallen)play(rec,fallen,e.fallClock);
     else if(orchard)play(rec,orchard,orchard==='BruteBrace'?wind:undefined);
-    else if(wind>0)play(rec,'Windup',wind);
-    else if(rec.attack>0||state.phase==='Attack')play(rec,'Attack',state.phase==='Attack'?state.remaining:rec.attack);
+    else if(wind>0)play(rec,rec.actions['Windup_'+state.key]?'Windup_'+state.key:'Windup',wind);
+    else if(rec.attack>0||state.phase==='Attack')play(rec,rec.actions['Attack_'+state.key]?'Attack_'+state.key:'Attack',state.phase==='Attack'?state.remaining:rec.attack);
     else if(rec.recover>0)play(rec,'Recover');
     else if((e.hitFlash||0)>rec.hit+.025){rec.restart=true;play(rec,'Hit');}
     else if(rec.cur!=='Hit'||!rec.actions.Hit?.isRunning())play(rec,speed>3&&speed<1600?'Move':'Idle');

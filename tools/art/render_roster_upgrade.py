@@ -5,10 +5,10 @@ from mathutils import Vector
 
 ROOT=Path(__file__).resolve().parents[2]
 ASSETS=ROOT/'public/3d/enemy-assets/upgraded'
-OUT=ROOT/'output/enemy-roster-upgrade'
+OUT=ROOT/'output/enemy-roster-upgrade-v2141'
 OUT.mkdir(parents=True,exist_ok=True)
 ARGS=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else []
-records=json.loads((ASSETS/('sample-manifest.json' if ARGS else 'manifest.json')).read_text())
+records=json.loads((ASSETS/('sample-manifest-v2141.json' if ARGS else 'manifest-v2141.json')).read_text())
 if ARGS:records=[r for r in records if r['type'] in ARGS]
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 s=bpy.context.scene;s.render.engine='BLENDER_EEVEE_NEXT';s.render.resolution_x=460;s.render.resolution_y=550;s.render.resolution_percentage=100

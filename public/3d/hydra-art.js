@@ -25,7 +25,7 @@ export function createHydra(parent){
  for(let j=0;j<4;j++){const dorsal=make(new T.ConeGeometry(13-j*2,67-j*8,5),ridge,head);dorsal.position.set(0,67-j*5,-95+j*44);dorsal.rotation.x=-.28;}
  const jaw=ell(0,-37,89,55,10,88,shadow,head);jaw.rotation.x=.07;
  const cuff=make(new T.TorusGeometry(59,10,6,12),iron,g);cuff.material=iron.clone();mats.push(cuff.material);cuff.rotation.x=Math.PI/2;const links=[];for(let j=0;j<10;j++){const l=make(new T.TorusGeometry(15,4,5,8),iron,g);links.push(l);}
- necks.push({g,segs,head,cuff,links});}
+ necks.push({g,segs,head,jaw,cuff,links,pose:null,previousTime:null});}
  const jet=make(new T.CylinderGeometry(1,1,1,8),new T.MeshBasicMaterial({color:0x9adee9,transparent:true,opacity:.78,depthWrite:false}));mats.push(jet.material);jet.name='Hydra water jet';jet.visible=false;
  function update(G){const h=G.hydraArena;if(!h)return;const t=h.elapsed;jet.visible=h.state==='strike'&&h.kind==='blast'&&!h.freed;if(jet.visible){const a=window.BFHydra.heads[h.head],dir=new T.Vector3(h.x-a.x,0,h.z-a.z).normalize();let len=2200;for(let d=20;d<2200;d+=20)if(window.BFHydra.blocked({x:a.x+dir.x*d,z:a.z+dir.z*d},a)){len=d;break;}const start=new T.Vector3(a.x,180,a.z),end=start.clone().addScaledVector(dir,len);jet.position.copy(start.add(end).multiplyScalar(.5));jet.scale.set(50,len,50);jet.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),dir);}
  root.position.z=-h.retreat*2100;root.position.y=-h.retreat*370;
@@ -34,7 +34,18 @@ export function createHydra(parent){
  if(active&&h.state==='wind'){y+=Math.sin(Math.min(1,(2-h.clock)/2)*Math.PI/2)*120;}
  if(active&&h.state==='strike'&&h.kind==='sweep'){x=Math.sin((.45-h.clock)/.45*Math.PI-Math.PI/2)*800;y=190;z=100;}
  if(active&&h.state==='strike'&&h.kind==='bite'){x=h.x;y=h.y+58;z=h.z;}
- y+=Math.sin(t*1.6+i*2)*9;n.head.position.set(x,y,z);n.head.rotation.y=Math.atan2(h.x-x,h.z-z)*.25;
+ y+=Math.sin(t*1.6+i*2)*9;
+ // The combat target moves instantly, but the visible neck must follow an arc.
+ // A short, time-corrected settle keeps a bite from teleporting across the arena.
+ const elapsed=n.previousTime==null ? .05 : Math.max(0,Math.min(.05,t-n.previousTime));n.previousTime=t;
+ const approach=1-Math.exp(-elapsed*(active&&h.state==='strike'?15:8));
+ if(!n.pose)n.pose=new T.Vector3(x,y,z);else n.pose.lerp(new T.Vector3(x,y,z),approach);
+ x=n.pose.x;y=n.pose.y;z=n.pose.z;
+ n.head.position.copy(n.pose);n.head.rotation.y=Math.atan2(h.x-x,h.z-z)*.25;
+ const attackOpen=active&&h.state==='strike'&&h.kind==='bite'?1:active&&h.state==='wind'&&h.kind==='bite'?.45:0;
+ n.jaw.rotation.x+=(.07+attackOpen*.36-n.jaw.rotation.x)*Math.min(1,approach*1.7);
+ n.jaw.position.y=-37-attackOpen*8;
+ n.head.rotation.x+=(attackOpen*.12-n.head.rotation.x)*Math.min(1,approach*1.3);
  const point=u=>new T.Vector3(x*u,20+(y-20)*u+Math.sin(u*Math.PI)*200,-850+(z+850)*u);for(let j=0;j<10;j++){const a=point(j/10),b=point((j+1)/10),d=b.clone().sub(a),m=n.segs[j];m.position.copy(a.add(b).multiplyScalar(.5));m.scale.y=d.length()+5;m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());
   for(let side=0;side<2;side++){const angle=(side?1:-1)*.63;
    neckPose.position.copy(m.position).add(new T.Vector3(Math.sin(angle)*43,Math.cos(angle)*32,0));neckPose.quaternion.copy(m.quaternion);neckPose.scale.set(32,13,58);neckPose.updateMatrix();neckScales.setMatrixAt(i*20+j*2+side,neckPose.matrix);

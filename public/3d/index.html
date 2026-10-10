@@ -1090,7 +1090,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./hollow-cliffs.js?v=2161"></script>
-<script src="./lost-canyon.js?v=2163"></script>
+<script src="./lost-canyon.js?v=2164"></script>
 <script src="./broken-walls.js?v=2161"></script>
 <script src="./prison-dungeons.js?v=2146"></script>
 <script src="./snowbound-peaks.js?v=2162"></script>
@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.162.0-canyon-signal';
+const VERSION3D='2.163.0-melee-reach';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9718,6 +9718,9 @@ function spawnEnemy(type,x,z,isBoss){
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
     atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0,
     markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
+  // Ordinary campaign foot soldiers should not stop to wind up beyond the range of their own strike.
+  // Keep trials, side modes, specialized foes and bosses at their established tuning.
+  if(isCampaignAdventure()&&a.kind==='walk'&&(!a.spec||a.spec==='watch')&&!a.boss&&!isBoss)e.meleeReach=8;
   if(type==='dummy') e.hp=e.maxHp=trainingDummyHp(G&&G.p?G.p.level:1);
   if(e.boss) G.boss=e;
   e.mid=(G._midSeq=(G._midSeq||0)+1);   // stable multiplayer id (host & guest spawn in the same seeded order, so ids align)

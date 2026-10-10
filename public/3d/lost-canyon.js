@@ -136,6 +136,7 @@
      for(let i=0;i<Math.min(types.length,4-alive);i++){
       const e=spawn(types[i],x+(i?62:-40),z+(i?-32:38),false);
       Object.assign(e,{canyonAlarm:true,patrolGroup:'canyon.signal',label:types[i]==='sentinel'?'Signal sentinel':'Alarm guard',active:true,dropT:0,stunT:0.25,meleeReach:22});
+      if(types[i]==='grunt'){e.role=null;e.roleCol=null;} // The opening patrol must pressure the cage, not randomly flank or explode.
      }
      c.alarmWave++;c.alarmAt=G.time+16;
      if(c.alarmWave>1)a.toast?.('Another signal patrol reaches the holding yard.');

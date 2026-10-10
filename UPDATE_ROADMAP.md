@@ -2595,3 +2595,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] The alarm cable now has a collision-backed scaffold climb with real jump gaps and a recoverable fall into the yard. Signal posts and the winch change color when the alarm is active or cut.
 - [x] Freeing a cage before the cable is cut calls host-owned patrol pairs near the party in the holding yard. They chase and can damage the player. Further pairs answer after a respite, with at most four live signal guards; cutting the cable stops new calls. Cutting first keeps the quiet route.
 - [x] Existing rescue, shard, checkpoint and save IDs remain. Static/story tests and muted browser checks passed for the full route, real climb and miss/retry, guard damage and repeat waves, old saves, checkpoint, and two-page co-op. Oliver's playtest is still needed for combat pacing, climb challenge and visual appeal. No custom SFX work. See docs/design/LOST_CANYON_SIGNAL_PRESSURE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Campaign foot-soldier first-swing reach (SHIPPED v2.163.0)
+
+- [x] Ordinary campaign walkers and watch sentinels use a small, consistent reach for starting and landing their telegraphed melee. The first swing now hits a stationary target when not dodged; attack timing and damage are unchanged. Trial, side-mode and boss tuning are unchanged.
+- [x] Co-op snapshots mirror the reach. The Lost Canyon opening alarm pair has a fixed guard role, avoiding random exploder/flanker behavior at the rescue cage.
+- [x] Static and three repeated muted-browser first-hit/dodge/cover/trial tests passed, as did existing melee sync, campaign pursuit, Briar roles and Lost Canyon alarm/co-op tests. The broad natural-combat sweep still fails its separate Lost Canyon Galewisp sample; investigate its under-platform test spot or flyer behavior separately. Oliver's playtest must judge combat pressure. See docs/design/CAMPAIGN_MELEE_REACH_2026-10-10.md.

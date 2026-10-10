@@ -972,15 +972,15 @@
           "id": "gf.cache",
           "region": "ember",
           "title": "The cooling-box plate",
-          "text": "Three marks run against the water flow: triangle, square, circle. The sealed cooling box has the same three buttons."
+          "text": "Cold water drives the moving counterweights east of this room. Cross them to reach the cooling box above. The lower grate leads back if you fall."
         }
       ]
     },
-    "gf.cache.1": {
-      "once": false,
+    "gf.cache.release": {
+      "once": true,
       "when": [
         {
-          "flag": "gf.cache",
+          "flag": "gf.cool.open",
           "is": true
         },
         {
@@ -990,64 +990,8 @@
       ],
       "effects": [
         {
-          "type": "sequence",
-          "id": "gf.cache",
-          "value": 1,
-          "solution": [
-            3,
-            2,
-            1
-          ]
-        }
-      ]
-    },
-    "gf.cache.2": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.cache",
-          "is": true
-        },
-        {
-          "flag": "gf.cache.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "gf.cache",
-          "value": 2,
-          "solution": [
-            3,
-            2,
-            1
-          ]
-        }
-      ]
-    },
-    "gf.cache.3": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.cache",
-          "is": true
-        },
-        {
-          "flag": "gf.cache.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "gf.cache",
-          "value": 3,
-          "solution": [
-            3,
-            2,
-            1
-          ]
+          "type": "flag",
+          "id": "gf.cache.open"
         }
       ]
     },

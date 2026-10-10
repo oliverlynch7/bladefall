@@ -1152,3 +1152,7 @@ Oliver requests further all-around improvement to Bladefall, with earlier explic
 ## [Codex | 2026-10-10] Great Furnace Cinder rescue action variety
 
 Under Oliver's continuing authorization to improve existing campaign levels, replace the live Cinder cage's adjacent three-control order with a visible heat-feed shutdown, a short cage-guard fight, and a final safe release. Keep the companion, story completion and save identifiers, main progression and co-op authority. A previous completed rescue stays completed; partial old switch progress can restart at the new feed. See docs/design/GREAT_FURNACE_CINDER_RESCUE_2026-10-10.md. Custom SFX creation remains on hold.
+
+## [Codex | 2026-10-10] Great Furnace cooling-box action variety
+
+Under Oliver's continuing direction to remove repetitive combination puzzles and make optional Rift Shards worth exploring, replace the live cooling box's adjacent triangle-square-circle presses. The cooled waterworks should power a visible side gantry with moving counterweights. The player crosses it to open the cooling box and find the same ED-04 shard. The plate gives a short route clue but is not a mandatory quest pickup. Preserve `gf.cache.open`, the personal shard ID, main route, co-op and old saves; old partial button progress can restart at the gantry. Verify actual jumps, a miss/recovery, the opening visual, checkpoint and co-op in a muted browser. See docs/design/GREAT_FURNACE_COUNTERWEIGHT_2026-10-10.md. Custom SFX remain on hold.

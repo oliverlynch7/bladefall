@@ -2537,3 +2537,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional captive-Cinder three-control sequence with a visible heat-feed shutdown, cage-guard fight and final lock release. The pipe and cage respond to each step; the lock explains why it is blocked.
 - [x] Kept the Cinder reward, main Furnace route, co-op sharing, boss-entry banking and old completed saves. The cage clue remains in the journal but clears from the reading panel when combat begins.
 - [x] Static/story tests, full route, checkpoint, natural guard movement, two-player authority, prior-save loading and shoulder-camera review passed. Fight feel and visual taste remain for Oliver's playtest. See docs/design/GREAT_FURNACE_CINDER_RESCUE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Great Furnace cooling-box gantry (SHIPPED v2.151.0)
+
+- [x] Replaced the optional triangle-square-circle cache buttons with four moving counterweight decks east of the cooled waterworks. A lower grate and return steps make missed jumps recoverable.
+- [x] Moved the cooling box to a solid upper landing with a clear interaction lane, sliding lid and the same personal ED-04 shard. The plate gives a short clue; old partial and completed-box saves remain usable.
+- [x] Passed static/story tests, full Furnace route, physical jump/miss/recovery and under-landing exploit checks, chest collision, checkpoint banking, host/guest state and personal shard collection, prior-save reload and normal-camera visual review. Oliver's playtest is still needed for difficulty, route readability and art quality. See docs/design/GREAT_FURNACE_COUNTERWEIGHT_2026-10-10.md.

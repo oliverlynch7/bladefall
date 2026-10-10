@@ -549,7 +549,7 @@
               "id": "pc.defenses",
               "region": "palace",
               "title": "Two ways past the balconies",
-              "text": "Each occupied balcony controls a library barrier. Fight its guards and pull the upper release, or take the garden steps below and drain its water-powered lock. You can mix the two routes."
+              "text": "Open either balcony to reach the mirror terrace. Fight its patrol and pull the upper release, or drain its lock from the lower garden. The other balcony is an optional route."
             }
           ],
           "when": []
@@ -596,7 +596,7 @@
               "id": "pc.defenses",
               "region": "palace",
               "title": "Two ways past the balconies",
-              "text": "Clear a balcony patrol and pull its release, or drain the lock from the lower garden. Disable both defenses to reach the mirror terrace."
+              "text": "Choose either balcony: clear its patrol and pull the upper release, or drain its lock from the lower garden. One open route reaches the mirrors."
             }
           ],
           "when": []
@@ -613,7 +613,7 @@
       }
     },
     "pc.victor.route": {
-      "text": "Two balconies, two locks. Fight through their guards, or use the lower gardens' water controls to drain each lock and lower its barrier.",
+      "text": "Either balcony reaches the mirrors. Fight its patrol and pull the upper release, or use the lower garden to drain its lock. The other route is optional.",
       "choices": [
         {
           "id": "mirror",
@@ -806,7 +806,7 @@
           "id": "pc.court.open",
           "region": "palace",
           "title": "The fountain court is safe",
-          "text": "Water runs again and the large healing pad is restored. It heals without running out. Victor waits beyond the fountain. The library is still held by two balcony locks."
+          "text": "Water runs again and the large healing pad works without running out. Open either balcony route to reach the mirrors."
         }
       ]
     },
@@ -829,11 +829,16 @@
           "value": true
         },
         {
+          "type": "flag",
+          "id": "pc.route.open",
+          "value": true
+        },
+        {
           "type": "note",
           "id": "pc.west",
           "region": "palace",
           "title": "West barrier released",
-          "text": "The west balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+          "text": "The west barrier is down. Follow this route to the mirror terrace. The other balcony is optional."
         }
       ]
     },
@@ -856,11 +861,16 @@
           "value": true
         },
         {
+          "type": "flag",
+          "id": "pc.route.open",
+          "value": true
+        },
+        {
           "type": "note",
           "id": "pc.west",
           "region": "palace",
           "title": "West barrier released",
-          "text": "The west balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+          "text": "The west barrier is down. Follow this route to the mirror terrace. The other balcony is optional."
         }
       ]
     },
@@ -883,11 +893,16 @@
           "value": true
         },
         {
+          "type": "flag",
+          "id": "pc.route.open",
+          "value": true
+        },
+        {
           "type": "note",
           "id": "pc.east",
           "region": "palace",
           "title": "East barrier released",
-          "text": "The east balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+          "text": "The east barrier is down. Follow this route to the mirror terrace. The other balcony is optional."
         }
       ]
     },
@@ -910,11 +925,16 @@
           "value": true
         },
         {
+          "type": "flag",
+          "id": "pc.route.open",
+          "value": true
+        },
+        {
           "type": "note",
           "id": "pc.east",
           "region": "palace",
           "title": "East barrier released",
-          "text": "The east balcony lock has released. Its bridge is down. The other balcony still needs attention if its barrier is raised."
+          "text": "The east barrier is down. Follow this route to the mirror terrace. The other balcony is optional."
         }
       ]
     },
@@ -996,11 +1016,7 @@
       "once": true,
       "when": [
         {
-          "flag": "pc.west",
-          "is": true
-        },
-        {
-          "flag": "pc.east",
+          "flag": "pc.route.open",
           "is": true
         }
       ],
@@ -1023,11 +1039,7 @@
       "once": false,
       "when": [
         {
-          "flag": "pc.west",
-          "is": true
-        },
-        {
-          "flag": "pc.east",
+          "flag": "pc.route.open",
           "is": true
         },
         {
@@ -1053,11 +1065,7 @@
       "once": false,
       "when": [
         {
-          "flag": "pc.west",
-          "is": true
-        },
-        {
-          "flag": "pc.east",
+          "flag": "pc.route.open",
           "is": true
         },
         {
@@ -1083,11 +1091,7 @@
       "once": false,
       "when": [
         {
-          "flag": "pc.west",
-          "is": true
-        },
-        {
-          "flag": "pc.east",
+          "flag": "pc.route.open",
           "is": true
         },
         {

@@ -7,3 +7,7 @@ Validation: real browser purchased all five shop upgrades (including existing ch
 ## [Codex | 2026-10-10] Snowbound buried-camp ridge
 
 Version 2.149.0 replaces the live Snowbound camp's 1-3-2 marker puzzle with seven actual parkour landings and a high survey release. The same Winter Cloak chest and FF-02 shard remain, with a visible snow cover change. The notebook and Heath now point to the ridge, while the main route is unchanged. A spent release prompt is hidden and a saved old marker clue is updated on load. Browser QA traversed the ledges, recovered from a miss, claimed the rewards, and passed full route, co-op, checkpoint and old-save checks. The feel and final art still need Oliver's playtest. See docs/design/SNOWBOUND_CAMP_RIDGE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Palace Courtyard route choice
+
+Shipped in v2.159.0: either balcony opens the mirror terrace, with upper combat and lower garden approaches on both sides. The other balcony is optional, and old saves migrate without changing reward identity. Courtyard fall-back sun glare was reduced. Browser route, co-op and checkpoint QA passed; full human playtesting remains. See docs/design/PALACE_COURTYARD_ROUTE_CHOICE_2026-10-10.md.

@@ -2566,3 +2566,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional Lantern Wreck number-entry chest with a ship ballista on Rose Wreck. The player aims across the gap, sees the bolt miss or break a visible clasp, then returns to claim Stormshot from the opened chest.
 - [x] Kept the chest state and reward IDs, main boat and voyage, old partial and completed saves, and host-owned co-op progression. The quest tracker remains active until the reward is collected. Removed the old numbered pads and floating labels.
 - [x] Static/story tests and muted-browser checks passed for aim and retry, physical return, full shore route, prior saves, and a two-player host/guest reward flow. Oliver should judge aiming challenge and visual quality in normal play. No custom SFX work. See docs/design/SHIPWRECK_BALLISTA_2026-10-10.md.
+
+## [Codex | 2026-10-10] Co-op skill-effect parity (SHIPPED v2.156.0)
+
+- [x] Guest skill stuns, slows, pulls, lifts, marks and taunts now affect host-owned enemies, including pet-origin Roar; timers mirror back to the party. Soul Tether and Conduit link host enemies rather than only guest copies.
+- [x] Death's Door and Final Curse resolve on the host even if the guest stops updating. Execution uses the host's current enemy HP and the shared kill result.
+- [x] Muted two-page browser QA passed 28 focused cases, plus existing co-op hit, healing, PvP control and kill-reward regressions, prior-save reload and inline syntax. Real-network timing and play feel still need a human co-op session. See docs/design/COOP_SKILL_EFFECTS_2026-10-10.md.

@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.155.0-shore-ballista';
+const VERSION3D='2.156.0-coop-skills';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10918,6 +10918,15 @@ function moveGroundEnemy(e,dx,dz,speed,dt,range=300){
 }
 function syncedMelee(e){return e.kind==='walk'&&!e.boss&&!e.ceKind&&!e.prisonFoe&&!e.spec;}
 function enemyPartyTarget(e,p){
+ if((e.petTauntT||0)>0){
+  if(!MP.active||e.petTauntId===MP.myId){if(G.pet&&!G.pet.dead&&G.pet.hp>0)return G.pet;}
+  else {const owner=MP.peers[e.petTauntId];if(owner&&owner.zone===MP.zone&&owner.area===G.area&&owner.pet&&!owner.pet.dead&&owner.pet.hp>0)return owner.pet;}
+ }
+ if((e.tauntT||0)>0){
+  if(!MP.active||e.tauntId===MP.myId)return p;
+  const forced=MP.peers[e.tauntId];
+  if(forced&&forced.zone===MP.zone&&forced.area===G.area&&forced.hp>0&&!forced.downed)return forced;
+ }
  let target=p;
  if(MP.host_())for(const q of Object.values(MP.peers)){
   if(q.zone!==MP.zone||q.area!==G.area||q.hp<=0||q.downed||!Number.isFinite(q.x)||!Number.isFinite(q.z))continue;
@@ -11961,7 +11970,7 @@ function hurlAxe(p,w,amt){ const t=projectileAimTarget(p,700); if(t) p.yaw=Math.
   SFX.slash(); p.atkTimer=0.24; G.shake=Math.min(G.shake+4,11); }
 function chargeQuake(p,w,amt){ const charge=Math.max(0,Math.min(1,amt||0)), R=84+charge*164, dmg=w.dmg*effPower(p)*(1.4+charge*1.8)*offclassMul(p)*classStyleMul(p);
   skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+charge*6,16);
-  for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+charge*0.6); } }
+  for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+charge*0.6); coopSkillEffect(e,'quake',0.6+charge*0.6); } }
   p.atkTimer=0.30; }
 // longbow charged POWER ARROW — a fat golden lance that pierces everything, scaling hard with charge
 function fireChargedBow(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,1200); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
@@ -12031,6 +12040,11 @@ function fireProjectile(p,w,target){
 }
 /* ---------------- Class skills: execution (Phase 1) ---------------- */
 function skillRing(x,z,col,col2,maxR){ if(G._artCast){ G._artCast.rings.push({x,z,r:maxR||150}); return; } (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
+// Enemy control is owned by the host. Guest mirrors still play the immediate animation,
+// while these bounded packets make the effect change the enemy everyone is actually fighting.
+function coopSkillEffect(e,kind,value=0,source=null){
+ if(MP.guest()&&e?.mid!=null&&!e._peer)MP.sendEnemyEffect(e.mid,kind,value,source);
+}
 const SKILL_FX={
   cleave(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
     p.atkTimer=0.26; p.swingId++; SFX.slash(); playFx('warskill1'); G.shake=Math.min(G.shake+4,10);
@@ -12086,7 +12100,7 @@ const SKILL_FX={
     p.dodgeTimer=0.22; p.dashX=-Math.sin(p.yaw); p.dashZ=-Math.cos(p.yaw);
     p.invuln=Math.max(p.invuln,0.35); SFX.dodge();   // Tumble stays generous (14s CD skill) but no longer near-invincible
     if(meta.classId==='ranger'&&c2Passive('r_ambush'))p._ambushT=3;   // Ambusher arms on Tumble — the card names this skill and Shadowstrike
-    if(ok){ let n=0; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
+    if(ok){ let n=0; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); coopSkillEffect(e,'tumble'); n++; } }
       if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
     burst(p.x,8,p.z,'#9fe0ff',10); },
   mark(p,ok,am){ const t=projectileAimTarget(p,800); if(!t){ toast('No target in sight'); return 'refund'; }
@@ -12103,7 +12117,7 @@ const SKILL_FX={
   nova(p,ok,am){ const w=p.weapon; SFX.magic('ice'); skillRing(p.x,p.z,'#bff0ff','#7fd6ff',190);
     const dmg=(w?w.dmg:10)*effPower(p)*1.4*am*(ok?1:OFFCLASS_MUL);
     for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>165+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
-      hitEnemy(e,dmg,p,220,0,null); if(ok) e.slowT=Math.max(e.slowT||0,2.5); }
+      hitEnemy(e,dmg,p,220,0,null); if(ok){e.slowT=Math.max(e.slowT||0,2.5);coopSkillEffect(e,'nova');} }
     for(let i=0;i<14;i++){ const a=i/14*6.283; G.particles.push({x:p.x+Math.cos(a)*22,y:6,z:p.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:50,vz:Math.sin(a)*130,life:0.45,color:'#bff0ff',sz:3}); } },
   blink(p,ok,am){ // AIMED teleport (Dishonored-style): blink toward where you're looking, to the farthest
     // valid ground/ledge in line of sight, up to max range. Aims with the camera when you can steer it.
@@ -12142,19 +12156,20 @@ const SKILL_FX={
   deathsdoor(p,ok,am){ let n=0;
     for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>230+e.r) continue;
       e.doomT=4; e.doomDps=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.5*am*(ok?1:OFFCLASS_MUL); e.doomAcc=0; e.doomSrc=p; n++;
+      coopSkillEffect(e,c2Passive('x_doom')?'deathsdoorLong':'deathsdoor',e.doomDps);
       addText(e.x,e.y+e.h+16,e.z,'DOOMED','#b06bff',true); }
     if(!n){ toast('Nothing near enough to doom'); return 'refund'; }
     SFX.growl(1); G.shake=Math.min(G.shake+6,12); toast('⚰️ '+n+' marked for death'); },
   // ===== PATH B skills (chosen at the rank-2 fork) — a fully different kit per subclass =====
   // GUARDIAN (Warrior path B) — hold the line
   bulwark(p,ok,am){ p.guardT=3.2; skillRing(p.x,p.z,'#9fd0ff','#4a7da0',110); SFX.magic('ice');
-    for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<260) e.taunt=3.2; }   // pull aggro
+    for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<260){e.tauntT=3.2;e.tauntId=MP.active?MP.myId:'solo';coopSkillEffect(e,'bulwark');} }   // pull aggro
     addText(p.x,p.y+70,p.z,'BULWARK','#9fd0ff',true); },
   ironwave(p,ok,am){ const w=p.weapon; SFX.boss(); G.shake=Math.min(G.shake+8,15); skillRing(p.x,p.z,'#c8b06a','#8a6a3a',230);
     const dmg=(w?w.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL);
     for(const e of combatTargets()){ if(e.dead) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>240+e.r||losBlocked(p.x,p.z,e.x,e.z)) continue;
       hitEnemy(e,dmg,p,0,effLifesteal(p),null);
-      const nx=(p.x-e.x)/(d||1),nz=(p.z-e.z)/(d||1); e.hurtKbX=nx*260; e.hurtKbZ=nz*260; } },   // PULL inward, not away
+      const nx=(p.x-e.x)/(d||1),nz=(p.z-e.z)/(d||1); e.hurtKbX=nx*260; e.hurtKbZ=nz*260;coopSkillEffect(e,'ironwave'); } },   // PULL inward, not away
   laststand(p,ok,am){ p.guardT=Math.max(p.guardT||0,4); p.reflectT=4; p.invuln=Math.max(p.invuln,0.5);
     SFX.growl(1); toast('🛡️ LAST STAND — damage reflected'); burst(p.x,p.y+30,p.z,'#ffd24a',20); },
   // WIZARD (Mage path B) — control & protection
@@ -12162,7 +12177,7 @@ const SKILL_FX={
     const dmg=(w?w.dmg:10)*effPower(p)*1.2*am*(ok?1:OFFCLASS_MUL);
     for(const e of combatTargets()){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
       if(d>360) continue; if((dx*fx+dz*fz)/(d||1)<Math.cos(0.6)) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
-      hitEnemy(e,dmg,p,0,0,'ice'); e.stunT=Math.max(e.stunT||0,ok?2:1); e.slowT=Math.max(e.slowT||0,3.5); n++;
+      hitEnemy(e,dmg,p,0,0,'ice'); e.stunT=Math.max(e.stunT||0,ok?2:1); e.slowT=Math.max(e.slowT||0,3.5);coopSkillEffect(e,'frostchains',ok?2:1); n++;
       for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+i*10,z:e.z,vx:0,vy:20,vz:0,life:0.5,color:'#bff0ff',sz:3}); }
     if(!n){ toast('No one in the frost'); return 'refund'; } },
   barrier(p,ok,am){ p.shieldHp=Math.round(effMaxHp(p)*(ok?0.5:0.35)); p.shieldT=10; SFX.magic('arcane');
@@ -12177,7 +12192,7 @@ const SKILL_FX={
     burst(p.x,p.y+16,p.z,'#6a2fa0',14); SFX.dodge();
     const w=p.weapon; hitEnemy(t,(w?w.dmg:8)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),p,180,effLifesteal(p),ok?(w&&w.el):null); },
   smokebomb(p,ok,am){ p.invuln=Math.max(p.invuln,ok?1.4:0.9); burst(p.x,p.y+14,p.z,'#8a8f9a',22);
-    for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200){ e.slowT=Math.max(e.slowT||0,3); e.taunt=0; } }
+    for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200){ e.slowT=Math.max(e.slowT||0,3); e.tauntT=0;coopSkillEffect(e,'smokebomb'); } }
     for(let i=0;i<10;i++) G.particles.push({x:p.x+(Math.random()-0.5)*80,y:8+Math.random()*40,z:p.z+(Math.random()-0.5)*80,vx:0,vy:14,vz:0,life:1.2,color:'#9aa0ac',sz:5});
     SFX.dodge(); toast('💨 Vanished'); },
   deathmark(p,ok,am){ let n=0; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>260+e.r) continue;
@@ -12185,8 +12200,13 @@ const SKILL_FX={
     if(!n){ toast('No targets to mark'); return 'refund'; } SFX.growl(1); toast('✖ '+n+' marked — they burst on death'); },
   // EXECUTIONER (Reaper path B) — finish them
   execute(p,ok,am){ const t=projectileAimTarget(p,150); if(!t){ toast('Nothing in sight'); return 'refund'; }
-    const w=p.weapon; if(t.hp<t.maxHp*0.25){ t.hp=0; killEnemy(t); addText(t.x,t.y+40,t.z,'EXECUTED','#ff2a1a',true); G.shake=Math.min(G.shake+8,14); }
-    else hitEnemy(t,(w?w.dmg:10)*effPower(p)*4*am*(ok?1:OFFCLASS_MUL),p,200,Math.max(0.2,effLifesteal(p)),ok?(w&&w.el):null);
+    const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*4*am*(ok?1:OFFCLASS_MUL);
+    if(MP.guest()&&t.mid!=null&&!t._peer){
+      // The guest cannot kill the host's enemy directly. Send one hit with execute intent;
+      // the host checks its current HP before either finishing or dealing the normal strike.
+      G._guestExecute=true;try{hitEnemy(t,dmg,p,200,Math.max(0.2,effLifesteal(p)),ok?(w&&w.el):null);}finally{G._guestExecute=false;}
+    }else if(t.hp<t.maxHp*0.25){ t.hp=0; killEnemy(t); addText(t.x,t.y+40,t.z,'EXECUTED','#ff2a1a',true); G.shake=Math.min(G.shake+8,14); }
+    else hitEnemy(t,dmg,p,200,Math.max(0.2,effLifesteal(p)),ok?(w&&w.el):null);
     SFX.slash(); burst(t.x,t.y+t.h*0.5,t.z,'#ff3020',12); },
   grimscythe(p,ok,am){ const w=p.weapon; p.atkTimer=0.3; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
     const dmg=(w?w.dmg:10)*effPower(p)*1.8*am*(ok?1:OFFCLASS_MUL);
@@ -12328,7 +12348,6 @@ function class2Innate(p,dt){
       }else{p._beastPrevHp=p.hp;pet._beastPrevHp=pet.hp;}
     }
     if((p.beastMendT||0)>0){const step=Math.min(dt,p.beastMendT);p.beastMendT-=step;p.hp=Math.min(effMaxHp(p),p.hp+(p.beastMendHp||0)*step/5);}
-    for(const e of combatTargets())if(!e._peer&&(e.beastMarkT||0)>0)e.beastMarkT=Math.max(0,e.beastMarkT-dt);
   }
   if(meta.classId==='monk'&&c2def('monk')&&c2Passive('mon_med')&&p.hp>0&&p.hp<effMaxHp(p)){ p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*0.012*dt); }   // Meditation: steady self-heal
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
@@ -12470,7 +12489,7 @@ SKILL_FX.r_smoke=SKILL_FX.smokebomb; SKILL_FX.r_mark=SKILL_FX.mark; SKILL_FX.r_d
 SKILL_FX.w_cleave=SKILL_FX.cleave; SKILL_FX.w_charge=SKILL_FX.wcharge; SKILL_FX.w_guard=SKILL_FX.bulwark;
 SKILL_FX.w_stomp=SKILL_FX.stomp; SKILL_FX.w_berserk=SKILL_FX.berserk; SKILL_FX.w_execute=SKILL_FX.execute;
 SKILL_FX.w_bash=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,125); if(!t){ SKILL_FX.cleave(p,ok,am*.78); p.guardT=Math.max(p.guardT||0,1); return; }
-  const dmg=(w?w.dmg:10)*effPower(p)*1.7*am*(ok?1:OFFCLASS_MUL); hitEnemy(t,dmg,p,420,effLifesteal(p),ok?(w&&w.el):null); t.stunT=Math.max(t.stunT||0,1.1); p.guardT=Math.max(p.guardT||0,1.2); skillRing(t.x,t.z,'#d8c391','#776342',70); };
+  const dmg=(w?w.dmg:10)*effPower(p)*1.7*am*(ok?1:OFFCLASS_MUL); hitEnemy(t,dmg,p,420,effLifesteal(p),ok?(w&&w.el):null); t.stunT=Math.max(t.stunT||0,1.1);coopSkillEffect(t,'bash'); p.guardT=Math.max(p.guardT||0,1.2); skillRing(t.x,t.z,'#d8c391','#776342',70); };
 SKILL_FX.w_whirl=function(p,ok,am){ const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL); skillRing(p.x,p.z,'#ffd27a','#8c642f',185);
   for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<165+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,260,effLifesteal(p),ok?(w&&w.el):null); } SFX.slash(); };
 // Mage v2 skills
@@ -12518,20 +12537,20 @@ function beastCompanionHit(p,pet,t,mul,stun){
   pet.x=t.x-Math.sin(p.yaw)*28; pet.z=t.z-Math.cos(p.yaw)*28; pet.y=t.y+12; pet.yaw=Math.atan2(t.x-pet.x,t.z-pet.z);
   const mark=(t.beastMarkT||0)>0?1.18:1, scent=c2Passive('bst_scent')&&(t.elite||t.boss||t.hp<t.maxHp*.35||(t.beastMarkT||0)>0)?1.20:1;
   hitEnemy(t,petAtkDmg(pet.id)*mul*beastCommandPower()*mark*scent,{x:pet.x,z:pet.z,pet:true},180,0,null);
-  if(stun)t.stunT=Math.max(t.stunT||0,stun);
+  if(stun){t.stunT=Math.max(t.stunT||0,stun);coopSkillEffect(t,'beastSic');}
   burst(t.x,t.y+t.h*.45,t.z,'#d6a85c',12); return true;
 }
 SKILL_FX.bst_sic=function(p){ const pet=beastCompanion(),t=beastTarget(p,760); if(!pet||!t){toast('No target in sight');return 'refund';} beastCompanionHit(p,pet,t,1.6,.65); addText(t.x,t.y+t.h+28,t.z,"SIC 'EM",'#f0c66d',true); };
 SKILL_FX.bst_coordinated=function(p,ok,am){ const pet=beastCompanion(),t=beastTarget(p,650); if(!pet||!t){toast('No target in sight');return 'refund';}
   const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.45*am*(ok?1:OFFCLASS_MUL); hitEnemy(t,dmg,p,120,effLifesteal(p),ok?(w&&w.el):null); beastCompanionHit(p,pet,t,1.25,0);
-  t.beastMarkT=6; skillRing(t.x,t.z,'#f0c66d','#70502a',90); addText(t.x,t.y+t.h+30,t.z,'PACK MARK','#f0c66d',true); };
+  t.beastMarkT=6;coopSkillEffect(t,'beastMark'); skillRing(t.x,t.z,'#f0c66d','#70502a',90); addText(t.x,t.y+t.h+30,t.z,'PACK MARK','#f0c66d',true); };
 SKILL_FX.bst_guardian=function(p){ const pet=beastCompanion(); if(!pet)return 'refund'; pet.guardBondT=4; pet.shieldHp=Math.max(pet.shieldHp||0,Math.round(pet.maxHp*.25)); skillRing(pet.x,pet.z,'#8fd6ff','#355c70',90); addText(pet.x,pet.y+48,pet.z,'GUARDIAN BOND','#8fd6ff',true); };
 SKILL_FX.bst_step=function(p,ok,am){ const pet=beastCompanion(),t=beastTarget(p,620); if(!pet||!t){toast('No target in sight');return 'refund';}
   const a=Math.atan2(t.x-p.x,t.z-p.z),side=34; p.x=t.x-Math.sin(a)*side;p.z=t.z-Math.cos(a)*side;pet.x=t.x+Math.sin(a)*side;pet.z=t.z+Math.cos(a)*side;p.invuln=Math.max(p.invuln,.45);pet.invuln=.65;
   beastCompanionHit(p,pet,t,1.15,.2); burst(p.x,p.y+20,p.z,'#7de0a0',12); };
 SKILL_FX.bst_mend=function(p){ const pet=beastCompanion(); if(!pet)return 'refund'; p.beastMendT=5;pet.beastMendT=5;pet.beastMendHp=pet.maxHp*.30;p.beastMendHp=effMaxHp(p)*.10;skillRing(p.x,p.z,'#7de08a','#315d42',110); };
 SKILL_FX.bst_roar=function(p){ const pet=beastCompanion(); if(!pet)return 'refund'; const R=230,dmg=petAtkDmg(pet.id)*1.2*beastCommandPower();
-  skillRing(pet.x,pet.z,'#efb85c','#6e3d20',R); for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,pet.x,pet.z)>R+e.r)continue;hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},260,0,null);e.slowT=Math.max(e.slowT||0,2.5);e.petTauntT=3;} addText(pet.x,pet.y+55,pet.z,'ALPHA ROAR','#efb85c',true); };
+  skillRing(pet.x,pet.z,'#efb85c','#6e3d20',R); for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,pet.x,pet.z)>R+e.r)continue;hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},260,0,null);e.slowT=Math.max(e.slowT||0,2.5);e.petTauntT=3;coopSkillEffect(e,'beastRoar',0,pet);} addText(pet.x,pet.y+55,pet.z,'ALPHA ROAR','#efb85c',true); };
 SKILL_FX.bst_stampede=function(p){ const pet=beastCompanion(),range=640,half=105,dmg=petAtkDmg(pet.id)*1.35*beastCommandPower(),sx=Math.sin(p.yaw),sz=Math.cos(p.yaw);
   for(let k=0;k<9;k++){const d=50+k*70;setTimeout(()=>{if(!G)return;const x=p.x+sx*d,z=p.z+sz*d;burst(x,p.y+18,z,k%2?'#d7c59c':'#8bb8c4',12);skillRing(x,z,'#d7c59c','#6f6250',70);},k*45);}
   for(const e of combatTargets()){if(e.dead||!e.active||e.dummy)continue;const dx=e.x-p.x,dz=e.z-p.z,forward=dx*sx+dz*sz,side=Math.abs(dx*sz-dz*sx);if(forward>0&&forward<range&&side<half+e.r)hitEnemy(e,dmg,{x:p.x,z:p.z,pet:true},420,0,null);} };
@@ -12580,7 +12599,7 @@ SKILL_FX.x_bind=function(p,ok,am){
   for(const e of combatTargets()){
     if(e.dead||e.dummy) continue;
     if(dXZ(e.x,e.z,p.x,p.z)>300) continue;
-    e._tether=id; e._tetherT=8; n++;
+    e._tether=MP.active?MP.myId+':'+id:id; e._tetherT=8;coopSkillEffect(e,'soulTether',id); n++;
     try{ skillRing(e.x,e.z,'#b06bff','#3a1a4a',70); }catch(err){}
   }
   if(n>1) addText(p.x,p.y+52,p.z,'TETHERED x'+n,'#c9a6ff',true);
@@ -12588,7 +12607,7 @@ SKILL_FX.x_bind=function(p,ok,am){
 };
 SKILL_FX.x_cleave=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,820);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);const sp=620,col='#b06bff';G.projectiles.push({owner:'player',x:p.x,y:p.y+25,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:22,color:col,shape:'scythespin',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2.1*am*(ok?1:OFFCLASS_MUL),kb:230,pierce:3,el:ok?(w&&w.el):null,life:1.25,hitSet:[]});SFX.magic('void');};
 SKILL_FX.x_wraith=function(p,ok,am){p.wraithT=3;p.guardT=Math.max(p.guardT||0,3);p.invuln=Math.max(p.invuln,.3);addText(p.x,p.y+70,p.z,'WRAITH FORM','#c9a6ff',true);burst(p.x,p.y+25,p.z,'#b06bff',20);};
-SKILL_FX.x_pull=function(p,ok,am){const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#7b3ab5','#241133',230);for(const e of combatTargets()){if(e.dead)continue;const d=dXZ(e.x,e.z,p.x,p.z);if(d>230+e.r)continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(p.x-e.x)/(d||1)*400;e.hurtKbZ=(p.z-e.z)/(d||1)*400;e.stunT=Math.max(e.stunT||0,.5);}SFX.magic('void');};
+SKILL_FX.x_pull=function(p,ok,am){const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#7b3ab5','#241133',230);for(const e of combatTargets()){if(e.dead)continue;const d=dXZ(e.x,e.z,p.x,p.z);if(d>230+e.r)continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(p.x-e.x)/(d||1)*400;e.hurtKbZ=(p.z-e.z)/(d||1)*400;e.stunT=Math.max(e.stunT||0,.5);coopSkillEffect(e,'voidPull');}SFX.magic('void');};
 SKILL_FX.x_siphon=function(p,ok,am){SKILL_FX.harvest(p,ok,am*1.15);p.siphonT=4;};
 SKILL_FX.x_vortex=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*.62*am*(ok?1:OFFCLASS_MUL);p._tmpVoid=1;skillRing(p.x,p.z,'#b06bff','#3d175e',220);SFX.magic('void');};
 // Warlock — authored blood/void spell shapes. Its class identity is health-for-power,
@@ -12605,10 +12624,10 @@ SKILL_FX.war_drain=function(p,ok,am){let t=null,b=-1;for(const e of combatTarget
 SKILL_FX.war_step=function(p,ok,am){const ox=p.x,oz=p.z;SKILL_FX.blink(p,ok,am);const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.15*am*(ok?1:OFFCLASS_MUL);
   for(const e of combatTargets()){if(e.dead||!e.active||e.dummy)continue;if(dXZ(e.x,e.z,ox,oz)<115+e.r||dXZ(e.x,e.z,p.x,p.z)<115+e.r)hitEnemy(e,dmg,p,180,0,'void');}skillRing(ox,oz,'#7c3fc2','#1b0829',130);skillRing(p.x,p.z,'#d05cff','#35104b',130);SFX.magic('void');};
 SKILL_FX.war_orb=function(p,ok,am){const t=projectileAimTarget(p,720);if(!t)return 'refund';const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.3*am*(ok?1:OFFCLASS_MUL),tx=t.x,tz=t.z;skillRing(tx,tz,'#8b43c7','#22082e',205);
-  for(const e of combatTargets()){if(e.dead||!e.active||e.dummy)continue;const d=dXZ(e.x,e.z,tx,tz);if(d>185+e.r||losBlocked(tx,tz,e.x,e.z))continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(tx-e.x)/(d||1)*360;e.hurtKbZ=(tz-e.z)/(d||1)*360;e.slowT=Math.max(e.slowT||0,2);}SFX.magic('void');};
+  for(const e of combatTargets()){if(e.dead||!e.active||e.dummy)continue;const d=dXZ(e.x,e.z,tx,tz);if(d>185+e.r||losBlocked(tx,tz,e.x,e.z))continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(tx-e.x)/(d||1)*360;e.hurtKbZ=(tz-e.z)/(d||1)*360;e.slowT=Math.max(e.slowT||0,2);coopSkillEffect(e,'warOrb');}SFX.magic('void');};
 SKILL_FX.war_storm=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*.68*am*(ok?1:OFFCLASS_MUL);p._tmpVoid=1;skillRing(p.x,p.z,'#aa4cff','#2b0b40',230);SFX.magic('void');};
 SKILL_FX.war_final=function(p,ok,am){let t=null,b=-1;for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>760)continue;if(e.hp>b){b=e.hp;t=e;}}if(!t)return 'refund';
-  t.warCurseT=Math.max(t.warCurseT||0,7);t.warCurseOwner=MP.active?MP.myId:'solo';if(MP.guest()&&t.mid!=null)MP.sendEnemyEffect(t.mid,'curse');t.warBurstT=1.0;t.warBurstDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*5.0*am*(ok?1:OFFCLASS_MUL);t.warBurstSrc=p;skillRing(t.x,t.z,'#ff5475','#54112d',150);addText(t.x,t.y+t.h+24,t.z,'FINAL CURSE','#ff7ca0',true);SFX.magic('void');};
+  t.warCurseT=Math.max(t.warCurseT||0,7);t.warCurseOwner=MP.active?MP.myId:'solo';t.warBurstT=1.0;t.warBurstDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*5.0*am*(ok?1:OFFCLASS_MUL);t.warBurstSrc=p;coopSkillEffect(t,'finalCurse',t.warBurstDmg);skillRing(t.x,t.z,'#ff5475','#54112d',150);addText(t.x,t.y+t.h+24,t.z,'FINAL CURSE','#ff7ca0',true);SFX.magic('void');};
 // Skylancer — movement and attacks are one continuous aerial loop. Launch skills create
 // height, air skills steer or fire, and dive skills turn the eventual landing into damage.
 SKILL_FX.sky_rise=function(p,ok,am){const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.25*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#bcecff','#ffffff',150);
@@ -12618,7 +12637,7 @@ SKILL_FX.sky_gale=function(p,ok,am){const w=p.weapon,t=projectileAimTarget(p,920
 SKILL_FX.sky_dive=function(p,ok,am){if(p.onGround){p.vy=430;p.onGround=false;}p.vx=Math.sin(p.yaw)*520;p.vz=Math.cos(p.yaw)*520;p.vy=Math.min(p.vy,-360);
   p.skyLandDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);p.skyLandR=175;p.skyLandCol='#7ddcff';burst(p.x,p.y+20,p.z,'#8fdcff',14);SFX.dodge();};
 SKILL_FX.sky_lift=function(p,ok,am){const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#a8efff','#eaffff',205);
-  for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<190+e.r){hitEnemy(e,dmg,p,120,0,'ice');e.stunT=Math.max(e.stunT||0,.7);}p.vy=Math.max(p.vy,760);p.onGround=false;p.jumps=Math.max(1,p.jumps);SFX.magic('ice');};
+  for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<190+e.r){hitEnemy(e,dmg,p,120,0,'ice');e.stunT=Math.max(e.stunT||0,.7);coopSkillEffect(e,'skyLift');}p.vy=Math.max(p.vy,760);p.onGround=false;p.jumps=Math.max(1,p.jumps);SFX.magic('ice');};
 SKILL_FX.sky_dash=function(p,ok,am){const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.8*am*(ok?1:OFFCLASS_MUL),ox=p.x,oz=p.z;
   const ex=ox+Math.sin(p.yaw)*270,ez=oz+Math.cos(p.yaw)*270;p.dodgeTimer=.22;p.invuln=Math.max(p.invuln,.22);p.dashX=Math.sin(p.yaw);p.dashZ=Math.cos(p.yaw);p.vy=Math.max(p.vy,40);p.onGround=false;
   for(const e of combatTargets()){if(e.dead||!e.active)continue;const dx=ex-ox,dz=ez-oz,l2=dx*dx+dz*dz,t=Math.max(0,Math.min(1,((e.x-ox)*dx+(e.z-oz)*dz)/(l2||1))),d=Math.hypot(e.x-(ox+dx*t),e.z-(oz+dz*t));if(d<55+e.r)hitEnemy(e,dmg,p,260,0,'ice');}
@@ -12638,7 +12657,7 @@ SKILL_FX.sky_cyclone=function(p,ok,am){
   for(const e of combatTargets()){
     if(e.dead || e.boss || e.dummy) continue;
     if(dXZ(e.x, e.z, p.x, p.z) > 280) continue;
-    e.y = (e.y || 0) + 90; e.vy = 0; e._noLand = 3.2; lifted++;
+    e.y = (e.y || 0) + 90; e.vy = 0; e._noLand = 3.2;coopSkillEffect(e,'skyCyclone'); lifted++;
     try { burst(e.x, (e.y||0), e.z, '#bfe6ff', 8); } catch(err){}
   }
   if(lifted) addText(p.x, p.y + 54, p.z, 'UPDRAFT x' + lifted, '#bfe6ff', true);
@@ -12648,7 +12667,7 @@ const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.05*am*(ok?1:OFFCLASS_MUL);
 // Bladedancer — explicit, readable timing instead of passive random blocks. Stance skills open
 // a real parry window; hurtPlayer consumes it and stores a Riposte for the player's chosen counter.
 function bdArc(p,dmg,reach,arc,kb,stun){const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw),cos=Math.cos((arc||2.2)/2);let n=0;
-  for(const e of combatTargets()){if(e.dead||!e.active)continue;const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);if(d>reach+e.r||losBlocked(p.x,p.z,e.x,e.z))continue;if(d>e.r&&(dx*fx+dz*fz)/d<cos)continue;hitEnemy(e,dmg,p,kb||180,0,null);if(stun)e.stunT=Math.max(e.stunT||0,stun);n++;}return n;}
+  for(const e of combatTargets()){if(e.dead||!e.active)continue;const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);if(d>reach+e.r||losBlocked(p.x,p.z,e.x,e.z))continue;if(d>e.r&&(dx*fx+dz*fz)/d<cos)continue;hitEnemy(e,dmg,p,kb||180,0,null);if(stun){e.stunT=Math.max(e.stunT||0,stun);coopSkillEffect(e,stun>.5?'bladeCross':'bladeRiposte');}n++;}return n;}
 SKILL_FX.bd_counter=function(p){p.bdParryT=c2Passive('bd_patient')?.85:.65;p.bdMirrorDmg=0;p.bdPerfectDmg=0;p.atkTimer=.34;skillRing(p.x,p.z,'#dce7f5','#ffffff',95);addText(p.x,p.y+p.h+18,p.z,'PARRY READY','#dce7f5',true);SFX.dodge();};
 SKILL_FX.bd_twin=function(p,ok,am){const d=(p.weapon?p.weapon.dmg:10)*effPower(p)*am*(ok?1:OFFCLASS_MUL);p.atkTimer=.42;bdArc(p,d*.78,150,2.8,120);bdArc(p,d,175,2.45,260);skillRing(p.x,p.z,'#d7b4ff','#ffffff',175);SFX.slash();};
 SKILL_FX.bd_riposte=function(p,ok,am){const charged=!!p.bdRiposte,mul=charged?(c2Passive('bd_sharp')?4.4:3.3):1.75,d=(p.weapon?p.weapon.dmg:10)*effPower(p)*mul*am*(ok?1:OFFCLASS_MUL);
@@ -13004,11 +13023,31 @@ function classHeal(p,amount){
  const before=p.hp;p.hp=Math.min(effMaxHp(p),p.hp+amount);return p.hp-before;
 }
 const COOP_ATTACK_PERKS=['r_longshot','r_closeq','pir_deadly','pir_brutal','chr_slow','chr_freeze','necro_pest','war_deep','m_savant','x_corrupt'];
+const COOP_SKILL_CONTROL={
+ quake:{classes:null,range:250,stun:1.2,variable:true,weapon:'hammer'},
+ tumble:{classes:['ranger','pirate','ninja','monk'],range:180,slow:2.5},
+ nova:{classes:['mage','chronomancer','paladin','necromancer','stormcaller','monk'],range:205,slow:2.5},
+ frostchains:{classes:['mage'],range:360,stun:2,slow:3.5,variable:true},
+ smokebomb:{classes:['ranger','pirate','ninja'],range:200,slow:3,clearTaunt:true},
+ bulwark:{classes:['warrior','berserker','paladin'],range:260,taunt:3.2},
+ warcry:{classes:['warrior','berserker','ninja','monk'],range:620,taunt:6},
+ bash:{classes:['warrior','berserker','paladin','monk'],range:160,stun:1.1},
+ beastSic:{classes:['beastmaster'],range:760,stun:.65},
+ beastRoar:{classes:['beastmaster'],range:285,slow:2.5,petTaunt:3},
+ beastMark:{classes:['beastmaster'],range:650,mark:6},
+ warOrb:{classes:['warlock'],range:950,slow:2},
+ voidPull:{classes:['reaper'],range:240,stun:.5,pull:400},
+ ironwave:{classes:['warrior'],range:250,pull:260},
+ skyLift:{classes:['skylancer'],range:205,stun:.7},
+ skyCyclone:{classes:['skylancer'],range:280,lift:90,noLand:3.2},
+ bladeCross:{classes:['bladedancer'],range:250,stun:.65},
+ bladeRiposte:{classes:['bladedancer'],range:235,stun:.35}
+};
 function coopPerkBits(){let bits=0;for(let i=0;i<COOP_ATTACK_PERKS.length;i++)if(c2Passive(COOP_ATTACK_PERKS[i]))bits|=1<<i;return bits;}
 function hasGuestPerk(owner,id){const i=COOP_ATTACK_PERKS.indexOf(id);return i>=0&&!!(owner.bits&(1<<i));}
 function guestHitOffense(e,dmg,kb){
  const p=G.p,cid=meta.classId,designated=!!G._desig;
- const owner={guest:true,cid,bits:coopPerkBits(),designated,weapon:p.weapon?{cd:p.weapon.cd,art:p.weapon.art}:null};
+ const owner={guest:true,cid,bits:coopPerkBits(),designated,execute:!!G._guestExecute,weapon:p.weapon?{cd:p.weapon.cd,art:p.weapon.art}:null};
  const beforeHp=p.hp,beforeMana=p.mana,beforeBlood=p._bloodOwed||0;
  if(!designated){
    if(cid==='warrior'&&c2Passive('w_swift')){p._swiftHits=(p._swiftHits||0)+1;if(p._swiftHits%4===0)dmg*=1.25;}
@@ -13032,6 +13071,7 @@ function guestHitOffense(e,dmg,kb){
 function guestOwnerFromPacket(raw,peer){
  const cid=raw&&CLASSES[raw.cid]?raw.cid:null,w=raw?.weapon;
   return {guest:true,id:peer?.id||null,cid,bits:Number.isInteger(raw?.bits)?raw.bits&1023:0,designated:!!raw?.designated,
+   execute:!!raw?.execute&&['warrior','berserker','reaper'].includes(cid),
    weapon:w&&Number.isFinite(w.cd)?{cd:Math.max(.1,Math.min(2.4,w.cd)),art:w.art==='scythe'?'scythe':''}:null,
    stun:Number.isFinite(raw?.stun)?Math.max(0,Math.min(2,raw.stun)):0,
    extraStatus:Array.isArray(raw?.extraStatus)?raw.extraStatus.slice(0,2).filter(s=>EL_STAT[normEl(s?.el)]&&Number.isFinite(s?.dmg)&&s.dmg>0).map(s=>({el:normEl(s.el),dmg:Math.min(100000,s.dmg)})):[],
@@ -14907,6 +14947,7 @@ const MP={
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
       if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort};
       if(STATUS_ORDER.some(k=>(e.st?.[k]||0)>0)||(e.stunT||0)>0||(e.slowT||0)>0||(e.exposed||0)>0||(e.markT||0)>0||(e.warCurseT||0)>0||(e.markExplode||0)>0)row[8]=[...STATUS_ORDER.map(k=>Math.round((e.st?.[k]||0)*10)/10),Math.round(e.stDmg||0),Math.round((e.stunT||0)*10)/10,Math.round((e.slowT||0)*10)/10,Math.round((e.exposed||0)*10)/10,e.primed?1:0,Math.round((e.markT||0)*10)/10,e.markOwner||null,Math.round((e.warCurseT||0)*10)/10,e.warCurseOwner||null,Math.round(e.markExplode||0)];
+      if((e._tetherT||0)>0||(e.doomT||0)>0||(e.warBurstT||0)>0||(e.beastMarkT||0)>0||(e.tauntT||0)>0||(e.petTauntT||0)>0)row[9]=[e._tether||null,Math.round((e._tetherT||0)*10)/10,Math.round((e.doomT||0)*10)/10,Math.round((e.warBurstT||0)*10)/10,Math.round((e.beastMarkT||0)*10)/10,Math.round((e.tauntT||0)*10)/10,e.tauntId||null,Math.round((e.petTauntT||0)*10)/10,e.petTauntId||null,Math.round(e.warBurstDmg||0)];
       out.push(row); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
@@ -14917,10 +14958,14 @@ const MP={
       c._hitReceipts=c._hitReceipts||new Map();for(const [k,v]of c._hitReceipts)if(performance.now()-v.at>10000)c._hitReceipts.delete(k);
       if(d.token&&c._hitReceipts.has(d.token)){try{c.send(c._hitReceipts.get(d.token).packet);}catch{}return;}}
     const e=this.byMid(d.m),before=e?Math.max(0,e.hp):0;
-    let bonusHeal=0;
-    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner};hitEnemy(e,d.d,src,d.kb||0,0,d.el||null);bonusHeal=src._guestHeal||0;
+    let bonusHeal=0,executed=false;
+    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner};
+      if(owner.execute&&q&&dXZ(q.tx,q.tz,e.x,e.z)<200+e.r&&e.hp<e.maxHp*.25){
+        e.hp=0;killEnemy(e);executed=true;addText(e.x,e.y+40,e.z,'EXECUTED','#ff2a1a',true);
+      }else hitEnemy(e,d.d,src,d.kb||0,0,d.el||null);
+      bonusHeal=src._guestHeal||0;
       if(before>e.hp){if(owner.stun&&!e.dead)e.stunT=Math.max(e.stunT||0,owner.stun);if(!e.dead)for(const s of owner.extraStatus)applyStatus(e,s.el,s.dmg,owner.weapon,owner);}}
-    if(c&&d.token){const packet={t:'hitResult',token:d.token,dealt:e?Math.max(0,before-Math.max(0,e.hp)):0,bonusHeal};c._hitReceipts.set(d.token,{at:performance.now(),packet});try{c.send(packet);}catch{}}
+    if(c&&d.token){const packet={t:'hitResult',token:d.token,dealt:e?Math.max(0,before-Math.max(0,e.hp)):0,bonusHeal,executed};c._hitReceipts.set(d.token,{at:performance.now(),packet});try{c.send(packet);}catch{}}
   },
   hostApplyStatus(d,c){
     if(!this.host_()||!G||!c||!Number.isFinite(d.d)||d.d<=0)return;
@@ -14930,6 +14975,33 @@ const MP={
   hostApplyEnemyEffect(d,c){
     if(!this.host_()||!G||!c)return;
     const q=this.peers[c._pid],e=this.byMid(d.m);if(!q||q.zone!==this.zone||q.downed||q.hp<=0||!e||e.dead||e.dummy)return;
+    const cid=CLASSES[d.owner?.cid]?d.owner.cid:null,dist=dXZ(q.tx,q.tz,e.x,e.z);
+    const control=COOP_SKILL_CONTROL[d.kind];
+    if(control){
+      const petRoar=d.kind==='beastRoar',origin=petRoar&&Number.isFinite(d.sx)&&Number.isFinite(d.sz)?{x:d.sx,z:d.sz}:null;
+      if(petRoar&&(!origin||dXZ(q.tx,q.tz,origin.x,origin.z)>760))return;
+      if(!cid||(control.classes&&!control.classes.includes(cid))||e.untargetable||(petRoar?dXZ(origin.x,origin.z,e.x,e.z):dist)>control.range+e.r||control.weapon&&q.weapon?.art!==control.weapon)return;
+      const stun=control.variable?Math.max(d.kind==='quake'?.6:1,Math.min(control.stun,Number(d.d)||0)):control.stun;
+      if(stun)e.stunT=Math.max(e.stunT||0,stun);
+      if(control.slow)e.slowT=Math.max(e.slowT||0,control.slow);
+      if(control.clearTaunt&&e.tauntId===q.id)e.tauntT=0;
+      if(control.taunt){e.tauntT=control.taunt;e.tauntId=q.id;}
+      if(control.petTaunt){e.petTauntT=control.petTaunt;e.petTauntId=q.id;}
+      if(control.mark)e.beastMarkT=Math.max(e.beastMarkT||0,control.mark);
+      if(control.pull){const to=Math.max(1,dist);e.hurtKbX=(q.tx-e.x)/to*control.pull;e.hurtKbZ=(q.tz-e.z)/to*control.pull;}
+      if(control.lift&&!e.boss){e.y=(e.y||0)+control.lift;e.vy=0;e._noLand=control.noLand;}
+      return;
+    }
+    if((d.kind==='soulTether'&&cid==='reaper'||d.kind==='conduit'&&cid==='stormcaller')&&dist<=(d.kind==='conduit'?340:300)+e.r&&Number.isSafeInteger(d.d)&&d.d>0){
+      e._tether=q.id+':'+d.d;e._tetherT=8;return;
+    }
+    if((d.kind==='deathsdoor'||d.kind==='deathsdoorLong')&&cid==='reaper'&&dist<=260+e.r&&Number.isFinite(d.d)&&d.d>0){
+      e.doomT=4;e.doomSlow=d.kind==='deathsdoorLong'?1.2:1;e.doomDps=Math.min(100000,d.d);e.doomAcc=0;e.doomSrc={x:q.tx,z:q.tz,_guestCtx:guestOwnerFromPacket(d.owner,q)};return;
+    }
+    if(d.kind==='finalCurse'&&cid==='warlock'&&dist<=760+e.r&&Number.isFinite(d.d)&&d.d>0){
+      e.warCurseT=Math.max(e.warCurseT||0,7);e.warCurseOwner=q.id;
+      e.warBurstT=1;e.warBurstDmg=Math.min(100000,d.d);e.warBurstSrc={x:q.tx,z:q.tz,_guestCtx:guestOwnerFromPacket(d.owner,q)};return;
+    }
     const range=d.kind==='curseSlow'||d.kind==='deathmark'?420:950;
     if(dXZ(q.tx,q.tz,e.x,e.z)>range+e.r)return;
     if(d.kind==='mark'||d.kind==='deathmark'){
@@ -14951,15 +15023,15 @@ const MP={
     if(!this.guest()||!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
     try{this.hostConn.send({t:'status',m:mid,el,d:Math.round(dmg),owner:{cid:meta.classId,bits:coopPerkBits(),weapon:w?{cd:w.cd,art:w.art}:null}});}catch{}
   },
-  sendEnemyEffect(mid,kind,dmg=0){
+  sendEnemyEffect(mid,kind,dmg=0,source=null){
     if(!this.guest()||!this.hostConn?.open)return;
-    try{this.hostConn.send({t:'enemyEffect',m:mid,kind,d:dmg,owner:{cid:meta.classId,bits:coopPerkBits()}});}catch{}
+    try{this.hostConn.send({t:'enemyEffect',m:mid,kind,d:dmg,sx:source?.x,sz:source?.z,owner:{cid:meta.classId,bits:coopPerkBits()}});}catch{}
   },
   takeHitResult(d){
     const h=this._pendingEnemyHits?.get(d.token);if(!h)return;this._pendingEnemyHits.delete(d.token);
     if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt))return;
     if(d.dealt<=0){const p=G.p;p.hp=Math.max(0,Math.min(effMaxHp(p),p.hp-h.hpDelta));p.mana=Math.max(0,Math.min(p.maxMana||100,p.mana-h.manaDelta));p._bloodOwed=Math.max(0,(p._bloodOwed||0)-h.bloodDelta);hudUpdate();return;}
-    classHeal(G.p,d.dealt*h.rate+h.flat+Math.max(0,Number(d.bonusHeal)||0));hudUpdate();
+    classHeal(G.p,d.dealt*(d.executed?0:h.rate)+(d.executed?0:h.flat)+Math.max(0,Number(d.bonusHeal)||0));hudUpdate();
   },
   // guest: reconcile local enemy list to the host's authoritative set + process kills
   applyEnemies(en,ek){ if(!this.guest()||!G) return; this._gotEn=true;
@@ -14976,6 +15048,7 @@ const MP={
            safe to exactly the pre-flag behaviour. */
         if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } }
       if(e){const st=a[8];if(st){e.st=Object.fromEntries(STATUS_ORDER.map((k,i)=>[k,Math.max(0,Number(st[i])||0)]));e.stDmg=Math.max(0,Number(st[6])||0);e.stunT=Math.max(0,Number(st[7])||0);e.slowT=Math.max(0,Number(st[8])||0);e.exposed=Math.max(0,Number(st[9])||0);e.primed=!!st[10];e.markT=Math.max(0,Number(st[11])||0);e.markOwner=st[12]||null;e.warCurseT=Math.max(0,Number(st[13])||0);e.warCurseOwner=st[14]||null;e.markExplode=Math.max(0,Number(st[15])||0);}else{e.st=null;e.stunT=0;e.slowT=0;e.exposed=0;e.primed=false;e.markT=0;e.markOwner=null;e.warCurseT=0;e.warCurseOwner=null;e.markExplode=0;}}
+      if(e){const fx=a[9];if(fx){e._tether=fx[0]||null;e._tetherT=Math.max(0,Number(fx[1])||0);e.doomT=Math.max(0,Number(fx[2])||0);e.warBurstT=Math.max(0,Number(fx[3])||0);e.beastMarkT=Math.max(0,Number(fx[4])||0);e.tauntT=Math.max(0,Number(fx[5])||0);e.tauntId=fx[6]||null;e.petTauntT=Math.max(0,Number(fx[7])||0);e.petTauntId=fx[8]||null;e.warBurstDmg=Math.max(0,Number(fx[9])||0);}else{e._tether=null;e._tetherT=0;e.doomT=0;e.warBurstT=0;e.warBurstDmg=0;e.beastMarkT=0;e.tauntT=0;e.tauntId=null;e.petTauntT=0;e.petTauntId=null;}}
     }
     for(const a of en)if(a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
@@ -16072,11 +16145,12 @@ function updateWorld(dt){
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
     if((e.warCurseT||0)>0)e.warCurseT=Math.max(0,e.warCurseT-dt);
-    if((e.warBurstT||0)>0){e.warBurstT-=dt;if(e.warBurstT<=0&&e.warBurstDmg>0){const wd=e.warBurstDmg,ws=e.warBurstSrc||p;e.warBurstDmg=0;hitEnemy(e,wd,ws,420,0,'void');skillRing(e.x,e.z,'#ff5475','#3b0920',210);burst(e.x,e.y+e.h*.5,e.z,'#d04cff',22);}}
+    if((e.warBurstT||0)>0){e.warBurstT-=dt;if(e.warBurstT<=0&&e.warBurstDmg>0){const wd=e.warBurstDmg,ws=e.warBurstSrc||p;e.warBurstDmg=0;if(!MP.guest())hitEnemy(e,wd,ws,420,0,'void');skillRing(e.x,e.z,'#ff5475','#3b0920',210);burst(e.x,e.y+e.h*.5,e.z,'#d04cff',22);}}
     const _chillMul=statusTick(e,dt); if(e.dead) continue;   // elemental stacks: DoT + decay; returns the Chill move-speed factor
     let eff=e.speed*(e.slowT>0?0.5:1)*_chillMul; if(meta.classId==='reaper'&&c2Passive('x_chill')&&e.st&&e.st.corrupt>0)eff*=.82; if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
-    if(e.doomT>0){ e.doomT-=dt/(meta.classId==='reaper'&&c2Passive('x_doom')?1.2:1); e.doomAcc+=dt;                       // Death's Door burns them down over time
-      if(e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
+    if(e.tauntT>0)e.tauntT=Math.max(0,e.tauntT-dt);if(e.petTauntT>0)e.petTauntT=Math.max(0,e.petTauntT-dt);if(e.beastMarkT>0)e.beastMarkT=Math.max(0,e.beastMarkT-dt);
+    if(e.doomT>0){ e.doomT-=dt/(e.doomSlow||(e.doomSrc===G.p&&meta.classId==='reaper'&&c2Passive('x_doom')?1.2:1)); if(!MP.guest())e.doomAcc+=dt;                       // Death's Door burns them down over time
+      if(!MP.guest()&&e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
         G.particles.push({x:e.x,y:e.y+e.h*0.6,z:e.z,vx:0,vy:50,vz:0,life:0.4,color:'#b06bff',sz:2.6}); } }
     /* Stopped Clock holds an enemy exactly as a stun does, and holds its wind-up too so nothing
        lands the instant time resumes. Reusing the stun gate means every behaviour that already
@@ -22902,7 +22976,7 @@ SKILL_FX.w_berserk=function(p,ok,am){
   for(const e of combatTargets()){
     if(e.dead||e.dummy) continue;
     if(dXZ(e.x,e.z,p.x,p.z)>620) continue;
-    e._taunt=6; e.target=p; n++;
+    e._taunt=6; e.target=p;e.tauntT=6;e.tauntId=MP.active?MP.myId:'solo';coopSkillEffect(e,'warcry'); n++;
   }
   p.warcryT=6;
   addText(p.x,p.y+56,p.z,'WARCRY x'+n,'#ffd24a',true);
@@ -23010,7 +23084,7 @@ SKILL_FX.st_storm=function(p,ok,am){
   let n=0;
   for(const e of combatTargets()){
     if(e.dead||dXZ(e.x,e.z,p.x,p.z)>340) continue;
-    e._tether=id; e._tetherT=8; n++;
+    e._tether=MP.active?MP.myId+':'+id:id; e._tetherT=8;coopSkillEffect(e,'conduit',id); n++;
     try{ skillRing(e.x,e.z,'#9fe0ff','#1a3040',60); }catch(err){}
   }
   addText(p.x,p.y+56,p.z,'CONDUIT x'+n,'#9fe0ff',true);

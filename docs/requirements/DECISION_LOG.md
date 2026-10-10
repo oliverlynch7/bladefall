@@ -885,3 +885,7 @@ Oliver's later broad puzzle and parkour direction supersedes the original simple
 ## [Codex | 2026-10-10] Shipwreck Shore ballista chest | U-2026-10-10-SHORE-BALLISTA
 
 Under Oliver's standing campaign and puzzle-quality authorization, retire the optional Lantern Wreck number-entry chest. The new action is to aim a fixed ballista from Rose's Wreck at the chest's visible iron clasp, fire, adjust after a miss and see the binding fall. Preserve `sc.code.open`, `sc.code.note`, `sc.stormshot`, the main boat/voyage and old completed saves; discard only old partial sequence inputs. Share the opened state through host-owned co-op story state. See docs/design/SHIPWRECK_BALLISTA_2026-10-10.md. No custom SFX work.
+
+## [Codex | 2026-10-10] Co-op skill effects | U-2026-10-10-COOP-EFFECTS
+
+Continue the approved co-op parity work by moving existing control and delayed skill effects onto the enemy-owning host. Keep values, class access, solo/PvP behavior, reward authority and save identity intact. Verify actual guest skill casts and host state through two browser pages; treat this as a correctness pass, not a balance sign-off. See docs/design/COOP_SKILL_EFFECTS_2026-10-10.md.

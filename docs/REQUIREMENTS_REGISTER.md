@@ -1171,3 +1171,7 @@ Under Oliver's continuing direction to replace repetitive adjacent-button puzzle
 ## [Codex | 2026-10-10] Shipwreck Shore optional chest action
 
 Under Oliver's continuing direction to improve existing levels and retire repeated button-order puzzles, replace the Lantern Wreck number-entry chest with a fixed ballista on Rose's Wreck. Aim at the visible iron clasp, fire, recover from a miss and watch the binding break. Preserve the optional Stormshot reward, `sc.code.open`/`sc.code.note`, old completed saves, host-shared opening and the main boat/voyage. See docs/design/SHIPWRECK_BALLISTA_2026-10-10.md. No custom SFX work.
+
+## [Codex | 2026-10-10] Co-op class-effect parity continuation
+
+Oliver's continuing all-around quality request includes his standing requirement that class skills act on enemies in co-op as they do in solo play. Source inspection found guest-only stun/slow/taunt, Death's Door and Final Curse delayed effects, plus a guest-only Execution kill. Preserve host enemy authority, existing class tuning, solo/PvP behavior and saves. Plan and verification: docs/design/COOP_SKILL_EFFECTS_2026-10-10.md. This focused transport fix does not certify every class combination or real-network timing.

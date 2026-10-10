@@ -1096,7 +1096,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./deep-ice-caves.js?v=2160"></script>
 <script src="./iron-machinery.js?v=2039"></script>
 <script src="./iron-halls.js?v=2155"></script>
-<script src="./thunder-cliffs.js?v=2146"></script>
+<script src="./thunder-cliffs.js?v=2147"></script>
 <script src="./castle-gates.js?v=2050"></script>
 <script src="./long-ascent.js?v=2050"></script>
 <script src="./final-king.js?v=2022"></script>
@@ -1144,7 +1144,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.146.0-canyon-freight-climb';
+const VERSION3D='2.147.0-thunder-tide-crossing';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3190,7 +3190,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2162').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2163').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -3901,7 +3901,7 @@ function discoveredOptionalTasks(){
   if(inSkyLibrary()){const rescue=BFDragonRescue.task(state);if(rescue)optional.push(rescue);if(state.flags['sl.shelf.known'])optional.push(entry('The turning shelves',state.flags['sl.shelf.open']?'Cross to the far shelf and collect the shard':'Match the shelf handles to the guide',!!state.flags['sl.shelf.open']));if(state.flags['sl.vow.known']){const a=G.library.remote||BFSkyLibrary.status(G),n=[0,1,2].filter(i=>state.flags['sl.vow.'+i]).length;optional.push(entry('Protect the archive',n===3?'All stands safe — collect the shard':a.active>=0?(a.left<=0?'Seal faded — activate a stand to retry':a.vow?'Stand '+(a.active+1)+': '+a.vow+' guards, '+Math.ceil(a.left)+' seconds':'Secure stand '+(a.active+1)+' before its marks fade'):n+'/3 stands safe',n===3));}}
   if(inPalaceCourtyard()&&state.flags['pc.garden.known'])optional.push(entry('The garden still lives',state.flags['pc.garden.done']?'Seeds delivered; finish this half to secure the garden':state.flags['pc.garden.water']?(state.items['pc.seeds']?'Bring the seed tin to Grace':'Find the dry seed tin in the greenhouse'):'Open the east garden channel',!!state.flags['pc.garden.done']));
   if(inThunderCliffs()&&state.flags['tc.dash.met'])optional.push(entry('Dash’s claim',state.flags['tc.race']?'Touch flags 1, 2, 3, then ring the cave bell':'Brace the lower catch, then turn the upper wheel',!!state.flags['tc.cave.open']));
-  if(inThunderCliffs()&&state.flags['tc.tide.note'])optional.push(entry('The tide stones','Follow the carved rising tide',!!state.flags['tc.tide.open']));
+  if(inThunderCliffs()&&state.flags['tc.tide.note'])optional.push(entry('The inland tide route','Cross the rocks at low tide and release the door',!!state.flags['tc.tide.open']));
   if(inShipwreck()&&state.flags['sc.rose.met'])optional.push(entry("Rose's last voyage",state.flags['sc.rose.closed']?'Rose wants to be left alone':state.flags['sc.rose.angry']?'Consider what Rose said about the crew board':'Find the bell and read the crew record',!!state.flags['sc.rose.reward']||!!state.flags['sc.rose.closed']));
   if(inShipwreck()&&state.flags['sc.hull.note'])optional.push(entry('The lower hatch','Balance the marked hanging weights',!!state.flags['sc.hull.open']));
   if(inShipwreck()&&state.flags['sc.code.note'])optional.push(entry('The ship chest','Count lanterns: anchor, wheel, sail',!!state.flags['sc.code.open']));
@@ -15514,7 +15514,7 @@ function updateWorld(dt){
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
   if(inBriar()&&!G._storeJumpHint&&Math.hypot(G.p.x-440,G.p.z+360)<160){G._storeJumpHint=true;BFJournalNotice.push({id:'briar.store.jump',kind:'Movement tip',title:'The store’s rear window',text:'Jump onto the crate, then jump through the low window. Hold '+controlHint('jump')+' for a higher jump. The clean dressings are inside. Missing a jump leaves you safely on the ground.'});}
-  if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:[G.p,...Object.values(MP.peers||{}).filter(p=>p.zone===G.zone&&!p.downed)],spawn:spawnEnemy,notice:(title,text)=>{BFJournalNotice.push({id:G.patrolWork.id+'.camp',title,text,kind:'Combat area'});questUpdate();}});
+  if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:[G.p,...Object.values(MP.peers||{}).filter(p=>p.zone===G.zone&&!p.downed)],spawn:spawnEnemy,notice:()=>{const w=G.patrolWork,home=w.id==='combat.0.0';toast('Optional hunt: '+w.total+' '+(w.target|| (home?'farm raiders':'enemies'))+' · '+(w.place|| (home?'western supply wagon':'this area')));questUpdate();}});
   G._freezeT=Math.max(0,(G._freezeT||0)-dt);
   /* Headlong drives you forward and refuses to be steered - the whole point of it.
      AND IT HAS TO LET GO. _headlongT was set to 0.9 by SKILL_FX.bsk_charge and decremented by
@@ -15570,7 +15570,7 @@ function updateWorld(dt){
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
   if(inLongAscent())BFLongAscent.tick(G,dt);
-  if(inCastleGates())BFCastleGates.tick(G,adventureStoryState(),dt,!MP.active||MP.isHost,spawnEnemy,toast);if(inSkyLibrary())BFSkyLibrary.tick(G,dt,!MP.active||MP.isHost);if(inThunderCliffs())BFThunderCliffs.tick(G,dt,toast);if(G.hydraArena)updateHydra(dt);
+  if(inCastleGates())BFCastleGates.tick(G,adventureStoryState(),dt,!MP.active||MP.isHost,spawnEnemy,toast);if(inSkyLibrary())BFSkyLibrary.tick(G,dt,!MP.active||MP.isHost);if(inThunderCliffs())BFThunderCliffs.tick(G,dt,toast,(d,o)=>hurtPlayer(d,o.x,o.z,o.name));if(G.hydraArena)updateHydra(dt);
   if(inShipwreck()){G.shore.clock+=dt;voyageTick(dt);}
   if(inGreatFurnace())BFGreatFurnace.tick({G,state:adventureStoryState(),toast,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,o.name)},dt);
   if(inIronHalls())BFIronHalls.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,o.name)},dt);

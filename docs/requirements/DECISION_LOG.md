@@ -854,3 +854,11 @@ Within Oliver's existing-campaign quality pass, the Keep breach now uses individ
 ## [Codex | 2026-10-09] Lost Canyon optional freight store | U-2026-10-09-CANYON-FREIGHT
 
 Within Oliver's authorization to improve the existing campaign levels and replace repeated reskinned button-order puzzles, the optional Lost Canyon HP-04 store now asks the player to climb scaffold decks and release a high brake. The cart visibly follows its track away from the store. Preserve the existing main rescue, shard ID, open-state flag, co-op story authority, and older save behavior. The old four directions are retired. Automated traversal and state tests passed; satisfaction and pacing remain for Oliver's playtest.
+
+## [Codex | 2026-10-10] Thunder Cliffs physical tide crossing | U-2026-10-10-THUNDER-TIDE
+
+Continuing Oliver's approved full-scale campaign quality pass, the optional Thunder Cliffs inland shard now uses an observed tide cycle, spatial jumps and a far-side low-water catch instead of adjacent buttons. Keep the same door flag, shard reward, shared co-op opening and pre-change saves. An opaque lower ledge returns missed jumps without discarding progress. Browser traversal and state checks pass; playtesting decides the final difficulty.
+
+## [Codex | 2026-10-10] Compact campaign hunt discovery | U-2026-10-10-HUNT-NOTICE
+
+To reduce reading fatigue and preserve sight of active combat and traversal, first entry into a repeatable campaign hunt camp gives a brief toast and tracker refresh instead of a large journal overlay. The quest, journal entry, repeat spawns and kill rewards remain unchanged. Browser QA confirms the task still appears and progresses.

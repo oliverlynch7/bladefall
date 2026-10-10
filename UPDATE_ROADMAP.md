@@ -2519,3 +2519,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional HP-04 four-handle direction lock with a seven-jump scaffold climb in the existing full-scale Lost Canyon.
 - [x] Linked the high brake to a loaded cart at the store door; it rolls on the visible rails and uncovers the same shard. Kept the main rescue, prior open flag, old saves, and host-shared gate with personal shard collection.
 - [x] Passed story unit and static gate, real-browser movement/miss/recovery, full level route, co-op, checkpoint retry, five-shard progression, prior-save reload, and shoulder-camera before/after review. Parkour difficulty and enjoyment await Oliver's playtest.
+
+## [Codex | 2026-10-10] Thunder Cliffs tide crossing and shorter hunt discovery (v2.147.0)
+
+- [x] Replaced the optional SC-05 three-stone order lock with a tide-timed rock crossing and far-side release in the existing full-size level. Included visible phases, safe rest, surge danger and missed-jump recovery.
+- [x] Preserved the tc.tide.open story state, shard, main hydra route, co-op sharing and old-save progress. Shortened automatic hunt discovery from a large reading panel to a toast; tracker, journal and kill quests remain.
+- [x] Passed static gate, story unit, physical route, full Thunder waypoints, race, checkpoint, co-op, prior-save and hunt-discovery browser checks. Shoulder-camera visuals reviewed. Human playtest remains for timing, challenge and feel.

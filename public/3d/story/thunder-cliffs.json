@@ -710,10 +710,33 @@
           "id": "tc.tide",
           "region": "storm",
           "title": "The carved tide marks",
-          "text": "Three stones show the sea rising: one wave, two waves, three waves. A worn groove links them to the inland rock door."
+          "text": "The sea falls, warns with pale foam, then surges. Cross the exposed rocks while it is low. Wait on a wide stone if the foam gathers. The inland door has a release catch on the far side; pull it while the water is down. A low ledge catches missed jumps."
         }
       ],
       "when": [],
+      "once": true
+    },
+    "tc.tide.release": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "tc.tide.open",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "tc.tide.release",
+          "region": "storm",
+          "title": "The inland door is open",
+          "text": "You crossed the tide rocks and released the inland door. The grotto beyond holds a Rift Shard."
+        }
+      ],
+      "when": [
+        {
+          "flag": "tc.tide.open",
+          "is": false
+        }
+      ],
       "once": true
     },
     "tc.tide.1": {

@@ -1132,3 +1132,11 @@ The existing Broken Walls hold-the-breach task should make the escaping group vu
 ## [Codex | 2026-10-09] Replace Lost Canyon's optional order lock with traversal
 
 The live Lost Canyon's HP-04 side reward currently asks for north, west, south and east handles in a fixed sequence. This is the very input family Oliver identified as repetitive despite different story dressing. Preserve the existing freight store, shard ID, open flag, main rescue, co-op sharing and previous saves, but let players climb the freight scaffold to release a physical cart brake. The cart should visibly roll aside and expose the same reward. Include a readable failed-jump recovery and check the route by normal movement in a real browser. Do not count the new labels or a scripted completion as proof of satisfying parkour; Oliver's playtest decides that.
+
+## [Codex | 2026-10-09] Live campaign quality continuation
+
+Oliver requests further all-around improvement to Bladefall. Continue the already-approved existing-map passes, prioritizing player-visible action variety, purposeful paths and reliable feedback over adding superficially different content. The immediate grounded target is Thunder Cliffs' optional inland shard: replace the adjacent three-stone order with an observable tidal crossing and a far-side release, preserving its reward, main hydra route, co-op authority, saved `tc.tide.open` flag and older saves. Keep normal-camera verification and human-playtest limits explicit. See docs/design/THUNDER_CLIFFS_TIDE_PASS_2026-10-09.md. SFX creation remains on hold by Oliver's request.
+
+## [Codex | 2026-10-09] Campaign hunt discovery readability
+
+During normal-camera verification, the automatic combat-camp journal notice obscured the route for many seconds. The user's standing preference is concise guidance and minimal reading fatigue while playing. Preserve the optional kill quests, respawns, tracker, journal access and rewards; announce first camp discovery with a short toast rather than a large timed reading panel. See docs/design/CAMPAIGN_HUNT_NOTICE_2026-10-09.md. This does not change the user's hold on custom SFX.

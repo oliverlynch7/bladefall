@@ -2554,3 +2554,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional sun-water-wheat press order with a watchtower warning bell, sequential Legion patrols and an elite key-carrying captain.
 - [x] Preserved the same 180-gold chest, durable completion flag, main route, older saves and shared co-op progression. The alarm resumes at the tower after reload, and the roof approach stays clear.
 - [x] Passed static/story tests, physical stair climb, real interaction prompts, natural enemy approach and attack, two-page co-op damage and reward QA, old partial/completed save reload, neighboring granary and journal checks. Oliver should judge challenge and art in normal play.
+
+## [Codex | 2026-10-10] Black Woods split-tree root trail (SHIPPED v2.154.0)
+
+- [x] Replaced the optional bird-deer-wolf stone presses with a track-led, six-perch root climb and a high binding that opens the lower BR-04 hollow.
+- [x] Kept the main signal route, Beth rescue, shared opening, personal shard, checkpoint and prior-save behavior. The root art is merged into four material batches and appears in both 3D renderers, with a voxel fallback.
+- [x] Passed static/story tests, full Black Woods routes, physical climb and miss/retry, ordinary interaction, co-op guest release, old partial/completed save reload, Beth regressions and normal/shoulder camera review. Human playtesting remains for challenge and presentation. See docs/design/BLACK_WOODS_TRACK_ROUTE_2026-10-10.md.

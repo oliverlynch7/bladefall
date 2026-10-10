@@ -12,7 +12,8 @@ import {buildPalaceCourt} from './palace-courtyard-art.js?v=2074';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2141';
 import {buildStorm,updateStorm} from './storm-art.js?v=2015';
 import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2135';
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2074';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2154';
+import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2140';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2135';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2153';
@@ -1765,6 +1766,14 @@ function buildHubDecoProps(world){
   return out;
 }
 
+function buildWoodsRootTrail(world){
+ const steps=(world.obstacles||[]).filter(o=>o.woodsRootPerch);
+ if(!steps.length)return;
+ const roots=buildWoodsRootArt(steps);group.add(roots);
+ group.userData.dispose=()=>roots.userData.dispose();
+ window.__WOODS_ROOT_3D_ACTIVE=true;
+}
+
 export function buildWorld(scene, world){
  if(world.finalStage&&deepReady(world)){clearWorld(scene);const art=buildFinalKing(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.castleScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.castleScene).startsWith('ascent:')?buildLongAscent(scene,world):buildCastleGates(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1921,6 +1930,7 @@ export function buildWorld(scene, world){
   const zoneBuild = buildBuildings(bins.building.map(d => ({
     x: d.x, y: (d.y0 || 0) + 1.5, z: d.z, w: d.bw | 0, d: d.bd | 0,
     storeys: d.storeys | 0, style: d.style, ry: d.ry || 0 })));
+  buildWoodsRootTrail(world);
 
   buildCategory(scene, bins.shard, shardGeo(), mat(), (o, d) => {
     const r = hash(d.x, d.z);
@@ -1973,7 +1983,7 @@ export function clearWorld(scene){
     if(o.isLight && o.userData._w3dOrig != null){ o.intensity = o.userData._w3dOrig; }
   });
   if(group?.userData.dispose) group.userData.dispose();
-  window.__OUTSKIRTS_ACTIVE=false;window.__PRISON_ART_ACTIVE=false;
+  window.__OUTSKIRTS_ACTIVE=false;window.__PRISON_ART_ACTIVE=false;window.__WOODS_ROOT_3D_ACTIVE=false;
   if(group && group.parent) group.parent.remove(group);
   if(group){
     group.traverse(o => { if(o.isInstancedMesh){ o.dispose && o.dispose(); } });

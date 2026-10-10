@@ -14,13 +14,13 @@ async page=>{
   await page.evaluate(()=>__BF3.nextArea());await flush();
   ok('both peers enter Black Woods',await guest.evaluate(()=>__BF3.G.area===1&&__BF3.G.storyNpcs[0].id==='lewis'));
   await guest.evaluate(()=>{const b=__BF3,n=b.G.storyNpcs[0];Object.assign(b.G.p,{x:n.x,z:n.z,y:0});b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('open',{npc:'lewis'});});await flush();
-  ok('Lewis conversation shared',await page.evaluate(()=>__BF3.mode==='npc'&&__BF3.G.storyState.conversation.owner==='g'));
+  ok('Lewis dialogue stays local while quest state is shared',await page.evaluate(()=>__BF3.mode==='play'&&__BF3.G.storyState.conversation.owner==='g')&&await guest.evaluate(()=>__BF3.mode==='npc'));
   for(const choice of ['route','go']){await guest.evaluate(choice=>{const b=__BF3;b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice})},choice);await flush();}
   await guest.evaluate(()=>__BF3.briarRequest('close'));await flush();
   const act=async key=>{await guest.evaluate(key=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key===key);Object.assign(b.G.p,{x:o.x,z:o.z,y:o.y});b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key});},key);await flush();};
   await act('woods.signal.cable');ok('signal and exit shared',await page.evaluate(()=>__BF3.G.storyState.flags['woods.signal']&&!!__BF3.G.portal)&&await guest.evaluate(()=>!!__BF3.G.portal));
-  for(const animal of ['bird','deer','wolf'])await act('woods.tracks.'+animal);
-  ok('track puzzle unlock shared',await page.evaluate(()=>__BF3.G.storyState.flags['woods.tracks.open'])&&await guest.evaluate(()=>__BF3.G.storyState.flags['woods.tracks.open']));
+  await act('woods.tracks.release');
+  ok('root release unlocks the hollow for both players',await page.evaluate(()=>__BF3.G.storyState.flags['woods.tracks.open'])&&await guest.evaluate(()=>__BF3.G.storyState.flags['woods.tracks.open']));
   await guest.evaluate(()=>{const b=__BF3;Object.assign(b.G.p,{x:-2130,z:-2530,y:0});b.takeWorldRiftShard('BR-04');});await flush();
   ok('physical shard remains personal',await guest.evaluate(()=>__BF3.G.pendingRiftShards.found.includes('BR-04'))&&await page.evaluate(()=>!__BF3.G.pendingRiftShards?.found?.includes('BR-04')));
   await page.evaluate(()=>__BF3.restartCampaignCheckpoint());await flush();

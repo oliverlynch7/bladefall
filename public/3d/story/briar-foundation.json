@@ -1602,12 +1602,13 @@
           "type": "note",
           "id": "woods.tracks",
           "region": "outskirts",
-          "title": "Tracks around the old stones",
-          "text": "The carving says: Follow the tracks from the shallow pool to the split tree. Press the matching stones in that order. The prints are still visible along the grove’s western edge."
+          "title": "The split tree",
+          "text": "Bird tracks stop at the shallow pool. Hoofprints continue to the split tree, then vanish upward. The wolf circled below. Climb the roots to find what was hidden above."
         }
       ]
     },
-    "woods.tracks.bird": {
+    "woods.tracks.release": {
+      "once": true,
       "when": [
         {
           "flag": "woods.tracks.open",
@@ -1616,54 +1617,15 @@
       ],
       "effects": [
         {
-          "type": "sequence",
+          "type": "flag",
+          "id": "woods.tracks.open"
+        },
+        {
+          "type": "note",
           "id": "woods.tracks",
-          "solution": [
-            "bird",
-            "deer",
-            "wolf"
-          ],
-          "value": "bird"
-        }
-      ]
-    },
-    "woods.tracks.deer": {
-      "when": [
-        {
-          "flag": "woods.tracks.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "woods.tracks",
-          "solution": [
-            "bird",
-            "deer",
-            "wolf"
-          ],
-          "value": "deer"
-        }
-      ]
-    },
-    "woods.tracks.wolf": {
-      "when": [
-        {
-          "flag": "woods.tracks.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "woods.tracks",
-          "solution": [
-            "bird",
-            "deer",
-            "wolf"
-          ],
-          "value": "wolf"
+          "region": "outskirts",
+          "title": "The roots opened",
+          "text": "The binding above the split tree came loose. Its roots opened the lower hollow. The Rift Shard is below."
         }
       ]
     },

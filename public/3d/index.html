@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.153.0-home-bell-defense';
+const VERSION3D='2.154.0-woods-root-trail';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3191,7 +3191,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2168').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2169').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -3235,7 +3235,7 @@ function briarObjects(){if(G?.colossusArena&&G.boss?.dead)return [];
  if(!inBriarStory())return [];
  const s=adventureStoryState(),f=s.flags,i=s.items;
  const waterLevel=i['ic.lock.level']||0,showWaterReset=waterLevel>=3||!!f['ic.lock.frozen']&&waterLevel!==2;
- return (G.storyObjects||[]).filter(o=>!(o.key==='gf.cache.release'&&f['gf.cache.open'])).filter(o=>!(o.key==='rk.breach'&&f['rk.breach.start'])&&!(o.key==='lc.rail.release'&&f['lc.rail.open'])&&!(o.key==='ff.camp.release'&&f['ff.camp.open'])).filter(o=>!(o.key==='ff.heater'&&f['ff.heater'])&&!(o.key==='ih.cart'&&f['ih.cart'])&&!(o.key==='home.bell.alarm'&&f['home.bells.open'])&&!(o.key==='home.bell.cache'&&!f['home.bells.open'])&&!(f['ic.lock.open']&&/^ic\.lock\.[123]$/.test(o.key))&&!(f['ic.lock.frozen']&&/^ic\.lock\.[12]$/.test(o.key))&&!(o.key==='ic.lock.3'&&!f['ic.lock.frozen'])&&!(o.key==='ic.lock.reset'&&(f['ic.lock.open']||!showWaterReset))&&(o.key!=='sc.fit'||!f['sc.boat.ready']&&['rudder','sail','rope'].some(k=>(adventureStoryState().items['sc.'+k]||0)>0&&!f['sc.installed.'+k]))).map(o=>({...o,available:BFReturnVisits.available(o.key,adventureStoryState())&&(!inLongAscent()||BFLongAscent.available(o.key,G,G.ascent?.remote))&&(!inCastleGates()||BFCastleGates.available(o.key,G,G.castleGates?.remote))&&(!G.marbleArena||BFMarbleGuardian.available(o.key,G))&&(!inSkyLibrary()||BFSkyLibrary.available(o.key,G,G.library?.remote))&&(!inPalaceCourtyard()||BFPalaceCourtyard.available(o.key,G,G.court?.remote))&&(!inThunderCliffs()||BFThunderCliffs.available(o.key,G))&&(!inShipwreck()||BFShipwreckShore.available(o.key,G,G.shore?.remote))&&(!G.colossusArena||BFFurnaceColossus.available(G))&&(!inGreatFurnace()||BFGreatFurnace.available(o.key,G,G.furnace?.remote))&&(!inIronHalls()||BFIronHalls.available(o.key,G,G.iron?.remote))&&(!inIceCaves()||BFIceCaves.available(o.key,G,G.iceCaves?.remote))&&(!inPrison()||BFPrison.available(o.key,G,G.prison?.remote))&&(!inBrokenWalls()||BFBrokenWalls.available(o.key,G,G.keep?.remote))&&(!inLostCanyon()||BFLostCanyon.available(o.key,G,adventureStoryState(),MP.active&&!MP.isHost?G._canyonGuards:undefined))&&(o.key!=='hp.lift'||f['hp.quiet']||!(MP.active&&!MP.isHost?G._cliffGuards:G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length))&&(o.key!=='woods.rescue.release'||!(MP.active&&!MP.isHost?G._rescueGuards:G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length))&&!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
+ return (G.storyObjects||[]).filter(o=>!(o.key==='gf.cache.release'&&f['gf.cache.open'])).filter(o=>!(o.key==='rk.breach'&&f['rk.breach.start'])&&!(o.key==='lc.rail.release'&&f['lc.rail.open'])&&!(o.key==='ff.camp.release'&&f['ff.camp.open'])).filter(o=>!(o.key==='ff.heater'&&f['ff.heater'])&&!(o.key==='ih.cart'&&f['ih.cart'])&&!(o.key==='home.bell.alarm'&&f['home.bells.open'])&&!(o.key==='home.bell.cache'&&!f['home.bells.open'])&&!(o.key==='woods.tracks.release'&&f['woods.tracks.open'])&&!(f['ic.lock.open']&&/^ic\.lock\.[123]$/.test(o.key))&&!(f['ic.lock.frozen']&&/^ic\.lock\.[12]$/.test(o.key))&&!(o.key==='ic.lock.3'&&!f['ic.lock.frozen'])&&!(o.key==='ic.lock.reset'&&(f['ic.lock.open']||!showWaterReset))&&(o.key!=='sc.fit'||!f['sc.boat.ready']&&['rudder','sail','rope'].some(k=>(adventureStoryState().items['sc.'+k]||0)>0&&!f['sc.installed.'+k]))).map(o=>({...o,available:BFReturnVisits.available(o.key,adventureStoryState())&&(!inLongAscent()||BFLongAscent.available(o.key,G,G.ascent?.remote))&&(!inCastleGates()||BFCastleGates.available(o.key,G,G.castleGates?.remote))&&(!G.marbleArena||BFMarbleGuardian.available(o.key,G))&&(!inSkyLibrary()||BFSkyLibrary.available(o.key,G,G.library?.remote))&&(!inPalaceCourtyard()||BFPalaceCourtyard.available(o.key,G,G.court?.remote))&&(!inThunderCliffs()||BFThunderCliffs.available(o.key,G))&&(!inShipwreck()||BFShipwreckShore.available(o.key,G,G.shore?.remote))&&(!G.colossusArena||BFFurnaceColossus.available(G))&&(!inGreatFurnace()||BFGreatFurnace.available(o.key,G,G.furnace?.remote))&&(!inIronHalls()||BFIronHalls.available(o.key,G,G.iron?.remote))&&(!inIceCaves()||BFIceCaves.available(o.key,G,G.iceCaves?.remote))&&(!inPrison()||BFPrison.available(o.key,G,G.prison?.remote))&&(!inBrokenWalls()||BFBrokenWalls.available(o.key,G,G.keep?.remote))&&(!inLostCanyon()||BFLostCanyon.available(o.key,G,adventureStoryState(),MP.active&&!MP.isHost?G._canyonGuards:undefined))&&(o.key!=='hp.lift'||f['hp.quiet']||!(MP.active&&!MP.isHost?G._cliffGuards:G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length))&&(o.key!=='woods.rescue.release'||!(MP.active&&!MP.isHost?G._rescueGuards:G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length))&&!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
 }
 function briarReceive(request,actor,position){
  if(!inBriarStory()||!briarBook||(MP.active&&!MP.isHost))return false;
@@ -3316,7 +3316,7 @@ function briarSync(){
   else if(reward.kind==='rift_shard'&&['briar.gus.BR-02','lc.ruth.HP-03','kd.sly.RK-04','ic.hugo.FF-03','ih.flint.ED-02','sc.rose.SC-02','pc.grace.SP-02','cg.roland.CD-01','la.workers.CD-04'].includes(id)){const outcome=collectRiftShard(id.split('.').pop());if(outcome!=='invalid')G.storyClaims[id]=true;}
  }
  if(!inBriarStory())return;
- if(inReturnHub()){}else if(G.kingFinal){syncFinalKingStory(s);}else if(inLongAscent()){BFLongAscent.sync({G,state:s,openWay});}else if(inCastleGates()){BFCastleGates.sync({G,state:s,openWay});}else if(G.marbleArena){BFMarbleGuardian.sync(G,s,openWay);const dead=!!s.flags['mc.defeated'];if(G._orbMusic!==dead){G._orbMusic=dead;musicForScene();}}else if(inSkyLibrary()){BFSkyLibrary.sync({G,state:s,plat:vplat,spawn:spawnEnemy,host:!MP.active||MP.isHost,openWay});}else if(inPalaceCourtyard()){BFPalaceCourtyard.sync({G,state:s,openWay});}else if(inThunderCliffs()){BFThunderCliffs.sync({G,state:s,openWay,toast});}else if(inShipwreck()){BFShipwreckShore.sync({G,state:s,plat:vplat});if(s.flags["sc.depart"]&&!G.voyage&&(!MP.active||MP.isHost))startVoyage();}else if(G.colossusArena){BFFurnaceColossus.cool(G.boss,s.items['fc.cool']||0,()=>{toast('Armor cooled! Strike the pale joints before they heat up.');playFx('frostclink');});}else if(inGreatFurnace()){BFGreatFurnace.sync({G,state:s,plat:vplat,spawn:spawnEnemy,host:!MP.active||MP.isHost,openWay,toast});}else if(inIronHalls()){BFIronHalls.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inIceCaves()){BFIceCaves.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inSnowbound()){BFSnowbound.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inPrison()){BFPrison.sync({G,state:s,openWay});}else if(inBrokenWalls()){BFBrokenWalls.sync({G,state:s,openWay});}else if(inLostCanyon()){BFLostCanyon.sync({G,state:s,seg:vseg,openWay,spawn:spawnEnemy,host:!MP.active||MP.isHost,toast});}else if(inWindingCliffs()){BFHollowCliffs.sync({G,state:s,seg:vseg,plat:vplat,openWay,toast,sound:playFx});}else if(G.riftMentor){if(s.flags['trial.taught']&&!G.portal)openWay();}else if(G.riftHall){syncRiftHall(s);}else if(inBlackWoods()){syncBethRescue(s);if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
+ if(inReturnHub()){}else if(G.kingFinal){syncFinalKingStory(s);}else if(inLongAscent()){BFLongAscent.sync({G,state:s,openWay});}else if(inCastleGates()){BFCastleGates.sync({G,state:s,openWay});}else if(G.marbleArena){BFMarbleGuardian.sync(G,s,openWay);const dead=!!s.flags['mc.defeated'];if(G._orbMusic!==dead){G._orbMusic=dead;musicForScene();}}else if(inSkyLibrary()){BFSkyLibrary.sync({G,state:s,plat:vplat,spawn:spawnEnemy,host:!MP.active||MP.isHost,openWay});}else if(inPalaceCourtyard()){BFPalaceCourtyard.sync({G,state:s,openWay});}else if(inThunderCliffs()){BFThunderCliffs.sync({G,state:s,openWay,toast});}else if(inShipwreck()){BFShipwreckShore.sync({G,state:s,plat:vplat});if(s.flags["sc.depart"]&&!G.voyage&&(!MP.active||MP.isHost))startVoyage();}else if(G.colossusArena){BFFurnaceColossus.cool(G.boss,s.items['fc.cool']||0,()=>{toast('Armor cooled! Strike the pale joints before they heat up.');playFx('frostclink');});}else if(inGreatFurnace()){BFGreatFurnace.sync({G,state:s,plat:vplat,spawn:spawnEnemy,host:!MP.active||MP.isHost,openWay,toast});}else if(inIronHalls()){BFIronHalls.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inIceCaves()){BFIceCaves.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inSnowbound()){BFSnowbound.sync({G,state:s,plat:vplat,openWay,toast,sound:playFx});}else if(inPrison()){BFPrison.sync({G,state:s,openWay});}else if(inBrokenWalls()){BFBrokenWalls.sync({G,state:s,openWay});}else if(inLostCanyon()){BFLostCanyon.sync({G,state:s,seg:vseg,openWay,spawn:spawnEnemy,host:!MP.active||MP.isHost,toast});}else if(inWindingCliffs()){BFHollowCliffs.sync({G,state:s,seg:vseg,plat:vplat,openWay,toast,sound:playFx});}else if(G.riftMentor){if(s.flags['trial.taught']&&!G.portal)openWay();}else if(G.riftHall){syncRiftHall(s);}else if(inBlackWoods()){syncBethRescue(s);syncWoodsTrackRoute(s);if(s.flags['woods.signal']){G.qs['woods.signal']=1;const lewis=G.storyNpcs.find(n=>n.id==='lewis');if(lewis)Object.assign(lewis,{x:-160,z:-4250,y:0});if(!G.portal)openWay();}}else{
  const pad=G.healpads.find(p=>p.storyPad);if(pad)pad.locked=!s.flags['mara.healing'];
  if(s.flags['briar.bridge']&&G.briarBridge){G.briarBridge.closed=false;G.walls=G.walls.filter(w=>!w.storyBridge);}
  if(s.flags['briar.depart']){G.qs['briar.opening']=1;const thomas=G.storyNpcs?.find(n=>n.id==='thomas');if(thomas&&G.portalPos)Object.assign(thomas,{x:G.portalPos.x-120,z:G.portalPos.z+100,y:G.portalPos.y||0});if(!G.portal)openWay();}
@@ -3451,6 +3451,31 @@ function buildWindingCliffs(){
  briarPending=null;G._storyEpoch=null;briarEpoch();briarSync();
 }
 function drawWindingCliffs(t){if(inWindingCliffs())BFHollowCliffs.draw({G,state:adventureStoryState(),bx,pushM,popM,mv,rotY,box},t);}
+const WOODS_TRACK_ROOT_STEPS=[
+ {x:-2110,z:-2160,y:23,w:150,d:103},
+ {x:-2225,z:-2260,y:47,w:122,d:96},
+ {x:-2080,z:-2350,y:70,w:125,d:82},
+ {x:-2220,z:-2450,y:91,w:132,d:98},
+ {x:-2050,z:-2550,y:115,w:110,d:84},
+ {x:-2140,z:-2650,y:138,w:154,d:105}
+];
+function buildWoodsTrackRoute(){
+ const open=!!adventureStoryState().flags['woods.tracks.open'];
+ for(const [x,z,h,w]of [[-2280,-2160,181,108],[-1830,-2300,188,118],[-2260,-2590,198,116]]){
+  const trunk=vcol(x,z,29,29,h);trunk.treeCol=true;
+  G.deco.push({x,z,y0:h,w,h:92,d:w,c:'#3f6b44',theme:'forest',kind:'tree',lead:true,trunkH:h});
+ }
+ for(const p of WOODS_TRACK_ROOT_STEPS){
+  vplat(p.x,p.z,p.y,p.w,p.d,{slab:13,woodsRootPerch:true,invisible:true});
+ }
+ G.obstacles.push({kind:'col',x:-2130,z:-2530,w:96,d:88,h:79,invisible:true,woodsTrackSeal:true});
+ G.woodsTrail={rootSteps:WOODS_TRACK_ROOT_STEPS,sealT:open?1:0};
+}
+function syncWoodsTrackRoute(s){
+ if(!G.woodsTrail)return;
+ if(s.flags['woods.tracks.open'])G.obstacles=G.obstacles.filter(o=>!o.woodsTrackSeal);
+ const n=s.notes['woods.tracks'];if(n){n.title='The split tree';n.text=s.flags['woods.tracks.open']?'The binding above the split tree came loose. Its roots opened the lower hollow. The Rift Shard is below.':'Bird tracks end at the pool. Hoofprints continue to the split tree, then disappear upward. Climb the roots to reach the hanging binding.';}
+}
 function buildBlackWoods(){
  for(const key of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[key]=[];
  G.haz=null;G.thorns=[];G.vents=[];G.phasers=[];G.debris=[];G.lights=[];G.npc=null;G.secret=null;G.secretTrigger=null;G.waystone=null;G.dashSign=null;G.beam=null;G.collapse=[];G.optionalMissions=[];G._midSeq=0;G.portal=null;G.vertical=true;
@@ -3477,13 +3502,14 @@ function buildBlackWoods(){
  for(const [x,z]of [[-930,-1660],[-350,-2030]]){vsolid(x,z,0,180,68,145,'#514b3b');G.deco.push({x,z,y0:70,w:215,h:24,d:180,c:'#667053',nocol:true});}
  for(const [x,z]of [[-830,-2150],[-450,-1620],[210,-2900]])vsolid(x,z,0,130,44,28,'#675942');
  vsolid(370,-3250,0,180,100,22,'#615039');for(const x of [280,470])vsolid(x,-3410,0,45,65,60,'#756145');
- // Small pool and the ordered tracks are environmental clues, not a revealed solution list.
+ // The pool and animal prints lead to a high root climb, not another three-stone code.
  G.deco.push({x:-2160,z:-2020,y0:1,w:150,h:2,d:110,c:'#47685c',nocol:true});
- vsolid(-2150,-2660,0,25,160,30,'#574d39');vsolid(-2100,-2670,0,25,185,30,'#574d39');
+ vsolid(-2250,-2690,0,25,160,30,'#574d39');vsolid(-2025,-2690,0,25,185,30,'#574d39');
+ buildWoodsTrackRoute();
  G.storyObjects=[{key:'woods.signal.crank',label:'Stop the signal crank',x:80,z:-3060,y:0,kind:'signalcrank'},
  {key:'woods.signal.cable',label:'Cut the horn cable',x:0,z:-3070,y:220,kind:'signalcable'},
  {key:'woods.tracks.clue',label:'Read the old grove stone',x:-1770,z:-2050,y:0,kind:'trackclue'},
- ...['bird','deer','wolf'].map((animal,i)=>({key:'woods.tracks.'+animal,label:'Press the '+animal+' stone',x:-1800+i*110,z:-2480,y:0,kind:'trackstone',animal}))];
+ {key:'woods.tracks.release',label:'Release the root binding',x:-2140,z:-2650,y:138,range:70,kind:'trackrelease',bounds:{minX:-2212,maxX:-2068,minZ:-2705,maxZ:-2595}}];
  for(const [x,z]of [[160,-650],[-1130,-2600],[180,-4090]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
  for(const [type,x,z]of [['grunt',-570,-1360],['grunt',-820,-1800],['caster',-400,-1870],['grunt',-650,-2220],['flyer',1040,-2120],['thornboar',-1600,-2180],['thornboar',-1920,-2770],['grunt',-200,-2890],['caster',240,-3100],['grunt',-170,-3600]]){const e=spawnEnemy(type,x,z,false);e.woodsEncounter=true;}
  buildBethRescue();
@@ -3535,10 +3561,35 @@ function drawBlackWoods(t){
  for(let k=0;k<4;k++)bx(0,296,-3130-k*12,12+k*12,14+k*6,14,'#b29a62');
  if(!f['woods.signal']){bx(0,157,-3070,3,314,3,'#c9b985');bx(80,26,-3060,18,52,18,'#69543a');pushM();mv(80,50,-3060);rotY(t*1.7);box(62,7,9,'#a68c5b');popM();}
  else bx(0,229,-3070,3,18,3,'#c9b985');
- for(const o of G.storyObjects)if(o.kind==='trackstone'||o.kind==='trackclue'){
-  bx(o.x,8,o.z,70,16,60,'#676d59');if(o.animal)drawWoodsTrack(o.animal,o.x,o.z,17);else{bx(o.x,25,o.z,58,18,30,'#93917a');for(let j=0;j<3;j++)bx(o.x,27+j*4,o.z+16,40-j*5,2,2,'#4c5145');}}
- for(const [animal,z]of [['bird',-2110],['deer',-2280],['wolf',-2470]]){for(const dx of [-14,14])drawWoodsTrack(animal,-2160+dx,z+(dx>0?28:0));}
- const count=s.items['woods.tracks']||0;for(let k=0;k<3;k++)bx(-1690+k*22,24,-2550,12,8,12,k<count?'#b89cdc':'#575b51');
+ for(const o of G.storyObjects)if(o.kind==='trackclue'){
+  bx(o.x,8,o.z,70,16,60,'#676d59');bx(o.x,25,o.z,58,18,30,'#93917a');for(let j=0;j<3;j++)bx(o.x,27+j*4,o.z+16,40-j*5,2,2,'#4c5145');}
+ // Distinct animal shapes tell a spatial story; they are no longer a code to enter.
+ for(const [animal,marks]of [
+  ['bird',[[-2000,-2010],[-2060,-2015],[-2115,-2020]]],
+  ['deer',[[-2200,-2060],[-2185,-2110],[-2130,-2160],[-2210,-2230],[-2150,-2300],[-2110,-2390],[-2130,-2510]]],
+  ['wolf',[[-2380,-2510],[-2330,-2590],[-2250,-2680],[-2160,-2740],[-2040,-2690]]]
+ ])for(const [x,z]of marks)drawWoodsTrack(animal,x,z);
+ const trail=G.woodsTrail;if(trail){
+  const roots=trail.rootSteps;
+  const woodsWorld3d=window.__world3d?.();
+  if(!(three3DLive()&&woodsWorld3d?.on&&woodsWorld3d?.ready&&window.__WOODS_ROOT_3D_ACTIVE))for(let i=0;i<roots.length;i++){
+   const p=roots[i],prev=roots[i-1]||{x:-2110,z:-2080,y:3};
+   const dx=p.x-prev.x,dz=p.z-prev.z,dy=p.y-prev.y,run=Math.hypot(dx,dz);
+   pushM();mv((p.x+prev.x)/2,(p.y+prev.y)/2-9,(p.z+prev.z)/2);rotY(Math.atan2(dx,dz));rotX(-Math.atan2(dy,run));box(27,18,Math.hypot(run,dy)+28,'#60462e');popM();
+   bx(p.x,p.y-7,p.z,p.w*.92,14,p.d*.88,'#715236');bx(p.x,p.y+1,p.z,p.w*.81,2,p.d*.72,'#6e935b');
+   for(const side of [-1,1])bx(p.x+side*p.w*.40,p.y-5,p.z+side*8,9,8,p.d*.72,'#644b30');
+  }
+  // The upper cut binding retracts while the lower root bundle opens around the shard.
+  const seal=Math.max(0,1-trail.sealT),part=trail.sealT*63;
+  for(const side of [-1,1]){
+   bx(-2130+side*(51+part),42,-2530,24,75*seal+5,94,'#58422c');
+   bx(-2130+side*(25+part),80,-2530,13,9,99,'#8a7150');
+  }
+  if(seal>0.01){
+   for(let i=0;i<3;i++){pushM();mv(-2140,155+i*2,-2650);rotY(i*.43-.35);box(42,7,7,i===1?'#d2b67c':'#a78d60','#8a793f');popM();}
+   bx(-2140,158+Math.sin(t*2.5)*2,-2650,10,16,10,'#eddb9b','#ae8b4b');
+  }
+ }
 }
 
 function buildBriarOpening(){
@@ -3925,7 +3976,7 @@ function discoveredOptionalTasks(){
   }
   if(inBlackWoods()){
     if(state.flags['beth.help'])optional.push(entry('Nobody left behind','Follow the boot prints to the old rope lift',!!state.flags['beth.rescued']));
-    if(state.notes['woods.tracks'])optional.push(entry('The forest stones','Use the animal marks to open the hidden path',!!state.flags['woods.tracks.open']));
+    if(state.notes['woods.tracks'])optional.push(entry('The split tree','Follow the hoofprints and climb the roots',!!state.flags['woods.tracks.open']));
   }
   return optional;
 }
@@ -15619,6 +15670,7 @@ function updateWorld(dt){
   if(mode!=='play') return;
   if(G?.kingFinal&&finalKingTick(dt))return;
   if(G?.p?.saberSwingT>0)G.p.saberSwingT=Math.max(0,G.p.saberSwingT-dt);
+  if(inBlackWoods()&&G.woodsTrail&&adventureStoryState().flags['woods.tracks.open'])G.woodsTrail.sealT=Math.min(1,G.woodsTrail.sealT+dt*1.35);
   /* THE WORLD HOLDS STILL WHILE YOU EDIT. Oliver: "time should freeze so that I don't get attacked
      or my character doesn't move around while I'm editing." Editing a room while its occupants
      chase you is the obvious problem; the quieter one is that a moving hero drifts the whole time
@@ -23717,7 +23769,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2153-campaign"></script>
+<script type="module" src="./hero3d.js?v=2154-campaign"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

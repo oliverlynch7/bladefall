@@ -1,4 +1,5 @@
 import {claimSurface} from './surface-regions.js?v=1972';
+import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 /* Outskirts: original Blender kit, fitted to the game's existing geometry.
    No gameplay mutation. Static scenery is instanced in spatial chunks. */
 import * as THREE from './three.module.js';
@@ -153,13 +154,15 @@ export function buildOutskirts(scene,w){
 
   }
   const state=B.finish();root.userData.art=state;
+  const rootSteps=(w.obstacles||[]).filter(o=>o.woodsRootPerch);
+  if(rootSteps.length){state.rootTrail=buildWoodsRootArt(rootSteps);root.add(state.rootTrail);window.__WOODS_ROOT_3D_ACTIVE=true;}
   // Lights affect only this zone and are restored by the outer world's clear function.
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.37:.24)}});
   state.oldFog=scene.fog;scene.fog=new THREE.Fog(woods?'#202827':'#302d29',650,2300);
   const key=new THREE.DirectionalLight(0xffd2a0,woods?1.35:1.8);key.position.set(-600,1000,600);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-650,right:650,top:650,bottom:-650,near:1,far:2600});key.shadow.normalBias=1.2;key.shadow.bias=-.0001;root.add(key,key.target);state.key=key;
   state.points=[0,1,2].map(()=>{const l=new THREE.PointLight(0xffb44e,900,150,1.6);root.add(l);return l});
   state.scene=scene;state.obstacles=obstacles;state.stats={outskirtsArt:true,floorTiles:floors,roadTiles:roads,tree:deco.filter(d=>d.kind==='tree'&&d.lead===true).length,totalTriangles:state.triangles,instances:state.instances,chunks:state.groups.length,drawCalls:state.groups.reduce((n,g)=>n+g.children.length,0),visibleTriangles:0,visibleDrawCalls:0,artObstacles:true};
-  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();if(active===root)active=null};
+  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.rootTrail?.userData.dispose();if(active===root)active=null};
   return {group:root,counts:state.stats};
 }
 export function updateOutskirts(w){

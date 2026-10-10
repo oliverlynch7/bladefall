@@ -81,7 +81,7 @@
     },
     "ff.heath.prepare": {
       "topicMenu": true,
-      "text": "The heater coil fell out beside the crossing. Fit it in the winch, then climb to the signal crown. The western ridge shelters you from the wind.",
+      "text": "The heater coil fell out beside the crossing. Fit it in the winch, then climb toward the cave. The western ridge shelters you from the wind.",
       "choices": [
         {
           "id": "return",
@@ -207,7 +207,7 @@
       }
     },
     "ff.heath.repaired": {
-      "text": "The crossing is down. This small healing pad has limited charge. Read the signal crown's carving before turning its reflectors.",
+      "text": "The crossing is down. This small healing pad has limited charge. The cave is buried under a snow shelf. Look for the anchor above it.",
       "choices": [
         {
           "id": "next",
@@ -219,7 +219,7 @@
               "id": "ff.signal",
               "region": "frost",
               "title": "Find the cave mouth",
-              "text": "The repaired crossing leads to the signal crown. Read the carving and match its shape using the reflectors. Then follow the light to the buried entrance."
+              "text": "The repaired crossing leads to the shelf above the cave. Find the stone marker there, climb the broken ledges, and release the anchor holding the snow."
             }
           ]
         },
@@ -259,7 +259,7 @@
       }
     },
     "ff.heath.waiting": {
-      "text": "The crossing is ready. Read the signal carving on the highest broad shelf. Its light reveals the entrance.",
+      "text": "The crossing is ready. Read the marker on the broad shelf above the cave. It points to the cornice anchor.",
       "choices": [
         {
           "id": "camp",
@@ -369,8 +369,8 @@
           "type": "note",
           "id": "ff.reflect",
           "region": "frost",
-          "title": "The signal carving",
-          "text": "“The tree drinks the light. The mountain turns it away. The broken moon shows the hollow.” Choose the matching shape on the signal stand."
+          "title": "The buried cave",
+          "text": "The cave mouth is buried beneath an unstable snow cornice. Follow the broken stone shelves above the entrance and release the brass anchor. The snow will slide away below you."
         }
       ],
       "when": [
@@ -380,62 +380,12 @@
         }
       ]
     },
-    "ff.reflect.1": {
-      "once": false,
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "ff.reflect",
-          "value": 1,
-          "solution": [
-            3
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ff.reflect.clue",
-          "is": true
-        },
-        {
-          "flag": "ff.reflect.open",
-          "is": false
-        }
-      ]
-    },
-    "ff.reflect.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "ff.reflect",
-          "value": 2,
-          "solution": [
-            3
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ff.reflect.clue",
-          "is": true
-        },
-        {
-          "flag": "ff.reflect.open",
-          "is": false
-        }
-      ]
-    },
     "ff.reflect.3": {
-      "once": false,
+      "once": true,
       "effects": [
         {
-          "type": "sequence",
-          "id": "ff.reflect",
-          "value": 3,
-          "solution": [
-            3
-          ]
+          "type": "flag",
+          "id": "ff.reflect.open"
         }
       ],
       "when": [

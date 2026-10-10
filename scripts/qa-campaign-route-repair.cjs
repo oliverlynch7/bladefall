@@ -135,8 +135,8 @@ async page => {
     act('ff.heater');
     if (!(!!G.storyState.flags['ff.heater'] && G.peaks.crossing && !G.storyState.flags['ff.heath'])) throw Error('player installs coil without NPC return ' + JSON.stringify({flags:G.storyState.flags,crossing:G.peaks.crossing,quest:BFSnowbound.quest(G.storyState),object:G.storyObjects.find(o=>o.key==='ff.heater'),event:(await b.briarReady)?.events?.['ff.heater'],conversation:G.storyState.conversation}));
     checks.push('player installs coil without NPC return');
-    act('ff.reflect.clue'); act('ff.reflect.1');
-    ok('wrong signal still fails safely', !G.storyState.flags['ff.reflect.open']);
+    act('ff.reflect.clue');
+    ok('buried cave remains sealed before anchor release', !G.storyState.flags['ff.reflect.open']);
     act('ff.reflect.3'); act('ff.cave');
     ok('cave route opens after crossing', !!G.portal);
     act('ff.lift');

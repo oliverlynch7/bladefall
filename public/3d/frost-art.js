@@ -48,6 +48,16 @@ export function buildFrost(scene,w){
   const solids=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
   const peakBodies=new Set();
   for(const o of solids){source=authored?o:null;const top=o.h||1,base=outdoor&&o.mountainPath?-120:(o.y0??(o.kind==='plat'?Math.min(0,top-16):0));surface(o,base,top);obstacles.add(o);
+    if(outdoor&&o.corniceRidge){
+      // Faceted native Frostfell stone breaks up the square silhouette of the
+      // playable collision top. Keep the snow lip aligned to that top.
+      source=null;
+      add('peakRock',o.x,top-39,o.z,o.w*1.25,83,o.d*1.22,'#677f8e',hash(o.z,o.x)*1.8);
+      for(let j=0;j<5;j++){const a=j*2.4+hash(o.x,o.z)*3,dx=Math.cos(a)*o.w*.36,dz=Math.sin(a)*o.d*.34;
+        add('drift',o.x+dx,top+3,o.z+dz,Math.min(51,o.w*.31),9+hash(dx,dz)*5,Math.min(47,o.d*.34),j%2?'#eef3ee':'#d1e3e8',a);
+      }
+      source=authored?o:null;
+    }
     if(outdoor&&(o.terrain||(o.mountainPath&&hash(o.x,o.z)<.13))){const peakKey=[o.x,o.z,o.w,o.d,top].join(',');if(peakBodies.has(peakKey))continue;peakBodies.add(peakKey);const h=Math.max(100,top+120);add('peakRock',o.x,top-h*.5-4,o.z,o.w*1.35,h,o.d*1.35,'#6e8490',hash(o.x,o.z)*2);}
   }source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;surface({...o,caveWall:true},o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
@@ -90,6 +100,15 @@ export function buildFrost(scene,w){
     else{add('slab',d.x,y+hh/2,d.z,ww,hh,dd,d.kind==='mountainTimber'?(d.c||'#8a7355'):hh>40?'#447f9c':'#9bc9db');if(hh>18)add('snow',d.x,y+hh+.5,d.z,ww,1,dd);}
   }
   source=null;
+  let snowCover=null;
+  if(outdoor&&w.peaks){
+    snowCover=new THREE.Group();snowCover.name='Buried cave · sliding cornice';
+    const geo=new THREE.IcosahedronGeometry(1,1),colors=['#d9e9ed','#edf3ed','#bed7df','#e5f0ef'];
+    for(const [j,dx,dy,dz,sx,sy,sz]of [[0,0,0,0,148,72,47],[1,-79,29,9,72,49,39],[2,80,20,-5,75,52,40],[3,3,55,12,92,36,35]]){
+      const mesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:colors[j],flatShading:true}));mesh.position.set(dx,dy,dz);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;mesh.receiveShadow=true;snowCover.add(mesh);
+    }
+    root.add(snowCover);
+  }
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,list} of bins.values()){
     if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;g.userData.roof=roofs.get(cell)||null;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,name==='crystal'?crystalMaterial:material,list.length),col=new THREE.Color();m.name='Frost '+name;
@@ -101,11 +120,14 @@ export function buildFrost(scene,w){
   const sun=new THREE.DirectionalLight('#d3edff',1.8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-740,right:740,top:740,bottom:-740,near:1,far:2600});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#5bc8ff',800,210,1.6);root.add(l);return l});
   const counts={frostArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  active={root,groups,obstacles,walls,sun,counts,fade,glows,lights};window.__FROST_ART_ACTIVE=true;
+  active={root,groups,obstacles,walls,sun,counts,fade,glows,lights,snowCover};window.__FROST_ART_ACTIVE=true;
   root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();if(active?.root===root)active=null;window.__FROST_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateFrost(w){
   if(!active||!w.p)return;const a=active,p=w.p,meta=window.__BF_META?.(),low=meta?.quality==='low',range=low?720:1080,fps=meta?.camMode==='fps';let tris=0,calls=0;
+  if(a.snowCover){const released=!!w.storyState?.flags?.['ff.reflect.open'],at=w.peaks?.corniceReleaseAt,slide=released?(at===undefined?1:Math.max(0,Math.min(1,((w.time||0)-at)/.9))):0;
+    a.snowCover.visible=slide<1;a.snowCover.position.set(-260+slide*205,795-slide*128,-5245+slide*25);
+  }
   for(const [cell,g] of a.groups){const roof=g.userData.roof,[cx,cz]=roof?[roof.x,roof.z]:cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;
     if(g.visible&&roof&&!fps&&w.eye&&w.eye.y>roof.y0-30&&(!roof.underPlayerOnly||p.y<roof.y0-10)&&Math.abs(p.x-roof.x)<roof.w/2+180&&Math.abs(p.z-roof.z)<roof.d/2+230)g.visible=false;
     if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}

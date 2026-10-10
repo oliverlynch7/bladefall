@@ -41,7 +41,7 @@ function target(g){
  const puzzles={
   'hp.bridge.clue':[/^hp\.weight\.\d+$/,'Bridge weights'],
   'kd.lift.note':[/^kd\.lift\.\d+$/,'Lift weights'],
-  'ff.reflect.clue':[/^ff\.reflect\.\d+$/,'Signal stand'],
+  'ff.reflect.clue':[/^ff\.reflect\.3$/,'Cornice ledges'],
   'ic.lock.clue':[/^ic\.lock\.\d+$/,'Water controls'],
   'ih.plate':[/^ih\.line\.\d+$/,'Machine controls'],
   'gf.pipes':[/^gf\.cool\.\d+$/,'Cooling controls'],

@@ -2583,3 +2583,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the mandatory ordered work/shelter-bell input with a visible three-worker evacuation along the foundry floor. Players call the workers, guard their health through three timed attacks, and reach the shelter; failure resets the encounter for a bell retry. The quiet brake route reduces each attack wave.
 - [x] Kept the existing evacuation completion flag, later furnace route and old-save behavior. Host-owned escort positions, health and completion mirror to the co-op guest; the main arrow follows the workers.
 - [x] Muted browser QA covered normal-camera movement and health bars, walkable route samples, damage/failure/retry/success, full level and checkpoint regressions, old partial/completed saves, and two-page co-op sync. Human playtesting remains for pacing and challenge. See docs/design/GREAT_FURNACE_WORKER_ESCORT_2026-10-10.md.
+
+## [Codex | 2026-10-10] Winding Cliffs bridge and lookout (SHIPPED v2.161.0)
+
+- [x] The seven-weight freight puzzle lights its plate marks and lowers a hinged bridge visibly. An older open bridge starts fully lowered.
+- [x] A named Cliff warden replaces one lookout shielder, with a marked dodgeable cleave and recovery window. The existing upper rope bypass remains.
+- [x] Muted browser set-piece, full physical route, two-page co-op state, checkpoint, old-save, story unit and static checks passed. Oliver's playtest still decides combat challenge, pacing and visual appeal.

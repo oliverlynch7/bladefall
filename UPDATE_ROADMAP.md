@@ -2589,3 +2589,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] The seven-weight freight puzzle lights its plate marks and lowers a hinged bridge visibly. An older open bridge starts fully lowered.
 - [x] A named Cliff warden replaces one lookout shielder, with a marked dodgeable cleave and recovery window. The existing upper rope bypass remains.
 - [x] Muted browser set-piece, full physical route, two-page co-op state, checkpoint, old-save, story unit and static checks passed. Oliver's playtest still decides combat challenge, pacing and visual appeal.
+
+## [Codex | 2026-10-10] Lost Canyon signal pressure (SHIPPED v2.162.0)
+
+- [x] The alarm cable now has a collision-backed scaffold climb with real jump gaps and a recoverable fall into the yard. Signal posts and the winch change color when the alarm is active or cut.
+- [x] Freeing a cage before the cable is cut calls host-owned patrol pairs near the party in the holding yard. They chase and can damage the player. Further pairs answer after a respite, with at most four live signal guards; cutting the cable stops new calls. Cutting first keeps the quiet route.
+- [x] Existing rescue, shard, checkpoint and save IDs remain. Static/story tests and muted browser checks passed for the full route, real climb and miss/retry, guard damage and repeat waves, old saves, checkpoint, and two-page co-op. Oliver's playtest is still needed for combat pacing, climb challenge and visual appeal. No custom SFX work. See docs/design/LOST_CANYON_SIGNAL_PRESSURE_2026-10-10.md.

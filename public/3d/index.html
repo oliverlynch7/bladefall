@@ -1090,7 +1090,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./hollow-cliffs.js?v=2161"></script>
-<script src="./lost-canyon.js?v=2162"></script>
+<script src="./lost-canyon.js?v=2163"></script>
 <script src="./broken-walls.js?v=2161"></script>
 <script src="./prison-dungeons.js?v=2146"></script>
 <script src="./snowbound-peaks.js?v=2162"></script>
@@ -1122,7 +1122,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./frost-officers.js?v=2010"></script>
 <script src="./story-authority.js?v=2116"></script>
 <script src="./skill-identity.js?v=1981s"></script>
-<script src="./party-navigation.js?v=2160"></script>
+<script src="./party-navigation.js?v=2163"></script>
 <script src="./combat-art.js?v=2094"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2122">
@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.161.0-cliff-warden';
+const VERSION3D='2.162.0-canyon-signal';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -14945,7 +14945,7 @@ const MP={
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
-      if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort,furnaceEscort:!!e.furnaceEscort,furnaceEscortWave:e.furnaceEscortWave||0};
+      if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,meleeReach:e.meleeReach||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort,furnaceEscort:!!e.furnaceEscort,furnaceEscortWave:e.furnaceEscortWave||0};
       if(STATUS_ORDER.some(k=>(e.st?.[k]||0)>0)||(e.stunT||0)>0||(e.slowT||0)>0||(e.exposed||0)>0||(e.markT||0)>0||(e.warCurseT||0)>0||(e.markExplode||0)>0)row[8]=[...STATUS_ORDER.map(k=>Math.round((e.st?.[k]||0)*10)/10),Math.round(e.stDmg||0),Math.round((e.stunT||0)*10)/10,Math.round((e.slowT||0)*10)/10,Math.round((e.exposed||0)*10)/10,e.primed?1:0,Math.round((e.markT||0)*10)/10,e.markOwner||null,Math.round((e.warCurseT||0)*10)/10,e.warCurseOwner||null,Math.round(e.markExplode||0)];
       if((e._tetherT||0)>0||(e.doomT||0)>0||(e.warBurstT||0)>0||(e.beastMarkT||0)>0||(e.tauntT||0)>0||(e.petTauntT||0)>0)row[9]=[e._tether||null,Math.round((e._tetherT||0)*10)/10,Math.round((e.doomT||0)*10)/10,Math.round((e.warBurstT||0)*10)/10,Math.round((e.beastMarkT||0)*10)/10,Math.round((e.tauntT||0)*10)/10,e.tauntId||null,Math.round((e.petTauntT||0)*10)/10,e.petTauntId||null,Math.round(e.warBurstDmg||0)];
       out.push(row); }
@@ -15819,7 +15819,7 @@ function updateWorld(dt){
   if(inIceCaves())BFIceCaves.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,toast},dt);
   if(inPrison())BFPrison.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,complete:finishPrisonEvent,toast},dt);
   if(inBrokenWalls()){BFBrokenWalls.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,spawn:spawnEnemy,complete:finishKeepEvent,toast,players:[G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===G.zone&&p.area===G.area):[])]},dt);BFBrokenWalls.actors(G,adventureStoryState(),G.keep.remote);}
-  if(inLostCanyon())BFLostCanyon.tick({G,spawn:spawnEnemy,host:!MP.active||MP.isHost,height:highestSurfaceAt},dt);
+  if(inLostCanyon())BFLostCanyon.tick({G,spawn:spawnEnemy,host:!MP.active||MP.isHost,height:highestSurfaceAt,toast,players:[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area).map(q=>({x:q.tx,z:q.tz,hp:q.hp,downed:q.downed})):[])]},dt);
   /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood, how much health you had and
      how much mana, sampled a few times a second. Recorded for the Chronomancer ONLY - every other
      class pays nothing for a mechanic it cannot use.
@@ -16174,7 +16174,7 @@ function updateWorld(dt){
         e._meleeSeen=(e._meleeSeen||0)+dt;eff=0;e.meleeW=Math.max(0,e.meleeW-dt);
         if(e.meleeW===0&&!mirror){e.meleeActive=.18;e.meleeCd=.9;}
       }
-      else if(!mirror&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?45:10)&&Math.abs(e.y-meleeTarget.y)<75&&enemyMeleeClear(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
+      else if(!mirror&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?(e.meleeReach??45):10)&&Math.abs(e.y-meleeTarget.y)<75&&enemyMeleeClear(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
       if(e.meleeActive>0||mirror)eff=0;
     }
     if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
@@ -16258,7 +16258,7 @@ function updateWorld(dt){
       if(inBrokenWalls()&&!MP.guest()&&e.keepEscort&&e.meleeActive>0&&BFBrokenWalls.hitEscort(G,e)){/* The host owns escort health and retry state. */}
       else if(inGreatFurnace()&&!MP.guest()&&e.furnaceEscort&&e.meleeActive>0&&BFGreatFurnace.hitEscort(G,e)){/* The host owns worker health and retry state. */}
       else if(petClose&&enemyMeleeClear(e,G.pet)) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
-      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)&&enemyMeleeClear(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
+      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r+(e.meleeReach||0)) && vOverlap(e,p)&&enemyMeleeClear(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
   }
   // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
   for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }

@@ -1297,12 +1297,13 @@
           "type": "note",
           "id": "home.bells",
           "region": "outskirts",
-          "title": "The farm bells",
-          "text": "The tower stone reads: First the sun wakes us. Then water feeds the fields. Last, wheat fills our tables. Three bells carry those marks."
+          "title": "The watchtower chest",
+          "text": "The Legion watch captain took the tower chest key. Ring the warning bell to draw him and his patrol to the roof."
         }
       ]
     },
-    "home.bell.sun": {
+    "home.bell.alarm": {
+      "once": true,
       "when": [
         {
           "flag": "home.bells.open",
@@ -1311,54 +1312,37 @@
       ],
       "effects": [
         {
-          "type": "sequence",
+          "type": "flag",
+          "id": "home.bell.alarm"
+        },
+        {
+          "type": "note",
           "id": "home.bells",
-          "value": "sun",
-          "solution": [
-            "sun",
-            "water",
-            "wheat"
-          ]
+          "region": "outskirts",
+          "title": "The watchtower chest",
+          "text": "The warning bell drew the Legion patrol. Clear each group. Their captain carries the chest key."
         }
       ]
     },
-    "home.bell.water": {
+    "home.bell.defended": {
+      "once": true,
       "when": [
         {
-          "flag": "home.bells.open",
-          "is": false
+          "flag": "home.bell.alarm",
+          "is": true
         }
       ],
       "effects": [
         {
-          "type": "sequence",
-          "id": "home.bells",
-          "value": "water",
-          "solution": [
-            "sun",
-            "water",
-            "wheat"
-          ]
-        }
-      ]
-    },
-    "home.bell.wheat": {
-      "when": [
+          "type": "flag",
+          "id": "home.bells.open"
+        },
         {
-          "flag": "home.bells.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
+          "type": "note",
           "id": "home.bells",
-          "value": "wheat",
-          "solution": [
-            "sun",
-            "water",
-            "wheat"
-          ]
+          "region": "outskirts",
+          "title": "The watchtower chest",
+          "text": "The captain fell and dropped the chest key. Open the chest by the eastern pillar."
         }
       ]
     },
@@ -1381,8 +1365,8 @@
           "type": "note",
           "id": "home.bells",
           "region": "outskirts",
-          "title": "The farm bells",
-          "text": "The bells opened the old tower chest. We recovered the coins inside."
+          "title": "The watchtower chest",
+          "text": "The old tower chest held coins for the journey."
         }
       ]
     },

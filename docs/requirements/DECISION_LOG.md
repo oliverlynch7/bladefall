@@ -874,3 +874,7 @@ Under Oliver's existing authorization to improve live campaign levels, retire th
 ## [Codex | 2026-10-10] Sky Library hidden display reflector | U-2026-10-10-LIBRARY-REFLECTOR
 
 Continuing Oliver's live-campaign quality request, replace the optional Sky Library's three adjacent symbol presses with a visible reflector that the player slides along a rail while watching its light sweep toward the sword seal. Keep `sl.display.open`, SP-04, main progression, the other optional branches, host-owned co-op sharing and old completed saves; discard only old partial button order. Verify normal movement, overshoot/recovery, release, co-op guest control, checkpoint banking and normal-camera visual cause/effect. See docs/design/SKY_LIBRARY_REFLECTOR_2026-10-10.md. No custom SFX work.
+
+## [Codex | 2026-10-10] Homefields warning bell | U-2026-10-10-HOME-BELL
+
+Within Oliver's standing request for distinct campaign actions and more meaningful combat, retire the optional Homefields sun-water-wheat code. Use the existing raised eastern watchtower for a warning-bell encounter: ring it, defeat small sequential Legion groups and their key-carrying captain, then open the existing chest. Keep `home.bells.open`, `home.bells.cache`, the 180-gold reward, main progress, co-op and old completed saves; old partial input may restart. Check that enemies really approach and attack rather than merely appearing in the story state. See docs/design/HOMEFIELDS_WARNING_BELL_2026-10-10.md. No custom SFX work.

@@ -2549,3 +2549,8 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional three-mark sequence with a reflector the player grips and slides along a rail. Its beam sweeps across the sealed wall; holding it on the sword seal opens the display and exposes the same SP-04 shard.
 - [x] Kept the main route, shelf and archive branches, existing open-state flag and personal shard collection. Co-op guests can operate the host-owned reflector; old partial and completed-display saves reload correctly.
 - [x] Passed static/story checks, full Sky Library route, physical overshoot/recovery, checkpoint banking, two-player authority, prior-state reload and normal-camera review. Oliver's playtest is still needed for clarity, challenge and art quality. See docs/design/SKY_LIBRARY_REFLECTOR_2026-10-10.md.
+## [Codex | 2026-10-10] Homefields watchtower warning bell (SHIPPED v2.153.0)
+
+- [x] Replaced the optional sun-water-wheat press order with a watchtower warning bell, sequential Legion patrols and an elite key-carrying captain.
+- [x] Preserved the same 180-gold chest, durable completion flag, main route, older saves and shared co-op progression. The alarm resumes at the tower after reload, and the roof approach stays clear.
+- [x] Passed static/story tests, physical stair climb, real interaction prompts, natural enemy approach and attack, two-page co-op damage and reward QA, old partial/completed save reload, neighboring granary and journal checks. Oliver should judge challenge and art in normal play.

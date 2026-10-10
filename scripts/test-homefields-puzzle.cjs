@@ -1,3 +1,60 @@
-const assert=require('node:assert/strict'),fs=require('node:fs'),E=require('../public/3d/story-state.js'),b=JSON.parse(fs.readFileSync('public/3d/story/briar-foundation.json'));
-let s=E.create(),i=0;function world(key){const r=E.transact(s,b,{id:'puzzle-'+ ++i,type:'world',key:'home.bell.'+key});s=r.state;return r.changed}
-assert(!world('cache'));assert(world('clue'));assert(s.notes['home.bells']);world('sun');world('wheat');assert.equal(s.items['home.bells'],0);world('water');assert.equal(s.items['home.bells'],0);world('sun');world('water');world('wheat');assert(s.flags['home.bells.open']);assert(!world('sun'));assert(world('cache'));assert(!world('cache'));assert.equal(s.rewards['home.bells.cache'].amount,180);assert(E.restore(s).flags['home.bells.open']);assert(!E.create().flags['home.bells.open']);console.log('Tower puzzle passed: clue, wrong-order reset, correct sequence, once-only reward and checkpoint restore.');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const Story=require('../public/3d/story-state.js');
+const Bell=require('../public/3d/home-bell-defense.js');
+const book=JSON.parse(fs.readFileSync('public/3d/story/briar-foundation.json'));
+let state=Story.create(),serial=0;
+function world(key){const r=Story.transact(state,book,{id:'bell-'+ ++serial,type:'world',key:'home.bell.'+key});state=r.state;return r.changed;}
+assert(!world('cache'));
+assert(world('clue'));
+assert.match(state.notes['home.bells'].text,/warning bell/i);
+assert(world('alarm'));
+assert(state.flags['home.bell.alarm']);
+assert(!world('alarm'));
+assert(!world('cache'));
+
+const G={p:{x:2350,y:168,z:-1810},enemies:[],homeBell:Bell.create()};
+let eliteCount=0,kitCount=0;
+const spawn=(type,x,z)=>{const e={type,x,z,y:0,hp:100,mid:G.enemies.length+1,dead:false,active:false};G.enemies.push(e);return e;};
+const config={G,state,host:true,spawn,elite:e=>{eliteCount++;e.elite=true;},setupElite:e=>{kitCount++;e.raid=true;}};
+function tick(dt){return Bell.tick(config,dt);}
+assert.equal(Bell.tick({...config,host:false},.016),false);
+assert.equal(G.enemies.length,0);
+const far={p:{x:0,y:0,z:0},enemies:[],homeBell:Bell.create()};
+assert.equal(Bell.tick({...config,G:far},.016),false);
+assert.equal(far.enemies.length,0);
+assert.equal(tick(.016),false);
+assert.equal(G.homeBell.wave,1);
+assert.equal(Bell.foes(G,1).length,2);
+for(const e of Bell.foes(G,1))e.dead=true;
+assert.equal(tick(1),false);
+assert.equal(G.homeBell.wave,1);
+assert.equal(tick(1.5),false);
+assert.equal(G.homeBell.wave,2);
+assert.equal(Bell.foes(G,2).length,3);
+for(const e of Bell.foes(G,2))e.dead=true;
+tick(2.5);
+assert.equal(G.homeBell.wave,3);
+assert.equal(eliteCount,1);
+assert.equal(kitCount,1);
+assert.equal(Bell.foes(G,3).length,2);
+assert(Bell.foes(G,3).some(e=>e.campaignElite&&e.label==='Watch Captain'));
+for(const e of Bell.foes(G,3))e.dead=true;
+assert.equal(tick(.016),true);
+assert(world('defended'));
+assert(state.flags['home.bells.open']);
+assert(world('cache'));
+assert(!world('cache'));
+assert.equal(state.rewards['home.bells.cache'].amount,180);
+assert(Story.restore(state).flags['home.bells.open']);
+assert(!Story.create().flags['home.bells.open']);
+
+// Old saves can hold partial sequence data or the already-open chest.
+const partial=Story.create();partial.items['home.bells']=2;
+assert.equal(Bell.create().wave,0);
+assert(!partial.flags['home.bells.open']);
+const completed=Story.restore(state);completed.items['home.bells']=3;
+const oldG={enemies:[],homeBell:Bell.create()};
+assert.equal(Bell.tick({...config,G:oldG,state:completed},.016),false);
+assert.equal(oldG.enemies.length,0);
+console.log('Homefields warning bell passed: discovery, three combat waves, elite captain, chest reward, and save migration.');

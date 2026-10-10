@@ -1167,3 +1167,7 @@ Oliver continues to request concrete improvements to existing campaign play, esp
 ## [Codex | 2026-10-10] Black Woods animal-track route
 
 Under Oliver's continuing direction to replace repetitive adjacent-button puzzles with readable environmental action and meaningful optional parkour, revise the live Black Woods BR-04 grove. Retire the bird-deer-wolf stone presses in favor of following the existing animal tracks to a split-tree root climb. Release the high binding to uncover the lower hollow and existing personal shard. Keep woods.tracks.open, BR-04, main signal path, Beth rescue, co-op sharing, checkpoint rules and old completed saves. Old partial stone input may restart at the physical route. Validate the actual climb, miss/retry, visible release, normal prompt, co-op and prior saves in a muted browser. See docs/design/BLACK_WOODS_TRACK_ROUTE_2026-10-10.md. No custom SFX work.
+
+## [Codex | 2026-10-10] Shipwreck Shore optional chest action
+
+Under Oliver's continuing direction to improve existing levels and retire repeated button-order puzzles, replace the Lantern Wreck number-entry chest with a fixed ballista on Rose's Wreck. Aim at the visible iron clasp, fire, recover from a miss and watch the binding break. Preserve the optional Stormshot reward, `sc.code.open`/`sc.code.note`, old completed saves, host-shared opening and the main boat/voyage. See docs/design/SHIPWRECK_BALLISTA_2026-10-10.md. No custom SFX work.

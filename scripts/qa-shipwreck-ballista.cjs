@@ -1,0 +1,35 @@
+async page=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4331/3d/?mute=1');
+ await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+ await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.autoAttack=false;b.openHub();b.enterZone(5);b.meta.tutOff=true;b.meta.camMode='far';b.G.p.invuln=999;for(const e of b.G.enemies)e.stunT=999;});
+ await page.waitForFunction(()=>!BF_LOADING.active&&__BF3.G.shore);
+ const before=await page.evaluate(()=>{const b=__BF3,G=b.G,p=G.p,chest=G.storyObjects.find(o=>o.key==='sc.code.note');Object.assign(p,{x:chest.x,y:chest.y,z:chest.z,vy:0});b.briarRequest('world',{key:chest.key});Object.assign(p,{x:-1415,y:130,z:-3290,vy:0,yaw:BFShipwreckShore.targetYaw});G.camYaw=BFShipwreckShore.targetYaw;for(let i=0;i<20;i++)b.update(.016);const prompt=b.briarInteract();if(prompt?.label!=='Aim the wreck ballista')throw Error('Ballista prompt: '+prompt?.label);prompt.act();return {prompt:prompt.label,oldControls:G.storyObjects.filter(o=>/^sc\.code\.[1-4]$/.test(o.key)).length,open:!!G.storyState.flags['sc.code.open'],camera:BFShipwreckShore.camera(G)};});
+ await page.waitForFunction(()=>!!document.getElementById('shoreBallistaAim'));
+ await page.screenshot({path:'output/playwright/shipwreck-ballista-sight-before.png'});
+ const padAim=await page.evaluate(()=>{const turn=__BF3.G.shore.ballista,yaw=turn.yaw,pitch=turn.pitch;BFShipwreckShore.control({rx:-1,ry:1,edge:()=>false},.016);const moved=turn.yaw<yaw&&turn.pitch>pitch;turn.yaw=yaw;turn.pitch=pitch;return moved;});
+ if(!padAim)throw Error('Controller stick did not move the ballista sight');
+ await page.evaluate(()=>BFShipwreckShore.control({rx:0,ry:0,edge:a=>a==='attack'},.016));
+ await page.screenshot({path:'output/playwright/shipwreck-ballista-sight-miss.png'});
+ await page.keyboard.press('e');
+ const missed=await page.evaluate(()=>({open:!!__BF3.G.storyState.flags['sc.code.open'],text:document.querySelector('[data-aim-result]')?.textContent,shot:__BF3.G.shore.ballista.shot}));
+ if(missed.open||!missed.text?.includes('missed'))throw Error('Miss/retry failure: '+JSON.stringify(missed));
+ const pad=page.locator('#shoreBallistaAim [data-aim-pad]');const box=await pad.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;
+ await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-82,y-44,{steps:12});await page.mouse.up();
+ const aligned=await page.evaluate(()=>({yaw:__BF3.G.shore.ballista.yaw,pitch:__BF3.G.shore.ballista.pitch,hit:BFShipwreckShore.aimHit(__BF3.G.shore.ballista.yaw,__BF3.G.shore.ballista.pitch)}));
+ if(!aligned.hit)throw Error('Pointer aim failed: '+JSON.stringify(aligned));
+ await page.keyboard.press('e');await page.waitForFunction(()=>!!__BF3.G.storyState.flags['sc.code.open']);
+ await page.screenshot({path:'output/playwright/shipwreck-ballista-sight-hit.png'});
+ await page.waitForTimeout(280);
+ await page.screenshot({path:'output/playwright/shipwreck-ballista-sight-hit-late.png'});
+ await page.waitForTimeout(420);
+ await page.screenshot({path:'output/playwright/shipwreck-ballista-sight-open.png'});
+ const shotClock=await page.evaluate(()=>({gameTime:__BF3.G.time,shotAt:__BF3.G.shore.ballista.shot?.at,mode:__BF3.mode,camera:BFShipwreckShore.camera(__BF3.G),actualCamera:window.__world3d?.().camera?.position?.toArray?.()}));
+ const after=await page.evaluate(()=>{const b=__BF3,G=b.G;const reward=G.storyState.rewards['sc.stormshot'],task=b.discoveredOptionalTasks().find(t=>t.title==='The iron-bound chest');return {open:!!G.storyState.flags['sc.code.open'],reward:!!reward,claimed:!!G.storyClaims['sc.stormshot'],task,shot:G.shore.ballista.shot,mainBoat:!!G.storyState.flags['sc.boat.ready']};});
+ await page.keyboard.press('Escape');
+ const closed=await page.evaluate(()=>({ui:!!document.getElementById('shoreBallistaAim'),camera:BFShipwreckShore.camera(__BF3.G),opened:!!__BF3.G.storyState.flags['sc.code.open']}));
+ const claimed=await page.evaluate(()=>{const b=__BF3,G=b.G,p=G.p;const walk=(x,z)=>{for(let i=0;i<700;i++){const dx=x-p.x,dz=z-p.z,d=Math.hypot(dx,dz);if(d<14)break;b.input.jx=dx/d;b.input.jz=dz/d;b.update(.016);}b.input.jx=b.input.jz=0;};walk(-1320,-3400);walk(-2130,-3540);walk(-2140,-3400);const prompt=b.briarInteract();if(prompt?.label!=='Take Stormshot from the opened chest')throw Error('Chest prompt: '+JSON.stringify({prompt:prompt?.label,p:{x:p.x,y:p.y,z:p.z}}));prompt.act();return {position:{x:Math.round(p.x),y:Math.round(p.y),z:Math.round(p.z)},prompt:prompt.label,reward:!!G.storyState.rewards['sc.stormshot'],claimed:!!G.storyClaims['sc.stormshot'],task:b.discoveredOptionalTasks().find(t=>t.title==='The iron-bound chest')};});
+ await page.screenshot({path:'output/playwright/shipwreck-ballista-opened-chest.png'});
+ if(!after.open||after.reward||after.claimed||after.task?.done||!after.task?.progress.includes('claim Stormshot')||closed.ui||closed.camera||!claimed.reward||!claimed.claimed||!claimed.task?.done||claimed.task?.progress!=='Stormshot claimed'||errors.length)throw Error(JSON.stringify({after,closed,claimed,errors}));
+ return {before,padAim,missed:{open:missed.open,text:missed.text},aligned,after,shotClock,closed,claimed,errors};
+}

@@ -979,164 +979,41 @@
           "type": "note",
           "id": "sc.code",
           "region": "storm",
-          "title": "The ship chest",
-          "text": "The lid shows anchor, wheel, sail. Count the intact lanterns beside each matching mark around this wreck. Enter the three counts in that order."
+          "title": "The iron-bound chest",
+          "text": "An iron clasp holds the chest shut. Look across to Rose's Wreck: the ship ballista still points this way. Aim at the bright clasp above the lid and fire. A missed bolt can be retried."
         }
       ]
     },
-    "sc.code.1": {
-      "once": false,
+    "sc.code.fire": {
+      "once": true,
       "when": [
         {
-          "flag": "sc.code.note",
+          "flag": "sc.code.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sc.code.open",
+          "value": true
+        }
+      ]
+    },
+    "sc.code.claim": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sc.code.open",
           "is": true
         }
       ],
       "effects": [
         {
-          "type": "sequence",
-          "id": "sc.code",
-          "value": 1,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "sc.code.reward",
-          "when": [
-            {
-              "flag": "sc.code.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "sc.stormshot",
-              "kind": "stormshot",
-              "amount": 1
-            }
-          ]
-        }
-      ]
-    },
-    "sc.code.2": {
-      "once": false,
-      "when": [
-        {
-          "flag": "sc.code.note",
-          "is": true
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "sc.code",
-          "value": 2,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "sc.code.reward",
-          "when": [
-            {
-              "flag": "sc.code.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "sc.stormshot",
-              "kind": "stormshot",
-              "amount": 1
-            }
-          ]
-        }
-      ]
-    },
-    "sc.code.3": {
-      "once": false,
-      "when": [
-        {
-          "flag": "sc.code.note",
-          "is": true
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "sc.code",
-          "value": 3,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "sc.code.reward",
-          "when": [
-            {
-              "flag": "sc.code.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "sc.stormshot",
-              "kind": "stormshot",
-              "amount": 1
-            }
-          ]
-        }
-      ]
-    },
-    "sc.code.4": {
-      "once": false,
-      "when": [
-        {
-          "flag": "sc.code.note",
-          "is": true
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "sc.code",
-          "value": 4,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "sc.code.reward",
-          "when": [
-            {
-              "flag": "sc.code.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "sc.stormshot",
-              "kind": "stormshot",
-              "amount": 1
-            }
-          ]
+          "type": "reward",
+          "id": "sc.stormshot",
+          "kind": "stormshot",
+          "amount": 1
         }
       ]
     },

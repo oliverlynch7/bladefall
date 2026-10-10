@@ -2560,3 +2560,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional bird-deer-wolf stone presses with a track-led, six-perch root climb and a high binding that opens the lower BR-04 hollow.
 - [x] Kept the main signal route, Beth rescue, shared opening, personal shard, checkpoint and prior-save behavior. The root art is merged into four material batches and appears in both 3D renderers, with a voxel fallback.
 - [x] Passed static/story tests, full Black Woods routes, physical climb and miss/retry, ordinary interaction, co-op guest release, old partial/completed save reload, Beth regressions and normal/shoulder camera review. Human playtesting remains for challenge and presentation. See docs/design/BLACK_WOODS_TRACK_ROUTE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Shipwreck Shore ballista chest (SHIPPED v2.155.0)
+
+- [x] Replaced the optional Lantern Wreck number-entry chest with a ship ballista on Rose Wreck. The player aims across the gap, sees the bolt miss or break a visible clasp, then returns to claim Stormshot from the opened chest.
+- [x] Kept the chest state and reward IDs, main boat and voyage, old partial and completed saves, and host-owned co-op progression. The quest tracker remains active until the reward is collected. Removed the old numbered pads and floating labels.
+- [x] Static/story tests and muted-browser checks passed for aim and retry, physical return, full shore route, prior saves, and a two-player host/guest reward flow. Oliver should judge aiming challenge and visual quality in normal play. No custom SFX work. See docs/design/SHIPWRECK_BALLISTA_2026-10-10.md.

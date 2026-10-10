@@ -881,3 +881,7 @@ Within Oliver's standing request for distinct campaign actions and more meaningf
 ## [Codex | 2026-10-10] Black Woods environmental trail | U-2026-10-10-WOODS-TRACK
 
 Oliver's later broad puzzle and parkour direction supersedes the original simple fixed bird-deer-wolf sequence in the September Black Woods work order. The approved intent is a distinct optional action: observe tracks, climb the split tree's uneven roots, and release a visible binding over the BR-04 hollow. Preserve the shared woods.tracks.open flag and personal shard; old completed saves stay completed, partial sequence items become legacy state. Do not alter the main signal route or Beth's rescue. See docs/design/BLACK_WOODS_TRACK_ROUTE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Shipwreck Shore ballista chest | U-2026-10-10-SHORE-BALLISTA
+
+Under Oliver's standing campaign and puzzle-quality authorization, retire the optional Lantern Wreck number-entry chest. The new action is to aim a fixed ballista from Rose's Wreck at the chest's visible iron clasp, fire, adjust after a miss and see the binding fall. Preserve `sc.code.open`, `sc.code.note`, `sc.stormshot`, the main boat/voyage and old completed saves; discard only old partial sequence inputs. Share the opened state through host-owned co-op story state. See docs/design/SHIPWRECK_BALLISTA_2026-10-10.md. No custom SFX work.

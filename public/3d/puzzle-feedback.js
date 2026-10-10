@@ -1,6 +1,8 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
+ 'sc.code.fire':'The iron clasp breaks. Return to the Lantern Wreck to claim Stormshot.',
+ 'sc.code.claim':'Stormshot taken from the opened chest.',
  'sc.rudder':'Rudder recovered. Fit it at Otto’s workbench beside the boat.',
  'sc.sail':'Sailcloth recovered. Fit it at Otto’s workbench beside the boat.',
  'sc.rope':'Dry rope recovered. Fit it at Otto’s workbench beside the boat.',

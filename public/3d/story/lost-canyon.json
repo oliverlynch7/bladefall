@@ -816,74 +816,27 @@
           "id": "lc.rail",
           "region": "hollow",
           "title": "The freight track",
-          "text": "Follow the loaded cart’s track. Turn the handles in the order the track bends. A wrong turn rolls the lock back. No one in the yard has mentioned this store."
+          "text": "The cart is held by a brake high above the sealed store. The old-cage ledge leads to its scaffold. A fall lands on the freight road below."
         }
       ],
       "once": true
     },
-    "lc.rail.north": {
+    "lc.rail.release": {
       "effects": [
         {
-          "type": "sequence",
-          "id": "lc.rail",
-          "solution": [
-            "north",
-            "west",
-            "south",
-            "east"
-          ],
-          "value": "north"
-        }
-      ],
-      "once": false
-    },
-    "lc.rail.west": {
-      "effects": [
+          "type": "flag",
+          "id": "lc.rail.open",
+          "value": true
+        },
         {
-          "type": "sequence",
-          "id": "lc.rail",
-          "solution": [
-            "north",
-            "west",
-            "south",
-            "east"
-          ],
-          "value": "west"
+          "type": "note",
+          "id": "lc.rail.open",
+          "region": "hollow",
+          "title": "Freight store open",
+          "text": "The brake released the loaded cart. It rolled along the track and uncovered the store below."
         }
       ],
-      "once": false
-    },
-    "lc.rail.south": {
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "lc.rail",
-          "solution": [
-            "north",
-            "west",
-            "south",
-            "east"
-          ],
-          "value": "south"
-        }
-      ],
-      "once": false
-    },
-    "lc.rail.east": {
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "lc.rail",
-          "solution": [
-            "north",
-            "west",
-            "south",
-            "east"
-          ],
-          "value": "east"
-        }
-      ],
-      "once": false
+      "once": true
     }
   }
 }

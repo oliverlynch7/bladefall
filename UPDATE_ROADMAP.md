@@ -2514,3 +2514,8 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Made the three prisoners crossing Broken Walls individually vulnerable to targeted Legion melee attacks, with visible health bars, a clear retreat and safe retry on loss.
 - [x] Directed later waves toward the moving group, kept the caster on the player, hid the spent bell prompt, and made the objective arrow follow the group only while the player is far away.
 - [x] Preserved story flags and optional content. Passed static gate, story tests, solo attack/retry/completion browser tests, full existing Keep route browser test, and host/guest state and enemy-focus checks. Human playtesting is still needed to tune escort difficulty.
+## [Codex | 2026-10-09] Lost Canyon freight climb (SHIPPED v2.146.0)
+
+- [x] Replaced the optional HP-04 four-handle direction lock with a seven-jump scaffold climb in the existing full-scale Lost Canyon.
+- [x] Linked the high brake to a loaded cart at the store door; it rolls on the visible rails and uncovers the same shard. Kept the main rescue, prior open flag, old saves, and host-shared gate with personal shard collection.
+- [x] Passed story unit and static gate, real-browser movement/miss/recovery, full level route, co-op, checkpoint retry, five-shard progression, prior-save reload, and shoulder-camera before/after review. Parkour difficulty and enjoyment await Oliver's playtest.

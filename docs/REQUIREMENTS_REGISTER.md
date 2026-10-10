@@ -1128,3 +1128,7 @@ Oliver's recurring complaint is that differently named three-button puzzles stil
 ## [Codex | 2026-10-08] Ruined Keep prisoners need a real protection objective
 
 The existing Broken Walls hold-the-breach task should make the escaping group vulnerable, fulfilling Oliver's request for an escort with health and attackers that target the people being rescued. Each of the three prisoners has a visible health bar. Some waves chase them, while the caster still pressures the player. A fallen prisoner causes a short retreat and retry without discarding the larger quest. Both co-op players see the same health and enemy focus; the host remains authoritative. The existing thirty-second hold, final enemy clear, optional chamber, and save flags remain. See docs/design/CAMPAIGN_EXISTING_LEVEL_PASS_2026-10-08.md.
+
+## [Codex | 2026-10-09] Replace Lost Canyon's optional order lock with traversal
+
+The live Lost Canyon's HP-04 side reward currently asks for north, west, south and east handles in a fixed sequence. This is the very input family Oliver identified as repetitive despite different story dressing. Preserve the existing freight store, shard ID, open flag, main rescue, co-op sharing and previous saves, but let players climb the freight scaffold to release a physical cart brake. The cart should visibly roll aside and expose the same reward. Include a readable failed-jump recovery and check the route by normal movement in a real browser. Do not count the new labels or a scripted completion as proof of satisfying parkour; Oliver's playtest decides that.

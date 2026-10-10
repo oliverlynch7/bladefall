@@ -851,3 +851,6 @@ Within the existing-level quality authorization, replace the main waterworks' ad
 ## [Codex | 2026-10-08] Protecting the Broken Walls prisoners | U-2026-10-08-KEEP-ESCORT
 
 Within Oliver's existing-campaign quality pass, the Keep breach now uses individually vulnerable prisoners rather than a purely timed hold. Some attackers pursue the group and others threaten the player; if one prisoner falls, the party can retry without resetting the rest of the level. This is a distinct combat/escort action in the existing map and follows Oliver's prior request for escorts with health. Keep the host authoritative in co-op, preserve the main quest flags and optional chamber, and judge final balance by human playtesting rather than code checks alone.
+## [Codex | 2026-10-09] Lost Canyon optional freight store | U-2026-10-09-CANYON-FREIGHT
+
+Within Oliver's authorization to improve the existing campaign levels and replace repeated reskinned button-order puzzles, the optional Lost Canyon HP-04 store now asks the player to climb scaffold decks and release a high brake. The cart visibly follows its track away from the store. Preserve the existing main rescue, shard ID, open-state flag, co-op story authority, and older save behavior. The old four directions are retired. Automated traversal and state tests passed; satisfaction and pacing remain for Oliver's playtest.

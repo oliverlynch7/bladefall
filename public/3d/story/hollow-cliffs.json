@@ -612,56 +612,21 @@
           "type": "note",
           "id": "hp.code",
           "region": "hollow",
-          "title": "The cliff chest",
-          "text": "Three groups of marked supports sit along this side trail. Count the marked supports beneath one dot, then two dots, then three dots. Press those three numbers on the chest lock. A wrong number starts it over."
+          "title": "The cliff cargo chest",
+          "text": "A cable holds cargo over the cliff chest. Follow the uneven brackets from the lower alcove to its high release pin."
         }
       ],
       "once": true
     },
-    "hp.code.1": {
+    "hp.code.release": {
       "effects": [
         {
-          "type": "sequence",
-          "id": "hp.code",
-          "solution": [
-            1,
-            2,
-            3
-          ],
-          "value": 1
+          "type": "flag",
+          "id": "hp.code.open",
+          "value": true
         }
       ],
-      "once": false
-    },
-    "hp.code.2": {
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "hp.code",
-          "solution": [
-            1,
-            2,
-            3
-          ],
-          "value": 2
-        }
-      ],
-      "once": false
-    },
-    "hp.code.3": {
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "hp.code",
-          "solution": [
-            1,
-            2,
-            3
-          ],
-          "value": 3
-        }
-      ],
-      "once": false
+      "once": true
     },
     "hp.code.claim": {
       "effects": [

@@ -27,12 +27,26 @@ export function buildHollow(scene,w){
   const surfaces=new Map();
   function surface(o,base,top,wood=false){
     if(w.marksmanCrossing&&wood){for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},'marksman-deck'))rawSurface(part,base,top,true);return;}
+    // Suspended brackets do not replace the canyon floor beneath them.
+    if(o.cargoBracket)return rawSurface(o,base,top,wood);
     if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood);
     for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},w.cliffScene!=null?'cliff-union':base+':'+top))rawSurface(part,base,top,wood);
   }
   function rawSurface(o,base,top,wood=false){
     const ww=o.w||20,dd=o.d||ww,height=Math.max(1,top-base),r=hash(o.x,o.z),c=palette[Math.floor(r*5)];
     if(o.canyonCliff){add('column',o.x,base,o.z,ww,height,dd,'#b78954',r*.22);return;}
+    if(o.cargoBracket){
+      // The optional hoist route consists of thin brackets with open air beneath.
+      // The generic canyon rule extends every shelf into the abyss, which turned
+      // this deliberate climb into six giant square towers that hid the chest.
+      add('stone',o.x,base+height/2,o.z,ww,height,dd,'#80684e');
+      add('timber',o.x,top+.8,o.z,ww-8,1.6,dd-8,'#c8ad77');
+      for(const side of [-1,1]){
+        block(o.x+side*(ww/2-5),top-5,o.z,6,7,dd-12,'#565d5c');
+        block(o.x+side*(ww/2-14),base-9,o.z,6,18,dd*.48,'#7b674c');
+      }
+      floors++;return;
+    }
     // The expanded pass is carved out of rock, not a staircase of floating paving slabs.
     // Collision tops remain exact; the rock beneath extends into the canyon mist.
     if(w.cliffScene!=null&&!wood){

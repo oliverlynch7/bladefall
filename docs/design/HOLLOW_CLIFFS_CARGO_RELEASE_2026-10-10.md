@@ -1,0 +1,13 @@
+# Winding Cliffs cargo chest — grounded change plan
+
+The live Winding Cliffs optional cliff chest is still a seeded three-number lock. The player reads an explicit solution and presses three adjacent buttons. This is the same action family Oliver has identified as repetitive. The chest sits on an existing lower side trail, beneath open cliff space. The main freight-bridge weight puzzle, Skip's upper rope route, the patrol camp, and both existing shard locations are separate and remain intact.
+
+Replace only the optional chest lock with a visible cargo hoist. A short, uneven set of solid cliff brackets rises from the lower side trail. At its high landing, the player releases a single cable pin. The suspended cargo rises away from the chest below, which can then be opened for its existing `hp.cliffcache` reward. A missed jump lands on the existing safe lower trail; there is no timed reset or combination to guess. The cable, chest restraint and moving cargo must be visible from below, so the player can predict the release's result without reading a solution. Keep an optional short plate clue for orientation.
+
+Preserve `hp.code.open`, `hp.code.claimed`, `hp.cliffcache` and previous save rewards. Retire only `hp.code.1`–`3` and ignore partial `items['hp.code']` from older saves. Refresh any old cliff-chest journal note to the new route. A completed old chest stays complete. The release must be host-owned in co-op; either living player may reach it, and both see the same open state.
+
+Before shipping: inspect the normal camera from the lower trail and the high pin; physically traverse the brackets with the game movement and jump rules, deliberately miss a jump and recover, trigger the release through its actual world interaction, return to claim the chest once, check an old partial and an old completed save, and exercise a guest interaction. Static route tests and code inspection alone are insufficient evidence of reachability or visual clarity. Human playtesting remains the judgment of fun and difficulty.
+
+## Verification outcome
+
+The six brackets are thin collision-backed ledges, leaving the lower floor visible. Normal-camera captures show the chest, hanging cargo and route from below; pulling the high pin visibly lifts the cargo. Browser movement crossed all six brackets using the game's jump physics, and an intentional missed jump landed on the lower trail. The full Winding Cliffs route, old partial and completed saves after reload, and a two-page guest release/chest claim passed. Existing story, authority, surface, patrol, checkpoint and co-op checks passed. This establishes reachability and state consistency; Oliver's playtest remains the measure of whether the optional climb is enjoyable and appropriately difficult.

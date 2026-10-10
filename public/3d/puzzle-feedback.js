@@ -1,6 +1,8 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
+ 'hp.code.release':'The hoist lifted its cargo clear of the chest below. Drop to the lower trail and open it.',
+ 'hp.code.claim':'The cliff chest is open. Its reward is yours.',
  'sc.code.fire':'The iron clasp breaks. Return to the Lantern Wreck to claim Stormshot.',
  'sc.code.claim':'Stormshot taken from the opened chest.',
  'sc.rudder':'Rudder recovered. Fit it at Otto’s workbench beside the boat.',

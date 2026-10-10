@@ -17,8 +17,13 @@ Object.assign(p,{x:720,z:-870,y:110});for(const q of G.cliffs.walks.rope)walk(q[
 const count=b.meta.stash.length;b.briarSync();ok('reward cannot repeat',b.meta.stash.length===count);
 Object.assign(p,{x:900,z:-1670,y:200});for(const q of G.cliffs.ridgeSteps)walk(q[0],q[1],true,q[2]);ok('ridge reached at shard height',p.y>=390);ok('upper shard collectible',b.takeWorldRiftShard('HP-02')==='collected'||G.pendingRiftShards?.found.includes('HP-02'));
 Object.assign(p,{x:-850,z:-1230,y:0});for(const q of G.cliffs.walks.cloth)walk(q[0],q[1]);Object.assign(p,{x:-1770,z:-1630,y:0});b.takeWorldRiftShard('HP-01');ok('two distinct physical shards remain unbanked',G.pendingRiftShards.found.length===2&&!b.meta.riftShards.length);
-for(const n of G.cliffs.code)act('hp.code.'+n);act('hp.code.claim');ok('code chest grants once',G.storyState.flags['hp.code.claimed']);
-return {checks,walks,errors:[],code:G.cliffs.code,counts:__world3d().counts};});
+Object.assign(p,{x:-1700,z:-2280,y:0,vy:0,onGround:true});
+for(const q of BFHollowCliffs.cargoSteps){let idle=0;for(let i=0;i<360;i++){const dx=q.x-p.x,dz=q.z-p.z,d=Math.hypot(dx,dz),onStep=p.onGround&&p.y>=q.y-4&&Math.abs(dx)<q.w/2-6&&Math.abs(dz)<q.d/2-6;if(onStep&&(d<20||idle>15))break;const oldX=p.x,oldZ=p.z;b.input.jx=dx/d;b.input.jz=dz/d;if(p.onGround&&p.y<q.y-8)b.input.jumpEdge=true;b.update(.016);idle=onStep&&Math.hypot(p.x-oldX,p.z-oldZ)<.2?idle+1:0;}b.input.jx=b.input.jz=0;walks.push({to:[q.x,q.z],at:[Math.round(p.x),Math.round(p.y),Math.round(p.z)],expectedY:q.y,ok:p.onGround&&p.y>=q.y-4&&Math.abs(q.x-p.x)<q.w/2-6&&Math.abs(q.z-p.z)<q.d/2-6});}
+ok('cargo release is reachable by normal jumps',p.y>=176&&Math.hypot(p.x+1770,p.z+2390)<35);
+act('hp.code.release');ok('hoist opens the chest',G.storyState.flags['hp.code.open']);
+act('hp.code.claim');ok('cargo chest grants once',G.storyState.flags['hp.code.claimed']);
+Object.assign(p,{x:-1545,z:-2365,y:58,vy:0,onGround:true});for(let i=0;i<90;i++){b.input.jx=-1;b.input.jz=0;if(i===1)b.input.jumpEdge=true;b.update(.016);}b.input.jx=b.input.jz=0;ok('missed bracket lands on lower trail',p.onGround&&p.y===0&&p.x>-1900);
+return {checks,walks,errors:[],counts:__world3d().counts};});
 await page.evaluate(()=>{Object.assign(__BF3.G.p,{x:850,z:-1500,y:200});});await page.waitForTimeout(650);await page.screenshot({path:'output/playwright/winding-cliffs-route.png'});
 if(errors.length||result.walks.some(w=>!w.ok))throw Error(JSON.stringify({errors,failedWalks:result.walks.filter(w=>!w.ok)}));return {...result,walks:undefined,waypoints:result.walks.length,failedWalks:result.walks.filter(w=>!w.ok),errors};
 }

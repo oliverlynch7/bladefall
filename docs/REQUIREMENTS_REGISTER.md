@@ -1175,3 +1175,7 @@ Under Oliver's continuing direction to improve existing levels and retire repeat
 ## [Codex | 2026-10-10] Co-op class-effect parity continuation
 
 Oliver's continuing all-around quality request includes his standing requirement that class skills act on enemies in co-op as they do in solo play. Source inspection found guest-only stun/slow/taunt, Death's Door and Final Curse delayed effects, plus a guest-only Execution kill. Preserve host enemy authority, existing class tuning, solo/PvP behavior and saves. Plan and verification: docs/design/COOP_SKILL_EFFECTS_2026-10-10.md. This focused transport fix does not certify every class combination or real-network timing.
+
+## [Codex | 2026-10-10] Winding Cliffs optional chest action variety
+
+Continuing Oliver's approved live-campaign quality pass and later instruction to remove reskinned order-guessing puzzles, replace the Winding Cliffs optional three-number chest lock with a physically traversed cargo-hoist release. Preserve the existing chest reward and flags (`hp.code.open`, `hp.code.claimed`, `hp.cliffcache`), main freight bridge, Skip route, shard locations, co-op story sharing, and completed saves. Old partial code inputs can be ignored. Inspect the normal-camera player action, fall recovery, chest reveal and old-save behavior before claiming the work shipped. See docs/design/HOLLOW_CLIFFS_CARGO_RELEASE_2026-10-10.md.

@@ -2572,3 +2572,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Guest skill stuns, slows, pulls, lifts, marks and taunts now affect host-owned enemies, including pet-origin Roar; timers mirror back to the party. Soul Tether and Conduit link host enemies rather than only guest copies.
 - [x] Death's Door and Final Curse resolve on the host even if the guest stops updating. Execution uses the host's current enemy HP and the shared kill result.
 - [x] Muted two-page browser QA passed 28 focused cases, plus existing co-op hit, healing, PvP control and kill-reward regressions, prior-save reload and inline syntax. Real-network timing and play feel still need a human co-op session. See docs/design/COOP_SKILL_EFFECTS_2026-10-10.md.
+
+## [Codex | 2026-10-10] Winding Cliffs cargo chest (SHIPPED v2.157.0)
+
+- [x] Replaced the optional three-number lock with six uneven cliff brackets, a high cable release and cargo that visibly rises from the chest on the lower trail.
+- [x] Kept the freight bridge, Skip's route, both shards, the original chest reward and old completion flags. Old partial numeric inputs no longer control the new route.
+- [x] Muted browser checks passed the full level route, physical climb and missed-jump recovery, normal-camera before/after views, once-only chest, old partial/completed save reloads and two-player guest release. Human playtesting remains for difficulty and visual quality. See docs/design/HOLLOW_CLIFFS_CARGO_RELEASE_2026-10-10.md.

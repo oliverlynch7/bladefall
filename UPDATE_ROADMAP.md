@@ -2543,3 +2543,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional triangle-square-circle cache buttons with four moving counterweight decks east of the cooled waterworks. A lower grate and return steps make missed jumps recoverable.
 - [x] Moved the cooling box to a solid upper landing with a clear interaction lane, sliding lid and the same personal ED-04 shard. The plate gives a short clue; old partial and completed-box saves remain usable.
 - [x] Passed static/story tests, full Furnace route, physical jump/miss/recovery and under-landing exploit checks, chest collision, checkpoint banking, host/guest state and personal shard collection, prior-save reload and normal-camera visual review. Oliver's playtest is still needed for difficulty, route readability and art quality. See docs/design/GREAT_FURNACE_COUNTERWEIGHT_2026-10-10.md.
+
+## [Codex | 2026-10-10] Sky Library hidden display reflector (SHIPPED v2.152.0)
+
+- [x] Replaced the optional three-mark sequence with a reflector the player grips and slides along a rail. Its beam sweeps across the sealed wall; holding it on the sword seal opens the display and exposes the same SP-04 shard.
+- [x] Kept the main route, shelf and archive branches, existing open-state flag and personal shard collection. Co-op guests can operate the host-owned reflector; old partial and completed-display saves reload correctly.
+- [x] Passed static/story checks, full Sky Library route, physical overshoot/recovery, checkpoint banking, two-player authority, prior-state reload and normal-camera review. Oliver's playtest is still needed for clarity, challenge and art quality. See docs/design/SKY_LIBRARY_REFLECTOR_2026-10-10.md.

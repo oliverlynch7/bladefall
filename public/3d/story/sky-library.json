@@ -722,8 +722,8 @@
           "type": "note",
           "id": "sl.display",
           "region": "palace",
-          "title": "Three empty places",
-          "text": "The mounts show a sun above a sword, with a wing between them. A note reads: “Begin with the light. Carry the lesson. Keep it safe.” Press the marks in that order."
+          "title": "The hidden display",
+          "text": "The sun-lamp still shines. Grip the wing-shaped reflector and walk it along the rail. Hold its beam on the sword seal to open the hidden display."
         }
       ]
     },
@@ -756,19 +756,35 @@
         }
       ]
     },
-    "sl.display.0": {
+    "sl.display.grip": {
       "once": false,
-      "when": [],
+      "when": [
+        {
+          "flag": "sl.display.open",
+          "is": false
+        }
+      ],
       "effects": [
         {
-          "type": "sequence",
-          "id": "sl.display",
-          "value": 0,
-          "solution": [
-            0,
-            1,
-            2
-          ]
+          "type": "item",
+          "id": "sl.display.grips",
+          "amount": 1
+        }
+      ]
+    },
+    "sl.display.align": {
+      "once": true,
+      "when": [
+        {
+          "flag": "sl.display.open",
+          "is": false
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "sl.display.open",
+          "value": true
         }
       ]
     },
@@ -836,22 +852,6 @@
         }
       ]
     },
-    "sl.display.1": {
-      "once": false,
-      "when": [],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "sl.display",
-          "value": 1,
-          "solution": [
-            0,
-            1,
-            2
-          ]
-        }
-      ]
-    },
     "sl.vow.1": {
       "once": false,
       "when": [
@@ -912,22 +912,6 @@
             1,
             2,
             3
-          ]
-        }
-      ]
-    },
-    "sl.display.2": {
-      "once": false,
-      "when": [],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "sl.display",
-          "value": 2,
-          "solution": [
-            0,
-            1,
-            2
           ]
         }
       ]

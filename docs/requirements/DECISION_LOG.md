@@ -870,3 +870,7 @@ Oliver's continuing all-around Bladefall quality request includes his standing e
 ## [Codex | 2026-10-10] Snowbound optional camp action variety | U-2026-10-10-SNOW-CAMP
 
 Under Oliver's existing authorization to improve live campaign levels, retire the optional Snowbound 1-3-2 marker sequence. Use a real, recoverable ridge climb and a visible survey release to reach the same Winter Cloak chest and FF-02 shard. Keep the main route and story/reward IDs, share the open flag in co-op while collecting shards personally, and load previous saves safely. Automated play checks confirm reachability and state; human playtesting decides final challenge and visual appeal.
+
+## [Codex | 2026-10-10] Sky Library hidden display reflector | U-2026-10-10-LIBRARY-REFLECTOR
+
+Continuing Oliver's live-campaign quality request, replace the optional Sky Library's three adjacent symbol presses with a visible reflector that the player slides along a rail while watching its light sweep toward the sword seal. Keep `sl.display.open`, SP-04, main progression, the other optional branches, host-owned co-op sharing and old completed saves; discard only old partial button order. Verify normal movement, overshoot/recovery, release, co-op guest control, checkpoint banking and normal-camera visual cause/effect. See docs/design/SKY_LIBRARY_REFLECTOR_2026-10-10.md. No custom SFX work.

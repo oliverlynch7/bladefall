@@ -1085,7 +1085,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./brute-encounter.js?v=2000"></script>
 <script src="./marksman-encounter.js?v=2004"></script>
 <script src="./story-state.js?v=2106-2046"></script>
-<script src="./campaign-patrols.js?v=2044"></script>
+<script src="./campaign-patrols.js?v=2152"></script>
 <script src="./campaign-elites.js?v=2057"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./hollow-cliffs.js?v=2002"></script>
@@ -1105,7 +1105,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./palace-courtyard.js?v=2047"></script>
 <script src="./dragon-rescue.js?v=2024"></script>
 <script src="./dragon-combat.js?v=2024"></script>
-<script src="./sky-library.js?v=2045"></script>
+<script src="./sky-library.js?v=2152"></script>
 <script src="./marble-guardian.js?v=2019"></script>
 <script src="./hydra.js?v=2049"></script>
 <script src="./shipwreck-shore.js?v=2151"></script>
@@ -1144,7 +1144,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.151.0-furnace-counterweights';
+const VERSION3D='2.152.0-library-reflector';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3190,7 +3190,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2166').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2167').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};if(inWindingCliffs())configureCliffCode();if(inShipwreck())configureShoreCode();return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -3240,9 +3240,10 @@ function briarReceive(request,actor,position){
  if(!inBriarStory()||!briarBook||(MP.active&&!MP.isHost))return false;
  const s=adventureStoryState(),party=MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];
  if(!party.includes(actor))return false;
- const r=BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:actor!==briarId()||mode==='play'||!!backgroundMenuMode,npcs:G.storyNpcs||[],objects:briarObjects(),party});
- if(r.changed){if(MP.active&&JSON.stringify(s.quests)!==JSON.stringify(r.state.quests))toast('Shared quest progress updated');journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;briarSync();
-  if(request.event.type==='world'){
+ const gripBusy=inSkyLibrary()&&request?.event?.type==='world'&&request.event.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==actor;
+ const r=gripBusy?{changed:false,state:s}:BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:actor!==briarId()||mode==='play'||!!backgroundMenuMode,npcs:G.storyNpcs||[],objects:briarObjects(),party});
+ if(r.changed){if(MP.active&&JSON.stringify(s.quests)!==JSON.stringify(r.state.quests))toast('Shared quest progress updated');journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;if(inSkyLibrary()&&request.event.type==='world'&&request.event.key==='sl.display.grip')BFSkyLibrary.grip(G,actor);briarSync();
+  if(request.event.type==='world'&&request.event.key!=='sl.display.grip'){
    const key=request.event.key,event=briarBook.events[key],notesChanged=JSON.stringify(s.notes)!==JSON.stringify(r.state.notes);
    if(notesChanged){const note=Object.entries(r.state.notes).filter(([id,n])=>JSON.stringify(n)!==JSON.stringify(s.notes[id])).at(-1)?.[1];if(note)toast('Journal updated · '+note.title);}
    const o=(G.storyObjects||[]).find(o=>o.key===key),puzzle=BFPuzzleFeedback.notice(event,s,r.state,o,request.event.id);
@@ -3274,13 +3275,14 @@ function briarSendPending(){if(!briarPending||!MP.active||MP.isHost)return;try{M
 function briarApply(packet,place=false,ack){
  if(!packet||!(isCampaignAdventure()||G?.riftHall||G?.riftMentor||inReturnHub())||(packet.scene||'campaign')!==(G.riftMentor?'class-trial':inReturnHub()?'hub-return':G.riftHall?'rift-hall':'campaign')||(G.riftMentor&&packet.trialSession!==G.trialSession)||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
  if(!place&&(G._storyEpoch!==packet.epoch||packet.state.revision<(G.storyState?.revision||0)))return;
+ const displayWasOpen=inSkyLibrary()&&!!G.storyState?.flags['sl.display.open'];
  if(place&&G.riftHall)G._hallAssembly=packet.state.items?.['hall.assembly']||0;
   if(!place&&JSON.stringify(G.storyState?.quests||{})!==JSON.stringify(packet.state.quests||{}))toast('Your teammate updated a shared quest');
   G.returnActive=packet.returnActive||[];G._storyEpoch=packet.epoch;G._canyonGuards=packet.canyonGuards||{};G._cliffGuards=packet.cliffGuards;G._briarGuards=packet.guards;G._rescueGuards=packet.rescueGuards;G.storyState=checkpointClone(packet.state);if(G.kingFinal&&packet.finalStatus){Object.assign(G.boss,packet.finalStatus);prepareFinalScene();}
  if(briarPending&&(ack===briarPending.request.event.id||packet.state.events[briarPending.request.event.id]||packet.state.revision>briarPending.request.event.revision))briarPending=null;
  if(G.riftMentor){G.trialKills=Math.max(0,Number(packet.trialKills)||0);if(G.storyState.flags['trial.proved']&&G.storyNpcs[0]&&G.portalPos)Object.assign(G.storyNpcs[0],trialMentorSpot(G.portalPos));}
  if(place)journalNoticeSync(true);
- briarSync();presentStoryNotice(packet.notice,place);
+ briarSync();presentStoryNotice(packet.notice,place);if(!place&&inSkyLibrary()&&!displayWasOpen&&G.storyState.flags['sl.display.open'])toast('The sword seal opens the hidden display.');
  if(inLongAscent())G.ascent.remote=packet.ascentStatus;
  if(inCastleGates())G.castleGates.remote=packet.castleStatus;
  if(inSkyLibrary())G.library.remote=packet.libraryStatus;
@@ -3336,14 +3338,14 @@ function briarSync(){
  if(mode==='npc')musicForScene();
  questUpdate();hudUpdate();
 }
-function briarDisconnect(actor){if(inBriarStory()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
+function briarDisconnect(actor){if(inSkyLibrary()&&G.library?.gripOwner===actor)G.library.gripOwner=null;if(inBriarStory()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
 function briarInteract(){
  if(!inBriarStory())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65)return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={x:o.x,z:o.z,y:(o.y||0)+62,label,act};}};
  if(inLongAscent()&&G.ascent.lift)for(const y of [250,1250])consider({x:1420,z:-170,y,range:110},y===250?'Ride service lift up':'Ride service lift down',()=>BFLongAscent.ride(G,y===250));
  if(inThunderCliffs()&&G.thunder.lift)for(const y of [40,340])consider({x:-300,z:-650,y,range:115},y===40?'Ride lift up':'Ride lift down',()=>BFThunderCliffs.ride(G,y===40));
  for(const n of G.storyNpcs||[])if((G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>inReturnHub()&&n.open&&!n.direct?openNpcTalk(n):briarRequest('open',{npc:n.id}));
- if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]){const ready=o.available&&BFStoryState.matches(s,briarBook.events[o.key]?.when);consider(o,ready?o.label:'Inspect · '+o.label,()=>{if(ready)briarRequest('world',{key:o.key});else{const text=o.blockedText||(o.available?'This may be useful later. Follow your current task, then return here.':'This needs another step first. Check the current task in your journal.');BFJournalNotice.push({id:'inspect.'+o.key,kind:'Not ready yet',title:o.label,text});toast(text);}});}
+ if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]){const ready=o.available&&BFStoryState.matches(s,briarBook.events[o.key]?.when),gripBusy=o.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==briarId();consider(o,gripBusy?'Reflector in use by ally':ready?o.label:'Inspect · '+o.label,()=>{if(gripBusy){toast('Your ally is moving the reflector.');return;}if(ready)briarRequest('world',{key:o.key});else{const text=o.blockedText||(o.available?'This may be useful later. Follow your current task, then return here.':'This needs another step first. Check the current task in your journal.');BFJournalNotice.push({id:'inspect.'+o.key,kind:'Not ready yet',title:o.label,text});toast(text);}});}
  return best;
 }
 function configureCliffCode(){if(!briarBook||!G.cliffs)return;for(const n of [1,2,3])briarBook.events['hp.code.'+n].effects[0].solution=[...G.cliffs.code];}
@@ -3427,6 +3429,7 @@ function buildBrokenWalls(){
  briarPending=null;G._storyEpoch=null;briarEpoch();briarSync();
 }
 function finishKeepEvent(key){if(!inBrokenWalls()||MP.active&&!MP.isHost)return;const r=BFStoryState.transact(adventureStoryState(),briarBook,{id:briarEpoch()+':'+key,type:'world',key});if(r.changed){G.storyState=r.state;briarSync();}}
+function finishLibraryDisplay(){if(!inSkyLibrary()||MP.active&&!MP.isHost||!briarBook)return;const r=BFStoryState.transact(adventureStoryState(),briarBook,{id:briarEpoch()+':sl.display.align',type:'world',key:'sl.display.align'});if(r.changed){G.storyState=r.state;briarSync();toast('The sword seal opens the hidden display.');if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket()});}catch(e){}}}
 function drawBrokenWalls(t){if(inBrokenWalls())BFBrokenWalls.draw({G,state:adventureStoryState(),bx,remote:G.keep.remote},t);}
 function buildLostCanyon(){
  BFLostCanyon.build({G,seg:vseg,plat:vplat,solid:vsolid,spawn:spawnEnemy});
@@ -14595,7 +14598,7 @@ const MP={
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
-    const msg={t:'state',players:all, en:this.enemySnap(), ek,social:window.BFSocial?.snapshot()};if(G?.escape)msg.prison=BFPrisonRun.packet();if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
+    const msg={t:'state',players:all, en:this.enemySnap(), ek,social:window.BFSocial?.snapshot()};if(G?.escape)msg.prison=BFPrisonRun.packet();if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(inSkyLibrary())msg.libraryLens=BFSkyLibrary.status(G);if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
     const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }window.BFSocial?.reset();
@@ -14662,7 +14665,7 @@ const MP={
       ARENA_LOADOUT.map=d.map||'flat'; if(d.fair && d.ld){ Object.assign(ARENA_LOADOUT,d.ld); ARENA_LOADOUT.fair=true; }
       if(!IN_ARENA){ try{ enterArena(); }catch(e){} } }
     else if(d.t==='teams'){ this.teamMap=d.map||{}; this.teams=!!d.on; }
-    else if(d.t==='state'){if(d.social)window.BFSocial?.apply(d.social);if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return; const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
+    else if(d.t==='state'){if(d.social)window.BFSocial?.apply(d.social);if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return;if(inSkyLibrary()&&d.libraryLens)G.library.remote=d.libraryLens; const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
       if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
@@ -15673,7 +15676,7 @@ function updateWorld(dt){
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
   if(inLongAscent())BFLongAscent.tick(G,dt);
-  if(inCastleGates())BFCastleGates.tick(G,adventureStoryState(),dt,!MP.active||MP.isHost,spawnEnemy,toast);if(inSkyLibrary())BFSkyLibrary.tick(G,dt,!MP.active||MP.isHost);if(inThunderCliffs())BFThunderCliffs.tick(G,dt,toast,(d,o)=>hurtPlayer(d,o.x,o.z,o.name));if(G.hydraArena)updateHydra(dt);
+  if(inCastleGates())BFCastleGates.tick(G,adventureStoryState(),dt,!MP.active||MP.isHost,spawnEnemy,toast);if(inSkyLibrary()){const owner=G.library.gripOwner,peer=MP.peers[owner],operator=owner===briarId()?G.p:peer&&peer.zone===G.zone&&peer.area===G.area?{...peer,x:peer.tx,y:peer.ty,z:peer.tz}:null;if(BFSkyLibrary.tick(G,dt,!MP.active||MP.isHost,operator))finishLibraryDisplay();}if(inThunderCliffs())BFThunderCliffs.tick(G,dt,toast,(d,o)=>hurtPlayer(d,o.x,o.z,o.name));if(G.hydraArena)updateHydra(dt);
   if(inShipwreck()){G.shore.clock+=dt;voyageTick(dt);}
   if(inGreatFurnace())BFGreatFurnace.tick({G,state:adventureStoryState(),toast,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,o.name)},dt);
   if(inIronHalls())BFIronHalls.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,o.name)},dt);

@@ -24,7 +24,7 @@ const camps={
  '5.0':{place:'upper shipwreck',target:'wreck raiders',at:[1390,-1800,350],near:[1390,-1800,350],radius:380},
  '5.1':{place:'lower tide pools',target:'tide slimes',at:[-400,-4200,320],near:[-400,-4200,320],radius:400},
  '6.0':{place:'western palace garden',target:'Legion garden patrol',at:[-1400,-1900,180],add:[['grunt',-1330,-2100,180],['caster',-1490,-1930,180]]},
- '6.1':{place:'sealed display hall',target:'library patrol',at:[-1330,-4000,440],add:[['grunt',-1220,-4010,440],['caster',-1500,-3900,440]]},
+ '6.1':{place:'sealed display hall',target:'library patrol',at:[-990,-3740,440],add:[['grunt',-925,-3690,440],['caster',-1100,-3800,440]]},
  '7.0':{place:'western castle approach',target:'castle patrol',at:[-1230,-1970,150],near:[-1230,-1970,150],radius:400},
  '7.1':{place:'first high tower landing',target:'tower reinforcements',at:[250,-894,500],near:[250,-894,500],radius:180,allowLanding:true}
 };

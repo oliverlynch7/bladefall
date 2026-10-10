@@ -862,3 +862,7 @@ Continuing Oliver's approved full-scale campaign quality pass, the optional Thun
 ## [Codex | 2026-10-10] Compact campaign hunt discovery | U-2026-10-10-HUNT-NOTICE
 
 To reduce reading fatigue and preserve sight of active combat and traversal, first entry into a repeatable campaign hunt camp gives a brief toast and tracker refresh instead of a large journal overlay. The quest, journal entry, repeat spawns and kill rewards remain unchanged. Browser QA confirms the task still appears and progresses.
+
+## [Codex | 2026-10-10] Guest attack identity | U-2026-10-10-COOP-ATTACK
+
+Oliver's continuing all-around Bladefall quality request includes his standing expectation that class attacks and skill effects work in co-op regardless of host. For this pass, preserve host-owned enemy HP, status damage and deaths, while carrying guest offensive class/weapon context to the host. Use actual-damage receipts for healing and refund basic resource costs when the host rejects a hit. Keep PvP rules, unrelated rewards, saves and custom SFX unchanged. Browser packet tests and prior-save reload passed; remote-network feel remains unverified. See docs/design/COOP_ATTACK_OWNERSHIP_2026-10-10.md.

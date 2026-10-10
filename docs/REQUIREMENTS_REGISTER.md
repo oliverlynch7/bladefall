@@ -1140,3 +1140,7 @@ Oliver requests further all-around improvement to Bladefall. Continue the alread
 ## [Codex | 2026-10-09] Campaign hunt discovery readability
 
 During normal-camera verification, the automatic combat-camp journal notice obscured the route for many seconds. The user's standing preference is concise guidance and minimal reading fatigue while playing. Preserve the optional kill quests, respawns, tracker, journal access and rewards; announce first camp discovery with a short toast rather than a large timed reading panel. See docs/design/CAMPAIGN_HUNT_NOTICE_2026-10-09.md. This does not change the user's hold on custom SFX.
+
+## [Codex | 2026-10-10] Co-op attack ownership follow-up
+
+Oliver requests continued all-around Bladefall improvements; his earlier class/PvP/co-op audit requires player and skill effects to work when either friend hosts. The outstanding audit notes guest offensive class hooks and status damage authority. Preserve host-owned enemy HP/death and receipt-based guest healing while making guest basic identities and elemental/designated effects belong to the attacker rather than the host's class/weapon. Do not change PvP or skill balance as a side effect. See docs/design/COOP_ATTACK_OWNERSHIP_2026-10-10.md. Custom SFX creation remains on hold.

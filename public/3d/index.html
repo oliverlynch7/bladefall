@@ -1144,7 +1144,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.147.0-thunder-tide-crossing';
+const VERSION3D='2.148.0-coop-attack-ownership';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11563,6 +11563,7 @@ function lavaHit(){
    hitboxes/rapid multi-hits from applying full stacks every frame. Bosses build at half rate and never
    fully freeze. Meters are floats; integer stacks = floor(meter). No per-tick entity allocation. */
 const EL_STAT={fire:'burn',ice:'chill',poison:'venom',arcane:'rune',holy:'radiance',void:'corrupt'};
+const STATUS_ORDER=['burn','chill','venom','rune','radiance','corrupt'];
 const STCAP={burn:5,chill:5,venom:6,rune:5,radiance:5,corrupt:5};
 const STCOL={burn:'#ff7a3a',chill:'#7fd6ff',venom:'#86e05a',rune:'#c47bff',radiance:'#ffe9a8',corrupt:'#8f52d6'};
 const STATUS_ICON_SRC={burn:'icons/status-burn.png',chill:'icons/status-chill.png',venom:'icons/status-venom.png',rune:'icons/status-rune-mark.png',radiance:'icons/status-radiance.png',corrupt:'icons/status-corruption.png'};
@@ -11575,29 +11576,35 @@ function statTotal(e){ if(!e.st) return 0; let n=0; for(const k in e.st) n+=e.st
 function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.2:1; return Math.min(2.4,(cd/0.4))*scy*(boss?0.5:1); }
 function statusDamage(e,dmg,flatHeal=0){
  if(e._peer){MP.sendPvp(e._peerId||e.id,dmg,G.p.x,G.p.z,{flatHeal});return;}
+ if(MP.guest()&&e.mid!=null&&!e.dummy&&!e.practice)return; // mirrored enemies never own DoT/death
  e.hp-=dmg;if(e.hp<=0)killEnemy(e);
 }
-function applyStatus(e,el,dmg,w){
+function applyStatus(e,el,dmg,w,owner){
   el=normEl(el); const stat=EL_STAT[el]; if(!stat||e.dummy) return;
   const now=(G&&G.time)||0; e.stcd=e.stcd||{};
   if(now-(e.stcd[stat]||-9)<0.12) return;                    // per-target buildup rate limit (kills full-stack-every-frame)
   e.stcd[stat]=now;
+  if(MP.guest()&&e.mid!=null&&!e.practice){
+    if(G?._guestBasicStatus)G._guestBasicStatus.push({el,dmg});
+    else MP.sendStatus(e.mid,el,dmg,w);
+    return;
+  }
   const st=estat(e); e.stFresh=e.stFresh||{}; e.stFresh[stat]=now;
   e.stDmg=Math.max(e.stDmg||0,dmg||1);                       // representative hit for DoT scaling
   let buildup=buildAmt(w,e.boss);
-  if(G&&G.p&&meta.classId==='mage'&&c2Passive('m_savant')) buildup*=1.15;
-  if(stat==='corrupt'&&G&&G.p&&meta.classId==='reaper'&&c2Passive('x_corrupt')) buildup*=1.25;
+  if(owner?.guest?owner.cid==='mage'&&hasGuestPerk(owner,'m_savant'):G&&G.p&&meta.classId==='mage'&&c2Passive('m_savant')) buildup*=1.15;
+  if(stat==='corrupt'&&(owner?.guest?owner.cid==='reaper'&&hasGuestPerk(owner,'x_corrupt'):G&&G.p&&meta.classId==='reaper'&&c2Passive('x_corrupt'))) buildup*=1.25;
   st[stat]=Math.min(STCAP[stat], st[stat]+buildup);
-  if(stat==='burn'   && st.burn>=STCAP.burn)         igniteBurn(e);
+  if(stat==='burn'   && st.burn>=STCAP.burn)         igniteBurn(e,owner);
   else if(stat==='chill' && st.chill>=STCAP.chill)   freezeChill(e);
-  else if(stat==='radiance' && st.radiance>=STCAP.radiance) purifyRadiance(e);
+  else if(stat==='radiance' && st.radiance>=STCAP.radiance) purifyRadiance(e,owner);
   else if(stat==='venom' && st.venom>=3)             e.healCut=0.5;      // heavy Venom chokes enemy healing/regen
   else if(stat==='corrupt' && st.corrupt>=STCAP.corrupt) e.primed=true;  // primed for Rupture (Reaper/void payoff)
 }
 // legacy entry point (skills/projectiles pass el here) -> routes into the stack system, scaled by the current weapon
-function applyElement(e,el,dmg){ applyStatus(e,el,dmg, (G&&G.p)?G.p.weapon:null); }
-function c2ReactionMul(){ return meta.classId==='mage'&&c2Passive('m_savant')?1.15:1; }
-function igniteBurn(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.2:2.2)*c2ReactionMul()); e.st.burn=0;
+function applyElement(e,el,dmg,owner){ applyStatus(e,el,dmg, owner?.guest?owner.weapon:(G&&G.p)?G.p.weapon:null,owner); }
+function c2ReactionMul(owner){ return owner?.guest?owner.cid==='mage'&&hasGuestPerk(owner,'m_savant')?1.15:1:meta.classId==='mage'&&c2Passive('m_savant')?1.15:1; }
+function igniteBurn(e,owner){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.2:2.2)*c2ReactionMul(owner)); e.st.burn=0;
   skillRing(e.x,e.z,'#ffd07a','#ff7a3a',110); burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',16); addText(e.x,e.y+e.h+12,e.z,'IGNITE','#ff7a3a',true);
   statusDamage(e,dmg); for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){ statusDamage(o,Math.round(dmg*0.4)); estat(o).burn=Math.min(STCAP.burn,o.st.burn+1); } }   // combustion splash
   if(e.hp<=0) killEnemy(e); }
@@ -11605,12 +11612,13 @@ function freezeChill(e){
   if(e.boss){ e.slowT=Math.max(e.slowT,2.2); e.stunT=Math.max(e.stunT,0.4); e.st.chill=2.5; addText(e.x,e.y+e.h+12,e.z,'DEEP CHILL','#7fd6ff'); }  // bosses stagger + heavy slow, never full-freeze
   else if((e.freezeCd||0)<=0){ e.stunT=Math.max(e.stunT,1.2); e.slowT=Math.max(e.slowT,1.5); e.freezeCd=3.0; e.st.chill=1; addText(e.x,e.y+e.h+12,e.z,'FROZEN','#e3faff',true); burst(e.x,e.y+e.h*0.5,e.z,'#e3faff',12); }  // freeze-immunity window stops permanent CC loops
   else e.st.chill=STCAP.chill-1; }
-function purifyRadiance(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.0:1.8)*c2ReactionMul()); e.st.radiance=0; e.exposed=4;
+function purifyRadiance(e,owner){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.0:1.8)*c2ReactionMul(owner)); e.st.radiance=0; e.exposed=4;
   skillRing(e.x,e.z,'#fff8d6','#ffe9a8',115); burst(e.x,e.y+e.h*0.6,e.z,'#ffe9a8',16); addText(e.x,e.y+e.h+12,e.z,'PURIFY','#ffe9a8',true);
   statusDamage(e,dmg); }
 // designated attacks (Reaper scythe finisher / charged scythe / void charge) rupture a primed target
-function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corrupt)) return 0;
-  const base=e.stDmg||10, mastery=(meta.classId==='reaper'&&c2Passive('x_corrupt'))?1.15:1, dmg=Math.round(base*(e.boss?1.4:2.5)*mastery); e.primed=false; if(e.st) e.st.corrupt=0;
+function ruptureCorrupt(e,src,owner){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corrupt)) return 0;
+  const mastered=owner?.guest?owner.cid==='reaper'&&hasGuestPerk(owner,'x_corrupt'):meta.classId==='reaper'&&c2Passive('x_corrupt');
+  const base=e.stDmg||10, mastery=mastered?1.15:1, dmg=Math.round(base*(e.boss?1.4:2.5)*mastery); e.primed=false; if(e.st) e.st.corrupt=0;
   skillRing(e.x,e.z,'#d69bff','#8f52d6',120); burst(e.x,e.y+e.h*0.5,e.z,'#8f52d6',18); addText(e.x,e.y+e.h+12,e.z,'RUPTURE','#d69bff',true);
   /* CORRUPTION MASTERY (reaper r9 a): "Rupturing a corrupted enemy corrupts everything near it."
      The id was READ before this — twice, for +25% buildup (applyStatus) and the +15% above — so
@@ -11638,24 +11646,29 @@ function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corru
      working and not: applyStatus's buildup is buildAmt, which scales with the WEAPON'S swing speed
      and can hand over a fraction, and a fraction of a corrupt meter primes nothing. `had+1` rather
      than `1` so repeated ruptures build a pack up toward the cap the way repeated hits do. */
-  if(G&&G.p&&meta.classId==='reaper'&&c2Passive('x_corrupt')){
+  if(G&&G.p&&mastered){
     let spread=0;
     for(const o of G.enemies){ if(o===e||o.dead||o.dummy) continue;
       if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){
         const had=(o.st&&o.st.corrupt)||0;
-        applyElement(o,'void',e.stDmg||0);
+        applyElement(o,'void',e.stDmg||0,owner);
         const st=estat(o); st.corrupt=Math.min(STCAP.corrupt,Math.max(st.corrupt,had+1));
         if(st.corrupt>=STCAP.corrupt) o.primed=true;    // applyStatus's own cap branch, verbatim
         spread++; } }
     if(spread){ skillRing(e.x,e.z,'#8f52d6','#3d175e',120); addText(e.x,e.y+e.h+30,e.z,'CORRUPTION SPREADS','#d69bff',true); }
   }
-  const p=G.p,heal=p?Math.max(3,effMaxHp(p)*.04):0;statusDamage(e,dmg,heal);if(p&&!e._peer)classHeal(p,heal);return dmg; }
+  const p=G.p,heal=owner?.guest?owner.healFlat||3:p?Math.max(3,effMaxHp(p)*.04):0;statusDamage(e,dmg,heal);if(owner?.guest)src._guestHeal=(src._guestHeal||0)+heal;else if(p&&!e._peer)classHeal(p,heal);return dmg; }
 // consume Rune Marks on a designated attack (charged/skill) for a burst — more marks, bigger payoff
-function consumeRunes(e){ if(!e.st||e.st.rune<1) return 0; const marks=Math.floor(e.st.rune), base=e.stDmg||8, dmg=Math.round(marks*base*0.5*c2ReactionMul());
+function consumeRunes(e,owner){ if(!e.st||e.st.rune<1) return 0; const marks=Math.floor(e.st.rune), base=e.stDmg||8, dmg=Math.round(marks*base*0.5*c2ReactionMul(owner));
   e.st.rune=0; skillRing(e.x,e.z,'#e1b9ff','#c47bff',90); addText(e.x,e.y+e.h+12,e.z,'RUNE ×'+marks,'#c47bff',true); statusDamage(e,dmg); return dmg; }
 // per-enemy status upkeep (DoT + decay + chill slow factor). Returns the movement-speed multiplier from Chill.
 function statusTick(e,dt){
   if(!e.st){ return 1; } const now=(G&&G.time)||0, st=e.st;
+  if(MP.guest()&&e.mid!=null&&!e.practice){
+    if(st.burn>0.01&&Math.random()<0.25)G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:'#ff7a3a',sz:2});
+    if(st.venom>0.01&&Math.random()<0.18)G.particles.push({x:e.x,y:e.y+Math.random()*e.h*0.6,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#86e05a',sz:2});
+    const ch=Math.floor(st.chill);return ch>0?1-Math.min(0.5,ch*0.1):1;
+  }
   if(e.freezeCd>0) e.freezeCd-=dt;
   // DoT: Burn + Venom, scaled by stacks and the remembered hit
   if(st.burn>0.01){ e.stAcc=(e.stAcc||0)+Math.floor(st.burn)*(e.stDmg||6)*0.055*dt;
@@ -12013,7 +12026,7 @@ const SKILL_FX={
       if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
     burst(p.x,8,p.z,'#9fe0ff',10); },
   mark(p,ok,am){ const t=projectileAimTarget(p,800); if(!t){ toast('No target in sight'); return 'refund'; }
-    t.markT=8; addText(t.x,t.h+22,t.z,'MARKED','#ffd24a',true); SFX.pickup(); },
+    t.markT=8;t.markOwner=MP.active?MP.myId:'solo';if(MP.guest()&&t.mid!=null)MP.sendEnemyEffect(t.mid,'mark');addText(t.x,t.h+22,t.z,'MARKED','#ffd24a',true); SFX.pickup(); },
   bolt(p,ok,am){ const w=p.weapon, el=ok?(w&&w.el):null, col=elementColor(w&&w.el)||'#c9a6ff';
     const t=projectileAimTarget(p,820); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
     const sp=560, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
@@ -12104,7 +12117,7 @@ const SKILL_FX={
     for(let i=0;i<10;i++) G.particles.push({x:p.x+(Math.random()-0.5)*80,y:8+Math.random()*40,z:p.z+(Math.random()-0.5)*80,vx:0,vy:14,vz:0,life:1.2,color:'#9aa0ac',sz:5});
     SFX.dodge(); toast('💨 Vanished'); },
   deathmark(p,ok,am){ let n=0; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>260+e.r) continue;
-      e.markExplode=(p.weapon?p.weapon.dmg:10)*effPower(p)*2*am; e.markT=8; n++; addText(e.x,e.y+e.h+14,e.z,'✖','#ff5a3a',true); }
+      e.markExplode=(p.weapon?p.weapon.dmg:10)*effPower(p)*2*am; e.markT=8;e.markOwner=MP.active?MP.myId:'solo';if(MP.guest()&&e.mid!=null)MP.sendEnemyEffect(e.mid,'deathmark',e.markExplode);n++; addText(e.x,e.y+e.h+14,e.z,'✖','#ff5a3a',true); }
     if(!n){ toast('No targets to mark'); return 'refund'; } SFX.growl(1); toast('✖ '+n+' marked — they burst on death'); },
   // EXECUTIONER (Reaper path B) — finish them
   execute(p,ok,am){ const t=projectileAimTarget(p,150); if(!t){ toast('Nothing in sight'); return 'refund'; }
@@ -12290,7 +12303,7 @@ function c2OnKill(p,e){
      is here with the other kill riders (war_feast's 5% two lines down is the same shape).
      A mark is `e.markT`, which BOTH of the ranger's rank-8 options set to 8 (SKILL_FX.mark 9860,
      SKILL_FX.deathmark 9951), so this rank-9 passive always has a source in its own kit. */
-  if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&e&&(e.markT||0)>0){
+  if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&e&&(e.markT||0)>0&&(!e.markOwner||e.markOwner===(MP.active?MP.myId:'solo'))){
     const h=Math.max(1,Math.round(effMaxHp(p)*.04)); const pre=p.hp;
     p.hp=Math.min(effMaxHp(p),p.hp+h);
     if(p.hp>pre){ addText(p.x,p.y+p.h+22,p.z,'BOUNTY +'+(p.hp-pre),'#ffd24a',true,'heal'); try{hudUpdate();}catch(_){} }
@@ -12520,7 +12533,7 @@ SKILL_FX.war_bolt=function(p,ok,am){const w=p.weapon,t=projectileAimTarget(p,820
   G.projectiles.push({owner:'player',x:p.x,y:p.y+25,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:13,color:'#9d55ff',shape:'orb',glow:1,trail:'#4b176e',dmg:(w?w.dmg:10)*effPower(p)*1.25*am*(ok?1:OFFCLASS_MUL),kb:110,pierce:1,el:'void',life:1.3,hitSet:[]});SFX.magic('void');};
 SKILL_FX.war_lance=function(p,ok,am){const w=p.weapon,t=projectileAimTarget(p,900);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);const sp=880;
   G.projectiles.push({owner:'player',x:p.x,y:p.y+27,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:9,color:'#ff5475',shape:'lance',glow:1,trail:'#7a1835',dmg:(w?w.dmg:10)*effPower(p)*3.0*am*(ok?1:OFFCLASS_MUL),kb:260,pierce:5,el:'void',life:1.25,hitSet:[]});skillRing(p.x,p.z,'#9a1f48','#2b0a18',70);SFX.magic('void');};
-SKILL_FX.war_curse=function(p,ok,am){let hit=0;skillRing(p.x,p.z,'#a458e8','#36104f',245);for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>225+e.r)continue;e.warCurseT=7;e.slowT=Math.max(e.slowT||0,1.2);hit++;addText(e.x,e.y+e.h+12,e.z,'CURSED','#d78cff');}if(!hit)return 'refund';SFX.magic('void');};
+SKILL_FX.war_curse=function(p,ok,am){let hit=0;skillRing(p.x,p.z,'#a458e8','#36104f',245);for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>225+e.r)continue;e.warCurseT=7;e.warCurseOwner=MP.active?MP.myId:'solo';e.slowT=Math.max(e.slowT||0,1.2);if(MP.guest()&&e.mid!=null)MP.sendEnemyEffect(e.mid,'curseSlow');hit++;addText(e.x,e.y+e.h+12,e.z,'CURSED','#d78cff');}if(!hit)return 'refund';SFX.magic('void');};
 SKILL_FX.war_drain=function(p,ok,am){let t=null,b=-1;for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>620)continue;if(e.hp>b){b=e.hp;t=e;}}if(!t)return 'refund';
   const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.0*am*(ok?1:OFFCLASS_MUL),before=p.hp,previous=G._hitHealRatio;
   try{G._hitHealRatio=.22;hitEnemy(t,dmg,p,80,0,'void');}finally{G._hitHealRatio=previous;}
@@ -12531,7 +12544,7 @@ SKILL_FX.war_orb=function(p,ok,am){const t=projectileAimTarget(p,720);if(!t)retu
   for(const e of combatTargets()){if(e.dead||!e.active||e.dummy)continue;const d=dXZ(e.x,e.z,tx,tz);if(d>185+e.r||losBlocked(tx,tz,e.x,e.z))continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(tx-e.x)/(d||1)*360;e.hurtKbZ=(tz-e.z)/(d||1)*360;e.slowT=Math.max(e.slowT||0,2);}SFX.magic('void');};
 SKILL_FX.war_storm=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*.68*am*(ok?1:OFFCLASS_MUL);p._tmpVoid=1;skillRing(p.x,p.z,'#aa4cff','#2b0b40',230);SFX.magic('void');};
 SKILL_FX.war_final=function(p,ok,am){let t=null,b=-1;for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>760)continue;if(e.hp>b){b=e.hp;t=e;}}if(!t)return 'refund';
-  t.warCurseT=Math.max(t.warCurseT||0,7);t.warBurstT=1.0;t.warBurstDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*5.0*am*(ok?1:OFFCLASS_MUL);t.warBurstSrc=p;skillRing(t.x,t.z,'#ff5475','#54112d',150);addText(t.x,t.y+t.h+24,t.z,'FINAL CURSE','#ff7ca0',true);SFX.magic('void');};
+  t.warCurseT=Math.max(t.warCurseT||0,7);t.warCurseOwner=MP.active?MP.myId:'solo';if(MP.guest()&&t.mid!=null)MP.sendEnemyEffect(t.mid,'curse');t.warBurstT=1.0;t.warBurstDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*5.0*am*(ok?1:OFFCLASS_MUL);t.warBurstSrc=p;skillRing(t.x,t.z,'#ff5475','#54112d',150);addText(t.x,t.y+t.h+24,t.z,'FINAL CURSE','#ff7ca0',true);SFX.magic('void');};
 // Skylancer — movement and attacks are one continuous aerial loop. Launch skills create
 // height, air skills steer or fire, and dive skills turn the eventual landing into damage.
 SKILL_FX.sky_rise=function(p,ok,am){const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.25*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#bcecff','#ffffff',150);
@@ -12926,6 +12939,40 @@ function classHeal(p,amount){
  if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0||!Number.isFinite(amount)||amount<=0)return 0;
  const before=p.hp;p.hp=Math.min(effMaxHp(p),p.hp+amount);return p.hp-before;
 }
+const COOP_ATTACK_PERKS=['r_longshot','r_closeq','pir_deadly','pir_brutal','chr_slow','chr_freeze','necro_pest','war_deep','m_savant','x_corrupt'];
+function coopPerkBits(){let bits=0;for(let i=0;i<COOP_ATTACK_PERKS.length;i++)if(c2Passive(COOP_ATTACK_PERKS[i]))bits|=1<<i;return bits;}
+function hasGuestPerk(owner,id){const i=COOP_ATTACK_PERKS.indexOf(id);return i>=0&&!!(owner.bits&(1<<i));}
+function guestHitOffense(e,dmg,kb){
+ const p=G.p,cid=meta.classId,designated=!!G._desig;
+ const owner={guest:true,cid,bits:coopPerkBits(),designated,weapon:p.weapon?{cd:p.weapon.cd,art:p.weapon.art}:null};
+ const beforeHp=p.hp,beforeMana=p.mana,beforeBlood=p._bloodOwed||0;
+ if(!designated){
+   if(cid==='warrior'&&c2Passive('w_swift')){p._swiftHits=(p._swiftHits||0)+1;if(p._swiftHits%4===0)dmg*=1.25;}
+   if(cid==='mage'&&c2def('mage')&&p.weapon?.sch==='mag')gainMana(p,2,false);
+   if(cid!=='pyromancer'&&CLASS_BASIC[cid]){
+     G._guestBasicStatus=[];
+     try{const result=CLASS_BASIC[cid](p,e,dmg);if(typeof result==='number')dmg=result;}
+     catch(err){console.warn('Guest basic hook',err);}
+     finally{owner.extraStatus=G._guestBasicStatus;delete G._guestBasicStatus;}
+   }
+ }
+ if(cid==='reaper'&&c2Passive('x_favor')&&(e.elite||e.boss)&&(G.time-(p._favorHitT||-9))>=.75){p._favorHitT=G.time;gainMana(p,1,false);}
+ if((p._noRetreatT||0)>0)dmg*=2;
+ if(cid==='paladin'&&designated&&c2Passive('pal_holypow')&&p._oath===e)dmg*=2;
+ if(!e._peer)dmg*=tPlayerDmg();
+ if(cid==='monk'&&c2def('monk')&&!e.dead){const cap=classState('monk').rank>=10?7:5;p.focusStacks=Math.min(cap,(p.focusStacks||0)+1);p.focusT=c2Passive('mon_focused')?5:4;}
+ if(cid==='stormcaller'&&c2def('stormcaller')&&!e.dead){p.staticStacks=Math.min(5,(p.staticStacks||0)+1);p.staticT=4;}
+ owner.stun=Math.max(0,Math.min(2,e._guestStun||0));delete e._guestStun;
+ return {dmg,kb,owner,hpDelta:p.hp-beforeHp,manaDelta:p.mana-beforeMana,bloodDelta:(p._bloodOwed||0)-beforeBlood};
+}
+function guestOwnerFromPacket(raw,peer){
+ const cid=raw&&CLASSES[raw.cid]?raw.cid:null,w=raw?.weapon;
+  return {guest:true,id:peer?.id||null,cid,bits:Number.isInteger(raw?.bits)?raw.bits&1023:0,designated:!!raw?.designated,
+   weapon:w&&Number.isFinite(w.cd)?{cd:Math.max(.1,Math.min(2.4,w.cd)),art:w.art==='scythe'?'scythe':''}:null,
+   stun:Number.isFinite(raw?.stun)?Math.max(0,Math.min(2,raw.stun)):0,
+   extraStatus:Array.isArray(raw?.extraStatus)?raw.extraStatus.slice(0,2).filter(s=>EL_STAT[normEl(s?.el)]&&Number.isFinite(s?.dmg)&&s.dmg>0).map(s=>({el:normEl(s.el),dmg:Math.min(100000,s.dmg)})):[],
+   healFlat:Math.max(3,Math.min(400,(peer?.hpm||100)*.04))};
+}
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
  if(src?.projSrc&&!src.pet)src=G.p;
 
@@ -12971,7 +13018,8 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      making projectiles satisfy THAT would ship the largest balance change in the game as a side
      effect of a netcode fix. A separate marker keeps the two apart. */
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
-    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0});
+    const offense=src===G.p?guestHitOffense(e,dmg,kb):{dmg,kb,owner:{guest:true,cid:null,bits:0,designated:false,weapon:null}};dmg=offense.dmg;kb=offense.kb;
+    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0});
     if(e.prisonFoe)dmg=BFPrisonCombat.guardDamage(e,src,dmg);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
@@ -12999,13 +13047,30 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     }
     if(meta.classId==='necromancer'&&c2Passive('necro_pest')&&(e.st?.venom||0)>0)dmg*=1.20;
   }
+  const guestOwner=src?._guestCtx;
+  if(guestOwner){
+    if(guestOwner.cid==='ranger'){
+      if(hasGuestPerk(guestOwner,'r_longshot')&&dXZ(src.x,src.z,e.x,e.z)>=280)dmg*=1.12;
+      if(hasGuestPerk(guestOwner,'r_closeq')&&!guestOwner.designated&&dXZ(src.x,src.z,e.x,e.z)<160)kb=(kb||0)+180;
+    }
+    if(guestOwner.cid==='pirate'){
+      if(hasGuestPerk(guestOwner,'pir_deadly')&&!guestOwner.designated)dmg*=1.15;
+      if(hasGuestPerk(guestOwner,'pir_brutal')&&e.hp<e.maxHp*.5)dmg*=1.20;
+    }
+    if(guestOwner.cid==='chronomancer'){
+      if(hasGuestPerk(guestOwner,'chr_slow')&&(e.slowT||0)>0)dmg*=1.20;
+      if(hasGuestPerk(guestOwner,'chr_freeze')&&guestOwner.designated)e.slowT=Math.max(e.slowT||0,1.5);
+    }
+    if(guestOwner.cid==='necromancer'&&hasGuestPerk(guestOwner,'necro_pest')&&(e.st?.venom||0)>0)dmg*=1.20;
+  }
   let mod=elemMod(el,e.element);
   if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}if(meta.classId==='mage'&&c2def('mage')&&src.weapon&&src.weapon.sch==='mag')gainMana(src,2,false);}
   if(src===G.p&&meta.classId==='reaper'&&c2Passive('x_favor')&&(e.elite||e.boss)&&(G.time-(src._favorHitT||-9))>=.75){src._favorHitT=G.time;gainMana(src,1,false);}
   if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
-  if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
-  if(meta.classId==='warlock'&&(e.warCurseT||0)>0)dmg*=c2Passive('war_deep')?1.30:1.15;
+  if(e.markT>0&&((src===G.p&&(!e.markOwner||e.markOwner===(MP.active?MP.myId:'solo')))||(guestOwner?.id&&guestOwner.id===e.markOwner)))dmg*=1.4; // Hunter's Mark belongs to its caster
+  if(src===G.p&&meta.classId==='warlock'&&(e.warCurseT||0)>0&&(!e.warCurseOwner||e.warCurseOwner===(MP.active?MP.myId:'solo')))dmg*=c2Passive('war_deep')?1.30:1.15;
+  if(guestOwner?.cid==='warlock'&&(e.warCurseT||0)>0&&guestOwner.id===e.warCurseOwner)dmg*=hasGuestPerk(guestOwner,'war_deep')?1.30:1.15;
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
     if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
@@ -13087,7 +13152,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
   addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
   burst(e.x,e.y+e.h*0.5,e.z,e.color,5);
-  if(el) applyElement(e,el,dmg);
+  if(el) applyElement(e,el,dmg,guestOwner);
   G.shake=Math.min(G.shake+(e.boss?2:3),9);
   /* ONE impact sound per SWING, not per enemy hit. A2's sibling on the playtest list (A3), asked
      for twice: a single sword arc through three trial enemies fired SFX.hit() three times AND the
@@ -13110,7 +13175,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     weaponImpact(w);                                                        // curated heavy-weapon impact (axe/great/hammer/scythe)
     if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
     else if((e.boss||e.elite) && Math.random()<0.4 && !(w&&/axe|great|hammer|scythe/.test(w.art||''))) playFx('heavyhit',0.85); } // meaty connect on the big foes (skip if a curated impact already played)
-  if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
+  if((src===G.p&&G._desig||guestOwner?.designated)&&!e.dead&&e.hp>0){consumeRunes(e,guestOwner);ruptureCorrupt(e,src,guestOwner);}   // owner class spends Rune Marks + rupture Corruption
   if(lifesteal>0 && src===G.p){                                    // lifesteal heavily nerfed globally; the Reaper keeps a clear edge but is no longer a free full-heal
     const lsMul = meta.classId==='reaper'?0.5:0.3;
     classHeal(G.p,dealt*lifesteal*lsMul); }
@@ -13246,8 +13311,9 @@ function killEnemy(e,weaponKill){
   if(e.elite&&meta.classId==='reaper'&&c2Passive('x_favor')){ const h=Math.max(1,Math.round(effMaxHp(G.p)*.08)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h); addText(G.p.x,G.p.y+72,G.p.z,'DEATH’S FAVOR +'+h,'#c47bff',true,'heal'); }
   { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
     if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
-  if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // Death Mark: burst on death
-    for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
+  if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // host alone owns Death Mark's burst damage; guests still see the ring
+    if(!(MP.guest()&&e.mid!=null)){const src=e.markBurstOwner?{x:e.x,z:e.z,_guestCtx:e.markBurstOwner}:G.p;
+      for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,src,180,0,'fire'); } } }
   questKill(e.type); try{ questHuntKill(e); }catch(err){}
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
     if(fq && !fq.placed && !e.boss && Math.random()<0.62){ const x=e.x+10,z=e.z+10; G.pickups.push({x,z,y0:highestSurfaceAt(x,z),questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); } }
@@ -13264,7 +13330,7 @@ function killEnemy(e,weaponKill){
   const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+Math.round(_xp*(isCampaignAdventure()?1.5:1))+' XP','var(--xp)'); gainXp(_xp);
   /* BOUNTY HUNTER's gold clause. A multiplier on the kill's own purse rather than a second
      awardGold call, so the payout formula stays in exactly one place and cannot drift from it. */
-  const _bounty=(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&(e.markT||0)>0)?1.1:1;
+  const _bounty=(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&(e.markT||0)>0&&(!e.markOwner||e.markOwner===(MP.active?MP.myId:'solo')))?1.1:1;
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))*_bounty); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
   if(e.boss&&(!e.frostOfficer||!G.enemies.some(q=>q.frostOfficer&&!q.dead&&q.hp>0))){
@@ -13507,6 +13573,7 @@ const CLASS_BASIC = {
     if(p._mom >= (c2Passive('w_master') ? 2 : 3)){   // Weapon Master: stagger a hit sooner
       p._mom = 0;
       e.stunT = Math.max(e.stunT || 0, 0.8);
+      if(MP.guest()&&e.mid!=null)e._guestStun=.8;
       addText(e.x, e.y + e.h + 18, e.z, 'STAGGER', '#ffd24a');
       try { burst(e.x, e.y + e.h * 0.5, e.z, '#ffd24a', 8); } catch(err){}
     }
@@ -13556,7 +13623,7 @@ const CLASS_BASIC = {
       try {
         skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 90);
         for(let i = 0; i < arcs && i < near.length; i++){
-          if(c2Passive('st_master')&&!near[i].o.boss&&!near[i].o.bot&&!near[i].o._peer)near[i].o.stunT=Math.max(near[i].o.stunT||0,.4);
+          if(c2Passive('st_master')&&!near[i].o.boss&&!near[i].o.bot&&!near[i].o._peer){near[i].o.stunT=Math.max(near[i].o.stunT||0,.4);if(MP.guest()&&near[i].o.mid!=null)near[i].o._guestStun=.4;}
           hitEnemy(near[i].o, Math.max(1, Math.round(dmg * (c2Passive('st_conductor')?.50:.34)*(c2Passive('st_amped')?1.5:1))), p, 0, 0, 'shock');}
       } catch(err){}
       p._chaining = 0;
@@ -14497,6 +14564,8 @@ const MP={
         try{ mpHideBanner(); toast('⚔️ '+(d.p.name||'Your friend')+' joined the arena!','#7de08a'); }catch(e){} }
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d,c); }
+      else if(d.t==='status'){ this.hostApplyStatus(d,c); }
+      else if(d.t==='enemyEffect'){ this.hostApplyEnemyEffect(d,c); }
       else if(d.t==='trialRequest'){const q=this.peers[c._pid],f=riftHallFrames().find(f=>f.classId===d.cid),n=f&&G?.hubNpcs?.find(n=>n.id==='rift-'+f.id);if(G?.riftHall&&q?.hall&&n&&!q.downed&&q.hp>0&&Math.hypot(q.tx-n.x,q.tz-n.z)<150)requestPartyTrial(d.cid,c);}
       else if(d.t==='trialFinish'){const q=this.peers[c._pid];if(G?.trialSession===d.session&&q&&q.zone===this.TRIAL&&!q.downed&&q.hp>0&&G.portal&&Math.hypot(q.tx-G.portal.x,q.tz-G.portal.z)<170)finishPartyTrial();}
       else if(d.t==='trialExit'){if(G?.trialSession===d.session)abandonTrial();}
@@ -14772,37 +14841,67 @@ const MP={
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort};
+      if(STATUS_ORDER.some(k=>(e.st?.[k]||0)>0)||(e.stunT||0)>0||(e.slowT||0)>0||(e.exposed||0)>0||(e.markT||0)>0||(e.warCurseT||0)>0||(e.markExplode||0)>0)row[8]=[...STATUS_ORDER.map(k=>Math.round((e.st?.[k]||0)*10)/10),Math.round(e.stDmg||0),Math.round((e.stunT||0)*10)/10,Math.round((e.slowT||0)*10)/10,Math.round((e.exposed||0)*10)/10,e.primed?1:0,Math.round((e.markT||0)*10)/10,e.markOwner||null,Math.round((e.warCurseT||0)*10)/10,e.warCurseOwner||null,Math.round(e.markExplode||0)];
       out.push(row); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
   hostApplyHit(d,c){
     if(!this.host_()||!G||!Number.isFinite(d.d)||d.d<=0)return;
-    if(c){const q=this.peers[c._pid];if(!q||q.zone!==this.zone||q.downed||q.hp<=0)return;
+    let q=null;if(c){q=this.peers[c._pid];if(!q||q.zone!==this.zone||q.downed||q.hp<=0)return;
       c._hitReceipts=c._hitReceipts||new Map();for(const [k,v]of c._hitReceipts)if(performance.now()-v.at>10000)c._hitReceipts.delete(k);
       if(d.token&&c._hitReceipts.has(d.token)){try{c.send(c._hitReceipts.get(d.token).packet);}catch{}return;}}
     const e=this.byMid(d.m),before=e?Math.max(0,e.hp):0;
-    if(e&&!e.dead){const src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true};hitEnemy(e,d.d,src,d.kb||0,0,d.el||null);}
-    if(c&&d.token){const packet={t:'hitResult',token:d.token,dealt:e?Math.max(0,before-Math.max(0,e.hp)):0};c._hitReceipts.set(d.token,{at:performance.now(),packet});try{c.send(packet);}catch{}}
+    let bonusHeal=0;
+    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner};hitEnemy(e,d.d,src,d.kb||0,0,d.el||null);bonusHeal=src._guestHeal||0;
+      if(before>e.hp){if(owner.stun&&!e.dead)e.stunT=Math.max(e.stunT||0,owner.stun);if(!e.dead)for(const s of owner.extraStatus)applyStatus(e,s.el,s.dmg,owner.weapon,owner);}}
+    if(c&&d.token){const packet={t:'hitResult',token:d.token,dealt:e?Math.max(0,before-Math.max(0,e.hp)):0,bonusHeal};c._hitReceipts.set(d.token,{at:performance.now(),packet});try{c.send(packet);}catch{}}
+  },
+  hostApplyStatus(d,c){
+    if(!this.host_()||!G||!c||!Number.isFinite(d.d)||d.d<=0)return;
+    const q=this.peers[c._pid],e=this.byMid(d.m);if(!q||q.zone!==this.zone||q.downed||q.hp<=0||!e||e.dead)return;
+    const owner=guestOwnerFromPacket(d.owner,q);applyStatus(e,d.el,Math.min(100000,d.d),owner.weapon,owner);
+  },
+  hostApplyEnemyEffect(d,c){
+    if(!this.host_()||!G||!c)return;
+    const q=this.peers[c._pid],e=this.byMid(d.m);if(!q||q.zone!==this.zone||q.downed||q.hp<=0||!e||e.dead||e.dummy)return;
+    const range=d.kind==='curseSlow'||d.kind==='deathmark'?420:950;
+    if(dXZ(q.tx,q.tz,e.x,e.z)>range+e.r)return;
+    if(d.kind==='mark'||d.kind==='deathmark'){
+      e.markT=8;e.markOwner=q.id;
+      if(d.kind==='deathmark'&&Number.isFinite(d.d)&&d.d>0){e.markExplode=Math.min(100000,d.d);e.markBurstOwner=guestOwnerFromPacket(d.owner,q);}
+    }else if(d.kind==='curse'||d.kind==='curseSlow'){
+      e.warCurseT=7;e.warCurseOwner=q.id;
+      if(d.kind==='curseSlow')e.slowT=Math.max(e.slowT||0,1.2);
+    }
   },
   sendHit(mid,dmg,kb,el,sx,sz,effects={}){
     if(!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
     const token=this.myId+':e:'+((this._enemyHitSerial=(this._enemyHitSerial||0)+1));this._pendingEnemyHits=this._pendingEnemyHits||new Map();
     for(const [k,h]of this._pendingEnemyHits)if(performance.now()-h.at>10000)this._pendingEnemyHits.delete(k);
-    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0)});
-    try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0)});}catch{this._pendingEnemyHits.delete(token);}
+    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0});
+    try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0),owner:effects.owner||null});}catch{this._pendingEnemyHits.delete(token);}
+  },
+  sendStatus(mid,el,dmg,w){
+    if(!this.guest()||!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
+    try{this.hostConn.send({t:'status',m:mid,el,d:Math.round(dmg),owner:{cid:meta.classId,bits:coopPerkBits(),weapon:w?{cd:w.cd,art:w.art}:null}});}catch{}
+  },
+  sendEnemyEffect(mid,kind,dmg=0){
+    if(!this.guest()||!this.hostConn?.open)return;
+    try{this.hostConn.send({t:'enemyEffect',m:mid,kind,d:dmg,owner:{cid:meta.classId,bits:coopPerkBits()}});}catch{}
   },
   takeHitResult(d){
     const h=this._pendingEnemyHits?.get(d.token);if(!h)return;this._pendingEnemyHits.delete(d.token);
-    if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt)||d.dealt<=0)return;
-    classHeal(G.p,d.dealt*h.rate+h.flat);hudUpdate();
+    if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt))return;
+    if(d.dealt<=0){const p=G.p;p.hp=Math.max(0,Math.min(effMaxHp(p),p.hp-h.hpDelta));p.mana=Math.max(0,Math.min(p.maxMana||100,p.mana-h.manaDelta));p._bloodOwed=Math.max(0,(p._bloodOwed||0)-h.bloodDelta);hudUpdate();return;}
+    classHeal(G.p,d.dealt*h.rate+h.flat+Math.max(0,Number(d.bonusHeal)||0));hudUpdate();
   },
   // guest: reconcile local enemy list to the host's authoritative set + process kills
   applyEnemies(en,ek){ if(!this.guest()||!G) return; this._gotEn=true;
     const seen={};
     for(const a of en){ const mid=a[0]; seen[mid]=1; if(this._killed[mid]) continue; let e=this.byMid(mid);
       if(!e){ const type=this.ekey(a[1]); if(!type) continue; let ne=null; try{ ne=spawnEnemy(type,a[2],a[3]); }catch(err){ continue; }
-        if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; if(ne.boss)G.boss=ne; } }
+        if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; if(ne.boss)G.boss=ne;e=ne; } }
       else { if(a[4]<e.hp)e.hitFlash=.12; if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); if(e.boss)G.boss=e;
         /* The host's position becomes a TARGET the update lerps toward, never a teleport — a snapshot
            lands between frames and a 14 Hz jump of a charging body is visible. Only when slot 6 says
@@ -14810,7 +14909,9 @@ const MP={
            point, and adopting it would drag back every monster a guest engages alone. a[6] undefined
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
-        if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
+        if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } }
+      if(e){const st=a[8];if(st){e.st=Object.fromEntries(STATUS_ORDER.map((k,i)=>[k,Math.max(0,Number(st[i])||0)]));e.stDmg=Math.max(0,Number(st[6])||0);e.stunT=Math.max(0,Number(st[7])||0);e.slowT=Math.max(0,Number(st[8])||0);e.exposed=Math.max(0,Number(st[9])||0);e.primed=!!st[10];e.markT=Math.max(0,Number(st[11])||0);e.markOwner=st[12]||null;e.warCurseT=Math.max(0,Number(st[13])||0);e.warCurseOwner=st[14]||null;e.markExplode=Math.max(0,Number(st[15])||0);}else{e.st=null;e.stunT=0;e.slowT=0;e.exposed=0;e.primed=false;e.markT=0;e.markOwner=null;e.warCurseT=0;e.warCurseOwner=null;e.markExplode=0;}}
+    }
     for(const a of en)if(a[7]?.normalMelee||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);

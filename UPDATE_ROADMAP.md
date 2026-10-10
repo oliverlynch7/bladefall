@@ -2525,3 +2525,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional SC-05 three-stone order lock with a tide-timed rock crossing and far-side release in the existing full-size level. Included visible phases, safe rest, surge danger and missed-jump recovery.
 - [x] Preserved the tc.tide.open story state, shard, main hydra route, co-op sharing and old-save progress. Shortened automatic hunt discovery from a large reading panel to a toast; tracker, journal and kill quests remain.
 - [x] Passed static gate, story unit, physical route, full Thunder waypoints, race, checkpoint, co-op, prior-save and hunt-discovery browser checks. Shoulder-camera visuals reviewed. Human playtest remains for timing, challenge and feel.
+
+## [Codex | 2026-10-10] Co-op attack ownership (SHIPPED v2.148.0)
+
+- [x] Guest attacks now carry their own class/passive/weapon context; host-owned enemy HP, status reactions, kills and receipts no longer borrow the host's class. Guest mirrors no longer apply their own status damage.
+- [x] Accepted guest Mage, Warrior, Ranger, Reaper, companion and projectile hits passed two-browser packet QA. Warded hits refund basic mana/HP costs and do not apply the Mage's extra status.
+- [x] Class/PvP, healing, kill-reward and Thunder Cliffs co-op regressions, prior-save reload and static gate passed. Remote-network timing and class balance still need human playtesting.

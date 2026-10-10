@@ -1236,3 +1236,7 @@ Version 2.147.0 replaces the optional Thunder Cliffs adjacent three-stone lock w
 ## [Codex | 2026-10-10] Co-op combat authority follow-up
 
 Version 2.148.0 repairs the host/guest class-identity split on enemy hits. The guest sends class, offensive passive, weapon buildup timing and designated-hit context; the host keeps enemy damage, reactions, DoT deaths and kill rewards authoritative. The guest receives actual-damage healing receipts. Warded basic hits refund spent Mage mana or Warlock HP and do not mark the rejected target. Two browser pages verified several classes, elemental buildup, Rune/Corruption payoff, companion/projectile hits and status snapshots. Existing PvP/class, co-op kill reward, Thunder Cliffs and old-save tests passed. This is not a class balance change; real-network timing and feel still need playtesting. See docs/design/COOP_ATTACK_OWNERSHIP_2026-10-10.md.
+
+## [Codex | 2026-10-10] Snowbound camp ridge continuity
+
+The Snowbound Peaks optional buried camp is now a physical survey-ridge climb. Its notebook, Heath's hint, seven ledges, high release, Winter Cloak chest and FF-02 shard all refer to the same site. Prior ff.camp.found, ff.camp.open and ff.cache flags remain valid; old partial marker entries are ignored and old notebook text is refreshed. Co-op shares the release and chest state, while each player takes FF-02 separately. The main crossing and signal route are unchanged. Verified with browser traversal, co-op, checkpoint and prior-save tests; Oliver's hands-on judgment of pacing and art is pending.

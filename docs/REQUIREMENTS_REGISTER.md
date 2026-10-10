@@ -1144,3 +1144,7 @@ During normal-camera verification, the automatic combat-camp journal notice obsc
 ## [Codex | 2026-10-10] Co-op attack ownership follow-up
 
 Oliver requests continued all-around Bladefall improvements; his earlier class/PvP/co-op audit requires player and skill effects to work when either friend hosts. The outstanding audit notes guest offensive class hooks and status damage authority. Preserve host-owned enemy HP/death and receipt-based guest healing while making guest basic identities and elemental/designated effects belong to the attacker rather than the host's class/weapon. Do not change PvP or skill balance as a side effect. See docs/design/COOP_ATTACK_OWNERSHIP_2026-10-10.md. Custom SFX creation remains on hold.
+
+## [Codex | 2026-10-10] Snowbound optional camp action variety
+
+Oliver requests further all-around improvement to Bladefall, with earlier explicit direction that campaign puzzles should differ in player actions, show physical cause and effect, and offer demanding optional Rift Shard parkour. The live Snowbound camp's 1-3-2 marker sequence is another short combination puzzle. Replace its live input with an uneven, recoverable ridge climb to a visible rig release and the same Winter Cloak/FF-02 reward. Keep prior story flags, save compatibility, main route and co-op sharing. Implementation/verification contract: docs/design/SNOWBOUND_CAMP_RIDGE_2026-10-10.md. Human difficulty and art acceptance remain open.

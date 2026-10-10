@@ -866,3 +866,7 @@ To reduce reading fatigue and preserve sight of active combat and traversal, fir
 ## [Codex | 2026-10-10] Guest attack identity | U-2026-10-10-COOP-ATTACK
 
 Oliver's continuing all-around Bladefall quality request includes his standing expectation that class attacks and skill effects work in co-op regardless of host. For this pass, preserve host-owned enemy HP, status damage and deaths, while carrying guest offensive class/weapon context to the host. Use actual-damage receipts for healing and refund basic resource costs when the host rejects a hit. Keep PvP rules, unrelated rewards, saves and custom SFX unchanged. Browser packet tests and prior-save reload passed; remote-network feel remains unverified. See docs/design/COOP_ATTACK_OWNERSHIP_2026-10-10.md.
+
+## [Codex | 2026-10-10] Snowbound optional camp action variety | U-2026-10-10-SNOW-CAMP
+
+Under Oliver's existing authorization to improve live campaign levels, retire the optional Snowbound 1-3-2 marker sequence. Use a real, recoverable ridge climb and a visible survey release to reach the same Winter Cloak chest and FF-02 shard. Keep the main route and story/reward IDs, share the open flag in co-op while collecting shards personally, and load previous saves safely. Automated play checks confirm reachability and state; human playtesting decides final challenge and visual appeal.

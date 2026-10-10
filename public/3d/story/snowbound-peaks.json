@@ -117,7 +117,7 @@
         },
         {
           "id": "camp",
-          "text": "Who left the old markers?",
+          "text": "What is above the old camp?",
           "next": "ff.heath.camp"
         }
       ],
@@ -170,7 +170,7 @@
       }
     },
     "ff.heath.camp": {
-      "text": "West of the upper trail, three notched stones mark an explorer's hidden box. He said their shadows remember the order.",
+      "text": "West of the upper trail is an explorer’s camp. I can see his survey rig above it. Those broken ledges might still hold your weight.",
       "choices": [
         {
           "id": "back",
@@ -191,7 +191,7 @@
               "id": "ff.camp.hint",
               "region": "frost",
               "title": "The buried camp",
-              "text": "Heath mentioned an explorer’s camp west of the upper trail. Three marked stones and their shadows may reveal the order of its lock."
+              "text": "Heath mentioned an explorer’s camp west of the upper trail. An old survey rig sits above it. Its broken ledges may still be climbable."
             }
           ]
         }
@@ -278,7 +278,7 @@
       }
     },
     "ff.heath.aftercamp": {
-      "text": "West of the upper trail. Three notched stones, with shadow marks carved into the ground.",
+      "text": "West of the upper trail. Follow the broken ledges above the camp. The rig’s anchor is at the top.",
       "choices": [
         {
           "id": "back",
@@ -480,72 +480,16 @@
           "id": "ff.camp",
           "region": "frost",
           "title": "Something under the snow",
-          "text": "The notebook says: “Read the shadows from left to right. Then turn their stones in that order.” The carved shadows survive even under cloudy skies."
+          "text": "The notebook says: “Our chest is under the rig’s snow cover. Reach the anchor above camp and let the cover fall.” The broken ledges climb toward it."
         }
       ]
     },
-    "ff.marker.1": {
-      "once": false,
+    "ff.camp.release": {
+      "once": true,
       "effects": [
         {
-          "type": "sequence",
-          "id": "ff.camp",
-          "value": 1,
-          "solution": [
-            1,
-            3,
-            2
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ff.camp.found",
-          "is": true
-        },
-        {
-          "flag": "ff.camp.open",
-          "is": false
-        }
-      ]
-    },
-    "ff.marker.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "ff.camp",
-          "value": 2,
-          "solution": [
-            1,
-            3,
-            2
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ff.camp.found",
-          "is": true
-        },
-        {
-          "flag": "ff.camp.open",
-          "is": false
-        }
-      ]
-    },
-    "ff.marker.3": {
-      "once": false,
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "ff.camp",
-          "value": 3,
-          "solution": [
-            1,
-            3,
-            2
-          ]
+          "type": "flag",
+          "id": "ff.camp.open"
         }
       ],
       "when": [
@@ -571,7 +515,7 @@
           "id": "ff.reward",
           "region": "frost",
           "title": "The explorer’s keepsakes",
-          "text": "The buried chest held a winter cloak and a Rift Shard. Collect the shard beside the chest yourself. Reach Deep Ice Caves to keep both discoveries."
+          "text": "The exposed chest held a winter cloak. Collect the Rift Shard beside it yourself. Reach Deep Ice Caves to keep both discoveries."
         }
       ],
       "when": [

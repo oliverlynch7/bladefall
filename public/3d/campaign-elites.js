@@ -4,12 +4,13 @@ const kits={
  briar_runner:{wind:.85,strike:.38,recover:1.3,reach:155,color:'#edb679',title:'Lunge',hint:'Step sideways from the narrow lane, then strike while the raider recovers.',damage:.95},
  briar_guard:{wind:1.15,strike:.25,recover:1.6,reach:120,color:'#a6c9df',title:'Heavy sweep',hint:'Move behind the guard, or back out of the marked fan.',damage:1.2},
  briar_hex:{wind:1.3,strike:.28,recover:1.9,reach:310,radius:65,color:'#bb8bea',title:'Ground hex',hint:'Leave the purple circle before it flashes. The caster cannot move while casting.',damage:1.05},
+ cliff:{wind:1.05,strike:.32,recover:1.55,reach:180,color:'#8bded4',title:'Cliff cleave',hint:'Sidestep the marked fan, then strike while the warden recovers.',damage:1.05},
  raid:{wind:.95,strike:.24,recover:1.15,reach:150,color:'#efb663',title:'Wide sweep',hint:'Step behind the raid leader.',damage:1.15},
  forge:{wind:1.2,strike:.7,recover:1.4,reach:210,color:'#ff9856',title:'Ground pulse',hint:'Jump the ring, or move outside it.',damage:1.25},
  shore:{wind:1.15,strike:.26,recover:1.35,reach:360,color:'#83dce6',title:'Scatter shot',hint:'Move between the three aim lines.',damage:1.1},
  tower:{wind:1.25,strike:.28,recover:1.5,reach:200,color:'#c5a3f3',title:'Cross strike',hint:'Stand between the crossing lines.',damage:1.25}
 };
-function setup(e,zone){const kind={0:'raid',4:'forge',5:'shore',7:'tower'}[zone];if(!kind)return;if(e.role==='exploder')e.speed/=1.28;else if(e.role==='flanker')e.speed/=1.15;if(zone===5)Object.assign(e,{x:-180,z:-1100,y:30,sx:-180,sz:-1100,sy:30});Object.assign(e,{ceKind:kind,ceState:'hunt',ceClock:1.2,ceSerial:0,role:null,spec:null,kind:'walk',shot:null,meleeW:0,meleeActive:0});}
+function setup(e,zone){const kind={0:'raid',1:'cliff',4:'forge',5:'shore',7:'tower'}[zone];if(!kind)return;if(e.role==='exploder')e.speed/=1.28;else if(e.role==='flanker')e.speed/=1.15;if(zone===5)Object.assign(e,{x:-180,z:-1100,y:30,sx:-180,sz:-1100,sy:30});Object.assign(e,{ceKind:kind,ceState:'hunt',ceClock:1.2,ceSerial:0,role:null,spec:null,kind:'walk',shot:null,meleeW:0,meleeActive:0});}
 // Ordinary Briar troops share telegraph geometry, never elite health or rewards.
 function briar(e){
  if(e.briarRole||e.ceKind||e.boss||e.elite||e.dummy||e.practice||e.bot||!['grunt','caster'].includes(e.type))return;
@@ -36,7 +37,7 @@ function contains(e,p){const k=kits[e.ceKind];if(!k||e.ceState!=='strike'||e.dea
  const q=local(e,p),r=Math.min(20,p.r||12);
  if(e.briarRole==='hex')return q.d<=k.radius+r;
  if(e.briarRole==='runner')return q.forward>=-r&&q.forward<=k.reach+r&&Math.abs(q.side)<=19+r&&Math.hypot(p.x-e.x,p.z-e.z)<=e.r+r+30;
- if(e.ceKind==='raid'||e.briarRole==='guard')return q.d<=k.reach+r&&(q.d<r||q.forward/(q.d||1)>=Math.cos(1.05));
+ if(e.ceKind==='raid'||e.ceKind==='cliff'||e.briarRole==='guard')return q.d<=k.reach+r&&(q.d<r||q.forward/(q.d||1)>=Math.cos(1.05));
  if(e.ceKind==='forge'){const wave=25+(k.reach-25)*(1-e.ceClock/k.strike);return Math.abs(q.d-wave)<r+24;}
  if(e.ceKind==='tower')return (Math.abs(q.forward)<k.reach+r&&Math.abs(q.side)<22+r)||(Math.abs(q.side)<k.reach+r&&Math.abs(q.forward)<22+r);
  return [-.32,0,.32].some(a=>{const f=q.forward*Math.cos(a)+q.side*Math.sin(a),s=q.side*Math.cos(a)-q.forward*Math.sin(a);return f>=-r&&f<k.reach+r&&Math.abs(s)<13+r;});

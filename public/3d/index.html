@@ -1087,9 +1087,9 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./story-state.js?v=2106-2046"></script>
 <script src="./campaign-patrols.js?v=2152"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
-<script src="./campaign-elites.js?v=2057"></script>
+<script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
-<script src="./hollow-cliffs.js?v=2003"></script>
+<script src="./hollow-cliffs.js?v=2161"></script>
 <script src="./lost-canyon.js?v=2162"></script>
 <script src="./broken-walls.js?v=2161"></script>
 <script src="./prison-dungeons.js?v=2146"></script>
@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.160.0-snowbound-cornice';
+const VERSION3D='2.161.0-cliff-warden';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8178,7 +8178,7 @@ function drawCampaignEliteDanger(e){
  const line=(ax,az,bx2,bz2,width)=>{const len=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(len/22));for(let i=0;i<=n;i++)mark(ax+(bx2-ax)*i/n,az+(bz2-az)*i/n,width);};
  const point=(f,a)=>({x:x+e.ceDX*f+e.ceDZ*a,z:z+e.ceDZ*f-e.ceDX*a});
  const lane=(dx,dz,reach,width,both=false)=>{const a=both?-reach:0;for(const side of [-1,1])line(x+dx*a+dz*width*side,z+dz*a-dx*width*side,x+dx*reach+dz*width*side,z+dz*reach-dx*width*side,4);};
- if(e.ceKind==='raid'||e.briarRole==='guard')ring(k.reach,1.05);
+ if(e.ceKind==='raid'||e.ceKind==='cliff'||e.briarRole==='guard')ring(k.reach,1.05);
  else if(e.briarRole==='runner')lane(e.ceDX,e.ceDZ,k.reach,19);
  else if(e.briarRole==='hex')ring(k.radius);
  else if(e.ceKind==='forge'){ring(k.reach);const r=strike?25+(k.reach-25)*(1-e.ceClock/k.strike):k.reach*(1-e.ceClock/k.wind);ring(Math.max(10,r));}

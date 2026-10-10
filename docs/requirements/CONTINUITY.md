@@ -1240,3 +1240,7 @@ Version 2.148.0 repairs the host/guest class-identity split on enemy hits. The g
 ## [Codex | 2026-10-10] Snowbound camp ridge continuity
 
 The Snowbound Peaks optional buried camp is now a physical survey-ridge climb. Its notebook, Heath's hint, seven ledges, high release, Winter Cloak chest and FF-02 shard all refer to the same site. Prior ff.camp.found, ff.camp.open and ff.cache flags remain valid; old partial marker entries are ignored and old notebook text is refreshed. Co-op shares the release and chest state, while each player takes FF-02 separately. The main crossing and signal route are unchanged. Verified with browser traversal, co-op, checkpoint and prior-save tests; Oliver's hands-on judgment of pacing and art is pending.
+
+## [Codex | 2026-10-10] Great Furnace Cinder rescue
+
+Version 2.150.0 replaces the optional cage's adjacent three-control code with a hot-feed shutdown, a host-owned guard response, and a final cage release after the bay is safe. Pipe/cage visuals and lock prompts expose cause and effect. The cage clue remains journaled without a reading panel over the fight. `gf.cage`, `gf.pet.open` and `gf.cinder` remain the durable identifiers; retired partial control progress is ignored, while an old completed rescue remains complete. Main story gates and Colossus-entry reward banking are unchanged. Full route, checkpoint, co-op and old-save browser checks passed. Human playtesting still decides the encounter's challenge and art quality. See docs/design/GREAT_FURNACE_CINDER_RESCUE_2026-10-10.md.

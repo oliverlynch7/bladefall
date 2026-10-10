@@ -2531,3 +2531,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Guest attacks now carry their own class/passive/weapon context; host-owned enemy HP, status reactions, kills and receipts no longer borrow the host's class. Guest mirrors no longer apply their own status damage.
 - [x] Accepted guest Mage, Warrior, Ranger, Reaper, companion and projectile hits passed two-browser packet QA. Warded hits refund basic mana/HP costs and do not apply the Mage's extra status.
 - [x] Class/PvP, healing, kill-reward and Thunder Cliffs co-op regressions, prior-save reload and static gate passed. Remote-network timing and class balance still need human playtesting.
+
+## [Codex | 2026-10-10] Great Furnace Cinder rescue (SHIPPED v2.150.0)
+
+- [x] Replaced the optional captive-Cinder three-control sequence with a visible heat-feed shutdown, cage-guard fight and final lock release. The pipe and cage respond to each step; the lock explains why it is blocked.
+- [x] Kept the Cinder reward, main Furnace route, co-op sharing, boss-entry banking and old completed saves. The cage clue remains in the journal but clears from the reading panel when combat begins.
+- [x] Static/story tests, full route, checkpoint, natural guard movement, two-player authority, prior-save loading and shoulder-camera review passed. Fight feel and visual taste remain for Oliver's playtest. See docs/design/GREAT_FURNACE_CINDER_RESCUE_2026-10-10.md.

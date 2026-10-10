@@ -510,7 +510,7 @@
       }
     },
     "gf.martin.cage": {
-      "text": "The heat is hurting that creature. Close the heat feed, open the small air vent, then release the lock.",
+      "text": "The heat is hurting that creature. Shut its feed at the cage bay. The skitters will come running; clear them, then open the lock.",
       "choices": [
         {
           "id": "back",
@@ -1069,12 +1069,12 @@
           "id": "gf.cage",
           "region": "ember",
           "title": "Something alive in the cage",
-          "text": "A small fire creature is trapped in the work cage. Its pipes are marked: heat feed, air vent, lock. Stop feeding heat before letting the cage breathe. Martin may know more."
+          "text": "A small fire creature is trapped in the work cage. The heat feed enters from the east gallery. Shut it off, clear the cage guards, then release the lock. Martin may know more."
         }
       ]
     },
-    "gf.pet.1": {
-      "once": false,
+    "gf.pet.feed": {
+      "once": true,
       "when": [
         {
           "flag": "gf.cage",
@@ -1087,47 +1087,20 @@
       ],
       "effects": [
         {
-          "type": "sequence",
-          "id": "gf.pet",
-          "value": 1,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "gf.pet.reward",
-          "when": [
-            {
-              "flag": "gf.pet.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "gf.cinder",
-              "kind": "companion",
-              "amount": 1
-            },
-            {
-              "type": "note",
-              "id": "gf.cinder",
-              "region": "ember",
-              "title": "Cinder is free",
-              "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
-            }
-          ]
+          "type": "flag",
+          "id": "gf.pet.feed.closed"
         }
       ]
     },
-    "gf.pet.2": {
-      "once": false,
+    "gf.pet.release": {
+      "once": true,
       "when": [
         {
           "flag": "gf.cage",
+          "is": true
+        },
+        {
+          "flag": "gf.pet.feed.closed",
           "is": true
         },
         {
@@ -1137,89 +1110,21 @@
       ],
       "effects": [
         {
-          "type": "sequence",
-          "id": "gf.pet",
-          "value": 2,
-          "solution": [
-            1,
-            2,
-            3
-          ]
+          "type": "flag",
+          "id": "gf.pet.open"
         },
         {
-          "type": "conditional",
-          "id": "gf.pet.reward",
-          "when": [
-            {
-              "flag": "gf.pet.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "gf.cinder",
-              "kind": "companion",
-              "amount": 1
-            },
-            {
-              "type": "note",
-              "id": "gf.cinder",
-              "region": "ember",
-              "title": "Cinder is free",
-              "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
-            }
-          ]
-        }
-      ]
-    },
-    "gf.pet.3": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.cage",
-          "is": true
+          "type": "reward",
+          "id": "gf.cinder",
+          "kind": "companion",
+          "amount": 1
         },
         {
-          "flag": "gf.pet.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "gf.pet",
-          "value": 3,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "gf.pet.reward",
-          "when": [
-            {
-              "flag": "gf.pet.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "reward",
-              "id": "gf.cinder",
-              "kind": "companion",
-              "amount": 1
-            },
-            {
-              "type": "note",
-              "id": "gf.cinder",
-              "region": "ember",
-              "title": "Cinder is free",
-              "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
-            }
-          ]
+          "type": "note",
+          "id": "gf.cinder",
+          "region": "ember",
+          "title": "Cinder is free",
+          "text": "The fire creature is free. Reach the Colossus room to keep Cinder as a companion. It will then appear in the Beastkeeper’s menu."
         }
       ]
     },

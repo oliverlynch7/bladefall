@@ -1148,3 +1148,7 @@ Oliver requests continued all-around Bladefall improvements; his earlier class/P
 ## [Codex | 2026-10-10] Snowbound optional camp action variety
 
 Oliver requests further all-around improvement to Bladefall, with earlier explicit direction that campaign puzzles should differ in player actions, show physical cause and effect, and offer demanding optional Rift Shard parkour. The live Snowbound camp's 1-3-2 marker sequence is another short combination puzzle. Replace its live input with an uneven, recoverable ridge climb to a visible rig release and the same Winter Cloak/FF-02 reward. Keep prior story flags, save compatibility, main route and co-op sharing. Implementation/verification contract: docs/design/SNOWBOUND_CAMP_RIDGE_2026-10-10.md. Human difficulty and art acceptance remain open.
+
+## [Codex | 2026-10-10] Great Furnace Cinder rescue action variety
+
+Under Oliver's continuing authorization to improve existing campaign levels, replace the live Cinder cage's adjacent three-control order with a visible heat-feed shutdown, a short cage-guard fight, and a final safe release. Keep the companion, story completion and save identifiers, main progression and co-op authority. A previous completed rescue stays completed; partial old switch progress can restart at the new feed. See docs/design/GREAT_FURNACE_CINDER_RESCUE_2026-10-10.md. Custom SFX creation remains on hold.

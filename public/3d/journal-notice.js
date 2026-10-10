@@ -9,7 +9,7 @@ function createQueue(){let scene=null,seen=new Map(),waiting=[],current=null,lef
    if(n.replaceKey&&current?.replaceKey===n.replaceKey){current=n;left=readingTime(n.title+' '+n.text);return;}
    const existing=waiting.findIndex(q=>q.id===n.id||n.replaceKey&&q.replaceKey===n.replaceKey);if(existing>=0)waiting[existing]=n;else waiting.push(n);},
   tick(dt,visible,held=false){if(!visible)return current;if(!current&&waiting.length){current=waiting.shift();left=readingTime(current.title+' '+current.text);}else if(current&&!held){left=Math.max(0,left-Math.max(0,dt));if(!left)current=null;}return current;},
-  dismiss(){current=null;left=0;},get current(){return current;},get remaining(){return left;},get pending(){return waiting.length;}
+  dismiss(id){if(id){waiting=waiting.filter(q=>q.id!==id);if(current?.id!==id)return;}current=null;left=0;},get current(){return current;},get remaining(){return left;},get pending(){return waiting.length;}
  };
 }
 const queue=createQueue();let panel=null,shown=null,held=false,openJournal=()=>{},sceneOwner=null,sceneKey='';

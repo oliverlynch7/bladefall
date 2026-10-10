@@ -225,7 +225,7 @@
       }
     },
     "gf.martin.plan": {
-      "text": "Open the worker passage. For a direct rescue, ring work then shelter. For a quiet rescue, stop the transport chain first.",
+      "text": "Open the worker passage. I can lead everyone to the break room, but guards will come. Stop the transport chain first if you want fewer patrols on the route.",
       "choices": [
         {
           "id": "early",
@@ -241,7 +241,7 @@
               "id": "gf.workers",
               "region": "ember",
               "title": "Get the workers out",
-              "text": "Open the worker passage on the lower western floor. Ring the work bell there, then the shelter bell in the break room. The patrols will remain on the lower route."
+              "text": "Open the worker passage, then ring the work bell to start the escape. Stay near the workers and keep the guards off them. If someone falls, ring the bell to try again."
             }
           ],
           "when": []
@@ -260,7 +260,7 @@
               "id": "gf.workers",
               "region": "ember",
               "title": "A quieter escape",
-              "text": "Open the worker passage. Take the western climbing route to stop the transport chain. Then ring the shelter bell in the break room, followed by the work bell below. This draws patrols away from the workers."
+              "text": "Open the worker passage and stop the transport chain on the western route. Then ring the work bell and defend the workers to the break room. Fewer patrols will find you."
             }
           ],
           "when": []
@@ -277,7 +277,7 @@
       }
     },
     "gf.martin.early": {
-      "text": "Open the west passage. Ring work bell, then shelter bell. Hold off the guards while we escape.",
+      "text": "Open the west passage, then ring the work bell. Stay with us and keep the guards off the workers.",
       "choices": [
         {
           "id": "ready",
@@ -289,7 +289,7 @@
               "id": "gf.workers",
               "region": "ember",
               "title": "Get the workers out",
-              "text": "Open the worker passage on the lower western floor. Ring the work bell there, then the shelter bell in the break room. The patrols remain on the lower route."
+              "text": "Open the worker passage, ring the work bell, and guard the group on the way to the break room. If someone falls, ring again to retry."
             }
           ],
           "when": []
@@ -306,7 +306,7 @@
       }
     },
     "gf.martin.quiet": {
-      "text": "Use the brake above the west loading floor. Then ring shelter bell, followed by work bell, to cover our escape.",
+      "text": "Stop the transport chain on the west loading floor. Then ring the work bell and guard us on the way up.",
       "choices": [
         {
           "id": "ready",
@@ -599,7 +599,7 @@
           "id": "gf.passage",
           "region": "ember",
           "title": "The worker passage is open",
-          "text": "The lower passage is open. Follow the bell order agreed with Martin to guide the workers to shelter."
+          "text": "The lower passage is open. Ring the work bell to start the escort. Stay with the workers and protect them until they reach the break room."
         }
       ]
     },
@@ -615,174 +615,6 @@
         {
           "type": "flag",
           "id": "gf.transport"
-        }
-      ]
-    },
-    "gf.workbell": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.passage",
-          "is": true
-        },
-        {
-          "flag": "gf.evacuated",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "conditional",
-          "id": "gf.bells.early",
-          "when": [
-            {
-              "flag": "gf.early",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "sequence",
-              "id": "gf.bells",
-              "value": 1,
-              "solution": [
-                1,
-                2
-              ]
-            }
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "gf.bells.quiet",
-          "when": [
-            {
-              "flag": "gf.quiet",
-              "is": true
-            },
-            {
-              "flag": "gf.transport",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "sequence",
-              "id": "gf.bells",
-              "value": 1,
-              "solution": [
-                2,
-                1
-              ]
-            }
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "gf.bells.done",
-          "when": [
-            {
-              "flag": "gf.bells.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "flag",
-              "id": "gf.evacuated"
-            },
-            {
-              "type": "note",
-              "id": "gf.safe",
-              "region": "ember",
-              "title": "The workers are safe",
-              "text": "Both bells sounded in order. The workers have reached shelter and opened a service crossing. Find the cooling controls north of the furnace."
-            }
-          ]
-        }
-      ]
-    },
-    "gf.shelterbell": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.passage",
-          "is": true
-        },
-        {
-          "flag": "gf.evacuated",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "conditional",
-          "id": "gf.bells.early",
-          "when": [
-            {
-              "flag": "gf.early",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "sequence",
-              "id": "gf.bells",
-              "value": 2,
-              "solution": [
-                1,
-                2
-              ]
-            }
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "gf.bells.quiet",
-          "when": [
-            {
-              "flag": "gf.quiet",
-              "is": true
-            },
-            {
-              "flag": "gf.transport",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "sequence",
-              "id": "gf.bells",
-              "value": 2,
-              "solution": [
-                2,
-                1
-              ]
-            }
-          ]
-        },
-        {
-          "type": "conditional",
-          "id": "gf.bells.done",
-          "when": [
-            {
-              "flag": "gf.bells.open",
-              "is": true
-            }
-          ],
-          "effects": [
-            {
-              "type": "flag",
-              "id": "gf.evacuated"
-            },
-            {
-              "type": "note",
-              "id": "gf.safe",
-              "region": "ember",
-              "title": "The workers are safe",
-              "text": "Both bells sounded in order. The workers have reached shelter and opened a service crossing. Find the cooling controls north of the furnace."
-            }
-          ]
         }
       ]
     },
@@ -974,6 +806,27 @@
           "title": "The cooling-box plate",
           "text": "Cold water drives the moving counterweights east of this room. Cross them to reach the cooling box above. The lower grate leads back if you fall."
         }
+      ]
+    },
+    "gf.evac.call": {
+      "once": false,
+      "when": [
+        { "flag": "gf.passage", "is": true },
+        { "flag": "gf.evacuated", "is": false }
+      ],
+      "effects": [
+        { "type": "item", "id": "gf.evac.calls", "amount": 1 }
+      ]
+    },
+    "gf.evac.complete": {
+      "once": true,
+      "when": [
+        { "flag": "gf.passage", "is": true },
+        { "flag": "gf.evacuated", "is": false }
+      ],
+      "effects": [
+        { "type": "flag", "id": "gf.evacuated" },
+        { "type": "note", "id": "gf.safe", "region": "ember", "title": "The workers are safe", "text": "All three workers reached the break room. They opened the service crossing toward the cooling controls." }
       ]
     },
     "gf.cache.release": {

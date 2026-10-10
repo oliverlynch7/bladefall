@@ -889,3 +889,6 @@ Under Oliver's standing campaign and puzzle-quality authorization, retire the op
 ## [Codex | 2026-10-10] Co-op skill effects | U-2026-10-10-COOP-EFFECTS
 
 Continue the approved co-op parity work by moving existing control and delayed skill effects onto the enemy-owning host. Keep values, class access, solo/PvP behavior, reward authority and save identity intact. Verify actual guest skill casts and host state through two browser pages; treat this as a correctness pass, not a balance sign-off. See docs/design/COOP_SKILL_EFFECTS_2026-10-10.md.
+## [Codex | 2026-10-10] Great Furnace evacuation | U-2026-10-10-FURNACE-ESCORT
+
+Under Oliver's standing request for varied, visible campaign actions and vulnerable escort companions, replace the mandatory Great Furnace two-bell order with a real three-worker escort. Start from the work bell after opening the passage; workers move on the foundry floor, take damage from actual pursuers, and require protection through timed attacks. Failure permits retry. Preserve the quiet transport-brake advantage, old gf.evacuated completion meaning, main progression, co-op authority, and old saves. Retire ordered-bell input only. Keep custom SFX out of scope. See docs/design/GREAT_FURNACE_WORKER_ESCORT_2026-10-10.md.

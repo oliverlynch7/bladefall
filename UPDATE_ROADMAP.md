@@ -2578,3 +2578,8 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Replaced the optional three-number lock with six uneven cliff brackets, a high cable release and cargo that visibly rises from the chest on the lower trail.
 - [x] Kept the freight bridge, Skip's route, both shards, the original chest reward and old completion flags. Old partial numeric inputs no longer control the new route.
 - [x] Muted browser checks passed the full level route, physical climb and missed-jump recovery, normal-camera before/after views, once-only chest, old partial/completed save reloads and two-player guest release. Human playtesting remains for difficulty and visual quality. See docs/design/HOLLOW_CLIFFS_CARGO_RELEASE_2026-10-10.md.
+## [Codex | 2026-10-10] Great Furnace worker escort (SHIPPED v2.158.0)
+
+- [x] Replaced the mandatory ordered work/shelter-bell input with a visible three-worker evacuation along the foundry floor. Players call the workers, guard their health through three timed attacks, and reach the shelter; failure resets the encounter for a bell retry. The quiet brake route reduces each attack wave.
+- [x] Kept the existing evacuation completion flag, later furnace route and old-save behavior. Host-owned escort positions, health and completion mirror to the co-op guest; the main arrow follows the workers.
+- [x] Muted browser QA covered normal-camera movement and health bars, walkable route samples, damage/failure/retry/success, full level and checkpoint regressions, old partial/completed saves, and two-page co-op sync. Human playtesting remains for pacing and challenge. See docs/design/GREAT_FURNACE_WORKER_ESCORT_2026-10-10.md.

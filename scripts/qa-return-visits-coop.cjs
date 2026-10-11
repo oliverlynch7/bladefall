@@ -1,14 +1,57 @@
-async page=>{
- const context=await page.context().browser().newContext(),guest=await context.newPage(),errors=[],checks=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n)};for(const p of [page,guest])p.on('pageerror',e=>errors.push(e.message));
- try{
- for(const p of [page,guest]){await (await p.context().newCDPSession(p)).send('Network.setCacheDisabled',{cacheDisabled:true});await p.goto('http://127.0.0.1:4331/3d/?mute=1');await p.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);await p.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.returnVisits={};b.meta.zoneDone={keep:true,ember:true};b.meta.riftShards=[];b.meta.autoAttack=false;b.meta.classes.warrior={rank:10,xp:0,v2:1,ch:{}};b.openHub();window.qaPackets=[];window.qaAct=k=>{const o=b.G.storyObjects.find(o=>o.key===k);Object.assign(b.G.p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key:o.key});};window.qaTalk=(npc,choices)=>{const o=b.G.storyNpcs.find(o=>o.id===npc);Object.assign(b.G.p,{x:o.x,z:o.z,y:o.y});b.briarRequest('open',{npc});for(const choice of choices)b.briarRequest('choose',{line:b.G.storyState.conversation.node,choice});b.briarRequest('close');};});}
- await page.evaluate(()=>{const m=__BF3.MP;m.active=true;m.isHost=true;m.myId='h';m.conns=[];window.qaListeners={};m.wireGuest({open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>qaListeners[k]=f});qaListeners.open();});
- await guest.evaluate(()=>{const m=__BF3.MP;m.active=true;m.isHost=false;m.myId='g';m.hostConn={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d)))};});
- const flush=async()=>{for(let i=0;i<2;i++){await page.evaluate(()=>__BF3.MP.tick(.12));for(const d of await guest.evaluate(()=>qaPackets.splice(0)))await page.evaluate(d=>qaListeners.data(d),d);for(const d of await page.evaluate(()=>qaPackets.splice(0)))await guest.evaluate(d=>__BF3.MP.onGuestData(d),d);}};
-
- await page.evaluate(d=>qaListeners.data(d),await guest.evaluate(()=>({t:'hello',p:__BF3.MP.selfState()})));await page.evaluate(()=>__BF3.MP.onEnter(__BF3.MP.HUB));await flush();
- await page.evaluate(()=>{const n=__BF3.G.storyNpcs.find(n=>n.id==='anvil');Object.assign(__BF3.G.p,{x:n.x,y:n.y||0,z:n.z});__BF3.openReturnRequest(n);});await flush();ok('hub quest pauses both players',await guest.evaluate(()=>__BF3.mode==='npc'&&__BF3.G.storyState.conversation?.npc==='anvil'));
- await guest.evaluate(()=>__BF3.briarRequest('choose',{line:__BF3.G.storyState.conversation.node,choice:'help'}));await flush();ok('only conversation starter chooses',await page.evaluate(()=>!__BF3.meta.returnVisits.pattern));await page.evaluate(()=>{__BF3.briarRequest('choose',{line:__BF3.G.storyState.conversation.node,choice:'help'});__BF3.briarRequest('close');});await flush();ok('both receive request',await guest.evaluate(()=>__BF3.meta.returnVisits.pattern==='accepted'));
- await page.evaluate(()=>__BF3.enterZone(4));await flush();for(const p of [page,guest])await p.waitForFunction(()=>__BF3.G.iron&&!BF_LOADING.active);await page.evaluate(()=>{__BF3.G.p.invuln=999;qaAct('rv.pattern.cool');qaAct('rv.pattern.clamp');});await flush();await guest.evaluate(()=>{const o=__BF3.G.storyObjects.find(o=>o.key==='rv.pattern.take');Object.assign(__BF3.G.p,{x:o.x,y:o.y,z:o.z});qaPackets.push({t:'pos',p:__BF3.MP.selfState()});__BF3.briarRequest('world',{key:o.key});});await flush();ok('guest collection rewards party provisionally',await page.evaluate(()=>__BF3.G.pendingReturnItems.includes('pattern'))&&await guest.evaluate(()=>__BF3.G.pendingReturnItems.includes('pattern')));
- await page.evaluate(()=>__BF3.nextArea());await flush();ok('both bank at half boundary',await guest.evaluate(()=>__BF3.meta.returnVisits.pattern==='ready')&&await page.evaluate(()=>__BF3.meta.returnVisits.pattern==='ready'));
- await page.evaluate(()=>__BF3.openHub());await flush();await page.evaluate(()=>{const n=__BF3.G.storyNpcs.find(n=>n.id==='anvil');Object.assign(__BF3.G.p,{x:n.x,y:n.y||0,z:n.z});__BF3.openReturnRequest(n);__BF3.briarRequest('choose',{line:__BF3.G.storyState.conversation.node,choice:'give'});});await flush();ok('shared delivery completes for both',await guest.evaluate(()=>__BF3.meta.returnVisits.pattern==='done'&&__BF3.meta.hubUpgrades.returnForge));const paid=await guest.evaluate(()=>__BF3.meta.gold);await flush();ok('repeated packets do not duplicate payment',paid===await guest.evaluate(()=>__BF3.meta.gold));if(errors.length)throw Error(errors.join(';'));return{checks,errors};}finally{await page.evaluate(()=>{__BF3.MP.active=false;__BF3.MP.conns=[];});await context.close();}}
+async parent=>{
+  const checks=[],errors=[],ok=(name,pass)=>{if(!pass)throw Error(name);checks.push(name);};
+  const context=await parent.context().browser().newContext(),host=await context.newPage(),guest=await context.newPage();
+  host.on('pageerror',e=>errors.push('host: '+e.message));
+  guest.on('pageerror',e=>errors.push('guest: '+e.message));
+  try{
+    for(const p of [host,guest]){
+      await p.goto('http://127.0.0.1:4331/3d/?mute=1');
+      await p.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready&&window.BFReturnVisits&&window.BFController);
+      await p.evaluate(async()=>{
+        const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;
+        b.meta.introSeen=true;b.meta.classId='warrior';b.meta.tutOff=true;b.meta.hubTutDone=true;
+        b.meta.zoneDone={ember:true};b.meta.returnVisits={pattern:'accepted'};b.openHub();
+        window.qaPackets=[];
+      });
+    }
+    await host.evaluate(()=>{
+      const m=__BF3.MP;m.active=true;m.isHost=true;m.myId='h';m.conns=[];
+      window.qaListeners={};
+      m.wireGuest({open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>qaListeners[k]=f});
+      qaListeners.open();
+    });
+    await guest.evaluate(()=>{
+      const m=__BF3.MP;m.active=true;m.isHost=false;m.myId='g';
+      m.hostConn={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d)))};
+    });
+    const flush=async()=>{for(let i=0;i<2;i++){
+      for(const d of await guest.evaluate(()=>qaPackets.splice(0)))await host.evaluate(d=>qaListeners.data(d),d);
+      for(const d of await host.evaluate(()=>qaPackets.splice(0)))await guest.evaluate(d=>__BF3.MP.onGuestData(d),d);
+    }};
+    await host.evaluate(d=>qaListeners.data(d),await guest.evaluate(()=>({t:'hello',p:__BF3.MP.selfState()})));
+    await flush();
+    await host.evaluate(()=>__BF3.enterZone(4));await flush();
+    for(const p of [host,guest])await p.waitForFunction(()=>!BF_LOADING.active&&__BF3.G.storyObjects?.some(o=>o.key==='rv.pattern.take'));
+    ok('both see forge pattern',await host.evaluate(()=>__BF3.G.storyObjects.some(o=>o.key==='rv.pattern.take'))&&await guest.evaluate(()=>__BF3.G.storyObjects.some(o=>o.key==='rv.pattern.take')));
+    const act=async key=>{
+      await guest.evaluate(key=>{
+        const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='rv.pattern.'+key);
+        Object.assign(b.G.p,{x:o.x,z:o.z,y:o.y});
+        b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});
+        b.briarRequest('world',{key:o.key});
+      },key);
+      await flush();
+    };
+    await act('clamp');
+    ok('uncooled clamp stays locked',await host.evaluate(()=>!__BF3.G.storyState.flags['rv.pattern.clamp']));
+    await act('cool');await act('clamp');
+    ok('guest cool and clamp shared',await host.evaluate(()=>__BF3.G.storyState.flags['rv.pattern.cool']&&__BF3.G.storyState.flags['rv.pattern.clamp'])&&await guest.evaluate(()=>__BF3.G.storyState.flags['rv.pattern.clamp']));
+    await act('take');
+    ok('both saves secure pattern immediately',await host.evaluate(()=>__BF3.meta.returnVisits.pattern==='ready')&&await guest.evaluate(()=>__BF3.meta.returnVisits.pattern==='ready'));
+    const packet=await host.evaluate(()=>__BF3.briarPacket());
+    await guest.evaluate(p=>{__BF3.briarApply(p);__BF3.briarApply(p);},packet);
+    ok('replayed packet does not unset recovery',await guest.evaluate(()=>__BF3.meta.returnVisits.pattern==='ready'));
+    if(errors.length)throw Error(errors.join('; '));
+    return {checks,errors};
+  }finally{await context.close();}
+}

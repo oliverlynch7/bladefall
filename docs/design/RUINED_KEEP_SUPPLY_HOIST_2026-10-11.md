@@ -1,0 +1,17 @@
+# Broken Walls return request: supply-hoist brake — 11 October 2026
+
+The Quartermaster's optional Food for the Refuge request is still a three-box `E` sum (3 + 5 = 8). The large western sealed chamber already contains an elevated old-wall approach, a suspended food load, the separate chamber shield trial and a lower collection point. Preserve that geography and quest. Retire the nearby number toggles rather than reskinning them.
+
+The hoist's brake is jammed on an upper service perch along the chamber's west side. The player crosses uneven, collision-backed maintenance ledges to reach it. A miss returns them to the chamber floor; no quest resource is lost. Releasing the brake raises its counterweight and visibly lowers the loaded food basket. The player then returns to the floor to collect the same supplies. The upper release must not be reachable from floor height. Keep the middle of the room open for its existing shield encounter and avoid the old-wall entrance, RK-02 shard and prison route.
+
+Keep `rv.supplies.balance.open` as the durable completion flag for existing saves, `rv.supplies.take` and `rv.item.supplies` as the once-only reward IDs, and the accepted/ready/done return state. Old completed flags display the food lowered; old partial mask values do not solve the new action. The host owns the release, and either co-op player can perform it through the existing story-authority check. The collection becomes save-local ready progress immediately, consistent with the current return-quest system; it needs no boss or half transition. Existing recorded takes must not be replaced, and custom SFX remain on hold. Update the clue and tracker so they describe the physical action in plain language.
+
+Acceptance: verify a normal-camera view from entry, floor and upper perch; traverse the actual ledges and recover from a missed jump; reject a floor-level release; see counterweight and basket movement; collect only after release and only once; preserve the separate chamber trial, immediate return-quest persistence, prior partial/completed saves and two-page co-op interaction.
+
+Human judgment of route difficulty, visibility and visual quality remains open after automated browser verification.
+
+## [Codex | 2026-10-11] Implemented and verified
+
+Version 2.171.0 gives the hoist four staggered collision-backed ledges, an upper brake, a rising counterweight and a descending food basket. The tracker changes from the climb to floor collection when the brake is freed. Ready/done return-quest saves show the hoist opened without an unclaimable duplicate basket. Collection is saved immediately, including when a player leaves before the boss.
+
+Muted browser checks passed a deliberate fall to the chamber floor, a full held-jump retry to all four landings, normal interaction prompts at the brake and basket, floor-height rejection, one-time collection and tracker update. A full Broken Walls route passed all 16 checks over 228 waypoints, including the separate chamber shield trial and RK-02. Two-page co-op checks passed guest floor rejection, guest release, shared hoist state, both saves receiving the item and a replayed packet. Legacy-shaped partial and open hoist saves both reloaded; the old note changed to the new clue and gold/class data were preserved. Static, dialogue, story-state and authority checks passed. This is code and browser validation, not a human verdict on puzzle feel or final art.

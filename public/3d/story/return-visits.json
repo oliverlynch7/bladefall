@@ -247,7 +247,7 @@
       }
     },
     "rv.supplies.accepted": {
-      "text": "Use the hoist plate in Broken Walls' sealed western chamber to lower the supplies. Reach the Dungeons before returning.",
+      "text": "Climb to the hoist brake in Broken Walls' western chamber. Lower the food, then bring it back here.",
       "choices": [],
       "voice": {
         "speaker": "quartermaster",
@@ -259,7 +259,7 @@
       }
     },
     "rv.supplies.wait": {
-      "text": "Balance the western chamber's hoist. Finish Broken Walls, then bring the supplies here.",
+      "text": "Free the hoist brake above the western chamber. Collect the food below, then bring it here.",
       "choices": [],
       "voice": {
         "speaker": "quartermaster",
@@ -783,7 +783,7 @@
           "type": "note",
           "id": "rv.pattern.recovered",
           "title": "Tools for Tomorrow — recovered",
-          "text": "Finish this level half to keep the recovery. Then return to The Smith in the Waystation.",
+          "text": "The forge pattern is safe. Return to the Smith in the Waystation when you are ready.",
           "region": "ember"
         }
       ]
@@ -801,13 +801,13 @@
           "type": "note",
           "id": "rv.supplies.clue",
           "title": "Food for the Refuge",
-          "text": "The loaded basket needs 8 on the other side. The weights are 3, 5 and 7. Use only the weights you need.",
+          "text": "The food basket hangs over the far side of this room. Its brake is jammed above the west wall. Climb the service ledges, free the brake, then collect the load below.",
           "region": "keep"
         }
       ]
     },
-    "rv.supplies.weight.0": {
-      "once": false,
+    "rv.supplies.release": {
+      "once": true,
       "when": [
         {
           "flag": "rv.active.supplies",
@@ -816,59 +816,8 @@
       ],
       "effects": [
         {
-          "type": "counterweight",
-          "id": "rv.supplies.balance",
-          "weights": [
-            3,
-            5,
-            7
-          ],
-          "index": 0,
-          "target": 8
-        }
-      ]
-    },
-    "rv.supplies.weight.1": {
-      "once": false,
-      "when": [
-        {
-          "flag": "rv.active.supplies",
-          "is": true
-        }
-      ],
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "rv.supplies.balance",
-          "weights": [
-            3,
-            5,
-            7
-          ],
-          "index": 1,
-          "target": 8
-        }
-      ]
-    },
-    "rv.supplies.weight.2": {
-      "once": false,
-      "when": [
-        {
-          "flag": "rv.active.supplies",
-          "is": true
-        }
-      ],
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "rv.supplies.balance",
-          "weights": [
-            3,
-            5,
-            7
-          ],
-          "index": 2,
-          "target": 8
+          "type": "flag",
+          "id": "rv.supplies.balance.open"
         }
       ]
     },
@@ -899,7 +848,7 @@
           "type": "note",
           "id": "rv.supplies.recovered",
           "title": "Food for the Refuge — recovered",
-          "text": "Finish this level half to keep the recovery. Then return to Quartermaster in the Waystation.",
+          "text": "The food is safe. Return to the Quartermaster in the Waystation when you are ready.",
           "region": "keep"
         }
       ]

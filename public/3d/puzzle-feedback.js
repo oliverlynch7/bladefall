@@ -1,6 +1,7 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
+ 'rv.supplies.take':'The food is secured. Return to the Quartermaster in the Waystation.',
  'home.grain.clue':'The basket is tied to the store-room door. Find where the loft hopper sends its grain.',
  'home.grain.spout':'The trough now points at the hanging basket. Release the grain from the loft hopper.',
  'home.grain.hopper':'The hopper gate is open. If the grain misses the basket, swing the trough toward it below.',
@@ -23,6 +24,7 @@ const outcomes={
 };
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
+ if(event?.effects?.some(e=>e.id==='rv.supplies.balance.open')&&after.flags['rv.supplies.balance.open'])return {id,replaceKey:'puzzle:rv.supplies',kind:'Supplies lowered',title:'Hoist brake freed',text:'The counterweight rises and the food basket descends. Return to the floor and collect the supplies.'};
  if(['home.grain.spout','home.grain.hopper'].some(key=>event?.effects?.some(e=>e.id===key))){
   const solved=!!after.flags['home.grain.open'];
   return {id,replaceKey:'puzzle:home.grain',kind:solved?'Path opened':'Granary machinery',title:solved?'Store door lifted':event.effects[0].id==='home.grain.spout'?'Trough aimed':'Grain released',text:solved?'Grain fills the basket. It descends and lifts the store-room door. The chest is inside.':event.effects[0].id==='home.grain.spout'?'The trough now points at the basket. Climb to the loft and open the hopper.':'Grain misses the hanging basket. Swing the trough toward it from the barn floor.'};

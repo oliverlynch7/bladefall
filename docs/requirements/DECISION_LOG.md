@@ -945,3 +945,10 @@ The single shared release keeps the existing `ic.channel.open` flag and FF-04 re
 ## [Codex | 2026-10-11] Homefields grain-route puzzle | U-2026-10-11-CONTINUE
 
 Apply Oliver's approved puzzle-variety principle to the optional granary: retire the 1/2/4 handle combination and use the existing loft climb to reach a hopper whose trough can be aimed at a hanging basket. The resulting pulley visibly lifts the existing store door. Either action order works; grain released too early misses visibly without locking the player out. Keep home.grain.open, the cache and note IDs, reward, old completed saves and host-owned co-op state. Group the exterior roof trim so the normal camera can show the interior without deleting roof geometry from outside. A brief journal/chest layout correction is included because browser QA exposed that overlap. This is a scoped implementation, pending human playtest for visual quality and enjoyment; no new story decision or custom SFX.
+## [Codex | 2026-10-11] Broken Walls optional supply hoist | U-2026-10-11-CONTINUE
+
+Under Oliver's approved campaign-quality and puzzle-variety direction, retire the optional Quartermaster supply hoist's adjacent three-weight sum. Use the sealed chamber's west side for a short, uneven service climb to a jammed upper brake; releasing it visibly lowers the existing food basket for collection below. Preserve `rv.supplies.balance.open`, return-quest status/reward IDs, the independent shield trial, co-op authority and older saves. See docs/design/RUINED_KEEP_SUPPLY_HOIST_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Broken Walls hoist verification | U-2026-10-11-CONTINUE
+
+This optional interaction is implemented in v2.171.0 with the previously approved immediate saving of collected return-request items. The old completed flag still opens the hoist, while old partial sums do not. The food is absent on later ready/done visits. Browser route, deliberate miss and retry, normal prompts, story gates, legacy-shaped save reload, two-page co-op and full Keep route passed. Its fun, difficulty and art remain for Oliver to judge in a playtest.

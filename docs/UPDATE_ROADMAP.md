@@ -11,3 +11,7 @@ Version 2.149.0 replaces the live Snowbound camp's 1-3-2 marker puzzle with seve
 ## [Codex | 2026-10-10] Palace Courtyard route choice
 
 Shipped in v2.159.0: either balcony opens the mirror terrace, with upper combat and lower garden approaches on both sides. The other balcony is optional, and old saves migrate without changing reward identity. Courtyard fall-back sun glare was reduced. Browser route, co-op and checkpoint QA passed; full human playtesting remains. See docs/design/PALACE_COURTYARD_ROUTE_CHOICE_2026-10-10.md.
+
+## [Codex | 2026-10-11] Broken Walls supply hoist, v2.171.0
+
+The optional Quartermaster food request now uses four collision-backed service ledges to reach an upper brake. Releasing it visibly raises the counterweight and lowers the food basket for collection below; the tracker follows that change. A failed jump returns to the chamber floor. The old opened flag, reward and accepted/ready/done states remain, with immediate saving on collection. Old partial weight values do not solve the new route; completed and ready revisits show an empty, lowered hoist. Muted browser QA passed the full physical climb with miss/retry, normal prompts, once-only food, legacy-shaped partial/completed save reloads, two-page co-op and the 228-waypoint Broken Walls route including the separate shard trial. Static, dialogue and story tests passed. Human playtesting remains for feel and final visuals. See docs/design/RUINED_KEEP_SUPPLY_HOIST_2026-10-11.md. No custom SFX work.

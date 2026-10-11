@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.163.0-melee-reach';
+const VERSION3D='2.164.0-galewisp-dive';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9721,6 +9721,8 @@ function spawnEnemy(type,x,z,isBoss){
   // Ordinary campaign foot soldiers should not stop to wind up beyond the range of their own strike.
   // Keep trials, side modes, specialized foes and bosses at their established tuning.
   if(isCampaignAdventure()&&a.kind==='walk'&&(!a.spec||a.spec==='watch')&&!a.boss&&!isBoss)e.meleeReach=8;
+  // The Galewisp's close dive needs the same wind-up and hit reach; it must still descend to contact height.
+  if(isCampaignAdventure()&&a.kind==='fly'&&a.dive&&!a.boss&&!isBoss)e.meleeReach=12;
   if(type==='dummy') e.hp=e.maxHp=trainingDummyHp(G&&G.p?G.p.level:1);
   if(e.boss) G.boss=e;
   e.mid=(G._midSeq=(G._midSeq||0)+1);   // stable multiplayer id (host & guest spawn in the same seeded order, so ids align)
@@ -9734,8 +9736,9 @@ function spawnEnemy(type,x,z,isBoss){
      identity the two clients already agree on, so this roll does not have to be reached in the same
      order as any other to land on the same answer. Hoisted above the roll for exactly that. */
   const roleRnd=mulberry((((G&&G.runSeed||0)>>>0) ^ Math.imul(e.mid,0x9E3779B1) ^ 0x726f1e)|0);
-  // Phase 11: enemy ROLES — a behavior archetype forcing a response (no extra HP). A minority of ground mobs.
-  if(!e.boss && e.kind!=='goblin' && !isBoss && roleRnd()<0.22){
+  // Phase 11: enemy ROLES — a behavior archetype forcing a response (no extra HP).
+  // Galewisps keep their signature warned dive; a rolled exploder would self-destruct mid-swoop.
+  if(!e.boss && e.kind!=='goblin' && !(e.kind==='fly'&&e.dive) && !isBoss && roleRnd()<0.22){
     const opts = e.kind==='caster' ? ['healer'] : e.kind==='charger' ? ['exploder','flanker'] : ['shielder','exploder','flanker'];
     e.role = opts[Math.floor(roleRnd()*opts.length)];
     e.roleCol = {shielder:'#8fb7ff',healer:'#7de08a',exploder:'#ff7a3a',flanker:'#c98cff'}[e.role];
@@ -10939,6 +10942,31 @@ function enemyPartyTarget(e,p){
 function enemyMeleeClear(e,target){
  const a={x:e.x,z:e.z,y:(e.y||0)+Math.min(e.h||40,48)*.55},b={x:target.x,z:target.z,y:(target.y||0)+Math.min(target.h||40,48)*.55};
  return !BFEnemyNavigation.blocked(a,b,[...(G.obstacles||[]),...(G.walls||[]).map(w=>w.courtWall?{...w,h:(w.y0||0)+w.h}:w),...(G.doors||[])]);
+}
+function galewispCoverPerch(e,p){
+ if(!e.dive||!isCampaignAdventure())return null;
+ let cover=null,area=Infinity;
+ for(const o of G.obstacles){
+  if(o.kind!=='plat'||o.invisible||!Number.isFinite(o.y0)||o.y0<=p.y+p.h+16)continue;
+  if(Math.abs(p.x-o.x)>=o.w/2||Math.abs(p.z-o.z)>=o.d/2)continue;
+  if(o.w*o.d<area){cover=o;area=o.w*o.d;}
+ }
+ if(!cover)return null;
+ const sx=Number.isFinite(e.sx)?e.sx:e.x,sz=Number.isFinite(e.sz)?e.sz:e.z,m=e.r+18;
+ const cx=Math.max(cover.x-cover.w/2,Math.min(cover.x+cover.w/2,p.x));
+ const cz=Math.max(cover.z-cover.d/2,Math.min(cover.z+cover.d/2,p.z));
+ const edges=[{x:cover.x-cover.w/2-m,z:cz},{x:cover.x+cover.w/2+m,z:cz},{x:cx,z:cover.z-cover.d/2-m},{x:cx,z:cover.z+cover.d/2+m}];
+ return edges.reduce((best,q)=>Math.hypot(q.x-sx,q.z-sz)<Math.hypot(best.x-sx,best.z-sz)?q:best);
+}
+function galewispHasStrikeClearance(e,target){
+ if(!e.dive||!isCampaignAdventure())return true;
+ // Its wings must clear a raised platform before the melee wind-up freezes horizontal movement.
+ // Otherwise the platform's flyer collision lifts it out of contact during the strike.
+ for(const o of G.obstacles){
+  if(o.kind!=='plat'||o.invisible||!Number.isFinite(o.y0)||o.y0<=target.y+target.h+16)continue;
+  if(o.h>e.y-6&&Math.abs(e.x-o.x)<o.w/2+e.r*.6&&Math.abs(e.z-o.z)<o.d/2+e.r*.6)return false;
+ }
+ return true;
 }
 // true if a wall (or a closed door) blocks the straight line a->b — used so melee can't reach through walls
 function losBlocked(x0,z0,x1,z1){
@@ -16177,7 +16205,7 @@ function updateWorld(dt){
         e._meleeSeen=(e._meleeSeen||0)+dt;eff=0;e.meleeW=Math.max(0,e.meleeW-dt);
         if(e.meleeW===0&&!mirror){e.meleeActive=.18;e.meleeCd=.9;}
       }
-      else if(!mirror&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?(e.meleeReach??45):10)&&Math.abs(e.y-meleeTarget.y)<75&&enemyMeleeClear(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
+      else if(!mirror&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?(e.meleeReach??45):10)&&Math.abs(e.y-meleeTarget.y)<75&&galewispHasStrikeClearance(e,meleeTarget)&&enemyMeleeClear(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
       if(e.meleeActive>0||mirror)eff=0;
     }
     if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
@@ -16197,13 +16225,20 @@ function updateWorld(dt){
     if(e.spec){ specBehavior(e,dt,p,dirX,dirZ,d); }
     if(e.eruptW>0||e.knightW>0||e.fuseT>0||e.blinkFx>0)eff=0;   // Batch-2 unique-mob behaviors (totem/trail/blink/tether/knightslam)
     if(e.kind==='fly'){ e.bob+=dt*2.4;
-      let ty=Math.max(0,p.y+44+Math.sin(e.bob)*52-8), spd=eff;   // wave tracks YOUR height
+      const flyTarget=e.dive&&isCampaignAdventure()?meleeTarget:p;
+      const perch=galewispCoverPerch(e,flyTarget);
+      if(perch)e.diving=0; // Sheltered players stay safe; the wisp waits at the approach-side edge.
+      let ty=Math.max(0,flyTarget.y+44+Math.sin(e.bob)*52-8), spd=eff;   // wave tracks the target's height
       if(e.dive){                                                // galewisp: hover high, telegraphed swoop to your level, then climb back
-        if(e.diving>0){ e.diving-=dt; ty=Math.max(0,p.y+4); spd=eff*2.5; if(e.diving<=0) e.diveCd=2.4+Math.random()*1.8; }
-        else { e.diveCd=(e.diveCd==null?1.4:e.diveCd)-dt; ty=Math.max(0,p.y+78+Math.sin(e.bob)*26);
-          if(e.diveCd<=0 && d<420){ e.diving=0.8; SFX.growl(1.25); addText(e.x,e.y+e.h+10,e.z,'!','#bfe0e8',true); } } }
+        if(e.diving>0){ e.diving-=dt; ty=Math.max(0,flyTarget.y+4); spd=eff*2.5; if(e.diving<=0) e.diveCd=2.4+Math.random()*1.8; }
+        else { e.diveCd=(e.diveCd==null?1.4:e.diveCd)-dt; ty=Math.max(0,flyTarget.y+78+Math.sin(e.bob)*26);
+          if(!perch&&e.diveCd<=0 && d<420){ e.diving=0.8; SFX.growl(1.25); addText(e.x,e.y+e.h+10,e.z,'!','#bfe0e8',true); } } }
+      if(perch){const toEdge=Math.hypot(perch.x-e.x,perch.z-e.z);dirX=toEdge>6?(perch.x-e.x)/toEdge:0;dirZ=toEdge>6?(perch.z-e.z)/toEdge:0;}
       e.x+=dirX*spd*dt; e.z+=dirZ*spd*dt;
       e.y+=Math.sign(ty-e.y)*Math.min(Math.abs(ty-e.y),spd*1.6*dt);
+      // A Galewisp's warned strike must carry its body down to contact height, even though
+      // the shared melee wind-up halts horizontal movement. The player can still dodge out.
+      if(e.dive&&!perch&&isCampaignAdventure()&&(e.meleeW>0||e.meleeActive>0)&&e.y>flyTarget.y+4)e.y=Math.max(flyTarget.y+4,e.y-110*dt);
       // flyers breach over anything in their way (columns included) instead of being walled
       for(const ob of G.obstacles){ if(ob.h>e.y-6 && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.6 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.6){ e.y+=300*dt; break; } }
     }

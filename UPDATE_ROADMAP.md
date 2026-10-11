@@ -2601,3 +2601,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Ordinary campaign walkers and watch sentinels use a small, consistent reach for starting and landing their telegraphed melee. The first swing now hits a stationary target when not dodged; attack timing and damage are unchanged. Trial, side-mode and boss tuning are unchanged.
 - [x] Co-op snapshots mirror the reach. The Lost Canyon opening alarm pair has a fixed guard role, avoiding random exploder/flanker behavior at the rescue cage.
 - [x] Static and three repeated muted-browser first-hit/dodge/cover/trial tests passed, as did existing melee sync, campaign pursuit, Briar roles and Lost Canyon alarm/co-op tests. The broad natural-combat sweep still fails its separate Lost Canyon Galewisp sample; investigate its under-platform test spot or flyer behavior separately. Oliver's playtest must judge combat pressure. See docs/design/CAMPAIGN_MELEE_REACH_2026-10-10.md.
+
+## [Codex | 2026-10-10] Galewisp cover and dive (SHIPPED v2.164.0)
+
+- [x] In the campaign, the Galewisp waits at a raised platform edge while its target shelters beneath it, and it does not begin a strike where its body would be lifted by the platform.
+- [x] In open ground its warned dive reaches contact height; the first strike connects against a stationary player and a timed dodge avoids it. The generic role roll no longer turns Galewisps into self-destructing exploders. Other flyers and trial tuning are unchanged.
+- [x] A fixed-slice browser cover/hit/dodge check passed 20 repeated runs. Static gate, Lost Canyon route/climb/checkpoint/old-save/co-op, campaign pursuit, Briar roles and enemy navigation checks passed. The broad natural-combat test's under-bracket coordinate remains cover, so a hit is not expected there. Human playtesting remains for combat feel. See docs/design/GALEWISP_COVER_DIVE_2026-10-10.md.

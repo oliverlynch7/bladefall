@@ -908,3 +908,11 @@ Oliver's repeated broad continuation adds no new specific mechanic; this scoped 
 ## [Codex | 2026-10-10] Campaign ordinary melee first-swing fix | U-2026-10-10-CONTINUE-CLIFF
 
 Oliver's standing complaint that ordinary enemies are too easy supports a focused correctness fix where all six sampled grunt/sentinel first swings missed a stationary target because the AI stopped to wind up beyond contact range. Give standard campaign walking foes a small consistent reach for wind-up and hit, while keeping timing, dodge, cover, tutorial trials, specialized encounters and non-campaign modes unchanged. Mirror the reach to co-op guests. This is not a broader balance redesign or a new difficulty mandate. See docs/design/CAMPAIGN_MELEE_REACH_2026-10-10.md.
+
+## [Codex | 2026-10-10] Galewisp cover and dive | U-2026-10-10-CONTINUE-CLIFF
+
+The continuing approved enemy reliability and campaign combat work includes making the existing Galewisp's telegraphed dive a real encounter. Browser evidence shows a frozen overhead stall under a solid bracket and high-altitude wind-ups that miss on open ground. Keep the raised bracket as valid cover, move the wisp to its approach-side edge while the player shelters, and make its warned strike visibly descend to contact height in the open. Do not change damage, timing, other flyers, trials, saves or custom SFX. See docs/design/GALEWISP_COVER_DIVE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Galewisp role consistency | U-2026-10-10-CONTINUE-CLIFF
+
+Repeated browser combat testing exposed a conflicting generic role assignment: a Galewisp could roll `exploder`, die during its own warned dive and damage the player with a blast. Exclude the Galewisp from that generic role roll so its established dive remains the identifiable attack. Other flyer role behavior stays as it was. This is part of the same scoped enemy-reliability fix, with no new damage, timing, trial, save or SFX rule. See docs/design/GALEWISP_COVER_DIVE_2026-10-10.md.

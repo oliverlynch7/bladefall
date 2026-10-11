@@ -2633,3 +2633,9 @@ The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing 
 - [x] Replaced the optional FF-04 lower-channel switch combination with five service ledges and a visible hanging-plug release. The side bridge freezes after water reaches the chiller; the main floating-platform crossing remains separate.
 - [x] Kept completed/partial save compatibility and co-op authority, made the tracker finish only on shard collection, and verified normal-camera visibility after moving the control aside.
 - [x] Muted browser route, miss/recovery, old-state, checkpoint, physical main crossing, full cave and two-page co-op checks passed alongside static/story checks. Human playtesting remains for feel and visual polish. No custom SFX work. See docs/design/DEEP_ICE_SIDE_SPILL_2026-10-11.md.
+
+## [Codex | 2026-10-11] Homefields granary route (v2.170.0)
+
+- [x] Replaced the optional three-weight combination with a loft hopper, lower aimable trough, visible grain flow and pulley basket that opens the same store room. Hopper-first spills visibly without trapping the player.
+- [x] Kept the existing reward and save IDs, corrected the far-camera roof obstruction, and moved journal updates clear of simultaneous chest reveals and the minimap.
+- [x] Muted browser route/height/collision, save, two-page co-op and story checks passed. Human playtesting remains for challenge, art and readability. This is one optional puzzle, not a full Homefields redesign. See docs/design/HOMEFIELDS_GRANARY_CHUTE_2026-10-11.md. No custom SFX work.

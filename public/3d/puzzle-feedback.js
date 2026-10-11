@@ -1,6 +1,9 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
+ 'home.grain.clue':'The basket is tied to the store-room door. Find where the loft hopper sends its grain.',
+ 'home.grain.spout':'The trough now points at the hanging basket. Release the grain from the loft hopper.',
+ 'home.grain.hopper':'The hopper gate is open. If the grain misses the basket, swing the trough toward it below.',
  'hp.code.release':'The hoist lifted its cargo clear of the chest below. Drop to the lower trail and open it.',
  'hp.code.claim':'The cliff chest is open. Its reward is yours.',
  'sc.code.fire':'The iron clasp breaks. Return to the Lantern Wreck to claim Stormshot.',
@@ -20,6 +23,10 @@ const outcomes={
 };
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
+ if(['home.grain.spout','home.grain.hopper'].some(key=>event?.effects?.some(e=>e.id===key))){
+  const solved=!!after.flags['home.grain.open'];
+  return {id,replaceKey:'puzzle:home.grain',kind:solved?'Path opened':'Granary machinery',title:solved?'Store door lifted':event.effects[0].id==='home.grain.spout'?'Trough aimed':'Grain released',text:solved?'Grain fills the basket. It descends and lifts the store-room door. The chest is inside.':event.effects[0].id==='home.grain.spout'?'The trough now points at the basket. Climb to the loft and open the hopper.':'Grain misses the hanging basket. Swing the trough toward it from the barn floor.'};
+ }
  if(event?.effects?.some(e=>e.id==='ic.channel.open')&&after.flags['ic.channel.open'])return {id,replaceKey:'puzzle:ic.channel',kind:'Path opened',title:'Spring diverted',text:'The stone plug blocks the spill. Water reaches the chiller, and a frozen path leads to the sealed side chamber.'};
  if(event?.effects?.some(e=>e.id==='sl.shelf.stage1')&&after.flags['sl.shelf.stage1'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'First shelves unfolded',text:'Two shelves now span the gap. Cross them to reach the second crank.'};
  if(event?.effects?.some(e=>e.id==='sl.shelf.open')&&after.flags['sl.shelf.open'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'Far shelves unfolded',text:'The remaining shelves lead into the restricted archive. Follow their gold edges to the Rift Shard.'};

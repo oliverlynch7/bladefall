@@ -941,3 +941,7 @@ The optional lower pipe puzzle is another adjacent-toggle mask despite water-the
 ## [Codex | 2026-10-11] Deep Ice side-channel implementation verified
 
 The single shared release keeps the existing `ic.channel.open` flag and FF-04 reward. The retired toggle events are absent from the live story book. The visible spill/chiller change and physical jump route distinguish this from the adjacent-switch pattern Oliver rejected. Muted browser and co-op tests passed, including old save states; human playtest remains open. This is a scoped campaign improvement, not a decision to replace the main Frostfell crossing or all other puzzles.
+
+## [Codex | 2026-10-11] Homefields grain-route puzzle | U-2026-10-11-CONTINUE
+
+Apply Oliver's approved puzzle-variety principle to the optional granary: retire the 1/2/4 handle combination and use the existing loft climb to reach a hopper whose trough can be aimed at a hanging basket. The resulting pulley visibly lifts the existing store door. Either action order works; grain released too early misses visibly without locking the player out. Keep home.grain.open, the cache and note IDs, reward, old completed saves and host-owned co-op state. Group the exterior roof trim so the normal camera can show the interior without deleting roof geometry from outside. A brief journal/chest layout correction is included because browser QA exposed that overlap. This is a scoped implementation, pending human playtest for visual quality and enjoyment; no new story decision or custom SFX.

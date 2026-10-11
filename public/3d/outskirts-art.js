@@ -112,7 +112,14 @@ export function buildOutskirts(scene,w){
     }else B.solid(o,woods?'#67694f':'#756950',!!(o.root||o.canopy||o.interior));}});
     obstacles.add(o);
   }
+  // Granary roof trim stays on the exterior, but the open barn aisle must not be
+  // hidden by an overhead camera looking through its southern frame.
+  const granaryRoof=deco.filter(d=>d.granaryRoof);
+  if(granaryRoof.length)B.structure({granaryRoof:true,x:1150,z:90,w:570,d:510,h:280},()=>{
+    for(const d of granaryRoof)add('timber',d.x,(d.y0||0)+d.h/2,d.z,d.w,d.h,d.d||d.w,d.c);
+  });
   for(const d of deco){
+    if(d.granaryRoof)continue;
     const kind=d.kind;if(d.lead===false||(kind==='tree'&&d.lead!==true))continue;
     const y=d.y0||0,ww=d.w||8,hh=d.h||1,dd=d.d||ww,r=hash(d.x,d.z);
     if(kind==='tree'){
@@ -172,6 +179,7 @@ export function updateOutskirts(w){
   for(const g of st.groups){let x,z,r=CHUNK*.72;const ob=g.userData.obstacle;
     if(ob){x=ob.x;z=ob.z;r=Math.max(ob.w||10,ob.d||10)*.6}else{const a=g.userData.cell.split(',').map(Number);x=(a[0]+.5)*CHUNK;z=(a[1]+.5)*CHUNK}
     g.visible=Math.hypot(x-p.x,z-p.z)<distance+r;
+    if(ob?.granaryRoof&&p.x>875&&p.x<1425&&p.z>-355&&p.z<310)g.visible=false;
     if(g.visible&&ob){const base=ob.y0||0,top=ob.kind==='plat'?ob.h:base+(ob.h||0);if(window.BFCameraOcclusion.blocks(w,ob,base,top,window.__BF_META?.().camMode,5))g.visible=false;}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri||0;calls++}
   }

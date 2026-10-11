@@ -1113,9 +1113,9 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./ship-crossing.js?v=2015"></script>
 <script src="./great-furnace.js?v=2158a"></script>
 <script src="./furnace-colossus.js?v=2014"></script>
-<link rel="stylesheet" href="./journal-notice.css?v=2032">
+<link rel="stylesheet" href="./journal-notice.css?v=2170">
 <script src="./journal-notice.js?v=2150"></script>
-<script src="./puzzle-feedback.js?v=2169"></script>
+<script src="./puzzle-feedback.js?v=2170"></script>
 <script src="./journal-clues.js?v=2046"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.169.0-ice-side-spill';
+const VERSION3D='2.170.0-granary-chute';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3191,7 +3191,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2169').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};return briarBook}).catch(e=>{console.warn(e);return null});
+const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(id=>fetch('./story/'+id+'.json?v=2170').then(r=>{if(!r.ok)throw Error('Story dialogue unavailable');return r.json()}).then(b=>BFVoiceContent.apply(b)))).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
 function inCastleGates(){return isCampaignAdventure()&&G.zone===7&&G.area===0;}
@@ -3235,7 +3235,7 @@ function briarObjects(){if(G?.colossusArena&&G.boss?.dead)return [];
  if(!inBriarStory())return [];
  const s=adventureStoryState(),f=s.flags,i=s.items;
  const waterLevel=i['ic.lock.level']||0,showWaterReset=waterLevel>=3||!!f['ic.lock.frozen']&&waterLevel!==2;
- return (G.storyObjects||[]).filter(o=>o.key!=='gf.evac.call'||(!f['gf.evacuated']&&!(G.furnace?.remote||G.furnace)?.escortActive)).filter(o=>!(o.key==='hp.code.release'&&f['hp.code.open'])&&!(o.key==='hp.code.claim'&&(!f['hp.code.open']||f['hp.code.claimed']))).filter(o=>!(o.key==='gf.cache.release'&&f['gf.cache.open'])).filter(o=>!(o.key==='rk.breach'&&f['rk.breach.start'])&&!(o.key==='lc.rail.release'&&f['lc.rail.open'])&&!(o.key==='ff.camp.release'&&f['ff.camp.open'])).filter(o=>!(o.key==='ff.heater'&&f['ff.heater'])&&!(o.key==='ih.cart'&&f['ih.cart'])&&!(o.key==='home.bell.alarm'&&f['home.bells.open'])&&!(o.key==='home.bell.cache'&&!f['home.bells.open'])&&!(o.key==='woods.tracks.release'&&f['woods.tracks.open'])&&!(o.key==='sc.code.claim'&&(!f['sc.code.open']||s.rewards['sc.stormshot']))&&!(o.key==='sc.code.note'&&f['sc.code.open'])&&!(o.key==='sc.ballista'&&f['sc.code.open'])&&!(o.key==='sc.code.fire'&&f['sc.code.open'])&&!(f['ic.lock.open']&&/^ic\.lock\.[123]$/.test(o.key))&&!(f['ic.lock.frozen']&&/^ic\.lock\.[12]$/.test(o.key))&&!(o.key==='ic.lock.3'&&!f['ic.lock.frozen'])&&!(o.key==='ic.lock.reset'&&(f['ic.lock.open']||!showWaterReset))&&(o.key!=='sc.fit'||!f['sc.boat.ready']&&['rudder','sail','rope'].some(k=>(adventureStoryState().items['sc.'+k]||0)>0&&!f['sc.installed.'+k]))).map(o=>({...o,available:BFReturnVisits.available(o.key,adventureStoryState())&&(!inWindingCliffs()||BFHollowCliffs.available(o.key,s,G))&&(!inLongAscent()||BFLongAscent.available(o.key,G,G.ascent?.remote))&&(!inCastleGates()||BFCastleGates.available(o.key,G,G.castleGates?.remote))&&(!G.marbleArena||BFMarbleGuardian.available(o.key,G))&&(!inSkyLibrary()||BFSkyLibrary.available(o.key,G,G.library?.remote))&&(!inPalaceCourtyard()||BFPalaceCourtyard.available(o.key,G,G.court?.remote))&&(!inThunderCliffs()||BFThunderCliffs.available(o.key,G))&&(!inShipwreck()||BFShipwreckShore.available(o.key,G,G.shore?.remote))&&(!G.colossusArena||BFFurnaceColossus.available(G))&&(!inGreatFurnace()||BFGreatFurnace.available(o.key,G,G.furnace?.remote))&&(!inIronHalls()||BFIronHalls.available(o.key,G,G.iron?.remote))&&(!inIceCaves()||BFIceCaves.available(o.key,G,G.iceCaves?.remote))&&(!inPrison()||BFPrison.available(o.key,G,G.prison?.remote))&&(!inBrokenWalls()||BFBrokenWalls.available(o.key,G,G.keep?.remote))&&(!inLostCanyon()||BFLostCanyon.available(o.key,G,adventureStoryState(),MP.active&&!MP.isHost?G._canyonGuards:undefined))&&(o.key!=='hp.lift'||f['hp.quiet']||!(MP.active&&!MP.isHost?G._cliffGuards:G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length))&&(o.key!=='woods.rescue.release'||!(MP.active&&!MP.isHost?G._rescueGuards:G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length))&&!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
+ return (G.storyObjects||[]).filter(o=>o.key!=='gf.evac.call'||(!f['gf.evacuated']&&!(G.furnace?.remote||G.furnace)?.escortActive)).filter(o=>!(o.key==='hp.code.release'&&f['hp.code.open'])&&!(o.key==='hp.code.claim'&&(!f['hp.code.open']||f['hp.code.claimed']))).filter(o=>!(o.key==='gf.cache.release'&&f['gf.cache.open'])&&!(f['home.grain.open']&&['home.grain.spout','home.grain.hopper'].includes(o.key))).filter(o=>!(o.key==='rk.breach'&&f['rk.breach.start'])&&!(o.key==='lc.rail.release'&&f['lc.rail.open'])&&!(o.key==='ff.camp.release'&&f['ff.camp.open'])).filter(o=>!(o.key==='ff.heater'&&f['ff.heater'])&&!(o.key==='ih.cart'&&f['ih.cart'])&&!(o.key==='home.bell.alarm'&&f['home.bells.open'])&&!(o.key==='home.bell.cache'&&!f['home.bells.open'])&&!(o.key==='woods.tracks.release'&&f['woods.tracks.open'])&&!(o.key==='sc.code.claim'&&(!f['sc.code.open']||s.rewards['sc.stormshot']))&&!(o.key==='sc.code.note'&&f['sc.code.open'])&&!(o.key==='sc.ballista'&&f['sc.code.open'])&&!(o.key==='sc.code.fire'&&f['sc.code.open'])&&!(f['ic.lock.open']&&/^ic\.lock\.[123]$/.test(o.key))&&!(f['ic.lock.frozen']&&/^ic\.lock\.[12]$/.test(o.key))&&!(o.key==='ic.lock.3'&&!f['ic.lock.frozen'])&&!(o.key==='ic.lock.reset'&&(f['ic.lock.open']||!showWaterReset))&&(o.key!=='sc.fit'||!f['sc.boat.ready']&&['rudder','sail','rope'].some(k=>(adventureStoryState().items['sc.'+k]||0)>0&&!f['sc.installed.'+k]))).map(o=>({...o,available:BFReturnVisits.available(o.key,adventureStoryState())&&(!inWindingCliffs()||BFHollowCliffs.available(o.key,s,G))&&(!inLongAscent()||BFLongAscent.available(o.key,G,G.ascent?.remote))&&(!inCastleGates()||BFCastleGates.available(o.key,G,G.castleGates?.remote))&&(!G.marbleArena||BFMarbleGuardian.available(o.key,G))&&(!inSkyLibrary()||BFSkyLibrary.available(o.key,G,G.library?.remote))&&(!inPalaceCourtyard()||BFPalaceCourtyard.available(o.key,G,G.court?.remote))&&(!inThunderCliffs()||BFThunderCliffs.available(o.key,G))&&(!inShipwreck()||BFShipwreckShore.available(o.key,G,G.shore?.remote))&&(!G.colossusArena||BFFurnaceColossus.available(G))&&(!inGreatFurnace()||BFGreatFurnace.available(o.key,G,G.furnace?.remote))&&(!inIronHalls()||BFIronHalls.available(o.key,G,G.iron?.remote))&&(!inIceCaves()||BFIceCaves.available(o.key,G,G.iceCaves?.remote))&&(!inPrison()||BFPrison.available(o.key,G,G.prison?.remote))&&(!inBrokenWalls()||BFBrokenWalls.available(o.key,G,G.keep?.remote))&&(!inLostCanyon()||BFLostCanyon.available(o.key,G,adventureStoryState(),MP.active&&!MP.isHost?G._canyonGuards:undefined))&&(o.key!=='hp.lift'||f['hp.quiet']||!(MP.active&&!MP.isHost?G._cliffGuards:G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length))&&(o.key!=='woods.rescue.release'||!(MP.active&&!MP.isHost?G._rescueGuards:G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length))&&!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
 }
 function briarReceive(request,actor,position){
  if(!inBriarStory()||!briarBook||(MP.active&&!MP.isHost))return false;
@@ -3692,7 +3692,7 @@ function rebuildHomefieldsVillage(){
  G.homefieldsVillage={revision:1,homes:4};
 }
 function buildHomefieldsGranary(){
- const detail=(x,z,y,w,h,d,c)=>G.deco.push({x,z,y0:y,w,h,d,c,nocol:true});
+ const detail=(x,z,y,w,h,d,c,extra)=>G.deco.push({x,z,y0:y,w,h,d,c,nocol:true,...extra});
  const inside=o=>o.x>820&&o.x<1480&&o.z>-395&&o.z<430;
  G.deco=G.deco.filter(o=>!inside(o));G.obstacles=G.obstacles.filter(o=>!inside(o));
  vseg(1110,130,780,690,{meadow:true});vseg(775,330,480,260,{meadow:true});vseg(1450,-350,520,300,{meadow:true});vseg(1550,0,280,900,{meadow:true});vseg(1150,-265,350,310,{meadow:true});
@@ -3709,49 +3709,64 @@ function buildHomefieldsGranary(){
  // Small locked annex. High enclosing walls prevent bypassing the latch with a normal jump.
  wall(1030,-243,16,280,225);wall(1270,-243,16,280,225);wall(1150,-350,255,280,16);
  for(const x of [900,1400])for(const z of [-130,85,305]){detail(x,z,0,23,210,23,'#4d3d2b');detail(x,z,210,35,10,35,'#a18a5a');}
- for(const z of [-130,305]){detail(1150,z,210,530,14,20,'#635035');for(let k=0;k<5;k++)detail(1150,z,224+k*12,450-k*85,13,24,'#786545');}
+ for(const z of [-130,305]){detail(1150,z,210,530,14,20,'#635035',{granaryRoof:true});for(let k=0;k<5;k++)detail(1150,z,224+k*12,450-k*85,13,24,'#786545',{granaryRoof:true});}
  // Roof strips stay over the side walls; the aisle is open to the camera and sky.
- for(const x of [925,1375])detail(x,85,220,80,12,440,'#6b583b');
+ for(const x of [925,1375])detail(x,85,220,80,12,440,'#6b583b',{granaryRoof:true});
  vplat(960,250,22,110,125,{checkpoint:true});vplat(960,150,48,110,125,{checkpoint:true});vplat(960,50,74,110,125,{checkpoint:true});
  vplat(960,-55,100,110,125,{checkpoint:true});vplat(1100,-55,100,170,90,{slab:12,checkpoint:true});
- G.chests.push({x:1100,z:-55,y:100,opened:false,bob:0});
+ G.chests.push({x:1040,z:-55,y:100,opened:false,bob:0});
  for(const z of [-95,-15])detail(1100,z,112,150,7,7,'#9b8252');
  // Grain bags and crates sit in bays; the middle remains clear for combat and co-op.
  for(const [x,z]of [[940,-105],[1360,230],[1360,180]])for(let k=0;k<3;k++){detail(x,z+k*22,0,34,28+(k%2)*8,20,'#c0ae77');detail(x,z+k*22,20,36,4,22,'#7d6b45');}
  G.storyObjects.push({key:'home.grain.clue',label:'Read the grain keeper’s note',x:1260,z:255,y:0,kind:'grainnote'},
- {key:'home.grain.weight.0',label:'Move the one-sack weight',x:1050,z:125,y:0,kind:'grainweight',weight:1,index:0},
- {key:'home.grain.weight.1',label:'Move the two-sack weight',x:1160,z:30,y:0,kind:'grainweight',weight:2,index:1},
- {key:'home.grain.weight.2',label:'Move the four-sack weight',x:1300,z:125,y:0,kind:'grainweight',weight:4,index:2},
+ {key:'home.grain.spout',label:'Swing the grain trough toward the basket',x:1310,z:100,y:0,kind:'grainspout'},
+ {key:'home.grain.hopper',label:'Release grain from the loft hopper',x:1160,z:-55,y:100,kind:'grainhopper'},
  {key:'home.grain.cache',label:'Open the grain keeper’s chest',x:1150,z:-260,y:0,kind:'graincache',bounds:{minX:1040,maxX:1260,minZ:-335,maxZ:-150}});
- const open=!!adventureStoryState().flags['home.grain.open'];
- G.granary={x:1150,z:-130,open};
+ const f=adventureStoryState().flags,open=!!f['home.grain.open'];
+ G.granary={x:1150,z:-130,open,spout:!!(f['home.grain.spout']||open),hopper:!!(f['home.grain.hopper']||open),spilled:!!(f['home.grain.hopper']&&!f['home.grain.spout']),openAt:-Infinity};
  if(!open)G.walls.push({x:1150,z:-130,w:110,d:22,h:280,invisible:true,grainDoor:true});
  // A shortcut from the barn yard rejoins the eastern exploration trail.
  G.homefieldsVillage.granary=true;
 }
 function syncHomefieldsGranary(s){
- if(!G.granary)return;const open=!!s.flags['home.grain.open'],weight=s.items['home.grain']||0;
- if(open&&!G.granary.open){G.granary.open=true;G.walls=G.walls.filter(w=>!w.grainDoor);playFx('lever');toast('The scale balances. The store-room door rises.');}
- else if(G.granary.weight!==undefined&&weight!==G.granary.weight){playFx('lever');toast('The scale holds '+weight+' sacks of weight.');}
+ if(!G.granary)return;const f=s.flags,open=!!f['home.grain.open'];
+ if(open&&!G.granary.open){G.granary.open=true;G.granary.openAt=G.time;G.walls=G.walls.filter(w=>!w.grainDoor);playFx('lever');}
+ if(f['home.grain.spout']&&!G.granary.spout){G.granary.spout=true;playFx('lever');}
+ if(f['home.grain.hopper']&&!G.granary.hopper){G.granary.hopper=true;playFx('lever');}
+ if(f['home.grain.hopper']&&!f['home.grain.spout'])G.granary.spilled=true;
  if(s.flags['event.home.grain.clue']&&!G.granary.read){G.granary.read=true;toast('Grain keeper’s note added to your journal · J');}
- G.granary.weight=weight;
+ if(s.notes['home.grain']){const cache=!!s.flags['event.home.grain.cache'];s.notes['home.grain'].title=cache?'The granary store room':'The granary basket';s.notes['home.grain'].text=cache?'The grain filled the hanging basket and lifted the store door. We recovered the grain keeper’s saved coins.':open?'Grain filled the hanging basket and lifted the store door. The chest is inside.':'The store door rises when its hanging basket fills. The hopper above the loft still holds grain, but its trough points away from the basket.';}
 }
 function drawHomefieldsGranary(s,t){
- if(!G.granary)return;const f=s.flags,mask=s.items['home.grain.mask']||0,total=s.items['home.grain']||0;
- const d=G.granary,y=d.open?235:0;
+ if(!G.granary)return;const f=s.flags,d=G.granary,aligned=d.spout||d.open,released=d.hopper||d.open,progress=d.open?Math.max(0,Math.min(1,(t-d.openAt)/1.5)):0,y=235*progress;
  for(let k=0;k<7;k++)bx(d.x-45+k*15,y+110,d.z,12,220,12,'#826a44');
  for(const h of [20,190])bx(d.x,y+h,d.z+9,105,9,8,'#4f5145');
- // Five fixed marks show the target; the moving pointer shows current balance.
- bx(1160,74,-93,115,42,10,'#786b4c');for(let k=0;k<5;k++)bx(1120+k*20,74,-86,5,21,3,'#e0d3a1');
- bx(1120+Math.min(total,7)*16,102,-86,5,16,4,f['home.grain.open']?'#a7d896':'#d9ad6b');
- for(const o of G.storyObjects.filter(o=>o.kind==='grainweight')){
-  const lowered=!!(mask&(1<<o.index));
-  for(const dx of [-26,26])bx(o.x+dx,72,o.z,7,144,9,'#665136');bx(o.x,146,o.z,64,9,14,'#967d53');
-  const h=lowered?40:94;bx(o.x,(146+h)/2,o.z,3,146-h,3,'#554938');
-  bx(o.x,h,o.z,31,24+o.weight*4,26,'#858573');bx(o.x,h,o.z+15,26,15,4,'#514d3c');
-  for(let k=0;k<o.weight;k++)bx(o.x-10+k*6,h,o.z+18,3,10,2,'#e0d1a1');
-  bx(o.x+28,24,o.z+17,25,6,6,'#b6a16e');
- }
+ // An empty hanging basket is visibly tied over a pulley to the store-room door.
+ for(const x of [1245,1305]){bx(x,110,-78,8,220,8,'#5f4930');bx(x,219,-78,15,10,15,'#bba579');}
+ bx(1275,221,-78,94,11,20,'#765a3a');bx(1275,220,-78,18,21,18,'#c9b477');
+ const basketY=132-79*progress;bx(1275,(basketY+220)/2,-78,3,220-basketY,3,'#c4ac76');
+ bx(1275,basketY,-78,70,10,58,'#60482f');for(const x of [1244,1306])bx(x,basketY+19,-78,8,38,56,'#87643e');
+ for(const z of [-103,-53])bx(1275,basketY+19,z,68,38,7,'#87643e');
+ if(released&&aligned)bx(1275,basketY+14,-78,55,18,44,'#d2ae62');
+ bx(1195,224,-130,162,4,4,'#c4a96d');bx(1110,218,-130,4,10,4,'#c4a96d');
+ // The hopper sits on the reachable loft. The trough's open end shows its aim from below.
+ // Framed, open-topped bin leaves room to read the loft and the character.
+ for(const x of [1122,1198])for(const z of [-84,-26])bx(x,142,z,7,84,7,'#80643f');
+ bx(1160,133,-55,82,7,64,'#593f2d');
+ for(const x of [1122,1198])bx(x,157,-55,7,46,64,'#a68554');
+ for(const z of [-84,-26])bx(1160,157,z,82,46,7,'#9d794d');
+ for(const x of [1122,1198])bx(x,183,-55,10,7,68,'#c2a068');
+ for(const z of [-84,-26])bx(1160,183,z,84,7,10,'#c2a068');
+ bx(1160,179,-55,68,4,49,released?'#594735':'#d2b466');
+ bx(1160,120,-55,38,13,41,released?'#d2ad5c':'#4c3829');
+ bx(1160,115,-21,39,8,12,released?'#8e6239':'#c09a5e');
+ const end=aligned?{x:1275,z:-78}:{x:1215,z:93},dx=end.x-1160,dz=end.z+55,len=Math.hypot(dx,dz),angle=Math.atan2(dx,dz);
+ pushM();mv((1160+end.x)/2,143,(end.z-55)/2);rotY(angle);box(56,9,len,'#7d5a37');for(const side of [-1,1])bx(side*25,9,0,7,20,len,'#b8894e');popM();
+ bx(1310,37,100,13,74,13,'#6a4d32');bx(1310,77,100,32,9,15,aligned?'#bcb276':'#916c45');
+ bx(1310,18,100,68,10,52,'#816342');bx(1310,25,100,48,7,32,aligned?'#b8c77a':'#a48257');
+ if(released){for(let k=0;k<10;k++){const q=(t*.7+k/10)%1;bx(1160+dx*q,128-11*q+Math.sin(k*2.3)*3,-55+dz*q,6,5,6,'#e7c773');}
+  for(let k=0;k<8;k++){const q=(t*.6+k/8)%1;bx(end.x+(k%3-1)*6,119-96*q,end.z+(k%2?5:-5),5,5,5,'#e4bb65');}}
+ if(d.spilled){bx(1215,3,93,78,5,60,'#927343');bx(1215,7,93,57,6,44,'#b49255');bx(1215,11,93,31,5,25,'#c8a765');for(let k=0;k<8;k++)bx(1179+k*9,4,69+(k%3)*25,5,4,4,k%2?'#d2b470':'#aa8b52');}
  const note=G.storyObjects.find(o=>o.kind==='grainnote');if(note){bx(note.x,32,note.z,8,64,8,'#66563b');bx(note.x,63,note.z,52,35,7,'#c2b991');for(let k=0;k<3;k++)bx(note.x,55+k*8,note.z+5,36-k*4,2,2,'#605b49');}
  if(!f['event.home.grain.cache']){bx(1150,18,-260,68,36,40,'#806039');bx(1150,38,-260,70,6,43,'#b39b61');for(const x of [1127,1173])bx(x,20,-238,5,36,4,'#4b4e41');}
 }
@@ -3973,7 +3988,7 @@ function discoveredOptionalTasks(){
   if(inIronHalls()&&state.flags['ih.flint.work'])optional.push(entry('Flint’s own work',state.flags['ih.blank']?'Return the blade blank to Flint':'Find the seized blade blank above the eastern presses',!!state.flags['ih.flint.reward']));
   if(inBriar()){
     if(state.quests['briar.gus.tools']&&state.quests['briar.gus.tools']!=='closed')optional.push(entry('Gus’s good tools',state.items.gus_tools?'Bring the tool roll back to Gus':'Search the workshop loft',state.quests['briar.gus.tools']==='complete'));
-    for(const [id,title,done]of [['home.bells','The watchtower key','home.bells.cache'],['home.grain','The granary scale','home.grain.cache'],['home.orchard','The old orchard','home.orchard.cache']])if(state.notes[id]){const bell=BFHomeBellDefense.status(G,state),bellStep=state.flags['home.bells.open']?'Open the tower chest':bell.active?`Defend the tower · wave ${Math.max(1,bell.wave)}/3${bell.alive?' · '+bell.alive+' foes left':''}`:'Ring the warning bell at the eastern tower';optional.push(entry(title,({'home.bells':bellStep,'home.grain':'Balance the weights inside the granary','home.orchard':'Climb the western picking platforms and lower the walkway'})[id],!!state.rewards[done]));}
+    for(const [id,title,done]of [['home.bells','The watchtower key','home.bells.cache'],['home.grain','The granary basket','home.grain.cache'],['home.orchard','The old orchard','home.orchard.cache']])if(state.notes[id]){const bell=BFHomeBellDefense.status(G,state),bellStep=state.flags['home.bells.open']?'Open the tower chest':bell.active?`Defend the tower · wave ${Math.max(1,bell.wave)}/3${bell.alive?' · '+bell.alive+' foes left':''}`:'Ring the warning bell at the eastern tower',grainStep=state.flags['home.grain.open']?'Open the store-room chest':state.flags['home.grain.spout']?'Climb the loft and release the hopper':'Aim the trough at the hanging basket';optional.push(entry(title,({'home.bells':bellStep,'home.grain':grainStep,'home.orchard':'Climb the western picking platforms and lower the walkway'})[id],!!state.rewards[done]));}
   }
   if(inBlackWoods()){
     if(state.flags['beth.help'])optional.push(entry('Nobody left behind','Follow the boot prints to the old rope lift',!!state.flags['beth.rescued']));
@@ -20444,6 +20459,8 @@ function drawCourse(s,t){
   if(_hubDeco) deferOn();   // these stand on ground the 3D pass covers completely - inline they are painted straight back out
   if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    // Loft beams remain visible from outside but cannot fill the far camera inside the barn.
+    if(d.granaryRoof&&G.granary&&G.p.x>875&&G.p.x<1425&&G.p.z>-355&&G.p.z<310)continue;
     /* Nothing may be excluded by tag here that the 3D layer does not actually stand something in
        the place of: buildWorld returns on the hub branch before the bins/classify block, so a kind
        only counts as converted if buildHub or buildHubDecoProps built it and returned a count. */
@@ -23910,7 +23927,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2167-ascent-art"></script>
+<script type="module" src="./hero3d.js?v=2170-granary-chute"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

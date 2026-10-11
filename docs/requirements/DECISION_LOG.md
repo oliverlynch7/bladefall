@@ -931,3 +931,6 @@ The required catches should visibly clear the two matching spiral flights, not m
 ## [Codex | 2026-10-11] Long Ascent catch and art implementation — verified
 
 The two existing catch flags now control physical, sliding bars at the next stair openings. Catch journal text explains the local result, and the overview briefly looks toward it. Existing saves, rewards, branches and co-op story authority remain intact. Browser QA passed route, gate, save, checkpoint and co-op checks. Unifying six art-wrapper imports with the shared deep-art loader repaired a verified module-instance failure across the castle and palace scenes; all six built without a browser error. This is one scoped increment toward the campaign redesign, not full campaign signoff or a human playtest. No custom SFX.
+## [Codex | 2026-10-11] Sky Library optional shelf mechanics
+
+This applies Oliver's approved puzzle-variety and parkour direction to one existing optional branch. The old linked three-control combination was a verified example of the repeated action pattern Oliver rejected. Two separated cranks now unfold visible shelf platforms in stages; the challenge is traversing them. No new story, reward, or class decision was introduced. See docs/design/SKY_LIBRARY_SHELF_CROSSING_2026-10-11.md. Status: locally verified, awaiting human playtest.

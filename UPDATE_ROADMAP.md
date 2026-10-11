@@ -2624,3 +2624,6 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] Lower and upper catches retract collision-backed iron grilles on the next spiral flights; old completed flags keep the matching gate open. A brief overview glance and updated journal copy explain the local result.
 - [x] The Long Ascent overview and shaft support placement no longer routinely hide the hero at the northern gates. Six Castle Duskmoor and Sunspire scene wrappers share the loaded detailed-art module instead of falling back to generic voxels.
 - [x] Static/unit and muted browser checks passed both gate interactions and traversal, old partial save, full Long Ascent route, combat, checkpoint, co-op and six-scene art integration. Human playtesting remains for feel and art. The broader campaign quality backlog stays active. See docs/design/LONG_ASCENT_STAIR_CATCHES_2026-10-11.md. No custom SFX work.
+## [Codex | 2026-10-11] Campaign puzzles — Sky Library shelf route shipped in v2.168.0
+
+The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing with six varied jumps and lower catch shelves. Simon, quest tracking and on-screen feedback were updated; old completed saves and co-op stages are preserved. Muted browser route, fall/recovery, main-route, save-state and co-op checks passed. Human playtest remains open.

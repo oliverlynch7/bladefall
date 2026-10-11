@@ -351,7 +351,7 @@
       }
     },
     "sl.simon.shelf": {
-      "text": "A shard is behind the turning shelves. Handles move shelves and bridges together. Read the guide's arrows.",
+      "text": "A shard is across that gap. Turn the first crank, cross the shelves, then turn the second crank on the far landing.",
       "choices": [
         {
           "id": "go",
@@ -362,8 +362,8 @@
               "type": "note",
               "id": "sl.shelves",
               "region": "palace",
-              "title": "The turning shelves",
-              "text": "Three handles turn the shelf bridges. The guide beside them shows their directions. Match all three to reach the far shelf and its Rift Shard."
+              "title": "The folding shelves",
+              "text": "The first crank extends two shelf bridges. Cross them to reach a second crank, then follow the next shelves to the Rift Shard. A lower row catches missed jumps."
             }
           ],
           "when": []
@@ -383,7 +383,7 @@
       }
     },
     "sl.simon.hint": {
-      "text": "First toward sunrise. Next toward Hugh. Last away from sunrise. Follow the gold tips, not the book spines.",
+      "text": "The gold edges mark where the shelves will unfold. If you fall, use the lower shelves to get back and try again.",
       "choices": [
         {
           "id": "go",
@@ -395,7 +395,7 @@
               "id": "sl.shelf.hint",
               "region": "palace",
               "title": "Simon’s hint",
-              "text": "Set the first gold tip east, the second south, and the third west. North is toward the guardian door. The handles keep turning one step at a time."
+              "text": "Look for the gold edges. The first crank opens a way to the second. If you miss a jump, the lower shelves will catch you."
             }
           ],
           "when": []
@@ -736,23 +736,27 @@
           "id": "sl.shelf.guide",
           "region": "palace",
           "title": "The shelf guide",
-          "text": "Each handle turns two shelves: its own and the next one. The third also turns the first. Match the gold pointers to the pale marks carved beside them. The return lever resets all three. Once aligned, the shelves lock and the stepping platforms extend."
+          "text": "Turn the near crank to unfold two shelves. Cross to the second crank and turn it to unfold the rest. The lower shelves catch missed jumps."
         }
       ]
     },
     "sl.shelf.0": {
-      "once": false,
-      "when": [],
+      "once": true,
+      "when": [
+        {
+          "flag": "sl.shelf.stage1",
+          "is": false
+        },
+        {
+          "flag": "sl.shelf.open",
+          "is": false
+        }
+      ],
       "effects": [
         {
-          "type": "linkedRotate",
-          "id": "sl.shelf",
-          "index": 0,
-          "target": [
-            1,
-            2,
-            3
-          ]
+          "type": "flag",
+          "id": "sl.shelf.stage1",
+          "value": true
         }
       ]
     },
@@ -837,18 +841,22 @@
       ]
     },
     "sl.shelf.1": {
-      "once": false,
-      "when": [],
+      "once": true,
+      "when": [
+        {
+          "flag": "sl.shelf.stage1",
+          "is": true
+        },
+        {
+          "flag": "sl.shelf.open",
+          "is": false
+        }
+      ],
       "effects": [
         {
-          "type": "linkedRotate",
-          "id": "sl.shelf",
-          "index": 1,
-          "target": [
-            1,
-            2,
-            3
-          ]
+          "type": "flag",
+          "id": "sl.shelf.open",
+          "value": true
         }
       ]
     },
@@ -897,22 +905,6 @@
           "region": "palace",
           "title": "Archive stand 2 saved",
           "text": "The seal is stable and the records are safe. The other stands can be defended in any order."
-        }
-      ]
-    },
-    "sl.shelf.2": {
-      "once": false,
-      "when": [],
-      "effects": [
-        {
-          "type": "linkedRotate",
-          "id": "sl.shelf",
-          "index": 2,
-          "target": [
-            1,
-            2,
-            3
-          ]
         }
       ]
     },
@@ -1118,22 +1110,6 @@
           "region": "palace",
           "title": "An unexpected friend",
           "text": "The dragon accepts your help. Finish Sky Library and enter the guardian hall to keep your new companion. Then select Sunspire Dragon at the Beastkeeper. Leaving or dying before that loses this rescue."
-        }
-      ]
-    },
-    "sl.shelf.reset": {
-      "once": false,
-      "when": [],
-      "effects": [
-        {
-          "type": "linkedRotate",
-          "id": "sl.shelf",
-          "index": -1,
-          "target": [
-            1,
-            2,
-            3
-          ]
         }
       ]
     }

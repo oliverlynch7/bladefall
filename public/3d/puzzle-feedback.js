@@ -20,6 +20,8 @@ const outcomes={
 };
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
+ if(event?.effects?.some(e=>e.id==='sl.shelf.stage1')&&after.flags['sl.shelf.stage1'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'First shelves unfolded',text:'Two shelves now span the gap. Cross them to reach the second crank.'};
+ if(event?.effects?.some(e=>e.id==='sl.shelf.open')&&after.flags['sl.shelf.open'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'Far shelves unfolded',text:'The remaining shelves lead into the restricted archive. Follow their gold edges to the Rift Shard.'};
  if(event?.effects?.some(e=>e.id==='sc.fit.rudder')){
   const fitted=['rudder','sail','rope'].filter(k=>!before.flags['sc.installed.'+k]&&after.flags['sc.installed.'+k]);
   if(fitted.length)return {id,replaceKey:'boat:assembly',kind:after.flags['sc.boat.ready']?'Boat ready':'Boat repair',title:after.flags['sc.boat.ready']?'The boat is ready':fitted.map(k=>k[0].toUpperCase()+k.slice(1)).join(' and ')+' fitted',text:after.flags['sc.boat.ready']?'All three parts are fitted. Board beside Otto when you are ready to cross.':'The '+fitted.join(' and ')+' '+(fitted.length===1?'is':'are')+' now fitted to the boat. Find the remaining supplies or ask Otto for help.'};

@@ -17,7 +17,8 @@ async page=>{
   const w=G.enemies.find(e=>e.label==='Cliff warden');
   ok('named warden holds broad lookout',w?.type==='siegeknight'&&w.elite&&w.cliffGuard&&w.ceKind==='cliff'&&Math.hypot(w.x+450,w.z+3900)<400);
   G.storyState.flags['hp.trail']=true;G.storyState.flags['hp.orders']=true;
-  for(const key of ['hp.weight.2','hp.weight.5','hp.brake.right']){const o=G.storyObjects.find(o=>o.key===key);Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key});}
+  {const o=G.storyObjects.find(o=>o.key==='hp.cart.push');Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key:o.key});for(let i=0;i<150;i++)b.update(.016);}
+  {const o=G.storyObjects.find(o=>o.key==='hp.brake.right');Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key:o.key});}
   ok('freight bridge collision unlocks',!!G.storyState.flags['hp.bridge']&&G.cliffs.bridge&&G.segments.some(s=>s.bridge));
   ok('fresh release starts a timed lowering',Number.isFinite(G.cliffs.bridgeLowerAt)&&G.time-G.cliffs.bridgeLowerAt<.1);
   Object.assign(p,{x:0,z:-2450,y:0,vy:0,vx:0,vz:0,onGround:true});b.update(.016);

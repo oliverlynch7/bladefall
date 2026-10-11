@@ -2612,3 +2612,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 
 - [x] The eastern fortress wall now stops below the upper arrow-post floor and reads as its ground-level support. The central ground passage and western wall remain intact; the platform no longer contains a wall that blocks its own caster's shot.
 - [x] A three-run muted browser test verified the ground barrier and cover, open upper sightline, projectile release and player damage. Normal-camera art, full Broken Walls route, checkpoint reload, co-op state, escort defense, content unit and static gate checks passed. Human playtesting remains for encounter feel and visual polish. See docs/design/RUINED_KEEP_ARROW_POST_SIGHTLINE_2026-10-10.md.
+
+## [Codex | 2026-10-11] Winding Cliffs freight cart (SHIPPED v2.166.0)
+
+- [x] The required bridge now uses a loaded cart rolling along the left siding to a sinking, lit floor plate, followed by the far winch. The 2/3/5 weight buttons and wrong-brake choice are no longer in the world. A premature winch press explains the missing load.
+- [x] The old `hp.weight.open` readiness flag remains as a save alias; old partial/ready/completed saves load correctly. The main bridge, lookout branches, optional cargo chest, rewards and shards retain their IDs.
+- [x] Muted browser checks passed normal E interactions, moving render/collider, full physical level route, bridge set piece, combat/quiet branches, guest-owned co-op push/winch, checkpoint, old saves and guidance. Story and dialogue-logic checks passed. Human playtesting remains for puzzle feel and visual quality. See docs/design/WINDING_CLIFFS_FREIGHT_CART_2026-10-11.md. No custom SFX work.

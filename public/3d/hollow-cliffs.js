@@ -21,14 +21,26 @@
   {x:-1690,z:-2490,y:155,w:135,d:113},
   {x:-1770,z:-2390,y:186,w:173,d:130}
  ];
+ const freight={startX:-430,endX:-175,z:-2610,duration:2.15};
+ function cartProgress(G){
+  const c=G?.cliffs;if(!c?.cartReady)return 0;
+  if(c.cartMoveAt===-Infinity)return 1;
+  return Math.max(0,Math.min(1,((G.time||0)-c.cartMoveAt)/freight.duration));
+ }
+ function cartX(G){const p=cartProgress(G);return freight.startX+(freight.endX-freight.startX)*p*p*(3-2*p);}
  function build(a){
   const {G,seg,plat,solid,spawn}=a;
   for(const key of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[key]=[];
   Object.assign(G,{haz:'gusts',thorns:[],vents:[],phasers:[],debris:[],lights:[],npc:null,secret:null,secretTrigger:null,waystone:null,dashSign:null,beam:null,collapse:[],optionalMissions:[],_midSeq:0,portal:null,vertical:true,canyonWind:{vanes:[],zones:[],time:0}});
-  G.cliffs={revision:2004,paths,bridge:false,bridgeInitialized:false,bridgeLowerAt:-Infinity,ridge:false,cargoSteps,cargoOpen:false,cargoReleaseAt:-Infinity};
+  G.cliffs={revision:2004,paths,bridge:false,bridgeInitialized:false,bridgeLowerAt:-Infinity,ridge:false,cargoSteps,cargoOpen:false,cargoReleaseAt:-Infinity,cartReady:false,cartInitialized:false,cartMoveAt:Infinity};
   G.areaName='Hollow Pass · Winding Cliffs';G.campaignLayout={revision:2004,experience:{title:'Winding Cliffs',objectives:['Follow the prisoner trail','Lower the freight bridge','Open the canyon lift']}};
   const rooms=[['Cliff Refuge',0,180,700,750],['Split Trail',0,-400,750,520],['Broken Cart',-1000,-1450,620,850],['Climber’s Rest',850,-1150,560,500],['Bridge Works',0,-2450,850,600],['Far Landing',0,-3150,650,420],['Legion Lookout',-450,-3900,850,760],['Canyon Lift',0,-4600,850,550]];
   for(const [name,x,z,w,d]of rooms){G.rooms.push({name,x,z,w,d,y:0,monsters:[],encounter:false,cleared:true});if(name!=='Climber’s Rest')seg(x,z,w,d);}
+  // A short rail siding remains on the near bank; the loaded cart never blocks
+  // the 250-unit bridge deck when it reaches its pressure plate.
+  seg(-455,freight.z,340,280,{freightSiding:true});
+  G.cliffs.cartCollider={kind:'col',x:freight.startX,z:freight.z,w:94,d:76,h:57,invisible:true,freightCart:true};
+  G.obstacles.push(G.cliffs.cartCollider);
   function route(route,width=240){const points=[];for(let j=1;j<route.length;j++){const p=route[j-1],q=route[j],n=Math.ceil(Math.max(Math.hypot(q[0]-p[0],q[1]-p[1])/100,Math.abs(q[2]-p[2])/18));for(let k=0;k<=n;k++){const r=p.map((v,i)=>v+(q[i]-v)*k/n);if(r[2]<1)seg(r[0],r[1],width,width);else plat(r[0],r[1],r[2],width,width,{slab:20,checkpoint:true});points.push(r);}}return points;}
   G.cliffs.walks={};for(const [id,p]of Object.entries(paths))if(id!=='ridge')G.cliffs.walks[id]=route(p,id==='quiet'?190:id==='cloth'?185:260);
   // The high route has real gaps; a lower recovery shelf avoids repeated long falls.
@@ -37,7 +49,7 @@
   plat(850,-1150,150,560,500,{slab:25,checkpoint:true});plat(1730,-2210,400,240,230,{slab:22,checkpoint:true});
   for(const step of cargoSteps)plat(step.x,step.z,step.y,step.w,step.d,{slab:14,checkpoint:true,cargoBracket:true});
   // Tall columns remain outside route widths. They frame landmarks without hiding controls.
-  for(const [x,z,w,d,h]of [[-500,270,160,500,370],[500,200,180,430,440],[-350,-1180,230,460,620],[360,-1450,200,750,560],[-1320,-850,150,230,390],[-2050,-1460,240,500,570],[-2000,-2290,210,650,620],[1200,-560,220,420,470],[1850,-1120,220,500,490],[2090,-2340,180,340,690],[450,-2720,130,260,500],[-500,-2740,170,240,530],[-1000,-3550,260,600,550],[-1000,-4350,230,480,640],[1200,-3920,260,600,670],[610,-4700,180,270,460],[-600,-4800,210,360,580]])plat(x,z,h,w,d,{canyonCliff:true});
+  for(const [x,z,w,d,h]of [[-500,270,160,500,370],[500,200,180,430,440],[-350,-1180,230,460,620],[360,-1450,200,750,560],[-1320,-850,150,230,390],[-2050,-1460,240,500,570],[-2000,-2290,210,650,620],[1200,-560,220,420,470],[1850,-1120,220,500,490],[2090,-2340,180,340,690],[450,-2720,130,260,500],[-760,-2810,160,200,300],[-1000,-3550,260,600,550],[-1000,-4350,230,480,640],[1200,-3920,260,600,670],[610,-4700,180,270,460],[-600,-4800,210,360,580]])plat(x,z,h,w,d,{canyonCliff:true});
   // Cart, supply stacks, shade posts and sandstone arches are individually placed landmarks.
   solid(-1160,-1500,0,100,64,145,'#775238');solid(-1150,-1430,68,110,12,165,'#9d7850');
   for(const [x,z]of [[-720,-370],[-270,-2410],[350,-3200],[-680,-4010],[-210,-3630]])solid(x,z,0,85,60,70,'#715439');
@@ -47,8 +59,8 @@
   G.storyNpcs=[{id:'caleb',name:'Caleb',x:-100,z:210,y:0},{id:'skip',name:'Skip',x:940,z:-1140,y:150}];
   const obj=(key,label,x,z,y=0,kind='lever')=>({key,label,x,z,y,kind});
   G.storyObjects=[obj('hp.orders','Read the transport orders',-1060,-1510,0,'orders'),obj('hp.rope','Take the lost rope',1510,-1300,0,'rope'),obj('hp.bridge.clue','Read the freight plate',-110,-2400,0,'plate'),
-   ...[2,3,5].map((n,i)=>obj('hp.weight.'+n,'Attach or remove the '+n+'-mark weight',-170+i*150,-2570,0,'weight')),
-   obj('hp.brake.wrong','Release the cart brake',-230,-2680),obj('hp.brake.right','Release the bridge brake',230,-2680),
+   obj('hp.cart.push','Push the loaded cart onto the plate',-530,freight.z,0,'cartpush'),
+   {...obj('hp.brake.right','Release the bridge winch',230,-2680,0,'bridgebrake'),blockedText:'The plate needs the loaded cart. Push it along the left rail and wait for it to dock.'},
    obj('hp.windbreak','Tie the windbreak shut',570,-880,90),obj('hp.quiet','Tie the lookout rope',790,-3900,180,'rope'),obj('hp.lift','Release the canyon lift',40,-4600),obj('hp.code.clue','Read the cargo plate',-1610,-2110,0,'plate'),
    obj('hp.code.release','Pull the cargo release',-1770,-2390,186,'release'),obj('hp.code.claim','Open the cliff chest',-1550,-2160,0,'chest')];
   for(const [x,z]of [[150,-2300],[-180,-3330],[230,-4430]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
@@ -62,34 +74,54 @@
   G.bounds={minX:-2240,maxX:2250,minZ:-5000,maxZ:650};G.progressEnd=-4900;G.portalPos={x:0,z:-4780,y:0};G.goalPos={...G.portalPos};G.startPos={x:0,z:330};G.lastSafe={x:0,z:330,y:0};Object.assign(G.p,{x:0,z:330,y:0,vy:0});
  }
  function sync(a){const {G,state:s,seg,plat,openWay}=a,f=s.flags;if(!G.cliffs)return;
+  const cartReady=!!(f['hp.weight.open']||f['hp.bridge']);
+  if(!G.cliffs.cartInitialized){G.cliffs.cartInitialized=true;G.cliffs.cartReady=cartReady;G.cliffs.cartMoveAt=cartReady?-Infinity:Infinity;}
+  else if(cartReady&&!G.cliffs.cartReady){G.cliffs.cartReady=true;G.cliffs.cartMoveAt=G.time||0;root.BFJournalNotice?.queue.dismiss('inspect.hp.brake.right');a.sound?.('lever');a.toast?.('The loaded cart rolls toward the floor plate.');}
+  G.cliffs.cartCollider.x=cartX(G);
   if(f['hp.bridge']&&!G.cliffs.bridge){if(G.cliffs.bridgeInitialized)G.cliffs.bridgeLowerAt=G.time||0;G.cliffs.bridge=true;seg(0,-2820,260,560,{bridge:true});}
   G.cliffs.bridgeInitialized=true;
   if(f['hp.skip.returned']&&!G.cliffs.ridge){G.cliffs.ridge=true;for(const p of G.cliffs.ropeSteps)plat(p[0],p[1],p[2],115,115,{slab:14,bridge:true,checkpoint:true});}
   if(f['hp.wind.safe'])G.canyonWind.vanes[0].until=Number.MAX_SAFE_INTEGER;
   for(const [id,message]of [['hp.orders','The orders name Ruined Keep. Open the canyon lift to reach the prisoners.'],['hp.rope','Rope recovered. Bring it back to Skip at the high rest spot.'],['hp.bridge','Freight bridge lowered. Both lookout approaches are open.'],['hp.wind.safe','Windbreak tied shut. The upper crossing is sheltered.']])if(f[id]&&!G.cliffs['seen.'+id]){G.cliffs['seen.'+id]=true;a.toast?.(message);}
-  const mask=s.items['hp.weight.mask']||0;if(G.cliffs.lastWeight!==undefined&&G.cliffs.lastWeight!==mask){a.sound?.('lever');a.toast?.('Hanging weight: '+(s.items['hp.weight']||0)+' / 7 marks');}G.cliffs.lastWeight=mask;
+  const bridgeNote=s.notes['hp.bridge'];if(bridgeNote){bridgeNote.title='Freight bridge';bridgeNote.text=f['hp.bridge']?'The freight cart has lowered the bridge. Cross to the lookout.':cartReady?'The loaded cart sits on the plate. Release the bridge winch across the works.':'Push the loaded cart along the left rail onto the plate. When the cable pulls tight, release the bridge winch across the works.';}
+  const cartNote=s.notes['hp.cart'];if(cartNote&&f['hp.bridge'])cartNote.text='The cart loaded the plate and the bridge lowered. Cross to the lookout.';
   if(!G.cliffs.cargoInitialized){G.cliffs.cargoInitialized=true;G.cliffs.cargoOpen=!!f['hp.code.open'];}
   else if(f['hp.code.open']&&!G.cliffs.cargoOpen){G.cliffs.cargoOpen=true;G.cliffs.cargoReleaseAt=G.time||0;a.sound?.('lever');a.toast?.('The hoist lifts clear of the chest below.');}
   const note=s.notes['hp.code'];if(note){note.title='The cliff cargo chest';note.text=f['hp.code.open']?'The cargo has lifted. Return to the chest beneath the brackets.':'A cable holds cargo over the cliff chest. Follow the uneven brackets from the lower alcove to its high release pin.';}
   if(f['hp.descent']){G.qs['hp.cliffs']=1;openWay();}
  }
- function quest(s){const f=s.flags;return !f['hp.trail']?'Speak to Caleb at the cliff refuge':!f['hp.orders']?'Follow the cart tracks to the broken wagon':!f['hp.bridge']?'Set the freight weights and lower the bridge':!f['hp.descent']?'Reach the lookout — clear its guards or use the upper rope':'Take the lift down into Lost Canyon';}
+ function tick(G,toast){const c=G?.cliffs;if(!c?.cartCollider)return;c.cartCollider.x=cartX(G);if(c.cartReady&&c.cartMoveAt!==-Infinity&&!c.cartDockNoticed&&cartProgress(G)>=1){c.cartDockNoticed=true;root.BFJournalNotice?.queue.dismiss('inspect.hp.brake.right');toast?.('The cart settles on the plate. The bridge winch is ready.');}}
+ function quest(s){const f=s.flags;return !f['hp.trail']?'Speak to Caleb at the cliff refuge':!f['hp.orders']?'Follow the cart tracks to the broken wagon':!f['hp.bridge']?f['hp.weight.open']?'Release the bridge winch across the works':'Push the loaded cart onto the plate':!f['hp.descent']?'Reach the lookout — clear its guards or use the upper rope':'Take the lift down into Lost Canyon';}
  function shards(s){return [{id:'HP-01',x:-1770,z:-1630,y:0},...(s.flags['hp.skip.returned']?[{id:'HP-02',x:1730,z:-2210,y:400}]:[])];}
- function available(key,s){if(key==='hp.code.release')return !s.flags['hp.code.open'];if(key==='hp.code.claim')return !!s.flags['hp.code.open']&&!s.flags['hp.code.claimed'];return true;}
+ function available(key,s,G){if(key==='hp.code.release')return !s.flags['hp.code.open'];if(key==='hp.code.claim')return !!s.flags['hp.code.open']&&!s.flags['hp.code.claimed'];if(key==='hp.cart.push')return !s.flags['hp.weight.open']&&!s.flags['hp.bridge'];if(key==='hp.brake.right')return !!s.flags['hp.weight.open']&&(!G?.cliffs||cartProgress(G)>=1);return true;}
  function draw(a,t){const {G,state:s,bx,pushM,popM,mv,rotY,rotX,box}=a;if(!G.cliffs)return;const f=s.flags;
   // Teal torn cloth hides the sheltered opening; its fluttering edge is a fair visual clue.
   for(let j=0;j<7;j++)bx(-1550,80+j*9,-1280+Math.sin(t*1.5+j*.4)*8,12,10,120,'#587b77');
   for(const o of G.storyObjects){const y=o.y||0;
    if(o.kind==='orders'||o.kind==='plate'){bx(o.x,y+26,o.z,62,52,20,'#725338');bx(o.x,y+50,o.z+12,54,30,2,'#d8c59b');for(let j=0;j<3;j++)bx(o.x,y+43+j*7,o.z+14,36-j*6,2,2,'#534832');}
-   else if(o.kind==='weight'){const i=[2,3,5].indexOf(Number(o.key.split('.').pop())),on=(s.items['hp.weight.mask']||0)&(1<<i),n=[2,3,5][i];bx(o.x,y+(on?58:20),o.z,48,40,48,on?'#ba985d':'#766757');for(let k=0;k<n;k++)bx(o.x-16+k*8,y+(on?62:24),o.z+25,3,18,2,'#f0dcae');bx(o.x,y+(on?118:98),o.z,3,on?120:155,3,'#544635');}
+   else if(o.kind==='cartpush'){bx(o.x,y+30,o.z,16,60,16,'#735338');bx(o.x,y+64,o.z,36,8,12,'#d6ad6e');}
    else if(o.kind==='rope'){if(o.key==='hp.rope'&&f['hp.rope'])continue;for(let j=0;j<7;j++){pushM();mv(o.x,y+7+j*3,o.z);rotY(j*.6);box(37,3,28,'#c5aa76');popM();}}
    else if(o.kind==='release'){bx(o.x,y+8,o.z,50,16,52,'#655847');bx(o.x,y+27,o.z,12,30,12,'#cba873');bx(o.x,y+44,o.z-18,43,7,10,f['hp.code.open']?'#5d675f':'#e6c67e');}
    else if(o.kind==='chest'){bx(o.x,y+22,o.z,90,44,55,'#a47c3f');bx(o.x,y+(f['hp.code.claimed']?65:48),o.z,94,12,58,'#d7b36e');}
    else {bx(o.x,y+25,o.z,16,50,16,'#79603e');bx(o.x,y+49,o.z,52,7,9,'#d2b675');}
   }
-  // Seven marks on the bridge plate, paired with the hanging weights and dedicated brake.
-  for(let j=0;j<7;j++)bx(-132+j*7,61,-2388,5,12,3,j<(s.items['hp.weight']||0)?'#ffdb8b':'#332d27');
-  for(const x of [-290,330])bx(x,90,-2570,16,180,16,'#705035');bx(20,181,-2570,640,16,20,'#95754c');
+  // Rail ties and a loaded cart tell the bridge story without a number lock.
+  for(let x=-505;x<=-115;x+=43)bx(x,3,freight.z,13,5,155,'#77583b');
+  for(const dz of [-49,49])bx(-305,7,freight.z+dz,405,8,8,'#808b88');
+  const docked=cartProgress(G),cx=cartX(G),plateColor=docked>=1?'#e4c77e':'#51636a';
+  bx(freight.endX,8,freight.z,138,12,128,'#46545a');bx(freight.endX,15-docked*5,freight.z,112,3,104,plateColor);
+  for(const dx of [-42,42])for(const dz of [-37,37])bx(freight.endX+dx,20-docked*5,freight.z+dz,8,4,8,docked>=1?'#f6dda4':'#8d9c99');
+  for(const dz of [-35,35])for(const dx of [-37,37])bx(cx+dx,23,freight.z+dz,20,25,17,'#42494b');
+  bx(cx,37,freight.z,112,19,83,'#775237');bx(cx,49,freight.z,104,5,77,'#bb9362');
+  for(const dz of [-42,42])bx(cx,51,freight.z+dz,103,10,6,'#39797a');
+  for(const dx of [-36,0,36])bx(cx+dx,55,freight.z+45,4,15,3,'#dbbf83');
+  for(const dx of [-45,45])bx(cx+dx,60,freight.z,8,24,80,'#4d5557');
+  for(const dx of [-25,25]){bx(cx+dx,75,freight.z,37,31,55,'#68645b');bx(cx+dx,93,freight.z,41,5,59,'#b7a376');}
+  bx(cx,109,freight.z,28,4,18,'#d0bd92');
+  // The plate tugs a clearly continuous cable toward the winch on the other bank.
+  bx(-100,110,-2570,6,203,6,docked>=1?'#d8b872':'#706456');
+  bx(65,210,-2570,335,7,7,docked>=1?'#e2c27e':'#6d655c');
+  bx(-340,90,-2470,16,180,16,'#705035');bx(330,90,-2570,16,180,16,'#705035');bx(20,181,-2570,640,16,20,'#95754c');
   for(const x of [-155,155]){bx(x,110,-2750,20,220,20,'#806044');bx(x,75,-3030,18,150,18,'#806044');}
   // A single hinged deck lowers from the near bank. The saved-open state starts
   // fully down; only a newly solved bridge plays the short lowering motion.
@@ -100,8 +132,8 @@
   for(const side of [-1,1]){bx(side*127,24,-279,8,42,540,'#735738');for(let j=0;j<8;j++)bx(side*127,13,-35-j*72,9,26,9,'#d0ac69');}
   popM();
   for(const x of [-145,145])bx(x,12,-2540,24,24,34,'#8c704a');
-  // Arrow points from the bridge winch to its brake; the cart brake is attached to a wheel.
-  bx(230,46,-2690,30,6,70,'#cab480');bx(-230,32,-2700,60,50,13,'#67523d');
+  // The far winch is distinct from the cart and remains on the safe bank.
+  bx(230,46,-2690,30,6,70,'#cab480');bx(230,32,-2700,60,50,13,'#67523d');
   // Brackets have visible stone undersides, iron edge rails and staggered approach marks.
   // The actual walking slabs are the matching plat obstacles built above.
   for(let i=0;i<cargoSteps.length;i++){const p=cargoSteps[i];bx(p.x,p.y-13,p.z,p.w-7,13,p.d-8,'#625447');bx(p.x,p.y+2.4,p.z,p.w-13,2,p.d-14,i===cargoSteps.length-1?'#b9a174':'#a8916e');
@@ -124,5 +156,5 @@
   for(const x of [-120,120])bx(x,75,-4730,12,150,12,'#795638');bx(0,155,-4730,265,15,20,'#be965c');
   for(const n of G.storyNpcs){const ready=n.id==='caleb'?!f['hp.trail']:!f['hp.skip.returned'];if(ready){const col=n.id==='skip'&&f['hp.rope']?'#9ee0b3':'#eac582';bx(n.x,n.y+83+Math.sin(t*2)*2,n.z,5,12,5,col);bx(n.x,n.y+72+Math.sin(t*2)*2,n.z,5,4,5,col);}}
  }
- const api={build,sync,quest,shards,available,draw,paths,cargoSteps};root.BFHollowCliffs=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+ const api={build,sync,tick,quest,shards,available,draw,paths,cargoSteps,cartProgress,cartX,freight};root.BFHollowCliffs=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -11,6 +11,12 @@ async page=>{
   await page.evaluate(()=>{__BF3.enterZone(1);__BF3.MP.onEnter(1);});await flush();
   for(const p of [page,guest])await p.waitForFunction(()=>__BF3.G.cliffs&&!BF_LOADING.active);
   ok('guest enters same Winding Cliffs',await guest.evaluate(()=>__BF3.G.zone===1&&__BF3.G.area===0));
+  await page.evaluate(()=>{const b=__BF3;b.G.storyState.flags['hp.trail']=true;const o=b.G.storyObjects.find(o=>o.key==='hp.orders');Object.assign(b.G.p,{x:o.x,y:o.y,z:o.z});b.briarRequest('world',{key:o.key});});await flush();
+  await guest.evaluate(()=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='hp.cart.push');Object.assign(b.G.p,{x:o.x,y:o.y,z:o.z});qaPackets.push({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key:o.key});});await flush();
+  ok('guest push starts the shared cart roll',await page.evaluate(()=>__BF3.G.cliffs.cartReady&&BFHollowCliffs.cartProgress(__BF3.G)<1)&&await guest.evaluate(()=>__BF3.G.cliffs.cartReady&&BFHollowCliffs.cartProgress(__BF3.G)<1));
+  for(const p of [page,guest])await p.evaluate(()=>{for(let i=0;i<150;i++)__BF3.update(.016);});
+  await guest.evaluate(()=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='hp.brake.right');Object.assign(b.G.p,{x:o.x,y:o.y,z:o.z});qaPackets.push({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key:o.key});});await flush();
+  ok('guest winch lowers the host and guest bridges',await page.evaluate(()=>__BF3.G.cliffs.bridge)&&await guest.evaluate(()=>__BF3.G.cliffs.bridge));
   await guest.evaluate(()=>{const b=__BF3,o=b.G.storyObjects.find(o=>o.key==='hp.code.release');Object.assign(b.G.p,{x:o.x,y:o.y,z:o.z});qaPackets.push({t:'pos',p:b.MP.selfState()});b.briarRequest('world',{key:o.key});});await flush();
   ok('guest release accepted by host',await page.evaluate(()=>!!__BF3.G.storyState.flags['hp.code.open']));
   ok('cargo rises for both players',await guest.evaluate(()=>!!__BF3.G.storyState.flags['hp.code.open']&&__BF3.G.cliffs.cargoOpen));

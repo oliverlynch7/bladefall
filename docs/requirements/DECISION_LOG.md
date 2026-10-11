@@ -920,3 +920,7 @@ Repeated browser combat testing exposed a conflicting generic role assignment: a
 ## [Codex | 2026-10-10] Ruined Keep arrow-post sightline | U-2026-10-10-CONTINUE-CLIFF
 
 The continuing approved campaign terrain and enemy-reliability work includes removing a live wall/platform overlap that makes the first Ruined Keep caster inert. The eastern ground wall rises through the upper arrow-post floor, so movement allows player and caster to occupy the post while line of sight blocks the shot. Lower that one wall below the 150-unit post and preserve its ground-level barrier. Keep the quest, route, save, co-op and other enemy rules intact; no custom SFX. See docs/design/RUINED_KEEP_ARROW_POST_SIGHTLINE_2026-10-10.md.
+
+## [Codex | 2026-10-11] Winding Cliffs freight cart | U-2026-10-11-CONTINUE
+
+Oliver's continuing direction to improve existing campaign levels and replace reskinned adjacent-button puzzles supports replacing the required freight bridge's weight sum with a visible cart-to-plate-to-winch chain. Keep old bridge and weight-ready flags meaningful for saves, preserve the existing optional cargo climb and both lookout routes, and use host-owned story actions for co-op. A premature winch press explains the missing cart. The cart moves with collision and the pressure plate visibly sinks. See docs/design/WINDING_CLIFFS_FREIGHT_CART_2026-10-11.md. This is a scoped implementation decision, not a claim that the entire campaign is redesigned or human-playtested.

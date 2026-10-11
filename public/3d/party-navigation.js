@@ -39,7 +39,7 @@ function target(g){
   return a.length?{x:a.reduce((n,o)=>n+o.x,0)/a.length,z:a.reduce((n,o)=>n+o.z,0)/a.length,y:a.reduce((n,o)=>n+(o.y||0),0)/a.length,navLabel:label}:null;
  };
  const puzzles={
-  'hp.bridge.clue':[/^hp\.weight\.\d+$/,'Bridge weights'],
+  'hp.bridge.clue':[/^hp\.cart\.push$/,'Loaded cart'],
   'kd.lift.note':[/^kd\.lift\.\d+$/,'Lift weights'],
   'ff.reflect.clue':[/^ff\.reflect\.3$/,'Cornice ledges'],
   'ic.lock.clue':[/^ic\.lock\.\d+$/,'Water controls'],
@@ -48,7 +48,7 @@ function target(g){
   'pc.mirror.note':[/^pc\.mirror\.\d+$/,'Sun mirrors']
  };
  const puzzle=t&&puzzles[t.key];if(puzzle&&read(t.key)){const key=t.key;t=bank(...puzzle)||t;t={...t,clueId:({'hp.bridge.clue':'hp.bridge','kd.lift.note':'kd.lift','ff.reflect.clue':'ff.reflect','ic.lock.clue':'ic.lock','ih.plate':'ih.order','gf.pipes':'gf.pipes','pc.mirror.note':'pc.mirrors'})[key]};}
- if(g.zone===1&&g.area===0&&f['hp.orders']&&!f['hp.bridge']&&f['hp.weight.open'])t=bank(/^hp\.brake\./,'Bridge brakes')||t;
+ if(g.zone===1&&g.area===0&&f['hp.orders']&&!f['hp.bridge']&&f['hp.weight.open'])t=obj('hp.brake.right')||t;
  if(g.zone===3&&g.area===1&&f['ic.ellis.lead']&&read('ic.lock.clue')&&!f['ic.lock.open']){
   const level=i['ic.lock.level']||0,key=level>=3||f['ic.lock.frozen']&&level!==2?'ic.lock.reset':f['ic.lock.frozen']?'ic.lock.3':level<2?'ic.lock.1':'ic.lock.2',o=obj(key);
   if(o)t={...o,clueId:'ic.lock',navLabel:key==='ic.lock.1'?'Spring pump':key==='ic.lock.2'?'Floating platform':key==='ic.lock.reset'?'Overflow sluice':'Far drain'};

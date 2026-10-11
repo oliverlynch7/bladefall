@@ -350,7 +350,7 @@
       }
     },
     "hp.skip.ready": {
-      "text": "The freight bridge is below. Match its weights to the plate, then use the bridge brake—not the cart brake.",
+      "text": "The bridge cart sits on the left rail. Roll it onto the floor plate, then release the bridge winch.",
       "choices": [
         {
           "id": "joke",
@@ -374,11 +374,11 @@
       }
     },
     "hp.skip.brake": {
-      "text": "A very short ride. A very long walk back.",
+      "text": "I watched the bridge move when the cart hit that plate. Keep clear of the wheels.",
       "choices": [
         {
           "id": "back",
-          "text": "I'll read the plate.",
+          "text": "I'll try the cart.",
           "next": "hp.skip.ready"
         }
       ],
@@ -440,10 +440,41 @@
           "id": "hp.bridge",
           "region": "hollow",
           "title": "Freight bridge",
-          "text": "The plate has seven marks. Three hanging weights show two, three and five marks. The bridge brake has a cable running to the bridge; the cart brake holds the wagon."
+          "text": "The loaded cart is parked on the left rail. Push it onto the floor plate. When the bridge cable pulls tight, release the winch on the far side of the works."
         }
       ],
       "once": true
+    },
+    "hp.cart.push": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "hp.weight.open",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "hp.cart",
+          "region": "hollow",
+          "title": "Cart released",
+          "text": "You sent the loaded cart toward the floor plate. After it docks, release the bridge winch."
+        }
+      ],
+      "once": true,
+      "when": [
+        {
+          "flag": "hp.orders",
+          "is": true
+        },
+        {
+          "flag": "hp.bridge",
+          "is": false
+        },
+        {
+          "flag": "hp.weight.open",
+          "is": false
+        }
+      ]
     },
     "hp.weight.2": {
       "effects": [

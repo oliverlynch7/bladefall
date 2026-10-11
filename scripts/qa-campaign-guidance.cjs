@@ -2,7 +2,7 @@ async page=>{const ctx=await page.context().browser().newContext(),p=await ctx.n
 await p.goto('http://127.0.0.1:4331/3d/?mute=1');await p.waitForFunction(()=>window.__BF3&&HERO3D?.ready);
 return await p.evaluate(async()=>{const b=__BF3,book=await b.briarReady,checks=[];b.loadMode('rl');b.meta.introSeen=true;b.meta.classUnlocked={warrior:true};b.meta.classId='warrior';b.meta.dialogueTTS=false;b.meta.autoAttack=false;b.openHub();b.meta.classes.warrior.rank=10;b.meta.tutOff=true;
 const rows=[
-[1,0,'hp.bridge.clue','hp.weight',/^hp\.weight\.\d+$/,['hp.trail','hp.orders'],'Bridge weights'],
+[1,0,'hp.bridge.clue','hp.weight',/^hp\.cart\.push$/,['hp.trail','hp.orders'],'Loaded cart'],
 [2,1,'kd.lift.note','kd.lift',/^kd\.lift\.\d+$/,['kd.roster','kd.hidden','kd.free','kd.papers'],'Lift weights'],
 
 [4,1,'gf.pipes','gf.cool',/^gf\.cool\.\d+$/,['gf.access','gf.martin.met','gf.evacuated'],'Cooling controls'],
@@ -11,10 +11,11 @@ for(const [zone,area,clue,puzzle,pattern,flags,label]of rows){b.openHub();b.ente
 const act=key=>{const o=G.storyObjects.find(o=>o.key===key);if(!o)throw Error('Missing object '+key);Object.assign(G.p,{x:o.x,z:o.z,y:o.y||0,vy:0});b.briarRequest('world',{key});};
 if(BFPartyNavigation.target(G)?.key!==clue)throw Error('Clue target '+clue);act(clue);if(!G.storyState.flags['event.'+clue])throw Error('Clue transaction failed '+clue);
 const controls=G.storyObjects.filter(o=>pattern.test(o.key)),t=BFPartyNavigation.target(G),expected=controls.reduce((sum,o)=>sum+o.x,0)/controls.length;if(t?.navLabel!==label||Math.abs(t.x-expected)>.01||t.key)throw Error('Puzzle hint leaks/stale '+clue);checks.push(clue+' -> neutral controls');
-const effects=controls.map(o=>({key:o.key,e:book.events[o.key].effects.find(e=>['sequence','rotatePuzzle','counterweight'].includes(e.type))}));const kind=effects[0].e;
+const effects=controls.map(o=>({key:o.key,e:book.events[o.key].effects.find(e=>['sequence','rotatePuzzle','counterweight'].includes(e.type)||e.type==='flag'&&e.id==='hp.weight.open')}));const kind=effects[0].e;
 if(kind.type==='sequence'){const wrong=effects.find(x=>x.e.value!==kind.solution[0]);act(wrong.key);if(BFPartyNavigation.target(G)?.navLabel!==label)throw Error('Wrong answer hides task');for(const value of kind.solution){if(puzzle==='gf.cool'&&value===2)G.enemies.filter(e=>e.furnaceCooling).forEach(e=>e.dead=true);if(puzzle==='gf.cool'&&value===3)G.furnace.heat=0;act(effects.find(x=>x.e.value===value).key);}}
 if(kind.type==='rotatePuzzle')for(const x of effects)for(let n=0;n<x.e.target[x.e.index];n++)act(x.key);
 if(kind.type==='counterweight'){const mask=Array.from({length:1<<kind.weights.length},(_,m)=>m).find(m=>kind.weights.reduce((n,v,i)=>n+((m&(1<<i))?v:0),0)===kind.target);for(const x of effects)if(mask&(1<<x.e.index))act(x.key);}
+if(kind.type==='flag')act(effects[0].key);
 if(!G.storyState.flags[puzzle+'.open'])throw Error('Puzzle did not solve '+puzzle);const next=BFPartyNavigation.target(G);if(!next||next.navLabel===label)throw Error('Task did not advance '+puzzle);checks.push(puzzle+' solved -> '+(next.navLabel||next.key||next.id||'exit'));
 const restored=BFStoryState.restore(G.storyState);const prev=G.storyState;G.storyState=restored;if(JSON.stringify(BFPartyNavigation.target(G))!==JSON.stringify(next))throw Error('Restored guidance differs');G.storyState=prev;
 }

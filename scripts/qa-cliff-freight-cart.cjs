@@ -1,0 +1,29 @@
+async page=>{
+ const checks=[],errors=[],ok=(name,value)=>{if(!value)throw Error(name);checks.push(name)};
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4331/3d/?mute=1');
+ await page.waitForFunction(()=>window.__BF3&&window.HERO3D?.ready);
+ await page.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.tutOff=true;b.meta.camMode='far';b.openHub();b.enterZone(1);b.G.p.invuln=999;for(const e of b.G.enemies)e.stunT=999;});
+ await page.waitForFunction(()=>__world3d().counts.hollowArt&&!BF_LOADING.active);
+ const before=await page.evaluate(()=>{const b=__BF3,G=b.G,p=G.p;G.storyState.flags['hp.trail']=true;G.storyState.flags['hp.orders']=true;
+  Object.assign(p,{x:230,z:-2680,y:0,vx:0,vz:0,vy:0,onGround:true});b.update(.016);const earlyPrompt=G.interact?.label;b.doInteract();const earlyBridge=!!G.storyState.flags['hp.bridge'];
+  Object.assign(p,{x:-530,z:-2610,y:0,vx:0,vz:0,vy:0,onGround:true});b.camYaw=3.0;G.stageBanner=0;b.update(.016);const prompt=G.interact?.label;
+  for(let i=0;i<30;i++){b.input.jx=1;b.input.jz=0;b.update(.016);}b.input.jx=0;b.input.jz=0;const contactX=p.x;
+  return {prompt,earlyPrompt,earlyBridge,contactX,cart:BFHollowCliffs.cartX(G),collider:G.cliffs.cartCollider.x,progress:BFHollowCliffs.cartProgress(G),oldControls:G.storyObjects.filter(o=>/^hp\.weight\.|^hp\.brake\.wrong$/.test(o.key)).length};});
+ ok('cart prompt is reachable without the old controls',before.prompt==='Push the loaded cart onto the plate'&&before.oldControls===0);
+ ok('premature winch explains the missing load',before.earlyPrompt==='Inspect · Release the bridge winch'&&!before.earlyBridge);
+ ok('cart blocks a player walking into it',before.contactX<before.cart-45);
+ await page.waitForTimeout(280);await page.screenshot({path:'output/playwright/cliff-freight-before.png'});
+ const pushed=await page.evaluate(()=>{const b=__BF3,G=b.G;b.doInteract();b.update(.016);return {flag:!!G.storyState.flags['hp.weight.open'],progress:BFHollowCliffs.cartProgress(G),note:G.storyState.notes['hp.cart']?.title,staleNotice:BFJournalNotice.queue.current?.id==='inspect.hp.brake.right'};});
+ ok('ordinary interact starts shared cart action',pushed.flag&&pushed.progress<.1&&pushed.note==='Cart released');
+ ok('loading the plate dismisses the premature winch notice',!pushed.staleNotice);
+ await page.evaluate(()=>{for(let i=0;i<65;i++)__BF3.update(.016);});await page.waitForTimeout(180);await page.screenshot({path:'output/playwright/cliff-freight-moving.png'});
+ const midway=await page.evaluate(()=>{const G=__BF3.G;return {progress:BFHollowCliffs.cartProgress(G),render:BFHollowCliffs.cartX(G),collider:G.cliffs.cartCollider.x};});
+ ok('rolling cart carries its collision shape',midway.progress>.4&&midway.progress<.8&&Math.abs(midway.render-midway.collider)<.01);
+ await page.evaluate(()=>{for(let i=0;i<95;i++)__BF3.update(.016);});await page.waitForTimeout(180);await page.screenshot({path:'output/playwright/cliff-freight-docked.png'});
+ const docked=await page.evaluate(()=>{const b=__BF3,G=b.G;return {progress:BFHollowCliffs.cartProgress(G),x:G.cliffs.cartCollider.x,brake:b.briarObjects().find(o=>o.key==='hp.brake.right')?.available};});
+ ok('cart docks off bridge and winch becomes ready',docked.progress===1&&Math.abs(docked.x+175)<.01&&docked.brake);
+ const released=await page.evaluate(()=>{const b=__BF3,G=b.G;Object.assign(G.p,{x:230,z:-2680,y:0,vx:0,vz:0,vy:0,onGround:true});b.update(.016);const prompt=G.interact?.label;b.doInteract();return {prompt,bridge:!!G.storyState.flags['hp.bridge'],collision:G.segments.some(s=>s.bridge)};});
+ ok('ordinary winch interact lowers the walkable bridge',released.prompt==='Release the bridge winch'&&released.bridge&&released.collision);
+ if(errors.length)throw Error(JSON.stringify(errors));return {checks,before,pushed,midway,docked,released,errors};
+}

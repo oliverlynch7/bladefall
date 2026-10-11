@@ -9,7 +9,12 @@ function talk(n,choice){const o=G.storyNpcs.find(o=>o.id===n);Object.assign(p,{x
 function walk(x,z,jump=false,expectedY=0){for(let i=0;i<950;i++){const dx=x-p.x,dz=z-p.z,d=Math.hypot(dx,dz);if(d<16)break;b.input.jx=dx/d;b.input.jz=dz/d;if(jump&&i%28===0)b.input.jumpEdge=true;b.update(.016)}b.input.jx=b.input.jz=0;walks.push({to:[x,z],at:[Math.round(p.x),Math.round(p.y),Math.round(p.z)],expectedY,ok:Math.hypot(p.x-x,p.z-z)<25&&p.y>=expectedY-48});}
 talk('caleb','help');ok('Caleb begins trail',G.storyState.flags['hp.trail']);
 Object.assign(p,{x:0,z:300,y:0});for(const q of BFHollowCliffs.paths.approach)walk(q[0],q[1]);
-act('hp.orders');act('hp.brake.right');ok('wrong weight cannot open bridge',!G.storyState.flags['hp.bridge']);act('hp.weight.2');act('hp.weight.5');act('hp.brake.wrong');ok('cart brake resets weights safely',!G.storyState.flags['hp.weight.open']);act('hp.weight.2');act('hp.weight.5');act('hp.brake.right');ok('bridge adds real walkable ground',G.cliffs.bridge&&G.segments.some(s=>s.bridge));
+act('hp.orders');act('hp.brake.right');ok('unweighted plate cannot open bridge',!G.storyState.flags['hp.bridge']);
+act('hp.cart.push');ok('cart starts moving toward the plate',G.storyState.flags['hp.weight.open']&&BFHollowCliffs.cartProgress(G)<.1);
+act('hp.brake.right');ok('winch waits for cart to dock',!G.storyState.flags['hp.bridge']);
+for(let i=0;i<150;i++)b.update(.016);
+ok('cart docks with matching collision',BFHollowCliffs.cartProgress(G)===1&&Math.abs(G.cliffs.cartCollider.x-BFHollowCliffs.freight.endX)<1);
+act('hp.brake.right');ok('bridge adds real walkable ground',G.cliffs.bridge&&G.segments.some(s=>s.bridge));
 Object.assign(p,{x:0,z:-2470,y:0});walk(0,-3100);act('hp.lift');ok('live patrol blocks lower lift',!G.storyState.flags['hp.descent']);
 Object.assign(p,{x:150,z:-3200,y:0});for(const q of G.cliffs.walks.quiet)walk(q[0],q[1],true,q[2]);act('hp.quiet');act('hp.lift');ok('quiet rope opens descent with patrol alive',G.portal&&G.enemies.some(e=>e.cliffGuard&&!e.dead));
 Object.assign(p,{x:0,z:-400,y:0});for(const q of G.cliffs.walks.shelves)walk(q[0],q[1],true,q[2]);

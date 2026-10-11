@@ -1,0 +1,11 @@
+# Ruined Keep arrow-post sightline — grounded plan
+
+The broad campaign combat report selected the first caster at the upper arrow post in Ruined Keep. A stationary player 100 units north of that caster, on the same 150-unit-high platform, took no damage in twenty seconds. The caster walked directly into the player and never fired. Browser positions and the level builder identify the cause: the eastern fortress wall at (530, -900) spans x=315..745, z=-940..-860, and rises to 240. The arrow-post platform is at y=150 and overlaps that wall. Movement permits walking on the intended platform, but line-of-sight still treats the higher wall as solid. Visually, the wall protrudes through the fighting area.
+
+Lower this one eastern wall to a height below the upper platform while retaining its ground-level barrier and the central passage. It should read as masonry supporting the post, not a wall bisecting its floor. Keep the western wall and all post, caster, quest, shard, save and co-op identifiers unchanged. Do not modify general caster behavior or custom SFX.
+
+Verify the normal-camera arrow-post scene; the caster should see, fire at and damage an exposed player on the post without walking into them. Cover elsewhere should still block shots. Test the ground-level wall/passage, full Keep progression, prior save entry and co-op guest state. A stationary browser test is evidence of function, not final difficulty balance; human playtesting will judge pacing and visual quality.
+
+## [Codex | 2026-10-10] Implemented and checked
+
+The eastern wall now stops at y=138, twelve units below the upper floor, and its script URL is refreshed for existing browser caches. The western wall still rises to 240. A muted browser check verified that the eastern wall still pushes a ground-level actor out and blocks a ground-level ray, while a ray across the arrow-post deck is clear. The caster aimed, released a projectile and damaged the exposed player in three repeated runs. Normal-camera screenshots showed a clear fighting deck instead of wall blocks protruding through it. The full Broken Walls quest and walking route, checkpoint reload, two-page co-op state, escort-defense checks, content unit check and static gate passed. No quest, save, reward or SFX rule changed. Human playtesting remains for actual combat and presentation quality.

@@ -2607,3 +2607,8 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] In the campaign, the Galewisp waits at a raised platform edge while its target shelters beneath it, and it does not begin a strike where its body would be lifted by the platform.
 - [x] In open ground its warned dive reaches contact height; the first strike connects against a stationary player and a timed dodge avoids it. The generic role roll no longer turns Galewisps into self-destructing exploders. Other flyers and trial tuning are unchanged.
 - [x] A fixed-slice browser cover/hit/dodge check passed 20 repeated runs. Static gate, Lost Canyon route/climb/checkpoint/old-save/co-op, campaign pursuit, Briar roles and enemy navigation checks passed. The broad natural-combat test's under-bracket coordinate remains cover, so a hit is not expected there. Human playtesting remains for combat feel. See docs/design/GALEWISP_COVER_DIVE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Ruined Keep arrow-post sightline (SHIPPED v2.165.0)
+
+- [x] The eastern fortress wall now stops below the upper arrow-post floor and reads as its ground-level support. The central ground passage and western wall remain intact; the platform no longer contains a wall that blocks its own caster's shot.
+- [x] A three-run muted browser test verified the ground barrier and cover, open upper sightline, projectile release and player damage. Normal-camera art, full Broken Walls route, checkpoint reload, co-op state, escort defense, content unit and static gate checks passed. Human playtesting remains for encounter feel and visual polish. See docs/design/RUINED_KEEP_ARROW_POST_SIGHTLINE_2026-10-10.md.

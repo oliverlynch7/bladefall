@@ -916,3 +916,7 @@ The continuing approved enemy reliability and campaign combat work includes maki
 ## [Codex | 2026-10-10] Galewisp role consistency | U-2026-10-10-CONTINUE-CLIFF
 
 Repeated browser combat testing exposed a conflicting generic role assignment: a Galewisp could roll `exploder`, die during its own warned dive and damage the player with a blast. Exclude the Galewisp from that generic role roll so its established dive remains the identifiable attack. Other flyer role behavior stays as it was. This is part of the same scoped enemy-reliability fix, with no new damage, timing, trial, save or SFX rule. See docs/design/GALEWISP_COVER_DIVE_2026-10-10.md.
+
+## [Codex | 2026-10-10] Ruined Keep arrow-post sightline | U-2026-10-10-CONTINUE-CLIFF
+
+The continuing approved campaign terrain and enemy-reliability work includes removing a live wall/platform overlap that makes the first Ruined Keep caster inert. The eastern ground wall rises through the upper arrow-post floor, so movement allows player and caster to occupy the post while line of sight blocks the shot. Lower that one wall below the 150-unit post and preserve its ground-level barrier. Keep the quest, route, save, co-op and other enemy rules intact; no custom SFX. See docs/design/RUINED_KEEP_ARROW_POST_SIGHTLINE_2026-10-10.md.

@@ -924,3 +924,10 @@ The continuing approved campaign terrain and enemy-reliability work includes rem
 ## [Codex | 2026-10-11] Winding Cliffs freight cart | U-2026-10-11-CONTINUE
 
 Oliver's continuing direction to improve existing campaign levels and replace reskinned adjacent-button puzzles supports replacing the required freight bridge's weight sum with a visible cart-to-plate-to-winch chain. Keep old bridge and weight-ready flags meaningful for saves, preserve the existing optional cargo climb and both lookout routes, and use host-owned story actions for co-op. A premature winch press explains the missing cart. The cart moves with collision and the pressure plate visibly sinks. See docs/design/WINDING_CLIFFS_FREIGHT_CART_2026-10-11.md. This is a scoped implementation decision, not a claim that the entire campaign is redesigned or human-playtested.
+
+## [Codex | 2026-10-11] Long Ascent catches open the stairs — planned
+
+The required catches should visibly clear the two matching spiral flights, not merely satisfy a distant throne-door flag. Position the gates immediately after their accessible side catches. Existing `la.lower`/`la.upper` flags remain the durable save/co-op truth, and old completed catches start open. Preserve the optional vault, worker and memorial branches. Implementation and acceptance are recorded in docs/design/LONG_ASCENT_STAIR_CATCHES_2026-10-11.md.
+## [Codex | 2026-10-11] Long Ascent catch and art implementation — verified
+
+The two existing catch flags now control physical, sliding bars at the next stair openings. Catch journal text explains the local result, and the overview briefly looks toward it. Existing saves, rewards, branches and co-op story authority remain intact. Browser QA passed route, gate, save, checkpoint and co-op checks. Unifying six art-wrapper imports with the shared deep-art loader repaired a verified module-instance failure across the castle and palace scenes; all six built without a browser error. This is one scoped increment toward the campaign redesign, not full campaign signoff or a human playtest. No custom SFX.

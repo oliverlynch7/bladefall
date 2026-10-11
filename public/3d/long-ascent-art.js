@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {buildDeep} from './deep-art.js?v=2074';
+import {buildDeep} from './deep-art.js?v=2135';
 export function buildLongAscent(scene,w){
  const result=buildDeep(scene,{...w,portalProfile:{name:'Castle Duskmoor · Long Ascent',palette:['#655f6b','#696370','#625d68','#706875'],fog:'#252937',sky:[.12,.14,.20],sun:'#dcd4e2',body:'#373a47',lamp:'#deb179',hazard:['#202631','#414c63'],sunGlow:[.03,.02,.04]}});
  result.group.traverse(o=>{if(o.isInstancedMesh&&['castle ring','castle rune'].includes(o.name))o.visible=false;});
@@ -11,8 +11,10 @@ export function buildLongAscent(scene,w){
   part(new T.BoxGeometry(105,2350,115),0,x,1020,z).rotation.y=a;
   for(let y=150;y<2300;y+=500){part(new T.BoxGeometry(245,100,85),0,x,y,z).rotation.y=a;part(new T.BoxGeometry(260,18,100),1,x,y+61,z).rotation.y=a;}
  }
- // Stone ribs carry both spiral turns to the shaft. Their feet extend below the first landing.
+ // Keep the masonry ribs on the camera's far side of the shaft. The near-side
+ // ribs otherwise cut across the player and the catch gates on both north turns.
  for(let i=0;i<20;i++){const a=i*Math.PI/10,x=Math.sin(a)*770,z=Math.cos(a)*770;
+  if(z<80)continue;
   part(new T.BoxGeometry(42,2200,48),0,x,950,z).rotation.y=a;
   for(let turn=0;turn<2;turn++){const y=i/20*1000+turn*1000-38;part(new T.BoxGeometry(45,38,310),0,Math.sin(a)*915,y,Math.cos(a)*915).rotation.y=a;}
  }

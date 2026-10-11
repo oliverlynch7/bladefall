@@ -1,0 +1,19 @@
+# Long Ascent stair catches — grounded plan
+
+The live Long Ascent has two required catches at heights 500 and 1500. Both set durable story flags and are required by the throne-door check, but neither changes the nearby stairs. A player can climb past either catch and only learn at the summit that a remote lever was missed. The stair notice also repeats its broken-flight instructions. This makes the catches feel like arbitrary quest switches at the peak of the campaign.
+
+Place a barred stair opening shortly beyond each catch on the existing spiral. The lower gate is centered on the flight near turn 0.55; the upper gate near turn 1.55. Each catch is reachable before its gate. Pulling the catch retracts both halves of its gate, revealing the next stretch of stairs. The player sees the result from normal third-person view and can pass it after release. Keep the two exposed jumping gaps and lower catch ledges, the prisoner branch, service lift, vault, memorial, summit combat and throne gate.
+
+Use the existing `la.lower` and `la.upper` flags. Previously completed saves start with the matching gate open. New catches use the same host-owned story transaction; a co-op guest can pull one and both players see the opening. Avoid a new save field. Give the initial stair notice one concise description of the catches and gaps; the catch journal entries should describe the bars they retract.
+
+Acceptance: an ordinary player walking the spiral meets each physical closed gate before its catch flag is set, can turn toward the nearby catch, pull it with the usual interaction, watch the bars retract, and then continue up. Test both heights, an old completed/partial save, a missed jump and recovery, full summit progression, optional branches and guest-owned catch. A static state check alone does not prove the route or visual consequence. Human playtesting remains the test of pacing and spectacle.
+
+## Browser discovery: detailed scenery cache split
+
+The first fresh browser pass did not reach the expected Long Ascent art scene. The console showed `buildDeep` failing at `kit.get(name)`: `world3d.js` loads `deep-art.js?v=2135`, while Long Ascent and other castle/palace art modules import `deep-art.js?v=2074`. Browser modules are keyed by the full URL, so the kit loaded into one module instance is absent from the other. The renderer then falls back to voxels. Unify those imports with the loader’s URL and refresh the art-module imports from `world3d.js`, then check Long Ascent and the adjacent affected scenes in a muted browser. This is a verified asset-wiring failure, not a request to redesign their art.
+
+## Verified implementation
+
+Version 2.167.0 uses the existing la.lower and la.upper flags for collision-backed stair bars. Two iron grilles slide into wall pockets over 1.2 seconds; the matching wall collider disappears when its catch is released. A brief overview-camera glance shows the opening around the bend, then returns to the normal follow view. The Long Ascent overview camera is steeper and closer so the shaft ribs and upper storeys do not regularly hide the player. The stair notice and catch journal entries now describe the local change without repeating the jump advice.
+
+Browser checks passed: normal walking is stopped at both closed gates, E interaction opens each gate, the lower opened gate can be crossed, and an old partial save starts with only its completed gate open. The 259-waypoint full route, combat, checkpoint, two-page co-op catch/reward/portal flow, and a six-scene detailed-art integration test passed. Screenshots were inspected at the lower gate and during the catch's opening. Guardian Hall and Palace Courtyard's old preview-capture scripts stop on an obsolete Show full line button label; their gameplay tests and the art integration test passed separately. Human playtesting is still needed for route pacing, missed-jump recovery and visual appeal.

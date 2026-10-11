@@ -2618,3 +2618,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 - [x] The required bridge now uses a loaded cart rolling along the left siding to a sinking, lit floor plate, followed by the far winch. The 2/3/5 weight buttons and wrong-brake choice are no longer in the world. A premature winch press explains the missing load.
 - [x] The old `hp.weight.open` readiness flag remains as a save alias; old partial/ready/completed saves load correctly. The main bridge, lookout branches, optional cargo chest, rewards and shards retain their IDs.
 - [x] Muted browser checks passed normal E interactions, moving render/collider, full physical level route, bridge set piece, combat/quiet branches, guest-owned co-op push/winch, checkpoint, old saves and guidance. Story and dialogue-logic checks passed. Human playtesting remains for puzzle feel and visual quality. See docs/design/WINDING_CLIFFS_FREIGHT_CART_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Long Ascent catches and scenery loader (SHIPPED v2.167.0)
+
+- [x] Lower and upper catches retract collision-backed iron grilles on the next spiral flights; old completed flags keep the matching gate open. A brief overview glance and updated journal copy explain the local result.
+- [x] The Long Ascent overview and shaft support placement no longer routinely hide the hero at the northern gates. Six Castle Duskmoor and Sunspire scene wrappers share the loaded detailed-art module instead of falling back to generic voxels.
+- [x] Static/unit and muted browser checks passed both gate interactions and traversal, old partial save, full Long Ascent route, combat, checkpoint, co-op and six-scene art integration. Human playtesting remains for feel and art. The broader campaign quality backlog stays active. See docs/design/LONG_ASCENT_STAIR_CATCHES_2026-10-11.md. No custom SFX work.

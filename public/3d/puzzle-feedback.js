@@ -20,6 +20,7 @@ const outcomes={
 };
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
+ if(event?.effects?.some(e=>e.id==='ic.channel.open')&&after.flags['ic.channel.open'])return {id,replaceKey:'puzzle:ic.channel',kind:'Path opened',title:'Spring diverted',text:'The stone plug blocks the spill. Water reaches the chiller, and a frozen path leads to the sealed side chamber.'};
  if(event?.effects?.some(e=>e.id==='sl.shelf.stage1')&&after.flags['sl.shelf.stage1'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'First shelves unfolded',text:'Two shelves now span the gap. Cross them to reach the second crank.'};
  if(event?.effects?.some(e=>e.id==='sl.shelf.open')&&after.flags['sl.shelf.open'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'Far shelves unfolded',text:'The remaining shelves lead into the restricted archive. Follow their gold edges to the Rift Shard.'};
  if(event?.effects?.some(e=>e.id==='sc.fit.rudder')){

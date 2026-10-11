@@ -2627,3 +2627,9 @@ Refined all 48 versioned enemy models with brighter midtones, species-shaped bea
 ## [Codex | 2026-10-11] Campaign puzzles — Sky Library shelf route shipped in v2.168.0
 
 The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing with six varied jumps and lower catch shelves. Simon, quest tracking and on-screen feedback were updated; old completed saves and co-op stages are preserved. Muted browser route, fall/recovery, main-route, save-state and co-op checks passed. Human playtest remains open.
+
+## [Codex | 2026-10-11] Deep Ice Caves side spill (v2.169.0)
+
+- [x] Replaced the optional FF-04 lower-channel switch combination with five service ledges and a visible hanging-plug release. The side bridge freezes after water reaches the chiller; the main floating-platform crossing remains separate.
+- [x] Kept completed/partial save compatibility and co-op authority, made the tracker finish only on shard collection, and verified normal-camera visibility after moving the control aside.
+- [x] Muted browser route, miss/recovery, old-state, checkpoint, physical main crossing, full cave and two-page co-op checks passed alongside static/story checks. Human playtesting remains for feel and visual polish. No custom SFX work. See docs/design/DEEP_ICE_SIDE_SPILL_2026-10-11.md.

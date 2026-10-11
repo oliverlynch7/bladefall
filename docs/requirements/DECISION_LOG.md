@@ -934,3 +934,10 @@ The two existing catch flags now control physical, sliding bars at the next stai
 ## [Codex | 2026-10-11] Sky Library optional shelf mechanics
 
 This applies Oliver's approved puzzle-variety and parkour direction to one existing optional branch. The old linked three-control combination was a verified example of the repeated action pattern Oliver rejected. Two separated cranks now unfold visible shelf platforms in stages; the challenge is traversing them. No new story, reward, or class decision was introduced. See docs/design/SKY_LIBRARY_SHELF_CROSSING_2026-10-11.md. Status: locally verified, awaiting human playtest.
+## [Codex | 2026-10-11] Deep Ice side-channel action replacement — planned
+
+The optional lower pipe puzzle is another adjacent-toggle mask despite water-themed labels. Replacing those inputs with a visible spill plug and physical service-ledge climb applies Oliver's approved experiential puzzle-variety requirement without changing Frostfell story or rewards. The release keeps `ic.channel.open` as the durable shared flag; old partial mask state is harmless. Acceptance and scope are in docs/design/DEEP_ICE_SIDE_SPILL_2026-10-11.md. Browser and user playtesting status must be reported separately.
+
+## [Codex | 2026-10-11] Deep Ice side-channel implementation verified
+
+The single shared release keeps the existing `ic.channel.open` flag and FF-04 reward. The retired toggle events are absent from the live story book. The visible spill/chiller change and physical jump route distinguish this from the adjacent-switch pattern Oliver rejected. Muted browser and co-op tests passed, including old save states; human playtest remains open. This is a scoped campaign improvement, not a decision to replace the main Frostfell crossing or all other puzzles.

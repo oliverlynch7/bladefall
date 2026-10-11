@@ -636,8 +636,8 @@
           "type": "note",
           "id": "ic.channel",
           "region": "frost",
-          "title": "The old side channel",
-          "text": "The spring feeds the chiller through the outer pipes. The middle pipe spills water away. Open a path from the spring to the chiller without feeding the spill. Watch where the water actually runs."
+          "title": "The hanging spill plug",
+          "text": "Spring water is spilling into the basin. Climb the service ledges along the west wall and release the stone plug above the spill. The water will reach the chiller and freeze a path to the side chamber."
         }
       ]
     },
@@ -714,53 +714,13 @@
         { "flag": "ic.lock.open", "is": false }
       ]
     },
-    "ic.channel.1": {
-      "once": false,
+    "ic.channel.plug": {
+      "once": true,
       "effects": [
         {
-          "type": "flowSwitch",
-          "id": "ic.channel",
-          "index": 0
-        }
-      ],
-      "when": [
-        {
-          "flag": "ic.channel.clue",
-          "is": true
-        },
-        {
-          "flag": "ic.channel.open",
-          "is": false
-        }
-      ]
-    },
-    "ic.channel.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "flowSwitch",
-          "id": "ic.channel",
-          "index": 1
-        }
-      ],
-      "when": [
-        {
-          "flag": "ic.channel.clue",
-          "is": true
-        },
-        {
-          "flag": "ic.channel.open",
-          "is": false
-        }
-      ]
-    },
-    "ic.channel.3": {
-      "once": false,
-      "effects": [
-        {
-          "type": "flowSwitch",
-          "id": "ic.channel",
-          "index": 2
+          "type": "flag",
+          "id": "ic.channel.open",
+          "value": true
         }
       ],
       "when": [

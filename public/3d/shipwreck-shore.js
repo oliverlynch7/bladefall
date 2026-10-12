@@ -43,7 +43,7 @@ function build({G,plat,spawn}){
  for(const o of G.storyObjects)if(['sc.ballista','sc.code.fire'].includes(o.key))o.range=165;
  G.storyObjects.find(o=>o.key==='sc.hull.release').blockedText='The cargo is not over the gold mark yet. Watch it swing across, then pull the release.';
  G.storyObjects.find(o=>o.key==='sc.sail').blockedLabel='Clear the lookout patrol first';G.storyObjects.find(o=>o.key==='sc.sail').blockedText='The patrol still controls the sailcloth.';
- for(const [x,z,y]of [[-210,-550,30],[1050,-720,125],[-250,-2780,30]])G.healpads.push({x,z,y,r:31,charge:1,_acc:0});
+ for(const [x,z,y]of [[-210,-550,36],[1235,-643,79],[-278,-2752,40]])G.healpads.push({x,z,y,r:31,charge:1,_acc:0});
  for(const [type,x,z,y,guard]of [['grunt',-950,-850,65],['caster',-1670,-1800,240],['grunt',-720,-2200,120],['grunt',1390,-1700,350,true],['caster',1210,-1840,350,true],['grunt',1550,-2040,350,true],['slime',2350,-1030,0],['slime',2250,-1810,0],['grunt',-1060,-3190,115],['caster',-2050,-3480,200],['grunt',0,-3830,30]]){const e=spawn(type,x,z,false);e.y=y;e.shoreLookout=!!guard;}
  G.bounds={minX:-2900,maxX:2950,minZ:-4400,maxZ:900};G.progressEnd=-4300;G.startPos={x:0,z:490,y:30};G.lastSafe={...G.startPos};G.portalPos={x:-180,z:-210,y:30};G.goalPos={...G.portalPos};Object.assign(G.p,{...G.startPos,vy:0});
 }

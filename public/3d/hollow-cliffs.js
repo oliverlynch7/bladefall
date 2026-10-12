@@ -63,14 +63,14 @@
    {...obj('hp.brake.right','Release the bridge winch',230,-2680,0,'bridgebrake'),blockedText:'The plate needs the loaded cart. Push it along the left rail and wait for it to dock.'},
    obj('hp.windbreak','Tie the windbreak shut',570,-880,90),obj('hp.quiet','Tie the lookout rope',790,-3900,180,'rope'),obj('hp.lift','Release the canyon lift',40,-4600),obj('hp.code.clue','Read the cargo plate',-1610,-2110,0,'plate'),
    obj('hp.code.release','Pull the cargo release',-1770,-2390,186,'release'),obj('hp.code.claim','Open the cliff chest',-1550,-2160,0,'chest')];
-  for(const [x,z]of [[150,-2300],[-180,-3330],[230,-4430]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
-  for(const [type,x,z]of [['dustjackal',-630,-920],['dustjackal',-800,-1030],['cragspitter',-900,-1780],['galewisp',910,-1700],['dustjackal',1460,-1450],['bones',-1800,-2140],['grunt',-660,-3850],['caster',-380,-4100]]){const e=spawn(type,x,z,false);if(z<-3400)e.cliffGuard=true;}
+  for(const [x,z]of [[-35,-2223],[-180,-3330],[341,-4476]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
+  for(const [type,x,z]of [['dustjackal',-630,-920],['dustjackal',-800,-1030],['cragspitter',-900,-1780],['galewisp',910,-1700],['dustjackal',1510,-1300],['bones',-1680,-2230],['grunt',-660,-3850],['caster',-380,-4100]]){const e=spawn(type,x,z,false);if(z<-3400)e.cliffGuard=true;}
   // The last guard stands on the broad lookout, where a dodge has room to land.
   // Its long, readable cleave is a distinct final fight before the canyon lift.
   const warden=spawn('siegeknight',-280,-3740,false);
   if(warden){Object.assign(warden,{cliffGuard:true,elite:true,campaignElite:true,label:'Cliff warden',color:'#638c91',hp:Math.round(warden.hp*1.12),dmg:Math.round(warden.dmg*.9),xp:Math.round(warden.xp*2),r:warden.r*1.12,h:warden.h*1.18,speed:warden.speed*1.08});warden.maxHp=warden.hp;root.BFCampaignElites?.setup(warden,1);}
   // Wind only affects this exposed shelf. Main lower routes and puzzle controls are sheltered.
-  G.canyonWind.vanes=[{x:570,z:-880,y:90,until:0}];G.canyonWind.zones=[{x:850,z:-1710,y:200,r:280,vane:0}];G.deco.push({x:570,z:-880,y0:90,w:20,h:70,d:20,kind:'windbreak'});
+  G.canyonWind.vanes=[{x:570,z:-880,y:90,until:0}];G.canyonWind.zones=[{x:850,z:-1710,y:200,r:280,vane:0}];G.deco.push({x:570,z:-880,y0:90,w:20,h:70,d:20,c:'#a58355',kind:'windbreak'});
   G.bounds={minX:-2240,maxX:2250,minZ:-5000,maxZ:650};G.progressEnd=-4900;G.portalPos={x:0,z:-4780,y:0};G.goalPos={...G.portalPos};G.startPos={x:0,z:330};G.lastSafe={x:0,z:330,y:0};Object.assign(G.p,{x:0,z:330,y:0,vy:0});
  }
  function sync(a){const {G,state:s,seg,plat,openWay}=a,f=s.flags;if(!G.cliffs)return;

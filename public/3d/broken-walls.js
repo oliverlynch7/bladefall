@@ -32,7 +32,7 @@ for(const [x,z,y]of [[-510,80,0],[530,90,0],[700,-1070,150],[-1740,-1470,320],[6
 for(const [x,z]of [[-570,-1850],[570,-2450],[-160,-3550],[1260,-3150]])solid(x,z,0,90,55,60,'#49392e');
 G.storyNpcs=[{id:'grant',name:'Grant',x:-260,z:-440,y:0},{id:'felix',name:'Felix',x:700,z:-1750,y:0}];
 const o=(key,label,x,z,y=0,kind='lever')=>({key,label,x,z,y,kind});G.storyObjects=[o('rk.arrow','Cut the arrow-post bow cord',730,-1030,150,'bow'),o('rk.gate','Open Grant’s side gate',0,-830,0,'gate'),o('rk.breach','Ring the breach bell',0,-1850,0,'bell'),o('rk.key','Take the jail key',-320,-3650,0,'key'),o('rk.wheel','Turn the dungeon gate wheel',650,-3650,200,'wheel'),o('rk.timing','Release the latch while the notch is green',1450,-2680,0,'timing'),o('rk.tools','Take Felix’s tools',1500,-3020,0,'tools'),o('rk.wall','Unbar the chamber from the old wall',-1730,-3310,80,'bar'),o('rk.trial','Lift the sealed chamber’s shield',-1440,-3520,80,'shield')];
-for(const [x,z]of [[-300,-1450],[320,-3300],[1350,-2360]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
+for(const [x,z]of [[-300,-1450],[320,-3340],[1350,-2360]])G.healpads.push({x,z,y:0,r:32,charge:1,_acc:0});
 for(const [type,x,z,y,group]of [['caster',660,-980,150,'arrow'],['grunt',850,-950,150,'arrow'],['grunt',-340,-3580,0,'post'],['caster',-520,-3770,0,'post'],['grunt',1250,-2190,0,'workshop'],['grunt',-1350,-1850,0,'tower'],['bones',-2120,-2630,170,'wall']]){const e=spawn(type,x,z,false);e.y=y;e.keepGuard=group;}
 G.bounds={minX:-2440,maxX:1850,minZ:-4900,maxZ:680};G.progressEnd=-4800;G.startPos={x:0,z:450};G.lastSafe={x:0,z:450,y:0};G.portalPos={x:0,z:-4630,y:0};G.goalPos={...G.portalPos};Object.assign(G.p,{x:0,z:450,y:0,vy:0});
 }

@@ -15,7 +15,7 @@ const camps={
  '0.1':{place:'forest signal path',target:'Legion searchers',at:[-650,-1800,0],near:[-650,-1800,0],radius:550},
  '1.0':{place:'lower cliff paths',target:'cliff predators',at:[-750,-1100,0],near:[-750,-1100,0],radius:800},
  '1.1':{place:'hidden canyon floor',target:'canyon predators',at:[2350,-3310,0],near:[2350,-3310,0],radius:550},
- '2.0':{place:'old bell tower yard',target:'Legion siege troops',at:[-1680,-1800,0],add:[['grunt',-1630,-1800,0],['caster',-1840,-1830,0],['grunt',-1740,-1970,0]]},
+ '2.0':{place:'old bell tower yard',target:'Legion siege troops',at:[-1680,-1800,0],add:[['grunt',-1630,-1800,0],['caster',-1840,-1700,0],['grunt',-1740,-1970,0]]},
  '2.1':{place:'lower prison works',target:'prison search troops',at:[0,-2970,0],add:[['grunt',-180,-2940,0],['caster',180,-3060,0],['grunt',-120,-3200,0]]},
  '3.0':{place:'mountain lift house',target:'Legion mountain troops',at:[-2100,-1300,220],near:[-2100,-1300,220],radius:320},
  '3.1':{place:'cave waterworks',target:'Legion searchers',at:[0,-3600,180],near:[0,-3600,180],radius:280},

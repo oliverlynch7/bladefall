@@ -1,0 +1,1772 @@
+{
+  "version": "2.183.0-campaign-footing",
+  "date": "2026-10-12",
+  "scope": "Campaign spawn support, healing presentation and placement, repaired interaction approaches and fallback rendering.",
+  "footing": {
+    "halves": 16,
+    "enemies": 206,
+    "patrolRefills": 39,
+    "rows": [
+      {
+        "zone": 0,
+        "area": 0,
+        "name": "Briar Town · Homefields",
+        "rests": [
+          {
+            "at": [
+              -700,
+              140,
+              -1060
+            ],
+            "floor": 140,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -1030,
+              0,
+              -2710
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -210,
+              0,
+              15
+            ],
+            "floor": 0,
+            "locked": true,
+            "healed": null
+          },
+          {
+            "at": [
+              -2300,
+              0,
+              -1350
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 23,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 0,
+        "area": 1,
+        "name": "Briar Town · Black Woods",
+        "rests": [
+          {
+            "at": [
+              160,
+              0,
+              -650
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -1130,
+              0,
+              -2680
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              180,
+              0,
+              -4090
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 11,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 1,
+        "area": 0,
+        "name": "Hollow Pass · Winding Cliffs",
+        "rests": [
+          {
+            "at": [
+              -35,
+              0,
+              -2223
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -180,
+              0,
+              -3330
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              341,
+              0,
+              -4476
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 8,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 1,
+        "area": 1,
+        "name": "Hollow Pass · Lost Canyon",
+        "rests": [
+          {
+            "at": [
+              450,
+              0,
+              -1750
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -650,
+              0,
+              -3260
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              320,
+              0,
+              -4050
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              2240,
+              0,
+              -3250
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 8,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 2,
+        "area": 0,
+        "name": "Ruined Keep · Broken Walls",
+        "rests": [
+          {
+            "at": [
+              -300,
+              0,
+              -1450
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              320,
+              0,
+              -3340
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              1350,
+              0,
+              -2360
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 10,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 2,
+        "area": 1,
+        "name": "Ruined Keep · The Dungeons",
+        "rests": [
+          {
+            "at": [
+              80,
+              180,
+              -1480
+            ],
+            "floor": 180,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              450,
+              180,
+              -3160
+            ],
+            "floor": 180,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              1515,
+              86,
+              -3033
+            ],
+            "floor": 86,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 12,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 3,
+        "area": 0,
+        "name": "Frostfell · Snowbound Peaks",
+        "rests": [
+          {
+            "at": [
+              -690,
+              130,
+              -640
+            ],
+            "floor": 130,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              180,
+              380,
+              -1900
+            ],
+            "floor": 380,
+            "locked": true,
+            "healed": null
+          },
+          {
+            "at": [
+              1100,
+              579,
+              -3730
+            ],
+            "floor": 579,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 15,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 3,
+        "area": 1,
+        "name": "Frostfell · Deep Ice Caves",
+        "rests": [
+          {
+            "at": [
+              190,
+              240,
+              -1280
+            ],
+            "floor": 240,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -990,
+              300,
+              -2300
+            ],
+            "floor": 300,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              230,
+              180,
+              -3450
+            ],
+            "floor": 180,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              140,
+              201,
+              -4750
+            ],
+            "floor": 201,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 16,
+        "enemyIssues": [],
+        "objectIssues": [
+          {
+            "key": "ic.lock.2",
+            "kind": "freeze",
+            "at": [
+              85,
+              180,
+              -4110
+            ],
+            "spots": 0
+          }
+        ]
+      },
+      {
+        "zone": 4,
+        "area": 0,
+        "name": "Emberdeep · Iron Halls",
+        "rests": [
+          {
+            "at": [
+              300,
+              100,
+              100
+            ],
+            "floor": 100,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -640,
+              103,
+              -1810
+            ],
+            "floor": 103,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              220,
+              100,
+              -3880
+            ],
+            "floor": 100,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 16,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 4,
+        "area": 1,
+        "name": "Emberdeep · The Great Furnace",
+        "rests": [
+          {
+            "at": [
+              -250,
+              120,
+              -200
+            ],
+            "floor": 120,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              320,
+              120,
+              -2070
+            ],
+            "floor": 120,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              1557,
+              260,
+              -3915
+            ],
+            "floor": 260,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -260,
+              260,
+              -6440
+            ],
+            "floor": 260,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 16,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 5,
+        "area": 0,
+        "name": "Storm Coast - Shipwreck Shore",
+        "rests": [
+          {
+            "at": [
+              -210,
+              36,
+              -550
+            ],
+            "floor": 36,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              1235,
+              79,
+              -643
+            ],
+            "floor": 79,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -278,
+              40,
+              -2752
+            ],
+            "floor": 40,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 3,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 11,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 5,
+        "area": 1,
+        "name": "Thunder Cliffs",
+        "rests": [
+          {
+            "at": [
+              230,
+              40,
+              350
+            ],
+            "floor": 40,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -130,
+              340,
+              -1560
+            ],
+            "floor": 340,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              410,
+              850,
+              -4530
+            ],
+            "floor": 850,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 10,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 6,
+        "area": 0,
+        "name": "Palace Courtyard",
+        "rests": [
+          {
+            "at": [
+              0,
+              200,
+              -1280
+            ],
+            "floor": 200,
+            "locked": true,
+            "healed": null
+          },
+          {
+            "at": [
+              1540,
+              160,
+              -870
+            ],
+            "floor": 160,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -260,
+              420,
+              -3590
+            ],
+            "floor": 420,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 12,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 6,
+        "area": 1,
+        "name": "The Sky Library",
+        "rests": [
+          {
+            "at": [
+              280,
+              200,
+              -940
+            ],
+            "floor": 200,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -720,
+              440,
+              -3650
+            ],
+            "floor": 440,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              820,
+              400,
+              -4860
+            ],
+            "floor": 400,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -2337,
+              520,
+              -3183
+            ],
+            "floor": 520,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 13,
+        "enemyIssues": [],
+        "objectIssues": [
+          {
+            "key": "sl.shelf.1",
+            "kind": "shelf1",
+            "at": [
+              1910,
+              390,
+              -4040
+            ],
+            "spots": 0
+          }
+        ]
+      },
+      {
+        "zone": 7,
+        "area": 0,
+        "name": "The Castle Gates",
+        "rests": [
+          {
+            "at": [
+              -1000,
+              120,
+              -790
+            ],
+            "floor": 120,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              1410,
+              240,
+              -2900
+            ],
+            "floor": 240,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              440,
+              280,
+              -3840
+            ],
+            "floor": 280,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              260,
+              280,
+              -5490
+            ],
+            "floor": 280,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 9,
+        "enemyIssues": [],
+        "objectIssues": []
+      },
+      {
+        "zone": 7,
+        "area": 1,
+        "name": "The Long Ascent",
+        "rests": [
+          {
+            "at": [
+              -170,
+              0,
+              900
+            ],
+            "floor": 0,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              1340,
+              250,
+              50
+            ],
+            "floor": 250,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -1130,
+              750,
+              80
+            ],
+            "floor": 750,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              180,
+              1000,
+              940
+            ],
+            "floor": 1000,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              120,
+              1500,
+              -1090
+            ],
+            "floor": 1500,
+            "locked": false,
+            "healed": 43.99999999999999
+          },
+          {
+            "at": [
+              -200,
+              2000,
+              980
+            ],
+            "floor": 2000,
+            "locked": false,
+            "healed": 43.99999999999999
+          }
+        ],
+        "respawns": 2,
+        "unresolved": [],
+        "missingDecorColors": 0,
+        "enemyCount": 16,
+        "enemyIssues": [],
+        "objectIssues": []
+      }
+    ]
+  },
+  "restPresentation": {
+    "scenes": [
+      {
+        "zone": 0,
+        "pad": {
+          "x": -1030,
+          "y": 0,
+          "z": -2710
+        },
+        "name": "Briar Town · Homefields",
+        "stats": {
+          "sites": 4,
+          "visible": 1,
+          "triangles": 952
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 1,
+        "pad": {
+          "x": -35,
+          "y": 0,
+          "z": -2223
+        },
+        "name": "Hollow Pass · Winding Cliffs",
+        "stats": {
+          "sites": 3,
+          "visible": 1,
+          "triangles": 1096
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 2,
+        "pad": {
+          "x": -300,
+          "y": 0,
+          "z": -1450
+        },
+        "name": "Ruined Keep · Broken Walls",
+        "stats": {
+          "sites": 3,
+          "visible": 1,
+          "triangles": 1152
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 3,
+        "pad": {
+          "x": -690,
+          "y": 130,
+          "z": -640
+        },
+        "name": "Frostfell · Snowbound Peaks",
+        "stats": {
+          "sites": 3,
+          "visible": 1,
+          "triangles": 1032
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 4,
+        "pad": {
+          "x": 300,
+          "y": 100,
+          "z": 100
+        },
+        "name": "Emberdeep · Iron Halls",
+        "stats": {
+          "sites": 3,
+          "visible": 1,
+          "triangles": 1132
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 5,
+        "pad": {
+          "x": -210,
+          "y": 36,
+          "z": -550
+        },
+        "name": "Storm Coast - Shipwreck Shore",
+        "stats": {
+          "sites": 3,
+          "visible": 1,
+          "triangles": 1132
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 6,
+        "pad": {
+          "x": 1540,
+          "y": 160,
+          "z": -870
+        },
+        "name": "Palace Courtyard",
+        "stats": {
+          "sites": 3,
+          "visible": 1,
+          "triangles": 1064
+        },
+        "label": "Health full · 40% HP still available"
+      },
+      {
+        "zone": 7,
+        "pad": {
+          "x": -1000,
+          "y": 120,
+          "z": -790
+        },
+        "name": "The Castle Gates",
+        "stats": {
+          "sites": 4,
+          "visible": 1,
+          "triangles": 1152
+        },
+        "label": "Health full · 40% HP still available"
+      }
+    ],
+    "healing": {
+      "finiteBudget": 43.99999999999999,
+      "expected": 44,
+      "spentStops": true,
+      "lockedStops": true,
+      "unlimitedFills": true
+    },
+    "fullHint": "Health full · unlimited healing here",
+    "hiddenInHub": true,
+    "hiddenBehindWall": true,
+    "hiddenInPause": true,
+    "hiddenInFallback": true,
+    "errors": []
+  },
+  "combat": {
+    "result": [
+      {
+        "z": 0,
+        "area": 0,
+        "type": "grunt",
+        "eliteKind": "briar_guard",
+        "active": true,
+        "movement": 29,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 27,
+        "mode": "play",
+        "player": [
+          10,
+          0,
+          -56.7003310388277
+        ],
+        "enemy": [
+          10,
+          0,
+          -190.93279999999993
+        ]
+      },
+      {
+        "z": 0,
+        "area": 1,
+        "type": "grunt",
+        "eliteKind": "briar_guard",
+        "active": true,
+        "movement": 61,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 75,
+        "mode": "play",
+        "player": [
+          -534.5170773511277,
+          0,
+          -1145.6823248166374
+        ],
+        "enemy": [
+          -570.8338387679852,
+          0,
+          -1298.5268907219277
+        ]
+      },
+      {
+        "z": 1,
+        "area": 0,
+        "type": "dustjackal",
+        "active": true,
+        "movement": 193,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 102,
+        "mode": "play",
+        "player": [
+          -619.8864553554887,
+          0,
+          -807.3696165603916
+        ],
+        "enemy": [
+          -747.9164899777808,
+          0,
+          -767.7242038948978
+        ]
+      },
+      {
+        "z": 1,
+        "area": 1,
+        "type": "grunt",
+        "active": true,
+        "movement": 228,
+        "attack": true,
+        "projectile": true,
+        "states": [],
+        "damage": 117,
+        "mode": "play",
+        "player": [
+          -679.6152547018395,
+          0,
+          -1695.8106250272986
+        ],
+        "enemy": [
+          -679.7422999748327,
+          0,
+          -1695.9667326961503
+        ]
+      },
+      {
+        "z": 2,
+        "area": 0,
+        "type": "caster",
+        "active": true,
+        "movement": 92,
+        "attack": true,
+        "projectile": true,
+        "states": [],
+        "damage": 90,
+        "mode": "play",
+        "player": [
+          625.1062082244356,
+          120,
+          -712.1444361302036
+        ],
+        "enemy": [
+          647.9662673341305,
+          150,
+          -949.8100524695037
+        ]
+      },
+      {
+        "z": 2,
+        "area": 1,
+        "type": "grunt",
+        "active": true,
+        "movement": 38,
+        "attack": false,
+        "projectile": true,
+        "states": [],
+        "damage": 124,
+        "mode": "play",
+        "player": [
+          -974.0537290297389,
+          180,
+          -1770.3860267482466
+        ],
+        "enemy": [
+          -970,
+          180,
+          -1941.9072000000028
+        ]
+      },
+      {
+        "z": 3,
+        "area": 0,
+        "type": "frostling",
+        "active": true,
+        "movement": 141,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 90,
+        "mode": "play",
+        "player": [
+          -184.23595149273066,
+          40,
+          -247
+        ],
+        "enemy": [
+          -185.03311180169496,
+          40,
+          -247.00000001475237
+        ]
+      },
+      {
+        "z": 3,
+        "area": 1,
+        "type": "frostling",
+        "active": true,
+        "movement": 108,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 90,
+        "mode": "play",
+        "player": [
+          -100,
+          315,
+          -580.0751730821846
+        ],
+        "enemy": [
+          -100,
+          315,
+          -579.6000000000029
+        ]
+      },
+      {
+        "z": 4,
+        "area": 0,
+        "type": "grunt",
+        "eliteKind": "forge",
+        "active": true,
+        "movement": 20,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 95,
+        "mode": "play",
+        "player": [
+          0,
+          100,
+          -444.500551731379
+        ],
+        "enemy": [
+          0,
+          100,
+          -629.6431999999999
+        ]
+      },
+      {
+        "z": 4,
+        "area": 1,
+        "type": "grunt",
+        "active": true,
+        "movement": 304,
+        "attack": true,
+        "projectile": true,
+        "states": [],
+        "damage": 165,
+        "mode": "play",
+        "player": [
+          -242.3354521959667,
+          127.296,
+          -1005.6457527551889
+        ],
+        "enemy": [
+          -226.26616141773377,
+          120,
+          -1025.893340507645
+        ]
+      },
+      {
+        "z": 5,
+        "area": 0,
+        "type": "grunt",
+        "eliteKind": "shore",
+        "active": true,
+        "movement": 1,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 114,
+        "mode": "play",
+        "player": [
+          -180,
+          30,
+          -873.4006620776563
+        ],
+        "enemy": [
+          -180,
+          30,
+          -1098.92864
+        ]
+      },
+      {
+        "z": 5,
+        "area": 1,
+        "type": "grunt",
+        "active": true,
+        "movement": 157,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 121,
+        "mode": "play",
+        "player": [
+          894,
+          190,
+          -940.0118546079964
+        ],
+        "enemy": [
+          894,
+          190,
+          -939.1360000000054
+        ]
+      },
+      {
+        "z": 6,
+        "area": 0,
+        "type": "grunt",
+        "active": true,
+        "movement": 157,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 132,
+        "mode": "play",
+        "player": [
+          756.2533253418582,
+          170,
+          -1050
+        ],
+        "enemy": [
+          756.735999999994,
+          170,
+          -1050
+        ]
+      },
+      {
+        "z": 6,
+        "area": 1,
+        "type": "grunt",
+        "active": true,
+        "movement": 158,
+        "attack": true,
+        "projectile": false,
+        "states": [],
+        "damage": 36,
+        "mode": "play",
+        "player": [
+          -1110,
+          60,
+          -1066.7003310388282
+        ],
+        "enemy": [
+          -1067.211554456835,
+          60,
+          -1078.0915544568393
+        ]
+      },
+      {
+        "z": 7,
+        "area": 0,
+        "type": "grunt",
+        "active": true,
+        "movement": 114,
+        "attack": true,
+        "projectile": true,
+        "states": [],
+        "damage": 228,
+        "mode": "play",
+        "player": [
+          937.0342771419236,
+          120,
+          -1390.0949578394714
+        ],
+        "enemy": [
+          943.8616814658276,
+          120,
+          -1401.7797946602177
+        ]
+      },
+      {
+        "z": 7,
+        "area": 1,
+        "type": "grunt",
+        "active": true,
+        "movement": 38,
+        "attack": false,
+        "projectile": true,
+        "states": [],
+        "damage": 274,
+        "mode": "play",
+        "player": [
+          -191.57931964256446,
+          2000,
+          1132.1215330655439
+        ],
+        "enemy": [
+          -325,
+          2000,
+          889.0928000000006
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "approaches": {
+    "rows": [
+      {
+        "key": "tc.brake",
+        "movement": [
+          [
+            -75.95282498730046,
+            41.93599999999999,
+            -515.446928110713
+          ],
+          [
+            -163.65412738737248,
+            40,
+            -585.4941448414816
+          ],
+          [
+            -224.5836861720712,
+            40,
+            -617.9697638238332
+          ]
+        ],
+        "keyboardInteraction": true
+      },
+      {
+        "key": "lc.cache",
+        "movement": [
+          [
+            2218.182117205922,
+            0,
+            -3043.50756144972
+          ],
+          [
+            2296.854982681786,
+            0,
+            -3223.145470711101
+          ],
+          [
+            2343.808809693634,
+            0,
+            -3267.404606781533
+          ]
+        ],
+        "keyboardInteraction": true
+      }
+    ],
+    "errors": []
+  },
+  "thunderCliffs": {
+    "checks": [
+      "no disguised boss troops",
+      "brake required before release",
+      "lift restored",
+      "lift reaches upper station",
+      "inspect chain before opening approach",
+      "main open without optional NPC",
+      "lower brace required",
+      "cave physically opens",
+      "high tide keeps inland door closed",
+      "low-tide release opens inland door",
+      "three personal shards provisional"
+    ],
+    "waypoints": 134,
+    "failed": [],
+    "counts": {
+      "name": "Thunder Cliffs",
+      "artObstacles": true,
+      "triangles": 80312,
+      "totalTriangles": 80312,
+      "instances": 2032
+    },
+    "errors": []
+  },
+  "castleDisguise": {
+    "checks": [
+      "warrior uniform preserves equipment",
+      "mage uniform preserves equipment",
+      "ranger uniform preserves equipment",
+      "ninja uniform preserves equipment",
+      "pirate uniform preserves equipment",
+      "reaper uniform preserves equipment",
+      "paladin uniform preserves equipment",
+      "network appearance flag survives peer snapshots",
+      "failed inspection returns control and original body",
+      "failed inspection starts real guard wave"
+    ]
+  },
+  "freshPlayer": {
+    "freshNewGame": true,
+    "openingFivePages": true,
+    "creatorFourSteps": true,
+    "creatorBackPreservesName": true,
+    "tutorial": {
+      "name": "Trail Tester",
+      "trial": "warrior",
+      "enemies": 19,
+      "bosses": 0
+    }
+  },
+  "preChangeSave": {
+    "preChangeSave": true,
+    "zone": 4,
+    "area": 1,
+    "level": 1,
+    "classId": "warrior",
+    "goldPreserved": true,
+    "weapon": "Rusty Sword"
+  },
+  "checkpoints": {
+    "routes": 24,
+    "checkpoints": [
+      "0/0",
+      "0/1",
+      "0/-1",
+      "1/0",
+      "1/1",
+      "1/-1",
+      "2/0",
+      "2/1",
+      "2/-1",
+      "3/0",
+      "3/1",
+      "3/-1",
+      "4/0",
+      "4/1",
+      "4/-1",
+      "5/0",
+      "5/1",
+      "5/-1",
+      "6/0",
+      "6/1",
+      "6/-1",
+      "7/0",
+      "7/1",
+      "7/-1"
+    ]
+  },
+  "localTwoClient": {
+    "checks": [
+      "host escort health and position reach guest",
+      "guest sees which Legion fighters are pursuing prisoners",
+      "direct winch repair reaches guest",
+      "raised ice float reaches guest",
+      "frozen crossing reaches guest",
+      "permanent ice bridge reaches guest",
+      "direct cart repair reaches guest",
+      "fitted boat part reaches guest",
+      "prisoner transfer reaches guest",
+      "late guest can wait on returned lift",
+      "returned lift carries guest toward exit"
+    ],
+    "pageErrors": []
+  },
+  "rendering": {
+    "scenes": [
+      {
+        "zone": 0,
+        "area": 0,
+        "name": "Briar Town · Homefields",
+        "npcs": 3,
+        "render": {
+          "shadows": true,
+          "triangles": 174716,
+          "calls": 298,
+          "geometries": 261
+        }
+      },
+      {
+        "zone": 0,
+        "area": 1,
+        "name": "Briar Town · Black Woods",
+        "npcs": 3,
+        "render": {
+          "shadows": true,
+          "triangles": 102761,
+          "calls": 185,
+          "geometries": 277
+        }
+      },
+      {
+        "zone": 0,
+        "area": -1,
+        "name": "The Brute",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 18514,
+          "calls": 74,
+          "geometries": 225
+        }
+      },
+      {
+        "zone": 1,
+        "area": 0,
+        "name": "Hollow Pass · Winding Cliffs",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 81118,
+          "calls": 121,
+          "geometries": 285
+        }
+      },
+      {
+        "zone": 1,
+        "area": 1,
+        "name": "Hollow Pass · Lost Canyon",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 125254,
+          "calls": 141,
+          "geometries": 292
+        }
+      },
+      {
+        "zone": 1,
+        "area": -1,
+        "name": "Hollow Marksman",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 44650,
+          "calls": 60,
+          "geometries": 265
+        }
+      },
+      {
+        "zone": 2,
+        "area": 0,
+        "name": "Ruined Keep · Broken Walls",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 117524,
+          "calls": 139,
+          "geometries": 355
+        }
+      },
+      {
+        "zone": 2,
+        "area": 1,
+        "name": "Ruined Keep · The Dungeons",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 99934,
+          "calls": 151,
+          "geometries": 367
+        }
+      },
+      {
+        "zone": 2,
+        "area": -1,
+        "name": "The Fallen",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 42258,
+          "calls": 78,
+          "geometries": 283
+        }
+      },
+      {
+        "zone": 3,
+        "area": 0,
+        "name": "Frostfell · Snowbound Peaks",
+        "npcs": 1,
+        "render": {
+          "shadows": true,
+          "triangles": 63646,
+          "calls": 134,
+          "geometries": 311
+        }
+      },
+      {
+        "zone": 3,
+        "area": 1,
+        "name": "Frostfell · Deep Ice Caves",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 73202,
+          "calls": 144,
+          "geometries": 309
+        }
+      },
+      {
+        "zone": 3,
+        "area": -1,
+        "name": "The Hollowed Officers",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 27470,
+          "calls": 75,
+          "geometries": 326
+        }
+      },
+      {
+        "zone": 4,
+        "area": 0,
+        "name": "Emberdeep · Iron Halls",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 111060,
+          "calls": 187,
+          "geometries": 406
+        }
+      },
+      {
+        "zone": 4,
+        "area": 1,
+        "name": "Emberdeep · The Great Furnace",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 110228,
+          "calls": 152,
+          "geometries": 416
+        }
+      },
+      {
+        "zone": 4,
+        "area": -1,
+        "name": "Ember Colossus",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 57830,
+          "calls": 52,
+          "geometries": 350
+        }
+      },
+      {
+        "zone": 5,
+        "area": 0,
+        "name": "Storm Coast - Shipwreck Shore",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 113354,
+          "calls": 136,
+          "geometries": 398
+        }
+      },
+      {
+        "zone": 5,
+        "area": 1,
+        "name": "Thunder Cliffs",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 137970,
+          "calls": 124,
+          "geometries": 374
+        }
+      },
+      {
+        "zone": 5,
+        "area": -1,
+        "name": "Chained Sea Hydra",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 31824,
+          "calls": 242,
+          "geometries": 568
+        }
+      },
+      {
+        "zone": 6,
+        "area": 0,
+        "name": "Palace Courtyard",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 163614,
+          "calls": 252,
+          "geometries": 398
+        }
+      },
+      {
+        "zone": 6,
+        "area": 1,
+        "name": "The Sky Library",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 120589,
+          "calls": 225,
+          "geometries": 399
+        }
+      },
+      {
+        "zone": 6,
+        "area": -1,
+        "name": "The Marble Colossus",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 125154,
+          "calls": 114,
+          "geometries": 389
+        }
+      },
+      {
+        "zone": 7,
+        "area": 0,
+        "name": "The Castle Gates",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 76970,
+          "calls": 150,
+          "geometries": 451
+        }
+      },
+      {
+        "zone": 7,
+        "area": 1,
+        "name": "The Long Ascent",
+        "npcs": 1,
+        "render": {
+          "shadows": true,
+          "triangles": 133792,
+          "calls": 144,
+          "geometries": 479
+        }
+      },
+      {
+        "zone": 7,
+        "area": -1,
+        "name": "The Abyss King, Awakened",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 11016,
+          "calls": 38,
+          "geometries": 481
+        }
+      }
+    ],
+    "occlusion": {
+      "foregroundClears": true,
+      "supportStaysSolid": true,
+      "firstPersonSolid": true
+    },
+    "lowQuality": {
+      "shadows": false,
+      "triangles": 134766,
+      "calls": 98,
+      "geometries": 416
+    },
+    "errors": []
+  },
+  "limits": [
+    "Automated browser and normal-camera visual verification are not a human playtest of fun or difficulty.",
+    "Co-op transport is exercised with two browser clients and locally relayed packets, not a public network session.",
+    "Performance readings come from this desktop; low-end devices are not certified.",
+    "Initially unreachable Ice Caves freeze valve and Sky Library second crank require their existing puzzle state and are intentionally retained."
+  ]
+}

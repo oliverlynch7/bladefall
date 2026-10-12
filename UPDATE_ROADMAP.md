@@ -2664,3 +2664,10 @@ The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing 
 - [x] Fixed two NPC/terrain overlaps, coastal overhead obstructions and scene-introduction readability/stale text. Supporting floors remain visible and first-person walls stay solid.
 - [x] Muted browser: 24 scenes in three cameras, 32 NPC placement checks, fresh creator/tutorial, pre-change save, 24 checkpoint restores, earned progress, main-route checks, Thunder Cliffs movement, local two-client sharing, solid-wall pixels and renderer fallbacks. Relevant static/content tests passed. See docs/design/CAMPAIGN_PLAYTEST_READINESS_2026-10-12.md.
 - [ ] Human first-session playtest, public-network co-op and slower-device performance assessment. These tests establish functional readiness of the changed build, not that every asset or level is perfected. No custom SFX work.
+
+## [Codex | 2026-10-12] Campaign encounter footing and healing clarity (v2.183.0)
+
+- [x] Corrected unsupported/clipped campaign spawn points and kept repeating patrols on those same valid floors; all 206 inspected ground enemies in the 16 halves pass support/clearance checks.
+- [x] Moved 20 misplaced rest sites onto clear nearby footing. Added eight regional styles, a visible charge arc and short local healing/status hints. Verified all 57 sites and every unlocked finite healing budget.
+- [x] Connected Thunder Cliffs' lower lift dock to its approach, made the Lost Canyon cave cache accessible, fixed two missing-color scenery definitions that could interrupt rendering, and corrected outdated campaign/progress tips.
+- [x] Passed combat in every half, 39 patrol refills, 134 coastal route waypoints, real E interactions, fresh/older saves, 24 checkpoints, local two-client quest synchronization and 24 scene renders in three camera modes. Human feel, real-network and low-end-device checks remain open.

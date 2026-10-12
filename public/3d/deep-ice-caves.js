@@ -53,7 +53,7 @@ function build({G,seg,plat,solid,spawn}){
  for(const [x,z,y,w,d,h]of [[-540,200,200,260,850,540],[530,40,200,280,800,600],[-420,-680,70,170,480,620],[610,-990,100,300,320,650],[-1430,-760,100,850,250,600],[-2320,-1710,150,340,750,550],[-1580,-2810,70,550,200,730],[-540,-2220,150,240,480,610],[1920,-2340,0,260,930,740],[1020,-2410,0,220,480,670],[-860,-3180,0,350,380,680],[-1970,-4040,0,320,900,850],[-1950,-5250,0,360,650,860],[600,-4120,0,280,820,780],[-550,-4770,0,200,780,820],[2540,-4240,0,330,850,870],[2050,-4980,100,400,650,930],[-590,-5540,0,230,580,830]])G.walls.push({x,z,y0:y,w,d,h,caveWall:true});
  for(const [x,z,y,w,d]of [[0,220,900,900,660],[-1350,-2240,950,1150,800],[1450,-2490,900,770,660],[0,-3570,1080,950,700],[-1350,-5310,950,840,600]])G.deco.push({kind:'caveroof',x,z,y0:y,w,d,h:65,c:'#86b9cb'});
  for(const [x,z,y,w,h]of [[-350,-1440,240,60,130],[280,-1300,240,50,95],[-1860,-2430,300,70,180],[1700,-2560,100,65,150],[-1630,-4180,80,80,150],[2100,-4440,340,65,120],[210,-4800,180,55,135]])G.deco.push({theme:'frost',x,z,y0:y,w,d:w,h,c:'#81b5cc'});
- for(let i=0;i<8;i++)G.deco.push({theme:'frost',x:1800+i*29,z:-4540+(i%3)*17,y0:20,w:47,d:62,h:450-i*22});
+ for(let i=0;i<8;i++)G.deco.push({theme:'frost',x:1800+i*29,z:-4540+(i%3)*17,y0:20,w:47,d:62,h:450-i*22,c:i%2?'#8bc7d4':'#b3dfe7'});
  // Workbenches and shelves are placed off the two lab approaches.
  for(const [x,z,w,d,h]of [[-1220,-2420,210,85,48],[-1580,-2420,180,65,50],[-1660,-2080,200,45,125]])G.deco.push({kind:'iceResearch',x,z,y0:300,w,d,h,c:'#796b55'});
  const obj=(key,label,x,z,y,kind='lever')=>({key,label,x,z,y,kind});
@@ -65,7 +65,7 @@ function build({G,seg,plat,solid,spawn}){
  G.iceCaves.float={iceFloat:true,x:0,x0:0,z:-4095,w:210,d:210,h:0,px:0,py:0,amp:0,sp:0,ph:0};
  G.iceCaves.sheet={iceSheet:true,x:0,x0:0,z:-4290,w:220,d:260,h:-80,px:0,py:-80,amp:0,sp:0,ph:0};
  G.movers.push(G.iceCaves.float,G.iceCaves.sheet);
- for(const [x,z,y]of [[190,-1280,240],[-990,-2300,300],[230,-3450,180],[180,-4750,180]])G.healpads.push({x,z,y,r:31,charge:1,_acc:0});
+ for(const [x,z,y]of [[190,-1280,240],[-990,-2300,300],[230,-3450,180],[140,-4750,201]])G.healpads.push({x,z,y,r:31,charge:1,_acc:0});
  for(const [type,x,z,y,guard]of [['frostling',-100,-630,280],['frostling',200,-1380,240],['frostling',-1100,-1200,240],['grunt',-1250,-2310,300,true],['caster',-1570,-2300,300,true],['grunt',-1100,-2100,300,true],['frostling',-2120,-2620,220],['frostling',1100,-2010,100],['frostling',1670,-2410,100],['frostlobber',1430,-3130,130],['grunt',-100,-3500,180],['caster',140,-3680,180],['frostling',-1310,-4130,80],['frostling',1800,-4000,255],['frostlobber',1750,-4530,350],['grunt',120,-5020,180]]){const e=spawn(type,x,z,false);e.y=y;e.iceGuard=!!guard;}
  seg(0,-4200,500,640,{icePool:true});seg(-1350,-4680,400,590,{icePool:true});
  G.bounds={minX:-2660,maxX:2750,minZ:-5800,maxZ:700};G.progressEnd=-5610;G.startPos={x:0,z:300,y:340};G.lastSafe={...G.startPos};G.portalPos={x:0,z:-5550,y:180};G.goalPos={...G.portalPos};Object.assign(G.p,{...G.startPos,vy:0});

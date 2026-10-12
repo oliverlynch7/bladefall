@@ -13,6 +13,9 @@ function build({G,plat,spawn}){
  for(const [id,ps]of Object.entries(paths)){if(id==='grotto')continue;const walk=[];for(let j=1;j<ps.length;j++){const a=ps[j-1],b=ps[j],jump=(id==='upper'&&j===2)||(id==='wind'&&j===2),n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/(jump?155:85),Math.abs(b[2]-a[2])/(jump?25:10)));for(let i=0;i<=n;i++){const p=a.map((v,k)=>v+(b[k]-v)*i/n);floor(...p,jump?(id==='wind'?75:95):id==='wind'?170:270,jump?(id==='wind'?75:95):id==='wind'?170:270);if(jump)floor(p[0],p[1],p[2]-80,220,220,{thunderCatch:true});walk.push(p);}}G.thunder.walks[id]=walk;}
  // Wide rests, distinct junctions, low catches beneath the risky side climb.
  for(const [name,x,z,y,w,d]of [['Landing',0,200,40,750,1000],['Middle ledge',-300,-1680,340,750,650],['Dash’s arch',-2070,-2750,450,620,540],['Wreck cave',-2140,-3830,340,650,570],['Tide circle',-590,-4350,300,650,440],['Inland grotto',-1560,-4780,300,520,480],['High wind rest',1260,-4530,950,500,450],['Upper approach',300,-4700,850,720,560]]){floor(x,z,y,w,d);G.rooms.push({name,x,z,y,w,d,encounter:false,cleared:true,monsters:[]});}
+ // The visible lower lift dock must have real footing and a connection to the arrival path.
+ floor(-300,-650,40,180,190,{liftDock:true});
+ floor(-170,-590,40,230,210,{liftDock:true});
  // A separated line of rocks replaces the continuous grotto walkway. The large last
  // landing lets players wait out a surge before releasing the door.
  G.thunder.tideRocks=[[-960,-4480,300,110],[-1090,-4600,300,92],[-1035,-4715,300,105],[-1160,-4800,300,205]];

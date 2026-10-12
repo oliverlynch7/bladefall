@@ -2701,3 +2701,8 @@ Implemented U-GEO-20261012 and follow-ups B/C/D: purposeful terrain/boundaries a
 Title > Dev previews > Campaign blueprints opens sixteen interactive plans with previous/updated footprints, actual routes, height slices/profiles, real objective markers and authored branch purposes. The latest request arrived mid-build: plans review this pass before publication; subsequent layout changes begin with blueprint updates. Correctly mark Thunder's lift and the library records as optional.
 
 Validated 123 geography assertions, 238 state-appropriate interaction approaches, 24 scene renders, 24 checkpoint restores, pre-change save, twelve mechanism behaviors, palace alternative routes, prison repeated lift travel, seven local co-op pickup/clue assertions, targeted movement/climbs and 55 desktop/phone blueprint checks. Repaired the old Thunder route-only test fixture so a legitimate rank-up choice no longer stalls its movement; race/hydra traversal passes. Scope/results: docs/design/CAMPAIGN_GEOGRAPHY_2026-10-12.md and docs/art-validation/campaign-geography-2026-10-12.json. Human pacing/aesthetic acceptance and slower-device/public-network tests remain open. No custom SFX work. General campaign quality objective remains open. Unrelated companion3d.js/articulated-rigs.json changes excluded.
+
+
+## [Codex | 2026-10-12] Geography release verified live
+
+Commit 849622db pushed to main. Cloudflare Pages succeeded. Fresh production browser confirmed v2.187.0, the actual title > Dev previews > Campaign blueprints link, all sixteen plans and the updated Keep geometry/render with no page or WebGL errors. Live: https://bladefall.pages.dev/design/campaign-geography/ . Detailed production evidence added to the geography QA report.

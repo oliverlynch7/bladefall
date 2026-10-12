@@ -2,7 +2,7 @@
   "version": "2.187.0-campaign-geography",
   "date": "2026-10-12",
   "previousCommit": "9d143bd1",
-  "status": "Local validation passed; publication pending",
+  "status": "Local and production browser validation passed",
   "scope": "24 campaign scenes; blueprints for 16 campaign halves; shared surface materials",
   "geography": {
     "checks": [
@@ -2316,5 +2316,40 @@
     "docs/art-validation/campaign-geography/geo187-final-2-0.png",
     "docs/art-validation/campaign-geography/geo187-final-6-1.png",
     "docs/art-validation/campaign-geography/geo187-ice-final-3-1.png"
-  ]
+  ],
+  "production": {
+    "published": true,
+    "version": "2.187.0-campaign-geography",
+    "plans": {
+      "count": 16,
+      "version": "2.187.0-campaign-geography"
+    },
+    "keep": {
+      "revision": 2187,
+      "bounds": {
+        "minX": -2440,
+        "maxX": 1850,
+        "minZ": -4900,
+        "maxZ": 680
+      },
+      "features": 97,
+      "world": true,
+      "error": null,
+      "render": {
+        "calls": 260,
+        "triangles": 104990,
+        "points": 0,
+        "lines": 0,
+        "geometries": 177,
+        "textures": 71,
+        "programs": 24
+      }
+    },
+    "errors": [],
+    "commit": "849622db",
+    "url": "https://bladefall.pages.dev/3d/",
+    "blueprints": "https://bladefall.pages.dev/design/campaign-geography/",
+    "cloudflareCheck": "success",
+    "method": "Fresh browser profile; used actual title Dev Previews link, loaded all 16 plans and rendered the updated Keep."
+  }
 }

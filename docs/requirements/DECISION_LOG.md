@@ -984,3 +984,7 @@ The old upper-deck 1/2/4 weight toggles repeat a puzzle interaction Oliver expli
 ## [Codex | 2026-10-11] Shipwreck Shore hull mechanism — local verification
 
 The scoped cargo-release interaction is implemented in v2.176.0. A normal-camera mistake and retry, successful opening, walkable lower ramp, complete shore/voyage route, checkpoint, old partial/completed saves and guest-operated co-op release passed muted browser checks. This verifies function and presentation, not that Oliver finds the challenge or art satisfying. Keep the wider level-design review open. No custom SFX work.
+
+## [Codex | 2026-10-11] Palace Courtyard sunbeam — scoped visual correction
+
+Oliver's existing direction favors puzzles whose inputs have visible environmental consequences. The courtyard's path math already supports this, but its thin pale beam and similar-looking mirror states encouraged handle guessing. Keep the same three spatial mirrors and save IDs; show each turn and the ray's route, off-target impact and successful receiver state clearly from normal camera. Version 2.177.0 implements this and passed muted-browser, route, checkpoint, old-save and co-op checks. This is a visual/cause-and-effect improvement, not a claim that the whole level or all campaign puzzles are finished. Await Oliver's human assessment. No custom SFX work.

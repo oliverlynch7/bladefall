@@ -23,3 +23,11 @@ The required three-weight lift input is now a walkable winch on the lift deck. I
 ## [Codex | 2026-10-11] Castle Gates broken drain crossing, v2.175.0
 
 The repeated two-catch bridge step is now an offset stone crossing to one brake, a visible return walkway and a lowerable, walkable bridge. The direct far-bank shortcut is gone. Old bridge and catch flags remain safe; quiet infiltration, three-wave assault and rewards are unchanged. Muted browser tests passed actual jumps, missed-jump recovery, E interactions, bridge traversal, full route, checkpoint, combat, legacy states and two-client co-op, plus visual inspection. Human difficulty and art playtest remains. See docs/design/CASTLE_GATES_DRAIN_CROSSING_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Shipwreck Shore hull cargo, v2.176.0
+
+The optional three-weight hatch was replaced by a swinging cargo-cage timing release that opens the existing lower shard route. Miss/retry, E input, boat voyage, old saves and host/guest state passed muted browser checks. Human timing and visual judgment remain open. See docs/design/SHIPWRECK_HULL_CARGO_RELEASE_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Palace Courtyard sunbeam readability, v2.177.0
+
+The three mirrors now visibly turn their faces; a stronger ray and floor projection show where the light travels and misses, while the receiver lights when the library opens. Old completed saves without a mask still render the solved path. Initial, wrong-turn, progress, solved and legacy states were reviewed in a muted browser. Full courtyard path, checkpoint, co-op and node story checks passed. Human playtesting remains for difficulty and art. See docs/design/PALACE_SUNBEAM_READABILITY_2026-10-11.md. No custom SFX work.

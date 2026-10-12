@@ -1103,7 +1103,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./final-king.js?v=2022"></script>
 <script src="./return-adventures.js?v=2038"></script>
 <script src="./return-visits.js?v=2171"></script>
-<script src="./palace-courtyard.js?v=2159"></script>
+<script src="./palace-courtyard.js?v=2177"></script>
 <script src="./dragon-rescue.js?v=2024"></script>
 <script src="./dragon-combat.js?v=2024"></script>
 <script src="./sky-library.js?v=2168"></script>
@@ -1115,7 +1115,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./furnace-colossus.js?v=2014"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2170">
 <script src="./journal-notice.js?v=2150"></script>
-<script src="./puzzle-feedback.js?v=2176"></script>
+<script src="./puzzle-feedback.js?v=2177"></script>
 <script src="./journal-clues.js?v=2175"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.176.0-shore-cargo';
+const VERSION3D='2.177.0-palace-sunbeam';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -20172,7 +20172,7 @@ function drawCourse(s,t){
   drawPrison(t);
   drawSnowbound(t);
   drawIceCaves(t);
-  BFReturnVisits.draw({G,bx,ring:dangerRing},t);drawIronHalls(t);drawGreatFurnace(t);if(G?.kingFinal)BFFinalKing.draw({G,bx,ring:dangerRing},t);if(inLongAscent())BFLongAscent.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inCastleGates())BFCastleGates.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(G.marbleArena)BFMarbleGuardian.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inSkyLibrary())BFSkyLibrary.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inPalaceCourtyard())BFPalaceCourtyard.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inThunderCliffs())BFThunderCliffs.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(G.hydraArena)BFHydra.draw({G,bx,ring:dangerRing},t);if(inShipwreck()&&!G.voyage)BFShipwreckShore.draw({G,state:adventureStoryState(),bx},t);
+  BFReturnVisits.draw({G,bx,ring:dangerRing},t);drawIronHalls(t);drawGreatFurnace(t);if(G?.kingFinal)BFFinalKing.draw({G,bx,ring:dangerRing},t);if(inLongAscent())BFLongAscent.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inCastleGates())BFCastleGates.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(G.marbleArena)BFMarbleGuardian.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inSkyLibrary())BFSkyLibrary.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(inPalaceCourtyard())BFPalaceCourtyard.draw({G,state:adventureStoryState(),bx,ring:dangerRing,pushM,popM,mv,rotY,rotZ,box},t);if(inThunderCliffs())BFThunderCliffs.draw({G,state:adventureStoryState(),bx,ring:dangerRing},t);if(G.hydraArena)BFHydra.draw({G,bx,ring:dangerRing},t);if(inShipwreck()&&!G.voyage)BFShipwreckShore.draw({G,state:adventureStoryState(),bx},t);
   drawBethRescue(t);
   drawBruteOrchard(t);
   if(G.marksmanArena)BFMarksman.draw({G,bx},t);

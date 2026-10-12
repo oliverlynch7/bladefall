@@ -1,0 +1,13 @@
+# Sunspire Courtyard: make the mirror puzzle readable in play
+
+The courtyard already simulates a real light path, but the normal shoulder view renders it as a thin pale line. The three mirrors look much the same in either position. A player can therefore solve it by trying handle combinations without observing how the world responds, repeating the exact failure mode Oliver identified in other puzzles.
+
+Keep the existing route, mirror locations, `pc.light.mask`, `pc.light.open`, library door, quest and old saves. Show a tall, unmistakable sun source, each mirror as a single diagonal reflective face that actually turns, a bright continuous beam with small moving motes showing travel direction, an amber impact at a missed terrace edge, and a distinct receiver that lights only when hit. The in-world response should be sufficient to identify the last reached mirror without reading a notice. Keep the marble/gold Sunspire palette and low render cost; these are visual pieces, not extra colliders.
+
+Check the unsolved initial state, a wrong middle-mirror turn, progress after the first mirror, the last-mirror miss, and the solved door in a muted real browser at normal camera scale. Verify no mirror/beam disappears after a repeat interaction, story flags remain shared in co-op, the route and older completed saves still work, and no new visual clips through a walking player. Human playtesting remains the standard for difficulty and satisfaction; this pass only establishes clear cause and effect.
+
+## [Codex | 2026-10-11] Implementation and local verification
+
+Version 2.177.0 gives each mirror a turning reflective face and lit pedestal, marks the ray's direction with moving points, and projects its path onto the pale floor. The sun source and receiver now have distinct silhouettes; a miss makes an amber impact, while hitting the receiver lights it and the library threshold. Feedback reports the last mirror the beam reached without giving the next handle choice. A completed old save with no mask is rendered in the solved orientation.
+
+Muted-browser screenshots were reviewed for initial, wrong-middle, first-reflection, solved and old-complete states from the normal far camera. The floor projection was added after the first visual check showed the brighter airborne ray still blended into the marble. Browser checks passed full courtyard routes, all 50 path waypoints, death/checkpoint, garden/shard rewards, guest mirror operation and shared door state. Node story check passed. No page exceptions occurred. Oliver has not yet judged puzzle feel or final visual quality in a human playtest; the broader campaign level-quality work remains open. No custom SFX work.

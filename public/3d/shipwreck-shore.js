@@ -39,12 +39,14 @@ function build({G,plat,spawn}){
  for(const d of G.deco)d.c=d.kind==='shoreRock'?'#405359':'#98734c';
  G.storyNpcs=[{id:'otto',name:'Otto',x:170,z:-300,y:30},{id:'rose',name:'Captain Rose',x:-160,z:-2680,y:30}];
  const obj=(key,label,x,z,y,kind)=>({key:'sc.'+key,label,x,z,y,kind});
- G.storyObjects=[obj('rudder','Take the rudder',-1390,-2420,300,'rudder'),obj('sail','Take the sailcloth',1480,-1900,350,'sail'),obj('drain','Open the outside drain',2230,-690,0,'lever'),obj('latch','Lift the dry-room latch',2390,-1190,0,'lever'),obj('rope','Take the dry rope',2370,-1640,0,'rope'),obj('fit','Fit recovered parts at Otto’s workbench',300,-320,30,'workbench'),obj('bell','Take the ship bell',-1320,-3430,130,'bell'),obj('record','Read the last crew entry',-1120,-3600,130,'book'),obj('memorial','Set the crew board upright',100,-4100,30,'memorial'),obj('hull.note','Read the hull repair marks',-1270,-2110,300,'book'),obj('hull.release','Pull the cargo release at the gold mark',HULL.lever.x,HULL.lever.z,HULL.lever.y,'hullLever'),obj('code.note','Inspect the iron-bound chest',-2140,-3400,200,'chest'),obj('code.claim','Take Stormshot from the opened chest',-2140,-3400,200,'chestclaim'),obj('ballista','Aim the wreck ballista',BALLISTA.x,BALLISTA.z,BALLISTA.y,'ballista'),obj('code.fire','Release the chest binding',BALLISTA.x,BALLISTA.z,BALLISTA.y,'ballistafire'),obj('board','Board the repaired boat',-180,-210,30,'board')];
+ G.storyObjects=[obj('rudder','Take the rudder',-1390,-2420,300,'rudder'),obj('sail','Take the sailcloth',1480,-1900,350,'sail'),obj('drain','Open the outside drain',2230,-690,0,'lever'),obj('latch','Lift the dry-room latch',2390,-1190,0,'lever'),obj('rope','Take the dry rope',2370,-1640,0,'rope'),obj('fit','Fit recovered parts at Otto’s workbench',300,-320,30,'workbench'),obj('bell','Take the ship bell',-1290,-3430,130,'bell'),obj('record','Read the last crew entry',-1120,-3600,130,'book'),obj('memorial','Set the crew board upright',100,-4100,30,'memorial'),obj('hull.note','Read the hull repair marks',-1270,-2110,300,'book'),obj('hull.release','Pull the cargo release at the gold mark',HULL.lever.x,HULL.lever.z,HULL.lever.y,'hullLever'),obj('code.note','Inspect the iron-bound chest',-2140,-3400,200,'chest'),obj('code.claim','Take Stormshot from the opened chest',-2140,-3400,200,'chestclaim'),obj('ballista','Aim the wreck ballista',BALLISTA.x,BALLISTA.z,BALLISTA.y,'ballista'),obj('code.fire','Release the chest binding',BALLISTA.x,BALLISTA.z,BALLISTA.y,'ballistafire'),obj('board','Board the repaired boat',-180,-210,30,'board')];
  for(const o of G.storyObjects)if(['sc.ballista','sc.code.fire'].includes(o.key))o.range=165;
  G.storyObjects.find(o=>o.key==='sc.hull.release').blockedText='The cargo is not over the gold mark yet. Watch it swing across, then pull the release.';
  G.storyObjects.find(o=>o.key==='sc.sail').blockedLabel='Clear the lookout patrol first';G.storyObjects.find(o=>o.key==='sc.sail').blockedText='The patrol still controls the sailcloth.';
  for(const [x,z,y]of [[-210,-550,36],[1235,-643,79],[-278,-2752,40]])G.healpads.push({x,z,y,r:31,charge:1,_acc:0});
  for(const [type,x,z,y,guard]of [['grunt',-950,-850,65],['caster',-1670,-1800,240],['grunt',-720,-2200,120],['grunt',1390,-1700,350,true],['caster',1210,-1840,350,true],['grunt',1550,-2040,350,true],['slime',2350,-1030,0],['slime',2250,-1810,0],['grunt',-1060,-3190,115],['caster',-2050,-3480,200],['grunt',0,-3830,30]]){const e=spawn(type,x,z,false);e.y=y;e.shoreLookout=!!guard;}
+ // Coastal art gives wall height above its base; collision and reach use the same convention.
+ for(const wall of G.walls)wall.courtWall=true;
  G.bounds={minX:-2900,maxX:2950,minZ:-4400,maxZ:900};G.progressEnd=-4300;G.startPos={x:0,z:490,y:30};G.lastSafe={...G.startPos};G.portalPos={x:-180,z:-210,y:30};G.goalPos={...G.portalPos};Object.assign(G.p,{...G.startPos,vy:0});
 }
 function sync({G,state:s,plat}){if(s.notes['sc.hull'])s.notes['sc.hull'].text='The cargo cage swings over a painted strike mark. Pull the release as it crosses the mark. Its weight will lift the lower hatch. The broken upper deck can be crossed with ordinary jumps; lower boards catch a miss.';
@@ -56,7 +58,7 @@ function sync({G,state:s,plat}){if(s.notes['sc.hull'])s.notes['sc.hull'].text='T
 }
 function shards(s){return f(s,'hull.open')?[{id:'SC-01',x:-1930,z:-1230,y:40}]:[];}
 function draw({G,state:s,bx},t){
- for(const o of G.storyObjects){if(['workbench','ballista','ballistafire','chestclaim','hullLever'].includes(o.kind)||s.flags['event.'+o.key]&&!['memorial','chest'].includes(o.kind))continue;const y=o.y;
+ for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;if(['workbench','ballista','ballistafire','chestclaim','hullLever'].includes(o.kind)||s.flags['event.'+o.key]&&!['memorial','chest'].includes(o.kind))continue;const y=o.y;
   if(o.kind==='book'){bx(o.x,y+24,o.z,70,45,50,'#64513b');bx(o.x,y+49,o.z,60,4,40,'#ddcca3');}
   else if(o.kind==='rope'){for(let i=0;i<3;i++){bx(o.x,y+10+i*9,o.z,60-i*5,7,48-i*5,'#c3a775');}}
   else if(o.kind==='sail'){bx(o.x,y+16,o.z,90,25,55,'#dbcca8');for(const x of [-30,30])bx(o.x+x,y+30,o.z,8,5,57,'#5a695e');}
@@ -73,9 +75,14 @@ function draw({G,state:s,bx},t){
  for(const x of [-1630,-1230]){bx(x,405,-2240,24,205,27,'#664830');bx(x,312,-2240,48,20,54,'#3c4647');bx(x,512,-2240,65,17,60,'#b58b5a');}
  bx(HULL.x,516,-2240,445,23,46,'#6a4b32');bx(HULL.x,531,-2240,455,8,48,'#c79b5d');
  for(const x of [-1620,-1240])bx(x,489,-2240,11,55,13,'#39494c');
+ // The hanging load and its chain are not footing. Cut away when they hide the hero;
+ // it stays fully visible from the release handle, where timing matters.
+ const cargoBlocksView=root.BFCameraOcclusion?.blocks(G,{x:(HULL.x+loadX)/2,z:-2240,w:Math.abs(loadX-HULL.x)+90,d:85},loadY-48,523,root.__BF_META?.().camMode||'far',24);
+ if(!cargoBlocksView){
  for(let i=0;i<10;i++){const q=i/9;bx(HULL.x+(loadX-HULL.x)*q,508+(loadY-508)*q,-2240,7,15,7,'#d0b881');}
- bx(loadX,loadY,-2240,76,78,70,'#3d4748');for(const dx of [-27,27]){bx(loadX+dx,loadY,-2240,8,82,75,'#a3784c');bx(loadX+dx,loadY+38,-2240,14,8,81,'#c4a26c');}
- bx(loadX,loadY-42,-2240,84,11,78,'#594531');bx(loadX,loadY+43,-2240,84,10,78,'#c8a66d');
+  bx(loadX,loadY,-2240,76,78,70,'#3d4748');for(const dx of [-27,27]){bx(loadX+dx,loadY,-2240,8,82,75,'#a3784c');bx(loadX+dx,loadY+38,-2240,14,8,81,'#c4a26c');}
+  bx(loadX,loadY-42,-2240,84,11,78,'#594531');bx(loadX,loadY+43,-2240,84,10,78,'#c8a66d');
+ }
  bx(HULL.x,303,-2145,125,5,17,'#dfbe79');bx(HULL.x,330,-2163,92,8,56,'#d4b06a');for(const dx of [-38,0,38])bx(HULL.x+dx,336,-2134,12,5,8,'#fff0b6');
  const miss=clock-G.shore.hullMissAt<.48,mark=open?'#c7e4c3':miss?'#e96d56':ready?'#fce092':'#826a4c';
  bx(HULL.x,355+impact*105,-2190,360,28,36,'#9b7449');bx(HULL.x,379+impact*105,-2180,116,12,43,mark);

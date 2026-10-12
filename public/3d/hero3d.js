@@ -1,3 +1,4 @@
+import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
 import {syncClassLook,clearClassLook} from './class-look3d.js?v=2084';
@@ -2016,7 +2017,7 @@ export function drawHero3D(p, t){
       if(!p._portrait)syncCompanions(scene,dt);
       syncNpcs(scene,dt);
       syncRiftShards(scene);
-      if(!p._portrait)syncCampaignRest(scene);
+      if(!p._portrait){syncCampaignRest(scene);syncCampaignObjects(scene);}
   syncProjectiles(scene);
       syncProps(scene, dt);           // chests and the other objects you interact with
       syncClass();                    // respec or a different save changes the body

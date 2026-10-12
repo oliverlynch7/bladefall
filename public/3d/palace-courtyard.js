@@ -56,7 +56,7 @@ function build({G,plat,spawn}){
  for(const x of [-720,720]){part('stone',x,710,-4660,360,480,450,'#d7d1c0');part('furnace',x,790,-4418,110,205,5,'#b9a465');part('ring',x,980,-4660,140,70,140);part('stone',x,1060,-4660,50,130,50,'#d8c990');}
  G.storyNpcs=[{id:'grace',name:'Sister Grace',x:-220,z:-1320,y:200},{id:'victor',name:'Sergeant Victor',x:290,z:-1660,y:230}];
  const o=(k,label,x,z,y,kind='lever')=>({key:'pc.'+k,label,x,z,y,kind});
- G.storyObjects=[o('clamp','Remove the iron clamp',-1320,-720,80,'clamp'),o('water','Open the court water wheel',-1200,-1070,80,'wheel'),o('west.lower','Drain the west lock',-1390,-2370,200,'wheel'),o('east.lower','Drain the east lock',770,-2280,200,'wheel'),o('west.upper','Release the west balcony',-1000,-2530,340),o('east.upper','Release the east balcony',1090,-2150,340),o('garden.water','Open the garden channel',1320,-1000,160,'wheel'),o('seeds','Take the dry seed tin',1770,-1420,160,'seeds'),o('memorial','Read the garden keeper’s stone',-1930,-2000,370,'book'),o('mirror.note','Read the sun marks',-420,-3650,420,'book'),o('enter','Open the library door',0,-4240,440,'door')];
+ G.storyObjects=[o('clamp','Remove the iron clamp',-1320,-720,80,'clamp'),o('water','Open the court water wheel',-1200,-1070,80,'wheel'),o('west.lower','Drain the west lock',-1390,-2370,200,'wheel'),o('east.lower','Drain the east lock',770,-2280,200,'wheel'),o('west.upper','Release the west balcony',-1000,-2530,340),o('east.upper','Release the east balcony',1090,-2150,340),o('garden.water','Open the garden channel',1320,-1000,160,'wheel'),o('seeds','Take the dry seed tin',1770,-1420,160,'seeds'),o('memorial','Read the garden keeper’s stone',-1965,-1730,300,'book'),o('mirror.note','Read the sun marks',-420,-3650,420,'book'),o('enter','Open the library door',0,-4240,440,'door')];
  for(let i=0;i<3;i++)G.storyObjects.push(o('mirror.'+i,'Turn '+['left','middle','right'][i]+' mirror',mirrorPoints[i][0],mirrorPoints[i][1],420,'mirror'+i));
  for(const ob of G.storyObjects)if(ob.key.endsWith('.upper')){ob.blockedLabel='Defeat this balcony patrol first';ob.blockedText='The patrol controls this release. The lower garden offers another way.';}
  G.healpads=[{x:0,z:-1280,y:200,r:85,charge:1,infinite:true,locked:true,courtPad:true,_acc:0},{x:1540,z:-870,y:160,r:31,charge:1,_acc:0},{x:-260,z:-3590,y:420,r:31,charge:1,_acc:0}];
@@ -73,7 +73,7 @@ function shards(){return [{id:'SP-01',x:-1810,z:-3100,y:540}];}
 function draw({G,state:s,bx,ring,pushM,popM,mv,rotY,rotZ,box},t){
  // A completed legacy save may have the open flag without a stored mirror mask.
  const active=f(s,'west')||f(s,'east'),mask=f(s,'light.open')?5:(s.items['pc.light.mask']||0),r=lightPath(mask);
- for(const o of G.storyObjects){if(s.flags['event.'+o.key]&&o.kind!=='book')continue;const y=o.y;
+ for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;if(s.flags['event.'+o.key]&&o.kind!=='book')continue;const y=o.y;
  if(o.kind.startsWith('mirror')){
   const i=+o.kind.slice(6),on=!!(mask&(1<<i)),lit=active&&r.hits.includes(i),rim=lit?'#ffe49b':'#ad9257';
   bx(o.x,y+9,o.z,100,18,100,'#ded6b9');ring(o.x,y+21,o.z,43,rim,lit?1:.7);

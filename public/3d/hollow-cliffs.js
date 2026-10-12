@@ -58,7 +58,7 @@
   for(let j=0;j<5;j++)G.deco.push({x:-80+j*42,z:-2350,y0:0,w:28,h:30+j%2*18,d:24,c:'#98724b',nocol:true});
   G.storyNpcs=[{id:'caleb',name:'Caleb',x:-100,z:210,y:0},{id:'skip',name:'Skip',x:940,z:-1140,y:150}];
   const obj=(key,label,x,z,y=0,kind='lever')=>({key,label,x,z,y,kind});
-  G.storyObjects=[obj('hp.orders','Read the transport orders',-1060,-1510,0,'orders'),obj('hp.rope','Take the lost rope',1510,-1300,0,'rope'),obj('hp.bridge.clue','Read the freight plate',-110,-2400,0,'plate'),
+  G.storyObjects=[obj('hp.orders','Read the transport orders',-1060,-1510,0,'orders'),obj('hp.rope','Take the lost rope',1510,-1300,6,'rope'),obj('hp.bridge.clue','Read the freight plate',-110,-2400,0,'plate'),
    obj('hp.cart.push','Push the loaded cart onto the plate',-530,freight.z,0,'cartpush'),
    {...obj('hp.brake.right','Release the bridge winch',230,-2680,0,'bridgebrake'),blockedText:'The plate needs the loaded cart. Push it along the left rail and wait for it to dock.'},
    obj('hp.windbreak','Tie the windbreak shut',570,-880,90),obj('hp.quiet','Tie the lookout rope',790,-3900,180,'rope'),obj('hp.lift','Release the canyon lift',40,-4600),obj('hp.code.clue','Read the cargo plate',-1610,-2110,0,'plate'),
@@ -97,7 +97,7 @@
  function draw(a,t){const {G,state:s,bx,pushM,popM,mv,rotY,rotX,box}=a;if(!G.cliffs)return;const f=s.flags;
   // Teal torn cloth hides the sheltered opening; its fluttering edge is a fair visual clue.
   for(let j=0;j<7;j++)bx(-1550,80+j*9,-1280+Math.sin(t*1.5+j*.4)*8,12,10,120,'#587b77');
-  for(const o of G.storyObjects){const y=o.y||0;
+  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;const y=o.y||0;
    if(o.kind==='orders'||o.kind==='plate'){bx(o.x,y+26,o.z,62,52,20,'#725338');bx(o.x,y+50,o.z+12,54,30,2,'#d8c59b');for(let j=0;j<3;j++)bx(o.x,y+43+j*7,o.z+14,36-j*6,2,2,'#534832');}
    else if(o.kind==='cartpush'){bx(o.x,y+30,o.z,16,60,16,'#735338');bx(o.x,y+64,o.z,36,8,12,'#d6ad6e');}
    else if(o.kind==='rope'){if(o.key==='hp.rope'&&f['hp.rope'])continue;for(let j=0;j<7;j++){pushM();mv(o.x,y+7+j*3,o.z);rotY(j*.6);box(37,3,28,'#c5aa76');popM();}}

@@ -71,7 +71,7 @@ const corniceRidge=[
   for(const [x,z,y,w,h]of [[-100,320,0,100,50],[-490,-440,70,90,65],[-990,-910,170,100,70],[-1270,-1200,220,110,80],[-1790,-850,175,100,55],[-2260,-1680,260,110,90],[-400,-1840,365,130,80],[280,-2160,380,90,60],[330,-2820,400,110,80],[930,-3070,480,100,70],[1380,-3700,540,130,80],[800,-4220,630,95,65],[-700,-3710,570,100,70],[-1250,-4240,580,120,80],[-320,-4690,740,130,70],[260,-4940,740,110,70]])G.deco.push({kind:'mountainBoulder',x,z,y0:y,w,h,d:w*.85,c:'#8a9ca6'});
   G.storyNpcs=[{id:'heath',name:'Heath',x:0,z:-1960,y:380}];
   const obj=(key,label,x,z,y,kind='sign')=>({key,label,x,z,y,kind});
-  G.storyObjects=[obj('ff.trail','Read the scratched trail sign',-790,-640,130),obj('ff.part','Take the loose heater coil',-150,-2110,380,'part'),obj('ff.heater','Fit the coil to the crossing winch',115,-2120,380,'heater'),obj('ff.lift','Lower the return steps',-1470,-2190,380,'lever'),obj('ff.reflect.clue','Read the cornice marker',0,-4570,740),obj('ff.reflect.3','Release the cornice anchor',-185,-5200,965,'anchor'),obj('ff.cave','Enter the exposed ice cave',-260,-5280,740,'entrance'),obj('ff.camp','Read the explorer’s notebook',-930,-3800,580),obj('ff.camp.release','Release the survey rig above the camp',-500,-3530,810,'lever'),obj('ff.cache','Open the explorer’s exposed chest',-680,-3530,810,'chest')];
+  G.storyObjects=[obj('ff.trail','Read the scratched trail sign',-790,-640,133),obj('ff.part','Take the loose heater coil',-150,-2110,380,'part'),obj('ff.heater','Fit the coil to the crossing winch',115,-2120,380,'heater'),obj('ff.lift','Lower the return steps',-1470,-2190,380,'lever'),obj('ff.reflect.clue','Read the cornice marker',0,-4570,740),obj('ff.reflect.3','Release the cornice anchor',-185,-5200,965,'anchor'),obj('ff.cave','Enter the exposed ice cave',-260,-5280,740,'entrance'),obj('ff.camp','Read the explorer’s notebook',-930,-3800,580),obj('ff.camp.release','Release the survey rig above the camp',-500,-3530,810,'lever'),obj('ff.cache','Open the explorer’s exposed chest',-680,-3530,810,'chest')];
   G.peaks.trailMarks=[[-300,-430,55],[-940,-1050,170],[-1040,-1530,270],[-540,-1870,350]];
   G.canyonWind={time:0,vanes:[{x:-2250,z:-1850,y:290,until:0}],zones:[{x:-2050,z:-1800,y:290,r:250}]};G.canyonWind.zones[0].vane=0;
   for(const [x,z,y]of [[-690,-640,130],[180,-1900,380],[1100,-3730,579]])G.healpads.push({x,z,y,r:32,charge:1,_acc:0,locked:x===180});
@@ -105,7 +105,7 @@ const corniceRidge=[
  function wind(time){const t=((time%12)+12)%12;return t<5?{push:0,phase:'calm'}:t<7?{push:0,phase:'warning'}:{push:Math.sin((t-7)/5*Math.PI)*.9,phase:'gust'};}
  function draw({G,state:s,bx,pushM,mv,rotY,rotX,popM},t){if(!G.peaks)return;const f=s.flags;
   for(const [x,z,y]of G.peaks.trailMarks){for(const dx of [-17,17])for(let j=0;j<4;j++)bx(x+dx,y+3,z-j*24,7,3,14,'#557788');}
-  for(const o of G.storyObjects){const y=o.y;
+  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;const y=o.y;
    if(o.kind==='part'){if(!f['ff.part']){bx(o.x,y+18,o.z,86,30,65,'#695c50');for(let j=0;j<4;j++)bx(o.x-27+j*18,y+41,o.z,10,18,32,'#bea06b');bx(o.x,y+54,o.z,60,5,35,'#d9bd79');}}
    else if(o.kind==='heater')continue;
    else if(o.kind==='chest'){

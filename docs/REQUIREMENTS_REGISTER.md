@@ -1371,3 +1371,15 @@ Reference: attached 1-Photo-1.jpg (1B511883-7627-4B56-84C8-C2344F5F1732), five c
 ## [Codex | 2026-10-12] Chest reference redesign — implementation evidence
 
 All five shared rarity models implemented in v2.184.0; mixed timber/metal and increasing ornament replace the monochrome treatment. Existing loot/save contracts preserved. See docs/design/CHEST_REFERENCE_REDESIGN_2026-10-12.md and docs/art-validation/chest-craft-2026-10-12.json for bounded browser evidence. Human aesthetic acceptance remains open.
+
+
+## [Codex | 2026-10-12] Return to campaign improvements — requested
+
+Exact user request: "Ok once you finish making the chests look awesome, please get back to improving all the campaign levels all the way around". The chest redesign shipped as v2.184.0. Continue existing campaign improvements, using inspected shortcomings and normal-camera checks, while preserving current story, quests, save contracts and the custom-SFX hold. The next bounded pass addresses indistinct clue/pickup props across the campaign, interaction through solid walls, and stale quest wording about retaining earned progress. Scope and verification: docs/design/CAMPAIGN_OBJECTS_AND_INTERACTION_2026-10-12.md. The general campaign quality objective remains open.
+
+
+## [Codex | 2026-10-12] Campaign object detail and interaction correctness, v2.185.0
+
+Implemented 62 crafted clue/pickup props in all 16 campaign halves with 20 reusable models plus two supports. Corrected 17 unsupported, buried or obstructed placements. Solid-wall reach now applies both to local prompts and host story authority; coastal wall collisions match drawn height. Readables remain after reading; physical items disappear from persistent/shared pickup state. Fixed two misleading earned-progress journal messages, wind-caption placement and Shipwreck Shore cargo/chain obscuring the rudder pickup view.
+
+Verified all mapped props, 18 pickup/save/deduplication flows, 238 state-appropriate interaction approaches, older save, 24 campaign checkpoints, 184 coastal movement waypoints, 12 guidance checks, 11 cooperative route checks and seven new cooperative clue/pickup checks. Representative normal-camera frames inspected in each half; selected evidence saved. See docs/design/CAMPAIGN_OBJECTS_AND_INTERACTION_2026-10-12.md and docs/art-validation/campaign-objects-2026-10-12.json. Co-op uses local browser packet relays, not public-network testing. Human feel, aesthetic acceptance and slower-device performance remain open; the broader campaign improvement request is not closed. No custom SFX. Unrelated companion3d.js and articulated-rigs.json edits excluded.

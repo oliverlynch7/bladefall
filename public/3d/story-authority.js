@@ -10,6 +10,7 @@
    if((event.type==='open'&&state.conversation)||!context.canInteract)return fail();
    const target=event.type==='open'?context.npcs.find(n=>n.id===event.npc):context.objects.find(o=>o.key===event.key);
    if(!target||target.available===false)return fail();
+   if(context.canReach&&!context.canReach(context.position,target))return fail();
    if(target.bounds){const b=target.bounds,p=context.position;if(!p||p.x<b.minX||p.x>b.maxX||p.z<b.minZ||p.z>b.maxZ)return fail();}
    const p=context.position;if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.z)||Math.hypot(p.x-target.x,p.z-target.z)>(target.range||115)||Math.abs((p.y||0)-(target.y||0))>65)return fail();
   }

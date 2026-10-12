@@ -101,7 +101,7 @@
   }
   G.storyNpcs=[{id:'ward',name:'Captain Ward',x:-90,z:-750,y:140},{id:'ruth',name:'Ruth',x:-440,z:-1450,y:0}];
   const o=(key,label,x,z,y=0,kind='lever')=>({key,label,x,z,y,kind});
-  G.storyObjects=[o('lc.orders','Read the shift orders',-650,-650,120,'orders'),o('lc.force','Pull the locked gate chain',50,-860,90,'chain'),o('lc.gate','Open the front gate',80,-880,85),o('lc.side','Lower the side ladder',820,-1520,80,'rope'),
+  G.storyObjects=[o('lc.orders','Read the shift orders',-650,-650,150,'orders'),o('lc.force','Pull the locked gate chain',50,-860,90,'chain'),o('lc.gate','Open the front gate',80,-880,85),o('lc.side','Lower the side ladder',820,-1520,80,'rope'),
    ...Object.entries(cages).map(([id,c])=>({...o('lc.cage.'+id,'Release the '+(id==='extra'?'old':id)+' cage',c.x,c.z+135,c.y,'lock'),guardGroup:id,blockedLabel:'Drive off the cage guards first',blockedText:'The guards are too close to the cage door.'})),
    o('lc.alarm','Cut the alarm cable',0,-2550,180,'winch'),o('lc.escape','Open the escape gate',90,-4520,0,'chain'),o('lc.wagon','Unload the blocking wagon',1350,-2460,0,'wagon'),o('lc.water','Fill a clean water flask',2200,-3040,0,'water'),
    o('lc.rail.clue','Inspect the loaded cart',-2280,-3770,0,'cart'),o('lc.rail.release','Release the high freight brake',-2350,-3580,230,'brake'),o('lc.cache','Open the cave supply chest',2350,-3310,0,'chest')];
@@ -189,7 +189,7 @@
   for(const [id,c]of Object.entries(cages)){const open=f['lc.'+id]||id==='north'&&f['lc.north.open'];for(const dx of [-105,105])for(const dz of [-95,95])bx(c.x+dx,c.y+75,c.z+dz,14,150,14,'#68563d');for(const dz of [-95,95])bx(c.x,c.y+150,c.z+dz,226,12,18,'#94744a');for(let i=-3;i<=3;i++){bx(c.x+i*27,c.y+70,c.z-95,7,140,7,'#635e53');if(!open)bx(c.x+i*27,c.y+70,c.z+95,7,140,7,'#635e53');}for(const dx of [-105,105])for(let i=-2;i<=2;i++)bx(c.x+dx,c.y+70,c.z+i*30,7,140,7,'#635e53');if(open)bx(c.x+120,c.y+70,c.z+40,12,130,110,'#786d51');}
   const gates=[['lc.entry',0,-940,70,390],['lc.escape',0,-4610,0,390],['lc.rail.open',-2280,-3830,0,320]];
   for(const [flag,x,z,y,w]of gates){for(const dx of [-w/2,w/2])bx(x+dx,y+90,z,18,180,18,'#73543b');bx(x,y+184,z,w+24,16,20,'#ab895b');if(!f[flag]&&flag!=='lc.rail.open')for(let j=0;j<9;j++)bx(x-w/2+20+j*(w-40)/8,y+80,z,10,160,10,'#73644b');}
-  for(const o of G.storyObjects){const y=o.y||0;
+  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;const y=o.y||0;
    if(o.kind==='orders'){bx(o.x,y+27,o.z,95,54,65,'#7f5937');bx(o.x,y+56,o.z,58,3,40,'#e3cfaa');for(let k=0;k<4;k++)bx(o.x,y+59,o.z-12+k*7,34,2,2,'#584e40');}
    else if(o.kind==='lock'){if(!f['lc.'+o.key.slice(8)]&&!(o.key==='lc.cage.north'&&f['lc.north.open'])){bx(o.x,y+54,o.z-15,22,28,10,'#bb985e');bx(o.x,y+73,o.z-15,15,12,8,'#6a6253');}}
    else if(o.kind==='wagon'){const x=f['lc.wagon']?1550:1420,z=f['lc.wagon']?-2290:-2460;bx(x,40,z,150,55,170,'#795632');for(const dx of [-83,83])for(const dz of [-55,55])bx(x+dx,24,z+dz,12,48,48,'#433d32');if(!f['lc.wagon'])for(const dx of [-35,35])bx(x+dx,92,z,54,52,120,'#b19767');}

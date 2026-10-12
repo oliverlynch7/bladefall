@@ -1,0 +1,23 @@
+const assert=require('node:assert/strict'),I=require('../public/3d/campaign-interaction.js');
+const S=require('../public/3d/story-state.js'),A=require('../public/3d/story-authority.js'),P=require('../public/3d/campaign-objects.js');
+const book=require('../public/3d/story/briar-foundation.json');
+const p={x:0,y:180,z:85},o={key:'briar.root.1',x:0,y:180,z:0},g={area:0,walls:[],obstacles:[],doors:[]};
+assert(I.reachable(g,p,o));
+g.obstacles=[{kind:'plat',x:0,z:0,y0:155,h:180,w:220,d:250}];assert(I.reachable(g,p,o),'Support must not block');
+g.walls=[{x:0,z:42,y0:180,h:310,w:160,d:12}];assert(!I.reachable(g,p,o),'Solid wall must block');
+g.walls[0].h=205;assert(I.reachable(g,p,o),'A low step must not block hand/eye reach');
+g.walls[0]={x:0,z:42,y0:240,h:360,w:160,d:12};assert(I.reachable(g,p,o),'A beam overhead must not block');
+g.walls[0]={x:0,z:42,y0:180,h:110,w:160,d:12,courtWall:true};assert(!I.reachable(g,p,o),'Courtyard walls use relative height');
+g.walls=[];g.doors=[{x:0,z:42,y0:180,h:320,w:90,d:16}];assert(!I.reachable(g,p,o));g.doors[0].open=true;assert(I.reachable(g,p,o));
+g.doors=[];g.obstacles=[{x:0,z:0,y0:180,h:280,w:50,d:45,interactionKey:o.key}];assert(I.reachable(g,p,o),'The control can be touched on its own collision body');
+g.obstacles.push({x:0,z:42,y0:180,h:320,w:90,d:16});assert(!I.reachable(g,p,o),'Owning a collider does not bypass another wall');
+const request={epoch:'qa',event:{id:'pickup',type:'world',key:o.key}},state=S.create();
+const context={epoch:'qa',actor:'guest',alive:true,canInteract:true,position:p,objects:[o],npcs:[],party:['host','guest'],canReach:(p,o)=>I.reachable(g,p,o)};
+assert(!A.apply(state,book,request,context).changed,'Host must reject a guest through a wall');
+g.obstacles.pop();const result=A.apply(state,book,request,context);assert(result.changed);assert.equal(result.state.items.tangle_root,1);
+assert(!A.apply(result.state,book,request,context).changed,'Repeated packets cannot duplicate the pickup');
+assert(P.taken(o,result.state));assert(!P.taken(o,state));
+assert(P.taken({key:'ff.part'},{flags:{'ff.part':true}}),'Legacy completed item flags hide the pickup');
+assert(!P.taken({key:'sl.orders'},{flags:{'event.sl.orders':true}}),'Documents remain in the world after reading');
+for(const [key,spec]of Object.entries(P.props)){assert(spec.model&&P.anchor({key})>=62);}
+console.log('Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed.');

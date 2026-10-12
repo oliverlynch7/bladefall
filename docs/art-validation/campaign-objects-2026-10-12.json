@@ -1,0 +1,1207 @@
+{
+  "version": "2.185.0-campaign-objects",
+  "date": "2026-10-12",
+  "implementation": {
+    "campaignHalves": 16,
+    "mappedObjects": 62,
+    "objectModels": 20,
+    "supportModels": 2,
+    "correctedPlacements": [
+      "briar.dressings",
+      "home.orchard.clue",
+      "hp.rope",
+      "lc.orders",
+      "kd.roster",
+      "kd.lift.note",
+      "kd.depth.note",
+      "kd.drain.note",
+      "ff.trail",
+      "ic.notes",
+      "sc.bell",
+      "tc.tide.note",
+      "pc.memorial",
+      "cg.bells",
+      "cg.store.note",
+      "cg.balcony.note",
+      "la.vault.note"
+    ],
+    "meshMaterialsPerTemplate": [
+      1,
+      4
+    ],
+    "trianglesPerTemplate": [
+      100,
+      3352
+    ],
+    "cachedGeometry": true
+  },
+  "objects": {
+    "scenes": [
+      {
+        "zone": 0,
+        "area": 0,
+        "key": "home.bell.clue",
+        "expected": 8,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 8,
+            "visible": 1,
+            "triangles": 484,
+            "meshes": 3,
+            "templates": 5,
+            "items": [
+              {
+                "key": "home.bell.clue",
+                "model": "stone",
+                "collected": false,
+                "meshes": 3,
+                "triangles": 484
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 0,
+        "area": 1,
+        "key": "woods.tracks.clue",
+        "expected": 1,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 1,
+            "visible": 1,
+            "triangles": 484,
+            "meshes": 3,
+            "templates": 5,
+            "items": [
+              {
+                "key": "woods.tracks.clue",
+                "model": "stone",
+                "collected": false,
+                "meshes": 3,
+                "triangles": 484
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 1,
+        "area": 0,
+        "key": "hp.orders",
+        "expected": 4,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 4,
+            "visible": 2,
+            "triangles": 1498,
+            "meshes": 7,
+            "templates": 7,
+            "items": [
+              {
+                "key": "hp.orders",
+                "model": "notice",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 698
+              },
+              {
+                "key": "hp.code.clue",
+                "model": "diagram",
+                "collected": false,
+                "meshes": 3,
+                "triangles": 800
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 1,
+        "area": 1,
+        "key": "lc.orders",
+        "expected": 1,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 1,
+            "visible": 1,
+            "triangles": 964,
+            "meshes": 4,
+            "templates": 8,
+            "items": [
+              {
+                "key": "lc.orders",
+                "model": "papers",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 964
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 2,
+        "area": 0,
+        "key": "rk.tools",
+        "expected": 1,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 1,
+            "visible": 1,
+            "triangles": 1204,
+            "meshes": 5,
+            "templates": 9,
+            "items": [
+              {
+                "key": "rk.tools",
+                "model": "tools",
+                "collected": false,
+                "meshes": 3,
+                "triangles": 696
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 2,
+        "area": 1,
+        "key": "kd.roster",
+        "expected": 6,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 6,
+            "visible": 1,
+            "triangles": 964,
+            "meshes": 4,
+            "templates": 9,
+            "items": [
+              {
+                "key": "kd.roster",
+                "model": "papers",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 964
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 3,
+        "area": 0,
+        "key": "ff.part",
+        "expected": 4,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 4,
+            "visible": 1,
+            "triangles": 2116,
+            "meshes": 3,
+            "templates": 12,
+            "items": [
+              {
+                "key": "ff.part",
+                "model": "coil",
+                "collected": false,
+                "meshes": 1,
+                "triangles": 1608
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 3,
+        "area": 1,
+        "key": "ic.notes",
+        "expected": 5,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 5,
+            "visible": 1,
+            "triangles": 224,
+            "meshes": 2,
+            "templates": 13,
+            "items": [
+              {
+                "key": "ic.notes",
+                "model": "pack",
+                "collected": false,
+                "meshes": 2,
+                "triangles": 224
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 4,
+        "area": 0,
+        "key": "ih.handles",
+        "expected": 3,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 3,
+            "visible": 1,
+            "triangles": 3860,
+            "meshes": 4,
+            "templates": 16,
+            "items": [
+              {
+                "key": "ih.handles",
+                "model": "handles",
+                "collected": false,
+                "meshes": 2,
+                "triangles": 3352
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 4,
+        "area": 1,
+        "key": "gf.writings",
+        "expected": 4,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 4,
+            "visible": 1,
+            "triangles": 1204,
+            "meshes": 4,
+            "templates": 16,
+            "items": [
+              {
+                "key": "gf.writings",
+                "model": "book",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 1204
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 5,
+        "area": 0,
+        "key": "sc.rudder",
+        "expected": 6,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 6,
+            "visible": 2,
+            "triangles": 2048,
+            "meshes": 6,
+            "templates": 19,
+            "items": [
+              {
+                "key": "sc.rudder",
+                "model": "rudder",
+                "collected": false,
+                "meshes": 2,
+                "triangles": 844
+              },
+              {
+                "key": "sc.hull.note",
+                "model": "book",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 1204
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 5,
+        "area": 1,
+        "key": "tc.sail",
+        "expected": 3,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 3,
+            "visible": 1,
+            "triangles": 1000,
+            "meshes": 4,
+            "templates": 20,
+            "items": [
+              {
+                "key": "tc.sail",
+                "model": "cape",
+                "collected": false,
+                "meshes": 2,
+                "triangles": 492
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 6,
+        "area": 0,
+        "key": "pc.mirror.note",
+        "expected": 3,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 3,
+            "visible": 1,
+            "triangles": 588,
+            "meshes": 3,
+            "templates": 22,
+            "items": [
+              {
+                "key": "pc.mirror.note",
+                "model": "sunstone",
+                "collected": false,
+                "meshes": 3,
+                "triangles": 588
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 6,
+        "area": 1,
+        "key": "sl.history",
+        "expected": 4,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 4,
+            "visible": 2,
+            "triangles": 2408,
+            "meshes": 8,
+            "templates": 22,
+            "items": [
+              {
+                "key": "sl.history",
+                "model": "book",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 1204
+              },
+              {
+                "key": "sl.display.clue",
+                "model": "book",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 1204
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 7,
+        "area": 0,
+        "key": "cg.papers",
+        "expected": 5,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 5,
+            "visible": 2,
+            "triangles": 1662,
+            "meshes": 8,
+            "templates": 22,
+            "items": [
+              {
+                "key": "cg.papers",
+                "model": "papers",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 964
+              },
+              {
+                "key": "cg.store.note",
+                "model": "notice",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 698
+              }
+            ]
+          }
+        }
+      },
+      {
+        "zone": 7,
+        "area": 1,
+        "key": "la.vault.note",
+        "expected": 4,
+        "stats": {
+          "hero": true,
+          "err": null,
+          "props": {
+            "total": 4,
+            "visible": 1,
+            "triangles": 1204,
+            "meshes": 4,
+            "templates": 22,
+            "items": [
+              {
+                "key": "la.vault.note",
+                "model": "book",
+                "collected": false,
+                "meshes": 4,
+                "triangles": 1204
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "pickups": [
+      {
+        "key": "briar.root.1",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "briar.root.2",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "briar.root.3",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "briar.dressings",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "briar.gus.tools",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "hp.rope",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "rk.tools",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "ff.part",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "ic.notes",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "ic.rope",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "ih.handles",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "ih.blank",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "sc.rudder",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "sc.sail",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "sc.rope",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "sc.bell",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "tc.sail",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      },
+      {
+        "key": "pc.seeds",
+        "before": false,
+        "savedFlag": true,
+        "hidden": true
+      }
+    ],
+    "metrics": [
+      {
+        "name": "herbs",
+        "triangles": 1268,
+        "meshes": 2,
+        "min": [
+          -17.548702239990234,
+          0,
+          -16.217439651489258
+        ],
+        "max": [
+          20.473094940185547,
+          34.04411697387695,
+          18
+        ],
+        "finite": true
+      },
+      {
+        "name": "bandages",
+        "triangles": 1412,
+        "meshes": 1,
+        "min": [
+          -21,
+          0,
+          -14.5
+        ],
+        "max": [
+          21,
+          19.5,
+          14.500000953674316
+        ],
+        "finite": true
+      },
+      {
+        "name": "stone",
+        "triangles": 484,
+        "meshes": 3,
+        "min": [
+          -34.12247848510742,
+          0,
+          -31.533910751342773
+        ],
+        "max": [
+          34.12247848510742,
+          66.26765441894531,
+          35
+        ],
+        "finite": true
+      },
+      {
+        "name": "tools",
+        "triangles": 696,
+        "meshes": 3,
+        "min": [
+          -26,
+          0,
+          -15
+        ],
+        "max": [
+          26,
+          12,
+          15
+        ],
+        "finite": true
+      },
+      {
+        "name": "notice",
+        "triangles": 698,
+        "meshes": 4,
+        "min": [
+          -36.5,
+          0,
+          -8.5
+        ],
+        "max": [
+          36.5,
+          80,
+          5.587829113006592
+        ],
+        "finite": true
+      },
+      {
+        "name": "rope",
+        "triangles": 2148,
+        "meshes": 1,
+        "min": [
+          -28.711902618408203,
+          0,
+          -19.68573570251465
+        ],
+        "max": [
+          38.66050338745117,
+          12.252916619181633,
+          28.485410690307617
+        ],
+        "finite": true
+      },
+      {
+        "name": "diagram",
+        "triangles": 800,
+        "meshes": 3,
+        "min": [
+          -36.5,
+          0,
+          -8.5
+        ],
+        "max": [
+          36.5,
+          80,
+          4.6999993324279785
+        ],
+        "finite": true
+      },
+      {
+        "name": "papers",
+        "triangles": 964,
+        "meshes": 4,
+        "min": [
+          -35,
+          0,
+          -22.450000762939453
+        ],
+        "max": [
+          38.72868728637695,
+          55.47613525390625,
+          20.895000457763672
+        ],
+        "finite": true
+      },
+      {
+        "name": "crate",
+        "triangles": 508,
+        "meshes": 2,
+        "min": [
+          -31,
+          0,
+          -21.549999237060547
+        ],
+        "max": [
+          31,
+          33,
+          21.549999237060547
+        ],
+        "finite": true
+      },
+      {
+        "name": "coil",
+        "triangles": 1608,
+        "meshes": 1,
+        "min": [
+          -27.5,
+          0,
+          -17
+        ],
+        "max": [
+          27.5,
+          19.346847534179688,
+          17.5
+        ],
+        "finite": true
+      },
+      {
+        "name": "trail",
+        "triangles": 536,
+        "meshes": 3,
+        "min": [
+          -42,
+          0,
+          -8.5
+        ],
+        "max": [
+          42,
+          80,
+          4.6999993324279785
+        ],
+        "finite": true
+      },
+      {
+        "name": "book",
+        "triangles": 1204,
+        "meshes": 4,
+        "min": [
+          -32,
+          0,
+          -20.895000457763672
+        ],
+        "max": [
+          32,
+          50.67009353637695,
+          21.88818359375
+        ],
+        "finite": true
+      },
+      {
+        "name": "pack",
+        "triangles": 224,
+        "meshes": 2,
+        "min": [
+          -21,
+          0,
+          -14
+        ],
+        "max": [
+          21,
+          37.70000076293945,
+          15.75
+        ],
+        "finite": true
+      },
+      {
+        "name": "handles",
+        "triangles": 3352,
+        "meshes": 2,
+        "min": [
+          -19.5,
+          0,
+          -35.5
+        ],
+        "max": [
+          19.5,
+          8.799999713897705,
+          15
+        ],
+        "finite": true
+      },
+      {
+        "name": "blade",
+        "triangles": 100,
+        "meshes": 1,
+        "min": [
+          -45,
+          0,
+          -7.250796794891357
+        ],
+        "max": [
+          39.353511810302734,
+          3.6500000953674316,
+          7.250812530517578
+        ],
+        "finite": true
+      },
+      {
+        "name": "bench",
+        "triangles": 468,
+        "meshes": 2,
+        "min": [
+          -47.5,
+          0,
+          -20.895000457763672
+        ],
+        "max": [
+          47.5,
+          35.099998474121094,
+          20.895000457763672
+        ],
+        "finite": true
+      },
+      {
+        "name": "rudder",
+        "triangles": 844,
+        "meshes": 2,
+        "min": [
+          -23.25050926208496,
+          0,
+          -81.5
+        ],
+        "max": [
+          23.253501892089844,
+          8,
+          55.26618194580078
+        ],
+        "finite": true
+      },
+      {
+        "name": "sail",
+        "triangles": 612,
+        "meshes": 1,
+        "min": [
+          -38,
+          0,
+          -31.100000381469727
+        ],
+        "max": [
+          38,
+          17.100000381469727,
+          25
+        ],
+        "finite": true
+      },
+      {
+        "name": "bell",
+        "triangles": 824,
+        "meshes": 1,
+        "min": [
+          -17,
+          0,
+          -17
+        ],
+        "max": [
+          17,
+          38.79999923706055,
+          17
+        ],
+        "finite": true
+      },
+      {
+        "name": "cape",
+        "triangles": 492,
+        "meshes": 2,
+        "min": [
+          -24,
+          0,
+          -22
+        ],
+        "max": [
+          24,
+          15.426584243774414,
+          22
+        ],
+        "finite": true
+      },
+      {
+        "name": "seeds",
+        "triangles": 186,
+        "meshes": 2,
+        "min": [
+          -16,
+          0,
+          -13.5
+        ],
+        "max": [
+          16,
+          31.5,
+          14.229999542236328
+        ],
+        "finite": true
+      },
+      {
+        "name": "sunstone",
+        "triangles": 588,
+        "meshes": 3,
+        "min": [
+          -34.12247848510742,
+          0,
+          -31.533910751342773
+        ],
+        "max": [
+          34.12247848510742,
+          66.26765441894531,
+          35
+        ],
+        "finite": true
+      }
+    ],
+    "keyboardWallAndPickup": true,
+    "readDocumentPersists": true,
+    "fallbackRestores": true,
+    "errors": []
+  },
+  "supportAudit": {
+    "affectedObjects": 62,
+    "issues": [],
+    "method": "Samples at physical feet, not decorative footprint; authored height checked against actual floorAt; explicit owned collider omitted for its own placement only."
+  },
+  "interactionAudit": {
+    "targets": 238,
+    "initialSupportedApproaches": 237,
+    "initiallyRaisedFloatControl": {
+      "key": "ic.lock.2",
+      "position": {
+        "x": 0,
+        "z": -4095,
+        "y": 183.99960585539066
+      },
+      "target": {
+        "key": "ic.lock.2",
+        "label": "Freeze the channel from the float",
+        "x": 85,
+        "z": -4110,
+        "y": 180,
+        "kind": "freeze",
+        "blockedText": "Raise the float to the middle bank marks before freezing."
+      },
+      "supported": true,
+      "reachable": true,
+      "distance": 86.31338250816034
+    },
+    "method": "96 candidate positions per target, real floorAt/resolveObstacles and shared reach check; not an end-to-end natural traversal."
+  },
+  "cooperativeObjects": {
+    "checks": [
+      "host rejects guest pickup behind a wall",
+      "rejected pickup stays visible on guest",
+      "host removes collected pickup",
+      "guest removes collected pickup",
+      "host receives clue and keeps its sign",
+      "guest receives clue and keeps its sign",
+      "snapshot restores collected item and readable clue"
+    ],
+    "errors": [],
+    "transport": "two local browser clients using real host/guest packet handlers; no external network"
+  },
+  "cooperativeRoutes": {
+    "checks": [
+      "host escort health and position reach guest",
+      "guest sees which Legion fighters are pursuing prisoners",
+      "direct winch repair reaches guest",
+      "raised ice float reaches guest",
+      "frozen crossing reaches guest",
+      "permanent ice bridge reaches guest",
+      "direct cart repair reaches guest",
+      "fitted boat part reaches guest",
+      "prisoner transfer reaches guest",
+      "late guest can wait on returned lift",
+      "returned lift carries guest toward exit"
+    ],
+    "pageErrors": []
+  },
+  "oldSave": {
+    "preChangeSave": true,
+    "zone": 4,
+    "area": 1,
+    "level": 1,
+    "classId": "warrior",
+    "goldPreserved": true,
+    "weapon": "Rusty Sword"
+  },
+  "checkpoints": {
+    "routes": 24,
+    "checkpoints": [
+      "0/0",
+      "0/1",
+      "0/-1",
+      "1/0",
+      "1/1",
+      "1/-1",
+      "2/0",
+      "2/1",
+      "2/-1",
+      "3/0",
+      "3/1",
+      "3/-1",
+      "4/0",
+      "4/1",
+      "4/-1",
+      "5/0",
+      "5/1",
+      "5/-1",
+      "6/0",
+      "6/1",
+      "6/-1",
+      "7/0",
+      "7/1",
+      "7/-1"
+    ]
+  },
+  "guidance": {
+    "checks": [
+      "hp.bridge.clue -> neutral controls",
+      "hp.weight solved -> hp.brake.right",
+      "pc.mirror.note -> neutral controls",
+      "pc.light solved -> pc.enter",
+      "Great Furnace pedal -> office guards -> writings",
+      "kd.free guards -> interaction",
+      "ic.free guards -> interaction",
+      "ih.workers guards -> interaction",
+      "gf.gate guards -> interaction",
+      "gf.writings guards -> interaction",
+      "sl.release guards -> interaction",
+      "la.summit guards -> interaction"
+    ],
+    "scope": "Real puzzle transactions and scene guards; earlier quest flags prepared as fixtures, not a natural full campaign run"
+  },
+  "thunderCliffs": {
+    "checks": [
+      "no disguised boss troops",
+      "brake required before release",
+      "lift restored",
+      "lift reaches upper station",
+      "inspect chain before opening approach",
+      "main open without optional NPC",
+      "lower brace required",
+      "cave physically opens",
+      "high tide keeps inland door closed",
+      "low-tide release opens inland door",
+      "three personal shards provisional"
+    ],
+    "waypoints": 134,
+    "failed": [],
+    "counts": {
+      "name": "Thunder Cliffs",
+      "artObstacles": true,
+      "triangles": 80312,
+      "totalTriangles": 80312,
+      "instances": 2032
+    },
+    "errors": []
+  },
+  "shipwreckShore": {
+    "checks": [
+      "lookout patrol blocks sailcloth",
+      "storage cave needs drain and latch",
+      "three installed boat parts",
+      "timed cargo release opens actual wall",
+      "physical and quest shards remain provisional",
+      "Stormshot awarded once"
+    ],
+    "waypoints": 50,
+    "failed": [],
+    "counts": {
+      "name": "Storm Coast",
+      "artObstacles": true,
+      "floorTiles": 1186,
+      "totalTriangles": 51272,
+      "triangles": 51272,
+      "instances": 1186
+    },
+    "errors": []
+  },
+  "cameraAndLowQuality": {
+    "checks": [
+      {
+        "mode": "shoulder",
+        "hero": true,
+        "eye": {
+          "x": -1390,
+          "y": 471.1936371990411,
+          "z": -2163.039431957391
+        },
+        "cargoCutaway": true,
+        "props": 2
+      },
+      {
+        "mode": "far",
+        "hero": true,
+        "eye": {
+          "x": -1390,
+          "y": 596,
+          "z": -2005
+        },
+        "cargoCutaway": true,
+        "props": 2
+      },
+      {
+        "mode": "fps",
+        "hero": true,
+        "eye": {
+          "x": -1390,
+          "y": 340.81791917335465,
+          "z": -2338.8213459565022
+        },
+        "cargoCutaway": false,
+        "props": 2
+      },
+      {
+        "releaseHandleCargoVisible": true
+      },
+      {
+        "lowQuality": true,
+        "props": 2
+      }
+    ],
+    "float": {
+      "key": "ic.lock.2",
+      "position": {
+        "x": 0,
+        "z": -4095,
+        "y": 183.99960585539066
+      },
+      "target": {
+        "key": "ic.lock.2",
+        "label": "Freeze the channel from the float",
+        "x": 85,
+        "z": -4110,
+        "y": 180,
+        "kind": "freeze",
+        "blockedText": "Raise the float to the middle bank marks before freezing."
+      },
+      "supported": true,
+      "reachable": true,
+      "distance": 86.31338250816034
+    },
+    "errors": []
+  },
+  "visualReview": {
+    "coverage": "Representative normal-camera frame from each of 16 campaign halves; selected corrected placements; Shipwreck Shore hanging-load cutaway in shoulder/far and solid first-person; cargo visible at release handle; wind caption above hotbar on low graphics.",
+    "retainedImages": [
+      "campaign-objects-2-0.png",
+      "campaign-objects-4-1.png",
+      "campaign-objects-6-0.png",
+      "campaign-cargo-shoulder-185.png",
+      "campaign-props-low-hud-185.png"
+    ]
+  },
+  "nodeChecks": [
+    "campaign-interaction",
+    "story-authority",
+    "story-state",
+    "story-topics (29 menus)",
+    "prison-story",
+    "gus-story",
+    "shipwreck-shore",
+    "thunder-hydra"
+  ],
+  "syntaxScripts": 21,
+  "limits": [
+    "Not a claim that every asset or puzzle is redesigned.",
+    "Approach sampling does not establish route quality or fun.",
+    "Co-op uses real handlers in two local browser clients with a local packet relay, not an external network.",
+    "Human aesthetic/playtest acceptance and low-end hardware performance remain open."
+  ],
+  "deployment": "Prepared for main; live verification is recorded in the delivery, not assumed by this evidence."
+}

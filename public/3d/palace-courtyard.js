@@ -34,14 +34,14 @@ function build({G,plat,spawn}){
  for(const [x,z,y,h]of [[-470,-1210,200,265],[470,-1210,200,265],[-470,-1680,200,265],[470,-1680,200,265],[-420,440,120,220],[420,440,120,220],[-1420,-2440,340,235],[1420,-2070,340,235]])column(x,z,y,h);
  for(const [x,z,y,w]of [[0,430,120,840],[0,-1730,200,940],[0,-4330,420,970]]){for(const sign of [-1,1])column(x+sign*w/2,z,y,290);part('stone',x,y+300,z,w+100,45,90,'#d7cfb6');part('cap',x,y+329,z,w+160,15,110,'#b59a55');for(let i=-3;i<=3;i++)part('stone',x+i*w/9,y+285,z,24,32,112,'#c6ae6a');}
  // Entry mosaic, low edging and planted corners break up the large marble landing.
- for(const x of [-495,495])for(let j=0;j<9;j++)part('stone',x,130,480-j*120,32,20,90,'#c7ba8b');
+ for(const x of [-495,495])for(let j=0;j<9;j++){const start=G.deco.length;part('stone',x,130,480-j*120,32,20,90,'#c7ba8b');G.deco[start].craftHidden=true;G.deco.push({kind:'craft',model:'balustrade',x,z:480-j*120,y0:120,rot:Math.PI/2,options:{w:90,h:30,d:28}});}
  for(const x of [-230,230])for(let j=0;j<8;j++)part('cap',x,123,400-j*110,12,3,72,'#b49b5b');
  part('ring',0,123,-180,140,4,140);part('rune',0,125,-180,120,1,120,'#b79b51');
  for(const [x,z]of [[-360,280],[360,280],[-360,-400],[360,-400]]){part('stone',x,131,z,125,22,130,'#bbb28e');part('stone',x,143,z,108,3,112,'#637b55');for(let j=0;j<7;j++)part('rubble',x+(j%3-1)*25,152,z+(Math.floor(j/3)-1)*25,30,45,30,'#79965d');}
  // Rest benches face the fountain; roofless arches keep sightlines open.
- for(const x of [-350,350]){part('stone',x,227,-1190,140,20,45,'#c8bfa3');for(const dx of [-50,50])part('stone',x+dx,211,-1190,15,22,38,'#a79b7c');}
+ for(const x of [-350,350]){const start=G.deco.length;part('stone',x,227,-1190,140,20,45,'#c8bfa3');for(const dx of [-50,50])part('stone',x+dx,211,-1190,15,22,38,'#a79b7c');for(const d of G.deco.slice(start))d.craftHidden=true;G.deco.push({kind:'craft',model:'bench',x,z:-1190,y0:200,options:{w:140,h:37,d:45}});}
  // Fountain ring leaves Grace and the large pad clearly visible on its south side.
- part('ring',0,207,-1470,100,15,100);part('pillar',0,207,-1470,36,100,36);part('cap',0,305,-1470,75,10,75,'#cbb277');
+ const fountainStart=G.deco.length;part('ring',0,207,-1470,100,15,100);part('pillar',0,207,-1470,36,100,36);part('cap',0,305,-1470,75,10,75,'#cbb277');for(const d of G.deco.slice(fountainStart))d.craftHidden=true;
  for(const [x,z,y]of [[-680,-790,160],[700,-1230,180],[-1360,-2040,180],[1570,-1000,160],[1840,-1210,160],[280,-3800,420]]){part('stone',x,y+9,z,160,18,120,'#cfc5a3');part('stone',x,y+20,z,144,5,105,'#627353');for(let j=0;j<7;j++)part('rubble',x-55+j*18,y+26,z+(j%2?18:-18),30,25,26,'#6e8b59');}
  // Greenhouse frame: no opaque roof hiding the seed tin or enemy.
  for(const x of [1380,1950])for(const z of [-870,-1180,-1500]){column(x,z,160,195);part('stone',x,363,z,36,15,50,'#b69d62');}
@@ -79,11 +79,11 @@ function draw({G,state:s,bx,ring,pushM,popM,mv,rotY,rotZ,box},t){
   bx(o.x,y+9,o.z,100,18,100,'#ded6b9');ring(o.x,y+21,o.z,43,rim,lit?1:.7);
   bx(o.x,y+42,o.z,32,66,32,'#bfa366');
   // The actual reflective face turns through 90 degrees with its handle.
-  pushM();mv(o.x,y+92,o.z);rotY(on?Math.PI/4:-Math.PI/4);
+  if(!root.BFCampaignCraft?.has('sun-mirror-'+i)){pushM();mv(o.x,y+92,o.z);rotY(on?Math.PI/4:-Math.PI/4);
   box(20,94,112,'#906f36');
   for(const edge of [-1,1]){pushM();mv(0,edge*47,0);box(24,7,121,'#e6c774');popM();pushM();mv(0,0,edge*57);box(24,95,7,'#c5a052');popM();}
   for(const side of [-1,1]){pushM();mv(side*11,0,0);box(4,78,94,lit?'#e8d6a1':'#a6b6b3');popM();}
-  popM();
+  popM();}
   if(lit)bx(o.x,y+151,o.z,14,14,14,'#fff7d2','#ffe38a');
   continue;
  }
@@ -93,7 +93,7 @@ function draw({G,state:s,bx,ring,pushM,popM,mv,rotY,rotZ,box},t){
  bx(sunSource[0],480,sunSource[1],43,92,43,'#b59a5e');bx(sunSource[0],530,sunSource[1],55,62,55,active?'#f0cd75':'#c5b993',active?'#ffc564':undefined);
  for(const side of [-1,1]){bx(sunSource[0]+side*39,530,sunSource[1],19,8,10,'#d9b767');bx(sunSource[0],530,sunSource[1]+side*39,10,8,19,'#d9b767');}
  ring(sunReceiver[0],430,sunReceiver[1],64,sealColor);ring(sunReceiver[0],432,sunReceiver[1],40,sealColor);
- bx(sunReceiver[0],465,sunReceiver[1],28,72,28,'#bba166');bx(sunReceiver[0],520,sunReceiver[1],78,78,18,'#967d4c');
+ if(!root.BFCampaignCraft?.has('sun-receiver')){bx(sunReceiver[0],465,sunReceiver[1],28,72,28,'#bba166');bx(sunReceiver[0],520,sunReceiver[1],78,78,18,'#967d4c');}
  pushM();mv(sunReceiver[0],520,sunReceiver[1]);rotZ(Math.PI/4);box(78,78,17,'#bc9a52');popM();
  bx(sunReceiver[0],520,sunReceiver[1],54,54,21,litSeal?'#fff0a8':'#c7b888',litSeal?'#ffe9a4':undefined);
  for(const side of [-1,1]){bx(sunReceiver[0]+side*67,520,sunReceiver[1],28,10,12,sealColor);bx(sunReceiver[0],520+side*67,sunReceiver[1],10,28,12,sealColor);}

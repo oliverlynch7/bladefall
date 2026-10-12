@@ -1,0 +1,16 @@
+async root=>{
+ const context=await root.context().browser().newContext({viewport:{width:1440,height:900}}),page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&/WebGL|THREE/.test(m.text()))errors.push(m.text());});
+ await page.goto('http://127.0.0.1:4345/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&HERO3D?.ready);await page.evaluate(()=>__BF3.briarReady);
+ await page.evaluate(()=>{const b=__BF3;b.loadMode('rl');Object.assign(b.meta,{classId:'warrior',run:null,bank:null,introSeen:true,hubTutDone:true,tutOff:true,dialogueTTS:false,camMode:'shoulder',petActive:null});});
+ const poses=[[350,0,370,0],[900,220,-2130,Math.PI],[0,0,-2430,Math.PI],[-1020,0,-1810,2.48],[0,0,-650,Math.PI],[0,180,-2200,Math.PI],[-800,130,-650,Math.PI],[-1280,300,-2220,Math.PI],[170,100,260,Math.PI],[0,120,-2500,Math.PI],[-1330,130,-3170,Math.PI],[-1120,340,-1640,-2.0],[0,200,-1190,Math.PI],[0,300,-2740,Math.PI],[0,280,-4920,Math.PI],[1420,250,-340,Math.PI]];const rows=[];
+ for(let z=0;z<8;z++)for(let a=0;a<3;a++){
+  const pose=a<2?poses[z*2+a]:null;await page.evaluate(({z,a,pose})=>{const b=__BF3;b.openHub();b.enterZone(z);b.G.area=a===2?-1:a;b.loadArea();const g=b.G;g.enemies.forEach(e=>e.stunT=99999);Object.assign(g.p,{x:pose?.[0]??g.p.x,y:pose?.[1]??g.p.y,z:pose?.[2]??g.p.z,invuln:99999,onGround:true,vy:0});g.camYaw=pose?.[3]??Math.PI;g.camPitch=.36;g.cam={x:g.p.x,y:g.p.y,z:g.p.z};delete g._cameraBoom;},{z,a,pose});
+  await page.waitForFunction(()=>!BF_LOADING.active,{timeout:30000});await page.waitForTimeout(200);await page.evaluate(()=>document.getElementById('storycard').classList.remove('show'));
+  const row=await page.evaluate(()=>({zone:__BF_WORLD().zone,area:__BF3.G.area,hero:HERO3D.on,err:HERO3D.err,world:window.__world3d?.()?.err,craft:window.__CAMPAIGN_CRAFT}));rows.push(row);if(row.err||row.world||!row.hero)throw Error('Campaign renderer failed '+z+'/'+a+JSON.stringify(row));await page.screenshot({path:'output/playwright/craft186-'+z+'-'+a+'.png'});
+ }
+ const models=await page.evaluate(async()=>{const m=await import('./campaign-craft-models.js?v=2186c');return m.CRAFT_MODEL_NAMES.map(name=>{const rs=m.craftModel(name,'briar',{w:100,h:100,d:80});return {name,tri:rs.reduce((n,r)=>n+r.tri,0),meshes:rs.length,finite:rs.every(r=>Array.from(r.geo.attributes.position.array).every(Number.isFinite))};});});
+ const kits=await page.evaluate(()=>window.__CAMPAIGN_CRAFT_KITS);for(const [theme,parts]of Object.entries(kits))for(const part of parts)if(part.fitError>1e-4)throw Error('Kit footprint changed '+theme+'/'+part.name);
+ const low=await page.evaluate(()=>{__BF3.meta.quality='low';__BF3.openHub();__BF3.enterZone(0);return true;});await page.waitForTimeout(300);const lowState=await page.evaluate(()=>({world:__world3d(),craft:BFCampaignCraft.snapshot()}));await page.screenshot({path:'output/playwright/craft186-low.png'});
+ await context.close();if(errors.length)throw Error(errors.join(' / '));if(models.some(m=>!m.finite))throw Error('Invalid model geometry');return {rows,models,kits,errors,low:{on:lowState.world.on,err:lowState.world.err,visibleDrawCalls:lowState.craft?.visibleDrawCalls}};
+}

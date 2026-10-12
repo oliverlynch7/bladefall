@@ -1,25 +1,26 @@
+import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2186c';
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
 import {buildBriarBetaArt} from './briar-beta-art.js?v=2182f';
 window.__briarAssetsPreload=loadBriarTrees;
 import {buildPrisonArt} from './prison-art3d.js?v=2139';
 import {claimSurface} from './surface-regions.js?v=1972';
-import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2182f';
-import {buildLongAscent} from './long-ascent-art.js?v=2182f';
-import {buildCastleGates} from './castle-gates-art.js?v=2182f';
-import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2182f';
-import {buildSkyLibrary} from './sky-library-art.js?v=2182f';
-import {buildPalaceCourt} from './palace-courtyard-art.js?v=2182f';
-import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2182f';
-import {buildStorm,updateStorm} from './storm-art.js?v=2182f';
-import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2182f';
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2182f';
+import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2186c';
+import {buildLongAscent} from './long-ascent-art.js?v=2186c';
+import {buildCastleGates} from './castle-gates-art.js?v=2186c';
+import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2186c';
+import {buildSkyLibrary} from './sky-library-art.js?v=2186c';
+import {buildPalaceCourt} from './palace-courtyard-art.js?v=2186c';
+import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2186c';
+import {buildStorm,updateStorm} from './storm-art.js?v=2186c';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2186c';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2186c';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2182f';
-import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2182f';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2182f';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2182f';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2182f';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2186c';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2186c';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2186c';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2186c';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -1783,7 +1784,8 @@ function buildWoodsSignalCanopy(world){
  window.__WOODS_SIGNAL_3D_ACTIVE=true;
 }
 
-export function buildWorld(scene, world){
+export function buildWorld(scene,world){const result=buildWorldBase(scene,world);if(group)attachCampaignCraft(group,world,WORLD3D.counts||{});return result;}
+function buildWorldBase(scene,world){
  if(world.finalStage&&deepReady(world)){clearWorld(scene);const art=buildFinalKing(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.castleScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.castleScene).startsWith('ascent:')?buildLongAscent(scene,world):buildCastleGates(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('guardian:')?buildMarbleGuardian(scene,world):String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -2045,7 +2047,7 @@ export function syncWorld(scene){
     window.__PRISON_ART_ACTIVE=true;WORLD3D.ready=true;return true;
   }
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh(world);updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
+  if(sig === WORLD3D.built){ updateCampaignCraft(world);updateStorm(world);updateCoastHigh(world);updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
@@ -2072,7 +2074,7 @@ export function syncWorld(scene){
     buildWorld(scene, world);
     clearMobs();          // a new level must not inherit the previous zone's pooled creatures
     clearProps();         // ...nor its chests
-    WORLD3D.built = sig;
+    WORLD3D.built = sig;updateCampaignCraft(world);
     updateStorm(world);updateCoastHigh(world);updateOutskirts(world);
     updateHubArt(world,performance.now()/1000);
     updateHollow(world);

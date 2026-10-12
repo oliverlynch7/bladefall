@@ -1,0 +1,1243 @@
+{
+  "version": "2.186.0-campaign-craft",
+  "date": "2026-10-12",
+  "scope": "Approved campaign environmental asset shortlist; appropriate assets across all eight regions. Not a wholesale enemy/hub/dungeon remake.",
+  "modelLibrary": {
+    "count": 59,
+    "models": [
+      {
+        "name": "cliff",
+        "tri": 208,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "shelf",
+        "tri": 208,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "bank",
+        "tri": 208,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "rock",
+        "tri": 144,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "ice",
+        "tri": 298,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "wall",
+        "tri": 792,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "arch",
+        "tri": 628,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "cave-mouth",
+        "tri": 628,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "gatehouse",
+        "tri": 1716,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "buttress",
+        "tri": 168,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "roof",
+        "tri": 900,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "cottage",
+        "tri": 6992,
+        "meshes": 4,
+        "finite": true
+      },
+      {
+        "name": "window",
+        "tri": 272,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "door",
+        "tri": 1168,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "bridge",
+        "tri": 1336,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "rope-bridge",
+        "tri": 1428,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "stone-bridge",
+        "tri": 2260,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "scaffold",
+        "tri": 1744,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "perch",
+        "tri": 672,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "landing",
+        "tri": 264,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "wagon",
+        "tri": 4420,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "prison-cart",
+        "tri": 5032,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "tent",
+        "tri": 444,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "barricade",
+        "tri": 482,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "rack",
+        "tri": 860,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "supplies",
+        "tri": 1244,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "barrel",
+        "tri": 1812,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "lantern",
+        "tri": 636,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "sconce",
+        "tri": 770,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "brazier",
+        "tri": 519,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "bench",
+        "tri": 724,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "workbench",
+        "tri": 892,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "laboratory",
+        "tri": 1642,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "bookshelf",
+        "tri": 4664,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "folding-shelf",
+        "tri": 5216,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "cell-front",
+        "tri": 916,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "portcullis",
+        "tri": 1078,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "waterwheel",
+        "tri": 2264,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "winch",
+        "tri": 2840,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "pulley",
+        "tri": 720,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "valve",
+        "tri": 480,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "pressure",
+        "tri": 3556,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "counterweight",
+        "tri": 460,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "crane",
+        "tri": 992,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "pipe",
+        "tri": 2352,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "bellows",
+        "tri": 400,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "furnace",
+        "tri": 1927,
+        "meshes": 4,
+        "finite": true
+      },
+      {
+        "name": "press",
+        "tri": 444,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "wreck",
+        "tri": 6134,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "ballista",
+        "tri": 4514,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "bollard",
+        "tri": 992,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "fountain",
+        "tri": 1624,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "mirror",
+        "tri": 776,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "receiver",
+        "tri": 768,
+        "meshes": 3,
+        "finite": true
+      },
+      {
+        "name": "balustrade",
+        "tri": 472,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "throne",
+        "tri": 2948,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "root",
+        "tri": 600,
+        "meshes": 1,
+        "finite": true
+      },
+      {
+        "name": "trunk",
+        "tri": 352,
+        "meshes": 2,
+        "finite": true
+      },
+      {
+        "name": "foliage",
+        "tri": 1832,
+        "meshes": 2,
+        "finite": true
+      }
+    ],
+    "notSeparatelyPlaced": [
+      "door",
+      "perch",
+      "scaffold",
+      "shelf"
+    ],
+    "note": "Standalone door/scaffold/perch/shelf variants are available in the workshop; campaign door detailing is integrated in cottages, and existing supported scaffold/perch/shelf structures use fitted kit and landing/collar components."
+  },
+  "regions": {
+    "Briar Town / Black Woods": "Timber cottages and damaged hamlet variants; shingle roofs, doors/windows/chimneys; mill and wheel; open barn/workshop gables; stone bridge; signal belfry fittings; canopy tenons, roots and fallen timber. Mature trees and the established walkable canopy stay in place.",
+    "Hollow Pass": "Layered rock bodies, freight cart/cranes/winch/pressure plate, hinged rope bridge, raised cage fronts, prisoner wagon, gabled camp roofs, Ruth's supported awning, supplies and existing scaffold landings.",
+    "Ruined Keep": "Gatehouse arch and buttresses, three working portcullises, prison fronts/arches and sconces, rescue-lift deck/shaft caps/pulley, press gears, workshop bench; existing correctly animated winch/counterweight retained.",
+    "Frostfell": "Shaped snow cliffs and crystal rubble, ice cave entrance, camp roofs and supplies, Ellis laboratory/shelves/instruments/lanterns, waterworks valves and pipes tied to the water state.",
+    "Emberdeep": "Furnace with an open fire chamber and foundation, bellows/exhaust/flanged pipes/valves, live press frames/rams, cooling channels/pistons, forge racks and workstations. Removed duplicated core body and stopped natural rock dressing from becoming arbitrary furnaces.",
+    "Stormcoast": "Layered coastal foundations and spires, three ribbed broken hulls with planking and camera-clear broken port side, salvage crane/winch, ballista, curved arches and shelter roofs, rope bollards, Otto's bench. Existing playable boat/crossing retained.",
+    "Sunspire": "Ornate arches and balustrades, tiered fountain and benches, rotating mirror frames/receiver, fitted bookcases, folding shelf frames/hinges and leaves that follow both crank stages.",
+    "Castle Duskmoor": "Monumental gate arch, working portcullis, buttresses/windows, spiral-step corbels, service-lift housing/hoist, upholstered royal throne and existing Hollow Gate surround. Story reveals retained."
+  },
+  "scenes": [
+    {
+      "zone": "outskirts",
+      "area": 0,
+      "rendererOn": true,
+      "models": 84,
+      "triangles": 86360,
+      "potentialDrawCalls": 88,
+      "visibleDrawCalls": 43,
+      "errors": []
+    },
+    {
+      "zone": "outskirts",
+      "area": 1,
+      "rendererOn": true,
+      "models": 151,
+      "triangles": 116756,
+      "potentialDrawCalls": 162,
+      "visibleDrawCalls": 95,
+      "errors": []
+    },
+    {
+      "zone": "outskirts",
+      "area": -1,
+      "rendererOn": true,
+      "models": 15,
+      "triangles": 13928,
+      "potentialDrawCalls": 17,
+      "visibleDrawCalls": 9,
+      "errors": []
+    },
+    {
+      "zone": "hollow",
+      "area": 0,
+      "rendererOn": true,
+      "models": 13,
+      "triangles": 17068,
+      "potentialDrawCalls": 29,
+      "visibleDrawCalls": 13,
+      "errors": []
+    },
+    {
+      "zone": "hollow",
+      "area": 1,
+      "rendererOn": true,
+      "models": 29,
+      "triangles": 23852,
+      "potentialDrawCalls": 61,
+      "visibleDrawCalls": 25,
+      "errors": []
+    },
+    {
+      "zone": "hollow",
+      "area": -1,
+      "rendererOn": true,
+      "models": 54,
+      "triangles": 39468,
+      "potentialDrawCalls": 24,
+      "visibleDrawCalls": 10,
+      "errors": []
+    },
+    {
+      "zone": "keep",
+      "area": 0,
+      "rendererOn": true,
+      "models": 7,
+      "triangles": 5090,
+      "potentialDrawCalls": 15,
+      "visibleDrawCalls": 8,
+      "errors": []
+    },
+    {
+      "zone": "keep",
+      "area": 1,
+      "rendererOn": true,
+      "models": 19,
+      "triangles": 12716,
+      "potentialDrawCalls": 31,
+      "visibleDrawCalls": 31,
+      "errors": []
+    },
+    {
+      "zone": "keep",
+      "area": -1,
+      "rendererOn": true,
+      "models": 0,
+      "triangles": 0,
+      "potentialDrawCalls": 0,
+      "visibleDrawCalls": 0,
+      "errors": []
+    },
+    {
+      "zone": "frost",
+      "area": 0,
+      "rendererOn": true,
+      "models": 9,
+      "triangles": 10812,
+      "potentialDrawCalls": 27,
+      "visibleDrawCalls": 12,
+      "errors": []
+    },
+    {
+      "zone": "frost",
+      "area": 1,
+      "rendererOn": true,
+      "models": 14,
+      "triangles": 21266,
+      "potentialDrawCalls": 28,
+      "visibleDrawCalls": 14,
+      "errors": []
+    },
+    {
+      "zone": "frost",
+      "area": -1,
+      "rendererOn": true,
+      "models": 0,
+      "triangles": 0,
+      "potentialDrawCalls": 0,
+      "visibleDrawCalls": 0,
+      "errors": []
+    },
+    {
+      "zone": "ember",
+      "area": 0,
+      "rendererOn": true,
+      "models": 38,
+      "triangles": 39831,
+      "potentialDrawCalls": 79,
+      "visibleDrawCalls": 20,
+      "errors": []
+    },
+    {
+      "zone": "ember",
+      "area": 1,
+      "rendererOn": true,
+      "models": 40,
+      "triangles": 50024,
+      "potentialDrawCalls": 86,
+      "visibleDrawCalls": 41,
+      "errors": []
+    },
+    {
+      "zone": "ember",
+      "area": -1,
+      "rendererOn": true,
+      "models": 17,
+      "triangles": 20428,
+      "potentialDrawCalls": 30,
+      "visibleDrawCalls": 14,
+      "errors": []
+    },
+    {
+      "zone": "abyss",
+      "area": 0,
+      "rendererOn": true,
+      "models": 51,
+      "triangles": 38160,
+      "potentialDrawCalls": 70,
+      "visibleDrawCalls": 19,
+      "errors": []
+    },
+    {
+      "zone": "abyss",
+      "area": 1,
+      "rendererOn": true,
+      "models": 3,
+      "triangles": 1884,
+      "potentialDrawCalls": 6,
+      "visibleDrawCalls": 4,
+      "errors": []
+    },
+    {
+      "zone": "abyss",
+      "area": -1,
+      "rendererOn": true,
+      "models": 0,
+      "triangles": 0,
+      "potentialDrawCalls": 0,
+      "visibleDrawCalls": 0,
+      "errors": []
+    },
+    {
+      "zone": "palace",
+      "area": 0,
+      "rendererOn": true,
+      "models": 28,
+      "triangles": 19992,
+      "potentialDrawCalls": 33,
+      "visibleDrawCalls": 15,
+      "errors": []
+    },
+    {
+      "zone": "palace",
+      "area": 1,
+      "rendererOn": true,
+      "models": 35,
+      "triangles": 93088,
+      "potentialDrawCalls": 48,
+      "visibleDrawCalls": 10,
+      "errors": []
+    },
+    {
+      "zone": "palace",
+      "area": -1,
+      "rendererOn": true,
+      "models": 0,
+      "triangles": 0,
+      "potentialDrawCalls": 0,
+      "visibleDrawCalls": 0,
+      "errors": []
+    },
+    {
+      "zone": "castle",
+      "area": 0,
+      "rendererOn": true,
+      "models": 8,
+      "triangles": 3130,
+      "potentialDrawCalls": 12,
+      "visibleDrawCalls": 12,
+      "errors": []
+    },
+    {
+      "zone": "castle",
+      "area": 1,
+      "rendererOn": true,
+      "models": 46,
+      "triangles": 11504,
+      "potentialDrawCalls": 37,
+      "visibleDrawCalls": 23,
+      "errors": []
+    },
+    {
+      "zone": "castle",
+      "area": -1,
+      "rendererOn": true,
+      "models": 17,
+      "triangles": 9724,
+      "potentialDrawCalls": 12,
+      "visibleDrawCalls": 0,
+      "errors": []
+    }
+  ],
+  "kitReplacements": {
+    "briar": [
+      {
+        "name": "cliffFace",
+        "model": "layered-cliff",
+        "triangles": 208
+      },
+      {
+        "name": "rubble",
+        "model": "rock",
+        "oldTriangles": 72,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.4055939316749573,
+            -0.04858458787202835,
+            -0.4579308331012726
+          ],
+          "max": [
+            0.5471486449241638,
+            0.2963077127933502,
+            0.44048628211021423
+          ]
+        },
+        "fitError": 5.960464477539063e-08
+      },
+      {
+        "name": "bank",
+        "model": "bank",
+        "oldTriangles": 21,
+        "triangles": 208,
+        "bounds": {
+          "min": [
+            -0.48746395111083984,
+            0,
+            -0.45048442482948303
+          ],
+          "max": [
+            0.48746395111083984,
+            1,
+            0.5
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "lantern",
+        "model": "lantern",
+        "oldTriangles": 132,
+        "triangles": 636,
+        "bounds": {
+          "min": [
+            -0.38999998569488525,
+            0,
+            -0.38999998569488525
+          ],
+          "max": [
+            0.38999998569488525,
+            3.8949999809265137,
+            0.38999998569488525
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "crate",
+        "model": "supplies",
+        "oldTriangles": 108,
+        "triangles": 1244,
+        "bounds": {
+          "min": [
+            -0.41999998688697815,
+            0,
+            -0.4000000059604645
+          ],
+          "max": [
+            0.41999998688697815,
+            0.800000011920929,
+            0.5099999904632568
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "palisade",
+        "model": "barricade",
+        "oldTriangles": 120,
+        "triangles": 482,
+        "bounds": {
+          "min": [
+            -0.949999988079071,
+            0,
+            -0.20999999344348907
+          ],
+          "max": [
+            0.949999988079071,
+            2.815627336502075,
+            0.20999999344348907
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "timber",
+        "model": "chamfered-timber",
+        "triangles": 44
+      },
+      {
+        "name": "brick",
+        "model": "chamfered-brick",
+        "triangles": 44
+      }
+    ],
+    "hollow": [
+      {
+        "name": "cliffFace",
+        "model": "layered-cliff",
+        "triangles": 208
+      },
+      {
+        "name": "column",
+        "model": "cliff",
+        "oldTriangles": 100,
+        "triangles": 208,
+        "bounds": {
+          "min": [
+            -0.49000000953674316,
+            0,
+            -0.4243524372577667
+          ],
+          "max": [
+            0.49000000953674316,
+            0.9879999756813049,
+            0.4243524372577667
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "scree",
+        "model": "rock",
+        "oldTriangles": 48,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.4115150272846222,
+            -0.004999999888241291,
+            -0.35194480419158936
+          ],
+          "max": [
+            0.40232470631599426,
+            0.19900000095367432,
+            0.4949689209461212
+          ]
+        },
+        "fitError": 2.9802322387695312e-08
+      },
+      {
+        "name": "beacon",
+        "model": "brazier",
+        "oldTriangles": 144,
+        "triangles": 519,
+        "bounds": {
+          "min": [
+            -0.38999998569488525,
+            0,
+            -0.38999998569488525
+          ],
+          "max": [
+            0.38999998569488525,
+            2.9149999618530273,
+            0.38999998569488525
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "timber",
+        "model": "chamfered-timber",
+        "triangles": 44
+      }
+    ],
+    "keep": [
+      {
+        "name": "rubble",
+        "model": "rock",
+        "oldTriangles": 72,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.4657663404941559,
+            -0.018136203289031982,
+            -0.31780073046684265
+          ],
+          "max": [
+            0.40426331758499146,
+            0.2492179572582245,
+            0.5236033797264099
+          ]
+        },
+        "fitError": 6.664001874625056e-08
+      },
+      {
+        "name": "arch",
+        "model": "arch",
+        "oldTriangles": 132,
+        "triangles": 628,
+        "bounds": {
+          "min": [
+            -1.0999207496643066,
+            0.010799740441143513,
+            -0.5
+          ],
+          "max": [
+            1.0999207496643066,
+            1.0906037092208862,
+            0.5
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "brazier",
+        "model": "brazier",
+        "oldTriangles": 176,
+        "triangles": 519,
+        "bounds": {
+          "min": [
+            -0.4000000059604645,
+            0,
+            -0.4000000059604645
+          ],
+          "max": [
+            0.4000000059604645,
+            2.8450000286102295,
+            0.4000000059604645
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "grille",
+        "model": "cell-front",
+        "oldTriangles": 84,
+        "triangles": 916,
+        "bounds": {
+          "min": [
+            -0.5,
+            0,
+            -0.03999999910593033
+          ],
+          "max": [
+            0.5,
+            1,
+            0.03999999910593033
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "crate",
+        "model": "supplies",
+        "oldTriangles": 108,
+        "triangles": 1244,
+        "bounds": {
+          "min": [
+            -0.5,
+            0,
+            -0.4749999940395355
+          ],
+          "max": [
+            0.5,
+            1,
+            0.5800000429153442
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "timber",
+        "model": "chamfered-timber",
+        "triangles": 44
+      }
+    ],
+    "frost": [
+      {
+        "name": "cliffFace",
+        "model": "layered-cliff",
+        "triangles": 208
+      },
+      {
+        "name": "rubble",
+        "model": "ice",
+        "oldTriangles": 60,
+        "triangles": 298,
+        "bounds": {
+          "min": [
+            -0.41343018412590027,
+            -0.01250896230340004,
+            -0.2606416940689087
+          ],
+          "max": [
+            0.31775403022766113,
+            0.22137436270713806,
+            0.4721842110157013
+          ]
+        },
+        "fitError": 4.2146848510894035e-08
+      },
+      {
+        "name": "wall",
+        "model": "cliff",
+        "oldTriangles": 20,
+        "triangles": 208,
+        "bounds": {
+          "min": [
+            -0.5,
+            -0.5,
+            -0.5
+          ],
+          "max": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "arch",
+        "model": "cave-mouth",
+        "oldTriangles": 132,
+        "triangles": 718,
+        "bounds": {
+          "min": [
+            -1.0999648571014404,
+            0.007199923042207956,
+            -0.30000001192092896
+          ],
+          "max": [
+            1.0999648571014404,
+            1.0900211334228516,
+            0.30000001192092896
+          ]
+        },
+        "fitError": 0
+      }
+    ],
+    "ember": [
+      {
+        "name": "crag",
+        "model": "cliff",
+        "oldTriangles": 80,
+        "triangles": 208,
+        "bounds": {
+          "min": [
+            -0.38180339336395264,
+            0,
+            -0.4102112948894501
+          ],
+          "max": [
+            0.4099999964237213,
+            1,
+            0.37021130323410034
+          ]
+        },
+        "fitError": 4.2146848510894035e-08
+      },
+      {
+        "name": "rubble",
+        "model": "rock",
+        "oldTriangles": 72,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.4078005850315094,
+            -0.008136202581226826,
+            -0.284557968378067
+          ],
+          "max": [
+            0.3602525591850281,
+            0.23921795189380646,
+            0.462056964635849
+          ]
+        },
+        "fitError": 6.664001874625056e-08
+      },
+      {
+        "name": "furnace",
+        "model": "furnace",
+        "oldTriangles": 1140,
+        "triangles": 1927,
+        "bounds": {
+          "min": [
+            -0.4749999940395355,
+            0.003000000026077032,
+            -0.23018653690814972
+          ],
+          "max": [
+            0.4749999940395355,
+            1,
+            0.23018653690814972
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "arch",
+        "model": "arch",
+        "oldTriangles": 156,
+        "triangles": 628,
+        "bounds": {
+          "min": [
+            -0.9999279975891113,
+            0.009599769487977028,
+            -0.1599999964237213
+          ],
+          "max": [
+            0.9999279975891113,
+            0.994083821773529,
+            0.1599999964237213
+          ]
+        },
+        "fitError": 0
+      }
+    ],
+    "palace": [
+      {
+        "name": "crag",
+        "model": "rock",
+        "oldTriangles": 300,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.44999998807907104,
+            0,
+            -0.44999998807907104
+          ],
+          "max": [
+            0.44999998807907104,
+            1,
+            0.44999998807907104
+          ]
+        },
+        "fitError": 5.960464477539063e-08
+      },
+      {
+        "name": "rubble",
+        "model": "rock",
+        "oldTriangles": 60,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.4362090229988098,
+            0,
+            -0.3116571009159088
+          ],
+          "max": [
+            0.3807734251022339,
+            0.1599999964237213,
+            0.45879971981048584
+          ]
+        },
+        "fitError": 2.9802322387695312e-08
+      },
+      {
+        "name": "arch",
+        "model": "arch",
+        "oldTriangles": 132,
+        "triangles": 628,
+        "bounds": {
+          "min": [
+            -0.9999499917030334,
+            0.007999866269528866,
+            -0.15000000596046448
+          ],
+          "max": [
+            0.9999499917030334,
+            0.9911950826644897,
+            0.15000000596046448
+          ]
+        },
+        "fitError": 0
+      }
+    ],
+    "castle": [
+      {
+        "name": "crag",
+        "model": "cliff",
+        "oldTriangles": 300,
+        "triangles": 208,
+        "bounds": {
+          "min": [
+            -0.44999998807907104,
+            0,
+            -0.44999998807907104
+          ],
+          "max": [
+            0.44999998807907104,
+            1,
+            0.44999998807907104
+          ]
+        },
+        "fitError": 0
+      },
+      {
+        "name": "rubble",
+        "model": "rock",
+        "oldTriangles": 60,
+        "triangles": 144,
+        "bounds": {
+          "min": [
+            -0.3809472620487213,
+            0,
+            -0.365803062915802
+          ],
+          "max": [
+            0.4343486428260803,
+            0.1599999964237213,
+            0.46793457865715027
+          ]
+        },
+        "fitError": 4.2146848510894035e-08
+      },
+      {
+        "name": "arch",
+        "model": "arch",
+        "oldTriangles": 132,
+        "triangles": 628,
+        "bounds": {
+          "min": [
+            -0.9999499917030334,
+            0.007999866269528866,
+            -0.15000000596046448
+          ],
+          "max": [
+            0.9999499917030334,
+            0.9911950826644897,
+            0.15000000596046448
+          ]
+        },
+        "fitError": 0
+      }
+    ]
+  },
+  "fittedComponents": 678,
+  "lowDetail": {
+    "on": true,
+    "err": null,
+    "visibleDrawCalls": 20
+  },
+  "verification": {
+    "allCampaignScenes": 24,
+    "motionAssertions": [
+      "Hinged bridge uses the lowered gameplay state",
+      "Loaded cart follows its collider",
+      "Pressure plate depresses at the dock",
+      "Released cage raises its real front",
+      "Crafted rescue deck follows the real lift",
+      "Waterworks valve follows the water level",
+      "Stopped forge press retracts its ram",
+      "Sun mirror turns with the actual beam mask",
+      "First library crank unfolds the matching leaf",
+      "Far shelves stay folded until their crank",
+      "Closed gate has a visible portcullis",
+      "Opened castle gate removes its portcullis",
+      "No runtime errors"
+    ],
+    "viewer": {
+      "modelsRendered": 59,
+      "phone": {
+        "width": 390,
+        "scrollWidth": 390,
+        "failure": "none"
+      },
+      "errors": []
+    },
+    "interactionTargets": 238,
+    "interactionFailures": 0,
+    "interactionNote": "The freeze control is checked with the float raised to its required middle marks using the live waterworks tick.",
+    "propFootingFailures": 0,
+    "checkpointRestores": 24,
+    "preChangeSave": "Character/class/gold/weapon loaded and retained. Fixture stays private.",
+    "cooperativeCluePickupChecks": 7,
+    "cooperativeTransport": "Local two-browser packet relay, not public-network testing.",
+    "coastalRouteWaypoints": 184,
+    "runtimeErrors": [],
+    "fallback": {
+      "active": true,
+      "fallback": true,
+      "restored": true,
+      "errors": []
+    }
+  },
+  "visualReview": {
+    "method": "Real Chromium/WebGL. 24 campaign frames, before/after mechanism states, all library models on contact sheets, desktop/phone workshop. Normal shoulder camera samples supplemented by isolated model inspection.",
+    "corrected": [
+      "overlapping old/new furnace bodies",
+      "closed lantern casings hiding the light",
+      "overgrown cliff strata bands",
+      "canopy roofs blocking the view",
+      "unsupported duplicate scaffold/counterweight additions",
+      "wreck port-side visibility beside interaction",
+      "phone workshop framing",
+      "unsafe screenshot camera positions"
+    ]
+  },
+  "limits": [
+    "Automated state, save and route checks do not establish fun or human aesthetic acceptance.",
+    "No minimum FPS or slower-hardware performance claim; geometry is cached/instanced and distance culled.",
+    "Retains established high-quality trees and working machinery where replacing them would add no value."
+  ],
+  "reproduce": [
+    "scripts/qa-campaign-craft.cjs",
+    "scripts/qa-campaign-craft-motion.cjs",
+    "scripts/qa-campaign-craft-viewer.cjs",
+    "scripts/qa-campaign-reach.cjs",
+    "scripts/qa-campaign-object-footing.cjs",
+    "scripts/qa-campaign-object-coop.cjs"
+  ]
+}

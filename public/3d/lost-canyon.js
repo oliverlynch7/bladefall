@@ -59,7 +59,7 @@
   // Small shelters, wheels and rails have clear usable space around them.
   for(const [x,z]of [[-570,-1670],[890,-1830],[-760,-2700],[1150,-3170],[-350,-4070]])solid(x,z,0,100,62,80,'#6f5239');
   for(const x of [-220,220])for(const z of [-3940,-4220])solid(x,z,0,14,130,14,'#775b3c');
-  G.deco.push({x:0,z:-4090,y0:130,w:500,h:16,d:340,c:'#587a72',nocol:true});
+  G.deco.push({x:0,z:-4090,y0:130,w:500,h:16,d:340,c:'#587a72',nocol:true,craftHidden:true});
   // Side cave walls stay outside its walkable center; ceiling is rendered separately.
   for(const z of [-2340,-2580])solid(1580,z,0,440,145,55,'#a27b4f');
   G.obstacles.push({kind:'plat',x:1580,z:-2460,y0:143,h:159,w:440,d:300,invisible:true});
@@ -88,7 +88,7 @@
   for(const [x,z,y]of [[-320,-90,220],[-910,-700,120],[760,-1950,0],[-1200,-2500,0],[310,-4150,0],[2470,-3180,0]]){
    detail(x,z,y,64,32,48,'#71533c');detail(x+60,z+15,y,48,25,38,'#a58b61');detail(x+15,z-60,y+2,82,6,36,'#6f8980');for(const dx of [-23,23])detail(x+dx,z,y+33,5,3,49,'#b19a70');detail(x,z,y+35,59,3,4,'#b19a70');
   }
-  for(const [x,z]of [[-680,-1770],[780,-2160]]){for(const dx of [-100,100])for(const dz of [-75,75])detail(x+dx,z+dz,0,12,105,12,'#776044');detail(x,z,106,225,8,180,'#53646b');detail(x,z-65,18,150,5,35,'#8f754e');}
+  for(const [x,z]of [[-680,-1770],[780,-2160]]){for(const dx of [-100,100])for(const dz of [-75,75])detail(x+dx,z+dz,0,12,105,12,'#776044');detail(x,z,106,225,8,180,'#53646b').craftHidden=true;detail(x,z-65,18,150,5,35,'#8f754e');}
   for(const [x,z,y]of [[-220,-900,70],[1180,-1950,0],[-2460,-2300,90]]){detail(x,z,y,10,170,10,'#65523e');detail(x+32,z,y+105,58,55,4,'#595264');detail(x+32,z+3,y+120,9,30,3,'#b5a188');}
   // An optional jump route climbs the existing freight road to the brake above the sealed store.
   // The road below catches misses, and each deck is within the normal jump envelope.
@@ -186,13 +186,13 @@
  function shards(s){return s.flags['lc.rail.open']?[{id:'HP-04',x:-2280,z:-3890,y:0}]:[];}
  function visualKey(s){return ['lc.entry','lc.wagon','lc.rail.open','lc.south','lc.north.open','lc.north','lc.extra','lc.escape','lc.alarm.called','lc.alarm'].map(k=>Number(!!s.flags[k])).join('');}
  function draw(a,t){const {G,state:s,bx}=a,f=s.flags;if(!G.canyon)return;
-  for(const [id,c]of Object.entries(cages)){const open=f['lc.'+id]||id==='north'&&f['lc.north.open'];for(const dx of [-105,105])for(const dz of [-95,95])bx(c.x+dx,c.y+75,c.z+dz,14,150,14,'#68563d');for(const dz of [-95,95])bx(c.x,c.y+150,c.z+dz,226,12,18,'#94744a');for(let i=-3;i<=3;i++){bx(c.x+i*27,c.y+70,c.z-95,7,140,7,'#635e53');if(!open)bx(c.x+i*27,c.y+70,c.z+95,7,140,7,'#635e53');}for(const dx of [-105,105])for(let i=-2;i<=2;i++)bx(c.x+dx,c.y+70,c.z+i*30,7,140,7,'#635e53');if(open)bx(c.x+120,c.y+70,c.z+40,12,130,110,'#786d51');}
+  for(const [id,c]of Object.entries(cages)){const open=f['lc.'+id]||id==='north'&&f['lc.north.open'];for(const dx of [-105,105])for(const dz of [-95,95])bx(c.x+dx,c.y+75,c.z+dz,14,150,14,'#68563d');for(const dz of [-95,95])bx(c.x,c.y+150,c.z+dz,226,12,18,'#94744a');for(let i=-3;i<=3;i++){bx(c.x+i*27,c.y+70,c.z-95,7,140,7,'#635e53');if(!open&&!root.BFCampaignCraft?.has('cage-door-'+id))bx(c.x+i*27,c.y+70,c.z+95,7,140,7,'#635e53');}for(const dx of [-105,105])for(let i=-2;i<=2;i++)bx(c.x+dx,c.y+70,c.z+i*30,7,140,7,'#635e53');if(open)bx(c.x+120,c.y+70,c.z+40,12,130,110,'#786d51');}
   const gates=[['lc.entry',0,-940,70,390],['lc.escape',0,-4610,0,390],['lc.rail.open',-2280,-3830,0,320]];
   for(const [flag,x,z,y,w]of gates){for(const dx of [-w/2,w/2])bx(x+dx,y+90,z,18,180,18,'#73543b');bx(x,y+184,z,w+24,16,20,'#ab895b');if(!f[flag]&&flag!=='lc.rail.open')for(let j=0;j<9;j++)bx(x-w/2+20+j*(w-40)/8,y+80,z,10,160,10,'#73644b');}
-  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;const y=o.y||0;
+  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o)||o.kind==='wagon'&&root.BFCampaignCraft?.has('holding-wagon'))continue;const y=o.y||0;
    if(o.kind==='orders'){bx(o.x,y+27,o.z,95,54,65,'#7f5937');bx(o.x,y+56,o.z,58,3,40,'#e3cfaa');for(let k=0;k<4;k++)bx(o.x,y+59,o.z-12+k*7,34,2,2,'#584e40');}
    else if(o.kind==='lock'){if(!f['lc.'+o.key.slice(8)]&&!(o.key==='lc.cage.north'&&f['lc.north.open'])){bx(o.x,y+54,o.z-15,22,28,10,'#bb985e');bx(o.x,y+73,o.z-15,15,12,8,'#6a6253');}}
-   else if(o.kind==='wagon'){const x=f['lc.wagon']?1550:1420,z=f['lc.wagon']?-2290:-2460;bx(x,40,z,150,55,170,'#795632');for(const dx of [-83,83])for(const dz of [-55,55])bx(x+dx,24,z+dz,12,48,48,'#433d32');if(!f['lc.wagon'])for(const dx of [-35,35])bx(x+dx,92,z,54,52,120,'#b19767');}
+   else if(o.kind==='wagon'&&!root.BFCampaignCraft?.has('holding-wagon')){const x=f['lc.wagon']?1550:1420,z=f['lc.wagon']?-2290:-2460;bx(x,40,z,150,55,170,'#795632');for(const dx of [-83,83])for(const dz of [-55,55])bx(x+dx,24,z+dz,12,48,48,'#433d32');if(!f['lc.wagon'])for(const dx of [-35,35])bx(x+dx,92,z,54,52,120,'#b19767');}
    else if(o.kind==='water'){bx(o.x,9,o.z,120,18,95,'#766e56');bx(o.x,20,o.z,100,3,75,'#739b9a');if(!f['lc.water'])bx(o.x+44,34,o.z+20,13,26,13,'#acaf93');}
    else if(o.kind==='chest'){bx(o.x,26,o.z,90,52,58,'#8a683e');bx(o.x,f['lc.cache']?77:54,o.z,94,12,60,'#bd9b5c');}
    else if(o.kind==='winch'){bx(o.x,y+25,o.z,60,50,45,'#826849');for(const x of [-75,75])bx(x,y+85,o.z,14,170,14,'#70533a');bx(o.x,y+170,o.z,180,14,18,'#b7925c');if(!f['lc.alarm'])bx(o.x,y+105,o.z,3,105,3,'#d5c295');for(let k=0;k<4;k++)bx(o.x,y+145,o.z-18-k*12,18+k*13,20+k*5,14,'#b69251');bx(o.x,y+204,o.z,44,18,44,f['lc.alarm']?'#79bd9d':f['lc.alarm.called']?'#f6a95b':'#817e69');}

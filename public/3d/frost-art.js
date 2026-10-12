@@ -1,3 +1,5 @@
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
 import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Frostfell: faceted opaque ice keeps the cave maze affordable in a browser. */
@@ -11,7 +13,7 @@ export const frostReady=()=>kit.size>=7;
 export function loadFrost(){
   if(pending)return pending;
   pending=new Promise(resolve=>new GLTFLoader().load('./frost-assets/frost-kit.glb',g=>{
-    try{g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const co=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(!frostReady())throw Error('Incomplete Frostfell kit');}
+    try{g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const co=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(!frostReady())throw Error('Incomplete Frostfell kit');upgradeCampaignKit(kit,'frost');}
     catch(e){failed=true;console.warn('[frost-art]',e)}resolve();
   },undefined,e=>{failed=true;console.warn('[frost-art] Original scenery fallback',e);resolve()}));return pending;
 }
@@ -43,7 +45,7 @@ export function buildFrost(scene,w){
   }
   function rawSurface(o,base,top){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
-    add(o.caveWall?'wall':'slab',o.x,base+h/2,o.z,ww,h,dd,o.caveWall?null:(w.frostScene&&o.c?'#806c52':'#52849f'),0,o.caveWall?o:null);cap({...o,w:ww,d:dd},top,!!o.caveWall);
+    add(o.caveWall?'wall':outdoor&&(o.mountainPath||o.terrain)?'cliffFace':'slab',o.x,base+h/2,o.z,ww,h,dd,o.caveWall?null:(w.frostScene&&o.c?'#806c52':'#52849f'),0,o.caveWall?o:null);cap({...o,w:ww,d:dd},top,!!o.caveWall);
     // Crystals grow on inaccessible wall crowns, not on the floor of the maze.
     if(o.caveWall&&hash(o.x,o.z)<.22)add('crystal',o.x,top+1,o.z,ww*.68,25+hash(o.z,o.x)*28,dd*.68);
   }
@@ -64,7 +66,7 @@ export function buildFrost(scene,w){
     if(outdoor&&(o.terrain||(o.mountainPath&&hash(o.x,o.z)<.13))){const peakKey=[o.x,o.z,o.w,o.d,top].join(',');if(peakBodies.has(peakKey))continue;peakBodies.add(peakKey);const h=Math.max(100,top+120);add('peakRock',o.x,top-h*.5-4,o.z,o.w*1.35,h,o.d*1.35,'#6e8490',hash(o.x,o.z)*2);}
   }source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;surface({...o,caveWall:true},o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
-  for(const d of w.deco||[]){source=authored?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+  for(const d of w.deco||[]){if(craftReplacesDeco(d,w))continue;source=authored?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(d.kind==='officerBanner'){add('trunk',d.x,y+hh*.5,d.z,130,hh,130,'#515b61');add('slab',d.x,y+hh*.7,d.z+9,ww,hh*.5,5,'#263e4e',0,null,'cloth');add('slab',d.x,y+hh*.7,d.z+13,12,hh*.42,3,'#a8b8bd',0,null,'cloth');for(const dx of [-ww*.47,ww*.47])add('slab',d.x+dx,y+hh*.7,d.z+13,5,hh*.5,3,'#899aa3',0,null,'cloth');continue;}
     if(d.kind==='iceResearch'){
       add('slab',d.x,y+hh-6,d.z,ww,12,dd,'#8a775c',0,null,'wood');for(const dx of [-ww*.4,ww*.4])for(const dz of [-dd*.35,dd*.35])add('slab',d.x+dx,y+hh*.45,d.z+dz,9,hh*.9,9,'#665844',0,null,'wood');

@@ -1,3 +1,5 @@
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
 import {enrichCampaignKit} from './campaign-kit-detail.js?v=2182f';
 import {trackCampaignOccluder} from './campaign-scene.js?v=2182f';
 import {campaignMaterial} from './campaign-materials.js?v=2182f';
@@ -19,7 +21,7 @@ export const deepReady=w=>kits.get(w.zone)?.size===10;
 export function loadDeep(w){
   const zone=w.zone;if(pending.has(zone))return pending.get(zone);
   const promise=new Promise(resolve=>new GLTFLoader().load(`./${zone}-assets/${zone}-kit.glb`,g=>{
-    try{const kit=new Map();g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const c=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<c.count;i++){mean.r+=c.getX(i);mean.g+=c.getY(i);mean.b+=c.getZ(i)}mean.multiplyScalar(1/c.count);kit.set(o.name.replace(/\.\d+$/,''),{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(kit.size!==10)throw Error('Incomplete deep scenery kit');enrichCampaignKit(kit,zone);kits.set(zone,kit);}
+    try{const kit=new Map();g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const c=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<c.count;i++){mean.r+=c.getX(i);mean.g+=c.getY(i);mean.b+=c.getZ(i)}mean.multiplyScalar(1/c.count);kit.set(o.name.replace(/\.\d+$/,''),{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(kit.size!==10)throw Error('Incomplete deep scenery kit');enrichCampaignKit(kit,zone);upgradeCampaignKit(kit,zone);kits.set(zone,kit);}
     catch(e){failed.add(zone);console.warn('[deep-art]',e)}resolve();
   },undefined,e=>{failed.add(zone);console.warn('[deep-art] Original scenery fallback',e);resolve()}));pending.set(zone,promise);return promise;
 }
@@ -67,7 +69,7 @@ export function buildDeep(scene,w){
   for(const s of w.segments||[])if(!s.nofloor&&!s.phaseable&&!s.phase)surface(s,abyss?-45:-24,0);
   const solids=(w.obstacles||[]).filter(o=>!o.phase&&!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol&&!(w.portalMode==='descent'&&o.descentCover));
     for(const o of solids){const top=o.h??1,base=w.portalMode==='sprint'&&o.kind==='plat'?top-22:o.y0??(o.kind==='plat'?Math.min(0,top-16):0);surface(o,base,top,o);obstacles.add(o);}
-  for(const o of w.walls||[]){if(o.invisible)continue;surface(o,o.y0||0,(o.y0||0)+(o.h||1),o);walls.add(o);}
+  for(const o of w.walls||[]){if(o.craftOwned){walls.add(o);continue;}if(o.invisible)continue;surface(o,o.y0||0,(o.y0||0)+(o.h||1),o);walls.add(o);}
   // Exposed island edges get masonry courses; shared interior edges are left untouched.
   const terrain=solids.filter(o=>o.kind==='plat'&&o.terrain);
   for(const o of terrain){const top=o.h??0,base=o.y0??Math.min(0,top-16),height=top-base;if(height<35)continue;
@@ -79,7 +81,7 @@ export function buildDeep(scene,w){
       }
     }
   }
-  for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+  for(const d of w.deco||[]){if(craftReplacesDeco(d,w))continue;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(d.kind==='forgeFrame'){for(const dx of [-ww*.5,ww*.5]){add('stone',d.x+dx,y+hh*.5,d.z,48,hh,dd,'#30383b');for(let j=1;j<4;j++)add('stone',d.x+dx,y+hh*j/4,d.z,58,12,dd+8,'#9c7951');}add('stone',d.x,y+hh,d.z,ww+70,52,dd+12,'#4a5050');for(let j=0;j<5;j++)add('stone',d.x-ww*.36+j*ww*.18,y+hh-34,d.z,12,30,dd+4,'#9c7951');continue;}
     if(d.kind==='forgeCrates'){for(const dx of [-ww*.3,ww*.3]){add('stone',d.x+dx,y+hh*.35,d.z,ww*.55,hh*.7,dd,'#68533c');for(const dz of [-dd*.4,dd*.4])add('stone',d.x+dx,y+hh*.35,d.z+dz,ww*.58,hh*.76,7,'#363c3d');}add('stone',d.x,y+hh*.86,d.z,ww*.6,hh*.3,dd*.7,'#80704d');continue;}
     if(d.kind==='forgeLamp'){add('stone',d.x,y+hh*.5,d.z,12,hh,12,'#484c49');add('stone',d.x,y+hh,d.z,45,45,45,'#5e533f');add('glow',d.x,y+hh,d.z+24,25,29,2,'#ffc780');add('stone',d.x,y+hh+28,d.z,55,8,55,'#393f3e');glows.push(new THREE.Vector3(d.x,y+hh,d.z+35));continue;}
@@ -98,7 +100,7 @@ export function buildDeep(scene,w){
     if(hh<4&&ww>60)continue;
     if(d.theme==='ember'||d.theme==='volcano'||d.theme==='void'||d.kind==='standstone'||d.kind==='rock'){
       if(d.lead===false)continue;
-      add(!abyss&&hh>120&&r<.55?'furnace':hh>45?'crag':'rubble',d.x,y,d.z,ww,hh/(abyss&&hh>45?1.16:1),dd);
+      add(hh>45?'crag':'rubble',d.x,y,d.z,ww,hh/(abyss&&hh>45?1.16:1),dd);
       if(hh>70&&r<.45){add('glow',d.x,y+hh*.45,d.z+dd*.21,ww*.075,hh*.55,dd*.06);glows.push(new THREE.Vector3(d.x,y+hh*.45,d.z));}
     }else if(['pillar','column','grave'].includes(d.kind)){add('pillar',d.x,y,d.z,ww,hh,dd);if(abyss&&hh>70)add('crag',d.x,y+hh+18,d.z,ww*.4,20,dd*.4);}
     else add('stone',d.x,y+hh/2,d.z,ww,hh,dd,hh>40?null:palette[Math.floor(r*4)]);

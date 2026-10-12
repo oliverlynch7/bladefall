@@ -1,3 +1,5 @@
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
 import {loadBriarTrees,briarTreesReady,campaignTreesReady,buildCampaignTrees} from './briar-trees.js?v=2182f';
 import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
@@ -12,7 +14,7 @@ const CHUNK=400,white=new THREE.Color('white'),dummy=new THREE.Object3D();
 const hash=(x,z)=>{const n=Math.sin(x*12.9898+z*78.233)*43758.5453;return n-Math.floor(n)};
 let active=null;
 export function wantsOutskirts(w){return !failed && new URLSearchParams(location.search).get('outskirtsart')!=='0' && w.zone==='outskirts'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus;}
-export function outskirtsReady(){return kit.size===11&&briarTreesReady();}
+export function outskirtsReady(){return kit.size>=11&&briarTreesReady();}
 export function loadOutskirts(){
   if(pending)return pending;
   pending=new Promise((resolve,reject)=>new GLTFLoader().load('./outskirts-assets/outskirts-kit.glb',g=>{
@@ -23,7 +25,7 @@ export function loadOutskirts(){
     const colors=[],mean=new THREE.Color(0,0,0),p=geo.attributes.position;
     for(let i=0;i<p.count;i++){const c=new THREE.Color(p.getY(i)>.1?'#7c8651':'#676f43');colors.push(c.r,c.g,c.b);mean.add(c);}
     mean.multiplyScalar(1/p.count);geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeBoundingBox();
-    kit.set('bank',{geo,mean,tri:p.count/3});resolve();
+    kit.set('bank',{geo,mean,tri:p.count/3});upgradeCampaignKit(kit,'briar');resolve();
   },undefined,e=>{failed=true;console.warn('[outskirts-art] asset unavailable; using original scenery',e);resolve();})).then(()=>loadBriarTrees());return pending;
 }
 function makeGrain(){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),im=ctx.createImageData(128,128);for(let i=0;i<128*128;i++){const v=205+Math.floor(hash(i,55)*50);im.data.set([v,v,v,255],i*4)}ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;}
@@ -108,11 +110,11 @@ export function buildOutskirts(scene,w){
   for(const o of w.obstacles||[]){
     if(o.autoCol||o.treeCol||o.pillarCol||o.invisible||o.h<=0)continue;
     // A structure deco is the visible owner of this matching collider.
-    if(o.structure){obstacles.add(o);continue;}
+    if(o.structure||o.craftOwned){obstacles.add(o);continue;}
     const pieces=o.kind==='plat'?claimSurface(platformSurfaces,o,'top:'+o.h):[o];
     B.structure(o,()=>{for(const o of pieces){if(o.earth){
       const base=o.y0||0,h=o.h-base;
-      add('tile',o.x,base+h/2,o.z,o.w-.8,h,o.d-.8,'#665b40');
+      add('cliffFace',o.x,base+h/2,o.z,o.w-.8,h,o.d-.8,'#665b40');
       add('tile',o.x,o.h+.4,o.z,o.w,1.5,o.d,o.path?'#a3916c':'#777747');
     }else B.solid(o,woods?'#67694f':'#756950',!!(o.root||o.canopy||o.interior));}});
     obstacles.add(o);
@@ -121,9 +123,9 @@ export function buildOutskirts(scene,w){
   // hidden by an overhead camera looking through its southern frame.
   const granaryRoof=deco.filter(d=>d.granaryRoof);
   if(granaryRoof.length)B.structure({granaryRoof:true,x:1150,z:90,w:570,d:510,h:280},()=>{
-    for(const d of granaryRoof)add('timber',d.x,(d.y0||0)+d.h/2,d.z,d.w,d.h,d.d||d.w,d.c);
+    for(const d of granaryRoof.filter(d=>!craftReplacesDeco({craftHidden:d.w!==80},w)))add('timber',d.x,(d.y0||0)+d.h/2,d.z,d.w,d.h,d.d||d.w,d.c);
   });
-  for(const d of deco){
+  for(const d of deco){if(craftReplacesDeco(d,w))continue;
     if(d.granaryRoof)continue;
     const kind=d.kind;if(d.lead===false||(kind==='tree'&&d.lead!==true))continue;
     const y=d.y0||0,ww=d.w||8,hh=d.h||1,dd=d.d||ww,r=hash(d.x,d.z);

@@ -1,3 +1,5 @@
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
 import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Ruined Keep: authored fortress scenery fitted to the existing game geometry. */
@@ -12,7 +14,7 @@ export const keepReady=()=>kit.size===9;
 export function loadKeep(){
   if(pending)return pending;
   pending=new Promise(resolve=>new GLTFLoader().load('./keep-assets/keep-kit.glb',g=>{
-    try{g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const co=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(!keepReady())throw Error('Incomplete Keep kit');}
+    try{g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const co=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(!keepReady())throw Error('Incomplete Keep kit');upgradeCampaignKit(kit,'keep');}
     catch(e){failed=true;console.warn('[keep-art]',e)}resolve();
   },undefined,e=>{failed=true;console.warn('[keep-art] Original scenery fallback',e);resolve()}));return pending;
 }
@@ -118,7 +120,7 @@ export function buildKeep(scene,w){
   }
   source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;if(w.delve){target='s'+structures.length;structures.push({cell:target,o});}surface(o,o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);target=null;}
-  for(const d of w.deco||[]){source=w.keepScene?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+  for(const d of w.deco||[]){if(craftReplacesDeco(d,w))continue;source=w.keepScene?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(solids.some(o=>Math.abs(o.x-d.x)<.01&&Math.abs(o.z-d.z)<.01&&o.w===ww&&o.d===dd&&Math.abs(o.h-y-hh)<2))continue;
     if(d.theme==='ruins'||d.theme==='dungeon'){
       if(hh>110&&ww>45){add('tower',d.x,y,d.z,ww,hh,dd);if(r<.42)add('banner',d.x+ww*.21,y+hh*.34,d.z+dd*.5+2,ww*.42,hh*.36,12,null,.04);}

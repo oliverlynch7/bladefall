@@ -1,3 +1,5 @@
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
 import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Hollow Pass: warm sandstone canyon scenery over the authored collision surfaces. */
@@ -8,11 +10,11 @@ let pending,failed=false,active=null;
 const hash=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v)};
 const palette=['#c4955e','#cea66f','#bb8c55','#ddbb85','#c49b67'];
 export const wantsHollow=w=>!failed&&w.zone==='hollow'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&new URLSearchParams(location.search).get('hollowart')!=='0';
-export const hollowReady=()=>kit.size===8;
+export const hollowReady=()=>kit.size>=8;
 export function loadHollow(){
   if(pending)return pending;
   pending=new Promise(resolve=>new GLTFLoader().load('./hollow-assets/hollow-kit.glb',g=>{
-    try{g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const co=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(kit.size!==7)throw Error('Incomplete canyon kit');
+    try{g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const co=geo.attributes.color,mean=new THREE.Color(0,0,0);for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});if(kit.size!==7)throw Error('Incomplete canyon kit');upgradeCampaignKit(kit,'hollow');
       const geo=new THREE.TorusGeometry(.5,.055,4,12,Math.PI).toNonIndexed(),colors=[];for(let i=0;i<geo.attributes.position.count;i++)colors.push(1,1,1);geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));kit.set('fossil',{geo,mean:new THREE.Color(1,1,1),tri:geo.attributes.position.count/3});}
     catch(e){failed=true;console.warn('[hollow-art]',e)}resolve();
   },undefined,e=>{failed=true;console.warn('[hollow-art] Original scenery fallback',e);resolve()}));return pending;
@@ -52,7 +54,7 @@ export function buildHollow(scene,w){
     // Collision tops remain exact; the rock beneath extends into the canyon mist.
     if(w.cliffScene!=null&&!wood){
       const bottom=-360,depth=top-bottom;
-      add('stone',o.x,bottom+depth/2,o.z,ww,depth,dd,'#977047');
+      add('cliffFace',o.x,bottom+depth/2,o.z,ww,depth,dd,'#977047');
       add('timber',o.x,top+.55,o.z,ww,1.1,dd,c);
       for(let y=bottom+65;y<top-10;y+=72){
         for(const side of [-1,1]){
@@ -116,7 +118,7 @@ export function buildHollow(scene,w){
   }
   source=null;
   // Replace the old decorative canyon scatter, preserving every supplied anchor and height.
-  for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+  for(const d of w.deco||[]){if(craftReplacesDeco(d,w))continue;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(d.kind==='campdetail'){add('timber',d.x,y+hh/2,d.z,ww,hh,dd,d.c,0,'wood');continue;}
     if(d.kind==='fossil'){add('fossil',d.x,y,d.z,ww,hh*2,dd,'#e3d5b0',Math.PI/2);continue;}
     if(d.kind==='windbreak'){

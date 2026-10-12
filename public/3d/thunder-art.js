@@ -1,5 +1,8 @@
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
 import {trackCampaignOccluder,updateCampaignOccluders,updateCampaignSun} from './campaign-scene.js?v=2182f';
 import * as T from './three.module.js';
+import {craftModel} from './campaign-craft-models.js?v=2186c';
+import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {createHydra} from './hydra-art.js?v=2141';
@@ -12,7 +15,7 @@ export function buildCoastHigh(scene,w){
  const ledger=new Map();for(const o of w.obstacles.filter(o=>o.kind==='plat'))for(const p of claimSurface(ledger,o,String(o.h))){box(p.x,p.h-15,p.z,p.w,30,p.d,'#82999a');if(!p.thunderCatch)box(p.x,p.h/2-60,p.z,p.w*1.1,Math.max(50,p.h+90),p.d*1.1,'#3c5664','rock');}
  for(const wall of w.walls)box(wall.x,wall.y0+wall.h/2,wall.z,wall.w,wall.h,wall.d,wall.thunderTag?.endsWith('Gate')?'#69757b':'#4a6570');
  box(0,-105,-1900,15000,20,16000,'#1c6274');
- for(const d of w.deco){if(d.kind==='thunderSpire'){box(d.x,d.y0+d.h*.45,d.z,d.w,d.h,d.d,'#3b596b','rock');box(d.x-20,d.y0+d.h*.8,d.z,d.w*.7,d.h*.5,d.d*.7,'#647e89','rock');}if(d.kind==='thunderArch'){for(const s of [-1,1])box(d.x+s*d.w*.5,d.y0+d.h/2,d.z,95,d.h,d.d,'#78908d','rock');box(d.x,d.y0+d.h,d.z,d.w+120,95,140,'#90a19a','rock');}}
+ for(const d of w.deco){if(craftReplacesDeco(d,w))continue;if(d.kind==='thunderSpire'){box(d.x,d.y0+d.h*.45,d.z,d.w,d.h,d.d,'#3b596b','rock');box(d.x-20,d.y0+d.h*.8,d.z,d.w*.7,d.h*.5,d.d*.7,'#647e89','rock');}if(d.kind==='thunderArch'){for(const s of [-1,1])box(d.x+s*d.w*.5,d.y0+d.h/2,d.z,95,d.h,d.d,'#78908d','rock');box(d.x,d.y0+d.h,d.z,d.w+120,95,140,'#90a19a','rock');}}
  for(const r of w.rooms){for(let j=0;j<16;j++){const a=j/16*Math.PI*2,x=r.x+Math.cos(a)*r.w*.53,z=r.z+Math.sin(a)*r.d*.53;box(x,r.y-6,z,35+j%4*12,35,40+j%3*15,'#889a91','rock');if(j%3===0)box(x,r.y+18,z,4,45,9,'#6b9384');}}
  for(const r of w.rooms)for(let j=0;j<38;j++){const x=r.x+(j*97%Math.max(100,r.w-60))-r.w/2+30,z=r.z+(j*131%Math.max(100,r.d-60))-r.d/2+30;box(x,r.y+2,z,7+j%4*5,3,6+j%5*4,j%5===0?'#b4b18b':'#789693','rock');if(j%7===0&&Math.abs(x-r.x)>r.w*.28)for(let k=0;k<4;k++)box(x+k*4,r.y+12+k*2,z,3,22+k*5,5,'#80a991');}
  let hydra;if(w.shipScene==='hydra'){hydra=createHydra(group);for(const s of [-1,1])for(let j=0;j<5;j++)box(s*(1100+j*90),100+j*75,-650-j*100,230,480+j*110,300,'#476777','rock');}
@@ -27,9 +30,9 @@ export function buildCoastHigh(scene,w){
  for(let j=0;j<12;j++)box(300,875+j*16,-5090-j*55,210,20,65,'#c0c6b1');
  for(const [x,z,y]of [[-2120,-3820,340],[-1560,-4780,300]]){box(x,y+240,z,590,100,540,'#435e69','rock');}
  }
- let triangles=0,instances=0;const cube=beveledBoxGeometry(.012),rock=new T.CylinderGeometry(.43,.62,1,9);geos.push(cube,rock);
+ let triangles=0,instances=0;const cube=beveledBoxGeometry(.012),parts=craftModel('cliff','coast',{w:1.18,h:1,d:1.18}).map(r=>r.geo.clone()),rock=mergeGeometries(parts,false);parts.forEach(g=>g.dispose());rock.translate(0,-.5,0);geos.push(cube,rock);
  const woodColors=new Set(['#665c49','#9b997e','#c4b99a','#96856a','#9c845a','#645e50']);
- for(const [key,list]of bins){const isRock=key.startsWith('rock:'),color=key.slice(key.indexOf(':')+1),kind=color==='#1c6274'?'water':woodColors.has(color)?'wood':color==='#c0c6b1'?'marble':'stone',m=campaignMaterial(kind,{color,flatShading:true});mats.push(m);const mesh=new T.InstancedMesh(isRock?rock:cube,m,list.length);list.forEach(([x,y,z,sx,sy,sz],i)=>{dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,isRock?(i%4)*.31:0,0);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);trackCampaignOccluder(occluders,mesh,i,dummy.matrix);});mesh.computeBoundingSphere();mesh.castShadow=kind!=='water';mesh.receiveShadow=true;group.add(mesh);triangles+=list.length*(isRock?36:44);instances+=list.length;}
+ for(const [key,list]of bins){const isRock=key.startsWith('rock:'),color=key.slice(key.indexOf(':')+1),kind=color==='#1c6274'?'water':woodColors.has(color)?'wood':color==='#c0c6b1'?'marble':'stone',m=campaignMaterial(kind,{color,flatShading:true});mats.push(m);const mesh=new T.InstancedMesh(isRock?rock:cube,m,list.length);list.forEach(([x,y,z,sx,sy,sz],i)=>{dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,isRock?(i%4)*.31:0,0);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);trackCampaignOccluder(occluders,mesh,i,dummy.matrix);});mesh.computeBoundingSphere();mesh.castShadow=kind!=='water';mesh.receiveShadow=true;group.add(mesh);triangles+=list.length*((isRock?rock:cube).index?.count||(isRock?rock:cube).attributes.position.count)/3;instances+=list.length;}
  window.__DEEP_ART_ACTIVE=true;window.__DEEP_ART_LOOK={body:'#46606d',hazard:['#1c6274','#81b9c0'],sky:[.31,.46,.54],sunGlow:[.04,.07,.09]};active={group,hydra,sun,occluders};group.userData.dispose=()=>{sun.shadow.map?.dispose();hydra?.dispose();geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());scene.fog=oldFog;if(active?.group===group)active=null;window.__DEEP_ART_ACTIVE=false;window.__DEEP_ART_LOOK=null;};
  return {group,counts:{name:w.shipScene==='hydra'?'Hydra Ledges':'Thunder Cliffs',artObstacles:true,triangles,totalTriangles:triangles,instances}};
 }

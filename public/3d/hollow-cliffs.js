@@ -109,28 +109,28 @@
   for(let x=-505;x<=-115;x+=43)bx(x,3,freight.z,13,5,155,'#77583b');
   for(const dz of [-49,49])bx(-305,7,freight.z+dz,405,8,8,'#808b88');
   const docked=cartProgress(G),cx=cartX(G),plateColor=docked>=1?'#e4c77e':'#51636a';
-  bx(freight.endX,8,freight.z,138,12,128,'#46545a');bx(freight.endX,15-docked*5,freight.z,112,3,104,plateColor);
-  for(const dx of [-42,42])for(const dz of [-37,37])bx(freight.endX+dx,20-docked*5,freight.z+dz,8,4,8,docked>=1?'#f6dda4':'#8d9c99');
-  for(const dz of [-35,35])for(const dx of [-37,37])bx(cx+dx,23,freight.z+dz,20,25,17,'#42494b');
+  if(!root.BFCampaignCraft?.has('freight-pressure')){bx(freight.endX,8,freight.z,138,12,128,'#46545a');bx(freight.endX,15-docked*5,freight.z,112,3,104,plateColor);
+  for(const dx of [-42,42])for(const dz of [-37,37])bx(freight.endX+dx,20-docked*5,freight.z+dz,8,4,8,docked>=1?'#f6dda4':'#8d9c99');}
+  if(!root.BFCampaignCraft?.has('freight-cart')){for(const dz of [-35,35])for(const dx of [-37,37])bx(cx+dx,23,freight.z+dz,20,25,17,'#42494b');
   bx(cx,37,freight.z,112,19,83,'#775237');bx(cx,49,freight.z,104,5,77,'#bb9362');
   for(const dz of [-42,42])bx(cx,51,freight.z+dz,103,10,6,'#39797a');
   for(const dx of [-36,0,36])bx(cx+dx,55,freight.z+45,4,15,3,'#dbbf83');
   for(const dx of [-45,45])bx(cx+dx,60,freight.z,8,24,80,'#4d5557');
   for(const dx of [-25,25]){bx(cx+dx,75,freight.z,37,31,55,'#68645b');bx(cx+dx,93,freight.z,41,5,59,'#b7a376');}
-  bx(cx,109,freight.z,28,4,18,'#d0bd92');
+  bx(cx,109,freight.z,28,4,18,'#d0bd92');}
   // The plate tugs a clearly continuous cable toward the winch on the other bank.
   bx(-100,110,-2570,6,203,6,docked>=1?'#d8b872':'#706456');
   bx(65,210,-2570,335,7,7,docked>=1?'#e2c27e':'#6d655c');
-  bx(-340,90,-2470,16,180,16,'#705035');bx(330,90,-2570,16,180,16,'#705035');bx(20,181,-2570,640,16,20,'#95754c');
+  if(!root.BFCampaignCraft?.has('freight-crane')){bx(-340,90,-2470,16,180,16,'#705035');bx(330,90,-2570,16,180,16,'#705035');bx(20,181,-2570,640,16,20,'#95754c');}
   for(const x of [-155,155]){bx(x,110,-2750,20,220,20,'#806044');bx(x,75,-3030,18,150,18,'#806044');}
   // A single hinged deck lowers from the near bank. The saved-open state starts
   // fully down; only a newly solved bridge plays the short lowering motion.
   const elapsed=(G.time||0)-G.cliffs.bridgeLowerAt,progress=f['hp.bridge']?Math.max(0,Math.min(1,elapsed/1.5)):0;
   const eased=progress*progress*(3-2*progress),angle=(1-eased)*1.24;
-  pushM();mv(0,5,-2540);rotX(angle);
+  if(!root.BFCampaignCraft?.has('cliff-bridge')){pushM();mv(0,5,-2540);rotX(angle);
   for(let j=0;j<19;j++){const zz=-15-j*29;bx(0,0,zz,250,8,25,j%3===0?'#c29b5d':'#ad8751');bx(0,5,zz,251,2,3,'#684d31');}
   for(const side of [-1,1]){bx(side*127,24,-279,8,42,540,'#735738');for(let j=0;j<8;j++)bx(side*127,13,-35-j*72,9,26,9,'#d0ac69');}
-  popM();
+  popM();}
   for(const x of [-145,145])bx(x,12,-2540,24,24,34,'#8c704a');
   // The far winch is distinct from the cart and remains on the safe bank.
   bx(230,46,-2690,30,6,70,'#cab480');bx(230,32,-2700,60,50,13,'#67523d');

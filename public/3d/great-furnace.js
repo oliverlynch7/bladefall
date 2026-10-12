@@ -38,7 +38,7 @@ function build({G,plat,spawn}){
  G.furnace.ledges=Array.from({length:5},(_,i)=>[-840+i*175,-5340-i*26,480-i*36]);
  for(const [kind,x,z,y,w,d,h]of [['forgeFrame',0,-780,120,910,70,570],['forgeFrame',0,-2180,120,1050,70,650],['forgeFrame',0,-6480,260,1000,80,900],['forgePipe',-590,-3210,120,100,900,210],['forgePipe',1050,-3540,260,100,850,250],['forgePipe',-330,-4860,120,95,650,190],['forgeBench',1800,-4930,400,170,85,70],['forgeRack',2410,-4800,400,150,70,140],['forgeCrates',-2050,-3240,220,120,100,100],['forgeBench',330,-2310,120,150,70,60],['forgeLamp',-290,-2180,120,35,35,155],['forgeLamp',1620,-3100,260,35,35,150],['forgeLamp',-1180,-4110,120,35,35,170]])G.deco.push({kind,x,z,y0:y,w,d,h,c:'#77614b'});
  // Furnace body stays below and away from all playable walkways.
- G.deco.push({theme:'ember',x:160,z:-3470,y0:-220,w:760,d:1080,h:380,c:'#332c29'});
+ G.deco.push({theme:'ember',x:160,z:-3470,y0:-220,w:760,d:1080,h:380,c:'#332c29',craftHidden:true});
  G.storyNpcs=[{id:'pike',name:'Foreman Pike',x:220,z:-1310,y:120},{id:'martin',name:'Martin',x:210,z:-2080,y:120}];
  G.ironWorkers=[0,1,2].map(i=>({id:'iron_worker'+i,name:'Worker',escortIndex:i,x:-1060+i*70,z:-3430,y:120,r:18,h:105,hp:ESCORT_HP,maxHp:ESCORT_HP}));
  const obj=(key,label,x,z,y,kind)=>({key:'gf.'+key,label,x,z,y,kind});

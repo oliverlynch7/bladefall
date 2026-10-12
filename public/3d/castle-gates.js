@@ -46,7 +46,7 @@ function build({G,plat,spawn}){
  for(let i=0;i<6;i++){part('stone',-1080,118,-3020-i*65,45,36,42,'#586366');part('cap',-815,103,-3040-i*85,70,5,70,'#627979');}
  // A far gatehouse frames the destination; no black portal appears at ground level.
  for(const side of [-1,1]){const x=side*880;part('stone',x,625,-5010,270,690,510,'#484853');for(let j=0;j<4;j++)part('stone',x+(j-1.5)*75,998,-5010,42,72,520,'#66616d');part('furnace',x,665,-4745,110,260,7,'#462f3b');part('cap',x,684,-4737,18,120,8,'#afa59c');}
- part('stone',0,900,-5260,1510,120,170,'#54525d');part('cap',0,973,-5260,1560,26,190,'#77717c');
+ const gateLintel=G.deco.length;part('stone',0,900,-5260,1510,120,170,'#54525d');part('cap',0,973,-5260,1560,26,190,'#77717c');for(const d of G.deco.slice(gateLintel))d.craftHidden=true;
  for(const x of [-1100,1100]){part('stone',x,900,-5970,520,1300,760,'#373844');part('pillar',x,1670,-5970,140,260,140,'#625765');}
  // Iron gatehouse: readable bars, raised stone joints, narrow windows and hanging cloth.
  for(const side of [-1,1]){
@@ -104,7 +104,7 @@ function draw({G,state:s,bx,ring},t){
   bx(0,deckY+9+lift,z,282,14,58,'#807b83');for(const side of [-1,1]){bx(side*137,deckY+14+lift,z,10,20,58,'#b6a188');bx(side*130,deckY+35+lift,z,7,42,8,'#6e7077');}
  }
  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;if(o.kind==='brake'||s.flags['event.'+o.key]||o.key==='cg.release'&&!f(s,'alarm')||o.key==='cg.break'&&(f(s,'alarm')||f(s,'entry')))continue;const y=o.y;if(o.key==='cg.bridge'){bx(o.x,y+20,o.z,112,40,82,'#55535e');for(const side of [-1,1])bx(o.x+side*43,y+64,o.z,15,82,18,'#867b75');bx(o.x,y+69,o.z,86,28,25,'#666773');ring(o.x,y+93,o.z,35,'#d6bb83');for(const dx of [-24,0,24])bx(o.x+dx,y+73,o.z+21,8,8,7,'#d6bb83');continue;}bx(o.x,y+18,o.z,52,36,46,'#55535e');if(o.kind==='book')bx(o.x,y+39,o.z,52,5,36,'#c7b28d');else if(o.kind==='armor'){bx(o.x,y+65,o.z,48,52,24,'#8b8992');for(const sign of [-1,1])bx(o.x+sign*30,y+82,o.z,20,18,32,'#9c9396');bx(o.x,y+62,o.z+14,12,30,3,'#5d343d');}else if(o.kind==='helmet'){bx(o.x,y+61,o.z,36,32,32,'#9b9297');bx(o.x,y+58,o.z+18,27,7,3,'#292d36');}else if(o.kind==='wheel'){ring(o.x,y+54,o.z,38,'#b59c79');bx(o.x,y+57,o.z,74,8,8,'#b59c79');}else{bx(o.x,y+55,o.z,28,36,28,'#b19c73');}}
- if(!f(s,'entry')){for(let i=-7;i<=7;i++)bx(i*62,540,-5230,15,520,20,'#73717d');for(const y of [340,520,710])bx(0,y,-5230,955,18,30,'#8d8089');}
+ if(!f(s,'entry')&&!root.BFCampaignCraft?.has('castle-portcullis')){for(let i=-7;i<=7;i++)bx(i*62,540,-5230,15,520,20,'#73717d');for(const y of [340,520,710])bx(0,y,-5230,955,18,30,'#8d8089');}
  if(f(s,'entry')){for(const x of [-430,430])bx(x,450,-5230,36,340,45,'#79737d');}
 }
 const api={paths,build,status,quest,available,visualKey,ready:flagReady,sync,tick,shards,draw};root.BFCastleGates=api;if(typeof module!=='undefined')module.exports=api;

@@ -72,9 +72,9 @@ function draw({G,state:s,bx},t){
  const open=f(s,'hull.open'),clock=G.shore.remote?.clock??G.shore.clock,phase=Math.sin(clock*HULL.period),ready=Math.abs(phase)<=HULL.window;
  const elapsed=Math.max(0,clock-G.shore.openAt),impact=open?Math.min(1,elapsed/.55):0;
  const loadX=open?HULL.x:HULL.x+phase*150,loadY=open?397-impact*65:397+Math.abs(phase)*19;
- for(const x of [-1630,-1230]){bx(x,405,-2240,24,205,27,'#664830');bx(x,312,-2240,48,20,54,'#3c4647');bx(x,512,-2240,65,17,60,'#b58b5a');}
+ if(!root.BFCampaignCraft?.has('salvage-crane')){for(const x of [-1630,-1230]){bx(x,405,-2240,24,205,27,'#664830');bx(x,312,-2240,48,20,54,'#3c4647');bx(x,512,-2240,65,17,60,'#b58b5a');}
  bx(HULL.x,516,-2240,445,23,46,'#6a4b32');bx(HULL.x,531,-2240,455,8,48,'#c79b5d');
- for(const x of [-1620,-1240])bx(x,489,-2240,11,55,13,'#39494c');
+ for(const x of [-1620,-1240])bx(x,489,-2240,11,55,13,'#39494c');}
  // The hanging load and its chain are not footing. Cut away when they hide the hero;
  // it stays fully visible from the release handle, where timing matters.
  const cargoBlocksView=root.BFCameraOcclusion?.blocks(G,{x:(HULL.x+loadX)/2,z:-2240,w:Math.abs(loadX-HULL.x)+90,d:85},loadY-48,523,root.__BF_META?.().camMode||'far',24);

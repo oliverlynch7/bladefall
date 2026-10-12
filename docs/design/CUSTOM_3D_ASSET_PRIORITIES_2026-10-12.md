@@ -58,3 +58,8 @@ Capture each at the normal gameplay camera beside its old version before spreadi
 - Models improve presentation; they do not by themselves solve pacing, empty travel or repetitive quest/puzzle decisions.
 
 Enemy/boss bodies, player equipment and the hub also matter, but several have already received large passes. Revisit specific remaining weak models after reviewing them in motion, rather than automatically restarting the entire roster before addressing the environment.
+
+
+## [Codex | 2026-10-12] Full campaign asset shortlist — approved for implementation
+
+Exact user request: “I’d like you to improve every single asset you listed in every single level ! Do it now”. This explicitly approves all nine model families and all eight regional landmark groups in docs/design/CUSTOM_3D_ASSET_PRIORITIES_2026-10-12.md. The earlier recommended comparison batch is no longer a scope limit. Apply appropriate families throughout the existing campaign, preserving layouts, collision, parkour, stateful machinery, story, saves, co-op and the custom-SFX hold. Reuse the established higher-quality trees. Continue the brighter colorful stylized fantasy direction. Implementation and evidence are tracked in docs/design/CAMPAIGN_CRAFT_IMPLEMENTATION_2026-10-12.md; do not equate automatic coverage checks with human aesthetic acceptance.

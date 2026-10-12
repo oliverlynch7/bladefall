@@ -23,7 +23,7 @@ const wall=(x,z,y,w,d,h,tag)=>G.walls.push({x,z,y0:y,w,d,h,c:'#bdb49b',courtWall
 wall(0,-1650,200,740,55,260,'access');wall(-1500,-4340,440,520,45,210,'display');wall(0,-5060,400,750,60,290,'exit');
 wall(-1710,-3930,440,76,76,125,'displayLamp');
 const part=(n,x,y,z,w,h,d=w,c='#d8d1b8')=>G.deco.push({portalPart:n,x,y0:y,z,w,h,d,c});
-const shelf=(x,z,y,w=180,d=55)=>{wall(x,z,y,w,d,155);part('stone',x,y+80,z,w,160,d,'#9a8969');for(let row=0;row<3;row++){part('cap',x,y+22+row*50,z,w+8,8,d+9,'#cbb88b');for(let b=0;b<6;b++)part('stone',x-w*.4+b*w*.16,y+42+row*50,z+4,w*.12,29,d+4,['#777e7b','#a18c67','#776b7d'][b%3]);}};
+const shelf=(x,z,y,w=180,d=55)=>{const ds=G.deco.length,ws=G.walls.length;wall(x,z,y,w,d,155);part('stone',x,y+80,z,w,160,d,'#9a8969');for(let row=0;row<3;row++){part('cap',x,y+22+row*50,z,w+8,8,d+9,'#cbb88b');for(let b=0;b<6;b++)part('stone',x-w*.4+b*w*.16,y+42+row*50,z+4,w*.12,29,d+4,['#777e7b','#a18c67','#776b7d'][b%3]);}for(const p of G.deco.slice(ds))p.craftHidden=true;for(const p of G.walls.slice(ws))p.craftOwned=true;G.deco.push({kind:'craft',model:'bookshelf',x,z,y0:y,w,h:160,d});};
 // Books and desks are solid; the central reading aisle stays clear.
 for(const side of [-1,1])for(const z of [-2520,-2780,-3040]){shelf(side*420,z,300);part('stone',side*270,337,z,100,65,90,'#b9a780');part('cap',side*270,374,z,125,10,110,'#ddd1b1');}
 for(const z of [-750,-1050,-1350])for(const side of [-1,1]){part('pillar',side*390,120,z,45,320,45);wall(side*390,z,120,40,40,320);part('cap',side*390,445,z,70,15,70,'#c9a65c');}
@@ -63,6 +63,7 @@ BFDragonRescue.draw({G,state:s,bx,ring},t);const a=G.library.remote||status(G);i
 for(let i=0;i<3;i++)if(f(s,'vow.'+i))ring(1000+i*300,493,-4740,35,'#cfe1a4');
 // Folded frames and their lower catch row show the route before either crank is turned.
 for(let i=0;i<shelfJumps.length;i++){const [x,z,y]=shelfJumps[i],raised=i<2?(f(s,'shelf.stage1')||f(s,'shelf.open')):f(s,'shelf.open');
+ if(root.BFCampaignCraft?.has('hinged-leaf-'+i))continue;
  bx(x,280,z,180,8,160,'#b7a579');for(const side of [-1,1])bx(x+side*78,294,z,9,28,154,'#d6bb79');
  if(!raised){bx(x,312,z,110,57,22,'#847d85');bx(x,342,z,115,7,28,'#d8ba73');continue;}
  bx(x,y-29,z,108,55,92,'#857660');bx(x,y+5,z,112,9,96,'#e9d7a3');

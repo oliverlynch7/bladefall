@@ -1290,3 +1290,15 @@ Continue Oliver's approved campaign quest-variety work: the exposed north cage b
 ## [Codex | 2026-10-11] Lost Canyon north crossing — locally verified
 
 Version 2.174.0 makes the exposed north release a 20-second, two-prisoner escort with visible health, two ambush waves, live enemy targeting, a walkable evacuation lane, retreat/retry on failure and a quiet-route advantage for cutting the alarm cable first. The south cage stays a quick sheltered release. `lc.north.open` separates the open cage from the existing durable `lc.north` safe-at-shelter completion. Old completed and partial saves reload; all five Hollow Pass shards, Ruth's reward, alarm patrols, full canyon route and two-client story state remain. The prisoners use visually distinct civilian models. Static and muted browser QA passed. Human pacing, difficulty and art remain unverified; campaign-wide quality remains PARTIAL. No custom SFX work. See docs/design/LOST_CANYON_NORTH_CROSSING_2026-10-11.md.
+
+## [Codex | 2026-10-11] Castle Gates broken drain crossing — planned
+
+Continue Oliver's approved puzzle-variety and purposeful-parkour direction without replacing the Castle Gates map or altering its disguise/assault choice. The two adjacent bridge catches and wheel currently repeat one button interaction. Replace the middle drain floor with an offset masonry traversal to one far-bank brake, retain `cg.catch.west` as the durable release flag, and make the existing wheel lower a visibly moving bridge. Keep `cg.catch.east` loadable as a retired partial-save flag; keep `cg.bridge.open`, all rewards and story outcomes. See docs/design/CASTLE_GATES_DRAIN_CROSSING_2026-10-11.md. This is a scoped implementation, awaiting browser and human playtesting; no custom SFX work.
+
+## [Codex | 2026-10-11] Castle Gates route correction during browser QA
+
+The first normal-camera check showed the far drain bank still led directly toward the court, making the bridge requirement artificial. Remove that outlet. The brake instead lowers a return walkway to the near-bank wheel, and the lowered bridge becomes the actual court crossing. This refines the planned scoped change in CASTLE_GATES_DRAIN_CROSSING_2026-10-11.md before release; the infiltration and assault choice remains unchanged.
+
+## [Codex | 2026-10-11] Castle Gates drain crossing — locally verified
+
+Version 2.175.0 replaces the two adjacent bridge catches with offset, collision-backed masonry jumps to one brake. The brake creates a walkable return route to the near-bank wheel; that wheel lowers the only walkable bridge into the court. A miss incurs the existing fall toll and returns to solid ground. `cg.catch.west`, `cg.bridge.open`, reward IDs, Roland's infiltration/assault branches, and legacy `cg.catch.east` save data remain. Static and muted-browser movement, E-key, route, combat, disguise, checkpoint, old-state, navigation and two-client checks passed, with raised/lowered normal-camera inspection. Oliver's human playtest still decides feel and final art. Campaign-wide quality remains partial. No custom SFX work. See docs/design/CASTLE_GATES_DRAIN_CROSSING_2026-10-11.md.

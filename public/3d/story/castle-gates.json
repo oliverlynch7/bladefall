@@ -177,7 +177,7 @@
               "id": "cg.bridge",
               "region": "castle",
               "title": "The supply crossing",
-              "text": "The bridge has two catches in the drain below the bell post. Release both, then turn the wheel on the north bank. Both catches stay released; no second person is needed."
+              "text": "The drain floor is broken below the bell post. Follow the offset stone ledges to the brake. It lowers a return walkway. The bridge wheel is beside the bell post."
             }
           ],
           "when": []
@@ -215,7 +215,7 @@
       }
     },
     "cg.roland.bridge": {
-      "text": "Two catches below the bell post. One wheel across the bridge.",
+      "text": "Cross the broken drain below the bell post. The brake lowers a walkway back. Then turn the bridge wheel by the bell post.",
       "choices": [
         {
           "id": "go",
@@ -889,8 +889,8 @@
           "type": "note",
           "id": "cg.catch.west",
           "region": "castle",
-          "title": "West catch released",
-          "text": "The west catch is released and stays open. Release the other catch, then use the wheel on the north bank."
+          "title": "Bridge brake released",
+          "text": "The brake lowered a return walkway. Cross it and turn the wheel beside the bell post."
         }
       ]
     },
@@ -907,8 +907,8 @@
           "type": "note",
           "id": "cg.catch.east",
           "region": "castle",
-          "title": "East catch released",
-          "text": "The east catch is released and stays open. Release the other catch, then use the wheel on the north bank."
+          "title": "Old bridge catch",
+          "text": "This old catch is free. The far-end brake lowers the return walkway; the bridge wheel is beside the bell post."
         }
       ]
     },
@@ -917,10 +917,6 @@
       "when": [
         {
           "flag": "cg.catch.west",
-          "is": true
-        },
-        {
-          "flag": "cg.catch.east",
           "is": true
         }
       ],
@@ -935,7 +931,7 @@
           "id": "cg.bridge",
           "region": "castle",
           "title": "Crossing lowered",
-          "text": "Both catches are free. The bridge is down. The gate court is ahead. Prepare with Roland and read the orders, or use the challenge bell to fight through."
+          "text": "The brake is free and the bridge is down. The gate court is ahead. Prepare with Roland and read the orders, or use the challenge bell to fight through."
         }
       ]
     },

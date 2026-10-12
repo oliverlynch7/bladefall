@@ -10,7 +10,7 @@ async page=>{await page.goto('http://127.0.0.1:4331/3d/?mute=1');await page.wait
 [5,1,['tc.brake','tc.lift','tc.shackle']],
 [6,0,['pc.met','pc.clamp','pc.court','pc.west','pc.light.open']],
 [6,1,['sl.access','sl.orders']],
-[7,0,['cg.met','cg.catch.west','cg.catch.east','cg.bridge.open','cg.disguise','cg.orders','cg.bells']],
+[7,0,['cg.met','cg.catch.west','cg.bridge.open','cg.disguise','cg.orders','cg.bells']],
 [7,1,['la.lower','la.upper']]];
 for(const [zone,area,flags]of rows){b.openHub();b.enterZone(zone);b.G.area=area;b.loadArea();for(const flag of flags){b.G.storyState.flags[flag]=true;const t=BFPartyNavigation.target(b.G);if(!t)throw Error(zone+':'+area+' missing target after '+flag);checked++;}}
 b.openHub();b.enterZone(5);const s=b.G.storyState;s.flags['sc.met']=true;s.items['sc.rudder']=1;s.items['sc.sail']=1;s.items['sc.rope']=1;const boat=BFPartyNavigation.target(b.G);if(boat?.key!=='sc.fit')throw Error('collected boat parts should point to the fitting workbench');checked++;

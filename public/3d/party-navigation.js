@@ -28,7 +28,7 @@ function target(g){
  case '5:1':t=first([['tc.shackle','tc.shackle'],['tc.approach','tc.approach']]);break;
  case '6:0':t=!f['pc.met']?npc('grace'):!f['pc.clamp']?obj('pc.clamp'):!f['pc.court']?obj('pc.water'):!f['pc.west']&&!f['pc.east']?nearest(['west','east'].flatMap(k=>['lower','upper'].map(route=>obj('pc.'+k+'.'+route)))):first([['pc.light.open','pc.mirror.note'],['pc.ready','pc.enter']]);break;
  case '6:1':t=first([['sl.access','@hugh'],['sl.orders','sl.orders'],['sl.ready','sl.release']]);break;
- case '7:0':t=f['cg.entry']?exit():f['cg.alarm']?obj('cg.release'):!f['cg.met']?npc('roland'):!f['cg.bridge.open']?nearest(['catch.west','catch.east','bridge'].filter(k=>!f['cg.'+k]).map(k=>obj('cg.'+k))):!f['cg.disguise']?nearest(['coat','helmet','papers'].filter(k=>!(i['cg.'+k]>0)).map(k=>obj('cg.'+k)))||npc('roland'):first([['cg.orders','cg.orders'],['cg.bells','cg.bells']])||npc('cross');if(f['cg.disguise']&&f['cg.orders']&&f['cg.bells']&&!f['cg.entry']&&!f['cg.alarm'])t=npc('cross');break;
+ case '7:0':t=f['cg.entry']?exit():f['cg.alarm']?obj('cg.release'):!f['cg.met']?npc('roland'):!f['cg.bridge.open']?obj(f['cg.catch.west']?'cg.bridge':'cg.catch.west'):!f['cg.disguise']?nearest(['coat','helmet','papers'].filter(k=>!(i['cg.'+k]>0)).map(k=>obj('cg.'+k)))||npc('roland'):first([['cg.orders','cg.orders'],['cg.bells','cg.bells']])||npc('cross');if(f['cg.disguise']&&f['cg.orders']&&f['cg.bells']&&!f['cg.entry']&&!f['cg.alarm'])t=npc('cross');break;
  case '7:1':t=first([['la.lower','la.lower'],['la.upper','la.upper'],['la.summit','la.summit']]);break;
  }
  // A read clue is no longer the task. Point at the whole control bank, never

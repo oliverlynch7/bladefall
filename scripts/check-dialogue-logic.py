@@ -7,7 +7,17 @@ for p in Path('public/3d/story').glob('*.json'):
  for k,n in new.get('nodes',{}).items():
   a=old['nodes'][k];strip=lambda v:{x:y for x,y in v.items() if x not in ['text','voice','choices']}
   assert strip(a)==strip(n),(p,k,'node logic')
-  clean=lambda rows:[{k:v for k,v in row.items() if k not in ['text','optional']} for row in rows]
+  # A note's prose is copy, even when it sits inside a choice effect. Keep
+  # its type, ID, region, gates and every non-prose effect field in the check.
+  def clean(rows):
+   result=[]
+   for row in rows:
+    item={k:v for k,v in row.items() if k not in ['text','optional']}
+    if 'effects' in item:
+     item['effects']=[{k:v for k,v in effect.items() if k not in ['text','title']}
+                      for effect in item['effects']]
+    result.append(item)
+   return result
   assert clean(a.get('choices',[]))==clean(n.get('choices',[])),(p,k,'choice logic')
   checked+=1
 print('Preserved node/choice IDs, gates, effects and transitions:',checked)

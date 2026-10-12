@@ -4,7 +4,7 @@ const puzzles=[
  ['woods.signal','woods.signal'],['woods.rescue','woods.rescue'],['lc.rail','lc.rail'],['lc.water','lc.water'],['lc.wagon','lc.wagon'],
  ['rk.wheel','rk.cells'],['rk.key','rk.cells'],['kd.hidden','kd.marks'],['gf.pressure','gf.pressure'],['gf.passage','gf.passage'],
  ['sc.hull','sc.hull'],['sc.code','sc.code'],['sc.memorial','sc.record'],['tc.wind','tc.wind'],['tc.cave','tc.cave'],['tc.shackle','tc.hydra'],
- ['sl.vow.0','sl.stand.0'],['sl.vow.1','sl.stand.1'],['sl.vow.2','sl.stand.2'],['cg.catch.east','cg.catch.east'],
+ ['sl.vow.0','sl.stand.0'],['sl.vow.1','sl.stand.1'],['sl.vow.2','sl.stand.2'],
  ['cg.bridge','cg.catch.west'],['cg.catch','cg.catch.west'],['la.lower','la.notice'],['la.upper','la.notice'],['dr.winch','dr.beam'],['dr.brace','dr.frame'],
  ['home.bell','home.bells'],['home.grain','home.grain'],['home.orchard','home.orchard'],['woods.track','woods.tracks'],
  ['hp.weight','hp.bridge'],['hp.brake','hp.bridge'],['hp.code','hp.code'],

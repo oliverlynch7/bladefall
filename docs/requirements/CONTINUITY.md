@@ -1333,3 +1333,7 @@ The lower RK-03 branch now has three phased physical presses, safe gaps and a br
 ## [Codex | 2026-10-11] Lost Canyon north prisoner crossing, v2.174.0
 
 The previously identical cage releases now diverge in actual play: south opens directly; north requires escorting two damageable prisoners across an exposed lane while clearing two pursuer waves. A live signal creates more pressure; cutting it first reduces each wave. A failed crossing resets at the open cage. The old `lc.north` completion flag is retained and prior completed saves stay complete. Host-owned crossing state and guest proximity work in co-op. Full Lost Canyon, alarm, shard, older-save and two-client checks passed in muted browser QA. The two prisoners use distinct civilian models after normal-camera inspection. Oliver's human playtest remains necessary; do not claim broader campaign polish complete. No custom SFX work.
+
+## [Codex | 2026-10-11] Castle Gates crossing, v2.175.0
+
+The Castle Gates required bridge approach is now a short broken-drain parkour route. One far brake lowers a return walkway; the nearby wheel lowers a real colliding bridge. The old east catch is inactive but loadable, while old completed bridge flags remain valid. Unit, real-input, miss/retry, legacy-state, full-route, combat, disguise, checkpoint, navigation and co-op browser checks passed. The broader campaign quality pass is still in progress, and Oliver has not yet playtested this change. See docs/design/CASTLE_GATES_DRAIN_CROSSING_2026-10-11.md. No custom SFX work.

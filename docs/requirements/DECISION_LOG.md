@@ -972,3 +972,7 @@ Continue the approved campaign puzzle-variety correction in v2.173.0. The option
 ## [Codex | 2026-10-11] Lost Canyon north rescue — scoped implementation
 
 Oliver's approved vulnerable-escort and quest-variety direction is now applied to the exposed north cage. Opening it starts a real defense crossing; `lc.north` remains the completed rescue flag only after both prisoners reach Ruth's shelter. Cutting the signal first reduces each ambush and prevents repeating alarm patrols. Falling prisoners retreat and permit retry. The south release, reward IDs, story beats and old saves remain. Browser verification passed; Oliver has not yet judged the experience in a playtest. No custom SFX work.
+
+## [Codex | 2026-10-11] Castle Gates required crossing — scoped implementation
+
+Under Oliver's approved campaign puzzle-variety and parkour direction, the bridge's repeated adjacent catches become a physical drain traversal, single far-bank brake, return walkway and near-bank lowering wheel. The far-bank route cannot enter the court until the bridge descends. `cg.catch.west` remains the durable brake state and `cg.catch.east` remains only as an old-save alias. The disguise, inspection, assault, rewards and class-rift paths are unchanged. Muted browser and static checks passed; this does not establish that a human finds the route enjoyable. No custom SFX work.

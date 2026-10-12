@@ -1,9 +1,9 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
 import {trackCampaignOccluder,updateCampaignOccluders,updateCampaignSun} from './campaign-scene.js?v=2182f';
 import * as T from './three.module.js';
-import {craftModel} from './campaign-craft-models.js?v=2186c';
+import {craftModel} from './campaign-craft-models.js?v=2187a';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
-import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2182f';
+import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {createBoat,createCrossingScene} from './ship3d.js';
 let active;

@@ -6,7 +6,7 @@
 <div class="bar"><label>Model <select id="model"></select></label><label>Region <select id="theme"></select></label><button id="wear" aria-pressed="false">Weathered cottage</button><button id="spin" aria-pressed="false">Turntable</button><button id="reset">Reset view</button></div>
 <script type="importmap">{"imports":{"three":"../../3d/three.module.js"}}</script><script type="module">
 import * as T from '../../3d/three.module.js';
-import {createCraftModel,CRAFT_MODEL_NAMES,CRAFT_PALETTES} from '../../3d/campaign-craft-models.js?v=2186c';
+import {createCraftModel,CRAFT_MODEL_NAMES,CRAFT_PALETTES} from '../../3d/campaign-craft-models.js?v=2187a';
 try{
 const scene=new T.Scene();scene.background=new T.Color('#344b54');const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;document.body.prepend(renderer.domElement);
 const camera=new T.PerspectiveCamera(38,innerWidth/innerHeight,1,5000),target=new T.Vector3(),points=new Map();let yaw=.55,pitch=.32,distance=400,baseDistance=400,actor=null,spin=false,damaged=false;

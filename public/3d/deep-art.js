@@ -1,8 +1,8 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {enrichCampaignKit} from './campaign-kit-detail.js?v=2182f';
 import {trackCampaignOccluder} from './campaign-scene.js?v=2182f';
-import {campaignMaterial} from './campaign-materials.js?v=2182f';
+import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Final campaign worlds: opaque, instanced architecture; animated hazards retain their renderer. */
 import * as THREE from './three.module.js';
@@ -29,7 +29,7 @@ function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(
 export function buildDeep(scene,w){
   const abyss=w.zone==='abyss',regal=['palace','castle'].includes(w.zone),cfg={...profiles[w.zone],...w.portalProfile},kit=kits.get(w.zone),root=new THREE.Group();root.name=w.ironScene?'Emberdeep · Iron Halls':cfg.name;
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),fade=[],glows=[],bodies=new Set();let floors=0;
-  const material=campaignMaterial(regal?'masonry':'basalt',{vertexColors:true,emissive:cfg.emissive}),capMaterial=campaignMaterial(w.zone==='palace'?'marble':w.zone==='ember'?'metal':'stone',{vertexColors:true,emissive:cfg.emissive}),trimMaterial=campaignMaterial(w.zone==='palace'?'marble':'metal',{vertexColors:true}),glowMaterial=new THREE.MeshBasicMaterial({vertexColors:true});
+  const material=campaignMaterial(regal?'masonry':'basalt',{vertexColors:true,emissive:cfg.emissive}),capMaterial=campaignMaterial(w.zone==='palace'?'marble':w.zone==='ember'?'metal':w.zone==='castle'?'flagstone':'stone',{vertexColors:true,emissive:cfg.emissive}),trimMaterial=campaignMaterial(w.zone==='palace'?'marble':'metal',{vertexColors:true}),glowMaterial=new THREE.MeshBasicMaterial({vertexColors:true});
   const palette=cfg.palette,plainMaterial=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86}),woodMaterial=campaignMaterial('wood',{vertexColors:true}),clothMaterial=campaignMaterial('cloth',{vertexColors:true}),metalMaterial=campaignMaterial('metal',{vertexColors:true});
   const authoredWood=new Set(['#9a8969','#cbb88b','#b9a780','#ddd1b1','#68533c','#80704d','#5f5142']),authoredBooks=new Set(['#777e7b','#a18c67','#776b7d']),authoredGreen=new Set(['#637b55','#79965d','#627353','#6e8b59','#7e9b69','#66855e','#7e976a','#5d7652']);
   function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,obstacle=null){const cell=Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),finish=authoredWood.has(color)?'wood':authoredBooks.has(color)?'cloth':authoredGreen.has(color)?'plain':null,key=cell+'|'+name+'|'+finish;if(!bins.has(key))bins.set(key,{cell,name,finish,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,obstacle});}

@@ -1,7 +1,7 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {loadBriarTrees,briarTreesReady,campaignTreesReady,buildCampaignTrees} from './briar-trees.js?v=2182f';
-import {campaignMaterial} from './campaign-materials.js?v=2182f';
+import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
@@ -85,7 +85,7 @@ export function buildOutskirts(scene,w){
   const soil=woods?'#657246':boss?'#7c8150':'#80984f';let floors=0,roads=0;
   const done=[],surfaces=new Map();
   for(const s of segs.flatMap(s=>claimSurface(surfaces,s))){
-    const tile=s.meadow&&!s.path?72:36;
+    const tile=s.geography?180:s.meadow&&!s.path?72:36;
     const nx=Math.ceil(s.w/tile),nz=Math.ceil(s.d/tile),dx=s.w/nx,dz=s.d/nz;
     for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){
       const x=s.x-s.w/2+(ix+.5)*dx,z=s.z-s.d/2+(iz+.5)*dz;

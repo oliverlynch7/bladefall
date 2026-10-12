@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {craftModel,createCraftModel,craftCacheStats} from './campaign-craft-models.js?v=2186c';
+import {craftModel,createCraftModel,craftCacheStats} from './campaign-craft-models.js?v=2187a';
 import {trackCampaignOccluder,updateCampaignOccluders} from './campaign-scene.js?v=2182f';
 let active=null;
 const mappedKinds=new Set(['craft','shoreWreck','shoreShelter','shoreRock','thunderArch','iceResearch','forgeRack','forgeBench','forgeCrates','forgeLamp','forgePipe','forgeFrame']);

@@ -1,0 +1,10 @@
+async root=>{
+ const ctx=await root.context().browser().newContext(),page=await ctx.newPage(),rows=[];
+ try{await page.goto('http://127.0.0.1:4345/3d/?mute=1');await page.waitForFunction(()=>window.__BF3&&HERO3D?.ready);await page.evaluate(()=>__BF3.briarReady);
+ for(const [zone,area,names]of [[2,0,['arrival','arrow','workshop']],[6,0,['entry','water']],[6,1,['main','records']]]){
+ await page.evaluate(({zone,area})=>{const b=__BF3;b.loadMode('rl');Object.assign(b.meta,{classId:'warrior',run:null,bank:null,introSeen:true,hubTutDone:true,tutOff:true,dialogueTTS:false,autoAttack:false,petActive:null});b.openHub();b.enterZone(zone);b.G.area=area;b.loadArea();const g=b.G;g.enemies.forEach(e=>{e.dead=true;e.hp=0;});Object.assign(g.storyState.flags,{'rk.gate':true,'rk.workshop':true,'sl.access':true,'sl.ready':true});b.briarSync();},{zone,area});await page.waitForFunction(()=>!BF_LOADING.active);
+ rows.push(await page.evaluate(({zone,area,names})=>{const b=__BF3,g=b.G,p=g.p,paths=zone===2?BFBrokenWalls.paths:area===0?BFPalaceCourtyard.paths:BFSkyLibrary.paths,checks=[];
+ for(const name of names){const path=paths[name];Object.assign(p,{x:path[0][0],z:path[0][1],y:path[0][2],vy:0,vx:0,vz:0,onGround:true,invuln:99999,recoverT:0,dead:false});let result={name,ok:true,waypoints:0};
+ for(const q of path.slice(1)){for(let n=0;n<2400;n++){const dx=q[0]-p.x,dz=q[1]-p.z,d=Math.hypot(dx,dz);if(d<12&&Math.abs(p.y-q[2])<60)break;b.input.jx=dx/Math.max(1,d);b.input.jz=dz/Math.max(1,d);b.update(.016);}b.input.jx=b.input.jz=0;if(Math.hypot(q[0]-p.x,q[1]-p.z)>22||Math.abs(p.y-q[2])>60){result={name,ok:false,q,at:[p.x,p.z,p.y],mode:b.mode,loading:BF_LOADING.active};break;}result.waypoints++;}checks.push(result);}return {zone,area,checks};},{zone,area,names}));
+ }if(rows.some(r=>r.checks.some(c=>!c.ok)))throw Error(JSON.stringify(rows));return rows;}finally{await ctx.close();}
+}

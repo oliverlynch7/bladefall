@@ -1,4 +1,4 @@
-import {buildDeep} from './deep-art.js?v=2186c';
+import {buildDeep} from './deep-art.js?v=2187a';
 import * as T from './three.module.js';
 let orb=null;
 export function buildMarbleGuardian(scene,w){const art=buildDeep(scene,{...w,portalProfile:{name:'Sunspire · Guardian Hall',fog:'#a8c7d9',sky:[.44,.65,.83],sun:'#fff0cf',body:'#b4ad9a',lamp:'#f2d49b',hazard:['#a1b5c1','#c7d4dc'],sunGlow:[.18,.15,.10]}});art.counts.name='Guardian Hall';

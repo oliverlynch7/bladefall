@@ -1,6 +1,6 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
-import {campaignMaterial} from './campaign-materials.js?v=2182f';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
+import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Ruined Keep: authored fortress scenery fitted to the existing game geometry. */
 import * as THREE from './three.module.js';
@@ -19,6 +19,7 @@ export function loadKeep(){
   },undefined,e=>{failed=true;console.warn('[keep-art] Original scenery fallback',e);resolve()}));return pending;
 }
 const material=campaignMaterial('masonry',{vertexColors:true});
+const floorMaterial=campaignMaterial('flagstone',{vertexColors:true});
 const woodMaterial=campaignMaterial('wood',{vertexColors:true}),metalMaterial=campaignMaterial('metal',{vertexColors:true}),rockMaterial=campaignMaterial('stone',{vertexColors:true});
 const bannerMaterial=campaignMaterial('cloth',{vertexColors:true,side:THREE.DoubleSide});
 function buildLiftWinch(root){
@@ -85,8 +86,8 @@ export function buildKeep(scene,w){
   function cap(o,top,wood){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];
     for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
-    for(const p of pieces){const nx=Math.ceil((p.b-p.a)/52),nz=Math.ceil((p.d-p.c)/44),dx=(p.b-p.a)/nx,dz=(p.d-p.c)/nz;
-      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*dx,z=p.c+(iz+.5)*dz;add('timber',x,top+.6,z,Math.max(.1,dx-.65),1.4,Math.max(.1,dz-.65),wood?'#846c48':palette[Math.floor(hash(x,z)*5)],0,wood?'wood':'stone');floors++;}laid.push(p);
+    for(const p of pieces){const nx=Math.ceil((p.b-p.a)/(w.geography?130:52)),nz=Math.ceil((p.d-p.c)/(w.geography?120:44)),dx=(p.b-p.a)/nx,dz=(p.d-p.c)/nz;
+      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*dx,z=p.c+(iz+.5)*dz;add('timber',x,top+.6,z,Math.max(.1,dx-.65),1.4,Math.max(.1,dz-.65),wood?'#846c48':palette[Math.floor(hash(x,z)*5)],0,wood?'wood':'flagstone');floors++;}laid.push(p);
     }
   }
   const surfaces=new Map();
@@ -98,7 +99,8 @@ export function buildKeep(scene,w){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
     if(o.water){add('stone',o.x,-5,o.z,ww,10,dd,'#263f42');for(let i=0;i<Math.floor(dd/110);i++)block(o.x,.8,o.z-dd/2+i*110,ww*.7,.6,2,'#3d5d60');return;}
     add(wood?'timber':'stone',o.x,base+(h-.4)/2,o.z,Math.max(1,ww-.6),Math.max(.5,h-.4),Math.max(1,dd-.6),wood?'#493a28':'#444b45');cap({...o,w:ww,d:dd},top,wood);
-    if(h<35||!facade)return;const rows=Math.min(10,Math.ceil(h/30)),rh=h/rows;
+    if(h<35||!facade)return;
+    if((o.geography||o.geographyFoundation)&&!wood){block(o.x,top-2,o.z,ww,4,dd,'#807967','stone');return;}const rows=Math.min(10,Math.ceil(h/30)),rh=h/rows;
     for(let row=0;row<rows;row++)for(const side of [-1,1])for(const axis of [0,1]){
       const len=axis?dd:ww,cols=Math.max(1,Math.ceil(len/55)),bw=len/cols;
       for(let k=0;k<cols;k++){const u=-len/2+(k+.5)*bw;block(o.x+(axis?side*(ww/2-.7):u),base+(row+.5)*rh,o.z+(axis?u:side*(dd/2-.7)),axis?1.8:bw-1.4,rh-1.2,axis?bw-1.4:1.8,wood?'#635037':palette[Math.floor(hash(k+row*7+o.x,side+o.z)*5)],wood?'wood':'masonry');}
@@ -199,7 +201,7 @@ export function buildKeep(scene,w){
   }
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,finish,list} of bins.values()){
-    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='wood'?woodMaterial:finish==='stone'?rockMaterial:finish==='masonry'?material:name==='banner'?bannerMaterial:['timber','crate'].includes(name)?woodMaterial:['grille','brazier'].includes(name)?metalMaterial:name==='rubble'?rockMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
+    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='flagstone'?floorMaterial:finish==='wood'?woodMaterial:finish==='stone'?rockMaterial:finish==='masonry'?material:name==='banner'?bannerMaterial:['timber','crate'].includes(name)?woodMaterial:['grille','brazier'].includes(name)?metalMaterial:name==='rubble'?rockMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
     for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.source){if(!occluders.has(d.source))occluders.set(d.source,{o:d.source,parts:[],hidden:false});occluders.get(d.source).parts.push({mesh:m,index:i,matrix:dummy.matrix.clone()});}}
     m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='banner'&&name!=='timber';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }

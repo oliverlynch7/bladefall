@@ -1,6 +1,6 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2186c';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2186c';
-import {campaignMaterial} from './campaign-materials.js?v=2182f';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
+import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Hollow Pass: warm sandstone canyon scenery over the authored collision surfaces. */
 import * as THREE from './three.module.js';

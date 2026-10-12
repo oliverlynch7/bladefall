@@ -1,6 +1,6 @@
 import * as T from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
-import {beveledBoxGeometry,campaignMaterial} from './campaign-materials.js?v=2182f';
+import {beveledBoxGeometry,campaignMaterial} from './campaign-materials.js?v=2187a';
 
 // Original reusable environment meshes. Units are centimetre-like game units;
 // origin is the centre of the footprint at floor height unless documented.
@@ -50,24 +50,27 @@ function construct(name,theme,o){
  if(['cliff','shelf','bank','rock','ice'].includes(name)){
   // Rings retain the full rectangle at the walkable top. Lower layers are
   // inset, not bulged into neighbouring corridors or jumping clearances.
-  const n=16,layers=name==='rock'?4:6,vertices=[],indices=[];
+  const n=16,layers=name==='rock'?4:6,iceHeight=(name==='ice'&&!o.fullHeight) ? .45 : 1,vertices=[],indices=[];
   for(let j=0;j<=layers;j++)for(let i=0;i<n;i++){
    const a=i/n*Math.PI*2,dx=Math.cos(a),dz=Math.sin(a),edge=1/Math.max(Math.abs(dx),Math.abs(dz)),top=j===layers;
    const s=name==='bank'?Math.max(.06,Math.pow(1-j/layers,.6))*(.94+.06*Math.sin(i*1.7)**2):name==='rock'?.72+.15*Math.sin(j/layers*Math.PI)+.06*Math.sin(i*1.7+j*.85)**2:top?1:.78+.15*Math.sin(i*1.7+j*.85)**2;
-   vertices.push(dx*edge*W/2*s,j/layers*H*(name==='ice'?.45:1),dz*edge*D/2*s);
+   vertices.push(dx*edge*W/2*s,j/layers*H*iceHeight,dz*edge*D/2*s);
   }
   for(let j=0;j<layers;j++)for(let i=0;i<n;i++){const a=j*n+i,bb=j*n+(i+1)%n,c=a+n,d=bb+n;indices.push(a,c,bb,bb,c,d);}
-  vertices.push(0,H*(name==='ice'?.45:1),0);const cap=vertices.length/3-1;for(let i=0;i<n;i++)indices.push(cap,layers*n+(i+1)%n,layers*n+i);
+  vertices.push(0,H*iceHeight,0);const cap=vertices.length/3-1;for(let i=0;i<n;i++)indices.push(cap,layers*n+(i+1)%n,layers*n+i);
   let g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();const skin=put(g,name==='ice'?'#8bbacb':'stone',0,0,0,0,0,0,name==='ice'?'ice':'stone'),colors=skin.attributes.color,positions=skin.attributes.position;
   // Color the actual strata, rather than pushing unrelated rings through the rock.
-  for(let i=0;i<positions.count;i+=3){const y=(positions.getY(i)+positions.getY(i+1)+positions.getY(i+2))/3,band=Math.min(layers-1,Math.floor(y/(H*(name==='ice'?.45:1))*layers)),shade=[.9,1.02,.95,1.05,.91,1][band%6];for(let v=0;v<3;v++)colors.setXYZ(i+v,colors.getX(i+v)*shade,colors.getY(i+v)*shade,colors.getZ(i+v)*shade);}
-  if(name==='ice')for(let i=0;i<6;i++){const a=i*2.4,r=W*(.06+.065*(i%3)),h=H*(i===0?.68:.35+.045*(i%4)),g=new T.ConeGeometry(W*.11,h,5);put(g,i%2?'#bfe9ed':'#87bdce',Math.cos(a)*r,H*.32+h*.5,Math.sin(a)*D*.23,0,.4*i,.05*(i-2),'ice');}
+  for(let i=0;i<positions.count;i+=3){const y=(positions.getY(i)+positions.getY(i+1)+positions.getY(i+2))/3,band=Math.min(layers-1,Math.floor(y/(H*iceHeight)*layers)),shade=[.9,1.02,.95,1.05,.91,1][band%6];for(let v=0;v<3;v++)colors.setXYZ(i+v,colors.getX(i+v)*shade,colors.getY(i+v)*shade,colors.getZ(i+v)*shade);}
+  if(name==='ice'&&!o.fullHeight)for(let i=0;i<6;i++){const a=i*2.4,r=W*(.06+.065*(i%3)),h=H*(i===0?.68:.35+.045*(i%4)),g=new T.ConeGeometry(W*.11,h,5);put(g,i%2?'#bfe9ed':'#87bdce',Math.cos(a)*r,H*.32+h*.5,Math.sin(a)*D*.23,0,.4*i,.05*(i-2),'ice');}
  }else if(name==='wall'){
   box(0,H/2,0,W,H,D,'stone');
   const rows=Math.min(9,Math.max(2,Math.ceil(H/32))),cols=Math.min(9,Math.max(2,Math.ceil(W/50))),cw=W/cols,rh=H/rows;
-  for(const side of [-1,1])for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+  if(o.surfaceDetail!=='painted')for(const side of [-1,1])for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
    const x=-W/2+(i+.5)*cw;box(x,j*rh+rh/2,side*(D/2-.4),cw-2,rh-2,2.8,(i+j)%5===0?'light':'stone');
   }
+  // Large enclosing walls use the shared mortar/stone relief instead of
+  // hundreds of tiny blocks. Keep real base courses and coping at the edges.
+  if(o.surfaceDetail==='painted')box(0,10,0,W+1,20,D+2,'stone');
   box(0,H-4,0,W+1,8,D+1,'light');
  }else if(name==='arch'||name==='cave-mouth'||name==='gatehouse'){
   const gate=name==='gatehouse',ice=name==='cave-mouth'&&theme==='frost',rise=H*.32,spring=H-rise,t=W*.09;

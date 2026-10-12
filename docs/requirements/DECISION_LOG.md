@@ -1044,3 +1044,28 @@ Exact user request: “I’d like you to improve every single asset you listed i
 All nine approved environmental model families now have appropriate upgrades across all eight campaign regions. Added a 59-model reusable procedural library, fitted kit replacements and 678 authored components across 24 campaign scene snapshots, including cottages/mill/barn, cliffs/caves, bridges/cages, rescue lift, laboratory, furnace/presses, wrecks/crane/ballista, palace fountain/mirrors/library, and castle gate/stair/lift/throne surroundings. Retained good mature trees, working ship, and existing detailed machinery where appropriate. Four standalone library variants (door, scaffold, perch, shelf) are not blindly inserted; their campaign roles use integrated cottage detail and fitted improvements to existing route structures.
 
 Geometry is cached, merged, instanced and distance culled. Moving parts follow the existing gameplay state; story, loot, saves and route collisions remain intact. Title > Dev previews > Campaign environment opens the model workshop. Verified 24 campaign scenes, 59 workshop models, 12 mechanism assertions, unchanged imported-kit bounds, 238 reachable interactions at the appropriate puzzle state, prop footing, 24 checkpoints, pre-change save, seven local co-op clue/pickup checks, and 184 coastal waypoints. Visual review corrected duplicate furnace bodies, dark lantern casings, canopy/camera obstructions, rock artifacts and workshop phone framing. See docs/design/CAMPAIGN_CRAFT_IMPLEMENTATION_2026-10-12.md and docs/art-validation/campaign-craft-2026-10-12.json. Human aesthetic acceptance and low-end/public-network testing remain open. Broader campaign improvement goal remains open. No custom SFX work. Excludes unrelated companion3d.js/articulated-rigs.json edits.
+
+## [Codex | 2026-10-12] U-GEO-20261012 — map structure
+
+Preserve the complete geography request in USER_SOURCE_2026-10-12_GEOGRAPHY.md. Approved: physical enclosure and cohesive terrain/architecture across the eight campaign regions; primary examples Keep, Briar, Sunspire; genuine contextual fall risks for mountains/lava/tower. Later direction supersedes preservation of the previous fragmented layout where it conflicts. Keep narrative and mechanical route purposes. Potential shove/grab enemies are a proposal for separate combat work. See CAMPAIGN_GEOGRAPHY_2026-10-12.md for the grounded implementation plan.
+
+## [Codex | 2026-10-12] U-GEO-20261012-B — paths as well as borders
+
+User asks for all route connections/navigation to feel intentional. Add main-route and branch legibility to geography acceptance; broader layouts may change within the existing narrative. Preserve authored puzzle crossings and alternate-route purposes.
+
+## [Codex | 2026-10-12] U-GEO-20261012-C — large maps and textured surfaces
+
+Keep existing map bounds, landmark distances, secret destinations and branches. Use shared seamless masonry, paving, grain, rock and ground textures with normal/roughness response; no map shrink or blanket detail geometry. Verify actual normal-camera readability and rendering cost.
+
+## [Codex | 2026-10-12] U-GEO-20261012-D — blueprint-driven layout review
+
+Add visual, scale-preserving overhead plans for all sixteen campaign halves before publishing the current geography work. Show actual footprints and route data separately from authored design intent, support stacked floor inspection, and expose before/after comparison. Future level layout changes start with the plan, then physical/normal-camera checks, then human judgment of pacing and enjoyment. Exact latest request preserved in USER_SOURCE_2026-10-12_GEOGRAPHY.md.
+
+
+## [Codex | 2026-10-12] Campaign geography, materials and blueprints — v2.187.0
+
+Implemented U-GEO-20261012 and follow-ups B/C/D: purposeful terrain/boundaries across all eight campaign regions, connected Keep courts/dungeons, Sunspire garden axis and library rooms, and contextual recovery on ordinary ground. All 24 scene bounds retain their previous scale. Deliberate mill/lift/shelf/lava/moat gaps and route alternatives remain. Seven Keep/Sunspire route connections were physically checked; moved the records bookshelf out of its walking lane. Shared 512px painted surfaces add floor/wall definition without tessellation; large walls use textured relief rather than grids of tiny brick meshes.
+
+Title > Dev previews > Campaign blueprints opens sixteen interactive plans with previous/updated footprints, actual routes, height slices/profiles, real objective markers and authored branch purposes. The latest request arrived mid-build: plans review this pass before publication; subsequent layout changes begin with blueprint updates. Correctly mark Thunder's lift and the library records as optional.
+
+Validated 123 geography assertions, 238 state-appropriate interaction approaches, 24 scene renders, 24 checkpoint restores, pre-change save, twelve mechanism behaviors, palace alternative routes, prison repeated lift travel, seven local co-op pickup/clue assertions, targeted movement/climbs and 55 desktop/phone blueprint checks. Repaired the old Thunder route-only test fixture so a legitimate rank-up choice no longer stalls its movement; race/hydra traversal passes. Scope/results: docs/design/CAMPAIGN_GEOGRAPHY_2026-10-12.md and docs/art-validation/campaign-geography-2026-10-12.json. Human pacing/aesthetic acceptance and slower-device/public-network tests remain open. No custom SFX work. General campaign quality objective remains open. Unrelated companion3d.js/articulated-rigs.json changes excluded.

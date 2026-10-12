@@ -1,4 +1,4 @@
-import {buildDeep} from './deep-art.js?v=2186c';
+import {buildDeep} from './deep-art.js?v=2187a';
 // Palace-kit geometry is shared with existing Sunspire art, including chunk culling.
 export function buildPalaceCourt(scene,w){
  const s=window.__BF3?.G?.storyState||{flags:{},items:{}},f=k=>!!s.flags['pc.'+k],deco=[...w.deco];

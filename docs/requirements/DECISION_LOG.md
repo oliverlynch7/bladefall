@@ -992,3 +992,7 @@ Oliver's existing direction favors puzzles whose inputs have visible environment
 ## [Codex | 2026-10-11] Great Furnace physical cooling crossing
 
 The three nearby ordered cooling controls repeated the puzzle input pattern Oliver asked us to eliminate. Version 2.178.0 implements a pedal held during Legion attacks, with visible water and falling/reheating heat. Keep `gf.cool.open` as the save truth and retain the broken bridge, optional branches and story outcomes. Legacy partial values no longer operate the puzzle; prior completion stays complete. Muted-browser full route, old-save rebuild, checkpoint and two-client checks passed. Human combat pacing and art feedback remain open. No custom SFX work.
+
+## [Codex | 2026-10-12] Campaign readiness - implemented within approved scope
+
+Under Oliver's final campaign graphics/readiness request, v2.182.0 improves shared surface materials, regional daylight, existing trees, coastal bevels and palace/forge/castle details while preserving map, combat, save and story contracts. Confirmed NPC clipping and obstructing overhead scenery were corrected. New-player/save/route/co-op checks passed locally. This is implementation evidence, not a new user approval of level feel or an assertion that every asset is finished. Detailed evidence and limits are in docs/design/CAMPAIGN_PLAYTEST_READINESS_2026-10-12.md. No custom SFX work.

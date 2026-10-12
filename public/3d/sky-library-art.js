@@ -1,5 +1,5 @@
-import {buildDeep} from './deep-art.js?v=2135';
+import {buildDeep} from './deep-art.js?v=2182f';
 export function buildSkyLibrary(scene,w){
- const result=buildDeep(scene,{...w,portalProfile:{name:'Sunspire Palace · Sky Library',fog:'#aebdc7',sky:[.56,.66,.74],sun:'#fff1d3',body:'#b5ad98',lamp:'#f5d48c',hazard:['#9aaebf','#c3d1db'],sunGlow:[.18,.15,.10]}});
+ const result=buildDeep(scene,{...w,portalProfile:{name:'Sunspire Palace · Sky Library',fog:'#a8c7d9',sky:[.44,.65,.83],sun:'#fff1d3',body:'#b5ad98',lamp:'#f5d48c',hazard:['#9aaebf','#c3d1db'],sunGlow:[.18,.15,.10]}});
  result.counts.name='Sky Library';return result;
 }

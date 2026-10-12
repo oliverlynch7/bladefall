@@ -1,3 +1,4 @@
+import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Ruined Keep: authored fortress scenery fitted to the existing game geometry. */
 import * as THREE from './three.module.js';
@@ -15,8 +16,9 @@ export function loadKeep(){
     catch(e){failed=true;console.warn('[keep-art]',e)}resolve();
   },undefined,e=>{failed=true;console.warn('[keep-art] Original scenery fallback',e);resolve()}));return pending;
 }
-const material=new THREE.MeshLambertMaterial({vertexColors:true});
-const bannerMaterial=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
+const material=campaignMaterial('masonry',{vertexColors:true});
+const woodMaterial=campaignMaterial('wood',{vertexColors:true}),metalMaterial=campaignMaterial('metal',{vertexColors:true}),rockMaterial=campaignMaterial('stone',{vertexColors:true});
+const bannerMaterial=campaignMaterial('cloth',{vertexColors:true,side:THREE.DoubleSide});
 function buildLiftWinch(root){
   const owned=new Set(),wood=new THREE.MeshStandardMaterial({color:'#665342',roughness:.86}),iron=new THREE.MeshStandardMaterial({color:'#52636a',metalness:.45,roughness:.56}),brass=new THREE.MeshStandardMaterial({color:'#d6ae69',metalness:.68,roughness:.35}),ivory=new THREE.MeshStandardMaterial({color:'#f2dda4',metalness:.18,roughness:.42});
   const mat=[wood,iron,brass,ivory],deck=new THREE.Group();deck.name='Moving prisoner lift winch';deck.position.set(0,180,-2500);root.add(deck);
@@ -76,13 +78,13 @@ export function buildKeep(scene,w){
   const root=new THREE.Group();root.name='Ruined Keep · The Fallen Standard';
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),lamps=[],structures=[],bodies=new Set(),occluders=new Map();let target=null,source=null,floors=0;
   const under=w.area===1||w.side||w.keepScene==='fallen';
-  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
-  const block=(x,y,z,ww,h,d,c)=>add(Math.min(ww,h,d)<=3?'timber':'stone',x,y,z,ww,h,d,c);
+  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,finish=null){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name+'|'+(finish||'');if(!bins.has(key))bins.set(key,{cell,name,finish,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
+  const block=(x,y,z,ww,h,d,c,finish='masonry')=>add(Math.min(ww,h,d)<=3?'timber':'stone',x,y,z,ww,h,d,c,0,finish);
   function cap(o,top,wood){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];
     for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
     for(const p of pieces){const nx=Math.ceil((p.b-p.a)/52),nz=Math.ceil((p.d-p.c)/44),dx=(p.b-p.a)/nx,dz=(p.d-p.c)/nz;
-      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*dx,z=p.c+(iz+.5)*dz;add('timber',x,top+.6,z,Math.max(.1,dx-.65),1.4,Math.max(.1,dz-.65),wood?'#846c48':palette[Math.floor(hash(x,z)*5)]);floors++;}laid.push(p);
+      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*dx,z=p.c+(iz+.5)*dz;add('timber',x,top+.6,z,Math.max(.1,dx-.65),1.4,Math.max(.1,dz-.65),wood?'#846c48':palette[Math.floor(hash(x,z)*5)],0,wood?'wood':'stone');floors++;}laid.push(p);
     }
   }
   const surfaces=new Map();
@@ -97,9 +99,9 @@ export function buildKeep(scene,w){
     if(h<35||!facade)return;const rows=Math.min(10,Math.ceil(h/30)),rh=h/rows;
     for(let row=0;row<rows;row++)for(const side of [-1,1])for(const axis of [0,1]){
       const len=axis?dd:ww,cols=Math.max(1,Math.ceil(len/55)),bw=len/cols;
-      for(let k=0;k<cols;k++){const u=-len/2+(k+.5)*bw;block(o.x+(axis?side*(ww/2-.7):u),base+(row+.5)*rh,o.z+(axis?u:side*(dd/2-.7)),axis?1.8:bw-1.4,rh-1.2,axis?bw-1.4:1.8,wood?'#635037':palette[Math.floor(hash(k+row*7+o.x,side+o.z)*5)]);}
+      for(let k=0;k<cols;k++){const u=-len/2+(k+.5)*bw;block(o.x+(axis?side*(ww/2-.7):u),base+(row+.5)*rh,o.z+(axis?u:side*(dd/2-.7)),axis?1.8:bw-1.4,rh-1.2,axis?bw-1.4:1.8,wood?'#635037':palette[Math.floor(hash(k+row*7+o.x,side+o.z)*5)],wood?'wood':'masonry');}
     }
-    block(o.x,top-2,o.z,ww,4,dd,wood?'#6c573c':'#807967');
+    block(o.x,top-2,o.z,ww,4,dd,wood?'#6c573c':'#807967',wood?'wood':'stone');
   }
   function brazier(x,y,z,s=20){add('brazier',x,y,z,s);lamps.push(new THREE.Vector3(x,y+s*2.05,z));}
   if(w.keepScene){const terrain=[...(w.segments||[]).filter(s=>!s.nofloor).map(s=>({o:s,base:-25,top:0})),...(w.obstacles||[]).filter(o=>o.kind==='plat').map(o=>({o,base:o.y0??-25,top:o.h||0}))].sort((a,b)=>b.top-a.top);for(const t of terrain){source=t.o.kind==='plat'?t.o:null;surface(t.o,t.base,t.top,!!t.o.bridge);if(t.o.kind==='plat')obstacles.add(t.o);}source=null;}else for(const s of w.segments||[])if(!s.nofloor)surface(s,-25,0,!!s.bridge,false);
@@ -157,16 +159,16 @@ export function buildKeep(scene,w){
       add('tower',x,y-12,z,115,280,115);add('banner',x,y+95,z+60,45,105,8);brazier(x,y+280,z,17);
     }
     // Supplies and bedding explain why the freed group waits under the outer wall.
-    for(const [x,z]of [[-370,-1610],[-435,-1645],[-350,-3030]]){add('crate',x,0,z,52,40,38);block(x+42,4,z+10,28,8,62,'#6e6e54');}
+    for(const [x,z]of [[-370,-1610],[-435,-1645],[-350,-3030]]){add('crate',x,0,z,52,40,38);block(x+42,4,z+10,28,8,62,'#6e6e54','wood');}
     // The seized workshop has an open roof for camera visibility, with a distinct timber frame.
-    for(const x of [1160,1710]){for(const z of [-2740,-3190])block(x,75,z,18,150,18,'#59462e');block(x,142,-2965,22,18,470,'#816a47');}
-    block(1435,155,-3190,570,22,24,'#816a47');
-    for(const x of [1260,1630]){block(x,32,-3100,95,12,50,'#796448');for(const dx of [-36,36])block(x+dx,14,-3100,9,28,38,'#50412d');add('crate',x,0,-3180,54,46,42);}
+    for(const x of [1160,1710]){for(const z of [-2740,-3190])block(x,75,z,18,150,18,'#59462e','wood');block(x,142,-2965,22,18,470,'#816a47','wood');}
+    block(1435,155,-3190,570,22,24,'#816a47','wood');
+    for(const x of [1260,1630]){block(x,32,-3100,95,12,50,'#796448','wood');for(const dx of [-36,36])block(x+dx,14,-3100,9,28,38,'#50412d','wood');add('crate',x,0,-3180,54,46,42);}
     // Broken bell frame crowns the climb. The shard is tucked behind its stone screen.
     for(const x of [-1810,-1590]){block(x,396,-1680,24,152,28,'#7c7868');block(x,474,-1620,28,12,145,'#978d72');}
     block(-1700,479,-1680,244,18,34,'#9b8e70');add('brazier',-1700,401,-1680,27);
     // A shield and empty weapon stands make the optional chamber challenge readable.
-    for(const [x,z]of [[-1800,-3710],[-1180,-3710]]){block(x,115,z,16,70,18,'#594d37');block(x,143,z,80,12,18,'#8a7751');add('banner',x,115,z+12,33,50,5);}
+    for(const [x,z]of [[-1800,-3710],[-1180,-3710]]){block(x,115,z,16,70,18,'#594d37','wood');block(x,143,z,80,12,18,'#8a7751','wood');add('banner',x,115,z+12,33,50,5);}
     for(const [x,z,y]of [[-525,-975,0],[570,-990,0],[-700,-2280,0],[700,-2280,0],[-1780,-1740,0],[1660,-3090,0],[-1720,-3900,80]]){
       for(let i=0;i<4;i++)add('rubble',x+i*18,y,z+(i%2)*22,35,15+i*3,28);
     }
@@ -177,7 +179,7 @@ export function buildKeep(scene,w){
       for(const dx of [-170,170]){block(x+dx,y+90,z-140,24,180,24,'#6e6b5e');block(x+dx,y+180,z,28,16,310,'#827967');}
       block(x,y+186,z-140,370,24,32,'#8d846f');
       for(let i=0;i<5;i++)block(x-120+i*60,y+55,z-135,8,110,8,'#4f5654');
-      for(const dx of [-95,95]){block(x+dx,y+8,z+60,65,16,125,'#594936');block(x+dx,y+18,z+70,55,5,100,'#80765a');}
+      for(const dx of [-95,95]){block(x+dx,y+8,z+60,65,16,125,'#594936','wood');block(x+dx,y+18,z+70,55,5,100,'#80765a','wood');}
     }
     for(const x of [-205,205]){for(const z of [-2690,-2310])block(x,335,z,34,350,34,'#625f52');block(x,512,-2500,40,18,420,'#96866a');}
     for(const x of [-330,330]){add('banner',x,400,-3490,45,100,8);brazier(x,360,-3550,19);}
@@ -194,15 +196,16 @@ export function buildKeep(scene,w){
     for(const x of [-90,90])block(x,1.2,0,5,1.4,1330,'#8f846e');
   }
   const groups=new Map();let triangles=0,instances=0;
-  for(const {cell,name,list} of bins.values()){
-    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,name==='banner'?bannerMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
+  for(const {cell,name,finish,list} of bins.values()){
+    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='wood'?woodMaterial:finish==='stone'?rockMaterial:finish==='masonry'?material:name==='banner'?bannerMaterial:['timber','crate'].includes(name)?woodMaterial:['grille','brazier'].includes(name)?metalMaterial:name==='rubble'?rockMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
     for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.source){if(!occluders.has(d.source))occluders.set(d.source,{o:d.source,parts:[],hidden:false});occluders.get(d.source).parts.push({mesh:m,index:i,matrix:dummy.matrix.clone()});}}
     m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='banner'&&name!=='timber';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   for(const s of structures)if(groups.has(s.cell))groups.get(s.cell).userData.obstacle=s.o;
-  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.56:.15)}});
-  const oldFog=scene.fog;scene.fog=new THREE.Fog(under?'#262d2d':'#303831',650,2300);
-  const sun=new THREE.DirectionalLight('#ffe1b2',under?1.15:2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:3000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.2;sun.shadow.bias=-.0002;root.add(sun,sun.target);
+  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.72:.15)}});
+  const oldFog=scene.fog;scene.fog=new THREE.Fog(under?'#303d3e':'#82969f',650,2300);
+  root.add(new THREE.HemisphereLight('#bedce3','#756047',under?.5:.65));
+  const sun=new THREE.DirectionalLight('#ffe1b2',under?1.45:2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:3000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.2;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffad55',900,180,1.6);root.add(l);return l});
   const counts={keepArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
   const winch=w.keepScene==='dungeons'?buildLiftWinch(root):null,presses=w.keepScene==='dungeons'?buildLowerPresses(root):null;

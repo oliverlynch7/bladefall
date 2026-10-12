@@ -1,0 +1,397 @@
+{
+  "version": "2.182.0-campaign-surfaces",
+  "date": "2026-10-12",
+  "scope": "Shared scenery materials and targeted architecture across eight campaign destinations; not a remake of every game asset.",
+  "browserSweep": {
+    "scenes": [
+      {
+        "zone": 0,
+        "area": 0,
+        "name": "Briar Town \u00b7 Homefields",
+        "npcs": 3,
+        "render": {
+          "shadows": true,
+          "triangles": 173412,
+          "calls": 295,
+          "geometries": 258
+        }
+      },
+      {
+        "zone": 0,
+        "area": 1,
+        "name": "Briar Town \u00b7 Black Woods",
+        "npcs": 3,
+        "render": {
+          "shadows": true,
+          "triangles": 102761,
+          "calls": 185,
+          "geometries": 274
+        }
+      },
+      {
+        "zone": 0,
+        "area": -1,
+        "name": "The Brute",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 18514,
+          "calls": 74,
+          "geometries": 222
+        }
+      },
+      {
+        "zone": 1,
+        "area": 0,
+        "name": "Hollow Pass \u00b7 Winding Cliffs",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 81118,
+          "calls": 121,
+          "geometries": 282
+        }
+      },
+      {
+        "zone": 1,
+        "area": 1,
+        "name": "Hollow Pass \u00b7 Lost Canyon",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 125254,
+          "calls": 141,
+          "geometries": 289
+        }
+      },
+      {
+        "zone": 1,
+        "area": -1,
+        "name": "Hollow Marksman",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 44650,
+          "calls": 60,
+          "geometries": 262
+        }
+      },
+      {
+        "zone": 2,
+        "area": 0,
+        "name": "Ruined Keep \u00b7 Broken Walls",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 117524,
+          "calls": 139,
+          "geometries": 352
+        }
+      },
+      {
+        "zone": 2,
+        "area": 1,
+        "name": "Ruined Keep \u00b7 The Dungeons",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 99934,
+          "calls": 151,
+          "geometries": 364
+        }
+      },
+      {
+        "zone": 2,
+        "area": -1,
+        "name": "The Fallen",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 42258,
+          "calls": 78,
+          "geometries": 280
+        }
+      },
+      {
+        "zone": 3,
+        "area": 0,
+        "name": "Frostfell \u00b7 Snowbound Peaks",
+        "npcs": 1,
+        "render": {
+          "shadows": true,
+          "triangles": 63646,
+          "calls": 134,
+          "geometries": 308
+        }
+      },
+      {
+        "zone": 3,
+        "area": 1,
+        "name": "Frostfell \u00b7 Deep Ice Caves",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 73202,
+          "calls": 144,
+          "geometries": 306
+        }
+      },
+      {
+        "zone": 3,
+        "area": -1,
+        "name": "The Hollowed Officers",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 27470,
+          "calls": 75,
+          "geometries": 323
+        }
+      },
+      {
+        "zone": 4,
+        "area": 0,
+        "name": "Emberdeep \u00b7 Iron Halls",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 109928,
+          "calls": 184,
+          "geometries": 401
+        }
+      },
+      {
+        "zone": 4,
+        "area": 1,
+        "name": "Emberdeep \u00b7 The Great Furnace",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 109096,
+          "calls": 149,
+          "geometries": 411
+        }
+      },
+      {
+        "zone": 4,
+        "area": -1,
+        "name": "Ember Colossus",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 57830,
+          "calls": 52,
+          "geometries": 345
+        }
+      },
+      {
+        "zone": 5,
+        "area": 0,
+        "name": "Storm Coast - Shipwreck Shore",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 113354,
+          "calls": 136,
+          "geometries": 393
+        }
+      },
+      {
+        "zone": 5,
+        "area": 1,
+        "name": "Thunder Cliffs",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 136518,
+          "calls": 121,
+          "geometries": 367
+        }
+      },
+      {
+        "zone": 5,
+        "area": -1,
+        "name": "Chained Sea Hydra",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 31824,
+          "calls": 242,
+          "geometries": 561
+        }
+      },
+      {
+        "zone": 6,
+        "area": 0,
+        "name": "Palace Courtyard",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 163614,
+          "calls": 252,
+          "geometries": 391
+        }
+      },
+      {
+        "zone": 6,
+        "area": 1,
+        "name": "The Sky Library",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 120589,
+          "calls": 225,
+          "geometries": 392
+        }
+      },
+      {
+        "zone": 6,
+        "area": -1,
+        "name": "The Marble Colossus",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 125154,
+          "calls": 114,
+          "geometries": 382
+        }
+      },
+      {
+        "zone": 7,
+        "area": 0,
+        "name": "The Castle Gates",
+        "npcs": 2,
+        "render": {
+          "shadows": true,
+          "triangles": 76970,
+          "calls": 150,
+          "geometries": 444
+        }
+      },
+      {
+        "zone": 7,
+        "area": 1,
+        "name": "The Long Ascent",
+        "npcs": 1,
+        "render": {
+          "shadows": true,
+          "triangles": 132640,
+          "calls": 141,
+          "geometries": 470
+        }
+      },
+      {
+        "zone": 7,
+        "area": -1,
+        "name": "The Abyss King, Awakened",
+        "npcs": 0,
+        "render": {
+          "shadows": true,
+          "triangles": 11016,
+          "calls": 38,
+          "geometries": 472
+        }
+      }
+    ],
+    "occlusion": {
+      "foregroundClears": true,
+      "supportStaysSolid": true,
+      "firstPersonSolid": true
+    },
+    "lowQuality": {
+      "shadows": false,
+      "triangles": 134446,
+      "calls": 98,
+      "geometries": 407
+    },
+    "errors": []
+  },
+  "newPlayer": {
+    "freshNewGame": true,
+    "openingFivePages": true,
+    "creatorFourSteps": true,
+    "creatorBackPreservesName": true,
+    "tutorial": {
+      "name": "Trail Tester",
+      "trial": "warrior",
+      "enemies": 13,
+      "bosses": 0
+    }
+  },
+  "checkpoints": {
+    "routes": 24,
+    "checkpoints": [
+      "0/0",
+      "0/1",
+      "0/-1",
+      "1/0",
+      "1/1",
+      "1/-1",
+      "2/0",
+      "2/1",
+      "2/-1",
+      "3/0",
+      "3/1",
+      "3/-1",
+      "4/0",
+      "4/1",
+      "4/-1",
+      "5/0",
+      "5/1",
+      "5/-1",
+      "6/0",
+      "6/1",
+      "6/-1",
+      "7/0",
+      "7/1",
+      "7/-1"
+    ]
+  },
+  "solidWallPixels": {
+    "behindWall": 0,
+    "inOpen": 28929,
+    "solidWallsOccludeEnemies": true
+  },
+  "fallbacks": "generic 3D and voxel root routes both render without errors",
+  "earnedProgress": {
+    "expected": {
+      "level": 3,
+      "xp": 185,
+      "rank": 4,
+      "cxp": 392,
+      "gold": 237
+    },
+    "deathRetry": true,
+    "earlyHub": true,
+    "requestReady": true,
+    "skillChoice": true,
+    "reload": true
+  },
+  "coopLocalTransport": {
+    "checks": [
+      "host escort health and position reach guest",
+      "guest sees which Legion fighters are pursuing prisoners",
+      "direct winch repair reaches guest",
+      "raised ice float reaches guest",
+      "frozen crossing reaches guest",
+      "permanent ice bridge reaches guest",
+      "direct cart repair reaches guest",
+      "fitted boat part reaches guest",
+      "prisoner transfer reaches guest",
+      "late guest can wait on returned lift",
+      "returned lift carries guest toward exit"
+    ],
+    "pageErrors": []
+  },
+  "preChangeSave": {
+    "loaded": true,
+    "goldAndGearPreserved": true,
+    "scene": "Great Furnace"
+  },
+  "limits": [
+    "No human playtest of these changes yet.",
+    "Two-client co-op uses a local mocked transport, not an external network.",
+    "Scene triangle and draw counts are observations, not FPS guarantees.",
+    "Visual checks cover sampled views and routes; not every possible camera angle or prop."
+  ]
+}

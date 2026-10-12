@@ -1,3 +1,5 @@
+import {loadBriarTrees,briarTreesReady,campaignTreesReady,buildCampaignTrees} from './briar-trees.js?v=2182f';
+import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
@@ -10,7 +12,7 @@ const CHUNK=400,white=new THREE.Color('white'),dummy=new THREE.Object3D();
 const hash=(x,z)=>{const n=Math.sin(x*12.9898+z*78.233)*43758.5453;return n-Math.floor(n)};
 let active=null;
 export function wantsOutskirts(w){return !failed && new URLSearchParams(location.search).get('outskirtsart')!=='0' && w.zone==='outskirts'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus;}
-export function outskirtsReady(){return kit.size===11;}
+export function outskirtsReady(){return kit.size===11&&briarTreesReady();}
 export function loadOutskirts(){
   if(pending)return pending;
   pending=new Promise((resolve,reject)=>new GLTFLoader().load('./outskirts-assets/outskirts-kit.glb',g=>{
@@ -22,15 +24,17 @@ export function loadOutskirts(){
     for(let i=0;i<p.count;i++){const c=new THREE.Color(p.getY(i)>.1?'#7c8651':'#676f43');colors.push(c.r,c.g,c.b);mean.add(c);}
     mean.multiplyScalar(1/p.count);geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeBoundingBox();
     kit.set('bank',{geo,mean,tri:p.count/3});resolve();
-  },undefined,e=>{failed=true;console.warn('[outskirts-art] asset unavailable; using original scenery',e);resolve();}));return pending;
+  },undefined,e=>{failed=true;console.warn('[outskirts-art] asset unavailable; using original scenery',e);resolve();})).then(()=>loadBriarTrees());return pending;
 }
 function makeGrain(){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),im=ctx.createImageData(128,128);for(let i=0;i<128*128;i++){const v=205+Math.floor(hash(i,55)*50);im.data.set([v,v,v,255],i*4)}ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;}
 const grain=makeGrain();const material=new THREE.MeshLambertMaterial({vertexColors:true,map:grain});
+const finishes=Object.fromEntries(['stone','masonry','wood','soil','grass'].map(kind=>[kind,campaignMaterial(kind,{vertexColors:true})]));
+const materialKinds={brick:'masonry',tile:'stone',timber:'wood',palisade:'wood',crate:'wood',rubble:'stone'};
 function builder(root){
   const bins=new Map(),structures=[],lamps=[];let destination=null;
-  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){
+  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,finish=null){
     const cell=destination||`${Math.floor(x/CHUNK)},${Math.floor(z/CHUNK)}`;
-    const key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});
+    const surface=finish||materialKinds[name]||null,key=cell+'|'+name+'|'+surface;if(!bins.has(key))bins.set(key,{cell,name,surface,list:[]});
     bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot});
   }
   function solid(o,c='#726754',wood=false){
@@ -60,9 +64,9 @@ function builder(root){
   return {add,solid,lamps,structures,
     structure(o,fn){destination='s'+structures.length;structures.push({id:destination,o});fn();destination=null},
     finish(){const groups=new Map();let triangles=0,instances=0;
-      for(const {cell,name,list} of bins.values()){
+      for(const {cell,name,surface,list} of bins.values()){
         let g=groups.get(cell);if(!g){g=new THREE.Group();g.name='Outskirts '+cell;g.userData.cell=cell;groups.set(cell,g);root.add(g)}
-        const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,material,list.length);
+        const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finishes[surface]||material,list.length);
         const col=new THREE.Color();
         for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);
           if(d.color){col.set(d.color);col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b);}else col.copy(white);m.setColorAt(i,col)}
@@ -74,9 +78,9 @@ function builder(root){
 }
 const covers=(s,x,z,margin=0)=>Math.abs(x-s.x)<=s.w/2+margin&&Math.abs(z-s.z)<=s.d/2+margin;
 export function buildOutskirts(scene,w){
-  const root=new THREE.Group();root.name='Outskirts authored art';const B=builder(root),add=B.add;
+  const matureTrees=[];const root=new THREE.Group();root.name='Outskirts authored art';const B=builder(root),add=B.add;
   const woods=w.area===1||w.side||(w.delve&&w.theme==='forest'),boss=w.area<0,segs=(w.segments||[]).filter(s=>!s.nofloor&&s.w>8&&s.d>8),paths=segs.filter(s=>s.path);
-  const soil=woods?'#494637':boss?'#635039':'#695b43';let floors=0,roads=0;
+  const soil=woods?'#657246':boss?'#7c8150':'#80984f';let floors=0,roads=0;
   const done=[],surfaces=new Map();
   for(const s of segs.flatMap(s=>claimSurface(surfaces,s))){
     const tile=s.meadow&&!s.path?72:36;
@@ -85,8 +89,8 @@ export function buildOutskirts(scene,w){
       const x=s.x-s.w/2+(ix+.5)*dx,z=s.z-s.d/2+(iz+.5)*dz;
       if(done.some(r=>x-dx/2>=r.x-r.w/2&&x+dx/2<=r.x+r.w/2&&z-dz/2>=r.z-r.d/2&&z+dz/2<=r.z+r.d/2))continue;
       const road=s.path||paths.some(p=>covers(p,x,z))||(w.bruteOrchard&&Math.abs(x-Math.sin(z*.004)*110)<105),r=hash(x,z);
-      const c=road?['#a79470','#ac9975','#9d8b69','#b29e79'][Math.floor(r*4)]:(w.bruteOrchard?['#71754b','#70734b','#74764e','#6e734b'][Math.floor(r*4)]:s.meadow?['#707345','#76784a','#7d7b4b','#696e43'][Math.floor(r*4)]:soil);
-      add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx,2,road&&!s.meadow?dz-.5:dz,c,0);floors++;if(road)roads++;
+      const c=road?['#b6a278','#b9a67b','#b29e74','#beaa7e'][Math.floor(r*4)]:(w.bruteOrchard?['#71754b','#70734b','#74764e','#6e734b'][Math.floor(r*4)]:soil);
+      add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx,2,road&&!s.meadow?dz-.5:dz,c,0,road?'soil':'grass');floors++;if(road)roads++;
       if(!road&&r<.055){add('grass',x,2,z,25,25+hash(z,x)*12,25,woods?'#777344':null,r*6.28)}
       if(!road&&r>.982)add('rubble',x,1.8,z,18,10,18,null,r*6.28);
     }
@@ -125,10 +129,11 @@ export function buildOutskirts(scene,w){
     const y=d.y0||0,ww=d.w||8,hh=d.h||1,dd=d.d||ww,r=hash(d.x,d.z);
     if(kind==='tree'){
       const h=(d.trunkH||0)+hh+30,base=y-(d.trunkH||0),sc=h/3.5;
-      add('tree',d.x,base,d.z,sc,sc,sc,null,r*6.28);
+      matureTrees.push({x:d.x,y:base,z:d.z,h,w:Math.max(ww,sc*1.9),variant:woods?1:r>.82?1:0,rotation:r*6.28});
+      if(!campaignTreesReady())add('tree',d.x,base,d.z,sc,sc,sc,null,r*6.28);
       // Dark, sparse crowns in the woods retain its canopy identity.
-      if(w.bruteOrchard)for(let k=0;k<4;k++)add('brick',d.x+Math.cos(k*1.6)*24,base+h*.72+(k%2)*14,d.z+Math.sin(k*1.6)*24,65,38,62,['#566936','#687b3e','#748448','#5c713b'][k],r*2);
-      if(woods)for(let k=0;k<3;k++)add('brick',d.x+(k-1)*23,base+h*.67+Math.abs(k-1)*9,d.z,44,25,48,['#343d2b','#434932','#515337'][k],r*2);
+      if(w.bruteOrchard&&!campaignTreesReady())for(let k=0;k<4;k++)add('brick',d.x+Math.cos(k*1.6)*24,base+h*.72+(k%2)*14,d.z+Math.sin(k*1.6)*24,65,38,62,['#566936','#687b3e','#748448','#5c713b'][k],r*2);
+      if(woods&&!campaignTreesReady())for(let k=0;k<3;k++)add('brick',d.x+(k-1)*23,base+h*.67+Math.abs(k-1)*9,d.z,44,25,48,['#343d2b','#434932','#515337'][k],r*2);
       continue;
     }
     if(kind==='corn'){if(d.lead!==true)continue;const sc=(d.cropH||hh)/1.13;add('crop',d.x,y,d.z,sc,sc,sc,null,r*6.28);continue;}
@@ -161,19 +166,20 @@ export function buildOutskirts(scene,w){
     }
 
   }
-  const state=B.finish();root.userData.art=state;
+  const state=B.finish();root.userData.art=state;state.matureTrees=buildCampaignTrees(matureTrees);if(state.matureTrees)root.add(state.matureTrees);
   const rootSteps=(w.obstacles||[]).filter(o=>o.woodsRootPerch);
   if(rootSteps.length){state.rootTrail=buildWoodsRootArt(rootSteps);root.add(state.rootTrail);window.__WOODS_ROOT_3D_ACTIVE=true;}
   state.signalCanopy=buildWoodsSignalArt(w.obstacles||[]);
   if(state.signalCanopy){root.add(state.signalCanopy);state.signalPerches=(w.obstacles||[]).filter(o=>o.woodsSignalPerch||o.woodsSignalDeck);window.__WOODS_SIGNAL_3D_ACTIVE=true;}
   // Lights affect only this zone and are restored by the outer world's clear function.
-  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.37:.24)}});
-  state.oldFog=scene.fog;scene.fog=new THREE.Fog(woods?'#202827':'#302d29',650,2300);
-  const key=new THREE.DirectionalLight(0xffd2a0,woods?1.35:1.8);key.position.set(-600,1000,600);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-650,right:650,top:650,bottom:-650,near:1,far:2600});key.shadow.normalBias=1.2;key.shadow.bias=-.0001;root.add(key,key.target);state.key=key;
+  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.65:.24)}});
+  state.oldFog=scene.fog;scene.fog=new THREE.Fog(woods?'#3f6560':'#93b8cc',650,2300);
+  root.add(new THREE.HemisphereLight('#d6eaff','#70844d',.6));
+  const key=new THREE.DirectionalLight(0xffd2a0,woods?1.75:2.0);key.position.set(-600,1000,600);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-650,right:650,top:650,bottom:-650,near:1,far:2600});key.shadow.normalBias=1.2;key.shadow.bias=-.0001;root.add(key,key.target);state.key=key;
   state.points=[0,1,2].map(()=>{const l=new THREE.PointLight(0xffb44e,900,150,1.6);root.add(l);return l});
   state.scene=scene;state.obstacles=obstacles;state.stats={outskirtsArt:true,floorTiles:floors,roadTiles:roads,tree:deco.filter(d=>d.kind==='tree'&&d.lead===true).length,totalTriangles:state.triangles,instances:state.instances,chunks:state.groups.length,drawCalls:state.groups.reduce((n,g)=>n+g.children.length,0),visibleTriangles:0,visibleDrawCalls:0,artObstacles:true};
   if(state.signalCanopy){state.signalTriangles=state.signalCanopy.children.reduce((n,m)=>n+(m.geometry?.attributes.position.count||0)/3,0);state.stats.totalTriangles+=state.signalTriangles;state.stats.drawCalls+=state.signalCanopy.children.length;}
-  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.rootTrail?.userData.dispose();state.signalCanopy?.userData.dispose();if(active===root)active=null};
+  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.matureTrees?.userData.dispose();state.rootTrail?.userData.dispose();state.signalCanopy?.userData.dispose();if(active===root)active=null};
   return {group:root,counts:state.stats};
 }
 export function updateOutskirts(w){
@@ -188,6 +194,7 @@ export function updateOutskirts(w){
     if(g.visible)for(const m of g.children){tris+=m.userData.tri||0;calls++}
   }
   if(st.signalCanopy){st.signalCanopy.visible=st.signalPerches.some(o=>Math.hypot(o.x-p.x,o.z-p.z)<1200);if(st.signalCanopy.visible){tris+=st.signalTriangles;calls+=st.signalCanopy.children.length;}}
+  if(st.matureTrees){const t=st.matureTrees.userData.tick(w);tris+=t.triangles;calls+=t.calls;}
   st.stats.visibleTriangles=tris;st.stats.visibleDrawCalls=calls;
   const lamps=st.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.y-(p.y||0))**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);
   st.points.forEach((l,i)=>{l.visible=!!lamps[i]&&lamps[i].d<250*250;if(l.visible)l.position.copy(lamps[i].v)});

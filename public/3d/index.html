@@ -185,7 +185,7 @@
   #storyskip:hover{background:rgba(255,255,255,.16);}
   #storycard{position:absolute;left:50%;top:34%;transform:translateX(-50%);z-index:6;pointer-events:none;
     max-width:min(78vw,520px);text-align:center;color:#eae4d6;font-size:clamp(14px,2.4vw,19px);line-height:1.55;
-    font-style:italic;letter-spacing:.01em;text-shadow:0 2px 14px #000;opacity:0;transition:opacity .8s ease;}
+    font-style:italic;letter-spacing:.01em;text-shadow:0 1px 2px #000; background:rgba(12,20,28,.78);padding:8px 15px;border-radius:10px;box-shadow:0 3px 15px #0003;opacity:0;transition:opacity .8s ease;}
   #storycard.show{opacity:1;}
   #bKeep,#bBag{display:none!important;}
   #bKeep{top:calc(38% + 38px);}
@@ -1090,7 +1090,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./hollow-cliffs.js?v=2166"></script>
-<script src="./lost-canyon.js?v=2174"></script>
+<script src="./lost-canyon.js?v=2182f"></script>
 <script src="./broken-walls.js?v=2165"></script>
 <script src="./prison-dungeons.js?v=2173"></script>
 <script src="./snowbound-peaks.js?v=2162"></script>
@@ -1111,7 +1111,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./hydra.js?v=2049"></script>
 <script src="./shipwreck-shore.js?v=2176k"></script>
 <script src="./ship-crossing.js?v=2015"></script>
-<script src="./great-furnace.js?v=2178a"></script>
+<script src="./great-furnace.js?v=2182f"></script>
 <script src="./furnace-colossus.js?v=2014"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2170">
 <script src="./journal-notice.js?v=2150"></script>
@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.181.0-woods-canopy';
+const VERSION3D='2.182.0-campaign-surfaces';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5500,6 +5500,7 @@ function enterZone(zi){
 }
 function loadArea(){
   BFChestReveal.clear();
+  clearTimeout(storyToast._t);const oldStoryCard=document.getElementById('storycard');if(oldStoryCard){oldStoryCard.classList.remove('show');oldStoryCard.textContent='';}
  G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
   G.kingFinal=null;document.getElementById('finalCharge')?.remove();G.ascent=null;G.ascentWorkers=[];G.castleGates=null;G.library=null;G.court=null;G.thunder=null;G.shore=null;G.voyage=null;G.voyageLanded=false;document.getElementById("voyagehud")?.remove();G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;G.peaks=null;G.iceCaves=null;G.iron=null;G.furnace=null;G.ironWorkers=[];
   const Z=curZone();
@@ -22340,11 +22341,11 @@ function render(t){
   const keepArtSky=window.__KEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const frostArtSky=window.__FROST_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const deepArtSky=window.__DEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
-  const sky=G?.sparringRoom?[.075,.105,.12]:G?.devBriar?(G.devBriar.part?[.16,.25,.23]:[.38,.53,.62]):deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.49,.62,.70]:[.110,.208,.278]):keepArtSky?(G.area===1||G.side?[.149,.176,.176]:[.188,.220,.192]):hollowArtSky?[.149,.243,.235]:hubArtSky?[.31,.42,.48]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
+  const sky=G?.sparringRoom?[.075,.105,.12]:G?.devBriar?(G.devBriar.part?[.16,.25,.23]:[.38,.53,.62]):deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.51,.70,.86]:[.145,.28,.36]):keepArtSky?(G.area===1||G.side?[.188,.239,.243]:[.42,.55,.63]):hollowArtSky?[.46,.65,.73]:hubArtSky?[.31,.42,.48]:artSky?(G.area===1||G.side?[.247,.396,.376]:[.48,.67,.80]):s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
-  if(G){ const sc=G.sparringRoom?{z:1,p:[.72,.22],c:[0,0,0]}:G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:inPalaceCourtyard()?{z:.55,p:[.50,.80],c:[.30,.25,.16]}:deepArtSky?{z:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:.46,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:.48,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.48,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
+  if(G){ const sc=G.sparringRoom?{z:1,p:[.72,.22],c:[0,0,0]}:G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:inPalaceCourtyard()?{z:.78,p:[.50,.80],c:[.30,.25,.16]}:deepArtSky?{z:G.zone===6?.76:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:inSnowbound()?.75:.6,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:G.area===0?.74:.55,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.76,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:artSky?(G.area===1?.68:.76):.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // STATIC skybox sun: the sun holds one fixed spot in the sky no matter how the camera turns, so the
     // scene's key light and ambience stay consistent (the world-space light direction uL is already fixed).
@@ -23968,7 +23969,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2181b"></script>
+<script type="module" src="./hero3d.js?v=2182f"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

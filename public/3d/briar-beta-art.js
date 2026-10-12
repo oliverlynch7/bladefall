@@ -1,4 +1,4 @@
-import {buildBriarTrees,buildBriarDressing} from './briar-trees.js?v=2127';
+import {buildBriarTrees,buildBriarDressing} from './briar-trees.js?v=2182f';
 import * as T from './three.module.js';
 // Authored landmarks and workspaces. No scatter algorithm places gameplay props.
 export function buildBriarBetaArt(world){

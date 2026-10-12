@@ -1,3 +1,4 @@
+import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Frostfell: faceted opaque ice keeps the cave maze affordable in a browser. */
 import * as THREE from './three.module.js';
@@ -14,8 +15,10 @@ export function loadFrost(){
     catch(e){failed=true;console.warn('[frost-art]',e)}resolve();
   },undefined,e=>{failed=true;console.warn('[frost-art] Original scenery fallback',e);resolve()}));return pending;
 }
-const material=new THREE.MeshLambertMaterial({vertexColors:true,emissive:'#07111a'});
-const crystalMaterial=new THREE.MeshLambertMaterial({vertexColors:true,emissive:'#10364c'});
+const material=campaignMaterial('ice',{vertexColors:true,emissive:'#07111a'});
+const snowMaterial=campaignMaterial('snow',{vertexColors:true}),woodMaterial=campaignMaterial('wood',{vertexColors:true}),rockMaterial=campaignMaterial('stone',{vertexColors:true});
+const clothMaterial=campaignMaterial('cloth',{vertexColors:true}),metalMaterial=campaignMaterial('metal',{vertexColors:true}),plainMaterial=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8});
+const crystalMaterial=campaignMaterial('ice',{vertexColors:true,emissive:'#10364c',roughness:.27});
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildFrost(scene,w){
   const outdoor=String(w.frostScene||'').startsWith('peaks:'),authored=!!w.frostScene;
@@ -25,7 +28,7 @@ export function buildFrost(scene,w){
   }
   const root=new THREE.Group();root.name=outdoor?'Frostfell · Snowbound Peaks':w.frostScene==='officers'?'Frostfell · Officers’ Cavern':authored?'Frostfell · Deep Ice Caves':'Frostfell · The Crystal Labyrinth';
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),roofs=new Map(),fade=[],glows=[],bodies=new Set();let floors=0,target=null,source=null;
-  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,obstacle=null){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,obstacle:obstacle||source});}
+  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,obstacle=null,finish=null){const cell=target||Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name+'|'+(finish||'');if(!bins.has(key))bins.set(key,{cell,name,finish,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,obstacle:obstacle||source});}
   function cap(o,top,isWall){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
     for(const p of pieces){const x=(p.a+p.b)/2,z=(p.c+p.d)/2,ww=p.b-p.a,dd=p.d-p.c;
@@ -62,15 +65,15 @@ export function buildFrost(scene,w){
   }source=null;
   for(const o of w.walls||[]){if(o.invisible)continue;surface({...o,caveWall:true},o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
   for(const d of w.deco||[]){source=authored?{...d,h:(d.y0||0)+(d.h||0)}:null;const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
-    if(d.kind==='officerBanner'){add('trunk',d.x,y+hh*.5,d.z,130,hh,130,'#515b61');add('slab',d.x,y+hh*.7,d.z+9,ww,hh*.5,5,'#263e4e');add('slab',d.x,y+hh*.7,d.z+13,12,hh*.42,3,'#a8b8bd');for(const dx of [-ww*.47,ww*.47])add('slab',d.x+dx,y+hh*.7,d.z+13,5,hh*.5,3,'#899aa3');continue;}
+    if(d.kind==='officerBanner'){add('trunk',d.x,y+hh*.5,d.z,130,hh,130,'#515b61');add('slab',d.x,y+hh*.7,d.z+9,ww,hh*.5,5,'#263e4e',0,null,'cloth');add('slab',d.x,y+hh*.7,d.z+13,12,hh*.42,3,'#a8b8bd',0,null,'cloth');for(const dx of [-ww*.47,ww*.47])add('slab',d.x+dx,y+hh*.7,d.z+13,5,hh*.5,3,'#899aa3',0,null,'cloth');continue;}
     if(d.kind==='iceResearch'){
-      add('slab',d.x,y+hh-6,d.z,ww,12,dd,'#8a775c');for(const dx of [-ww*.4,ww*.4])for(const dz of [-dd*.35,dd*.35])add('slab',d.x+dx,y+hh*.45,d.z+dz,9,hh*.9,9,'#665844');
-      if(hh>90){for(let j=0;j<3;j++){add('slab',d.x,y+30+j*32,d.z,ww,5,dd,'#937b59');for(let k=0;k<5;k++)add('slab',d.x-ww*.35+k*ww*.16,y+42+j*32,d.z,ww*.11,20,dd*.6,k%2?'#837855':'#586f7b');}}
-      else{add('slab',d.x-ww*.18,y+hh+2,d.z,45,3,35,'#d3c8a5');add('barrel',d.x+ww*.25,y+hh+14,d.z,20,28,20,'#77abb7');add('barrel',d.x+ww*.25,y+hh+29,d.z,14,3,14,'#b9b59e');}continue;
+      add('slab',d.x,y+hh-6,d.z,ww,12,dd,'#8a775c',0,null,'wood');for(const dx of [-ww*.4,ww*.4])for(const dz of [-dd*.35,dd*.35])add('slab',d.x+dx,y+hh*.45,d.z+dz,9,hh*.9,9,'#665844',0,null,'wood');
+      if(hh>90){for(let j=0;j<3;j++){add('slab',d.x,y+30+j*32,d.z,ww,5,dd,'#937b59',0,null,'wood');for(let k=0;k<5;k++)add('slab',d.x-ww*.35+k*ww*.16,y+42+j*32,d.z,ww*.11,20,dd*.6,k%2?'#837855':'#586f7b',0,null,'cloth');}}
+      else{add('slab',d.x-ww*.18,y+hh+2,d.z,45,3,35,'#d3c8a5',0,null,'plain');add('barrel',d.x+ww*.25,y+hh+14,d.z,20,28,20,'#77abb7',0,null,'plain');add('barrel',d.x+ww*.25,y+hh+29,d.z,14,3,14,'#b9b59e',0,null,'metal');}continue;
     }
     if(d.kind==='mountainCamp'){
-      for(const dx of [-40,40]){add('barrel',d.x+dx,y+24,d.z,38,48,38,'#7b6145');for(const dy of [9,37])add('barrel',d.x+dx,y+dy,d.z,40,5,40,'#47545b');}
-      add('slab',d.x+10,y+9,d.z+70,130,14,30,'#877254');
+      for(const dx of [-40,40]){add('barrel',d.x+dx,y+24,d.z,38,48,38,'#7b6145');for(const dy of [9,37])add('barrel',d.x+dx,y+dy,d.z,40,5,40,'#47545b',0,null,'metal');}
+      add('slab',d.x+10,y+9,d.z+70,130,14,30,'#877254',0,null,'wood');
       for(let j=0;j<7;j++){const a=j*Math.PI*2/7;add('drift',d.x+Math.cos(a)*28,y+5,d.z+135+Math.sin(a)*28,22,15,21,'#596c75',a);}add('drift',d.x,y+5,d.z+135,35,7,30,'#302d2a');continue;
     }
     if(d.kind==='mountainBoulder'){add('drift',d.x,y+hh*.35,d.z,ww,hh,dd,'#728792',r*3);add('drift',d.x-ww*.06,y+hh*.66,d.z,ww*.9,hh*.38,dd*.86,'#e1e6df',r*3);continue;}
@@ -80,7 +83,7 @@ export function buildFrost(scene,w){
     }
     if(d.kind==='mountainAwning'){
       target='roof'+roofs.size;roofs.set(target,d);
-      add('slab',d.x,y+hh/2,d.z,ww,hh,dd,d.c||'#ad9c7f');
+      add('slab',d.x,y+hh/2,d.z,ww,hh,dd,d.c||'#ad9c7f',0,null,'wood');
       add('snow',d.x,y+hh+.5,d.z,ww,1,dd,'#e1e6df');
       target=null;continue;
     }
@@ -97,7 +100,7 @@ export function buildFrost(scene,w){
       else add('rubble',d.x,y,d.z,ww,Math.min(hh,26),dd);
     }else if(d.kind==='rock')add('rubble',d.x,y,d.z,ww,hh,dd);
     else if(hh<4&&ww>60)continue;
-    else{add('slab',d.x,y+hh/2,d.z,ww,hh,dd,d.kind==='mountainTimber'?(d.c||'#8a7355'):hh>40?'#447f9c':'#9bc9db');if(hh>18)add('snow',d.x,y+hh+.5,d.z,ww,1,dd);}
+    else{add('slab',d.x,y+hh/2,d.z,ww,hh,dd,d.kind==='mountainTimber'?(d.c||'#8a7355'):hh>40?'#447f9c':'#9bc9db',0,null,d.kind==='mountainTimber'?'wood':null);if(hh>18)add('snow',d.x,y+hh+.5,d.z,ww,1,dd);}
   }
   source=null;
   let snowCover=null;
@@ -110,13 +113,14 @@ export function buildFrost(scene,w){
     root.add(snowCover);
   }
   const groups=new Map();let triangles=0,instances=0;
-  for(const {cell,name,list} of bins.values()){
-    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;g.userData.roof=roofs.get(cell)||null;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,name==='crystal'?crystalMaterial:material,list.length),col=new THREE.Color();m.name='Frost '+name;
+  for(const {cell,name,finish,list} of bins.values()){
+    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;g.userData.roof=roofs.get(cell)||null;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='wood'?woodMaterial:finish==='cloth'?clothMaterial:finish==='metal'?metalMaterial:finish==='plain'?plainMaterial:finish==='stone'?rockMaterial:name==='crystal'?crystalMaterial:['snow','drift'].includes(name)?snowMaterial:['barrel','trunk'].includes(name)?woodMaterial:['peakRock','rubble'].includes(name)?rockMaterial:material,list.length),col=new THREE.Color();m.name='Frost '+name;
     for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.obstacle)fade.push({mesh:m,index:i,o:d.obstacle,matrix:dummy.matrix.clone(),hidden:false});}
     m.userData.artMatrices=m.instanceMatrix.array.slice();m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='snow'&&name!=='roof';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.72:.18)}});
-  const oldFog=scene.fog;scene.fog=new THREE.Fog(outdoor?'#8ea8b5':'#1c3547',outdoor?800:500,outdoor?2400:2000);
+  const oldFog=scene.fog;scene.fog=new THREE.Fog(outdoor?'#abcbdc':'#25485c',outdoor?800:500,outdoor?2400:2000);
+  root.add(new THREE.HemisphereLight('#daf3ff','#506b8a',.55));
   const sun=new THREE.DirectionalLight('#d3edff',1.8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-740,right:740,top:740,bottom:-740,near:1,far:2600});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#5bc8ff',800,210,1.6);root.add(l);return l});
   const counts={frostArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};

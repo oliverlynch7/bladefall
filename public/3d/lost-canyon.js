@@ -99,7 +99,7 @@
    if(i)for(const dz of [-46,46])detail(x,z+dz,y-21,112,7,8,'#ad8c5a');
    if(i){detail(x+44,z-37,y+2,6,55,6,'#725c42');detail(x+47,z-32,y+28,42,24,5,i===freightJumps.length-1?'#d2a457':'#5a9a98');}
   }
-  G.storyNpcs=[{id:'ward',name:'Captain Ward',x:-90,z:-630,y:140},{id:'ruth',name:'Ruth',x:-440,z:-1450,y:0}];
+  G.storyNpcs=[{id:'ward',name:'Captain Ward',x:-90,z:-750,y:140},{id:'ruth',name:'Ruth',x:-440,z:-1450,y:0}];
   const o=(key,label,x,z,y=0,kind='lever')=>({key,label,x,z,y,kind});
   G.storyObjects=[o('lc.orders','Read the shift orders',-650,-650,120,'orders'),o('lc.force','Pull the locked gate chain',50,-860,90,'chain'),o('lc.gate','Open the front gate',80,-880,85),o('lc.side','Lower the side ladder',820,-1520,80,'rope'),
    ...Object.entries(cages).map(([id,c])=>({...o('lc.cage.'+id,'Release the '+(id==='extra'?'old':id)+' cage',c.x,c.z+135,c.y,'lock'),guardGroup:id,blockedLabel:'Drive off the cage guards first',blockedText:'The guards are too close to the cage door.'})),

@@ -1,0 +1,31 @@
+# Campaign playtest readiness and visual detail pass
+
+## [Codex | 2026-10-12] Scope and evidence
+
+Oliver requested a large final push across the levels for new players to test independently, including a substantial asset-detail upgrade, clipping fixes and other discovered problems. The initial muted-browser sweep captured both halves of all eight campaign destinations. The recurring visible weakness is large, almost untextured surfaces: green and brown floor squares in Briar, flat sandstone in Hollow Pass, repeated gray slabs in the Keep, blank snow and ice in Frostfell, undifferentiated furnace plates, square beaches, pale palace tiles and blank castle masonry. Existing detailed models should be reused. The Black Woods descent also had a missing ground connection; v2.181.0 fixes it and physically tests the entire climb and descent.
+
+Implement a shared, world-scaled surface system for the campaign art kits. Give masonry, natural rock, wood, industrial plates, grass/soil, snow/ice, sand and marble distinct painted detail, with consistent scale across differently sized instances. Keep the existing silhouettes, class/enemy identity, room layout and collision surfaces; fine material relief must not suggest nonexistent parkour footholds. Use the user's brighter, colorful adventure preference while keeping each region recognizable. Add geometry only where it improves a specific structure or readable object, rather than scattering props to fill space.
+
+Audit initial NPC, enemy and interactable placement against real collision and walking surfaces. Inspect normal-camera screenshots across all 16 halves and relevant boss scenes, correct confirmed overlap/visibility defects, and preserve solid platforms during occlusion. Run main-route, checkpoint, old-save and co-op regression appropriate to changed systems. Watch renderer errors, draw calls and triangle counts: detail should not make ordinary browser play lag. Preserve source assets, saves, rewards, lore, music and the custom-SFX hold.
+
+The completion evidence must distinguish code/automated route checks, visual inspection and human playtesting. This pass can prepare a stable build for outside testers; it cannot certify enjoyment, universal device performance or absence of every visual issue without their feedback.
+
+## [Codex | 2026-10-12] Implemented pass and verification, v2.182.0
+
+The pass upgrades shared campaign scenery rather than replacing every character, enemy, item or prop model. Thirteen cached surface finishes distinguish masonry, rock, timber, metal, grass, soil, sand, snow, ice, marble, cloth, basalt and water. World-space projection keeps detail at a consistent scale on large walls and small ledges. Rounded coastal box edges, additional rock facets, pillar collars/fluting and furnace grilles/window tracery provide limited new silhouette detail. Most geometry stays instanced and new material detail adds no decal layers or collision surfaces.
+
+Homefields and Black Woods reuse the established nature models at the original tree footprints. Added fill lighting, improved coastal shadows and brighter daylight/fog in Briar, Hollow Pass, exterior Ruined Keep, Frostfell and Sunspire follow the approved colorful direction. Caves, woods, Emberdeep and the castle retain their separate atmosphere. Floor tiles no longer get arbitrary grass colors. Furniture uses wood/cloth where the same source shape also represented stone or ice.
+
+Corrected Captain Ward's overlap with descending terrain in Lost Canyon and Martin's overlap with a raised step in Great Furnace. Tall decorative scenery in the coast and deep kits now clears third-person sightlines using actual transformed bounds. The Thunder Cliffs overhang beside the sailcloth route no longer hides the player; supporting platforms stay opaque, and first-person walls stay solid. Intro text gains a dark backing and old intro text is cleared on area changes. The earlier v2.181.0 Black Woods supported climb/descent is included in this work session.
+
+Verification completed in a muted real Chromium browser:
+
+- Rendered and captured all 16 campaign halves and eight boss arenas, using far, shoulder and first-person cameras. No page or shader errors. Inspected overview/contact sheets plus focused start, architecture, furniture and coastal-obstruction frames.
+- Checked 32 story-NPC placements against collision bounds with no remaining detected intersections. This does not certify every decorative mesh intersection in the game.
+- Fresh save: five opening panels, four creator steps, Back preserves the name, the actual name reaches the warrior tutorial, and no tutorial boss spawns.
+- Loaded the private pre-change browser save in Great Furnace with gear and gold intact. Restored 24 distinct campaign checkpoints, preserving earned gold and the Reaper's intrinsic weapon. Death, early hub exit and reload preserve earned character/class XP, skill choice and completed return-request progress.
+- Existing route-repair and guidance checks passed. Thunder Cliffs' 134 movement waypoints passed. Two-client local-transport checks passed escort, ice, cart, boat and prison-lift sharing; these are not external-network tests.
+- Foreground obstruction clears, supporting platforms stay visible, first-person surfaces remain opaque and low quality disables shadows. Pixel comparison found zero enemy pixels through a solid test wall and 28,929 changed pixels when that wall was removed. Generic 3D and voxel Black Woods fallbacks both render.
+- Inline syntax, floor surface splitting, campaign refinement, story state/authority, Gus, Great Furnace, Thunder/Hydra, Sky Library, Castle Gates and 200,000 chest-table samples passed. Opening/checkpoint QA was updated to the current creator and keep-earned-gold behavior.
+
+Machine-readable results: `docs/art-validation/campaign-readiness-2026-10-12.json`. Screenshots and private test-save fixtures remain local under output/tmp. This is a build prepared for outside playtest, not a claim that all assets were remodeled, all visual flaws are eliminated, fun is proven or performance is verified on every device. Human first-session feedback, real-network co-op and slower-device performance remain valuable next checks.

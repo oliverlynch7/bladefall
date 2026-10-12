@@ -1,7 +1,7 @@
-import {buildDeep} from './deep-art.js?v=2135';
+import {buildDeep} from './deep-art.js?v=2182f';
 import * as T from './three.module.js';
 let orb=null;
-export function buildMarbleGuardian(scene,w){const art=buildDeep(scene,{...w,portalProfile:{name:'Sunspire · Guardian Hall',fog:'#a8b8c3',sky:[.53,.64,.71],sun:'#fff0cf',body:'#b4ad9a',lamp:'#f2d49b',hazard:['#a1b5c1','#c7d4dc'],sunGlow:[.18,.15,.10]}});art.counts.name='Guardian Hall';
+export function buildMarbleGuardian(scene,w){const art=buildDeep(scene,{...w,portalProfile:{name:'Sunspire · Guardian Hall',fog:'#a8c7d9',sky:[.44,.65,.83],sun:'#fff0cf',body:'#b4ad9a',lamp:'#f2d49b',hazard:['#a1b5c1','#c7d4dc'],sunGlow:[.18,.15,.10]}});art.counts.name='Guardian Hall';
  const root=new T.Group();root.position.set(0,354,-1780);art.group.add(root);
  const pearl=new T.MeshStandardMaterial({color:0xd1e7ec,emissive:0x637da8,emissiveIntensity:.5,roughness:.25,metalness:.28}),gold=new T.MeshStandardMaterial({color:0xd1b16f,roughness:.4,metalness:.65});
  const ball=new T.Mesh(new T.IcosahedronGeometry(37,2),pearl);root.add(ball);const rings=[];

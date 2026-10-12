@@ -1,25 +1,25 @@
-import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2127';
-import {buildBriarBetaArt} from './briar-beta-art.js?v=2132';
+import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
+import {buildBriarBetaArt} from './briar-beta-art.js?v=2182f';
 window.__briarAssetsPreload=loadBriarTrees;
 import {buildPrisonArt} from './prison-art3d.js?v=2139';
 import {claimSurface} from './surface-regions.js?v=1972';
-import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2167';
-import {buildLongAscent} from './long-ascent-art.js?v=2180b';
-import {buildCastleGates} from './castle-gates-art.js?v=2167';
-import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2167';
-import {buildSkyLibrary} from './sky-library-art.js?v=2167';
-import {buildPalaceCourt} from './palace-courtyard-art.js?v=2167';
-import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2141';
-import {buildStorm,updateStorm} from './storm-art.js?v=2155c';
-import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2135';
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2181b';
+import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2182f';
+import {buildLongAscent} from './long-ascent-art.js?v=2182f';
+import {buildCastleGates} from './castle-gates-art.js?v=2182f';
+import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2182f';
+import {buildSkyLibrary} from './sky-library-art.js?v=2182f';
+import {buildPalaceCourt} from './palace-courtyard-art.js?v=2182f';
+import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2182f';
+import {buildStorm,updateStorm} from './storm-art.js?v=2182f';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2182f';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2182f';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
-import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2140';
-import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2135';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2160';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2173';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2075';
+import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2182f';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2182f';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2182f';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2182f';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2182f';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -2045,7 +2045,7 @@ export function syncWorld(scene){
     window.__PRISON_ART_ACTIVE=true;WORLD3D.ready=true;return true;
   }
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh();updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
+  if(sig === WORLD3D.built){ updateStorm(world);updateCoastHigh(world);updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world);updateMarbleOrb(world);updateFinalKing(world); return true; }
   WORLD3D.ready = false; // Loading must wait for this scene, not the previous scene.
   const customPortal=wantsPortal(world);
   if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
@@ -2073,7 +2073,7 @@ export function syncWorld(scene){
     clearMobs();          // a new level must not inherit the previous zone's pooled creatures
     clearProps();         // ...nor its chests
     WORLD3D.built = sig;
-    updateStorm(world);updateCoastHigh();updateOutskirts(world);
+    updateStorm(world);updateCoastHigh(world);updateOutskirts(world);
     updateHubArt(world,performance.now()/1000);
     updateHollow(world);
     updateKeep(world);

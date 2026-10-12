@@ -1,12 +1,14 @@
+import {trackCampaignOccluder,updateCampaignOccluders,updateCampaignSun} from './campaign-scene.js?v=2182f';
 import * as T from './three.module.js';
+import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {createBoat,createCrossingScene} from './ship3d.js';
 let active;
 export function buildStorm(scene,w){
  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.65:.18);}});
- const group=new T.Group(),geometries=[],materials=[],bins=new Map(),dummy=new T.Object3D();
+ const occluders=[];const group=new T.Group(),geometries=[],materials=[],bins=new Map(),dummy=new T.Object3D();
  const oldFog=scene.fog;scene.fog=new T.Fog('#66818a',w.shipScene==='voyage'?4000:1100,w.shipScene==='voyage'?16000:3300);
- const sun=new T.DirectionalLight('#ffe1b5',1.9);sun.position.set(-600,1000,300);group.add(sun);group.add(new T.HemisphereLight('#cadfdf','#514b3b',1.2));
+ const sun=new T.DirectionalLight('#ffe1b5',1.9);sun.position.set(-600,1000,300);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-700,right:700,top:700,bottom:-700,near:1,far:3000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.2;sun.shadow.bias=-.0002;group.add(sun,sun.target);group.add(new T.HemisphereLight('#cbe9ed','#776342',1.2));
  const box=(x,y,z,sx,sy,sz,c,rz=0)=>{const list=bins.get(c)||[];list.push([x,y,z,sx,sy,sz,rz]);bins.set(c,list);};
  const rock=(x,y,z,sx,sy,sz,c)=>box(x,y,z,sx,sy,sz,'rock:'+c,.17);
  let boat,crossing,ballistaRig;
@@ -66,15 +68,17 @@ export function buildStorm(scene,w){
   ballistaRig={ring,cage};
   boat=createBoat();boat.root.scale.setScalar(32);boat.root.position.set(-250,30,-180);group.add(boat.root);
  }
- let triangles=0,instances=0;const geometry=new T.BoxGeometry(1,1,1),rockGeometry=new T.DodecahedronGeometry(1,0);geometries.push(geometry,rockGeometry);
- for(const [key,list]of bins){const isRock=key.startsWith('rock:'),color=isRock?key.slice(5):key,geo=isRock?rockGeometry:geometry;const material=new T.MeshStandardMaterial({color,roughness:.94,flatShading:true});materials.push(material);const mesh=new T.InstancedMesh(geo,material,list.length);
-  list.forEach(([x,y,z,sx,sy,sz,rz],i)=>{dummy.position.set(x,y,z);dummy.rotation.set(0,0,rz);dummy.scale.set(sx,sy,sz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});mesh.computeBoundingSphere();group.add(mesh);triangles+=list.length*(isRock?36:12);instances+=list.length;
+ let triangles=0,instances=0;const geometry=beveledBoxGeometry(.012),rockGeometry=new T.DodecahedronGeometry(1,0);geometries.push(geometry,rockGeometry);
+ const timberColors=new Set(['#a2784b','#674a32','#715139','#5b4030','#a77549','#a8774c','#b88957','#62432d','#675038','#966b43','#514132','#ad7c4b','#584334']);
+ for(const [key,list]of bins){const isRock=key.startsWith('rock:'),color=isRock?key.slice(5):key,geo=isRock?rockGeometry:geometry,kind=color==='#286a72'?'water':color==='#a69770'?'sand':timberColors.has(color)?'wood':color==='#b4aa85'?'cloth':'stone';const material=campaignMaterial(kind,{color,flatShading:true});materials.push(material);const mesh=new T.InstancedMesh(geo,material,list.length);
+  list.forEach(([x,y,z,sx,sy,sz,rz],i)=>{dummy.position.set(x,y,z);dummy.rotation.set(0,0,rz);dummy.scale.set(sx,sy,sz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);trackCampaignOccluder(occluders,mesh,i,dummy.matrix);});mesh.computeBoundingSphere();mesh.castShadow=kind!=='water';mesh.receiveShadow=true;group.add(mesh);triangles+=list.length*(isRock?36:44);instances+=list.length;
  }
  window.__DEEP_ART_ACTIVE=true;window.__DEEP_ART_LOOK={body:'#65756d',hazard:['#286a72','#629799'],sky:[.35,.48,.52],sunGlow:[.09,.09,.05]};
- active={group,boat,crossing,ballistaRig};group.userData.dispose=()=>{scene.fog=oldFog;boat?.dispose();crossing?.dispose();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of group.userData.textures||[])t.dispose();if(active?.group===group)active=null;window.__DEEP_ART_ACTIVE=false;window.__DEEP_ART_LOOK=null;};
+ active={group,boat,crossing,ballistaRig,sun,occluders};group.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();boat?.dispose();crossing?.dispose();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of group.userData.textures||[])t.dispose();if(active?.group===group)active=null;window.__DEEP_ART_ACTIVE=false;window.__DEEP_ART_LOOK=null;};
  return {group,counts:{name:'Storm Coast',artObstacles:true,floorTiles:instances,totalTriangles:triangles,triangles,instances}};
 }
 export function updateStorm(w){if(!active||!w.shipScene)return;const g=window.__BF3?.G;if(!g)return;
+ const p=g.p;updateCampaignSun(active,p,-600,1000,300);updateCampaignOccluders(active.occluders,w);
  if(active.ballistaRig){const shot=g.shore?.ballista?.shot,open=!!g.storyState?.flags['sc.code.open']&&(!shot?.hit||performance.now()/1000-shot.at>=.52);active.ballistaRig.ring.visible=!open;active.ballistaRig.cage.position.y+=(open?-85-active.ballistaRig.cage.position.y:-active.ballistaRig.cage.position.y)*.12;}
  if(active.boat){const [rudderInstalled,sailInstalled,ropeInstalled]=g.shore?.parts||[];active.boat.update(g.time,0,{rudderInstalled,sailInstalled,ropeInstalled,underway:false});}
  if(active.crossing&&g.voyage){active.crossing.sync(g.voyage,g.voyage.elapsed);active.crossing.root.position.x=-g.voyage.x*64;}

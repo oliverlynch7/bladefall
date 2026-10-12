@@ -5,7 +5,7 @@ import * as THREE from './three.module.js';
 import {buildWaystone,animateWaystone} from './hub-waystone.js?v=2121';
 import {buildRiftHallArt,updateRiftHallArt} from './rift-hall-art.js?v=2076';
 import {companionPortrait} from './companion3d.js?v=2073';
-import {loadBriarTrees,buildBriarTrees,buildBriarDressing} from './briar-trees.js?v=2127';
+import {loadBriarTrees,buildBriarTrees,buildBriarDressing} from './briar-trees.js?v=2182f';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
 
 const meshes=new Map(),loader=new GLTFLoader(),dummy=new THREE.Object3D();

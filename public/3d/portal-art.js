@@ -1,5 +1,5 @@
 // Secondary modes share the authored architecture, but have their own art identity.
-import {wantsDeep,deepReady,loadDeep,buildDeep} from './deep-art.js?v=2135';
+import {wantsDeep,deepReady,loadDeep,buildDeep} from './deep-art.js?v=2182f';
 const accents={plains:'#abc77c',forest:'#91bd8a',badlands:'#e1a96c',canyon:'#dbbc83',ruins:'#d88169',dungeon:'#b98a79',frost:'#9adfee',volcano:'#ff994d',void:'#c397f1',marble:'#edce86',apex:'#bca0e1'};
 const descentStone={
  plains:['#55565c','#595b61','#51535a','#5d5e63'],forest:['#4b5554','#515c58','#48514f','#57615b'],

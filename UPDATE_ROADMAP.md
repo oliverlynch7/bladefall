@@ -2657,3 +2657,10 @@ The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing 
 - [x] Replaced three nearby number-weight toggles with a swinging cargo cage, marked brace and timed release. An early pull is recoverable; a correct pull opens the existing lower hatch and timber ramp to SC-01.
 - [x] Kept sc.hull.open, old completed saves, main boat/voyage story and rewards. Old partial weight values no longer shortcut the hatch.
 - [x] Muted browser normal-camera, E-key, full shore, voyage, checkpoint, legacy-save and guest-operated co-op checks passed with static/story tests. Human playtesting remains for timing, clarity and art; the campaign-wide quality effort is still open. No custom SFX work. See docs/design/SHIPWRECK_HULL_CARGO_RELEASE_2026-10-11.md.
+
+## [Codex | 2026-10-12] Campaign scene detail and playtest readiness (v2.182.0)
+
+- [x] Shared scenery upgrades across all eight campaign destinations: 13 world-scaled surface finishes, existing nature trees, brighter daylight/fill lighting, coastal shadows/bevels and more detailed pillars, forge grilles and palace/castle windows. No per-prop textures or added decal layers.
+- [x] Fixed two NPC/terrain overlaps, coastal overhead obstructions and scene-introduction readability/stale text. Supporting floors remain visible and first-person walls stay solid.
+- [x] Muted browser: 24 scenes in three cameras, 32 NPC placement checks, fresh creator/tutorial, pre-change save, 24 checkpoint restores, earned progress, main-route checks, Thunder Cliffs movement, local two-client sharing, solid-wall pixels and renderer fallbacks. Relevant static/content tests passed. See docs/design/CAMPAIGN_PLAYTEST_READINESS_2026-10-12.md.
+- [ ] Human first-session playtest, public-network co-op and slower-device performance assessment. These tests establish functional readiness of the changed build, not that every asset or level is perfected. No custom SFX work.

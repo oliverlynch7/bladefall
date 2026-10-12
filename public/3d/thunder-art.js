@@ -1,12 +1,13 @@
+import {trackCampaignOccluder,updateCampaignOccluders,updateCampaignSun} from './campaign-scene.js?v=2182f';
 import * as T from './three.module.js';
+import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {createHydra} from './hydra-art.js?v=2141';
 let active;
 export function buildCoastHigh(scene,w){
  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.5:.16);}});
- const textures=[];const groundCanvas=document.createElement('canvas');groundCanvas.width=groundCanvas.height=256;const ctx=groundCanvas.getContext('2d');ctx.fillStyle='#91a7a6';ctx.fillRect(0,0,256,256);for(let i=0;i<85;i++){const x=i*73%256,y=i*113%256;ctx.fillStyle=i%4===0?'#b8b997':i%3===0?'#667f86':'#819c9f';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+8+i%13,y-3);ctx.lineTo(x+15,y+5);ctx.lineTo(x+3,y+8);ctx.fill();}ctx.strokeStyle='#6b858b';ctx.lineWidth=2;for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(i*41,0);ctx.lineTo(i*41+12,28+i*9);ctx.lineTo(i*41+4,45+i*9);ctx.stroke();}const groundTex=new T.CanvasTexture(groundCanvas);groundTex.colorSpace=T.SRGBColorSpace;groundTex.wrapS=groundTex.wrapT=T.RepeatWrapping;textures.push(groundTex);
- const group=new T.Group(),bins=new Map(),geos=[],mats=[],dummy=new T.Object3D(),oldFog=scene.fog;
- scene.fog=new T.Fog('#648996',1800,6500);const sun=new T.DirectionalLight('#d2e7ee',2);sun.position.set(-500,1400,600);group.add(sun);group.add(new T.HemisphereLight('#b3d7e7','#273e45',1.4));
+ const occluders=[];const group=new T.Group(),bins=new Map(),geos=[],mats=[],dummy=new T.Object3D(),oldFog=scene.fog;
+ scene.fog=new T.Fog('#648996',1800,6500);const sun=new T.DirectionalLight('#d2e7ee',2);sun.position.set(-500,1400,600);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-850,right:850,top:850,bottom:-850,near:1,far:3500});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;sun.shadow.bias=-.0002;group.add(sun,sun.target);group.add(new T.HemisphereLight('#c6e6ee','#415d61',1.4));
  const box=(x,y,z,sx,sy,sz,c,kind='box')=>{const key=kind+':'+c,a=bins.get(key)||[];a.push([x,y,z,sx,sy,sz]);bins.set(key,a);};
  const ledger=new Map();for(const o of w.obstacles.filter(o=>o.kind==='plat'))for(const p of claimSurface(ledger,o,String(o.h))){box(p.x,p.h-15,p.z,p.w,30,p.d,'#82999a');if(!p.thunderCatch)box(p.x,p.h/2-60,p.z,p.w*1.1,Math.max(50,p.h+90),p.d*1.1,'#3c5664','rock');}
  for(const wall of w.walls)box(wall.x,wall.y0+wall.h/2,wall.z,wall.w,wall.h,wall.d,wall.thunderTag?.endsWith('Gate')?'#69757b':'#4a6570');
@@ -26,9 +27,10 @@ export function buildCoastHigh(scene,w){
  for(let j=0;j<12;j++)box(300,875+j*16,-5090-j*55,210,20,65,'#c0c6b1');
  for(const [x,z,y]of [[-2120,-3820,340],[-1560,-4780,300]]){box(x,y+240,z,590,100,540,'#435e69','rock');}
  }
- let triangles=0,instances=0;const cube=new T.BoxGeometry(1,1,1),rock=new T.CylinderGeometry(.43,.62,1,6);geos.push(cube,rock);
- for(const [key,list]of bins){const isRock=key.startsWith('rock:'),m=new T.MeshStandardMaterial({color:key.slice(key.indexOf(':')+1),roughness:.96,flatShading:true});if(key.endsWith('#82999a'))m.map=groundTex;mats.push(m);const mesh=new T.InstancedMesh(isRock?rock:cube,m,list.length);list.forEach(([x,y,z,sx,sy,sz],i)=>{dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,isRock?(i%4)*.31:0,0);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});mesh.computeBoundingSphere();group.add(mesh);triangles+=list.length*(isRock?24:12);instances+=list.length;}
- window.__DEEP_ART_ACTIVE=true;window.__DEEP_ART_LOOK={body:'#46606d',hazard:['#1c6274','#81b9c0'],sky:[.31,.46,.54],sunGlow:[.04,.07,.09]};active={group,hydra};group.userData.dispose=()=>{hydra?.dispose();geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());scene.fog=oldFog;if(active?.group===group)active=null;window.__DEEP_ART_ACTIVE=false;window.__DEEP_ART_LOOK=null;};
+ let triangles=0,instances=0;const cube=beveledBoxGeometry(.012),rock=new T.CylinderGeometry(.43,.62,1,9);geos.push(cube,rock);
+ const woodColors=new Set(['#665c49','#9b997e','#c4b99a','#96856a','#9c845a','#645e50']);
+ for(const [key,list]of bins){const isRock=key.startsWith('rock:'),color=key.slice(key.indexOf(':')+1),kind=color==='#1c6274'?'water':woodColors.has(color)?'wood':color==='#c0c6b1'?'marble':'stone',m=campaignMaterial(kind,{color,flatShading:true});mats.push(m);const mesh=new T.InstancedMesh(isRock?rock:cube,m,list.length);list.forEach(([x,y,z,sx,sy,sz],i)=>{dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,isRock?(i%4)*.31:0,0);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);trackCampaignOccluder(occluders,mesh,i,dummy.matrix);});mesh.computeBoundingSphere();mesh.castShadow=kind!=='water';mesh.receiveShadow=true;group.add(mesh);triangles+=list.length*(isRock?36:44);instances+=list.length;}
+ window.__DEEP_ART_ACTIVE=true;window.__DEEP_ART_LOOK={body:'#46606d',hazard:['#1c6274','#81b9c0'],sky:[.31,.46,.54],sunGlow:[.04,.07,.09]};active={group,hydra,sun,occluders};group.userData.dispose=()=>{sun.shadow.map?.dispose();hydra?.dispose();geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());scene.fog=oldFog;if(active?.group===group)active=null;window.__DEEP_ART_ACTIVE=false;window.__DEEP_ART_LOOK=null;};
  return {group,counts:{name:w.shipScene==='hydra'?'Hydra Ledges':'Thunder Cliffs',artObstacles:true,triangles,totalTriangles:triangles,instances}};
 }
-export function updateCoastHigh(){if(active?.hydra&&window.__BF3?.G?.hydraArena)active.hydra.update(window.__BF3.G);}
+export function updateCoastHigh(w){const g=window.__BF3?.G;if(!active||!g)return;const p=g.p;updateCampaignSun(active,p,-500,1400,600);window.__COAST_OCCLUSION=updateCampaignOccluders(active.occluders,w);if(active.hydra&&g.hydraArena)active.hydra.update(g);}

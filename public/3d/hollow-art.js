@@ -1,3 +1,4 @@
+import {campaignMaterial} from './campaign-materials.js?v=2182f';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Hollow Pass: warm sandstone canyon scenery over the authored collision surfaces. */
 import * as THREE from './three.module.js';
@@ -16,11 +17,11 @@ export function loadHollow(){
     catch(e){failed=true;console.warn('[hollow-art]',e)}resolve();
   },undefined,e=>{failed=true;console.warn('[hollow-art] Original scenery fallback',e);resolve()}));return pending;
 }
-const material=new THREE.MeshLambertMaterial({vertexColors:true});
+const material=campaignMaterial('stone',{vertexColors:true}),woodMaterial=campaignMaterial('wood',{vertexColors:true});
 export function buildHollow(scene,w){
   const root=new THREE.Group();root.name='Hollow Pass · The Wind-carved Canyon';
   const bins=new Map(),obstacles=new WeakSet(),ribbons=[],owned=[],windbreaks=[],occluders=new Map();let floors=0,source=null;
-  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
+  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,finish='stone'){const cell=Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name+'|'+(finish||'');if(!bins.has(key))bins.set(key,{cell,name,finish,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
   const block=(x,y,z,ww,h,d,c)=>add(Math.min(ww,h,d)<=2?'timber':'stone',x,y,z,ww,h,d,c);
   const tops=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
   // Each heightfield slab retains its exact extent. Broad caps split into worn flagstones.
@@ -77,11 +78,11 @@ export function buildHollow(scene,w){
       }
       return;
     }
-    add(wood?'timber':'stone',o.x,base+height/2,o.z,ww,height,dd,wood?'#69583e':top>70?'#805936':'#a67547');
+    add(wood?'timber':'stone',o.x,base+height/2,o.z,ww,height,dd,wood?'#69583e':top>70?'#805936':'#a67547',0,wood?'wood':'stone');
     const nx=Math.ceil(ww/48),nz=Math.ceil(dd/48),dx=ww/nx,dz=dd/nz;
     for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){
       const x=o.x-ww/2+(ix+.5)*dx,z=o.z-dd/2+(iz+.5)*dz;
-      add('timber',x,top+.5,z,dx-.9,1.4,dz-.9,wood?'#9a8058':palette[Math.floor(hash(x,z)*5)]);floors++;
+      add('timber',x,top+.5,z,dx-.9,1.4,dz-.9,wood?'#9a8058':palette[Math.floor(hash(x,z)*5)],0,wood?'wood':'stone');floors++;
     }
     // Shallow seams sit inside the solid, never extending into a walking route.
     if(height>45){const rows=Math.min(8,Math.ceil(height/44));for(let j=1;j<rows;j++){
@@ -108,15 +109,15 @@ export function buildHollow(scene,w){
   }
   for(const o of tops){source=o;const top=o.h||1,base=o.y0??(o.kind==='plat'?Math.min(0,top-18):0);surface(o,base,top,!!(o.bridge||o.root));obstacles.add(o);
     if(o.bridge){const alongX=o.w>o.d,length=alongX?o.w:o.d,width=alongX?o.d:o.w;
-      for(const side of [-1,1])for(let i=0;i<=Math.floor(length/65);i++){const u=-length/2+i*length/Math.max(1,Math.floor(length/65));add('timber',o.x+(alongX?u:side*(width/2-3)),top+17,o.z+(alongX?side*(width/2-3):u),3,34,3,'#6e5436');}
-      for(const side of [-1,1])add('timber',o.x+(alongX?0:side*(width/2-3)),top+28,o.z+(alongX?side*(width/2-3):0),alongX?length:2.2,2.2,alongX?2.2:length,'#ad9060');
+      for(const side of [-1,1])for(let i=0;i<=Math.floor(length/65);i++){const u=-length/2+i*length/Math.max(1,Math.floor(length/65));add('timber',o.x+(alongX?u:side*(width/2-3)),top+17,o.z+(alongX?side*(width/2-3):u),3,34,3,'#6e5436',0,'wood');}
+      for(const side of [-1,1])add('timber',o.x+(alongX?0:side*(width/2-3)),top+28,o.z+(alongX?side*(width/2-3):0),alongX?length:2.2,2.2,alongX?2.2:length,'#ad9060',0,'wood');
     }
   }
   }
   source=null;
   // Replace the old decorative canyon scatter, preserving every supplied anchor and height.
   for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
-    if(d.kind==='campdetail'){add('timber',d.x,y+hh/2,d.z,ww,hh,dd,d.c);continue;}
+    if(d.kind==='campdetail'){add('timber',d.x,y+hh/2,d.z,ww,hh,dd,d.c,0,'wood');continue;}
     if(d.kind==='fossil'){add('fossil',d.x,y,d.z,ww,hh*2,dd,'#e3d5b0',Math.PI/2);continue;}
     if(d.kind==='windbreak'){
       add('beacon',d.x,y,d.z,20,20,20,'#c79a54');
@@ -143,13 +144,14 @@ export function buildHollow(scene,w){
     const curve=new THREE.CatmullRomCurve3(points),geo=new THREE.TubeGeometry(curve,28,1.6,3,false),mat=new THREE.MeshBasicMaterial({color:'#70aaa1',transparent:true,opacity:.24,depthWrite:false});const m=new THREE.Mesh(geo,mat);root.add(m);ribbons.push({m,x:r.x,z:r.z,phase:i,vane:r.vane});owned.push(geo,mat);
   }
   const groups=new Map();let triangles=0,instances=0;
-  for(const {cell,name,list} of bins.values()){
-    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,material,list.length),col=new THREE.Color();
+  for(const {cell,name,finish,list} of bins.values()){
+    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='wood'?woodMaterial:material,list.length),col=new THREE.Color();
     for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.source){if(!occluders.has(d.source))occluders.set(d.source,{o:d.source,parts:[],hidden:false});occluders.get(d.source).parts.push({mesh:m,index:i,matrix:dummy.matrix.clone()});}}
     m.userData.artMatrices=m.instanceMatrix.array.slice();m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='tuft';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.58:.14)}});
-  const oldFog=scene.fog;scene.fog=new THREE.Fog('#9c805b',750,2500);
+  const oldFog=scene.fog;scene.fog=new THREE.Fog('#b5b9a8',750,2500);
+  root.add(new THREE.HemisphereLight('#c6e8ee','#997346',.6));
   const sun=new THREE.DirectionalLight('#ffe0b0',2.1);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:2800});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;root.add(sun,sun.target);
   const counts={hollowArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
   active={root,groups,obstacles,ribbons,windbreaks,sun,counts,occluders,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__HOLLOW_ART_ACTIVE=true;

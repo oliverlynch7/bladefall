@@ -2639,3 +2639,9 @@ The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing 
 - [x] Replaced the optional three-weight combination with a loft hopper, lower aimable trough, visible grain flow and pulley basket that opens the same store room. Hopper-first spills visibly without trapping the player.
 - [x] Kept the existing reward and save IDs, corrected the far-camera roof obstruction, and moved journal updates clear of simultaneous chest reveals and the minimap.
 - [x] Muted browser route/height/collision, save, two-page co-op and story checks passed. Human playtesting remains for challenge, art and readability. This is one optional puzzle, not a full Homefields redesign. See docs/design/HOMEFIELDS_GRANARY_CHUTE_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Ruined Keep lower works press crossing (v2.173.0)
+
+- [x] Retired both optional weight combinations and latch; replaced them with three staggered, visible presses and a reachable emergency brake.
+- [x] Kept `kd.deep.open`, RK-03, Sly, the main lift, drain, other rewards, co-op authority and old completed saves. Old partial weights do not solve the new route.
+- [x] Muted browser visual, normal-movement crossing, hit/retry, gate/shard, full route, checkpoint, co-op and legacy-save checks passed with static/story checks. Human playtest remains for difficulty and art; the wider level-design backlog is still active. No custom SFX work. See docs/design/RUINED_KEEP_LOWER_WORKS_2026-10-11.md.

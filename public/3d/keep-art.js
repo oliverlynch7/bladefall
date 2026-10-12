@@ -38,6 +38,39 @@ function buildLiftWinch(root){
   const colors={lit:new THREE.Color('#aee9c6'),dark:new THREE.Color('#72685a')};
   return {deck,arm,weight,marker,colors,lastLit:-1,dispose(){deck.removeFromParent();weight.removeFromParent();for(const g of owned)g.dispose();for(const m of mat)m.dispose();}};
 }
+function buildLowerPresses(root){
+  const geometry=new Set(),materials=[],iron=new THREE.MeshStandardMaterial({color:'#52646b',metalness:.55,roughness:.55}),dark=new THREE.MeshStandardMaterial({color:'#303b42',metalness:.38,roughness:.7}),brass=new THREE.MeshStandardMaterial({color:'#d6a95a',metalness:.58,roughness:.42}),stripe=new THREE.MeshStandardMaterial({color:'#e09b50',metalness:.28,roughness:.58});materials.push(iron,dark,brass,stripe);
+  const add=(parent,geo,mat,x=0,y=0,z=0)=>{geometry.add(geo);const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;};
+  const stages=[];
+  for(const z of [-3120,-2990,-2860]){
+    const group=new THREE.Group();group.position.z=z;group.name='Lower works counterweight press';root.add(group);
+    add(group,new THREE.BoxGeometry(542,5,76),dark,0,2.5,0);
+    for(const x of [-274,274]){
+      add(group,new THREE.BoxGeometry(15,160,70),iron,x,80,0);
+      for(const y of [18,75,132])add(group,new THREE.BoxGeometry(20,7,76),brass,x,y,0);
+    }
+    add(group,new THREE.BoxGeometry(556,16,85),dark,0,165,0);
+    for(let i=-4;i<=4;i++)add(group,new THREE.BoxGeometry(6,8,83),brass,i*55,174,0);
+    const ram=add(group,new THREE.BoxGeometry(480,1,54),iron),ribs=[];
+    for(const x of [-226,-112,0,112,226])ribs.push(add(group,new THREE.BoxGeometry(8,1,6),brass,x,0,-30));
+    for(const x of [-168,-56,56,168])add(group,new THREE.BoxGeometry(56,9,6),stripe,x,156,-35);
+    const plate=new THREE.Group();group.add(plate);add(plate,new THREE.BoxGeometry(530,28,62),iron,0,14,0);
+    add(plate,new THREE.BoxGeometry(516,7,66),brass,0,5,0);
+    for(let i=-4;i<=4;i++){add(plate,new THREE.BoxGeometry(24,5,67),i%2?dark:stripe,i*55,29,0);for(const dz of [-26,26])add(plate,new THREE.SphereGeometry(3.1,6,6),brass,i*55,16,dz);}
+    const lamps=[];for(const x of [-245,245]){
+      add(group,new THREE.BoxGeometry(32,27,14),dark,x,119,-47);
+      const lampMaterial=new THREE.MeshStandardMaterial({color:'#85a3a7',emissive:'#1f3b43',emissiveIntensity:.9});materials.push(lampMaterial);
+      add(group,new THREE.BoxGeometry(19,14,5),lampMaterial,x,119,-57);lamps.push(lampMaterial);
+    }
+    add(group,new THREE.BoxGeometry(220,12,6),lamps[0],0,119,-57);
+    stages.push({group,plate,ram,ribs,lamps});
+  }
+  const brake=new THREE.Group();brake.name='Lower works emergency brake';brake.position.set(-205,0,-2760);root.add(brake);
+  add(brake,new THREE.BoxGeometry(58,82,48),iron,0,41,0);add(brake,new THREE.BoxGeometry(66,10,56),brass,0,86,0);
+  const handle=new THREE.Group();handle.position.set(0,94,0);brake.add(handle);add(handle,new THREE.BoxGeometry(9,54,9),brass,0,26,0);add(handle,new THREE.SphereGeometry(10,10,8),stripe,0,54,0);
+  const brakeLamp=new THREE.MeshStandardMaterial({color:'#d79861',emissive:'#6e321b',emissiveIntensity:.8});materials.push(brakeLamp);add(brake,new THREE.BoxGeometry(27,13,6),brakeLamp,0,73,28);
+  return {stages,handle,brakeLamp,dispose(){for(const s of stages)s.group.removeFromParent();brake.removeFromParent();for(const g of geometry)g.dispose();for(const m of materials)m.dispose();}};
+}
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildKeep(scene,w){
   const root=new THREE.Group();root.name='Ruined Keep · The Fallen Standard';
@@ -172,13 +205,24 @@ export function buildKeep(scene,w){
   const sun=new THREE.DirectionalLight('#ffe1b2',under?1.15:2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:3000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.2;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffad55',900,180,1.6);root.add(l);return l});
   const counts={keepArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  const winch=w.keepScene==='dungeons'?buildLiftWinch(root):null;
-  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,winch,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
-  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();winch?.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
+  const winch=w.keepScene==='dungeons'?buildLiftWinch(root):null,presses=w.keepScene==='dungeons'?buildLowerPresses(root):null;
+  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,winch,presses,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
+  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();winch?.dispose();presses?.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateKeep(w){
   if(!active||!w.p)return;const a=active,p=w.p,low=window.__BF_META?.().quality==='low',range=low?750:1200;let tris=0,calls=0;
   if(a.winch&&w.prison){const lift=w.movers.find(m=>m.prisonLift),k=w.prison.winch,rig=a.winch;if(lift){rig.deck.position.y=lift.h;rig.weight.position.set(243,435-(lift.h-180),-2500);}rig.arm.rotation.y=-(k.angle||0);const lit=Math.floor((k.progress||0)*24+.0001);if(lit!==rig.lastLit){for(let i=0;i<24;i++)rig.marker.setColorAt(i,i<lit?rig.colors.lit:rig.colors.dark);rig.marker.instanceColor.needsUpdate=true;rig.lastLit=lit;}}
+  if(a.presses&&w.prison){const stopped=!!w.storyState?.flags?.['kd.deep.open'];for(const [i,rig]of a.presses.stages.entries()){
+    const state=w.prison.presses[i],bottom=state?.bottom??134;
+    // The chase camera sits behind the player. Once a press is behind them,
+    // keep its overhead plate from filling the lens while it follows through.
+    rig.group.visible=!(p.y<100&&p.z>state.z+40&&(w.eye?.z??p.z)<state.z&&Math.abs(p.x)<330);
+    rig.plate.position.y=bottom;
+    const ramHeight=Math.max(1,160-bottom-28),ramCenter=bottom+28+ramHeight/2;
+    rig.ram.scale.y=ramHeight;rig.ram.position.y=ramCenter;
+    for(const rib of rig.ribs){rib.scale.y=ramHeight;rib.position.y=ramCenter;}
+    const color=stopped?'#9fe6b6':state?.warning?'#ffd15a':state?.down?'#ef7660':'#85a3a7';for(const lamp of rig.lamps){lamp.color.set(color);lamp.emissive.set(color);}
+  }a.presses.handle.rotation.x=stopped?-.8:.4;a.presses.brakeLamp.color.set(stopped?'#9fe6b6':'#d79861');a.presses.brakeLamp.emissive.set(stopped?'#397954':'#6e321b');}
   for(const [cell,g] of a.groups){const o=g.userData.obstacle,[cx,cz]=o?[o.x,o.z]:cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;
     if(g.visible&&o&&w.eye&&p.y<o.h-5&&window.__BF_META?.().camMode!=='fps')for(let t=.08;t<.95;t+=.08){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t;if(Math.abs(x-o.x)<o.w/2+5&&Math.abs(z-o.z)<o.d/2+5){g.visible=false;break;}}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}

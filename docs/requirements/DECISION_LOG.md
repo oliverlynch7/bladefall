@@ -960,3 +960,11 @@ Continue Oliver's approved campaign puzzle-variety pass. The required dungeon li
 ## [Codex | 2026-10-11] Ruined Keep main lift winch — locally verified
 
 Version 2.172.0 implements the scoped required lift replacement. Real-input browser checks covered grip, partial raise, reverse/release/retry, full turn and late rider; separate two-client checks covered guest operation, host ownership, state sharing, disconnect and transfer. Older partial/completed saves and the full dungeon route passed. Human difficulty and final visual judgment remain with Oliver; do not generalize this result to the remaining campaign levels. No custom SFX work.
+
+## [Codex | 2026-10-11] Ruined Keep lower works press crossing — planned
+
+The later campaign puzzle-variety direction supersedes the earlier optional two-pan implementation as an end state: it still feels like two sequential nearby combination banks. Replace it with a staggered counterweight-press traversal and an emergency brake on the far side. Preserve kd.deep.open, RK-03, main rescue, drain, Sly, old completed saves and co-op story authority. This is a scoped experiential change, pending browser and human playtesting. See docs/design/RUINED_KEEP_LOWER_WORKS_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Ruined Keep lower works press crossing - locally verified
+
+Continue the approved campaign puzzle-variety correction in v2.173.0. The optional RK-03 branch now uses three timed, staggered presses and an emergency brake on the far side in place of both number/weight banks. A mistimed crossing hurts and resets to safe floor; the brake opens the original gate and stops the presses. Preserve `kd.deep.open`, shard and reward IDs, old completed saves, main rescue, Sly, drain and co-op authority. Static and muted browser route, hit, visual, co-op, checkpoint and old-state checks passed. Human playtest remains for feel and visual polish; this is not a completion claim for the campaign. No custom SFX work.

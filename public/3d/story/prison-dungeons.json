@@ -706,154 +706,20 @@
           "type": "note",
           "id": "kd.depth",
           "region": "keep",
-          "title": "Two pans, one lock",
-          "text": "Set the safety bank to 5 and lock its bar. Then hang all three lower weights across the two pans. Each handle moves its weight from the rack to the left pan, then the right pan, then back to the rack. Equal loads release the lower lock."
+          "title": "Counterweight press warning",
+          "text": "The old presses drop in turns. Watch each warning lamp, cross when its plate rises, and wait in the clear floor between them. The emergency brake past the third press stops the machine and opens the shard gate."
         }
       ]
     },
-    "kd.brace.0": {
-      "once": false,
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "kd.brace",
-          "weights": [
-            2,
-            3,
-            5
-          ],
-          "target": 5,
-          "index": 0
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.lift.open",
-          "is": true
-        }
-      ]
-    },
-    "kd.brace.1": {
-      "once": false,
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "kd.brace",
-          "weights": [
-            2,
-            3,
-            5
-          ],
-          "target": 5,
-          "index": 1
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.lift.open",
-          "is": true
-        }
-      ]
-    },
-    "kd.brace.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "kd.brace",
-          "weights": [
-            2,
-            3,
-            5
-          ],
-          "target": 5,
-          "index": 2
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.lift.open",
-          "is": true
-        }
-      ]
-    },
-    "kd.deep.0": {
-      "once": false,
-      "effects": [
-        {
-          "type": "balanceBeam",
-          "id": "kd.deep",
-          "weights": [
-            2,
-            3,
-            5
-          ],
-          "index": 0
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.latch",
-          "is": true
-        }
-      ]
-    },
-    "kd.deep.1": {
-      "once": false,
-      "effects": [
-        {
-          "type": "balanceBeam",
-          "id": "kd.deep",
-          "weights": [
-            2,
-            3,
-            5
-          ],
-          "index": 1
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.latch",
-          "is": true
-        }
-      ]
-    },
-    "kd.deep.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "balanceBeam",
-          "id": "kd.deep",
-          "weights": [
-            2,
-            3,
-            5
-          ],
-          "index": 2
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.latch",
-          "is": true
-        }
-      ]
-    },
-    "kd.latch": {
+    "kd.press.brake": {
       "once": true,
       "effects": [
-        {
-          "type": "flag",
-          "id": "kd.latch",
-          "value": true
-        }
+        { "type": "flag", "id": "kd.deep.open", "value": true },
+        { "type": "note", "id": "kd.press.stopped", "region": "keep", "title": "The presses stopped", "text": "The emergency brake locked the presses overhead. The lower gate is open; a rift shard lies beyond it." }
       ],
       "when": [
-        {
-          "flag": "kd.brace.open",
-          "is": true
-        }
+        { "flag": "kd.lift.open", "is": true },
+        { "flag": "kd.deep.open", "is": false }
       ]
     },
     "kd.return": {

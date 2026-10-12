@@ -1,0 +1,170 @@
+{
+  "version": "2.184.0-chest-craft",
+  "date": "2026-10-12",
+  "scope": "Shared rarity chest visuals; no reward/balance/placement changes",
+  "humanAestheticApproval": false,
+  "realNetworkCoopTested": false,
+  "visual": {
+    "models": [
+      {
+        "chestArt": "2184",
+        "rarity": "common",
+        "triangles": 7216,
+        "drawCalls": 8,
+        "width": 34.650001525878906,
+        "height": 27.170000076293945,
+        "sharedResources": true,
+        "finiteGeometry": true,
+        "hingedOpening": true,
+        "mimic": true
+      },
+      {
+        "chestArt": "2184",
+        "rarity": "uncommon",
+        "triangles": 8992,
+        "drawCalls": 11,
+        "width": 39.58103206634521,
+        "height": 30.702100086212155,
+        "sharedResources": true,
+        "finiteGeometry": true,
+        "hingedOpening": true,
+        "mimic": true
+      },
+      {
+        "chestArt": "2184",
+        "rarity": "rare",
+        "triangles": 9652,
+        "drawCalls": 11,
+        "width": 44.1346021270752,
+        "height": 38.7889147567749,
+        "sharedResources": true,
+        "finiteGeometry": true,
+        "hingedOpening": true,
+        "mimic": true
+      },
+      {
+        "chestArt": "2184",
+        "rarity": "epic",
+        "triangles": 10311,
+        "drawCalls": 12,
+        "width": 48.68817218780518,
+        "height": 50.07474946975709,
+        "sharedResources": true,
+        "finiteGeometry": true,
+        "hingedOpening": true,
+        "mimic": true
+      },
+      {
+        "chestArt": "2184",
+        "rarity": "legendary",
+        "triangles": 11763,
+        "drawCalls": 13,
+        "width": 53.241742248535154,
+        "height": 54.757999420166016,
+        "sharedResources": true,
+        "finiteGeometry": true,
+        "hingedOpening": true,
+        "mimic": true
+      }
+    ],
+    "cameras": [
+      {
+        "mode": "far",
+        "chests": 5
+      },
+      {
+        "mode": "shoulder",
+        "chests": 5
+      },
+      {
+        "mode": "fps",
+        "chests": 5
+      }
+    ],
+    "opening": {
+      "mimic": false,
+      "opened": true,
+      "br": 0,
+      "shove": 0,
+      "rarity": "legendary",
+      "scale": 1.52,
+      "opening": 1,
+      "lidAngle": -1.85
+    },
+    "reward": {
+      "oneItem": true,
+      "repeatSafe": true
+    },
+    "phone": {
+      "left": 11.703125,
+      "right": 378.296875,
+      "bottom": 832
+    },
+    "reveal": {
+      "left": 11.703125,
+      "width": 366.59375,
+      "settled": true
+    },
+    "lowQuality": true,
+    "fallback": true,
+    "errors": []
+  },
+  "rewards": {
+    "campaign": {
+      "retainedEquipment": true,
+      "retainedClaim": true
+    },
+    "others": {
+      "unopenedStable": true,
+      "fullBagSale": true,
+      "duplicateProtected": true,
+      "oneClearReward": true,
+      "grade": "uncommon"
+    },
+    "errors": []
+  },
+  "coop": [
+    "Host and guest share chest grade, each claim exactly one personal item",
+    "Repeated clear/reconstructed chest cannot duplicate guest claim",
+    "Guest reload/rejoin retains claimed chest and item"
+  ],
+  "prison": {
+    "unopenedStable": true,
+    "oneItem": true,
+    "claimedReloadSafe": true
+  },
+  "oldSave": {
+    "preChangeSave": true,
+    "zone": 4,
+    "area": 1,
+    "level": 1,
+    "classId": "warrior",
+    "goldPreserved": true,
+    "weapon": "Rusty Sword"
+  },
+  "lighting": {
+    "campaign": [
+      {
+        "zone": 0,
+        "models": 5,
+        "error": null,
+        "triangles": 214882
+      },
+      {
+        "zone": 3,
+        "models": 5,
+        "error": null,
+        "triangles": 113362
+      },
+      {
+        "zone": 7,
+        "models": 5,
+        "error": null,
+        "triangles": 124584
+      }
+    ],
+    "devLink": true,
+    "drag": true,
+    "errors": []
+  }
+}

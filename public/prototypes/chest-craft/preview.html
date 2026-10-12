@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bladefall · Chest workshop</title>
+<style>
+*{box-sizing:border-box}body{height:100dvh;overflow:hidden;margin:0;background:#242b30;color:#f4eee3;font:15px/1.45 system-ui}canvas{display:block;width:100%;height:100%}header{position:absolute;top:20px;left:24px;padding:10px 14px;border:1px solid #586169;border-radius:10px;background:#172229ed;pointer-events:none}h1{font-size:24px;margin:0}p{margin:5px 0;color:#d4d0c7}.controls{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:9px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:94vw}button,select{border:1px solid #c3a774;border-radius:7px;background:#303b43;color:#fff4dc;padding:10px 15px;font:inherit;cursor:pointer}button:hover,button[aria-pressed=true]{background:#675233}#label{position:absolute;bottom:84px;left:50%;transform:translateX(-50%);width:max-content;max-width:94vw;padding:6px 12px;border-radius:8px;background:#172229e6;text-align:center;color:#f1e0c5;pointer-events:none}a{color:#efcc8d}#back{position:absolute;right:24px;top:25px;padding:8px 12px;background:#172229ed;border:1px solid #586169;border-radius:8px}@media(max-width:600px){header{top:12px;left:14px;right:14px}h1{font-size:19px}p{font-size:12px;max-width:270px}#back{right:14px;top:120px}.controls{bottom:12px;gap:5px}button,select{font-size:12px;padding:9px}#label{bottom:108px}}
+</style></head><body>
+<header><h1>Bladefall · Chest workshop</h1><p>Drag to turn. Scroll or pinch to zoom. These are the game models.</p></header>
+<a id="back" href="../../3d/">Back to Bladefall</a><div id="label">Common · Uncommon · Rare · Epic · Legendary</div>
+<div class="controls"><select id="tier" aria-label="Choose chest"><option value="all">All five rarities</option><option value="0">Common</option><option value="1">Uncommon</option><option value="2">Rare</option><option value="3">Epic</option><option value="4">Legendary</option></select><button id="open" aria-pressed="false">Open lids</button><button id="mimic" aria-pressed="false">Mimic breathing</button><button id="reset">Reset view</button></div>
+<script type="importmap">{"imports":{"three":"../../3d/three.module.js"}}</script>
+<script type="module">
+import * as T from '../../3d/three.module.js';
+import {createChestActor,animateChest} from '../../3d/chest-art.js?v=2184';
+const scene=new T.Scene();scene.background=new T.Color('#333b41');scene.fog=new T.Fog('#333b41',1600,3500);
+const camera=new T.PerspectiveCamera(37,innerWidth/innerHeight,.1,4000),renderer=new T.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;document.body.prepend(renderer.domElement);
+const controls={target:new T.Vector3(),yaw:.193,pitch:.36,distance:310,update(){const c=Math.cos(this.pitch);camera.position.set(this.target.x+Math.sin(this.yaw)*this.distance*c,this.target.y+Math.sin(this.pitch)*this.distance,this.target.z+Math.cos(this.yaw)*this.distance*c);camera.lookAt(this.target);}};
+const points=new Map();renderer.domElement.style.touchAction='none';
+renderer.domElement.addEventListener('pointerdown',e=>{points.set(e.pointerId,[e.clientX,e.clientY]);renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointermove',e=>{if(!points.has(e.pointerId))return;const old=points.get(e.pointerId);if(points.size===1){controls.yaw-=(e.clientX-old[0])*.007;controls.pitch=Math.max(.08,Math.min(1.4,controls.pitch+(e.clientY-old[1])*.007));}else{const other=[...points].find(([id])=>id!==e.pointerId)[1],a=Math.hypot(old[0]-other[0],old[1]-other[1]),b=Math.hypot(e.clientX-other[0],e.clientY-other[1]);if(b>0)controls.distance=Math.max(40,Math.min(1800,controls.distance*a/b));}points.set(e.pointerId,[e.clientX,e.clientY]);});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(event,e=>points.delete(e.pointerId));
+renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();controls.distance=Math.max(40,Math.min(1800,controls.distance*Math.exp(e.deltaY*.001)))},{passive:false});
+scene.add(new T.HemisphereLight('#eef4ff','#6a5140',2.2));
+const key=new T.DirectionalLight('#fff1d5',3.8);key.position.set(-90,170,120);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-200,right:200,top:140,bottom:-140,near:1,far:420});key.shadow.bias=-.00015;key.shadow.normalBias=.15;scene.add(key);
+const rim=new T.DirectionalLight('#bedaff',2.5);rim.position.set(80,100,-100);scene.add(rim);
+const floor=new T.Mesh(new T.PlaneGeometry(10000,10000),new T.MeshStandardMaterial({color:'#535951',roughness:.96}));floor.rotation.x=-Math.PI/2;floor.position.y=-.08;floor.receiveShadow=true;scene.add(floor);
+const rarities=['common','uncommon','rare','epic','legendary'],actors=rarities.map(r=>createChestActor(r));for(const a of actors)scene.add(a.root);
+let opened=false,mimic=false,selected='all',elapsed=0;
+function layout(){const all=selected==='all';actors.forEach((a,i)=>{a.root.visible=all||i===Number(selected);a.root.position.set(all?(i-2)*62:0,0,0);a.root.rotation.y=0;});document.querySelector('#label').textContent=all?'Common · Uncommon · Rare · Epic · Legendary':rarities[selected].replace(/^./,s=>s.toUpperCase());reset();}
+function reset(){const all=selected==='all';const distance=all?Math.max(360,540*innerHeight/innerWidth):Math.max(128+Number(selected)*7,106*innerHeight/innerWidth);controls.target.set(0,all?17:20,0);controls.yaw=.193;controls.pitch=.36;controls.distance=distance;controls.update();}
+document.querySelector('#tier').onchange=e=>{selected=e.target.value;layout()};
+document.querySelector('#open').onclick=e=>{opened=!opened;e.target.textContent=opened?'Close lids':'Open lids';e.target.setAttribute('aria-pressed',opened);};
+document.querySelector('#mimic').onclick=e=>{mimic=!mimic;e.target.setAttribute('aria-pressed',mimic);};document.querySelector('#reset').onclick=reset;
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);reset()});
+const clock=new T.Clock();function tick(){requestAnimationFrame(tick);const dt=Math.min(.1,clock.getDelta());elapsed+=dt;actors.forEach((a,i)=>animateChest(a,{x:selected==='all'?(i-2)*62:0,y:0,z:0,opened,_br:mimic?Math.max(0,Math.sin(elapsed*.8))*1.1:0},dt));controls.update();renderer.render(scene,camera);}layout();tick();
+window.__chestWorkshop={actors,scene,camera,renderer,controls,select(t){selected=String(t);document.querySelector('#tier').value=selected;layout()},open(v){opened=v},reset};
+</script></body></html>

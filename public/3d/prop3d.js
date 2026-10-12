@@ -1,4 +1,4 @@
-import {createChestActor,animateChest} from './chest-art.js?v=2122';
+import {createChestActor,animateChest} from './chest-art.js?v=2184';
 import * as THREE from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadKitModel, kitModel } from './mob3d.js?v=2104';

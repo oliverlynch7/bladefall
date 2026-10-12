@@ -1360,3 +1360,14 @@ Oliver requested: "Ok we have a. Lot of usage left so do another round of these 
 Continued the approved core campaign pass across all eight regions. Grounded authored enemies and their repeating patrols using bounded deterministic placement; explicitly corrected off-path guards. Repositioned 20 finite healing sites from unsupported/obstructed/stair locations onto adjacent clear floor. Added regional rest-site meshes, charge indicators and local reachable-only instructions. Rest charge and quest locks remain unchanged. Fixed the missing lower Thunder Cliffs lift dock, the inaccessible Lost Canyon cache and missing fallback scenery colors that could halt rendering. Updated misleading hub tips about campaign entry and kept progress.
 
 Muted browser checks passed: 206 ground enemies across 16 halves, 39 patrol refills, 57 rest-site floor checks and actual healing at every unlocked finite site, eight regional visual samples, finite/spent/locked/unlimited healing, two real movement-and-E approaches, 134 Thunder Cliffs waypoints, class disguise behavior, 24 scenes in three camera modes, fresh creation, a pre-change save, 24 checkpoints and 11 local two-client progression checks. Pause and renderer fallback hide the contextual rest hint. See docs/art-validation/campaign-footing-2026-10-12.json and docs/design/CAMPAIGN_ENCOUNTERS_AND_REST_2026-10-12.md. Human playtest, real-network co-op and low-end performance remain unverified. This does not close the broader campaign quality goal. No custom SFX work. Preserve unrelated companion3d.js, prop3d.js and articulated-rigs.json edits.
+
+
+## [Codex | 2026-10-12] Chest reference redesign — approved
+
+Exact user request: "Btw you made the chests all one of color of their rarity, I want them redesigned to look more like these"
+Reference: attached 1-Photo-1.jpg (1B511883-7627-4B56-84C8-C2344F5F1732), five chests from common to legendary. Visible brown timber throughout; plain iron, green patinated metal/leaves, silver and blue gems, violet ceremonial panels/crystals, then elaborate gold/red sun ornament. Progressively larger and more ornate. This corrects the existing monochrome rarity treatment; it does not change chest odds, rewards or placements. Preserve hinged lids, mimic breathing, one equipment item, the skippable reveal, personal co-op claims and saved outcomes. Grounded plan: docs/design/CHEST_REFERENCE_REDESIGN_2026-10-12.md.
+
+
+## [Codex | 2026-10-12] Chest reference redesign — implementation evidence
+
+All five shared rarity models implemented in v2.184.0; mixed timber/metal and increasing ornament replace the monochrome treatment. Existing loot/save contracts preserved. See docs/design/CHEST_REFERENCE_REDESIGN_2026-10-12.md and docs/art-validation/chest-craft-2026-10-12.json for bounded browser evidence. Human aesthetic acceptance remains open.

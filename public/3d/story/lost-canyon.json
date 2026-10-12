@@ -658,15 +658,15 @@
       "effects": [
         {
           "type": "flag",
-          "id": "lc.north",
+          "id": "lc.north.open",
           "value": true
         },
         {
           "type": "note",
-          "id": "lc.north",
+          "id": "lc.north.open",
           "region": "hollow",
           "title": "North cage opened",
-          "text": "The freed group is taking a sheltered route to Ruth."
+          "text": "Stay close to the two north prisoners as they cross the open yard. Guards can hurt them. If either falls, return to the open cage and try again. Cutting the high signal cable stops new patrols."
         },
         {
           "type": "conditional",
@@ -692,6 +692,27 @@
           "flag": "lc.rescue",
           "is": true
         }
+      ]
+    },
+    "lc.north.complete": {
+      "effects": [
+        {
+          "type": "flag",
+          "id": "lc.north",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "lc.north",
+          "region": "hollow",
+          "title": "North prisoners safe",
+          "text": "Both prisoners crossed the exposed yard and reached Ruth's shelter."
+        }
+      ],
+      "once": true,
+      "when": [
+        { "flag": "lc.north.open", "is": true },
+        { "flag": "lc.north", "is": false }
       ]
     },
     "lc.cage.extra": {

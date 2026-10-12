@@ -6,7 +6,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2119';
+import {syncNpcs} from './npc3d.js?v=2174';
 import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
 /* ─────────────────────────────────────────────────────────────────────────────

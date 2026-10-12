@@ -1,0 +1,26 @@
+async page=>{
+ const errors=[];const context=await page.context().browser().newContext(),guest=await context.newPage();page.on('pageerror',e=>errors.push(e.message));guest.on('pageerror',e=>errors.push(e.message));const checks=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n);};
+ try{
+  for(const p of [page,guest]){await p.goto('http://127.0.0.1:4331/3d/?mute=1');await p.waitForFunction(()=>window.__BF3&&HERO3D?.ready);await p.evaluate(async()=>{const b=__BF3;await b.briarReady;b.loadMode('rl');b.meta.run=null;b.meta.bank=null;b.meta.introSeen=true;b.meta.classId='warrior';b.meta.tutOff=true;b.openHub();window.qaPackets=[];});}
+  await page.evaluate(()=>{const m=__BF3.MP;m.active=true;m.isHost=true;m.myId='h';m.conns=[];window.qaListeners={};const c={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>qaListeners[k]=f};m.wireGuest(c);qaListeners.open();});
+  await guest.evaluate(()=>{const m=__BF3.MP;m.active=true;m.isHost=false;m.myId='g';m.hostConn={open:true,send:d=>qaPackets.push(JSON.parse(JSON.stringify(d)))};});
+  const flush=async()=>{for(let i=0;i<2;i++){for(const d of await guest.evaluate(()=>qaPackets.splice(0)))await page.evaluate(d=>qaListeners.data(d),d);for(const d of await page.evaluate(()=>qaPackets.splice(0)))await guest.evaluate(d=>__BF3.MP.onGuestData(d),d);}};
+  await page.evaluate(d=>qaListeners.data(d),await guest.evaluate(()=>({t:'hello',p:__BF3.MP.selfState()})));await flush();await page.evaluate(()=>{__BF3.enterZone(1);__BF3.nextArea();});await flush();for(const p of [page,guest])await p.waitForFunction(()=>!BF_LOADING.active&&__BF3.G.canyon);
+  await page.evaluate(()=>{const b=__BF3,G=b.G,p=G.p,act=key=>{const o=G.storyObjects.find(o=>o.key===key);Object.assign(p,{x:o.x,y:o.y,z:o.z});b.briarRequest('world',{key});},talk=(id,choice)=>{const n=G.storyNpcs.find(n=>n.id===id);Object.assign(p,{x:n.x,y:n.y,z:n.z});b.briarRequest('open',{npc:id});b.briarRequest('choose',{line:G.storyState.conversation.node,choice});b.briarRequest('close');};act('lc.orders');talk('ward','orders');talk('ruth','help');act('lc.alarm');for(const e of G.enemies){e.hp=0;e.dead=true;}act('lc.cage.north');Object.assign(p,{x:-1000,y:0,z:-2000});});await flush();
+  ok('open-not-safe state shared',await guest.evaluate(()=>__BF3.G.storyState.flags['lc.north.open']&&!__BF3.G.storyState.flags['lc.north']&&!__BF3.G.obstacles.some(o=>o.lcBlock==='north')));
+  await guest.evaluate(()=>{Object.assign(__BF3.G.p,{x:640,y:0,z:-3550});__BF3.MP.hostConn.send({t:'pos',p:__BF3.MP.selfState()});});await flush();
+  for(let batch=0;batch<8;batch++){await page.evaluate(()=>{for(let i=0;i<60&&__BF3.G.canyon.northWave<1;i++)__BF3.update(.016);});if(await page.evaluate(()=>__BF3.G.canyon.northWave>=1))break;await guest.evaluate(()=>__BF3.MP.hostConn.send({t:'pos',p:__BF3.MP.selfState()}));await flush();}const partial=await page.evaluate(()=>{const b=__BF3,G=b.G,e=G.enemies.find(e=>e.canyonEscortWave===1&&!e.dead);if(!e)throw Error(JSON.stringify({reason:'guest-led rescue did not reach ambush',status:BFLostCanyon.status(G),peers:b.MP.peers,player:[G.p.x,G.p.z],flags:G.storyState.flags}));const n=G.canyonPrisoners.find(n=>n.group==='north');e.x=n.x+22;e.z=n.z;e.y=n.y;e.meleeSerial=1;if(!BFLostCanyon.hitEscort(G,e))throw Error('escort hit failed');return {status:BFLostCanyon.status(G),story:b.briarPacket(),enemies:b.MP.enemySnap()};});
+  await guest.evaluate(p=>{__BF3.briarApply(p.story);__BF3.MP.applyEnemies(p.enemies,[]);},partial);
+  ok('guest proximity advances host-owned convoy',partial.status.northActive&&partial.status.northT>=4);
+  ok('guest sees matching health and position',await guest.evaluate(p=>{const G=__BF3.G,lead=G.canyonPrisoners.find(n=>n.group==='north');return G.canyon.remote?.northActive&&Math.abs(G.canyon.remote.northT-p.status.northT)<.1&&lead.hp===p.status.northHp[0]&&Math.abs(lead.x-BFLostCanyon.northAt(p.status.northT).x)<1;},partial));
+  ok('guest sees pursuer focused on prisoner',await guest.evaluate(()=>{const G=__BF3.G,e=G.enemies.find(e=>e.canyonEscortWave===1&&!e.dead);return e&&BFLostCanyon.target(G,e,G.p)?.escortIndex!=null;}));
+  for(let batch=0;batch<32&&!await page.evaluate(()=>!!__BF3.G.storyState.flags['lc.north']);batch++){
+   const at=await page.evaluate(()=>{const n=__BF3.G.canyonPrisoners.find(n=>n.group==='north');return {x:n.x,z:n.z};});
+   await guest.evaluate(at=>{Object.assign(__BF3.G.p,{x:at.x,y:0,z:at.z});__BF3.MP.hostConn.send({t:'pos',p:__BF3.MP.selfState()});},at);await flush();
+   await page.evaluate(()=>{for(let i=0;i<60;i++){for(const e of __BF3.G.enemies)if(e.canyonEscortWave&&!e.dead){e.hp=0;e.dead=true;}__BF3.update(.016);}});await flush();
+  }
+  ok('host reaches shelter with guest guidance',await page.evaluate(()=>!!__BF3.G.storyState.flags['lc.north']));
+  ok('guest receives completed rescue and final positions',await guest.evaluate(()=>{const G=__BF3.G;return !!G.storyState.flags['lc.north']&&G.canyonPrisoners.filter(n=>n.group==='north'||n.follow==='north').every(n=>n.z<-3900);}));
+  if(errors.length)throw Error(JSON.stringify(errors));return {checks,errors};
+ }finally{await page.evaluate(()=>{__BF3.MP.active=false;__BF3.MP.conns=[];});await context.close();}
+}

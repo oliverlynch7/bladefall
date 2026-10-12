@@ -7,6 +7,7 @@
   roof:[[120,-400,190],[600,-540,230],[1050,-950,220],[1000,-1350,150],[650,-1770,0]],
   west:[[-450,-1450,0],[-950,-2100,0],[-1000,-2800,0],[-650,-3400,0],[0,-3900,0]],
   east:[[650,-1770,0],[1100,-2250,0],[1000,-2900,0],[650,-3550,0],[0,-3900,0]],
+  northEvac:[[850,-3750,0],[600,-4050,0],[100,-4150,0]],
   oldCage:[[-1000,-2800,0],[-1500,-2780,40],[-2000,-2600,90],[-2200,-2300,90]],
   freight:[[-1500,-2780,40],[-1700,-3130,0],[-2200,-3480,0],[-2300,-3830,0]],
   cave:[[1140,-2450,0],[1700,-2460,0],[2150,-2800,0],[2400,-3420,0]],
@@ -18,6 +19,11 @@
  const signalPosts=[[-520,-1690],[-490,-2450],[-780,-2780],[1050,-2740],[910,-3300]];
  const freightJumps=[[-1510,-2790,40],[-1625,-2900,70],[-1740,-3010,100],[-1855,-3120,130],[-1970,-3230,160],[-2085,-3340,190],[-2200,-3450,220],[-2320,-3560,230]];
  const railPath=[[-2280,-3830],[-2280,-3480],[-1750,-3480],[-1750,-3100]];
+ const NORTH_ROUTE=[[640,-3550],[640,-3360],[850,-3410],[850,-3750],[600,-4050],[100,-4150]];
+ const NORTH_SECONDS=20,NORTH_HP=110;
+ const northLengths=NORTH_ROUTE.slice(1).map((p,i)=>Math.hypot(p[0]-NORTH_ROUTE[i][0],p[1]-NORTH_ROUTE[i][1]));
+ const northLength=northLengths.reduce((a,b)=>a+b,0);
+ function northAt(t){let left=Math.max(0,Math.min(1,t/NORTH_SECONDS))*northLength;for(let i=0;i<northLengths.length;i++){const length=northLengths[i];if(left<=length){const a=NORTH_ROUTE[i],b=NORTH_ROUTE[i+1],u=left/length;return {x:a[0]+(b[0]-a[0])*u,z:a[1]+(b[1]-a[1])*u,yaw:Math.atan2(b[0]-a[0],b[1]-a[1])};}left-=length;}const p=NORTH_ROUTE.at(-1);return {x:p[0],z:p[1],yaw:Math.PI};}
  function cartAt(t){
   let remaining=Math.max(0,Math.min(1,t))*1260;
   for(let i=1;i<railPath.length;i++){
@@ -28,12 +34,16 @@
   return {x:railPath[3][0],z:railPath[3][1]};
  }
  function ready(s){return ['lc.rescue','lc.south','lc.north','lc.alarm','lc.escape'].every(k=>s.flags[k]);}
- function quest(s){const f=s.flags;return !f['lc.entry']?'Enter the holding yard: orders, force, or the upper side path':!f['lc.rescue']?'Speak to Ruth by the first cage yard':f['lc.alarm.called']&&!f['lc.alarm']?'Cut the signal cable above the east yard to stop reinforcements':!f['lc.south']||!f['lc.north']?'Free both prisoner groups · '+Number(!!f['lc.south'])+' south / '+Number(!!f['lc.north'])+' north':!f['lc.alarm']?'Stop the alarm winch above the yard':!f['lc.escape']?'Open the escape gate beyond the shelter':'Follow the prisoners toward the last crossing';}
+ function quest(s,G){const f=s.flags,c=G?.canyon?.remote||G?.canyon;return !f['lc.entry']?'Enter the holding yard: orders, force, or the upper side path':!f['lc.rescue']?'Speak to Ruth by the first cage yard':f['lc.north.open']&&!f['lc.north']?(c?.northActive?'Stay with the north prisoners and defend them · '+Math.floor(c.northT||0)+' / '+NORTH_SECONDS+' seconds':c?.northRetryT>0?'The north prisoners are recovering. Return to their cage':'Return to the north cage and guide the prisoners to Ruth'):f['lc.alarm.called']&&!f['lc.alarm']?'Cut the signal cable above the east yard to stop reinforcements':!f['lc.south']||!f['lc.north']?'Free both prisoner groups · '+Number(!!f['lc.south'])+' south / '+Number(!!f['lc.north'])+' north':!f['lc.alarm']?'Stop the alarm winch above the yard':!f['lc.escape']?'Open the escape gate beyond the shelter':'Follow the prisoners toward the last crossing';}
+ function status(G){const c=G.canyon;return {northActive:!!c.northActive,northT:c.northT||0,northWave:c.northWave||0,northRetryT:c.northRetryT||0,northHp:[...(c.northHp||[NORTH_HP,NORTH_HP])],northHitT:c.northHitT||0};}
+ function escortLive(G){return G.enemies.some(e=>e.canyonEscortWave&&!e.dead&&e.hp>0);}
+ function target(G,e,fallback){const c=G.canyon?.remote||G.canyon;if(!c?.northActive||G.storyState?.flags['lc.north']||!(e.canyonEscort||e.canyonAlarm))return fallback;let chosen=null,best=e.canyonEscort?820:480;for(const n of G.canyonPrisoners||[]){if(n.group!=='north'&&n.follow!=='north'||n.hp<=0)continue;const d=Math.hypot(n.x-e.x,n.z-e.z);if(d<best){chosen=n;best=d;}}return chosen||fallback;}
+ function hitEscort(G,e){const n=target(G,e,null),c=G.canyon;if(!n||e._canyonHitSerial===e.meleeSerial||Math.abs((e.y||0)-n.y)>85||Math.hypot(e.x-n.x,e.z-n.z)>e.r+(n.r||18)+40)return false;e._canyonHitSerial=e.meleeSerial;c.northHp[n.escortIndex]=Math.max(0,c.northHp[n.escortIndex]-Math.max(13,Math.round((e.dmg||10)*1.05)));n.hp=c.northHp[n.escortIndex];c.northHitT=.38;return true;}
  function build(a){const {G,seg,plat,solid,spawn}=a;
   for(const k of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[k]=[];
   Object.assign(G,{haz:null,canyonWind:null,thorns:[],vents:[],phasers:[],debris:[],lights:[],npc:null,secret:null,secretTrigger:null,waystone:null,dashSign:null,beam:null,collapse:[],optionalMissions:[],_midSeq:0,portal:null,vertical:true});
-  G.canyon={revision:2005,walks:{},cages,freightJumps,alarmJumps,signalLamps:[],cartT:0,gateSpawned:false,alarmSpawned:false,alarmWave:0,prisoners:{},seen:{}};G.canyonPrisoners=[];
-  G.areaName='Hollow Pass · Lost Canyon';G.campaignLayout={revision:2005,experience:{title:'Lost Canyon',objectives:['Enter the holding yard','Free the prisoners','Open their escape route']}};
+  G.canyon={revision:2006,walks:{},cages,freightJumps,alarmJumps,signalLamps:[],cartT:0,gateSpawned:false,alarmSpawned:false,alarmWave:0,prisoners:{},seen:{},northActive:false,northT:0,northWave:0,northRetryT:0,northHp:[NORTH_HP,NORTH_HP],northHitT:0};G.canyonPrisoners=[];
+  G.areaName='Hollow Pass · Lost Canyon';G.campaignLayout={revision:2006,experience:{title:'Lost Canyon',objectives:['Enter the holding yard','Free the prisoners','Open their escape route']}};
   const rooms=[['Lift Landing',0,220,750,650,220],['Gate Records',-650,-630,480,480,120],['South Holding Yard',0,-1920,2200,1350,0],['North Cages',640,-3540,900,820,0],['Ruth’s Shelter',0,-3990,900,720,0],['Old Cage',-2200,-2300,580,570,90],['Freight Store',-2050,-3580,900,900,0],['Hidden Canyon Floor',2350,-3310,850,900,0],['High Return',2000,-4380,720,480,220],['Last Crossing Approach',0,-5000,780,680,0]];
   for(const [name,x,z,w,d,y]of rooms){G.rooms.push({name,x,z,w,d,y,monsters:[],encounter:false,cleared:true});if(y)plat(x,z,y,w,d,{checkpoint:true});else seg(x,z,w,d);}
   function route(p,width=300,jumps=false){const out=[];for(let j=1;j<p.length;j++){const u=p[j-1],v=p[j],jump=jumps&&j===2,n=Math.ceil(Math.max(Math.hypot(v[0]-u[0],v[1]-u[1])/(jump?150:110),Math.abs(v[2]-u[2])/18));for(let k=0;k<=n;k++){const q=u.map((x,i)=>x+(v[i]-x)*k/n);if(q[2]>0)plat(q[0],q[1],q[2],jump?95:width,jump?95:width,{checkpoint:true});else seg(q[0],q[1],width,width);out.push(q);}}return out;}
@@ -103,8 +113,9 @@
  function guards(G){const result={gate:0,south:0,north:0,extra:0};for(const e of G.enemies||[])if(e.canyonGuard&&!e.dead&&e.hp>0)result[e.canyonGuard]++;return result;}
  function available(key,G,s,counts=guards(G)){if(key==='lc.gate')return !!s.flags['lc.gate.fight']&&!counts.gate;if(key==='lc.rail.release')return !s.flags['lc.rail.open'];const group=key.startsWith('lc.cage.')&&key.slice(8);return !group||!counts[group];}
  function sync(a){const {G,state:s,seg,openWay,spawn,host,toast}=a,f=s.flags,c=G.canyon;if(!c)return;
-  const open={gate:f['lc.entry'],wagon:f['lc.wagon'],rail:f['lc.rail.open'],escape:f['lc.escape'],south:f['lc.south'],north:f['lc.north'],extra:f['lc.extra']};
+  const open={gate:f['lc.entry'],wagon:f['lc.wagon'],rail:f['lc.rail.open'],escape:f['lc.escape'],south:f['lc.south'],north:f['lc.north.open']||f['lc.north'],extra:f['lc.extra']};
   G.obstacles=G.obstacles.filter(o=>!o.lcBlock||!open[o.lcBlock]);
+  if(f['lc.north']){c.northActive=false;c.northT=NORTH_SECONDS;c.northRetryT=0;}
   if(f['lc.gate.fight']&&!c.gateSpawned){c.gateSpawned=true;if(host){for(const [x,z]of [[-110,-1100],[120,-1180],[0,-1380]]){const e=spawn('grunt',x,z,false);e.canyonGuard='gate';}}}
   if(f['lc.alarm.called']&&!f['lc.alarm']&&!c.alarmSpawned){c.alarmSpawned=true;c.alarmAt=G.time+2.5;toast('Signal fires flare across the yard. Cut the high cable to stop more guards!');}
   if(f['lc.alarm']){c.alarmAt=0;if(!c.seen['lc.alarm']){c.seen['lc.alarm']=true;toast(f['lc.alarm.called']?'The signal goes dark. No more guards can answer it.':'The signal cable is cut. The cages can open quietly.');}}
@@ -114,12 +125,14 @@
   if(f['lc.rail.open']&&!c.cartOpen){c.cartOpen=true;c.cartT=c.initialSync?0:1;}
   c.initialSync=true;
   for(const [id,cell]of Object.entries(cages)){
-   if(!c.prisoners[id]){const n={id:'canyon_'+id,name:id==='extra'?'Freed worker':'Prisoner',x:cell.x-25,z:cell.z,y:cell.y,group:id};c.prisoners[id]=n;G.canyonPrisoners.push(n,{id:n.id+'_b',name:'Prisoner',x:n.x+45,z:n.z+25,y:n.y,follow:id});}
-   const n=c.prisoners[id];if(f['lc.'+id]&&!n.route){n.route=id==='south'?[[cell.x,cell.z,cell.y],[-950,-2500,0],[-1000,-2800,0],[-650,-3400,0],[-140,-4060,0]]:id==='north'?[[cell.x,cell.z,cell.y],[600,-3850,0],[100,-4150,0]]:[[cell.x,cell.z,cell.y],[-2000,-2600,90],[-1500,-2780,40],[-1000,-2800,0],[-650,-3400,0],[170,-4050,0]];n.route.splice(1,0,[cell.x,cell.z+175,cell.y],[cell.x+170,cell.z+175,cell.y],[cell.x+170,cell.z-170,cell.y]);n.step=1;n.walking=true;}
+   if(!c.prisoners[id]){const n={id:'canyon_'+id,name:id==='extra'?'Freed worker':'Prisoner',x:cell.x-25,z:cell.z,y:cell.y,group:id};c.prisoners[id]=n;G.canyonPrisoners.push(n,{id:n.id+'_b',name:'Prisoner',x:n.x+45,z:n.z+25,y:n.y,follow:id});if(id==='north')for(const [i,p]of [n,G.canyonPrisoners.at(-1)].entries())Object.assign(p,{escortIndex:i,r:18,h:105,hp:NORTH_HP,maxHp:NORTH_HP});}
+   const n=c.prisoners[id];if(id!=='north'&&f['lc.'+id]&&!n.route){n.route=id==='south'?[[cell.x,cell.z,cell.y],[-950,-2500,0],[-1000,-2800,0],[-650,-3400,0],[-140,-4060,0]]:[[cell.x,cell.z,cell.y],[-2000,-2600,90],[-1500,-2780,40],[-1000,-2800,0],[-650,-3400,0],[170,-4050,0]];n.route.splice(1,0,[cell.x,cell.z+175,cell.y],[cell.x+170,cell.z+175,cell.y],[cell.x+170,cell.z-170,cell.y]);n.step=1;n.walking=true;}
   }
+  actors(G,s,host?null:c.remote);
   for(const [key,message]of [['lc.entry','The holding yard is open. Find Ruth beside the south cages.'],['lc.wagon','The cave passage is clear. A lower trail loops around the prison.'],['lc.rail.open','The freight cart rolls aside, revealing a hidden store.']])if(f[key]&&!c.seen[key]){c.seen[key]=true;toast(message);}
   if(ready(s)){G.qs['lc.rescue']=1;openWay();}
  }
+ function actors(G,s,remote){const c=remote||G.canyon,p=northAt(s.flags['lc.north']?NORTH_SECONDS:c.northActive?c.northT||0:0);for(const n of G.canyonPrisoners||[]){if(n.group!=='north'&&n.follow!=='north')continue;const i=n.escortIndex||0;n.x=p.x+(i?Math.cos(p.yaw)*90:0);n.z=p.z-(i?Math.sin(p.yaw)*90:0);n.y=0;n._yaw=p.yaw;n.walking=!!c.northActive&&!s.flags['lc.north'];n.hp=(c.northHp||[])[i]??NORTH_HP;n.maxHp=NORTH_HP;}}
  function tick(a,dt){const {G,spawn,host}=a,c=G.canyon;if(!c)return;
   if(c.cartOpen)c.cartT=Math.min(1,c.cartT+dt/2.8);
   const flags=G.storyState?.flags||{};
@@ -143,17 +156,42 @@
     }else c.alarmAt=G.time+3;
    }
   }
-  for(const n of G.canyonPrisoners){if(n.follow){const leader=c.prisoners[n.follow];Object.assign(n,{x:leader.x+45,z:leader.z+25,y:leader.y,walking:leader.walking,_yaw:leader._yaw});continue;}if(!n.walking)continue;const p=n.route[n.step],dx=p[0]-n.x,dz=p[1]-n.z,d=Math.hypot(dx,dz),q=Math.min(1,dt*100/Math.max(1,d));n.x+=dx*q;n.z+=dz*q;n.y=a.height?a.height(n.x,n.z,12):n.y+(p[2]-n.y)*q;n._yaw=Math.atan2(dx,dz);if(d<4){n.step++;if(n.step>=n.route.length)n.walking=false;}}
+  if(host&&flags['lc.north.open']&&!flags['lc.north']){
+   c.northHitT=Math.max(0,c.northHitT-dt);
+   if(c.northActive&&c.northHp.some(h=>h<=0)){
+    c.northActive=false;c.northRetryT=2.5;c.northT=0;c.northWave=0;
+    for(const e of G.enemies)if(e.canyonEscortWave)e.dead=true;
+    a.toast?.('A north prisoner fell. The group retreats to the open cage. Return to guide them again.');
+   }
+   if(c.northRetryT>0){c.northRetryT=Math.max(0,c.northRetryT-dt);if(c.northRetryT===0)c.northHp.fill(NORTH_HP);}
+   if(!c.northActive&&c.northRetryT<=0&&(a.players||[G.p]).some(p=>p&&p.hp>0&&!p.downed&&Math.hypot(p.x-cages.north.x,p.z-cages.north.z)<340)){
+    c.northActive=true;c.northT=0;c.northWave=0;c.northHp.fill(NORTH_HP);
+    a.toast?.(flags['lc.alarm']?'The north group is moving. Stay close and guard both prisoners.':'The north group is moving. The signal is still active; guard both prisoners.');
+   }
+   if(c.northActive){
+    const at=northAt(c.northT),near=(a.players||[G.p]).some(p=>p&&p.hp>0&&!p.downed&&Math.hypot(p.x-at.x,p.z-at.z)<620);
+    if(near&&!escortLive(G))c.northT=Math.min(NORTH_SECONDS,c.northT+dt);
+    const wave=c.northT>=12.2?2:c.northT>=4?1:0;
+    if(wave>c.northWave&&spawn){
+     c.northWave=wave;const [x,z]=wave===1?[1040,-3480]:[890,-3880],quiet=!!flags['lc.alarm'];
+     for(let i=0;i<(quiet?1:2);i++){const e=spawn('grunt',x+(wave===1?-70:75)*i,z-55*i,false);if(!e)continue;Object.assign(e,{canyonEscort:true,canyonEscortWave:wave,active:true,dropT:0,stunT:.25,meleeReach:22,label:'North pursuer',role:null,roleCol:null});}
+     a.toast?.(wave===1?'Pursuers at the east bend! Defend the prisoners.':'Pursuers near Ruth’s shelter! Keep the path clear.');
+    }
+    if(c.northT>=NORTH_SECONDS&&!escortLive(G))a.complete?.('lc.north.complete');
+   }
+  }
+  for(const n of G.canyonPrisoners){if(n.group==='north'||n.follow==='north')continue;if(n.follow){const leader=c.prisoners[n.follow];Object.assign(n,{x:leader.x+45,z:leader.z+25,y:leader.y,walking:leader.walking,_yaw:leader._yaw});continue;}if(!n.walking)continue;const p=n.route[n.step],dx=p[0]-n.x,dz=p[1]-n.z,d=Math.hypot(dx,dz),q=Math.min(1,dt*100/Math.max(1,d));n.x+=dx*q;n.z+=dz*q;n.y=a.height?a.height(n.x,n.z,12):n.y+(p[2]-n.y)*q;n._yaw=Math.atan2(dx,dz);if(d<4){n.step++;if(n.step>=n.route.length)n.walking=false;}}
+  actors(G,G.storyState,host?null:c.remote);
  }
  function shards(s){return s.flags['lc.rail.open']?[{id:'HP-04',x:-2280,z:-3890,y:0}]:[];}
- function visualKey(s){return ['lc.entry','lc.wagon','lc.rail.open','lc.south','lc.north','lc.extra','lc.escape','lc.alarm.called','lc.alarm'].map(k=>Number(!!s.flags[k])).join('');}
+ function visualKey(s){return ['lc.entry','lc.wagon','lc.rail.open','lc.south','lc.north.open','lc.north','lc.extra','lc.escape','lc.alarm.called','lc.alarm'].map(k=>Number(!!s.flags[k])).join('');}
  function draw(a,t){const {G,state:s,bx}=a,f=s.flags;if(!G.canyon)return;
-  for(const [id,c]of Object.entries(cages)){const open=f['lc.'+id];for(const dx of [-105,105])for(const dz of [-95,95])bx(c.x+dx,c.y+75,c.z+dz,14,150,14,'#68563d');for(const dz of [-95,95])bx(c.x,c.y+150,c.z+dz,226,12,18,'#94744a');for(let i=-3;i<=3;i++){bx(c.x+i*27,c.y+70,c.z-95,7,140,7,'#635e53');if(!open)bx(c.x+i*27,c.y+70,c.z+95,7,140,7,'#635e53');}for(const dx of [-105,105])for(let i=-2;i<=2;i++)bx(c.x+dx,c.y+70,c.z+i*30,7,140,7,'#635e53');if(open)bx(c.x+120,c.y+70,c.z+40,12,130,110,'#786d51');}
+  for(const [id,c]of Object.entries(cages)){const open=f['lc.'+id]||id==='north'&&f['lc.north.open'];for(const dx of [-105,105])for(const dz of [-95,95])bx(c.x+dx,c.y+75,c.z+dz,14,150,14,'#68563d');for(const dz of [-95,95])bx(c.x,c.y+150,c.z+dz,226,12,18,'#94744a');for(let i=-3;i<=3;i++){bx(c.x+i*27,c.y+70,c.z-95,7,140,7,'#635e53');if(!open)bx(c.x+i*27,c.y+70,c.z+95,7,140,7,'#635e53');}for(const dx of [-105,105])for(let i=-2;i<=2;i++)bx(c.x+dx,c.y+70,c.z+i*30,7,140,7,'#635e53');if(open)bx(c.x+120,c.y+70,c.z+40,12,130,110,'#786d51');}
   const gates=[['lc.entry',0,-940,70,390],['lc.escape',0,-4610,0,390],['lc.rail.open',-2280,-3830,0,320]];
   for(const [flag,x,z,y,w]of gates){for(const dx of [-w/2,w/2])bx(x+dx,y+90,z,18,180,18,'#73543b');bx(x,y+184,z,w+24,16,20,'#ab895b');if(!f[flag]&&flag!=='lc.rail.open')for(let j=0;j<9;j++)bx(x-w/2+20+j*(w-40)/8,y+80,z,10,160,10,'#73644b');}
   for(const o of G.storyObjects){const y=o.y||0;
    if(o.kind==='orders'){bx(o.x,y+27,o.z,95,54,65,'#7f5937');bx(o.x,y+56,o.z,58,3,40,'#e3cfaa');for(let k=0;k<4;k++)bx(o.x,y+59,o.z-12+k*7,34,2,2,'#584e40');}
-   else if(o.kind==='lock'){if(!f['lc.'+o.key.slice(8)]){bx(o.x,y+54,o.z-15,22,28,10,'#bb985e');bx(o.x,y+73,o.z-15,15,12,8,'#6a6253');}}
+   else if(o.kind==='lock'){if(!f['lc.'+o.key.slice(8)]&&!(o.key==='lc.cage.north'&&f['lc.north.open'])){bx(o.x,y+54,o.z-15,22,28,10,'#bb985e');bx(o.x,y+73,o.z-15,15,12,8,'#6a6253');}}
    else if(o.kind==='wagon'){const x=f['lc.wagon']?1550:1420,z=f['lc.wagon']?-2290:-2460;bx(x,40,z,150,55,170,'#795632');for(const dx of [-83,83])for(const dz of [-55,55])bx(x+dx,24,z+dz,12,48,48,'#433d32');if(!f['lc.wagon'])for(const dx of [-35,35])bx(x+dx,92,z,54,52,120,'#b19767');}
    else if(o.kind==='water'){bx(o.x,9,o.z,120,18,95,'#766e56');bx(o.x,20,o.z,100,3,75,'#739b9a');if(!f['lc.water'])bx(o.x+44,34,o.z+20,13,26,13,'#acaf93');}
    else if(o.kind==='chest'){bx(o.x,26,o.z,90,52,58,'#8a683e');bx(o.x,f['lc.cache']?77:54,o.z,94,12,60,'#bd9b5c');}
@@ -180,6 +218,6 @@
   for(const [x,z]of signalPosts){const lit=f['lc.alarm.called']&&!f['lc.alarm'];bx(x,141,z,54,12,18,lit?'#ffb85e':f['lc.alarm']?'#91cbaa':'#9b876a');if(lit)bx(x,158+Math.sin(t*5+x)*5,z,20,22,20,'#ffe09a');}
   for(const n of G.storyNpcs){const on=n.id==='ruth'?!f['lc.rescue']||f['lc.extra']&&!f['lc.reward']:!f['lc.entry'];if(on){const c=n.id==='ruth'&&f['lc.extra']?'#ace0b5':'#e6c483';bx(n.x,n.y+84,n.z,5,13,5,c);bx(n.x,n.y+73,n.z,5,4,5,c);}}
  }
- const api={build,sync,tick,draw,guards,available,quest,ready,shards,visualKey,paths,freightJumps,alarmJumps,signalPosts,cartAt};root.BFLostCanyon=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+ const api={build,sync,tick,draw,guards,available,quest,ready,shards,visualKey,paths,freightJumps,alarmJumps,signalPosts,cartAt,northAt,status,actors,target,hitEscort};root.BFLostCanyon=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
 

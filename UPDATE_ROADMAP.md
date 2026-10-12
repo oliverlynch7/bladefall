@@ -2645,3 +2645,9 @@ The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing 
 - [x] Retired both optional weight combinations and latch; replaced them with three staggered, visible presses and a reachable emergency brake.
 - [x] Kept `kd.deep.open`, RK-03, Sly, the main lift, drain, other rewards, co-op authority and old completed saves. Old partial weights do not solve the new route.
 - [x] Muted browser visual, normal-movement crossing, hit/retry, gate/shard, full route, checkpoint, co-op and legacy-save checks passed with static/story checks. Human playtest remains for difficulty and art; the wider level-design backlog is still active. No custom SFX work. See docs/design/RUINED_KEEP_LOWER_WORKS_2026-10-11.md.
+
+## [Codex | 2026-10-11] Lost Canyon north rescue crossing (v2.174.0)
+
+- [x] The north prisoners now cross a supported evacuation lane with individual health, two live pursuer ambushes, failure/retry and co-op host authority. Cutting the signal cable first makes each wave smaller; the sheltered south release remains quick.
+- [x] Preserved `lc.north` as safe-at-shelter completion, old saves, Ruth's reward, alarm patrols, all five Hollow Pass shards and the main route. Distinct civilian models and two on-screen health bars make the escort legible.
+- [x] Static checks plus muted browser failure/retry, both ambush hits, quiet/loud counts, full route, old-save reload and two-client sync passed. Oliver's playtest remains for pacing, difficulty and art. The campaign-wide quality pass remains active. No custom SFX work. See docs/design/LOST_CANYON_NORTH_CROSSING_2026-10-11.md.

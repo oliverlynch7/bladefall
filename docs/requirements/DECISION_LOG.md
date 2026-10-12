@@ -968,3 +968,7 @@ The later campaign puzzle-variety direction supersedes the earlier optional two-
 ## [Codex | 2026-10-11] Ruined Keep lower works press crossing - locally verified
 
 Continue the approved campaign puzzle-variety correction in v2.173.0. The optional RK-03 branch now uses three timed, staggered presses and an emergency brake on the far side in place of both number/weight banks. A mistimed crossing hurts and resets to safe floor; the brake opens the original gate and stops the presses. Preserve `kd.deep.open`, shard and reward IDs, old completed saves, main rescue, Sly, drain and co-op authority. Static and muted browser route, hit, visual, co-op, checkpoint and old-state checks passed. Human playtest remains for feel and visual polish; this is not a completion claim for the campaign. No custom SFX work.
+
+## [Codex | 2026-10-11] Lost Canyon north rescue — scoped implementation
+
+Oliver's approved vulnerable-escort and quest-variety direction is now applied to the exposed north cage. Opening it starts a real defense crossing; `lc.north` remains the completed rescue flag only after both prisoners reach Ruth's shelter. Cutting the signal first reduces each ambush and prevents repeating alarm patrols. Falling prisoners retreat and permit retry. The south release, reward IDs, story beats and old saves remain. Browser verification passed; Oliver has not yet judged the experience in a playtest. No custom SFX work.

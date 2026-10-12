@@ -988,3 +988,7 @@ The scoped cargo-release interaction is implemented in v2.176.0. A normal-camera
 ## [Codex | 2026-10-11] Palace Courtyard sunbeam — scoped visual correction
 
 Oliver's existing direction favors puzzles whose inputs have visible environmental consequences. The courtyard's path math already supports this, but its thin pale beam and similar-looking mirror states encouraged handle guessing. Keep the same three spatial mirrors and save IDs; show each turn and the ray's route, off-target impact and successful receiver state clearly from normal camera. Version 2.177.0 implements this and passed muted-browser, route, checkpoint, old-save and co-op checks. This is a visual/cause-and-effect improvement, not a claim that the whole level or all campaign puzzles are finished. Await Oliver's human assessment. No custom SFX work.
+
+## [Codex | 2026-10-11] Great Furnace physical cooling crossing
+
+The three nearby ordered cooling controls repeated the puzzle input pattern Oliver asked us to eliminate. Version 2.178.0 implements a pedal held during Legion attacks, with visible water and falling/reheating heat. Keep `gf.cool.open` as the save truth and retain the broken bridge, optional branches and story outcomes. Legacy partial values no longer operate the puzzle; prior completion stays complete. Muted-browser full route, old-save rebuild, checkpoint and two-client checks passed. Human combat pacing and art feedback remain open. No custom SFX work.

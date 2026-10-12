@@ -1,7 +1,60 @@
-const assert=require('node:assert/strict'),fs=require('node:fs'),E=require('../public/3d/story-state.js'),C=require('../public/3d/great-furnace.js'),book=JSON.parse(fs.readFileSync('public/3d/story/great-furnace.json'));
-let s,n=0;const reset=()=>s=E.create(),act=(type,x={})=>{const r=E.transact(s,book,{id:'furnace-'+ ++n,type,...x});s=r.state;return r.changed},world=key=>act('world',{key:'gf.'+key}),pick=choice=>act('choose',{line:s.conversation.node,choice});
-for(const quiet of [false,true])for(const force of [false,true]){reset();assert(!world('cool.1'));assert(!world('gate'));assert(!world('cache.release'));world('fault');world('schedule');act('open',{npc:'pike'});pick(force?'force':'fault');pick(force?'leave':'pass');act('close');if(force)world('gate');assert(s.flags['gf.access']);act('open',{npc:'martin'});pick('help');pick(quiet?'quiet':'early');pick('ready');act('close');world('passage');if(quiet){world('shelterbell');world('workbell');assert(!s.flags['gf.evacuated']);world('transport');}world(quiet?'shelterbell':'workbell');world(quiet?'workbell':'shelterbell');assert(s.flags['gf.evacuated']);world('pipes');world('cool.1');world('cool.3');assert.equal(s.items['gf.cool'],0);[1,2,3].forEach(i=>world('cool.'+i));assert(s.flags['gf.cool.open']);assert(!C.ready(s));world('writings');act('open',{npc:'martin'});pick('pages');assert(C.ready(s));act('close');assert(!s.flags['gf.pet.open']);world('pressure');assert(world('cache.release'),'a player can discover the box without reading the plate');world('cache');assert.deepEqual(C.shards(s).map(x=>x.id),['ED-03','ED-04']);assert.equal(C.shards(s)[1].y,305);world('cage');assert(!world('pet.release'));assert(!s.rewards['gf.cinder']);assert(world('pet.feed'));assert(s.flags['gf.pet.feed.closed']);assert(world('pet.release'));assert(s.rewards['gf.cinder']);assert(!world('pet.release'));}
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const E=require('../public/3d/story-state.js');
+const C=require('../public/3d/great-furnace.js');
+const book=JSON.parse(fs.readFileSync('public/3d/story/great-furnace.json'));
+let s,n=0;
+const reset=()=>s=E.create();
+const act=(type,x={})=>{const r=E.transact(s,book,{id:'furnace-'+ ++n,type,...x});s=r.state;return r.changed;};
+const world=key=>act('world',{key:'gf.'+key});
+const pick=choice=>act('choose',{line:s.conversation.node,choice});
+
+for(const quiet of [false,true])for(const force of [false,true]){
+ reset();
+ assert(!world('cool.complete'));
+ assert(!world('gate'));
+ assert(!world('cache.release'));
+ world('fault');world('schedule');act('open',{npc:'pike'});pick(force?'force':'fault');pick(force?'leave':'pass');act('close');
+ if(force)world('gate');
+ assert(s.flags['gf.access']);
+ act('open',{npc:'martin'});pick('help');pick(quiet?'quiet':'early');pick('ready');act('close');world('passage');
+ if(quiet)world('transport');
+ world('evac.call');assert(!s.flags['gf.evacuated']);world('evac.complete');
+ assert(s.flags['gf.evacuated']);
+ world('pipes');
+ const G={furnace:{clock:0,heat:100,holdSeconds:0,coolWave:0},p:{x:0,z:-5150,y:120,hp:100,maxHp:100},enemies:[],ironWorkers:[],storyNpcs:[]};
+ const spawn=(type,x,z)=>{const e={type,x,z,hp:100};G.enemies.push(e);return e;};
+ const step=count=>{for(let i=0;i<count;i++)C.tick({G,state:s,spawn,players:[G.p],complete:key=>act('world',{key})},.1);};
+ step(12);
+ assert(G.furnace.heat<100&&G.furnace.heat>85);
+ assert.equal(G.furnace.coolWave,1);
+ G.p.x=400;step(20);
+ assert(G.furnace.heat>95,'leaving the pedal lets the furnace reheat');
+ assert(!s.flags['gf.cool.open']);
+ G.p.x=0;step(124);
+ assert(s.flags['gf.cool.open'],'sustained hold cools the crossing');
+ assert.equal(G.furnace.coolWave,3);
+ assert(G.enemies.length===6);
+ assert(!C.ready(s));
+ world('writings');act('open',{npc:'martin'});pick('pages');assert(C.ready(s));act('close');
+ assert(!s.flags['gf.pet.open']);world('pressure');
+ assert(world('cache.release'),'a player can discover the box without reading the plate');world('cache');
+ assert.deepEqual(C.shards(s).map(x=>x.id),['ED-03','ED-04']);
+ assert.equal(C.shards(s)[1].y,305);
+ world('cage');assert(!world('pet.release'));assert(!s.rewards['gf.cinder']);
+ assert(world('pet.feed'));assert(s.flags['gf.pet.feed.closed']);
+ assert(world('pet.release'));assert(s.rewards['gf.cinder']);assert(!world('pet.release'));
+}
 for(const [id,line]of Object.entries(book.nodes)){assert(line.voice.speaker&&line.voice.context,id);for(const c of line.choices)assert(book.nodes[c.next],id);}
-assert(C.phase(3.8).warn&&!C.phase(3.8).hit);assert(C.phase(4.6).hit);assert(!C.available('gf.writings',{furnace:{},enemies:[{furnaceOffice:true,hp:2}]}));
-assert.equal(C.cachePistons.length,4);assert(!book.events['gf.cache.1']&&!book.events['gf.cache.2']&&!book.events['gf.cache.3']);
-console.log('Great Furnace passed: four main paths, rescue prerequisites, safe puzzle reset, knowledge source, counterweight box, two physical shards, Cinder feed/release and dedupe, voice graph and warning timing.');
+assert(C.phase(3.8).warn&&!C.phase(3.8).hit);
+assert(C.phase(4.6).hit);
+assert(!C.available('gf.writings',{furnace:{},enemies:[{furnaceOffice:true,hp:2}]}));
+assert.equal(C.cachePistons.length,4);
+assert(!book.events['gf.cool.1']&&!book.events['gf.cool.2']&&!book.events['gf.cool.3']);
+const oldCompleted=E.restore({...s,items:{...s.items,'gf.cool':0}});
+const reloaded={furnace:{heat:100,escortCallSeen:null,escortHp:[90,90,90]},enemies:[],ironWorkers:[],storyNpcs:[],walls:[],storyObjects:[],qs:{}};
+const restoredPlatforms=[];
+C.sync({G:reloaded,state:oldCompleted,plat:(...args)=>restoredPlatforms.push(args),openWay:()=>{}});
+assert(reloaded.furnace.cooled&&reloaded.furnace.heat===0,'a previously completed crossing stays open after reload');
+assert(restoredPlatforms.length>=C.bridgeSteps.length,'the cooled bridge rebuilds from the saved completion flag');
+console.log('Great Furnace passed: four main paths, physical cooling hold and reheating, three ambush waves, rescue and knowledge source, optional shards and Cinder.');

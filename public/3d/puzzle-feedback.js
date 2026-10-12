@@ -31,6 +31,7 @@ function notice(event,before,after,object,id){
  }
  if(event?.effects?.some(e=>e.id==='ic.channel.open')&&after.flags['ic.channel.open'])return {id,replaceKey:'puzzle:ic.channel',kind:'Path opened',title:'Spring diverted',text:'The stone plug blocks the spill. Water reaches the chiller, and a frozen path leads to the sealed side chamber.'};
  if(event?.effects?.some(e=>e.id==='sc.hull.open')&&after.flags['sc.hull.open'])return {id,replaceKey:'puzzle:sc.hull',kind:'Path opened',title:'Lower hatch lifted',text:'The cargo struck the brace. Its line lifted the lower hatch. Follow the crawlspace beneath the wreck to reach the Rift Shard.'};
+ if(event?.effects?.some(e=>e.id==='gf.cool.open')&&after.flags['gf.cool.open'])return {id,replaceKey:'puzzle:gf.cool',kind:'Path opened',title:'Furnace crossing cooled',text:'The water raised the crossing. Jump its two broken sections to reach the Colossus.'};
  if(event?.effects?.some(e=>e.id==='sl.shelf.stage1')&&after.flags['sl.shelf.stage1'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'First shelves unfolded',text:'Two shelves now span the gap. Cross them to reach the second crank.'};
  if(event?.effects?.some(e=>e.id==='sl.shelf.open')&&after.flags['sl.shelf.open'])return {id,replaceKey:'puzzle:sl.shelf',kind:'Path opened',title:'Far shelves unfolded',text:'The remaining shelves lead into the restricted archive. Follow their gold edges to the Rift Shard.'};
  if(event?.effects?.some(e=>e.id==='sc.fit.rudder')){
@@ -45,7 +46,6 @@ function notice(event,before,after,object,id){
  let title='Puzzle updated',text;
  if(e.id==='ih.line'){const step=after.items[e.id]||0;title=solved?'Weapon line stopped':step===1?'Metal feed stopped':'Pressure released';text=solved?'The machinery is safe. The repaired cart leads onward.':step===1?'Watch the pressure gauge. Vent the tank while the needle is inside its pale band.':'Pull the safety cable, then hurry to the hammer lock before its eight lights go out.';}
  else if(e.id==='la.vault'){title=solved?'Service vault unlocked':'Service wheel turned';text=solved?'Both bolts withdraw. The service vault is open.':'The gold pointer moved. Compare it with the pale repair mark above this wheel; its bolt withdraws when aligned.';}
- else if(e.id==='gf.cool'){const step=after.items[e.id]||0;title=solved?'Crossing cooled':step===2?'Cooling water flowing':step===1?'Round tank filled':'Cooling system drained';text=solved?'The crossing rises. Jump across its two broken sections.':step===2?'Watch the heat gauge beside the triangle drain. Release it when the needle reaches the pale lower band.':step===1?'The tank is full. Open the square channel to cool the crossing.':'The safety drain cleared the system. Refill the round tank to try again.';}
  else if(e.id==='pc.light'){
   const path=root.BFPalaceCourtyard?.lightPath(after.items['pc.light.mask']||0),last=path?.hits[path.hits.length-1];
   title=solved?'Library seal lit':'Mirror turned';

@@ -340,7 +340,7 @@
               "id": "gf.cool",
               "region": "ember",
               "title": "Cool the furnace crossing",
-              "text": "Trace the pipes at the cooling controls: fill the round tank, open the square channel, drain the triangle tray. The crossing rises only after the workers are safe."
+              "text": "The workers restarted the pump. Stand on the wide blue pedal in the cooling room and defend it while the heat gauge falls."
             }
           ],
           "when": [
@@ -404,7 +404,7 @@
       }
     },
     "gf.martin.cool": {
-      "text": "Round tank, square channel, triangle tray. Cool the crossing to raise it. Cooling may also weaken the Colossus's heated armor.",
+      "text": "Stand on the blue cooling pedal. Water flows while you hold it, so watch the gauge and fight from there. Cold water may also weaken the Colossus's heated armor.",
       "choices": [
         {
           "id": "office",
@@ -636,110 +636,19 @@
           "id": "gf.pipes",
           "region": "ember",
           "title": "Follow the water",
-          "text": "The round tank feeds the square channel. Clear the guard, fill the tank, then open the channel. Watch the heat gauge beside the triangle drain: flowing water lowers its needle. Drain only when the needle reaches the pale lower band. Wrong steps empty the system safely. The cooled crossing has two broken sections; jump across the gaps."
+          "text": "The workers restored the pump. Stand on the wide blue pedal to drive cold water through the furnace pipes. Defend it while the heat gauge falls. Step back onto it if the flow stops. The cooled crossing has two broken sections to jump."
         }
       ]
     },
-    "gf.cool.1": {
-      "once": false,
+    "gf.cool.complete": {
+      "once": true,
       "when": [
-        {
-          "flag": "gf.evacuated",
-          "is": true
-        },
-        {
-          "flag": "gf.pipes",
-          "is": true
-        },
-        {
-          "flag": "gf.cool.open",
-          "is": false
-        }
+        { "flag": "gf.evacuated", "is": true },
+        { "flag": "gf.cool.open", "is": false }
       ],
       "effects": [
-        {
-          "type": "sequence",
-          "id": "gf.cool",
-          "value": 1,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "item",
-          "id": "gf.cool.tries",
-          "amount": 1
-        }
-      ]
-    },
-    "gf.cool.2": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.evacuated",
-          "is": true
-        },
-        {
-          "flag": "gf.pipes",
-          "is": true
-        },
-        {
-          "flag": "gf.cool.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "gf.cool",
-          "value": 2,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "item",
-          "id": "gf.cool.tries",
-          "amount": 1
-        }
-      ]
-    },
-    "gf.cool.3": {
-      "once": false,
-      "when": [
-        {
-          "flag": "gf.evacuated",
-          "is": true
-        },
-        {
-          "flag": "gf.pipes",
-          "is": true
-        },
-        {
-          "flag": "gf.cool.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "sequence",
-          "id": "gf.cool",
-          "value": 3,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "type": "item",
-          "id": "gf.cool.tries",
-          "amount": 1
-        }
+        { "type": "flag", "id": "gf.cool.open" },
+        { "type": "note", "id": "gf.cool.safe", "region": "ember", "title": "The crossing is cool", "text": "The cold water raised the crossing. Jump its two broken sections to reach the Colossus." }
       ]
     },
     "gf.writings": {

@@ -31,3 +31,7 @@ The optional three-weight hatch was replaced by a swinging cargo-cage timing rel
 ## [Codex | 2026-10-11] Palace Courtyard sunbeam readability, v2.177.0
 
 The three mirrors now visibly turn their faces; a stronger ray and floor projection show where the light travels and misses, while the receiver lights when the library opens. Old completed saves without a mask still render the solved path. Initial, wrong-turn, progress, solved and legacy states were reviewed in a muted browser. Full courtyard path, checkpoint, co-op and node story checks passed. Human playtesting remains for difficulty and art. See docs/design/PALACE_SUNBEAM_READABILITY_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Great Furnace cooling pedal, v2.178.0
+
+The required round/square/triangle control order is now a visible pedal defense: keep weight on the pedal while cold water lowers the heat and three Legion pairs attack; leaving lets the crossing reheat. The original broken bridge rises on completion, with optional cooling-box counterweights intact. Old completed saves load the bridge; old partial control values no longer advance it. Node, muted-browser normal movement, full route, checkpoint, navigation and two-client co-op checks passed. Human combat and visual playtesting remains. See docs/design/GREAT_FURNACE_COOLING_PEDAL_2026-10-11.md. No custom SFX work.

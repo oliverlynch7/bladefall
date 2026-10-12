@@ -41,8 +41,9 @@ async page => {
     act('kd.roster'); act('kd.marks'); act('kd.hidden');
     for (const enemy of G.enemies) { enemy.hp = 0; enemy.dead = true; }
     act('kd.free'); act('kd.papers');
-    act('kd.lift.0'); act('kd.lift.2');
-    ok('lift restored', !!G.storyState.flags['kd.lift.open']);
+    tick(520);act('kd.lift.winch');p.onGround=true;
+    for(let i=1;i<=34&&!G.storyState.flags['kd.lift.open'];i++){const a=i*Math.PI/15,tx=Math.cos(a)*BFPrison.WINCH.r,tz=BFPrison.WINCH.z+Math.sin(a)*BFPrison.WINCH.r;for(let j=0;j<90&&Math.hypot(p.x-tx,p.z-tz)>7;j++){const dx=tx-p.x,dz=tz-p.z,d=Math.hypot(dx,dz)||1;b.input.jx=dx/d;b.input.jz=dz/d;b.update(.016);}b.input.jx=b.input.jz=0;}
+    ok('lift restored by full winch turn', !!G.storyState.flags['kd.lift.open']);
     tick(1550);
     ok('prisoners reach upper shelter', !!G.storyState.flags['kd.transfer'] && !!G.portal);
     ok('lift initially at upper station', G.movers.find(m => m.prisonLift).h > 355);

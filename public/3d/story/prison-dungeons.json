@@ -85,7 +85,7 @@
       }
     },
     "kd.walter.lift": {
-      "text": "Free the prisoners, then hook lift weights totaling four. The old stairs have collapsed, so board the lift with them. It keeps running after they reach shelter.",
+      "text": "Free the prisoners, then grip the winch handle on the lift. Walk around its drum to raise everyone. The old stairs have collapsed. The lift keeps running after they reach shelter.",
       "choices": [
         {
           "id": "back",
@@ -608,7 +608,7 @@
           "id": "kd.rescue",
           "region": "keep",
           "title": "Get them to the lift",
-          "text": "The hidden prisoners are free. The old service stair has collapsed, so they need the central lift. Hook weights totaling four and board with them. Read their confiscated papers before leaving."
+          "text": "The hidden prisoners are free. The old stair has collapsed, so they need the central lift. Meet them there, grip the winch handle, and walk around its drum to raise everyone. Read their confiscated papers before leaving."
         }
       ],
       "when": [
@@ -648,75 +648,28 @@
           "type": "note",
           "id": "kd.lift",
           "region": "keep",
-          "title": "Lift load plate",
-          "text": "UPPER SHELTER: 4. Hook weights that add up to four. A hooked weight is raised and pale green; a loose one stays dark. Board the lift once the load is right. It cycles after the group reaches shelter."
+          "title": "Lift winch plate",
+          "text": "Grip the handle on the lift. Walk around the drum while holding it; one full turn raises the platform. Letting go lowers it for another try. The lift cycles after the group reaches shelter."
         }
       ]
     },
-    "kd.lift.0": {
+    "kd.lift.winch": {
       "once": false,
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "kd.lift",
-          "weights": [
-            1,
-            2,
-            3
-          ],
-          "target": 4,
-          "index": 0
-        }
-      ],
+      "effects": [],
       "when": [
-        {
-          "flag": "kd.free",
-          "is": true
-        }
+        { "flag": "kd.free", "is": true },
+        { "flag": "kd.papers", "is": true },
+        { "flag": "kd.lift.open", "is": false }
       ]
     },
-    "kd.lift.1": {
-      "once": false,
+    "kd.lift.wound": {
+      "once": true,
       "effects": [
-        {
-          "type": "counterweight",
-          "id": "kd.lift",
-          "weights": [
-            1,
-            2,
-            3
-          ],
-          "target": 4,
-          "index": 1
-        }
+        { "type": "flag", "id": "kd.lift.open", "value": true }
       ],
       "when": [
-        {
-          "flag": "kd.free",
-          "is": true
-        }
-      ]
-    },
-    "kd.lift.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "kd.lift",
-          "weights": [
-            1,
-            2,
-            3
-          ],
-          "target": 4,
-          "index": 2
-        }
-      ],
-      "when": [
-        {
-          "flag": "kd.free",
-          "is": true
-        }
+        { "flag": "kd.free", "is": true },
+        { "flag": "kd.papers", "is": true }
       ]
     },
     "kd.transfer": {

@@ -55,7 +55,8 @@ async page => {
     ok('fitted boat part reaches guest',await guest.evaluate(()=>__BF3.G.storyState.flags['sc.installed.rudder']&&__BF3.G.shore.parts[0]));
     await load(2,1);
     await page.evaluate(()=>{for(const e of __BF3.G.enemies){e.hp=0;e.dead=true;}});
-    await act(['kd.roster','kd.marks','kd.hidden','kd.free','kd.papers','kd.lift.0','kd.lift.2']);
+    await act(['kd.roster','kd.marks','kd.hidden','kd.free','kd.papers']);
+    await page.evaluate(()=>{const b=__BF3,G=b.G,p=G.p;for(let i=0;i<520;i++)b.update(.016);const o=G.storyObjects.find(o=>o.key==='kd.lift.winch');Object.assign(p,{x:o.x,z:o.z,y:o.y,vy:0,onGround:true});b.briarRequest('world',{key:o.key});for(let i=1;i<=34&&!G.storyState.flags['kd.lift.open'];i++){const a=i*Math.PI/15,tx=Math.cos(a)*BFPrison.WINCH.r,tz=BFPrison.WINCH.z+Math.sin(a)*BFPrison.WINCH.r;for(let j=0;j<90&&Math.hypot(p.x-tx,p.z-tz)>7;j++){const dx=tx-p.x,dz=tz-p.z,d=Math.hypot(dx,dz)||1;b.input.jx=dx/d;b.input.jz=dz/d;b.update(.016);}b.input.jx=b.input.jz=0;}if(!G.storyState.flags['kd.lift.open'])throw Error('Host winch did not reach shelter');});
     await page.evaluate(()=>{for(let i=0;i<1550;i++)__BF3.update(.016);});await flush();
     ok('prisoner transfer reaches guest',await guest.evaluate(()=>__BF3.G.storyState.flags['kd.transfer']));
     const lift=await page.evaluate(()=>{const b=__BF3,m=b.G.movers.find(m=>m.prisonLift);for(let i=0;i<900&&m.h>180.01;i++)b.update(.016);return {x:m.x,z:m.z,h:m.h};});

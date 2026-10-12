@@ -1268,3 +1268,10 @@ Oliver's standing request for varied, physical campaign puzzles also applies to 
 ## [Codex | 2026-10-11] Broken Walls return-request hoist — locally verified
 
 Version 2.171.0 implements that physical climb and visible hoist. The normal-prompt brake release is height gated, missed jumps return to the chamber floor, the tracker follows the lowered basket, and food collection becomes durable ready progress immediately. Old partial weight values stay unsolved; old open saves stay open with an updated clue. Ready/done saves show an opened, empty hoist. Quest/reward identifiers, the chamber shield trial and main route remain. Muted browser route, return-quest flow, legacy-shaped save reload, two-page co-op, full Keep route, static/story and dialogue checks passed. Human difficulty and visual feel remain unverified. See docs/design/RUINED_KEEP_SUPPLY_HOIST_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Ruined Keep lift winch — planned
+
+The ongoing approved campaign-quality work applies to the required dungeon lift: retire the adjacent three-weight sum, use a moving-platform winch driven by the player's walk around the handle, visibly raise the rescued group with the player, and allow retry after release or fall. Preserve kd.lift.open/kd.transfer, checkpoint compatibility, co-op control and late-rider cycling. See docs/design/RUINED_KEEP_LIFT_WINCH_2026-10-11.md. Human playtest remains outstanding; no custom SFX work.
+## [Codex | 2026-10-11] Ruined Keep lift winch — locally verified
+
+Version 2.172.0 implements the approved physical lift action, readable rig and live tracker. Solo movement, release/reversal, two-client co-op and disconnect, checkpoint and old completed/partial saves, the full dungeon route and its optional branches passed muted browser QA. `kd.lift.open`/`kd.transfer` retain their meaning. A transient story-file request now retries to protect campaign dialogue loading. Human puzzle feel and final art remain unverified. This does not claim the campaign-wide redesign is finished. No custom SFX work. See docs/design/RUINED_KEEP_LIFT_WINCH_2026-10-11.md.

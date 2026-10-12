@@ -17,7 +17,7 @@ import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2140';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2135';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2160';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2074';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2172';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2075';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.

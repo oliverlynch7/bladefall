@@ -952,3 +952,11 @@ Under Oliver's approved campaign-quality and puzzle-variety direction, retire th
 ## [Codex | 2026-10-11] Broken Walls hoist verification | U-2026-10-11-CONTINUE
 
 This optional interaction is implemented in v2.171.0 with the previously approved immediate saving of collected return-request items. The old completed flag still opens the hoist, while old partial sums do not. The food is absent on later ready/done visits. Browser route, deliberate miss and retry, normal prompts, story gates, legacy-shaped save reload, two-page co-op and full Keep route passed. Its fun, difficulty and art remain for Oliver to judge in a playtest.
+
+## [Codex | 2026-10-11] Ruined Keep main lift winch — planned
+
+Continue Oliver's approved campaign puzzle-variety pass. The required dungeon lift currently uses three adjacent 1/2/3 toggles and a total-four answer; replace that action with a player-operated hand winch on the moving platform. Walking around its handle should visibly raise player and prisoners together, and release/fall should lower it for retry. Keep kd.lift.open/kd.transfer, old completed saves, co-op host authority, late-rider cycling and all optional branches. This is a scoped experiential correction, not a new lore direction or a claim of human playtest acceptance. See docs/design/RUINED_KEEP_LIFT_WINCH_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Ruined Keep main lift winch — locally verified
+
+Version 2.172.0 implements the scoped required lift replacement. Real-input browser checks covered grip, partial raise, reverse/release/retry, full turn and late rider; separate two-client checks covered guest operation, host ownership, state sharing, disconnect and transfer. Older partial/completed saves and the full dungeon route passed. Human difficulty and final visual judgment remain with Oliver; do not generalize this result to the remaining campaign levels. No custom SFX work.

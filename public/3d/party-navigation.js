@@ -19,7 +19,7 @@ function target(g){
    const k=g.keep?.remote||g.keep,z=-1650-Math.min(1,(k?.elapsed||0)/30)*1250;
    t=Math.hypot(g.p.x,g.p.z-z)>380?{x:0,z,y:0,navLabel:'Protect the escaping group'}:null;
   }else t=first([['rk.help','@grant'],['rk.arrow','rk.arrow'],['rk.gate','rk.gate'],['rk.breach.start','rk.breach'],['rk.cells','rk.wheel']]);break;
- case '2:1':t=first([['kd.roster','kd.roster'],['kd.hidden','kd.hidden'],['kd.free','kd.free'],['kd.papers','kd.papers'],['kd.lift.open','kd.lift.note'],['kd.transfer','kd.lift.note']]);break;
+ case '2:1':t=first([['kd.roster','kd.roster'],['kd.hidden','kd.hidden'],['kd.free','kd.free'],['kd.papers','kd.papers'],['kd.lift.open','kd.lift.winch'],['kd.transfer','kd.lift.winch']]);break;
  case '3:0':t=first([['ff.trail','ff.trail'],['ff.part','ff.part'],['ff.heater','ff.heater'],['ff.reflect.open','ff.reflect.clue'],['ff.cave','ff.cave']]);break;
  case '3:1':t=first([['ic.pages','ic.pages'],['ic.free','ic.free'],['ic.ellis.met','@ellis'],['ic.notes','ic.notes'],['ic.ellis.lead','@ellis'],['ic.lock.open','ic.lock.clue']]);break;
  case '4:0':t=first([['ih.flint.met','@flint'],['ih.workers.safe','ih.workers'],['ih.handles','ih.handles'],['ih.cart','ih.cart'],['ih.line.open','ih.plate']]);break;
@@ -40,7 +40,6 @@ function target(g){
  };
  const puzzles={
   'hp.bridge.clue':[/^hp\.cart\.push$/,'Loaded cart'],
-  'kd.lift.note':[/^kd\.lift\.\d+$/,'Lift weights'],
   'ff.reflect.clue':[/^ff\.reflect\.3$/,'Cornice ledges'],
   'ic.lock.clue':[/^ic\.lock\.\d+$/,'Water controls'],
   'ih.plate':[/^ih\.line\.\d+$/,'Machine controls'],

@@ -17,6 +17,27 @@ export function loadKeep(){
 }
 const material=new THREE.MeshLambertMaterial({vertexColors:true});
 const bannerMaterial=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
+function buildLiftWinch(root){
+  const owned=new Set(),wood=new THREE.MeshStandardMaterial({color:'#665342',roughness:.86}),iron=new THREE.MeshStandardMaterial({color:'#52636a',metalness:.45,roughness:.56}),brass=new THREE.MeshStandardMaterial({color:'#d6ae69',metalness:.68,roughness:.35}),ivory=new THREE.MeshStandardMaterial({color:'#f2dda4',metalness:.18,roughness:.42});
+  const mat=[wood,iron,brass,ivory],deck=new THREE.Group();deck.name='Moving prisoner lift winch';deck.position.set(0,180,-2500);root.add(deck);
+  const add=(parent,geometry,m,x=0,y=0,z=0)=>{owned.add(geometry);const mesh=new THREE.Mesh(geometry,m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;};
+  const torus=(radius,tube,y,m)=>{const ring=add(deck,new THREE.TorusGeometry(radius,tube,8,56),m,0,y,0);ring.rotation.x=Math.PI/2;};
+  torus(88,3.4,8,brass);torus(59,2.2,5,iron);torus(37,3,8,brass);
+  add(deck,new THREE.CylinderGeometry(32,35,58,20),wood,0,32,0);
+  for(const y of [9,31,55]){const band=add(deck,new THREE.TorusGeometry(33,3,8,24),brass,0,y,0);band.rotation.x=Math.PI/2;}
+  add(deck,new THREE.CylinderGeometry(14,16,14,16),iron,0,65,0);
+  add(deck,new THREE.CylinderGeometry(8,11,6,16),ivory,0,75,0);
+  for(let i=0;i<12;i++){const a=i*Math.PI/6;add(deck,new THREE.BoxGeometry(7,9,12),iron,Math.cos(a)*35,14,Math.sin(a)*35).rotation.y=-a;}
+  const arm=new THREE.Group();deck.add(arm);add(arm,new THREE.BoxGeometry(83,9,11),brass,44,59,0);add(arm,new THREE.CylinderGeometry(6,6,47,12),wood,88,79,0);add(arm,new THREE.SphereGeometry(9,12,8),ivory,88,105,0);
+  const marker=new THREE.InstancedMesh(new THREE.BoxGeometry(9,3,15),new THREE.MeshBasicMaterial({color:'#ffffff'}),24);owned.add(marker.geometry);mat.push(marker.material);deck.add(marker);
+  const dot=new THREE.Object3D();for(let i=0;i<24;i++){const a=i*Math.PI/12;dot.position.set(Math.cos(a)*88,10,Math.sin(a)*88);dot.rotation.set(0,-a,0);dot.updateMatrix();marker.setMatrixAt(i,dot.matrix);}marker.instanceMatrix.needsUpdate=true;
+  const weight=new THREE.Group();weight.name='Opposing counterweight';root.add(weight);
+  add(weight,new THREE.BoxGeometry(64,76,56),iron);for(const dx of [-24,24]){add(weight,new THREE.BoxGeometry(7,79,59),brass,dx,0,0);for(const dz of [-23,23])for(const dy of [-28,28])add(weight,new THREE.SphereGeometry(3.2,8,6),ivory,dx,dy,dz);}
+  for(const dy of [-32,32])add(weight,new THREE.BoxGeometry(67,7,60),wood,0,dy,0);
+  const hook=add(weight,new THREE.TorusGeometry(13,3.5,8,16),brass,0,49,0);hook.rotation.x=Math.PI/2;
+  const colors={lit:new THREE.Color('#aee9c6'),dark:new THREE.Color('#72685a')};
+  return {deck,arm,weight,marker,colors,lastLit:-1,dispose(){deck.removeFromParent();weight.removeFromParent();for(const g of owned)g.dispose();for(const m of mat)m.dispose();}};
+}
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildKeep(scene,w){
   const root=new THREE.Group();root.name='Ruined Keep · The Fallen Standard';
@@ -151,11 +172,13 @@ export function buildKeep(scene,w){
   const sun=new THREE.DirectionalLight('#ffe1b2',under?1.15:2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:3000});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.2;sun.shadow.bias=-.0002;root.add(sun,sun.target);
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffad55',900,180,1.6);root.add(l);return l});
   const counts={keepArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
-  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
+  const winch=w.keepScene==='dungeons'?buildLiftWinch(root):null;
+  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,winch,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
+  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();winch?.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateKeep(w){
   if(!active||!w.p)return;const a=active,p=w.p,low=window.__BF_META?.().quality==='low',range=low?750:1200;let tris=0,calls=0;
+  if(a.winch&&w.prison){const lift=w.movers.find(m=>m.prisonLift),k=w.prison.winch,rig=a.winch;if(lift){rig.deck.position.y=lift.h;rig.weight.position.set(243,435-(lift.h-180),-2500);}rig.arm.rotation.y=-(k.angle||0);const lit=Math.floor((k.progress||0)*24+.0001);if(lit!==rig.lastLit){for(let i=0;i<24;i++)rig.marker.setColorAt(i,i<lit?rig.colors.lit:rig.colors.dark);rig.marker.instanceColor.needsUpdate=true;rig.lastLit=lit;}}
   for(const [cell,g] of a.groups){const o=g.userData.obstacle,[cx,cz]=o?[o.x,o.z]:cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;
     if(g.visible&&o&&w.eye&&p.y<o.h-5&&window.__BF_META?.().camMode!=='fps')for(let t=.08;t<.95;t+=.08){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t;if(Math.abs(x-o.x)<o.w/2+5&&Math.abs(z-o.z)<o.d/2+5){g.visible=false;break;}}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}

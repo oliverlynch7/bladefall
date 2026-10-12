@@ -1,5 +1,6 @@
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
+import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
 /* Outskirts: original Blender kit, fitted to the game's existing geometry.
    No gameplay mutation. Static scenery is instanced in spatial chunks. */
 import * as THREE from './three.module.js';
@@ -163,13 +164,16 @@ export function buildOutskirts(scene,w){
   const state=B.finish();root.userData.art=state;
   const rootSteps=(w.obstacles||[]).filter(o=>o.woodsRootPerch);
   if(rootSteps.length){state.rootTrail=buildWoodsRootArt(rootSteps);root.add(state.rootTrail);window.__WOODS_ROOT_3D_ACTIVE=true;}
+  state.signalCanopy=buildWoodsSignalArt(w.obstacles||[]);
+  if(state.signalCanopy){root.add(state.signalCanopy);state.signalPerches=(w.obstacles||[]).filter(o=>o.woodsSignalPerch||o.woodsSignalDeck);window.__WOODS_SIGNAL_3D_ACTIVE=true;}
   // Lights affect only this zone and are restored by the outer world's clear function.
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.37:.24)}});
   state.oldFog=scene.fog;scene.fog=new THREE.Fog(woods?'#202827':'#302d29',650,2300);
   const key=new THREE.DirectionalLight(0xffd2a0,woods?1.35:1.8);key.position.set(-600,1000,600);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-650,right:650,top:650,bottom:-650,near:1,far:2600});key.shadow.normalBias=1.2;key.shadow.bias=-.0001;root.add(key,key.target);state.key=key;
   state.points=[0,1,2].map(()=>{const l=new THREE.PointLight(0xffb44e,900,150,1.6);root.add(l);return l});
   state.scene=scene;state.obstacles=obstacles;state.stats={outskirtsArt:true,floorTiles:floors,roadTiles:roads,tree:deco.filter(d=>d.kind==='tree'&&d.lead===true).length,totalTriangles:state.triangles,instances:state.instances,chunks:state.groups.length,drawCalls:state.groups.reduce((n,g)=>n+g.children.length,0),visibleTriangles:0,visibleDrawCalls:0,artObstacles:true};
-  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.rootTrail?.userData.dispose();if(active===root)active=null};
+  if(state.signalCanopy){state.signalTriangles=state.signalCanopy.children.reduce((n,m)=>n+(m.geometry?.attributes.position.count||0)/3,0);state.stats.totalTriangles+=state.signalTriangles;state.stats.drawCalls+=state.signalCanopy.children.length;}
+  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.rootTrail?.userData.dispose();state.signalCanopy?.userData.dispose();if(active===root)active=null};
   return {group:root,counts:state.stats};
 }
 export function updateOutskirts(w){
@@ -183,6 +187,7 @@ export function updateOutskirts(w){
     if(g.visible&&ob){const base=ob.y0||0,top=ob.kind==='plat'?ob.h:base+(ob.h||0);if(window.BFCameraOcclusion.blocks(w,ob,base,top,window.__BF_META?.().camMode,5))g.visible=false;}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri||0;calls++}
   }
+  if(st.signalCanopy){st.signalCanopy.visible=st.signalPerches.some(o=>Math.hypot(o.x-p.x,o.z-p.z)<1200);if(st.signalCanopy.visible){tris+=st.signalTriangles;calls+=st.signalCanopy.children.length;}}
   st.stats.visibleTriangles=tris;st.stats.visibleDrawCalls=calls;
   const lamps=st.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.y-(p.y||0))**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);
   st.points.forEach((l,i)=>{l.visible=!!lamps[i]&&lamps[i].d<250*250;if(l.visible)l.position.copy(lamps[i].v)});

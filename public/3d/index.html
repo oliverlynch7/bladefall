@@ -1145,7 +1145,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.180.0-vault-brake';
+const VERSION3D='2.181.0-woods-canopy';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3490,17 +3490,24 @@ function buildBlackWoods(){
  G.areaName='Briar Town · Black Woods';G.campaignLayout={revision:1999,experience:{title:'Black Woods',objectives:['Find a way past the patrols','Silence the signal','Reach the northern shelter']}};
  const rooms=[['Forest Arrival',0,200,750,650],['Split Roots',0,-650,950,750],['Occupied Camp',-650,-1850,1100,1000],['Hunting Platforms',850,-1650,1100,1200],['Track Grove',-1850,-2320,1000,1000],['Signal Clearing',0,-3100,1250,950],['North Shelter',0,-4400,1000,900]];
  for(const [name,x,z,w,d]of rooms){vseg(x,z,w,d,{meadow:true});G.rooms.push({name,x,z,w,d,y:0,monsters:[],encounter:false,cleared:true});}
- const paths=[[[0,200],[0,-650],[-650,-1250],[-650,-1850],[0,-2600],[0,-3100],[0,-4400]],[[0,-650],[850,-950],[850,-1650],[900,-2300],[0,-3100]],[[-650,-1850],[-1850,-2100],[-1850,-2320]],[[-1850,-2320],[-1150,-2900],[0,-3100]]];
+ const paths=[[[0,200],[0,-650],[-650,-1250],[-650,-1850],[0,-2600],[0,-3100],[0,-4400]],[[0,-650],[850,-950],[850,-1650],[900,-2300],[0,-3100]],[[-650,-1850],[-1850,-2100],[-1850,-2320]],[[-1850,-2320],[-1150,-2900],[0,-3100]],[[-580,-3660],[0,-3660]]];
  for(const path of paths)for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],n=Math.ceil(Math.hypot(a[0]-b[0],a[1]-b[1])/130);for(let j=0;j<=n;j++)vseg(a[0]+(b[0]-a[0])*j/n,a[1]+(b[1]-a[1])*j/n,360,360,{path:true});}
  vseg(1400,-1870,600,600,{meadow:true});vseg(-560,-3520,360,360,{meadow:true});
  const stair=(a,b)=>{const n=Math.ceil(Math.max(Math.hypot(b[0]-a[0],b[1]-a[1])/95,Math.abs(b[2]-a[2])/22)),out=[];for(let k=0;k<=n;k++){const q=a.map((v,i)=>v+(b[i]-v)*k/n);vplat(q[0],q[1],q[2],190,190,{slab:14,checkpoint:true,roots:true});out.push(q);}return out;};
- const climb=stair([560,-740,0],[850,-1360,160]),upper=stair([850,-1360,160],[900,-2300,220]),cross=stair([900,-2300,220],[0,-3040,220]),loft=stair([900,-1800,185],[1390,-1850,240]);
- vplat(1390,-1870,240,420,320,{slab:14,checkpoint:true});vsolid(1390,-1780,240,95,94,24,'#554c35');
- vplat(0,-3100,220,670,410,{slab:16,checkpoint:true});const down=stair([-280,-3140,220],[-580,-3540,0]);
- for(const [x,z,y]of [[850,-1360,160],[900,-1950,200],[900,-2300,220],[1390,-1870,240],[0,-3100,220]]){
-  for(const dx of [-70,70])G.deco.push({x:x+dx,z,y0:0,w:18,h:y+14,d:18,c:'#54442e',nocol:true});
-  for(let j=0;j<7;j++)G.deco.push({x:x-76+j*24,z,y0:y+1,w:19,h:4,d:165,c:'#89714b',nocol:true});
- }
+ // Lewis's eastern route is a real climb. The separated perches have collision at the
+ // same height as their visible timber, while the forest floor catches missed jumps.
+ // The west camp/crank route remains entirely on the ground.
+ const signalPerches=new Map();
+ const perch=(x,z,y,w=104,d=82)=>{const key=x+':'+z+':'+y;if(!signalPerches.has(key)){
+  const p={x,z,y,w,d};signalPerches.set(key,p);
+  vplat(x,z,y,w,d,{slab:14,checkpoint:true,woodsSignalPerch:true,invisible:true});
+ }return [x,z,y];};
+ const climb=[perch(560,-740,4,152,124),perch(615,-890,26),perch(730,-1025,58),perch(825,-1170,105,112,104),perch(955,-1260,140),perch(850,-1360,160,130,106)];
+ const upper=[climb[climb.length-1],perch(920,-1510,177),perch(810,-1650,193),perch(910,-1800,185,130,104),perch(1035,-1930,207),perch(900,-2080,220,120,100),perch(900,-2190,220,96,72),perch(900,-2300,220,130,106)];
+ const cross=[upper[upper.length-1],perch(770,-2410,222),perch(615,-2525,240),perch(455,-2665,231),perch(300,-2785,245),perch(140,-2910,226),perch(0,-3040,220,136,110)];
+ const loft=[upper[3],perch(1085,-1715,205,92,76),perch(1230,-1615,229,88,72),[1390,-1850,240]];
+ vplat(1390,-1870,240,420,320,{slab:14,checkpoint:true,woodsSignalDeck:true,invisible:true});vsolid(1390,-1780,240,95,94,24,'#554c35');
+ vplat(0,-3100,220,670,410,{slab:16,checkpoint:true,woodsSignalDeck:true,invisible:true});const down=stair([-280,-3140,220],[-580,-3540,0]);
  // Trees frame the clearings, with open gaps where connecting routes enter.
  for(let i=0;i<rooms.length;i++){const [,x,z,w,d]=rooms[i];for(let k=0;k<10;k++){const a=k*Math.PI*2/10+.17*i,tx=x+Math.cos(a)*(w*.58),tz=z+Math.sin(a)*(d*.58),h=155+(k%4)*22;
   if(paths.some(path=>path.some(q=>Math.hypot(q[0]-tx,q[1]-tz)<210)))continue;
@@ -3521,7 +3528,7 @@ function buildBlackWoods(){
  for(const [type,x,z]of [['grunt',-570,-1360],['grunt',-820,-1800],['caster',-400,-1870],['grunt',-650,-2220],['flyer',1040,-2120],['thornboar',-1600,-2180],['thornboar',-1920,-2770],['grunt',-200,-2890],['caster',240,-3100],['grunt',-170,-3600]]){const e=spawnEnemy(type,x,z,false);e.woodsEncounter=true;}
  buildBethRescue();
  G.bounds={minX:-2600,maxX:3150,minZ:-4900,maxZ:650};G.progressEnd=-4850;G.portalPos={x:0,z:-4680,y:0};G.goalPos={...G.portalPos};G.startPos={x:0,z:300};G.lastSafe={x:0,z:300,y:0};Object.assign(G.p,{x:0,z:300,y:0,vy:0});
- G.blackWoods={paths,climb,upper,cross,loft,down,revision:1999};briarPending=null;G._storyEpoch=null;briarEpoch();briarSync();
+ G.blackWoods={paths,climb,upper,cross,loft,down,signalPerches:[...signalPerches.values()],revision:2000};briarPending=null;G._storyEpoch=null;briarEpoch();briarSync();
 }
 function buildBethRescue(){
  const trail=[[1200,-1000],[1510,-1060],[1740,-1180],[1940,-1330],[2220,-1530],[2580,-1720]];
@@ -3564,10 +3571,18 @@ function drawBlackWoods(t){
  if(!inBlackWoods())return;const s=adventureStoryState(),f=s.flags;
  const n=G.storyNpcs[0];if(!window.__npc3dDrawn?.('lewis')){bx(n.x,28,n.z,22,38,16,'#6c7754');bx(n.x,55,n.z,16,16,16,'#cbb38f');}
  if(!f['woods.ready']){bx(n.x,80,n.z,5,13,5,'#e3cb8a');bx(n.x,70,n.z,5,4,5,'#e3cb8a');}
- for(const x of [-45,45])bx(x,270,-3130,12,100,12,'#61503b');bx(0,322,-3130,115,12,22,'#8d7348');
- for(let k=0;k<4;k++)bx(0,296,-3130-k*12,12+k*12,14+k*6,14,'#b29a62');
- if(!f['woods.signal']){bx(0,157,-3070,3,314,3,'#c9b985');bx(80,26,-3060,18,52,18,'#69543a');pushM();mv(80,50,-3060);rotY(t*1.7);box(62,7,9,'#a68c5b');popM();}
- else bx(0,229,-3070,3,18,3,'#c9b985');
+ const signal3D=three3DLive()&&window.__world3d?.()?.on&&window.__WOODS_SIGNAL_3D_ACTIVE;
+ if(!signal3D){
+  for(const p of [...G.blackWoods.signalPerches,...G.obstacles.filter(o=>o.woodsSignalDeck).map(o=>({x:o.x,z:o.z,y:o.h,w:o.w,d:o.d}))]){
+   bx(p.x,p.y-7,p.z,p.w,14,p.d,'#51402e');
+   for(let j=0;j<7;j++)bx(p.x,p.y+1,p.z-p.d*.43+j*p.d*.143,p.w-8,2,p.d*.126,j%3?'#97734d':'#b18b5d');
+   if(p.y>0)for(const side of [-1,1])bx(p.x+side*p.w*.38,p.y/2-6,p.z,11,p.y-12,11,'#684931');
+  }
+  for(const x of [-67,67])bx(x,312,-3175,16,184,16,'#76543b');bx(0,396,-3175,164,18,28,'#9c784e');
+  for(const x of [-37,37]){bx(x,347,-3149,29,31,44,'#aa8958');bx(x,347,-3126,49,9,10,'#4c504c');}
+ }
+ if(!f['woods.signal']){bx(0,306,-3070,3,170,3,'#d7c18d');bx(0,397,-3070,18,9,18,'#dbbc77');bx(80,26,-3060,18,52,18,'#69543a');pushM();mv(80,50,-3060);rotY(t*1.7);box(62,7,9,'#a68c5b');popM();}
+ else {bx(0,233,-3070,4,25,4,'#a39878');bx(80,34,-3060,62,8,12,'#766e59');}
  for(const o of G.storyObjects)if(o.kind==='trackclue'){
   bx(o.x,8,o.z,70,16,60,'#676d59');bx(o.x,25,o.z,58,18,30,'#93917a');for(let j=0;j<3;j++)bx(o.x,27+j*4,o.z+16,40-j*5,2,2,'#4c5145');}
  // Distinct animal shapes tell a spatial story; they are no longer a code to enter.
@@ -23953,7 +23968,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2180b"></script>
+<script type="module" src="./hero3d.js?v=2181b"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

@@ -976,3 +976,11 @@ Oliver's approved vulnerable-escort and quest-variety direction is now applied t
 ## [Codex | 2026-10-11] Castle Gates required crossing — scoped implementation
 
 Under Oliver's approved campaign puzzle-variety and parkour direction, the bridge's repeated adjacent catches become a physical drain traversal, single far-bank brake, return walkway and near-bank lowering wheel. The far-bank route cannot enter the court until the bridge descends. `cg.catch.west` remains the durable brake state and `cg.catch.east` remains only as an old-save alias. The disguise, inspection, assault, rewards and class-rift paths are unchanged. Muted browser and static checks passed; this does not establish that a human finds the route enjoyable. No custom SFX work.
+
+## [Codex | 2026-10-11] Shipwreck Shore hull mechanism — scoped plan
+
+The old upper-deck 1/2/4 weight toggles repeat a puzzle interaction Oliver explicitly rejected. Use the existing hull and crawlspace, but make the optional SC-01 hatch open through a readable cargo-cage timing action: watch it swing past a marked brace and release the catch. Keep the `sc.hull.open` flag, lower ramp, shard, story/reward IDs and prior completed saves. Old partial masks provide no shortcut. This is implementation within the standing campaign-quality approval, not a new user-authored story beat. See docs/design/SHIPWRECK_HULL_CARGO_RELEASE_2026-10-11.md.
+
+## [Codex | 2026-10-11] Shipwreck Shore hull mechanism — local verification
+
+The scoped cargo-release interaction is implemented in v2.176.0. A normal-camera mistake and retry, successful opening, walkable lower ramp, complete shore/voyage route, checkpoint, old partial/completed saves and guest-operated co-op release passed muted browser checks. This verifies function and presentation, not that Oliver finds the challenge or art satisfying. Keep the wider level-design review open. No custom SFX work.

@@ -911,58 +911,18 @@
           "id": "sc.hull",
           "region": "storm",
           "title": "The trapped crawlspace",
-          "text": "Cargo weights marked one, two and four hang beside the hatch beam. Its repair mark is five. Match that load to lift the beam and lower the ramp inside the hull. Cross broken deck boards with ordinary jumps; lower boards catch a missed jump."
+          "text": "The cargo cage swings over a painted strike mark. Pull the release as it crosses the mark. Its weight will lift the lower hatch. The broken upper deck can be crossed with ordinary jumps; lower boards catch a miss."
         }
       ]
     },
-    "sc.weight.1": {
-      "once": false,
+    "sc.hull.release": {
+      "once": true,
       "when": [],
       "effects": [
         {
-          "type": "counterweight",
-          "id": "sc.hull",
-          "weights": [
-            1,
-            2,
-            4
-          ],
-          "index": 0,
-          "target": 5
-        }
-      ]
-    },
-    "sc.weight.2": {
-      "once": false,
-      "when": [],
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "sc.hull",
-          "weights": [
-            1,
-            2,
-            4
-          ],
-          "index": 1,
-          "target": 5
-        }
-      ]
-    },
-    "sc.weight.3": {
-      "once": false,
-      "when": [],
-      "effects": [
-        {
-          "type": "counterweight",
-          "id": "sc.hull",
-          "weights": [
-            1,
-            2,
-            4
-          ],
-          "index": 2,
-          "target": 5
+          "type": "flag",
+          "id": "sc.hull.open",
+          "value": true
         }
       ]
     },

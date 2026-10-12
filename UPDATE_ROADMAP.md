@@ -2651,3 +2651,9 @@ The optional SP-03 branch now unfolds as a visible two-crank bookshelf crossing 
 - [x] The north prisoners now cross a supported evacuation lane with individual health, two live pursuer ambushes, failure/retry and co-op host authority. Cutting the signal cable first makes each wave smaller; the sheltered south release remains quick.
 - [x] Preserved `lc.north` as safe-at-shelter completion, old saves, Ruth's reward, alarm patrols, all five Hollow Pass shards and the main route. Distinct civilian models and two on-screen health bars make the escort legible.
 - [x] Static checks plus muted browser failure/retry, both ambush hits, quiet/loud counts, full route, old-save reload and two-client sync passed. Oliver's playtest remains for pacing, difficulty and art. The campaign-wide quality pass remains active. No custom SFX work. See docs/design/LOST_CANYON_NORTH_CROSSING_2026-10-11.md.
+
+## [Codex | 2026-10-11] Shipwreck Shore cargo release (v2.176.0)
+
+- [x] Replaced three nearby number-weight toggles with a swinging cargo cage, marked brace and timed release. An early pull is recoverable; a correct pull opens the existing lower hatch and timber ramp to SC-01.
+- [x] Kept sc.hull.open, old completed saves, main boat/voyage story and rewards. Old partial weight values no longer shortcut the hatch.
+- [x] Muted browser normal-camera, E-key, full shore, voyage, checkpoint, legacy-save and guest-operated co-op checks passed with static/story tests. Human playtesting remains for timing, clarity and art; the campaign-wide quality effort is still open. No custom SFX work. See docs/design/SHIPWRECK_HULL_CARGO_RELEASE_2026-10-11.md.

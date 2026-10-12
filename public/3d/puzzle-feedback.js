@@ -38,14 +38,12 @@ function notice(event,before,after,object,id){
   const fitted=['rudder','sail','rope'].filter(k=>!before.flags['sc.installed.'+k]&&after.flags['sc.installed.'+k]);
   if(fitted.length)return {id,replaceKey:'boat:assembly',kind:after.flags['sc.boat.ready']?'Boat ready':'Boat repair',title:after.flags['sc.boat.ready']?'The boat is ready':fitted.map(k=>k[0].toUpperCase()+k.slice(1)).join(' and ')+' fitted',text:after.flags['sc.boat.ready']?'All three parts are fitted. Board beside Otto when you are ready to cross.':'The '+fitted.join(' and ')+' '+(fitted.length===1?'is':'are')+' now fitted to the boat. Find the remaining supplies or ask Otto for help.'};
  }
- if(event?.effects?.some(e=>e.id==='ih.braces'))return {id,replaceKey:'puzzle:ih.line',kind:'Machine safety',title:'Safety cable pulled',text:'Eight lights are counting down. Reach the hammer lock before they go out. You can pull this cable again if you miss it.'};
  const e=event?.effects?.find(e=>['counterweight','rotatePuzzle','sequence','resetPuzzle','balanceBeam','waterworks','flowSwitch','linkedRotate'].includes(e.type));
  if(!e)return null;
  const solved=!!after.flags[e.id+'.open'],wasSolved=!!before.flags[e.id+'.open'];
  if(wasSolved&&solved)return null;
  let title='Puzzle updated',text;
- if(e.id==='ih.line'){const step=after.items[e.id]||0;title=solved?'Weapon line stopped':step===1?'Metal feed stopped':'Pressure released';text=solved?'The machinery is safe. The repaired cart leads onward.':step===1?'Watch the pressure gauge. Vent the tank while the needle is inside its pale band.':'Pull the safety cable, then hurry to the hammer lock before its eight lights go out.';}
- else if(e.id==='la.vault'){title=solved?'Service vault unlocked':'Service wheel turned';text=solved?'Both bolts withdraw. The service vault is open.':'The gold pointer moved. Compare it with the pale repair mark above this wheel; its bolt withdraws when aligned.';}
+ if(e.id==='la.vault'){title=solved?'Service vault unlocked':'Service wheel turned';text=solved?'Both bolts withdraw. The service vault is open.':'The gold pointer moved. Compare it with the pale repair mark above this wheel; its bolt withdraws when aligned.';}
  else if(e.id==='pc.light'){
   const path=root.BFPalaceCourtyard?.lightPath(after.items['pc.light.mask']||0),last=path?.hits[path.hits.length-1];
   title=solved?'Library seal lit':'Mirror turned';

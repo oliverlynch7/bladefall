@@ -19,7 +19,7 @@ const camps={
  '2.1':{place:'lower prison works',target:'prison search troops',at:[0,-2970,0],add:[['grunt',-180,-2940,0],['caster',180,-3060,0],['grunt',-120,-3200,0]]},
  '3.0':{place:'mountain lift house',target:'Legion mountain troops',at:[-2100,-1300,220],near:[-2100,-1300,220],radius:320},
  '3.1':{place:'cave waterworks',target:'Legion searchers',at:[0,-3600,180],near:[0,-3600,180],radius:280},
- '4.0':{place:'machine control floor',target:'forge guards',at:[0,-3950,100],near:[0,-3950,100],radius:350},
+ '4.0':{place:'weapon-line drive floor',target:'forge guards',at:[0,-3950,100],near:[0,-3950,100],radius:350},
  '4.1':{place:'furnace worker floor',target:'furnace patrol',at:[-1000,-3650,120],near:[-1000,-3650,120],radius:350},
  '5.0':{place:'upper shipwreck',target:'wreck raiders',at:[1390,-1800,350],near:[1390,-1800,350],radius:380},
  '5.1':{place:'lower tide pools',target:'tide slimes',at:[-400,-4200,320],near:[-400,-4200,320],radius:400},

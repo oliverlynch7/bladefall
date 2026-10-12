@@ -227,7 +227,7 @@
       }
     },
     "ih.flint.remind": {
-      "text": "Shelter first, then Jack's cart handles. Stop the feed; vent at the pale gauge band. Pull the safety cable, then hurry to the hammer lock.",
+      "text": "Shelter the workers, then repair Jack's cart. In the machine room, push the scrap sled along the track. The floor flashes before the hammer falls. Jam the drive gear to stop the line.",
       "choices": [
         {
           "id": "back",
@@ -539,7 +539,7 @@
       }
     },
     "ih.jack.controls": {
-      "text": "Read the plate: feed, pressure, hammer. Shelter the workers first. A wrong step resets the machinery safely.",
+      "text": "Read the plate by the track. Push the scrap sled from behind. When the hammer warns, stop and let it strike, then push on. The sled jams the drive gear.",
       "choices": [
         {
           "id": "back",
@@ -581,7 +581,7 @@
       "choices": [
         {
           "id": "controls",
-          "text": "Remind me about the controls.",
+          "text": "Remind me about the machine room.",
           "next": "ih.jack.controls"
         }
       ],
@@ -661,7 +661,34 @@
           "id": "ih.order",
           "region": "ember",
           "title": "Stop the weapon line",
-          "text": "Stop the metal feed at the west machine. Vent the pressure tank only when its needle reaches the pale safe band. Then pull the safety cable at the north end and reach the hammer lock before its eight lights go out. If you miss it, pull the cable again. The stopped feed and empty tank stay safe."
+          "text": "The scrap sled sits on the track. Walk into its rear to push it toward the drive gear. The floor flashes before the hammer drops. If the hammer hits the sled, it rolls back a short way. Wait for the strike, then push again. The workers must be sheltered and Jack's cart repaired first."
+        }
+      ]
+    },
+    "ih.line.complete": {
+      "once": true,
+      "effects": [
+        {
+          "type": "flag",
+          "id": "ih.line.open"
+        }
+      ],
+      "when": [
+        {
+          "flag": "ih.workers.safe",
+          "is": true
+        },
+        {
+          "flag": "ih.cart",
+          "is": true
+        },
+        {
+          "flag": "ih.plate",
+          "is": true
+        },
+        {
+          "flag": "ih.line.open",
+          "is": false
         }
       ]
     },
@@ -686,132 +713,6 @@
         {
           "flag": "ih.line.open",
           "is": true
-        }
-      ]
-    },
-    "ih.line.1": {
-      "once": false,
-      "effects": [
-        {
-          "type": "item",
-          "id": "ih.attempts",
-          "amount": 1
-        },
-        {
-          "type": "sequence",
-          "id": "ih.line",
-          "value": 1,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ih.workers.safe",
-          "is": true
-        },
-        {
-          "flag": "ih.plate",
-          "is": true
-        },
-        {
-          "flag": "ih.line.open",
-          "is": false
-        }
-      ]
-    },
-    "ih.line.2": {
-      "once": false,
-      "effects": [
-        {
-          "type": "item",
-          "id": "ih.attempts",
-          "amount": 1
-        },
-        {
-          "type": "sequence",
-          "id": "ih.line",
-          "value": 2,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ih.workers.safe",
-          "is": true
-        },
-        {
-          "flag": "ih.plate",
-          "is": true
-        },
-        {
-          "flag": "ih.line.open",
-          "is": false
-        }
-      ]
-    },
-    "ih.line.3": {
-      "once": false,
-      "effects": [
-        {
-          "type": "item",
-          "id": "ih.attempts",
-          "amount": 1
-        },
-        {
-          "type": "sequence",
-          "id": "ih.line",
-          "value": 3,
-          "solution": [
-            1,
-            2,
-            3
-          ]
-        }
-      ],
-      "when": [
-        {
-          "flag": "ih.workers.safe",
-          "is": true
-        },
-        {
-          "flag": "ih.plate",
-          "is": true
-        },
-        {
-          "flag": "ih.line.open",
-          "is": false
-        }
-      ]
-    },
-    "ih.brace": {
-      "once": false,
-      "when": [
-        {
-          "flag": "ih.workers.safe",
-          "is": true
-        },
-        {
-          "flag": "ih.plate",
-          "is": true
-        },
-        {
-          "flag": "ih.line.open",
-          "is": false
-        }
-      ],
-      "effects": [
-        {
-          "type": "item",
-          "id": "ih.braces",
-          "amount": 1
         }
       ]
     }

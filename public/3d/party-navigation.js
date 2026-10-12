@@ -55,8 +55,7 @@ function target(g){
   const lift=(g.movers||[]).find(m=>m.prisonLift);if(lift)t={x:lift.x,z:lift.z,y:lift.h,navLabel:'Prisoner lift'};
  }
  if(g.zone===4&&g.area===0&&f['ih.cart']&&read('ih.plate')&&!f['ih.line.open']){
-  const step=i['ih.line']||0,k=g.iron||{},key=step===0?'ih.line.1':step===1?'ih.line.2':k.braceUntil>k.clock?'ih.line.3':'ih.brace';
-  const o=obj(key);if(o)t={...o,clueId:'ih.order',navLabel:step===0?'Metal feed':step===1?'Pressure tank':key==='ih.brace'?'Safety cable':'Hammer lock'};
+  const z=g.iron?.sledZ??-3780;t={x:0,z:z+105,y:100,clueId:'ih.order',navLabel:'Push the scrap sled'};
  }
  // Only point to guards that actually block this required interaction.
  const guards={

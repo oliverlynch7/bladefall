@@ -35,3 +35,7 @@ The three mirrors now visibly turn their faces; a stronger ray and floor project
 ## [Codex | 2026-10-11] Great Furnace cooling pedal, v2.178.0
 
 The required round/square/triangle control order is now a visible pedal defense: keep weight on the pedal while cold water lowers the heat and three Legion pairs attack; leaving lets the crossing reheat. The original broken bridge rises on completion, with optional cooling-box counterweights intact. Old completed saves load the bridge; old partial control values no longer advance it. Node, muted-browser normal movement, full route, checkpoint, navigation and two-client co-op checks passed. Human combat and visual playtesting remains. See docs/design/GREAT_FURNACE_COOLING_PEDAL_2026-10-11.md. No custom SFX work.
+
+## [Codex | 2026-10-11] Iron Halls drive sled, v2.179.0
+
+The mandatory three-control weapon-line puzzle is now a physical scrap-sled push along a track. The timed hammer warns, strikes and knocks the sled partway back; reaching the gear visibly stops the line. The worker shelter and service cart remain required, and Flint, Jack, the journal and objective arrow explain the new action. Old partial controls are inert; old completed saves still open the exit. Muted-browser route, checkpoint, journal, old-save, normal-camera and repeated guest-operated co-op checks passed. The raised parked hammer leaves the solved view clear. Oliver's playtest is still needed to judge challenge and visual quality. See docs/design/IRON_HALLS_DRIVE_SLED_2026-10-11.md. No custom SFX work.

@@ -10,7 +10,7 @@ const puzzles=[
  ['hp.weight','hp.bridge'],['hp.brake','hp.bridge'],['hp.code','hp.code'],
  ['kd.lift','kd.lift'],['kd.depth','kd.depth'],['kd.press','kd.depth'],['kd.drain','kd.drain'],
  ['ff.reflect','ff.reflect'],['ff.marker','ff.camp'],['ic.lock','ic.lock'],['ic.channel','ic.channel'],
- ['ih.line','ih.order'],['ih.brace','ih.order'],['gf.cool','gf.pipes'],['gf.cache','gf.cache'],['gf.pet','gf.cage'],
+ ['ih.plate','ih.order'],['ih.line','ih.order'],['gf.cool','gf.pipes'],['gf.cache','gf.cache'],['gf.pet','gf.cage'],
  ['pc.mirror','pc.mirrors'],['sl.shelf','sl.shelf.guide'],['sl.display','sl.display'],['la.vault','la.vault'],['tc.tide','tc.tide']
 ];
 function related(g,target){

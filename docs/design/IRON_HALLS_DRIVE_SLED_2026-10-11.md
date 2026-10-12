@@ -1,0 +1,15 @@
+# Iron Halls drive-sled shutdown
+
+The required weapon-line shutdown still consists of three nearby controls in a prescribed order. Its pressure and cable timing change the details but not the player's basic action: press controls, read text, repeat after a mistake. Oliver's later puzzle-variety direction rejects this pattern. Preserve the timed hammer, but make its motion a visible hazard in a physical task.
+
+After the workers are sheltered and Jack's cart is repaired, a plate explains the stopped line's drive gear. A scrap sled starts at the south end of a floor track. Walk into its rear to push it north. A single forge hammer warns on the floor before striking across the track. If it catches the sled, the sled rolls partway back, so the player can watch its rhythm and try again without resetting the whole room. At the end of the track the sled wedges the gear, stopping the line and opening the existing exit. The track, sled, hammer, and gear must all move or change visibly. Keep a side lane around the track so players can inspect the plate and get back behind the sled.
+
+Keep `ih.line.open` as the durable story/save completion flag; the old `ih.line` partial value and attempts remain loadable but inert. Keep worker safety, cart repair, Flint and Jack, overhead route, optional mold, both Rift Shards, rewards, portal and checkpoints. The host owns sled motion and completion. A living co-op player can push; guests receive the moving sled and hammer phase. Do not add custom SFX. Update the quest tracker, journal, NPC directions and objective arrow to explain the new action with short language.
+
+Verify normal-camera cause and effect, an idle player, a deliberate hammer hit and recovery, physical completion, old partial and complete states, the route through the cart bridge, a checkpoint reload, and host/guest movement. Automated checks can establish function and visual legibility; human challenge and art judgment remain open.
+
+## [Codex | 2026-10-11] Local verification
+
+Version 2.179.0 removes the three live control interactions. The player pushes a collision-backed sled toward a moving drive gear; a warned hammer strike knocks the sled back partway and can hurt the nearby player. The cart, optional mold, return route and all reward identities remain. The objective arrow, journal, Flint and Jack now direct the player to the physical action. Legacy partial values remain inert; the old completed flag still places the sled at the gear and opens the route. The host owns motion and completion, while either player can push. A compact sled and hammer snapshot rides normal co-op state packets so a late guest sees the hazard promptly.
+
+Muted browser QA passed idle, strike/recovery, real movement, full route, checkpoint rollback and banking, old partial/completed states, journal access and three consecutive two-client guest-operated shutdowns with shared rewards. Normal-camera initial, warning, strike and solved states were inspected; the parked hammer was raised after it obscured the completed view. Human judgment of timing, challenge and art remains open. No custom SFX work.

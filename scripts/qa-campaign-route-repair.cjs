@@ -190,9 +190,9 @@ async page => {
     for(let i=0;i<100;i++)b.update(.016);
     ok('cart rolls into crossing position', G.iron.cartVisual===1);
     ok('shutdown remains required', !G.portal);
-    act('ih.plate'); act('ih.line.1');
-    G.iron.clock = 3.5;
-    act('ih.line.2'); act('ih.brace'); act('ih.line.3');
+    act('ih.plate');
+    Object.assign(p, {x:0,z:BFIronMachinery.startZ+118,y:100,vx:0,vz:0,vy:0,invuln:999});
+    b.input.jz=-1; for(let j=0;j<640&&!G.storyState.flags['ih.line.open'];j++) b.update(.016); b.input.jz=0;
     ok('weapon line shutdown opens exit', !!G.portal);
     return {level: 'Iron Halls · direct repair', checks};
   }));

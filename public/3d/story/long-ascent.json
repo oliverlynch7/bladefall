@@ -211,11 +211,11 @@
       }
     },
     "la.miles.vault": {
-      "text": "Free the prisoners to unlock the service wheels. Check the repair tally beside the linen shelves; use those settings, not matching marks.",
+      "text": "The worker-cell lock holds the vault cable. Free them, then climb the broken shelves above the linen room to reach its brake.",
       "choices": [
         {
           "id": "back",
-          "text": "I will look for the tally.",
+          "text": "I will find the brake.",
           "next": "la.miles.menu",
           "effects": [
             {
@@ -378,42 +378,18 @@
           "type": "note",
           "id": "la.vault",
           "region": "castle",
-          "title": "Service wheel tally",
-          "text": "The cell lock holds the service wheels shut. Free the workers first. Then set the four-mark wheels from rest: left two turns, right three. The door stays open once the marks line up. Gold pointers show the current positions. Pale marks show the repair settings. Each matching wheel pulls back one bolt."
+          "title": "Service vault brake",
+          "text": "The worker-cell lock holds the vault cable. Free them, then climb the broken rack above the linen room to reach its high brake. The lower shelf catches a missed jump."
         }
       ]
     },
-    "la.vault.left": {
-      "once": false,
+    "la.vault.brake": {
+      "once": true,
       "effects": [
         {
-          "type": "rotatePuzzle",
-          "id": "la.vault",
-          "target": [
-            2,
-            3
-          ],
-          "index": 0
-        }
-      ],
-      "when": [
-        {
-          "flag": "la.cells",
-          "is": true
-        }
-      ]
-    },
-    "la.vault.right": {
-      "once": false,
-      "effects": [
-        {
-          "type": "rotatePuzzle",
-          "id": "la.vault",
-          "target": [
-            2,
-            3
-          ],
-          "index": 1
+          "type": "flag",
+          "id": "la.vault.open",
+          "value": true
         }
       ],
       "when": [

@@ -20,9 +20,37 @@ export function buildLongAscent(scene,w){
  }
  // Low room walls keep the workers and service puzzles visible from the play camera.
  for(const [cx,cz,y,width]of [[1390,-480,250,470],[-1420,-520,750,580],[-1650,535,1800,440]]){
-  for(let row=0;row<5;row++)for(let col=0;col<7;col++){const x=cx-width/2+(col+.5)*width/7+(row%2?14:0);part(new T.BoxGeometry(width/7-3,35,28),0,x,y+row*38+18,cz);}
+  for(let row=0;row<5;row++)for(let col=0;col<7;col++){
+   // The linen-room rack starts through a broken bay, not behind a solid wall.
+   if(cx===1390&&col>=3&&col<=5)continue;
+   const x=cx-width/2+(col+.5)*width/7+(row%2?14:0);part(new T.BoxGeometry(width/7-3,35,28),0,x,y+row*38+18,cz);
+  }
   part(new T.BoxGeometry(width+40,15,44),1,cx,y+201,cz);
   for(const dx of [-width*.36,width*.36]){part(new T.BoxGeometry(16,98,16),2,cx+dx,y+100,cz+22);part(new T.CylinderGeometry(10,18,24,8,1,true),1,cx+dx,y+157,cz+22);}
+ }
+ // A back and side wall give the optional rack a believable service bay. The
+ // climb now reads against masonry instead of floating in the open tower void.
+ for(let row=0;row<10;row++)for(let col=0;col<10;col++){
+  const x=1350+(col+.5)*70+(row%2?18:0),y=270+row*40;
+  part(new T.BoxGeometry(68,38,32),0,x,y,-715);
+ }
+ for(let row=0;row<10;row++)for(let col=0;col<5;col++){
+  const z=-680+(col+.5)*82+(row%2?12:0),y=270+row*40;
+  part(new T.BoxGeometry(30,38,79),0,2070,y,z);
+ }
+ for(const x of [1350,1710,2050]){
+  part(new T.BoxGeometry(30,460,50),2,x,475,-695);
+  part(new T.BoxGeometry(54,26,70),1,x,714,-695);
+ }
+ part(new T.BoxGeometry(780,22,65),1,1700,690,-695);
+ for(const [x,y]of [[1470,355],[1870,520]]){
+  part(new T.BoxGeometry(15,110,16),2,x,y,-665);
+  part(new T.CylinderGeometry(11,20,26,8,1,true),1,x,y+62,-665);
+ }
+ // Fallen stone edges make the rack entrance readable while leaving its center clear.
+ for(const [x,z,y,w]of [[1350,-460,265,48],[1565,-457,266,38]]){
+  part(new T.BoxGeometry(w,25,46),0,x,y,z).rotation.z=x<1450?-.18:.14;
+  part(new T.BoxGeometry(w*.72,18,35),1,x,y+21,z-8).rotation.z=x<1450?.25:-.22;
  }
  // Legion cloth and iron bands break up the tall stone without hiding the stairs.
  for(const [x,z,y]of [[-450,-1390,750],[450,-1390,1750]]){

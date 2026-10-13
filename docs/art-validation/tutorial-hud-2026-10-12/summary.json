@@ -108,7 +108,7 @@
       "Controller continue",
       "Controller skip closes guide"
     ],
-    "normalEntry": "Title → New Game → Class → Face → Stats → Name → Start Warrior tutorial → Start practicing; normal shoulder camera visually checked.",
+    "normalEntry": "Title \u2192 New Game \u2192 Class \u2192 Face \u2192 Stats \u2192 Name \u2192 Start Warrior tutorial \u2192 Start practicing; normal shoulder camera visually checked.",
     "sixKills": {
       "kills": 6,
       "portal": true,
@@ -129,7 +129,7 @@
       }
     },
     "help": {
-      "controls": "Your current controls\nMove\nW / ↑ · A / ← · S / ↓ · D / →\nJump · hold for height\nSpace\nBasic attack\nLeft Click / J\nDodge / air dash\nL-Shift / Right Click\nTalk / use\nE\nJournal\nN\nBag\nTab / B\nEmotes\nM\nToggle auto-sell\nV\nMenu / release mouse\nEsc\n\nSkills: 1 · 2 · 3 · 4. Locked skills become available as your class ranks up.",
+      "controls": "Your current controls\nMove\nW / \u2191 \u00b7 A / \u2190 \u00b7 S / \u2193 \u00b7 D / \u2192\nJump \u00b7 hold for height\nSpace\nBasic attack\nLeft Click / J\nDodge / air dash\nL-Shift / Right Click\nTalk / use\nE\nJournal\nN\nBag\nTab / B\nEmotes\nM\nToggle auto-sell\nV\nMenu / release mouse\nEsc\n\nSkills: 1 \u00b7 2 \u00b7 3 \u00b7 4. Locked skills become available as your class ranks up.",
       "topics": [
         "Attack and charge",
         "Dodge and air dash",
@@ -778,5 +778,13 @@
     "Xbox and PlayStation labels/actions are simulated; physical controllers were not tested.",
     "Responsive sizes are iframe viewports, not physical phones. Screenshot phone view is scaled only for capture.",
     "These checks verify behavior and presentation; they do not establish novice comprehension or fun."
-  ]
+  ],
+  "deployment": {
+    "implementationCommit": "bba06f09",
+    "cloudflareDeployment": "a4271fa9-d431-415f-8b0e-a8955f056215",
+    "result": "success",
+    "url": "https://bladefall.pages.dev/3d/",
+    "verifiedVersion": "2.192.0-tutorial-hud",
+    "verification": "Production HTML and fresh in-app browser title confirm this version; production browser reports no errors."
+  }
 }

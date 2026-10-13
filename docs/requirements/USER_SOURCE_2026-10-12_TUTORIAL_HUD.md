@@ -16,7 +16,7 @@ Inspection: `public/3d/guided-tutorial.js`, `hub-tour.js`, the Adventure HUD mod
 - Refresh hub-tour and Help text against actual current features, including the Stylist's saved class appearances/rank gates, stat allocation, forge requirements, travel and separate dungeon saves. Do not invent new mechanics or change story/campaign geometry.
 - Verify actual beginner controls (including mouse), pause/resume, rebound controls, controller labels, full-bag instructions, rank/exit flow, old saves and desktop/narrow layouts in a real browser. Capture callout evidence; automated checks do not prove beginner comprehension.
 
-Status: implemented locally; final verification and deployment below. Previous unrelated companion rendering changes remain excluded.
+Status: shipped and verified live as v2.192.0-tutorial-hud (bba06f09). Previous unrelated companion rendering changes remain excluded.
 
 ## Findings during verification
 

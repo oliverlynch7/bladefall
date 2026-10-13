@@ -2785,3 +2785,8 @@ Real character creation exposed the beginner rear-wall spawn pushing the camera 
 Verification: keyboard and actual left/right mouse controls; safe practice and active-world information tips; short/held jumps; menu hide/resume; first-skill interruption/resume; rebound keys; simulated Xbox/PlayStation labels and guide buttons; all three starters rank 2 after three kills; six-kill exit and saved completion; pre-change save compatibility; real title/creator/start flow; 36 HUD steps across 1280×720, 820×700, 390×844 and 844×390 with cards within the viewport and clear of their targets. Both chase cameras have full initial clearance for all three starters. Syntax, journal-notice and story-authority checks passed. Evidence: docs/art-validation/tutorial-hud-2026-10-12/summary.json and screenshots.
 
 Limitations: responsive checks use browser iframe sizes; controller input is simulated, not physical hardware. This verifies behavior and presentation, not novice comprehension or fun. No campaign geometry, story, cosmetic art or unrelated companion changes included. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-12] Tutorial update verified live
+
+Implementation bba06f09 is on main. Cloudflare deployment a4271fa9 reports success; production HTML and a fresh browser title confirm v2.192.0-tutorial-hud with no browser errors. The tutorial stylesheet and versioned scripts load. Temporary QA pages were removed and the two test servers stopped. Reusable QA scripts and evidence remain in the repository.

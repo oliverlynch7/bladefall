@@ -1455,3 +1455,8 @@ Status: previews ready for choice; no new gameplay HUD applied. Selection and an
 ## [Codex | 2026-10-12] HUD preview readability — v2.189.1
 
 Before delivery, enlarged health/mana numbers and adjusted companion spacing in A/B. Rechecked all 60 preview combinations, phone fit/full-size, fullscreen, and interactive controls. The gameplay HUD remains unchanged. Final publication and selection are tracked with the same HUD preview report.
+
+
+## [Codex | 2026-10-12] HUD previews verified live
+
+Commits 02da2aa0 and dbd3881a published. Fresh production browser confirmed v2.189.1, actual title > Dev Previews access, all three layouts with their artwork and clue panels, and switching layouts in fullscreen without page errors. Review URL: https://bladefall.pages.dev/design/hud-preview/ . Gameplay HUD selection remains pending; no rollout has occurred.

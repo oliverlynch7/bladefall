@@ -2745,3 +2745,16 @@ Before delivery, enlarged health/mana numbers and adjusted companion spacing in 
 ## [Codex | 2026-10-12] Queued next after HUD — earned class skin rework
 
 User reports clipping and insufficient visual quality across the unlockable class skins. After HUD completion, audit and substantially improve every class's earned tiers: shapes, materials, palettes, distinctive embellishments and full-motion clearance with gear/capes. Retain unlock/save/Stylist/co-op contracts. This is queued work, not shipped art. Source and acceptance: docs/requirements/USER_SOURCE_2026-10-12_CLASS_SKIN_REWORK.md.
+
+
+## [Codex | 2026-10-12] Adventure HUD applied — v2.190.0
+
+U-HUD-ADVENTURE-20261012 implemented: compact upper-left health/mana and companion, upper-right map/next objective, bottom-center skills/character XP/class rank, persistent bottom-left bag capacity and Auto-sell ON/OFF, plus queued equipment comparisons above the bag. Notes use the approved paper appearance and remain readable until dismissed. Short screens defer loot while reading; card position follows the bag's actual height. Optional tasks are collapsed initially but remain available in the tracker/journal.
+
+Auto-sell is a saved explicit preference, default OFF for new and legacy profiles. OFF immediately bags equipment only when a slot exists; a full bag leaves ground gear untouched and chests unopened. ON sells new equipment, including chest gear, with clear sale feedback. Quest items stay separate. Comparison cards never grant or sell an item, show stat gains/losses and equipment restrictions, and can be reopened using Loot. Existing prison currency handling remains in its own grant path.
+
+Mana badges sit at each skill's upper-left and respond to passive cost changes. Shared prompts now use current keyboard/controller mappings (including secondary-only and unbound states), covering hotbar, bag, journal, interaction, travel, tutorial/confirmation and chest skip controls. Fixed the objective-panel journal button's camera-input obstruction. Original concept pages are marked as an archive rather than claiming the live HUD is unchanged.
+
+Validation: thirteen inventory/binding browser assertions, actual collision pickup preservation/collection, unopened/full chest then exactly-once grant and explicit sale, saved preference/rebinding reload, mana-cost rendering for all seventeen classes including the Mage health-dependent reduction, real Settings rebinding and class confirmation/cancel, paper/loot queuing, companion rendering, 1440x900, 1280x720, 1024x768 and 390x844 layouts. A v2.189.2-created save preserves name, 654 gold, character level 8 / XP 77, Warrior rank 7 / XP 123, rare armor and completed tutorial; auto-sell defaults OFF. Syntax, journal queue and story-authority checks passed. Evidence: docs/art-validation/adventure-hud-2026-10-12.json and three screenshots. Physical controller and physical phone testing remain open; screenshots use an isolated local fixture, not a human gameplay verdict.
+
+Next authorized task: improve all earned class skins (U-CLASS-SKINS-20261012). Not started in this HUD pass. Campaign finishing still open. Unrelated companion3d.js and articulated-rigs.json changes excluded.

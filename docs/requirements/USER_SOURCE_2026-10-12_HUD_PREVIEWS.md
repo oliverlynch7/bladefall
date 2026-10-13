@@ -69,3 +69,24 @@ Exact user message:
 User identifies unclear full-bag behavior and proposes visible capacity with an icon. Interpret this within the active preview-before-rollout request. The live game already has a small bag counter; ordinary collected equipment is immediately bagged or auto-sold when capacity is exhausted. This feedback does not revoke the previously approved overflow sale rule or approve a particular new gameplay HUD.
 
 Preview implementation plan: improve the persistent bag icon/count with an explicit Bag label, free-slot status, amber near-full and red full states, and visible “Full — new gear auto-sells” wording. Provide a Bag state control and simulated pickup so the transition and sale result are reviewable in every layout; mark samples as illustrative. Display the sold item's name and gold value, with no implication it is in the bag. The bag button opens a short explanation of current behavior. All interactions remain local to the preview; no game saves, inventory, preferences or sale policy change. Acceptance: readable text beyond color alone, used/capacity counts consistent with pickup notices, keyboard-operable controls, no overlap with notes/map/skills at desktop and laptop sizes, and usable phone review.
+
+## [Codex | 2026-10-12] U-HUD-ADVENTURE-20261012 — selected for implementation
+
+Exact latest user messages:
+
+> I think maybe the item feed and bag feature should be on the bottom left corner. Just a. Feeling.
+> We could also just not allow gear to be picked up with a full bag unless auto sell is intentionally set to on.
+> We should also include mana cost numbers on the top left of each skill indicator box.
+> Also are sure that if buttons ever get rebound that the new assigned button reflects on the screen and hud whenever that action is present. For all buttons.
+> And whether gear is set to auto sell or not there should be an sblubtle indicator for that that appears next to the and on the bag “box” on the hud in what will be the bottom left.
+
+> But overall I like the adventure focused hud best go ahead and apply it with these changes added
+
+The user now selects Adventure Focus and authorizes live rollout. This supersedes preview-only scope and mandatory overflow selling. Apply upper-left compact vitals, upper-right map/objective, bottom-center skills and paired progression tracks, paper clue cards, and bottom-left bag/equipment feedback. Retain useful equipment stat comparisons. Auto-sell is an explicit preference, initially OFF even for legacy saves; OFF bags gear while space remains and otherwise leaves it on the ground. ON intentionally sells encountered gear, clearly labeled in HUD/bag and pickup outcomes. Quest pickups remain independent of gear capacity. Mana badges use actual calculated skill cost. Rebinding prompts must reflect current input assignments, including secondary-only/unbound states and controller labels when using a controller. Do not promise universal correctness without evidence.
+
+Grounded implementation: existing monolith handles HUD, bindings and pickup decisions; guided-tutorial.js owns the minimap; journal-notice.js/css own queued reading. Preserve element IDs and mechanics while replacing layout in a dedicated stylesheet. Add a presentation-only recent-loot module; successful collection is resolved once in inventory code. Full bags must not mark a pickup taken or create repeated sale/toast events. Keep quest trackers, navigation, controller/touch actions, saves and dungeon currency contracts intact. Use browser checks for layout at 1440x900, 1280x720 and compact sizes, visible rebinding/mana states, simulated inventory boundary cases, and a pre-change save. Queue major class-skin work after this HUD pass.
+
+
+## [Codex | 2026-10-12] U-HUD-ADVENTURE-20261012 complete
+
+Adventure Focus is applied in v2.190.0 with bottom-left bag/equipment comparisons, explicit default-OFF auto-sell and full-bag loss protection, paper notes, upper-left mana costs and current binding labels. Local browser, old-save, inventory/chest boundary and all-class mana checks passed. See docs/requirements/CONTINUITY.md and docs/art-validation/adventure-hud-2026-10-12.json (repository paths) for scope and limitations. Earned-skin overhaul remains next; this does not mark that art work complete.

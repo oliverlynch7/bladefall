@@ -1008,14 +1008,16 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 @media(max-width:600px){.classviewer .buildhead{max-height:45%;overflow:auto;flex-shrink:0}.classviewer .buildhead .ovkicker{font-size:12px!important;letter-spacing:.04em!important}.classviewer .buildhead .ovh{font-size:26px!important;line-height:1.2}.classviewer .ctabs{max-height:130px;overflow:auto}.classviewer .buildscroll{min-height:100px}.classviewer .viewerfoot{flex-shrink:0}}
 .journal-clue small{display:block;margin-top:4px}
 </style>
+<link rel="stylesheet" href="./adventure-hud.css?v=2190">
+<script src="./adventure-hud.js?v=2190"></script>
 </head>
-<body>
+<body class="adventure-hud">
 <canvas id="gl"></canvas>
 <div id="hud" class="hide">
   <div class="hudportrait"><img id="hudportraitimg" src="icons/skins/skin-knight.png" alt="Equipped skin"></div>
   <div class="hudpanel">
   <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="lvlbadge">Warrior</span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span><span id="armortag"></span></div></div>
-  <div id="hudbag" title="Bag · 0 / 30 slots used"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span id="hudbagnum">0 / 30</span></div>
+  <button id="hudDetails" aria-label="Show equipped weapon" aria-expanded="false" title="Equipped weapon">⋯</button>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
@@ -1032,6 +1034,12 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
 <div id="eschint" class="hide" aria-hidden="true"><span class="ico ico-pause"></span><span class="eschk">Esc</span></div>
 <div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><span class="ssword">cold</span></div>
+<div id="inventoryDock" class="hide">
+ <button id="hudbag"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span class="bag-copy"><span class="bag-count">Bag <b id="hudbagnum">0 / 30</b></span><small id="hudBagState">30 slots free</small></span><kbd class="hud-key" data-action-hint="bag">Tab</kbd></button>
+ <div class="bag-tools"><button id="hudAutoSell" data-on="false" aria-pressed="false">Auto-sell OFF</button><button id="hudJournal"><span data-action-hint="journal">N</span> Journal</button><button id="hudLootHistory" title="Show your most recent equipment pickup">Loot</button><span id="hudGold"><span class="ico ico-coin"></span><span id="hudGoldValue">0</span></span></div>
+</div>
+<aside id="equipmentFeed" hidden aria-label="Equipment pickup"><button class="loot-close" data-dismiss-loot aria-label="Dismiss equipment notice">×</button><div class="loot-head"><img class="loot-icon" alt=""><div><strong class="loot-name"></strong><small class="loot-rarity"></small></div></div><div class="loot-outcome" role="status" aria-live="polite"></div><div class="loot-comparison"></div><div class="loot-usability"></div><div class="loot-foot"><button data-loot-bag>Bag</button><span class="loot-waiting"></span></div></aside>
+<div id="mapCaption" class="hide"><span id="mapPlace"></span><small><span style="color:#ffe07a">◆ Objective</span> · <span style="color:#75ddff">◇ Friends</span></small></div>
 <div id="lootcard" class="hide" aria-hidden="true"></div>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
@@ -1070,8 +1078,8 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2116"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
-<script src="./hub-tour.js?v=2096"></script>
-<script src="./controller.js?v=2116&prev=2091"></script>
+<script src="./hub-tour.js?v=2190"></script>
+<script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2089"></script>
 <script src="./stylist.js?v=2089"></script>
@@ -1092,7 +1100,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2188"></script>
-<script src="./briar-journey.js?v=2188"></script>
+<script src="./briar-journey.js?v=2190"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2186c"></script>
 <script src="./lost-canyon.js?v=2186c"></script>
@@ -1111,15 +1119,15 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./palace-courtyard.js?v=2187a"></script>
 <script src="./dragon-rescue.js?v=2183b"></script>
 <script src="./dragon-combat.js?v=2024"></script>
-<script src="./sky-library.js?v=2187a"></script>
+<script src="./sky-library.js?v=2190"></script>
 <script src="./marble-guardian.js?v=2019"></script>
 <script src="./hydra.js?v=2049"></script>
-<script src="./shipwreck-shore.js?v=2186c"></script>
+<script src="./shipwreck-shore.js?v=2190"></script>
 <script src="./ship-crossing.js?v=2015"></script>
 <script src="./great-furnace.js?v=2186c"></script>
 <script src="./furnace-colossus.js?v=2014"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2170">
-<script src="./journal-notice.js?v=2150"></script>
+<script src="./journal-notice.js?v=2190"></script>
 <script src="./puzzle-feedback.js?v=2179"></script>
 <script src="./journal-clues.js?v=2188"></script>
 <script src="./music-score.js?v=2013"></script>
@@ -1132,10 +1140,10 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2122">
 <script src="./chest-rules.js?v=2122"></script>
-<script src="./chest-reveal.js?v=2122"></script>
+<script src="./chest-reveal.js?v=2190"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
-<script src="./guided-tutorial.js?v=2117"></script>
+<script src="./guided-tutorial.js?v=2190"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1150,7 +1158,8 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.189.2-hud-bag-preview';
+const VERSION3D='2.190.0-adventure-hud';
+let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1208,7 +1217,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -1221,7 +1230,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 }
 _g.legacyHubDialogue=_g.legacyHubDialogue||_g.hubDialogue||{};
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,camMode:'shoulder',lookSens:1,fpsFov:92,renderDist:1,silhouette:true,dmgNumbers:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,autoSellEquipment:false,camMode:'shoulder',lookSens:1,fpsFov:92,renderDist:1,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -3251,7 +3260,7 @@ function briarReceive(request,actor,position){
  const winchBusy=inPrison()&&request?.event?.type==='world'&&request.event.key==='kd.lift.winch'&&G.prison.winch.owner&&G.prison.winch.owner!==actor;
  const millBusy=inBriar()&&['briar.water','briar.mill.reset'].includes(request?.event?.key)&&G.briarMill?.owner&&G.briarMill.owner!==actor;
  const r=gripBusy||winchBusy||millBusy?{changed:false,state:s}:BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:actor!==briarId()||mode==='play'||!!backgroundMenuMode||mode==='inspection'&&request?.event?.key==='sc.code.fire'&&BFShipwreckShore.aiming(),npcs:G.storyNpcs||[],objects:briarObjects(),party,canReach:(p,o)=>BFCampaignInteraction.reachable(G,p,o)});
-  if(r.changed){if(inShipwreck()&&request.event.type==='world'&&request.event.key==='sc.hull.release')G.shore.releaseAt=G.shore.clock;if(MP.active&&JSON.stringify(s.quests)!==JSON.stringify(r.state.quests))toast('Shared quest progress updated');journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;if(inBriar()&&request.event.type==='world'){if(request.event.key==='briar.water'){BFBriarJourney.grip(G,actor,position);if(actor===briarId())toast(G.briarMill.owner?'Walk to move the crate. E releases it.':'Crate released.');}if(request.event.key==='briar.mill.reset')BFBriarJourney.reset(G,actor);}if(inSkyLibrary()&&request.event.type==='world'&&request.event.key==='sl.display.grip')BFSkyLibrary.grip(G,actor);if(inPrison()&&request.event.type==='world'&&request.event.key==='kd.lift.winch')BFPrison.grip(G,actor,position);briarSync();if(request.event.type==='world'&&['home.bell.alarm','home.bell.cache'].includes(request.event.key))secureHomeBellProgress();
+  if(r.changed){if(inShipwreck()&&request.event.type==='world'&&request.event.key==='sc.hull.release')G.shore.releaseAt=G.shore.clock;if(MP.active&&JSON.stringify(s.quests)!==JSON.stringify(r.state.quests))toast('Shared quest progress updated');journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;if(inBriar()&&request.event.type==='world'){if(request.event.key==='briar.water'){BFBriarJourney.grip(G,actor,position);if(actor===briarId())toast(G.briarMill.owner?'Walk to move the crate. '+controlHint('interact')+' releases it.':'Crate released.');}if(request.event.key==='briar.mill.reset')BFBriarJourney.reset(G,actor);}if(inSkyLibrary()&&request.event.type==='world'&&request.event.key==='sl.display.grip')BFSkyLibrary.grip(G,actor);if(inPrison()&&request.event.type==='world'&&request.event.key==='kd.lift.winch')BFPrison.grip(G,actor,position);briarSync();if(request.event.type==='world'&&['home.bell.alarm','home.bell.cache'].includes(request.event.key))secureHomeBellProgress();
   if(request.event.type==='world'&&!['sl.display.grip','kd.lift.winch','briar.water','briar.mill.reset'].includes(request.event.key)){
    const key=request.event.key,event=briarBook.events[key],notesChanged=JSON.stringify(s.notes)!==JSON.stringify(r.state.notes);
    if(notesChanged){const note=Object.entries(r.state.notes).filter(([id,n])=>JSON.stringify(n)!==JSON.stringify(s.notes[id])).at(-1)?.[1];if(note)toast('Journal updated · '+note.title);}
@@ -4049,7 +4058,7 @@ function openJournal(focusId){
   const items=Object.entries(state.items).filter(([id,n])=>n>0&&(!id.includes('.')||/^(cg\.(coat|helmet|papers|personal)|pc\.seeds|sc\.(rudder|sail|rope|bell))$/.test(id)));
   const names={tangle_root:'Tangle roots',dressings:'Clean dressings',gus_tools:'Gus’s tool roll','cg.coat':'Legion coat','cg.helmet':'Legion helmet','cg.papers':'Patrol papers','cg.personal':'Roland’s armor','pc.seeds':'Seed tin','sc.rudder':'Rudder','sc.sail':'Sail','sc.rope':'Ship rope','sc.bell':'Ship bell'};
   const fetchItems=campaign?areaQuests().filter(q=>q.k==='fetch'&&(G.qs[q.id]||0)>0).map(q=>[q.item||q.d,Math.min(q.n||1,G.qs[q.id])]):[];
-  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">${uiIcon('journal')} JOURNAL · ${esc(keyLabel((meta.keybinds?.journal||[])[0]||'KeyN'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Your next step, nearby puzzle clues, and every clue you have found in this level.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>${uiIcon('quest-main')} Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',active.length-1):''}${related?'<section class="journal-next" id="journalRelevant"><h3>'+uiIcon('quest-puzzle')+((typeof focusId==='string'&&focusId===relatedId)?'The clue you opened':'Clue for this puzzle')+'</h3>'+note(related)+'</section>':''}<label for="journalScope">Show clues from <select id="journalScope"><option value="here">This level</option><option value="all">All visited levels</option></select></label><br><label for="journalSearch"><strong>Find a clue</strong></label><input id="journalSearch" type="search" placeholder="Search a place, object or word…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0;padding:12px;background:#171e2c;color:#f6ecd6;border:1px solid #8c7958;border-radius:8px"><div id="journalClueResults"></div>${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true,q.kind)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
+  showOverlayHTML(`<div class="card journal-card"><p class="ovsub">${uiIcon('journal')} JOURNAL · ${esc(controlHint('journal'))}</p><h2 class="ovh">${campaign?esc(G.areaName||region.name):'Your notes'}</h2><p class="journal-muted">${campaign?'Your next step, nearby puzzle clues, and every clue you have found in this level.':'Enter a campaign level to follow its tasks and clues.'}</p><div class="journal-scroll"><section class="journal-next"><h3>${uiIcon('quest-main')} Next step</h3><ul>${active.length?row(active[0].title,active[0].progress,false):'<li>No unfinished main task here.</li>'}</ul></section>${active.length>1?fold('Other main tasks','<ul>'+active.slice(1).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',active.length-1):''}${related?'<section class="journal-next" id="journalRelevant"><h3>'+uiIcon('quest-puzzle')+((typeof focusId==='string'&&focusId===relatedId)?'The clue you opened':'Clue for this puzzle')+'</h3>'+note(related)+'</section>':''}<label for="journalScope">Show clues from <select id="journalScope"><option value="here">This level</option><option value="all">All visited levels</option></select></label><br><label for="journalSearch"><strong>Find a clue</strong></label><input id="journalSearch" type="search" placeholder="Search a place, object or word…" autocomplete="off" style="width:100%;box-sizing:border-box;margin:8px 0;padding:12px;background:#171e2c;color:#f6ecd6;border:1px solid #8c7958;border-radius:8px"><div id="journalClueResults"></div>${optional.some(q=>!q.done)?fold('Optional tasks','<ul>'+optional.filter(q=>!q.done).map(q=>row(q.title,q.progress,false,q.kind)).join('')+'</ul>',optional.filter(q=>!q.done).length):''}${fold('Quest items','<p class="journal-muted">Kept outside your bag. These cannot be sold.</p><ul>'+items.concat(fetchItems).map(([id,n])=>'<li>'+esc(names[id]||id.replace(/[._]/g,' '))+' × '+esc(n)+'</li>').join('')+'</ul>',items.length+fetchItems.length)}${fold('Rift shards',riftShardJournal(),'')}${finished.length?fold('Completed tasks','<ul>'+finished.map(q=>row(q.title,q.progress,true,q.kind)).join('')+'</ul>',finished.length):''}</div><button class="bigbtn ghost" id="journalClose">Close journal</button></div>`);
   const renderClues=()=>{const query=document.getElementById('journalSearch').value.trim(),scope=document.getElementById('journalScope').value,visible=scope==='all'?notes:notes.filter(n=>n.region===region.id),found=BFJournalClues.search(visible,query),recent=visible.filter(n=>n.id!==relatedId);document.getElementById('journalClueResults').innerHTML=query?'<h3>'+found.length+' matching clues</h3>'+found.map(note).join('')+(found.length?'':'<p class="journal-muted">No matching clues. Try a shorter word.</p>'):'<h3>Latest discoveries</h3>'+recent.slice(0,3).map(note).join('')+(recent.length?'':'<p class="journal-muted">No other clues found in this part yet.</p>')+fold(scope==='all'?'All collected clues':'All clues in this level',visible.map(note).join('')||'<p>No clues found yet.</p>',visible.length);};
   document.getElementById('journalScope').value=campaign?'here':'all';document.getElementById('journalScope').onchange=renderClues;document.getElementById('journalSearch').oninput=renderClues;renderClues();
   document.getElementById('journalClose').onclick=closeJournal;
@@ -4141,12 +4150,13 @@ function openWay(){ if(G?.kingFinal)return; if(inLongAscent()&&!BFLongAscent.rea
 }
 // render only when the content changes; pulse once on a progress change, hold a stronger state on completion
 function applyQuest(el,head,rows,sig,complete=false){
-  const html=`<div class="qhead">${head}</div>${rows}`;
+  const html=`<div class="qhead">${head}</div>${rows}<button class="quest-journal"><span data-action-hint="journal">${htmlSafe(controlKey('journal'))}</span> Journal · all tasks &amp; clues</button>`;
   el.classList.remove('hide');
   if(applyQuest._html===html && applyQuest._complete===complete && el.innerHTML) return;              // unchanged — no DOM thrash, no re-pulse each frame
   const hadPrev=applyQuest._sig!=null && applyQuest._head===head;  // a change WITHIN the same objective set = progress moved
   applyQuest._sig=sig; applyQuest._head=head; applyQuest._html=html; applyQuest._complete=complete;
-  el.innerHTML=html;
+  el.innerHTML=html;el.querySelector('.quest-journal').onclick=()=>openJournal();
+  el.querySelector('.quest-journal').onpointerdown=e=>{if(e.button>0)return;e.preventDefault();e.stopPropagation();openJournal();};
   el.classList.toggle('qcomplete',complete);
   if(hadPrev){ el.classList.remove('qflash'); void el.offsetWidth; el.classList.add('qflash');
     clearTimeout(applyQuest._t); applyQuest._t=setTimeout(()=>el.classList.remove('qflash'),600); }
@@ -4208,7 +4218,7 @@ function questUpdate(){
     sig='z'+Z.id+G.area+'|'+(inBriar()?(G.storyState?.revision||0):'')+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed')+(secret?'|secret':''); }
   const details=el.querySelector('details');if(details)questUpdate._optionalOpen=details.open;
   const oq=discoveredOptionalTasks(),active=oq.filter(m=>!m.done);
-  if(oq.length){rows+=`<details class="qoptional"${questUpdate._optionalOpen===false?'':' open'}><summary>Optional tasks · ${active.length} active</summary>${oq.map(m=>qrow(m.done,m.done?'☑':'◇',journalEscape(m.title)+(m.done?'':`<br><small>${journalEscape(m.progress)}</small>`),null)).join('')}</details>`;}
+  if(oq.length){rows+=`<details class="qoptional"${questUpdate._optionalOpen===true?' open':''}><summary>Optional tasks · ${active.length} active</summary>${oq.map(m=>qrow(m.done,m.done?'☑':'◇',journalEscape(m.title)+(m.done?'':`<br><small>${journalEscape(m.progress)}</small>`),null)).join('')}</details>`;}
   applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
 }
 
@@ -5185,11 +5195,13 @@ function restoreBank(){ if(campaignCheckpoint()){restoreCampaignState();meta.run
 /* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
 let STASH_CAP=30;   // base; +5 per Magic Pack bought in the shop (meta.bagSlots) — refreshed in loadMode + on purchase
 function hudBagUpdate(){
-  const el=document.getElementById('hudbag'), num=document.getElementById('hudbagnum'); if(!el||!num) return;
-  const used=Array.isArray(meta.stash)?meta.stash.length:0;
-  num.textContent=used+' / '+STASH_CAP;
-  el.classList.toggle('full',used>=STASH_CAP);
-  el.title='Bag · '+used+' / '+STASH_CAP+' slots used';
+ const el=document.getElementById('hudbag'),num=document.getElementById('hudbagnum');if(!el||!num)return;
+ const used=Array.isArray(meta.stash)?meta.stash.length:0,free=Math.max(0,STASH_CAP-used),sell=meta.autoSellEquipment===true;
+ num.textContent=used+' / '+STASH_CAP;el.classList.toggle('full',!free);el.classList.toggle('near',free>0&&free<=3);
+ const message=sell?'New gear sells for gold':!free?'Full · gear stays on the ground':free+' slots free';
+ document.getElementById('hudBagState').textContent=message;el.title='Bag · '+used+' / '+STASH_CAP+' · '+message;el.setAttribute('aria-label',el.title);
+ const toggle=document.getElementById('hudAutoSell');toggle.textContent='Auto-sell '+(sell?'ON':'OFF');toggle.dataset.on=String(sell);toggle.setAttribute('aria-pressed',String(sell));toggle.title=controlHint('loot')+' · '+(sell?'Collected equipment sells for gold. Click to keep new gear.':'Equipment enters your bag; if full, it stays on the ground. Click to enable selling.');
+ document.getElementById('hudGoldValue').textContent=meta.gold||0;
 }
 function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; hudBagUpdate(); }
 // When you equip/buy something, the piece it replaced goes to your bag (not the void) —
@@ -5264,7 +5276,7 @@ function openBag(back,keepOpen=false){
   const expanded=keepOpen?new Set([...document.querySelectorAll('details.baggroup[open]')].map(e=>e.dataset.group)):new Set();
   migrateClassEquipment();
   mode='menu';
-  menuTip('tip_bag','your <b>Pack</b>. Spare gear lives here. Sort it, toggle <b>Auto-sell</b> or <b>Auto-bag</b> to handle future drops automatically, and buy more slots from the Quartermaster when it fills up.');
+  menuTip('tip_bag','your <b>Pack</b>. New gear goes here. When full, gear stays on the ground. Enable <b>Auto-sell</b> only if you want pickups sold for gold.');
   const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
   const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
@@ -5307,11 +5319,12 @@ function openBag(back,keepOpen=false){
   const doll=`<canvas id="bagDollCanvas" class="bagdoll3d" width="440" height="760"></canvas><div class="bagdollhint">drag to rotate</div>`;
   showOverlayHTML(`<div class="card bagmenu"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag &amp; Equipment</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
+    <label class="bag-sale-setting"><input id="bagAutoSell" type="checkbox" ${meta.autoSellEquipment===true?'checked':''}> Auto-sell equipment pickups for gold</label><p class="hint">Off: keep gear in free slots; a full bag leaves gear on the ground.</p><div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
       <div class="achlist">${rows}</div></section>
       <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
     <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn ghost" id="charStatsBtn">Character Stats${HR?` · ${BFCharacterStats.available(HR)} points`:""}</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
   setupBagDoll(HR);
+  document.getElementById('bagAutoSell').onchange=e=>setAutoSell(e.target.checked);
   document.getElementById('charStatsBtn').onclick=()=>openCharacterStats(()=>openBag(back));
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back,true); };
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
@@ -5502,7 +5515,7 @@ function newG(p,extra){
 function enterZone(zi){
   const Z=zoneOf(zi);
   initAudio(); queueLevelUp=0; queueSubclass=false;
-  meta.autoKeep=false; meta.autoBag=true; persistGlobal();   // Equipment pickups always enter the bag; overflow is sold.
+  // Preserve the explicit auto-sell preference across scene changes.
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
@@ -5590,10 +5603,18 @@ function startTrial(cid,fromZone,opts={}){
   else if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
-function controlHint(id){const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Not assigned — set in Key Bindings';}
-function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Auto-loot mode',controlHint('loot')],['Pause / release mouse','Esc']];}
+function controlHint(id){
+ if(hudInputDevice==='controller'&&!meta.padOff){const hint=BFController.hint(id);if(hint)return hint;}
+ const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];
+ return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Unassigned';
+}
+function controlKey(id){return controlHint(id).split(' / ')[0].replace('Left Click','LMB').replace('Right Click','RMB').replace('Middle Click','MMB').replace('L-Shift','Shift').replace('Unassigned','—');}
+function hudDevice(device){if(hudInputDevice===device)return;hudInputDevice=device;updateHudKeys();if(G)skillbarUpdate();}
+window.addEventListener('keydown',()=>hudDevice('keyboard'),true);
+window.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')hudDevice('keyboard');},true);
+function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Auto-sell equipment',controlHint('loot')],['Pause / release mouse','Esc']];}
 function showTutorial(cid){mode='menu';
- showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · E</button><button class="bigbtn ghost" id="tutSkip">Skip practice · Q</button></div>`);
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="tutSkip">Skip practice · Esc</button></div>`);
  document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
  document.getElementById('tutSkip').onclick=()=>{showOverlayHTML(`<div class="card"><h2 class="ovh">Skip the practice area?</h2><p class="ovsub">You will keep your chosen class and go to the Waystation. You can find the controls again in Pause → Help.</p><button class="bigbtn" id="skipYes">Skip and go to the Waystation</button><button class="bigbtn ghost" id="skipNo">Return to practice instructions</button></div>`);document.getElementById('skipYes').onclick=skipTrial;document.getElementById('skipNo').onclick=()=>showTutorial(cid);};
 }
@@ -5605,10 +5626,10 @@ function hubTutorial(){
 }
 /* ---- Tutorial / Help foundation: a one-time contextual teach primitive + a persistent Help/Codex ---- */
 const HELP_ENTRIES=[
-  {cat:'Controls', title:'Move & Jump', body:'Move with WASD / the left stick. Jump with Space — tap for a hop, hold for a higher jump.'},
+  {cat:'Controls', title:'Move & Jump', get body(){return 'Move: '+['up','left','down','right'].map(controlKey).join(' / ')+'. Jump: '+controlHint('jump')+' — hold for more height.';}},
   {cat:'Controls', title:'Attack & Dodge', body:'Attack with J / SLASH — it auto-aims where you look. Dodge with K / Shift; the roll has brief invulnerability, so roll THROUGH a blow to escape it.'},
   {cat:'Controls', title:'Skills', body:'Use skills with keys 1–4 or the skill buttons. They unlock as your class ranks up, and each has its own cooldown.'},
-  {cat:'Controls', title:'Talk / Pause', body:'Walk up to a keeper and press E to use them. Esc pauses and frees the camera.'},
+  {cat:'Controls', title:'Talk / Pause', get body(){return 'Walk up to a keeper and use '+controlHint('interact')+'. Esc opens the menu and frees the camera.';}},
   {cat:'Combat', title:'Elements & weakness', body:'Weapons carry an affinity. Each element beats its opposite — Fire↔Frost, Poison↔Arcane, Holy↔Void — and applies a status (Burn, Chill, Venom, Rune, Radiance, Corruption).'},
   {cat:'Combat', title:'Loot & rarity', body:'Foes and chests drop gear. Rarity runs grey → green → blue → purple → gold. Stronger gear needs a higher character level to equip — the 🔒 shows the requirement.'},
   {cat:'Combat', title:'Compare before you equip', body:'On a loot card the green ▲ / red ▼ arrows show how a new piece compares to what you carry. Equip it, Stash it in your bag, or Sell it for gold.'},
@@ -5953,7 +5974,7 @@ function zoneClear(){
 }
 function showGameUI(v){
   if(v) document.body.classList.remove('t-title');
-  ['hud','hudprogress','controls','pausebtn','eschint'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
+  ['hud','hudprogress','controls','pausebtn','eschint','inventoryDock','mapCaption'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
   if(!v){ const _ss=document.getElementById('secretsense'); if(_ss) _ss.classList.add('hide'); }   // heart only shows during play, via secretSenseUpdate
   if(!v) document.getElementById('pethud').classList.add('hide');
   else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
@@ -9848,13 +9869,16 @@ for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEvent
 })();
 function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); updateHudKeys(); try{ syncPingBtn(); }catch(e){} }
 // Keep every on-screen key hint in sync with the player's current keybinds (auto-fight, auto-loot cycle).
-function updateHudKeys(){ if(typeof keyLabel!=='function'||!meta.keybinds) return;
-  const lbl=id=>{ const c=meta.keybinds[id]&&meta.keybinds[id][0]; return keyLabel(c||''); };
-  const a=document.getElementById('bAuto'); if(a){ a.classList.add('tog'); a.innerHTML='AUTO <span class="togkey" style="opacity:.75">'+lbl('auto')+'</span>'; }
-  const lk=lbl('loot'); document.querySelectorAll('#bKeep .togkey,#bBag .togkey').forEach(s=>{ s.textContent=lk; });
-  const k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(k)k.title='Equipment is bagged automatically'; if(bg)bg.title='Equipment is bagged automatically'; }
+function updateHudKeys(){if(!meta.keybinds)return;
+ const a=document.getElementById('bAuto');if(a)a.innerHTML='Auto '+(meta.autoAttack?'ON':'OFF')+' <span class="togkey">'+htmlSafe(controlKey('auto'))+'</span>';
+ for(let i=0;i<4;i++){const b=document.getElementById('bSk'+i);if(b)b.dataset.n=controlKey('skill'+(i+1));}
+ for(const [id,action]of [['bLMB','attack'],['bSpace','dodge']]){const b=document.getElementById(id);if(b){b.dataset.k=controlKey(action);b.setAttribute('aria-label',(action==='attack'?'Basic attack':'Dodge')+' · '+controlHint(action));}}
+ document.querySelectorAll('[data-action-hint]').forEach(el=>el.textContent=controlKey(el.dataset.actionHint));
+ hudBagUpdate();
+}
 function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
-function toggleKeep(){toast('Equipment goes straight into your bag. Full bag items are sold.');}
+function setAutoSell(on){meta.autoSellEquipment=on===true;persistGlobal();hudBagUpdate();toast(on?'Auto-sell ON · new equipment sells for gold':'Auto-sell OFF · keep gear; full bags leave it on the ground');}
+function toggleKeep(){setAutoSell(!meta.autoSellEquipment);}
 function toggleBag(){toggleKeep();}
 function cycleLootMode(){toggleKeep();}
 [['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag],['bPing',()=>dropPing()]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
@@ -9874,7 +9898,7 @@ const KEYACTIONS=[
   {id:'skill3',  label:'Skill 3',           def:['Digit3']},
   {id:'skill4',  label:'Skill 4',           def:['Digit4']},
   {id:'interact',label:'Interact / Talk',   def:['KeyE']},
-  {id:'loot',     label:'Auto-loot: Sell / Bag / Off', def:['KeyV']},
+  {id:'loot',     label:'Toggle Equipment Auto-sell', def:['KeyV']},
   {id:'lootEquip',label:'Equip Dropped Item', def:['KeyF']},
   {id:'lootBag',  label:'Send Dropped Item to Bag', def:['KeyR']},
   {id:'lootSell', label:'Sell Dropped Item',  def:['KeyQ']},
@@ -9924,6 +9948,7 @@ window.addEventListener('keydown',e=>{
     return;
   }
   if(mode==='npc'||mode==='hubtour')return;
+  if(!e.repeat&&!e.target?.matches?.('input,textarea,select')&&!e.target?.isContentEditable&&classTutorialAction(e.code==='Escape'?'cancel':keyAction(e.code))){e.preventDefault();e.stopImmediatePropagation();return;}
   if(mode==='journal'){ const typing=e.target?.matches?.('input,textarea,select')||e.target?.isContentEditable;if(e.code==='Escape'||!typing&&keyAction(e.code)==='journal'){e.preventDefault();if(!e.repeat)closeJournal();}return;}
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
@@ -9975,7 +10000,9 @@ function pollGamepad(dt){
  BFController.setup(meta,persistGlobal);
  const release=()=>{if(!_padOwned)return;input.jx=input.jz=0;for(const a of ['attack','jump','dodge'])input[a]=[...heldKeyboard.values()].includes(a);partyHeld=false;_padOwned=false;};
  const p=BFController.read(mode+':'+BFController.active);
+ if(p&&!meta.padOff&&(p.buttons.some(Boolean)||Math.abs(p.x)+Math.abs(p.z)+Math.abs(p.rx)+Math.abs(p.ry)>.15))hudDevice('controller');
  if(p&&!meta.padOff&&BFShipwreckShore.aiming()){release();BFShipwreckShore.control(p,dt);return;}
+ if(p&&!meta.padOff&&!BFController.active){if(BFHubTour.control(p)||BFGuidedTutorial.control(p))return;if(BFChestReveal.active&&p.edge('interact')){BFChestReveal.skip();return;}if(classTutorialAction(p.edge('interact')?'interact':p.edge('dodge')?'cancel':null))return;}
  if(!p||meta.padOff||BFController.active||mode!=='play'){release();if(p&&(!meta.padOff||BFController.active)){if(p.edge('pause')&&mode==='pause'&&!BFController.active){resumeGameAudio(true);resumePlay();}else BFController.menu(p);}return;}
  if(p.edge('pause')){release();openPause();return;}
  if(p.edge('bag')){release();openBag(openPause);return;}
@@ -9992,7 +10019,7 @@ function pollGamepad(dt){
 // Mouse buttons share the same two-slot binding map as keyboard keys.
 // Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.
 window.addEventListener('pointerdown',e=>{
-  if(mode!=='play'||!G||!G.npc||e.target?.closest?.('#journalNotice,#questbox')) return;
+  if(mode!=='play'||!G||!G.npc||e.target?.closest?.('#journalNotice,#questbox,#inventoryDock,#equipmentFeed,#hud')) return;
   const n=G.npc, sp=project(n.x,(n.y||0)+22,n.z); if(!sp) return;
   const sx=sp[0]/DPR, sy=sp[1]/DPR;
   if(Math.hypot(e.clientX-sx,e.clientY-sy)<64){ e.preventDefault(); e.stopPropagation(); initAudio(); openShade(); }
@@ -10025,7 +10052,7 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Desktop: ANY click anywhere in live play recaptures the camera. Capture phase prevents HUD layers
 // or controls from shrinking the usable reacquisition region after tabbing away.
 function acquireCameraLock(event){
-  if(event?.target?.closest?.('#visual-qa-panel,#journalNotice,#questbox,#guidedLesson')) return;
+  if(event?.target?.closest?.('#visual-qa-panel,#journalNotice,#questbox,#guidedLesson,#inventoryDock,#equipmentFeed,#hud')) return;
   /* NEVER grab the pointer while the level editor is open. Oliver: "i dont have control of my
      mouse." The over-the-shoulder camera pointer-locks the canvas on click to steer the hero, which
      hides the cursor and feeds the movement straight to the camera - so in edit mode you could not
@@ -12311,7 +12338,7 @@ let queueSkillTut=null;
 // A quick, one-time lesson the first time you unlock a usable skill: what it does, and which key fires it.
 function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tut.skill=1; persist();
   mode='upgrade'; showGameUI(false); _offerT=Date.now();
-  showOverlayHTML(`<div class="card skilltut"><p class="ovkicker">Skill unlocked</p><h2>${htmlSafe(s.n)}</h2><p>${htmlSafe(s.d)}</p><p>Use ${htmlSafe(controlHint('skill1'))} · ${s.cd}s recharge</p><button class="bigbtn" id="tutGo">Try it · E</button></div>`);
+  showOverlayHTML(`<div class="card skilltut"><p class="ovkicker">Skill unlocked</p><h2>${htmlSafe(s.n)}</h2><p>${htmlSafe(s.d)}</p><p>Use ${htmlSafe(controlHint('skill1'))} · ${s.cd}s recharge</p><button class="bigbtn" id="tutGo">Try it · ${htmlSafe(controlKey('interact'))}</button></div>`);
   document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); if(inBeginnerTrial())BFGuidedTutorial.skill(G); };
 }
 function c2def(id){ return CLASS2[id||meta.classId]; }
@@ -12329,7 +12356,7 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
   showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Change choices later at the Drillmaster.</p></div>
-    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · E</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q</button></div></div>`);
+    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Esc</button></div></div>`);
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
     const selected=[R.a,R.b].find(o=>o.id===b.dataset.pick);if(!selected)return;
     const confirmAt=Date.now();
@@ -12342,13 +12369,14 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
     };
   });
 }
-window.addEventListener('keydown',e=>{
- if(e.repeat||!['KeyE','KeyQ'].includes(e.code)||['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName))return;
+function classTutorialAction(action){
+ if(!['interact','cancel'].includes(action))return false;
  let b=null;const review=document.getElementById('choiceReview');
- if(mode==='upgrade'&&review&&!review.hidden)b=document.getElementById(e.code==='KeyE'?'classChoiceConfirm':'classChoiceBack');
- else if(['upgrade','menu'].includes(mode)&&document.getElementById('tutGo'))b=document.getElementById(e.code==='KeyE'?'tutGo':'tutSkip');
- if(b){e.preventDefault();e.stopImmediatePropagation();b.click();}
-},true);
+ if(mode==='upgrade'&&review&&!review.hidden)b=document.getElementById(action==='interact'?'classChoiceConfirm':'classChoiceBack');
+ else if(['upgrade','menu'].includes(mode)&&document.getElementById('tutGo'))b=document.getElementById(action==='interact'?'tutGo':'tutSkip');
+ if(!b)return false;b.click();return true;
+}
+window.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.target.closest?.('button,input,select,textarea'))return;if(classTutorialAction(keyAction('Mouse'+e.button))){e.preventDefault();e.stopImmediatePropagation();}},true);
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
  if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0)return;
@@ -13047,25 +13075,25 @@ function auxCoolPaint(p){
   paint(document.getElementById('bLMB'),p.atkCd||0,p.atkCdMax||Math.max(p.atkCd||0,(p.weapon?.cd||.7)/effAtkSpeed(p)));
   paint(document.getElementById('bSpace'),p.dodgeCdT||0,effDodgeCd(p));
 }
-function skillbarUpdate(){ auxSlotsUpdate(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+function skillbarUpdate(){ auxSlotsUpdate();updateHudKeys(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
-    for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
-      if(!reached){ skIco(b).textContent='🔒'; skUnlockLabel(b,slotRank[i]); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
+    for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;b.dataset.skillName=(typeof s!=='undefined'&&s?.n)||'Skill '+(i+1);
+      if(!reached){b.dataset.skillName='Rank '+slotRank[i]; skIco(b).textContent='🔒'; skUnlockLabel(b,slotRank[i]); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
       if(!s){ skIco(b).textContent='❔'; skUnlockLabel(b,null); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
       skIco(b).innerHTML=C2_ICON[s.fx]||'✦'; skUnlockLabel(b,null);
       b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
       b.classList.toggle('nomana',!!(p&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
-      b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); }
+      b.setAttribute('aria-label',s.n+' · '+manaCost+' mana · '+controlHint('skill'+(i+1)));b.title=s.n+' ('+controlHint('skill'+(i+1))+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); }
     return; }
   const S=curSkills();
-  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;b.dataset.skillName=S[i]?.n||'Skill '+(i+1);
     if(i>=1&&!cs.sub){ skIco(b).textContent=cs.rank>=2?'🔀':'🔒'; skUnlockLabel(b,cs.rank>=2?null:((S[i]&&S[i].rank)||2)); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
     const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
     skIco(b).innerHTML=locked?'🔒':s.icon; skUnlockLabel(b,locked?s.rank:null);
     b.classList.toggle('lock',locked); b.classList.toggle('cooling',cooling);
     b.classList.toggle('nomana',!!(p&&!locked&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
-    b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); } }
+    b.setAttribute('aria-label',s.n+' · '+manaCost+' mana · '+controlHint('skill'+(i+1)));b.title=s.n+' ('+controlHint('skill'+(i+1))+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); } }
 function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
   if(p.atkTimer<0.26*0.4) return;                       // active-hit window
@@ -13612,7 +13640,8 @@ function descentRewardChest(){
  const ch={x:0,z:-160,y:0,rarity,descentReward:true,opened:false,bob:0};G.chests.push(ch);prepareChest(ch);
 }
 function openChest(ch){
-  if(!ch||ch.opened)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;record.claimed=true;
+  if(!ch||ch.opened)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;
+  if(!(ch.bonus&&G.sprintFun&&G.bonusActive)&&meta.autoSellEquipment!==true&&(meta.stash||[]).length>=STASH_CAP){fullBagNotice();return;}record.claimed=true;
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
      2026-08-12. It was NOT one of docs/SKILL_TRIAGE.md section E's dead passives — the audit has
@@ -13637,18 +13666,18 @@ function openChest(ch){
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
-  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot bagged — take the exit','#ffd24a','event-treasure-chest'); }
+  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Treasure secured — take the exit','#ffd24a','event-treasure-chest'); }
   else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
   const item=checkpointClone(record.item),kind=item.weapon?'weapon':item.armor?'armor':'trinket',gear=item[kind];
   if(G.escape)gear.prisonLootKey='chest-'+G.runSeed+'-'+G.floor+'-'+ch.x+'-'+ch.z;
-  let result;
+  let result,soldGold=0;
   if(!Array.isArray(meta.stash))meta.stash=[];
-  if(meta.stash.length<STASH_CAP){meta.stash.push(item);result='Added to bag';
+  if(meta.autoSellEquipment!==true){meta.stash.push(item);result='Added to bag';
     // A claimed chest and its equipment must commit together, including mid-campaign reloads.
     const cp=campaignCheckpoint();if(cp&&G._earningsCheckpoint===cp)cp.state.stash.push(checkpointClone(item));
-  }else{const gold=G.escape?BFPrisonRun.overflow(gear):sellItem(gear);result='Bag full · sold for '+gold+' gold';}
+  }else{const gold=G.escape?BFPrisonRun.overflow(gear):sellItem(gear);soldGold=gold;result='Auto-sold · +'+gold+' gold';}
   if(gear.rarity==='legendary')meta.legendaryFound=(meta.legendaryFound||0)+1;
-  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();revealChestReward(ch,item,result);
+  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();equipmentNotice(kind,gear,meta.autoSellEquipment===true,soldGold);revealChestReward(ch,item,result);
 
 }
 // every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
@@ -16439,7 +16468,7 @@ function updateWorld(dt){
         }
       }
       else if(pk.localItem){ addText(pk.x,26,pk.z,'+ '+pk.localItem.name,'var(--amber)'); if((G.optionalMissions||[]).some(m=>m.id===pk.localItem.id)) optionalBump(pk.localItem.id,1); else localBump(pk.localItem.id,1); }
-      else { playFx('lootpickup'); if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); }
+      else {const kind=pk.weapon?'weapon':pk.armor?'armor':pk.trinket?'trinket':null;if(kind&&!bagGroundEquipment(kind,pk[kind]))continue;playFx('lootpickup');}
       pk.taken=true; } }
   const collectedLoot=G.pickups.some(pk=>pk.taken);
   G.pickups=G.pickups.filter(pk=>!pk.taken);
@@ -16932,7 +16961,7 @@ function _lootCSS(){ if(document.getElementById('lootcardcss')) return; const st
    +'#lootcard .lcbar{height:4px;border-radius:3px;background:#1b1e28;overflow:hidden;margin-top:8px}'
    +'#lootcard .lcbar i{display:block;height:100%;background:linear-gradient(90deg,var(--lc),#ffd07a)}';
   document.head.appendChild(st); }
-function lootLabel(actId){ const c=(meta.keybinds&&meta.keybinds[actId]&&meta.keybinds[actId][0]); return keyLabel(c||''); }
+function lootLabel(actId){return controlKey(actId);}
 function queueLoot(drop){ if(!G) return; G.lootQueue=G.lootQueue||[]; G.lootQueue.push(drop); if(!G.lootCard) showNextLoot(); }
 function showNextLoot(){ if(!G) return; const q=G.lootQueue||[], el=document.getElementById('lootcard');
   if(!q.length){ G.lootCard=null; if(el) el.className='hide'; return; }
@@ -16969,17 +16998,23 @@ function lootEquipCurrent(){ const d=G&&G.lootCard; if(!d) return; const it=d.it
   SFX.pickup(); persist(); hudUpdate(); showNextLoot(); }
 function lootSellCurrent(){ const d=G&&G.lootCard; if(!d) return; const g=sellItem(d.item); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); showNextLoot(); }
 function lootToBag(auto){ const d=G&&G.lootCard; if(!d) return; const it=d.item, box=d.kind==='weapon'?{weapon:it}:(d.kind==='armor'?{armor:it}:{trinket:it});
-  if(stashItem(box)){ if(!auto) toast('🎒 '+it.name+' → bag'); } else { const g=sellItem(it); toast('Bag full — sold '+it.name+' · +'+g+'g'); } hudUpdate(); showNextLoot(); }
-// Picking up equipment is a completed inventory action, never a timed decision card.
-function bagGroundEquipment(kind,item){
-  if(!item||!G)return;
-  if(stashItem({[kind]:item}))toast('Bagged · '+item.name);
-  else {const gold=G.escape?BFPrisonRun.overflow(item):sellItem(item);persist();toast('Bag full — sold '+item.name+' · +'+gold+'g');}
-  hudUpdate();
+  if(!bagGroundEquipment(d.kind,it)){d.expire=Infinity;return;}hudUpdate();showNextLoot(); }
+// Pickup inventory decisions happen exactly once. UI feedback cannot grant/sell loot.
+function fullBagNotice(){if(!G)return;if((G._fullBagWarnAt??-100)+7>(G.time||0))return;G._fullBagWarnAt=G.time||0;toast('Bag full · make space in '+controlHint('bag')+' Bag. Gear stays here.');}
+function equipmentNotice(kind,item,sold=false,gold=0){
+ const p=G.p,old=kind==='weapon'?p.weapon:p.gear?.[item.slot];
+ BFAdventureHud.show({kind,item,equipped:old,rarity:RARITY[item.rarity],icon:itemAv(item),type:kind==='weapon'?weapFamily(item):slotLabel(item.slot),sold,gold,
+  usability:!canWield(item)?'Requires character level '+rarityReq(item.rarity):kind==='weapon'&&(!classFamilyOk(item)||monkBlocksWeapons(item))?'For another class':'Ready to equip from your bag'},G);
 }
-function offerWeapon(item){bagGroundEquipment('weapon',item);}
-function offerArmor(item){bagGroundEquipment('armor',item);}
-function offerTrinket(item){bagGroundEquipment('trinket',item);}
+function bagGroundEquipment(kind,item){
+ if(!item||!G||kind==='weapon'&&isIntrinsicLoot(item))return false;
+ if(meta.autoSellEquipment===true){const gold=G.escape?BFPrisonRun.overflow(item):sellItem(item);persist();equipmentNotice(kind,item,true,gold);hudUpdate();return true;}
+ if(!stashItem({[kind]:item})){fullBagNotice();return false;}
+ equipmentNotice(kind,item);hudUpdate();return true;
+}
+function offerWeapon(item){return bagGroundEquipment('weapon',item);}
+function offerArmor(item){return bagGroundEquipment('armor',item);}
+function offerTrinket(item){return bagGroundEquipment('trinket',item);}
 /* one random loot item (weapon / armor / trinket) at a given rarity */
 function randomLoot(rid){ const r=Math.random();
   if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
@@ -18452,7 +18487,7 @@ function enterWaystation(riftHall=false){
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   if(MP.active) MP.onEnter(MP.HUB);   // co-op: the Waystation is a shared space — allies appear here too (Phase 2)
   document.getElementById('stagetag').textContent=G.riftHall?'RIFT HALL':'THE WAYSTATION'; questUpdate(); hudUpdate();
-  if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
+  if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('The Waystation · '+controlHint('interact')+' talks to nearby keepers.'); }
   if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('Your Reaper scythe is part of the class. Its power grows as your class rank and player level rise.'); }
   if(meta._iansBladeNotify){ meta._iansBladeNotify=false; meta._iansBladeAnnounced=true; persist(); storyToast("Ian's Blade now waits in the Shop."); }
   if(!riftHall&&!meta.hubTutDone&&!meta.tutOff){hubTutorial();}   // one-time hub onboarding after the first trial
@@ -19831,7 +19866,7 @@ function openKeybinds(back){
   const rows=KEYACTIONS.map(a=>`<div class="kbrow"><span class="kblabel">${a.label}</span><div class="kbcaps">${cap(a,0)}${cap(a,1)}</div><button class="kbreset" data-r="${a.id}" title="Reset to default">↺</button></div>`).join('');
   showOverlayHTML(`<div class="card kbcard"><p class="ovkicker">Settings · Controls</p><h2 class="ovh">⌨️ Key Bindings</h2>
     <p class="ovsub">Choose either slot, then press a keyboard key or mouse button. <b>Esc</b> cancels. Every action holds two bindings. Menu keys (Esc, Enter) stay fixed.</p>
-    <p class="ovsub" id="keyboardTest" aria-live="polite">Control test: press W, A, S or D here to see what your browser sends.</p><div class="kblist">${rows}</div>
+    <p class="ovsub" id="keyboardTest" aria-live="polite">Control test: press any movement key here to see what your browser sends.</p><div class="kblist">${rows}</div>
     <div class="kbfoot"><button class="bigbtn ghost" id="kbResetAll">↺ Reset all to defaults</button><button class="bigbtn" id="kbDone">Done</button></div></div>`);
   const rerender=()=>openKeybinds(back);
   document.getElementById('kbDone').onclick=()=>{ _rebindState=null; back(); };
@@ -20028,6 +20063,9 @@ openPause=openPauseV2;
 document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(mode==='play') openPause(); });
 function hudUpdate(){
   if(!G) return; const p=G.p;
+  // Resource-sensitive passives can change costs without changing the chosen skill.
+  const currentSkills=c2def()?c2CurSkills():curSkills();
+  if(currentSkills.some((s,i)=>{const el=document.getElementById('bSk'+i);return el&&(Number(el.dataset.m)!==skillManaCost(i,s)||!el.classList.contains('lock')&&el.classList.contains('nomana')!==((p.mana??p.maxMana??100)<skillManaCost(i,s)));}))skillbarUpdate();
   document.getElementById('stagetag')?.classList.toggle('descent-floor',!!G.endless);
   hudBagUpdate();
   const maxHp=effMaxHp(p), maxMana=p.maxMana||100; if(p.mana==null) p.mana=maxMana;
@@ -22265,7 +22303,7 @@ function partyHud(){
  let el=document.getElementById('partyTravel');if(!el){el=document.createElement('div');el.id='partyTravel';el.innerHTML=uiIcon('action-party-teleport')+'<span data-party-text></span>';el.style.cssText='position:fixed;left:14px;top:43%;max-width:min(240px,42vw);padding:10px 13px;border:1px solid #697697;border-radius:10px;background:#111827de;color:#daefff;font:13px system-ui;pointer-events:none;z-index:8';document.body.appendChild(el);}
  const q=partySelected(),a=partyFriends(),far=q&&Math.hypot(q.x-G.p.x,q.z-G.p.z)>850;
  el.hidden=mode!=='play'||!q||G.voyage||G.kingFinal||(!far&&!partyChannel);if(el.hidden)return;
- const key=id=>keyLabel(meta.keybinds?.[id]?.[0]||'');
+ const key=controlKey;
  el.querySelector('[data-party-text]').textContent=partyChannel?'Teleporting to '+q.name+' · '+Math.ceil((3-partyChannel.t)*10)/10+'s — keep holding '+key('partyTeleport'):'Far from '+q.name+' · Hold '+key('partyTeleport')+' for 3 seconds'+(a.length>1?' · '+key('partyNext')+' next friend ('+(a.indexOf(q)+1)+'/'+a.length+')':'')+' · Hits cancel teleport';
 }
 function drawNavigation(c){
@@ -23049,7 +23087,7 @@ function frame(ts){
   const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
-  musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);
+  musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);BFAdventureHud.tick(dt,mode==='play'&&!window.BF_LOADING?.active,G);
   if(mode!=='play'||!window.HERO3D?.on){const restHint=document.getElementById('campaignRestHint');if(restHint)restHint.hidden=true;}
   window.BF_LOADING?.tick(G,mode);
    if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
@@ -23063,6 +23101,7 @@ function frame(ts){
   flushDeferred();                    // ...then the entities, depth-tested against what it just drew
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   BFGuidedTutorial.map(G,mode);
+  const mapCaption=document.getElementById('mapCaption');mapCaption.classList.toggle('hide',mode!=='play'||!G||!!G.bonusActive);if(G&&mode==='play')document.getElementById('mapPlace').textContent=G.hub?'THE WAYSTATION':G.areaName||curZone().name;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -23648,7 +23687,7 @@ window.__BF3={openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGro
   openCharCreate,   /* so character creation can be photographed - its preview IS the feature */
   openDiffSelect,   /* so the difficulty menu can be PHOTOGRAPHED - its art is the thing being changed */
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */
-  get rebinding(){return !!_rebindState;},resetKeyAction,controlHint,openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
+  controlKey,hudDevice,setAutoSell,bagGroundEquipment,offerTrinket,fullBagNotice,get rebinding(){return !!_rebindState;},resetKeyAction,controlHint,openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatResetRanks, cheatOpenEverything, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
@@ -23974,6 +24013,7 @@ const betaApi={
   Object.assign(p,{x:0,y:0,z:240,yaw:Math.PI,vx:0,vy:0,vz:0,onGround:true});G.cam={x:0,y:0,z:240};G.camYaw=Math.PI;G.camPitch=.35;queueLevelUp=0;queueSubclass=false;document.getElementById('stagetag').textContent='RUINED KEEP · DESIGN LAB';document.getElementById('bosshpwrap').classList.remove('on');return G;
  }
 };
+BFAdventureHud.mount({bag:()=>{releaseKeyboard();openBag(resumePlay);},journal:openJournal,toggleSell:toggleKeep,hint:controlKey});hudBagUpdate();updateHudKeys();
 BFKeepBeta.install(betaApi);BFBriarBeta.install(betaApi);
 if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).get('devbriar')==='1'?BFBriarBeta.setup():BFKeepBeta.setup(),150);
 
@@ -24002,5 +24042,6 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->
 <script type="module" src="./editor_mode.js"></script>
-<script src="./visual-qa.js?v=1968"></script></body>
+<script src="./visual-qa.js?v=1968"></script>
+</body>
 </html>

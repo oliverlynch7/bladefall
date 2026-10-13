@@ -1,0 +1,343 @@
+{
+  "date": "2026-10-12",
+  "version": "2.190.0-adventure-hud",
+  "preChangeCommit": "c57b3b09028b61be5ed8b3bef1099f0e42d2c212",
+  "oldSave": {
+    "preserved": [
+      "name",
+      "gold654",
+      "level8",
+      "characterXP77",
+      "classRank7",
+      "classXP123",
+      "one rare chestplate",
+      "tutorial completion"
+    ],
+    "autoSellDefault": false
+  },
+  "inventoryAndBindings": {
+    "passed": [
+      "Full bag OFF rejects ground weapon",
+      "Full bag OFF rejects armor and jewelry",
+      "Last free slot keeps item",
+      "Explicit ON sells full-bag gear once",
+      "ON sells gear even with empty slots",
+      "Collision loop leaves full-bag pickup intact",
+      "Freeing a slot collects same ground item",
+      "Rebound skill, attack, dodge captions",
+      "Secondary-only bag and journal labels",
+      "All displayed mana costs match actual skill costs",
+      "Unbound action never displays its default",
+      "Controller rebind displayed on hotbar",
+      "PlayStation labels respect mapping"
+    ]
+  },
+  "mana": {
+    "liveMana": {
+      "before": 7,
+      "after": 4
+    },
+    "classes": [
+      "pyromancer",
+      "warrior",
+      "ranger",
+      "mage",
+      "reaper",
+      "paladin",
+      "necromancer",
+      "ninja",
+      "berserker",
+      "pirate",
+      "chronomancer",
+      "monk",
+      "stormcaller",
+      "warlock",
+      "skylancer",
+      "bladedancer",
+      "beastmaster"
+    ]
+  },
+  "chests": [
+    "Full OFF leaves chest unclaimed/unopened and gold unchanged",
+    "Freeing a slot claims equipment exactly once",
+    "ON sells chest equipment without exceeding capacity"
+  ],
+  "ui": [
+    "Settings skill1 rebound to U through real menu; persists reload",
+    "Auto-sell persists reload",
+    "F confirms and Esc cancels class choice",
+    "World interaction shows F after rebind",
+    "Objective and bag Journal shortcuts work at normal viewport",
+    "Short screens defer loot while paper note open; closing note reveals queued equipment"
+  ],
+  "layouts": [
+    {
+      "size": {
+        "width": 1440,
+        "height": 900
+      },
+      "panels": {
+        "adventureCombat": {
+          "h": 129,
+          "hidden": false,
+          "w": 486,
+          "x": 477,
+          "y": 751
+        },
+        "equipmentFeed": {
+          "h": 0,
+          "hidden": true,
+          "w": 0,
+          "x": 0,
+          "y": 0
+        },
+        "hud": {
+          "h": 122,
+          "hidden": false,
+          "w": 336,
+          "x": 22,
+          "y": 22
+        },
+        "hudprogress": {
+          "h": 25,
+          "hidden": false,
+          "w": 486,
+          "x": 477,
+          "y": 855
+        },
+        "inventoryDock": {
+          "h": 90.390625,
+          "hidden": false,
+          "w": 278,
+          "x": 22,
+          "y": 789.609375
+        },
+        "journalNotice": {
+          "h": 213.75,
+          "hidden": false,
+          "w": 288,
+          "x": 22,
+          "y": 218
+        },
+        "localMap": {
+          "h": 176,
+          "hidden": false,
+          "w": 176,
+          "x": 1208,
+          "y": 62
+        },
+        "pethud": {
+          "h": 52,
+          "hidden": false,
+          "w": 220,
+          "x": 22,
+          "y": 148
+        },
+        "questbox": {
+          "h": 132.875,
+          "hidden": false,
+          "w": 244,
+          "x": 1174,
+          "y": 289
+        }
+      }
+    },
+    {
+      "size": {
+        "width": 1280,
+        "height": 720
+      },
+      "panels": {
+        "adventureCombat": {
+          "h": 129,
+          "hidden": false,
+          "w": 486,
+          "x": 397,
+          "y": 571
+        },
+        "equipmentFeed": {
+          "h": 0,
+          "hidden": true,
+          "w": 0,
+          "x": 0,
+          "y": 0
+        },
+        "hud": {
+          "h": 122,
+          "hidden": false,
+          "w": 336,
+          "x": 22,
+          "y": 22
+        },
+        "hudprogress": {
+          "h": 25,
+          "hidden": false,
+          "w": 486,
+          "x": 397,
+          "y": 675
+        },
+        "inventoryDock": {
+          "h": 90.390625,
+          "hidden": false,
+          "w": 278,
+          "x": 22,
+          "y": 609.609375
+        },
+        "journalNotice": {
+          "h": 213.75,
+          "hidden": false,
+          "w": 288,
+          "x": 22,
+          "y": 210
+        },
+        "localMap": {
+          "h": 152,
+          "hidden": false,
+          "w": 152,
+          "x": 1061,
+          "y": 62
+        },
+        "pethud": {
+          "h": 52,
+          "hidden": false,
+          "w": 220,
+          "x": 22,
+          "y": 148
+        },
+        "questbox": {
+          "h": 132.875,
+          "hidden": false,
+          "w": 244,
+          "x": 1014,
+          "y": 264
+        }
+      }
+    },
+    {
+      "size": {
+        "width": 1024,
+        "height": 768
+      },
+      "panels": {
+        "adventureCombat": {
+          "h": 124,
+          "hidden": false,
+          "w": 422,
+          "x": 301,
+          "y": 624
+        },
+        "equipmentFeed": {
+          "h": 0,
+          "hidden": true,
+          "w": 0,
+          "x": 0,
+          "y": 0
+        },
+        "hud": {
+          "h": 122,
+          "hidden": false,
+          "w": 302,
+          "x": 22,
+          "y": 22
+        },
+        "hudprogress": {
+          "h": 25,
+          "hidden": false,
+          "w": 422,
+          "x": 301,
+          "y": 723
+        },
+        "inventoryDock": {
+          "h": 90.390625,
+          "hidden": false,
+          "w": 216,
+          "x": 22,
+          "y": 657.609375
+        },
+        "journalNotice": {
+          "h": 213.75,
+          "hidden": false,
+          "w": 288,
+          "x": 22,
+          "y": 218
+        },
+        "localMap": {
+          "h": 176,
+          "hidden": false,
+          "w": 176,
+          "x": 792,
+          "y": 62
+        },
+        "pethud": {
+          "h": 52,
+          "hidden": false,
+          "w": 220,
+          "x": 22,
+          "y": 148
+        },
+        "questbox": {
+          "h": 132.875,
+          "hidden": false,
+          "w": 218,
+          "x": 784,
+          "y": 289
+        }
+      }
+    }
+  ],
+  "finalPhonePanels": {
+    "hud": {
+      "h": 116,
+      "w": 233,
+      "x": 12,
+      "y": 12
+    },
+    "hudprogress": {
+      "h": 45,
+      "w": 172,
+      "x": 12,
+      "y": 180
+    },
+    "inventoryDock": {
+      "h": 73.59375,
+      "w": 188,
+      "x": 12,
+      "y": 758.40625
+    },
+    "journalNotice": {
+      "h": 229,
+      "w": 177,
+      "x": 12,
+      "y": 240
+    },
+    "localMap": {
+      "h": 116,
+      "w": 116,
+      "x": 258,
+      "y": 61
+    },
+    "pethud": {
+      "h": 46,
+      "w": 160,
+      "x": 12,
+      "y": 134
+    },
+    "questbox": {
+      "h": 121.0625,
+      "w": 168,
+      "x": 210,
+      "y": 216
+    }
+  },
+  "screenshots": [
+    "adventure-hud-2026-10-12.jpg",
+    "adventure-hud-laptop-2026-10-12.jpg",
+    "adventure-hud-phone-2026-10-12.jpg"
+  ],
+  "limitations": [
+    "Controller mapping/label checks use configured mappings; physical controller not connected",
+    "Responsive dimensions do not substitute for physical touch-device testing",
+    "Local fixture with enemies stunned for HUD screenshots; no aesthetic/human gameplay acceptance inferred"
+  ],
+  "status": "Implementation complete; local browser and compatibility checks passed"
+}

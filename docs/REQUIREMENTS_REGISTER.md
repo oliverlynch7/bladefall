@@ -1474,3 +1474,12 @@ Preview ready for review at /design/hud-preview/?design=b&scene=clue&bag=full. F
 ## [Codex | 2026-10-12] U-CLASS-SKINS-20261012 — next after HUD
 
 User requests a major improvement to unlockable class skins, reporting widespread clipping and weak visuals, explicitly after finishing the HUD update. Queue a full earned-appearance quality pass across every class/tier next, ahead of returning to campaign finishing. Exact request and acceptance scope: requirements/USER_SOURCE_2026-10-12_CLASS_SKIN_REWORK.md (under docs/). Preserve rank-5/rank-10 unlocks, distinctive class palettes/details, cosmetic-only behavior, Stylist access, per-class saved selection and rank-10 cheat unlocks. Review motion, weapons/capes, previews and co-op appearances; previous static/gallery verification did not prove full animation clearance. Status: approved/queued, not implemented. HUD selection/rollout remains unfinished and takes precedence.
+
+## [Codex | 2026-10-12] Adventure HUD selected — U-HUD-ADVENTURE-20261012
+
+Apply Adventure Focus to the live game with bottom-left bag/loot, explicit auto-sell OFF/ON, protected full-bag ground loot, top-left skill mana costs and current binding prompts. This supersedes preview-only scope and unconditional overflow sales. Exact requests and source-grounded implementation/validation plan are appended to requirements/USER_SOURCE_2026-10-12_HUD_PREVIEWS.md. Status: implementing. Skin overhaul remains next; broader campaign work remains open.
+
+
+## [Codex | 2026-10-12] U-HUD-ADVENTURE-20261012 complete
+
+Adventure Focus is applied in v2.190.0 with bottom-left bag/equipment comparisons, explicit default-OFF auto-sell and full-bag loss protection, paper notes, upper-left mana costs and current binding labels. Local browser, old-save, inventory/chest boundary and all-class mana checks passed. See docs/requirements/CONTINUITY.md and docs/art-validation/adventure-hud-2026-10-12.json (repository paths) for scope and limitations. Earned-skin overhaul remains next; this does not mark that art work complete.

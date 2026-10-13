@@ -1,0 +1,20 @@
+#guidedLesson{position:fixed;z-index:18;box-sizing:border-box;width:min(338px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:15px 17px 12px;color:#f5efdf;background:linear-gradient(135deg,#1c303af7,#101d27fa);border:1px solid #a69267;border-top:3px solid #efc373;border-radius:9px;box-shadow:0 8px 26px #0007;font:14px/1.5 system-ui,sans-serif;pointer-events:auto;text-align:left}
+#guidedLesson[hidden],#lessonArrow[hidden]{display:none!important}
+#guidedLesson .lesson-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;font:700 10px/1.4 system-ui;letter-spacing:.09em;color:#efd19a;text-transform:uppercase}
+#guidedLesson .lesson-count{color:#c9d6d4;letter-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap}
+#guidedLesson h2{font:700 20px/1.2 Georgia,serif;margin:9px 0 7px;color:#fff3d8}
+#guidedLesson p{margin:0 0 10px}
+#guidedLesson .lesson-control{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:10px}
+#guidedLesson kbd{display:inline-block;font:700 12px/1.3 system-ui;padding:6px 9px;border:1px solid #8da2a2;border-bottom-width:3px;border-radius:5px;background:#0b1820;color:#fff1cc;white-space:normal}
+#guidedLesson .lesson-controls-label{font-size:11px;color:#c4d3d1}
+#guidedLesson .lesson-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+#guidedLesson button{min-height:35px;padding:7px 12px;border-radius:5px;border:1px solid #efcc85;background:#e9bf74;color:#1c211e;font:700 12px/1.3 system-ui;cursor:pointer}
+#guidedLesson button.skip{border-color:#647b81;color:#d5e2df;background:#14252e;font-weight:500}
+#guidedLesson button:focus-visible{outline:2px solid #fff4c5;outline-offset:3px}
+#guidedLesson .lesson-status{font:11px/1.4 system-ui;color:#bad2ca;margin:9px 0 0}
+#lessonArrow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:17;overflow:visible}
+#lessonArrow rect{fill:none}#lessonArrow .lesson-ring-shadow{stroke:#07141ed9;stroke-width:5}#lessonArrow .lesson-ring{stroke:#f4d492;stroke-width:1.5}
+#lessonArrow path[class]{fill:none;stroke-linecap:round}#lessonArrow .lesson-line-shadow{stroke:#07141ed9;stroke-width:5}#lessonArrow .lesson-line{stroke:#f4d492;stroke-width:2}#lessonArrow .lesson-dot{fill:#f4d492;stroke:#11232d;stroke-width:1.5}
+/* Compact screens retain the target's highlight; cards scroll rather than leave the viewport. */
+@media(max-width:699px),(max-height:520px){#guidedLesson{width:min(286px,calc(100vw - 24px));padding:10px 12px;font-size:12px;line-height:1.4}#guidedLesson h2{font-size:18px;margin:6px 0}#guidedLesson p{margin-bottom:7px}#guidedLesson .lesson-actions{gap:6px;margin-top:8px}#guidedLesson .lesson-status{font-size:10px;margin-top:7px}#guidedLesson button{padding:6px 8px;min-height:34px;font-size:11px}#guidedLesson kbd{padding:4px 7px}}
+#localMap{position:fixed;left:20px;bottom:115px;width:126px;height:126px;z-index:5;border:2px solid #c5a365;border-radius:50%;background:#101923dd;pointer-events:none}#localMap[hidden]{display:none}

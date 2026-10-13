@@ -1078,7 +1078,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2116"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
-<script src="./hub-tour.js?v=2190"></script>
+<script src="./hub-tour.js?v=2192"></script>
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2089"></script>
@@ -1143,7 +1143,9 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./chest-reveal.js?v=2190"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
-<script src="./guided-tutorial.js?v=2190"></script>
+<link rel="stylesheet" href="./guided-tutorial.css?v=2192">
+<script src="./tutorial-callout.js?v=2192"></script>
+<script src="./guided-tutorial.js?v=2192"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1158,7 +1160,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.191.0-class-wardrobe';
+const VERSION3D='2.192.0-tutorial-hud';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -2655,11 +2657,11 @@ const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-
 const TRIALS={
  pyromancer:{cls:'pyromancer',stage:9,seed:511,name:'Trial of the Flame',kills:26,earned:true,tier:5,tips:['Aim flames from a safe distance.','Defeat 26 foes, speak to your mentor, then take the exit.']},
   warrior:{cls:'warrior',stage:0,seed:501,name:'Trial of the Blade',kills:6,
-    tips:['Move with the stick (or WASD).','Tap SLASH to attack — hold it to keep swinging.','DODGE rolls you out of danger. Learn it.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
+    tips:['Move toward the practice area.','Tap your attack control for a basic strike. Hold and release to charge.','Dodge to avoid an incoming attack.','Defeat 3 enemies to unlock Skill 1 at class rank 2.','Defeat 6 enemies, then take the portal.']},
   ranger:{cls:'ranger',stage:1,seed:502,name:'Trial of the Bow',kills:6,
-    tips:['Move with the stick (or WASD).','Tap FIRE to loose an arrow — it aims for you.','DODGE rolls you out of danger. Keep your distance.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
+    tips:['Move toward the practice area.','Face your target and tap attack to shoot. Hold and release to charge.','Dodge away from danger. Keep your distance.','Defeat 3 enemies to unlock Skill 1 at class rank 2.','Defeat 6 enemies, then take the portal.']},
   mage:{cls:'mage',stage:5,seed:503,name:'Trial of the Staff',kills:6,
-    tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
+    tips:['Move toward the practice area.','Face your target and tap attack to cast.','Dodge away from danger. Keep your distance.','Defeat 3 enemies to unlock Skill 1 at class rank 2.','Defeat 6 enemies, then take the portal.']},
   reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:30,earned:true,tier:6,
     tips:['The dead do not welcome you. Only the strong leave.','Every room is a fight. Reap all 30. Then claim the scythe.']},
   paladin:{cls:'paladin',stage:9,seed:505,name:'Trial of the Paladin',kills:26,earned:true,tier:5,
@@ -5396,7 +5398,7 @@ function forgeRarityGuide(){
 }
 function openForge(back){
   mode='menu'; playFx('forgedone');   // Phase 20: the metal clang opens the forge (swapped with the sharpening)
-  menuTip('tip_forge','the <b>Forge</b>. Give the Smith <b>two pieces of the same type and rarity</b> and he fuses them into one random piece of the next rarity up. It is the main way to climb your gear — a gold-free upgrade path.');
+  menuTip('tip_forge','Fuse <b>two pieces of the same category and rarity</b> into one random item of the next rarity, with no gold fee. Your <b>character level</b> must meet that rarity’s requirement. See the guide below.');
   const fuseable=fuseGroups();
   const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.kind==='t'?TRINKETS[g.cat].label:catLabel(g.isW,g.cat);
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
@@ -5600,11 +5602,12 @@ function startTrial(cid,fromZone,opts={}){
   meta.run=null; persist();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   if(!T.earned && !hadHero && !Object.keys(meta.classUnlocked||{}).length){ showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
-  else if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
+  else if(!meta.tutOff&&T.earned&&T.tips?.length){ toast(T.tips[0]); G.tipT=4; }
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
 function controlHint(id){
  if(hudInputDevice==='controller'&&!meta.padOff){const hint=BFController.hint(id);if(hint)return hint;}
+ if(id==='pause')return 'Esc';
  const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];
  return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Unassigned';
 }
@@ -5612,9 +5615,9 @@ function controlKey(id){return controlHint(id).split(' / ')[0].replace('Left Cli
 function hudDevice(device){if(hudInputDevice===device)return;hudInputDevice=device;updateHudKeys();if(G)skillbarUpdate();}
 window.addEventListener('keydown',()=>hudDevice('keyboard'),true);
 window.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')hudDevice('keyboard');},true);
-function beginnerControls(){return [['Move',['up','left','down','right'].map(id=>(meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[]).filter(Boolean).map(keyLabel)[0]||'Unassigned').join(' · ')],['Jump',controlHint('jump')],['Attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Auto-sell equipment',controlHint('loot')],['Pause / release mouse','Esc']];}
+function beginnerControls(){return [['Move',[...new Set(['up','left','down','right'].map(controlHint))].join(' · ')],['Jump · hold for height',controlHint('jump')],['Basic attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Toggle auto-sell',controlHint('loot')],['Menu / release mouse',controlHint('pause')]];}
 function showTutorial(cid){mode='menu';
- showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="tutSkip">Skip practice · Esc</button></div>`);
+ showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="tutSkip">Skip practice · ${htmlSafe(hudInputDevice==='controller'?controlKey('dodge'):'Esc')}</button></div>`);
  document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
  document.getElementById('tutSkip').onclick=()=>{showOverlayHTML(`<div class="card"><h2 class="ovh">Skip the practice area?</h2><p class="ovsub">You will keep your chosen class and go to the Waystation. You can find the controls again in Pause → Help.</p><button class="bigbtn" id="skipYes">Skip and go to the Waystation</button><button class="bigbtn ghost" id="skipNo">Return to practice instructions</button></div>`);document.getElementById('skipYes').onclick=skipTrial;document.getElementById('skipNo').onclick=()=>showTutorial(cid);};
 }
@@ -5626,22 +5629,24 @@ function hubTutorial(){
 }
 /* ---- Tutorial / Help foundation: a one-time contextual teach primitive + a persistent Help/Codex ---- */
 const HELP_ENTRIES=[
-  {cat:'Controls', title:'Move & Jump', get body(){return 'Move: '+['up','left','down','right'].map(controlKey).join(' / ')+'. Jump: '+controlHint('jump')+' — hold for more height.';}},
-  {cat:'Controls', title:'Attack & Dodge', body:'Attack with J / SLASH — it auto-aims where you look. Dodge with K / Shift; the roll has brief invulnerability, so roll THROUGH a blow to escape it.'},
-  {cat:'Controls', title:'Skills', body:'Use skills with keys 1–4 or the skill buttons. They unlock as your class ranks up, and each has its own cooldown.'},
-  {cat:'Controls', title:'Talk / Pause', get body(){return 'Walk up to a keeper and use '+controlHint('interact')+'. Esc opens the menu and frees the camera.';}},
-  {cat:'Combat', title:'Elements & weakness', body:'Weapons carry an affinity. Each element beats its opposite — Fire↔Frost, Poison↔Arcane, Holy↔Void — and applies a status (Burn, Chill, Venom, Rune, Radiance, Corruption).'},
-  {cat:'Combat', title:'Loot & rarity', body:'Foes and chests drop gear. Rarity runs grey → green → blue → purple → gold. Stronger gear needs a higher character level to equip — the 🔒 shows the requirement.'},
-  {cat:'Combat', title:'Compare before you equip', body:'On a loot card the green ▲ / red ▼ arrows show how a new piece compares to what you carry. Equip it, Stash it in your bag, or Sell it for gold.'},
-  {cat:'Combat', title:'Chests & mimics', body:'Chests hold loot — but some are MIMICS that spring to life and bite back. A mimic hits hard, but drops well.'},
-  {cat:'Gear', title:'The Forge (Smith)', body:'Give the Smith two pieces of the SAME category and rarity and he fuses them into a random piece of the next rarity up. A gold sink that climbs your gear.'},
-  {cat:'Gear', title:'Your Pack (bag)', body:'Stash spare gear in your bag. Sort it, toggle Auto-sell / Auto-bag for drops, and buy more slots at the shop.'},
-  {cat:'Classes & Skills', title:'The skill fork', body:'At rank 2 you choose your path. Skills 2, 3 and 4 can each be picked from EITHER discipline, independently — mix and match your own kit.'},
-  {cat:'Classes & Skills', title:'Respec', body:'Changed your mind? The Drillmaster lets you respec — re-pick your skill slots for a gold fee.'},
-  {cat:'Classes & Skills', title:'Companions (pets)', body:'The Beastkeeper sells pets. Equip one at a time; some fight for chip damage, one only heals you slowly. Train the active pet for small gains.'},
-  {cat:'The Hub', title:'The Waystation', body:'Home between runs. The central waystone heals you and BANKS your progress. Keepers ring the plaza; the Gates on the far wall are the zones.'},
-  {cat:'The Hub', title:'The Abyssal Descent', body:'An endless survival mode that gets harder every floor. See how deep you can fall — your best depth is saved.'},
-  {cat:'Progress', title:'The difficulty ladder', body:'Beat the game on Normal to unlock Hardcore (permadeath), then Hitless (one hit ends the run). The same journey, mastered at rising stakes.'}
+ {cat:'Controls',title:'Attack and charge',get body(){return 'Face your target and tap '+controlHint('attack')+' for a basic attack. Chargeable weapons power up when held; release to launch the charged attack. Other weapons can repeat while held.';}},
+ {cat:'Controls',title:'Dodge and air dash',get body(){return 'Use '+controlHint('dodge')+' to dodge. It briefly protects you from hits. Jump with '+controlHint('jump')+'; hold for more height, then dash in the air to cross wider gaps.';}},
+ {cat:'Controls',title:'Menus and tutorials',get body(){return controlHint('pause')+' opens the menu. Enemies keep moving in menus, so find safety first. Guided control practice is protected; later HUD tips are optional. Use '+controlHint('interact')+' to continue a tip, or '+controlHint('pause')+' to close the guide.';}},
+ {cat:'Gear',title:'Bag capacity and auto-sell',get body(){return 'Gear pickups enter free bag slots automatically. With Auto-sell OFF, a full bag leaves gear on the ground and chests unopened. ON sells new equipment pickups for gold, even with empty slots. Check the bottom-left label. Open your bag with '+controlHint('bag')+'. Buy Magic Packs at the Quartermaster for more space.';}},
+ {cat:'Gear',title:'Pickup comparisons',body:'The bottom-left pickup card compares new gear with your equipped item. It says Added to bag, Auto-sold, or Bag full. Use Loot beside the bag to reopen the latest card. New gear is not automatically equipped: choose it in your bag.'},
+ {cat:'Gear',title:'Rarity and equipment requirements',body:'Common is grey, Uncommon green, Rare blue, Epic purple, Legendary gold. The same character-level requirements apply to weapons, armor, rings and amulets. Class rank does not meet a gear level requirement; your class must also support the weapon.'},
+ {cat:'Gear',title:'Chests and mimics',get body(){return 'Better chests offer better chances of rare gear. Each chest gives one equipment item. Use '+controlHint('interact')+' to finish its reveal faster. Some chests are mimics: be ready for a fight.';}},
+ {cat:'Gear',title:'The Forge (Smith)',body:'Fuse two unequipped pieces of the same category and rarity into one random item of the next rarity. There is no gold fee. Your character must meet the new rarity’s level requirement. The Forge shows a color-coded level guide.'},
+ {cat:'Classes & Skills',title:'Player levels and stat points',body:'Character XP raises your player level, unlocking stronger gear and one stat point per level until the allocation cap. Open Bag → Character Stats to spend points on health, attack, defense, speed or mana.'},
+ {cat:'Classes & Skills',title:'Class ranks, skills and mana',body:'Class XP ranks up your equipped class. Rank 2 unlocks your first skill; later ranks offer more skills and passive choices. Hotbar padlocks show locked skills. The top-left number is mana cost; the countdown shows recharge time.'},
+ {cat:'Classes & Skills',title:'Changing classes and choices',body:'Visit the Drillmaster to equip an unlocked class or reset your skill choices for gold. Each class keeps its own rank and cosmetic selection. Changing classes does not reset your character level.'},
+ {cat:'Classes & Skills',title:'Earned class appearances',body:'At class ranks 5 and 10, new looks unlock at the Stylist. Equip the class you want to style first. Its selected look is remembered when you switch away. These rewards change appearance, not combat stats.'},
+ {cat:'The Hub',title:'The Stylist',body:'Change your name, eye color and facial features for gold, or choose an unlocked appearance for your equipped class. Preview earned styles before choosing.'},
+ {cat:'The Hub',title:'The Waystone',body:'Use the central crystal to restore health and open travel to unlocked campaign regions or the Rift Hall. Start the story at Briar Town. Shops and side activities are optional.'},
+ {cat:'The Hub',title:'Companions and sparring',body:'Rescue the two dogs in the Black Woods to unlock the Beastkeeper’s pet shop. Equip one companion at a time. The Sparring Room lets you practice combat and inspect enemies in the bestiary.'},
+ {cat:'The Hub',title:'Abyssal Descent and Endless Dungeon',body:'Abyssal Descent earns campaign gold, XP and gear through waves of enemies. Endless Dungeon is a separate prison-escape roguelite with three save slots; spend its earned gold on permanent upgrades between runs.'},
+ {cat:'Progress',title:'Leaving a campaign level',get body(){return isPermadeath()?'This difficulty erases your character save on death. Check its rules before fighting.':'Campaign XP, class upgrades, gold and completed hub requests stay saved when you die or return to the hub. Finish the current part to secure new gear and carried Rift Shards.';}},
+ {cat:'Exploration',title:'Rift Shards and trials',body:'Find five matching shards across both parts of a region. Finish the part to save carried shards. A complete saved set opens its portal in the Rift Hall automatically; win the trial to unlock its class.'}
 ];
 // menuTip(id, body) — queues a ONE-TIME explainer banner to be injected into the next menu that opens
 // (showOverlayHTML consumes it). Used to teach each interactable the first time you open it.
@@ -5728,35 +5733,35 @@ function hubTeachTick(dt){
   /* Contextual, and only once the player owns the thing the NPC is for. */
   if((meta.gold || 0) >= 400)
     teachOnce('hub_shop','You have coin. The Quartermaster sells gear, and the Smith upgrades what you already carry.',{icon:'🪙',pri:6});
-  const bagN = (meta.bank && meta.bank.length) || 0;
+  const bagN = (meta.stash || []).length;
   if(bagN >= 3)
     teachOnce('hub_bag','Your bag is filling up. Sell spare gear at the Quartermaster. Campaign XP, gold and completed return requests stay with you when you leave.',{icon:'🎒',pri:6});
   if((meta.zonesCleared || 0) >= 1)
-    teachOnce('hub_extras','A zone down. The side doors — the Arena, the Dungeon, the Gauntlet — are optional trials, and all of them are harder than the road.',{icon:'⚔️',pri:6});
+    teachOnce('hub_extras','Your first region is clear. Optional challenge doors are now open. Keep following the campaign gates to continue the story.',{icon:'⚔️',pri:6});
 }
 
 function teachQueueTick(dt){
   if(_teachT > 0) _teachT -= dt;
   if(_teachT > 0 || !TEACH_Q.length) return;
   /* Never during a menu or a cutscene - a lesson nobody is looking at is a lesson spent. */
-  if(mode !== 'play') return;
+  if(mode !== 'play' || BFGuidedTutorial.state) return;
   const t = TEACH_Q.shift();
   _teachT = TEACH_GAP;
   try{ storyToast(t.body, t.icon); }catch(e){ toast(t.body); }
 }
 // The tutorial LEVEL (first class trial) taught JUST-IN-TIME: each core verb is introduced the moment
 // it first matters, one at a time, in a safe context — instead of a wall of front-loaded text.
-function trialTeachTick(dt){ if(!G||!G.trial||mode!=='play') return; const T=TRIALS[G.trial]; if(!T||T.earned||meta.tutOff) return; const p=G.p; if(!p) return;
+function trialTeachTick(dt){ if(!G||!G.trial||G._guidedUsed||mode!=='play') return; const T=TRIALS[G.trial]; if(!T||T.earned||meta.tutOff) return; const p=G.p; if(!p) return;
   G._ttT=(G._ttT||0)+dt;
   // 1) MOVE — the instant you gain control, before any threat
   if(G._ttT>0.6) teachOnce('t_move',`Move: ${['up','left','down','right'].map(controlHint).join(' · ')}. Jump: ${controlHint('jump')}. Hold jump to go higher.`,{icon:'🏃',pri:0});
   const live=G.enemies.filter(e=>!e.dead&&!e.practice&&!e.dummy);
   // 2) ATTACK — when the first foe closes in
-  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack',`Attack with ${controlHint('attack')} or the attack button. Face your enemy. Hold to keep attacking.`,{icon:'⚔️',pri:0});
+  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack',`Face an enemy and tap ${controlHint('attack')} to attack. With chargeable weapons, hold and release for a stronger attack.`,{icon:'⚔️',pri:0});
   // 3) DODGE — the first time an enemy winds up a blow near you (the Barnacle principle: learn the danger safely)
   if(live.some(e=>(e.windT>0||e.fuseT>0)&&dXZ(e.x,e.z,p.x,p.z)<190)) teachOnce('t_dodge',`An attack is coming! Dodge with ${controlHint('dodge')} or the dodge button. The dodge briefly protects you while you move.`,{icon:'💨',pri:0});
   // 4) first kill → the goal
-  if((G.trialKills||0)>=1) teachOnce('t_progress','Well struck. Clear the chamber — the way down opens once every foe has fallen.',{icon:'✨',pri:1});
+  if((G.trialKills||0)>=1) teachOnce('t_progress','Defeat 6 enemies to open the exit. After the first 3, choose your first skill and try it on the rest.',{icon:'✨',pri:1});
   // 5) the portal
   if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to finish practice and reach the Waystation.',{icon:'🌀',pri:1});
 }
@@ -5766,21 +5771,21 @@ function openDashTutorial(){ if(!G) return; meta.tut=meta.tut||{}; meta.tut.dash
   showOverlayHTML(`<div class="card skilltut" style="--tut:#3a9dd0">
     <p class="ovkicker">Traversal</p><h2 class="ovh">The Mid-Air Dash</h2>
     <div class="tutbody"><div class="tuticon">💨</div>
-      <div class="tutcopy"><p class="tutdesc">That ravine is too wide to clear with a jump alone — but your <b>dodge is also a dash</b>, and it works in the air.</p>
-        <div class="tutkeyrow"><span class="tutkey">⎵</span><span class="tutkeymsg">Run at the gap and <b>JUMP</b> (Space).</span></div>
-        <div class="tutkeyrow"><span class="tutkey">K</span><span class="tutkeymsg">At the top of the jump, <b>DASH</b> (K / Shift / right-click) in the way you're moving — you'll fly across.</span></div>
-        <p class="tuthint">A jump + mid-air dash covers far more ground than a jump alone. You'll use it to clear wide gaps and reach hidden places all the way down.</p></div></div>
-    <button class="bigbtn" id="tutGo">Got it — I'll try it</button></div>`);
+      <div class="tutcopy"><p class="tutdesc">Your dodge also works in the air. Use it to cross wider gaps.</p>
+        <div class="tutkeyrow"><span class="tutkey">${htmlSafe(controlHint('jump'))}</span><span class="tutkeymsg">Move toward the gap. <b>Hold jump</b> for height.</span></div>
+        <div class="tutkeyrow"><span class="tutkey">${htmlSafe(controlHint('dodge'))}</span><span class="tutkeymsg">Near the top of your jump, <b>dash toward the landing</b>.</span></div>
+        <p class="tuthint">Keep moving toward solid ground.</p></div></div>
+    <button class="bigbtn" id="tutGo">Try it · ${htmlSafe(controlKey('interact'))}</button></div>`);
   const b=document.getElementById('tutGo'); if(b) b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); resumePlay(); };
 }
 function openHelp(back){
  mode='menu';
- const entries=HELP_ENTRIES.filter(e=>e.cat!=='Controls'&&!['Elements & weakness','Companions (pets)','The skill fork'].includes(e.title)).concat([
+ const entries=HELP_ENTRIES.concat([
  {cat:'Combat',title:'Skills and passives',body:'Class ranks unlock choices. Skills are actions you trigger; passives work automatically. Read both options, select one, then confirm. The Drillmaster can help you change your choices later.'},
  {cat:'Exploration',title:'Find your next objective',body:'The quest tracker shows your current task. Gold direction markers guide you to main objectives. Turn them on or off in Pause → Settings. Optional secrets are left for you to discover.'},
- {cat:'Exploration',title:'Find a clue again',body:'Open the journal to see your next task and collected clues. Search by a place, object or word. Selecting Open journal on a new-note notice opens that exact clue.'},
+ {cat:'Exploration',title:'Find a clue again',get body(){return 'New clues stay on paper notices until dismissed. '+controlHint('journal')+' opens the journal: check current tasks, filter clues or search a word. Open journal on a notice goes straight to that clue.';}},
  {cat:'Exploration',title:'Healing pads',body:'Small healing pads have limited healing. Large healing pads are rare and can restore your health repeatedly. Watch your health before starting another fight.'},
- {cat:'Controls',title:'Change the camera or controls',body:'Pause to choose a camera view. Key Bindings shows your current controls and lets you change them. On touch screens, use the movement stick and action buttons.'}
+ {cat:'Controls',title:'Change the camera or controls',body:'Open Settings to change your camera or rebind controls. Controller Setup supports Xbox and PlayStation labels, button rebinding and separate camera inversion for each stick axis. On touch screens, use the movement stick and action buttons.'}
  ]);
  const next=G?.trial?'Practice: defeat the enemies, then enter the exit portal.':G?.hub?'To start the campaign, use the Briar Town entrance. You can visit the shops later.':'Follow the current main task in the quest tracker. Open your journal if you need the clue again.';
  showOverlayHTML(`<style>#ovcard:has(.beginnerhelp){padding:0;border:0;background:none;box-shadow:none}.beginnerhelp{box-sizing:border-box;width:100%;max-width:760px!important}.beginnerhelp span{min-width:0;text-align:right;overflow-wrap:anywhere}.beginnerhelp summary{line-height:1.5}</style><div class="card beginnerhelp"><h2 class="ovh">Help for your adventure</h2><p class="ovsub">${next}</p><div style="text-align:left;max-height:62vh;overflow:auto"><details open><summary style="color:var(--amber);font-size:18px;cursor:pointer">Your current controls</summary>${beginnerControls().map(([a,b])=>`<div style="display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid #333"><strong>${a}</strong><span>${htmlSafe(b)}</span></div>`).join('')}<p>Skills: ${['skill1','skill2','skill3','skill4'].map(controlHint).map(htmlSafe).join(' · ')}. Locked skills become available as your class ranks up.</p></details><label for="helpSearch" style="display:block;margin-top:16px">Search help</label><input id="helpSearch" type="search" placeholder="Try healing, controls or clues" style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0;font-size:16px;background:#171921;color:#fff;border:1px solid #947748;border-radius:8px"><div id="helpResults"></div></div><button class="bigbtn ghost" id="helpBack">Back</button></div>`);
@@ -9608,9 +9613,13 @@ function loadStageRaw(i){
   G.startPos={x:entryRoom.x,z:entryRoom.z}; G.goalPos={x:goalRoom.x,z:goalRoom.z};
   G.progressEnd=goalRoom.z; G._dbg={maze:true,rooms:G.rooms.length,edges:edges.length,goalD};
   hazSetup(rnd2);
-  G.lastSafe={x:entryRoom.x,z:entryRoom.z+entryRoom.d/2-40};
+  // Beginners need room behind the camera while learning controls. The old
+  // rear-wall spawn retracted both chase cameras into the character's head.
+  const entryZ=inBeginnerTrial()?entryRoom.z:entryRoom.z+entryRoom.d/2-40;
+  G.lastSafe={x:entryRoom.x,z:entryZ};
   placeShade(entryRoom.x-60,entryRoom.z+entryRoom.d/2-60);
-  G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  G.p.x=entryRoom.x; G.p.z=entryZ; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(inBeginnerTrial()){G.cam={x:G.p.x,y:G.p.y,z:G.p.z};delete G._cameraBoom;}
   G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
   snapWorldInteractables();
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
@@ -15837,6 +15846,7 @@ function validActivity(v){return ['In menus','Talking','Inspecting','Playing che
 function playerActivity(){const m=backgroundMenuMode||mode;return m==='npc'?'Talking':m==='inspection'?'Inspecting':m==='chess'?'Playing chess':liveMenuWorld===G&&['pause','menu','journal','mirror'].includes(m)?'In menus':'';}
 function menuDamageWarning(){let e=document.getElementById('menuDamage');if(!e){e=document.createElement('div');e.id='menuDamage';e.style.cssText='pointer-events:none;position:fixed;inset:0;z-index:9999;box-shadow:inset 0 0 110px 35px #e32626aa;border:5px solid #e54b4b88';e.setAttribute('aria-live','assertive');document.body.append(e);}e.textContent='';e.hidden=false;clearTimeout(menuDamageWarning.timer);menuDamageWarning.timer=setTimeout(()=>e.hidden=true,450);}
 function update(dt){
+ if(mode!=='play')BFGuidedTutorial.suspend();
  if(BFShipwreckShore.aiming()&&(!G?.shore||!inShipwreck()||G.p?.dead))BFShipwreckShore.closeAim();
  const conv=G?.storyState?.conversation;
  if(conv&&briarBook&&(!MP.active||MP.isHost)&&!G.kingFinal){const owner=conv.owner===briarId()?G.p:MP.peers[conv.owner];if(!owner||owner.dead||owner.hp<=0||conv.owner!==briarId()&&(owner.zone!==G.zone||owner.area!==G.area)){const r=BFStoryState.transact(G.storyState,briarBook,{id:'owner-left:'+G.storyState.revision,type:'close',revision:G.storyState.revision});if(r.changed){G.storyState=r.state;briarSync();if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket()});}catch{}}}}
@@ -16497,7 +16507,7 @@ function updateWorld(dt){
         toast(S.name+' claimed — reach the exit ALIVE to keep it. Die, and the rift slips away.','#c47bff','event-secret-rift'); } } }
   // trial tutorial tips, paced out
   if(G.trial){ const T=TRIALS[G.trial];
-    if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
+    if(!meta.tutOff&&!G._guidedUsed&&T.earned&&T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
   // portal
   if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72){ if(G.portal.win) winFinale(); else nextStage(); } }
   // particles
@@ -17850,7 +17860,7 @@ function titleScreen(){
       <div class="mmcontinue" id="mmContinueWrap"><button class="mmbtn ${hasSave?'':'mmdis'}" id="mmCont" ${hasSave?'':'disabled'}><span class="mmtx">Continue</span><span class="mmsub" id="mmContSave">${hasSave?activeLine:'No saved Warden yet'}</span></button><button class="mmslotedge prev" id="mmSlotPrev" aria-label="Previous saved Warden" ${savedSlots.length>1?'':'disabled'}>‹</button><button class="mmslotedge next" id="mmSlotNext" aria-label="Next saved Warden" ${savedSlots.length>1?'':'disabled'}>›</button></div>
       <button class="mmbtn" id="mmLoad"><span class="mmtx">Load Character</span><span class="mmsub">View &amp; choose your saved Wardens</span></button>
       <button class="mmbtn" id="mmMP"><span class="mmtx">Multiplayer <span style="font-size:.7em;opacity:.7;letter-spacing:.1em">BETA</span></span><span class="mmsub">Play a zone co-op with a friend</span></button>
-      <button class="mmbtn" id="mmSet"><span class="mmtx">Settings</span><span class="mmsub">Audio, controls &amp; skins</span></button>
+      <button class="mmbtn" id="mmSet"><span class="mmtx">Settings</span><span class="mmsub">Audio, controls &amp; display</span></button>
       <button class="mmbtn" id="mmStudio"><span class="mmtx">Design Studio</span><span class="mmsub">Preview every voxel model &amp; weapon</span></button>
       <button class="mmbtn" id="mmDev"><span class="mmtx">Dev Previews</span><span class="mmsub">Design plans &amp; beta proposals</span></button>
       <button class="mmbtn mmexit" id="mmExit"><span class="mmtx">Exit</span></button>
@@ -18851,7 +18861,7 @@ function updateInteract(){
       const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
       if(eff<best){ best=eff; it=make(); } };
     for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.y||0)+(n.direct?155:142),service:n.role||'',label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
-    if(!G.riftHall&&!G.sparringRoom)consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
+    if(!G.riftHall&&!G.sparringRoom)consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
     if(!G.riftHall&&!G.sparringRoom)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner
   }
@@ -19298,7 +19308,7 @@ function openStylistMakeover(back=()=>openWardrobe(wsResume)){
 }
 function openWardrobe(back){
   mode='menu'; checkCosmetics();
-  menuTip('tip_wardrobe','the <b>Keeper</b>. Change your look — skins and appearance. Purely cosmetic: it never changes your stats, so wear whatever you like.');
+  menuTip('tip_wardrobe','the <b>Stylist</b>. Change your name and face for gold, or choose your equipped class’s appearance. New looks unlock at <b>class ranks 5 and 10</b>. Each class remembers its choice. Cosmetic only.');
   const secs=COSSLOTS.map(s=>{
     const tiles=COSMETICS[s.k].map(c=>{ const un=c.has(), sel=meta.cosEquipped[s.k]===c.id;
       return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" style="--cos:${c.col}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
@@ -19374,7 +19384,7 @@ function petTrain(id){ const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('A
 function petToggleLabel(){ meta.petLabel=!meta.petLabel; persist(); SFX.pickup(); }
 function openBeastkeeper(back){
   mode='menu';
-  menuTip('tip_beast','the <b>Beastkeeper</b>. Buy a companion and equip <b>one</b> at a time. Most fight alongside you for chip damage; one only heals you. Train your active pet for small, permanent gains.');
+  menuTip('tip_beast','Equip <b>one companion</b> at a time. Check its abilities before buying: pets can help you fight or recover. Train your active companion to improve it.');
   const active=meta.petActive;
   const owned=meta.petOwned.filter(id=>PETS[id]);
   const unowned=PETIDS.filter(id=>!PETS[id].questOnly&&!meta.petOwned.includes(id));

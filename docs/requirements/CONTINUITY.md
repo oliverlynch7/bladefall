@@ -1518,3 +1518,16 @@ Verification: 51 class/tier combinations, 13 sampled animations each (3,978 fram
 ## [Codex | 2026-10-12] Class wardrobe verified live
 
 Implementation commit 40a99823 is on main. Cloudflare Pages reports success. A fresh production browser confirms v2.191.0-class-wardrobe; title > Dev Previews > Class wardrobe reaches the live gallery. All 17 class buttons, three real model previews and icon images load without browser errors. Preview: https://bladefall.pages.dev/3d/class-skins.html. Completed local fixture pages were removed; only their reusable builder/check scripts are committed. The gallery is ready for Oliver's visual review. Broader campaign finishing remains open.
+
+
+## [Codex | 2026-10-12] Tutorial and HUD guidance refreshed — v2.192.0
+
+U-TUTORIAL-HUD-20261012 implemented. The beginner guide now explains the current Adventure HUD, explicit Auto-sell OFF/ON, protected full bags, pickup comparisons, persistent paper clues, skill mana/cooldowns, player stats versus class ranks, navigation and menus that leave combat running. Help and the Waystation tour reflect the Forge, Stylist rank 5/10 looks, bestiary and separate dungeon progression. Prompts follow current keyboard/controller bindings.
+
+Replaced the old center-pointing arrows with a persistent measured SVG layer: highlighted target outlines, fine rounded leaders routed to the outside edge, compact movable cards, viewport bounds and automatic menu hiding/resume. First-skill practice resumes any unfinished HUD tips instead of discarding them; redundant legacy notices wait behind the guide. Four safe control lessons remain action-gated; later HUD tips are optional and nonblocking. A jump must land before the next lesson, including short-hop retries.
+
+Real character creation exposed the beginner rear-wall spawn pushing the camera into the character's head. Beginner trials now start at the empty entry-room center with a matching recovery/follow point. Earned-trial placement and difficulty are unchanged.
+
+Verification: keyboard and actual left/right mouse controls; safe practice and active-world information tips; short/held jumps; menu hide/resume; first-skill interruption/resume; rebound keys; simulated Xbox/PlayStation labels and guide buttons; all three starters rank 2 after three kills; six-kill exit and saved completion; pre-change save compatibility; real title/creator/start flow; 36 HUD steps across 1280×720, 820×700, 390×844 and 844×390 with cards within the viewport and clear of their targets. Both chase cameras have full initial clearance for all three starters. Syntax, journal-notice and story-authority checks passed. Evidence: docs/art-validation/tutorial-hud-2026-10-12/summary.json and screenshots.
+
+Limitations: responsive checks use browser iframe sizes; controller input is simulated, not physical hardware. This verifies behavior and presentation, not novice comprehension or fun. No campaign geometry, story, cosmetic art or unrelated companion changes included. Deployment confirmation follows.

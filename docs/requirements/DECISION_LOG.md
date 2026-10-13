@@ -1141,3 +1141,20 @@ U-CLASS-SKINS-20261012: rebuilt all 34 earned appearances across 17 classes. Def
 The real-model wardrobe is at /3d/class-skins.html, linked first in title > Dev Previews and from the Stylist. Compare Default / Rank 5 / Rank 10, focus an outfit, rotate/zoom, try animations, weapons and capes, switch lighting or freeze ornaments. The gallery does not load or change character saves. Actual in-game preview testing caught and fixed cloned emissive-color metadata turning Stylist bodies black; default material/pad restoration was also verified.
 
 Verification: 51 class/tier combinations, 13 sampled animations each (3,978 frames), 129 state/Stylist checks, 51 simulated-peer render checks, old-save compatibility, bag/Stylist visual inspection, and 390px responsive gallery verification. Evidence and explicit limitations: docs/art-validation/class-wardrobe-2026-10-12/summary.json. No live second-device network or physical phone session; representative weapon/cape views are not an exhaustive no-clipping guarantee. Visual acceptance by Oliver remains open. This completes the skin implementation pass, not the outstanding campaign finishing work. Unrelated companion3d.js and articulated-rigs.json changes are excluded. Commit/deployment verification follows.
+
+## [Codex | 2026-10-12] Tutorial accuracy and HUD callouts
+
+The latest request prioritizes refreshing new-player guidance after the Adventure HUD and earned wardrobe rollout. Implement U-TUTORIAL-HUD-20261012 using the grounded plan in USER_SOURCE_2026-10-12_TUTORIAL_HUD.md. Maintain the established four safe input gates and optional information tips; do not force returning saves through onboarding again. Current loot policy, bindings and menu behavior override old help copy.
+
+
+## [Codex | 2026-10-12] Tutorial and HUD guidance refreshed — v2.192.0
+
+U-TUTORIAL-HUD-20261012 implemented. The beginner guide now explains the current Adventure HUD, explicit Auto-sell OFF/ON, protected full bags, pickup comparisons, persistent paper clues, skill mana/cooldowns, player stats versus class ranks, navigation and menus that leave combat running. Help and the Waystation tour reflect the Forge, Stylist rank 5/10 looks, bestiary and separate dungeon progression. Prompts follow current keyboard/controller bindings.
+
+Replaced the old center-pointing arrows with a persistent measured SVG layer: highlighted target outlines, fine rounded leaders routed to the outside edge, compact movable cards, viewport bounds and automatic menu hiding/resume. First-skill practice resumes any unfinished HUD tips instead of discarding them; redundant legacy notices wait behind the guide. Four safe control lessons remain action-gated; later HUD tips are optional and nonblocking. A jump must land before the next lesson, including short-hop retries.
+
+Real character creation exposed the beginner rear-wall spawn pushing the camera into the character's head. Beginner trials now start at the empty entry-room center with a matching recovery/follow point. Earned-trial placement and difficulty are unchanged.
+
+Verification: keyboard and actual left/right mouse controls; safe practice and active-world information tips; short/held jumps; menu hide/resume; first-skill interruption/resume; rebound keys; simulated Xbox/PlayStation labels and guide buttons; all three starters rank 2 after three kills; six-kill exit and saved completion; pre-change save compatibility; real title/creator/start flow; 36 HUD steps across 1280×720, 820×700, 390×844 and 844×390 with cards within the viewport and clear of their targets. Both chase cameras have full initial clearance for all three starters. Syntax, journal-notice and story-authority checks passed. Evidence: docs/art-validation/tutorial-hud-2026-10-12/summary.json and screenshots.
+
+Limitations: responsive checks use browser iframe sizes; controller input is simulated, not physical hardware. This verifies behavior and presentation, not novice comprehension or fun. No campaign geometry, story, cosmetic art or unrelated companion changes included. Deployment confirmation follows.

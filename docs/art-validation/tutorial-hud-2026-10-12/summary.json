@@ -1,0 +1,782 @@
+{
+  "version": "2.192.0-tutorial-hud",
+  "checks": {
+    "core": {
+      "controls": true,
+      "enemySafety": true,
+      "nonblocking": true,
+      "state": {
+        "step": 5,
+        "id": "vitals",
+        "title": "Watch health and mana"
+      }
+    },
+    "jump": {
+      "shortHopRetry": true,
+      "heldJumpCompletesOnGround": true
+    },
+    "cameras": [
+      {
+        "class": "warrior",
+        "camera": "far",
+        "fraction": 1,
+        "spawn": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "class": "warrior",
+        "camera": "shoulder",
+        "fraction": 1,
+        "spawn": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "class": "ranger",
+        "camera": "far",
+        "fraction": 1,
+        "spawn": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "class": "ranger",
+        "camera": "shoulder",
+        "fraction": 1,
+        "spawn": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "class": "mage",
+        "camera": "far",
+        "fraction": 1,
+        "spawn": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "class": "mage",
+        "camera": "shoulder",
+        "fraction": 1,
+        "spawn": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "starterRanks": [
+      {
+        "class": "warrior",
+        "rank": 2,
+        "kills": 3
+      },
+      {
+        "class": "ranger",
+        "rank": 2,
+        "kills": 3
+      },
+      {
+        "class": "mage",
+        "rank": 2,
+        "kills": 3
+      }
+    ],
+    "menusAndBindings": [
+      "Lesson and arrow hide in menu",
+      "Resumes same lesson",
+      "First skill takes precedence",
+      "Unfinished HUD guide resumes after skill",
+      "Rebound bag and continue labels",
+      "Old interact no longer advances",
+      "Rebound interact advances",
+      "Auto-sell policy is explicit",
+      "Xbox labels",
+      "PlayStation labels",
+      "Controller continue",
+      "Controller skip closes guide"
+    ],
+    "normalEntry": "Title → New Game → Class → Face → Stats → Name → Start Warrior tutorial → Start practicing; normal shoulder camera visually checked.",
+    "sixKills": {
+      "kills": 6,
+      "portal": true,
+      "state": {
+        "step": 0,
+        "id": "exit",
+        "title": "The exit is open"
+      }
+    },
+    "completion": {
+      "mode": "menu",
+      "done": true,
+      "hero": true,
+      "state": {
+        "step": 0,
+        "id": "exit",
+        "title": "The exit is open"
+      }
+    },
+    "help": {
+      "controls": "Your current controls\nMove\nW / ↑ · A / ← · S / ↓ · D / →\nJump · hold for height\nSpace\nBasic attack\nLeft Click / J\nDodge / air dash\nL-Shift / Right Click\nTalk / use\nE\nJournal\nN\nBag\nTab / B\nEmotes\nM\nToggle auto-sell\nV\nMenu / release mouse\nEsc\n\nSkills: 1 · 2 · 3 · 4. Locked skills become available as your class ranks up.",
+      "topics": [
+        "Attack and charge",
+        "Dodge and air dash",
+        "Menus and tutorials",
+        "Bag capacity and auto-sell",
+        "Pickup comparisons",
+        "Rarity and equipment requirements",
+        "Chests and mimics",
+        "The Forge (Smith)",
+        "Player levels and stat points",
+        "Class ranks, skills and mana",
+        "Changing classes and choices",
+        "Earned class appearances",
+        "The Stylist",
+        "The Waystone",
+        "Companions and sparring",
+        "Abyssal Descent and Endless Dungeon",
+        "Leaving a campaign level",
+        "Rift Shards and trials",
+        "Skills and passives",
+        "Find your next objective",
+        "Find a clue again",
+        "Healing pads",
+        "Change the camera or controls"
+      ]
+    },
+    "runtimeErrors": [],
+    "preChangeSave": {
+      "name": "Tutorial Returner",
+      "gold": 734,
+      "level": 8,
+      "xp": 53,
+      "rank": 7,
+      "done": true
+    },
+    "oldSave": {
+      "preserved": {
+        "name": "Tutorial Returner",
+        "gold": 734,
+        "level": 8,
+        "xp": 53,
+        "rank": 7,
+        "done": true
+      },
+      "mode": "play"
+    },
+    "mouseAttack": {
+      "step": 4,
+      "id": "dodge",
+      "title": "Dodge or dash"
+    },
+    "mouseDodge": {
+      "step": 5,
+      "id": "vitals",
+      "title": "Watch health and mana"
+    }
+  },
+  "layouts": {
+    "phone": [
+      {
+        "id": "vitals",
+        "target": "#hud .hudvitals",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          143,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M128.5,140 L128.5,135 Q128.5,130 133.5,130 L150,130 Q155,130 155,125 L155,120"
+      },
+      {
+        "id": "objective",
+        "target": "questbox",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          92,
+          368.0625,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M294,365.0625 L294,360.0625 Q294,355.0625 289,355.0625 L240,355.0625 Q235,355.0625 235,350.0625 L235,345.0625"
+      },
+      {
+        "id": "progress",
+        "target": "hudprogress",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          255,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M98,252 L98,247 Q98,242 103,242 L150,242 Q155,242 155,237 L155,232"
+      },
+      {
+        "id": "skills",
+        "target": "bSk0",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          42,
+          365,
+          286,
+          222.578125
+        ],
+        "overlap": 0,
+        "arrow": "M185,591 L185,596 Q185,601 185,606 L185,611"
+      },
+      {
+        "id": "bag",
+        "target": "inventoryDock",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          485.40625,
+          286,
+          242.96875
+        ],
+        "overlap": 0,
+        "arrow": "M106,731.40625 L106,736.40625 Q106,741.40625 111,741.40625 L150,741.40625 Q155,741.40625 155,746.40625 L155,751.40625"
+      },
+      {
+        "id": "autosell",
+        "target": "hudAutoSell",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          521.40625,
+          286,
+          206.578125
+        ],
+        "overlap": 0,
+        "arrow": "M43.875,731.40625 L43.875,736.40625 Q43.875,741.40625 48.875,741.40625 L53.75,741.40625 Q61.75,741.40625 61.75,749.40625 L61.75,788 Q61.75,793 61.75,798 L61.75,803"
+      },
+      {
+        "id": "journal",
+        "target": "hudJournal",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          505.40625,
+          286,
+          222.578125
+        ],
+        "overlap": 0,
+        "arrow": "M104.2578125,731.40625 L104.2578125,736.46484375 Q104.2578125,741.40625 109.19921875,741.40625 L109.19921875,741.40625 Q114.140625,741.40625 114.140625,746.34765625 L114.140625,788 Q114.140625,793 114.140625,798 L114.140625,803"
+      },
+      {
+        "id": "navigation",
+        "target": "localMap",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          207,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M284,204 L284,199 Q284,194 279,194 L249,194 Q241,194 241,186 L241,168 Q241,163 246,163 L251,163"
+      },
+      {
+        "id": "menu",
+        "target": "pausebtn",
+        "viewport": [
+          390,
+          844
+        ],
+        "card": [
+          12,
+          82,
+          286,
+          222.578125
+        ],
+        "overlap": 0,
+        "arrow": "M284,79 L284,74 Q284,69 284,64 L284,46 Q284,38 292,38 L316,38 Q321,38 326,38 L331,38"
+      }
+    ],
+    "tablet": [
+      {
+        "id": "vitals",
+        "target": "#hud .hudvitals",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          343,
+          12,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M340,91 L334,91 Q330,91 330,95 L330,95 Q330,99 326,99 L320,99"
+      },
+      {
+        "id": "objective",
+        "target": "questbox",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          12,
+          368.0625,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M353,382.0625 L358,382.0625 Q363,382.0625 363,377.0625 L363,332.0625 Q363,324.0625 371,324.0625 L618,324.0625 Q623,324.0625 628,324.0625 L633,324.0625"
+      },
+      {
+        "id": "progress",
+        "target": "hudprogress",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          12,
+          255,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M98,252 L98,247 Q98,242 103,242 L165,242 Q170,242 170,237 L170,232"
+      },
+      {
+        "id": "skills",
+        "target": "bSk0",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          12,
+          263,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M353,499 L358,499 Q363,499 363,494 L363,493.5 Q363,488 368.5,488 L568,488 Q573,488 578,488 L583,488"
+      },
+      {
+        "id": "bag",
+        "target": "inventoryDock",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          12,
+          323.40625,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M106,587.40625 L106,592.40625 Q106,597.40625 111,597.40625 L176,597.40625 Q181,597.40625 181,602.40625 L181,607.40625"
+      },
+      {
+        "id": "autosell",
+        "target": "hudAutoSell",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          230,
+          469,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M227,674 L222,674 Q217,674 217,679 L217,686 Q217,694 209,694 L100.75,694 Q92.75,694 92.75,686 L92.75,682 Q92.75,677 87.75,677 L82.75,677"
+      },
+      {
+        "id": "journal",
+        "target": "hudJournal",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          12,
+          323.40625,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M353,570.40625 L358,570.40625 Q363,570.40625 363,575.40625 L363,669 Q363,677 355,677 L150.140625,677 Q145.140625,677 140.140625,677 L135.140625,677"
+      },
+      {
+        "id": "navigation",
+        "target": "localMap",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          320,
+          12,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M661,119 L669.75,119 Q671,119 671,120.25 L671,120.25 Q671,121.5 672.25,121.5 L681,121.5"
+      },
+      {
+        "id": "menu",
+        "target": "pausebtn",
+        "viewport": [
+          820,
+          700
+        ],
+        "card": [
+          241,
+          18,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M582,35 L590.5,35 Q592,35 592,36.5 L592,36.5 Q592,38 593.5,38 L746,38 Q751,38 756,38 L761,38"
+      }
+    ],
+    "landscape": [
+      {
+        "id": "vitals",
+        "target": "#hud .hudvitals",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          343,
+          12,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M340,91 L334,91 Q330,91 330,95 L330,95 Q330,99 326,99 L320,99"
+      },
+      {
+        "id": "objective",
+        "target": "questbox",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          348,
+          12,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M345,183 L340,183 Q335,183 335,188 L335,222 Q335,230 343,230 L642,230 Q647,230 652,230 L657,230"
+      },
+      {
+        "id": "progress",
+        "target": "hudprogress",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          214,
+          193,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M211,207 L203,207 Q201,207 201,209 L201,209 Q201,211 199,211 L191,211"
+      },
+      {
+        "id": "skills",
+        "target": "bSk0",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          298,
+          155,
+          286,
+          222.578125
+        ],
+        "overlap": 0,
+        "arrow": "M587,189 L592,189 Q597,189 597,194 L597,195 Q597,200 602,200 L607,200"
+      },
+      {
+        "id": "bag",
+        "target": "inventoryDock",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          230,
+          135,
+          286,
+          242.96875
+        ],
+        "overlap": 0,
+        "arrow": "M227,341.203125 L222,341.203125 Q217,341.203125 217,336.203125 L217,323.40625 Q217,318.40625 212,318.40625 L207,318.40625"
+      },
+      {
+        "id": "autosell",
+        "target": "hudAutoSell",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          230,
+          171,
+          286,
+          206.578125
+        ],
+        "overlap": 0,
+        "arrow": "M227,364 L222,364 Q217,364 217,369 L217,376 Q217,384 209,384 L100.75,384 Q92.75,384 92.75,376 L92.75,372 Q92.75,367 87.75,367 L82.75,367"
+      },
+      {
+        "id": "journal",
+        "target": "hudJournal",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          230,
+          155,
+          286,
+          222.578125
+        ],
+        "overlap": 0,
+        "arrow": "M227,364 L218.5,364 Q217,364 217,365.5 L217,365.5 Q217,367 215.5,367 L150.140625,367 Q145.140625,367 140.140625,367 L135.140625,367"
+      },
+      {
+        "id": "navigation",
+        "target": "localMap",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          396,
+          12,
+          286,
+          184.984375
+        ],
+        "overlap": 0,
+        "arrow": "M685,119 L690,119 Q695,119 695,114 L695,109.5 Q695,104.5 700,104.5 L705,104.5"
+      },
+      {
+        "id": "menu",
+        "target": "pausebtn",
+        "viewport": [
+          844,
+          390
+        ],
+        "card": [
+          279,
+          18,
+          286,
+          222.578125
+        ],
+        "overlap": 0,
+        "arrow": "M568,35 L576.5,35 Q578,35 578,36.5 L578,36.5 Q578,38 579.5,38 L770,38 Q775,38 780,38 L785,38"
+      }
+    ],
+    "desktop": [
+      {
+        "id": "vitals",
+        "target": "#hud .hudvitals",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          53,
+          158,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M222,155 L222,150 Q222,145 222,140 L222,135"
+      },
+      {
+        "id": "objective",
+        "target": "questbox",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          930,
+          409.484375,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M1136,406.484375 L1136,401.484375 Q1136,396.484375 1131,396.484375 L1104,396.484375 Q1099,396.484375 1099,391.484375 L1099,386.484375"
+      },
+      {
+        "id": "progress",
+        "target": "hudprogress",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          913,
+          489,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M910,687.5 L905,687.5 Q900,687.5 895,687.5 L890,687.5"
+      },
+      {
+        "id": "skills",
+        "target": "bSk0",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          117.65625,
+          288,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M458.65625,535 L463.65625,535 Q468.65625,535 468.65625,540 L468.65625,554 Q468.65625,562 476.65625,562 L494.65625,562 Q499.65625,562 499.65625,567 L499.65625,572"
+      },
+      {
+        "id": "bag",
+        "target": "inventoryDock",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          12,
+          318.609375,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M161,582.609375 L161,587.609375 Q161,592.609375 166,592.609375 L176,592.609375 Q181,592.609375 181,597.609375 L181,602.609375"
+      },
+      {
+        "id": "autosell",
+        "target": "hudAutoSell",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          12,
+          360.609375,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M58.859375,582.609375 L58.859375,587.609375 Q58.859375,592.609375 53.859375,592.609375 L13,592.609375 Q5,592.609375 5,600.609375 L5,682 Q5,687 10,687 L15,687"
+      },
+      {
+        "id": "journal",
+        "target": "hudJournal",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          12,
+          318.609375,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M353,565.609375 L358,565.609375 Q363,565.609375 363,570.609375 L363,704 Q363,712 355,712 L203.265625,712 Q195.265625,712 195.265625,704 L195.265625,692 Q195.265625,687 190.265625,687 L185.265625,687"
+      },
+      {
+        "id": "navigation",
+        "target": "localMap",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          930,
+          489,
+          338,
+          219.390625
+        ],
+        "overlap": 0,
+        "arrow": "M927,503 L922,503 Q917,503 917,498 L917,208 Q917,200 925,200 L1039,200 Q1044,200 1049,200 L1054,200"
+      },
+      {
+        "id": "menu",
+        "target": "pausebtn",
+        "viewport": [
+          1280,
+          720
+        ],
+        "card": [
+          930,
+          447,
+          338,
+          260.984375
+        ],
+        "overlap": 0,
+        "arrow": "M1245,444 L1245,439 Q1245,434 1250,434 L1266,434 Q1274,434 1274,426 L1274,77 Q1274,69 1266,69 L1247,69 Q1242,69 1242,64 L1242,59"
+      }
+    ]
+  },
+  "limits": [
+    "Input gates use real game input handlers with simulated fixed timesteps. Mouse clicks and skill confirmation were also driven through the browser UI.",
+    "Xbox and PlayStation labels/actions are simulated; physical controllers were not tested.",
+    "Responsive sizes are iframe viewports, not physical phones. Screenshot phone view is scaled only for capture.",
+    "These checks verify behavior and presentation; they do not establish novice comprehension or fun."
+  ]
+}

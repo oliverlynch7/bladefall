@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),S=require('../p
 const book=JSON.parse(fs.readFileSync('public/3d/story/hollow-cliffs.json','utf8'));let s=S.create(),seq=0;
 function doEvent(type,fields){const r=S.transact(s,book,{id:'test-'+ ++seq,type,...fields});s=r.state;return r.changed;}
 function world(key){return doEvent('world',{key});}function choose(id){return doEvent('choose',{line:s.conversation.node,choice:id});}
-assert(!world('hp.orders'));doEvent('open',{npc:'caleb'});choose('blame');choose('repair');assert(s.flags['hp.trail']);doEvent('close');assert(world('hp.orders'));
+assert(world('hp.orders'));assert(s.flags['hp.trail'],'early orders start the trail');s=S.create();doEvent('open',{npc:'caleb'});choose('blame');choose('repair');assert(s.flags['hp.trail']);doEvent('close');assert(world('hp.orders'));
 assert(!world('hp.brake.right'));assert(world('hp.cart.push'));assert(s.flags['hp.weight.open']);assert(!world('hp.cart.push'));assert(world('hp.brake.right'));assert(s.flags['hp.bridge']);
 const G={p:{}};C.build({G,seg:()=>{},plat:()=>{},solid:()=>{},spawn:()=>({})});assert(G.storyObjects.some(o=>o.key==='hp.cart.push'));assert(!G.storyObjects.some(o=>/^hp\.weight\.|^hp\.brake\.wrong$/.test(o.key)));
 const oldBridge=S.restore({version:1,flags:{'hp.bridge':true}}),oldReady=S.restore({version:1,flags:{'hp.weight.open':true}}),oldPartialWeights=S.restore({version:1,items:{'hp.weight.mask':1,'hp.weight':2}});

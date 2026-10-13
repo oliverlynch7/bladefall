@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>Hollow Pass co-op QA</title>
+<style>body{font:14px system-ui;background:#15202a;color:white}button{padding:10px}iframe{width:48%;height:300px;border:1px solid #687}pre{white-space:pre-wrap}</style>
+<h1>Local host/guest bridge verification</h1><button id="run">Test the co-op bridge</button><pre id="result">Wait for both clients, then start.</pre>
+<iframe id="host" title="Host" src="/3d/.qa-hollow-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-hollow-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result');out.textContent='Running…';
+ try{
+  const h=document.getElementById('host').contentWindow,g=document.getElementById('guest').contentWindow;
+  const hb=await h.hollowQA.ready(),gb=await g.hollowQA.ready(),checks=[];
+  const ok=(name,v)=>{if(!v)throw Error(name);checks.push(name);};
+  await h.hollowQA.fresh(hb);await g.hollowQA.fresh(gb);
+  const hostQueue=[],guestQueue=[],handlers={};
+  Object.assign(hb.MP,{active:true,isHost:true,myId:'h',conns:[]});
+  hb.MP.wireGuest({open:true,send:d=>hostQueue.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'g',hostConn:{open:true,send:d=>guestQueue.push(JSON.parse(JSON.stringify(d)))}});
+  function flush(){for(let n=0;n<4;n++){for(const p of guestQueue.splice(0))handlers.data(p);for(const p of hostQueue.splice(0))gb.MP.onGuestData(p);}}
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();hb.enterZone(1);hb.MP.onEnter(1);flush();
+  await h.hollowQA.wait(250);flush();
+  for(const b of [hb,gb]){b.G.p.invuln=99999;for(const e of b.G.enemies)e.stunT=99999;}
+  const pump=n=>{for(let i=0;i<n;i++){hb.update(1/60);gb.update(1/60);}flush();};
+  function act(win,b,key){const o=b.G.storyObjects.find(o=>o.key===key);win.hollowQA.place(b,o.x,o.z,o.y);if(!b.MP.isHost){b.MP.hostConn.send({t:'pos',p:b.MP.selfState()});flush();}b.briarRequest('world',{key});flush();}
+  ok('Both clients enter identical cliffs',hb.G.cliffs&&gb.G.cliffs&&JSON.stringify(hb.G.bounds)===JSON.stringify(gb.G.bounds));
+  act(g,gb,'hp.orders');ok('Guest early discovery starts shared trail',hb.G.storyState.flags['hp.orders']&&gb.G.storyState.flags['hp.trail']);
+  act(g,gb,'hp.cart.push');act(g,gb,'hp.brake.right');ok('Host rejects the premature guest winch',!hb.G.storyState.flags['hp.bridge']);pump(160);
+  ok('Cart docks on both clients',h.BFHollowCliffs.cartProgress(hb.G)===1&&g.BFHollowCliffs.cartProgress(gb.G)===1);
+  act(g,gb,'hp.brake.right');const oldPacket=JSON.parse(JSON.stringify(hb.briarPacket()));
+  ok('New bridge stays non-walkable on both while lowering',hb.G.cliffs.bridge&&gb.G.cliffs.bridge&&!hb.G.cliffs.bridgeWalkable&&!gb.G.cliffs.bridgeWalkable);
+  pump(110);ok('Both gain the settled crossing',hb.G.cliffs.bridgeWalkable&&gb.G.cliffs.bridgeWalkable&&hb.G.segments.filter(s=>s.bridge).length===1&&gb.G.segments.filter(s=>s.bridge).length===1);
+  const at=gb.G.cliffs.bridgeLowerAt;gb.briarApply(oldPacket);pump(3);ok('Duplicate story packet does not restart or duplicate deck',gb.G.cliffs.bridgeLowerAt===at&&gb.G.segments.filter(s=>s.bridge).length===1);
+  act(g,gb,'hp.lift');ok('Guest cannot bypass a living patrol',!hb.G.storyState.flags['hp.descent']);
+  act(g,gb,'hp.quiet');act(g,gb,'hp.lift');ok('Quiet-route lift progress is shared',hb.G.storyState.flags['hp.descent']&&gb.G.storyState.flags['hp.descent']);
+  const nav=g.BFPartyNavigation.target(gb.G);ok('Quiet route no longer directs guest at patrol',nav?.navLabel!=='Clear the guards');
+  for(const b of [hb,gb]){b.MP.active=false;b.MP.conns=[];}out.textContent=JSON.stringify({checks,transport:'Local relay of actual host/guest handlers; no public network'},null,2);
+ }catch(e){out.textContent='FAIL '+e.stack;}
+};
+</script>

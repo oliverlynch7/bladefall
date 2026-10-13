@@ -1,0 +1,52 @@
+{
+  "version": "2.193.0-hollow-journey",
+  "baseline": "af0b92d4",
+  "date": "2026-10-13",
+  "scope": "Winding Cliffs campaign finishing pass; shared crafted-scenery registry correction",
+  "implementation": [
+    "Joined freight-road surface follows existing ground routes; 5 signs at real junctions; bounds unchanged",
+    "Detailed abandoned wagon reuses existing mesh; moved supply crate out of the path between controls",
+    "Detailed winch matches interaction; bridge becomes walkable only after its 1.5-second lowering",
+    "Early transport orders start the trail; guard count/quiet route/lift guidance matches quest state",
+    "Active scene owns the crafted-model registry, preventing idle cached module copies from re-enabling fallback geometry"
+  ],
+  "automated_browser": [
+    "12 main-route movement waypoints; 14 bridge/quest/navigation assertions",
+    "91 alternate-route waypoints; ridge and cargo climbs, once-only reward and missed-jump recovery",
+    "Rendered normal-camera bridge sequence with deliberate early winch interaction, walking to cart and winch, lowering and crossing",
+    "10 host/guest checks over a local relay of real multiplayer handlers",
+    "Earlier build creates both cart-docked and bridge-completed saved states; current build preserves name, 827 gold, level 9 / XP 67, Warrior rank 7 / XP 124 and flags; completed bridge is immediately walkable with one deck",
+    "Crafted-model registry belongs to the active scene in all 8 campaign entry regions",
+    "Blueprint selection/marker shows current geometry and bounds; no browser errors in tested pages"
+  ],
+  "unit_checks": [
+    "check-3d-inline.cjs",
+    "test-hollow-cliffs.cjs",
+    "test-hollow-journey.cjs",
+    "test-story-authority.cjs",
+    "Syntax checks for new and changed modules"
+  ],
+  "visual_review": [
+    "Player-camera wagon/road view",
+    "Bridge and correctly placed handle, closed and open",
+    "Continuous rendered mistake/recovery/crossing sequence"
+  ],
+  "limits": [
+    "Route tests stun enemies and use invulnerability; not a full combat playthrough",
+    "Co-op uses two clients with a local handler relay, not a public internet session",
+    "No claim that automation establishes fun, new-player comprehension or lower-end-device performance",
+    "Shared renderer checks validate active ownership; not a full visual inspection of every asset in eight regions"
+  ],
+  "next": "Lost Canyon campaign finishing pass; other campaign halves remain open",
+  "evidence": [
+    "main-route.json",
+    "optional-routes.json",
+    "coop.json",
+    "completed-old-save.json",
+    "scenery-registry.json",
+    "rendered-walkthrough.json",
+    "geometry.json",
+    "wagon-and-road.jpg",
+    "freight-bridge.jpg"
+  ]
+}

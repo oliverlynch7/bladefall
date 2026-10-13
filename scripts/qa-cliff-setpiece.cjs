@@ -19,7 +19,7 @@ async page=>{
   G.storyState.flags['hp.trail']=true;G.storyState.flags['hp.orders']=true;
   {const o=G.storyObjects.find(o=>o.key==='hp.cart.push');Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key:o.key});for(let i=0;i<150;i++)b.update(.016);}
   {const o=G.storyObjects.find(o=>o.key==='hp.brake.right');Object.assign(p,{x:o.x,z:o.z,y:o.y});b.briarRequest('world',{key:o.key});}
-  ok('freight bridge collision unlocks',!!G.storyState.flags['hp.bridge']&&G.cliffs.bridge&&G.segments.some(s=>s.bridge));
+  ok('freight bridge starts lowering without early floor',!!G.storyState.flags['hp.bridge']&&G.cliffs.bridge&&!G.segments.some(s=>s.bridge));
   ok('fresh release starts a timed lowering',Number.isFinite(G.cliffs.bridgeLowerAt)&&G.time-G.cliffs.bridgeLowerAt<.1);
   Object.assign(p,{x:0,z:-2450,y:0,vy:0,vx:0,vz:0,onGround:true});b.update(.016);
   return {checks,startedAt:G.cliffs.bridgeLowerAt};
@@ -29,6 +29,7 @@ async page=>{
  const second=await page.evaluate(()=>{
   const b=__BF3,G=b.G,p=G.p;for(let i=0;i<100;i++)b.update(.016);
   const elapsed=G.time-G.cliffs.bridgeLowerAt;if(elapsed<1.5)throw Error('bridge lowering did not finish');
+  if(!G.cliffs.bridgeWalkable||G.segments.filter(s=>s.bridge).length!==1)throw Error('settled bridge must have exactly one floor');
   const w=G.enemies.find(e=>e.label==='Cliff warden');w.stunT=0;w.active=true;w.ceState='hunt';w.ceClock=0;
   Object.assign(p,{x:w.x,z:w.z+115,y:w.y,vy:0,vx:0,vz:0,onGround:true,invuln:999});
   const states=new Set();for(let i=0;i<220;i++){b.update(.016);states.add(w.ceState);}

@@ -397,6 +397,11 @@
       "effects": [
         {
           "type": "flag",
+          "id": "hp.trail",
+          "value": true
+        },
+        {
+          "type": "flag",
           "id": "hp.orders",
           "value": true
         },
@@ -408,13 +413,7 @@
           "text": "The prisoners are bound for Ruined Keep. First reach the Lost Canyon holding yard. The freight bridge leads to the lookout and its lift."
         }
       ],
-      "once": true,
-      "when": [
-        {
-          "flag": "hp.trail",
-          "is": true
-        }
-      ]
+      "once": true
     },
     "hp.rope": {
       "effects": [
@@ -440,7 +439,7 @@
           "id": "hp.bridge",
           "region": "hollow",
           "title": "Freight bridge",
-          "text": "The loaded cart is parked on the left rail. Push it onto the floor plate. When the bridge cable pulls tight, release the winch on the far side of the works."
+          "text": "Push the loaded cart on the left rail onto its plate. When it docks, release the winch on the right. Wait for the bridge to settle before crossing."
         }
       ],
       "once": true
@@ -575,8 +574,8 @@
           "type": "note",
           "id": "hp.bridge.done",
           "region": "hollow",
-          "title": "Bridge lowered",
-          "text": "The freight bridge is down. The lower path leads through the patrol. The high shelves reach a rope behind the lookout."
+          "title": "Bridge released",
+          "text": "The bridge is lowering. Once it settles, cross to the lookout. Clear the lower patrol or tie the rope on the high route."
         }
       ],
       "once": true,

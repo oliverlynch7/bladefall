@@ -24,6 +24,7 @@ async page=>{
  const docked=await page.evaluate(()=>{const b=__BF3,G=b.G;return {progress:BFHollowCliffs.cartProgress(G),x:G.cliffs.cartCollider.x,brake:b.briarObjects().find(o=>o.key==='hp.brake.right')?.available};});
  ok('cart docks off bridge and winch becomes ready',docked.progress===1&&Math.abs(docked.x+175)<.01&&docked.brake);
  const released=await page.evaluate(()=>{const b=__BF3,G=b.G;Object.assign(G.p,{x:230,z:-2680,y:0,vx:0,vz:0,vy:0,onGround:true});b.update(.016);const prompt=G.interact?.label;b.doInteract();return {prompt,bridge:!!G.storyState.flags['hp.bridge'],collision:G.segments.some(s=>s.bridge)};});
- ok('ordinary winch interact lowers the walkable bridge',released.prompt==='Release the bridge winch'&&released.bridge&&released.collision);
+ ok('ordinary winch interact starts lowering without an early floor',released.prompt==='Release the bridge winch'&&released.bridge&&!released.collision);
+ const settled=await page.evaluate(()=>{for(let i=0;i<100;i++)__BF3.update(.016);return __BF3.G.cliffs.bridgeWalkable&&__BF3.G.segments.filter(s=>s.bridge).length===1;});ok('settled bridge becomes walkable exactly once',settled);
  if(errors.length)throw Error(JSON.stringify(errors));return {checks,before,pushed,midway,docked,released,errors};
 }

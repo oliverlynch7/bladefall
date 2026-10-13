@@ -1,0 +1,183 @@
+{
+  "checks": [
+    "Early orders start the trail",
+    "Unloaded winch stays closed",
+    "Moving cart cannot release bridge",
+    "Cart and collision dock together",
+    "No invisible floor during lowering",
+    "Tracker explains lowering",
+    "Half-lowered bridge still has no floor",
+    "Settled bridge gets one floor",
+    "Repeated sync does not duplicate deck",
+    "Navigation targets the remaining patrol",
+    "Living guards keep lift locked",
+    "Cleared patrol directs to lift",
+    "Lift opens after patrol",
+    "Painted road stops at ravine {\"loaded\":true,\"area\":0,\"bad\":[]}"
+  ],
+  "walks": [
+    {
+      "to": [
+        0,
+        300,
+        0
+      ],
+      "at": [
+        0,
+        309,
+        0
+      ],
+      "frames": 10
+    },
+    {
+      "to": [
+        0,
+        -400,
+        0
+      ],
+      "at": [
+        -3,
+        -393,
+        16
+      ],
+      "frames": 225
+    },
+    {
+      "to": [
+        -650,
+        -900,
+        0
+      ],
+      "at": [
+        -644,
+        -896,
+        0
+      ],
+      "frames": 264
+    },
+    {
+      "to": [
+        -1000,
+        -1450,
+        0
+      ],
+      "at": [
+        -996,
+        -1443,
+        0
+      ],
+      "frames": 208
+    },
+    {
+      "to": [
+        -650,
+        -2050,
+        0
+      ],
+      "at": [
+        -653,
+        -2046,
+        0
+      ],
+      "frames": 219
+    },
+    {
+      "to": [
+        0,
+        -2450,
+        0
+      ],
+      "at": [
+        -6,
+        -2446,
+        17
+      ],
+      "frames": 243
+    },
+    {
+      "to": [
+        0,
+        -3130,
+        0
+      ],
+      "at": [
+        -1,
+        -3122,
+        0
+      ],
+      "frames": 218
+    },
+    {
+      "to": [
+        0,
+        -3050,
+        0
+      ],
+      "at": [
+        1,
+        -3057,
+        0
+      ],
+      "frames": 29
+    },
+    {
+      "to": [
+        -450,
+        -3450,
+        0
+      ],
+      "at": [
+        -446,
+        -3446,
+        0
+      ],
+      "frames": 196
+    },
+    {
+      "to": [
+        -450,
+        -3900,
+        0
+      ],
+      "at": [
+        -453,
+        -3893,
+        0
+      ],
+      "frames": 144
+    },
+    {
+      "to": [
+        0,
+        -4200,
+        0
+      ],
+      "at": [
+        -6,
+        -4196,
+        0
+      ],
+      "frames": 174
+    },
+    {
+      "to": [
+        0,
+        -4600,
+        0
+      ],
+      "at": [
+        3,
+        -4594,
+        0
+      ],
+      "frames": 129
+    }
+  ],
+  "triangles": 5270,
+  "bounds": {
+    "minX": -2240,
+    "maxX": 2250,
+    "minZ": -5000,
+    "maxZ": 650
+  }
+}

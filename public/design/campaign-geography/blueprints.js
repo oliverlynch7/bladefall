@@ -84,4 +84,4 @@ function bind(){
  let timer;window.addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(fit,100);});
  const match=location.hash.match(/^#([0-7])-([01])$/);if(match){$('region').value=match[1];area=Number(match[2]);}load();
 }
-fetch('layout-data.json?v=2188').then(r=>{if(!r.ok)throw Error('Could not load the plans.');return r.json();}).then(value=>{data=value;bind();}).catch(error=>{$('error').hidden=false;$('error').textContent=error.message+' Please refresh or return to Bladefall.';});
+fetch('layout-data.json?v=2193').then(r=>{if(!r.ok)throw Error('Could not load the plans.');return r.json();}).then(value=>{data=value;bind();}).catch(error=>{$('error').hidden=false;$('error').textContent=error.message+' Please refresh or return to Bladefall.';});

@@ -34,7 +34,7 @@ dict(title='Hollow Pass · Winding Cliffs',module='hollow-cliffs.js',main=['appr
  steps=[('caleb','Reach the refuge','Get bearings before leaving cover.'),('hp.orders','Follow the transport','The wreck and its papers point deeper into the canyon.'),('hp.cart.push','Load the bridge plate','Move the freight cart onto its plate.'),('hp.brake.right','Release the crossing','The winch controls the visible bridge over the ravine.'),('hp.lift','Descend into the canyon','Pass the lookout by combat or the quiet upper approach.')],
  branches=[('hp.quiet','Quiet approach','An elevated rope route bypasses the lookout fight.'),('hp.rope','Climber loop','Retrieve rope along a side ledge.'),('hp.code.release','Freight cache','Use the high cargo route to reach the release above the cache.')],
  protect='No ground across the freight ravine; the two land masses stay separate. Preserve upper-route gaps and access to the bridge controls.',
- review='The freight crossing must be visible before repair. Watch the approach length so new canyon ground does not become an empty shortcut around the landmarks.'),
+ review='Winding Cliffs finishing pass implemented: joined trade road, five destination boards, clear bridge approach, detailed wagon and correctly placed winch. Bridge collision waits for the deck. Tested both lookout approaches and optional climbs, saved states and a local two-client relay; human pacing remains unverified.'),
 dict(title='Hollow Pass · Lost Canyon',module='lost-canyon.js',main=['arrival','west','east','northEvac','exit'],
  idea='Occupied holding yards connected by service roads. Entry choice leads to two rescue locations, then a controlled escape.',
  steps=[('ward','Choose an entry','Use papers, force the gate, or take the roof and side ladder.'),('lc.cage.south','Free the south cage','This group is near the entry and guard yard.'),('lc.alarm','Cut the alarm','The alarm overlooks the north holding area.'),('lc.cage.north','Free the north cage','Finish the second rescue before opening the escape route.'),('lc.escape','Open the way out','The north road leads to the next crossing.')],
@@ -172,7 +172,7 @@ def main():
             enemies=r['enemies'],source={'file':plan['module'],'sha256':hashlib.sha256(source.read_bytes()).hexdigest()},
             heightMax=max([o.get('y',0) or 0 for o in rooms]+[0]),
             pathNote='Lines follow authored route centers, including slopes, jumps and initially locked passages. A line is not proof of an open walking route.'))
-    data=dict(version='2.188.0-briar-journey',date='2026-10-12',beforeCommit='9d143bd1',
+    data=dict(version='2.193.0-hollow-journey',date='2026-10-13',beforeCommit='9d143bd1',
               status='Initial-state geometry review with authored design intent. Not a human playtest or a complete quest walkthrough.',maps=maps)
     (OUT/'layout-data.json').write_text(json.dumps(data,separators=(',',':'),ensure_ascii=False),encoding='utf-8')
     print(f'Built {len(maps)} maps; {(OUT/"layout-data.json").stat().st_size:,} bytes; bounds unchanged.')

@@ -14,7 +14,7 @@ act('hp.cart.push');ok('cart starts moving toward the plate',G.storyState.flags[
 act('hp.brake.right');ok('winch waits for cart to dock',!G.storyState.flags['hp.bridge']);
 for(let i=0;i<150;i++)b.update(.016);
 ok('cart docks with matching collision',BFHollowCliffs.cartProgress(G)===1&&Math.abs(G.cliffs.cartCollider.x-BFHollowCliffs.freight.endX)<1);
-act('hp.brake.right');ok('bridge adds real walkable ground',G.cliffs.bridge&&G.segments.some(s=>s.bridge));
+act('hp.brake.right');ok('lowering bridge has no early floor',!G.segments.some(s=>s.bridge));for(let i=0;i<100;i++)b.update(.016);ok('settled bridge adds real walkable ground',G.cliffs.bridge&&G.segments.some(s=>s.bridge));
 Object.assign(p,{x:0,z:-2470,y:0});walk(0,-3100);act('hp.lift');ok('live patrol blocks lower lift',!G.storyState.flags['hp.descent']);
 Object.assign(p,{x:150,z:-3200,y:0});for(const q of G.cliffs.walks.quiet)walk(q[0],q[1],true,q[2]);act('hp.quiet');act('hp.lift');ok('quiet rope opens descent with patrol alive',G.portal&&G.enemies.some(e=>e.cliffGuard&&!e.dead));
 Object.assign(p,{x:0,z:-400,y:0});for(const q of G.cliffs.walks.shelves)walk(q[0],q[1],true,q[2]);

@@ -1,3 +1,4 @@
+import {buildHollowJourneyArt} from './hollow-journey-art.js?v=2193';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
@@ -155,12 +156,14 @@ export function buildHollow(scene,w){
   const oldFog=scene.fog;scene.fog=new THREE.Fog('#b5b9a8',750,2500);
   root.add(new THREE.HemisphereLight('#c6e8ee','#997346',.6));
   const sun=new THREE.DirectionalLight('#ffe0b0',2.1);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:2800});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;root.add(sun,sun.target);
+  const journey=buildHollowJourneyArt(w);if(journey)root.add(journey);
   const counts={hollowArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  active={root,groups,obstacles,ribbons,windbreaks,sun,counts,occluders,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__HOLLOW_ART_ACTIVE=true;
-  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HOLLOW_ART_ACTIVE=false;};return {group:root,counts};
+  active={root,groups,obstacles,ribbons,windbreaks,sun,counts,journey,occluders,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__HOLLOW_ART_ACTIVE=true;
+  root.userData.dispose=()=>{journey?.userData.dispose?.();scene.fog=oldFog;sun.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HOLLOW_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateHollow(w){
   if(!active||!w.p)return;const a=active,p=w.p,low=window.__BF_META?.().quality==='low',range=low?750:1200;let tris=0,calls=0;
+  a.journey?.userData.tick?.(w);
   for(const [cell,g] of a.groups){const [x,z]=cell.split(',').map(Number);g.visible=Math.hypot((x+.5)*CHUNK-p.x,(z+.5)*CHUNK-p.z)<range+CHUNK*.72;if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}}
   // Cut away only the cliff pieces between the camera and hero. The collider never changes.
   for(const f of a.occluders.values()){

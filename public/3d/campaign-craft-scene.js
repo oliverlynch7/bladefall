@@ -84,7 +84,7 @@ export function attachCampaignCraft(parent,w,counts){
    add('freight-crane','crane',20,0,-2570,{w:860,h:223,d:85,liveCable:true});
    add('freight-cart','wagon',-450,0,-2530,{freight:true},0,1,(n,world,game)=>{n.position.x=game.cliffs?.cartCollider?.x??-450;n.position.z=game.cliffs?.cartCollider?.z??-2530;});
    add('freight-pressure','pressure',-175,7,-2610,{w:138,h:10,d:128},0,1,(n,world,game)=>{n.position.y=7-5*(window.BFHollowCliffs?.cartProgress?.(game)||0);});
-   add('freight-winch','winch',-340,0,-2470,{},0,.85);
+   add('freight-winch','winch',230,0,-2680,{},0,.85);
 
    add('cargo-pulley','pulley',-1550,282,-2160,{w:37,h:37,d:15});
    add('cargo-frame','crane',-1550,0,-2185,{w:180,h:285,d:75,liveCable:true});
@@ -206,6 +206,10 @@ export function attachCampaignCraft(parent,w,counts){
  counts.craft={theme,models:items.length,triangles:triangles+animated.reduce((sum,a)=>sum+a.row.triangles,0),drawCalls:bins.size+animated.reduce((n,a)=>n+a.node.children.length,0),items,visibleDrawCalls:0};
  active={root,world:w,counts:counts.craft,items,animated,occluders,groups,keys,cache:craftCacheStats()};
  const prior=parent.userData.dispose;parent.userData.dispose=()=>{prior?.();for(const {mesh}of groups)mesh.dispose();if(active?.root===root){active=null;window.__CAMPAIGN_CRAFT=null;}};
+ // Other art modules can import older cache-key copies of this module.
+ // Publish the API from the instance that actually owns the scene, so fallback
+ // geometry is suppressed by the rendered models rather than an idle import.
+ exposeCraftApi();
  window.__CAMPAIGN_CRAFT={...counts.craft,cache:active.cache};
  updateCampaignCraft(w);
 }
@@ -216,4 +220,4 @@ export function updateCampaignCraft(w){
  for(const q of a.animated){q.node.visible=true;q.step(q.node,w,game);q.node.visible=q.node.visible&&Math.hypot(q.node.position.x-p.x,q.node.position.z-p.z)<range+400;if(q.node.visible)calls+=q.node.children.length;}
  updateCampaignOccluders(a.occluders,w);a.counts.visibleDrawCalls=calls;if(window.__CAMPAIGN_CRAFT)window.__CAMPAIGN_CRAFT.visibleDrawCalls=calls;
 }
-window.BFCampaignCraft={has:id=>!!(active&&window.HERO3D?.on&&window.__world3d?.()?.on&&active.keys.has(id)),stats:()=>window.__CAMPAIGN_CRAFT,snapshot:()=>active?{...active.counts,animated:active.animated.map(a=>({id:a.row.id,position:a.node.position.toArray(),rotation:a.node.rotation.toArray().slice(0,3),visible:a.node.visible})),kits:window.__CAMPAIGN_CRAFT_KITS}:null};
+function exposeCraftApi(){window.BFCampaignCraft={has:id=>!!(active&&window.HERO3D?.on&&window.__world3d?.()?.on&&active.keys.has(id)),stats:()=>window.__CAMPAIGN_CRAFT,snapshot:()=>active?{...active.counts,animated:active.animated.map(a=>({id:a.row.id,position:a.node.position.toArray(),rotation:a.node.rotation.toArray().slice(0,3),visible:a.node.visible})),kits:window.__CAMPAIGN_CRAFT_KITS}:null};}

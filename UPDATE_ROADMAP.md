@@ -2790,3 +2790,16 @@ Limitations: responsive checks use browser iframe sizes; controller input is sim
 ## [Codex | 2026-10-12] Tutorial update verified live
 
 Implementation bba06f09 is on main. Cloudflare deployment a4271fa9 reports success; production HTML and a fresh browser title confirm v2.192.0-tutorial-hud with no browser errors. The tutorial stylesheet and versioned scripts load. Temporary QA pages were removed and the two test servers stopped. Reusable QA scripts and evidence remain in the repository.
+
+
+## [Codex | 2026-10-13] Winding Cliffs finishing pass — v2.193.0
+
+Implemented the next campaign pass after Briar. Winding Cliffs keeps its 4,490 × 5,650 map bounds, original elevations, cargo climb, ridge/rope route, encounters and rewards. Added a joined worn freight road and five destination signs; reused the detailed wagon model, removed loose bridge-approach blocks and moved a supply crate out of the route between controls. The detailed winch is at its functional handle. A newly lowered bridge gains collision when its animation settles; previously completed saves restore it immediately.
+
+Early-found transport orders now start the trail. The tracker reports remaining lookout guards and then the available lift; navigation points at the required guards while preserving the quiet high-route option. Transient obsolete cart/winch messages clear without removing journal clues. Refreshed the corresponding blueprint from actual initial-state geometry.
+
+Also fixed a shared renderer ownership bug: multiple scenery imports used different cache keys for the crafted-model module, so an idle copy could overwrite the active has-model API and cause primitive fallback geometry to draw over detailed models. The active scene now publishes its own registry. Verified ownership in all eight campaign entry regions.
+
+Checks: main route plus 91 optional-route waypoints using actual movement/collision; a rendered continuous bridge mistake/recovery/crossing sequence; ten host/guest assertions using the real handlers over a local relay; pre-change partial/complete bridge saves with character/class XP and gold retained; story, bridge timing, navigation and syntax checks. Evidence and limitations: docs/art-validation/hollow-journey-2026-10-13/summary.json. Enemies were stunned during route verification; no full combat playthrough, public-network session, low-end performance claim or human fun/novice-comprehension verdict.
+
+Next: Lost Canyon and the remaining campaign finishing sequence. No custom SFX or unrelated companion changes. Deployment confirmation follows.

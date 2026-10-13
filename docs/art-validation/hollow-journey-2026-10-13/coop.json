@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "Both clients enter identical cliffs",
+    "Guest early discovery starts shared trail",
+    "Host rejects the premature guest winch",
+    "Cart docks on both clients",
+    "New bridge stays non-walkable on both while lowering",
+    "Both gain the settled crossing",
+    "Duplicate story packet does not restart or duplicate deck",
+    "Guest cannot bypass a living patrol",
+    "Quiet-route lift progress is shared",
+    "Quiet route no longer directs guest at patrol"
+  ],
+  "transport": "Local relay of actual host/guest handlers; no public network"
+}

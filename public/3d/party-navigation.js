@@ -60,11 +60,12 @@ function target(g){
  }
  // Only point to guards that actually block this required interaction.
  const guards={
-  'kd.free':e=>e.prisonGuard==='cells', 'ic.free':e=>e.iceGuard,
+  'hp.lift':e=>!f['hp.quiet']&&e.cliffGuard, 'kd.free':e=>e.prisonGuard==='cells', 'ic.free':e=>e.iceGuard,
   'ih.workers':e=>e.ironGuard, 'gf.gate':e=>e.furnaceGate,
   'gf.writings':e=>e.furnaceOffice, 'sl.release':e=>e.libraryGuard==='main',
   'la.summit':e=>e.ascentGuard==='summit'
  };
+ if(t?.key==='hp.lift'&&!f['hp.quiet']&&g._cliffGuards>0&&!g.enemies?.some(e=>e.cliffGuard&&!e.dead&&e.hp>0))t={x:-450,z:-3740,y:0,navLabel:'Lookout patrol'};
  const guard=t&&guards[t.key];if(guard){const e=nearest((g.enemies||[]).filter(e=>!e.dead&&e.hp>0&&guard(e)));if(e)t={x:e.x,z:e.z,y:e.y||0,navLabel:'Clear the guards'};}
  return t&&Number.isFinite(t.x)&&Number.isFinite(t.z)?t:null;
 }

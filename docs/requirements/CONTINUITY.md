@@ -1554,3 +1554,8 @@ Also fixed a shared renderer ownership bug: multiple scenery imports used differ
 Checks: main route plus 91 optional-route waypoints using actual movement/collision; a rendered continuous bridge mistake/recovery/crossing sequence; ten host/guest assertions using the real handlers over a local relay; pre-change partial/complete bridge saves with character/class XP and gold retained; story, bridge timing, navigation and syntax checks. Evidence and limitations: docs/art-validation/hollow-journey-2026-10-13/summary.json. Enemies were stunned during route verification; no full combat playthrough, public-network session, low-end performance claim or human fun/novice-comprehension verdict.
 
 Next: Lost Canyon and the remaining campaign finishing sequence. No custom SFX or unrelated companion changes. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-13] Winding Cliffs verified live
+
+Implementation 3af439d5 is on main. Cloudflare deployment c1a3a80e succeeded; production HTML and a fresh browser title both report v2.193.0-hollow-journey. The new road/sign module returns HTTP 200, and the live title has no browser errors. Generated QA pages were removed, owned test tabs closed and the local server stopped. Lost Canyon remains the next campaign finishing pass.

@@ -1460,3 +1460,8 @@ Before delivery, enlarged health/mana numbers and adjusted companion spacing in 
 ## [Codex | 2026-10-12] HUD previews verified live
 
 Commits 02da2aa0 and dbd3881a published. Fresh production browser confirmed v2.189.1, actual title > Dev Previews access, all three layouts with their artwork and clue panels, and switching layouts in fullscreen without page errors. Review URL: https://bladefall.pages.dev/design/hud-preview/ . Gameplay HUD selection remains pending; no rollout has occurred.
+
+
+## [Codex | 2026-10-12] HUD preview feedback — preferences, no rollout
+
+User favors an upper-corner minimap and the paper-style clue cards. HP/mana placement remains undecided. They flag missing equipment comparisons and ask about Skyrim-like navigation/settings and further ideas. Exact feedback and inspected pickup behavior appended to requirements/USER_SOURCE_2026-10-12_HUD_PREVIEWS.md (under docs/). Keep immediate bagging; comparison presentation must not duplicate inventory actions. Recommendation: restore useful loot comparisons, preview independently selectable vitals placement and map/compass modes, and preserve readable notes. These recommendations are not approval for a particular new gameplay HUD. Existing preview and game are unchanged by this discussion. Campaign finishing remains open.

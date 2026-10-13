@@ -1,5 +1,5 @@
 {
-  "version": "2.189.0-hud-previews",
+  "version": "2.189.1-hud-previews",
   "scope": "Standalone HUD design previews only. The gameplay HUD is unchanged.",
   "layouts": {
     "checks": [
@@ -662,5 +662,6 @@
     "HUD values and minimap are illustrative, not a running game.",
     "Current-HUD comparison is an actual starter-character screenshot, not the same sample stats.",
     "No replacement HUD is approved or applied. Human design choice remains pending."
-  ]
+  ],
+  "readability": "Final pass enlarged HP/mana numbers and reserved space before companion rows. All 60 combinations rechecked."
 }

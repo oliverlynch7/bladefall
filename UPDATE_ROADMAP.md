@@ -2729,3 +2729,8 @@ Built three isolated choices: Classic Compact (familiar corners), Adventure Focu
 Verified 60 layout/state/detail combinations without intersecting primary panels or escaped bounds; assets, cooldowns, clue controls, deep links, comparison, fullscreen and phone overflow checks pass. Visual inspection covered A/B/C and phone. An actual v2.188-generated save retains character/class XP, gold, equipment, name and story flag after loading v2.189. Main-game changes are only version, preview-menu wording, and its link. Report: docs/art-validation/hud-previews-2026-10-12.json; source/plan: docs/requirements/USER_SOURCE_2026-10-12_HUD_PREVIEWS.md. A fixture correction was needed to persist the story flag through the authoritative campaign save object.
 
 Status: previews ready for choice; no new gameplay HUD applied. Selection and any combined layout remain for Oliver. The approved sequential campaign pass remains open with Hollow Cliffs next. Unrelated companion3d.js/articulated-rigs.json edits excluded.
+
+
+## [Codex | 2026-10-12] HUD preview readability — v2.189.1
+
+Before delivery, enlarged health/mana numbers and adjusted companion spacing in A/B. Rechecked all 60 preview combinations, phone fit/full-size, fullscreen, and interactive controls. The gameplay HUD remains unchanged. Final publication and selection are tracked with the same HUD preview report.

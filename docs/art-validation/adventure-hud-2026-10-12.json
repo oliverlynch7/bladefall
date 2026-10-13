@@ -339,5 +339,13 @@
     "Responsive dimensions do not substitute for physical touch-device testing",
     "Local fixture with enemies stunned for HUD screenshots; no aesthetic/human gameplay acceptance inferred"
   ],
-  "status": "Implementation complete; local browser and compatibility checks passed"
+  "status": "Published; Cloudflare success and production browser verified",
+  "deployment": {
+    "commit": "d7cc86fe",
+    "check": "Cloudflare Pages completed/success",
+    "url": "https://bladefall.pages.dev/3d/",
+    "browserVersion": "2.190.0-adventure-hud",
+    "pageErrors": [],
+    "note": "Initial browser load was cached v2.189.2; fresh release URL confirms v2.190.0. Direct terminal HTTP returned 403, so verification used the real browser."
+  }
 }

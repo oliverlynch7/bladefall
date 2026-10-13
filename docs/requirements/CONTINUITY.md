@@ -1494,3 +1494,8 @@ Mana badges sit at each skill's upper-left and respond to passive cost changes. 
 Validation: thirteen inventory/binding browser assertions, actual collision pickup preservation/collection, unopened/full chest then exactly-once grant and explicit sale, saved preference/rebinding reload, mana-cost rendering for all seventeen classes including the Mage health-dependent reduction, real Settings rebinding and class confirmation/cancel, paper/loot queuing, companion rendering, 1440x900, 1280x720, 1024x768 and 390x844 layouts. A v2.189.2-created save preserves name, 654 gold, character level 8 / XP 77, Warrior rank 7 / XP 123, rare armor and completed tutorial; auto-sell defaults OFF. Syntax, journal queue and story-authority checks passed. Evidence: docs/art-validation/adventure-hud-2026-10-12.json and three screenshots. Physical controller and physical phone testing remain open; screenshots use an isolated local fixture, not a human gameplay verdict.
 
 Next authorized task: improve all earned class skins (U-CLASS-SKINS-20261012). Not started in this HUD pass. Campaign finishing still open. Unrelated companion3d.js and articulated-rigs.json changes excluded.
+
+
+## [Codex | 2026-10-12] Adventure HUD verified live
+
+Commit d7cc86fe pushed to main. Cloudflare Pages reports success. Fresh production browser confirms v2.190.0-adventure-hud and no page errors. Local screenshots and detailed verification are in docs/art-validation/adventure-hud-2026-10-12.json. HUD implementation is complete; class-skin work is next, followed by the remaining campaign pass.

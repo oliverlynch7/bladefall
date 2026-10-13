@@ -37,5 +37,15 @@
     "Co-op tested using simulated packets and real peer rigs, not a live second-device network session.",
     "Phone layout tested with an actual 390px iframe viewport, not a physical phone or touch gestures.",
     "User aesthetic/playtest acceptance remains open."
-  ]
+  ],
+  "production": {
+    "commit": "40a99823",
+    "cloudflare": "success",
+    "visibleGameVersion": "2.191.0-class-wardrobe",
+    "menuRouteVerified": true,
+    "galleryClasses": 17,
+    "galleryModelsLoaded": 3,
+    "missingIcons": 0,
+    "browserErrors": []
+  }
 }

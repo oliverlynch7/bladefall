@@ -2706,3 +2706,12 @@ Validated 123 geography assertions, 238 state-appropriate interaction approaches
 ## [Codex | 2026-10-12] Geography release verified live
 
 Commit 849622db pushed to main. Cloudflare Pages succeeded. Fresh production browser confirmed v2.187.0, the actual title > Dev previews > Campaign blueprints link, all sixteen plans and the updated Keep geometry/render with no page or WebGL errors. Live: https://bladefall.pages.dev/design/campaign-geography/ . Detailed production evidence added to the geography QA report.
+
+
+## [Codex | 2026-10-12] Briar player journey — v2.188.0
+
+Implemented the first region of the approved sequential campaign finishing pass. Live Homefields/Black Woods retain their large bounds, optional granary/orchard/canopy/root routes, rewards and existing detailed assets. Joined trails and nine destination boards clarify navigation. The mill now uses a movable grain crate and pressure plate, with a visible sluice, interrupted water, jammed wheel and lowering bridge. One co-op operator owns the crate; reset/disconnect and old partial/completed states remain safe. Mara activates the escape task on delivery. Two signal defenders now occupy their intended ground storey, and superseded mill notices clear from the overlay without deleting journal entries.
+
+Validation passed: 20 main-route assertions across 69 physical movement waypoints to the Brute checkpoint; seven existing optional-route/combat regressions; seven two-client co-op checks; four saves created by the v2.187 main HTML preserving gold, character/class XP, equipment and name; uncut normal-camera mill interaction with mistake/recovery; actual attacks by both corrected ground guards; 55 desktop/phone blueprint checks; story, authority, Briar and syntax tests. Navigation fixtures stun enemies; combat probes are separate. Co-op transport is a local relay. Human pacing/art judgment, real-network behavior and low-end performance remain open.
+
+See docs/design/BRIAR_JOURNEY_2026-10-12.md and docs/art-validation/briar-journey-2026-10-12.json. The broader campaign pass is still in progress; Hollow Cliffs is next. No custom SFX work. Unrelated companion3d.js and articulated-rigs.json edits are excluded.

@@ -1,0 +1,2431 @@
+{
+  "version": "2.188.0-briar-journey",
+  "date": "2026-10-12",
+  "baseCommit": "253fa6bd",
+  "scope": "Live Briar Homefields and Black Woods finishing pass; original large bounds and optional routes retained. Wider campaign work remains in progress.",
+  "unitSuites": [
+    "test-briar-journey.cjs",
+    "test-story-state.cjs",
+    "test-story-authority.cjs",
+    "test-briar-refinement.cjs"
+  ],
+  "syntax": "check-3d-inline.cjs and changed-module node --check passed; git diff --check passed",
+  "journey": {
+    "checks": [
+      "Open thomas",
+      "Open mara",
+      "All physical supplies collected",
+      "Open mara",
+      "Delivery immediately activates mill quest",
+      "Rushing the jam fails safely",
+      "Player weight closes the sluice",
+      "Stepping off restores flow",
+      "Crate can be gripped from the walking lane",
+      "Reset returns a misplaced crate",
+      "Crate weight holds the sluice and advances quest",
+      "Timber is removed",
+      "Bridge collision remains during lowering",
+      "Lowered crossing removes the closed barrier",
+      "Guard objective still blocks evacuation",
+      "Departure opens the Woods transition",
+      "Signal defenders occupy the ground storey",
+      "Open lewis",
+      "Ground-route crank opens the north shelter",
+      "Briar reaches its Brute encounter"
+    ],
+    "walks": [
+      {
+        "target": [
+          0,
+          410
+        ],
+        "at": [
+          0,
+          0,
+          401
+        ],
+        "frames": 24,
+        "ok": true
+      },
+      {
+        "target": [
+          -130,
+          160
+        ],
+        "at": [
+          -135,
+          0,
+          150
+        ],
+        "frames": 99,
+        "ok": true
+      },
+      {
+        "target": [
+          -340,
+          -65
+        ],
+        "at": [
+          -348,
+          0,
+          -67
+        ],
+        "frames": 107,
+        "ok": true
+      },
+      {
+        "target": [
+          -410,
+          -130
+        ],
+        "at": [
+          -416,
+          0,
+          -138
+        ],
+        "frames": 39,
+        "ok": true
+      },
+      {
+        "target": [
+          -505,
+          -245
+        ],
+        "at": [
+          -512,
+          0,
+          -253
+        ],
+        "frames": 52,
+        "ok": true
+      },
+      {
+        "target": [
+          -370,
+          -335
+        ],
+        "at": [
+          -362,
+          0,
+          -339
+        ],
+        "frames": 60,
+        "ok": true
+      },
+      {
+        "target": [
+          -180,
+          -480
+        ],
+        "at": [
+          -177,
+          0,
+          -489
+        ],
+        "frames": 99,
+        "ok": true
+      },
+      {
+        "target": [
+          230,
+          -480
+        ],
+        "at": [
+          240,
+          0,
+          -479
+        ],
+        "frames": 145,
+        "ok": true
+      },
+      {
+        "target": [
+          440,
+          -430
+        ],
+        "at": [
+          449,
+          0,
+          -428
+        ],
+        "frames": 75,
+        "ok": true
+      },
+      {
+        "target": [
+          440,
+          -360
+        ],
+        "at": [
+          438,
+          60,
+          -349
+        ],
+        "frames": 28,
+        "ok": true
+      },
+      {
+        "target": [
+          440,
+          -308
+        ],
+        "at": [
+          438,
+          84,
+          -298
+        ],
+        "frames": 18,
+        "ok": true
+      },
+      {
+        "target": [
+          440,
+          -255
+        ],
+        "at": [
+          438,
+          20,
+          -246
+        ],
+        "frames": 18,
+        "ok": true
+      },
+      {
+        "target": [
+          440,
+          -308
+        ],
+        "at": [
+          438,
+          84,
+          -318
+        ],
+        "frames": 25,
+        "ok": true
+      },
+      {
+        "target": [
+          440,
+          -435
+        ],
+        "at": [
+          438,
+          0,
+          -445
+        ],
+        "frames": 44,
+        "ok": true
+      },
+      {
+        "target": [
+          230,
+          -480
+        ],
+        "at": [
+          220,
+          0,
+          -481
+        ],
+        "frames": 77,
+        "ok": true
+      },
+      {
+        "target": [
+          -180,
+          -480
+        ],
+        "at": [
+          -190,
+          0,
+          -481
+        ],
+        "frames": 142,
+        "ok": true
+      },
+      {
+        "target": [
+          -190,
+          80
+        ],
+        "at": [
+          -190,
+          0,
+          90
+        ],
+        "frames": 198,
+        "ok": true
+      },
+      {
+        "target": [
+          -180,
+          -480
+        ],
+        "at": [
+          -178,
+          0,
+          -491
+        ],
+        "frames": 202,
+        "ok": true
+      },
+      {
+        "target": [
+          -180,
+          -860
+        ],
+        "at": [
+          -178,
+          0,
+          -871
+        ],
+        "frames": 132,
+        "ok": true
+      },
+      {
+        "target": [
+          -81.30617207941958,
+          -1123.1835411215477
+        ],
+        "at": [
+          -78,
+          0,
+          -1132
+        ],
+        "frames": 97,
+        "ok": true
+      },
+      {
+        "target": [
+          -104.3503990303168,
+          -1189.8923254322515
+        ],
+        "at": [
+          -109,
+          0,
+          -1200
+        ],
+        "frames": 26,
+        "ok": true
+      },
+      {
+        "target": [
+          -99.30475065414267,
+          -1246.0674064953034
+        ],
+        "at": [
+          -98,
+          0,
+          -1256
+        ],
+        "frames": 20,
+        "ok": true
+      },
+      {
+        "target": [
+          -66.1692269508972,
+          -1291.7087843107035
+        ],
+        "at": [
+          -60,
+          0,
+          -1299
+        ],
+        "frames": 20,
+        "ok": true
+      },
+      {
+        "target": [
+          -4.943827920580404,
+          -1326.8164588784523
+        ],
+        "at": [
+          4,
+          0,
+          -1331
+        ],
+        "frames": 25,
+        "ok": true
+      },
+      {
+        "target": [
+          100,
+          -1470
+        ],
+        "at": [
+          105,
+          0,
+          -1478
+        ],
+        "frames": 62,
+        "ok": true
+      },
+      {
+        "target": [
+          210,
+          -1740
+        ],
+        "at": [
+          212,
+          0,
+          -1751
+        ],
+        "frames": 140,
+        "ok": true
+      },
+      {
+        "target": [
+          230,
+          -1880
+        ],
+        "at": [
+          231,
+          0,
+          -1889
+        ],
+        "frames": 49,
+        "ok": true
+      },
+      {
+        "target": [
+          130,
+          -1880
+        ],
+        "at": [
+          121,
+          0,
+          -1879
+        ],
+        "frames": 39,
+        "ok": true
+      },
+      {
+        "target": [
+          230,
+          -1880
+        ],
+        "at": [
+          232,
+          0,
+          -1879
+        ],
+        "frames": 42,
+        "ok": true
+      },
+      {
+        "target": [
+          220,
+          -1510
+        ],
+        "at": [
+          219,
+          0,
+          -1501
+        ],
+        "frames": 132,
+        "ok": true
+      },
+      {
+        "target": [
+          130,
+          -1510
+        ],
+        "at": [
+          120,
+          0,
+          -1511
+        ],
+        "frames": 35,
+        "ok": true
+      },
+      {
+        "target": [
+          130,
+          -1690
+        ],
+        "at": [
+          131,
+          0,
+          -1700
+        ],
+        "frames": 66,
+        "ok": true
+      },
+      {
+        "target": [
+          5,
+          -1730
+        ],
+        "at": [
+          -6,
+          0,
+          -1732
+        ],
+        "frames": 49,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -1490
+        ],
+        "at": [
+          0,
+          0,
+          -1480
+        ],
+        "frames": 88,
+        "ok": true
+      },
+      {
+        "target": [
+          130,
+          -1510
+        ],
+        "at": [
+          140,
+          0,
+          -1512
+        ],
+        "frames": 50,
+        "ok": true
+      },
+      {
+        "target": [
+          130,
+          -1790
+        ],
+        "at": [
+          128,
+          0,
+          -1801
+        ],
+        "frames": 101,
+        "ok": true
+      },
+      {
+        "target": [
+          210,
+          -1740
+        ],
+        "at": [
+          218,
+          0,
+          -1734
+        ],
+        "frames": 39,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -1990
+        ],
+        "at": [
+          -7,
+          0,
+          -1999
+        ],
+        "frames": 141,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -2040
+        ],
+        "at": [
+          1,
+          0,
+          -2047
+        ],
+        "frames": 17,
+        "ok": true
+      },
+      {
+        "target": [
+          180,
+          -2030
+        ],
+        "at": [
+          189,
+          0,
+          -2029
+        ],
+        "frames": 66,
+        "ok": true
+      },
+      {
+        "target": [
+          180,
+          -2200
+        ],
+        "at": [
+          178,
+          8,
+          -2212
+        ],
+        "frames": 68,
+        "ok": true
+      },
+      {
+        "target": [
+          130,
+          -2320
+        ],
+        "at": [
+          126,
+          0,
+          -2330
+        ],
+        "frames": 45,
+        "ok": true
+      },
+      {
+        "target": [
+          50,
+          -2620
+        ],
+        "at": [
+          47,
+          0,
+          -2631
+        ],
+        "frames": 108,
+        "ok": true
+      },
+      {
+        "target": [
+          106.07661634992652,
+          -2891.036979024645
+        ],
+        "at": [
+          108,
+          27,
+          -2901
+        ],
+        "frames": 96,
+        "ok": true
+      },
+      {
+        "target": [
+          79.99171642486637,
+          -2956.903759506717
+        ],
+        "at": [
+          76,
+          40,
+          -2965
+        ],
+        "frames": 25,
+        "ok": true
+      },
+      {
+        "target": [
+          69.13975635880558,
+          -3019.618897259341
+        ],
+        "at": [
+          68,
+          53,
+          -3026
+        ],
+        "frames": 29,
+        "ok": true
+      },
+      {
+        "target": [
+          73.52073615174419,
+          -3079.1823922825165
+        ],
+        "at": [
+          74,
+          67,
+          -3076
+        ],
+        "frames": 28,
+        "ok": true
+      },
+      {
+        "target": [
+          93.13465580368214,
+          -3135.594244576244
+        ],
+        "at": [
+          95,
+          80,
+          -3144
+        ],
+        "frames": 29,
+        "ok": true
+      },
+      {
+        "target": [
+          127.98151531461951,
+          -3188.854454140524
+        ],
+        "at": [
+          134,
+          80,
+          -3197
+        ],
+        "frames": 23,
+        "ok": true
+      },
+      {
+        "target": [
+          178.06131468455624,
+          -3238.963020975355
+        ],
+        "at": [
+          186,
+          80,
+          -3247
+        ],
+        "frames": 25,
+        "ok": true
+      },
+      {
+        "target": [
+          230,
+          -3490
+        ],
+        "at": [
+          231,
+          80,
+          -3499
+        ],
+        "frames": 89,
+        "ok": true
+      },
+      {
+        "target": [
+          99.2854181226761,
+          -3745.487591851133
+        ],
+        "at": [
+          94,
+          93,
+          -3746
+        ],
+        "frames": 101,
+        "ok": true
+      },
+      {
+        "target": [
+          119.83455653659746,
+          -3827.2959392515327
+        ],
+        "at": [
+          122,
+          120,
+          -3837
+        ],
+        "frames": 38,
+        "ok": true
+      },
+      {
+        "target": [
+          120.6004024399113,
+          -3898.982602111621
+        ],
+        "at": [
+          122,
+          133,
+          -3900
+        ],
+        "frames": 25,
+        "ok": true
+      },
+      {
+        "target": [
+          101.5829558326176,
+          -3960.5475804313987
+        ],
+        "at": [
+          100,
+          147,
+          -3969
+        ],
+        "frames": 30,
+        "ok": true
+      },
+      {
+        "target": [
+          62.782216714716384,
+          -4011.990874210866
+        ],
+        "at": [
+          54,
+          160,
+          -4020
+        ],
+        "frames": 28,
+        "ok": true
+      },
+      {
+        "target": [
+          4.1981850862075945,
+          -4053.312483450022
+        ],
+        "at": [
+          -3,
+          160,
+          -4058
+        ],
+        "frames": 24,
+        "ok": true
+      },
+      {
+        "target": [
+          -74.16913905290866,
+          -4084.512408148867
+        ],
+        "at": [
+          -84,
+          160,
+          -4088
+        ],
+        "frames": 30,
+        "ok": true
+      },
+      {
+        "target": [
+          -210,
+          -4350
+        ],
+        "at": [
+          -215,
+          160,
+          -4360
+        ],
+        "frames": 105,
+        "ok": true
+      },
+      {
+        "target": [
+          -210,
+          -4240
+        ],
+        "at": [
+          -210,
+          160,
+          -4229
+        ],
+        "frames": 46,
+        "ok": true
+      },
+      {
+        "target": [
+          -100,
+          230
+        ],
+        "at": [
+          -108,
+          0,
+          224
+        ],
+        "frames": 46,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -600
+        ],
+        "at": [
+          1,
+          0,
+          -610
+        ],
+        "frames": 293,
+        "ok": true
+      },
+      {
+        "target": [
+          -650,
+          -1250
+        ],
+        "at": [
+          -658,
+          0,
+          -1257
+        ],
+        "frames": 326,
+        "ok": true
+      },
+      {
+        "target": [
+          -650,
+          -1850
+        ],
+        "at": [
+          -649,
+          0,
+          -1861
+        ],
+        "frames": 210,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -2600
+        ],
+        "at": [
+          7,
+          0,
+          -2607
+        ],
+        "frames": 360,
+        "ok": true
+      },
+      {
+        "target": [
+          80,
+          -3000
+        ],
+        "at": [
+          81,
+          0,
+          -3009
+        ],
+        "frames": 142,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -3540
+        ],
+        "at": [
+          -1,
+          0,
+          -3550
+        ],
+        "frames": 190,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -3900
+        ],
+        "at": [
+          -1,
+          0,
+          -3910
+        ],
+        "frames": 125,
+        "ok": true
+      },
+      {
+        "target": [
+          0,
+          -4300
+        ],
+        "at": [
+          -1,
+          0,
+          -4311
+        ],
+        "frames": 139,
+        "ok": true
+      }
+    ],
+    "mode": "play",
+    "boss": "brute",
+    "bounds": {
+      "minX": -1260,
+      "maxX": 1260,
+      "minZ": -1130,
+      "maxZ": 980
+    },
+    "saved": {
+      "area": -1,
+      "depart": true,
+      "signal": true,
+      "reward": true
+    },
+    "errors": []
+  },
+  "cooperativeMill": {
+    "checks": [
+      "guest owns crate on both clients",
+      "host cannot steal an occupied crate",
+      "second player cannot reset occupied crate",
+      "disconnect releases crate ownership",
+      "host accepts guest movement and shares weighted plate",
+      "lowered bridge and collision agree",
+      "replayed and old-run packets do not reset or pay again"
+    ],
+    "errors": [],
+    "transport": "two-client host/guest handler relay; not a remote internet session"
+  },
+  "preChangeSaves": {
+    "rows": [
+      {
+        "stage": "mara",
+        "before": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "oldBuild": true
+        },
+        "after": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "latched": false,
+          "bridge": 0,
+          "barrier": true,
+          "quest": "active",
+          "name": "Legacy Miller",
+          "area": 0
+        }
+      },
+      {
+        "stage": "water",
+        "before": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "oldBuild": true
+        },
+        "after": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "latched": true,
+          "bridge": 0,
+          "barrier": true,
+          "quest": "active",
+          "name": "Legacy Miller",
+          "area": 0
+        }
+      },
+      {
+        "stage": "jam",
+        "before": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "oldBuild": true
+        },
+        "after": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "latched": true,
+          "bridge": 0,
+          "barrier": true,
+          "quest": "active",
+          "name": "Legacy Miller",
+          "area": 0
+        }
+      },
+      {
+        "stage": "bridge",
+        "before": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "oldBuild": true
+        },
+        "after": {
+          "gold": 317,
+          "xp": 99,
+          "classXp": 41,
+          "weapon": "Rusty Sword",
+          "latched": true,
+          "bridge": 1,
+          "barrier": false,
+          "quest": "active",
+          "name": "Legacy Miller",
+          "area": 0
+        }
+      }
+    ],
+    "errors": [],
+    "source": "253fa6bd v2.187 HTML creates each save; current HTML loads it"
+  },
+  "existingRegressions": [
+    {
+      "name": "qa-briar-refinement",
+      "pass": true,
+      "result": {
+        "blockedWithoutJump": true,
+        "collected": true,
+        "walks": [
+          {
+            "target": [
+              440,
+              -360
+            ],
+            "at": [
+              440,
+              60,
+              -351.51127405186327
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              440,
+              -308
+            ],
+            "at": [
+              440,
+              84,
+              -300.00310796197243
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              440,
+              -255
+            ],
+            "at": [
+              440,
+              20,
+              -245.61290853132735
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              440,
+              -308
+            ],
+            "at": [
+              440,
+              84,
+              -317.3711699689665
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              440,
+              -440
+            ],
+            "at": [
+              440,
+              0,
+              -449.74397386400034
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2700,
+              -1490
+            ],
+            "at": [
+              -2700,
+              24,
+              -1500.8255424152098
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2700,
+              -1610
+            ],
+            "at": [
+              -2700,
+              52,
+              -1621.6510848304197
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2700,
+              -1730
+            ],
+            "at": [
+              -2700,
+              80,
+              -1739.5898562619918
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2620,
+              -1840
+            ],
+            "at": [
+              -2614.1245862065184,
+              108,
+              -1847.524130885939
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2490,
+              -1840
+            ],
+            "at": [
+              -2480.315712405491,
+              136,
+              -1839.3867388060162
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2360,
+              -1840
+            ],
+            "at": [
+              -2350.846425428101,
+              164,
+              -1839.3867388060162
+            ],
+            "ok": true
+          },
+          {
+            "target": [
+              -2210,
+              -1840
+            ],
+            "at": [
+              -2198.288006739557,
+              164,
+              -1839.3867388060162
+            ],
+            "ok": true
+          }
+        ],
+        "raid": [
+          {
+            "role": "runner",
+            "h": 47,
+            "label": "Farm raider"
+          },
+          {
+            "role": "caster",
+            "h": 56,
+            "label": "Legion hex caster"
+          },
+          {
+            "role": "heavy",
+            "h": 71.68,
+            "label": "Farm raid leader"
+          },
+          {
+            "role": "runner",
+            "h": 47,
+            "label": "Farm raider"
+          }
+        ],
+        "slots": 3
+      }
+    },
+    {
+      "name": "qa-homefields-granary",
+      "pass": true,
+      "result": {
+        "walks": [
+          {
+            "to": [
+              180,
+              340
+            ],
+            "at": [
+              168,
+              0,
+              349
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              650,
+              340
+            ],
+            "at": [
+              635,
+              0,
+              338
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1000,
+              380
+            ],
+            "at": [
+              985,
+              0,
+              377
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1150,
+              270
+            ],
+            "at": [
+              1138,
+              0,
+              279
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1260,
+              255
+            ],
+            "at": [
+              1246,
+              0,
+              256
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1150,
+              220
+            ],
+            "at": [
+              1164,
+              0,
+              224
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              960,
+              250
+            ],
+            "at": [
+              974,
+              49,
+              247
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              960,
+              150
+            ],
+            "at": [
+              956,
+              84,
+              163
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              960,
+              50
+            ],
+            "at": [
+              959,
+              99,
+              65
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              960,
+              -55
+            ],
+            "at": [
+              959,
+              136,
+              -40
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1100,
+              -55
+            ],
+            "at": [
+              1085,
+              128,
+              -59
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1160,
+              -55
+            ],
+            "at": [
+              1145,
+              100,
+              -56
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1150,
+              -95
+            ],
+            "at": [
+              1154,
+              0,
+              -80
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1150,
+              -260
+            ],
+            "at": [
+              1150,
+              0,
+              -244
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1150,
+              245
+            ],
+            "at": [
+              1150,
+              0,
+              230
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1150,
+              380
+            ],
+            "at": [
+              1150,
+              0,
+              365
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1520,
+              380
+            ],
+            "at": [
+              1507,
+              0,
+              383
+            ],
+            "ok": true
+          },
+          {
+            "to": [
+              1550,
+              -350
+            ],
+            "at": [
+              1550,
+              0,
+              -335
+            ],
+            "ok": true
+          }
+        ],
+        "checks": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "blocked": {
+          "to": [
+            1150,
+            -240
+          ],
+          "at": [
+            1150,
+            0,
+            -106
+          ],
+          "ok": false
+        }
+      }
+    },
+    {
+      "name": "qa-black-woods",
+      "pass": true,
+      "result": {
+        "checks": [
+          "new half has Lewis and no old fetch clutter",
+          "exit initially locked",
+          "Lewis opens both signal approaches",
+          "loft shard reachable",
+          "upper cable opens required exit",
+          "hidden supply nook shard reachable",
+          "track clue stored",
+          "ground cannot release high binding",
+          "high binding opens personal shard",
+          "grove shard collected",
+          "retry keeps first-half shard but removes woods gains"
+        ],
+        "walks": [
+          {
+            "x": -100,
+            "z": 180,
+            "at": [
+              -86,
+              0,
+              197
+            ],
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": -650,
+            "at": [
+              -4,
+              0,
+              -629
+            ],
+            "good": true
+          },
+          {
+            "x": 560,
+            "z": -740,
+            "at": [
+              539,
+              4,
+              -737
+            ],
+            "good": true
+          },
+          {
+            "x": 560,
+            "z": -740,
+            "at": [
+              539,
+              4,
+              -737
+            ],
+            "good": true
+          },
+          {
+            "x": 615,
+            "z": -890,
+            "at": [
+              614,
+              26,
+              -887
+            ],
+            "good": true
+          },
+          {
+            "x": 730,
+            "z": -1025,
+            "at": [
+              717,
+              58,
+              -1010
+            ],
+            "good": true
+          },
+          {
+            "x": 825,
+            "z": -1170,
+            "at": [
+              814,
+              105,
+              -1153
+            ],
+            "good": true
+          },
+          {
+            "x": 955,
+            "z": -1260,
+            "at": [
+              952,
+              140,
+              -1258
+            ],
+            "good": true
+          },
+          {
+            "x": 850,
+            "z": -1360,
+            "at": [
+              850,
+              160,
+              -1360
+            ],
+            "good": true
+          },
+          {
+            "x": 850,
+            "z": -1360,
+            "at": [
+              850,
+              160,
+              -1360
+            ],
+            "good": true
+          },
+          {
+            "x": 920,
+            "z": -1510,
+            "at": [
+              917,
+              177,
+              -1505
+            ],
+            "good": true
+          },
+          {
+            "x": 810,
+            "z": -1650,
+            "at": [
+              824,
+              193,
+              -1634
+            ],
+            "good": true
+          },
+          {
+            "x": 910,
+            "z": -1800,
+            "at": [
+              901,
+              185,
+              -1788
+            ],
+            "good": true
+          },
+          {
+            "x": 910,
+            "z": -1800,
+            "at": [
+              901,
+              185,
+              -1788
+            ],
+            "good": true
+          },
+          {
+            "x": 1085,
+            "z": -1715,
+            "at": [
+              1068,
+              205,
+              -1725
+            ],
+            "good": true
+          },
+          {
+            "x": 1230,
+            "z": -1615,
+            "at": [
+              1214,
+              229,
+              -1626
+            ],
+            "good": true
+          },
+          {
+            "x": 1390,
+            "z": -1850,
+            "at": [
+              1379,
+              240,
+              -1834
+            ],
+            "good": true
+          },
+          {
+            "x": 1480,
+            "z": -1950,
+            "at": [
+              1479,
+              240,
+              -1949
+            ],
+            "good": true
+          },
+          {
+            "x": 1390,
+            "z": -1850,
+            "at": [
+              1374,
+              240,
+              -1839
+            ],
+            "good": true
+          },
+          {
+            "x": 1390,
+            "z": -1850,
+            "at": [
+              1374,
+              240,
+              -1839
+            ],
+            "good": true
+          },
+          {
+            "x": 1230,
+            "z": -1615,
+            "at": [
+              1237,
+              229,
+              -1624
+            ],
+            "good": true
+          },
+          {
+            "x": 1085,
+            "z": -1715,
+            "at": [
+              1102,
+              205,
+              -1702
+            ],
+            "good": true
+          },
+          {
+            "x": 910,
+            "z": -1800,
+            "at": [
+              928,
+              185,
+              -1791
+            ],
+            "good": true
+          },
+          {
+            "x": 1035,
+            "z": -1930,
+            "at": [
+              1028,
+              207,
+              -1924
+            ],
+            "good": true
+          },
+          {
+            "x": 900,
+            "z": -2080,
+            "at": [
+              915,
+              220,
+              -2065
+            ],
+            "good": true
+          },
+          {
+            "x": 900,
+            "z": -2190,
+            "at": [
+              898,
+              220,
+              -2195
+            ],
+            "good": true
+          },
+          {
+            "x": 900,
+            "z": -2300,
+            "at": [
+              898,
+              220,
+              -2304
+            ],
+            "good": true
+          },
+          {
+            "x": 900,
+            "z": -2300,
+            "at": [
+              898,
+              220,
+              -2304
+            ],
+            "good": true
+          },
+          {
+            "x": 770,
+            "z": -2410,
+            "at": [
+              770,
+              222,
+              -2410
+            ],
+            "good": true
+          },
+          {
+            "x": 615,
+            "z": -2525,
+            "at": [
+              632,
+              240,
+              -2512
+            ],
+            "good": true
+          },
+          {
+            "x": 455,
+            "z": -2665,
+            "at": [
+              470,
+              231,
+              -2652
+            ],
+            "good": true
+          },
+          {
+            "x": 300,
+            "z": -2785,
+            "at": [
+              316,
+              245,
+              -2773
+            ],
+            "good": true
+          },
+          {
+            "x": 140,
+            "z": -2910,
+            "at": [
+              156,
+              226,
+              -2897
+            ],
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": -3040,
+            "at": [
+              16,
+              220,
+              -3025
+            ],
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": -3070,
+            "at": [
+              2,
+              220,
+              -3049
+            ],
+            "good": true
+          },
+          {
+            "x": -280,
+            "z": -3140,
+            "at": [
+              -260,
+              220,
+              -3135
+            ],
+            "good": true
+          },
+          {
+            "x": -310,
+            "z": -3180,
+            "at": [
+              -298,
+              220,
+              -3163
+            ],
+            "good": true
+          },
+          {
+            "x": -340,
+            "z": -3220,
+            "at": [
+              -329,
+              220,
+              -3203
+            ],
+            "good": true
+          },
+          {
+            "x": -370,
+            "z": -3260,
+            "at": [
+              -358,
+              220,
+              -3243
+            ],
+            "good": true
+          },
+          {
+            "x": -400,
+            "z": -3300,
+            "at": [
+              -387,
+              198,
+              -3283
+            ],
+            "good": true
+          },
+          {
+            "x": -430,
+            "z": -3340,
+            "at": [
+              -418,
+              176,
+              -3324
+            ],
+            "good": true
+          },
+          {
+            "x": -460,
+            "z": -3380,
+            "at": [
+              -448,
+              154,
+              -3364
+            ],
+            "good": true
+          },
+          {
+            "x": -490,
+            "z": -3420,
+            "at": [
+              -477,
+              132,
+              -3403
+            ],
+            "good": true
+          },
+          {
+            "x": -520,
+            "z": -3460,
+            "at": [
+              -508,
+              110,
+              -3444
+            ],
+            "good": true
+          },
+          {
+            "x": -550,
+            "z": -3500,
+            "at": [
+              -538,
+              88,
+              -3484
+            ],
+            "good": true
+          },
+          {
+            "x": -580,
+            "z": -3540,
+            "at": [
+              -567,
+              66,
+              -3523
+            ],
+            "good": true
+          },
+          {
+            "x": -650,
+            "z": -3680,
+            "at": [
+              -640,
+              0,
+              -3660
+            ],
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": -3680,
+            "at": [
+              -20,
+              0,
+              -3677
+            ],
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": -3500,
+            "at": [
+              0,
+              0,
+              -3520
+            ],
+            "good": true
+          },
+          {
+            "x": 550,
+            "z": -3500,
+            "at": [
+              530,
+              0,
+              -3501
+            ],
+            "good": true
+          },
+          {
+            "x": 370,
+            "z": -3500,
+            "at": [
+              391,
+              0,
+              -3501
+            ],
+            "good": true
+          },
+          {
+            "x": 370,
+            "z": -3390,
+            "at": [
+              369,
+              0,
+              -3410
+            ],
+            "good": true
+          },
+          {
+            "x": -1850,
+            "z": -2100,
+            "at": [
+              -1829,
+              0,
+              -2095
+            ],
+            "good": true
+          },
+          {
+            "x": -1770,
+            "z": -2050,
+            "at": [
+              -1788,
+              0,
+              -2060
+            ],
+            "good": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "qa-brute-orchard",
+      "pass": true,
+      "result": {
+        "checks": [
+          "authored arena only one initial boss",
+          "actual charge hits west cart",
+          "charge cannot pass through solid cover",
+          "stagger has a damage window",
+          "stagger applies 1.6x damage",
+          "first threshold creates exactly two handlers",
+          "second threshold creates exactly two more",
+          "no rubble accumulates",
+          "slam starts with warning, no hitbox",
+          "slam wave follows warning",
+          "handlers hold exit after boss dies",
+          "exit opens after surviving handlers fall",
+          "boss retry resets arena and waves",
+          "boss retry stays at boss checkpoint"
+        ],
+        "walks": [
+          {
+            "x": 0,
+            "z": 550,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": -600,
+            "z": 500,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": -1000,
+            "z": 280,
+            "y": 16,
+            "good": true
+          },
+          {
+            "x": -1000,
+            "z": -200,
+            "y": 16,
+            "good": true
+          },
+          {
+            "x": -620,
+            "z": -400,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": -500,
+            "z": -720,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": -940,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": 550,
+            "z": -690,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": 1000,
+            "z": -690,
+            "y": 16,
+            "good": true
+          },
+          {
+            "x": 1000,
+            "z": -100,
+            "y": 16,
+            "good": true
+          },
+          {
+            "x": 670,
+            "z": 240,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": 560,
+            "z": 520,
+            "y": 0,
+            "good": true
+          },
+          {
+            "x": 0,
+            "z": 600,
+            "y": 0,
+            "good": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "qa-brute-dodge",
+      "pass": true,
+      "result": {
+        "grounded": {
+          "hp": 132,
+          "apex": 7.295999999999999
+        },
+        "jumping": {
+          "hp": 158,
+          "apex": 100.09600000000002
+        },
+        "tap": {
+          "hp": 158,
+          "apex": 35.84
+        }
+      }
+    },
+    {
+      "name": "qa-briar-combat-roles",
+      "pass": true,
+      "result": [
+        {
+          "area": 0,
+          "roles": {
+            "guard": 4,
+            "runner": 4,
+            "hex": 1
+          },
+          "tests": [
+            {
+              "role": "runner",
+              "damage": 14,
+              "phases": [
+                "wind",
+                "strike",
+                "recover",
+                "hunt"
+              ],
+              "size": 47,
+              "movement": 124.99999999999545
+            },
+            {
+              "role": "guard",
+              "damage": 18,
+              "phases": [
+                "wind",
+                "strike",
+                "recover",
+                "hunt"
+              ],
+              "size": 65,
+              "movement": 1.6268800000000283
+            },
+            {
+              "role": "hex",
+              "damage": 10,
+              "phases": [
+                "wind",
+                "strike",
+                "recover",
+                "hunt"
+              ],
+              "size": 56,
+              "movement": 0.9984000000004016
+            }
+          ],
+          "slots": 3,
+          "task": "Drive back the farm raiders"
+        },
+        {
+          "area": 1,
+          "roles": {
+            "guard": 2,
+            "runner": 3,
+            "hex": 2
+          },
+          "tests": [
+            {
+              "role": "runner",
+              "damage": 14,
+              "phases": [
+                "wind",
+                "strike",
+                "recover",
+                "hunt"
+              ],
+              "size": 47,
+              "movement": 125.0000000000008
+            },
+            {
+              "role": "guard",
+              "damage": 18,
+              "phases": [
+                "wind",
+                "strike",
+                "recover",
+                "hunt"
+              ],
+              "size": 65,
+              "movement": 1.4316544000000704
+            },
+            {
+              "role": "hex",
+              "damage": 10,
+              "phases": [
+                "wind",
+                "strike",
+                "recover",
+                "hunt"
+              ],
+              "size": 56,
+              "movement": 0.9983999999999469
+            }
+          ],
+          "slots": 3,
+          "task": "Guard the forest route"
+        }
+      ]
+    },
+    {
+      "name": "qa-homefields-granary-legacy",
+      "pass": true,
+      "result": [
+        "old partial weights do not solve the new route",
+        "old solved save starts open"
+      ]
+    }
+  ],
+  "normalCameraPresentation": {
+    "mill": {
+      "bridge": 1,
+      "water": 1,
+      "gate": 70,
+      "wheel": 1.5306223148973008,
+      "notice": "briar.escape",
+      "flags": {
+        "thomas.ready": true,
+        "mara.healing": true,
+        "briar.water": true,
+        "event.briar.mill.weighted": true,
+        "briar.jam": true,
+        "event.briar.jam": true,
+        "briar.bridge": true,
+        "event.briar.bridge": true
+      },
+      "stats": {
+        "shadows": true,
+        "triangles": 198722,
+        "calls": 328,
+        "geometries": 151
+      },
+      "error": null
+    },
+    "guards": [
+      {
+        "type": "grunt",
+        "start": {
+          "x": -200,
+          "z": -2860,
+          "y": 0
+        },
+        "damage": 7,
+        "frames": 139,
+        "phases": [
+          "hunt",
+          "wind",
+          "strike"
+        ]
+      },
+      {
+        "type": "caster",
+        "start": {
+          "x": 240,
+          "z": -3250,
+          "y": 0
+        },
+        "damage": 10,
+        "frames": 83,
+        "phases": [
+          "wind",
+          "strike"
+        ]
+      }
+    ],
+    "errors": [],
+    "video": "output/playwright/briar188-video/page@82920d403be8a1c152084e6eecf7a237.webm"
+  },
+  "blueprintUi": {
+    "checks": [
+      "plan 0/0",
+      "select stop 0/0",
+      "old geometry 0/0",
+      "plan 0/1",
+      "select stop 0/1",
+      "old geometry 0/1",
+      "plan 1/0",
+      "select stop 1/0",
+      "old geometry 1/0",
+      "plan 1/1",
+      "select stop 1/1",
+      "old geometry 1/1",
+      "plan 2/0",
+      "select stop 2/0",
+      "old geometry 2/0",
+      "plan 2/1",
+      "select stop 2/1",
+      "old geometry 2/1",
+      "plan 3/0",
+      "select stop 3/0",
+      "old geometry 3/0",
+      "plan 3/1",
+      "select stop 3/1",
+      "old geometry 3/1",
+      "plan 4/0",
+      "select stop 4/0",
+      "old geometry 4/0",
+      "plan 4/1",
+      "select stop 4/1",
+      "old geometry 4/1",
+      "plan 5/0",
+      "select stop 5/0",
+      "old geometry 5/0",
+      "plan 5/1",
+      "select stop 5/1",
+      "old geometry 5/1",
+      "plan 6/0",
+      "select stop 6/0",
+      "old geometry 6/0",
+      "plan 6/1",
+      "select stop 6/1",
+      "old geometry 6/1",
+      "plan 7/0",
+      "select stop 7/0",
+      "old geometry 7/0",
+      "plan 7/1",
+      "select stop 7/1",
+      "old geometry 7/1",
+      "zoom changes view",
+      "drag pans view",
+      "fit restores frame",
+      "phone has no horizontal overflow",
+      "phone focus point",
+      "deep link retains level",
+      "no page errors"
+    ],
+    "errors": []
+  },
+  "preservedBounds": {
+    "Homefields": [
+      -3030,
+      2850,
+      -4820,
+      1100
+    ],
+    "Black Woods": [
+      -2600,
+      3150,
+      -4900,
+      650
+    ]
+  },
+  "visualEvidence": [
+    "docs/art-validation/briar188-weighted.png",
+    "docs/art-validation/briar188-restored.png"
+  ],
+  "observedAndCorrected": [
+    "Initial crate lane intersected the orchard ramp; moved the working lane onto existing clear ground.",
+    "First signboard obstructed the cross-village route; repositioned outside the lane.",
+    "Path ribbons overlapped; joined them into one ground mesh.",
+    "Sign support obscured lettering; moved label planes onto both visible faces.",
+    "Pressure rope intersected the crate; moved it beside the working lane.",
+    "Obsolete mill notices persisted; dismiss only superseded transient hints.",
+    "Crossing water overran the roadside; fitted banks, repositioned the lamp and removed grass piercing the deck."
+  ],
+  "limits": [
+    "The 69-waypoint journey fixture stuns enemies and uses invulnerability for route attribution. Separate combat probes test actual attacks and damage.",
+    "Presentation movement is driven by scripted input; aesthetic acceptance and fun require human playtesting.",
+    "Co-op uses two real local clients and the real packet handlers with a local relay, not an internet connection.",
+    "Pre-change main HTML uses current unchanged/shared assets; four old main-script save states were created and reloaded.",
+    "No low-end device performance or full novice combat playthrough is claimed.",
+    "One startup wait timed out; a clean startup diagnostic and the final rerun passed with no page or failed-request errors."
+  ],
+  "production": {
+    "status": "pending deployment verification"
+  }
+}

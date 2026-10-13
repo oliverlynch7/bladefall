@@ -1,6 +1,7 @@
 /* Choose from discovered notes only. Never manufacture or reveal a hidden clue. */
 (function(root){'use strict';
 const puzzles=[
+ ['briar.water','briar.mill.sketch'],['briar.jam','briar.mill.sketch'],['briar.bridge','briar.mill.sketch'],['briar.mill','briar.mill.sketch'],
  ['woods.signal','woods.signal'],['woods.rescue','woods.rescue'],['lc.rail','lc.rail'],['lc.water','lc.water'],['lc.wagon','lc.wagon'],
  ['rk.wheel','rk.cells'],['rk.key','rk.cells'],['kd.hidden','kd.marks'],['gf.pressure','gf.pressure'],['gf.passage','gf.passage'],
  ['sc.hull','sc.hull'],['sc.code','sc.code'],['sc.memorial','sc.record'],['tc.wind','tc.wind'],['tc.cave','tc.cave'],['tc.shackle','tc.hydra'],

@@ -1,4 +1,5 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {buildBriarJourneyArt} from './briar-journey-art.js?v=2188';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2188a';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {loadBriarTrees,briarTreesReady,campaignTreesReady,buildCampaignTrees} from './briar-trees.js?v=2182f';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
@@ -82,6 +83,7 @@ const covers=(s,x,z,margin=0)=>Math.abs(x-s.x)<=s.w/2+margin&&Math.abs(z-s.z)<=s
 export function buildOutskirts(scene,w){
   const matureTrees=[];const root=new THREE.Group();root.name='Outskirts authored art';const B=builder(root),add=B.add;
   const woods=w.area===1||w.side||(w.delve&&w.theme==='forest'),boss=w.area<0,segs=(w.segments||[]).filter(s=>!s.nofloor&&s.w>8&&s.d>8),paths=segs.filter(s=>s.path);
+  const journey=!!window.__BF3?.G?.briarJourney&&!w.side&&!w.delve&&!w.briarBeta&&!boss;
   const soil=woods?'#657246':boss?'#7c8150':'#80984f';let floors=0,roads=0;
   const done=[],surfaces=new Map();
   for(const s of segs.flatMap(s=>claimSurface(surfaces,s))){
@@ -90,10 +92,11 @@ export function buildOutskirts(scene,w){
     for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){
       const x=s.x-s.w/2+(ix+.5)*dx,z=s.z-s.d/2+(iz+.5)*dz;
       if(done.some(r=>x-dx/2>=r.x-r.w/2&&x+dx/2<=r.x+r.w/2&&z-dz/2>=r.z-r.d/2&&z+dz/2<=r.z+r.d/2))continue;
-      const road=s.path||paths.some(p=>covers(p,x,z))||(w.bruteOrchard&&Math.abs(x-Math.sin(z*.004)*110)<105),r=hash(x,z);
+      const road=!journey&&(s.path||paths.some(p=>covers(p,x,z))||(w.bruteOrchard&&Math.abs(x-Math.sin(z*.004)*110)<105)),r=hash(x,z);
       const c=road?['#b6a278','#b9a67b','#b29e74','#beaa7e'][Math.floor(r*4)]:(w.bruteOrchard?['#71754b','#70734b','#74764e','#6e734b'][Math.floor(r*4)]:soil);
       add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx,2,road&&!s.meadow?dz-.5:dz,c,0,road?'soil':'grass');floors++;if(road)roads++;
-      if(!road&&r<.055){add('grass',x,2,z,25,25+hash(z,x)*12,25,woods?'#777344':null,r*6.28)}
+      const millWater=journey&&!woods&&x>55&&x<425&&z<-2020&&z>-2310;
+      if(!road&&!millWater&&r<.055){add('grass',x,2,z,25,25+hash(z,x)*12,25,woods?'#777344':null,r*6.28)}
       if(!road&&r>.982)add('rubble',x,1.8,z,18,10,18,null,r*6.28);
     }
     done.push(s);
@@ -168,7 +171,7 @@ export function buildOutskirts(scene,w){
     }
 
   }
-  const state=B.finish();root.userData.art=state;state.matureTrees=buildCampaignTrees(matureTrees);if(state.matureTrees)root.add(state.matureTrees);
+  const state=B.finish();root.userData.art=state;state.journey=buildBriarJourneyArt(w);if(state.journey)root.add(state.journey);state.matureTrees=buildCampaignTrees(matureTrees);if(state.matureTrees)root.add(state.matureTrees);
   const rootSteps=(w.obstacles||[]).filter(o=>o.woodsRootPerch);
   if(rootSteps.length){state.rootTrail=buildWoodsRootArt(rootSteps);root.add(state.rootTrail);window.__WOODS_ROOT_3D_ACTIVE=true;}
   state.signalCanopy=buildWoodsSignalArt(w.obstacles||[]);
@@ -181,12 +184,13 @@ export function buildOutskirts(scene,w){
   state.points=[0,1,2].map(()=>{const l=new THREE.PointLight(0xffb44e,900,150,1.6);root.add(l);return l});
   state.scene=scene;state.obstacles=obstacles;state.stats={outskirtsArt:true,floorTiles:floors,roadTiles:roads,tree:deco.filter(d=>d.kind==='tree'&&d.lead===true).length,totalTriangles:state.triangles,instances:state.instances,chunks:state.groups.length,drawCalls:state.groups.reduce((n,g)=>n+g.children.length,0),visibleTriangles:0,visibleDrawCalls:0,artObstacles:true};
   if(state.signalCanopy){state.signalTriangles=state.signalCanopy.children.reduce((n,m)=>n+(m.geometry?.attributes.position.count||0)/3,0);state.stats.totalTriangles+=state.signalTriangles;state.stats.drawCalls+=state.signalCanopy.children.length;}
-  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.matureTrees?.userData.dispose();state.rootTrail?.userData.dispose();state.signalCanopy?.userData.dispose();if(active===root)active=null};
+  active=root;root.userData.dispose=()=>{scene.fog=state.oldFog;key.shadow.map?.dispose();state.journey?.userData.dispose();state.matureTrees?.userData.dispose();state.rootTrail?.userData.dispose();state.signalCanopy?.userData.dispose();if(active===root)active=null};
   return {group:root,counts:state.stats};
 }
 export function updateOutskirts(w){
   if(!active)return;const st=active.userData.art,p=w.p;if(!p)return;
   const low=window.__BF_META?.().quality==='low',distance=low?700:1050;
+  st.journey?.userData.tick(w);
   let tris=0,calls=0;
   for(const g of st.groups){let x,z,r=CHUNK*.72;const ob=g.userData.obstacle;
     if(ob){x=ob.x;z=ob.z;r=Math.max(ob.w||10,ob.d||10)*.6}else{const a=g.userData.cell.split(',').map(Number);x=(a[0]+.5)*CHUNK;z=(a[1]+.5)*CHUNK}

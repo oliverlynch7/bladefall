@@ -4,7 +4,7 @@
  const props={};
  const set=(keys,model,extra={})=>keys.split(' ').forEach(key=>props[key]={model,...extra});
  set('home.orchard.clue home.grain.clue hp.orders ff.trail cg.orders cg.bells cg.store.note cg.balcony.note la.notice la.orders','notice');
- set('hp.bridge.clue hp.code.clue kd.lift.note kd.depth.note ic.lock.clue ic.channel.clue ih.plate gf.schedule gf.pipes gf.cache','diagram');
+ set('briar.mill.note hp.bridge.clue hp.code.clue kd.lift.note kd.depth.note ic.lock.clue ic.channel.clue ih.plate gf.schedule gf.pipes gf.cache','diagram');
  set('home.bell.clue woods.tracks.clue kd.marks kd.drain.note pc.memorial tc.tide.note la.memorial.note','stone');
  set('pc.mirror.note','sunstone');
  set('lc.orders kd.roster kd.papers ic.pages cg.papers sl.orders','papers');

@@ -365,6 +365,18 @@
               "region": "outskirts",
               "title": "Healing pads",
               "text": "Mara’s large pad heals you fully and never runs out. Small pads have limited healing. Save them for when you need them."
+            },
+            {
+              "type": "quest",
+              "id": "briar.escape",
+              "value": "active"
+            },
+            {
+              "type": "note",
+              "id": "briar.escape",
+              "region": "outskirts",
+              "title": "Open the way out",
+              "text": "The mill crossing is stuck. Find what is jamming the wheel so the villagers can reach the escape lane."
             }
           ],
           "when": [
@@ -393,27 +405,15 @@
       }
     },
     "briar.mara.heal": {
-      "text": "The large healing pad works again. Stand on it to heal; it never runs out. Small pads have limited healing.",
+      "text": "The large pad can heal you fully. Next, clear the mill crossing so our neighbors can leave.",
       "choices": [
         {
           "id": "next",
-          "text": "What should I do next?",
+          "text": "How do I clear the crossing?",
           "next": "briar.mara.next",
-          "effects": [
-            {
-              "type": "quest",
-              "id": "briar.escape",
-              "value": "active"
-            },
-            {
-              "type": "note",
-              "id": "briar.escape",
-              "region": "outskirts",
-              "title": "Open the way out",
-              "text": "The mill crossing is stuck. Find what is jamming the wheel so the villagers can reach the escape lane."
-            }
-          ],
-          "when": []
+          "effects": [],
+          "when": [],
+          "optional": true
         }
       ],
       "voice": {
@@ -426,7 +426,7 @@
       }
     },
     "briar.mara.next": {
-      "text": "Clear the jammed mill crossing. Gus was checking the wheel.",
+      "text": "Follow the road to the mill. Its pressure plate shuts the water feed. Keep it down while you free the jammed wheel.",
       "choices": [],
       "voice": {
         "speaker": "mara",
@@ -1159,6 +1159,16 @@
       ]
     },
     "briar.water": {
+      "once": false,
+      "when": [
+        {
+          "flag": "briar.water",
+          "is": false
+        }
+      ],
+      "effects": []
+    },
+    "briar.jam": {
       "once": true,
       "when": [
         {
@@ -1172,24 +1182,6 @@
           "id": "briar.water",
           "value": true
         },
-        {
-          "type": "note",
-          "id": "briar.mill",
-          "region": "outskirts",
-          "title": "The mill crossing",
-          "text": "The water is stopped. Look for the timber caught in the wheel beside the mill."
-        }
-      ]
-    },
-    "briar.jam": {
-      "once": true,
-      "when": [
-        {
-          "flag": "briar.water",
-          "is": true
-        }
-      ],
-      "effects": [
         {
           "type": "flag",
           "id": "briar.jam",
@@ -1635,6 +1627,51 @@
           "id": "woods.rescue.shepherd",
           "kind": "companion",
           "amount": 1
+        }
+      ]
+    },
+    "briar.mill.weighted": {
+      "once": true,
+      "when": [
+        {
+          "quest": "briar.escape",
+          "is": "active"
+        }
+      ],
+      "effects": [
+        {
+          "type": "flag",
+          "id": "briar.water",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "briar.mill",
+          "region": "outskirts",
+          "title": "The mill crossing",
+          "text": "The crate holds the sluice shut. Free the timber beside the wheel, then lower the bridge with its winch."
+        }
+      ]
+    },
+    "briar.mill.reset": {
+      "once": false,
+      "when": [
+        {
+          "flag": "briar.water",
+          "is": false
+        }
+      ],
+      "effects": []
+    },
+    "briar.mill.note": {
+      "once": true,
+      "effects": [
+        {
+          "type": "note",
+          "id": "briar.mill.sketch",
+          "region": "outskirts",
+          "title": "The mill treadle",
+          "text": "Standing on the broad plate shuts the water feed. It opens again when the weight leaves. The grain crate can hold it down while you free the wheel."
         }
       ]
     }

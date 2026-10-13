@@ -20,7 +20,7 @@ export function attachCampaignCraft(parent,w,counts){
  const fitting=(id,name,o,extra={})=>add(id,name,o.x,o.y0||0,o.z,{w:o.w||100,h:o.h||100,d:o.d||80,...extra},o.rot||0);
  for(const [i,d]of (w.deco||[]).entries()){
   const id='deco-'+i;
-  if(d.kind==='craft'){const node=add(d.craftId||id,d.model,d.x,d.y0||0,d.z,d.options||{w:d.w,h:d.h,d:d.d},d.rot||0,d.scale||1,d.motion==='mill'?(node,world,game)=>{node.rotation.z=game.storyState?.flags?.['briar.water']?0:Math.sin(game.time*1.2)*.025;}:null);continue;}
+  if(d.kind==='craft'){const node=add(d.craftId||id,d.model,d.x,d.y0||0,d.z,d.options||{w:d.w,h:d.h,d:d.d},d.rot||0,d.scale||1,d.motion==='mill'?(node,world,game)=>{node.rotation.z=game.briarMill?game.briarMill.wheel:game.storyState?.flags?.['briar.water']?0:Math.sin(game.time*1.2)*.025;}:null);continue;}
   if(d.kind==='shoreWreck')fitting(id,'wreck',d,{port:d.x===-1320});
   else if(d.kind==='shoreRock')fitting(id,'rock',d);
   else if(d.kind==='shoreShelter'){

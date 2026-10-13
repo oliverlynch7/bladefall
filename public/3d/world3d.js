@@ -1,5 +1,5 @@
 import {attachGeographyArt,updateGeographyArt} from './campaign-geography-art.js?v=2187a';
-import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2187a';
+import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2188a';
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
 import {buildBriarBetaArt} from './briar-beta-art.js?v=2182f';
 window.__briarAssetsPreload=loadBriarTrees;
@@ -14,7 +14,7 @@ import {buildPalaceCourt} from './palace-courtyard-art.js?v=2187a';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2187a';
 import {buildStorm,updateStorm} from './storm-art.js?v=2187a';
 import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2187a';
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2187a';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2188a';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2182f';

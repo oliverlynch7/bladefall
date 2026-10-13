@@ -1431,3 +1431,8 @@ Implemented the first region of the approved sequential campaign finishing pass.
 Validation passed: 20 main-route assertions across 69 physical movement waypoints to the Brute checkpoint; seven existing optional-route/combat regressions; seven two-client co-op checks; four saves created by the v2.187 main HTML preserving gold, character/class XP, equipment and name; uncut normal-camera mill interaction with mistake/recovery; actual attacks by both corrected ground guards; 55 desktop/phone blueprint checks; story, authority, Briar and syntax tests. Navigation fixtures stun enemies; combat probes are separate. Co-op transport is a local relay. Human pacing/art judgment, real-network behavior and low-end performance remain open.
 
 See docs/design/BRIAR_JOURNEY_2026-10-12.md and docs/art-validation/briar-journey-2026-10-12.json. The broader campaign pass is still in progress; Hollow Cliffs is next. No custom SFX work. Unrelated companion3d.js and articulated-rigs.json edits are excluded.
+
+
+## [Codex | 2026-10-12] Briar release verified live
+
+Commit fc785605 pushed to main. Fresh production browser confirmed v2.188.0, the title > Dev previews > Campaign blueprints link, all sixteen updated plans, the mill plate marker, full-sized Homefields, the new rendered mill and correct completed bridge collision. Detailed, world-fallback and voxel rendering retain the appropriate puzzle props with no page/WebGL errors. Production results are recorded in docs/art-validation/briar-journey-2026-10-12.json.

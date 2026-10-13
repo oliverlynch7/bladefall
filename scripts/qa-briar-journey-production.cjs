@@ -15,8 +15,8 @@ async root=>{
   const briar=await p.evaluate(()=>({revision:__BF3.G.briarJourney.revision,bounds:__BF3.G.bounds,signs:__BF3.G.briarJourney.signs.length,bridge:__BF3.G.briarMill.bridge,barrier:__BF3.G.walls.some(o=>o.storyBridge),art:__BRIAR_JOURNEY_ART.revision,world:__world3d().ready,error:HERO3D.err}));
   await p.screenshot({path:'output/playwright/briar188-production.png'});
   const fallbacks=[];
-  for(const kind of ['generic-world','voxel','detailed']){
-   await p.evaluate(kind=>{HERO3D.on=kind!=='voxel';__world3d().on=kind==='detailed';},kind);await p.waitForTimeout(250);
+  for(const kind of ['world-fallback','voxel','detailed']){
+   await p.evaluate(kind=>{HERO3D.on=kind!=='voxel';__world3dEnabled(kind==='detailed');},kind);await p.waitForTimeout(250);
    const boxes=await p.evaluate(()=>{let count=0;BFBriarJourney.fallback(__BF3.G,()=>count++);return count;});fallbacks.push({kind,boxes});
   }
   if(plans.count!==16||!plans.millPlate||briar.revision!==2188||briar.art!==2188||briar.signs!==5||!briar.world||briar.bridge!==1||briar.barrier||briar.error||fallbacks[0].boxes<1||fallbacks[1].boxes<1||fallbacks[2].boxes!==0||errors.length)throw Error(JSON.stringify({briar,plans,fallbacks,errors}));

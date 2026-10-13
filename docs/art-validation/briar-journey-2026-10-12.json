@@ -2426,6 +2426,48 @@
     "One startup wait timed out; a clean startup diagnostic and the final rerun passed with no page or failed-request errors."
   ],
   "production": {
-    "status": "pending deployment verification"
+    "published": true,
+    "version": "2.188.0-briar-journey",
+    "plans": {
+      "count": 16,
+      "version": "2.188.0-briar-journey",
+      "millPlate": true
+    },
+    "briar": {
+      "revision": 2188,
+      "bounds": {
+        "minX": -3030,
+        "maxX": 2850,
+        "minZ": -4820,
+        "maxZ": 1100
+      },
+      "signs": 5,
+      "bridge": 1,
+      "barrier": false,
+      "art": 2188,
+      "world": true,
+      "error": null
+    },
+    "fallbacks": [
+      {
+        "kind": "world-fallback",
+        "boxes": 14
+      },
+      {
+        "kind": "voxel",
+        "boxes": 14
+      },
+      {
+        "kind": "detailed",
+        "boxes": 0
+      }
+    ],
+    "errors": [],
+    "status": "verified live",
+    "gameCommit": "fc785605",
+    "url": "https://bladefall.pages.dev/3d/",
+    "blueprintsUrl": "https://bladefall.pages.dev/design/campaign-geography/",
+    "screenshot": "output/playwright/briar188-production.png",
+    "harnessCorrection": "Renderer toggle uses __world3dEnabled; __world3d returns a read-only snapshot."
   }
 }

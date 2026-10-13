@@ -1499,3 +1499,17 @@ Next authorized task: improve all earned class skins (U-CLASS-SKINS-20261012). N
 ## [Codex | 2026-10-12] Adventure HUD verified live
 
 Commit d7cc86fe pushed to main. Cloudflare Pages reports success. Fresh production browser confirms v2.190.0-adventure-hud and no page errors. Local screenshots and detailed verification are in docs/art-validation/adventure-hud-2026-10-12.json. HUD implementation is complete; class-skin work is next, followed by the remaining campaign pass.
+
+
+## [Codex | 2026-10-12] U-CLASS-SKINS-20261012 implementation underway
+
+HUD is complete. Latest user explicitly requests the earned class-skin overhaul now and an accessible preview when finished. Preserve all rank gates, per-class saved choices, Stylist-only equipping and cosmetic-only stats. Grounded renderer/design plan: docs/design/CLASS_SKINS_2026-10-12.md. Source: docs/requirements/USER_SOURCE_2026-10-12_CLASS_SKIN_REWORK.md. No implementation or visual acceptance claimed yet.
+
+
+## [Codex | 2026-10-12] Earned class wardrobe complete locally — v2.191.0
+
+U-CLASS-SKINS-20261012: rebuilt all 34 earned appearances across 17 classes. Default appearances, rank 5/10 gates, Stylist-only equipping, per-class saved selection and cosmetic-only stats remain. Fitted armor now follows the appropriate torso, arm, leg and head bones from bind-pose matrices. Added shaped layered plates, veined leaves, curved horns, embroidered fabric, metal inlay and class-specific ornaments; separate broad armor and trim palettes preserve color variety. Mage retains orbiting stars; Paladin stays ivory/light gold. Batched detail costs at most 5,576 extra triangles and 36 meshes per outfit, with no added lights.
+
+The real-model wardrobe is at /3d/class-skins.html, linked first in title > Dev Previews and from the Stylist. Compare Default / Rank 5 / Rank 10, focus an outfit, rotate/zoom, try animations, weapons and capes, switch lighting or freeze ornaments. The gallery does not load or change character saves. Actual in-game preview testing caught and fixed cloned emissive-color metadata turning Stylist bodies black; default material/pad restoration was also verified.
+
+Verification: 51 class/tier combinations, 13 sampled animations each (3,978 frames), 129 state/Stylist checks, 51 simulated-peer render checks, old-save compatibility, bag/Stylist visual inspection, and 390px responsive gallery verification. Evidence and explicit limitations: docs/art-validation/class-wardrobe-2026-10-12/summary.json. No live second-device network or physical phone session; representative weapon/cape views are not an exhaustive no-clipping guarantee. Visual acceptance by Oliver remains open. This completes the skin implementation pass, not the outstanding campaign finishing work. Unrelated companion3d.js and articulated-rigs.json changes are excluded. Commit/deployment verification follows.

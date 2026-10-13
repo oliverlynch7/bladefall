@@ -27,3 +27,12 @@ Approved work queued immediately after completing the HUD update. This is a subs
 6. Keep evidence separate: code checks, rendered motion review, and user aesthetic acceptance. Do not claim every combination is clipping-free based solely on automated coverage or still images.
 
 Detailed new designs and implementation plan will follow inspection after the HUD work; they are not invented or locked by this queue entry.
+
+
+## [Codex | 2026-10-12] Earned skins implementation and preview approved
+
+> And now go ahead and work on the overhaul for the custom class skins. This is a huge opportunity for cool unlocks that keep the player excited to grind.
+>
+> Please allow me to preview the skins from here once u finish them
+
+The Adventure HUD is now shipped. Begin this overhaul across all 17 classes and both earned tiers. Include an accessible, read-only gallery using the actual game models, with default/rank-5/rank-10 comparison, orbit/zoom, motion and cape/weapon inspection. No gallery controls may alter a save or unlock a live appearance. Plan: docs/design/CLASS_SKINS_2026-10-12.md.

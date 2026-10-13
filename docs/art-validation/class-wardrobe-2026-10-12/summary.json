@@ -1,0 +1,41 @@
+{
+  "version": "2.191.0-class-wardrobe",
+  "date": "2026-10-12",
+  "scope": "All 17 classes, 34 earned appearances; original looks retained.",
+  "preview": "/3d/class-skins.html",
+  "renderFrames": 3978,
+  "classTierCombinations": 51,
+  "maxExtraTriangles": 5576,
+  "maxExtraMeshes": 36,
+  "stateChecks": 129,
+  "simulatedPeerChecks": 51,
+  "verified": [
+    "Real WebGL model gallery with all 17 class comparisons and rank-10 focus",
+    "Bone-relative attachment invariance through 13 animation samples and refitting in a non-neutral pose",
+    "Rank 4/5/9/10 gates, rank-10 cheat, per-class save/reload, cosmetic-only stats",
+    "Pre-change save compatibility from 2e6bb5f1, including character/class XP, gold, gear, name and tutorial",
+    "All 51 Stylist class/tier material checks, including switching back to default",
+    "All 51 peer class/tier states through production renderer, same-body palette independence",
+    "Corrected Stylist and bag previews inspected visually",
+    "Representative cape, warhammer, running pose, keyboard orbit, pause and view selection",
+    "390x844 iframe viewport: no horizontal overflow, all icon images loaded and 3D preview complete",
+    "JavaScript module and embedded game script syntax; git whitespace checks"
+  ],
+  "visualFixesDuringReview": [
+    "Removed flat thigh ornament panels",
+    "Kept Mage astrolabe rotation horizontal",
+    "Mounted Necromancer lanterns and Pyromancer flame crowns upright on torso supports",
+    "Added actual Warrior/Pirate crown geometry",
+    "Enlarged lotus petals, flight vanes and duelist fans",
+    "Added branching Beastmaster antlers and Stormcaller crown",
+    "Fixed material-clone emissive Color serialization causing black Stylist outfits",
+    "Restored original pads/materials when returning to Default"
+  ],
+  "limits": [
+    "Automated frame tests check transforms/rendering, not triangle collision or aesthetic quality.",
+    "Weapons/capes were sampled; this is not an exhaustive guarantee against clipping in every combination.",
+    "Co-op tested using simulated packets and real peer rigs, not a live second-device network session.",
+    "Phone layout tested with an actual 390px iframe viewport, not a physical phone or touch gestures.",
+    "User aesthetic/playtest acceptance remains open."
+  ]
+}

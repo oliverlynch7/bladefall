@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142330"><title>Bladefall · Class wardrobe</title><link rel="stylesheet" href="./class-skins.css?v=2191"><script type="importmap">{"imports":{"three":"./three.module.js"}}</script></head>
+<body>
+<header><a href="./" class="brand">BLADEFALL <span>WARDROBE</span></a><a class="back" href="./">Back to game ↗</a></header>
+<main>
+ <section class="intro"><p class="eyebrow">EARN YOUR LEGEND</p><h1>A look worth mastering.</h1><p>17 classes. 34 earned designs. Choose a class and see your journey from apprentice to master.</p></section>
+ <nav id="classes" aria-label="Choose class"></nav>
+ <section class="workshop" aria-label="Interactive skin preview">
+  <div class="stage"><canvas id="wardrobe" aria-label="3D class appearances. Drag to rotate; scroll or pinch to zoom." tabindex="0"></canvas><div class="stage-top"><span id="stageClass">Loading wardrobe…</span><span id="viewLabel">THREE RANKS · SAME LIGHTING</span></div><div class="stage-help">Drag to rotate · scroll / pinch to zoom</div><div id="loading" role="status">Loading the wardrobe…</div><div class="camera-actions"><button id="zoomIn" aria-label="Zoom in">+</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="reset">Reset view</button></div></div>
+  <div id="lookCards" class="look-cards"></div>
+  <section class="tools" aria-label="Preview controls">
+   <label>View<select id="view"><option value="all">Compare all ranks</option><option value="0">Default only</option><option value="1">Rank 5 only</option><option value="2">Rank 10 only</option></select></label>
+   <label>Animation<select id="animation"><option>Idle</option><option>Run</option><option value="Attack">Basic attack</option><option value="RunAttack">Moving attack</option><option value="Charge">Charge attack</option><option value="Skill">Cast skill</option><option>Jump</option><option>Dodge</option><option value="wave">Wave</option><option value="point">Point</option><option value="cheer">Cheer</option><option value="bow">Bow</option><option value="dance">Dance</option></select></label>
+   <label>Weapon<select id="weapon"><option value="class">Class weapon</option><option value="none">Hide weapon</option><option value="sword">Sword</option><option value="great">Greatsword</option><option value="hammer">Warhammer</option><option value="scythe">Scythe</option><option value="dagger">Dagger</option><option value="bow">Bow</option><option value="cross">Crossbow</option><option value="javelin">Javelin</option><option value="staff">Staff</option><option value="wand">Wand</option></select></label>
+   <label>Cape<select id="cape"><option value="">No cape</option><option value="wanderer">Wanderer</option><option value="sail">Sailcloth</option><option value="winter">Winter</option><option value="delver">Delver</option><option value="slayer">Slayer</option><option value="tyrant">Tyrant</option><option value="undying">Undying</option></select></label>
+   <label>Lighting<select id="lighting"><option value="day">Daylight</option><option value="night">Twilight</option></select></label>
+   <div class="toggles"><label><input id="rotate" type="checkbox">Turntable</label><label><input id="still" type="checkbox">Still ornaments</label><button id="pause">Pause motion</button></div>
+  </section>
+ </section>
+ <footer><span>Earn ranks 5 and 10, then visit the Stylist to equip. Cosmetic only. Your choices are saved per class.</span><span>This gallery never changes your saves.</span><details><summary>Model details</summary><output id="stats"></output></details></footer>
+</main>
+<script src="./face-options.js?v=2087"></script><script src="./class-looks.js?v=2191"></script><script type="module" src="./class-skins.js?v=2191"></script>
+</body></html>

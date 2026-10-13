@@ -1,7 +1,7 @@
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
-import {syncClassLook,clearClassLook} from './class-look3d.js?v=2084';
+import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2191';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
@@ -1398,7 +1398,7 @@ function repaintTexture(srcTex, skin){
   const ctx = cvs.getContext('2d', { willReadFrequently:true });
   ctx.drawImage(img, 0, 0);
   const data = ctx.getImageData(0,0,cvs.width,cvs.height), px = data.data;
-  const metal = hexRGB(skin.metal), leather = hexRGB(skin.leather), lift = skin.lift || 1.0;
+  const metal = hexRGB(skin.armor||skin.metal), leather = hexRGB(skin.leather), lift = skin.lift || 1.0;
   for(let i=0;i<px.length;i+=4){
     if(px[i+3] < 8) continue;
     const hsv = rgb2hsv(px[i],px[i+1],px[i+2]);
@@ -1458,17 +1458,27 @@ function paintClassBody(root,cls,packOriginal=false,override=null){
   const skin=override||CLASS_SKINS[cls];if(!root||!skin)return 0;
   let painted=0;
   root.traverse(o=>{
-    const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls]);
-    if(!o.isMesh||o.userData.classLookPart||o.userData._disguisePart||o.userData._eye||o.userData._weap||(!hooded&&/^(Head|Face)(?:_|$)/.test(o.name)))return;
+    const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls])||(cls==='paladin'&&!!override?.rank);
+    const protectedHead=!hooded&&/^(Head|Face)(?:_|$)/.test(o.name);
+    if(!o.isMesh||o.userData.classLookPart||o.userData._disguisePart||o.userData._eye||o.userData._mouth||o.userData._weap||(protectedHead&&!o.userData._lookHeadPainted))return;
+    if(cls==='paladin'&&override?.rank&&/^(Head|Face)(?:_|$)/.test(o.name))o.userData._lookHeadPainted=true;
     // Skeleton clones share source materials. Always isolate before touching a palette.
     if(o.userData._paletteOwner!==o.uuid){
       // Material.clone JSON-copies userData. Preserve the real source Texture for same-body allies.
-      const isolate=m=>{const c=m.clone();c.userData._srcMap=m.userData._srcMap?.isTexture?m.userData._srcMap:m.map||null;return c;};
+      const isolate=m=>{const c=m.clone();c.userData._srcMap=m.userData._srcMap?.isTexture?m.userData._srcMap:m.map||null;const pe=m.userData._paletteEmissive;if(pe)c.userData._paletteEmissive={color:pe.color?.isColor?pe.color.clone():new THREE.Color(pe.color??0),intensity:pe.intensity};return c;};
       o.material=Array.isArray(o.material)?o.material.map(isolate):isolate(o.material);o.userData._paletteOwner=o.uuid;}
+    // Earned fabrics/plates receive real lighting while original looks keep their original material.
+    const earned=!!override?.rank;
+    const surface=m=>{
+      if(earned&&m.isMeshBasicMaterial){const n=new THREE.MeshStandardMaterial({color:m.color,map:m.map,side:m.side,transparent:m.transparent,opacity:m.opacity,alphaTest:m.alphaTest,roughness:.73,metalness:.12});n.userData={...m.userData,_lookWasUnlit:true};m.dispose();return n;}
+      if(!earned&&m.userData._lookWasUnlit){const n=new THREE.MeshBasicMaterial({color:m.color,map:m.map,side:m.side,transparent:m.transparent,opacity:m.opacity,alphaTest:m.alphaTest});n.userData={...m.userData};delete n.userData._lookWasUnlit;m.dispose();return n;}
+      return m;
+    };
+    o.material=Array.isArray(o.material)?o.material.map(surface):surface(o.material);
     for(const m of (Array.isArray(o.material)?o.material:[o.material])){
       if(!('_srcMap' in m.userData))m.userData._srcMap=m.map||null;
       if(!m.userData._srcMap)continue;
-      m.map=packOriginal?m.userData._srcMap:repaintTexture(m.userData._srcMap,skin);
+      m.map=(packOriginal||protectedHead)?m.userData._srcMap:repaintTexture(m.userData._srcMap,skin);
       if(m.emissive){
         if(!m.userData._paletteEmissive)m.userData._paletteEmissive={color:m.emissive.clone(),intensity:m.emissiveIntensity};
         if(cls==='paladin'&&!packOriginal&&!override){m.emissive.set('#d9ac48');m.emissiveIntensity=.12;}
@@ -1476,6 +1486,7 @@ function paintClassBody(root,cls,packOriginal=false,override=null){
       }
       m.needsUpdate=true;painted++;
     }
+    if(protectedHead)delete o.userData._lookHeadPainted;
   });return painted;
 }
 function applyClassSkin(){
@@ -1584,6 +1595,49 @@ function syncCamera(){
   return true;
 }
 
+let displayModelsPromise;
+async function loadClassDisplayModels(){
+ if(!displayModelsPromise)displayModelsPromise=(async()=>{
+  const loader=new GLTFLoader(),names=['Warrior','Rogue','Ranger','Wizard','Cleric','Monk'];
+  const gs=await Promise.all(names.map(n=>loader.loadAsync(ASSETS+'chars/'+n+'.gltf').catch(()=>null)));
+  names.forEach((n,i)=>{if(!gs[i])return;_loaded[n]=gs[i];for(const c of gs[i].animations)clips[c.name]??=c;});return gs;
+ })();return displayModelsPromise;
+}
+
+// Independent display rig. The gallery uses the game's bodies, faces, grips and pose functions.
+// It neither loads a save nor mutates meta, stats, unlocks or the local player's rig.
+export async function createClassDisplay(classId,tier=0){
+ await loadClassDisplayModels();const model=CLASS_TO_MODEL[classId]||'Warrior',source=_loaded[model],node=SkeletonUtils.clone(source.scene),wrap=new THREE.Group();wrap.add(node);
+ const remove=[];node.traverse(o=>{if(o.userData.classLookRoot||o.userData._eye||o.userData._mouth||o.userData._weap)remove.push(o);if(o.isMesh){o.frustumCulled=false;o.castShadow=false;}});remove.forEach(o=>o.removeFromParent());
+ const holder={root:node,model},face=window.__npcBuildFace(node,model,'#9bd9e8',{mouthStyle:'line',browStyle:'natural'}),mixer=new THREE.AnimationMixer(node),A={mixer,cur:null};
+ paintClassBody(node,classId,false,tier?window.BFClassLooks.palette(classId,tier):null);
+ const defaultArt=({ranger:'bow',beastmaster:'bow',skylancer:'javelin',mage:'staff',pyromancer:'staff',necromancer:'staff',warlock:'staff',stormcaller:'staff',chronomancer:'staff',reaper:'scythe',monk:'fist',ninja:'dagger',berserker:'axe',pirate:'flintlock'})[classId]||'sword';
+ let weapon,disposed=false,time=0,action,clipName;
+ async function equip(art='class'){
+  const a=art==='class'?defaultArt:art;weapon={art:a,rar:'common',name:'Preview weapon',...(classId==='pirate'&&art==='class'?{intrinsic:'pirate'}:{})};
+  await queueEquip(()=>disposed?null:equipWeapon(holder,{model,weapon:a==='none'?{art:'fist'}:weapon}));
+  if(disposed)return;if(a==='none')clearWeapon(holder);colorWeapon(holder,weapon);
+ }
+ await equip();
+ const rec={wrap,node,model,classId,tier,equip,get stats(){return classLookStats(node)},get weapon(){return weapon},
+  update(dt,options={}){
+   if(disposed)return;time+=dt;const motion=options.animation||'Idle';
+   restoreEmotePose(A);restoreGripPose(A);
+   const attack=({bow:'Bow_Shoot',staff:'Staff_Attack',wand:'Spell1',fist:'Punch',dagger:'Dagger_Attack',axe:'Attack',hammer:'Attack',scythe:'Attack'})[weapon?.art]||'Sword_Attack';
+   const name=motion==='Attack'?attack:motion==='RunAttack'?attack:motion==='Charge'?(weapon?.art==='bow'?'Bow_Draw':'Attacking_Idle'):motion==='Skill'?'Spell1':motion==='Jump'?'Roll':motion==='Dodge'?'Run':['wave','point','cheer','bow','dance'].includes(motion)?'Idle':motion;
+   const actual=clips[name]?name:'Idle';if(actual!==clipName){action?.stop();action=mixer.clipAction(clips[actual]);action.reset().play();clipName=actual;}
+   mixer.update(dt);const p={x:0,y:0,z:0,yaw:0,vx:0,vz:['Run','RunAttack','Dodge'].includes(motion)?90:0,onGround:motion!=='Jump',weapon,atkTimer:['Attack','RunAttack'].includes(motion)?.4:0,chargeAmt:motion==='Charge'?.7:0,dodgeTimer:motion==='Dodge'?.12:0,combatPose:motion==='Skill'?{remaining:.5,clip:'Spell1'}:null,emote:['wave','point','cheer','bow','dance'].includes(motion)?{id:motion,t:time%4}:null};
+   movingCombatLegs(p,A,dt);captureGripPose(wrap,A);
+   if(!p.emote||p.emote.id==='bow'){pirateWeaponPose(p,wrap,A,dt);poseWeaponGrip(p,wrap,A,model,dt);}
+   applyEmotePose(p,wrap,A);syncClassLook(node,classId,tier,headMetrics(holder),time,options.motion!==false);
+   syncCosmetics(wrap,p,dt,{cape:options.cape||null,model,accent:window.BFClassLooks.palette(classId,tier)?.metal||CLASS_SKINS[classId].metal,particles:false});
+   wrap.position.y=motion==='Jump'?Math.abs(Math.sin(time*2))* .32:0;
+   wrap.updateMatrixWorld(true);node.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});
+  },
+  dispose(){if(disposed)return;disposed=true;holder._weapSeq=(holder._weapSeq||0)+1;restoreEmotePose(A);restoreGripPose(A);clearWeapon(holder);clearClassLook(node);disposeCosmetics(wrap);face.dispose();mixer.stopAllAction();mixer.uncacheRoot(node);disposePreviewMaterials(node);node.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});wrap.removeFromParent();}
+ };rec.update(.01);return rec;
+}
+
 async function boot(){
   try {
     const canvas = document.getElementById('gl');
@@ -1613,18 +1667,7 @@ async function boot(){
     const rim = new THREE.DirectionalLight(0x93b6ff, 0.7); rim.position.set(-70, 50, -60);
     scene.add(rim);
 
-    const loader = new GLTFLoader();
-    const load = url => new Promise((res, rej) => loader.load(url, res, undefined, rej));
-
-    // the six RPG characters share one skeleton, so clips pool across all of them
-    const pool = ['Warrior','Rogue','Ranger','Wizard','Cleric','Monk'];
-    const gs = await Promise.all(pool.map(n =>
-      load(ASSETS + 'chars/' + n + '.gltf').catch(() => null)));
-    /* Which body does the player's class wear? meta.classId is the game's own field, reached
-       through the __BF_META closure because `meta` is a top-level const in a classic script and
-       therefore not a window property. Falls back to Warrior if the class is unknown. */
-    _loaded = {};
-    for(let i = 0; i < pool.length; i++) if(gs[i]) _loaded[pool[i]] = gs[i];
+    const gs = await loadClassDisplayModels();
     HERO3D.model = modelForClass();
     const own = _loaded[HERO3D.model] || gs.find(Boolean);
     if(!own) throw new Error('no character models loaded from ' + ASSETS + 'chars/');
@@ -2438,7 +2481,7 @@ window.__hero3dProbe = () => {
   };
 };
 
-boot();
+if(document.getElementById('gl'))boot();
 /* Inventory portrait owns its canvas, scene and posed skeleton. No world capture or readback. */
 let bagPortrait=null;
 window.__hero3dBagPreview=(canvas,opts)=>{

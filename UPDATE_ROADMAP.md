@@ -2741,3 +2741,7 @@ Before delivery, enlarged health/mana numbers and adjusted companion spacing in 
 - Full state says new gear auto-sells; sample pickups identify the sold item and gold, while the final free slot still keeps its item.
 - Added bag-state/pickup controls, B/click explanation and phone-safe layout. Verified 54 combinations, six help layouts and pickup transitions in a real browser; fixed a laptop overlap.
 - Preview only. Live gameplay HUD, save logic and item collection/sale behavior are unchanged. Main HTML differs only in VERSION3D. Evidence: docs/art-validation/hud-bag-preview-2026-10-12.json.
+
+## [Codex | 2026-10-12] Queued next after HUD — earned class skin rework
+
+User reports clipping and insufficient visual quality across the unlockable class skins. After HUD completion, audit and substantially improve every class's earned tiers: shapes, materials, palettes, distinctive embellishments and full-motion clearance with gear/capes. Retain unlock/save/Stylist/co-op contracts. This is queued work, not shipped art. Source and acceptance: docs/requirements/USER_SOURCE_2026-10-12_CLASS_SKIN_REWORK.md.

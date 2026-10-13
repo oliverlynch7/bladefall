@@ -2720,3 +2720,12 @@ See docs/design/BRIAR_JOURNEY_2026-10-12.md and docs/art-validation/briar-journe
 ## [Codex | 2026-10-12] Briar release verified live
 
 Commit fc785605 pushed to main. Fresh production browser confirmed v2.188.0, the title > Dev previews > Campaign blueprints link, all sixteen updated plans, the mill plate marker, full-sized Homefields, the new rendered mill and correct completed bridge collision. Detailed, world-fallback and voxel rendering retain the appropriate puzzle props with no page/WebGL errors. Production results are recorded in docs/art-validation/briar-journey-2026-10-12.json.
+
+
+## [Codex | 2026-10-12] HUD comparison previews — v2.189.0
+
+Built three isolated choices: Classic Compact (familiar corners), Adventure Focus (map and objective together), and Combat Focus (health/mana with skills). Access: title > Dev Previews > HUD designs, or /design/hud-preview/. Real Briar scenery and existing icon art, five illustrative states (exploration, combat, reading, co-op, beginner), actual current-HUD comparison, desktop/laptop framing, full-size phone panning and fullscreen. Clickable skill cooldowns and clue dismissal/reopening demonstrate behavior. Optional gear/gold stays available. The preview never loads the game or reads/writes saved characters and settings.
+
+Verified 60 layout/state/detail combinations without intersecting primary panels or escaped bounds; assets, cooldowns, clue controls, deep links, comparison, fullscreen and phone overflow checks pass. Visual inspection covered A/B/C and phone. An actual v2.188-generated save retains character/class XP, gold, equipment, name and story flag after loading v2.189. Main-game changes are only version, preview-menu wording, and its link. Report: docs/art-validation/hud-previews-2026-10-12.json; source/plan: docs/requirements/USER_SOURCE_2026-10-12_HUD_PREVIEWS.md. A fixture correction was needed to persist the story flag through the authoritative campaign save object.
+
+Status: previews ready for choice; no new gameplay HUD applied. Selection and any combined layout remain for Oliver. The approved sequential campaign pass remains open with Hollow Cliffs next. Unrelated companion3d.js/articulated-rigs.json edits excluded.

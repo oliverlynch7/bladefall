@@ -1,0 +1,666 @@
+{
+  "version": "2.189.0-hud-previews",
+  "scope": "Standalone HUD design previews only. The gameplay HUD is unchanged.",
+  "layouts": {
+    "checks": [
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "explore",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "explore",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "combat",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "combat",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "clue",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "clue",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "coop",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "coop",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "beginner",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "a",
+        "scenario": "beginner",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "explore",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "explore",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "combat",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "combat",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "clue",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "clue",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "coop",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "coop",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "beginner",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "b",
+        "scenario": "beginner",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "explore",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "explore",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "combat",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "combat",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "clue",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "clue",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "coop",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "coop",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "beginner",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "desktop",
+        "design": "c",
+        "scenario": "beginner",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "explore",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "explore",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "combat",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "combat",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "clue",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "clue",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "coop",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "coop",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "beginner",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "a",
+        "scenario": "beginner",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "explore",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "explore",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "combat",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "combat",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "clue",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "clue",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "coop",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "coop",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "beginner",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "b",
+        "scenario": "beginner",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "explore",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "explore",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "combat",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "combat",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "clue",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "clue",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "coop",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "coop",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "beginner",
+        "details": false,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      },
+      {
+        "screen": "laptop",
+        "design": "c",
+        "scenario": "beginner",
+        "details": true,
+        "overlaps": [],
+        "escapes": [],
+        "images": [],
+        "bodyOverflow": false
+      }
+    ],
+    "cooldownStarted": true,
+    "cooldownFinished": true,
+    "clueClosed": true,
+    "clueReopened": true,
+    "details": true,
+    "comparison": true,
+    "phone": {
+      "bodyOverflow": false,
+      "stage": 360,
+      "viewport": 390
+    },
+    "actual": {
+      "width": 1280,
+      "scrollWidth": 1280,
+      "container": 330
+    },
+    "storage": [],
+    "fullscreen": {
+      "open": true,
+      "stage": 720,
+      "available": 974
+    },
+    "deepLink": true,
+    "errors": [],
+    "badResponses": []
+  },
+  "integration": {
+    "before": {
+      "gold": 317,
+      "xp": 99,
+      "classXp": 41,
+      "weapon": "Rusty Sword",
+      "name": "HUD Save Check",
+      "flag": true
+    },
+    "after": {
+      "gold": 317,
+      "xp": 99,
+      "classXp": 41,
+      "weapon": "Rusty Sword",
+      "name": "HUD Save Check",
+      "flag": true
+    },
+    "same": true,
+    "route": "http://127.0.0.1:4345/design/hud-preview/?design=a&scene=explore",
+    "errors": []
+  },
+  "visualReview": [
+    "A exploration and combat",
+    "B combat and clue",
+    "C clue",
+    "Entire design desk",
+    "390px phone review page"
+  ],
+  "limits": [
+    "HUD values and minimap are illustrative, not a running game.",
+    "Current-HUD comparison is an actual starter-character screenshot, not the same sample stats.",
+    "No replacement HUD is approved or applied. Human design choice remains pending."
+  ]
+}

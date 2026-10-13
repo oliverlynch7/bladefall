@@ -1439,3 +1439,17 @@ Implemented the first region of the approved sequential campaign finishing pass.
 Validation passed: 20 main-route assertions across 69 physical movement waypoints to the Brute checkpoint; seven existing optional-route/combat regressions; seven two-client co-op checks; four saves created by the v2.187 main HTML preserving gold, character/class XP, equipment and name; uncut normal-camera mill interaction with mistake/recovery; actual attacks by both corrected ground guards; 55 desktop/phone blueprint checks; story, authority, Briar and syntax tests. Navigation fixtures stun enemies; combat probes are separate. Co-op transport is a local relay. Human pacing/art judgment, real-network behavior and low-end performance remain open.
 
 See docs/design/BRIAR_JOURNEY_2026-10-12.md and docs/art-validation/briar-journey-2026-10-12.json. The broader campaign pass is still in progress; Hollow Cliffs is next. No custom SFX work. Unrelated companion3d.js and articulated-rigs.json edits are excluded.
+
+
+## [Codex | 2026-10-12] U-HUD-PREVIEWS-20261012 — visual choices before rollout
+
+User requests a less busy HUD and several visual alternatives to choose between before applying. Exact source and grounded plan: requirements/USER_SOURCE_2026-10-12_HUD_PREVIEWS.md (relative to docs/). Build an isolated, interactive comparison of Classic Compact, Adventure Focus and Combat Focus using actual game scenery and existing icons. Include exploration, combat, reading and co-op states. Add access from Dev Previews. No gameplay HUD replacement, preferences or saves change until a direction is selected. Broader campaign finishing remains open. Status: in progress.
+
+
+## [Codex | 2026-10-12] HUD comparison previews — v2.189.0
+
+Built three isolated choices: Classic Compact (familiar corners), Adventure Focus (map and objective together), and Combat Focus (health/mana with skills). Access: title > Dev Previews > HUD designs, or /design/hud-preview/. Real Briar scenery and existing icon art, five illustrative states (exploration, combat, reading, co-op, beginner), actual current-HUD comparison, desktop/laptop framing, full-size phone panning and fullscreen. Clickable skill cooldowns and clue dismissal/reopening demonstrate behavior. Optional gear/gold stays available. The preview never loads the game or reads/writes saved characters and settings.
+
+Verified 60 layout/state/detail combinations without intersecting primary panels or escaped bounds; assets, cooldowns, clue controls, deep links, comparison, fullscreen and phone overflow checks pass. Visual inspection covered A/B/C and phone. An actual v2.188-generated save retains character/class XP, gold, equipment, name and story flag after loading v2.189. Main-game changes are only version, preview-menu wording, and its link. Report: docs/art-validation/hud-previews-2026-10-12.json; source/plan: docs/requirements/USER_SOURCE_2026-10-12_HUD_PREVIEWS.md. A fixture correction was needed to persist the story flag through the authoritative campaign save object.
+
+Status: previews ready for choice; no new gameplay HUD applied. Selection and any combined layout remain for Oliver. The approved sequential campaign pass remains open with Hollow Cliffs next. Unrelated companion3d.js/articulated-rigs.json edits excluded.

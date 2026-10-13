@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101a22">
+  <title>Bladefall · HUD design previews</title>
+  <link rel="stylesheet" href="preview.css?v=2189">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="/3d/">BLADEFALL<span>DESIGN DESK</span></a>
+    <div class="header-right"><span class="preview-badge">Preview only</span><a href="/3d/">Back to game <span aria-hidden="true">↗</span></a></div>
+  </header>
+  <main>
+    <div class="intro">
+      <div><p class="eyebrow">A clearer view of the adventure</p><h1>Choose your next HUD.</h1><p>Three layouts. The same world, icons, and information. Try a few situations to find your favorite.</p></div>
+      <p class="scope-note">The game’s HUD is unchanged.<br>We can also combine parts you like.</p>
+    </div>
+
+    <div class="design-options" role="group" aria-label="HUD design">
+      <button class="design-option" data-design="a" aria-pressed="true"><span class="option-letter">A</span><span><strong>Classic Compact</strong><small>Familiar corners. Much lighter framing.</small></span><svg class="layout-sketch" viewBox="0 0 90 55" aria-hidden="true"><rect x="1" y="1" width="88" height="53" rx="4"/><path d="M7 8h28v10H7z M65 8h17v16H65z M29 42h32v6H29z"/><circle cx="15" cy="40" r="8"/></svg></button>
+      <button class="design-option" data-design="b" aria-pressed="false"><span class="option-letter">B</span><span><strong>Adventure Focus</strong><small>Map and objectives in one place.</small></span><svg class="layout-sketch" viewBox="0 0 90 55" aria-hidden="true"><rect x="1" y="1" width="88" height="53" rx="4"/><path d="M7 8h25v7H7z M64 28h18v9H64z M31 44h28v4H31z"/><circle cx="73" cy="16" r="9"/></svg></button>
+      <button class="design-option" data-design="c" aria-pressed="false"><span class="option-letter">C</span><span><strong>Combat Focus</strong><small>Health, mana, and skills together.</small></span><svg class="layout-sketch" viewBox="0 0 90 55" aria-hidden="true"><rect x="1" y="1" width="88" height="53" rx="4"/><path d="M7 8h15v6H7z M65 8h17v16H65z M29 32h32v16H29z"/><circle cx="14" cy="42" r="7"/></svg></button>
+    </div>
+
+    <section class="viewer" id="viewer" aria-label="Interactive HUD comparison">
+      <div class="viewer-toolbar">
+        <div class="scenarios" role="group" aria-label="Sample situation">
+          <button data-scenario="explore" aria-pressed="true">Exploring</button>
+          <button data-scenario="combat" aria-pressed="false">In combat</button>
+          <button data-scenario="clue" aria-pressed="false">Reading a clue</button>
+          <button data-scenario="coop" aria-pressed="false">Co-op</button>
+          <button data-scenario="beginner" aria-pressed="false">New player</button>
+        </div>
+        <div class="view-tools">
+          <select id="fullscreenDesign" class="fullscreen-design" aria-label="HUD layout"><option value="a">A · Classic Compact</option><option value="b">B · Adventure Focus</option><option value="c">C · Combat Focus</option></select>
+          <label class="sr-only" for="screen">Reference screen size</label>
+          <select id="screen"><option value="desktop">1440 × 900</option><option value="laptop">1280 × 720</option></select>
+          <button id="fullSize" aria-pressed="false" title="Inspect text at its full pixel size; scroll to look around">Actual size</button>
+          <button id="fullscreen" aria-label="Open preview fullscreen">⛶ <span>Fullscreen</span></button>
+        </div>
+      </div>
+      <div class="stage-scroll" id="stageScroll" tabindex="0" aria-label="HUD preview; in actual size mode, scroll to explore the screen">
+        <div class="stage-sizer" id="stageSizer"><div class="stage" id="stage" data-design="a" data-screen="desktop"></div></div>
+      </div>
+      <div class="viewer-footer">
+        <p id="sceneCaption">Real Briar Town scenery · sample HUD values</p>
+        <div><label class="details-toggle"><input type="checkbox" id="detailsToggle"> Show gear &amp; gold</label><button id="currentToggle" aria-pressed="false">Compare current HUD</button></div>
+      </div>
+    </section>
+
+    <section class="design-explanation" aria-labelledby="designTitle">
+      <div class="design-summary"><p class="eyebrow" id="designLetter">Option A</p><h2 id="designTitle">Classic Compact</h2><p id="designDescription"></p></div>
+      <div><p class="eyebrow">What changes</p><p id="designBenefit"></p></div>
+      <div><p class="eyebrow">The tradeoff</p><p id="designTradeoff"></p></div>
+    </section>
+    <div class="review-guide"><p><strong>Try this:</strong> switch between layouts during combat, then open a clue. Click a skill to preview its cooldown. On a phone, use <b>Actual size</b> and swipe around to inspect the text.</p><p>Tell me <b>A, B, or C</b>—or which pieces you’d combine. These previews don’t change your saves or settings.</p></div>
+    <p class="review-status" id="reviewStatus" role="status" aria-live="polite"></p>
+  </main>
+  <footer class="site-footer"><span>Bladefall · HUD explorations / 01</span><a href="/design/campaign-geography/">Campaign blueprints ↗</a></footer>
+  <noscript><p class="no-script">Enable JavaScript to compare the layouts. The gameplay HUD has not changed.</p></noscript>
+  <script src="preview.js?v=2189"></script>
+</body>
+</html>

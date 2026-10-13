@@ -742,5 +742,12 @@
   "keyboardHelp": true,
   "comparisonDisablesPickup": true,
   "pageErrors": [],
-  "saveCheck": "No save/gameplay implementation changed. Live file matches prior revision after normalizing VERSION3D. A fresh first-tutorial character did not create a persisted mode save; no old-save-load success claimed."
+  "saveCheck": "No save/gameplay implementation changed. Live file matches prior revision after normalizing VERSION3D. A fresh first-tutorial character did not create a persisted mode save; no old-save-load success claimed.",
+  "production": {
+    "url": "https://bladefall.pages.dev/design/hud-preview/?design=b&scene=clue&bag=full",
+    "warning": "Full — new gear auto-sells",
+    "outcome": "Iron Sword · Sold +12 gold\nBag full · This item was not kept",
+    "errors": []
+  },
+  "screenshot": "hud-bag-preview-2026-10-12.jpg"
 }

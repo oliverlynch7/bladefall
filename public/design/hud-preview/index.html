@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#101a22">
   <title>Bladefall · HUD design previews</title>
-  <link rel="stylesheet" href="preview.css?v=2189b">
+  <link rel="stylesheet" href="preview.css?v=2189c">
 </head>
 <body>
   <header class="site-header">
@@ -41,6 +41,12 @@
           <button id="fullscreen" aria-label="Open preview fullscreen">⛶ <span>Fullscreen</span></button>
         </div>
       </div>
+      <div class="pickup-preview-controls" role="group" aria-label="Bag capacity preview">
+        <label for="bagSample">Bag state</label>
+        <select id="bagSample"><option value="room">Room available</option><option value="near">Nearly full</option><option value="full">Full · auto-sell</option></select>
+        <button id="samplePickup">Preview equipment pickup</button>
+        <span>Sample items only · Click the bag for details.</span>
+      </div>
       <div class="stage-scroll" id="stageScroll" tabindex="0" aria-label="HUD preview; in actual size mode, scroll to explore the screen">
         <div class="stage-sizer" id="stageSizer"><div class="stage" id="stage" data-design="a" data-screen="desktop"></div></div>
       </div>
@@ -60,6 +66,6 @@
   </main>
   <footer class="site-footer"><span>Bladefall · HUD explorations / 01</span><a href="/design/campaign-geography/">Campaign blueprints ↗</a></footer>
   <noscript><p class="no-script">Enable JavaScript to compare the layouts. The gameplay HUD has not changed.</p></noscript>
-  <script src="preview.js?v=2189"></script>
+  <script src="preview.js?v=2189c"></script>
 </body>
 </html>

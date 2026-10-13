@@ -2734,3 +2734,10 @@ Status: previews ready for choice; no new gameplay HUD applied. Selection and an
 ## [Codex | 2026-10-12] HUD preview readability — v2.189.1
 
 Before delivery, enlarged health/mana numbers and adjusted companion spacing in A/B. Rechecked all 60 preview combinations, phone fit/full-size, fullscreen, and interactive controls. The gameplay HUD remains unchanged. Final publication and selection are tracked with the same HUD preview report.
+
+## [Codex | 2026-10-12] v2.189.2 — Clear bag capacity in HUD previews
+
+- Added a labeled bag icon/count and readable free, nearly-full and full warnings across all three isolated HUD layouts.
+- Full state says new gear auto-sells; sample pickups identify the sold item and gold, while the final free slot still keeps its item.
+- Added bag-state/pickup controls, B/click explanation and phone-safe layout. Verified 54 combinations, six help layouts and pickup transitions in a real browser; fixed a laptop overlap.
+- Preview only. Live gameplay HUD, save logic and item collection/sale behavior are unchanged. Main HTML differs only in VERSION3D. Evidence: docs/art-validation/hud-bag-preview-2026-10-12.json.

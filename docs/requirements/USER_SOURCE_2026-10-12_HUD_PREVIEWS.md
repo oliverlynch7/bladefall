@@ -59,3 +59,13 @@ Proposed next preview: upper-right minimap, paper clues, a real equipment-compar
 Further proposals, not implemented/approved: a recent-pickups view; concise explanations when a skill cannot fire; legible named buffs with duration; unobtrusive pending-stat/skill indicators; configurable text size and high contrast; interaction labels that state the action/result. Existing related-clue selection in the journal should be surfaced more clearly rather than rebuilt as a duplicate system.
 
 Reference sources inspected: https://www.aq.com/lore/guides/userinterface ; https://www.aq.com/lore/guides/battlebar ; https://help.bethesda.net/app/answers/detail/a_id/2529/~/what-does-the-white-arrow-symbol-on-my-compass-mean . These inform the proposal, not claims that it is already implemented or playtested.
+
+## [Codex | 2026-10-12] U-HUD-BAG-20261012 — capacity and overflow clarity
+
+Exact user message:
+
+> Also I don’t think it’s currently obvious to the player what happens when the bag is full and items are collected. They may accidentally lose loot they want so maybe we need to bro my our bag capciaty with icon to the hud to make that a clear part of the game
+
+User identifies unclear full-bag behavior and proposes visible capacity with an icon. Interpret this within the active preview-before-rollout request. The live game already has a small bag counter; ordinary collected equipment is immediately bagged or auto-sold when capacity is exhausted. This feedback does not revoke the previously approved overflow sale rule or approve a particular new gameplay HUD.
+
+Preview implementation plan: improve the persistent bag icon/count with an explicit Bag label, free-slot status, amber near-full and red full states, and visible “Full — new gear auto-sells” wording. Provide a Bag state control and simulated pickup so the transition and sale result are reviewable in every layout; mark samples as illustrative. Display the sold item's name and gold value, with no implication it is in the bag. The bag button opens a short explanation of current behavior. All interactions remain local to the preview; no game saves, inventory, preferences or sale policy change. Acceptance: readable text beyond color alone, used/capacity counts consistent with pickup notices, keyboard-operable controls, no overlap with notes/map/skills at desktop and laptop sizes, and usable phone review.

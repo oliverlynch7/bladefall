@@ -10,10 +10,13 @@
   };
   const scenarioNames = {explore:'Exploring',combat:'In combat',clue:'Reading a clue',coop:'Co-op',beginner:'New player'};
   const initial = new URLSearchParams(location.search);
+  const bagExamples = {room:17,near:28,full:30};
+  const initialBag = Object.hasOwn(bagExamples,initial.get('bag')) ? initial.get('bag') : 'room';
   const state = {
     design:descriptions[initial.get('design')] ? initial.get('design') : 'a',
     scenario:scenarioNames[initial.get('scene')] ? initial.get('scene') : 'explore',
-    details:false,current:false,actual:false,screen:'desktop',clueClosed:false
+    details:false,current:false,actual:false,screen:'desktop',clueClosed:false,
+    bagUsed:initialBag==='room'&&initial.get('scene')==='beginner'?0:bagExamples[initialBag],bagExample:initialBag,bagHelp:false,pickup:null,soldGold:0
   };
   const cooldowns = new Map();
   let tooltipTimer;
@@ -33,7 +36,7 @@
     return `<div class="vitals" aria-label="Health ${hp} of ${max}. Mana ${d.combat?44:75} of 75."><div class="vital-row health"><div class="bar"><i style="--fill:${hp/max*100}%"></i></div><div class="vital-words"><span>${d.combat?'HP · LOW':'HP'}</span><span>${hp} / ${max}</span></div></div><div class="vital-row mana"><div class="bar"><i style="--fill:${d.combat?59:100}%"></i></div><div class="vital-words"><span>MANA</span><span>${d.combat?44:75} / 75</span></div></div></div>`;
   }
   function player(d) {
-    return `<div class="player-panel hud-panel" data-region="player"><div class="hero-portrait">${icon('skins/skin-knight.png')}<span class="hero-level">Lv ${d.beginner?1:8}</span></div><div class="player-info"><div class="identity"><strong>Rowan</strong><span>Warrior · Rank ${d.beginner?1:7}</span></div>${state.design==='c'?'':vitals(d)}${state.details?`<div class="gear-detail">${icon('items/weapons/sword.png')}<span>${d.beginner?'Rusty':'Iron'} Sword</span><b>·</b><span class="gold">${d.beginner?0:346} gold</span></div>`:''}</div></div>`;
+    return `<div class="player-panel hud-panel" data-region="player"><div class="hero-portrait">${icon('skins/skin-knight.png')}<span class="hero-level">Lv ${d.beginner?1:8}</span></div><div class="player-info"><div class="identity"><strong>Rowan</strong><span>Warrior · Rank ${d.beginner?1:7}</span></div>${state.design==='c'?'':vitals(d)}${state.details?`<div class="gear-detail">${icon('items/weapons/sword.png')}<span>${d.beginner?'Rusty':'Iron'} Sword</span><b>·</b><span class="gold">${(d.beginner?0:346)+state.soldGold} gold</span></div>`:''}</div></div>`;
   }
   function allies(d) {
     if(d.beginner) return '';
@@ -55,16 +58,23 @@
     return `<article class="journal-card" data-region="clue" aria-label="New readable clue"><button class="close-clue" data-close-clue aria-label="Close the clue">×</button><span class="hud-label">New clue · Mill crossing</span><h3>Millkeeper’s note</h3><p>The sluice shuts when the plate is empty. Leave the grain crate on it to keep the water flowing. Then clear the jam at the wheel.</p><div class="clue-footer"><span>Saved in Journal → This level.<br>Stays until you close it.</span><button data-close-clue>Got it</button></div></article>`;
   }
   function notices(d) {
+    if(state.bagHelp)return `<aside class="notice-feed" data-region="notices"><div class="notice bag-help" id="bagHelp"><strong>What happens to new gear?</strong><p>Pickups fill empty slots. When full, new gear automatically sells for gold. Items already in your bag stay there.</p><small>Make room before collecting gear you want.</small></div></aside>`;
+    if(state.pickup)return `<div class="notice-feed" data-region="notices"><div class="notice pickup-result ${state.pickup.sold?'overflow-sale':''}">${icon('items/weapons/sword.png')}<div><strong class="${state.pickup.sold?'gold':'positive'}">Iron Sword · ${state.pickup.sold?'Sold +12 gold':'Added to bag'}</strong><small>${state.pickup.sold?'Bag full · This item was not kept':`${state.bagUsed} / 30 slots used · Uncommon`}</small></div></div>${d.coop?`<div class="notice">${icon('ui/quest-hunt.png')}<div><strong class="shared">Alex defeated a patrol</strong><small>Shared progress · 8 / 12</small></div></div>`:''}</div>`;
     if(d.combat) return `<div class="notice-feed" data-region="notices"><div class="notice">${icon('coin.png')}<div><strong class="gold">+18 gold · +35 XP</strong><small>Patrol defeated · Added to your totals</small></div></div><div class="notice">${icon('ui/journal-clue.png')}<div><strong>New clue saved</strong><small>Read when ready · N Journal</small></div></div></div>`;
-    if(d.coop) return `<div class="notice-feed" data-region="notices"><div class="notice">${icon('ui/quest-hunt.png')}<div><strong class="shared">Alex defeated a patrol</strong><small>Shared progress · 8 / 12</small></div></div><div class="notice">${icon('items/weapons/sword.png')}<div><strong class="positive">Iron Sword → Bag</strong><small>17 / 30 slots · Uncommon</small></div></div></div>`;
+    if(d.coop) return `<div class="notice-feed" data-region="notices"><div class="notice">${icon('ui/quest-hunt.png')}<div><strong class="shared">Alex defeated a patrol</strong><small>Shared progress · 8 / 12</small></div></div></div>`;
     return '';
+  }
+  function bagShortcut() {
+    const free=30-state.bagUsed,level=free===0?'full':free<=3?'near':'room';
+    const message=free===0?'Full — new gear auto-sells':free<=3?`${free} ${free===1?'slot':'slots'} left · then auto-sell`:`${free} slots free`;
+    return `<div class="quick-links" data-region="shortcuts"><button class="bag-capacity" data-bag-help data-capacity="${level}" aria-expanded="${state.bagHelp}"${state.bagHelp?' aria-controls="bagHelp"':''} aria-label="Bag, ${state.bagUsed} of 30 slots used. ${message}. Explain pickup behavior.">${icon('action_bag_stash.png')}<span class="bag-copy"><span class="bag-count">Bag <b>${state.bagUsed} / 30</b></span><span class="bag-state">${message}</span></span><kbd>B</kbd></button><button class="journal-shortcut" data-open-clue>${icon('ui/journal.png')}<kbd>N</kbd> Journal</button></div>`;
   }
   function render() {
     cooldowns.clear();clearTimeout(tooltipTimer);
     const d=data(),stage=$('stage');
     stage.dataset.design=state.design;stage.dataset.screen=state.screen;
     stage.className=`stage${d.combat?' low-health is-combat':''}${state.details?' has-details':''}`;
-    stage.innerHTML=`<div class="hud-demo-label">${state.design.toUpperCase()} · ${descriptions[state.design].title} · ${scenarioNames[state.scenario]}</div>${player(d)}${allies(d)}<div class="pause-hint"><kbd>Esc</kbd> Menu</div>${quest(d)}${map(d)}${hotbar(d)}${clue(d)}${notices(d)}${d.combat?`<div class="boss-panel hud-panel" data-region="boss"><div class="boss-sub">Boss encounter</div><strong>Hollow Brute</strong><div class="boss-bar"><i></i></div><small>870 / 1,280 HP</small></div><div class="buff-chip" data-region="buff">${icon('warrior_iron_guard.png')}Iron Guard <b>2s</b></div>`:`<div class="world-marker" aria-label="Main objective 12 metres away"><i></i><small>12 m</small></div>${!d.clue?`<div class="interact-prompt" data-region="interaction"><kbd>E</kbd>${d.beginner?'Talk to Thomas':'Inspect mill mechanism'}</div>`:''}`}${d.coop?'<div class="friend-marker" data-region="friend-arrow">◇ Alex →<span>32 m · Hold T to join</span></div>':''}<div class="quick-links" data-region="shortcuts"><span>${icon('action_bag_stash.png')}<kbd>B</kbd> ${d.beginner?'0':'17'}/30</span><button data-open-clue>${icon('ui/journal.png')}<kbd>N</kbd> Journal</button></div><div class="sample-tooltip" id="sampleTooltip" role="status" hidden></div>${state.current?'<img class="current-image" src="current-hud.jpg" alt="Actual current Bladefall HUD at the mill, with a rank one character"><div class="current-label"><strong>Current gameplay HUD</strong><span>Actual starter-character capture.<br>The redesigned layouts use sample values.</span><button data-return-design>Return to design '+state.design.toUpperCase()+'</button></div>':''}`;
+    stage.innerHTML=`<div class="hud-demo-label">${state.design.toUpperCase()} · ${descriptions[state.design].title} · ${scenarioNames[state.scenario]}</div>${player(d)}${allies(d)}<div class="pause-hint"><kbd>Esc</kbd> Menu</div>${quest(d)}${map(d)}${hotbar(d)}${clue(d)}${notices(d)}${d.combat?`<div class="boss-panel hud-panel" data-region="boss"><div class="boss-sub">Boss encounter</div><strong>Hollow Brute</strong><div class="boss-bar"><i></i></div><small>870 / 1,280 HP</small></div><div class="buff-chip" data-region="buff">${icon('warrior_iron_guard.png')}Iron Guard <b>2s</b></div>`:`<div class="world-marker" aria-label="Main objective 12 metres away"><i></i><small>12 m</small></div>${!d.clue?`<div class="interact-prompt" data-region="interaction"><kbd>E</kbd>${d.beginner?'Talk to Thomas':'Inspect mill mechanism'}</div>`:''}`}${d.coop?'<div class="friend-marker" data-region="friend-arrow">◇ Alex →<span>32 m · Hold T to join</span></div>':''}${bagShortcut()}<div class="sample-tooltip" id="sampleTooltip" role="status" hidden></div>${state.current?'<img class="current-image" src="current-hud.jpg" alt="Actual current Bladefall HUD at the mill, with a rank one character"><div class="current-label"><strong>Current gameplay HUD</strong><span>Actual starter-character capture.<br>The redesigned layouts use sample values.</span><button data-return-design>Return to design '+state.design.toUpperCase()+'</button></div>':''}`;
     for(const b of document.querySelectorAll('[data-design].design-option'))b.setAttribute('aria-pressed',String(b.dataset.design===state.design));
     for(const b of document.querySelectorAll('button[data-scenario]'))b.setAttribute('aria-pressed',String(b.dataset.scenario===state.scenario));
     const desc=descriptions[state.design];
@@ -73,9 +83,10 @@
     $('sceneCaption').textContent=state.current?'Actual current HUD · Starter character at the mill':'Real Briar Town scenery · Illustrative HUD values & minimap';
     $('detailsToggle').checked=state.details;$('detailsToggle').disabled=state.current;
     $('fullscreenDesign').value=state.design;
+    $('bagSample').value=state.bagExample;$('bagSample').disabled=state.current;$('samplePickup').disabled=state.current;
     // Current screenshot is 1440 × 900. Keep its aspect ratio even if a laptop preview was selected.
     fit();
-    const url=new URL(location.href);url.searchParams.set('design',state.design);url.searchParams.set('scene',state.scenario);history.replaceState(null,'',url);
+    const url=new URL(location.href);url.searchParams.set('design',state.design);url.searchParams.set('scene',state.scenario);url.searchParams.set('bag',state.bagExample);history.replaceState(null,'',url);
   }
   function fit() {
     const w=state.current||state.screen==='desktop'?1440:1280,h=state.current||state.screen==='desktop'?900:720;
@@ -89,12 +100,28 @@
     $('fullSize').setAttribute('aria-pressed',String(state.actual));$('fullSize').textContent=state.actual?'Fit to view':'Actual size';
   }
   function report(message) {$('reviewStatus').textContent=message;}
+  function toggleBagHelp() {
+    state.bagHelp=!state.bagHelp;render();$('stage').querySelector('[data-bag-help]')?.focus({preventScroll:true});
+  }
+  function resetBagSample() {
+    state.bagUsed=state.bagExample==='room'&&state.scenario==='beginner'?0:bagExamples[state.bagExample];
+    state.pickup=null;state.bagHelp=false;state.soldGold=0;
+  }
+  $('bagSample').addEventListener('change',()=>{state.bagExample=$('bagSample').value;resetBagSample();render();report(`Sample bag: ${state.bagUsed} / 30. ${state.bagUsed===30?'New equipment will automatically sell for gold.':'Equipment goes into free bag slots.'}`);});
+  $('samplePickup').addEventListener('click',()=>{
+    const sold=state.bagUsed>=30;
+    if(sold)state.soldGold+=12;else state.bagUsed++;
+    state.bagExample=state.bagUsed===30?'full':state.bagUsed>=27?'near':'room';
+    state.pickup={sold};state.bagHelp=false;render();
+    report(sold?'Sample pickup: Iron Sword sold for 12 gold because the bag is full. This item was not kept.':`Sample pickup: Iron Sword added to bag. ${state.bagUsed} / 30 slots used.${state.bagUsed===30?' Bag now full — the next equipment pickup will auto-sell.':''}`);
+  });
   function sample(message) {
     clearTimeout(tooltipTimer);const el=$('sampleTooltip');el.textContent=message;el.hidden=false;tooltipTimer=setTimeout(()=>{el.hidden=true;},3400);
   }
   document.querySelector('.design-options').addEventListener('click',e=>{const b=e.target.closest('[data-design]');if(!b)return;state.design=b.dataset.design;state.current=false;render();report(`Previewing ${state.design.toUpperCase()}: ${descriptions[state.design].title}. Gameplay is unchanged.`);});
-  document.querySelector('.scenarios').addEventListener('click',e=>{const b=e.target.closest('[data-scenario]');if(!b)return;state.scenario=b.dataset.scenario;state.clueClosed=false;state.current=false;render();report(`${scenarioNames[state.scenario]} sample.`);});
+  document.querySelector('.scenarios').addEventListener('click',e=>{const b=e.target.closest('[data-scenario]');if(!b)return;state.scenario=b.dataset.scenario;state.clueClosed=false;state.current=false;resetBagSample();render();report(`${scenarioNames[state.scenario]} sample.`);});
   $('stage').addEventListener('click',e=>{
+    if(e.target.closest('[data-bag-help]')){toggleBagHelp();return;}
     const close=e.target.closest('[data-close-clue]');if(close){state.clueClosed=true;render();$('stage').querySelector('[data-open-clue]')?.focus({preventScroll:true});return;}
     if(e.target.closest('[data-open-clue]')){state.scenario='clue';state.clueClosed=false;state.current=false;render();$('stage').querySelector('[data-close-clue]')?.focus({preventScroll:true});return;}
     if(e.target.closest('[data-return-design]')){state.current=false;render();$('currentToggle').focus({preventScroll:true});return;}
@@ -102,6 +129,10 @@
   });
   function updateCooldowns(){for(const [i,end]of cooldowns){const el=$('stage').querySelector(`[data-skill="${i}"] .cooldown`);if(!el){cooldowns.delete(i);continue;}const seconds=(end-performance.now())/1000;el.hidden=seconds<=0;el.textContent=seconds<1?Math.max(0,seconds).toFixed(1):Math.ceil(seconds);if(seconds<=0)cooldowns.delete(i);}}
   setInterval(updateCooldowns,100);
+  document.addEventListener('keydown',e=>{
+    if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,select,textarea,[contenteditable=true]')||state.current)return;
+    if(e.key.toLowerCase()==='b'||e.key==='Escape'&&state.bagHelp){e.preventDefault();toggleBagHelp();}
+  });
   $('screen').addEventListener('change',()=>{state.screen=$('screen').value;render();});
   $('fullscreenDesign').addEventListener('change',()=>{state.design=$('fullscreenDesign').value;state.current=false;render();});
   $('fullSize').addEventListener('click',()=>{state.actual=!state.actual;fit();report(state.actual?'Full pixel size. Scroll or swipe around the preview.':'Preview fitted to the available width.');});

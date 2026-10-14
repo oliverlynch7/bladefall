@@ -1,0 +1,108 @@
+{
+  "hero3D": {
+    "on": true,
+    "ready": true,
+    "error": null
+  },
+  "flags": {
+    "rk.help": true,
+    "rk.arrow": true,
+    "event.rk.arrow": true,
+    "rk.gate": true,
+    "event.rk.gate": true,
+    "rk.breach.start": true,
+    "event.rk.breach": true,
+    "rk.breach.done": true,
+    "event.rk.breach.complete": true,
+    "rk.cells": true,
+    "event.rk.key": true
+  },
+  "blocks": [
+    {
+      "kind": "col",
+      "x": 1450,
+      "z": -2770,
+      "y0": 0,
+      "h": 150,
+      "w": 300,
+      "d": 20,
+      "invisible": true,
+      "keepBlock": "workshop"
+    },
+    {
+      "kind": "col",
+      "x": -1050,
+      "z": -3400,
+      "y0": 80,
+      "h": 240,
+      "w": 28,
+      "d": 310,
+      "invisible": true,
+      "keepBlock": "chamber"
+    }
+  ],
+  "craft": [
+    {
+      "id": "keep-portcullis-gate",
+      "position": [
+        0,
+        0,
+        -930
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": false
+    },
+    {
+      "id": "keep-portcullis-cells",
+      "position": [
+        0,
+        0,
+        -4100
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": false
+    },
+    {
+      "id": "keep-portcullis-workshop",
+      "position": [
+        1450,
+        0,
+        -2770
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": false
+    }
+  ],
+  "journey": {
+    "triangles": 11786,
+    "signs": 6,
+    "objects": [
+      "rk.breach",
+      "rk.arrow",
+      "rk.wheel",
+      "rk.timing"
+    ],
+    "latchGreen": true,
+    "cordCut": true,
+    "warning": null
+  },
+  "quest": "Go through the dungeon gate and down to the cells",
+  "target": {
+    "x": 0,
+    "z": -4630,
+    "y": 0,
+    "t": 14.850000000000318
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "checks": [
+    "Both clients enter matching fortress",
+    "Host dialogue does not zoom the guest",
+    "Guest cannot choose in an unowned conversation",
+    "Guest cannot cut cord through living guards",
+    "Guest opens shared outer gate",
+    "Guest proximity advances host-owned rescue",
+    "Host-owned prisoner health reaches guest",
+    "One attack cannot hit a prisoner twice",
+    "Shared rescue completes with only guest protecting the court",
+    "Guest on battlements receives wheel guidance",
+    "Wheel opens shared exit without killing key guards",
+    "Shared timing window opens workshop",
+    "Repeated state does not duplicate geometry or close a gate"
+  ],
+  "transport": "Two rendered clients, actual host/guest handlers over a local relay. Not a public Internet test."
+}

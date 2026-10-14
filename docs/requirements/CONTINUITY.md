@@ -1578,3 +1578,19 @@ Next campaign finishing area: Ruined Keep — Broken Walls, then the remaining c
 ## [Codex | 2026-10-14] Lost Canyon verified live
 
 Implementation 5a627c3c is on main. Cloudflare deployment 846ed895-ae5a-455c-8582-6cea4271ceda succeeded; production HTML and a fresh browser title confirm v2.194.0-canyon-journey with no browser errors. No production save was opened. Generated local QA pages were removed, owned test tabs closed, and the local server stopped. Exact verification is saved in docs/art-validation/canyon-journey-20261014/deployment.json. Broken Walls is the next campaign finishing pass.
+
+
+## [Codex | 2026-10-14] Broken Walls finishing pass authorized
+
+Latest user: “Okay go ahead and work on that.” Continue the announced next campaign finishing area: Ruined Keep — Broken Walls. Preserve scale, current story/rewards and meaningful optional routes. Grounded scope and verification plan: docs/design/BROKEN_WALLS_JOURNEY_2026-10-14.md. Implementation in progress, not verified or shipped. Later campaign stages remain open.
+
+
+## [Codex | 2026-10-14] Broken Walls finishing pass — v2.195.0
+
+Retained the 4,290 x 5,580 fortress and its existing story, enemies, rewards and optional climbs. Added joined stone route paving, six destination signs, an escape lane, a bronze bell, a corded ballista, a gate wheel and a workshop dial whose green sector matches the real latch window. Guidance now identifies the arrow stair and living guards, rescue retreat/remaining attackers, and both prison-entry choices. Wave markers use the actual next spawn. Gate/latch feedback describes the result, and superseded transient notices clear while journal clues remain.
+
+Six decorative towers now have collision. Physical testing exposed a tower inside the battlement stair; moved the matching pair from X +/-720 to +/-930. Normal-camera inspection also moved supply props out of the walking lane and decorative columns clear of the ballista and wheel. Refreshed only blueprint 2-0 from captured initial geometry; all other maps and the historical footprint remain intact.
+
+Verified 40 main-route and 136 optional-route waypoints plus chamber traversal, live prisoner damage/failure/retreat/retry, both key/wheel exits, five continuous workshop checks, six tower collisions, 13 host/guest assertions using real handlers over a local relay, and a genuine b4fbfa47 partial save preserving name, gold and both XP systems. Relevant source/syntax regressions pass. Evidence and precise limits: docs/art-validation/keep-journey-20261014/summary.json. This is not a human fun/novice-comprehension verdict, Internet session or full combat/performance playtest.
+
+Next: Ruined Keep — Dungeons, then remaining campaign halves. No custom SFX or unrelated companion edits. Deployment confirmation follows.

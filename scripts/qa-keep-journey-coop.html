@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>Broken Walls cooperative verification</title>
+<style>body{background:#182a37;color:#fff;font:14px system-ui}button{padding:10px}iframe{width:48%;height:300px;border:1px solid #687}pre{white-space:pre-wrap}</style>
+<h1>Local host/guest fortress verification</h1><button id="run">Test shared breach rescue</button><pre id="result">Wait for both clients, then start.</pre>
+<iframe id="host" title="Host" src="/3d/.qa-keep-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-keep-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result');out.textContent='Running…';let hb,gb;
+ try{
+  const h=document.getElementById('host').contentWindow,g=document.getElementById('guest').contentWindow;
+  for(let i=0;i<200&&(!h.keepQA||!g.keepQA);i++)await new Promise(r=>setTimeout(r,100));
+  hb=await h.keepQA.ready();gb=await g.keepQA.ready();const checks=[],ok=(n,v)=>{if(!v)throw Error(n);checks.push(n);};
+  await h.keepQA.fresh(hb);await g.keepQA.fresh(gb);
+  const hostQueue=[],guestQueue=[],handlers={};
+  Object.assign(hb.MP,{active:true,isHost:true,myId:'h',conns:[]});hb.MP.wireGuest({open:true,send:d=>hostQueue.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'g',hostConn:{open:true,send:d=>guestQueue.push(JSON.parse(JSON.stringify(d)))}});
+  function flush(){for(let n=0;n<4;n++){for(const p of guestQueue.splice(0))handlers.data(p);for(const p of hostQueue.splice(0))gb.MP.onGuestData(p);}}
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();hb.enterZone(2);flush();await h.keepQA.wait(200);flush();
+  for(const b of [hb,gb]){b.G.p.invuln=99999;for(const e of b.G.enemies)e.stunT=99999;}
+  const broadcast=()=>{hb.MP._storySent=0;hb.MP.broadcast();flush();};
+  const pump=n=>{for(let i=0;i<n;i++){hb.update(1/60);gb.update(1/60);}broadcast();};
+  const guestPos=()=>{gb.MP.hostConn.send({t:'pos',p:gb.MP.selfState()});flush();};
+  function act(win,b,key){const o=b.G.storyObjects.find(o=>o.key===key);win.keepQA.place(b,o.x,o.z,Math.max(o.y,b.highestSurfaceAt(o.x,o.z,8)));if(!b.MP.isHost)guestPos();b.briarRequest('world',{key});flush();}
+  ok('Both clients enter matching fortress',hb.G.keep&&gb.G.keep&&JSON.stringify(hb.G.bounds)===JSON.stringify(gb.G.bounds));
+  h.keepQA.place(hb,-260,-400,0);hb.briarRequest('open',{npc:'grant'});flush();ok('Host dialogue does not zoom the guest',gb.mode==='play');gb.briarRequest('choose',{line:'rk.grant.first',choice:'help'});flush();ok('Guest cannot choose in an unowned conversation',!hb.G.storyState.flags['rk.help']);hb.briarRequest('choose',{line:'rk.grant.first',choice:'help'});flush();hb.briarRequest('close');flush();
+  act(g,gb,'rk.arrow');ok('Guest cannot cut cord through living guards',!hb.G.storyState.flags['rk.arrow']);h.keepQA.clear(hb,'arrow');broadcast();act(g,gb,'rk.arrow');act(g,gb,'rk.gate');ok('Guest opens shared outer gate',hb.G.storyState.flags['rk.gate']&&gb.G.storyState.flags['rk.gate']&&!gb.G.obstacles.some(o=>o.keepBlock==='gate'));
+  h.keepQA.place(hb,0,-300,0);act(g,gb,'rk.breach');pump(115);ok('Guest proximity advances host-owned rescue',hb.G.keep.elapsed>1.5&&gb.G.keep.remote.waves===1);
+  const e=hb.G.enemies.find(e=>e.keepEscort&&!e.dead),n=hb.G.keepPrisoners[0];Object.assign(e,{x:n.x+18,y:0,z:n.z,meleeSerial:871});h.BFBrokenWalls.hitEscort(hb.G,e);broadcast();ok('Host-owned prisoner health reaches guest',gb.G.keep.remote.escortHp[0]===hb.G.keep.escortHp[0]&&gb.G.keep.remote.escortHp[0]<90);
+  const original=hb.G.keep.escortHp[0];h.BFBrokenWalls.hitEscort(hb.G,e);ok('One attack cannot hit a prisoner twice',hb.G.keep.escortHp[0]===original);
+  for(let k=0;k<70&&!hb.G.storyState.flags['rk.breach.done'];k++){guestPos();for(let i=0;i<30;i++){for(const e of hb.G.enemies)if(e.keepGuard==='breach'){e.hp=0;e.dead=true;}hb.update(1/60);gb.update(1/60);}broadcast();if(k%10===0)await h.keepQA.wait(0);}
+  ok('Shared rescue completes with only guest protecting the court',hb.G.storyState.flags['rk.breach.done']&&gb.G.storyState.flags['rk.breach.done']);
+  h.keepQA.place(hb,0,-3100,0);g.keepQA.place(gb,650,-3650,200);guestPos();ok('Guest on battlements receives wheel guidance',g.BFPartyNavigation.target(gb.G)?.key==='rk.wheel');act(g,gb,'rk.wheel');ok('Wheel opens shared exit without killing key guards',hb.G.storyState.flags['rk.cells']&&gb.G.storyState.flags['rk.cells']&&hb.G.enemies.some(e=>e.keepGuard==='post'&&!e.dead)&&!!gb.G.portal);
+  act(g,gb,'rk.timing');if(!hb.G.storyState.flags['rk.workshop']){hb.G.keep.clock=1;broadcast();act(g,gb,'rk.timing');}ok('Shared timing window opens workshop',hb.G.storyState.flags['rk.workshop']&&gb.G.storyState.flags['rk.workshop']);
+  const packet=JSON.parse(JSON.stringify(hb.briarPacket())),count=gb.G.obstacles.length;gb.briarApply(packet);gb.briarApply(packet);ok('Repeated state does not duplicate geometry or close a gate',gb.G.obstacles.length===count&&!gb.G.obstacles.some(o=>o.keepBlock==='cells'));
+  out.textContent=JSON.stringify({checks,transport:'Two rendered clients, actual host/guest handlers over a local relay. Not a public Internet test.'},null,2);
+ }catch(e){out.textContent='FAIL '+e.stack+'\n'+JSON.stringify({host:hb&&{status:document.getElementById('host').contentWindow.BFBrokenWalls.status(hb.G),flags:hb.G.storyState.flags,peers:hb.MP.peers},guest:gb&&{status:document.getElementById('guest').contentWindow.BFBrokenWalls.status(gb.G),flags:gb.G.storyState.flags}},null,2);}finally{for(const b of [hb,gb])if(b){b.MP.active=false;b.MP.conns=[];}}
+};
+</script>

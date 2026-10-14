@@ -1,0 +1,79 @@
+{
+  "version": "2.195.0-keep-journey",
+  "baseline": "b4fbfa47",
+  "date": "2026-10-14",
+  "scope": "Production Ruined Keep, Broken Walls only; original 4290 x 5580 bounds retained.",
+  "changes": [
+    "Joined flagstone routes with clipped smooth edges, six double-sided destination signs, marked escape lane.",
+    "Bronze breach bell beside the prisoner path, corded ballista, battlement gate wheel, workshop dial matched to authoritative green window.",
+    "Objective guidance chooses stairs, actual blockers, group proximity, remaining attackers, and both key/wheel prison approaches.",
+    "Six existing towers now have collision. Breach pair moved to X +/-930 to clear actual battlement climb. Decorative columns and supplies moved clear of mechanisms and paving.",
+    "Wave warning marks actual next spawn location. Accepted latch/gate actions state the result; obsolete transient notices clear without deleting journal notes.",
+    "Only blueprint map 2-0 refreshed from final built geometry; other 15 and previous footprint preserved."
+  ],
+  "verification": {
+    "mainRoute": {
+      "checks": 7,
+      "recordedWaypoints": 40,
+      "file": "main-route.json"
+    },
+    "optionalRoutes": {
+      "checks": 7,
+      "waypoints": 136,
+      "additional": "Chamber shortcut, four-guard challenge, workshop timing and existing dagger reward.",
+      "file": "optional-routes.json"
+    },
+    "liveRescue": {
+      "checks": 6,
+      "file": "breach-combat.json",
+      "actualAI": "Moving attackers damage prisoners, defeat causes retreat, retry heals, leaving resets, return completes."
+    },
+    "cooperative": {
+      "checks": 13,
+      "file": "cooperative.json",
+      "transport": "Two rendered clients with actual host/guest message handlers through local relay; not Internet matchmaking."
+    },
+    "continuousWorkshop": {
+      "checks": 5,
+      "file": "continuous-workshop.json",
+      "method": "Normal camera; real-time movement from approach through mistimed input, green release, doorway, tools. No teleport after initial camera/setup."
+    },
+    "collision": "Six towers physically block movement; every authored optional route passed.",
+    "save": {
+      "createdBy": "Genuine b4fbfa47 index and Broken Walls/navigation/geography logic using current shared art; not a historical-render comparison.",
+      "retained": [
+        "name",
+        "gold 927",
+        "character level 11 / XP 82",
+        "Warrior rank 7 / XP 161",
+        "partial quest flags and open outer gate"
+      ],
+      "files": [
+        "old-save-created.json",
+        "old-save-loaded.json"
+      ]
+    },
+    "automated": [
+      "test-keep-journey.cjs",
+      "test-story-authority.cjs",
+      "test-journal-notice.cjs",
+      "test-campaign-refinement.cjs",
+      "check-3d-inline.cjs",
+      "Changed module syntax checks"
+    ],
+    "render": "Open dungeon gate matches collision; ballista, bell and wheel inspected from ordinary camera; no browser errors in final local checks.",
+    "newArtTriangles": 12905
+  },
+  "testAdjustments": [
+    "Accelerated co-op simulation must send guest position heartbeats each batch; production stale-peer expiry is unchanged.",
+    "Jump verifier uses actual highest surface because overlapping authored stair samples can sit above their nominal path point.",
+    "Continuous walk waits for actual position, not fixed wall-clock time under multiple rendered clients."
+  ],
+  "limitations": [
+    "Route tests stun or clear enemies to isolate collision; only the breach damage/failure/retry check exercises live enemy AI.",
+    "No full campaign combat balance, public Internet co-op, low-end performance, or human new-player/fun verdict.",
+    "Before image predates new art; later baseline save fixture reuses current shared render modules.",
+    "No systematic search for every possible gate bypass; existing walls and gate logic remain."
+  ],
+  "next": "Ruined Keep Dungeons finishing pass; not started here."
+}

@@ -1,3 +1,4 @@
+import {buildKeepJourneyArt} from './keep-journey-art.js?v=2195';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
@@ -159,11 +160,11 @@ export function buildKeep(scene,w){
       for(let i=0;i<n;i++){const d=-len/2+35+i*70;block(o.x+(alongX?d:0),o.h+13,o.z+(alongX?0:d),alongX?34:o.w,26,alongX?o.d:34,'#797767');}
       if(alongX)add('banner',o.x,o.h-100,o.z+o.d/2+3,50,90,8);
     }
-    for(const [x,z,y]of [[-540,420,0],[540,420,0],[-720,-2640,0],[720,-2640,0],[-1860,-3750,80],[420,-4360,0]]){
+    for(const [x,z,y]of [[-540,420,0],[540,420,0],[-930,-2640,0],[930,-2640,0],[-1860,-3750,80],[420,-4360,0]]){
       add('tower',x,y-12,z,115,280,115);add('banner',x,y+95,z+60,45,105,8);brazier(x,y+280,z,17);
     }
     // Supplies and bedding explain why the freed group waits under the outer wall.
-    for(const [x,z]of [[-370,-1610],[-435,-1645],[-350,-3030]]){add('crate',x,0,z,52,40,38);block(x+42,4,z+10,28,8,62,'#6e6e54','wood');}
+    for(const [x,z]of [[-380,-1500],[-465,-1500],[-350,-3030]]){add('crate',x,0,z,52,40,38);block(x+42,4,z+10,28,8,62,'#6e6e54','wood');}
     // The seized workshop has an open roof for camera visibility, with a distinct timber frame.
     for(const x of [1160,1710]){for(const z of [-2740,-3190])block(x,75,z,18,150,18,'#59462e','wood');block(x,142,-2965,22,18,470,'#816a47','wood');}
     block(1435,155,-3190,570,22,24,'#816a47','wood');
@@ -213,11 +214,12 @@ export function buildKeep(scene,w){
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffad55',900,180,1.6);root.add(l);return l});
   const counts={keepArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
   const winch=w.keepScene==='dungeons'?buildLiftWinch(root):null,presses=w.keepScene==='dungeons'?buildLowerPresses(root):null;
-  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,winch,presses,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
-  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();winch?.dispose();presses?.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
+  const journey=buildKeepJourneyArt(w);if(journey)root.add(journey);
+  active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,winch,presses,journey,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
+  root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();winch?.dispose();presses?.dispose();journey?.userData.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateKeep(w){
-  if(!active||!w.p)return;const a=active,p=w.p,low=window.__BF_META?.().quality==='low',range=low?750:1200;let tris=0,calls=0;
+  if(!active||!w.p)return;active.journey?.userData.update();const a=active,p=w.p,low=window.__BF_META?.().quality==='low',range=low?750:1200;let tris=0,calls=0;
   if(a.winch&&w.prison){const lift=w.movers.find(m=>m.prisonLift),k=w.prison.winch,rig=a.winch;if(lift){rig.deck.position.y=lift.h;rig.weight.position.set(243,435-(lift.h-180),-2500);}rig.arm.rotation.y=-(k.angle||0);const lit=Math.floor((k.progress||0)*24+.0001);if(lit!==rig.lastLit){for(let i=0;i<24;i++)rig.marker.setColorAt(i,i<lit?rig.colors.lit:rig.colors.dark);rig.marker.instanceColor.needsUpdate=true;rig.lastLit=lit;}}
   if(a.presses&&w.prison){const stopped=!!w.storyState?.flags?.['kd.deep.open'];for(const [i,rig]of a.presses.stages.entries()){
     const state=w.prison.presses[i],bottom=state?.bottom??134;

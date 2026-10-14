@@ -1,6 +1,9 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
+ 'rk.gate':'Grant’s gate is open. Ring the bell beside the breach when you are ready to protect the prisoners.',
+ 'rk.timing':'The workshop gate is open. Felix’s tools are on the crate inside.',
+ 'rk.tools':'Tools secured. Return them to Felix beside the breach court.',
  'rv.supplies.take':'The food is secured. Return to the Quartermaster in the Waystation.',
  'home.grain.clue':'The basket is tied to the store-room door. Find where the loft hopper sends its grain.',
  'home.grain.spout':'The trough now points at the hanging basket. Release the grain from the loft hopper.',
@@ -24,6 +27,8 @@ const outcomes={
 };
 function outcome(key){return outcomes[key]||null;}
 function notice(event,before,after,object,id){
+ const keepOpen={'rk.gate':['rk.gate','Outer gate opened'],'rk.timing':['rk.workshop','Workshop gate opened']}[object?.key];
+ if(keepOpen&&!before.flags[keepOpen[0]]&&after.flags[keepOpen[0]])return {id,replaceKey:'puzzle:'+object.key,kind:'Path opened',title:keepOpen[1],text:outcomes[object.key]};
  if(event?.effects?.some(e=>e.id==='rv.supplies.balance.open')&&after.flags['rv.supplies.balance.open'])return {id,replaceKey:'puzzle:rv.supplies',kind:'Supplies lowered',title:'Hoist brake freed',text:'The counterweight rises and the food basket descends. Return to the floor and collect the supplies.'};
  if(['home.grain.spout','home.grain.hopper'].some(key=>event?.effects?.some(e=>e.id===key))){
   const solved=!!after.flags['home.grain.open'];

@@ -1,0 +1,119 @@
+{
+  "hero3D": {
+    "on": true,
+    "ready": true,
+    "error": null
+  },
+  "flags": {},
+  "blocks": [
+    {
+      "kind": "col",
+      "x": 0,
+      "z": -930,
+      "y0": 0,
+      "h": 180,
+      "w": 440,
+      "d": 24,
+      "invisible": true,
+      "keepBlock": "gate"
+    },
+    {
+      "kind": "col",
+      "x": 0,
+      "z": -4100,
+      "y0": 0,
+      "h": 220,
+      "w": 450,
+      "d": 24,
+      "invisible": true,
+      "keepBlock": "cells"
+    },
+    {
+      "kind": "col",
+      "x": 1450,
+      "z": -2770,
+      "y0": 0,
+      "h": 150,
+      "w": 300,
+      "d": 20,
+      "invisible": true,
+      "keepBlock": "workshop"
+    },
+    {
+      "kind": "col",
+      "x": -1050,
+      "z": -3400,
+      "y0": 80,
+      "h": 240,
+      "w": 28,
+      "d": 310,
+      "invisible": true,
+      "keepBlock": "chamber"
+    }
+  ],
+  "craft": [
+    {
+      "id": "keep-portcullis-gate",
+      "position": [
+        0,
+        0,
+        -930
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": true
+    },
+    {
+      "id": "keep-portcullis-cells",
+      "position": [
+        0,
+        0,
+        -4100
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": false
+    },
+    {
+      "id": "keep-portcullis-workshop",
+      "position": [
+        1450,
+        0,
+        -2770
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": false
+    }
+  ],
+  "journey": {
+    "triangles": 12905,
+    "signs": 6,
+    "objects": [
+      "rk.breach",
+      "rk.arrow",
+      "rk.wheel",
+      "rk.timing"
+    ],
+    "latchGreen": true,
+    "cordCut": false,
+    "warning": null
+  },
+  "quest": "Speak to Grant in the outer court",
+  "target": {
+    "id": "grant",
+    "name": "Grant",
+    "x": -260,
+    "z": -440,
+    "y": 0
+  }
+}

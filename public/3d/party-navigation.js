@@ -15,10 +15,7 @@ function target(g){
  case '0:1':t=!f['woods.ready']?npc('lewis'):!f['woods.signal']?nearest([obj('woods.signal.crank'),obj('woods.signal.cable')]):exit();break;
  case '1:0':t=first([['hp.trail','@caleb'],['hp.orders','hp.orders'],['hp.bridge','hp.bridge.clue'],['hp.descent','hp.lift']]);break;
  case '1:1':t=root.BFLostCanyon?.destination(g);break;
- case '2:0':if(f['rk.breach.start']&&!f['rk.breach.done']){
-   const k=g.keep?.remote||g.keep,z=-1650-Math.min(1,(k?.elapsed||0)/30)*1250;
-   t=Math.hypot(g.p.x,g.p.z-z)>380?{x:0,z,y:0,navLabel:'Protect the escaping group'}:null;
-  }else t=first([['rk.help','@grant'],['rk.arrow','rk.arrow'],['rk.gate','rk.gate'],['rk.breach.start','rk.breach'],['rk.cells','rk.wheel']]);break;
+ case '2:0':t=root.BFBrokenWalls?.destination(g);break;
  case '2:1':t=first([['kd.roster','kd.roster'],['kd.hidden','kd.hidden'],['kd.free','kd.free'],['kd.papers','kd.papers'],['kd.lift.open','kd.lift.winch'],['kd.transfer','kd.lift.winch']]);break;
  case '3:0':t=first([['ff.trail','ff.trail'],['ff.part','ff.part'],['ff.heater','ff.heater'],['ff.reflect.open','ff.reflect.clue'],['ff.cave','ff.cave']]);break;
  case '3:1':t=first([['ic.pages','ic.pages'],['ic.free','ic.free'],['ic.ellis.met','@ellis'],['ic.notes','ic.notes'],['ic.ellis.lead','@ellis'],['ic.lock.open','ic.lock.clue']]);break;

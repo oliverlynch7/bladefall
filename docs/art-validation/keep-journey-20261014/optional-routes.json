@@ -1,0 +1,58 @@
+{
+  "checks": [
+    "Old wall unbars chamber",
+    "Physical chamber shortcut is traversable",
+    "Chamber challenge spawns all four guards",
+    "Challenge completion reveals the same shard",
+    "Mistimed latch does not open",
+    "Green latch opens the workshop",
+    "Tools remain redeemable for the existing dagger"
+  ],
+  "routes": [
+    {
+      "route": "west",
+      "count": 26,
+      "end": [
+        -3.9798834203341937,
+        -2996.6324063422303,
+        0
+      ]
+    },
+    {
+      "route": "east",
+      "count": 26,
+      "end": [
+        4.537531442520353,
+        -2996.1605503093865,
+        0
+      ]
+    },
+    {
+      "route": "wall",
+      "count": 34,
+      "end": [
+        185.69434185432092,
+        -4015.517220251807,
+        75.75
+      ]
+    },
+    {
+      "route": "bell",
+      "count": 24,
+      "end": [
+        -1697.13132479293,
+        -1596.1233153628598,
+        320
+      ]
+    },
+    {
+      "route": "oldwall",
+      "count": 26,
+      "end": [
+        -1485.2402996546084,
+        -3494.9536430135486,
+        80
+      ]
+    }
+  ]
+}

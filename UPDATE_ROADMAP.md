@@ -2828,3 +2828,8 @@ Six decorative towers now have collision. Physical testing exposed a tower insid
 Verified 40 main-route and 136 optional-route waypoints plus chamber traversal, live prisoner damage/failure/retreat/retry, both key/wheel exits, five continuous workshop checks, six tower collisions, 13 host/guest assertions using real handlers over a local relay, and a genuine b4fbfa47 partial save preserving name, gold and both XP systems. Relevant source/syntax regressions pass. Evidence and precise limits: docs/art-validation/keep-journey-20261014/summary.json. This is not a human fun/novice-comprehension verdict, Internet session or full combat/performance playtest.
 
 Next: Ruined Keep — Dungeons, then remaining campaign halves. No custom SFX or unrelated companion edits. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-14] Broken Walls verified live
+
+Implementation 483f70a7 is on main. Cloudflare deployment 8af9bf7c-7f70-43ef-bd88-bdbe50f9e7fb succeeded. Production HTML and a fresh browser title show v2.195.0-keep-journey; the new art module returns HTTP 200, and browser errors are empty. No production save was opened. Local QA pages were removed, owned tabs closed, and the local server stopped. Verification: docs/art-validation/keep-journey-20261014/deployment.json. Next: Ruined Keep — Dungeons. Preexisting companion3d.js and articulated-rigs.json edits remain unstaged and untouched.

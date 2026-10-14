@@ -1,0 +1,35 @@
+<!doctype html><meta charset="utf-8"><title>Dungeons cooperative verification</title>
+<style>body{background:#182a37;color:#fff;font:14px system-ui}button{padding:10px}iframe{width:48%;height:300px;border:1px solid #687}pre{white-space:pre-wrap}</style>
+<h1>Local host/guest dungeon verification</h1><button id="run">Test shared prisoner lift</button><pre id="result">Wait for both clients, then start.</pre>
+<iframe id="host" title="Host" src="/3d/.qa-prison-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-prison-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result');out.textContent='Running…';let hb,gb;const checks=[];
+ try{
+  const h=document.getElementById('host').contentWindow,g=document.getElementById('guest').contentWindow;
+  for(let i=0;i<200&&(!h.prisonQA||!g.prisonQA);i++)await new Promise(r=>setTimeout(r,100));hb=await h.prisonQA.ready();gb=await g.prisonQA.ready();const ok=(n,v)=>{if(!v)throw Error(n);checks.push(n);};
+  await h.prisonQA.fresh(hb);await g.prisonQA.fresh(gb);const hostQueue=[],guestQueue=[],handlers={};
+  Object.assign(hb.MP,{active:true,isHost:true,myId:'h',conns:[]});hb.MP.wireGuest({open:true,send:d=>hostQueue.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'g',hostConn:{open:true,send:d=>guestQueue.push(JSON.parse(JSON.stringify(d)))}});
+  function flush(){for(let n=0;n<4;n++){for(const p of guestQueue.splice(0))handlers.data(p);for(const p of hostQueue.splice(0))gb.MP.onGuestData(p);}}
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();hb.enterZone(2);hb.nextArea();flush();await h.prisonQA.wait(250);flush();
+  for(const b of [hb,gb]){b.G.p.invuln=99999;for(const e of b.G.enemies)e.stunT=99999;}
+  const broadcast=()=>{hb.MP._storySent=0;hb.MP.broadcast();flush();},guestPos=()=>{gb.MP.hostConn.send({t:'pos',p:gb.MP.selfState()});flush();};
+  const pump=n=>{for(let i=0;i<n;i++){guestPos();hb.update(1/60);gb.update(1/60);if(i%6===0)broadcast();}broadcast();};
+  function act(win,b,key){const o=b.G.storyObjects.find(o=>o.key===key);win.prisonQA.place(b,key==='kd.press.brake'?-145:o.x,key==='kd.press.brake'?-2770:o.z,o.y);if(!b.MP.isHost)guestPos();b.briarRequest('world',{key});flush();}
+  ok('Both clients enter matching dungeon floors',hb.G.area===1&&gb.G.area===1&&hb.G.prison&&gb.G.prison&&JSON.stringify(hb.G.bounds)===JSON.stringify(gb.G.bounds));
+  act(g,gb,'kd.roster');act(g,gb,'kd.hidden');ok('Guest opens shared service door',hb.G.storyState.flags['kd.hidden']&&gb.G.storyState.flags['kd.hidden']&&!gb.G.obstacles.some(o=>o.prisonBlock==='hidden'));
+  act(g,gb,'kd.free');ok('Living guards block guest release',!hb.G.storyState.flags['kd.free']);h.prisonQA.clear(hb,'cells');broadcast();act(g,gb,'kd.free');act(g,gb,'kd.papers');pump(500);ok('Both clients see prisoners waiting at the lift',gb.G.prison.remote.rescueT>=7.99&&!gb.G.storyState.flags['kd.lift.open']);
+  act(g,gb,'kd.lift.winch');ok('Guest owns the host-authoritative winch',hb.G.prison.winch.owner==='g');act(h,hb,'kd.lift.winch');ok('Host cannot steal the guest handle',hb.G.prison.winch.owner==='g');
+  h.prisonQA.place(hb,-670,-980,180);hb.briarRequest('open',{npc:'walter'});flush();ok('Host conversation leaves the guest playing',hb.G.storyState.conversation?.owner==='h'&&gb.mode==='play');
+  function walkAngle(angle){const p=gb.G.p,x=Math.cos(angle)*88,z=-2500+Math.sin(angle)*88;for(let i=0;i<100&&Math.hypot(p.x-x,p.z-z)>5&&!hb.G.storyState.flags['kd.lift.open'];i++){const dx=x-p.x,dz=z-p.z,d=Math.hypot(dx,dz);gb.input.jx=dx/d;gb.input.jz=dz/d;gb.update(.016);guestPos();hb.update(.016);broadcast();}gb.input.jx=gb.input.jz=0;}
+  for(let i=1;i<=6;i++)walkAngle(i*Math.PI/15);ok('Guest can raise lift while host talks to Walter',hb.G.prison.winch.progress>.12&&hb.G.prison.winch.owner==='g');ok('Guest rides the synchronized moving platform',Math.abs(gb.G.p.y-gb.G.movers.find(m=>m.prisonLift).h)<6);hb.briarRequest('close');flush();
+  handlers.close();ok('Disconnect releases exclusive handle',!hb.G.prison.winch.owner);handlers.open();handlers.data({t:'hello',p:gb.MP.selfState()});flush();pump(260);ok('Disconnected attempt lowers for a safe retry',hb.G.prison.winch.progress===0&&gb.G.prison.remote.winchProgress===0);
+  act(g,gb,'kd.lift.winch');ok('Reconnected guest can grip again',hb.G.prison.winch.owner==='g');for(let i=1;i<=34&&!hb.G.storyState.flags['kd.lift.open'];i++)walkAngle(i*Math.PI/15);ok('Guest completes the full turn for both clients',hb.G.storyState.flags['kd.lift.open']&&gb.G.storyState.flags['kd.lift.open']);pump(520);ok('Shared transfer opens both release gates',hb.G.storyState.flags['kd.transfer']&&gb.G.storyState.flags['kd.transfer']&&!!gb.G.portal&&!gb.G.obstacles.some(o=>o.prisonBlock==='release'));
+  const lift=hb.G.movers.find(m=>m.prisonLift);for(let i=0;i<900&&lift.h>180.01;i++)pump(1);h.prisonQA.place(hb,80,-2590,180);for(let i=0;i<900&&lift.h<350;i++)pump(1);ok('Host left below can take a later lift ride',hb.G.p.y>340&&Math.abs(hb.G.p.y-lift.h)<5);
+  act(g,gb,'kd.press.brake');ok('Guest brake synchronizes lower gate and presses',hb.G.storyState.flags['kd.deep.open']&&gb.G.storyState.flags['kd.deep.open']);pump(5);ok('Both press machines stay raised',hb.G.prison.presses.every(p=>p.bottom===134)&&gb.G.prison.presses.every(p=>p.bottom===134));
+  const packet=JSON.parse(JSON.stringify(hb.briarPacket())),count=gb.G.obstacles.length;gb.briarApply(packet);gb.briarApply(packet);ok('Repeated state preserves open gates without duplicate geometry',gb.G.obstacles.length===count&&!gb.G.obstacles.some(o=>o.prisonBlock));
+  out.textContent=JSON.stringify({checks,transport:'Two rendered clients, actual host/guest handlers over a local relay. Not a public Internet session.'},null,2);
+ }catch(e){out.textContent='FAIL '+e.stack+'\n'+JSON.stringify({checks,host:hb&&{status:document.getElementById('host').contentWindow.BFPrison.status(hb.G),flags:hb.G.storyState.flags,mode:hb.mode},guest:gb&&{status:document.getElementById('guest').contentWindow.BFPrison.status(gb.G),flags:gb.G.storyState.flags,mode:gb.mode}},null,2);}finally{for(const b of [hb,gb])if(b){b.MP.active=false;b.MP.conns=[];}}
+};
+</script>

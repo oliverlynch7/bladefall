@@ -16,7 +16,7 @@ function target(g){
  case '1:0':t=first([['hp.trail','@caleb'],['hp.orders','hp.orders'],['hp.bridge','hp.bridge.clue'],['hp.descent','hp.lift']]);break;
  case '1:1':t=root.BFLostCanyon?.destination(g);break;
  case '2:0':t=root.BFBrokenWalls?.destination(g);break;
- case '2:1':t=first([['kd.roster','kd.roster'],['kd.hidden','kd.hidden'],['kd.free','kd.free'],['kd.papers','kd.papers'],['kd.lift.open','kd.lift.winch'],['kd.transfer','kd.lift.winch']]);break;
+ case '2:1':t=root.BFPrison?.destination(g);break;
  case '3:0':t=first([['ff.trail','ff.trail'],['ff.part','ff.part'],['ff.heater','ff.heater'],['ff.reflect.open','ff.reflect.clue'],['ff.cave','ff.cave']]);break;
  case '3:1':t=first([['ic.pages','ic.pages'],['ic.free','ic.free'],['ic.ellis.met','@ellis'],['ic.notes','ic.notes'],['ic.ellis.lead','@ellis'],['ic.lock.open','ic.lock.clue']]);break;
  case '4:0':t=first([['ih.flint.met','@flint'],['ih.workers.safe','ih.workers'],['ih.handles','ih.handles'],['ih.cart','ih.cart'],['ih.line.open','ih.plate']]);break;
@@ -48,9 +48,6 @@ function target(g){
  if(g.zone===3&&g.area===1&&f['ic.ellis.lead']&&read('ic.lock.clue')&&!f['ic.lock.open']){
   const level=i['ic.lock.level']||0,key=level>=3||f['ic.lock.frozen']&&level!==2?'ic.lock.reset':f['ic.lock.frozen']?'ic.lock.3':level<2?'ic.lock.1':'ic.lock.2',o=obj(key);
   if(o)t={...o,clueId:'ic.lock',navLabel:key==='ic.lock.1'?'Spring pump':key==='ic.lock.2'?'Floating platform':key==='ic.lock.reset'?'Overflow sluice':'Far drain'};
- }
- if(g.zone===2&&g.area===1&&f['kd.papers']&&f['kd.lift.open']&&!f['kd.transfer']){
-  const lift=(g.movers||[]).find(m=>m.prisonLift);if(lift)t={x:lift.x,z:lift.z,y:lift.h,navLabel:'Prisoner lift'};
  }
  if(g.zone===4&&g.area===0&&f['ih.cart']&&read('ih.plate')&&!f['ih.line.open']){
   const z=g.iron?.sledZ??-3780;t={x:0,z:z+105,y:100,clueId:'ih.order',navLabel:'Push the scrap sled'};

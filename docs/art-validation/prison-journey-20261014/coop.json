@@ -1,0 +1,23 @@
+{
+  "checks": [
+    "Both clients enter matching dungeon floors",
+    "Guest opens shared service door",
+    "Living guards block guest release",
+    "Both clients see prisoners waiting at the lift",
+    "Guest owns the host-authoritative winch",
+    "Host cannot steal the guest handle",
+    "Host conversation leaves the guest playing",
+    "Guest can raise lift while host talks to Walter",
+    "Guest rides the synchronized moving platform",
+    "Disconnect releases exclusive handle",
+    "Disconnected attempt lowers for a safe retry",
+    "Reconnected guest can grip again",
+    "Guest completes the full turn for both clients",
+    "Shared transfer opens both release gates",
+    "Host left below can take a later lift ride",
+    "Guest brake synchronizes lower gate and presses",
+    "Both press machines stay raised",
+    "Repeated state preserves open gates without duplicate geometry"
+  ],
+  "transport": "Two rendered clients, actual host/guest handlers over a local relay. Not a public Internet session."
+}

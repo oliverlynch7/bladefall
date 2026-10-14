@@ -112,6 +112,9 @@ function apply(G,zone){
    line('lift-atrium-west',-690,-2110,-690,-3070,0,760);
    line('lift-atrium-east',690,-2140,690,-2950,0,760);
    rect('upper-hall',0,-4150,360,1140,1760,500,{south:[[0,820]]});
+   // The release gate closes the full corridor; its side gaps are masonry, not bypasses.
+   line('release-bulkhead-west',-570,-4030,-165,-4030,360,500,50);
+   line('release-bulkhead-east',165,-4030,570,-4030,360,500,50);
    // Cover around the drain is masonry, not an invisible map edge.
    rect('drain-cistern',1890,-4080,0,1660,2010,720,{south:[[1530,560]],west:[[-3340,500]]});
    hazard('lift-shaft',{x:0,z:-2500,w:390,d:670});hazard('flooded-drain',{x:1890,z:-4090,w:1370,d:1820});

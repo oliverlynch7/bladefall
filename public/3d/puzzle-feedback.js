@@ -1,6 +1,7 @@
 /* Explain an accepted puzzle action without revealing its next answer. */
 (function(root){'use strict';
 const outcomes={
+ 'kd.hidden':'The service door swings open. The missing prisoners are in the holding room beyond it.',
  'rk.gate':'Grant’s gate is open. Ring the bell beside the breach when you are ready to protect the prisoners.',
  'rk.timing':'The workshop gate is open. Felix’s tools are on the crate inside.',
  'rk.tools':'Tools secured. Return them to Felix beside the breach court.',

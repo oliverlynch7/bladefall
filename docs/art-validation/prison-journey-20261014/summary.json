@@ -1,0 +1,125 @@
+{
+  "version": "2.196.0-prison-journey",
+  "baseline": "6360c7df",
+  "date": "2026-10-14",
+  "scope": "Ruined Keep — The Dungeons finishing pass; original 4600 x 5850 bounds retained.",
+  "changes": [
+    "Floor-aware objectives lead through reachable entrances, lower branch returns, boarding dock and upper shelter. Holding guard count is explicit.",
+    "Four framed destination signs, height-clipped flagstone inlays, hinged covered service door, detailed release/depth/holding bars, cell-lock lever, keepsake bundle and the existing rare chest model. Existing winch and press models retained.",
+    "Release bulkhead closes the side bypass. East holding-room exit unlocks with the existing cell lock. Visible barriers match collision.",
+    "Prisoners follow supported paths clear of the winch drum. Deliberate angular movement chooses winch direction, avoiding approach-inertia lockout. Host conversations no longer freeze rescue or guest winding.",
+    "Obsolete transient clues clear as their step completes; stored notes remain. Removed duplicate hardcoded E from winch label.",
+    "Only blueprint 2-1 refreshed from initial-state geometry; all other 15 maps and historical geometry preserved."
+  ],
+  "verification": {
+    "main": {
+      "checks": 10,
+      "file": "main-route.json",
+      "recordedWaypoints": 55
+    },
+    "drain": {
+      "checks": 4,
+      "file": "drain.json",
+      "recordedWaypoints": 86
+    },
+    "presses": {
+      "checks": 3,
+      "file": "presses.json",
+      "recordedWaypoints": 40
+    },
+    "cooperative": {
+      "checks": 18,
+      "file": "coop.json"
+    },
+    "continuousWinch": {
+      "checks": 5,
+      "file": "continuous-winch.json"
+    },
+    "winchRetry": {
+      "checks": 6,
+      "file": "winch-recovery.json"
+    },
+    "clearance": {
+      "samples": 3204,
+      "collisions": [],
+      "collisionCount": 0,
+      "unsupported": [],
+      "unsupportedCount": 0
+    },
+    "releaseBarrier": {
+      "lanes": 5,
+      "allBlocked": true
+    },
+    "holdingExit": {
+      "closed": "Bars close the eastern bypass",
+      "opened": "Cell lock releases the eastern return route",
+      "position": -741.8546993574847
+    },
+    "save": {
+      "name": "Dungeons compatibility",
+      "gold": 983,
+      "level": 12,
+      "xp": 87,
+      "class": {
+        "xp": 169,
+        "rank": 7,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      },
+      "area": 1,
+      "flags": {
+        "kd.roster": true,
+        "event.kd.roster": true,
+        "kd.hidden": true,
+        "event.kd.hidden": true
+      },
+      "blocks": [
+        "release",
+        "depth",
+        "holdingExit"
+      ]
+    },
+    "browserErrors": [],
+    "syntax": {
+      "moduleSyntax": [
+        "prison-dungeons",
+        "prison-journey-art",
+        "keep-art",
+        "campaign-geography",
+        "party-navigation",
+        "puzzle-feedback",
+        "blueprints",
+        "qa-prison-journey-page"
+      ],
+      "inlineSyntax": [
+        "public/3d/index.html: 2 inline scripts",
+        "scripts/qa-prison-journey-coop.html: 1 inline scripts"
+      ],
+      "storyJson": "valid, no replacement glyphs"
+    },
+    "unitTests": [
+      "prison-journey",
+      "prison-story",
+      "prison-press",
+      "keep-journey",
+      "story-state",
+      "story-authority",
+      "campaign-interaction",
+      "journal-notice"
+    ]
+  },
+  "limitations": [
+    "Main/branch traversal clears or stuns enemies to isolate collision; press damage is live. This is not a full combat balance pass.",
+    "Co-op uses two rendered clients and actual message handlers over a local relay, not public Internet matchmaking.",
+    "The continuous normal-camera winch check includes partial winding, release/lowering, a full retry and walking onto shelter; prerequisites are staged before the sequence.",
+    "Legacy gameplay/persistence come from 6360c7df. The later save producer reuses current shared art with an empty optional sign list; it is not a historical visual comparison.",
+    "No human novice-comprehension, enjoyment, long-session pacing or low-end performance verdict."
+  ],
+  "testAdjustments": [
+    "Fixture startup now performs the title-entry pointer event, matching player startup before testing live NPC conversations.",
+    "Brake interactions are staged on reachable floor beside the solid handle housing, not inside it.",
+    "Old-save checks run with other game fixtures closed; simultaneous test clients share the local origin and can overwrite each other’s saves."
+  ],
+  "next": "Frostfell — Snowbound Peaks, then the remaining campaign halves."
+}

@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "Grip after walking onto the deck",
+    "First attempt raises the platform",
+    "Lowered safely for retry",
+    "Full retry reaches upper dock",
+    "Player walks off the lift onto shelter floor"
+  ],
+  "continuous": true,
+  "staging": "Rescue prerequisite setup only before sequence; natural camera and real-time movement throughout the shown winding, failure, retry and exit."
+}

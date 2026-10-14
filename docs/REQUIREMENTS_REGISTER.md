@@ -1549,3 +1549,17 @@ Six decorative towers now have collision. Physical testing exposed a tower insid
 Verified 40 main-route and 136 optional-route waypoints plus chamber traversal, live prisoner damage/failure/retreat/retry, both key/wheel exits, five continuous workshop checks, six tower collisions, 13 host/guest assertions using real handlers over a local relay, and a genuine b4fbfa47 partial save preserving name, gold and both XP systems. Relevant source/syntax regressions pass. Evidence and precise limits: docs/art-validation/keep-journey-20261014/summary.json. This is not a human fun/novice-comprehension verdict, Internet session or full combat/performance playtest.
 
 Next: Ruined Keep — Dungeons, then remaining campaign halves. No custom SFX or unrelated companion edits. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-14] Dungeons finishing pass authorized
+
+Latest user: “Go on.” Continue the announced next campaign finishing area: Ruined Keep — The Dungeons. Preserve the 4,600 x 5,850 footprint, current story/rewards and optional press/drain routes. Grounded scope and verification: docs/design/DUNGEONS_JOURNEY_2026-10-14.md. Implementation in progress; not verified or shipped.
+
+
+## [Codex | 2026-10-14] Dungeons finishing pass — v2.196.0
+
+Retained the 4,600 x 5,850 level, story/reward IDs and optional press/drain routes. Added floor-aware guidance, four framed signs, clipped stone route inlays, a covered hinged service door, detailed gates, a visible cell-lock lever/keepsake bundle and the existing rare chest model. The release gate now meets full-height side walls; a barred eastern holding-room exit opens with the existing cell lock. Prisoner arrival paths avoid the drum and unsupported corners. A deliberate initial turn selects winch direction instead of tiny approach inertia. Independent host conversations no longer stop the shared rescue/lift. Removed the extra hardcoded E and clear superseded transient clues while retaining journal notes.
+
+Verified 55 main-route waypoints, 86 drain waypoints, 40 lower-works waypoints, live press damage/brake/water recovery, five release-gate lanes, the holding exit before/after release, 3,204 supported prisoner positions without collision, a continuous normal-camera lift mistake/lowering/retry/ascent, and 18 host/guest assertions through a local relay. A genuine 6360c7df partial save retains name, 983 gold, character level 12 / XP 87, Warrior rank 7 / XP 169 and quest flags. Relevant unit and syntax checks pass; final browser errors are empty. Only blueprint 2-1 was refreshed; other 15 maps and historical footprints are unchanged.
+
+Evidence and precise limits: docs/art-validation/prison-journey-20261014/summary.json. Automated traversal is not a human fun/novice-comprehension or full combat/performance verdict; the co-op test is local, not an Internet session. Next campaign area: Frostfell — Snowbound Peaks. Deployment confirmation follows. Preexisting companion/articulated-rig work remains untouched.

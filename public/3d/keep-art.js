@@ -1,4 +1,5 @@
 import {buildKeepJourneyArt} from './keep-journey-art.js?v=2195';
+import {buildPrisonJourneyArt} from './prison-journey-art.js?v=2196';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
@@ -214,7 +215,7 @@ export function buildKeep(scene,w){
   const lights=[0,1,2].map(()=>{const l=new THREE.PointLight('#ffad55',900,180,1.6);root.add(l);return l});
   const counts={keepArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
   const winch=w.keepScene==='dungeons'?buildLiftWinch(root):null,presses=w.keepScene==='dungeons'?buildLowerPresses(root):null;
-  const journey=buildKeepJourneyArt(w);if(journey)root.add(journey);
+  const journey=w.keepScene==='dungeons'?buildPrisonJourneyArt(w):buildKeepJourneyArt(w);if(journey)root.add(journey);
   active={root,groups,obstacles,walls,sun,counts,lamps,lights,occluders,winch,presses,journey,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__KEEP_ART_ACTIVE=true;
   root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();winch?.dispose();presses?.dispose();journey?.userData.dispose();if(active?.root===root)active=null;window.__KEEP_ART_ACTIVE=false;};return {group:root,counts};
 }

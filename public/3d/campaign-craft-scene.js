@@ -90,10 +90,16 @@ export function attachCampaignCraft(parent,w,counts){
    add('cargo-frame','crane',-1550,0,-2185,{w:180,h:285,d:75,liveCable:true});
    add('cliff-bridge','rope-bridge',0,0,-2800,{w:250,h:20,d:540},0,1,(n,world,game)=>{const k=game.cliffs,progress=game.storyState.flags['hp.bridge']?Math.max(0,Math.min(1,((game.time||0)-(k?.bridgeLowerAt??-Infinity))/1.5)):0;const angle=(1-progress*progress*(3-2*progress))*1.24;n.rotation.x=angle;n.position.set(0,5+270*Math.sin(angle),-2540-270*Math.cos(angle));});
   }else if(w.area===1){
+   add('canyon-signal-winch','winch',0,180,-2600,{},0,2);
    for(const [id,c]of Object.entries(g?.canyon?.cages||{})){
-    const released=()=>!!g.storyState.flags['lc.'+id];
+    add('cage-back-'+id,'cell-front',c.x,c.y,c.z-95,{w:226,h:150,d:12});
+    for(const side of [-1,1])add('cage-side-'+id+side,'cell-front',c.x+side*105,c.y,c.z,{w:190,h:150,d:12},Math.PI/2);
     add('cage-frame-'+id,'arch',c.x,c.y,c.z+95,{w:242,h:165,d:16});
     add('cage-door-'+id,'cell-front',c.x,c.y,c.z+95,{w:210,h:140,d:10},0,1,(n,world,game)=>{const flag=game.storyState.flags['lc.'+id]||(id==='north'&&game.storyState.flags['lc.north.open']);n.position.y=c.y+(flag?151:0);});
+   }
+   for(const [flag,z,y]of [['lc.entry',-940,70],['lc.escape',-4610,0]]){
+    add('canyon-gate-'+flag,'arch',0,y,z,{w:430,h:205,d:30});
+    add('canyon-bars-'+flag,'portcullis',0,y,z,{w:390,h:170,d:14},0,1,(n,world,game)=>{n.visible=!game.storyState.flags[flag];});
    }
    add('holding-wagon','prison-cart',1420,0,-2460,{},0,1.65,(n,world,game)=>{const open=game.storyState.flags['lc.wagon'];n.position.set(open?1550:1420,0,open?-2290:-2460);});
    for(const [i,[x,z,y]]of [[-320,-90,220],[-910,-700,120],[760,-1950,0],[-1200,-2500,0],[310,-4150,0],[2470,-3180,0]].entries())add('camp-supplies-'+i,'supplies',x,y+38,z,{},0,.65);

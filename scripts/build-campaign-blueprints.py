@@ -35,12 +35,12 @@ dict(title='Hollow Pass · Winding Cliffs',module='hollow-cliffs.js',main=['appr
  branches=[('hp.quiet','Quiet approach','An elevated rope route bypasses the lookout fight.'),('hp.rope','Climber loop','Retrieve rope along a side ledge.'),('hp.code.release','Freight cache','Use the high cargo route to reach the release above the cache.')],
  protect='No ground across the freight ravine; the two land masses stay separate. Preserve upper-route gaps and access to the bridge controls.',
  review='Winding Cliffs finishing pass implemented: joined trade road, five destination boards, clear bridge approach, detailed wagon and correctly placed winch. Bridge collision waits for the deck. Tested both lookout approaches and optional climbs, saved states and a local two-client relay; human pacing remains unverified.'),
-dict(title='Hollow Pass · Lost Canyon',module='lost-canyon.js',main=['arrival','west','east','northEvac','exit'],
+dict(title='Hollow Pass · Lost Canyon',module='lost-canyon.js',main=['arrival','west','east','northRescue','northEvac','exit'],
  idea='Occupied holding yards connected by service roads. Entry choice leads to two rescue locations, then a controlled escape.',
- steps=[('ward','Choose an entry','Use papers, force the gate, or take the roof and side ladder.'),('lc.cage.south','Free the south cage','This group is near the entry and guard yard.'),('lc.alarm','Cut the alarm','The alarm overlooks the north holding area.'),('lc.cage.north','Free the north cage','Finish the second rescue before opening the escape route.'),('lc.escape','Open the way out','The north road leads to the next crossing.')],
+ steps=[('ward','Choose an entry','Use papers, force the gate, or take the roof and side ladder.'),('lc.cage.south','Free the south cage','This group is near the entry and guard yard.'),('lc.alarm','Cut the alarm','Cut it before a rescue to prevent reinforcements, or reach it under pressure.'),('lc.cage.north','Free the north cage','Protect two prisoners along the east road. Pursuers can hurt them; retry if either falls.'),('lc.escape','Open the way out','The north road leads to the next crossing.')],
  branches=[('lc.side','Roof entry','Climb around the front checkpoint and lower a return ladder.'),('lc.cage.extra','Old cage','A separate rescue off the main holding road.'),('lc.rail.release','High freight brake','Climb above the stored cargo to open the lower cache route.'),('lc.water','Shelter support','Bring water to the refuge near the rescued group.')],
  protect='Preserve the gate, side entry, freight brake and cave approach. Ground the yards without flattening the roof or upper return route.',
- review='Keep the two rescues tactically distinct: entry guards versus alarm exposure. Different cage labels alone do not create different gameplay.'),
+ review='Finishing pass implemented: signed service roads avoid cage footprints and return before the escape gate. Fitted cage sides are solid, the escort clears the doorway, and forced-entry guards approach from the accessible ramp. Detailed signal winch, cut cable and lanterns show the alarm state. Three entries, ground routes, both climbs, escort damage/retry, old save and local co-op checked; human pacing remains unverified.'),
 dict(title='Ruined Keep · Broken Walls',module='broken-walls.js',main=['arrival','arrow','west','east','exit'],
  idea='A real fortress: outer court, breach court and inner ward inside stepped curtain walls. The optional workshop and battlements have identifiable entrances.',
  steps=[('grant','Find Grant','Meet him in the outer court, below the arrow post.'),('rk.arrow','Silence the arrow post','Use the east climb; the retaining wall stops a ground-level shortcut.'),('rk.gate','Open the side gate','Return to the court and release Grant.'),('rk.breach','Hold the breach','Defend the escaping group across the damaged wall opening.'),('rk.key','Enter the prison','Take the guard key or climb the battlement to its wheel.'),('exit','Descend to the cells','The cell stair sits inside the inner ward.')],
@@ -144,6 +144,14 @@ def briar_paths(row):
     names=['westFarm','westReturn','eastPasture','eastReturn'] if row['area']==0 else ['campTrail','eastGround','grove','groveReturn','shelterLink']
     return {k:[p+[0] for p in ps] for k,ps in zip(names,paths)}
 
+def canyon_paths():
+    text=(ROOT/'public/3d/lost-canyon.js').read_text(encoding='utf-8')
+    paths={}
+    for key,name in [('signalClimb','alarmJumps'),('freightClimb','freightJumps'),('northRescue','NORTH_ROUTE')]:
+        points=json.loads(re.search(r'const '+name+r'=(\[\[.*?\]\]);',text).group(1))
+        paths[key]=[p+[0] if len(p)==2 else p for p in points]
+    return paths
+
 def main():
     before=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
     after=json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
@@ -153,6 +161,7 @@ def main():
         z,a=r['zone'],r['area'];assert z*2+a==len(maps)
         assert r['bounds']==old[z,a]['bounds'], 'Map scale changed'
         if z==0:r['paths']={**r['paths'],**briar_paths(r)}
+        if (z,a)==(1,1):r['paths']={**r['paths'],**canyon_paths()}
         lookup={str(o.get('key',o.get('id'))):o for o in r['objects']+r['npcs']}
         lookup['exit']=r['portal']
         points=[]
@@ -169,10 +178,10 @@ def main():
         maps.append(dict(id=f'{z}-{a}',title=plan['title'],zone=z,area=a,bounds=r['bounds'],
             idea=plan['idea'],protect=plan['protect'],review=plan['review'],points=points,paths=paths,rooms=rooms,
             before=geometry(old[z,a]),after=geometry(r),hazards=r['geography']['hazards'],
-            enemies=r['enemies'],source={'file':plan['module'],'sha256':hashlib.sha256(source.read_bytes()).hexdigest()},
+            enemies=r['enemies'],source={'file':plan['module'],'sha256':hashlib.sha256(source.read_bytes().replace(b'\r\n',b'\n')).hexdigest()},
             heightMax=max([o.get('y',0) or 0 for o in rooms]+[0]),
             pathNote='Lines follow authored route centers, including slopes, jumps and initially locked passages. A line is not proof of an open walking route.'))
-    data=dict(version='2.193.0-hollow-journey',date='2026-10-13',beforeCommit='9d143bd1',
+    data=dict(version='2.194.0-canyon-journey',date='2026-10-14',beforeCommit='9d143bd1',
               status='Initial-state geometry review with authored design intent. Not a human playtest or a complete quest walkthrough.',maps=maps)
     (OUT/'layout-data.json').write_text(json.dumps(data,separators=(',',':'),ensure_ascii=False),encoding='utf-8')
     print(f'Built {len(maps)} maps; {(OUT/"layout-data.json").stat().st_size:,} bytes; bounds unchanged.')

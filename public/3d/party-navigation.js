@@ -14,7 +14,7 @@ function target(g){
  case '0:0':t=!f['thomas.ready']?npc('thomas'):!f['mara.healing']?(q['briar.supplies']!=='active'?npc('mara'):(i.tangle_root||0)<3||(i.dressings||0)<1?nearest((g.storyObjects||[]).filter(o=>!f['event.'+o.key]&&(/root/.test(o.key)&&(i.tangle_root||0)<3||/dressing/.test(o.key)&&(i.dressings||0)<1))):npc('mara')):q['briar.escape']!=='active'&&!f['briar.depart']?npc('mara'):first([['briar.water','briar.water'],['briar.jam','briar.jam'],['briar.bridge','briar.bridge'],['briar.depart','briar.depart']]);break;
  case '0:1':t=!f['woods.ready']?npc('lewis'):!f['woods.signal']?nearest([obj('woods.signal.crank'),obj('woods.signal.cable')]):exit();break;
  case '1:0':t=first([['hp.trail','@caleb'],['hp.orders','hp.orders'],['hp.bridge','hp.bridge.clue'],['hp.descent','hp.lift']]);break;
-   case '1:1':t=!f['lc.entry']?obj('lc.gate'):!f['lc.rescue']?npc('ruth'):f['lc.north.open']&&!f['lc.north']?(g.canyon?.remote||g.canyon)?.northActive?nearest((g.canyonPrisoners||[]).filter(n=>n.group==='north'||n.follow==='north')):obj('lc.cage.north'):f['lc.alarm.called']&&!f['lc.alarm']?obj('lc.alarm'):!f['lc.south']||!f['lc.north']?nearest(['south','north'].filter(k=>!f['lc.'+k]).map(k=>obj('lc.cage.'+k))):first([['lc.alarm','lc.alarm'],['lc.escape','lc.escape']]);break;
+ case '1:1':t=root.BFLostCanyon?.destination(g);break;
  case '2:0':if(f['rk.breach.start']&&!f['rk.breach.done']){
    const k=g.keep?.remote||g.keep,z=-1650-Math.min(1,(k?.elapsed||0)/30)*1250;
    t=Math.hypot(g.p.x,g.p.z-z)>380?{x:0,z,y:0,navLabel:'Protect the escaping group'}:null;

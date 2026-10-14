@@ -1,0 +1,27 @@
+{
+  "checks": [
+    "Initial objective is Ward",
+    "Three gate guards spawn ahead of closed gate",
+    "Closed gate remains locked",
+    "Gate guards approach within melee range",
+    "Cleared force route opens gate",
+    "Orders route enters without force guards",
+    "Closed front blocks walking into cage",
+    "Cage side bars block walking",
+    "Opened front permits entry",
+    "Back wall remains solid after release",
+    "Service ladder route opens independently"
+  ],
+  "gateGuardDistances": {
+    "before": [
+      181.3587746988307,
+      280.9188316450286,
+      447.37427331997856
+    ],
+    "after": [
+      0,
+      0,
+      35
+    ]
+  }
+}

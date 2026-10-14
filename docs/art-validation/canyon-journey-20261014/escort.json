@@ -1,0 +1,120 @@
+{
+  "checks": [
+    "Open cage starts an incomplete escort",
+    "Distant player pauses route with follow instruction",
+    "First real pursuer spawns",
+    "Live AI damages prisoner health {\"hp\":[110,97],\"enemy\":[766.7473780728039,-3402.00192916259],\"group\":[[741.8808832314661,-3324.257353150349],[726.1306873746554,-3390.408175748954]]}",
+    "Combat pauses movement and explains why",
+    "Unprotected prisoner death fails escort",
+    "Retry heals both prisoners",
+    "Return restarts open cage escort",
+    "Prisoners pass through door without clipping sides",
+    "Escort completes and both rescues unlock shortcut",
+    "Escape opens the campaign portal",
+    "Walked through the open escape gate to the portal approach"
+  ],
+  "realDamage": {
+    "before": [
+      110,
+      110
+    ],
+    "after": [
+      110,
+      97
+    ],
+    "firstHitFrames": 330
+  },
+  "trace": [
+    {
+      "t": 0.06666666666666667,
+      "at": [
+        [
+          640,
+          -3544
+        ],
+        [
+          708,
+          -3544
+        ]
+      ]
+    },
+    {
+      "t": 3.399999999999993,
+      "at": [
+        [
+          689,
+          -3312
+        ],
+        [
+          673,
+          -3378
+        ]
+      ]
+    },
+    {
+      "t": 6.733333333333315,
+      "at": [
+        [
+          850,
+          -3479
+        ],
+        [
+          782,
+          -3479
+        ]
+      ]
+    },
+    {
+      "t": 10.066666666666746,
+      "at": [
+        [
+          835,
+          -3768
+        ],
+        [
+          783,
+          -3724
+        ]
+      ]
+    },
+    {
+      "t": 13.400000000000245,
+      "at": [
+        [
+          647,
+          -3994
+        ],
+        [
+          594,
+          -3950
+        ]
+      ]
+    },
+    {
+      "t": 16.733333333333665,
+      "at": [
+        [
+          383,
+          -4093
+        ],
+        [
+          370,
+          -4027
+        ]
+      ]
+    }
+  ],
+  "status": {
+    "northActive": false,
+    "northT": 20,
+    "northWave": 2,
+    "northRetryT": 0,
+    "northHp": [
+      110,
+      110
+    ],
+    "northHitT": 0,
+    "northWaiting": "moving",
+    "northPursuers": 0
+  }
+}

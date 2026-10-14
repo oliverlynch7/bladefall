@@ -1,0 +1,42 @@
+<!doctype html><meta charset="utf-8"><title>Lost Canyon co-op verification</title>
+<style>body{font:14px system-ui;background:#15202a;color:white}button{padding:10px}iframe{width:48%;height:300px;border:1px solid #687}pre{white-space:pre-wrap}</style>
+<h1>Local host/guest rescue verification</h1><button id="run">Test shared canyon rescue</button><pre id="result">Wait for both clients, then start.</pre>
+<iframe id="host" title="Host" src="/3d/.qa-canyon-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-canyon-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result');out.textContent='Running…';let hb,gb;
+ try{
+  const h=document.getElementById('host').contentWindow,g=document.getElementById('guest').contentWindow;
+  for(let i=0;i<200&&(!h.canyonQA||!g.canyonQA);i++)await new Promise(r=>setTimeout(r,100));
+  hb=await h.canyonQA.ready();gb=await g.canyonQA.ready();const checks=[];
+  const ok=(n,v)=>{if(!v)throw Error(n);checks.push(n);};
+  await h.canyonQA.fresh(hb);await g.canyonQA.fresh(gb);
+  const hostQueue=[],guestQueue=[],handlers={};
+  Object.assign(hb.MP,{active:true,isHost:true,myId:'h',conns:[]});hb.MP.wireGuest({open:true,send:d=>hostQueue.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'g',hostConn:{open:true,send:d=>guestQueue.push(JSON.parse(JSON.stringify(d)))}});
+  function flush(){for(let n=0;n<4;n++){for(const p of guestQueue.splice(0))handlers.data(p);for(const p of hostQueue.splice(0))gb.MP.onGuestData(p);}}
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();hb.enterZone(1);hb.nextArea();flush();await h.canyonQA.wait(250);flush();
+  for(const b of [hb,gb]){b.G.p.invuln=99999;for(const e of b.G.enemies)e.stunT=99999;}
+  // Simulation batches run faster than the normal 700 ms story broadcast clock.
+  const broadcast=()=>{hb.MP._storySent=0;hb.MP.broadcast();flush();};
+  const pump=n=>{for(let i=0;i<n;i++){hb.update(1/60);gb.update(1/60);}broadcast();};
+  const guestPos=()=>{gb.MP.hostConn.send({t:'pos',p:gb.MP.selfState()});flush();};
+  function act(win,b,key){const o=b.G.storyObjects.find(o=>o.key===key);win.canyonQA.place(b,o.x,o.z,Math.max(o.y,b.highestSurfaceAt(o.x,o.z,8)));if(!b.MP.isHost)guestPos();b.briarRequest('world',{key});flush();}
+  ok('Both clients enter matching canyon bounds',hb.G.canyon&&gb.G.canyon&&JSON.stringify(hb.G.bounds)===JSON.stringify(gb.G.bounds));
+  h.canyonQA.place(hb,-90,-750,140);hb.briarRequest('open',{npc:'ward'});flush();ok('Host conversation does not zoom guest',gb.mode==='play');gb.briarRequest('choose',{line:'lc.ward.first',choice:'bluff'});flush();ok('Guest cannot make an unowned dialogue choice',!hb.G.storyState.flags['lc.gate.fight']);hb.briarRequest('close');flush();
+  act(g,gb,'lc.orders');h.canyonQA.talk(hb,'ward','orders');flush();h.canyonQA.talk(hb,'ruth','help');flush();ok('Orders unlock shared gate collision',hb.G.storyState.flags['lc.entry']&&gb.G.storyState.flags['lc.entry']&&!gb.G.obstacles.some(o=>o.lcBlock==='gate'));
+  h.canyonQA.clear(hb);hb.MP.broadcast();flush();act(g,gb,'lc.cage.south');ok('Guest release triggers the shared alarm',hb.G.storyState.flags['lc.alarm.called']&&gb.G.storyState.flags['lc.south']);
+  h.canyonQA.place(hb,0,-4000,0);for(let i=0;i<5;i++){guestPos();pump(45);}ok('Remote guest attracts host-owned alarm guards',hb.G.enemies.filter(e=>e.canyonAlarm&&!e.dead).length===2&&gb.G.enemies.filter(e=>e.patrolGroup==='canyon.signal'&&!e.dead).length===2);
+  act(g,gb,'lc.alarm');ok('Guest cuts cable for both clients',hb.G.storyState.flags['lc.alarm']&&gb.G.storyState.flags['lc.alarm']&&hb.G.canyon.alarmAt===0);h.canyonQA.clear(hb);hb.MP.broadcast();flush();
+  act(g,gb,'lc.cage.north');pump(2);ok('Open north cage is not yet a completed rescue',gb.G.storyState.flags['lc.north.open']&&!gb.G.storyState.flags['lc.north']&&!gb.G.obstacles.some(o=>o.lcBlock==='north'));
+  h.canyonQA.place(hb,-1000,-1800,0);g.canyonQA.place(gb,-1000,-1800,0);guestPos();pump(3);ok('Shared follow instruction when everyone is distant',gb.G.canyon.remote.northWaiting==='follow'&&/Stay near/.test(g.BFLostCanyon.quest(gb.G.storyState,gb.G)));
+  for(let k=0;k<12&&hb.G.canyon.northWave<1;k++){const n=hb.G.canyonPrisoners.find(n=>n.group==='north');g.canyonQA.place(gb,n.x-65,n.z+25,n.y);guestPos();pump(30);}
+  ok('Guest proximity advances host-owned escort',hb.G.canyon.northWave===1);const at=hb.G.canyon.northT;pump(2);ok('Guest sees combat wait and matching route progress',gb.G.canyon.remote.northWaiting==='fight'&&Math.abs(gb.G.canyon.remote.northT-at)<.1);
+  const e=hb.G.enemies.find(e=>e.canyonEscortWave&&!e.dead),n=hb.G.canyonPrisoners.find(n=>n.group==='north');Object.assign(e,{x:n.x+22,y:0,z:n.z,meleeSerial:901});h.BFLostCanyon.hitEscort(hb.G,e);broadcast();ok('Prisoner health is replicated',gb.G.canyonPrisoners.find(n=>n.group==='north').hp===hb.G.canyon.northHp[0]&&hb.G.canyon.northHp[0]<110);
+  for(let k=0;k<50&&!hb.G.storyState.flags['lc.north'];k++){const n=hb.G.canyonPrisoners.find(n=>n.group==='north');g.canyonQA.place(gb,n.x-65,n.z+25,n.y);guestPos();for(let i=0;i<30;i++){for(const e of hb.G.enemies)if(e.canyonEscortWave){e.hp=0;e.dead=true;}hb.update(1/60);}hb.MP.broadcast();flush();if(k%8===0)await h.canyonQA.wait(0);}
+  ok('Guest-led escort reaches shelter on both clients',hb.G.storyState.flags['lc.north']&&gb.G.storyState.flags['lc.north']);act(g,gb,'lc.escape');ok('Escape portal and physical gate agree',!!hb.G.portal&&!!gb.G.portal&&!gb.G.obstacles.some(o=>o.lcBlock==='escape'));
+  const packet=JSON.parse(JSON.stringify(hb.briarPacket())),count=gb.G.segments.filter(s=>s.bridge).length;gb.briarApply(packet);gb.briarApply(packet);ok('Duplicate packet does not duplicate shortcut',gb.G.segments.filter(s=>s.bridge).length===count);ok('Permanent cage sides remain on both clients',hb.G.obstacles.filter(o=>o.cageWall).length===9&&gb.G.obstacles.filter(o=>o.cageWall).length===9);
+  out.textContent=JSON.stringify({checks,transport:'Two real rendered clients; local relay through actual host/guest handlers, not public Internet transport.'},null,2);
+ }catch(e){out.textContent='FAIL '+e.stack;}finally{for(const b of [hb,gb])if(b){b.MP.active=false;b.MP.conns=[];}}
+};
+</script>

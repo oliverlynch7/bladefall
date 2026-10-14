@@ -1,0 +1,41 @@
+{
+  "name": "Canyon compatibility",
+  "gold": 913,
+  "level": 10,
+  "xp": 81,
+  "class": {
+    "xp": 153,
+    "rank": 6,
+    "sub": null,
+    "v2": 1,
+    "ch": {}
+  },
+  "area": 1,
+  "flags": {
+    "lc.orders": true,
+    "event.lc.orders": true,
+    "lc.entry": true,
+    "lc.ward.pass": true,
+    "lc.rescue": true,
+    "lc.alarm": true,
+    "event.lc.alarm": true,
+    "lc.south": true,
+    "event.lc.cage.south": true
+  },
+  "blocks": [
+    "wagon",
+    "rail",
+    "escape",
+    "south",
+    "south",
+    "south",
+    "north",
+    "north",
+    "north",
+    "north",
+    "extra",
+    "extra",
+    "extra",
+    "extra"
+  ]
+}

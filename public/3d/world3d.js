@@ -1,5 +1,5 @@
 import {attachGeographyArt,updateGeographyArt} from './campaign-geography-art.js?v=2187a';
-import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2193';
+import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2194';
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
 import {buildBriarBetaArt} from './briar-beta-art.js?v=2182f';
 window.__briarAssetsPreload=loadBriarTrees;
@@ -21,7 +21,7 @@ import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2187a';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2187a';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2187a';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2193';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2194';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 

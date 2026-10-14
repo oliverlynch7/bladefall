@@ -2803,3 +2803,12 @@ Also fixed a shared renderer ownership bug: multiple scenery imports used differ
 Checks: main route plus 91 optional-route waypoints using actual movement/collision; a rendered continuous bridge mistake/recovery/crossing sequence; ten host/guest assertions using the real handlers over a local relay; pre-change partial/complete bridge saves with character/class XP and gold retained; story, bridge timing, navigation and syntax checks. Evidence and limitations: docs/art-validation/hollow-journey-2026-10-13/summary.json. Enemies were stunned during route verification; no full combat playthrough, public-network session, low-end performance claim or human fun/novice-comprehension verdict.
 
 Next: Lost Canyon and the remaining campaign finishing sequence. No custom SFX or unrelated companion changes. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-14] Lost Canyon finishing pass — v2.194.0
+
+Implemented the authorized next campaign pass at its original 5,890 x 6,160 scale. Joined service roads and six signs connect the yards. Detailed barred cages now have solid sides; roads approach their doors, the north escort clears its turn, and the cave return meets the road before the escape gate. Forced-entry guards spawn on the accessible ramp. Guidance follows Ward, blocking guards, the scaffold entrance, escort proximity/combat and the escape route. The signal uses a detailed winch, a clear standing space, a visibly cut cable and stateful lanterns. Fixed sign-post overlap with text. The corresponding blueprint captures final initial-state collision and the actual climb/escort paths.
+
+Verified physical entry routes and branches, both optional climbs, a continuous normal-camera missed-jump/recovery/retry, live prisoner damage and escort failure/retry, final gate traversal, a genuine 10ba0309 partial save with character/class XP and gold preserved, and 16 host/guest assertions over a local relay. Winding Cliffs art still mounts correctly. Relevant unit/syntax checks pass; browser error logs are empty. Evidence and limitations: docs/art-validation/canyon-journey-20261014/summary.json. This is not a full combat or public-network playtest and does not establish human enjoyment.
+
+Next campaign finishing area: Ruined Keep — Broken Walls, then the remaining campaign sequence. No custom SFX or unrelated companion edits. Deployment confirmation follows.

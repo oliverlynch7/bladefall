@@ -1,0 +1,44 @@
+{
+  "version": "2.194.0-canyon-journey",
+  "baseline": "10ba0309",
+  "date": "2026-10-14",
+  "scope": "Lost Canyon campaign finishing pass; original 5890 x 6160 bounds retained",
+  "implemented": [
+    "Joined ground service roads and six destination signs",
+    "Fitted barred cages with solid sides and openable fronts",
+    "Gate guards spawn on the accessible approach and pursue the player",
+    "Roads go around enclosures; cave return joins before the escape gate",
+    "North escort has a wider doorway turn and accurate follow/combat/progress guidance",
+    "Detailed winch with a clear standing point, visible cut cable and stateful lanterns",
+    "Blueprint refreshed from initial-state game geometry, including both climb routes and the actual escort route"
+  ],
+  "evidence": [
+    "entry-collision.json",
+    "escort.json",
+    "parkour.json",
+    "routes.json",
+    "roof-entry.json",
+    "continuous-play.json",
+    "coop.json",
+    "old-save-created.json",
+    "old-save.json",
+    "winding-regression.json",
+    "browser-errors.json",
+    "initial-geometry.json",
+    "north-yard.png"
+  ],
+  "unit_checks": [
+    "test-canyon-journey.cjs",
+    "test-lost-canyon.cjs",
+    "test-hollow-journey.cjs",
+    "test-campaign-interaction.cjs"
+  ],
+  "limits": [
+    "Routing tests suppress unrelated enemies and use an invulnerable test player; these are not a full combat playthrough.",
+    "Escort damage and failure were driven by actual enemy AI; successful continuation clears pursuers through the visible test harness.",
+    "Co-op uses two rendered game clients and the real host/guest handlers over a local relay, not public Internet transport.",
+    "The continuous scaffold sequence includes a deliberate fall and recovery with the normal gameplay camera; inspected screenshots do not establish human comprehension or fun.",
+    "No low-end performance or frame-rate claim; no enemy reward, SFX, tutorial or class balance changes."
+  ],
+  "blueprint_checks": "All 16 bounds retained; only Lost Canyon map content changed; source hash and all explicit path elevations verified."
+}

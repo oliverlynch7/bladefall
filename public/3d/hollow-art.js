@@ -1,4 +1,4 @@
-import {buildHollowJourneyArt} from './hollow-journey-art.js?v=2193';
+import {buildHollowJourneyArt} from './hollow-journey-art.js?v=2194';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';

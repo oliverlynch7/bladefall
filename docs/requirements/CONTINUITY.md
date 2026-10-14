@@ -1559,3 +1559,17 @@ Next: Lost Canyon and the remaining campaign finishing sequence. No custom SFX o
 ## [Codex | 2026-10-13] Winding Cliffs verified live
 
 Implementation 3af439d5 is on main. Cloudflare deployment c1a3a80e succeeded; production HTML and a fresh browser title both report v2.193.0-hollow-journey. The new road/sign module returns HTTP 200, and the live title has no browser errors. Generated QA pages were removed, owned test tabs closed and the local server stopped. Lost Canyon remains the next campaign finishing pass.
+
+
+## [Codex | 2026-10-14] Lost Canyon finishing pass authorized
+
+Latest user: “Go ahead” (repeated), approving the announced next campaign pass. Grounded plan: docs/design/LOST_CANYON_JOURNEY_2026-10-14.md. Preserve existing large scale, entry choices, signal/freight climbs, north escort and rewards; improve actual navigation, route readability, cage solidity and gate access. Source baseline 10ba0309. Implementation and visual verification pending; not full campaign completion.
+
+
+## [Codex | 2026-10-14] Lost Canyon finishing pass — v2.194.0
+
+Implemented the authorized next campaign pass at its original 5,890 x 6,160 scale. Joined service roads and six signs connect the yards. Detailed barred cages now have solid sides; roads approach their doors, the north escort clears its turn, and the cave return meets the road before the escape gate. Forced-entry guards spawn on the accessible ramp. Guidance follows Ward, blocking guards, the scaffold entrance, escort proximity/combat and the escape route. The signal uses a detailed winch, a clear standing space, a visibly cut cable and stateful lanterns. Fixed sign-post overlap with text. The corresponding blueprint captures final initial-state collision and the actual climb/escort paths.
+
+Verified physical entry routes and branches, both optional climbs, a continuous normal-camera missed-jump/recovery/retry, live prisoner damage and escort failure/retry, final gate traversal, a genuine 10ba0309 partial save with character/class XP and gold preserved, and 16 host/guest assertions over a local relay. Winding Cliffs art still mounts correctly. Relevant unit/syntax checks pass; browser error logs are empty. Evidence and limitations: docs/art-validation/canyon-journey-20261014/summary.json. This is not a full combat or public-network playtest and does not establish human enjoyment.
+
+Next campaign finishing area: Ruined Keep — Broken Walls, then the remaining campaign sequence. No custom SFX or unrelated companion edits. Deployment confirmation follows.

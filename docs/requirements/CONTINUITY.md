@@ -1573,3 +1573,8 @@ Implemented the authorized next campaign pass at its original 5,890 x 6,160 scal
 Verified physical entry routes and branches, both optional climbs, a continuous normal-camera missed-jump/recovery/retry, live prisoner damage and escort failure/retry, final gate traversal, a genuine 10ba0309 partial save with character/class XP and gold preserved, and 16 host/guest assertions over a local relay. Winding Cliffs art still mounts correctly. Relevant unit/syntax checks pass; browser error logs are empty. Evidence and limitations: docs/art-validation/canyon-journey-20261014/summary.json. This is not a full combat or public-network playtest and does not establish human enjoyment.
 
 Next campaign finishing area: Ruined Keep — Broken Walls, then the remaining campaign sequence. No custom SFX or unrelated companion edits. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-14] Lost Canyon verified live
+
+Implementation 5a627c3c is on main. Cloudflare deployment 846ed895-ae5a-455c-8582-6cea4271ceda succeeded; production HTML and a fresh browser title confirm v2.194.0-canyon-journey with no browser errors. No production save was opened. Generated local QA pages were removed, owned test tabs closed, and the local server stopped. Exact verification is saved in docs/art-validation/canyon-journey-20261014/deployment.json. Broken Walls is the next campaign finishing pass.

@@ -1295,3 +1295,8 @@ Recovered the in-app browser by activating this chat through the app navigation 
 Real-browser tests reproduce the old Compare purchase loss and verify safe full/last-slot purchases, bag-management return/retry, genuine v2.199 save loading, blocked/collected/sold feedback, mixed pickups and chest capacity/retry. Ten local host/guest assertions pass for independent inventory, auto-sell and personal chest claims. A short campaign/menu/save smoke found the Pause button covered by the camera-drag layer; raised it above controls and verified mouse operation at 1280x800, 960x640 and 390x844. Return to Hub / Title / Continue preserves the saved hero.
 
 Evidence: docs/art-validation/loot-readiness-20261015/summary.json. Earlier 28 logic checks and chest rarity sampling remain valid. Captures are low resolution, so this is layout/function verification, not art approval or a full fresh campaign. Local relay co-op is not Internet latency testing. One parent-harness observer error is documented; individual game collectors and standalone gameplay were clean. Ready for publication; deployment confirmation follows. Unrelated companion3d.js/articulated-rigs.json edits untouched.
+
+
+## [Codex | 2026-10-15] Loot safety deployed - v2.200.0
+
+Published gameplay commit 36738c0c to main. Cloudflare Pages reports success; the production browser displays v2.200.0-loot-safety with adventure-hud.css?v=2200 and no warning/error entries. No production save was opened. Deployment evidence: docs/art-validation/loot-readiness-20261015/deployment.json and production-browser.json. Owned local server and five generated QA files are removed, temporary viewport reset, and the surviving browser tab points to the live release. Unrelated companion/rig changes remain untouched.

@@ -1,7 +1,7 @@
 {
   "candidateVersion": "2.200.0-loot-safety",
   "baseline": "4d8637bd",
-  "status": "Verified locally; publication pending.",
+  "status": "Published to main and verified in the production browser.",
   "changes": [
     "Quartermaster direct and comparison purchases share safe bag delivery and validate level, class, gold and capacity before spending.",
     "Comparison confirmation is one-shot; paid relic purchase retains the existing claim flow, with room checked for the replaced weapon. Reforging uses the same storage safety check.",
@@ -24,8 +24,7 @@
     "High-resolution visual-art acceptance (app captures were low resolution)"
   ],
   "next": [
-    "Publish to main and verify production.",
-    "Close owned tabs and remove owned local QA resources."
+    "Continue the next authorized readiness work; retain the documented full-playthrough and Internet co-op limits."
   ],
   "localPreview": {
     "url": "http://127.0.0.1:4358/3d/.qa-loot-current.html",
@@ -37,8 +36,18 @@
       "public/3d/.qa-loot-before-hud.js",
       "public/3d/.qa-loot-before-hud.css",
       "public/3d/.qa-loot-coop.html"
-    ]
+    ],
+    "cleanup": "Owned server PID 20456 stopped after command verification; all five generated QA files removed. Test tab now displays the verified live release; browser viewport override reset."
   },
   "limits": "Focused staged loot/co-op checks and a short continuous campaign UI smoke verify these fixes, not a completed campaign, human fun, Internet latency or hardware performance. Unrelated companion/rig edits untouched.",
-  "harnessCaveat": "One unlocated MutationObserver error occurred in the two-frame parent browser log. Both game error collectors were empty, all ten assertions passed, and standalone gameplay had no errors. Do not call the parent console clean."
+  "harnessCaveat": "One unlocated MutationObserver error occurred in the two-frame parent browser log. Both game error collectors were empty, all ten assertions passed, and standalone gameplay had no errors. Do not call the parent console clean.",
+  "deployment": {
+    "version": "2.200.0-loot-safety",
+    "commit": "36738c0c639ad31e3f5e0c5efd238d380cd9ec8b",
+    "conclusion": "success",
+    "deploymentUrl": "https://dash.cloudflare.com/?to=/4ee6e0769c54163e373dee3dd31de1d0/pages/view/bladefall/3b27ab66-9b06-426e-8e05-95ffd2863612",
+    "productionBrowserVersionVerified": true,
+    "productionBrowserWarningsErrors": [],
+    "verifiedAt": "2026-10-15T18:49:23.472Z"
+  }
 }

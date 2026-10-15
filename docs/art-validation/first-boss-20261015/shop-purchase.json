@@ -1,0 +1,86 @@
+{
+  "gold": 210,
+  "hero": {
+    "allocation": {
+      "health": 4,
+      "attack": 1,
+      "defense": 3,
+      "speed": 1,
+      "mana": 2
+    },
+    "tunedLevels": 1,
+    "hp": 130.68,
+    "maxHp": 111,
+    "mana": 81,
+    "maxMana": 81,
+    "level": 2,
+    "xp": 236,
+    "xpNext": 335,
+    "weapon": {
+      "arche": "sword",
+      "art": "sword",
+      "cls": "melee",
+      "sch": "phys",
+      "el": null,
+      "rarity": "common",
+      "chg": null,
+      "reaper": false,
+      "anyClass": false,
+      "ians": false,
+      "name": "Rusty Sword",
+      "dmg": 10.6,
+      "cd": 0.38,
+      "kb": 260,
+      "lifesteal": 0,
+      "color": "#b9c0cc",
+      "blade": "#bcae8a",
+      "range": 84
+    },
+    "gear": {
+      "helmet": null,
+      "chest": null,
+      "legs": null,
+      "amulet": null,
+      "ring": null
+    },
+    "stats": {
+      "power": 1.035,
+      "magPower": 1,
+      "speed": 1.004,
+      "atkSpeed": 1.018,
+      "lifesteal": 0,
+      "defense": 0,
+      "cdr": 0,
+      "dodgeCd": 0.75,
+      "crit": 0,
+      "goldFind": 0
+    },
+    "maxJumps": 1,
+    "skin": "knight"
+  },
+  "bag": [
+    {
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Plain Sword",
+        "dmg": 11.5,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#dfe5ec",
+        "range": 84,
+        "shop": true
+      }
+    }
+  ]
+}

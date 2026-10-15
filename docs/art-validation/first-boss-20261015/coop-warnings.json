@@ -1,0 +1,90 @@
+{
+  "results": {
+    "corridor": {
+      "before": {
+        "host": [
+          -340,
+          -300
+        ],
+        "guest": [
+          0,
+          -250
+        ],
+        "target": [
+          -340,
+          -300
+        ]
+      },
+      "after": {
+        "host": [
+          -340,
+          -300
+        ],
+        "guest": [
+          -339.9999993549732,
+          -299.9999999051431
+        ]
+      },
+      "hostPath": {
+        "distance": 337.9236641221374,
+        "width": 88,
+        "hit": "cart-west"
+      },
+      "guestPath": {
+        "distance": 337.9236641221374,
+        "width": 88,
+        "hit": "cart-west"
+      }
+    },
+    "coop": {
+      "checks": [
+        {
+          "name": "wind host state reaches guest",
+          "pass": true
+        },
+        {
+          "name": "wind guest shows current advice",
+          "pass": true
+        },
+        {
+          "name": "guest and host charge corridor agree after interpolation",
+          "pass": true
+        },
+        {
+          "name": "stagger host state reaches guest",
+          "pass": true
+        },
+        {
+          "name": "stagger guest shows current advice",
+          "pass": true
+        },
+        {
+          "name": "slam host state reaches guest",
+          "pass": true
+        },
+        {
+          "name": "slam guest shows current advice",
+          "pass": true
+        },
+        {
+          "name": "recover host state reaches guest",
+          "pass": true
+        },
+        {
+          "name": "recover guest shows current advice",
+          "pass": true
+        },
+        {
+          "name": "guest does not advance authoritative attack",
+          "pass": true
+        },
+        {
+          "name": "guest uses its own jump binding",
+          "pass": true
+        }
+      ],
+      "scope": "Local production-message relay between two browser worlds; controlled poses, no Internet latency claim."
+    }
+  },
+  "errors": []
+}

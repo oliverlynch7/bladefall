@@ -1,0 +1,722 @@
+{
+  "results": {
+    "earned": {
+      "mode": "play",
+      "cls": "warrior",
+      "level": 2,
+      "rank": 3,
+      "hp": 130.68,
+      "maxHp": 130.68,
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Rusty Sword",
+        "dmg": 10.6,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#bcae8a",
+        "range": 84
+      },
+      "gear": {
+        "helmet": null,
+        "chest": null,
+        "legs": null,
+        "amulet": null,
+        "ring": null
+      },
+      "gold": 270,
+      "position": [
+        0,
+        0,
+        850
+      ],
+      "boss": {
+        "hp": 684,
+        "maxHp": 684,
+        "dmg": 39.76128,
+        "position": [
+          0,
+          0,
+          -250
+        ]
+      },
+      "portal": false
+    },
+    "stock": [
+      {
+        "cls": "warrior",
+        "starter": 10.6,
+        "shop": 9.8,
+        "drop": 12,
+        "cost": 60
+      },
+      {
+        "cls": "ranger",
+        "starter": 7.9,
+        "shop": 7.4,
+        "drop": 9,
+        "cost": 60
+      },
+      {
+        "cls": "mage",
+        "starter": 17.6,
+        "shop": 16.4,
+        "drop": 20,
+        "cost": 60
+      }
+    ],
+    "fights": [
+      {
+        "method": "Staged boss entry; actual earned/representative level-2 rank-3 stats, ordinary engine movement/combat, perfect state-reading scripted inputs; no health refill/invulnerability/enemy disabling during fight.",
+        "cls": "warrior",
+        "shop": false,
+        "start": {
+          "mode": "play",
+          "cls": "warrior",
+          "level": 2,
+          "rank": 3,
+          "hp": 130.68,
+          "maxHp": 130.68,
+          "weapon": {
+            "arche": "sword",
+            "art": "sword",
+            "cls": "melee",
+            "sch": "phys",
+            "el": null,
+            "rarity": "common",
+            "chg": null,
+            "reaper": false,
+            "anyClass": false,
+            "ians": false,
+            "name": "Rusty Sword",
+            "dmg": 10.6,
+            "cd": 0.38,
+            "kb": 260,
+            "lifesteal": 0,
+            "color": "#b9c0cc",
+            "blade": "#bcae8a",
+            "range": 84
+          },
+          "gear": {
+            "helmet": null,
+            "chest": null,
+            "legs": null,
+            "amulet": null,
+            "ring": null
+          },
+          "gold": 270,
+          "position": [
+            0,
+            0,
+            850
+          ],
+          "boss": {
+            "hp": 684,
+            "maxHp": 684,
+            "dmg": 39.76128,
+            "position": [
+              0,
+              0,
+              -250
+            ]
+          },
+          "portal": false
+        },
+        "end": {
+          "mode": "upgrade",
+          "cls": "warrior",
+          "level": 3,
+          "rank": 4,
+          "hp": 142.56,
+          "maxHp": 142.56,
+          "weapon": {
+            "arche": "sword",
+            "art": "sword",
+            "cls": "melee",
+            "sch": "phys",
+            "el": null,
+            "rarity": "common",
+            "chg": null,
+            "reaper": false,
+            "anyClass": false,
+            "ians": false,
+            "name": "Rusty Sword",
+            "dmg": 10.6,
+            "cd": 0.38,
+            "kb": 260,
+            "lifesteal": 0,
+            "color": "#b9c0cc",
+            "blade": "#bcae8a",
+            "range": 84
+          },
+          "gear": {
+            "helmet": null,
+            "chest": null,
+            "legs": null,
+            "amulet": null,
+            "ring": null
+          },
+          "gold": 760,
+          "position": [
+            384.5752322848892,
+            0,
+            354.0718358707273
+          ],
+          "boss": {
+            "hp": -7,
+            "maxHp": 684,
+            "dmg": 39.76128,
+            "state": "stagger",
+            "position": [
+              455.42179620502213,
+              0,
+              368.72648473541557
+            ]
+          },
+          "portal": true
+        },
+        "seconds": 22.45,
+        "lastHit": 0,
+        "won": true,
+        "trace": [
+          {
+            "t": 0,
+            "hp": 130.68,
+            "bossHp": 684,
+            "foes": 1,
+            "x": 0,
+            "z": 849.6,
+            "bossX": 0,
+            "bossZ": -250
+          },
+          {
+            "t": 3.17,
+            "hp": 130.68,
+            "bossHp": 684,
+            "state": "hunt",
+            "turn": 0,
+            "foes": 1,
+            "x": 0,
+            "z": 266.5,
+            "bossX": 0,
+            "bossZ": -248.5
+          },
+          {
+            "t": 4.55,
+            "hp": 130.68,
+            "bossHp": 684,
+            "state": "wind",
+            "turn": 1,
+            "foes": 1,
+            "x": 0,
+            "z": 4.2,
+            "bossX": 0,
+            "bossZ": -127.6
+          },
+          {
+            "t": 4.77,
+            "hp": 130.68,
+            "bossHp": 666,
+            "state": "wind",
+            "turn": 1,
+            "foes": 1,
+            "x": 0,
+            "z": -36.9,
+            "bossX": 0,
+            "bossZ": -128.7
+          },
+          {
+            "t": 5.22,
+            "hp": 130.68,
+            "bossHp": 648,
+            "state": "wind",
+            "turn": 1,
+            "foes": 1,
+            "x": 0,
+            "z": -78.2,
+            "bossX": 0,
+            "bossZ": -136.3
+          },
+          {
+            "t": 5.67,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "wind",
+            "turn": 1,
+            "foes": 1,
+            "x": 62.4,
+            "z": -78.8,
+            "bossX": 0,
+            "bossZ": -142.9
+          },
+          {
+            "t": 6.48,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "charge",
+            "turn": 1,
+            "foes": 1,
+            "x": 216.8,
+            "z": -78.8,
+            "bossX": -1.9,
+            "bossZ": -144.9
+          },
+          {
+            "t": 7.53,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "recover",
+            "turn": 1,
+            "foes": 1,
+            "x": 415.9,
+            "z": -78.8,
+            "bossX": -5.2,
+            "bossZ": 502.6
+          },
+          {
+            "t": 8.68,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "hunt",
+            "turn": 1,
+            "foes": 1,
+            "x": 317.2,
+            "z": 79,
+            "bossX": -5.2,
+            "bossZ": 502.6
+          },
+          {
+            "t": 9.73,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "wind",
+            "turn": 2,
+            "foes": 1,
+            "x": 196.6,
+            "z": 237.4,
+            "bossX": 50.4,
+            "bossZ": 429.6
+          },
+          {
+            "t": 10.88,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "charge",
+            "turn": 2,
+            "foes": 1,
+            "x": 160.4,
+            "z": 398,
+            "bossX": 50.4,
+            "bossZ": 429.6
+          },
+          {
+            "t": 11.93,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "recover",
+            "turn": 2,
+            "foes": 1,
+            "x": 300.2,
+            "z": 567.5,
+            "bossX": 444.7,
+            "bossZ": -88.5
+          },
+          {
+            "t": 13.08,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "hunt",
+            "turn": 2,
+            "foes": 1,
+            "x": 352.5,
+            "z": 508,
+            "bossX": 444.7,
+            "bossZ": -88.5
+          },
+          {
+            "t": 14.13,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "wind",
+            "turn": 3,
+            "foes": 1,
+            "x": 382.3,
+            "z": 489.2,
+            "bossX": 432.9,
+            "bossZ": 2.5
+          },
+          {
+            "t": 15.28,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "charge",
+            "turn": 3,
+            "foes": 1,
+            "x": 329.6,
+            "z": 333.4,
+            "bossX": 432.9,
+            "bossZ": 2.5
+          },
+          {
+            "t": 15.87,
+            "hp": 130.68,
+            "bossHp": 629,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 219.9,
+            "z": 321.6,
+            "bossX": 396.1,
+            "bossZ": 357.1
+          },
+          {
+            "t": 16.2,
+            "hp": 130.68,
+            "bossHp": 608,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 244.2,
+            "z": 328.1,
+            "bossX": 397.5,
+            "bossZ": 357.4
+          },
+          {
+            "t": 16.6,
+            "hp": 130.68,
+            "bossHp": 579,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 316.5,
+            "z": 342,
+            "bossX": 406.8,
+            "bossZ": 359.2
+          },
+          {
+            "t": 17.05,
+            "hp": 130.68,
+            "bossHp": 534,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357,
+            "z": 349.5,
+            "bossX": 414.3,
+            "bossZ": 360.6
+          },
+          {
+            "t": 17.5,
+            "hp": 130.68,
+            "bossHp": 504,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357.6,
+            "z": 349.5,
+            "bossX": 420.7,
+            "bossZ": 361.8
+          },
+          {
+            "t": 17.95,
+            "hp": 130.68,
+            "bossHp": 474,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357.6,
+            "z": 349.5,
+            "bossX": 420.7,
+            "bossZ": 361.8
+          },
+          {
+            "t": 18.22,
+            "hp": 130.68,
+            "bossHp": 422,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357.6,
+            "z": 349.5,
+            "bossX": 420.7,
+            "bossZ": 361.8
+          },
+          {
+            "t": 18.4,
+            "hp": 130.68,
+            "bossHp": 392,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357.6,
+            "z": 349.5,
+            "bossX": 425.7,
+            "bossZ": 362.8
+          },
+          {
+            "t": 18.85,
+            "hp": 130.68,
+            "bossHp": 362,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357.6,
+            "z": 349.5,
+            "bossX": 425.7,
+            "bossZ": 362.8
+          },
+          {
+            "t": 19.3,
+            "hp": 130.68,
+            "bossHp": 332,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 357.6,
+            "z": 349.5,
+            "bossX": 431.7,
+            "bossZ": 364
+          },
+          {
+            "t": 19.75,
+            "hp": 130.68,
+            "bossHp": 302,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 369.6,
+            "z": 351.4,
+            "bossX": 438.1,
+            "bossZ": 365.2
+          },
+          {
+            "t": 20.2,
+            "hp": 130.68,
+            "bossHp": 272,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 369.6,
+            "z": 351.4,
+            "bossX": 438.1,
+            "bossZ": 365.2
+          },
+          {
+            "t": 20.23,
+            "hp": 130.68,
+            "bossHp": 219,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 369.6,
+            "z": 351.4,
+            "bossX": 438.1,
+            "bossZ": 365.2
+          },
+          {
+            "t": 20.65,
+            "hp": 130.68,
+            "bossHp": 188,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 369.6,
+            "z": 351.4,
+            "bossX": 443,
+            "bossZ": 366.2
+          },
+          {
+            "t": 21.1,
+            "hp": 130.68,
+            "bossHp": 157,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 369.6,
+            "z": 351.4,
+            "bossX": 443,
+            "bossZ": 366.2
+          },
+          {
+            "t": 21.55,
+            "hp": 130.68,
+            "bossHp": 126,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 377.4,
+            "z": 353,
+            "bossX": 449,
+            "bossZ": 367.4
+          },
+          {
+            "t": 22,
+            "hp": 130.68,
+            "bossHp": 79,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 384.6,
+            "z": 354.1,
+            "bossX": 455.4,
+            "bossZ": 368.7
+          },
+          {
+            "t": 22.25,
+            "hp": 130.68,
+            "bossHp": 24,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 384.6,
+            "z": 354.1,
+            "bossX": 455.4,
+            "bossZ": 368.7
+          },
+          {
+            "t": 22.45,
+            "hp": 142.56,
+            "bossHp": -7,
+            "state": "stagger",
+            "turn": 3,
+            "foes": 1,
+            "x": 384.6,
+            "z": 354.1,
+            "bossX": 455.4,
+            "bossZ": 368.7
+          }
+        ]
+      }
+    ],
+    "probes": [
+      {
+        "name": "warrior stagger has no contact damage",
+        "pass": true,
+        "detail": {
+          "before": 130.68,
+          "after": 130.68
+        }
+      },
+      {
+        "name": "warrior can attack during stagger",
+        "pass": true,
+        "detail": {
+          "damage": 44
+        }
+      },
+      {
+        "name": "warrior ground wave stand",
+        "pass": true,
+        "detail": {
+          "damage": 43,
+          "apex": 7.25
+        }
+      },
+      {
+        "name": "warrior ground wave jump",
+        "pass": true,
+        "detail": {
+          "damage": 0,
+          "apex": 99.91666666666667
+        }
+      },
+      {
+        "name": "warrior ground wave dodge",
+        "pass": true,
+        "detail": {
+          "damage": 0,
+          "apex": 0
+        }
+      },
+      {
+        "name": "ranger stagger has no contact damage",
+        "pass": true,
+        "detail": {
+          "before": 119.88000000000001,
+          "after": 119.88000000000001
+        }
+      },
+      {
+        "name": "ranger can attack during stagger",
+        "pass": true,
+        "detail": {
+          "damage": 11
+        }
+      },
+      {
+        "name": "ranger ground wave stand",
+        "pass": true,
+        "detail": {
+          "damage": 44,
+          "apex": 7.25
+        }
+      },
+      {
+        "name": "ranger ground wave jump",
+        "pass": true,
+        "detail": {
+          "damage": 0,
+          "apex": 99.91666666666667
+        }
+      },
+      {
+        "name": "ranger ground wave dodge",
+        "pass": true,
+        "detail": {
+          "damage": 0,
+          "apex": 0
+        }
+      },
+      {
+        "name": "mage stagger has no contact damage",
+        "pass": true,
+        "detail": {
+          "before": 119.88000000000001,
+          "after": 119.88000000000001
+        }
+      },
+      {
+        "name": "mage can attack during stagger",
+        "pass": true,
+        "detail": {
+          "damage": 62
+        }
+      },
+      {
+        "name": "mage ground wave stand",
+        "pass": true,
+        "detail": {
+          "damage": 44,
+          "apex": 7.25
+        }
+      },
+      {
+        "name": "mage ground wave jump",
+        "pass": true,
+        "detail": {
+          "damage": 0,
+          "apex": 99.91666666666667
+        }
+      },
+      {
+        "name": "mage ground wave dodge",
+        "pass": true,
+        "detail": {
+          "damage": 0,
+          "apex": 0
+        }
+      }
+    ]
+  },
+  "errors": []
+}

@@ -2928,3 +2928,14 @@ Verified rendered request/delivery and exact-entry journal access, genuine old-c
 Gameplay commit 2b2ca8dd is on main. Cloudflare deployment 9a30ca86-cc7e-4d80-97de-5715c8548b16 succeeded; the production browser displays v2.201.0-first-journey and the updated journal/Briar/HUD asset versions, with no warning/error entries. No production save was opened. Owned local test server and both generated QA pages are removed; owned test tabs are closed. Evidence: docs/art-validation/first-session-20261015/deployment.json and production-browser.json.
 
 The continuous normal-difficulty run finished both Briar halves but did not defeat the Brute in two attempts. Next review should examine the first boss and early equipment/reward experience using earned builds, distinguishing automated input limitations from demonstrated tuning problems. Human novice pacing/fun and target-device performance remain open. Existing companion3d.js/articulated-rigs.json changes remain untouched.
+
+
+## [Codex | 2026-10-15] First-boss and early-equipment review - v2.202.0
+
+Corrected an actual early-shop downgrade: common stock is now 96% base damage versus the free starter's 88%, while ordinary common drops remain stronger. Starter-family comparisons are Warrior 10.6 -> 11.5, Ranger 7.9 -> 8.6, Mage 17.6 -> 19.2. Cost remains 60 gold; higher rarity power/gates and already-owned equipment stay intact.
+
+The Brute now shows its full charge-body corridor, clipped at the first blocking cart/stone, plus one short attack/recovery cue with the player's current bindings. Ground-wave deaths name the attack and offer a short retry hint. Area changes clear this advice, including the Hydra's separate boss HUD. No boss-stat, timing, loot-rate, story, geography or SFX changes.
+
+Real-browser review: 15 isolated damage/recovery checks, an unmodified real-time charge from a staged position into cover, purchase/actual reload, retained level-2/rank-3/270-gold retry, and 11 local host/guest warning checks pass. Corrected camera-aimed scripted fights clear the full encounter and handlers with all three starter classes (23/50/34 simulated seconds). The genuine Warrior save is preserved; alternate classes are representative staged builds. These perfect-state-reading probes are not human novice difficulty or pacing tests. Normal earned level-up healing remains active.
+
+Production logic checks cover 15 stock families, 22 loot transactions, 146 boss-combat scope cases, existing Brute behavior, 28 swept-preview/frame-rate cases, bindings and syntax. See docs/art-validation/first-boss-20261015/summary.json and docs/design/FIRST_BOSS_REVIEW_2026-10-15.md. Initial fixed-camera, inactive-boss and artificial-stun fixture mistakes are recorded separately from product findings. Internet latency, target-device performance and novice fun remain unverified. Unrelated companion3d.js/articulated-rigs.json changes remain untouched. Ready for publication; deployment confirmation follows.

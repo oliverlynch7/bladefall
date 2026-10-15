@@ -1027,7 +1027,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <div id="pethud" class="hide"><img id="pethudimg" alt=""><div><div class="petname" id="pethudname">Companion</div><div class="pethplabel" id="pethudhp">100 / 100 HP</div><div class="pethpbar"><i id="pethudfill"></i></div></div></div>
 <div id="hubtags" class="hide"></div>
 <div id="questbox" class="hide"></div>
-<div id="bosshpwrap"><div id="bossname"><span class="ico ico-event-boss-skull" style="width:20px;height:20px;vertical-align:-5px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div></div>
+<div id="bosshpwrap"><div id="bossname"><span class="ico ico-event-boss-skull" style="width:20px;height:20px;vertical-align:-5px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div><div id="bosscue" hidden style="margin-top:5px;font:600 12px/1.4 system-ui;text-shadow:0 2px 3px #000"></div></div>
 <div id="combo"></div>
 <div id="bonustimer" style="position:absolute;left:60%;top:calc(env(safe-area-inset-top) + 18px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:20px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;background:#101626d9;border:1px solid #d8ad58;border-radius:12px;padding:5px 14px;"></div>
 <style>@media(max-width:650px){#bonustimer{left:auto!important;right:10px!important;top:calc(env(safe-area-inset-top) + 196px)!important;transform:none!important;font-size:15px!important;padding:4px 9px!important}}</style>
@@ -1090,7 +1090,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./camera-occlusion.js?v=2095"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
-<script src="./brute-encounter.js?v=2000"></script>
+<script src="./brute-encounter.js?v=2202"></script>
 <script src="./marksman-encounter.js?v=2004"></script>
 <script src="./story-state.js?v=2106-2046"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
@@ -1161,7 +1161,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.201.0-first-journey';
+const VERSION3D='2.202.0-first-boss';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -2883,7 +2883,9 @@ const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Rel
 function shopWeapon(cid,rid){
   const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
   const w=makeWeapon(aid,rid,SHOPPLAIN[rid]+' '+a.disp);
-  w.dmg=+(w.dmg*0.82).toFixed(1);          // 18% under a rolled drop of the same rarity
+  // The first paid weapon must beat the 88% starter. Loot remains stronger;
+  // higher-rarity shop stock keeps its existing 18% discount in power.
+  w.dmg=+(w.dmg*(rid==='common'?0.96:0.82)).toFixed(1);
   w.lifesteal=0; w.shop=true;
   return w;
 }
@@ -8409,7 +8411,20 @@ function drawBruteOrchard(t){
  for(const [x,z,w]of [[-520,590,240],[550,100,170],[-430,-760,280],[480,-730,220]]){bx(x,7,z,w,14,10,'#776343');for(const dx of [-w/2,w/2])bx(x+dx,14,z,10,28,10,'#8d7650');}
  for(const [x,z]of [[-640,590],[700,180],[-570,-740],[620,-720]]){bx(x,16,z,36,32,32,'#7b653f');bx(x,34,z,42,6,42,'#ac935c');}
  const e=G.boss;if(!e||e.dead)return;
- if(e.windT>0){const tx=e.teleX,tz=e.teleZ,locked=e.windT<=.45,c=locked?'#ff7044':'#e9b367';for(let d=55;d<660;d+=45){bx(e.x+tx*d,5,e.z+tz*d,18,4,18,c,c,.9);}dangerRing(e.x,3,e.z,e.r+28,c,.9);}
+ if(e.windT>0){
+  const tx=e.teleX,tz=e.teleZ,locked=e.windT<=.45,c=locked?'#ff7044':'#e9b367';
+  const path=BFBruteEncounter.chargePreview(e,G.bruteArena.props),half=path.width/2;
+  // Borders show the moving body's full width; the player's own radius still
+  // matters at the edge. Stop at the cart/stone that actually blocks this rush.
+  for(let d=20;d<=path.distance;d+=24){
+   const x=e.x+tx*d,z=e.z+tz*d;
+   for(const side of [-1,1])bx(x+tz*half*side,5,z-tx*half*side,5,3,5,c,c,.95);
+   if(d%48===20){pushM();mv(x,4,z);rotY(Math.atan2(tx,tz));box(path.width,2,15,c,c,.22);popM();}
+  }
+  const target=G.bruteArena.props.find(q=>q.id===path.hit);
+  if(target)dangerRing(target.x,95,target.z,Math.max(target.w,target.d)/2+12,'#f5d27b',.9);
+  dangerRing(e.x,3,e.z,e.r+28,c,.9);
+ }
  if(e.staggerT>0){for(let i=0;i<3;i++){const a=t*3+i*Math.PI*2/3;bx(e.x+Math.cos(a)*40,e.y+e.h+24,e.z+Math.sin(a)*40,9,9,9,'#ffe3a2');}}
  if(e.bruteWaveWarn>0){const x=e.bruteWaveSide*1000;for(const z of [-120,30]){dangerRing(x,20,z,55,'#efbd72',.8);bx(x,110,z,8,24,8,'#efbd72');}}
 }
@@ -9341,6 +9356,7 @@ function loadStageRaw(i){
   G.fx=[]; G.combatArt=[]; G.hostileArt=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
+  document.getElementById('bosscue').hidden=true;document.getElementById('bosscue').textContent='';
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
   /* G1: BOSS AND MINI-BOSS ARENAS ARE SET, NOT PROCEDURAL.
      `runSeed` is re-rolled every run, so every arena was a different room each time you reached it.
@@ -16231,7 +16247,7 @@ function updateWorld(dt){
         if(!t.dead && (t.invuln||0)<=0 && (t.dodgeTimer||0)<=0 && Math.abs(dXZ(t.x,t.z,sw.x,sw.z)-sw.r)<28 && !sw.hitFoe){ sw.hitFoe=true; if(t.foe) botHurtFoe(t.foe,sw.dmg); }
         continue; }
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
-      if(p.invuln<=0 && p.dodgeTimer<=0 && Math.abs(p.y-(sw.y||0))<(sw.orchardId?24:42) && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow',src:G.boss||null}); } }
+      if(p.invuln<=0 && p.dodgeTimer<=0 && Math.abs(p.y-(sw.y||0))<(sw.orchardId?24:42) && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:sw.orchardId?'a ground wave':'a sweeping blow',src:G.boss||null}); } }
     G.shockwaves=G.shockwaves.filter(sw=>(sw.delay>0)||sw.r<sw.maxR); }
   if(G.collapse && G.collapse.length){ for(const tl of G.collapse){   // Void Tyrant: telegraphed floor tiles drop away, then re-form
       if(tl.warn>0){ tl.warn-=dt; if(tl.warn<=0) tl.open=1.4; }
@@ -16582,11 +16598,14 @@ function onBossActivate(e){ SFX.boss();
     // One readable side note instead of simultaneous messages over the fight.
     // The Officers share a note; revisiting the arena still makes the advice available.
     if(G._bossEntryNote!==id){G._bossEntryNote=id;
-      const tip=e.fallenDuel?'Watch the blade. The pale false start is followed by a sweep. Pillars stop a thrust.':e.marksmanCrossing?'Watch her aim line. Use stone cover or climb the outside paths to reach her.':e.bruteOrchard?'Bait its charge into a cart or stone. Jump the ground wave.':'';
+      const tip=e.fallenDuel?'Watch the blade. The pale false start is followed by a sweep. Pillars stop a thrust.':e.marksmanCrossing?'Watch her aim line. Use stone cover or climb the outside paths to reach her.':e.bruteOrchard?'Put a cart or stone between you and the Brute. Step aside as it charges, then attack while it is stunned. Jump over the expanding ground ring.':'';
       const text=[STORY.boss[Z.boss.stage],tip].filter(Boolean).join(' ');if(text)addJournalNote(id,Z.boss.name,text);
     }
   } }
-function updateBossBar(e){ if(e.hydraChain)return;if(e.finalKing){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',BFFinalKing.combat(e));document.getElementById('bossnametx').textContent=e.label;}if(e.marbleGuardian){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Marble Colossus'+(e.mcExposed>0?' · Armor seal open':' · Sealed armor');} if(e.furnaceColossus){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Ember Colossus'+(e.fcExposed>0?' · Armor cooled':' · Heated armor');}if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
+function updateBossBar(e){
+ const cueNode=document.getElementById('bosscue'),cue=e.bruteOrchard?BFBruteEncounter.cue(e,{jump:controlHint('jump'),dodge:controlHint('dodge')}):null;
+ if(cueNode){cueNode.hidden=!cue;if(cue){if(cueNode.textContent!==cue.text)cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}}
+ if(e.hydraChain)return;if(e.finalKing){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',BFFinalKing.combat(e));document.getElementById('bossnametx').textContent=e.label;}if(e.marbleGuardian){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Marble Colossus'+(e.mcExposed>0?' · Armor seal open':' · Sealed armor');} if(e.furnaceColossus){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Ember Colossus'+(e.fcExposed>0?' · Armor cooled':' · Heated armor');}if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
   const n=Math.max(8,Math.ceil(28*arc/Math.PI)),base=Math.atan2(dz,dx),step=arc*2/n;
   if(arc<Math.PI)for(const side of [-1,1])for(let k=1;k<=8;k++){const a=base+arc*side;bx(x+Math.cos(a)*r*k/8,y+4,z+Math.sin(a)*r*k/8,4,2,4,color,color,alpha);}
@@ -17137,6 +17156,7 @@ function showDeathScreen(){
   const Z=curZone(), perma=isPermadeath(), hitless=isHitless(), checkpoint=!perma&&isCampaignAdventure()&&!!campaignCheckpoint();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
   const cb=G.lastHitBy;
+  const retryTip=G.bruteArena?BFBruteEncounter.retryAdvice(cb?.attack):'';
   const cause = cb ? `Slain by <b style="color:#ff8a82">${cb.name}</b>${cb.attack?` <span style="opacity:.82">— ${cb.attack}</span>`:''}.`
                    : 'You fell in battle.';
   const next = hitless
@@ -17148,6 +17168,7 @@ function showDeathScreen(){
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
     <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
     <p class="ovsub" style="margin:8px auto 4px;max-width:520px;font-size:16px">${cause}</p>
+    ${retryTip?`<p class="ovsub" style="max-width:520px;color:#f1d99d">${retryTip}</p>`:''}
     <div class="statgrid" style="margin-top:10px"><div class="vsrow" style="display:block;text-align:center;line-height:1.55"><span>${next}</span></div></div>
     ${checkpoint?`<button class="bigbtn" id="checkpointRetry" style="margin-top:14px">Retry this part</button>`:''}
     ${!checkpoint&&playtestReviveOn()?`<button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest aid, not a game mechanic</span></button>`:''}

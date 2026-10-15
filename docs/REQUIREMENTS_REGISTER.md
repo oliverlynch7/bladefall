@@ -1657,3 +1657,13 @@ Verified rendered request/delivery and exact-entry journal access, genuine old-c
 Gameplay commit 2b2ca8dd is on main. Cloudflare deployment 9a30ca86-cc7e-4d80-97de-5715c8548b16 succeeded; the production browser displays v2.201.0-first-journey and the updated journal/Briar/HUD asset versions, with no warning/error entries. No production save was opened. Owned local test server and both generated QA pages are removed; owned test tabs are closed. Evidence: docs/art-validation/first-session-20261015/deployment.json and production-browser.json.
 
 The continuous normal-difficulty run finished both Briar halves but did not defeat the Brute in two attempts. Next review should examine the first boss and early equipment/reward experience using earned builds, distinguishing automated input limitations from demonstrated tuning problems. Human novice pacing/fun and target-device performance remain open. Existing companion3d.js/articulated-rigs.json changes remain untouched.
+
+
+## [Codex | 2026-10-15] First boss and early equipment review authorized
+
+U-FIRST-BOSS-20261015. Exact user message: "Go ahead with that next review". Review the Brute fight and the equipment reachable before it; fix demonstrated balance/guidance problems and test. Affected requirements: EQ-09, FX-02, BOSS-01/02, loot safety and retained campaign earnings. Plan: docs/design/FIRST_BOSS_REVIEW_2026-10-15.md. Preserve the real v2.201-era character, normal combat and existing story/map/tutorial scope. Automated failure alone is not evidence for a boss nerf. In progress.
+
+
+## [Codex | 2026-10-15] First-boss and early-equipment review - v2.202.0
+
+U-FIRST-BOSS-20261015 implemented and locally verified: paid common starter-family upgrades; accurate cover-stopping charge marker; current-binding attack cues; ground-wave retry advice; isolated boss HUD state. Evidence and limits: docs/art-validation/first-boss-20261015/summary.json. No boss stat nerf or new mandatory reward. Human novice balance remains open. Deployment confirmation follows.

@@ -1,0 +1,189 @@
+{
+  "version": "2.202.0-first-boss",
+  "baselineCommit": "3b972f6b",
+  "scope": "Brute attack readability, cause-specific retry advice and common Quartermaster weapon progression.",
+  "changes": [
+    "Common shop weapons now use 96% base damage, above equivalent 88% starter weapons but below ordinary common loot. Higher rarities remain 82%.",
+    "Full 88-unit charge-body corridor stops at first cart/stone collision; stopping target highlighted.",
+    "One short boss-bar cue shows charge lock, jumpable wave and safe attack windows, using current input bindings.",
+    "Ground-wave death names the attack and offers a short response hint. Brute cue clears on area change."
+  ],
+  "preserved": [
+    "Boss health, damage, attack timings, stagger multiplier and four finite handlers",
+    "Loot probabilities, rarity level gates, prices, tutorial difficulty, geography and story outcomes",
+    "Previously owned weapons and earned character/class/gold progress",
+    "Unrelated companion3d.js and articulated-rigs.json working changes"
+  ],
+  "browser": {
+    "priorSave": "Genuine first-session level-2/rank-3 Warrior, 270 gold, Rusty Sword and no armor; alternate classes staged with equivalent earned rank/starter equipment.",
+    "responseChecks": {
+      "total": 15,
+      "passed": 15,
+      "file": "baseline-probes.json"
+    },
+    "scriptedFights": [
+      {
+        "class": "warrior",
+        "won": true,
+        "simulatedSeconds": 22.9,
+        "remainingHp": 142.56,
+        "exitAppeared": true,
+        "startingBossHp": 684
+      },
+      {
+        "class": "ranger",
+        "won": true,
+        "simulatedSeconds": 50.37,
+        "remainingHp": 95.88000000000001,
+        "exitAppeared": true,
+        "startingBossHp": 684
+      },
+      {
+        "class": "mage",
+        "won": true,
+        "simulatedSeconds": 33.6,
+        "remainingHp": 51.88000000000001,
+        "exitAppeared": true,
+        "startingBossHp": 684
+      }
+    ],
+    "realTimeCover": {
+      "states": [
+        "initial",
+        "hunt",
+        "wind",
+        "charge",
+        "stagger"
+      ],
+      "startingHp": 130.68,
+      "endingHp": 130.68,
+      "file": "cover-watch.json"
+    },
+    "shopReload": {
+      "sameData": true,
+      "gold": 210,
+      "equippedDamage": 10.6,
+      "bagDamage": 11.5
+    },
+    "retry": {
+      "mode": "play",
+      "cls": "warrior",
+      "level": 2,
+      "rank": 3,
+      "hp": 130.68,
+      "maxHp": 130.68,
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Rusty Sword",
+        "dmg": 10.6,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#bcae8a",
+        "range": 84
+      },
+      "gear": {
+        "helmet": null,
+        "chest": null,
+        "legs": null,
+        "amulet": null,
+        "ring": null
+      },
+      "gold": 270,
+      "position": [
+        0,
+        0,
+        850
+      ],
+      "boss": {
+        "hp": 684,
+        "maxHp": 684,
+        "dmg": 39.76128,
+        "position": [
+          0,
+          0,
+          -250
+        ]
+      },
+      "portal": false
+    },
+    "coop": {
+      "passed": 11,
+      "scope": "Local production-message relay between two browser worlds; controlled poses, no Internet latency claim.",
+      "file": "coop-warnings.json"
+    },
+    "nextArenaCueCleared": {
+      "before": "Staggered \u00b7 attack now",
+      "hydra": true,
+      "hidden": true,
+      "text": ""
+    },
+    "visuals": {
+      "viewport": "1280x720",
+      "captures": [
+        "charge-cart-stop.png",
+        "charge-locked-rebound.png",
+        "death-hint.png"
+      ],
+      "scope": "Rendered warning width/cover target, readable rebound advice and death/retry layout. Frozen charge poses are explicitly staged; real-time cover trace is separate."
+    },
+    "errors": []
+  },
+  "logic": {
+    "brute": "Existing state-machine assertions plus 28 collision-preview/frame-rate cases and binding/advice cases passed.",
+    "shopFactories": {
+      "stockFamilies": 15,
+      "passed": true
+    },
+    "lootTransactions": 22,
+    "bossCombatScope": 146,
+    "syntax": [
+      {
+        "name": "inline-79.mjs",
+        "pass": true,
+        "error": ""
+      },
+      {
+        "name": "import map",
+        "pass": true
+      },
+      {
+        "name": "inline-81.mjs",
+        "pass": true,
+        "error": ""
+      },
+      {
+        "name": "public/3d/brute-encounter.js",
+        "pass": true,
+        "error": ""
+      },
+      {
+        "name": "scripts/qa-first-boss-review.js",
+        "pass": true,
+        "error": ""
+      }
+    ]
+  },
+  "harnessCorrections": [
+    "Initial Ranger/Mage probes did not turn the camera. Fixed the probe to use normal applyCameraLook, and accept ordinary earned rank-up choices. No gameplay balance adjustment.",
+    "First cover fixture left the hidden boss inactive. Corrected explicit staged activation; real-time cover then worked.",
+    "Co-op pose test initially compared before interpolation and applied an artificial stun that prevented position correction. Removed the fixture stun and advanced the normal guest update; all 11 checks passed."
+  ],
+  "limits": [
+    "Scripted fights read attack states perfectly and pump simulated frames. They prove mechanical feasibility, not novice difficulty, pacing or human victory.",
+    "No manual healing/invulnerability during complete fights. Normal earned level-up healing remains active.",
+    "Local host/guest message relay does not test Internet latency or two remote devices.",
+    "No full-campaign, mobile layout or target-device performance certification. Screenshots are layout checks, not approval of existing character/environment art."
+  ],
+  "deployment": "Pending"
+}

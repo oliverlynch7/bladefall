@@ -1,0 +1,52 @@
+{
+ "mode": "play",
+ "cls": "warrior",
+ "level": 2,
+ "rank": 3,
+ "hp": 130.68,
+ "maxHp": 130.68,
+ "weapon": {
+  "arche": "sword",
+  "art": "sword",
+  "cls": "melee",
+  "sch": "phys",
+  "el": null,
+  "rarity": "common",
+  "chg": null,
+  "reaper": false,
+  "anyClass": false,
+  "ians": false,
+  "name": "Rusty Sword",
+  "dmg": 10.6,
+  "cd": 0.38,
+  "kb": 260,
+  "lifesteal": 0,
+  "color": "#b9c0cc",
+  "blade": "#bcae8a",
+  "range": 84
+ },
+ "gear": {
+  "helmet": null,
+  "chest": null,
+  "legs": null,
+  "amulet": null,
+  "ring": null
+ },
+ "gold": 270,
+ "position": [
+  0,
+  0,
+  850
+ ],
+ "boss": {
+  "hp": 684,
+  "maxHp": 684,
+  "dmg": 39.76128,
+  "position": [
+   0,
+   0,
+   -250
+  ]
+ },
+ "portal": false
+}

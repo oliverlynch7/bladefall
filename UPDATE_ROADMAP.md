@@ -2852,3 +2852,8 @@ Implementation 4933d50d is on main. Cloudflare deployment 2b76f2bc-d1d3-4821-8a4
 ## [Codex | 2026-10-14] v2.197.0 - Remaining campaign journey pass
 
 Finished all ten remaining campaign halves: authored signs and route materials, floor-aware guidance, concrete mechanism feedback and corrected blueprint directions. Retained map scale, story/reward IDs and deliberate parkour. Verified 808 route waypoints, six cornice landings, five continuous mechanism checks, 61 local host/guest assertions and ten genuine prior-release saves. Evidence and precise limits: docs/art-validation/remaining-journey-20261014/summary.json. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-14] Remaining campaign pass verified live
+
+Implementation 367957bee99b7803d0e96563e29dd641537eaec4 is on main. Cloudflare deployment d875a56a-10bc-4839-a6b3-8335746e7715 succeeded. Production HTML and a fresh browser title show v2.197.0-campaign-journeys; the new journey modules, shared deep art, castle art and blueprints return HTTP 200. The settled production title screen reports no browser warnings/errors. No production save was opened. Generated public QA pages were removed, owned test tabs closed and the owned local server stopped. Evidence: docs/art-validation/remaining-journey-20261014/deployment.json and production-browser.json. All ten remaining campaign halves are shipped. Existing companion3d.js and articulated-rigs.json changes remain unstaged and untouched.

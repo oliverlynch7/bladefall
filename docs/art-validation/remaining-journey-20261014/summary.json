@@ -28,7 +28,15 @@
     "Not a human fun, novice comprehension or low-end performance verdict",
     "Co-op transport is a local serialized relay through the actual host/guest handlers, not an Internet session."
   ],
-  "status": "Implementation and scoped verification complete; deployment pending.",
+  "status": "Implementation, scoped verification and production deployment complete.",
   "visualReview": "Ten rendered area junctions plus five regional mechanism sequences inspected. Coastal signs moved clear of the boat and fishing shelter; screenshots saved.",
-  "browserNotes": "Final ten-area scene run reported no application errors. Repeated old/current page navigation also logged two unattributed MutationObserver errors without file/stack; no save check failed. Retained in save-browser-errors.json; not presented as a clean universal browser-error verdict. A fresh normal release tab subsequently reported no warnings/errors (fresh-release-browser.json)."
+  "browserNotes": "Final ten-area scene run reported no application errors. Repeated old/current page navigation also logged two unattributed MutationObserver errors without file/stack; no save check failed. Retained in save-browser-errors.json; not presented as a clean universal browser-error verdict. A fresh normal release tab subsequently reported no warnings/errors (fresh-release-browser.json).",
+  "deployment": {
+    "commit": "367957bee99b7803d0e96563e29dd641537eaec4",
+    "id": "d875a56a-10bc-4839-a6b3-8335746e7715",
+    "url": "https://bladefall.pages.dev/3d/",
+    "conclusion": "success",
+    "productionBrowserErrors": 0,
+    "productionBrowserWarnings": 0
+  }
 }

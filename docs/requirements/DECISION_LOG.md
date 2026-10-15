@@ -1331,3 +1331,16 @@ U-FIRST-BOSS-20261015. Exact user message: "Go ahead with that next review". Rev
 ## [Codex | 2026-10-15] First-boss and early-equipment review - v2.202.0
 
 Use the demonstrated shop mismatch and narrow charge marker as the fixes. Three corrected scripted starter-class victories do not support a boss-stat reduction; retain timings, health, damage and finite handlers. Improve response clarity with one cue beneath the existing boss bar and a short cause-specific retry hint. Do not add a modal, inflate rewards or migrate owned weapon stats. Source plan and browser/test evidence: docs/design/FIRST_BOSS_REVIEW_2026-10-15.md and docs/art-validation/first-boss-20261015/summary.json.
+
+
+## [Codex | 2026-10-15] Hollow Pass new-player review authorized
+
+U-HOLLOW-REVIEW-20261015. Exact user request: "Ok keep going with the next review into Hollow Pass. Do a long work session and fix anything that could confuse or frustrate new players. Don't waste usage." Review the earned Brute victory/exit, hub unlock, Winding Cliffs, Lost Canyon and the Marksman approach. Preserve the existing large layout and canon. Use real-browser movement/interactions and relevant save/co-op regressions; distinguish map-assisted or staged probes from human novice playtesting. Plan: docs/design/HOLLOW_PASS_REVIEW_2026-10-15.md. Baseline 7beba2d0. Unrelated companion3d.js/articulated-rigs.json edits stay untouched. In progress.
+
+
+## [Codex | 2026-10-15] U-PROMO-20261015 — shareable current-build poster
+
+User: "Please create a set of screenshots as if it were a piece of promotional material for the game. I want to show it off in its current state to a friend"
+Follow-up: "Yeah, and if you can put the screenshots together as if it was like a promotional piece, like pamphlet or brochure. I don't know if that's the right terminology, or poster for the game, with just like a description of, basic description of the game. I don't know, something like that, which would be cool. Something I could just text him over in a screenshot."
+
+Create a single portrait image with authentic current-game screenshots, a short accurate description and play link; also supply the original captures and a phone-friendly gallery. Camera staging and hiding the HUD are photographic preparation, not new assets or evidence of gameplay balance. Do not replace gameplay images with generated concept art. This interrupts the Hollow Pass review for a shareable deliverable; that review remains in progress, not completed.

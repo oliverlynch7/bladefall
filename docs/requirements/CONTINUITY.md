@@ -1754,3 +1754,15 @@ Production logic checks cover 15 stock families, 22 loot transactions, 146 boss-
 Gameplay commit c65a1ff7 is on main. Cloudflare deployment 7c65879f-03f1-4fa2-a0fa-0253a5bbfd67 succeeded. Production displays v2.202.0-first-boss with brute-encounter.js?v=2202 and no warning/error entries. No production save was opened. Evidence: docs/art-validation/first-boss-20261015/deployment.json and production-browser.json. Owned local review tab, server and generated QA page have been cleaned up. Existing companion/rig edits remain untouched.
 
 The first boss is mechanically feasible with all three starting builds in scripted tests; a novice human difficulty verdict remains open. For the next continuous review, use ordinary controls after a real Brute win and inspect the transition into Hollow Pass, objective/reward discovery and first higher-rarity upgrade. Keep staged encounter probes distinct from an uncut human-style journey.
+
+
+## [Codex | 2026-10-15] Hollow Pass new-player review authorized
+
+U-HOLLOW-REVIEW-20261015. Exact user request: "Ok keep going with the next review into Hollow Pass. Do a long work session and fix anything that could confuse or frustrate new players. Don't waste usage." Review the earned Brute victory/exit, hub unlock, Winding Cliffs, Lost Canyon and the Marksman approach. Preserve the existing large layout and canon. Use real-browser movement/interactions and relevant save/co-op regressions; distinguish map-assisted or staged probes from human novice playtesting. Plan: docs/design/HOLLOW_PASS_REVIEW_2026-10-15.md. Baseline 7beba2d0. Unrelated companion3d.js/articulated-rigs.json edits stay untouched. In progress.
+
+
+## [Codex | 2026-10-15] Promotional screenshot pack
+
+U-PROMO-20261015. Captured eight 1600x900 images from v2.202.0-first-boss: title screen, Waystation, mill, Sunspire, Brute, Hydra, Hollow freight crossing and Mage wardrobe. Built a 1280x2276 JPEG portrait poster from four of those captures, an approximately 1 MiB ZIP, and a responsive gallery at public/showcase/2026-10-15/. Source/layout builders: scripts/build-promo-capture.py, scripts/qa-promo-capture.js and scripts/build-promo-gallery.py. Cameras and actors were staged in a localhost copy; HUD hidden; no generated or repainted gameplay. Original title illustration is labeled as the title screen. All file formats/dimensions and ZIP CRC verified; browser layout checked at desktop and 390px phone width.
+
+The earlier Hollow review is still pending implementation. Its source-grounded plan and findings are in docs/design/HOLLOW_PASS_REVIEW_2026-10-15.md. No quest or gameplay fixes are claimed by this poster delivery. The unrelated companion/rig edits remain untouched.

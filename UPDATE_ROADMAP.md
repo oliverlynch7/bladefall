@@ -2946,3 +2946,8 @@ Production logic checks cover 15 stock families, 22 loot transactions, 146 boss-
 Gameplay commit c65a1ff7 is on main. Cloudflare deployment 7c65879f-03f1-4fa2-a0fa-0253a5bbfd67 succeeded. Production displays v2.202.0-first-boss with brute-encounter.js?v=2202 and no warning/error entries. No production save was opened. Evidence: docs/art-validation/first-boss-20261015/deployment.json and production-browser.json. Owned local review tab, server and generated QA page have been cleaned up. Existing companion/rig edits remain untouched.
 
 The first boss is mechanically feasible with all three starting builds in scripted tests; a novice human difficulty verdict remains open. For the next continuous review, use ordinary controls after a real Brute win and inspect the transition into Hollow Pass, objective/reward discovery and first higher-rarity upgrade. Keep staged encounter probes distinct from an uncut human-style journey.
+
+
+## [Codex | 2026-10-15] v2.202.1-showcase — current-build share pack
+
+Added a public screenshot gallery, eight real captures, downloadable portrait poster and ZIP at /showcase/2026-10-15/. Browser-verified desktop/mobile presentation and archive integrity. Game change is a version bump only; the Hollow Pass review continues separately.

@@ -1,6 +1,6 @@
 import {buildKeepJourneyArt} from './keep-journey-art.js?v=2195';
 import {buildPrisonJourneyArt} from './prison-journey-art.js?v=2196';
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';

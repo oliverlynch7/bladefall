@@ -1,4 +1,4 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {enrichCampaignKit} from './campaign-kit-detail.js?v=2182f';
 import {trackCampaignOccluder} from './campaign-scene.js?v=2182f';

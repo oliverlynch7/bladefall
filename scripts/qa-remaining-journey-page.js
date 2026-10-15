@@ -1,0 +1,44 @@
+(()=>{
+ if(!['localhost','127.0.0.1'].includes(location.hostname))return;
+ const cases={/*CASES*/},names=Object.keys(cases),results={},errors=[];
+ window.addEventListener('error',e=>errors.push(e.message));
+ const panel=document.createElement('section');panel.style.cssText='position:fixed;right:8px;bottom:8px;z-index:999999;background:#142b3e;color:white;padding:10px;max-width:480px;font:12px system-ui';
+ panel.innerHTML='<label>Campaign area <select id="journeyArea">'+names.map((n,i)=>'<option value="'+i+'">'+n+'</option>').join('')+'</select></label><div id="journeyButtons"></div><pre id="journeyResult" style="max-height:180px;overflow:auto;white-space:pre-wrap">Ready</pre><textarea id="journeyEvidence" aria-label="Evidence JSON" style="width:100%;height:22px"></textarea>';document.body.append(panel);
+ const out=x=>document.getElementById('journeyResult').textContent=typeof x==='string'?x:JSON.stringify(x,null,2),write=()=>document.getElementById('journeyEvidence').value=JSON.stringify(results),wait=ms=>new Promise(r=>setTimeout(r,ms)),selected=()=>+document.getElementById('journeyArea').value;
+ const until=async(fn)=>{const end=Date.now()+25000;while(!fn()){if(Date.now()>end)throw Error('Wait timed out: '+fn);await wait(60);}};
+ async function ready(){await until(()=>window.__BF3);await __BF3.briarReady;if(document.body.classList.contains('t-attract'))window.dispatchEvent(new PointerEvent('pointerdown'));return __BF3;}
+ const pump=(b,n=1)=>{for(let i=0;i<n;i++)b.update(1/60);b.render(1);};
+ async function fresh(i=selected()){const b=await ready();b.MP.active=false;b.MP.conns=[];b.loadMode('rl');Object.assign(b.meta,{hero:null,run:null,bank:null,introSeen:true,introV2Seen:true,hubTutDone:true,classId:'warrior',tutOff:true,camMode:'far',autoAttack:false,riftShards:[],stash:[],petActive:null});b.openHub();b.enterZone(3+Math.floor(i/2));if(i%2){b.G.area=1;b.loadArea();}b.G.p.invuln=99999;for(const e of b.G.enemies)e.stunT=99999;await until(()=>!window.BF_LOADING?.active&&window.HERO3D?.ready);pump(b);b.G.stageBanner=0;return b;}
+ function place(b,x,z,y=0){Object.assign(b.G.p,{x,z,y,vx:0,vz:0,vy:0,onGround:true});Object.assign(b.G.cam,{x,z,y});delete b.G._cameraBoom;b.camYaw=Math.PI;b.G.stageBanner=0;pump(b,2);}
+ function button(name,fn){const a=document.createElement('button');a.textContent=name;a.onclick=async()=>{panel.querySelectorAll('button,select').forEach(e=>e.disabled=true);out('Running '+name+'…');try{out(await fn());write();}catch(e){out('FAIL '+e.stack);results[names[selected()]+'-'+name]={error:e.message};write();}finally{panel.querySelectorAll('button,select').forEach(e=>e.disabled=false);}};document.getElementById('journeyButtons').append(a);}
+ button('Preview selected area',async()=>{const b=await fresh();return {name:b.G.areaName,bounds:b.G.bounds,art:window.__CAMPAIGN_JOURNEY_ART?.snapshot(),target:BFPartyNavigation.target(b.G)};});
+ button('Check area routes and quests',async()=>{
+  await fresh();const i=selected(),name=names[i];
+  // Reuse the existing authored test callbacks in the local page, with explicit
+  // visible controls. This adapter performs no external browser automation.
+  const adapter={on(){},async goto(){},waitForFunction:until,waitForTimeout:wait,async evaluate(fn,arg){return await fn(arg);},context(){return {async newCDPSession(){return {async send(){}};}};}};
+  const value=await cases[name](adapter),b=__BF3;await wait(200);pump(b);const result={checks:value.checks||[],waypoints:value.waypoints,failed:value.failed||[],errors:[...errors],area:name,art:window.__CAMPAIGN_JOURNEY_ART?.snapshot(),bounds:b.G.bounds};results[name]=result;return result;
+ });
+ button('Inspect signs and scene',()=>{const b=__BF3,G=b.G,rows=(G.journeySigns||[]).map(s=>({...s,supported:G.obstacles.some(o=>o.kind==='plat'&&Math.abs(o.h-s.y)<1&&Math.abs(s.x-o.x)<o.w/2&&Math.abs(s.z-o.z)<o.d/2),overlaps:G.walls.filter(o=>Math.abs(o.x-s.x)<o.w/2+7&&Math.abs(o.z-s.z)<o.d/2+7&&(o.y0||0)<s.y+130&&(o.courtWall?o.y0+o.h:o.h)>s.y).length}));const r={rows,art:window.__CAMPAIGN_JOURNEY_ART?.snapshot(),errors,renderError:window.HERO3D?.err};results[names[selected()]+'-scene']=r;return r;});
+ button('Audit every initial scene',async()=>{const rows=[];for(let i=0;i<names.length;i++){
+  const b=await fresh(i),G=b.G;await wait(100);const issues=[],signs=G.journeySigns.map(s=>{
+   const support=b.floorAt(s.x,s.z,0,s.y+4),collision=G.walls.filter(o=>Math.abs(o.x-s.x)<o.w/2+8&&Math.abs(o.z-s.z)<o.d/2+8&&(o.y0||0)<s.y+140&&(o.courtWall?o.y0+o.h:o.h)>s.y);
+   if(!Number.isFinite(support)||Math.abs(support-s.y)>7||collision.length)issues.push({sign:s.title,support,y:s.y,walls:collision});return s.title;
+  });
+  const inaccessible=[];for(const o of [...G.storyObjects,...G.storyNpcs]){let found=false;for(const radius of [65,90,102])for(let j=0;j<16;j++){
+   const a=j*Math.PI/8,x=o.x+Math.cos(a)*radius,z=o.z+Math.sin(a)*radius,y=b.floorAt(x,z,13,(o.y||0)+45);if(!Number.isFinite(y)||Math.abs(y-(o.y||0))>64)continue;
+   const p={x,z,y},blocked=[...G.obstacles.filter(q=>q.kind!=='plat'),...G.walls.map(q=>({...q,h:q.h+(q.courtWall?(q.y0||0):0)}))].some(q=>!q.nocol&&!q.open&&q.solid!==false&&(q.y0||0)<y+80&&q.h>y+22&&Math.abs(x-q.x)<q.w/2+13&&Math.abs(z-q.z)<q.d/2+13);
+   if(!blocked&&BFCampaignInteraction.reachable(G,p,o))found=true;
+  }if(!found)inaccessible.push(o.key||o.id);}
+  rows.push({area:names[i],signs,issues,inaccessible,art:window.__CAMPAIGN_JOURNEY_ART?.snapshot(),bounds:G.bounds});out('Audited '+names[i]);
+ }results.initialAudit=rows;return rows.map(r=>({area:r.area,signs:r.signs.length,issues:r.issues,inaccessible:r.inaccessible}));});
+ let signIndex=0;button('View next sign',()=>{const b=__BF3,s=b.G.journeySigns[signIndex++%b.G.journeySigns.length];place(b,s.x,s.z+220,s.y);return s;});
+ button('Export initial geometry',async()=>{const b=await fresh(),G=b.G,r={zone:G.zone,area:G.area,bounds:G.bounds,segments:G.segments,plats:G.obstacles.filter(o=>o.kind==='plat'),walls:G.walls,obstacles:G.obstacles.filter(o=>o.kind!=='plat'),objects:G.storyObjects,npcs:G.storyNpcs,rooms:G.rooms,paths:window[BFCampaignJourney.entry(G).api]?.paths||G.ascent?.routes,geography:G.geography,enemies:G.enemies.map(e=>({type:e.type,x:e.x,z:e.z,y:e.y})),portal:G.portalPos};results[names[selected()]+'-geometry']=r;return {name:G.areaName,bounds:G.bounds};});
+ button('Save pre-change character',async()=>{const b=await fresh(),G=b.G,i=selected();b.meta.heroName='Campaign compatibility '+i;b.meta.gold=983;G.p.level=12;G.p.xp=87;b.meta.hero=b.snapOf(G.p);Object.assign(b.classState('warrior'),{rank:7,xp:169});const first=['ff.trail','ic.pages',null,'gf.fault',null,'tc.shackle',null,'sl.records',null,'la.notice'][i];if(first){const o=G.storyObjects.find(o=>o.key===first);place(b,o.x,o.z,o.y);b.briarRequest('world',{key:first});}b.captureCampaignCheckpoint();b.autosaveRun();return {saved:!!b.meta.run,name:b.meta.heroName,gold:b.meta.gold,zone:G.zone,area:G.area,flags:G.storyState.flags};});
+ button('Load saved character',async()=>{const b=await ready();b.loadMode('rl');b.continueRun();await until(()=>!BF_LOADING.active);const r={name:b.meta.heroName,gold:b.meta.gold,level:b.G.p.level,xp:b.G.p.xp,classRank:b.classState('warrior').rank,classXp:b.classState('warrior').xp,zone:b.G.zone,area:b.G.area,flags:b.G.storyState.flags,signs:b.G.journeySigns?.length};results['save-'+b.G.zone+'-'+b.G.area]=r;return r;});
+ button('Export all initial geometry',async()=>{const rows=[];for(let i=0;i<names.length;i++){const b=await fresh(i),G=b.G;await wait(120);rows.push({zone:G.zone,area:G.area,bounds:G.bounds,segments:G.segments,plats:G.obstacles.filter(o=>o.kind==='plat'),walls:G.walls,obstacles:G.obstacles.filter(o=>o.kind!=='plat'),objects:G.storyObjects,npcs:G.storyNpcs,rooms:G.rooms,paths:window[BFCampaignJourney.entry(G).api]?.paths||G.ascent?.routes,geography:G.geography,enemies:G.enemies.map(e=>({type:e.type,x:e.x,z:e.z,y:e.y})),portal:G.portalPos});}results.geometry=rows;return {exported:rows.length,errors};});
+ button('View area junction',async()=>{const b=await fresh(),s=b.G.journeySigns[0];const candidates=[0,40,-40,80,-80,120,-120,170,-170].map(dx=>({x:s.x+dx,z:s.z+230}));const spot=candidates.map(p=>({...p,y:b.floorAt(p.x,p.z,0,s.y+120)})).find(p=>Number.isFinite(p.y)&&[-18,18].every(dx=>[-18,18].every(dz=>Math.abs(b.floorAt(p.x+dx,p.z+dz,0,p.y+3)-p.y)<4)));if(!spot)throw Error('No supported preview position');place(b,spot.x,spot.z,spot.y);await wait(450);return {name:b.G.areaName,art:window.__CAMPAIGN_JOURNEY_ART?.snapshot(),renderer:window.__world3d?.()};});
+ button('Capture clean view',()=>{panel.hidden=true;setTimeout(()=>panel.hidden=false,4000);return 'Controls hidden briefly';});
+ button('Hide test controls',()=>{panel.style.opacity='.06';return 'Hover to restore';});panel.onmouseenter=()=>panel.style.opacity='1';
+ window.journeyQA={ready,fresh,place,pump,wait,until,button,results,out,write};
+})();

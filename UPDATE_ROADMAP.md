@@ -2847,3 +2847,8 @@ Evidence and precise limits: docs/art-validation/prison-journey-20261014/summary
 ## [Codex | 2026-10-14] Dungeons verified live
 
 Implementation 4933d50d is on main. Cloudflare deployment 2b76f2bc-d1d3-4821-8a47-030dfa6cd0cf succeeded. Production HTML and a fresh browser title show v2.196.0-prison-journey, the new art module returns HTTP 200, the blueprint data reports the same release, and production browser errors are empty. No production save was opened. Generated QA pages were removed, owned tabs closed and the local server stopped. Evidence: docs/art-validation/prison-journey-20261014/deployment.json and production-browser.json. Next: Frostfell — Snowbound Peaks. Preexisting companion3d.js and articulated-rigs.json edits remain unstaged and untouched.
+
+
+## [Codex | 2026-10-14] v2.197.0 - Remaining campaign journey pass
+
+Finished all ten remaining campaign halves: authored signs and route materials, floor-aware guidance, concrete mechanism feedback and corrected blueprint directions. Retained map scale, story/reward IDs and deliberate parkour. Verified 808 route waypoints, six cornice landings, five continuous mechanism checks, 61 local host/guest assertions and ten genuine prior-release saves. Evidence and precise limits: docs/art-validation/remaining-journey-20261014/summary.json. Deployment confirmation follows.

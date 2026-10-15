@@ -1,0 +1,34 @@
+{
+  "release": "2.197.0-campaign-journeys",
+  "baseline": "fc6e6e24",
+  "scope": "Ten remaining campaign halves, zones 3–7, areas 0 and 1",
+  "bounds": "Original bounds and historical blueprint footprints preserved",
+  "changes": [
+    "48 crafted, double-sided junction signs with narrow solid posts",
+    "Floor-clipped regional route surfaces that preserve deliberate gaps",
+    "Height-aware tower and cornice guidance, lower-library latch guidance, required-guard targets",
+    "Concrete ice-crossing result and corrected coil directions",
+    "Consistent shared rendering module instances"
+  ],
+  "coverage": {
+    "routeWaypoints": 808,
+    "corniceLandings": 6,
+    "authoredQuestAssertions": 92,
+    "continuousRegionalSequences": 5,
+    "coastalEntranceWalks": 2,
+    "coopAssertions": 61,
+    "coopAreas": 10,
+    "preChangeSaves": 10,
+    "logicSuites": 15,
+    "syntaxChecks": 24
+  },
+  "limits": [
+    "Route tests isolate traversal with enemies disabled or an invulnerable player; not a combat balance verdict",
+    "Continuous sequences stage starting prerequisites once; subsequent movement and timing run in the normal camera",
+    "Not a human fun, novice comprehension or low-end performance verdict",
+    "Co-op transport is a local serialized relay through the actual host/guest handlers, not an Internet session."
+  ],
+  "status": "Implementation and scoped verification complete; deployment pending.",
+  "visualReview": "Ten rendered area junctions plus five regional mechanism sequences inspected. Coastal signs moved clear of the boat and fishing shelter; screenshots saved.",
+  "browserNotes": "Final ten-area scene run reported no application errors. Repeated old/current page navigation also logged two unattributed MutationObserver errors without file/stack; no save check failed. Retained in save-browser-errors.json; not presented as a clean universal browser-error verdict. A fresh normal release tab subsequently reported no warnings/errors (fresh-release-browser.json)."
+}

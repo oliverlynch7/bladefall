@@ -1,5 +1,5 @@
 import {buildBriarJourneyArt} from './briar-journey-art.js?v=2188';
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2188a';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {loadBriarTrees,briarTreesReady,campaignTreesReady,buildCampaignTrees} from './briar-trees.js?v=2182f';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';

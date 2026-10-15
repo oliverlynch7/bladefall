@@ -1618,3 +1618,20 @@ Evidence and precise limits: docs/art-validation/prison-journey-20261014/summary
 ## [Codex | 2026-10-14] Dungeons verified live
 
 Implementation 4933d50d is on main. Cloudflare deployment 2b76f2bc-d1d3-4821-8a47-030dfa6cd0cf succeeded. Production HTML and a fresh browser title show v2.196.0-prison-journey, the new art module returns HTTP 200, the blueprint data reports the same release, and production browser errors are empty. No production save was opened. Generated QA pages were removed, owned tabs closed and the local server stopped. Evidence: docs/art-validation/prison-journey-20261014/deployment.json and production-browser.json. Next: Frostfell — Snowbound Peaks. Preexisting companion3d.js and articulated-rigs.json edits remain unstaged and untouched.
+
+
+## [Codex | 2026-10-14] Finish every remaining campaign area
+
+Latest user: “Don’t stop till you’ve done this process for all the remaining levels.”
+Continue the established campaign journey finishing pass across both halves of Frostfell, Emberdeep, Storm Coast, Sunspire and Castle Duskmoor (ten halves). Preserve original bounds, story/reward identifiers, optional routes, meaningful hazard gaps and detailed existing assets. Improve authored wayfinding, route presentation, mechanism access and any defects exposed by actual traversal. Verify each area, saved progress and local co-op; do not stop after a single half. Source baseline fc6e6e24. Grounded plan: docs/design/REMAINING_CAMPAIGN_JOURNEY_2026-10-14.md. Work in progress; no completion or playtest claim.
+
+
+## [Codex | 2026-10-14] All remaining campaign journeys finished — v2.197.0
+
+Completed the pass across Snowbound Peaks, Deep Ice Caves, Iron Halls, Great Furnace, Shipwreck Shore, Thunder Cliffs, Palace Courtyard, Sky Library, Castle Gates and Long Ascent. Added 48 fitted, framed, double-sided destination signs and floor-clipped regional route surfaces; kept existing full-size maps, story/rewards, detailed assets and deliberate hazards. Guidance follows the tower’s current storey and required cornice ledges, identifies the lower library latch and remaining required guards. The ice crossing now describes its concrete result. The blueprint coil location is corrected to Heath’s shelter.
+
+Physical/visual checks moved new posts away from the ice rescue return, castle store return, unsupported cliff/terrace edges, Otto’s boat and Abe’s shelter. All new posts have supported footing and clear wall access. Unified the shared rendering module versions after a clean reload caught a split asset pool. Refreshed only the last ten initial-state blueprints; first six records, all bounds and historical footprints remain unchanged.
+
+Verified 808 route waypoints, six cornice landings, 92 returned quest assertions, five continuous normal-camera mistake/recovery sequences, two coastal entrance walks, 61 host/guest assertions through a local serialized relay, and ten genuine fc6e6e24 saves preserving names, 983 gold, character level 12 / XP 87, Warrior rank 7 / XP 169 and quest flags. Fifteen logic suites and 24 source/import-map syntax checks passed. Inspected ten rendered junctions. Scope, evidence, resolved failures and browser caveat: docs/art-validation/remaining-journey-20261014/summary.json.
+
+This finishes the remaining-area process requested in this turn. Automated traversal is not a human pacing/fun/novice-comprehension, full combat or low-end performance verdict; local relay testing is not an Internet session. No new custom SFX. Unrelated companion and articulated-rig edits remain untouched and unstaged. Deployment confirmation follows.

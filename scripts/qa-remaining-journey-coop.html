@@ -1,0 +1,35 @@
+<!doctype html><meta charset="utf-8"><title>Remaining campaign co-op checks</title>
+<style>body{background:#182a37;color:#fff;font:14px system-ui}button{padding:10px}iframe{width:48%;height:300px;border:1px solid #687}pre{white-space:pre-wrap}textarea{width:90%;height:60px}</style>
+<h1>Ten-area host/guest verification</h1><button id="run">Check all shared campaign areas</button><pre id="result">Ready</pre><textarea id="evidence" aria-label="Evidence JSON"></textarea>
+<iframe id="host" title="Host" src="/3d/.qa-remaining-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-remaining-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result'),results=[];out.textContent='Running…';let hb,gb;
+ try{
+ const h=document.getElementById('host').contentWindow,g=document.getElementById('guest').contentWindow,wait=ms=>new Promise(r=>setTimeout(r,ms));
+ while(!h.journeyQA||!g.journeyQA)await wait(100);hb=await h.journeyQA.ready();gb=await g.journeyQA.ready();
+ const scenes=[['ff.trail','ff.heater'],['ic.pages','ic.lock.open'],['ih.handles','ih.cart'],['gf.fault','gf.access'],['sc.drain','sc.hull.open'],['tc.brake','tc.approach'],['pc.clamp','pc.west'],['sl.records','sl.access'],['cg.papers','cg.bridge.open'],['la.lower','la.upper']];
+ for(let i=0;i<10;i++){
+  await h.journeyQA.fresh(i);await g.journeyQA.fresh(i);const hq=[],gq=[],handlers={},checks=[],ok=(name,value)=>{if(!value)throw Error(name);checks.push(name);};
+  Object.assign(hb.MP,{active:true,isHost:true,myId:'h',conns:[]});hb.MP.wireGuest({open:true,send:d=>hq.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'g',hostConn:{open:true,send:d=>gq.push(JSON.parse(JSON.stringify(d)))}});
+  const flush=()=>{for(let j=0;j<4;j++){for(const p of gq.splice(0))handlers.data(p);for(const p of hq.splice(0))gb.MP.onGuestData(p);}};
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();hb.enterZone(3+Math.floor(i/2));if(i%2){hb.G.area=1;hb.loadArea();hb.captureCampaignCheckpoint();hb.MP.onEnter(hb.G.zone);}flush();await wait(150);flush();
+  for(const b of [hb,gb]){b.G.p.invuln=999999;for(const e of b.G.enemies)e.stunT=999999;}
+  const broadcast=()=>{hb.MP._storySent=0;hb.MP.broadcast();flush();},pos=()=>{gb.MP.hostConn.send({t:'pos',p:gb.MP.selfState()});flush();};
+  ok('matching area and full map bounds',hb.G.zone===gb.G.zone&&hb.G.area===gb.G.area&&JSON.stringify(hb.G.bounds)===JSON.stringify(gb.G.bounds));
+  ok('matching authored signs and post collisions',JSON.stringify(hb.G.journeySigns)===JSON.stringify(gb.G.journeySigns)&&gb.G.obstacles.filter(o=>o.journeySign!==undefined).length===gb.G.journeySigns.length);
+  if(i===6){const npc=hb.G.storyNpcs.find(n=>n.id==='grace');h.journeyQA.place(hb,npc.x,npc.z,npc.y);hb.briarRequest('open',{npc:'grace'});hb.briarRequest('choose',{line:hb.G.storyState.conversation.node,choice:'help'});hb.briarRequest('close');flush();ok('Grace prerequisite shares to guest',hb.G.storyState.flags['pc.met']&&gb.G.storyState.flags['pc.met']);}
+  const key=scenes[i][0],o=gb.G.storyObjects.find(o=>o.key===key);g.journeyQA.place(gb,o.x,o.z,o.y);pos();gb.briarRequest('world',{key});flush();
+  ok('guest interaction reaches host and peer',hb.G.storyState.flags['event.'+key]&&gb.G.storyState.flags['event.'+key]);
+  const before=JSON.stringify(hb.G.storyState.rewards);gb.briarRequest('world',{key});flush();ok('duplicate request does not duplicate rewards',JSON.stringify(hb.G.storyState.rewards)===before);
+  // State setup here tests replication/reconstruction, not solving the gate.
+  hb.G.storyState.flags[scenes[i][1]]=true;hb.briarSync();broadcast();ok('gate state reconstructs on peer',!!gb.G.storyState.flags[scenes[i][1]]);
+  const packet=JSON.parse(JSON.stringify(hb.briarPacket())),count=gb.G.obstacles.length;gb.briarApply(packet);gb.briarApply(packet);ok('repeated snapshots do not add collision twice',gb.G.obstacles.length===count);
+  const hp=gb.G.p.hp;hb.MP.active=false;gb.MP.active=false;hb.MP.conns=[];gb.MP.conns=[];results.push({zone:hb.G.zone,area:hb.G.area,checks});out.textContent=JSON.stringify(results.map(r=>({zone:r.zone,area:r.area,checks:r.checks.length})),null,2);await wait(30);
+ }
+ document.getElementById('evidence').value=JSON.stringify({results,transport:'Actual host/guest handlers over a local serialized relay. Gate flags are staged only for reconstruction checks; quest unlocks are tested separately.'});out.textContent='PASS '+results.reduce((n,r)=>n+r.checks.length,0)+' assertions across ten areas.';
+ }catch(e){out.textContent='FAIL '+e.stack+'\n'+JSON.stringify(results);document.getElementById('evidence').value=JSON.stringify({results,error:e.message});}
+ finally{for(const b of [hb,gb])if(b){b.MP.active=false;b.MP.conns=[];}}
+};
+</script>

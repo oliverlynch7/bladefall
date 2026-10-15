@@ -1,6 +1,7 @@
 import * as T from './three.module.js';
 import {craftModel,createCraftModel,craftCacheStats} from './campaign-craft-models.js?v=2187a';
 import {trackCampaignOccluder,updateCampaignOccluders} from './campaign-scene.js?v=2182f';
+import {buildCampaignJourneyArt} from './campaign-journey-art.js?v=2197';
 let active=null;
 const mappedKinds=new Set(['craft','shoreWreck','shoreShelter','shoreRock','thunderArch','iceResearch','forgeRack','forgeBench','forgeCrates','forgeLamp','forgePipe','forgeFrame']);
 export const craftReplacesDeco=(d,w)=>enabled(w)&&(d.craftHidden||mappedKinds.has(d.kind));
@@ -204,14 +205,15 @@ export function attachCampaignCraft(parent,w,counts){
    for(const side of [-1,1]){add('castle-entry-buttress-'+side,'buttress',side*880,280,-4740,{w:115,h:610,d:90});for(const y of [490,765])add('castle-window-'+side+y,'window',side*880,y-78,-4730,{w:86,h:156,d:12});}
   }
  }
+ const journey=buildCampaignJourneyArt(w);if(journey)root.add(journey);
  const dummy=new T.Object3D();let triangles=0;
  for(const {cell,r,list}of bins.values()){
   const mesh=new T.InstancedMesh(r.geo,r.material,list.length);mesh.name='Craft '+list[0].row.name;mesh.castShadow=true;mesh.receiveShadow=true;
   list.forEach(({matrix,row},i)=>{mesh.setMatrixAt(i,matrix);trackCampaignOccluder(occluders,mesh,i,matrix);});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();root.add(mesh);groups.push({mesh,cell});triangles+=r.tri*list.length;
  }
  counts.craft={theme,models:items.length,triangles:triangles+animated.reduce((sum,a)=>sum+a.row.triangles,0),drawCalls:bins.size+animated.reduce((n,a)=>n+a.node.children.length,0),items,visibleDrawCalls:0};
- active={root,world:w,counts:counts.craft,items,animated,occluders,groups,keys,cache:craftCacheStats()};
- const prior=parent.userData.dispose;parent.userData.dispose=()=>{prior?.();for(const {mesh}of groups)mesh.dispose();if(active?.root===root){active=null;window.__CAMPAIGN_CRAFT=null;}};
+ active={root,journey,world:w,counts:counts.craft,items,animated,occluders,groups,keys,cache:craftCacheStats()};
+ const prior=parent.userData.dispose;parent.userData.dispose=()=>{prior?.();journey?.userData.dispose?.();for(const {mesh}of groups)mesh.dispose();if(active?.root===root){active=null;window.__CAMPAIGN_CRAFT=null;}};
  // Other art modules can import older cache-key copies of this module.
  // Publish the API from the instance that actually owns the scene, so fallback
  // geometry is suppressed by the rendered models rather than an idle import.
@@ -221,7 +223,7 @@ export function attachCampaignCraft(parent,w,counts){
 }
 export function updateCampaignCraft(w){
  if(!active)return;const a=active,p=w.p,game=window.__BF3?.G;if(!p||!game)return;
- let calls=0;const range=window.__BF_META?.().quality==='low'?850:1300;
+ a.journey?.userData.update?.();let calls=0;const range=window.__BF_META?.().quality==='low'?850:1300;
  for(const q of a.groups){const [x,z]=q.cell.split(',').map(n=>(+n+.5)*500);q.mesh.visible=Math.hypot(x-p.x,z-p.z)<range+360;if(q.mesh.visible)calls++;}
  for(const q of a.animated){q.node.visible=true;q.step(q.node,w,game);q.node.visible=q.node.visible&&Math.hypot(q.node.position.x-p.x,q.node.position.z-p.z)<range+400;if(q.node.visible)calls+=q.node.children.length;}
  updateCampaignOccluders(a.occluders,w);a.counts.visibleDrawCalls=calls;if(window.__CAMPAIGN_CRAFT)window.__CAMPAIGN_CRAFT.visibleDrawCalls=calls;

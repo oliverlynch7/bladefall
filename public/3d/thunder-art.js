@@ -1,4 +1,4 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2187a';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
 import {trackCampaignOccluder,updateCampaignOccluders,updateCampaignSun} from './campaign-scene.js?v=2182f';
 import * as T from './three.module.js';
 import {craftModel} from './campaign-craft-models.js?v=2187a';

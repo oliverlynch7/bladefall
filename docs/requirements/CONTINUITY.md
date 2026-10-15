@@ -1675,3 +1675,10 @@ Recovered missing earned class choices after reload, prevented stale choices aft
 Verified all three starters against six isolated authored tutorial foes each, third-kill rank 2, retained skills at the hub, 24 ordinary campaign damage exchanges, interrupted/multi-rank/class-switch/menu/retry paths, a genuine pre-change save, 8 local host/guest assertions and 2,873 rank/choice checks across 17 classes. Relevant boss, journal, story and syntax regressions pass. Rendered the recovered choice screen and unobstructed boss-entry advice. Evidence and exact limits: docs/art-validation/fresh-progression-20261014/summary.json. Staged combat does not establish a full fresh campaign, human fun/pacing or Internet/hardware performance. No global difficulty changes.
 
 Next: equipment/reward clarity and full-inventory interactions, followed by continuous early-campaign play and performance. Deployment confirmation follows. Preexisting companion3d.js and articulated-rigs.json changes remain untouched.
+
+
+## [Codex | 2026-10-14] Fresh-player progression verified live
+
+Implementation e4039768a7f1853f641f7a89bb764009089e6974 is on main. Cloudflare deployment 25dd3a36-9a6e-4b96-8143-b12ddc6d4e6c succeeded. The production browser displays v2.199.0-player-progression and settled warnings/errors are empty. A direct Python HTML probe returned 403; browser verification succeeded. No production save was opened. Generated local QA pages were removed, owned tabs closed and the owned local server stopped. Evidence: docs/art-validation/fresh-progression-20261014/deployment.json and production-browser.json.
+
+Next: equipment/reward clarity and full-inventory interactions, then continuous early-campaign play and performance. Existing companion3d.js and articulated-rigs.json changes remain unstaged and untouched.

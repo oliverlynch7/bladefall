@@ -23,3 +23,7 @@ Combat samples may stage positions to isolate a foe, but must keep normal HP, ge
 ## Implementation and verification
 
 Implemented the reproduced choice, lesson, retry-health and boss-message defects. All three starter tutorials, 24 regional damage exchanges, old-save transitions and eight local co-op assertions pass. Exact evidence, fixture corrections and limits are in `../art-validation/fresh-progression-20261014/summary.json`. No difficulty adjustment is inferred from these staged checks. Deployment pending.
+
+## Deployment
+
+Published e4039768 to main. Cloudflare succeeded and the real production browser confirms v2.199.0 with no warnings/errors. See deployment.json and production-browser.json in the evidence directory.

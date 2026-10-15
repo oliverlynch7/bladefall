@@ -1,7 +1,7 @@
 {
   "version": "2.199.0-player-progression",
   "baseline": "d260c6d9",
-  "status": "verified locally; deployment pending",
+  "status": "published to main; Cloudflare succeeded; live browser verified",
   "fixes": [
     "Earned class choices rebuild on reload and class switch, validate their class and rank, and wait while other menus or downed/dead state are active.",
     "Invalid legacy choices can be selected again; saved future-rank choices cannot enable skills/passives early.",
@@ -67,5 +67,6 @@
     "Initial diagnostic foe parking in the void caused false kill credit; corrected by testing one original foe at a time on supported terrain.",
     "The first Mage Frostfell sample selected a self-destructing enemy; final exchange checks select a non-exploder. These were harness selection issues, not game defects."
   ],
-  "next": "Continue fresh-player equipment/reward clarity and full-inventory interactions, then continuous early-campaign play and performance. Preserve campaign geography and difficulty until better play evidence warrants changes."
+  "next": "Continue fresh-player equipment/reward clarity and full-inventory interactions, then continuous early-campaign play and performance. Preserve campaign geography and difficulty until better play evidence warrants changes.",
+  "deployment": "deployment.json"
 }

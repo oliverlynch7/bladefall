@@ -1272,3 +1272,17 @@ Next: equipment/reward clarity and full-inventory interactions, followed by cont
 Implementation e4039768a7f1853f641f7a89bb764009089e6974 is on main. Cloudflare deployment 25dd3a36-9a6e-4b96-8143-b12ddc6d4e6c succeeded. The production browser displays v2.199.0-player-progression and settled warnings/errors are empty. A direct Python HTML probe returned 403; browser verification succeeded. No production save was opened. Generated local QA pages were removed, owned tabs closed and the owned local server stopped. Evidence: docs/art-validation/fresh-progression-20261014/deployment.json and production-browser.json.
 
 Next: equipment/reward clarity and full-inventory interactions, then continuous early-campaign play and performance. Existing companion3d.js and articulated-rigs.json changes remain unstaged and untouched.
+
+
+## [Codex | 2026-10-15] Loot, inventory and early-player continuation
+
+Latest user: "Continue", following v2.199.0 and the announced loot/full-bag then early-campaign checks. Inspect and fix demonstrated loss, transaction, feedback and save defects. Preserve U-HUD-ADVENTURE-20261012: default-OFF explicit auto-sell, immediate bagging, untouched ground equipment at full capacity, quest pickups independent of gear capacity, and current binding prompts. Keep campaign geography, difficulty, story outcomes and custom SFX unchanged. Baseline 4d8637bd. Grounded plan: docs/design/LOOT_READINESS_2026-10-15.md. In progress.
+
+
+## [Codex | 2026-10-15] Loot safety candidate prepared; browser verification pending
+
+Local candidate v2.200.0 unifies Quartermaster direct/Compare purchases around bag delivery, validates before spending, preserves the existing paid relic claim and checks replacement storage before purchase/reforge. Added bag access/capacity to shopping, named blocked-ground-loot comparisons, and immediate notice updates after collecting the same item. Chest warnings leave unopened contents hidden. The prior comparison loss was reproduced with the actual transaction functions under a DOM adapter.
+
+Passed 22 transaction/pickup/chest checks, 6 presentation queue checks, the existing 200,000-sample chest-table suite and six syntax checks. These are not browser or full-engine integration results. Browser selection reported "No browser is available"; documented troubleshooting returned no connections. Asked the user to open a Browser tab while continuing independent implementation. The app queued the local preview for this thread. No live deployment was made; production remains the last verified v2.199.0.
+
+Resume from docs/art-validation/loot-readiness-20261015/summary.json and docs/design/LOOT_READINESS_2026-10-15.md. Real-browser visuals, genuine pre-change save, co-op loot checks and continuous early play remain. Local preview: http://127.0.0.1:4358/3d/.qa-loot-current.html. Owned server PID 20456 is intentionally retained for that queued preview; generated QA pages are untracked and must not ship. Preexisting companion3d.js/articulated-rigs.json changes remain untouched.

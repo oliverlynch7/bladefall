@@ -18,7 +18,14 @@
   for(const el of [$('inventoryDock'),panel,$('hud')])for(const type of ['pointerdown','mousedown','touchstart'])el.addEventListener(type,e=>e.stopPropagation());
  }
  function reset(g){if(owner!==g){owner=g;queue=[];current=null;last=null;left=0;if(panel)panel.hidden=true;}}
- function show(data,g){reset(g);queue.push(data);if(queue.length>10)queue.shift();}
+ function show(data,g){
+  reset(g);
+  // One physical item can go from blocked to collected/sold. Never replay its stale outcome.
+  queue=queue.filter(d=>d.item!==data.item);
+  if(last?.item===data.item)last=data;
+  if(current?.item===data.item){current=data;last=data;left=10;paint(data);return;}
+  queue.push(data);if(queue.length>10)queue.shift();
+ }
  function paint(d){
   const o=d.item,old=d.equipped,rar=d.rarity||{};
   panel.style.setProperty('--loot-color',rar.color||'#d8c9a3');
@@ -33,7 +40,7 @@
   const effects=it=>[...(it?.affixes||[]).map(x=>x.label),it?.el?it.el+' element':'',it?.lifesteal?Math.round(it.lifesteal*100)+'% lifesteal':''].filter(Boolean).join(' · ')||'None';
   rows+='<div class="loot-effects"><span>Found: '+esc(effects(o))+'</span><span>Equipped: '+esc(effects(old))+'</span></div>';
   panel.querySelector('.loot-comparison').innerHTML=rows;
-  panel.querySelector('.loot-usability').textContent=d.sold?'Change Auto-sell below to keep future gear.':d.usability||'';
+  panel.querySelector('.loot-usability').textContent=d.sold?'Change Auto-sell below to keep future gear.':d.blocked?'Free a bag slot, then walk over this item.':d.usability||'';
   panel.querySelector('[data-loot-bag]').textContent=api.hint('bag')+' · Bag';
  }
  function tick(dt,visible,g){

@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {
+      "test": "scripts/test-loot-transactions.cjs",
+      "passed": true,
+      "cases": 22
+    },
+    {
+      "test": "scripts/test-loot-notices.cjs",
+      "passed": true,
+      "cases": 6
+    },
+    {
+      "test": "scripts/test-chest-rules.cjs",
+      "passed": true,
+      "samples": 200000
+    }
+  ],
+  "scope": "Node transaction/presentation tests and rarity tables. Browser integration and visuals remain pending."
+}

@@ -1009,7 +1009,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 .journal-clue small{display:block;margin-top:4px}
 </style>
 <link rel="stylesheet" href="./adventure-hud.css?v=2190">
-<script src="./adventure-hud.js?v=2190"></script>
+<script src="./adventure-hud.js?v=2200"></script>
 </head>
 <body class="adventure-hud">
 <canvas id="gl"></canvas>
@@ -1161,7 +1161,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.199.0-player-progression';
+const VERSION3D='2.200.0-loot-safety';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5211,13 +5211,13 @@ function hudBagUpdate(){
  document.getElementById('hudGoldValue').textContent=meta.gold||0;
 }
 function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; hudBagUpdate(); }
-// When you equip/buy something, the piece it replaced goes to your bag (not the void) —
-// unless it's throwaway starter/plain gear or the bag is full.
+// Free starter/intrinsic weapons need no storage when replaced; real equipment does.
 const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^Plain |^Serviceable |^Standard |^Reliable /;
+function keepsReplacedWeapon(old){return !!old&&!isIntrinsicLoot(old)&&!/^(Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe)$/.test(old.name||'');}
 function bagReplaced(old,isWeapon){
   // Only the free STARTER weapons are discarded when replaced; every real drop you had equipped
   // (including plain commons) is auto-sent to the bag so you never lose gear on an equip.
-  if(!old || (isWeapon&&isIntrinsicLoot(old)) || /^(Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe)$/.test(old.name||'')) return;
+  if(!old || isWeapon&&!keepsReplacedWeapon(old)) return;
   if(!Array.isArray(meta.stash)) meta.stash=[];
   if(meta.stash.length>=STASH_CAP){ toast('Bag full — '+old.name+' left behind'); return; }
   meta.stash.push(isWeapon?{weapon:old}:{armor:old}); persist();
@@ -13672,7 +13672,7 @@ function descentRewardChest(){
 }
 function openChest(ch){
   if(!ch||ch.opened)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;
-  if(!(ch.bonus&&G.sprintFun&&G.bonusActive)&&meta.autoSellEquipment!==true&&(meta.stash||[]).length>=STASH_CAP){fullBagNotice();return;}record.claimed=true;
+  if(!(ch.bonus&&G.sprintFun&&G.bonusActive)&&meta.autoSellEquipment!==true&&(meta.stash||[]).length>=STASH_CAP){fullBagNotice(null,null,'chest');return;}record.claimed=true;
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
      2026-08-12. It was NOT one of docs/SKILL_TRIAGE.md section E's dead passives — the audit has
@@ -17043,16 +17043,19 @@ function lootSellCurrent(){ const d=G&&G.lootCard; if(!d) return; const g=sellIt
 function lootToBag(auto){ const d=G&&G.lootCard; if(!d) return; const it=d.item, box=d.kind==='weapon'?{weapon:it}:(d.kind==='armor'?{armor:it}:{trinket:it});
   if(!bagGroundEquipment(d.kind,it)){d.expire=Infinity;return;}hudUpdate();showNextLoot(); }
 // Pickup inventory decisions happen exactly once. UI feedback cannot grant/sell loot.
-function fullBagNotice(){if(!G)return;if((G._fullBagWarnAt??-100)+7>(G.time||0))return;G._fullBagWarnAt=G.time||0;toast('Bag full · make space in '+controlHint('bag')+' Bag. Gear stays here.');}
-function equipmentNotice(kind,item,sold=false,gold=0){
+function fullBagNotice(kind,item,source='ground'){if(!G)return;if((G._fullBagWarnAt??-100)+7>(G.time||0))return;G._fullBagWarnAt=G.time||0;
+ if(kind&&item)equipmentNotice(kind,item,false,0,true);
+ else toast('Bag full · make space in '+controlHint('bag')+' Bag. '+(source==='chest'?'Chest stays closed.':'Gear stays here.'));
+}
+function equipmentNotice(kind,item,sold=false,gold=0,blocked=false){
  const p=G.p,old=kind==='weapon'?p.weapon:p.gear?.[item.slot];
- BFAdventureHud.show({kind,item,equipped:old,rarity:RARITY[item.rarity],icon:itemAv(item),type:kind==='weapon'?weapFamily(item):slotLabel(item.slot),sold,gold,
+ BFAdventureHud.show({kind,item,equipped:old,rarity:RARITY[item.rarity],icon:itemAv(item),type:kind==='weapon'?weapFamily(item):slotLabel(item.slot),sold,gold,blocked,
   usability:!canWield(item)?'Requires character level '+rarityReq(item.rarity):kind==='weapon'&&(!classFamilyOk(item)||monkBlocksWeapons(item))?'For another class':'Ready to equip from your bag'},G);
 }
 function bagGroundEquipment(kind,item){
  if(!item||!G||kind==='weapon'&&isIntrinsicLoot(item))return false;
  if(meta.autoSellEquipment===true){const gold=G.escape?BFPrisonRun.overflow(item):sellItem(item);persist();equipmentNotice(kind,item,true,gold);hudUpdate();return true;}
- if(!stashItem({[kind]:item})){fullBagNotice();return false;}
+ if(!stashItem({[kind]:item})){fullBagNotice(kind,item);return false;}
  equipmentNotice(kind,item);hudUpdate();return true;
 }
 function offerWeapon(item){return bagGroundEquipment('weapon',item);}
@@ -19527,6 +19530,7 @@ function openShop(back){
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2>
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
     <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
+    <button class="bigbtn ghost" id="shopBag" style="padding:8px 12px;font-size:13px">${actionIcon('bag-stash')}Bag ${meta.stash.length}/${STASH_CAP}${meta.stash.length>=STASH_CAP?' · Full':''}</button>
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}${arcadeRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
@@ -19542,19 +19546,12 @@ function openShop(back){
   { const rb=document.getElementById('refundPerks'); if(rb) rb.onclick=()=>{
       if(rb.dataset.armed!=='1'){ rb.dataset.armed='1'; rb.innerHTML='↩ Tap again to confirm — refund <b>'+perkRefundTotal()+'g</b> &amp; reset all perks'; rb.style.borderColor='#c0392b'; rb.style.color='#ff9a82'; return; }
       const back2=perkRefundTotal(); const got=refundAllPerks(); SFX.pickup(); toast('Refunded '+got+'g — all perks reset.'); openShop(back); }; }
-  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isIan=rid==='iansblade', cost=isIan?ibCost:shopWeapCost(rid);
-    const gateR=isIan?'legendary':rid; if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
-    if(meta.gold<cost){ toast('Not enough gold'); return; }
-    meta.gold-=cost;
-    if(isIan){ SFX.god(); playFx('bigreveal'); persist(); claimIansBlade(back); return; }   // the shortcut: buy it whole, name + reveal fire
-    const w=shopWeapon(meta.classId,rid);
-    if(!meta.hero){ const p=freshPlayer(); meta.hero=snapOf(p); }   // ensure a hero exists (keeps its own starter weapon)
-    if(stashItem({weapon:w})){ SFX.levelup(); persist(); toast('🎒 '+w.name+' sent to your bag'); openShop(back); }   // buy -> bag, never auto-equip
-    else { meta.gold+=cost; toast('Bag full — free up space first'); openShop(back); } });
+  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r,isIan=rid==='iansblade';purchaseShopWeapon(isIan?makeWeapon('iansblade','legendary'):shopWeapon(meta.classId,rid),isIan?ibCost:shopWeapCost(rid),back); });
   { const fg=document.querySelector('.iansforge'); if(fg) fg.onclick=()=>{
       if(!iansHasAllShards()){ toast('Recover all '+IANS_SHARDS.length+' Blade Shards first'); return; }
       if(((meta.hero&&meta.hero.level)||1)<IANS_FORGE_LEVEL){ toast('🔒 Reach Level '+IANS_FORGE_LEVEL+' to reforge it'); return; }
       if(meta.gold<IANS_FORGE_GOLD){ toast('Not enough gold'); return; }
+      if(keepsReplacedWeapon(meta.hero?.weapon)&&meta.stash.length>=STASH_CAP){toast('Bag full · free one slot for your current weapon before reforging.');return;}
       meta.gold-=IANS_FORGE_GOLD; SFX.god(); playFx('bigreveal'); persist(); claimIansBlade(back); }; }
   { const fr=document.querySelector('.iansfrags'); if(fr) fr.onclick=()=>{
       const lines=IANS_SHARDS.map((s,i)=>(meta.iansShards&&meta.iansShards.includes(i))?`<p style="margin:0 0 15px;font-style:italic;color:#e8dcc0">${s.frag}</p>`:`<p style="margin:0 0 15px;opacity:.32">— a fragment still in the dark —</p>`).join('');
@@ -19580,9 +19577,23 @@ function openShop(back){
   document.querySelectorAll('.hubbuy').forEach(b=>b.onclick=()=>{ const id=b.dataset.h, u=HUB_UPGRADES.find(x=>x.id===id); if(!u) return;
     if(meta.hubUpgrades&&meta.hubUpgrades[id]) return; if(meta.gold<u.cost){ toast('Not enough gold'); return; }
     meta.gold-=u.cost; if(!meta.hubUpgrades) meta.hubUpgrades={}; meta.hubUpgrades[id]=true; syncHubUpgradeFixtures(); SFX.god(); persist(); toast('🏰 '+u.name+' — the Waystation is reborn'); openShop(back); });
+  document.getElementById('shopBag').onclick=()=>openBag(()=>openShop(back));
   document.getElementById('backBtn').onclick=back;
 }
-// full side-by-side compare of a shop weapon vs your CURRENT weapon (every stat, with up/down arrows), then buy
+// Both shop entry points commit the same purchase. Validate capacity before taking gold.
+function purchaseShopWeapon(w,cost,back){
+ const relic=w.arche==='iansblade';
+ if(!canWield(w)){toast('Requires Level '+rarityReq(w.rarity)+' to buy this weapon.');return false;}
+ if(!relic&&(!classFamilyOk(w)||monkBlocksWeapons(w))){refuseOffclass(w);return false;}
+ if(meta.gold<cost){toast('Not enough gold');return false;}
+ if((!relic||keepsReplacedWeapon(meta.hero?.weapon))&&(meta.stash||[]).length>=STASH_CAP){toast(relic?'Bag full · free one slot for your current weapon.':'Bag full · free one slot before buying.');return false;}
+ meta.gold-=cost;
+ if(relic){SFX.god();playFx('bigreveal');persist();claimIansBlade(back);return true;}
+ if(!meta.hero)meta.hero=snapOf(freshPlayer());
+ if(!Array.isArray(meta.stash))meta.stash=[];
+ meta.stash.push({weapon:w});persist();SFX.levelup();playFx('buy');hudUpdate();toast(w.name+' added to your bag.');openShop(back);return true;
+}
+// Compare against the current weapon; ordinary purchases still go to the bag.
 function shopCompare(w,cost,back){
   mode='menu'; const cur=(meta.hero&&meta.hero.weapon)?meta.hero.weapon:null, f=n=>Math.round(n*100)/100;
   const row=(label,a,b,better)=>{ if(a==null) return `<div class="vsrow"><span>${label}</span><b>${f(b)}</b></div>`;
@@ -19601,11 +19612,12 @@ function shopCompare(w,cost,back){
       <div class="vsrow"><span>Element</span><b style="color:${elementColor(w.el)||'#cfd6df'};text-transform:capitalize">${w.el||'Neutral'}</b></div>
       ${row('Lifesteal %',cur?(cur.lifesteal*100):null,(w.lifesteal||0)*100)}
     </div>
-    <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">${actionIcon('buy')}Buy · ${cost}g</button>
+    <p class="hint">${w.arche==='iansblade'?'This relic equips after the purchase.':'Purchase goes to your bag.'} · ${meta.stash.length}/${STASH_CAP} bag slots used</p>
+    <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">${actionIcon('buy')}${w.arche==='iansblade'?'Buy relic':'Buy to bag'} · ${cost}g</button>
+    <button class="bigbtn ghost" id="compareBag">${actionIcon('bag-stash')}Manage bag</button>
     <button class="bigbtn ghost" id="backC">Back to shop</button></div>`);
-  document.getElementById('buyC').onclick=()=>{ if(!canWield(w)){ toast('🔒 Requires Level '+rarityReq(w.rarity)+' to wield'); return; } if(meta.gold<cost){ toast('Not enough gold'); return; }
-    meta.gold-=cost; if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
-    SFX.levelup(); playFx('buy'); persist(); toast('Equipped: '+w.name); openShop(back); };
+  let purchased=false;document.getElementById('buyC').onclick=()=>{if(!purchased)purchased=purchaseShopWeapon(w,cost,back);};
+  document.getElementById('compareBag').onclick=()=>openBag(()=>shopCompare(w,cost,back));
   document.getElementById('backC').onclick=()=>openShop(back);
 }
 const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];

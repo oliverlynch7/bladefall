@@ -1,32 +1,31 @@
 {
   "candidateVersion": "2.200.0-loot-safety",
   "baseline": "4d8637bd",
-  "status": "Implemented locally; not published. Browser verification is blocked by no available browser connection.",
+  "status": "Verified locally; publication pending.",
   "changes": [
     "Quartermaster direct and comparison purchases share safe bag delivery and validate level, class, gold and capacity before spending.",
     "Comparison confirmation is one-shot; paid relic purchase retains the existing claim flow, with room checked for the replaced weapon. Reforging uses the same storage safety check.",
     "Shop and comparison pages expose bag access and capacity.",
-    "Blocked ground loot uses the existing item comparison panel; collecting/selling the same item replaces the old outcome. Chest capacity warnings keep unopened contents hidden."
+    "Blocked ground loot uses the existing item comparison panel; collecting/selling the same item replaces the old outcome. Chest capacity warnings keep unopened contents hidden.",
+    "Pause button sits above the camera drag surface so clicks reach it."
   ],
   "evidence": {
     "baseline": "before-purchase.json: actual shopCompare/bagReplaced functions executed with a DOM adapter reproduce old-weapon loss at full capacity.",
     "logic": "22 transaction/pickup/chest cases and 6 presentation queue cases pass.",
     "rarity": "Existing chest-table suite passes 200,000 interval samples.",
     "syntax": "Six source/script syntax checks pass.",
-    "browser": "Runtime getForUrl returned No browser is available; documented troubleshooting found an empty connection list. Opening the local preview through the app returned queued."
+    "browser": "before-browser.json reproduces old saved-weapon loss. browser-results.json and browser-assertions.json verify shop/bag controls, genuine old-save load, pickup/chest capacity and feedback, responsive fit, Pause and a short continuous campaign/menu/save flow. Standalone error log is empty.",
+    "coop": "coop-results.json: ten assertions through two actual game instances and real host/guest handlers over a serialized local relay; not Internet co-op.",
+    "connectionRecovery": "No browsers were connected and app tab requests queued. Reopening Chrome did not connect. Activating this chat via navigate_to_codex_page restored the in-app browser. No OS unlock, settings change or plugin repair required. Restart causation unconfirmed."
   },
   "notYetVerified": [
-    "Rendered shop and full-bag panels, responsive fit and input focus",
-    "Genuine previous-save load in a real browser",
-    "Local co-op integration for independent loot settings",
-    "Continuous early-campaign gameplay"
+    "Complete fresh-character campaign playthrough, fun/pacing and hardware performance",
+    "Internet co-op and network latency",
+    "High-resolution visual-art acceptance (app captures were low resolution)"
   ],
   "next": [
-    "Open the queued local browser preview when this thread is active, then connect through the browser skill.",
-    "Use .qa-loot-before.html to capture a genuine 4d8637bd save via Export pre-change save; save evidence.save as previous-save.json and rebuild.",
-    "Exercise both purchase paths, full/last-slot bag, mixed ground pickups, explicit auto-sell, unchanged quest collection, chest claim/retry, and old-save reload in .qa-loot-current.html.",
-    "Inspect layout at desktop and laptop sizes, check local co-op and an early-player flow. Fix any actual failures, then publish main and verify production.",
-    "Close owned QA tabs, stop the verified owned server, and remove the three generated .qa-loot files before final cleanup."
+    "Publish to main and verify production.",
+    "Close owned tabs and remove owned local QA resources."
   ],
   "localPreview": {
     "url": "http://127.0.0.1:4358/3d/.qa-loot-current.html",
@@ -35,8 +34,11 @@
     "generatedFiles": [
       "public/3d/.qa-loot-before.html",
       "public/3d/.qa-loot-current.html",
-      "public/3d/.qa-loot-before-hud.js"
+      "public/3d/.qa-loot-before-hud.js",
+      "public/3d/.qa-loot-before-hud.css",
+      "public/3d/.qa-loot-coop.html"
     ]
   },
-  "limits": "Node DOM adapters establish logic only, not rendered or full-engine behavior. No deployment, full campaign, visual quality, Internet co-op or hardware-performance claim. Unrelated companion/rig edits untouched."
+  "limits": "Focused staged loot/co-op checks and a short continuous campaign UI smoke verify these fixes, not a completed campaign, human fun, Internet latency or hardware performance. Unrelated companion/rig edits untouched.",
+  "harnessCaveat": "One unlocated MutationObserver error occurred in the two-frame parent browser log. Both game error collectors were empty, all ten assertions passed, and standalone gameplay had no errors. Do not call the parent console clean."
 }

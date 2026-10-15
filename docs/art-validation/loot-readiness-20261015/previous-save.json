@@ -1,0 +1,866 @@
+{
+  "soundOn": false,
+  "musicOn": false,
+  "musicVol": 1,
+  "sfxVol": 1,
+  "showArmor": true,
+  "autoAttack": false,
+  "autoKeep": false,
+  "autoBag": true,
+  "autoSellEquipment": false,
+  "camMode": "far",
+  "lookSens": 1,
+  "fpsFov": 92,
+  "renderDist": 1,
+  "silhouette": true,
+  "dmgNumbers": true,
+  "unlockedSkins": [
+    "knight"
+  ],
+  "selectedSkin": "knight",
+  "achievements": {},
+  "totalKills": 0,
+  "bossKills": 0,
+  "kingKills": 0,
+  "tyrantKills": 0,
+  "magicBossKills": 0,
+  "rangedBossKills": 0,
+  "legendaryFound": 0,
+  "flawlessStages": 0,
+  "maxLevel": 1,
+  "beatNormal": false,
+  "beatHardcore": false,
+  "beatHitless": false,
+  "jetpack": true,
+  "diff": "normal",
+  "cosmetics": {},
+  "cosEquipped": {
+    "cape": null,
+    "trail": null,
+    "glow": null
+  },
+  "zonesCleared": 0,
+  "elitesKilled": 0,
+  "secretsFound": 0,
+  "introSeen": true,
+  "zoneSeen": {},
+  "shadeSeen": {},
+  "arcadeOwned": false,
+  "gold": 1000,
+  "ngPlus": 0,
+  "bestStage": 0,
+  "lastNgHp": 1,
+  "lastNgDmg": 1,
+  "run": null,
+  "stash": [
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "warding",
+        "accent": "#8fb7ff",
+        "defense": 10,
+        "color": "#b9c0cc",
+        "name": "Common Warding Chestplate",
+        "affixes": [
+          {
+            "stat": "def",
+            "val": 16,
+            "label": "+16 Defense"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "vigor",
+        "accent": "#ff8a82",
+        "defense": 7,
+        "color": "#b9c0cc",
+        "name": "Common Vigor Helmet",
+        "affixes": [
+          {
+            "stat": "hp",
+            "val": 12,
+            "label": "+12 Max HP"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "nimble",
+        "accent": "#9fe0ff",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Nimble Chestplate",
+        "affixes": [
+          {
+            "stat": "dodgeMul",
+            "val": 0.05,
+            "label": "-5% Dodge CD"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "keen",
+        "accent": "#ffd24a",
+        "defense": 5,
+        "color": "#b9c0cc",
+        "name": "Common Keen Helmet",
+        "affixes": [
+          {
+            "stat": "crit",
+            "val": 0.03,
+            "label": "+3% Crit"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "focus",
+        "accent": "#c9a6ff",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Focus Chestplate",
+        "affixes": [
+          {
+            "stat": "cdr",
+            "val": 0.04,
+            "label": "-4% Skill CD"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "might",
+        "accent": "#ffce6a",
+        "defense": 6,
+        "color": "#b9c0cc",
+        "name": "Common Might Helmet",
+        "affixes": [
+          {
+            "stat": "powerMul",
+            "val": 0.05,
+            "label": "+5% Damage"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "might",
+        "accent": "#ffce6a",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Might Chestplate",
+        "affixes": [
+          {
+            "stat": "powerMul",
+            "val": 0.05,
+            "label": "+5% Damage"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "gilded",
+        "accent": "#f0c24a",
+        "defense": 6,
+        "color": "#b9c0cc",
+        "name": "Common Gilded Helmet",
+        "affixes": [
+          {
+            "stat": "goldFind",
+            "val": 0.12,
+            "label": "+12% Gold Find"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "warding",
+        "accent": "#8fb7ff",
+        "defense": 10,
+        "color": "#b9c0cc",
+        "name": "Common Warding Chestplate",
+        "affixes": [
+          {
+            "stat": "def",
+            "val": 16,
+            "label": "+16 Defense"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "sanguine",
+        "accent": "#e0607a",
+        "defense": 6,
+        "color": "#b9c0cc",
+        "name": "Common Sanguine Helmet",
+        "affixes": [
+          {
+            "stat": "lifesteal",
+            "val": 0.03,
+            "label": "+3% Lifesteal"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "haste",
+        "accent": "#ffb060",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Haste Chestplate",
+        "affixes": [
+          {
+            "stat": "atkSpeedMul",
+            "val": 0.04,
+            "label": "+4% Attack Speed"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "keen",
+        "accent": "#ffd24a",
+        "defense": 5,
+        "color": "#b9c0cc",
+        "name": "Common Keen Helmet",
+        "affixes": [
+          {
+            "stat": "crit",
+            "val": 0.03,
+            "label": "+3% Crit"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "keen",
+        "accent": "#ffd24a",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Keen Chestplate",
+        "affixes": [
+          {
+            "stat": "crit",
+            "val": 0.03,
+            "label": "+3% Crit"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "mystic",
+        "accent": "#c47bff",
+        "defense": 5,
+        "color": "#b9c0cc",
+        "name": "Common Mystic Helmet",
+        "affixes": [
+          {
+            "stat": "magPowerMul",
+            "val": 0.06,
+            "label": "+6% Magic Damage"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "swift",
+        "accent": "#7ec46a",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Swift Chestplate",
+        "affixes": [
+          {
+            "stat": "speedMul",
+            "val": 0.05,
+            "label": "+5% Move Speed"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "vigor",
+        "accent": "#ff8a82",
+        "defense": 7,
+        "color": "#b9c0cc",
+        "name": "Common Vigor Helmet",
+        "affixes": [
+          {
+            "stat": "hp",
+            "val": 12,
+            "label": "+12 Max HP"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "sanguine",
+        "accent": "#e0607a",
+        "defense": 9,
+        "color": "#b9c0cc",
+        "name": "Common Sanguine Chestplate",
+        "affixes": [
+          {
+            "stat": "lifesteal",
+            "val": 0.03,
+            "label": "+3% Lifesteal"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "gilded",
+        "accent": "#f0c24a",
+        "defense": 6,
+        "color": "#b9c0cc",
+        "name": "Common Gilded Helmet",
+        "affixes": [
+          {
+            "stat": "goldFind",
+            "val": 0.12,
+            "label": "+12% Gold Find"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "focus",
+        "accent": "#c9a6ff",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Focus Chestplate",
+        "affixes": [
+          {
+            "stat": "cdr",
+            "val": 0.04,
+            "label": "-4% Skill CD"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "sanguine",
+        "accent": "#e0607a",
+        "defense": 6,
+        "color": "#b9c0cc",
+        "name": "Common Sanguine Helmet",
+        "affixes": [
+          {
+            "stat": "lifesteal",
+            "val": 0.03,
+            "label": "+3% Lifesteal"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "gilded",
+        "accent": "#f0c24a",
+        "defense": 9,
+        "color": "#b9c0cc",
+        "name": "Common Gilded Chestplate",
+        "affixes": [
+          {
+            "stat": "goldFind",
+            "val": 0.12,
+            "label": "+12% Gold Find"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "keen",
+        "accent": "#ffd24a",
+        "defense": 5,
+        "color": "#b9c0cc",
+        "name": "Common Keen Helmet",
+        "affixes": [
+          {
+            "stat": "crit",
+            "val": 0.03,
+            "label": "+3% Crit"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "sanguine",
+        "accent": "#e0607a",
+        "defense": 9,
+        "color": "#b9c0cc",
+        "name": "Common Sanguine Chestplate",
+        "affixes": [
+          {
+            "stat": "lifesteal",
+            "val": 0.03,
+            "label": "+3% Lifesteal"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "warding",
+        "accent": "#8fb7ff",
+        "defense": 7,
+        "color": "#b9c0cc",
+        "name": "Common Warding Helmet",
+        "affixes": [
+          {
+            "stat": "def",
+            "val": 16,
+            "label": "+16 Defense"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "focus",
+        "accent": "#c9a6ff",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Focus Chestplate",
+        "affixes": [
+          {
+            "stat": "cdr",
+            "val": 0.04,
+            "label": "-4% Skill CD"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "swift",
+        "accent": "#7ec46a",
+        "defense": 5,
+        "color": "#b9c0cc",
+        "name": "Common Swift Helmet",
+        "affixes": [
+          {
+            "stat": "speedMul",
+            "val": 0.05,
+            "label": "+5% Move Speed"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "swift",
+        "accent": "#7ec46a",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Swift Chestplate",
+        "affixes": [
+          {
+            "stat": "speedMul",
+            "val": 0.05,
+            "label": "+5% Move Speed"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "vigor",
+        "accent": "#ff8a82",
+        "defense": 7,
+        "color": "#b9c0cc",
+        "name": "Common Vigor Helmet",
+        "affixes": [
+          {
+            "stat": "hp",
+            "val": 12,
+            "label": "+12 Max HP"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "chest",
+        "rarity": "common",
+        "type": "nimble",
+        "accent": "#9fe0ff",
+        "defense": 8,
+        "color": "#b9c0cc",
+        "name": "Common Nimble Chestplate",
+        "affixes": [
+          {
+            "stat": "dodgeMul",
+            "val": 0.05,
+            "label": "-5% Dodge CD"
+          }
+        ]
+      }
+    },
+    {
+      "armor": {
+        "slot": "helmet",
+        "rarity": "common",
+        "type": "gilded",
+        "accent": "#f0c24a",
+        "defense": 6,
+        "color": "#b9c0cc",
+        "name": "Common Gilded Helmet",
+        "affixes": [
+          {
+            "stat": "goldFind",
+            "val": 0.12,
+            "label": "+12% Gold Find"
+          }
+        ]
+      }
+    }
+  ],
+  "descent": 0,
+  "perks": {},
+  "perkV2": true,
+  "classId": "warrior",
+  "classes": {
+    "warrior": {
+      "xp": 0,
+      "rank": 1,
+      "sub": null,
+      "v2": 1,
+      "ch": {}
+    }
+  },
+  "endlessBest": 0,
+  "riftOpen": [],
+  "riftHallStory": {
+    "version": 1,
+    "revision": 0,
+    "flags": {},
+    "items": {},
+    "quests": {},
+    "notes": {},
+    "cursors": {},
+    "rewards": {},
+    "events": {},
+    "conversation": null
+  },
+  "riftShards": [],
+  "hero": {
+    "allocation": {
+      "health": 0,
+      "attack": 0,
+      "defense": 0,
+      "speed": 0,
+      "mana": 0
+    },
+    "tunedLevels": 0,
+    "hp": 110,
+    "maxHp": 100,
+    "mana": 75,
+    "maxMana": 75,
+    "level": 1,
+    "xp": 0,
+    "xpNext": 230,
+    "weapon": {
+      "arche": "sword",
+      "art": "sword",
+      "cls": "melee",
+      "sch": "phys",
+      "el": null,
+      "rarity": "common",
+      "chg": null,
+      "reaper": false,
+      "anyClass": false,
+      "ians": false,
+      "name": "Protected Sword",
+      "dmg": 12,
+      "cd": 0.38,
+      "kb": 260,
+      "lifesteal": 0,
+      "color": "#b9c0cc",
+      "blade": "#dfe5ec",
+      "range": 84
+    },
+    "gear": {
+      "helmet": null,
+      "chest": null,
+      "legs": null,
+      "amulet": null,
+      "ring": null
+    },
+    "stats": {
+      "power": 1,
+      "magPower": 1,
+      "speed": 1,
+      "atkSpeed": 1,
+      "lifesteal": 0,
+      "defense": 0,
+      "cdr": 0,
+      "dodgeCd": 0.75,
+      "crit": 0,
+      "goldFind": 0
+    },
+    "maxJumps": 1,
+    "skin": "knight"
+  },
+  "bank": null,
+  "zoneMax": 0,
+  "zoneDone": {},
+  "classUnlocked": {
+    "warrior": true
+  },
+  "trialsDone": {
+    "warrior": true
+  },
+  "sideFound": {},
+  "sideDone": {},
+  "iansShards": [],
+  "iansComplete": false,
+  "masterSeal": false,
+  "masterSealSeen": false,
+  "socks": false,
+  "bagSlots": 0,
+  "hubUpgrades": {},
+  "petOwned": [],
+  "petActive": null,
+  "petNames": {},
+  "petTrain": {},
+  "petLabel": true,
+  "heroName": "",
+  "eyeColor": "#8fd0ff",
+  "hairStyle": "short",
+  "hairColor": "#3a2a1c",
+  "optionalDone": {},
+  "optionalProgress": {},
+  "legacyHubDialogue": {},
+  "camV2": 1,
+  "quality": "high",
+  "particles": true,
+  "keybinds": {
+    "up": [
+      "KeyW",
+      "ArrowUp"
+    ],
+    "down": [
+      "KeyS",
+      "ArrowDown"
+    ],
+    "left": [
+      "KeyA",
+      "ArrowLeft"
+    ],
+    "right": [
+      "KeyD",
+      "ArrowRight"
+    ],
+    "jump": [
+      "Space"
+    ],
+    "attack": [
+      "Mouse0",
+      "KeyJ"
+    ],
+    "dodge": [
+      "ShiftLeft",
+      "Mouse2"
+    ],
+    "skill1": [
+      "Digit1"
+    ],
+    "skill2": [
+      "Digit2"
+    ],
+    "skill3": [
+      "Digit3"
+    ],
+    "skill4": [
+      "Digit4"
+    ],
+    "interact": [
+      "KeyE"
+    ],
+    "loot": [
+      "KeyV"
+    ],
+    "lootEquip": [
+      "KeyF"
+    ],
+    "lootBag": [
+      "KeyR"
+    ],
+    "lootSell": [
+      "KeyQ"
+    ],
+    "auto": [
+      "KeyL"
+    ],
+    "ping": [
+      "KeyG"
+    ],
+    "partyTeleport": [
+      "KeyT"
+    ],
+    "partyNext": [
+      "KeyY"
+    ],
+    "journal": [
+      "KeyN"
+    ],
+    "bag": [
+      "Tab",
+      "KeyB"
+    ],
+    "emote": [
+      "KeyM"
+    ]
+  },
+  "controller": {
+    "bindings": {
+      "jump": 0,
+      "dodge": 1,
+      "attack": 2,
+      "interact": 3,
+      "skill1": 4,
+      "skill2": 5,
+      "skill3": 6,
+      "skill4": 7,
+      "bag": 8,
+      "pause": 9,
+      "journal": 10,
+      "partyTeleport": 11
+    },
+    "invertY": true,
+    "invertX": false,
+    "invert": true
+  },
+  "prisonSaves": {
+    "version": 1,
+    "active": 0,
+    "slots": [
+      null,
+      null,
+      null
+    ]
+  },
+  "prisonProfile": null,
+  "chestRecords": {},
+  "hubDialogue": {},
+  "returnVisits": {},
+  "campaignNgHp": 1,
+  "campaignNgDmg": 1,
+  "_perkRefund": 0,
+  "secretSense": false,
+  "classLooks": {
+    "warrior": 0,
+    "ranger": 0,
+    "mage": 0,
+    "reaper": 0,
+    "paladin": 0,
+    "necromancer": 0,
+    "ninja": 0,
+    "berserker": 0,
+    "pirate": 0,
+    "chronomancer": 0,
+    "monk": 0,
+    "stormcaller": 0,
+    "warlock": 0,
+    "skylancer": 0,
+    "bladedancer": 0,
+    "beastmaster": 0,
+    "pyromancer": 0
+  },
+  "mouthStyle": "line",
+  "faceAdjust": {
+    "eyeX": 0,
+    "eyeY": 0,
+    "eyeTilt": 0,
+    "mouthX": 0,
+    "mouthY": 0,
+    "mouthTilt": 0
+  },
+  "browStyle": "natural",
+  "story": null,
+  "campaign": null,
+  "tut": {},
+  "tutSeen": {},
+  "tutOff": true,
+  "hubTutDone": true,
+  "introV2Seen": true
+}

@@ -30,7 +30,7 @@ body.adventure-hud{--hud-edge:#76958b;--hud-panel:#12252eed;--hud-gold:#efd794;-
 .adventure-hud #questbox .qdone{display:none}.adventure-hud #questbox .qoptional{font:11px system-ui;margin-top:10px;padding-top:10px}
 .adventure-hud .quest-journal{background:none;border:0;border-top:1px solid #ffffff21;width:100%;text-align:left;color:#cddacc;margin:8px 0 0;padding:8px 0 0;font:11px system-ui;cursor:pointer}
 .adventure-hud #bosshpwrap{top:27px;width:min(350px,calc(100vw - 740px))}.adventure-hud #bossname{font:700 14px/1.25 Georgia;letter-spacing:.05em}.adventure-hud #bosshp{height:10px;clip-path:none;border-radius:4px;border-color:#937b62;box-shadow:0 3px 8px #0005}
-.adventure-hud #eschint{top:22px;right:22px}.adventure-hud #pausebtn{top:18px;right:18px}
+.adventure-hud #eschint{top:22px;right:22px}.adventure-hud #pausebtn{top:18px;right:18px;z-index:9} /* Above the camera-drag layer; below menu overlays. */
 .adventure-hud #inventoryDock{position:fixed;left:var(--hud-margin);bottom:20px;width:278px;z-index:8;pointer-events:auto;font:12px system-ui;color:#fff0d7}
 .adventure-hud #hudbag{position:static;display:flex;justify-content:flex-start;box-sizing:border-box;gap:10px;margin:0;width:100%;padding:9px 11px;border:1px solid #91a89a;border-radius:5px;background:var(--hud-panel);color:#fff0d7;text-align:left;cursor:pointer;font:600 13px system-ui;letter-spacing:0;box-shadow:0 3px 14px #0004}
 .adventure-hud #hudbag .ico{width:34px;height:34px}.adventure-hud .bag-copy{flex:1;min-width:0}.adventure-hud .bag-count{display:flex;gap:14px}.adventure-hud #hudbagnum{font-size:16px}.adventure-hud #hudBagState{display:block;font:11px/1.4 system-ui;color:#c4d8cb;margin-top:3px}

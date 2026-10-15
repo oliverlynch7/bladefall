@@ -12,6 +12,14 @@ Baseline: 4d8637bd / v2.199.0. User: Continue the announced loot/full-bag and ea
 
 No new currency rules, reward tables, story, world geometry or global balancing. Preserve unrelated companion/rig work.
 
-## Current outcome
+## Initial outcome - browser disconnected
 
 Implemented the reproduced purchase loss and feedback improvements. 28 transaction/presentation checks and relevant chest/syntax checks pass. Browser connection is unavailable; no visual, genuine old-save reload, co-op integration or continuous early-play claim. Publication is pending the required real-browser checks. Evidence and exact resume procedure: `../art-validation/loot-readiness-20261015/summary.json`.
+
+## Browser recovery and additional finding
+
+Activated the existing chat through the app navigation tool; the in-app testing browser then connected without the user returning to the PC. Real-browser transaction/save checks and ten local host/guest loot assertions pass. During the early campaign UI flow, the Pause button's center hit `#lookzone`: `#pausebtn` and the later `#controls` stacking context both have z-index 7. Escape still opens the menu. Raise only the pause button above camera controls while keeping it below modal overlays. Verify pointer hit targets and actual clicks at desktop/laptop/phone sizes, and retain keyboard/menu return behavior. No new mechanic or balancing change.
+
+## Verified outcome
+
+Browser connection restored remotely. Fifteen evidence checks, covering ten individual co-op assertions, pass. Short campaign/menu/save smoke completed; full fresh campaign/performance assessment remains separate. See summary.json for exact evidence, limits and deployment status.

@@ -1,0 +1,43 @@
+<!doctype html><meta charset="utf-8"><title>Co-op personal loot checks</title>
+<style>body{background:#172b3b;color:#fff;font:14px system-ui}button{padding:10px}iframe{width:48%;height:340px}pre{white-space:pre-wrap}textarea{width:95%;height:50px}</style>
+<h1>Shared adventure, personal inventory</h1><button id="run">Check co-op loot</button><pre id="result">Ready</pre><textarea id="evidence" aria-label="Evidence JSON"></textarea>
+<iframe id="host" title="Host" src="/3d/.qa-loot-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-loot-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result'),checks=[],h=document.getElementById('host').contentWindow,g=document.getElementById('guest').contentWindow,wait=ms=>new Promise(r=>setTimeout(r,ms));let hb,gb;
+ const ok=(name,value)=>{checks.push({name,pass:!!value});if(!value)throw Error(name);};document.getElementById('run').disabled=true;
+ try{
+  const deadline=Date.now()+30000;while(!h.lootQA||!g.lootQA){if(Date.now()>deadline)throw Error('Game frames did not initialize');await wait(100);}
+  hb=await h.lootQA.fresh();gb=await g.lootQA.fresh();hb.enterZone(0);gb.enterZone(0);await h.lootQA.until(()=>!h.BF_LOADING?.active&&!g.BF_LOADING?.active);
+  const hq=[],gq=[],handlers={};Object.assign(hb.MP,{active:true,isHost:true,myId:'loot-h',zone:0,conns:[]});hb.MP.onEnter(0);
+  hb.MP.wireGuest({open:true,send:d=>hq.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'loot-g',zone:0,hostConn:{open:true,send:d=>gq.push(JSON.parse(JSON.stringify(d)))}});
+  const flush=()=>{for(let j=0;j<5;j++){for(const p of gq.splice(0))handlers.data(p);for(const p of hq.splice(0))gb.MP.onGuestData(p);}},broadcast=()=>{hb.MP.broadcast();flush();};
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();await wait(150);flush();await h.lootQA.until(()=>!h.BF_LOADING?.active&&!g.BF_LOADING?.active);
+  ok('Both players share the campaign area',hb.G.zone===gb.G.zone&&hb.G.area===gb.G.area);
+  hb.G.enemies=[];gb.G.enemies=[];hb.G.pickups=[];gb.G.pickups=[];hb.G.chests=[];gb.G.chests=[];
+  h.lootQA.fill(hb,30);g.lootQA.fill(gb,29);hb.setAutoSell(false);gb.setAutoSell(false);
+  for(const [b,name] of [[hb,'Host personal sword'],[gb,'Guest personal sword']]){const p=b.G.p;b.pushLoot(p.x,p.z,b.highestSurfaceAt(p.x,p.z),{weapon:b.makeWeapon('sword','common',name)});}
+  await h.lootQA.until(()=>gb.meta.stash.some(i=>i.weapon?.name==='Guest personal sword'));
+  ok('Full host bag leaves host loot on the ground',hb.meta.stash.length===30&&hb.G.pickups.some(p=>p.weapon?.name==='Host personal sword'));
+  ok('Guest independently uses the last free slot',gb.meta.stash.length===30&&!gb.G.pickups.some(p=>p.weapon?.name==='Guest personal sword'));
+  broadcast();broadcast();await wait(120);
+  ok('Repeated party snapshots do not duplicate the guest item',gb.meta.stash.filter(i=>i.weapon?.name==='Guest personal sword').length===1);
+  const hg=hb.meta.gold,gg=gb.meta.gold;gb.setAutoSell(true);const gp=gb.G.p;gb.pushLoot(gp.x,gp.z,gb.highestSurfaceAt(gp.x,gp.z),{trinket:gb.makeTrinket('common','ring','vigor')});
+  await h.lootQA.until(()=>gb.meta.gold>gg);broadcast();
+  ok('Guest auto-sell preference does not change the host preference',gb.meta.autoSellEquipment===true&&hb.meta.autoSellEquipment===false);
+  ok('Selling guest loot preserves host gold and blocked item',hb.meta.gold===hg&&hb.G.pickups.some(p=>p.weapon?.name==='Host personal sword')&&gb.meta.stash.length===30);
+  hb.meta.stash.pop();hb.persist();hb.hudUpdate();await h.lootQA.until(()=>hb.meta.stash.some(i=>i.weapon?.name==='Host personal sword'));
+  ok('Host can later collect their item exactly once',hb.meta.stash.filter(i=>i.weapon?.name==='Host personal sword').length===1&&!hb.G.pickups.some(p=>p.weapon?.name==='Host personal sword'));
+  const hp=hb.G.p,pos={x:hp.x+100,z:hp.z,y:hb.highestSurfaceAt(hp.x+100,hp.z)},hc={...pos,rarity:'common',opened:false,bob:0},gc={...pos,rarity:'common',opened:false,bob:0};hb.G.chests=[hc];gb.G.chests=[gc];
+  hb.openChest(hc);gb.openChest(gc);const guestGold=gb.meta.gold;gb.openChest(gc);gb.openChest(gc);
+  ok('The same chest respects each player’s own bag and selling choice',!hc.opened&&gc.opened&&hb.meta.stash.length===30&&gb.meta.stash.length===30);
+  ok('Repeated chest interaction cannot repeat the guest sale',gb.meta.gold===guestGold);
+  hb.meta.stash.pop();hb.openChest(hc);const hostGold=hb.meta.gold;hb.openChest(hc);hb.openChest(hc);
+  ok('Host chest reward remains available and grants one item after freeing space',hc.opened&&hb.meta.stash.length===30&&hb.meta.gold===hostGold);
+  const result={checks,host:h.lootQA.state(),guest:g.lootQA.state(),errors:[...h.lootQA.errors,...g.lootQA.errors],transport:'Real host/guest handlers over a local serialized relay. Staged pickups and chests; no Internet latency or full campaign claim.'};
+  document.getElementById('evidence').value=JSON.stringify(result);out.textContent='PASS '+checks.length+' co-op loot assertions.';
+ }catch(e){out.textContent='FAIL '+e.stack;document.getElementById('evidence').value=JSON.stringify({checks,error:e.message,errors:[...(h.lootQA?.errors||[]),...(g.lootQA?.errors||[])]});}
+ finally{for(const b of [hb,gb])if(b){b.MP.active=false;b.MP.conns=[];}document.getElementById('run').disabled=false;}
+};
+</script>

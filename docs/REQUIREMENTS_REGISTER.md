@@ -1667,3 +1667,8 @@ U-FIRST-BOSS-20261015. Exact user message: "Go ahead with that next review". Rev
 ## [Codex | 2026-10-15] First-boss and early-equipment review - v2.202.0
 
 U-FIRST-BOSS-20261015 implemented and locally verified: paid common starter-family upgrades; accurate cover-stopping charge marker; current-binding attack cues; ground-wave retry advice; isolated boss HUD state. Evidence and limits: docs/art-validation/first-boss-20261015/summary.json. No boss stat nerf or new mandatory reward. Human novice balance remains open. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-15] U-FIRST-BOSS-20261015 published
+
+Verified live as v2.202.0-first-boss, gameplay commit c65a1ff7. Deployment and browser evidence are recorded in docs/art-validation/first-boss-20261015/. Human novice balance and remote latency remain outside this verified scope.

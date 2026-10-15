@@ -1,0 +1,88 @@
+{
+  "version": "2.198.0-campaign-combat",
+  "baseline": "969ce1a9",
+  "date": "2026-10-14",
+  "changes": [
+    "All eight authored bosses use one living-player selector scoped to the same campaign zone and area; invalid coordinates and defeated/downed players are excluded.",
+    "Dormant bosses can activate when a living guest reaches them first. Brute, Marksman and Fallen failed this check before the fix.",
+    "Hydra attack strength now uses the existing regional/difficulty boss curve, independently of the ordinary restraint entities. Restraint HP, warnings, exposure windows and release story are unchanged. Co-op scales health, not this attack damage."
+  ],
+  "reproducedBefore": {
+    "targetingFailures": 6,
+    "affectedEncounters": [
+      "Brute",
+      "Marksman",
+      "Ember Colossus",
+      "Hydra"
+    ],
+    "guestArrivalFailures": 3,
+    "hydraFirstHitDamage": [
+      10,
+      12
+    ]
+  },
+  "verification": {
+    "naturalFirstHits": {
+      "cases": 24,
+      "classes": [
+        "warrior",
+        "ranger",
+        "mage"
+      ],
+      "zones": 8,
+      "health": "ordinary derived stats; no invulnerability",
+      "entry": "staged arena, levels 5 + 3 per zone, legal common/uncommon/rare gear",
+      "hydraDamageAfter": [
+        54,
+        55
+      ]
+    },
+    "weaponReach": {
+      "cases": 24,
+      "method": "one real basic attack against an active boss; special exposure windows staged"
+    },
+    "targeting": {
+      "cases": 48,
+      "method": "actual game update with complete peer records, spy records the target passed to each encounter"
+    },
+    "guestArrival": {
+      "cases": 15,
+      "method": "actual game update, host outside wake range, valid or ineligible peer nearby"
+    },
+    "deathRetry": {
+      "cases": 8,
+      "method": "lethal QA hit, actual death screen and retry button",
+      "retained": [
+        "character level and XP",
+        "class rank and XP",
+        "gold",
+        "equipped weapon"
+      ]
+    },
+    "completion": {
+      "assertions": 41,
+      "method": "staged lethal events test blocked exits, remaining guards, single rewards, Hydra mercy, Marble orb and final King sequence; not complete combat wins"
+    },
+    "coOp": {
+      "assertions": 40,
+      "encounters": 8,
+      "transport": "Production host/guest handlers over a local serialized relay, with normal position interpolation and matching run identity."
+    },
+    "saveCompatibility": "A genuine previous-release Storm Coast checkpoint retains level 20, XP 38, Ranger rank 7 / XP 100, 12077 gold, rare bow, completed hub request and correct boss arena.",
+    "pureRegression": "146 target cases, damage scaling, preserved soldier/trial formula, Hydra state replication; all eight existing encounter suites pass.",
+    "visual": "Normal-camera Brute approach/charge and Hydra warning/hit/recovery observed; screenshots and real-time samples saved. Not an all-camera/all-device certification.",
+    "syntax": "Both inline game scripts, hydra.js and local fixture parse; diff whitespace check passes."
+  },
+  "testSetupCorrections": [
+    "Early ranged checks fired before dormant bosses activated. Waiting for natural activation yielded 24/24 passes before production edits; no artificial projectile correction was made.",
+    "Initial peer stubs omitted interpolation fields; corrected to use MP.mkPeer. Local relay setup uses MP.onEnter and stable enemy IDs for the officer trio.",
+    "A staging-only stale death overlay was removed in the fresh-scene helper, matching the real death-screen retry/return flow."
+  ],
+  "limits": [
+    "No full fresh-character campaign playthrough in this pass.",
+    "No human fun/difficulty judgement.",
+    "No public-network WebRTC or laptop/GPU performance verdict.",
+    "Trials, side-mode difficulty, storyline, camera algorithms and level geometry are unchanged."
+  ],
+  "next": "Check ordinary campaign combat, fresh-save progression and first-time player pacing. Keep hardware/network playtesting distinct from automated logic checks."
+}

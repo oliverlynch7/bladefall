@@ -1121,7 +1121,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./dragon-combat.js?v=2024"></script>
 <script src="./sky-library.js?v=2190"></script>
 <script src="./marble-guardian.js?v=2019"></script>
-<script src="./hydra.js?v=2049"></script>
+<script src="./hydra.js?v=2198"></script>
 <script src="./shipwreck-shore.js?v=2190"></script>
 <script src="./ship-crossing.js?v=2015"></script>
 <script src="./great-furnace.js?v=2186c"></script>
@@ -1161,7 +1161,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.197.0-campaign-journeys';
+const VERSION3D='2.198.0-campaign-combat';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8271,10 +8271,21 @@ function drawCampaignEliteDanger(e){
  else {lane(e.ceDX,e.ceDZ,k.reach,22,true);lane(e.ceDZ,-e.ceDX,k.reach,22,true);}
  if(!strike)ring(16+24*(1-e.ceClock/k.wind));
 }
+// Each boss chooses from the same living party in this arena. Never aim at a
+// downed companion or a stale position from another level/half of the campaign.
+function bossPartyTarget(origin,p){
+ const living=q=>q&&q.hp>0&&!q.dead&&!q.downed&&Number.isFinite(q.x)&&Number.isFinite(q.y)&&Number.isFinite(q.z);
+ let target=living(p)?p:null;
+ for(const q of Object.values(MP.active?MP.peers:{})){
+  if(!living(q)||q.zone!==G.zone||q.area!==G.area)continue;
+  if(!target||dXZ(origin.x,origin.z,q.x,q.z)<dXZ(origin.x,origin.z,target.x,target.z))target=q;
+ }
+ return target;
+}
 function updateOrchardBrute(e,dt,p,eff){
  updateBossBar(e);if(MP.guest()){if(['wind','charge'].includes(e.bruteState))e.yaw=Math.atan2(e.teleX,e.teleZ);return;}
  // Pick the nearest living co-op player, then lock the charge before it begins.
- let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{})){if(q&&q.hp>0&&q.zone===MP.zone&&Number.isFinite(q.x)&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;}if(!target)return;
+ const target=bossPartyTarget(e,p);if(!target)return;
  BFBruteEncounter.step(e,dt,target,{props:G.bruteArena.props,speed:Math.max(35,eff*1.9),
   tell:line=>{e._orchardHints=e._orchardHints||new Set();if(!e._orchardHints.has(line)){e._orchardHints.add(line);toast(line);}},
   impact:q=>{q.flashUntil=G.time+.45;G.shake=Math.min(9,G.shake+5);playFx('heavyhit');burst(e.x,e.y+35,e.z,'#c8ac73',12);addText(e.x,e.y+e.h+24,e.z,'STAGGERED!','#ffd47a');},
@@ -8284,9 +8295,9 @@ function updateOrchardBrute(e,dt,p,eff){
 }
 function updateHydra(dt){
  const h=G.hydraArena,p=G.p;if(!h)return;
- if(!MP.guest()){let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&(!target||dXZ(q.x,q.z,0,-300)<dXZ(target.x,target.z,0,-300)))target=q;
+ if(!MP.guest()){const target=bossPartyTarget({x:0,z:-300},p);
  if(target)BFHydra.step(G,dt,target,k=>{playFx(k==='wind'?'atk2':k==='free'?'portalopen':'heavyhit',.5);});}
- if(BFHydra.inAttack(G,p)&&G._hydraHit!==h.seq){G._hydraHit=h.seq;const e=G.enemies.find(e=>e.hydraIndex===h.head);hurtPlayer((e?.dmg||14)*1.8,h.x,h.z,foeHit(e,'the hydra’s '+h.kind));}
+ if(BFHydra.inAttack(G,p)&&G._hydraHit!==h.seq){G._hydraHit=h.seq;const e=G.enemies.find(e=>e.hydraIndex===h.head);hurtPlayer(h.attackDamage||scaledEnemyDamage(ENEMY.grunt.dmg,true)*1.8,h.x,h.z,foeHit(e,'the hydra’s '+h.kind));}
  const bar=document.getElementById('bosshpwrap');bar.classList.add('officer-team');bar.classList.toggle('on',!h.freed);document.getElementById('bossnametx').textContent='Free the Sea Hydra · '+BFHydra.live(G).length+' chains';const es=G.enemies.filter(e=>e.hydraChain);document.querySelector('#bosshp > i').style.width=(es.reduce((n,e)=>n+Math.max(0,e.hp),0)/(h.totalHp||1)*100)+'%';
  if(h.freed&&!G._hydraPaid){G._hydraPaid=true;gainXp(480);awardGold(700);adventureStoryState().notes['tc.hydra.free']={region:'storm',title:'The sea is its own again',text:'All three restraints are broken. The hydra returned to the sea. The stone climb beyond its ledges leads toward Sunspire.'};musicCue('hydra_release');toast('The hydra is free. The climb to Sunspire is open.');openWay();journalNoticeSync();}
  if(!G._hydraIntro){G._hydraIntro=true;toast('Free the three neck restraints. Dodge the marked attack, then strike its pale joint while that head rests. Stone blocks stop the water blast.');}questUpdate();
@@ -8332,40 +8343,39 @@ function finalKingTick(dt){if(!G?.kingFinal){document.getElementById('finalCharg
  }
  return mode==='npc';
 }
-function updateFinalKing(e,dt,p){updateBossBar(e);if(!BFFinalKing.combat(e))return;if(!MP.guest()){let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+function updateFinalKing(e,dt,p){updateBossBar(e);if(!BFFinalKing.combat(e))return;if(!MP.guest()){const target=bossPartyTarget(e,p);
  if(target)BFFinalKing.step(e,dt,target,{adds:G.enemies.filter(q=>q.kingAdd&&!q.dead&&q.hp>0).length,cue:k=>playFx(k==='wind'?'atk2':'heavyhit',.6),summon:()=>{for(const [i,type]of ['grunt','royalarcanist','grunt'].entries()){const q=spawnEnemy(type,-250+i*250,450,false);Object.assign(q,{y:0,active:true,dropT:0,kingAdd:true});}toast('His last guards enter. The King holds back while they fight.');}});}
  if(BFFinalKing.inAttack(e,p)&&e._akHit!==e.akSeq){e._akHit=e.akSeq;hurtPlayer(e.dmg,e.x,e.z,foeHit(e,{sweep:'a marked royal sweep',line:'a marked soul beam',burst:'a marked Void burst',wave:'a low soul wave'}[e.akKind]));}}
 
 function updateMarbleGuardian(e,dt,p){
  updateBossBar(e);G.marbleArena.screenCd=Math.max(0,(G.marbleArena.screenCd||0)-dt);
  if(!G.marbleArena.intro){G.marbleArena.intro=true;toast('Face a screen toward the boss and stand behind it for the heavy strike. Reflected force opens the armor seal. Jump or leave the low sweep; dodge the marked falling stone.');}
- if(!MP.guest()){let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+ if(!MP.guest()){const target=bossPartyTarget(e,p);
  if(target)BFMarbleGuardian.step(e,dt,target,kind=>{playFx(kind==='wind'?'atk2':kind==='break'?'wallbreak':'heavyhit',.6);if(kind==='break')toast('Armor seal broken — strike the pale joints!');});}
  if(BFMarbleGuardian.inAttack(e,p)&&e._mcHit!==e.mcSeq){e._mcHit=e.mcSeq;hurtPlayer(e.dmg,e.mcX,e.mcZ,foeHit(e,{hammer:'a marked heavy strike',sweep:'a low circular sweep',fall:'marked falling stone'}[e.mcKind]));}
 }
 function updateFurnaceColossus(e,dt,p){
  updateBossBar(e);if(!G.colossusArena.intro){G.colossusArena.intro=true;toast('Turn a cooling valve to expose its joints. Leave the marked circles; raised paths avoid the low sweep. All weapons can hurt cooled armor.');}
- if(!MP.guest()){let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+ if(!MP.guest()){const target=bossPartyTarget(e,p);
  if(target)BFFurnaceColossus.step(e,dt,target,{enemies:G.enemies,cue:kind=>playFx(kind==='wind'?'atk2':'heavyhit',.6),repair:()=>{for(const x of [-700,700]){const q=spawnEnemy('grunt',x,400,false);Object.assign(q,{active:true,dropT:0,y:120,furnaceRepair:true,label:'Forge repair guard'});}toast('A repair crew has arrived. Defeat them to stop the repairs.');}});}
  if(BFFurnaceColossus.inAttack(e,p)&&e._fcHit!==e.fcSeq){e._fcHit=e.fcSeq;hurtPlayer(e.dmg,e.fcX,e.fcZ,foeHit(e,e.fcKind==='sweep'?'a low furnace sweep':e.fcKind==='slam'?'a marked hammer strike':'a marked heat vent'));}
 }
 function updateFrostOfficer(e,dt,p,eff){
  updateBossBar(e);if(!G.frostOfficers.intro){G.frostOfficers.intro=true;toast('Three officers block the exit. Leave the marked circles, jump the shield wave, and dodge the spear line. Ramps reach both shelves.');}
- if(!MP.guest()){let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;if(target)BFFrostOfficers.step(e,dt,target,{enemies:G.enemies,arena:G.frostOfficers,speed:eff,cue:kind=>playFx(kind==='wind'?'atk2':'heavyhit',.55)});}
+ if(!MP.guest()){const target=bossPartyTarget(e,p);if(target)BFFrostOfficers.step(e,dt,target,{enemies:G.enemies,arena:G.frostOfficers,speed:eff,cue:kind=>playFx(kind==='wind'?'atk2':'heavyhit',.55)});}
  if(BFFrostOfficers.inAttack(e,p)&&e._offHit!==e.offSeq){e._offHit=e.offSeq;hurtPlayer(e.dmg,e.offX,e.offZ,foeHit(e,{caster:'a marked ice burst',shield:'a shield wave',spear:'a locked spear thrust'}[e.frostOfficer]));}
 }
 function updateFallenDuel(e,dt,p,eff){
  updateBossBar(e);
  if(!MP.guest()){
-  let target=p.hp>0&&!p.downed?p:null;
-  for(const q of Object.values(MP.active?MP.peers:{}))if(q&&q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&Number.isFinite(q.x)&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+  const target=bossPartyTarget(e,p);
   if(target)BFFallen.step(e,dt,target,{speed:Math.max(90,eff*2.4),cue:kind=>playFx(kind==='stagger'?'heavyhit':kind==='strike'?'atk1':'atk2',.65)});
  }
  if(BFFallen.inAttack(e,p)&&e._fallHitSeq!==e.fallSeq){e._fallHitSeq=e.fallSeq;hurtPlayer(e.dmg*(e.fallKind==='sweep'?1.25:1.1),e.fallX,e.fallZ,foeHit(e,e.fallKind==='sweep'?'a sword sweep':'a locked thrust'));}
 }
 function updateCrossingMarksman(e,dt,p){
  updateBossBar(e);if(MP.guest())return;
- let target=p.hp>0&&!p.downed?p:null;for(const q of Object.values(MP.active?MP.peers:{}))if(q&&q.hp>0&&q.zone===MP.zone&&Number.isFinite(q.x)&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;if(!target)return;
+ const target=bossPartyTarget(e,p);if(!target)return;
  BFMarksman.step(e,dt,target,{tell:toast,cue:()=>playFx('atk2',.65),fire:aim=>{const first=G.projectiles.length;releaseEnemyShot(e,aim);for(const pr of G.projectiles.slice(first))pr.life=5;},reinforce:()=>{for(const z of [-740,-880]){const q=spawnEnemy('grunt',1180,z,false);q.active=true;q.dropT=0;q.marksmanGuard=true;}toast('Two guards on the east path. Her bow needs time to reset after landing.');}});
 }
 function syncOrchardWaves(waves){
@@ -8403,7 +8413,7 @@ function drawBruteOrchard(t){
 }
 
 function buildCampaignArena(ctx){
-  const zone=curZone().id;if(zone==='castle'&&isCampaignAdventure()){BFFinalKing.build({G,plat:vplat,spawn:ctx.mkMonster});briarPending=null;G._storyEpoch=null;briarEpoch();document.getElementById('stagetag').textContent='The King’s Hall';return true;}if(zone==='palace'&&isCampaignAdventure()){BFMarbleGuardian.build({G,plat:vplat,spawn:ctx.mkMonster});briarPending=null;G._storyEpoch=null;briarEpoch();document.getElementById('stagetag').textContent='The Guardian Hall';return true;}if(zone==='abyss'&&isCampaignAdventure()){BFHydra.build({G,plat:vplat,spawn:spawnEnemy});briarPending=null;G._storyEpoch=null;briarEpoch();document.getElementById('stagetag').textContent='The Hydra Ledges';return true;}if(zone==='ember'){BFFurnaceColossus.build({G,seg:vseg,plat:vplat,spawn:ctx.mkMonster});briarPending=null;G._storyEpoch=null;briarEpoch();snapWorldInteractables();document.getElementById('stagetag').textContent='Ember Colossus';return true;}if(zone==='frost'){BFFrostOfficers.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Hollowed Officers';return true;}if(zone==='keep'){BFFallen.build({G,seg:vseg,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Fallen · The Release Hall';return true;}if(zone==='outskirts')return buildBruteOrchard(ctx);if(zone==='hollow'){BFMarksman.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='Hollow Marksman · The Last Crossing';return true;}
+  const zone=curZone().id;if(zone==='castle'&&isCampaignAdventure()){BFFinalKing.build({G,plat:vplat,spawn:ctx.mkMonster});briarPending=null;G._storyEpoch=null;briarEpoch();document.getElementById('stagetag').textContent='The King’s Hall';return true;}if(zone==='palace'&&isCampaignAdventure()){BFMarbleGuardian.build({G,plat:vplat,spawn:ctx.mkMonster});briarPending=null;G._storyEpoch=null;briarEpoch();document.getElementById('stagetag').textContent='The Guardian Hall';return true;}if(zone==='abyss'&&isCampaignAdventure()){BFHydra.build({G,plat:vplat,spawn:spawnEnemy,attackDamage:scaledEnemyDamage(ENEMY.grunt.dmg,true)*1.8});briarPending=null;G._storyEpoch=null;briarEpoch();document.getElementById('stagetag').textContent='The Hydra Ledges';return true;}if(zone==='ember'){BFFurnaceColossus.build({G,seg:vseg,plat:vplat,spawn:ctx.mkMonster});briarPending=null;G._storyEpoch=null;briarEpoch();snapWorldInteractables();document.getElementById('stagetag').textContent='Ember Colossus';return true;}if(zone==='frost'){BFFrostOfficers.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Hollowed Officers';return true;}if(zone==='keep'){BFFallen.build({G,seg:vseg,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='The Fallen · The Release Hall';return true;}if(zone==='outskirts')return buildBruteOrchard(ctx);if(zone==='hollow'){BFMarksman.build({G,seg:vseg,plat:vplat,col:vcol,spawn:ctx.mkMonster});snapWorldInteractables();document.getElementById('stagetag').textContent='Hollow Marksman · The Last Crossing';return true;}
   const specs={
     outskirts:{name:'Trampled Orchard',rows:[[0,0,1080,600],[0,-360,840,180],[0,360,840,180]],cover:[[-330,-200,32,32,120],[370,180,32,32,110]],color:'#725a38'},
     hollow:{name:'The Crossfire Bowl',rows:[[0,0,1180,620],[0,-400,900,220],[0,400,900,220]],cover:[[-240,100,62,100,125],[240,-110,62,100,125],[-360,-300,58,80,110],[360,310,58,80,110]],color:'#987749'},
@@ -9795,13 +9805,18 @@ function syncCampaignPartyHealth(){
 }
 
 
+// Damage scales with the encounter, independently of the killable model used by it.
+// Hydra restraints are ordinary entities; the animal's attack still follows the boss curve.
+function scaledEnemyDamage(base,boss,earnedTrial=false){
+ return base*DIFFICULTY*G.ngDmg*1.18*(boss?stageScale()*2.6:campaignEnemyDamageMul())*(earnedTrial?1.25:1)*tEnemyDmg()*(boss?dtune().boss:1);
+}
 function spawnEnemy(type,x,z,isBoss){
   if(G.trial&&ENEMY[type]?.boss){type='grunt';isBoss=false;} // Training never inherits campaign bosses.
   const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1)*partyHpMul();   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale); partyHpMul is 1 solo
   const e={partyHealthMul:partyHpMul(),type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
-    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:campaignEnemyDamageMul())*(_earnedTrial?1.25:1)*tEnemyDmg()*(a.boss?dtune().boss:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
+    dmg:scaledEnemyDamage(a.dmg,a.boss,_earnedTrial),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
     look:a.look||null,dive:!!a.dive,deathpuff:!!a.deathpuff,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
@@ -16273,7 +16288,8 @@ function updateWorld(dt){
     if(!MP.guest()&&G.zone===0&&G.area>=0&&isCampaignAdventure())BFCampaignElites.briar(e);
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
-    const wakeDistance=(e.briarRole||syncedMelee(e))&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
+    const bossTarget=e.boss?bossPartyTarget(e,p):null;
+    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):(e.briarRole||syncedMelee(e))&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
     if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;

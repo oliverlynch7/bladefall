@@ -2,8 +2,8 @@
 (function(root){'use strict';
 const heads=[{x:-550,z:-250,y:120},{x:0,z:-520,y:120},{x:550,z:-250,y:120}],covers=[{x:-330,z:140,w:130,d:140},{x:330,z:140,w:130,d:140}];
 const live=G=>G.enemies.filter(e=>e.hydraChain&&!e.dead&&e.hp>0);
-function build({G,plat,spawn}){
- G.hydraArena={clock:2,state:'recover',kind:'bite',head:0,seq:0,beat:0,revision:0,elapsed:0,x:0,z:0,y:120,freed:false,retreat:0,broken:[],totalHp:0};G.haz=null;G.boss=null;G.vertical=true;G.npc=null;G.secret=null;G.storyNpcs=[];G.storyObjects=[];
+function build({G,plat,spawn,attackDamage}){
+ G.hydraArena={clock:2,state:'recover',kind:'bite',head:0,seq:0,beat:0,revision:0,elapsed:0,x:0,z:0,y:120,freed:false,retreat:0,broken:[],totalHp:0,attackDamage};G.haz=null;G.boss=null;G.vertical=true;G.npc=null;G.secret=null;G.storyNpcs=[];G.storyObjects=[];
  for(const k of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','healpads','chests','qmarks','dens','movers','pads','shockwaves','trails','crumbles','geysers','springs','spikefields','torches','keys','doors','plates'])G[k]=[];
  const floor=(x,z,h,w,d)=>plat(x,z,h,w,d,{slab:35,checkpoint:true});
  floor(0,650,120,700,400);floor(0,385,120,190,300);for(const side of [-1,1]){floor(side*350,510,120,560,170);floor(side*610,20,120,520,850);floor(side*550,-250,120,500,350);floor(side*280,-450,120,550,180);}floor(0,-520,120,480,430);floor(0,100,120,1100,430);

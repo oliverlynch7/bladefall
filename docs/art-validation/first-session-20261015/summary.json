@@ -1,0 +1,136 @@
+{
+  "version": "2.201.0-first-journey",
+  "baseline": "1cfb5534",
+  "continuousRun": {
+    "controls": "Real keyboard/mouse inputs; normal difficulty; no state mutation, teleport, health boost, enemy disabling or simulation pumping. Read-only localhost observer.",
+    "character": "First Journey QA / Warrior / Rusty Sword",
+    "completed": [
+      "Five-page opening and four-step creator",
+      "Tutorial movement, held jump, mouse attack and mouse dodge",
+      "Third tutorial kill earns rank 2; chose and used Cleave",
+      "Tutorial exit and full hub tour",
+      "Title/page reload/Continue at the hub",
+      "Mara: three roots, rear-window dressings, return and delivery",
+      "Mill: move crate, hold sluice, remove timber, lower and cross bridge",
+      "Defeat bridge guards and open wagon gate",
+      "Black Woods: Lewis, ground camp route, stop signal crank, northern shelter",
+      "Healing pad, earned stat point allocated to Attack",
+      "Two Brute attempts, death, retry and return to Hub",
+      "Title/page reload/Continue in updated build"
+    ],
+    "boss": {
+      "attempts": 2,
+      "deaths": 2,
+      "victoryVerified": false,
+      "note": "Tool-driven input with analysis intervals is not a human skill/difficulty measurement. No balance changes made."
+    },
+    "return": {
+      "level": 2,
+      "xp": 236,
+      "classState": {
+        "xp": 543,
+        "rank": 3,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave",
+          "3": "w_heavy"
+        }
+      },
+      "gold": 270,
+      "hp": 130.68,
+      "maxHp": 130.68
+    },
+    "allocation": {
+      "health": 4,
+      "attack": 1,
+      "defense": 3,
+      "speed": 1,
+      "mana": 2
+    },
+    "gameErrors": [],
+    "evidence": [
+      "tutorial-combat.json",
+      "hub-resume.json",
+      "homefields-gate.json",
+      "signal-crank.json",
+      "brute-entry.json",
+      "brute-fight.json",
+      "brute-retry-fight.json",
+      "return-after-boss.json",
+      "final-resume.json"
+    ]
+  },
+  "fixes": [
+    "Pinned journal entries refresh when the same note changes. Latest arrivals take priority while older unread cards remain accessible through Next note.",
+    "Superseded Briar supply directions and the collected-dressings jump hint leave the HUD queue; journal history remains.",
+    "One-time skill and aerial-dodge tutorial flags are saved with existing global tutorial settings."
+  ],
+  "regressions": {
+    "browser": [
+      "Genuine pre-change character loads with level, XP, class choices, gold and allocation intact",
+      "New build saves completed skill lesson across full page reload",
+      "Staged rank 4 then rank 5 choices return directly to play without repeating Cleave lesson",
+      "Mara request shows current supply instruction; delivery shows mill instruction",
+      "Next note opens the previous unread card",
+      "Pinned clue revision updates immediately; Open journal selects the exact revised entry"
+    ],
+    "sharedJournal": {
+      "checks": [
+        {
+          "name": "Late join seeds history silently",
+          "pass": true
+        },
+        {
+          "name": "Live guest card shows revised instruction",
+          "pass": true
+        },
+        {
+          "name": "Duplicate packet adds no unread copies",
+          "pass": true
+        },
+        {
+          "name": "Older revision cannot restore obsolete text",
+          "pass": true
+        },
+        {
+          "name": "Guest dismissal does not dismiss host note",
+          "pass": true
+        },
+        {
+          "name": "Another update appears immediately",
+          "pass": true
+        },
+        {
+          "name": "Guest unread clue survives shared update",
+          "pass": true
+        }
+      ],
+      "transport": "Production story packet creation/application in two local browser worlds; staged initial guest placement, no Internet transport claim.",
+      "errors": []
+    },
+    "logic": [
+      "Journal queue suite including active/queued revisions, unread recovery, repeated snapshots, titles and restore",
+      "Briar mill, notice retirement and discovered-clue preservation",
+      "Puzzle guidance/coalescing",
+      "2,873 class progression checks across 17 classes plus real tutorial serializer round-trip, missing legacy field and stale-save guard"
+    ],
+    "syntax": "Both inline JavaScript blocks and import-map JSON pass; modified modules and QA scripts parse."
+  },
+  "performance": {
+    "method": "Read-only requestAnimationFrame interval observer, last 3,600 samples on this browser; not CPU/GPU profiling or target-hardware benchmarking.",
+    "observed": "Captured p95 intervals are roughly 5.7–16.6 ms. Largest captured outlier is 1,050 ms; its cause is not established. Load/transition/scheduling effects are included.",
+    "noBroadPerformanceClaim": true
+  },
+  "limits": [
+    "No completed first-boss victory or full campaign completion in this run",
+    "No human judgment of pacing, clarity or enjoyment",
+    "No Internet co-op latency, controller or low-end-device coverage this turn",
+    "Staged regression save/rank/quest setup is isolated from the continuous character on a separate localhost origin"
+  ],
+  "harnessCorrections": [
+    "An initial syntax command treated import-map JSON as JavaScript; corrected format detection passes.",
+    "An initial stale-packet fixture used two equal quest revisions from addJournalNote; corrected fixture explicitly supplies an older revision. Production logic was unchanged for this correction."
+  ],
+  "deployment": "Pending publication verification"
+}

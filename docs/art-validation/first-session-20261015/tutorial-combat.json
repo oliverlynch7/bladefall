@@ -1,0 +1,2407 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": "warrior",
+    "area": 0,
+    "zone": 0,
+    "areaName": "Trial of the Blade",
+    "position": [
+      -4,
+      0,
+      -1444
+    ],
+    "yaw": 3.1415865481857814,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 88.80000000000001,
+    "maxHp": 118.80000000000001,
+    "level": 1,
+    "xp": 134,
+    "class": "warrior",
+    "classState": {
+      "xp": 201,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 75,
+    "bag": 0,
+    "kills": 6,
+    "portal": {
+      "x": 0,
+      "y": 0,
+      "z": -1687.5
+    },
+    "objective": "TRIAL OF THE BLADE\n☐\nTake the portal\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 43,
+        "x": -5,
+        "y": 0,
+        "z": -1445,
+        "d": 0
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 46,
+        "x": -428,
+        "y": 0,
+        "z": -1279,
+        "d": 454
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 24,
+        "x": 150,
+        "y": 0,
+        "z": -705,
+        "d": 755
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 24,
+        "x": 425,
+        "y": 0,
+        "z": -715,
+        "d": 847
+      },
+      {
+        "id": "grunt",
+        "label": "Elite",
+        "type": "grunt",
+        "hp": 27,
+        "x": 422,
+        "y": 0,
+        "z": -712,
+        "d": 847
+      },
+      {
+        "id": "grunt",
+        "label": "Elite",
+        "type": "grunt",
+        "hp": 27,
+        "x": -1045,
+        "y": 0,
+        "z": -701,
+        "d": 1279
+      },
+      {
+        "id": "flyer",
+        "type": "flyer",
+        "hp": 11,
+        "x": 468,
+        "y": 82,
+        "z": -122,
+        "d": 1405
+      },
+      {
+        "id": "flyer",
+        "type": "flyer",
+        "hp": 11,
+        "x": -1115,
+        "y": 69,
+        "z": -540,
+        "d": 1432
+      }
+    ],
+    "nearNpcs": [],
+    "nearObjects": []
+  },
+  "events": [
+    {
+      "time": 814.9000000003725,
+      "state": {
+        "mode": "title",
+        "camera": "shoulder",
+        "class": "warrior",
+        "gold": 0,
+        "bag": 0,
+        "objective": "",
+        "lesson": null,
+        "nearEnemies": [],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 15909.400000000373,
+      "state": {
+        "mode": "story",
+        "camera": "shoulder",
+        "class": "warrior",
+        "gold": 0,
+        "bag": 0,
+        "objective": "",
+        "lesson": null,
+        "nearEnemies": [],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 31470.400000000373,
+      "state": {
+        "mode": "menu",
+        "camera": "shoulder",
+        "class": "warrior",
+        "gold": 0,
+        "bag": 0,
+        "objective": "",
+        "lesson": null,
+        "nearEnemies": [],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 50291.5,
+      "state": {
+        "mode": "menu",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 440
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 484
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 563
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 576
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 615
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 618
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 671
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 689
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 57178.700000000186,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 0,
+          "id": "welcome",
+          "title": "A safe place to learn"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 440
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 484
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 563
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 576
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 615
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 618
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 671
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 689
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 64282.299999999814,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -2
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 1,
+          "id": "move",
+          "title": "Move around"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 438
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 483
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 561
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 577
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 614
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 618
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 670
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 688
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 64618,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -38
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 2,
+          "id": "jump",
+          "title": "Hold to jump higher"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 404
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 476
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 526
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 585
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 590
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 617
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 646
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 684
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 75690.5,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -56
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 3,
+          "id": "attack",
+          "title": "Try a basic attack"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 387
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 473
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 508
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 579
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 591
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 617
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 635
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 683
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 88085.60000000056,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -56
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 4,
+          "id": "dodge",
+          "title": "Dodge or dash"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 387
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 473
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 508
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 579
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 591
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 617
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 635
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 683
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 103372.70000000019,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -194
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 5,
+          "id": "vitals",
+          "title": "Watch health and mana"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 138,
+            "y": 0,
+            "z": -418,
+            "d": 263
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 122,
+            "y": 0,
+            "z": -549,
+            "d": 376
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 474
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 453,
+            "y": 0,
+            "z": -417,
+            "d": 504
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -499,
+            "y": 0,
+            "z": -449,
+            "d": 560
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": -495,
+            "y": 0,
+            "z": -530,
+            "d": 599
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 637
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 646
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 113646,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -192
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 7,
+          "id": "progress",
+          "title": "Two kinds of progress"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 0,
+            "y": 0,
+            "z": -191,
+            "d": 1
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 34,
+            "y": 0,
+            "z": -373,
+            "d": 184
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": -194,
+            "y": 0,
+            "z": -542,
+            "d": 400
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -413,
+            "y": 0,
+            "z": -413,
+            "d": 468
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 474
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 433,
+            "y": 0,
+            "z": -399,
+            "d": 480
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 636
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 645
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 113863.29999999981,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -192
+        ],
+        "yaw": 3.141592653589793,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 0,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 0,
+        "bag": 0,
+        "kills": 0,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n0/6\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 13,
+          "id": "menu",
+          "title": "Ready to explore"
+        },
+        "nearEnemies": [
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": 0,
+            "y": 0,
+            "z": -192,
+            "d": 0
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 34,
+            "y": 0,
+            "z": -373,
+            "d": 184
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": -189,
+            "y": 0,
+            "z": -535,
+            "d": 391
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -413,
+            "y": 0,
+            "z": -413,
+            "d": 468
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 474
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 433,
+            "y": 0,
+            "z": -399,
+            "d": 480
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 636
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 645
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 114130.40000000037,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -211
+        ],
+        "yaw": 3.1399325711331723,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 13,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 7,
+        "bag": 0,
+        "kills": 1,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n1/6\nN Journal · all tasks & clues",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 34,
+            "y": 0,
+            "z": -373,
+            "d": 165
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": -188,
+            "y": 0,
+            "z": -534,
+            "d": 373
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -413,
+            "y": 0,
+            "z": -413,
+            "d": 459
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 435,
+            "y": 0,
+            "z": -399,
+            "d": 473
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 477
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 641
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 563,
+            "y": 0,
+            "z": 121,
+            "d": 654
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 692
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 115211.5,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -402
+        ],
+        "yaw": 2.595985237450797,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 34,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 19,
+        "bag": 0,
+        "kills": 2,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n2/6\nN Journal · all tasks & clues",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": -188,
+            "y": 0,
+            "z": -534,
+            "d": 229
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -413,
+            "y": 0,
+            "z": -419,
+            "d": 413
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 435,
+            "y": 0,
+            "z": -399,
+            "d": 435
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 546
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 17,
+            "y": 0,
+            "z": -1033,
+            "d": 631
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 562,
+            "y": 0,
+            "z": -703,
+            "d": 638
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 717
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 749
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 122346.90000000037,
+      "state": {
+        "mode": "upgrade",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -553
+        ],
+        "yaw": -1.4577752683570864,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 55,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 31,
+        "bag": 0,
+        "kills": 3,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n3/6\nN Journal · all tasks & clues",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -206,
+            "y": 0,
+            "z": -535,
+            "d": 207
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 8,
+            "y": 0,
+            "z": -784,
+            "d": 231
+          },
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": -21,
+            "y": 0,
+            "z": -814,
+            "d": 262
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 435,
+            "y": 0,
+            "z": -527,
+            "d": 435
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 433,
+            "y": 0,
+            "z": -487,
+            "d": 439
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 637
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 805
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 823
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 141737.5,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -555
+        ],
+        "yaw": -2.2487867740772396,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 55,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 31,
+        "bag": 0,
+        "kills": 3,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n3/6\nN Journal · all tasks & clues",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -198,
+            "y": 0,
+            "z": -535,
+            "d": 199
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 8,
+            "y": 0,
+            "z": -782,
+            "d": 227
+          },
+          {
+            "id": "grunt",
+            "type": "grunt",
+            "hp": 15,
+            "x": -20,
+            "y": 0,
+            "z": -809,
+            "d": 255
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 435,
+            "y": 0,
+            "z": -527,
+            "d": 436
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 431,
+            "y": 0,
+            "z": -485,
+            "d": 437
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 638
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 806
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 824
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 142670.90000000037,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          0,
+          0,
+          -705
+        ],
+        "yaw": 3.1365432906601023,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 113.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 89,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 50,
+        "bag": 0,
+        "kills": 5,
+        "portal": null,
+        "objective": "TRIAL OF THE BLADE\n☐\nDefeat the keepers\n5/6\nN Journal · all tasks & clues",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -106,
+            "y": 0,
+            "z": -463,
+            "d": 265
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 435,
+            "y": 0,
+            "z": -562,
+            "d": 458
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 425,
+            "y": 0,
+            "z": -446,
+            "d": 498
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 749
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 46,
+            "x": -612,
+            "y": 0,
+            "z": -1145,
+            "d": 754
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": -617,
+            "y": 0,
+            "z": -35,
+            "d": 911
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 682,
+            "y": 0,
+            "z": -94,
+            "d": 916
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": -720,
+            "y": 74,
+            "z": -76,
+            "d": 956
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 153228.10000000056,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          1,
+          0,
+          -1314
+        ],
+        "yaw": 2.3328352058958193,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 118.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 134,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 75,
+        "bag": 0,
+        "kills": 6,
+        "portal": {
+          "x": 0,
+          "y": 0,
+          "z": -1687.5
+        },
+        "objective": "TRIAL OF THE BLADE\n☐\nTake the portal\nN Journal · all tasks & clues",
+        "lesson": {
+          "step": 0,
+          "id": "exit",
+          "title": "The exit is open"
+        },
+        "nearEnemies": [
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 46,
+            "x": -434,
+            "y": 0,
+            "z": -1137,
+            "d": 469
+          },
+          {
+            "id": "thornboar",
+            "label": "Elite",
+            "type": "thornboar",
+            "hp": 43,
+            "x": 103,
+            "y": 0,
+            "z": -1824,
+            "d": 520
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 150,
+            "y": 0,
+            "z": -683,
+            "d": 648
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 422,
+            "y": 0,
+            "z": -712,
+            "d": 734
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 425,
+            "y": 0,
+            "z": -418,
+            "d": 991
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": -1045,
+            "y": 0,
+            "z": -701,
+            "d": 1213
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 1280
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": -1115,
+            "y": 69,
+            "z": -540,
+            "d": 1358
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    },
+    {
+      "time": 160276.10000000056,
+      "state": {
+        "mode": "play",
+        "trial": "warrior",
+        "area": 0,
+        "zone": 0,
+        "areaName": "Trial of the Blade",
+        "position": [
+          -4,
+          0,
+          -1444
+        ],
+        "yaw": 3.1415865481857814,
+        "camera": "shoulder",
+        "camYaw": 3.141592653589793,
+        "hp": 88.80000000000001,
+        "maxHp": 118.80000000000001,
+        "level": 1,
+        "xp": 134,
+        "class": "warrior",
+        "classState": {
+          "xp": 201,
+          "rank": 2,
+          "sub": null,
+          "v2": 1,
+          "ch": {
+            "2": "w_cleave"
+          }
+        },
+        "weapon": "Rusty Sword",
+        "gold": 75,
+        "bag": 0,
+        "kills": 6,
+        "portal": {
+          "x": 0,
+          "y": 0,
+          "z": -1687.5
+        },
+        "objective": "TRIAL OF THE BLADE\n☐\nTake the portal\nN Journal · all tasks & clues",
+        "lesson": null,
+        "nearEnemies": [
+          {
+            "id": "thornboar",
+            "label": "Elite",
+            "type": "thornboar",
+            "hp": 43,
+            "x": -5,
+            "y": 0,
+            "z": -1445,
+            "d": 0
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 46,
+            "x": -428,
+            "y": 0,
+            "z": -1279,
+            "d": 454
+          },
+          {
+            "id": "thornboar",
+            "type": "thornboar",
+            "hp": 24,
+            "x": 149,
+            "y": 0,
+            "z": -703,
+            "d": 757
+          },
+          {
+            "id": "sporeback",
+            "type": "sporeback",
+            "hp": 24,
+            "x": 425,
+            "y": 0,
+            "z": -715,
+            "d": 847
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": 422,
+            "y": 0,
+            "z": -712,
+            "d": 847
+          },
+          {
+            "id": "grunt",
+            "label": "Elite",
+            "type": "grunt",
+            "hp": 27,
+            "x": -1045,
+            "y": 0,
+            "z": -701,
+            "d": 1279
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": 468,
+            "y": 82,
+            "z": -122,
+            "d": 1405
+          },
+          {
+            "id": "flyer",
+            "type": "flyer",
+            "hp": 11,
+            "x": -1115,
+            "y": 69,
+            "z": -540,
+            "d": 1432
+          }
+        ],
+        "nearNpcs": [],
+        "nearObjects": []
+      }
+    }
+  ],
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 5.599999999976717,
+    "p95": 11.10000000000582,
+    "max": 22.20000000001164,
+    "visibility": "visible"
+  },
+  "save": {
+    "soundOn": false,
+    "musicOn": false,
+    "musicVol": 1,
+    "sfxVol": 1,
+    "showArmor": true,
+    "autoAttack": false,
+    "autoKeep": false,
+    "autoBag": true,
+    "autoSellEquipment": false,
+    "camMode": "shoulder",
+    "lookSens": 1,
+    "fpsFov": 92,
+    "renderDist": 1,
+    "silhouette": true,
+    "dmgNumbers": true,
+    "unlockedSkins": [
+      "knight"
+    ],
+    "selectedSkin": "knight",
+    "achievements": {
+      "first_blood": true
+    },
+    "totalKills": 6,
+    "bossKills": 0,
+    "kingKills": 0,
+    "tyrantKills": 0,
+    "magicBossKills": 0,
+    "rangedBossKills": 0,
+    "legendaryFound": 0,
+    "flawlessStages": 0,
+    "maxLevel": 1,
+    "beatNormal": false,
+    "beatHardcore": false,
+    "beatHitless": false,
+    "jetpack": true,
+    "diff": "normal",
+    "cosmetics": {},
+    "cosEquipped": {
+      "cape": null,
+      "trail": null,
+      "glow": null
+    },
+    "zonesCleared": 0,
+    "elitesKilled": 1,
+    "secretsFound": 0,
+    "introSeen": false,
+    "zoneSeen": {},
+    "shadeSeen": {},
+    "arcadeOwned": false,
+    "gold": 75,
+    "ngPlus": 0,
+    "bestStage": 0,
+    "lastNgHp": 1,
+    "lastNgDmg": 1,
+    "run": null,
+    "stash": [],
+    "descent": 0,
+    "perks": {},
+    "perkV2": true,
+    "classId": "warrior",
+    "classes": {
+      "warrior": {
+        "xp": 201,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      }
+    },
+    "endlessBest": 0,
+    "riftOpen": [],
+    "riftHallStory": {
+      "version": 1,
+      "revision": 0,
+      "flags": {},
+      "items": {},
+      "quests": {},
+      "notes": {},
+      "cursors": {},
+      "rewards": {},
+      "events": {},
+      "conversation": null
+    },
+    "riftShards": [],
+    "hero": null,
+    "bank": {
+      "gold": 0,
+      "hero": null,
+      "classes": {
+        "warrior": {
+          "xp": 0,
+          "rank": 1,
+          "sub": null,
+          "v2": 1
+        }
+      },
+      "stash": [],
+      "classId": "warrior"
+    },
+    "zoneMax": 0,
+    "zoneDone": {},
+    "classUnlocked": {},
+    "trialsDone": {},
+    "sideFound": {},
+    "sideDone": {},
+    "iansShards": [],
+    "iansComplete": false,
+    "masterSeal": false,
+    "masterSealSeen": false,
+    "socks": false,
+    "bagSlots": 0,
+    "hubUpgrades": {},
+    "petOwned": [],
+    "petActive": null,
+    "petNames": {},
+    "petTrain": {},
+    "petLabel": true,
+    "heroName": "First Journey QA",
+    "eyeColor": "#4be08a",
+    "hairStyle": "short",
+    "hairColor": "#3a2a1c",
+    "optionalDone": {},
+    "optionalProgress": {},
+    "legacyHubDialogue": {},
+    "camV2": 1,
+    "particles": true,
+    "quality": "high",
+    "keybinds": {
+      "up": [
+        "KeyW",
+        "ArrowUp"
+      ],
+      "down": [
+        "KeyS",
+        "ArrowDown"
+      ],
+      "left": [
+        "KeyA",
+        "ArrowLeft"
+      ],
+      "right": [
+        "KeyD",
+        "ArrowRight"
+      ],
+      "jump": [
+        "Space"
+      ],
+      "attack": [
+        "Mouse0",
+        "KeyJ"
+      ],
+      "dodge": [
+        "ShiftLeft",
+        "Mouse2"
+      ],
+      "skill1": [
+        "Digit1"
+      ],
+      "skill2": [
+        "Digit2"
+      ],
+      "skill3": [
+        "Digit3"
+      ],
+      "skill4": [
+        "Digit4"
+      ],
+      "interact": [
+        "KeyE"
+      ],
+      "loot": [
+        "KeyV"
+      ],
+      "lootEquip": [
+        "KeyF"
+      ],
+      "lootBag": [
+        "KeyR"
+      ],
+      "lootSell": [
+        "KeyQ"
+      ],
+      "auto": [
+        "KeyL"
+      ],
+      "ping": [
+        "KeyG"
+      ],
+      "partyTeleport": [
+        "KeyT"
+      ],
+      "partyNext": [
+        "KeyY"
+      ],
+      "journal": [
+        "KeyN"
+      ],
+      "bag": [
+        "Tab",
+        "KeyB"
+      ],
+      "emote": [
+        "KeyM"
+      ]
+    },
+    "controller": {
+      "bindings": {
+        "jump": 0,
+        "dodge": 1,
+        "attack": 2,
+        "interact": 3,
+        "skill1": 4,
+        "skill2": 5,
+        "skill3": 6,
+        "skill4": 7,
+        "bag": 8,
+        "pause": 9,
+        "journal": 10,
+        "partyTeleport": 11
+      },
+      "invertY": true,
+      "invertX": false,
+      "invert": true
+    },
+    "originSeen": true,
+    "prisonSaves": {
+      "version": 1,
+      "active": 0,
+      "slots": [
+        null,
+        null,
+        null
+      ]
+    },
+    "prisonProfile": null,
+    "chestRecords": {
+      "campaign:24373916:0:0:0:0:0:-612,-985": {
+        "rarity": "common",
+        "challenge": false,
+        "item": {
+          "weapon": {
+            "arche": "stormrod",
+            "art": "wand",
+            "cls": "ranged",
+            "sch": "mag",
+            "el": "arcane",
+            "rarity": "common",
+            "chg": null,
+            "reaper": false,
+            "anyClass": false,
+            "ians": false,
+            "name": "Common Arcane Wand",
+            "dmg": 12,
+            "cd": 0.24,
+            "kb": 110,
+            "lifesteal": 0,
+            "color": "#b9c0cc",
+            "blade": "#c47bff",
+            "proj": {
+              "speed": 820,
+              "size": 4,
+              "pierce": 1,
+              "range": 780,
+              "color": "#c47bff",
+              "shape": "spark",
+              "glow": 1
+            }
+          }
+        },
+        "claimed": false
+      }
+    },
+    "hubDialogue": {},
+    "returnVisits": {},
+    "campaignNgHp": 1,
+    "campaignNgDmg": 1,
+    "_perkRefund": 0,
+    "secretSense": false,
+    "classLooks": {
+      "warrior": 0,
+      "ranger": 0,
+      "mage": 0,
+      "reaper": 0,
+      "paladin": 0,
+      "necromancer": 0,
+      "ninja": 0,
+      "berserker": 0,
+      "pirate": 0,
+      "chronomancer": 0,
+      "monk": 0,
+      "stormcaller": 0,
+      "warlock": 0,
+      "skylancer": 0,
+      "bladedancer": 0,
+      "beastmaster": 0,
+      "pyromancer": 0
+    },
+    "mouthStyle": "smile",
+    "faceAdjust": {
+      "eyeX": 0,
+      "eyeY": 0,
+      "eyeTilt": 0,
+      "mouthX": 0,
+      "mouthY": 0,
+      "mouthTilt": 0
+    },
+    "browStyle": "natural",
+    "tutSeen": {
+      "m_spores": true
+    },
+    "tut": {
+      "skill": 1
+    }
+  }
+}

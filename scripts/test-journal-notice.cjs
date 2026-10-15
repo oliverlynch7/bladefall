@@ -12,3 +12,23 @@ q.push({id:'cage',title:'Cage',text:'Read the feed.'});q.push({id:'other',title:
 q.push({id:'other',title:'Other',text:'Another clue.'});q.push({id:'cage',title:'Cage',text:'Read the feed.'});q.tick(0,true);q.dismiss('cage');assert.equal(q.current.id,'other','targeted dismissal removes a queued clue without hiding the current one');q.dismiss();
 assert.ok(readingTime('word '.repeat(100))>45,'long notes get reading time');assert.ok(readingTime('One word')>=10);q.reset('frost',{});q.observe('frost',{a:a.a},'frost');assert.equal(q.pending,0,'other region not shown');
 console.log('Journal notice passed: restore, dedupe, queued changes, scene reset, dialogue/menu pause, hover hold, dismissal, length-based reading.');
+
+// A pinned card must show the new version immediately, not leave it behind itself.
+const live=createQueue();live.reset('woods');live.push({id:'signal',title:'Silence the horn',text:'Reach the crank.'});live.tick(0,true);
+live.push({id:'unrelated',title:'Hidden grove',text:'Follow the tracks.'});
+live.push({id:'signal',title:'The horn is silent',text:'Reach the shelter.'});
+assert.equal(live.current.title,'The horn is silent');assert.equal(live.pending,1);
+live.tick(100,true,true);assert.equal(live.current.text,'Reach the shelter.');
+live.dismiss();live.tick(0,true);assert.equal(live.current.id,'unrelated');
+
+const recent=createQueue({preferLatest:true});recent.reset('briar');
+recent.push({id:'clue',title:'Clue',text:'Read the wheel marks.'});
+recent.push({id:'task',title:'Task',text:'Collect roots.'});
+assert.equal(recent.current.id,'task');assert.equal(recent.pending,1);
+recent.push({id:'clue',title:'Updated clue',text:'Turn the wheel toward the stream.'});
+assert.equal(recent.current.title,'Updated clue');assert.equal(recent.pending,1,'queued revision replaces its older copy');
+recent.push({id:'clue',title:'Updated clue',text:'Turn the wheel toward the stream.'});assert.equal(recent.pending,1,'repeated packets do not multiply unread cards');
+recent.dismiss();recent.tick(0,true);assert.equal(recent.current.id,'task','interrupted unread note remains accessible');
+recent.push({id:'task',title:'Return to Mara',text:'Collect roots.'});assert.equal(recent.current.title,'Return to Mara','title-only changes are visible');
+recent.reset('woods',{signal:{region:'outskirts',title:'Horn',text:'Old saved note'}});recent.observe('woods',{signal:{region:'outskirts',title:'Horn',text:'Old saved note'}},'outskirts');assert.equal(recent.current,null,'restored history stays silent in latest-first mode');
+console.log('Pinned revisions, latest arrivals, unread recovery, queued replacement, title changes and repeated snapshots passed.');

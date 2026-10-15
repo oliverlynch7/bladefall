@@ -1008,7 +1008,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 @media(max-width:600px){.classviewer .buildhead{max-height:45%;overflow:auto;flex-shrink:0}.classviewer .buildhead .ovkicker{font-size:12px!important;letter-spacing:.04em!important}.classviewer .buildhead .ovh{font-size:26px!important;line-height:1.2}.classviewer .ctabs{max-height:130px;overflow:auto}.classviewer .buildscroll{min-height:100px}.classviewer .viewerfoot{flex-shrink:0}}
 .journal-clue small{display:block;margin-top:4px}
 </style>
-<link rel="stylesheet" href="./adventure-hud.css?v=2200">
+<link rel="stylesheet" href="./adventure-hud.css?v=2201">
 <script src="./adventure-hud.js?v=2200"></script>
 </head>
 <body class="adventure-hud">
@@ -1100,7 +1100,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2188"></script>
-<script src="./briar-journey.js?v=2190"></script>
+<script src="./briar-journey.js?v=2201"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2193"></script>
 <script src="./lost-canyon.js?v=2194"></script>
@@ -1126,8 +1126,8 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./ship-crossing.js?v=2015"></script>
 <script src="./great-furnace.js?v=2186c"></script>
 <script src="./furnace-colossus.js?v=2014"></script>
-<link rel="stylesheet" href="./journal-notice.css?v=2170">
-<script src="./journal-notice.js?v=2190"></script>
+<link rel="stylesheet" href="./journal-notice.css?v=2201">
+<script src="./journal-notice.js?v=2201"></script>
 <script src="./puzzle-feedback.js?v=2197"></script>
 <script src="./journal-clues.js?v=2188"></script>
 <script src="./music-score.js?v=2013"></script>
@@ -1161,7 +1161,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.200.0-loot-safety';
+const VERSION3D='2.201.0-first-journey';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1220,7 +1220,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];

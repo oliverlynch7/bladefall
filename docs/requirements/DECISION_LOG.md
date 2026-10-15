@@ -1300,3 +1300,17 @@ Evidence: docs/art-validation/loot-readiness-20261015/summary.json. Earlier 28 l
 ## [Codex | 2026-10-15] Loot safety deployed - v2.200.0
 
 Published gameplay commit 36738c0c to main. Cloudflare Pages reports success; the production browser displays v2.200.0-loot-safety with adventure-hud.css?v=2200 and no warning/error entries. No production save was opened. Deployment evidence: docs/art-validation/loot-readiness-20261015/deployment.json and production-browser.json. Owned local server and five generated QA files are removed, temporary viewport reset, and the surviving browser tab points to the live release. Unrelated companion/rig changes remain untouched.
+
+
+## [Codex | 2026-10-15] Continuous first-session test authorized
+
+User: "OK try that out." Run ordinary controls from fresh character creation through tutorial, hub, Briar Town and the first boss, then save/return. Investigate clarity, progression, actual performance and relevant co-op continuity; fix demonstrated defects. Plan: docs/design/FIRST_SESSION_JOURNEY_2026-10-15.md. Baseline 1cfb5534. Keep a continuous run distinct from staged tests, retain difficulty/story/map scale, and preserve unrelated companion/rig changes. In progress.
+
+
+## [Codex | 2026-10-15] Continuous first-session findings - v2.201.0
+
+Ran a fresh Warrior with ordinary keyboard/mouse controls through creation, tutorial, hub tour/reload, both Briar halves, the physical mill puzzle, ground signal route and two Brute attempts. No teleports, boosted stats, enemy disabling or direct simulation calls in the continuous run. Both boss attempts ended in death; retry and hub/title/reload retained level 2, rank 3, Cleave, Heavy Hand, 270 gold and the allocated Attack point. Boss victory, novice balance and full-campaign readiness remain unverified.
+
+Fixed two demonstrated issues: persistent journal cards kept obsolete task text in front of newer discoveries, and the one-time skill lesson flag was not serialized, repeating Cleave after reload. Current notes now revise in place; newest arrivals appear immediately with an explicit Next note button for earlier unread cards. Superseded Briar supply instructions leave the HUD queue without deleting journal history. Existing skill/dash lesson flags now persist with tutorial settings.
+
+Verified rendered request/delivery and exact-entry journal access, genuine old-character loading, real lesson-flag reload and staged later skill/passive selection. Seven production story-packet receiver checks cover late join, revised notes, duplicates, stale revisions and independent reading in two local worlds. Journal, mill, puzzle and class regressions pass, including 2,873 class checks and actual settings serialization. Evidence: docs/art-validation/first-session-20261015/summary.json. Observer frame p95 samples were about 5.7-16.6 ms; an unexplained 1,050 ms outlier prevents a blanket hitch-free claim. No geography, difficulty, story outcomes or SFX changed. Unrelated companion/rig edits untouched. Deployment confirmation follows.

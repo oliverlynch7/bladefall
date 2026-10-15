@@ -21,3 +21,12 @@ for(const [id,def] of Object.entries(ctx.definitions)){
  cs.ch[2]='retired-or-foreign-id';assert.equal(ctx.c2SkillOfSlot(0),null);assert.equal(ctx.c2NextChoice(),2,'Offer a replacement for an invalid legacy choice');cases++;
 }
 console.log(`${cases} rank, legacy-choice and ordered-choice checks passed across ${Object.keys(ctx.definitions).length} classes.`);
+
+// The real serializer previously dropped these flags, repeating lessons after reload.
+const saved=new Map(),persistence={meta:{tut:{skill:1,dash:1},tutSeen:{bag:true}},GKEY:'settings',saveGenerationCurrent:()=>true,localStorage:{setItem:(k,v)=>saved.set(k,v)}};
+vm.createContext(persistence);vm.runInContext(source.slice(source.indexOf('const GLOBAL_FIELDS='),source.indexOf('const MODE_FIELDS='))+fn('persistGlobal'),persistence);
+persistence.persistGlobal();const restored=JSON.parse(saved.get('settings'));
+assert.deepEqual(restored.tut,{skill:1,dash:1});assert.deepEqual(restored.tutSeen,{bag:true});
+persistence.meta={tutSeen:{bag:true}};persistence.persistGlobal();assert.equal(JSON.parse(saved.get('settings')).tut,undefined,'legacy settings need not contain the new field');
+persistence.saveGenerationCurrent=()=>false;persistence.meta={tut:{skill:1}};persistence.persistGlobal();assert.equal(JSON.parse(saved.get('settings')).tut,undefined,'deleted or replaced saves cannot write tutorial flags');
+console.log('Skill/dash lesson persistence, legacy missing field and stale-save guard passed.');

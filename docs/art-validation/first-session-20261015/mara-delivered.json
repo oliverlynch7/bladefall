@@ -1,0 +1,230 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": "Briar Town · Homefields",
+    "position": [
+      -125,
+      0,
+      -743
+    ],
+    "yaw": 3.1415926535897922,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 130.68,
+    "maxHp": 130.68,
+    "level": 2,
+    "xp": 10,
+    "class": "warrior",
+    "classState": {
+      "xp": 438,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 190,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\n☐\nKeep the mill’s water feed closed\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -770,
+        "y": 0,
+        "z": -1710,
+        "d": 1163
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1615,
+        "d": 1211
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1805,
+        "d": 1355
+      },
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 56,
+        "x": 1045,
+        "y": 0,
+        "z": -1745,
+        "d": 1540
+      },
+      {
+        "id": "flyer",
+        "label": "Elite",
+        "type": "flyer",
+        "hp": 25,
+        "x": 1045,
+        "y": 40,
+        "z": -1935,
+        "d": 1671
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": 1240,
+        "y": 0,
+        "z": -1840,
+        "d": 1751
+      },
+      {
+        "id": "grunt",
+        "label": "Farm raid leader",
+        "type": "grunt",
+        "hp": 54,
+        "x": -2040,
+        "y": 0,
+        "z": -700,
+        "d": 1916
+      },
+      {
+        "id": "caster",
+        "label": "Legion hex caster",
+        "type": "caster",
+        "hp": 18,
+        "x": -2190,
+        "y": 0,
+        "z": -930,
+        "d": 2074
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "mara",
+        "label": "Mara",
+        "x": -190,
+        "y": 0,
+        "z": 160,
+        "d": 905
+      },
+      {
+        "id": "thomas",
+        "label": "Thomas",
+        "x": 0,
+        "y": 0,
+        "z": 350,
+        "d": 1100
+      },
+      {
+        "id": "gus",
+        "label": "Gus",
+        "x": -1460,
+        "y": 0,
+        "z": -790,
+        "d": 1336
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "briar.root.3",
+        "label": "Gather tangle root",
+        "x": -370,
+        "y": 0,
+        "z": -335,
+        "d": 476
+      },
+      {
+        "id": "briar.root.2",
+        "label": "Gather tangle root",
+        "x": -505,
+        "y": 0,
+        "z": -245,
+        "d": 626
+      },
+      {
+        "id": "briar.root.1",
+        "label": "Gather tangle root",
+        "x": -410,
+        "y": 0,
+        "z": -130,
+        "d": 676
+      },
+      {
+        "id": "briar.dressings",
+        "label": "Take the clean dressings",
+        "x": 440,
+        "y": 20,
+        "z": -255,
+        "d": 746
+      },
+      {
+        "id": "briar.mill.note",
+        "label": "Read the millwright’s sketch",
+        "x": 5,
+        "y": 0,
+        "z": -1570,
+        "d": 837
+      },
+      {
+        "id": "briar.water",
+        "label": "Move the grain crate · E, then walk",
+        "x": 130,
+        "y": 0,
+        "z": -1600,
+        "d": 894
+      },
+      {
+        "id": "briar.gus.sign",
+        "label": "Repair the village sign",
+        "x": -1170,
+        "y": 0,
+        "z": -750,
+        "d": 1045
+      },
+      {
+        "id": "briar.mill.reset",
+        "label": "Return the grain crate to its starting place",
+        "x": 5,
+        "y": 0,
+        "z": -1780,
+        "d": 1045
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true,
+      "event.briar.root.2": true,
+      "event.briar.dressings": true,
+      "mara.healing": true
+    },
+    "items": {
+      "tangle_root": 0,
+      "dressings": 0
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11,
+    "p95": 11.20000000006985,
+    "max": 33.29999999993015,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

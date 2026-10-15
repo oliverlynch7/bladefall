@@ -1,0 +1,228 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": "Briar Town · Homefields",
+    "position": [
+      400,
+      11,
+      -290
+    ],
+    "yaw": 3.1415926514444217,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 130.68,
+    "maxHp": 130.68,
+    "level": 2,
+    "xp": 10,
+    "class": "warrior",
+    "classState": {
+      "xp": 438,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 125,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\n☐\nBring the supplies back to Mara\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 56,
+        "x": 1045,
+        "y": 0,
+        "z": -1745,
+        "d": 1592
+      },
+      {
+        "id": "flyer",
+        "type": "flyer",
+        "hp": 14,
+        "x": 2060,
+        "y": 76,
+        "z": -550,
+        "d": 1681
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": 1240,
+        "y": 0,
+        "z": -1840,
+        "d": 1763
+      },
+      {
+        "id": "flyer",
+        "label": "Elite",
+        "type": "flyer",
+        "hp": 25,
+        "x": 1045,
+        "y": 40,
+        "z": -1935,
+        "d": 1767
+      },
+      {
+        "id": "grunt",
+        "label": "Legion raider",
+        "type": "grunt",
+        "hp": 20,
+        "x": 2130,
+        "y": 0,
+        "z": -860,
+        "d": 1822
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -770,
+        "y": 0,
+        "z": -1710,
+        "d": 1840
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1615,
+        "d": 1902
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1805,
+        "d": 2039
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "mara",
+        "label": "Mara",
+        "x": -190,
+        "y": 0,
+        "z": 160,
+        "d": 742
+      },
+      {
+        "id": "thomas",
+        "label": "Thomas",
+        "x": 0,
+        "y": 0,
+        "z": 350,
+        "d": 754
+      },
+      {
+        "id": "gus",
+        "label": "Gus",
+        "x": -1460,
+        "y": 0,
+        "z": -790,
+        "d": 1926
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "briar.dressings",
+        "label": "Take the clean dressings",
+        "x": 440,
+        "y": 20,
+        "z": -255,
+        "d": 54
+      },
+      {
+        "id": "home.grain.cache",
+        "label": "Open the grain keeper’s chest",
+        "x": 1150,
+        "y": 0,
+        "z": -260,
+        "d": 751
+      },
+      {
+        "id": "briar.root.3",
+        "label": "Gather tangle root",
+        "x": -370,
+        "y": 0,
+        "z": -335,
+        "d": 771
+      },
+      {
+        "id": "home.grain.hopper",
+        "label": "Release grain from the loft hopper",
+        "x": 1160,
+        "y": 100,
+        "z": -55,
+        "d": 796
+      },
+      {
+        "id": "briar.root.1",
+        "label": "Gather tangle root",
+        "x": -410,
+        "y": 0,
+        "z": -130,
+        "d": 825
+      },
+      {
+        "id": "briar.root.2",
+        "label": "Gather tangle root",
+        "x": -505,
+        "y": 0,
+        "z": -245,
+        "d": 906
+      },
+      {
+        "id": "home.grain.spout",
+        "label": "Swing the grain trough toward the basket",
+        "x": 1310,
+        "y": 0,
+        "z": 100,
+        "d": 991
+      },
+      {
+        "id": "home.grain.clue",
+        "label": "Read the grain keeper’s note",
+        "x": 1260,
+        "y": 0,
+        "z": 255,
+        "d": 1019
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true,
+      "event.briar.root.2": true,
+      "event.briar.dressings": true
+    },
+    "items": {
+      "tangle_root": 3,
+      "dressings": 1
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11.099999999976717,
+    "p95": 16.599999999976717,
+    "max": 22.300000000046566,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

@@ -25,6 +25,13 @@ console.log('Briar mill: pressure/release, real obstacle blocking, owner arbitra
 const C=require('../public/3d/journal-clues.js');g=fixture();g.p={x:130,z:-1610,y:0};assert.equal(C.related(g),null);g.storyState=S.transact(g.storyState,book,{id:'sketch',type:'world',key:'briar.mill.note'}).state;assert.equal(C.related(g),'briar.mill.sketch');console.log('Mill sketch appears as a related clue only after discovery.');
 
 const notices=require('../public/3d/journal-notice.js').createQueue();notices.reset('mill');notices.push({id:'inspect.briar.jam',text:'Hold the plate first.'});notices.tick(0,true);g.briarMill.water=0;J.refreshNotices(g,notices);assert.equal(notices.current,null);
+
+const intro=require('../public/3d/journal-notice.js').createQueue({preferLatest:true});intro.reset('village');
+intro.push({id:'briar.mara',text:'Find Mara.'});intro.push({id:'briar.mill.sketch',text:'Keep this discovered sketch.'});
+g.storyState.quests['briar.supplies']='active';J.refreshNotices(g,intro);assert.equal(intro.pending,0);assert.equal(intro.current.id,'briar.mill.sketch');
+intro.push({id:'briar.supplies',text:'Find roots and dressings.'});intro.push({id:'briar.store.jump',text:'Find the window.'});
+Object.assign(g.storyState.items,{tangle_root:3,dressings:1});g.storyState.flags['event.briar.dressings']=true;J.refreshNotices(g,intro);intro.tick(0,true);assert.equal(intro.current.id,'briar.mill.sketch');
+g.storyState.flags['mara.healing']=true;intro.push({id:'briar.supplies',text:'Supplies delivered.'});J.refreshNotices(g,intro);assert.equal(intro.current.text,'Supplies delivered.','completion recap is retained');
 g.storyState.notes['briar.mill']={title:'Mill',text:'The wheel is clear. Lower the bridge.'};notices.push({id:'briar.mill',text:'Free the wheel.'});notices.tick(0,true);J.refreshNotices(g,notices);notices.tick(0,true);assert.equal(notices.current.text,g.storyState.notes['briar.mill'].text);
 g.storyState.flags['briar.bridge']=true;notices.push({id:'briar.mill.sketch',text:'The discovered sketch.'});J.refreshNotices(g,notices);notices.tick(0,true);assert.equal(notices.current.id,'briar.mill.sketch');assert(g.storyState.notes['briar.mill']);console.log('Superseded mill notices clear; discovered clues and permanent journal entries remain.');
 

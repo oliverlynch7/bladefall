@@ -1,0 +1,467 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": null,
+    "position": [
+      0,
+      0,
+      500
+    ],
+    "yaw": 3.141592653589793,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 118.80000000000001,
+    "maxHp": 118.80000000000001,
+    "level": 1,
+    "xp": 200,
+    "class": "warrior",
+    "classState": {
+      "xp": 334,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 111,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "dummy",
+        "type": "dummy",
+        "hp": 400,
+        "x": 440,
+        "y": 0,
+        "z": 245,
+        "d": 509
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "anvil",
+        "label": "The Smith",
+        "x": -610,
+        "y": 0,
+        "z": 205,
+        "d": 678
+      },
+      {
+        "id": "beastkeeper",
+        "label": "Beastkeeper",
+        "x": 610,
+        "y": 0,
+        "z": 65,
+        "d": 749
+      },
+      {
+        "id": "quartermaster",
+        "label": "Quartermaster",
+        "x": -610,
+        "y": 0,
+        "z": -110,
+        "d": 863
+      }
+    ],
+    "nearObjects": [],
+    "flags": {
+      "rv.eligible.tracks": true,
+      "rv.accepted.tracks": false,
+      "rv.ready.tracks": false,
+      "rv.done.tracks": false,
+      "rv.eligible.keepsake": false,
+      "rv.accepted.keepsake": false,
+      "rv.ready.keepsake": false,
+      "rv.done.keepsake": false,
+      "rv.eligible.pattern": false,
+      "rv.accepted.pattern": false,
+      "rv.ready.pattern": false,
+      "rv.done.pattern": false,
+      "rv.eligible.supplies": false,
+      "rv.accepted.supplies": false,
+      "rv.ready.supplies": false,
+      "rv.done.supplies": false
+    },
+    "items": {}
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 5.599999999998545,
+    "p95": 11.099999999998545,
+    "max": 238.79999999999927,
+    "visibility": "visible"
+  },
+  "save": {
+    "soundOn": false,
+    "musicOn": false,
+    "musicVol": 1,
+    "sfxVol": 1,
+    "showArmor": true,
+    "autoAttack": false,
+    "autoKeep": false,
+    "autoBag": true,
+    "autoSellEquipment": false,
+    "camMode": "shoulder",
+    "lookSens": 1,
+    "fpsFov": 92,
+    "renderDist": 1,
+    "silhouette": true,
+    "dmgNumbers": true,
+    "unlockedSkins": [
+      "knight"
+    ],
+    "selectedSkin": "knight",
+    "achievements": {
+      "first_blood": true
+    },
+    "totalKills": 7,
+    "bossKills": 0,
+    "kingKills": 0,
+    "tyrantKills": 0,
+    "magicBossKills": 0,
+    "rangedBossKills": 0,
+    "legendaryFound": 0,
+    "flawlessStages": 0,
+    "maxLevel": 1,
+    "beatNormal": false,
+    "beatHardcore": false,
+    "beatHitless": false,
+    "jetpack": true,
+    "diff": "normal",
+    "cosmetics": {},
+    "cosEquipped": {
+      "cape": null,
+      "trail": null,
+      "glow": null
+    },
+    "zonesCleared": 0,
+    "elitesKilled": 2,
+    "secretsFound": 0,
+    "introSeen": true,
+    "zoneSeen": {},
+    "shadeSeen": {},
+    "arcadeOwned": false,
+    "gold": 111,
+    "ngPlus": 0,
+    "bestStage": 0,
+    "lastNgHp": 1,
+    "lastNgDmg": 1,
+    "run": null,
+    "stash": [],
+    "descent": 0,
+    "perks": {},
+    "perkV2": true,
+    "classId": "warrior",
+    "classes": {
+      "warrior": {
+        "xp": 334,
+        "rank": 2,
+        "sub": null,
+        "v2": 1,
+        "ch": {
+          "2": "w_cleave"
+        }
+      }
+    },
+    "endlessBest": 0,
+    "riftOpen": [],
+    "riftHallStory": {
+      "version": 1,
+      "revision": 0,
+      "flags": {},
+      "items": {},
+      "quests": {},
+      "notes": {},
+      "cursors": {},
+      "rewards": {},
+      "events": {},
+      "conversation": null
+    },
+    "riftShards": [],
+    "hero": {
+      "allocation": {
+        "health": 4,
+        "attack": 0,
+        "defense": 3,
+        "speed": 1,
+        "mana": 2
+      },
+      "tunedLevels": 0,
+      "hp": 118.80000000000001,
+      "maxHp": 100,
+      "mana": 81,
+      "maxMana": 81,
+      "level": 1,
+      "xp": 200,
+      "xpNext": 230,
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Rusty Sword",
+        "dmg": 10.6,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#bcae8a",
+        "range": 84
+      },
+      "gear": {
+        "helmet": null,
+        "chest": null,
+        "legs": null,
+        "amulet": null,
+        "ring": null
+      },
+      "stats": {
+        "power": 1,
+        "magPower": 1,
+        "speed": 1,
+        "atkSpeed": 1,
+        "lifesteal": 0,
+        "defense": 0,
+        "cdr": 0,
+        "dodgeCd": 0.75,
+        "crit": 0,
+        "goldFind": 0
+      },
+      "maxJumps": 1,
+      "skin": "knight"
+    },
+    "bank": null,
+    "zoneMax": 0,
+    "zoneDone": {},
+    "classUnlocked": {
+      "warrior": true
+    },
+    "trialsDone": {
+      "warrior": true
+    },
+    "sideFound": {},
+    "sideDone": {},
+    "iansShards": [],
+    "iansComplete": false,
+    "masterSeal": false,
+    "masterSealSeen": false,
+    "socks": false,
+    "bagSlots": 0,
+    "hubUpgrades": {},
+    "petOwned": [],
+    "petActive": null,
+    "petNames": {},
+    "petTrain": {},
+    "petLabel": true,
+    "heroName": "First Journey QA",
+    "eyeColor": "#4be08a",
+    "hairStyle": "short",
+    "hairColor": "#3a2a1c",
+    "optionalDone": {},
+    "optionalProgress": {},
+    "legacyHubDialogue": {},
+    "camV2": 1,
+    "quality": "high",
+    "particles": true,
+    "hubTutDone": true,
+    "tutSeen": {
+      "m_spores": true,
+      "hub_first": true
+    },
+    "originSeen": true,
+    "keybinds": {
+      "up": [
+        "KeyW",
+        "ArrowUp"
+      ],
+      "down": [
+        "KeyS",
+        "ArrowDown"
+      ],
+      "left": [
+        "KeyA",
+        "ArrowLeft"
+      ],
+      "right": [
+        "KeyD",
+        "ArrowRight"
+      ],
+      "jump": [
+        "Space"
+      ],
+      "attack": [
+        "Mouse0",
+        "KeyJ"
+      ],
+      "dodge": [
+        "ShiftLeft",
+        "Mouse2"
+      ],
+      "skill1": [
+        "Digit1"
+      ],
+      "skill2": [
+        "Digit2"
+      ],
+      "skill3": [
+        "Digit3"
+      ],
+      "skill4": [
+        "Digit4"
+      ],
+      "interact": [
+        "KeyE"
+      ],
+      "loot": [
+        "KeyV"
+      ],
+      "lootEquip": [
+        "KeyF"
+      ],
+      "lootBag": [
+        "KeyR"
+      ],
+      "lootSell": [
+        "KeyQ"
+      ],
+      "auto": [
+        "KeyL"
+      ],
+      "ping": [
+        "KeyG"
+      ],
+      "partyTeleport": [
+        "KeyT"
+      ],
+      "partyNext": [
+        "KeyY"
+      ],
+      "journal": [
+        "KeyN"
+      ],
+      "bag": [
+        "Tab",
+        "KeyB"
+      ],
+      "emote": [
+        "KeyM"
+      ]
+    },
+    "controller": {
+      "bindings": {
+        "jump": 0,
+        "dodge": 1,
+        "attack": 2,
+        "interact": 3,
+        "skill1": 4,
+        "skill2": 5,
+        "skill3": 6,
+        "skill4": 7,
+        "bag": 8,
+        "pause": 9,
+        "journal": 10,
+        "partyTeleport": 11
+      },
+      "invertY": true,
+      "invertX": false,
+      "invert": true
+    },
+    "prisonSaves": {
+      "version": 1,
+      "active": 0,
+      "slots": [
+        null,
+        null,
+        null
+      ]
+    },
+    "prisonProfile": null,
+    "chestRecords": {
+      "campaign:24373916:0:0:0:0:0:-612,-985": {
+        "rarity": "common",
+        "challenge": false,
+        "item": {
+          "weapon": {
+            "arche": "stormrod",
+            "art": "wand",
+            "cls": "ranged",
+            "sch": "mag",
+            "el": "arcane",
+            "rarity": "common",
+            "chg": null,
+            "reaper": false,
+            "anyClass": false,
+            "ians": false,
+            "name": "Common Arcane Wand",
+            "dmg": 12,
+            "cd": 0.24,
+            "kb": 110,
+            "lifesteal": 0,
+            "color": "#b9c0cc",
+            "blade": "#c47bff",
+            "proj": {
+              "speed": 820,
+              "size": 4,
+              "pierce": 1,
+              "range": 780,
+              "color": "#c47bff",
+              "shape": "spark",
+              "glow": 1
+            }
+          }
+        },
+        "claimed": false
+      }
+    },
+    "hubDialogue": {},
+    "returnVisits": {},
+    "campaignNgHp": 1,
+    "campaignNgDmg": 1,
+    "secretSense": false,
+    "classLooks": {
+      "warrior": 0,
+      "ranger": 0,
+      "mage": 0,
+      "reaper": 0,
+      "paladin": 0,
+      "necromancer": 0,
+      "ninja": 0,
+      "berserker": 0,
+      "pirate": 0,
+      "chronomancer": 0,
+      "monk": 0,
+      "stormcaller": 0,
+      "warlock": 0,
+      "skylancer": 0,
+      "bladedancer": 0,
+      "beastmaster": 0,
+      "pyromancer": 0
+    },
+    "mouthStyle": "smile",
+    "faceAdjust": {
+      "eyeX": 0,
+      "eyeY": 0,
+      "eyeTilt": 0,
+      "mouthX": 0,
+      "mouthY": 0,
+      "mouthTilt": 0
+    },
+    "browStyle": "natural"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)"
+}

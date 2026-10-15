@@ -1,0 +1,241 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": "Briar Town · Homefields",
+    "position": [
+      -197,
+      160,
+      -4143
+    ],
+    "yaw": 4.712203673186538,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 89.68,
+    "maxHp": 130.68,
+    "level": 2,
+    "xp": 70,
+    "class": "warrior",
+    "classState": {
+      "xp": 107,
+      "rank": 3,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave",
+        "3": "w_heavy"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 211,
+    "bag": 0,
+    "kills": 0,
+    "portal": {
+      "x": -210,
+      "y": 160,
+      "z": -4350
+    },
+    "objective": "BRIAR TOWN\nThe way opens — take the portal\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 20,
+        "x": -900,
+        "y": 0,
+        "z": -2710,
+        "d": 1596
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -1095,
+        "y": 0,
+        "z": -2805,
+        "d": 1611
+      },
+      {
+        "id": "flyer",
+        "type": "flyer",
+        "hp": 14,
+        "x": 950,
+        "y": 80,
+        "z": -2800,
+        "d": 1766
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -1095,
+        "y": 0,
+        "z": -2615,
+        "d": 1773
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": 1210,
+        "y": 80,
+        "z": -2800,
+        "d": 1945
+      },
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 56,
+        "x": -1570,
+        "y": 0,
+        "z": -2400,
+        "d": 2219
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -1830,
+        "y": 0,
+        "z": -2400,
+        "d": 2389
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1805,
+        "d": 2461
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "thomas",
+        "label": "Thomas",
+        "x": -330,
+        "y": 160,
+        "z": -4250,
+        "d": 170
+      },
+      {
+        "id": "gus",
+        "label": "Gus",
+        "x": -1460,
+        "y": 0,
+        "z": -790,
+        "d": 3583
+      },
+      {
+        "id": "mara",
+        "label": "Mara",
+        "x": -190,
+        "y": 0,
+        "z": 160,
+        "d": 4303
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "briar.depart",
+        "label": "Open the wagon gate",
+        "x": -210,
+        "y": 160,
+        "z": -4240,
+        "d": 98
+      },
+      {
+        "id": "briar.bridge",
+        "label": "Lower the mill crossing",
+        "x": 80,
+        "y": 0,
+        "z": -2030,
+        "d": 2131
+      },
+      {
+        "id": "briar.water",
+        "label": "Move the grain crate · E, then walk",
+        "x": 130,
+        "y": 0,
+        "z": -1880,
+        "d": 2287
+      },
+      {
+        "id": "briar.mill.reset",
+        "label": "Return the grain crate to its starting place",
+        "x": 5,
+        "y": 0,
+        "z": -1780,
+        "d": 2372
+      },
+      {
+        "id": "briar.jam",
+        "label": "Free the wheel and latch the sluice",
+        "x": 300,
+        "y": 0,
+        "z": -1740,
+        "d": 2454
+      },
+      {
+        "id": "briar.mill.note",
+        "label": "Read the millwright’s sketch",
+        "x": 5,
+        "y": 0,
+        "z": -1570,
+        "d": 2581
+      },
+      {
+        "id": "home.orchard.cache",
+        "label": "Open the lookout chest",
+        "x": -2490,
+        "y": 136,
+        "z": -2370,
+        "d": 2899
+      },
+      {
+        "id": "briar.gus.tools",
+        "label": "Take Gus’s tool roll",
+        "x": -1460,
+        "y": 104,
+        "z": -1270,
+        "d": 3139
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true,
+      "event.briar.root.2": true,
+      "event.briar.dressings": true,
+      "mara.healing": true,
+      "briar.water": true,
+      "event.briar.mill.weighted": true,
+      "briar.jam": true,
+      "event.briar.jam": true,
+      "briar.bridge": true,
+      "event.briar.bridge": true,
+      "briar.depart": true,
+      "event.briar.depart": true
+    },
+    "items": {
+      "tangle_root": 0,
+      "dressings": 0
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11.099999999976717,
+    "p95": 11.29999999993015,
+    "max": 22.300000000046566,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

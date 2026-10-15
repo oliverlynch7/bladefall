@@ -1,0 +1,227 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": "Briar Town · Homefields",
+    "position": [
+      -237,
+      0,
+      -445
+    ],
+    "yaw": 1.5650559222562552,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 118.80000000000001,
+    "maxHp": 118.80000000000001,
+    "level": 1,
+    "xp": 200,
+    "class": "warrior",
+    "classState": {
+      "xp": 334,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 111,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\n☐\nGather tangle roots (2/3) and clean dressings (0/1)\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 20,
+        "x": -283,
+        "y": 0,
+        "z": -299,
+        "d": 154
+      },
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 20,
+        "x": -298,
+        "y": 0,
+        "z": -304,
+        "d": 154
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -770,
+        "y": 0,
+        "z": -1710,
+        "d": 1373
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1615,
+        "d": 1378
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1805,
+        "d": 1543
+      },
+      {
+        "id": "grunt",
+        "label": "Farm raid leader",
+        "type": "grunt",
+        "hp": 54,
+        "x": -2040,
+        "y": 0,
+        "z": -700,
+        "d": 1821
+      },
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 56,
+        "x": 1045,
+        "y": 0,
+        "z": -1745,
+        "d": 1825
+      },
+      {
+        "id": "flyer",
+        "label": "Elite",
+        "type": "flyer",
+        "hp": 25,
+        "x": 1045,
+        "y": 40,
+        "z": -1935,
+        "d": 1966
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "mara",
+        "label": "Mara",
+        "x": -190,
+        "y": 0,
+        "z": 160,
+        "d": 607
+      },
+      {
+        "id": "thomas",
+        "label": "Thomas",
+        "x": 0,
+        "y": 0,
+        "z": 350,
+        "d": 830
+      },
+      {
+        "id": "gus",
+        "label": "Gus",
+        "x": -1460,
+        "y": 0,
+        "z": -790,
+        "d": 1271
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "briar.root.3",
+        "label": "Gather tangle root",
+        "x": -370,
+        "y": 0,
+        "z": -335,
+        "d": 173
+      },
+      {
+        "id": "briar.root.2",
+        "label": "Gather tangle root",
+        "x": -505,
+        "y": 0,
+        "z": -245,
+        "d": 335
+      },
+      {
+        "id": "briar.root.1",
+        "label": "Gather tangle root",
+        "x": -410,
+        "y": 0,
+        "z": -130,
+        "d": 360
+      },
+      {
+        "id": "briar.dressings",
+        "label": "Take the clean dressings",
+        "x": 440,
+        "y": 20,
+        "z": -255,
+        "d": 703
+      },
+      {
+        "id": "briar.gus.sign",
+        "label": "Repair the village sign",
+        "x": -1170,
+        "y": 0,
+        "z": -750,
+        "d": 982
+      },
+      {
+        "id": "briar.mill.note",
+        "label": "Read the millwright’s sketch",
+        "x": 5,
+        "y": 0,
+        "z": -1570,
+        "d": 1151
+      },
+      {
+        "id": "briar.water",
+        "label": "Move the grain crate · E, then walk",
+        "x": 130,
+        "y": 0,
+        "z": -1600,
+        "d": 1212
+      },
+      {
+        "id": "briar.mill.reset",
+        "label": "Return the grain crate to its starting place",
+        "x": 5,
+        "y": 0,
+        "z": -1780,
+        "d": 1357
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true
+    },
+    "items": {
+      "tangle_root": 2
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11.10000000000582,
+    "p95": 16.60000000000582,
+    "max": 27.89999999999418,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

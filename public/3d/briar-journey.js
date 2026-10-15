@@ -62,7 +62,12 @@ function sync(G){const m=G.briarMill;if(!m)return;const f=G.storyState.flags;
  const o=G.storyObjects.find(o=>o.key==='briar.water');if(o)Object.assign(o,{x:m.x,z:m.z,label:m.owner?'Release the grain crate · E':'Move the grain crate · E, then walk'});
  refreshNotices(G,root.BFJournalNotice?.queue);
 }
-function refreshNotices(G,q){if(!q||!G.briarMill)return;const f=G.storyState.flags;
+function refreshNotices(G,q){if(!q||!G.storyState)return;const {flags:f,quests={},items={}}=G.storyState;
+ // Retire instructions only from the HUD; the journal keeps its history and clues.
+ if(quests['briar.supplies']||f['mara.healing'])q.dismiss('briar.mara');
+ if(!f['mara.healing']&&(items.tangle_root||0)>=3&&(items.dressings||0)>=1)q.dismiss('briar.supplies');
+ if(f['event.briar.dressings'])q.dismiss('briar.store.jump');
+ if(!G.briarMill)return;
  if(G.briarMill.water<.1||G.briarMill.latched)q.dismiss('inspect.briar.jam');
  if(f['briar.water'])q.dismiss('inspect.briar.water');
  if(f['briar.jam'])q.dismiss('inspect.briar.bridge');

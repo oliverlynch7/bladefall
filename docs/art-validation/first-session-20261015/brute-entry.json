@@ -1,0 +1,89 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": -1,
+    "zone": 0,
+    "areaName": "The Brute",
+    "position": [
+      0,
+      0,
+      850
+    ],
+    "yaw": 3.141592653589793,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 114.95199999999994,
+    "maxHp": 130.68,
+    "level": 2,
+    "xp": 236,
+    "class": "warrior",
+    "classState": {
+      "xp": 543,
+      "rank": 3,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave",
+        "3": "w_heavy"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 270,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\nSlay The Brute\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "brute",
+        "label": "THE BRUTE",
+        "type": "brute",
+        "hp": 684,
+        "x": 0,
+        "y": 0,
+        "z": -250,
+        "d": 1100
+      }
+    ],
+    "nearNpcs": [],
+    "nearObjects": [],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true,
+      "event.briar.root.2": true,
+      "event.briar.dressings": true,
+      "mara.healing": true,
+      "briar.water": true,
+      "event.briar.mill.weighted": true,
+      "briar.jam": true,
+      "event.briar.jam": true,
+      "briar.bridge": true,
+      "event.briar.bridge": true,
+      "briar.depart": true,
+      "event.briar.depart": true,
+      "woods.ready": true,
+      "combat.0.1.known": true,
+      "combat.0.1.camp": true,
+      "woods.signal": true,
+      "event.woods.signal.crank": true
+    },
+    "items": {
+      "tangle_root": 0,
+      "dressings": 0,
+      "combat.0.1": 3
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 5.599999999860302,
+    "p95": 11,
+    "max": 27.800000000046566,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

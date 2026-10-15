@@ -1,0 +1,224 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 1,
+    "zone": 0,
+    "areaName": "Briar Town · Black Woods",
+    "position": [
+      0,
+      0,
+      300
+    ],
+    "yaw": 3.141592653589793,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 89.68,
+    "maxHp": 130.68,
+    "level": 2,
+    "xp": 70,
+    "class": "warrior",
+    "classState": {
+      "xp": 107,
+      "rank": 3,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave",
+        "3": "w_heavy"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 211,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\n☐\nSpeak to Lewis at the forest entrance\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 21,
+        "x": -570,
+        "y": 0,
+        "z": -1360,
+        "d": 1755
+      },
+      {
+        "id": "caster",
+        "label": "Legion hex caster",
+        "type": "caster",
+        "hp": 19,
+        "x": -400,
+        "y": 0,
+        "z": -1870,
+        "d": 2207
+      },
+      {
+        "id": "grunt",
+        "label": "Legion raider",
+        "type": "grunt",
+        "hp": 21,
+        "x": -820,
+        "y": 0,
+        "z": -1800,
+        "d": 2254
+      },
+      {
+        "id": "grunt",
+        "label": "Legion raider",
+        "type": "grunt",
+        "hp": 21,
+        "x": -650,
+        "y": 0,
+        "z": -2220,
+        "d": 2602
+      },
+      {
+        "id": "flyer",
+        "type": "flyer",
+        "hp": 15,
+        "x": 1040,
+        "y": 52,
+        "z": -2120,
+        "d": 2634
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 32,
+        "x": -1600,
+        "y": 0,
+        "z": -2180,
+        "d": 2951
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 32,
+        "x": 2370,
+        "y": 0,
+        "z": -1550,
+        "d": 3007
+      },
+      {
+        "id": "grunt",
+        "label": "Legion raider",
+        "type": "grunt",
+        "hp": 21,
+        "x": -200,
+        "y": 0,
+        "z": -2860,
+        "d": 3166
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "lewis",
+        "label": "Lewis",
+        "x": -100,
+        "y": 0,
+        "z": 180,
+        "d": 156
+      },
+      {
+        "id": "beth",
+        "label": "Beth",
+        "x": 1320,
+        "y": 0,
+        "z": -940,
+        "d": 1811
+      },
+      {
+        "id": "bethBrother",
+        "label": "Beth’s brother",
+        "x": 2630,
+        "y": 0,
+        "z": -1880,
+        "d": 3416
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "woods.rescue.tracks",
+        "label": "Inspect the crooked boot prints",
+        "x": 1440,
+        "y": 0,
+        "z": -1030,
+        "d": 1960
+      },
+      {
+        "id": "woods.tracks.clue",
+        "label": "Read the old grove stone",
+        "x": -1770,
+        "y": 0,
+        "z": -2050,
+        "d": 2942
+      },
+      {
+        "id": "woods.rescue.release",
+        "label": "Pull the rescue rope",
+        "x": 2480,
+        "y": 0,
+        "z": -1790,
+        "d": 3243
+      },
+      {
+        "id": "woods.signal.crank",
+        "label": "Stop the signal crank",
+        "x": 80,
+        "y": 0,
+        "z": -3060,
+        "d": 3361
+      },
+      {
+        "id": "woods.signal.cable",
+        "label": "Cut the horn cable",
+        "x": 0,
+        "y": 220,
+        "z": -3070,
+        "d": 3370
+      },
+      {
+        "id": "woods.tracks.release",
+        "label": "Release the root binding",
+        "x": -2140,
+        "y": 138,
+        "z": -2650,
+        "d": 3644
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true,
+      "event.briar.root.2": true,
+      "event.briar.dressings": true,
+      "mara.healing": true,
+      "briar.water": true,
+      "event.briar.mill.weighted": true,
+      "briar.jam": true,
+      "event.briar.jam": true,
+      "briar.bridge": true,
+      "event.briar.bridge": true,
+      "briar.depart": true,
+      "event.briar.depart": true
+    },
+    "items": {
+      "tangle_root": 0,
+      "dressings": 0
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11.099999999976717,
+    "p95": 16.599999999976717,
+    "max": 305.60000000009313,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

@@ -1,0 +1,231 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": "Briar Town · Homefields",
+    "position": [
+      105,
+      0,
+      -1803
+    ],
+    "yaw": 3.1415926535897922,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 130.68,
+    "maxHp": 130.68,
+    "level": 2,
+    "xp": 10,
+    "class": "warrior",
+    "classState": {
+      "xp": 438,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 190,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\n☐\nRemove the timber caught in the mill wheel\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -770,
+        "y": 0,
+        "z": -1710,
+        "d": 880
+      },
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 56,
+        "x": 1045,
+        "y": 0,
+        "z": -1745,
+        "d": 941
+      },
+      {
+        "id": "flyer",
+        "label": "Elite",
+        "type": "flyer",
+        "hp": 25,
+        "x": 1045,
+        "y": 40,
+        "z": -1935,
+        "d": 949
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1805,
+        "d": 1070
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1615,
+        "d": 1087
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": 1240,
+        "y": 0,
+        "z": -1840,
+        "d": 1135
+      },
+      {
+        "id": "flyer",
+        "type": "flyer",
+        "hp": 14,
+        "x": 950,
+        "y": 80,
+        "z": -2800,
+        "d": 1306
+      },
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 20,
+        "x": -900,
+        "y": 0,
+        "z": -2710,
+        "d": 1354
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "gus",
+        "label": "Gus",
+        "x": -1460,
+        "y": 0,
+        "z": -790,
+        "d": 1865
+      },
+      {
+        "id": "mara",
+        "label": "Mara",
+        "x": -190,
+        "y": 0,
+        "z": 160,
+        "d": 1985
+      },
+      {
+        "id": "thomas",
+        "label": "Thomas",
+        "x": 0,
+        "y": 0,
+        "z": 350,
+        "d": 2156
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "briar.water",
+        "label": "Move the grain crate · E, then walk",
+        "x": 130,
+        "y": 0,
+        "z": -1880,
+        "d": 81
+      },
+      {
+        "id": "briar.mill.reset",
+        "label": "Return the grain crate to its starting place",
+        "x": 5,
+        "y": 0,
+        "z": -1780,
+        "d": 103
+      },
+      {
+        "id": "briar.jam",
+        "label": "Free the wheel and latch the sluice",
+        "x": 300,
+        "y": 0,
+        "z": -1740,
+        "d": 205
+      },
+      {
+        "id": "briar.bridge",
+        "label": "Lower the mill crossing",
+        "x": 80,
+        "y": 0,
+        "z": -2030,
+        "d": 228
+      },
+      {
+        "id": "briar.mill.note",
+        "label": "Read the millwright’s sketch",
+        "x": 5,
+        "y": 0,
+        "z": -1570,
+        "d": 254
+      },
+      {
+        "id": "briar.root.3",
+        "label": "Gather tangle root",
+        "x": -370,
+        "y": 0,
+        "z": -335,
+        "d": 1543
+      },
+      {
+        "id": "briar.dressings",
+        "label": "Take the clean dressings",
+        "x": 440,
+        "y": 20,
+        "z": -255,
+        "d": 1584
+      },
+      {
+        "id": "briar.gus.tools",
+        "label": "Take Gus’s tool roll",
+        "x": -1460,
+        "y": 104,
+        "z": -1270,
+        "d": 1654
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true,
+      "event.briar.root.2": true,
+      "event.briar.dressings": true,
+      "mara.healing": true,
+      "briar.water": true,
+      "event.briar.mill.weighted": true
+    },
+    "items": {
+      "tangle_root": 0,
+      "dressings": 0
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11.099999999976717,
+    "p95": 16.600000000093132,
+    "max": 1050,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

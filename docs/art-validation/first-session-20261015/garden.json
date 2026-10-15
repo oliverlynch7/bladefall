@@ -1,0 +1,227 @@
+{
+  "state": {
+    "mode": "play",
+    "trial": null,
+    "area": 0,
+    "zone": 0,
+    "areaName": "Briar Town · Homefields",
+    "position": [
+      -397,
+      0,
+      -254
+    ],
+    "yaw": 2.380452923860059,
+    "camera": "shoulder",
+    "camYaw": 3.141592653589793,
+    "hp": 118.80000000000001,
+    "maxHp": 118.80000000000001,
+    "level": 1,
+    "xp": 200,
+    "class": "warrior",
+    "classState": {
+      "xp": 334,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {
+        "2": "w_cleave"
+      }
+    },
+    "weapon": "Rusty Sword",
+    "gold": 111,
+    "bag": 0,
+    "kills": 0,
+    "portal": null,
+    "objective": "BRIAR TOWN\n☐\nGather tangle roots (2/3) and clean dressings (0/1)\nN Journal · all tasks & clues",
+    "lesson": null,
+    "nearEnemies": [
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 20,
+        "x": -307,
+        "y": 9,
+        "z": -72,
+        "d": 202
+      },
+      {
+        "id": "grunt",
+        "label": "Legion guard",
+        "type": "grunt",
+        "hp": 20,
+        "x": -276,
+        "y": 0,
+        "z": -41,
+        "d": 245
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1615,
+        "d": 1475
+      },
+      {
+        "id": "thornboar",
+        "type": "thornboar",
+        "hp": 31,
+        "x": -770,
+        "y": 0,
+        "z": -1710,
+        "d": 1504
+      },
+      {
+        "id": "sporeback",
+        "type": "sporeback",
+        "hp": 31,
+        "x": -965,
+        "y": 0,
+        "z": -1805,
+        "d": 1653
+      },
+      {
+        "id": "grunt",
+        "label": "Farm raid leader",
+        "type": "grunt",
+        "hp": 54,
+        "x": -2040,
+        "y": 0,
+        "z": -700,
+        "d": 1703
+      },
+      {
+        "id": "caster",
+        "label": "Legion hex caster",
+        "type": "caster",
+        "hp": 18,
+        "x": -2190,
+        "y": 0,
+        "z": -930,
+        "d": 1917
+      },
+      {
+        "id": "thornboar",
+        "label": "Elite",
+        "type": "thornboar",
+        "hp": 56,
+        "x": 1045,
+        "y": 0,
+        "z": -1745,
+        "d": 2074
+      }
+    ],
+    "nearNpcs": [
+      {
+        "id": "mara",
+        "label": "Mara",
+        "x": -190,
+        "y": 0,
+        "z": 160,
+        "d": 462
+      },
+      {
+        "id": "thomas",
+        "label": "Thomas",
+        "x": 0,
+        "y": 0,
+        "z": 350,
+        "d": 722
+      },
+      {
+        "id": "gus",
+        "label": "Gus",
+        "x": -1460,
+        "y": 0,
+        "z": -790,
+        "d": 1191
+      }
+    ],
+    "nearObjects": [
+      {
+        "id": "briar.root.3",
+        "label": "Gather tangle root",
+        "x": -370,
+        "y": 0,
+        "z": -335,
+        "d": 86
+      },
+      {
+        "id": "briar.root.2",
+        "label": "Gather tangle root",
+        "x": -505,
+        "y": 0,
+        "z": -245,
+        "d": 109
+      },
+      {
+        "id": "briar.root.1",
+        "label": "Gather tangle root",
+        "x": -410,
+        "y": 0,
+        "z": -130,
+        "d": 124
+      },
+      {
+        "id": "briar.dressings",
+        "label": "Take the clean dressings",
+        "x": 440,
+        "y": 20,
+        "z": -255,
+        "d": 837
+      },
+      {
+        "id": "briar.gus.sign",
+        "label": "Repair the village sign",
+        "x": -1170,
+        "y": 0,
+        "z": -750,
+        "d": 919
+      },
+      {
+        "id": "briar.mill.note",
+        "label": "Read the millwright’s sketch",
+        "x": 5,
+        "y": 0,
+        "z": -1570,
+        "d": 1376
+      },
+      {
+        "id": "briar.water",
+        "label": "Move the grain crate · E, then walk",
+        "x": 130,
+        "y": 0,
+        "z": -1600,
+        "d": 1446
+      },
+      {
+        "id": "briar.gus.tools",
+        "label": "Take Gus’s tool roll",
+        "x": -1460,
+        "y": 104,
+        "z": -1270,
+        "d": 1471
+      }
+    ],
+    "flags": {
+      "thomas.ready": true,
+      "event.briar.root.1": true,
+      "event.briar.root.3": true
+    },
+    "items": {
+      "tangle_root": 2
+    }
+  },
+  "errors": [],
+  "frameMs": {
+    "count": 3600,
+    "p50": 11.099999999991269,
+    "p95": 11.200000000011642,
+    "max": 27.89999999999418,
+    "visibility": "visible"
+  },
+  "timelineReference": "return-after-boss.json (post-tutorial reload); tutorial-combat.json (initial controls/combat)",
+  "saveReference": "hub-resume.json (pre-change baseline); return-after-boss.json (earned continuous character)"
+}

@@ -132,5 +132,22 @@
     "An initial syntax command treated import-map JSON as JavaScript; corrected format detection passes.",
     "An initial stale-packet fixture used two equal quest revisions from addJournalNote; corrected fixture explicitly supplies an older revision. Production logic was unchanged for this correction."
   ],
-  "deployment": "Pending publication verification"
+  "deployment": {
+    "version": "2.201.0-first-journey",
+    "commit": "2b2ca8dd142aade0c83f2ca11138c04da6498adf",
+    "conclusion": "success",
+    "deploymentUrl": "https://dash.cloudflare.com/?to=/4ee6e0769c54163e373dee3dd31de1d0/pages/view/bladefall/9a30ca86-cc7e-4d80-97de-5715c8548b16",
+    "productionBrowserVersionVerified": true,
+    "productionBrowserWarningsErrors": [],
+    "verifiedAt": "2026-10-15T19:59:05.333447+00:00"
+  },
+  "cleanup": {
+    "ownedServerStopped": 12168,
+    "generatedQaPagesRemoved": [
+      ".qa-first-session.html",
+      ".qa-first-session-fixes.html"
+    ],
+    "ownedLocalTabsClosed": true,
+    "productionSaveOpened": false
+  }
 }

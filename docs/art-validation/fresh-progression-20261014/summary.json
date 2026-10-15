@@ -1,0 +1,71 @@
+{
+  "version": "2.199.0-player-progression",
+  "baseline": "d260c6d9",
+  "status": "verified locally; deployment pending",
+  "fixes": [
+    "Earned class choices rebuild on reload and class switch, validate their class and rank, and wait while other menus or downed/dead state are active.",
+    "Invalid legacy choices can be selected again; saved future-rank choices cannot enable skills/passives early.",
+    "First-skill lesson is retained after a multi-rank award.",
+    "Campaign checkpoints restore effective HP from earned character growth and the protected loadout.",
+    "Boss introductions and tactical advice share a side-journal note; updated text uses existing canonical encounter facts."
+  ],
+  "checks": {
+    "starterTutorials": {
+      "classes": [
+        "warrior",
+        "ranger",
+        "mage"
+      ],
+      "authoredFoesDefeated": 18,
+      "rank2OnThirdKill": true,
+      "chosenSkillRetainedAtHub": true
+    },
+    "ordinaryCampaignCombat": {
+      "regions": 8,
+      "starterClasses": 3,
+      "exchanges": 24,
+      "actualIncomingAndOutgoingHits": true
+    },
+    "progression": [
+      "interrupted choice and previous-version save",
+      "stale queued choice across class change",
+      "multi-rank first-skill lesson",
+      "full effective checkpoint health without unsecured gear",
+      "pause menu keeps focus"
+    ],
+    "coopLocalRelay": {
+      "passed": 8,
+      "duplicateRewards": false,
+      "independentClassChoices": true,
+      "bossNoteReplicated": true
+    },
+    "unitSuites": {
+      "classProgressionCases": 2873,
+      "classes": 17,
+      "bossTargetCases": 146,
+      "additionalPassed": [
+        "test-journal-notice.cjs",
+        "test-story-authority.cjs",
+        "test-story-state.cjs"
+      ]
+    },
+    "syntax": "syntax.json",
+    "visuals": [
+      "boss-entry.png",
+      "recovered-choice.png"
+    ],
+    "browserWarningsErrors": []
+  },
+  "limits": [
+    "Tutorial checks isolate existing foes and stage supported positions. Basic attacks and skills use normal starter health and equipment; this is not a complete controls/navigation walkthrough.",
+    "Campaign checks isolate one reachable non-exploder per region/class and stage legal level/gear. They establish functioning damage exchange, not pacing, balanced difficulty or complete progression.",
+    "Co-op checks use the production handlers through a local serialized relay with a staged lethal hit, not a public Internet session.",
+    "Previous-version save was captured before source changes. Old stored 100/110 HP is preserved on import; newly saved checkpoints use the corrected effective cap.",
+    "No human fun/novice-comprehension verdict or low-end hardware benchmark. No global difficulty changes."
+  ],
+  "fixtureCorrections": [
+    "Initial diagnostic foe parking in the void caused false kill credit; corrected by testing one original foe at a time on supported terrain.",
+    "The first Mage Frostfell sample selected a self-destructing enemy; final exchange checks select a non-exploder. These were harness selection issues, not game defects."
+  ],
+  "next": "Continue fresh-player equipment/reward clarity and full-inventory interactions, then continuous early-campaign play and performance. Preserve campaign geography and difficulty until better play evidence warrants changes."
+}

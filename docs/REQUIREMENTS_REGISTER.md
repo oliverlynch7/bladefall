@@ -1594,3 +1594,17 @@ Fixed reproduced co-op targeting errors in the Brute, Marksman, Ember Colossus a
 Verification: 24 ordinary-health first-hit cases, 24 active-target starter-weapon reach cases, 48 party targeting cases, 15 guest-arrival cases, eight actual death-screen retries retaining earned growth/gold, 41 staged completion/reward assertions, 40 local serialized host/guest assertions and a genuine 969ce1a9 save reload. All eight encounter suites plus 146 pure target cases pass. The Hydra sample hit rose from 10–12 to 54–55 against normal level-20 gear/health. Brute and Hydra normal-camera attack sequences were observed. The final orb gate and both King phases remain intact; Ian’s Blade never replaces the equipped weapon.
 
 Evidence and testing limits: docs/art-validation/combat-readiness-20261014/summary.json. These are staged encounter/regression checks, not a full fresh campaign combat run, human fun verdict or public-network/hardware benchmark. Next: ordinary campaign combat and fresh-save progression. Preexisting companion3d.js and articulated-rigs.json edits are untouched. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-14] Fresh-character combat and progression continuation
+
+Latest user: "OK keep going please." Continue the announced ordinary-combat and new-character progression pass after v2.198.0. Inspect all three starter tutorials, earned skill choices, early campaign enemies/rewards, return/reload behavior and boss-entry readability. Preserve established difficulty, story and geography; fix demonstrated defects rather than adding new systems. No custom SFX or unrelated companion/rig changes. Grounded plan: docs/design/FRESH_CHARACTER_READINESS_2026-10-14.md. Baseline d260c6d9. In progress.
+
+
+## [Codex | 2026-10-14] Fresh-player progression readiness - v2.199.0
+
+Recovered missing earned class choices after reload, prevented stale choices after class switches, and kept queued upgrades from interrupting live menus or downed/dead state. Invalid legacy choice IDs can be chosen again; stored skills/passives require their earned rank. Multi-rank rewards now retain the first-skill lesson. Healthy checkpoints restore effective HP from the protected loadout and earned growth. Boss intros and tactical advice use one side-journal note, with concise existing canonical encounter facts instead of superseded dream/sleeper text.
+
+Verified all three starters against six isolated authored tutorial foes each, third-kill rank 2, retained skills at the hub, 24 ordinary campaign damage exchanges, interrupted/multi-rank/class-switch/menu/retry paths, a genuine pre-change save, 8 local host/guest assertions and 2,873 rank/choice checks across 17 classes. Relevant boss, journal, story and syntax regressions pass. Rendered the recovered choice screen and unobstructed boss-entry advice. Evidence and exact limits: docs/art-validation/fresh-progression-20261014/summary.json. Staged combat does not establish a full fresh campaign, human fun/pacing or Internet/hardware performance. No global difficulty changes.
+
+Next: equipment/reward clarity and full-inventory interactions, followed by continuous early-campaign play and performance. Deployment confirmation follows. Preexisting companion3d.js and articulated-rigs.json changes remain untouched.

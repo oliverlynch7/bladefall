@@ -48,3 +48,8 @@ Documentation records these decisions; the boss replacement and charge sequence 
 ## Guard-route design constraints
 
 Approved disguise quest leads to an alternate Duskmoor gate entry. Build clues into discoverable orders, procedures or credentials. The Hollowed guard follows standing orders and can be deceived using incomplete information, not persuaded into free-willed betrayal. A failed deception triggers the requested difficult horde; it remains a winnable progression path. Preserve underlying equipped gear and stats if disguise is implemented as a temporary appearance layer; exact gear behavior still needs design.
+
+
+## [Codex | 2026-10-14] Boss-entry presentation reconciliation
+
+The readiness pass retires legacy dream/sleeper/livestock narration from campaign boss entry. The eight short introductions now state the existing encounter's role: Briar defenses, canyon crossing, prisoner exit, three ice-cave officers, Great Furnace, chained Hydra rescue, the orb guardian and the King before the Hollow Gate. No ancestry, final-cut revelation, quest outcome or new lore is added. Boss entry is one journal note at the side of the HUD, retaining the existing Brute/Marksman/Fallen tactical advice for later reading. This replaces simultaneous centered lore and tactical overlays.

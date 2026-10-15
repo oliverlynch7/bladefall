@@ -1161,7 +1161,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.198.0-campaign-combat';
+const VERSION3D='2.199.0-player-progression';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1361,14 +1361,14 @@ const STORY={
     castle:"The last gate. He is awake now — you woke him — and he has been waiting to be."
   },
   boss:{   // by boss stage index — one line when the health bar reveals
-    2:"It was something's livestock once. Now it's the nightmare's.",
-    4:"It has been watching you since the ridge.",
-    6:"His orders are simple: no one leaves. The prisoners behind you are counting on you to change that.",
-    8:"It stopped being a person somewhere around the fourth winter.",
-    10:"The mountain stood up.",
-    12:"You have reached the sleeper. Your blood carried you here. Strike, and he wakes.",
-    14:"It was carved to guard the throne. The dream taught the marble to move.",
-    16:"This is what his dream wanted to be all along."
+    2:"The Brute threatens Briar Town's defenses.",
+    4:"The Hollowed Marksman controls the canyon crossing.",
+    6:"The Fallen Warrior blocks the prisoners' way out.",
+    8:"Three Hollowed Officers defend the ice caves.",
+    10:"The Ember Colossus guards the Great Furnace.",
+    12:"The Sea Hydra is chained. Break its restraints to free it.",
+    14:"The Marble Colossus guards the way to the knowledge orb.",
+    16:"The Abyss King stands before the Hollow Gate."
   },
   reveal:[   // fires when Ian's Blade is completed / at the summit — the one place his name is ever spoken
     "The sword remembers itself in your hands, and it remembers its name. And his.",
@@ -5167,7 +5167,9 @@ function retainCampaignEarnings(){
  const earned=snapOf(G.p),hero=cp.state.hero;
  for(const key of ['level','xp','xpNext','maxHp','maxMana','stats','allocation','tunedLevels'])hero[key]=checkpointClone(earned[key]);
  // Preserve the checkpoint's gear and healthy retry resources, but use the earned level.
- hero.hp=hero.maxHp;hero.mana=hero.maxMana;
+ // A retry restores the protected loadout's full effective health, including armor,
+ // class and allocated stats. Newly found, unsecured gear must not raise this cap.
+ hero.hp=effMaxHp(freshFromSnapshot(hero));hero.mana=hero.maxMana;
  for(const key of ['chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
  meta.run.p=checkpointClone(hero);return true;
 }
@@ -12370,13 +12372,13 @@ function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tu
 }
 function c2def(id){ return CLASS2[id||meta.classId]; }
 function c2ch(id){ const cs=classState(id||meta.classId); if(!cs.ch||typeof cs.ch!=='object') cs.ch={}; return cs.ch; }
-function c2Passive(pid){ const ch=c2ch(); for(const r of [3,5,7,9]) if(ch[r]===pid) return true; return false; }
+function c2Passive(pid){ const ch=c2ch(),rank=classState(meta.classId).rank; for(const r of [3,5,7,9]) if(rank>=r&&ch[r]===pid) return true; return false; }
 function c2SkillOfSlot(slot){ const def=c2def(); if(!def) return null; const rank=[2,4,6,8][slot], R=def['r'+rank]; if(!R) return null;
-  const pick=c2ch()[rank]; if(pick==null) return null; return R.a.id===pick?R.a:(R.b.id===pick?R.b:null); }
+   const pick=c2ch()[rank]; if(classState(meta.classId).rank<rank||pick==null) return null; return R.a.id===pick?R.a:(R.b.id===pick?R.b:null); }
 function c2CurSkills(){ return [0,1,2,3].map(c2SkillOfSlot); }
 function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classState(meta.classId), ch=c2ch();
-  for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
-function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
+  for(const r of CLASS2_CHOICE_RANKS){ const R=def['r'+r];if(cs.rank>=r&&R&&ch[r]!==R.a.id&&ch[r]!==R.b.id)return r; } return 0; }
+function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed) return; const cs=classState(cid),R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
     return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span><span class="c2badge">Conditions below</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
@@ -12391,8 +12393,8 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
     document.getElementById('choiceReview').hidden=false;document.getElementById('choiceSelected').textContent=selected.n;
     let committed=false;
     document.getElementById('classChoiceBack').onclick=()=>{document.getElementById('choiceReview').hidden=true;document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline='';el.setAttribute('aria-pressed','false');});};
-    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.classup();
-      const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(rank===2&&first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
+    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.classup();
+      const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
     };
   });
 }
@@ -13103,10 +13105,12 @@ function auxCoolPaint(p){
   paint(document.getElementById('bSpace'),p.dodgeCdT||0,effDodgeCd(p));
 }
 function skillbarUpdate(){ auxSlotsUpdate();updateHudKeys(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+  // Rebuild from this save/class on resume and class changes. The queue itself is not saved.
+  queueChoiceRank=c2def()?c2NextChoice():0;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;b.dataset.skillName=(typeof s!=='undefined'&&s?.n)||'Skill '+(i+1);
       if(!reached){b.dataset.skillName='Rank '+slotRank[i]; skIco(b).textContent='🔒'; skUnlockLabel(b,slotRank[i]); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
-      if(!s){ skIco(b).textContent='❔'; skUnlockLabel(b,null); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
+      if(!s){ skIco(b).textContent='❔'; skUnlockLabel(b,null); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill · '+controlHint('skill'+(i+1)); b.setAttribute('aria-label',b.title); attachSkillTip(b,'Choose a skill','Press '+controlHint('skill'+(i+1))+' or select this slot to choose your earned skill.',0,manaCost); continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
       skIco(b).innerHTML=C2_ICON[s.fx]||'✦'; skUnlockLabel(b,null);
       b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
@@ -16538,9 +16542,11 @@ function updateWorld(dt){
   if(G.hub&&G.pit){ const P=G.pit, inPit=(G.p.x>=P.minX&&G.p.x<=P.maxX&&G.p.z>=P.minZ&&G.p.z<=P.maxZ);
     for(const e of G.enemies){ if(e.practice&&!e.dead){ e.active=inPit;   // only wake (aggro) once you step into the ring
       e.x=Math.max(P.minX+16,Math.min(P.maxX-16,e.x)); e.z=Math.max(P.minZ+16,Math.min(P.maxZ-16,e.z)); } } }   // and never let them leave it
-  if(queueSkillTut && mode==='play'){ const s=queueSkillTut; queueSkillTut=null; openSkillTutorial(s); }   // first-skill lesson takes priority
-  else if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
-  else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
+  if(!backgroundMenuMode&&mode==='play'&&!p.dead&&!p.downed&&p.hp>0){
+    if(queueSkillTut){ const s=queueSkillTut; queueSkillTut=null; openSkillTutorial(s); }   // first-skill lesson takes priority
+    else if(queueChoiceRank){ const r=c2NextChoice(); queueChoiceRank=0; if(r)openClassChoice(r); }   // Revalidate after a scene, save or class transition.
+    else if(queueSubclass){ queueSubclass=false; openSubclass(); }   // legacy path-fork
+  }
   class2Innate(G.p,dt);
 
 }
@@ -16568,10 +16574,18 @@ function updateAmbient(dt,s){
   for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*a.sw*dt; a.y+=a.vy*dt; if(a.tw)a.tw+=dt*6; a.life-=dt; }
   G.ambient=G.ambient.filter(a=>a.life>0 && a.y>-5 && a.y<300);
 }
-function onBossActivate(e){ SFX.boss();if(e.fallenDuel)toast('Watch the blade. The pale false start is followed by a sweep. Pillars stop a thrust.');if(e.marksmanCrossing)toast('Watch her aim line. Use stone cover or climb the outside paths to reach her.');if(e.bruteOrchard)toast('Bait its charge into a cart or stone. Jump the ground wave.');
+function onBossActivate(e){ SFX.boss();
   playFx({brute:'bossroar1',warden:'bossroar1',archer:'bossroar2',sorcerer:'bossroar2',colossus:'bossroar3',king:'bossroar3',tyrant:'bossroar3'}[e.type]||'bossroar1');   // batch-2 boss-reveal roar, varied across the roster
   { const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); bn.textContent=e.label; } document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
-  if(G&&!G.trial&&!G.side&&!G.escape){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
+  if(isCampaignAdventure()){
+    const Z=curZone(),id='encounter.'+Z.id;
+    // One readable side note instead of simultaneous messages over the fight.
+    // The Officers share a note; revisiting the arena still makes the advice available.
+    if(G._bossEntryNote!==id){G._bossEntryNote=id;
+      const tip=e.fallenDuel?'Watch the blade. The pale false start is followed by a sweep. Pillars stop a thrust.':e.marksmanCrossing?'Watch her aim line. Use stone cover or climb the outside paths to reach her.':e.bruteOrchard?'Bait its charge into a cart or stone. Jump the ground wave.':'';
+      const text=[STORY.boss[Z.boss.stage],tip].filter(Boolean).join(' ');if(text)addJournalNote(id,Z.boss.name,text);
+    }
+  } }
 function updateBossBar(e){ if(e.hydraChain)return;if(e.finalKing){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',BFFinalKing.combat(e));document.getElementById('bossnametx').textContent=e.label;}if(e.marbleGuardian){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Marble Colossus'+(e.mcExposed>0?' · Armor seal open':' · Sealed armor');} if(e.furnaceColossus){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Ember Colossus'+(e.fcExposed>0?' · Armor cooled':' · Heated armor');}if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
   const n=Math.max(8,Math.ceil(28*arc/Math.PI)),base=Math.atan2(dz,dx),step=arc*2/n;

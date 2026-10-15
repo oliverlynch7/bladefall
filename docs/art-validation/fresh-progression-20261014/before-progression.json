@@ -1,0 +1,73 @@
+{
+  "baseline": "d260c6d9",
+  "interruptedBefore": {
+    "level": 1,
+    "xp": 0,
+    "xpNext": 230,
+    "hp": 110,
+    "maxHp": 110,
+    "classId": "warrior",
+    "rank": 2,
+    "classXp": 0,
+    "choices": {},
+    "weapon": "Rusty Sword",
+    "gold": 0,
+    "kills": 0
+  },
+  "interruptedAfter": {
+    "level": 1,
+    "xp": 0,
+    "xpNext": 230,
+    "hp": 100,
+    "maxHp": 110,
+    "classId": "warrior",
+    "rank": 2,
+    "classXp": 0,
+    "choices": {},
+    "weapon": "Rusty Sword",
+    "gold": 0,
+    "kills": 0,
+    "mode": "play",
+    "choiceVisible": false,
+    "skillTitle": "Choose your rank-2 skill"
+  },
+  "stale": {
+    "level": 1,
+    "xp": 0,
+    "xpNext": 230,
+    "hp": 100,
+    "maxHp": 100,
+    "classId": "mage",
+    "rank": 1,
+    "classXp": 0,
+    "choices": {},
+    "weapon": "Splintered Staff",
+    "gold": 0,
+    "kills": 0,
+    "mode": "upgrade",
+    "choiceVisible": true,
+    "heading": "Mage \u00b7 Rank 2"
+  },
+  "multiRank": {
+    "level": 1,
+    "xp": 0,
+    "xpNext": 230,
+    "hp": 110,
+    "maxHp": 110,
+    "classId": "warrior",
+    "rank": 3,
+    "classXp": 0,
+    "choices": {
+      "2": "w_cleave",
+      "3": "w_heavy"
+    },
+    "weapon": "Rusty Sword",
+    "gold": 0,
+    "kills": 0,
+    "taught": false,
+    "mode": "play",
+    "lesson": false
+  },
+  "errors": [],
+  "fixtureNotes": "Tutorial data from initial diagnostic captures was excluded because unsupported staging caused false void deaths/kill credit. The reload, stale-class and multi-rank cases here do not use that combat staging."
+}

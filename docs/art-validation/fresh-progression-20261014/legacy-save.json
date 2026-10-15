@@ -1,0 +1,1368 @@
+{
+  "soundOn": false,
+  "musicOn": false,
+  "musicVol": 1,
+  "sfxVol": 1,
+  "showArmor": true,
+  "autoAttack": false,
+  "autoKeep": false,
+  "autoBag": true,
+  "autoSellEquipment": false,
+  "camMode": "far",
+  "lookSens": 1,
+  "fpsFov": 92,
+  "renderDist": 1,
+  "silhouette": true,
+  "dmgNumbers": true,
+  "unlockedSkins": [
+    "knight"
+  ],
+  "selectedSkin": "knight",
+  "achievements": {
+    "first_blood": true
+  },
+  "totalKills": 16,
+  "bossKills": 0,
+  "kingKills": 0,
+  "tyrantKills": 0,
+  "magicBossKills": 0,
+  "rangedBossKills": 0,
+  "legendaryFound": 0,
+  "flawlessStages": 0,
+  "maxLevel": 2,
+  "beatNormal": false,
+  "beatHardcore": false,
+  "beatHitless": false,
+  "jetpack": true,
+  "diff": "normal",
+  "cosmetics": {},
+  "cosEquipped": {
+    "cape": null,
+    "trail": null,
+    "glow": null
+  },
+  "zonesCleared": 0,
+  "elitesKilled": 5,
+  "secretsFound": 0,
+  "introSeen": true,
+  "zoneSeen": {
+    "outskirts": 1
+  },
+  "shadeSeen": {},
+  "arcadeOwned": false,
+  "gold": 0,
+  "ngPlus": 0,
+  "bestStage": 0,
+  "lastNgHp": 1,
+  "lastNgDmg": 1,
+  "run": {
+    "ngPlus": 0,
+    "ngHp": 1,
+    "ngDmg": 1,
+    "stageIndex": 0,
+    "p": {
+      "allocation": {
+        "health": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "mana": 0
+      },
+      "tunedLevels": 0,
+      "hp": 100,
+      "maxHp": 100,
+      "mana": 75,
+      "maxMana": 75,
+      "level": 1,
+      "xp": 0,
+      "xpNext": 230,
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Rusty Sword",
+        "dmg": 10.6,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#bcae8a",
+        "range": 84
+      },
+      "gear": {
+        "helmet": null,
+        "chest": null,
+        "legs": null,
+        "amulet": null,
+        "ring": null
+      },
+      "stats": {
+        "power": 1,
+        "magPower": 1,
+        "speed": 1,
+        "atkSpeed": 1,
+        "lifesteal": 0,
+        "defense": 0,
+        "cdr": 0,
+        "dodgeCd": 0.75,
+        "crit": 0,
+        "goldFind": 0
+      },
+      "maxJumps": 1,
+      "skin": "knight"
+    },
+    "base": {
+      "allocation": {
+        "health": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "mana": 0
+      },
+      "tunedLevels": 0,
+      "hp": 110,
+      "maxHp": 100,
+      "mana": 75,
+      "maxMana": 75,
+      "level": 1,
+      "xp": 0,
+      "xpNext": 230,
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Rusty Sword",
+        "dmg": 10.6,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#bcae8a",
+        "range": 84
+      },
+      "gear": {
+        "helmet": null,
+        "chest": null,
+        "legs": null,
+        "amulet": null,
+        "ring": null
+      },
+      "stats": {
+        "power": 1,
+        "magPower": 1,
+        "speed": 1,
+        "atkSpeed": 1,
+        "lifesteal": 0,
+        "defense": 0,
+        "cdr": 0,
+        "dodgeCd": 0.75,
+        "crit": 0,
+        "goldFind": 0
+      },
+      "maxJumps": 1,
+      "skin": "knight"
+    },
+    "runSeed": 720325305,
+    "campaign": {
+      "zone": 0,
+      "area": 0,
+      "qs": {},
+      "outskirtsNests": [],
+      "storyState": {
+        "version": 1,
+        "revision": 0,
+        "flags": {},
+        "items": {},
+        "quests": {},
+        "notes": {},
+        "cursors": {},
+        "rewards": {},
+        "events": {},
+        "conversation": null
+      },
+      "storyClaims": {},
+      "revision": 2
+    },
+    "checkpoint": {
+      "version": 1,
+      "state": {
+        "chestRecords": {
+          "campaign:700753621:0:0:0:0:0:-620,-1000": {
+            "rarity": "uncommon",
+            "challenge": false,
+            "item": {
+              "trinket": {
+                "slot": "amulet",
+                "rarity": "uncommon",
+                "type": "keen",
+                "accent": "#ffd24a",
+                "color": "#5fd17a",
+                "name": "Uncommon Keen Amulet",
+                "affixes": [
+                  {
+                    "stat": "crit",
+                    "val": 0.063,
+                    "label": "+6% Crit"
+                  }
+                ],
+                "trinket": true
+              }
+            },
+            "claimed": false
+          },
+          "campaign:700753621:0:0:0:0:0:1160,-2740": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "armor": {
+                "slot": "legs",
+                "rarity": "common",
+                "type": "vigor",
+                "accent": "#ff8a82",
+                "defense": 8,
+                "color": "#b9c0cc",
+                "name": "Common Vigor Leggings",
+                "affixes": [
+                  {
+                    "stat": "hp",
+                    "val": 12,
+                    "label": "+12 Max HP"
+                  }
+                ]
+              }
+            },
+            "claimed": false
+          },
+          "campaign:700753621:0:0:0:0:0:-1620,-2340": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "trinket": {
+                "slot": "ring",
+                "rarity": "common",
+                "type": "vigor",
+                "accent": "#ff8a82",
+                "color": "#b9c0cc",
+                "name": "Common Vigor Ring",
+                "affixes": [
+                  {
+                    "stat": "hp",
+                    "val": 15.6,
+                    "label": "+15.6 Max HP"
+                  }
+                ],
+                "trinket": true
+              }
+            },
+            "claimed": false
+          },
+          "campaign:700753621:0:0:0:0:0:-2210,-1840": {
+            "rarity": "rare",
+            "challenge": true,
+            "item": {
+              "trinket": {
+                "slot": "ring",
+                "rarity": "rare",
+                "type": "swift",
+                "accent": "#7ec46a",
+                "color": "#4aa3e0",
+                "name": "Rare Swift Ring",
+                "affixes": [
+                  {
+                    "stat": "speedMul",
+                    "val": 0.112,
+                    "label": "+11% Move Speed"
+                  }
+                ],
+                "trinket": true
+              }
+            },
+            "claimed": false
+          },
+          "campaign:700753621:0:0:0:0:0:1040,-55": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "armor": {
+                "slot": "chest",
+                "rarity": "common",
+                "type": "warding",
+                "accent": "#8fb7ff",
+                "defense": 10,
+                "color": "#b9c0cc",
+                "name": "Common Warding Chestplate",
+                "affixes": [
+                  {
+                    "stat": "def",
+                    "val": 16,
+                    "label": "+16 Defense"
+                  }
+                ]
+              }
+            },
+            "claimed": false
+          },
+          "campaign:901559422:0:0:0:5:0:613,-960": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "armor": {
+                "slot": "helmet",
+                "rarity": "common",
+                "type": "vigor",
+                "accent": "#ff8a82",
+                "defense": 7,
+                "color": "#b9c0cc",
+                "name": "Common Vigor Helmet",
+                "affixes": [
+                  {
+                    "stat": "hp",
+                    "val": 12,
+                    "label": "+12 Max HP"
+                  }
+                ]
+              }
+            },
+            "claimed": false
+          },
+          "campaign:747006088:0:0:0:5:0:613,-392": {
+            "rarity": "uncommon",
+            "challenge": false,
+            "item": {
+              "weapon": {
+                "arche": "bow",
+                "art": "bow",
+                "cls": "ranged",
+                "sch": "phys",
+                "el": "poison",
+                "rarity": "uncommon",
+                "chg": "powershot",
+                "reaper": false,
+                "anyClass": false,
+                "ians": false,
+                "name": "Venomous Uncommon Longbow",
+                "dmg": 11.7,
+                "cd": 0.3,
+                "kb": 110,
+                "lifesteal": 0,
+                "color": "#5fd17a",
+                "blade": "#9fd84a",
+                "proj": {
+                  "speed": 680,
+                  "size": 5,
+                  "pierce": 0,
+                  "range": 1150,
+                  "color": "#d8c27a",
+                  "shape": "arrow"
+                },
+                "affixes": [
+                  {
+                    "label": "Venomous · deals poison damage",
+                    "n": "Venomous"
+                  }
+                ]
+              }
+            },
+            "claimed": false
+          },
+          "campaign:720325305:0:0:0:0:0:-620,-1000": {
+            "rarity": "uncommon",
+            "challenge": false,
+            "item": {
+              "armor": {
+                "slot": "helmet",
+                "rarity": "common",
+                "type": "might",
+                "accent": "#ffce6a",
+                "defense": 6,
+                "color": "#b9c0cc",
+                "name": "Common Might Helmet",
+                "affixes": [
+                  {
+                    "stat": "powerMul",
+                    "val": 0.05,
+                    "label": "+5% Damage"
+                  }
+                ]
+              }
+            },
+            "claimed": false
+          },
+          "campaign:720325305:0:0:0:0:0:1160,-2740": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "weapon": {
+                "arche": "great",
+                "art": "great",
+                "cls": "melee",
+                "sch": "phys",
+                "el": null,
+                "rarity": "common",
+                "chg": "spin",
+                "reaper": false,
+                "anyClass": false,
+                "ians": false,
+                "name": "Common Greatsword",
+                "dmg": 20,
+                "cd": 0.68,
+                "kb": 340,
+                "lifesteal": 0,
+                "color": "#b9c0cc",
+                "blade": "#dfe5ec",
+                "range": 84
+              }
+            },
+            "claimed": false
+          },
+          "campaign:720325305:0:0:0:0:0:-1620,-2340": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "weapon": {
+                "arche": "great",
+                "art": "great",
+                "cls": "melee",
+                "sch": "phys",
+                "el": null,
+                "rarity": "common",
+                "chg": "spin",
+                "reaper": false,
+                "anyClass": false,
+                "ians": false,
+                "name": "Common Greatsword",
+                "dmg": 20,
+                "cd": 0.68,
+                "kb": 340,
+                "lifesteal": 0,
+                "color": "#b9c0cc",
+                "blade": "#dfe5ec",
+                "range": 84
+              }
+            },
+            "claimed": false
+          },
+          "campaign:720325305:0:0:0:0:0:-2210,-1840": {
+            "rarity": "rare",
+            "challenge": true,
+            "item": {
+              "weapon": {
+                "arche": "arcaneorb",
+                "art": "wand",
+                "cls": "ranged",
+                "sch": "mag",
+                "el": "arcane",
+                "rarity": "rare",
+                "chg": null,
+                "reaper": false,
+                "anyClass": false,
+                "ians": false,
+                "name": "Balanced Rare Demon Eye Scepter",
+                "dmg": 46.3,
+                "cd": 0.546,
+                "kb": 170,
+                "lifesteal": 0,
+                "color": "#4aa3e0",
+                "blade": "#c47bff",
+                "proj": {
+                  "speed": 430,
+                  "size": 11,
+                  "pierce": 2,
+                  "range": 460,
+                  "color": "#c47bff",
+                  "shape": "orb",
+                  "glow": 1,
+                  "seek": true
+                },
+                "affixes": [
+                  {
+                    "label": "Balanced · +9% damage and speed",
+                    "n": "Balanced"
+                  }
+                ]
+              }
+            },
+            "claimed": false
+          },
+          "campaign:720325305:0:0:0:0:0:1040,-55": {
+            "rarity": "common",
+            "challenge": false,
+            "item": {
+              "weapon": {
+                "arche": "holyscepter",
+                "art": "wand",
+                "cls": "ranged",
+                "sch": "mag",
+                "el": "holy",
+                "rarity": "common",
+                "chg": null,
+                "reaper": false,
+                "anyClass": false,
+                "ians": false,
+                "name": "Common Holy Scepter",
+                "dmg": 22,
+                "cd": 0.56,
+                "kb": 160,
+                "lifesteal": 0,
+                "color": "#b9c0cc",
+                "blade": "#ffe9a8",
+                "proj": {
+                  "speed": 560,
+                  "size": 9,
+                  "pierce": 1,
+                  "range": 560,
+                  "color": "#ffe9a8",
+                  "shape": "light",
+                  "glow": 1,
+                  "seek": true
+                }
+              }
+            },
+            "claimed": false
+          }
+        },
+        "classLooks": {
+          "warrior": 0,
+          "ranger": 0,
+          "mage": 0,
+          "reaper": 0,
+          "paladin": 0,
+          "necromancer": 0,
+          "ninja": 0,
+          "berserker": 0,
+          "pirate": 0,
+          "chronomancer": 0,
+          "monk": 0,
+          "stormcaller": 0,
+          "warlock": 0,
+          "skylancer": 0,
+          "bladedancer": 0,
+          "beastmaster": 0,
+          "pyromancer": 0
+        },
+        "hubDialogue": {},
+        "returnVisits": {},
+        "riftOpen": [],
+        "riftHallStory": {
+          "version": 1,
+          "revision": 0,
+          "flags": {},
+          "items": {},
+          "quests": {},
+          "notes": {},
+          "cursors": {},
+          "rewards": {},
+          "events": {},
+          "conversation": null
+        },
+        "riftShards": [],
+        "campaignNgHp": 1,
+        "campaignNgDmg": 1,
+        "gold": 0,
+        "ngPlus": 0,
+        "bestStage": 0,
+        "lastNgHp": 1,
+        "lastNgDmg": 1,
+        "stash": [],
+        "descent": 0,
+        "perks": {},
+        "perkV2": true,
+        "classId": "warrior",
+        "classes": {
+          "warrior": {
+            "xp": 0,
+            "rank": 2,
+            "sub": null,
+            "v2": 1,
+            "ch": {}
+          }
+        },
+        "hero": {
+          "allocation": {
+            "health": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "mana": 0
+          },
+          "tunedLevels": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "mana": 75,
+          "maxMana": 75,
+          "level": 1,
+          "xp": 0,
+          "xpNext": 230,
+          "weapon": {
+            "arche": "sword",
+            "art": "sword",
+            "cls": "melee",
+            "sch": "phys",
+            "el": null,
+            "rarity": "common",
+            "chg": null,
+            "reaper": false,
+            "anyClass": false,
+            "ians": false,
+            "name": "Rusty Sword",
+            "dmg": 10.6,
+            "cd": 0.38,
+            "kb": 260,
+            "lifesteal": 0,
+            "color": "#b9c0cc",
+            "blade": "#bcae8a",
+            "range": 84
+          },
+          "gear": {
+            "helmet": null,
+            "chest": null,
+            "legs": null,
+            "amulet": null,
+            "ring": null
+          },
+          "stats": {
+            "power": 1,
+            "magPower": 1,
+            "speed": 1,
+            "atkSpeed": 1,
+            "lifesteal": 0,
+            "defense": 0,
+            "cdr": 0,
+            "dodgeCd": 0.75,
+            "crit": 0,
+            "goldFind": 0
+          },
+          "maxJumps": 1,
+          "skin": "knight"
+        },
+        "zoneMax": 0,
+        "zoneDone": {},
+        "classUnlocked": {
+          "warrior": true
+        },
+        "trialsDone": {
+          "warrior": true
+        },
+        "sideFound": {},
+        "sideDone": {},
+        "socks": false,
+        "bagSlots": 0,
+        "hubUpgrades": {},
+        "petOwned": [],
+        "petActive": null,
+        "petNames": {},
+        "petTrain": {},
+        "petLabel": true,
+        "heroName": "",
+        "faceAdjust": {
+          "eyeX": 0,
+          "eyeY": 0,
+          "eyeTilt": 0,
+          "mouthX": 0,
+          "mouthY": 0,
+          "mouthTilt": 0
+        },
+        "eyeColor": "#8fd0ff",
+        "mouthStyle": "line",
+        "browStyle": "natural",
+        "hairStyle": "short",
+        "hairColor": "#3a2a1c",
+        "optionalDone": {},
+        "optionalProgress": {},
+        "iansShards": [],
+        "iansComplete": false,
+        "masterSeal": false,
+        "masterSealSeen": false,
+        "secretSense": false
+      }
+    }
+  },
+  "stash": [],
+  "descent": 0,
+  "perks": {},
+  "perkV2": true,
+  "classId": "warrior",
+  "classes": {
+    "warrior": {
+      "xp": 0,
+      "rank": 2,
+      "sub": null,
+      "v2": 1,
+      "ch": {}
+    }
+  },
+  "endlessBest": 0,
+  "riftOpen": [],
+  "riftHallStory": {
+    "version": 1,
+    "revision": 0,
+    "flags": {},
+    "items": {},
+    "quests": {},
+    "notes": {},
+    "cursors": {},
+    "rewards": {},
+    "events": {},
+    "conversation": null
+  },
+  "riftShards": [],
+  "hero": {
+    "allocation": {
+      "health": 0,
+      "attack": 0,
+      "defense": 0,
+      "speed": 0,
+      "mana": 0
+    },
+    "tunedLevels": 0,
+    "hp": 110,
+    "maxHp": 100,
+    "mana": 75,
+    "maxMana": 75,
+    "level": 1,
+    "xp": 0,
+    "xpNext": 230,
+    "weapon": {
+      "arche": "sword",
+      "art": "sword",
+      "cls": "melee",
+      "sch": "phys",
+      "el": null,
+      "rarity": "common",
+      "chg": null,
+      "reaper": false,
+      "anyClass": false,
+      "ians": false,
+      "name": "Rusty Sword",
+      "dmg": 10.6,
+      "cd": 0.38,
+      "kb": 260,
+      "lifesteal": 0,
+      "color": "#b9c0cc",
+      "blade": "#bcae8a",
+      "range": 84
+    },
+    "gear": {
+      "helmet": null,
+      "chest": null,
+      "legs": null,
+      "amulet": null,
+      "ring": null
+    },
+    "stats": {
+      "power": 1,
+      "magPower": 1,
+      "speed": 1,
+      "atkSpeed": 1,
+      "lifesteal": 0,
+      "defense": 0,
+      "cdr": 0,
+      "dodgeCd": 0.75,
+      "crit": 0,
+      "goldFind": 0
+    },
+    "maxJumps": 1,
+    "skin": "knight"
+  },
+  "bank": {
+    "gold": 0,
+    "hero": {
+      "allocation": {
+        "health": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "mana": 0
+      },
+      "tunedLevels": 0,
+      "hp": 110,
+      "maxHp": 100,
+      "mana": 75,
+      "maxMana": 75,
+      "level": 1,
+      "xp": 0,
+      "xpNext": 230,
+      "weapon": {
+        "arche": "sword",
+        "art": "sword",
+        "cls": "melee",
+        "sch": "phys",
+        "el": null,
+        "rarity": "common",
+        "chg": null,
+        "reaper": false,
+        "anyClass": false,
+        "ians": false,
+        "name": "Rusty Sword",
+        "dmg": 10.6,
+        "cd": 0.38,
+        "kb": 260,
+        "lifesteal": 0,
+        "color": "#b9c0cc",
+        "blade": "#bcae8a",
+        "range": 84
+      },
+      "gear": {
+        "helmet": null,
+        "chest": null,
+        "legs": null,
+        "amulet": null,
+        "ring": null
+      },
+      "stats": {
+        "power": 1,
+        "magPower": 1,
+        "speed": 1,
+        "atkSpeed": 1,
+        "lifesteal": 0,
+        "defense": 0,
+        "cdr": 0,
+        "dodgeCd": 0.75,
+        "crit": 0,
+        "goldFind": 0
+      },
+      "maxJumps": 1,
+      "skin": "knight"
+    },
+    "classes": {
+      "warrior": {
+        "xp": 0,
+        "rank": 1,
+        "sub": null,
+        "v2": 1,
+        "ch": {}
+      }
+    },
+    "stash": [],
+    "classId": "warrior"
+  },
+  "zoneMax": 0,
+  "zoneDone": {},
+  "classUnlocked": {
+    "warrior": true
+  },
+  "trialsDone": {
+    "warrior": true
+  },
+  "sideFound": {},
+  "sideDone": {},
+  "iansShards": [],
+  "iansComplete": false,
+  "masterSeal": false,
+  "masterSealSeen": false,
+  "socks": false,
+  "bagSlots": 0,
+  "hubUpgrades": {},
+  "petOwned": [],
+  "petActive": null,
+  "petNames": {},
+  "petTrain": {},
+  "petLabel": true,
+  "heroName": "",
+  "eyeColor": "#8fd0ff",
+  "hairStyle": "short",
+  "hairColor": "#3a2a1c",
+  "optionalDone": {},
+  "optionalProgress": {},
+  "legacyHubDialogue": {},
+  "camV2": 1,
+  "quality": "high",
+  "particles": true,
+  "hubTutDone": true,
+  "tutSeen": {},
+  "tutOff": true,
+  "keybinds": {
+    "up": [
+      "KeyW",
+      "ArrowUp"
+    ],
+    "down": [
+      "KeyS",
+      "ArrowDown"
+    ],
+    "left": [
+      "KeyA",
+      "ArrowLeft"
+    ],
+    "right": [
+      "KeyD",
+      "ArrowRight"
+    ],
+    "jump": [
+      "Space"
+    ],
+    "attack": [
+      "Mouse0",
+      "KeyJ"
+    ],
+    "dodge": [
+      "ShiftLeft",
+      "Mouse2"
+    ],
+    "skill1": [
+      "Digit1"
+    ],
+    "skill2": [
+      "Digit2"
+    ],
+    "skill3": [
+      "Digit3"
+    ],
+    "skill4": [
+      "Digit4"
+    ],
+    "interact": [
+      "KeyE"
+    ],
+    "loot": [
+      "KeyV"
+    ],
+    "lootEquip": [
+      "KeyF"
+    ],
+    "lootBag": [
+      "KeyR"
+    ],
+    "lootSell": [
+      "KeyQ"
+    ],
+    "auto": [
+      "KeyL"
+    ],
+    "ping": [
+      "KeyG"
+    ],
+    "partyTeleport": [
+      "KeyT"
+    ],
+    "partyNext": [
+      "KeyY"
+    ],
+    "journal": [
+      "KeyN"
+    ],
+    "bag": [
+      "Tab",
+      "KeyB"
+    ],
+    "emote": [
+      "KeyM"
+    ]
+  },
+  "controller": {
+    "bindings": {
+      "jump": 0,
+      "dodge": 1,
+      "attack": 2,
+      "interact": 3,
+      "skill1": 4,
+      "skill2": 5,
+      "skill3": 6,
+      "skill4": 7,
+      "bag": 8,
+      "pause": 9,
+      "journal": 10,
+      "partyTeleport": 11
+    },
+    "invertY": true,
+    "invertX": false,
+    "invert": true
+  },
+  "prisonSaves": {
+    "version": 1,
+    "active": 0,
+    "slots": [
+      null,
+      null,
+      null
+    ]
+  },
+  "prisonProfile": null,
+  "chestRecords": {
+    "campaign:700753621:0:0:0:0:0:-620,-1000": {
+      "rarity": "uncommon",
+      "challenge": false,
+      "item": {
+        "trinket": {
+          "slot": "amulet",
+          "rarity": "uncommon",
+          "type": "keen",
+          "accent": "#ffd24a",
+          "color": "#5fd17a",
+          "name": "Uncommon Keen Amulet",
+          "affixes": [
+            {
+              "stat": "crit",
+              "val": 0.063,
+              "label": "+6% Crit"
+            }
+          ],
+          "trinket": true
+        }
+      },
+      "claimed": false
+    },
+    "campaign:700753621:0:0:0:0:0:1160,-2740": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "armor": {
+          "slot": "legs",
+          "rarity": "common",
+          "type": "vigor",
+          "accent": "#ff8a82",
+          "defense": 8,
+          "color": "#b9c0cc",
+          "name": "Common Vigor Leggings",
+          "affixes": [
+            {
+              "stat": "hp",
+              "val": 12,
+              "label": "+12 Max HP"
+            }
+          ]
+        }
+      },
+      "claimed": false
+    },
+    "campaign:700753621:0:0:0:0:0:-1620,-2340": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "trinket": {
+          "slot": "ring",
+          "rarity": "common",
+          "type": "vigor",
+          "accent": "#ff8a82",
+          "color": "#b9c0cc",
+          "name": "Common Vigor Ring",
+          "affixes": [
+            {
+              "stat": "hp",
+              "val": 15.6,
+              "label": "+15.6 Max HP"
+            }
+          ],
+          "trinket": true
+        }
+      },
+      "claimed": false
+    },
+    "campaign:700753621:0:0:0:0:0:-2210,-1840": {
+      "rarity": "rare",
+      "challenge": true,
+      "item": {
+        "trinket": {
+          "slot": "ring",
+          "rarity": "rare",
+          "type": "swift",
+          "accent": "#7ec46a",
+          "color": "#4aa3e0",
+          "name": "Rare Swift Ring",
+          "affixes": [
+            {
+              "stat": "speedMul",
+              "val": 0.112,
+              "label": "+11% Move Speed"
+            }
+          ],
+          "trinket": true
+        }
+      },
+      "claimed": false
+    },
+    "campaign:700753621:0:0:0:0:0:1040,-55": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "armor": {
+          "slot": "chest",
+          "rarity": "common",
+          "type": "warding",
+          "accent": "#8fb7ff",
+          "defense": 10,
+          "color": "#b9c0cc",
+          "name": "Common Warding Chestplate",
+          "affixes": [
+            {
+              "stat": "def",
+              "val": 16,
+              "label": "+16 Defense"
+            }
+          ]
+        }
+      },
+      "claimed": false
+    },
+    "campaign:901559422:0:0:0:5:0:613,-960": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "armor": {
+          "slot": "helmet",
+          "rarity": "common",
+          "type": "vigor",
+          "accent": "#ff8a82",
+          "defense": 7,
+          "color": "#b9c0cc",
+          "name": "Common Vigor Helmet",
+          "affixes": [
+            {
+              "stat": "hp",
+              "val": 12,
+              "label": "+12 Max HP"
+            }
+          ]
+        }
+      },
+      "claimed": false
+    },
+    "campaign:747006088:0:0:0:5:0:613,-392": {
+      "rarity": "uncommon",
+      "challenge": false,
+      "item": {
+        "weapon": {
+          "arche": "bow",
+          "art": "bow",
+          "cls": "ranged",
+          "sch": "phys",
+          "el": "poison",
+          "rarity": "uncommon",
+          "chg": "powershot",
+          "reaper": false,
+          "anyClass": false,
+          "ians": false,
+          "name": "Venomous Uncommon Longbow",
+          "dmg": 11.7,
+          "cd": 0.3,
+          "kb": 110,
+          "lifesteal": 0,
+          "color": "#5fd17a",
+          "blade": "#9fd84a",
+          "proj": {
+            "speed": 680,
+            "size": 5,
+            "pierce": 0,
+            "range": 1150,
+            "color": "#d8c27a",
+            "shape": "arrow"
+          },
+          "affixes": [
+            {
+              "label": "Venomous · deals poison damage",
+              "n": "Venomous"
+            }
+          ]
+        }
+      },
+      "claimed": false
+    },
+    "campaign:720325305:0:0:0:0:0:-620,-1000": {
+      "rarity": "uncommon",
+      "challenge": false,
+      "item": {
+        "armor": {
+          "slot": "helmet",
+          "rarity": "common",
+          "type": "might",
+          "accent": "#ffce6a",
+          "defense": 6,
+          "color": "#b9c0cc",
+          "name": "Common Might Helmet",
+          "affixes": [
+            {
+              "stat": "powerMul",
+              "val": 0.05,
+              "label": "+5% Damage"
+            }
+          ]
+        }
+      },
+      "claimed": false
+    },
+    "campaign:720325305:0:0:0:0:0:1160,-2740": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "weapon": {
+          "arche": "great",
+          "art": "great",
+          "cls": "melee",
+          "sch": "phys",
+          "el": null,
+          "rarity": "common",
+          "chg": "spin",
+          "reaper": false,
+          "anyClass": false,
+          "ians": false,
+          "name": "Common Greatsword",
+          "dmg": 20,
+          "cd": 0.68,
+          "kb": 340,
+          "lifesteal": 0,
+          "color": "#b9c0cc",
+          "blade": "#dfe5ec",
+          "range": 84
+        }
+      },
+      "claimed": false
+    },
+    "campaign:720325305:0:0:0:0:0:-1620,-2340": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "weapon": {
+          "arche": "great",
+          "art": "great",
+          "cls": "melee",
+          "sch": "phys",
+          "el": null,
+          "rarity": "common",
+          "chg": "spin",
+          "reaper": false,
+          "anyClass": false,
+          "ians": false,
+          "name": "Common Greatsword",
+          "dmg": 20,
+          "cd": 0.68,
+          "kb": 340,
+          "lifesteal": 0,
+          "color": "#b9c0cc",
+          "blade": "#dfe5ec",
+          "range": 84
+        }
+      },
+      "claimed": false
+    },
+    "campaign:720325305:0:0:0:0:0:-2210,-1840": {
+      "rarity": "rare",
+      "challenge": true,
+      "item": {
+        "weapon": {
+          "arche": "arcaneorb",
+          "art": "wand",
+          "cls": "ranged",
+          "sch": "mag",
+          "el": "arcane",
+          "rarity": "rare",
+          "chg": null,
+          "reaper": false,
+          "anyClass": false,
+          "ians": false,
+          "name": "Balanced Rare Demon Eye Scepter",
+          "dmg": 46.3,
+          "cd": 0.546,
+          "kb": 170,
+          "lifesteal": 0,
+          "color": "#4aa3e0",
+          "blade": "#c47bff",
+          "proj": {
+            "speed": 430,
+            "size": 11,
+            "pierce": 2,
+            "range": 460,
+            "color": "#c47bff",
+            "shape": "orb",
+            "glow": 1,
+            "seek": true
+          },
+          "affixes": [
+            {
+              "label": "Balanced · +9% damage and speed",
+              "n": "Balanced"
+            }
+          ]
+        }
+      },
+      "claimed": false
+    },
+    "campaign:720325305:0:0:0:0:0:1040,-55": {
+      "rarity": "common",
+      "challenge": false,
+      "item": {
+        "weapon": {
+          "arche": "holyscepter",
+          "art": "wand",
+          "cls": "ranged",
+          "sch": "mag",
+          "el": "holy",
+          "rarity": "common",
+          "chg": null,
+          "reaper": false,
+          "anyClass": false,
+          "ians": false,
+          "name": "Common Holy Scepter",
+          "dmg": 22,
+          "cd": 0.56,
+          "kb": 160,
+          "lifesteal": 0,
+          "color": "#b9c0cc",
+          "blade": "#ffe9a8",
+          "proj": {
+            "speed": 560,
+            "size": 9,
+            "pierce": 1,
+            "range": 560,
+            "color": "#ffe9a8",
+            "shape": "light",
+            "glow": 1,
+            "seek": true
+          }
+        }
+      },
+      "claimed": false
+    }
+  },
+  "hubDialogue": {},
+  "returnVisits": {},
+  "campaignNgHp": 1,
+  "campaignNgDmg": 1,
+  "secretSense": false,
+  "classLooks": {
+    "warrior": 0,
+    "ranger": 0,
+    "mage": 0,
+    "reaper": 0,
+    "paladin": 0,
+    "necromancer": 0,
+    "ninja": 0,
+    "berserker": 0,
+    "pirate": 0,
+    "chronomancer": 0,
+    "monk": 0,
+    "stormcaller": 0,
+    "warlock": 0,
+    "skylancer": 0,
+    "bladedancer": 0,
+    "beastmaster": 0,
+    "pyromancer": 0
+  },
+  "mouthStyle": "line",
+  "faceAdjust": {
+    "eyeX": 0,
+    "eyeY": 0,
+    "eyeTilt": 0,
+    "mouthX": 0,
+    "mouthY": 0,
+    "mouthTilt": 0
+  },
+  "browStyle": "natural",
+  "story": null,
+  "campaign": null,
+  "tut": {},
+  "introV2Seen": true
+}

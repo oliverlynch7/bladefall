@@ -1,0 +1,34 @@
+<!doctype html><meta charset="utf-8"><title>Co-op progression checks</title>
+<style>body{background:#172b3b;color:#fff;font:14px system-ui}button{padding:10px}iframe{width:48%;height:340px}pre{white-space:pre-wrap}textarea{width:95%;height:50px}</style>
+<h1>Shared combat rewards, independent class choices</h1><button id="run">Check co-op progression</button><pre id="result">Ready</pre><textarea id="evidence" aria-label="Evidence JSON"></textarea>
+<iframe id="host" title="Host" src="/3d/.qa-progression-current.html?mute=1"></iframe><iframe id="guest" title="Guest" src="/3d/.qa-progression-current.html?mute=1"></iframe>
+<script>
+document.getElementById('run').onclick=async()=>{
+ const out=document.getElementById('result'),checks=[],h=host.contentWindow,g=guest.contentWindow,wait=ms=>new Promise(r=>setTimeout(r,ms));let hb,gb;
+ const ok=(name,value)=>{checks.push({name,pass:!!value});if(!value)throw Error(name);};document.getElementById('run').disabled=true;
+ try{
+  while(!h.progressQA||!g.progressQA)await wait(100);
+  hb=await h.progressQA.fresh('warrior');hb.skipTrial();gb=await g.progressQA.fresh('ranger');gb.skipTrial();
+  hb.enterZone(0);gb.enterZone(0);await h.progressQA.until(()=>!h.BF_LOADING?.active&&!g.BF_LOADING?.active);
+  hb.classState('warrior').xp=149;gb.classState('ranger').xp=149;
+  const hq=[],gq=[],handlers={};Object.assign(hb.MP,{active:true,isHost:true,myId:'h',zone:0,conns:[]});hb.MP.onEnter(0);
+  hb.MP.wireGuest({open:true,send:d=>hq.push(JSON.parse(JSON.stringify(d))),on:(k,f)=>handlers[k]=f});handlers.open();
+  Object.assign(gb.MP,{active:true,isHost:false,myId:'g',zone:0,hostConn:{open:true,send:d=>gq.push(JSON.parse(JSON.stringify(d)))}});
+  const flush=()=>{for(let j=0;j<5;j++){for(const p of gq.splice(0))handlers.data(p);for(const p of hq.splice(0))gb.MP.onGuestData(p);}},broadcast=()=>{hb.MP.broadcast();flush();};
+  handlers.data({t:'hello',p:gb.MP.selfState()});flush();await wait(120);flush();
+  ok('Both players enter Briar Town',hb.G.zone===0&&gb.G.zone===0&&gb.G.area===0);
+  const foe=hb.G.enemies.find(e=>e.type==='grunt'&&!e.dead);ok('Guest has matching foe',gb.G.enemies.some(e=>e.mid===foe.mid));hb.hitEnemy(foe,999999,hb.G.p,0,0);broadcast();
+  ok('Shared kill awards both earned ranks',hb.classState('warrior').rank===2&&gb.classState('ranger').rank===2);
+  const before={host:h.progressQA.hero(hb),guest:g.progressQA.hero(gb)};broadcast();broadcast();ok('Duplicate snapshots do not duplicate XP/gold',hb.G.p.xp===before.host.xp&&gb.G.p.xp===before.guest.xp&&gb.meta.gold===before.guest.gold);
+  h.progressQA.pump(hb,2);g.progressQA.pump(gb,2);ok('Each player receives their own class choice',hb.mode==='upgrade'&&gb.mode==='upgrade'&&h.document.querySelector('.pickcrest').textContent.includes('Warrior')&&g.document.querySelector('.pickcrest').textContent.includes('Ranger'));
+  await h.progressQA.pick(hb);ok('Host choice does not choose for guest',hb.c2ch()[2]==='w_cleave'&&!gb.c2ch()[2]&&gb.mode==='upgrade');
+  await g.progressQA.pick(gb);ok('Guest retains own skill and tutorial',gb.c2ch()[2]==='r_volley'&&hb.c2ch()[2]==='w_cleave'&&hb.meta.tut.skill&&gb.meta.tut.skill);
+  hb.G.area=-1;hb.loadArea();hb.MP.onEnter(0);flush();await wait(120);flush();await h.progressQA.until(()=>!h.BF_LOADING?.active&&!g.BF_LOADING?.active);
+  h.progressQA.place(hb,hb.G.boss,280);hb.G.boss.dropT=.01;h.progressQA.pump(hb,3);broadcast();
+  ok('Boss advice reaches the guest journal',!!hb.G.storyState.notes['encounter.outskirts']&&gb.G.storyState.notes['encounter.outskirts']?.text===hb.G.storyState.notes['encounter.outskirts'].text);
+  const result={checks,rewards:before,host:h.progressQA.hero(hb),guest:g.progressQA.hero(gb),errors:[...h.progressQA.errors,...g.progressQA.errors],transport:'Real host/guest handlers over a local serialized relay. Staged lethal hit tests reward delivery; no Internet or full-fight claim.'};
+  evidence.value=JSON.stringify(result);out.textContent='PASS '+checks.length+' co-op progression assertions.';
+ }catch(e){out.textContent='FAIL '+e.stack;evidence.value=JSON.stringify({checks,error:e.message,errors:[...(h.progressQA?.errors||[]),...(g.progressQA?.errors||[])]});}
+ finally{for(const b of [hb,gb])if(b){b.MP.active=false;b.MP.conns=[];}document.getElementById('run').disabled=false;}
+};
+</script>

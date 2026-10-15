@@ -127,3 +127,8 @@ Existing approved campaign features remain: two-half checkpoint banking, five Ri
 ## Approved boss-design scope — latest clarification
 
 Replace the earlier Abyss King encounter in the Abyss with a Legion commander. Keep the Abyss King’s two-phase confrontation together at the final castle. Oliver authorizes changing existing bosses and arenas when it improves play, challenge or story fit. No permanent commander name, exact moveset or arena design has been chosen yet. Preserve old save/achievement identifiers through explicit migration rather than silently reinterpreting past King defeats as new commander accomplishments.
+
+
+## [Codex | 2026-10-14] Boss-entry presentation reconciliation
+
+The readiness pass retires legacy dream/sleeper/livestock narration from campaign boss entry. The eight short introductions now state the existing encounter's role: Briar defenses, canyon crossing, prisoner exit, three ice-cave officers, Great Furnace, chained Hydra rescue, the orb guardian and the King before the Hollow Gate. No ancestry, final-cut revelation, quest outcome or new lore is added. Boss entry is one journal note at the side of the HUD, retaining the existing Brute/Marksman/Fallen tactical advice for later reading. This replaces simultaneous centered lore and tactical overlays.

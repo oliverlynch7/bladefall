@@ -30,3 +30,8 @@ No new quest framework, map shrink, general difficulty nerf or custom SFX. Any n
 Implemented cart/bridge timing and clue guidance, completed rope-note repair, required alarm/player escort explanations, locked-object feedback, Waystone reach and canyon fall attribution. Targeted logic/syntax checks pass. Prior rendered fixtures cover gate/cage collision, all alarm/freight jumps, continuous missed-jump recovery, live prisoner damage/failure/retry, 16 local host/guest checks and an old partial-save load (level 10, rank 6, 913 gold and flags retained).
 
 The earned Warrior reached north escort wave 1, then rank-5 passive selection paused the driver at 20% rescue progress. Last persisted evidence: canyon-alarm-earned.json. Full scope, fixture corrections and test limits: docs/art-validation/hollow-review-20261015/summary.json. Browser discovery currently returns no available browser. Remaining: earned escort/Marksman approach, rendered Waystone front interaction and final production browser smoke check. Do not claim the entire review complete or infer novice fun/difficulty. Unrelated companion/rig changes remain untouched. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-16] Evidence export correction
+
+Final file validation found a truncated alarm export and corrupted aggregate fixture artifact. Their replacement metadata explicitly identifies the issue; completed staged results were reconstructed from the visible browser outputs. The last complete restorable earned export is canyon-arrival-before.json, not canyon-alarm-earned.json. All review JSON artifacts now parse. No gameplay source changed.

@@ -19,7 +19,7 @@
       "North guards and cage opening"
     ],
     "interruptedAt": "First escort pursuer defeated; rank-5 passive choice paused the driver with escort at 20%.",
-    "persistedEvidence": "canyon-alarm-earned.json"
+    "persistedEvidence": "canyon-arrival-before.json"
   },
   "stagedBrowser": {
     "evidence": "staged-canyon.json",
@@ -75,5 +75,6 @@
     "Final production browser smoke test",
     "Human novice pacing/fun and remote latency"
   ],
-  "browserAvailability": "October 16 discovery returned no available browser. Prior rendered evidence preserved; no final production browser claim."
+  "browserAvailability": "October 16 discovery returned no available browser. Prior rendered evidence preserved; no final production browser claim.",
+  "artifactCorrections": "Alarm export exceeded browser output limit; aggregate staged file was corrupted during interruption. Both now contain explicit capture-status metadata; staged results are reconstructed from visible completed tool output. Last valid restorable export is canyon-arrival-before.json."
 }

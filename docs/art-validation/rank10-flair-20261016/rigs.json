@@ -1,0 +1,1032 @@
+{
+  "method": "Actual rig/renderer geometry with mocked Canvas drawing; no browser or texture/visual acceptance claim",
+  "combinations": 51,
+  "frames": 4080,
+  "gates": 204,
+  "maxTriangles": 7422,
+  "maxMeshes": 44,
+  "rows": [
+    {
+      "cls": "warrior",
+      "tier": 0,
+      "key": "warrior:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "warrior",
+      "tier": 1,
+      "key": "warrior:1",
+      "meshes": 27,
+      "triangles": 5230,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "warrior",
+      "tier": 2,
+      "key": "warrior:2",
+      "meshes": 33,
+      "triangles": 6276,
+      "animated": 0,
+      "aura": {
+        "motif": "Royal command pennants",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 50
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Fluted royal shoulder shield",
+        "Royal heraldic breastwork"
+      ]
+    },
+    {
+      "cls": "berserker",
+      "tier": 0,
+      "key": "berserker:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "berserker",
+      "tier": 1,
+      "key": "berserker:1",
+      "meshes": 24,
+      "triangles": 4724,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "berserker",
+      "tier": 2,
+      "key": "berserker:2",
+      "meshes": 29,
+      "triangles": 7422,
+      "animated": 0,
+      "aura": {
+        "motif": "Scarlet rage flares",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 66
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Beast-jaw trophy pauldron"
+      ]
+    },
+    {
+      "cls": "pirate",
+      "tier": 0,
+      "key": "pirate:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "pirate",
+      "tier": 1,
+      "key": "pirate:1",
+      "meshes": 24,
+      "triangles": 5576,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "pirate",
+      "tier": 2,
+      "key": "pirate:2",
+      "meshes": 31,
+      "triangles": 7194,
+      "animated": 0,
+      "aura": {
+        "motif": "Teal tide and compass",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 66
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Admiral plume",
+        "Navigators regalia"
+      ]
+    },
+    {
+      "cls": "reaper",
+      "tier": 0,
+      "key": "reaper:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "reaper",
+      "tier": 1,
+      "key": "reaper:1",
+      "meshes": 21,
+      "triangles": 3960,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "reaper",
+      "tier": 2,
+      "key": "reaper:2",
+      "meshes": 27,
+      "triangles": 4636,
+      "animated": 0,
+      "aura": {
+        "motif": "Violet soul mantle",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 66
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Vaulted soul reliquary"
+      ]
+    },
+    {
+      "cls": "ninja",
+      "tier": 0,
+      "key": "ninja:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "ninja",
+      "tier": 1,
+      "key": "ninja:1",
+      "meshes": 22,
+      "triangles": 1620,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "ninja",
+      "tier": 2,
+      "key": "ninja:2",
+      "meshes": 30,
+      "triangles": 2354,
+      "animated": 0,
+      "aura": {
+        "motif": "Indigo afterimage slashes",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 42
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Folded silver fox seal"
+      ]
+    },
+    {
+      "cls": "bladedancer",
+      "tier": 0,
+      "key": "bladedancer:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "bladedancer",
+      "tier": 1,
+      "key": "bladedancer:1",
+      "meshes": 23,
+      "triangles": 3008,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "bladedancer",
+      "tier": 2,
+      "key": "bladedancer:2",
+      "meshes": 29,
+      "triangles": 3962,
+      "animated": 0,
+      "aura": {
+        "motif": "Sea-silk ribbon sweeps",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 58
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Ceremonial filigree fan"
+      ]
+    },
+    {
+      "cls": "paladin",
+      "tier": 0,
+      "key": "paladin:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "paladin",
+      "tier": 1,
+      "key": "paladin:1",
+      "meshes": 26,
+      "triangles": 5464,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "paladin",
+      "tier": 2,
+      "key": "paladin:2",
+      "meshes": 33,
+      "triangles": 6902,
+      "animated": 0,
+      "aura": {
+        "motif": "Ivory-gold sun wings",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 122
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Sculpted solar relief"
+      ]
+    },
+    {
+      "cls": "monk",
+      "tier": 0,
+      "key": "monk:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "monk",
+      "tier": 1,
+      "key": "monk:1",
+      "meshes": 21,
+      "triangles": 2788,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "monk",
+      "tier": 2,
+      "key": "monk:2",
+      "meshes": 32,
+      "triangles": 4926,
+      "animated": 6,
+      "aura": {
+        "motif": "Jade-gold lotus mandala",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 98
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": [
+        "Gilt prayer-bead ferrules"
+      ]
+    },
+    {
+      "cls": "ranger",
+      "tier": 0,
+      "key": "ranger:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "ranger",
+      "tier": 1,
+      "key": "ranger:1",
+      "meshes": 24,
+      "triangles": 2644,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "ranger",
+      "tier": 2,
+      "key": "ranger:2",
+      "meshes": 30,
+      "triangles": 4194,
+      "animated": 0,
+      "aura": {
+        "motif": "Emerald woodland crescents",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 186
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Whitewood carved leaf collar"
+      ]
+    },
+    {
+      "cls": "beastmaster",
+      "tier": 0,
+      "key": "beastmaster:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "beastmaster",
+      "tier": 1,
+      "key": "beastmaster:1",
+      "meshes": 22,
+      "triangles": 5000,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "beastmaster",
+      "tier": 2,
+      "key": "beastmaster:2",
+      "meshes": 30,
+      "triangles": 7074,
+      "animated": 0,
+      "aura": {
+        "motif": "Amber spirit antlers",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 58
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Carved great-beast crest"
+      ]
+    },
+    {
+      "cls": "skylancer",
+      "tier": 0,
+      "key": "skylancer:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "skylancer",
+      "tier": 1,
+      "key": "skylancer:1",
+      "meshes": 23,
+      "triangles": 2708,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "skylancer",
+      "tier": 2,
+      "key": "skylancer:2",
+      "meshes": 31,
+      "triangles": 3990,
+      "animated": 1,
+      "aura": {
+        "motif": "Azure slipstream wings",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 98
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Wind instrument"
+      ]
+    },
+    {
+      "cls": "mage",
+      "tier": 0,
+      "key": "mage:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "mage",
+      "tier": 1,
+      "key": "mage:1",
+      "meshes": 36,
+      "triangles": 3436,
+      "animated": 6,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "mage",
+      "tier": 2,
+      "key": "mage:2",
+      "meshes": 44,
+      "triangles": 4354,
+      "animated": 9,
+      "aura": {
+        "motif": "Violet constellation sweep",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 242
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Celestial armillary"
+      ]
+    },
+    {
+      "cls": "pyromancer",
+      "tier": 0,
+      "key": "pyromancer:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "pyromancer",
+      "tier": 1,
+      "key": "pyromancer:1",
+      "meshes": 36,
+      "triangles": 5032,
+      "animated": 6,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "pyromancer",
+      "tier": 2,
+      "key": "pyromancer:2",
+      "meshes": 42,
+      "triangles": 6082,
+      "animated": 7,
+      "aura": {
+        "motif": "Living flame mantle",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 90
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": [
+        "Obsidian furnace heart"
+      ]
+    },
+    {
+      "cls": "necromancer",
+      "tier": 0,
+      "key": "necromancer:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "necromancer",
+      "tier": 1,
+      "key": "necromancer:1",
+      "meshes": 25,
+      "triangles": 5256,
+      "animated": 2,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "necromancer",
+      "tier": 2,
+      "key": "necromancer:2",
+      "meshes": 31,
+      "triangles": 6558,
+      "animated": 2,
+      "aura": {
+        "motif": "Jade soul procession",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 58
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ],
+      "features": [
+        "Bone reliquary keywork"
+      ]
+    },
+    {
+      "cls": "chronomancer",
+      "tier": 0,
+      "key": "chronomancer:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "chronomancer",
+      "tier": 1,
+      "key": "chronomancer:1",
+      "meshes": 25,
+      "triangles": 4828,
+      "animated": 3,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "chronomancer",
+      "tier": 2,
+      "key": "chronomancer:2",
+      "meshes": 31,
+      "triangles": 5634,
+      "animated": 4,
+      "aura": {
+        "motif": "Amber clock dial",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 170
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": [
+        "Hourglass movement"
+      ]
+    },
+    {
+      "cls": "warlock",
+      "tier": 0,
+      "key": "warlock:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "warlock",
+      "tier": 1,
+      "key": "warlock:1",
+      "meshes": 27,
+      "triangles": 3680,
+      "animated": 2,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "warlock",
+      "tier": 2,
+      "key": "warlock:2",
+      "meshes": 33,
+      "triangles": 4394,
+      "animated": 4,
+      "aura": {
+        "motif": "Broken eclipse corona",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 258
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": [
+        "Split eclipse pact"
+      ]
+    },
+    {
+      "cls": "stormcaller",
+      "tier": 0,
+      "key": "stormcaller:0",
+      "meshes": 0,
+      "triangles": 0,
+      "animated": 0,
+      "aura": null,
+      "anchors": [],
+      "features": []
+    },
+    {
+      "cls": "stormcaller",
+      "tier": 1,
+      "key": "stormcaller:1",
+      "meshes": 30,
+      "triangles": 4516,
+      "animated": 6,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": []
+    },
+    {
+      "cls": "stormcaller",
+      "tier": 2,
+      "key": "stormcaller:2",
+      "meshes": 37,
+      "triangles": 5574,
+      "animated": 8,
+      "aura": {
+        "motif": "Cyan lightning cage",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 82
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL",
+        "UpperArmR",
+        "UpperArmL"
+      ],
+      "features": [
+        "Caged storm cores"
+      ]
+    }
+  ]
+}

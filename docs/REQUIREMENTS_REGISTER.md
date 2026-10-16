@@ -1713,3 +1713,10 @@ User requests the Reaper's scythe held diagonally in front, with its blade to th
 User: "Also the skins look so much better, but I wonder how you could make the rank 5 skins look as cool as the rank 10 skins and then make the rank 10 skins look absolutely legendary. Like way cooler, more detailed, more epic looking if that makes sense."
 
 Raise Rank 5 to the existing Rank 10 construction quality while preserving its distinct colors, then give every Rank 10 class its own additional signature craftsmanship and silhouette detail. Preserve original/default looks, IDs, rank gates, cosmetic-only behaviour, saved choices and cheat unlocks. Plan: docs/design/LEGENDARY_WARDROBE_2026-10-16.md. Current browser unavailable; local geometry/state validation and rendered acceptance remain separate.
+
+
+## [Codex | 2026-10-16] U-RANK10-FLAIR-20261016
+
+User: "Now the Rank 5 classes look better, but now the rank 10 ones look too much like the rank 5 ones. I would experiment with, like, auras, glows, extra pizzazz and flair. They need to be differentiated, similar to the progression of the chests."
+
+Accept the user's visual assessment: extra small fittings did not differentiate Rank 10 adequately. Keep the improved Rank 5 intact. Give each Rank 10 an immediately legible, class-specific aura silhouette, brighter small inlays and distinctive slow motion. Preview branch only; preserve production, cosmetic-only stats, ranks, save IDs and per-class colors. Use depth-tested effects, bounded draw/particle budgets, reduced-motion and low-quality paths. New effects are explicitly authorized here, superseding the previous design packet's no-particle scope. Do not equate rig tests with visible quality. Plan: docs/design/RANK10_FLAIR_2026-10-16.md.

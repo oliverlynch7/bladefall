@@ -1,0 +1,43 @@
+{
+  "version": "2.206.0-rank10-flair",
+  "status": "Isolated preview candidate, not production",
+  "reason": "User found Rank 10 too similar to Rank 5; small fittings alone were insufficient.",
+  "implementation": [
+    "17 separately authored Rank 10 aura silhouettes",
+    "Two layers of luminous energy ribbon, one diffuse wash and at most twelve textured motes",
+    "Stronger small Rank 10 inlay emissive intensity; Rank 5 unchanged",
+    "Four single-pass effect draws at full quality, two at low quality",
+    "Depth-tested additive effects without scene lights or screen-space bloom",
+    "Reduced-motion freeze and independently owned/disposed actor resources"
+  ],
+  "verification": {
+    "auraChecks": 2342,
+    "classTierCombinations": 51,
+    "rigFrames": 4080,
+    "rankBoundaryChecks": 204,
+    "maxTriangles": 7422,
+    "maxMeshes": 44,
+    "distinctSilhouetteGeometryHashes": 17,
+    "shared64pxTextures": 10,
+    "rank5MatchesPreviousPreview": true,
+    "passed": [
+      "Actual rig fitting stability and finite transforms",
+      "Aura placement bounds and scaled particle sizes",
+      "Default/Rank 5 aura exclusion",
+      "Depth flags and single-pass ribbons",
+      "Reduced motion, low quality and restoration",
+      "Actor independence and disposal",
+      "JavaScript syntax and whitespace"
+    ]
+  },
+  "limits": [
+    "No new browser/WebGL screenshot or GPU measurement: browser discovery returned no clients",
+    "Visual balance, face/cape/weapon clearance, bag framing and nameplate placement still require rendered review",
+    "Geometry/flag tests do not establish aesthetic acceptance or all clipping eliminated",
+    "Other unverified Keep/Reaper candidates remain included only in the preview branch"
+  ],
+  "publication": {
+    "branch": "wardrobe-preview-20261016",
+    "productionChanged": false
+  }
+}

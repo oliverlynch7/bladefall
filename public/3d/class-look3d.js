@@ -1,5 +1,6 @@
 import * as T from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
+import {createClassAura,syncClassAura} from './class-aura3d.js?v=2206';
 
 // Fittings use inverse bind matrices, not the head's current animated world position.
 // Art is cosmetic only. Static pieces are merged by bone/material; no dynamic lights.
@@ -29,8 +30,8 @@ function weave(cls,tier){
  if(tier===2){x.strokeStyle=p.inlay||p.accent||p.metal;x.lineWidth=1.2;for(let y=32;y<482;y+=23)for(const s of [-1,1])line([[128+s*101,y-9],[128+s*94,y],[128+s*101,y+9],[128+s*107,y],[128+s*101,y-9]]);}
  const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=2;textures.set(key,tex);return tex;
 }
-export function clearClassLook(root){const r=records.get(root);if(!r)return;r.groups.forEach(g=>g.removeFromParent());for(const o of r.hidden){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}r.geometries.forEach(g=>g.dispose());r.materials.forEach(m=>m.dispose());records.delete(root);}
-export function classLookStats(root){const r=records.get(root);return r?{key:r.key,meshes:r.meshes,triangles:r.triangles,animated:r.moving.length,anchors:r.groups.map(g=>g.userData.classLookBone)}:{meshes:0,triangles:0,animated:0,anchors:[]};}
+export function clearClassLook(root){const r=records.get(root);if(!r)return;r.aura?.dispose();r.groups.forEach(g=>g.removeFromParent());for(const o of r.hidden){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}r.geometries.forEach(g=>g.dispose());r.materials.forEach(m=>m.dispose());records.delete(root);}
+export function classLookStats(root){const r=records.get(root);return r?{key:r.key,meshes:r.meshes,triangles:r.triangles,animated:r.moving.length,aura:r.aura?.stats||null,anchors:r.groups.map(g=>g.userData.classLookBone)}:{meshes:0,triangles:0,animated:0,aura:null,anchors:[]};}
 function build(root,cls,tier){
  const p=window.BFClassLooks?.palette(cls,tier),r={key:cls+':'+tier,groups:[],moving:[],hidden:[],geometries:new Set(),materials:new Set(),meshes:0,triangles:0};records.set(root,r);
  const stale=[];root.traverse(o=>{if(o.userData.classLookBaseVisibility!==undefined){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}if(o.userData.classLookRoot)stale.push(o);});stale.forEach(o=>o.removeFromParent());if(!tier||!p)return r;root.traverse(o=>{if(o.isMesh&&/^(shoulderpad|armguard)/i.test(o.name)){o.userData.classLookBaseVisibility=o.visible;o.visible=false;r.hidden.push(o);}});
@@ -38,7 +39,7 @@ function build(root,cls,tier){
  const bones=new Map(skeleton.bones.map((b,i)=>[norm(b.name),{b,inv:skeleton.boneInverses[i]}])),anchors=new Map();
  function anchor(name){if(anchors.has(name))return anchors.get(name);const e=bones.get(norm(name));if(!e)return null;const pos=V().setFromMatrixPosition(e.inv.clone().invert()),g=new T.Group();g.name='Class fitting · '+name;g.userData.classLookRoot=true;g.userData.classLookBone=name;e.inv.clone().multiply(new T.Matrix4().makeTranslation(pos.x,pos.y,pos.z)).decompose(g.position,g.quaternion,g.scale);e.b.add(g);r.groups.push(g);anchors.set(name,g);return g;}
  const material=(color,metalness=.65,roughness=.36,glow=0,map=null)=>{const m=new T.MeshStandardMaterial({color,metalness,roughness,emissive:glow?color:'#000000',emissiveIntensity:glow,map});r.materials.add(m);return m;};
- const metal=material(p.metal),dark=material(p.leather,.30,.64),enamel=material(p.cloth,.38,.40),ivory=material('#ede0bd',.1,.65),light=material(p.accent||p.metal,.32,.28,.46),cloth=material('#ffffff',0,.94,0,weave(cls,tier));
+ const metal=material(p.metal),dark=material(p.leather,.30,.64),enamel=material(p.cloth,.38,.40),ivory=material('#ede0bd',.1,.65),light=material(p.accent||p.metal,.32,.28,tier===2?1.1:.46),cloth=material('#ffffff',0,.94,0,weave(cls,tier));
  // Both earned tiers inherit the former Rank 10 fittings; Rank 10 adds its own finish below.
  const rich=tier>0,body=anchor('Torso'),hips=anchor('Hips'),head=anchor('Head');
  const mesh=(g,geo,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0)=>{if(!g)return null;const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);m.userData.classLookPart=true;m.frustumCulled=false;g.add(m);return m;};
@@ -168,10 +169,15 @@ function build(root,cls,tier){
  function batch(g){const buckets=new Map(),remove=[];function collect(o,matrix){for(const c of [...o.children]){c.updateMatrix();const tr=matrix.clone().multiply(c.matrix);if(c.userData.lookAnimated){batch(c);continue;}if(c.isMesh){let geo=c.geometry.index?c.geometry.toNonIndexed():c.geometry.clone();geo.applyMatrix4(tr);if(!geo.attributes.uv)geo.setAttribute('uv',new T.Float32BufferAttribute(new Float32Array(geo.attributes.position.count*2),2));for(const name of Object.keys(geo.attributes))if(!['position','normal','uv'].includes(name))geo.deleteAttribute(name);const list=buckets.get(c.material)||[];list.push(geo);buckets.set(c.material,list);remove.push(c);c.geometry.dispose();}else collect(c,tr);}}collect(g,new T.Matrix4());remove.forEach(m=>m.removeFromParent());for(const [mat,geos] of buckets){const geo=mergeGeometries(geos,false);geos.forEach(g=>g.dispose());const m=new T.Mesh(geo,mat);m.userData.classLookPart=true;m.frustumCulled=false;g.add(m);r.geometries.add(geo);r.meshes++;r.triangles+=geo.attributes.position.count/3;}}
  // Animated meshes must retain and own their geometry; batching only their children is not enough.
  for(const a of r.moving)if(a.m.isMesh){r.geometries.add(a.m.geometry);r.meshes++;r.triangles+=(a.m.geometry.index?.count||a.m.geometry.attributes.position.count)/3;}
- r.groups.forEach(batch);return r;
+ r.groups.forEach(batch);
+ // Keep transparent energy outside the opaque fitting batches and its resources
+ // owned by this actor. Rank 5 remains the approved fitted outfit without aura.
+ if(tier===2){r.aura=createClassAura(hips,cls);if(r.aura){r.meshes+=r.aura.stats.drawCalls;r.triangles+=r.aura.stats.triangles;}}
+ return r;
 }
 export function syncClassLook(root,cls,tier,M,time=0,motion=true){
  if(!root)return;const n=window.BFClassLooks?.valid(tier)||0,key=cls+':'+n;let r=records.get(root);if(r?.key!==key){clearClassLook(root);r=build(root,cls,n);}const t=motion?time:0;
  for(const a of r.moving){const {m,base,rotation,scale,speed}=a;m.position.copy(base);m.rotation.copy(rotation);m.scale.copy(scale);if(a.type==='spinZ')m.rotation.z+=t*speed;if(a.type==='spinY')m.rotation.y+=t*speed;if(a.type==='orbit'){m.position.set(Math.cos(t*.28+speed)*.51,Math.sin(t*.28+speed)*.065,Math.sin(t*.28+speed)*.51);m.rotation.y=-t*.28;}if(a.type==='breathe')m.position.y+=Math.sin(t*1.7+speed)*.012;if(a.type==='flame')m.scale.y*=1+(motion?Math.sin(t*2.5+speed)*.09:0);if(a.type==='pulse')m.scale.multiplyScalar(1+(motion?Math.sin(t*2+speed)*.035:0));if(a.type==='petal')m.rotation.z+=motion?Math.sin(t*.8+speed)*.035:0;}
- return {key,meshes:r.meshes,animated:r.moving.length,triangles:r.triangles};
+ syncClassAura(r.aura,time,motion,window.__BF_META?.()?.quality==='low');
+ return {key,meshes:r.meshes,animated:r.moving.length,triangles:r.triangles,aura:r.aura?.stats||null};
 }

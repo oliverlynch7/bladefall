@@ -1830,3 +1830,17 @@ Publish ONLY to a separate wardrobe-preview-20261016 branch for visual compariso
 ## [Codex | 2026-10-16] Legendary wardrobe isolated preview deployed
 
 Cloudflare successfully deployed 52fd2ed1 to the wardrobe-preview-20261016 branch. Review all 17 classes at https://51dee707.bladefall.pages.dev/3d/class-skins.html?preview=1 (immutable build), or https://wardrobe-preview-20261016.bladefall.pages.dev/3d/class-skins.html?preview=1 (branch alias). Add &class=reaper to inspect the diagonal scythe carry. This is a separate, read-only wardrobe preview; live main remains ab457fa9 / v2.203.0. The preview contains pending Keep/Reaper work too; do not merge wholesale before their outstanding checks. No browser-rendered aesthetic, clipping or GPU claim; evidence and measured geometry limits are in docs/art-validation/legendary-wardrobe-20261016/. Unrelated companion/rig changes remain untouched.
+
+
+## [Codex | 2026-10-16] U-RANK10-FLAIR-20261016
+
+User: "Now the Rank 5 classes look better, but now the rank 10 ones look too much like the rank 5 ones. I would experiment with, like, auras, glows, extra pizzazz and flair. They need to be differentiated, similar to the progression of the chests."
+
+Accept the user's visual assessment: extra small fittings did not differentiate Rank 10 adequately. Keep the improved Rank 5 intact. Give each Rank 10 an immediately legible, class-specific aura silhouette, brighter small inlays and distinctive slow motion. Preview branch only; preserve production, cosmetic-only stats, ranks, save IDs and per-class colors. Use depth-tested effects, bounded draw/particle budgets, reduced-motion and low-quality paths. New effects are explicitly authorized here, superseding the previous design packet's no-particle scope. Do not equate rig tests with visible quality. Plan: docs/design/RANK10_FLAIR_2026-10-16.md.
+
+
+## [Codex | 2026-10-16] Rank 10 flair preview candidate
+
+Implemented U-RANK10-FLAIR-20261016: Rank 5 is unchanged; each of the 17 Rank 10 outfits receives an authored aura silhouette, layered additive glow and bounded motes, with stronger small inlays. Examples: Paladin sun wings, Reaper soul mantle, Chronomancer clock dial, Stormcaller lightning cage, Skylancer slipstreams and Pyromancer flame mantle. Four single-pass draws at full quality; low quality hides wash/motes. Reduced motion freezes effects. No scene lights or screen-space bloom. Resources are actor-owned and shared textures are bounded.
+
+Checks pass across 51 combinations, 4,080 rig samples, 204 unlock-boundary assertions and 2,342 aura checks. Rank 5 geometry/animation counts match the prior preview exactly. All 17 aura geometry hashes differ. Maximum additional outfit geometry is 7,422 triangles / 44 draws, within existing 10,000/50 limits. See docs/art-validation/rank10-flair-20261016/summary.json. Browser remains unavailable: no new rendered aesthetic, clipping, GPU, bag framing or nameplate claim. Publish to wardrobe-preview-20261016 only; production stays v2.203.0. Exact new preview link follows successful deployment.

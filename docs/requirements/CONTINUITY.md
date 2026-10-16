@@ -1766,3 +1766,14 @@ U-HOLLOW-REVIEW-20261015. Exact user request: "Ok keep going with the next revie
 U-PROMO-20261015. Captured eight 1600x900 images from v2.202.0-first-boss: title screen, Waystation, mill, Sunspire, Brute, Hydra, Hollow freight crossing and Mage wardrobe. Built a 1280x2276 JPEG portrait poster from four of those captures, an approximately 1 MiB ZIP, and a responsive gallery at public/showcase/2026-10-15/. Source/layout builders: scripts/build-promo-capture.py, scripts/qa-promo-capture.js and scripts/build-promo-gallery.py. Cameras and actors were staged in a localhost copy; HUD hidden; no generated or repainted gameplay. Original title illustration is labeled as the title screen. All file formats/dimensions and ZIP CRC verified; browser layout checked at desktop and 390px phone width.
 
 The earlier Hollow review is still pending implementation. Its source-grounded plan and findings are in docs/design/HOLLOW_PASS_REVIEW_2026-10-15.md. No quest or gameplay fixes are claimed by this poster delivery. The unrelated companion/rig edits remain untouched.
+
+## [Codex | 2026-10-15] Hollow review resumed after poster
+
+User: "Ok continue on what you were doing before the poster". Resume U-HOLLOW-REVIEW-20261015 using the existing grounded plan. Poster/gallery verified live; this is gameplay review again. Earned Brute victory, normal exit and hub unlock succeeded. A test-driver camera-space error caused an off-route fall; recorded separately from product behavior and corrected before route review. Demonstrated candidates: Waystone approach interaction radius, canyon fall incorrectly named lava, mandatory alarm wording, and stale or poorly linked quest clues. No broad difficulty or map replacement. In progress.
+
+
+## [Codex | 2026-10-16] Hollow guidance bounded release - v2.203.0
+
+Implemented cart/bridge timing and clue guidance, completed rope-note repair, required alarm/player escort explanations, locked-object feedback, Waystone reach and canyon fall attribution. Targeted logic/syntax checks pass. Prior rendered fixtures cover gate/cage collision, all alarm/freight jumps, continuous missed-jump recovery, live prisoner damage/failure/retry, 16 local host/guest checks and an old partial-save load (level 10, rank 6, 913 gold and flags retained).
+
+The earned Warrior reached north escort wave 1, then rank-5 passive selection paused the driver at 20% rescue progress. Last persisted evidence: canyon-alarm-earned.json. Full scope, fixture corrections and test limits: docs/art-validation/hollow-review-20261015/summary.json. Browser discovery currently returns no available browser. Remaining: earned escort/Marksman approach, rendered Waystone front interaction and final production browser smoke check. Do not claim the entire review complete or infer novice fun/difficulty. Unrelated companion/rig changes remain untouched. Deployment confirmation follows.

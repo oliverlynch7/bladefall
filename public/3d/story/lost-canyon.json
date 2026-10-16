@@ -200,7 +200,7 @@
       }
     },
     "lc.ruth.first": {
-      "text": "Caleb escaped? Good. Free both cage yards. The winch above calls more guards.",
+      "text": "Caleb escaped? Good. Free both cage groups and cut the alarm cable above the east yard. We need both done to escape.",
       "choices": [
         {
           "id": "help",
@@ -222,7 +222,7 @@
               "id": "lc.rescue",
               "region": "hollow",
               "title": "Get the prisoners out",
-              "text": "Free the south and north cage groups, stop the raised alarm winch, and open the escape gate. You choose the order. Ruth will guide the freed groups to shelter."
+              "text": "Free the south cage group. Protect both north prisoners on their walk to shelter. Cut the alarm cable on the east scaffold, then open the escape gate. Cutting the cable first prevents alarm patrols."
             }
           ]
         },
@@ -246,7 +246,7 @@
               "id": "lc.rescue",
               "region": "hollow",
               "title": "Get the prisoners out",
-              "text": "Free the south and north cage groups, stop the raised alarm winch, and open the escape gate. You choose the order. Ruth will guide the freed groups to shelter."
+              "text": "Free the south cage group. Protect both north prisoners on their walk to shelter. Cut the alarm cable on the east scaffold, then open the escape gate. Cutting the cable first prevents alarm patrols."
             },
             {
               "type": "flag",
@@ -287,7 +287,7 @@
     },
     "lc.ruth.plan": {
       "topicMenu": true,
-      "text": "Each yard has a lock. Cut the alarm cable for fewer interruptions. Free both groups, reach the shelter, then open the escape gate.",
+      "text": "Cut the east scaffold's alarm cable to stop patrols. Free both groups; protect the north pair as they walk. Then open the escape gate beyond the shelter.",
       "choices": [
         {
           "id": "others",

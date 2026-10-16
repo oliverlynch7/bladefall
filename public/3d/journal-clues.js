@@ -8,7 +8,7 @@ const puzzles=[
  ['sl.vow.0','sl.stand.0'],['sl.vow.1','sl.stand.1'],['sl.vow.2','sl.stand.2'],
  ['cg.bridge','cg.catch.west'],['cg.catch','cg.catch.west'],['la.lower','la.notice'],['la.upper','la.notice'],['dr.winch','dr.beam'],['dr.brace','dr.frame'],
  ['home.bell','home.bells'],['home.grain','home.grain'],['home.orchard','home.orchard'],['woods.track','woods.tracks'],
- ['hp.weight','hp.bridge'],['hp.brake','hp.bridge'],['hp.code','hp.code'],
+ ['hp.cart','hp.bridge'],['hp.bridge','hp.bridge'],['hp.weight','hp.bridge'],['hp.brake','hp.bridge'],['hp.code','hp.code'],
  ['kd.lift','kd.lift'],['kd.depth','kd.depth'],['kd.press','kd.depth'],['kd.drain','kd.drain'],
  ['ff.reflect','ff.reflect'],['ff.marker','ff.camp'],['ic.lock','ic.lock'],['ic.channel','ic.channel'],
  ['ih.plate','ih.order'],['ih.line','ih.order'],['gf.cool','gf.pipes'],['gf.cache','gf.cache'],['gf.pet','gf.cage'],

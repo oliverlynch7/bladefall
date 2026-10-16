@@ -1,0 +1,79 @@
+{
+  "version": "2.203.0-hollow-guidance",
+  "changes": [
+    "Waystone reach beyond its front collider",
+    "Cart/bridge moving versus settled guidance",
+    "Discovered freight clue linked to cart",
+    "Completed rope-return notes refreshed",
+    "Required alarm and player-protected escort explained",
+    "Locked cages/gate name missing requirements",
+    "Canyon fall attribution and colors corrected"
+  ],
+  "earnedJourney": {
+    "method": "Genuine Warrior staged at Brute entrance, then map-assisted ordinary-input movement and accelerated combat. No stat boosts or enemy disabling. Not human novice playtesting.",
+    "completed": [
+      "Brute victory/exit/unlock",
+      "Cliffs orders/cart/bridge/lookout/lift",
+      "Canyon orders/Ward/Ruth/south cage",
+      "Physical alarm climb and cable cut",
+      "North guards and cage opening"
+    ],
+    "interruptedAt": "First escort pursuer defeated; rank-5 passive choice paused the driver with escort at 20%.",
+    "persistedEvidence": "canyon-alarm-earned.json"
+  },
+  "stagedBrowser": {
+    "evidence": "staged-canyon.json",
+    "coverage": [
+      "Force/orders/service entry",
+      "Cage collision",
+      "Live prisoner damage, failure and healed retry",
+      "Completed rescue and escape",
+      "All alarm/freight jumps",
+      "Continuous rendered missed jump and full recovery"
+    ],
+    "limits": "Staged placement, player invulnerability and cleared/stunned foes isolate rules. Completion clears pursuers; not normal combat difficulty."
+  },
+  "coop": {
+    "evidence": "coop.json",
+    "passed": 16,
+    "transport": "Two rendered clients through actual host/guest handlers via local relay. Public network latency untested."
+  },
+  "legacySave": {
+    "method": "Old 10ba0309 page saved partial rescue; same tab navigated to current page and continued.",
+    "retained": {
+      "name": "Canyon compatibility",
+      "gold": 913,
+      "level": 10,
+      "xp": 81,
+      "warriorRank": 6,
+      "classXp": 153,
+      "area": 1,
+      "flags": [
+        "lc.orders",
+        "lc.entry",
+        "lc.ward.pass",
+        "lc.rescue",
+        "lc.alarm",
+        "lc.south"
+      ]
+    },
+    "fixtureCorrection": "Initial second-client reload read stale data while both clients ran. Closing that client and navigating the save-writing tab preserved expected values."
+  },
+  "codeChecks": [
+    "31 readiness assertions",
+    "Hollow journey/cliffs",
+    "Lost Canyon/journey",
+    "29 story topic menus",
+    "Journal notice/revision",
+    "Marksman combat",
+    "Inline/module syntax",
+    "git diff --check"
+  ],
+  "remaining": [
+    "Earned-build escort completion and Marksman approach",
+    "Rendered Waystone front interaction after reach adjustment",
+    "Final production browser smoke test",
+    "Human novice pacing/fun and remote latency"
+  ],
+  "browserAvailability": "October 16 discovery returned no available browser. Prior rendered evidence preserved; no final production browser claim."
+}

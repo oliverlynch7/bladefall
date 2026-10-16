@@ -2951,3 +2951,10 @@ The first boss is mechanically feasible with all three starting builds in script
 ## [Codex | 2026-10-15] v2.202.1-showcase — current-build share pack
 
 Added a public screenshot gallery, eight real captures, downloadable portrait poster and ZIP at /showcase/2026-10-15/. Browser-verified desktop/mobile presentation and archive integrity. Game change is a version bump only; the Hollow Pass review continues separately.
+
+
+## [Codex | 2026-10-16] Hollow guidance bounded release - v2.203.0
+
+Implemented cart/bridge timing and clue guidance, completed rope-note repair, required alarm/player escort explanations, locked-object feedback, Waystone reach and canyon fall attribution. Targeted logic/syntax checks pass. Prior rendered fixtures cover gate/cage collision, all alarm/freight jumps, continuous missed-jump recovery, live prisoner damage/failure/retry, 16 local host/guest checks and an old partial-save load (level 10, rank 6, 913 gold and flags retained).
+
+The earned Warrior reached north escort wave 1, then rank-5 passive selection paused the driver at 20% rescue progress. Last persisted evidence: canyon-alarm-earned.json. Full scope, fixture corrections and test limits: docs/art-validation/hollow-review-20261015/summary.json. Browser discovery currently returns no available browser. Remaining: earned escort/Marksman approach, rendered Waystone front interaction and final production browser smoke check. Do not claim the entire review complete or infer novice fun/difficulty. Unrelated companion/rig changes remain untouched. Deployment confirmation follows.

@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "Both clients enter matching canyon bounds",
+    "Host conversation does not zoom guest",
+    "Guest cannot make an unowned dialogue choice",
+    "Orders unlock shared gate collision",
+    "Guest release triggers the shared alarm",
+    "Remote guest attracts host-owned alarm guards",
+    "Guest cuts cable for both clients",
+    "Open north cage is not yet a completed rescue",
+    "Shared follow instruction when everyone is distant",
+    "Guest proximity advances host-owned escort",
+    "Guest sees combat wait and matching route progress",
+    "Prisoner health is replicated",
+    "Guest-led escort reaches shelter on both clients",
+    "Escape portal and physical gate agree",
+    "Duplicate packet does not duplicate shortcut",
+    "Permanent cage sides remain on both clients"
+  ],
+  "transport": "Two real rendered clients; local relay through actual host/guest handlers, not public Internet transport."
+}

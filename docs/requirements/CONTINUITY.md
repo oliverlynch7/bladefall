@@ -1787,3 +1787,15 @@ Final file validation found a truncated alarm export and corrupted aggregate fix
 ## [Codex | 2026-10-16] Hollow guidance deployed
 
 Gameplay commit 66b1fc66 passed the Cloudflare Pages deployment check. Evidence corrections are in 5a6a60e0. Version v2.203.0-hollow-guidance; deployment evidence: docs/art-validation/hollow-review-20261015/deployment.json. No production browser smoke claim: browser discovery was empty and direct HTTP fetch returned 403. Generated review pages were removed; unrelated companion/rig changes remain untouched. Continue earned escort/rank-5 choice, Marksman approach and rendered Waystone checks when browser reconnects.
+
+
+## [Codex | 2026-10-16] U-KEEP-READINESS-20261016 - next campaign review
+
+User: "Go ahead" in response to finishing Hollow Pass checks and reviewing Ruined Keep navigation, quest logic, collisions and confusing/stuck states. Browser discovery returned no clients, so Hollow's outstanding rendered checks remain open. Proceed with source-grounded Ruined Keep progression/guidance and saved-state review; no geometry or balance changes. Validate actual story transactions and old notes; prepare local fixes for rendered verification before a new gameplay release.
+
+
+## [Codex | 2026-10-16] Ruined Keep readiness implemented locally
+
+Candidate v2.204.0-keep-guidance updates rescue/tools/lift/press notes as goals change, gives actual missing-prerequisite feedback, uses shared guard clearance for guest feedback, and explains the required papers before operating the lift. Note identities/order and story/reward locks are preserved. New readiness suite failed before implementation and now passes 28 checks; existing Keep, prison story/journey/press/routes, Fallen, topic/journal and syntax suites pass. Evidence: docs/art-validation/keep-readiness-20261016/summary.json.
+
+Not published: AGENTS.md's production checklist requires real-browser verification. Browser discovery returned no clients; opening the local review page was queued without restoring a connection. Finish rendered checks before pushing this gameplay candidate to main. Production remains v2.203.0. The Hollow earned escort/Marksman and Waystone checks remain open; restore from the valid canyon-arrival-before.json export. No geometry/difficulty/SFX changes; unrelated companion/rig edits remain untouched.

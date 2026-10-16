@@ -60,7 +60,18 @@ for(const [type,x,z,y,group]of [['caster',660,-980,150,'arrow'],['grunt',850,-95
 for(const [x,z,y]of towers)G.obstacles.push({kind:'col',x,z,y0:y,w:112,d:112,h:y+268,invisible:true,keepTower:true});
 G.bounds={minX:-2440,maxX:1850,minZ:-4900,maxZ:680};G.progressEnd=-4800;G.startPos={x:0,z:450};G.lastSafe={x:0,z:450,y:0};G.portalPos={x:0,z:-4630,y:0};G.goalPos={...G.portalPos};Object.assign(G.p,{x:0,z:450,y:0,vy:0});
 }
-function sync(a){const {G,state:s,openWay}=a,f=s.flags,k=G.keep;if(!k)return;const opened={gate:f['rk.gate'],cells:f['rk.cells'],workshop:f['rk.workshop'],chamber:f['rk.chamber']};G.obstacles=G.obstacles.filter(o=>!o.keepBlock||!opened[o.keepBlock]);if(f['rk.gate'])Object.assign(G.storyNpcs.find(n=>n.id==='grant'),{x:-180,z:f['rk.breach.done']?-3100:-1760,y:0});if(ready(s)){G.qs['rk.keep']=1;openWay();}}
+function sync(a){const {G,state:s,openWay}=a,f=s.flags,k=G.keep;if(!k)return;const opened={gate:f['rk.gate'],cells:f['rk.cells'],workshop:f['rk.workshop'],chamber:f['rk.chamber']};G.obstacles=G.obstacles.filter(o=>!o.keepBlock||!opened[o.keepBlock]);if(f['rk.gate'])Object.assign(G.storyNpcs.find(n=>n.id==='grant'),{x:-180,z:f['rk.breach.done']?-3100:-1760,y:0});
+ const counts=k.remote||status(G),feedback=(key,text)=>{const o=G.storyObjects.find(o=>o.key===key);if(o)o.blockedText=text;};
+ feedback('rk.arrow','Defeat the guards on the upper arrow post, then cut the bow cord.');
+ feedback('rk.gate','Clear the upper arrow post and cut its bow cord before raising this side gate.');
+ feedback('rk.breach',!f['rk.help']?'Speak to Grant in the outer court first.':"Open Grant's side gate before ringing the breach bell.");
+ feedback('rk.key',counts.post?'Defeat the guards at the lower guard post before taking the jail key.':"Protect Grant's three prisoners at the breach first. Then use this key or the east battlement wheel.");
+ feedback('rk.wheel',"Protect Grant's three prisoners at the breach first. Then turn this wheel to open the dungeon gate.");
+ feedback('rk.tools',"Open the east workshop: use its latch when the notch turns green. The tools are inside.");
+ feedback('rk.trial',"Open the west chamber by returning Felix's tools or unbarring it from the old wall.");
+ const rescue=s.notes?.['rk.rescue'];if(rescue)rescue.text=f['rk.cells']?'The dungeon gate is open. Go down the stairs beyond the lower guard post to search the cells.':f['rk.breach.done']?"Grant's group reached cover. Open the dungeon gate with the guard-post jail key or the east battlement wheel.":f['rk.breach.start']?'Protect all three prisoners for thirty seconds, then clear the attackers. Stay in the breach court; the group can retry if it retreats.':f['rk.gate']?'Ring the breach bell when ready, then protect the three prisoners as they cross the court.':f['rk.arrow']?"The bow cord is cut. Open Grant's side gate below the arrow post.":'Clear the raised arrow post and cut its bow cord. Open the side gate, then meet Grant at the breach. The stairs begin east of the entrance.';
+ const tools=s.notes?.['rk.tools'];if(tools)tools.text=f['rk.felix.returned']?"Felix has his tools. The west chamber is open, and he gave you the Lockpick dagger.":f['rk.tools']?'Return the tools to Felix beside the east workshop approach.':f['rk.workshop']?'Take the tools inside the east workshop, then return them to Felix.':"Recover Felix's tools from the east workshop. Use its latch when the notch turns green.";
+ if(ready(s)){G.qs['rk.keep']=1;openWay();}}
 function tick(a,dt){const {G,state:s,host,spawn,complete,toast,players}=a,k=G.keep;if(!k)return;k.clock+=dt;if(!host){if(k.remote){k.remote.clock=k.clock;k.remote.trialWarn=Math.max(0,(k.remote.trialWarn||0)-dt);}return;}const f=s.flags;
 k.escortHp ||= [ESCORT_HP,ESCORT_HP,ESCORT_HP];k.escortHitT=Math.max(0,(k.escortHitT||0)-dt);
 if(f['rk.breach.start']&&!f['rk.breach.done']){

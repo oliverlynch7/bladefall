@@ -1,0 +1,60 @@
+{
+  "version": "2.204.0-keep-guidance",
+  "status": "Local candidate; not published. Real-browser verification pending.",
+  "baseline": "ab457fa9",
+  "findings": [
+    "Cleared jail-key controls described dead guards instead of the unfinished breach",
+    "Rescue/tools journal entries retained obsolete tasks after progression",
+    "Winch requires confiscated papers before use but old note only said before leaving",
+    "Completed lift/press notes reinstated active task instructions"
+  ],
+  "changes": [
+    "Stage-aware journal text preserving note IDs, ordering, rewards and progress flags",
+    "Specific blocked-object feedback using authoritative guest guard counts",
+    "Walter and the release note now state the papers prerequisite"
+  ],
+  "checks": {
+    "newReadinessAssertions": 28,
+    "passingSuites": [
+      "test-broken-walls.cjs",
+      "test-keep-journey.cjs",
+      "test-prison-story.cjs",
+      "test-prison-journey.cjs",
+      "test-prison-press.cjs",
+      "test-prison-revision11.cjs",
+      "test-prison-routes-v6.cjs",
+      "test-fallen.cjs",
+      "test-story-topics.cjs",
+      "test-journal-notice.cjs",
+      "check-3d-inline.cjs",
+      "Changed module syntax",
+      "git diff --check"
+    ],
+    "redBaseline": "New readiness suite failed on cleared jail-key feedback before implementation.",
+    "routeGeneratorRegressions": {
+      "plans": 1080,
+      "gates": 6480,
+      "olderLayouts": 10800,
+      "routeShapes": 6,
+      "routeCases": 1350,
+      "legacyPlans": 6750
+    }
+  },
+  "renderedVerification": {
+    "performedThisPass": false,
+    "reason": "Browser discovery returned no clients. Opening the local review page was queued by the desktop app, but did not establish a browser connection.",
+    "remaining": [
+      "Broken Walls key/wheel before and after breach completion",
+      "Felix tools early pickup and return",
+      "Dungeon papers before winch, prisoner boarding and completed lift/press notes",
+      "Guest guard feedback, saved-note reload and screen readability"
+    ]
+  },
+  "preserved": [
+    "Map scale and geometry",
+    "Enemy stats and encounter rules",
+    "Quest/reward identifiers and locks",
+    "Existing save schema",
+    "Unrelated companion/rig edits"
+  ]
+}

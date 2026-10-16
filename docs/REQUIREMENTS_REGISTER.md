@@ -1696,3 +1696,8 @@ User: "Ok continue on what you were doing before the poster". Resume U-HOLLOW-RE
 Implemented cart/bridge timing and clue guidance, completed rope-note repair, required alarm/player escort explanations, locked-object feedback, Waystone reach and canyon fall attribution. Targeted logic/syntax checks pass. Prior rendered fixtures cover gate/cage collision, all alarm/freight jumps, continuous missed-jump recovery, live prisoner damage/failure/retry, 16 local host/guest checks and an old partial-save load (level 10, rank 6, 913 gold and flags retained).
 
 The earned Warrior reached north escort wave 1, then rank-5 passive selection paused the driver at 20% rescue progress. Last persisted evidence: canyon-alarm-earned.json. Full scope, fixture corrections and test limits: docs/art-validation/hollow-review-20261015/summary.json. Browser discovery currently returns no available browser. Remaining: earned escort/Marksman approach, rendered Waystone front interaction and final production browser smoke check. Do not claim the entire review complete or infer novice fun/difficulty. Unrelated companion/rig changes remain untouched. Deployment confirmation follows.
+
+
+## [Codex | 2026-10-16] U-KEEP-READINESS-20261016 - next campaign review
+
+User: "Go ahead" in response to finishing Hollow Pass checks and reviewing Ruined Keep navigation, quest logic, collisions and confusing/stuck states. Browser discovery returned no clients, so Hollow's outstanding rendered checks remain open. Proceed with source-grounded Ruined Keep progression/guidance and saved-state review; no geometry or balance changes. Validate actual story transactions and old notes; prepare local fixes for rendered verification before a new gameplay release.

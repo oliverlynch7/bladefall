@@ -1,0 +1,41 @@
+{
+  "version": "2.205.0-legendary-wardrobe",
+  "status": "Design preview candidate; not applied to production",
+  "request": "Raise Rank 5 to prior Rank 10 craft and make Rank 10 more elaborate and class-specific.",
+  "implementation": [
+    "All 17 Rank 5 outfits inherit prior Rank 10 fitted geometry and signatures",
+    "All 17 Rank 10 outfits gain named class-specific fittings and complementary inlay",
+    "Class-specific cloth glyphs and finer Rank 10 borders at existing 256x512 texture size",
+    "Original colors, IDs, names, unlock gates and per-class saved selections retained",
+    "Scythe diagonal carry is included in this candidate"
+  ],
+  "verification": {
+    "classTierCombinations": 51,
+    "rigFrames": 4080,
+    "unlockBoundaryChecks": 204,
+    "maxTriangles": 7356,
+    "maxMeshes": 40,
+    "previousMaxTriangles": 5576,
+    "rank5MatchesPreviousRank10Construction": true,
+    "catalogComparisons": 51,
+    "passed": [
+      "Actual model bone attachment invariance across ten shared clips",
+      "Finite transforms",
+      "Reduced-motion stability",
+      "Default fitting restoration",
+      "Per-outfit geometry/draw limits",
+      "JavaScript syntax and whitespace"
+    ]
+  },
+  "limits": [
+    "Canvas drawing was mocked for Node geometry tests; texture appearance is not visually verified",
+    "No new browser/WebGL inspection or GPU performance measurement",
+    "No claim of aesthetic acceptance or all weapon/cape/motion clipping eliminated",
+    "No live remote-device co-op test"
+  ],
+  "publication": {
+    "target": "wardrobe-preview-20261016 branch only",
+    "productionChanged": false,
+    "reason": "Allow user visual comparison without applying unverified candidates to the live game."
+  }
+}

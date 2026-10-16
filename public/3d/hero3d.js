@@ -1,7 +1,7 @@
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
-import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2191';
+import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2205';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';

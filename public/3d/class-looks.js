@@ -23,6 +23,27 @@ const catalog=Object.fromEntries(Object.entries(rows).map(([c,r])=>[c,[{name:'Or
 // Large armor fields and small metal trim use separate colors, so gold trim does not dye an entire suit gold.
 const armor={warrior:['#a54235','#35549a'],paladin:['#eed590','#f8e9b4'],berserker:['#9f4435','#662c29'],pirate:['#9c3348','#245361'],ninja:['#424c48','#405268'],bladedancer:['#a76080','#538f8d'],reaper:['#7b6677','#cfc2a8'],beastmaster:['#8c7150','#78925a'],ranger:['#a66e3e','#cdd9b8']};
 for(const [c,a] of Object.entries(armor))a.forEach((v,i)=>catalog[c][i+1].armor=v);
+// Stable names, IDs and unlocks; richer fitted construction and class-specific finishes.
+const finishes={
+ warrior:['Crimson and copper officer armor, full crest, swept shoulders and layered fitted guards.','Cobalt royal armor with a fluted heraldic shield, gilt laurel breastwork and sculpted crest.','#ffdf9e'],
+ ranger:['Autumn copper leaves, carved hood crest, overlapping shoulders and fitted woodland guards.','Ivory-jade leaf collar, fine branch tracery and an inset woodland compass.','#92ceae'],
+ mage:['Amethyst embroidery, crystal shoulders, a celestial astrolabe and five orbiting stars.','Constellation silk, nested moving armillary rings and a luminous crescent at their centre.','#86daf1'],
+ reaper:['Ash-silver bone ribs, curved shoulder hooks and a fitted burgundy hood crest.','Pale bone vaults enclose a violet soul reliquary, framed by carved ribs and silver inlay.','#b89ddb'],
+ paladin:['Light gold and ivory, sun-wing shoulders, fitted holy armor and a sculpted sun brooch.','Luminous ivory-gold solar relief, twelve layered rays and intricate wing filigree.','#fffbe0'],
+ necromancer:['Verdigris robes, full bone ribs and two caged jade souls on carved shoulder supports.','Ivory reliquary armor, ornate cage fittings and fine mortuary keywork over deep jade.','#9bd5b3'],
+ ninja:['Copper fox crest, layered shadow armor and close-fitting segmented guards.','Folded silver fox seals, claw-cut inlays and restrained ice-blue details on indigo.','#c0e7ed'],
+ berserker:['Oxblood and bronze, carved ivory tusks and full asymmetric shoulder armor.','A sculpted beast-jaw trophy pauldron, forged victory chain and heavy oxblood inlays.','#d5aa75'],
+ pirate:['Crimson captain regalia, gold-edged tricorn, braided epaulettes and fitted naval guards.','Teal-wine admiral regalia, layered tricorn plume, pearl braid and navigators medals.','#ffe6ac'],
+ chronomancer:['Brass-teal clockwork, moving chest hands and inset rotating shoulder gears.','An ornate hourglass movement, ivory-brass casing and a slowly counter-turning mechanism.','#d5eddd'],
+ monk:['Jade-cream lotus mantle, layered petal guards and full prayer-bead fittings.','Saffron-gold lotus petals open gently above gilt prayer beads and fitted ceremonial wraps.','#ffdf97'],
+ stormcaller:['Cobalt-silver storm crown, forked conductors and fitted lightning-cut guards.','Caged storm cores glow inside silver conductors, with branching cyan and gold inlays.','#c6e9ff'],
+ warlock:['Rose-metal split horns, rotating pact seals and layered crimson-cherry armor.','A split eclipse turns around the pact jewel, framed by black-cherry facets and rose inlay.','#f7b2d3'],
+ skylancer:['Copper-sky flight armor, full swept vanes, head pinions and carved flight greaves.','Silver-azure layered flight vanes, fine gold spars and a slowly turning wind instrument.','#f1d6a1'],
+ bladedancer:['Rose-silver asymmetric fan armor, fitted guards and jewelled hip ornaments.','A seven-blade ceremonial filigree fan, sea-silk enamel and small jewels along every tip.','#f8ddc5'],
+ beastmaster:['Amber-hide armor, full branching antlers, ivory tooth clasps and fitted woodland guards.','A carved great-beast crest, amber trophy inset and gilded ferrules on the antler mantle.','#e7c68b'],
+ pyromancer:['Copper-blue furnace armor, full vented shoulders and animated flame crowns.','A luminous furnace heart inside black-glass grilles, layered flame cuts and ember inlay.','#ffe1a2']
+};
+for(const [c,[rank5,rank10,inlay]]of Object.entries(finishes)){catalog[c][1].detail=rank5;Object.assign(catalog[c][2],{detail:rank10,inlay});}
 const valid=v=>v===1||v===2?v:0;
 function tier(meta,c){const n=valid(meta?.classLooks?.[c]);return (meta?.classes?.[c]?.rank||1)>=(catalog[c]?.[n]?.rank||1)?n:0;}
 window.BFClassLooks={catalog,valid,tier,palette:(c,n)=>catalog[c]?.[valid(n)]};

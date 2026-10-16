@@ -1811,3 +1811,17 @@ User requests the Reaper's scythe held diagonally in front, with its blade to th
 Scythe-only carry now cants the shaft about 35.5 degrees toward the character's left and puts the lower hand farther forward. Both palm anchors remain tied to the actual shaft; authored attack release and other polearms retain their existing path. Main game and wardrobe import chains are cache-busted for the candidate. Actual Rogue/Scythe geometry plus shared idle/run/attack/recovery animations passed 4,800 finite/contact samples across four facings and two scales, with sub-millimetre support error. Evidence: docs/art-validation/reaper-grip-20261016/summary.json; repeat with node scripts/audit-reaper-grip.mjs --assert-diagonal.
 
 Not published: browser discovery returned no clients. Visual inspection of blade/face/robe clearance, Reaper skin ornaments, attack transitions and the production gallery is still required by the repository ship checklist. Local Ruined Keep candidate is also unpublished. Do not push this branch wholesale before finishing both review queues. Preserve unrelated companion3d.js/articulated-rigs.json changes.
+
+
+## [Codex | 2026-10-16] U-LEGENDARY-WARDROBE-20261016
+
+User: "Also the skins look so much better, but I wonder how you could make the rank 5 skins look as cool as the rank 10 skins and then make the rank 10 skins look absolutely legendary. Like way cooler, more detailed, more epic looking if that makes sense."
+
+Raise Rank 5 to the existing Rank 10 construction quality while preserving its distinct colors, then give every Rank 10 class its own additional signature craftsmanship and silhouette detail. Preserve original/default looks, IDs, rank gates, cosmetic-only behaviour, saved choices and cheat unlocks. Plan: docs/design/LEGENDARY_WARDROBE_2026-10-16.md. Current browser unavailable; local geometry/state validation and rendered acceptance remain separate.
+
+
+## [Codex | 2026-10-16] Legendary wardrobe design preview prepared
+
+All 17 Rank 5 outfits now inherit their former Rank 10 fitted construction while retaining existing colors and IDs. Every Rank 10 outfit has an additional named class-specific finish; cloth glyphs/borders are richer at unchanged texture resolution. Defaults and unlock/save rules remain intact. Actual-model geometry checks cover 51 combinations, 4,080 animation frames and 204 gate assertions; worst outfit is 7,356 added triangles/40 meshes, below existing 10,000/50 ceilings. These are rig/budget tests with mocked Canvas drawing, not visual acceptance. See docs/art-validation/legendary-wardrobe-20261016/summary.json.
+
+Publish ONLY to a separate wardrobe-preview-20261016 branch for visual comparison, linked directly to /3d/class-skins.html?preview=1. This avoids applying unverified changes to production. The preview also contains the pending Reaper grip and Keep guidance candidates; the gallery neither loads nor alters character saves. Browser remains unavailable; GPU appearance, cape/weapon clearance, real game/peer rendering and user aesthetic approval remain open. Do not push this branch wholesale to main until those checks finish. Production remains v2.203.0.

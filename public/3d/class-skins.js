@@ -1,10 +1,14 @@
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2204';
+import {createClassDisplay} from './hero3d.js?v=2205';
 const $=s=>document.querySelector(s),canvas=$('#wardrobe'),scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.05,120),renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setClearColor(0x000000,0);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setPixelRatio(Math.min(1.75,devicePixelRatio));
 const hemi=new T.HemisphereLight(0xd7ecff,0x86725a,2.15),key=new T.DirectionalLight(0xffefce,2.6),rim=new T.DirectionalLight(0x8bbdde,1.6);key.position.set(-3,6,6);rim.position.set(4,4,-3);scene.add(hemi,key,rim);
 const platform=new T.Group();scene.add(platform);for(let i=0;i<3;i++){const m=new T.Mesh(new T.CylinderGeometry(.83,.92,.08,48),new T.MeshStandardMaterial({color:'#354d56',roughness:.84,metalness:.18}));m.position.set((i-1)*2.50,-.065,0);platform.add(m);const ring=new T.Mesh(new T.TorusGeometry(.85,.014,6,48),new T.MeshStandardMaterial({color:i===2?'#d6b977':'#8faaa9',metalness:.6,roughness:.4}));ring.rotation.x=Math.PI/2;ring.position.copy(m.position);ring.position.y=-.018;platform.add(ring);}
 const catalog=window.BFClassLooks.catalog,ids=Object.keys(catalog),label=c=>c==='beastmaster'?'Beastmaster':c==='bladedancer'?'Bladedancer':c.charAt(0).toUpperCase()+c.slice(1),params=new URLSearchParams(location.search);
+if(params.get('preview')==='1'){
+ $('.intro>p:last-child').textContent='DESIGN PREVIEW · Rank 5 inherits the former Rank 10 fittings. Rank 10 adds new class signatures. The live game is unchanged.';
+ $('.back').href='https://bladefall.pages.dev/3d/';$('.brand').href='https://bladefall.pages.dev/3d/class-skins.html';
+}
 let cls=ids.includes(params.get('class'))?params.get('class'):'mage',rigs=[],yaw=.15,pitch=.07,zoom=1,paused=false,sequence=0,disposed=false;
 $('#classes').innerHTML=ids.map(c=>`<button data-class="${c}" aria-pressed="false"><img src="./icons/class-${c}.png" alt="">${label(c)}</button>`).join('');
 $('#classes').addEventListener('click',e=>{const b=e.target.closest('[data-class]');if(b)show(b.dataset.class);});

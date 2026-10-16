@@ -1706,3 +1706,10 @@ User: "Go ahead" in response to finishing Hollow Pass checks and reviewing Ruine
 ## [Codex | 2026-10-16] U-REAPER-GRIP-20261016
 
 User requests the Reaper's scythe held diagonally in front, with its blade to the side rather than straight upright in front of the face. Inspect the shared anatomical grip/arm solve, adjust the scythe-specific ready pose, preserve two-hand contact and authored attack release, and check idle/run/attacks/recovery plus other polearms. Current source uses the generic pole pose (.96 tilt) with no lateral cant. Plan: measure the actual Rogue rig/Scythe asset before and after; apply a scythe-only model-space cant with reachable hand position; verify actual rig contact and finite poses, then rendered presentation when browser returns. Keep local Ruined Keep candidate and unrelated companion/rig changes separate. Browser currently has no connected clients; no live visual claim.
+
+
+## [Codex | 2026-10-16] U-LEGENDARY-WARDROBE-20261016
+
+User: "Also the skins look so much better, but I wonder how you could make the rank 5 skins look as cool as the rank 10 skins and then make the rank 10 skins look absolutely legendary. Like way cooler, more detailed, more epic looking if that makes sense."
+
+Raise Rank 5 to the existing Rank 10 construction quality while preserving its distinct colors, then give every Rank 10 class its own additional signature craftsmanship and silhouette detail. Preserve original/default looks, IDs, rank gates, cosmetic-only behaviour, saved choices and cheat unlocks. Plan: docs/design/LEGENDARY_WARDROBE_2026-10-16.md. Current browser unavailable; local geometry/state validation and rendered acceptance remain separate.

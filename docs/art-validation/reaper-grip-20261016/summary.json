@@ -1,0 +1,51 @@
+{
+  "status": "Local candidate, not published; browser verification pending",
+  "request": "Carry the Reaper scythe diagonally in front with the blade out to the side.",
+  "implementation": {
+    "scope": "Scythe anatomical grip only, shared by Reaper skin tiers and scythe variants",
+    "cantRadians": -0.62,
+    "cantDegrees": -35.523,
+    "rightWristTarget": [
+      -0.28,
+      1.05,
+      0.4
+    ],
+    "behaviour": "Idle/run/charge carry uses diagonal wrist orientation. Existing authored attack release, throw hiding and two-hand support solver retained.",
+    "cacheChain": [
+      "index.html -> hero3d.js?v=2204 -> weapon-grips.js?v=2204",
+      "class-skins.html -> class-skins.js?v=2204 -> hero3d.js?v=2204"
+    ]
+  },
+  "verification": {
+    "actualAssets": [
+      "Rogue.gltf",
+      "Scythe.glb"
+    ],
+    "actualSharedAnimationSources": [
+      "Warrior.gltf",
+      "Rogue.gltf",
+      "Monk.gltf"
+    ],
+    "rigFrames": 4800,
+    "poses": [
+      "Idle",
+      "Run",
+      "Attack",
+      "Moving attack",
+      "Idle recovery"
+    ],
+    "facingDirections": 4,
+    "uniformScales": [
+      1,
+      52
+    ],
+    "supportErrorModelUnitsMax": 4.0233280970882417e-07,
+    "otherChecks": [
+      "96 protected weapon-handle points",
+      "Modified module syntax",
+      "Inline game script parsed",
+      "git diff --check"
+    ]
+  },
+  "limits": "Texture-free Node rig audit establishes geometry/contact/finite transforms only. No new browser render or visual no-clipping claim. Live gallery remains unchanged pending rendered verification."
+}

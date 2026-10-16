@@ -109,6 +109,7 @@ export function poseWeaponGrip(p,root,A,body,dt){
   const javelin=p.weapon?.art==='javelin';
   const cross=profile.kind==='crossbow';
   const hammer=profile.name?.startsWith('Hammer_');
+  const scythe=profile.name==='Scythe';
   const ready=!free&&(!attacking||bow||javelin||cross);
   if(bow){
     const draw=!free?((p.chargeAmt||0)>.04?.05+.14*Math.min(1,p.chargeAmt):attacking?.16*Math.pow(Math.min(1,p.atkTimer/.18),2):0):0;
@@ -145,8 +146,13 @@ export function poseWeaponGrip(p,root,A,body,dt){
     const heldTilt=A.gripTilt;
     const forward=Math.sqrt(1-heldTilt*heldTilt),x=new THREE.Vector3(0,-heldTilt,-forward),y=new THREE.Vector3(0,-forward,heldTilt),z=new THREE.Vector3(-1,0,0);
     const frame=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));
+    // Carry the scythe across the body: lower right hand, higher support hand,
+    // with the cutting head out to the character's left rather than over the face.
+    // Cant the wrist in character space; the existing palm anchors and support
+    // solve then move both hands with the shaft, including on rotated actors.
+    if(scythe)frame.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-.62));
     const q=root.getWorldQuaternion(new THREE.Quaternion()).multiply(frame);
-    const target=root.localToWorld(new THREE.Vector3(hammer?-.32:bow?-.25:heavy?-.10:-.40,hammer?1.02:bow?1.45:heavy?1.15:1.08,hammer?.38:bow?.50:heavy?.22+stab*.22:.28));
+    const target=root.localToWorld(new THREE.Vector3(scythe?-.28:hammer?-.32:bow?-.25:heavy?-.10:-.40,scythe?1.05:hammer?1.02:bow?1.45:heavy?1.15:1.08,scythe?.40:hammer?.38:bow?.50:heavy?.22+stab*.22:.28));
     armTo(root,'R',target,root.localToWorld(new THREE.Vector3(-.72,1.30,.12)),q,weight);
     if(fingers)fingers.quaternion.slerp(new THREE.Quaternion(),weight);
     root.updateMatrixWorld(true);

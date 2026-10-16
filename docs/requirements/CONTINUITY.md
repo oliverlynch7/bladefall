@@ -1799,3 +1799,15 @@ User: "Go ahead" in response to finishing Hollow Pass checks and reviewing Ruine
 Candidate v2.204.0-keep-guidance updates rescue/tools/lift/press notes as goals change, gives actual missing-prerequisite feedback, uses shared guard clearance for guest feedback, and explains the required papers before operating the lift. Note identities/order and story/reward locks are preserved. New readiness suite failed before implementation and now passes 28 checks; existing Keep, prison story/journey/press/routes, Fallen, topic/journal and syntax suites pass. Evidence: docs/art-validation/keep-readiness-20261016/summary.json.
 
 Not published: AGENTS.md's production checklist requires real-browser verification. Browser discovery returned no clients; opening the local review page was queued without restoring a connection. Finish rendered checks before pushing this gameplay candidate to main. Production remains v2.203.0. The Hollow earned escort/Marksman and Waystone checks remain open; restore from the valid canyon-arrival-before.json export. No geometry/difficulty/SFX changes; unrelated companion/rig edits remain untouched.
+
+
+## [Codex | 2026-10-16] U-REAPER-GRIP-20261016
+
+User requests the Reaper's scythe held diagonally in front, with its blade to the side rather than straight upright in front of the face. Inspect the shared anatomical grip/arm solve, adjust the scythe-specific ready pose, preserve two-hand contact and authored attack release, and check idle/run/attacks/recovery plus other polearms. Current source uses the generic pole pose (.96 tilt) with no lateral cant. Plan: measure the actual Rogue rig/Scythe asset before and after; apply a scythe-only model-space cant with reachable hand position; verify actual rig contact and finite poses, then rendered presentation when browser returns. Keep local Ruined Keep candidate and unrelated companion/rig changes separate. Browser currently has no connected clients; no live visual claim.
+
+
+## [Codex | 2026-10-16] Reaper diagonal carry implemented locally
+
+Scythe-only carry now cants the shaft about 35.5 degrees toward the character's left and puts the lower hand farther forward. Both palm anchors remain tied to the actual shaft; authored attack release and other polearms retain their existing path. Main game and wardrobe import chains are cache-busted for the candidate. Actual Rogue/Scythe geometry plus shared idle/run/attack/recovery animations passed 4,800 finite/contact samples across four facings and two scales, with sub-millimetre support error. Evidence: docs/art-validation/reaper-grip-20261016/summary.json; repeat with node scripts/audit-reaper-grip.mjs --assert-diagonal.
+
+Not published: browser discovery returned no clients. Visual inspection of blade/face/robe clearance, Reaper skin ornaments, attack transitions and the production gallery is still required by the repository ship checklist. Local Ruined Keep candidate is also unpublished. Do not push this branch wholesale before finishing both review queues. Preserve unrelated companion3d.js/articulated-rigs.json changes.

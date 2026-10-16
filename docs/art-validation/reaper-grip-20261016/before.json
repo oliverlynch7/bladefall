@@ -1,0 +1,32 @@
+{
+  "method": "Actual Rogue/Scythe geometry and production IK; textures omitted, not browser visual QA",
+  "frames": 480,
+  "maximumSupportError": 4.5543835083313e-7,
+  "ready": {
+    "lateralMin": 6.4714079095473664e-9,
+    "upMin": 0.9599999675245604,
+    "forwardMin": 0.27999985829320406
+  },
+  "idle": {
+    "motion": "Idle",
+    "attack": false,
+    "frame": 119,
+    "axis": [
+      1.0054456545116608e-7,
+      0.959999980011861,
+      0.28000007129775134
+    ],
+    "supportError": 9.161283192027015e-8
+  },
+  "run": {
+    "motion": "Run",
+    "attack": false,
+    "frame": 119,
+    "axis": [
+      2.3225365283763288e-7,
+      0.9600000379460427,
+      0.27999987053002795
+    ],
+    "supportError": 8.050612582776619e-8
+  }
+}

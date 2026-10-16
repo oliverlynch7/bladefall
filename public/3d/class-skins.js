@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2191';
+import {createClassDisplay} from './hero3d.js?v=2204';
 const $=s=>document.querySelector(s),canvas=$('#wardrobe'),scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.05,120),renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setClearColor(0x000000,0);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setPixelRatio(Math.min(1.75,devicePixelRatio));
 const hemi=new T.HemisphereLight(0xd7ecff,0x86725a,2.15),key=new T.DirectionalLight(0xffefce,2.6),rim=new T.DirectionalLight(0x8bbdde,1.6);key.position.set(-3,6,6);rim.position.set(4,4,-3);scene.add(hemi,key,rim);

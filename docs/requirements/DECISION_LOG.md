@@ -1360,3 +1360,8 @@ The earned Warrior reached north escort wave 1, then rank-5 passive selection pa
 ## [Codex | 2026-10-16] U-KEEP-READINESS-20261016 - next campaign review
 
 User: "Go ahead" in response to finishing Hollow Pass checks and reviewing Ruined Keep navigation, quest logic, collisions and confusing/stuck states. Browser discovery returned no clients, so Hollow's outstanding rendered checks remain open. Proceed with source-grounded Ruined Keep progression/guidance and saved-state review; no geometry or balance changes. Validate actual story transactions and old notes; prepare local fixes for rendered verification before a new gameplay release.
+
+
+## [Codex | 2026-10-16] U-REAPER-GRIP-20261016
+
+User requests the Reaper's scythe held diagonally in front, with its blade to the side rather than straight upright in front of the face. Inspect the shared anatomical grip/arm solve, adjust the scythe-specific ready pose, preserve two-hand contact and authored attack release, and check idle/run/attacks/recovery plus other polearms. Current source uses the generic pole pose (.96 tilt) with no lateral cant. Plan: measure the actual Rogue rig/Scythe asset before and after; apply a scythe-only model-space cant with reachable hand position; verify actual rig contact and finite poses, then rendered presentation when browser returns. Keep local Ruined Keep candidate and unrelated companion/rig changes separate. Browser currently has no connected clients; no live visual claim.

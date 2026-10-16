@@ -1782,3 +1782,8 @@ The earned Warrior reached north escort wave 1, then rank-5 passive selection pa
 ## [Codex | 2026-10-16] Evidence export correction
 
 Final file validation found a truncated alarm export and corrupted aggregate fixture artifact. Their replacement metadata explicitly identifies the issue; completed staged results were reconstructed from the visible browser outputs. The last complete restorable earned export is canyon-arrival-before.json, not canyon-alarm-earned.json. All review JSON artifacts now parse. No gameplay source changed.
+
+
+## [Codex | 2026-10-16] Hollow guidance deployed
+
+Gameplay commit 66b1fc66 passed the Cloudflare Pages deployment check. Evidence corrections are in 5a6a60e0. Version v2.203.0-hollow-guidance; deployment evidence: docs/art-validation/hollow-review-20261015/deployment.json. No production browser smoke claim: browser discovery was empty and direct HTTP fetch returned 403. Generated review pages were removed; unrelated companion/rig changes remain untouched. Continue earned escort/rank-5 choice, Marksman approach and rendered Waystone checks when browser reconnects.

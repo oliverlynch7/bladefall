@@ -1026,7 +1026,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
 <link rel="stylesheet" href="./bag-menu.css?v=2238">
-<link rel="stylesheet" href="./adventure-hud.css?v=2232">
+<link rel="stylesheet" href="./adventure-hud.css?v=2239">
 <script src="./adventure-hud.js?v=2232"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
@@ -1106,7 +1106,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./class-looks.js?v=2231"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2228"></script>
 <script src="./emotes.js?v=2225"></script>
-<script src="./camera-occlusion.js?v=2095"></script>
+<script src="./camera-occlusion.js?v=2239"></script>
 <script src="./campaign-threat.js?v=2217"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
@@ -1189,7 +1189,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.238.0-equipment-workbench';
+const VERSION3D='2.239.0-keep-performance';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4263,9 +4263,9 @@ function questUpdate(){
     const shardRegion=inBriarStory()&&BFRiftShards.regions[G.zone],shards=shardRegion&&BFRiftShards.progress(meta.riftShards,G.pendingRiftShards,shardRegion.id);
     rows+=shards&&(shards.banked+shards.pending)>0?qrow(shards.ready,eventIcon('event-secret-rift'),shards.ready?'Rift Shards ready · visit the Rift Hall':`Rift Shards · ${shards.banked}/5 saved${shards.pending?' · '+shards.pending+' carried':''}`,null):secretRow;
     sig='z'+Z.id+G.area+'|'+(inBriar()?(G.storyState?.revision||0):'')+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed')+(secret?'|secret':''); }
-  const details=el.querySelector('details');if(details)questUpdate._optionalOpen=details.open;
-  const oq=discoveredOptionalTasks(),active=oq.filter(m=>!m.done);
-  if(oq.length){rows+=`<details class="qoptional"${questUpdate._optionalOpen===true?' open':''}><summary>Optional tasks · ${active.length} active</summary>${oq.map(m=>qrow(m.done,m.done?'☑':'◇',journalEscape(m.title)+(m.done?'':`<br><small>${journalEscape(m.progress)}</small>`),null)).join('')}</details>`;}
+  const active=discoveredOptionalTasks().filter(m=>!m.done);
+  if(active.length){rows+=`<section class="qoptional" aria-label="Optional objectives"><div class="qoptionalhead">Optional · ${active.length}</div>${active.map(m=>qrow(false,'◇',journalEscape(m.title)+`<br><small>${journalEscape(m.progress)}</small>`,null)).join('')}</section>`;}
+  sig+='|optional:'+active.map(m=>m.title+':'+m.progress).join('|');
   applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
 }
 
@@ -11103,14 +11103,15 @@ function enemyRouteEdge(e,a,b){
 }
 // A route never leaves its 8-cell search window. Filter broad-phase candidates once per search.
 function enemyRouteContext(e){
- const margin=512+(e.r||0),near=o=>Math.abs(o.x-e.x)<=margin+(o.w||0)/2&&Math.abs(o.z-e.z)<=margin+(o.d||0)/2;
+ const margin=arguments[1]??(512+(e.r||0)),near=o=>Math.abs(o.x-e.x)<=margin+(o.w||0)/2&&Math.abs(o.z-e.z)<=margin+(o.d||0)/2;
  return {segments:G.segments.filter(near),obstacles:G.obstacles.filter(near),walls:(G.walls||[]).filter(near),movers:G.movers,crumbles:G.crumbles};
 }
 function moveGroundEnemy(e,dx,dz,speed,dt,range=300){
  if(speed<=0)return;const length=Math.hypot(dx,dz);if(length<.001)return;dx/=length;dz/=length;
  const reach=Math.max(1,Math.min(300,range)),look=Math.min(reach,Math.max(48,speed*dt));
  const goal={x:e.x+dx*reach,z:e.z+dz*reach,y:e.y},ahead={x:e.x+dx*look,z:e.z+dz*look};
- const direct=enemyRouteEdge(e,e,ahead);let node;
+ const directContext=enemyRouteContext(e,look+2*(e.r||0)+32);
+ const direct=enemyRouteEdge(e,e,ahead,directContext);let node;
  if(direct){e._route=null;node=ahead;}
  else {
   if(e._route&&Math.hypot(goal.x-e._routeGoal.x,goal.z-e._routeGoal.z)>180)e._route=null;
@@ -11124,7 +11125,7 @@ function moveGroundEnemy(e,dx,dz,speed,dt,range=300){
  if(!node)return;
  const d=Math.hypot(node.x-e.x,node.z-e.z),step=Math.min(speed*dt,d);if(d<.001)return;
  const next={x:e.x+(node.x-e.x)/d*step,z:e.z+(node.z-e.z)/d*step};
- if(enemyRouteEdge(e,e,next)){e.x=next.x;e.z=next.z;}
+ if(enemyRouteEdge(e,e,next,directContext)){e.x=next.x;e.z=next.z;}
  else {e._route=null;e._routeAt=Math.min(e._routeAt||0,G.time+.15);}
 }
 function syncedMelee(e){return e.kind==='walk'&&!e.boss&&!e.ceKind&&!e.prisonFoe&&!e.spec;}
@@ -24360,7 +24361,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2237"></script>
+<script type="module" src="./hero3d.js?v=2239"></script>
 <script type="module" src="./social-hub.js?v=2227a"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

@@ -158,3 +158,7 @@ body.adventure-hud{--hud-edge:#76958b;--hud-panel:#12252eed;--hud-gold:#efd794;-
  .adventure-hud #questbox{top:145px;width:calc(50vw - 18px);max-width:260px}
  .adventure-hud:has(#pethud:not(.hide)) #questbox{top:184px}
 }
+
+/* Active side objectives are part of the tracker, never a collapsed control. */
+.adventure-hud #questbox .qoptional{border-top:1px solid #cbb57755;margin-top:8px;padding-top:7px}.adventure-hud #questbox .qoptionalhead{font:700 10px/1.3 system-ui;color:#d9c394;letter-spacing:.04em}.adventure-hud #questbox .qoptional .qrow{font:12px/1.35 system-ui;margin:7px 0}.adventure-hud #questbox .qoptional small{display:block;color:#c0cfda;font-size:11px;margin-top:2px}.adventure-hud #questbox .qoptional br{display:none}
+@media(min-width:900px) and (min-height:680px){.adventure-hud #questbox{max-height:calc(100vh - 425px);overflow-y:auto;scrollbar-width:thin}}

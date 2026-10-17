@@ -1,3 +1,4 @@
+import {updateLocalLights} from './scene-lights.js?v=2239';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
 import {enrichCampaignKit} from './campaign-kit-detail.js?v=2182f';
@@ -132,7 +133,7 @@ export function updateDeep(w){
   for(const [cell,g] of a.groups){const [cx,cz]=cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}}
   for(const f of a.fade){const o=f.o;const hidden=window.BFCameraOcclusion.blocks(w,o,o.y0??Math.min(0,o.h-18),o.h,window.__BF_META?.().camMode,8);if(hidden!==f.hidden){f.mesh.setMatrixAt(f.index,hidden?zero:f.matrix);f.mesh.instanceMatrix.needsUpdate=true;f.hidden=hidden;}}
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;
-  const near=a.glows.map(v=>({v,d:(v.x-p.x)**2+(v.y-p.y)**2+(v.z-p.z)**2})).sort((x,y)=>x.d-y.d);a.lights.forEach((l,i)=>{l.visible=!low&&near[i]?.d<330**2;if(l.visible)l.position.copy(near[i].v)});
+  updateLocalLights(a,a.glows,p,330,900,low,false);
   const x=Math.round(p.x/250)*250,z=Math.round(p.z/250)*250,y=Math.round((p.y||0)/200)*200,key=x+','+y+','+z+','+low;if(a.shadow!==key){a.sun.position.set(x-450,y+1200,z+500);a.sun.target.position.set(x,y,z);a.sun.target.updateMatrixWorld();a.shadow=key;window.__DEEP_SHADOW_DIRTY=true;}
 }
 window.__deepObstacleDrawn=o=>!!active&&active.obstacles.has(o);

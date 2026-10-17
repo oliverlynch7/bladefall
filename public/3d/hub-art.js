@@ -1,3 +1,4 @@
+import {updateLocalLights} from './scene-lights.js?v=2239';
 import {makeHubMirror} from './hub-mirror3d.js?v=2233';
 import {buildHubUpgrades} from './hub-upgrades.js?v=2121';
 /* The Waystation: original, instanced Blender scenery. The layout is owned by
@@ -299,8 +300,7 @@ export function updateHubArt(w,t){
   if(w.hubArt?.riftHall){updateRiftHallArt(w,t);return;}
   if(!active)return;const p=w.p;if(!p)return;
   const low=window.__BF_META?.().quality==='low';if(active.quality!==low){active.quality=low;window.__HUB_SHADOW_DIRTY=true;}
-  const nearest=active.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);
-  active.lights.forEach((l,i)=>{l.visible=!low&&!!nearest[i]&&nearest[i].d<360**2;if(l.visible)l.position.copy(nearest[i].v)});
+  updateLocalLights(active,active.lamps,p,360,700,low,true);
   active.upgrades.userData.tick(t,window.__BF_META?.()||{});
   animateWaystone(active.waystone,t,window.__BF_META?.()||{});
   for(const m of active.animated){if(m.userData.portal)m.material.uniforms.time.value=t*.6;else{m.rotation.y=t*.25;m.position.y=66+Math.sin(t*1.1)*2;}}

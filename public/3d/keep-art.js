@@ -1,3 +1,4 @@
+import {updateLocalLights} from './scene-lights.js?v=2239';
 import {buildKeepJourneyArt} from './keep-journey-art.js?v=2236';
 import {buildPrisonJourneyArt} from './prison-journey-art.js?v=2196';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
@@ -243,7 +244,7 @@ export function updateKeep(w){
     if(hidden!==f.hidden){for(const q of f.parts){q.mesh.setMatrixAt(q.index,hidden?a.zero:q.matrix);q.mesh.instanceMatrix.needsUpdate=true;}f.hidden=hidden;window.__KEEP_SHADOW_DIRTY=true;}
   }
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;
-  const near=a.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.y-p.y)**2+(v.z-p.z)**2})).sort((x,y)=>x.d-y.d);a.lights.forEach((l,i)=>{l.visible=!low&&near[i]?.d<300**2;if(l.visible)l.position.copy(near[i].v)});
+  updateLocalLights(a,a.lamps,p,300,900,low,false);
   const x=Math.round(p.x/250)*250,z=Math.round(p.z/250)*250,key=x+','+z+','+low;if(a.shadow!==key){a.sun.position.set(x-600,1250,z+500);a.sun.target.position.set(x,0,z);a.sun.target.updateMatrixWorld();a.shadow=key;window.__KEEP_SHADOW_DIRTY=true;}
 }
 window.__keepObstacleDrawn=o=>!!active&&active.obstacles.has(o);

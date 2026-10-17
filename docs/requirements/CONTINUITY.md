@@ -2300,3 +2300,10 @@ HUD active optional objectives are a visible section under main objective, with 
 ## [Codex | 2026-10-17] v2.239 production confirmed
 
 Functional commitfd1210bd deployed successfully as5ed85a15-58be-43db-b69a-80166d1f1b3b. Actual public browser confirmsv2.239.0-keep-performance, normal main-menu boot and2239 camera/hero/HUD asset references. Local106-suite,6000 camera/60 movement parity cases, old-save, reproduced lighting-transition before/after and visible optional progress evidence recorded in docs/art-validation/keep-performance-20261017. Profile artifacts omit repeated decorative item records while retaining counts and timings. No production character/save changes.
+
+
+## [Codex | 2026-10-17] v2.240 overhead controls and movement clarity
+
+Mouse attack/dodge now route canvas and transparent look/joystick surfaces through the same binding handler, avoiding blocked overhead clicks without firing on HUD/menu controls. J retained; K is a compatibility dodge alias only for the conventional Shift/Mouse2 mapping when K has no explicit binding; customized mappings win. Dash model afterimages now default off globally; Graphics & appearance offers persisted Dash afterimages toggle, clearing existing echoes immediately, with Reduce motion overriding on. Overhead minimap heading derives from rendered camera view, keeping map aligned while player turns; shoulder/FPS still follow camera yaw.
+
+Browser disposable pre-change level100 save:30 checks pass for six mouse press/release pairs, HUD exclusion, J/K, fixed overhead direction, shoulder/FPS headings, default-off/opt-in/clear trails and actual settings toggle.106 existing offline suites plus new focused overhead suite pass; inline parses. No production saves modified. Publication pending.

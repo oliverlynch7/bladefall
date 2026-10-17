@@ -3175,3 +3175,10 @@ Shared camera occlusion/sweep now uses scalar slabs plus conservative XZ broad p
 HUD active optional objectives are a visible section under main objective, with title and next step/count, no dropdown. Completed history remains in Journal. Progress included in signature; tracker has bounded scroll on crowded/short screens. Actual Sly family-picture quest fixture verifies initial visible row, changed return-to-Sly instruction and completed row removal; no hidden details, no captured errors. Screenshot inspected.
 
 106 offline suites pass. Existing scenes, puzzles, water collision, rewards and saves preserved; pre-change save loaded. No production save changes, physical mobile/controller or two-device co-op test claimed. Evidence before/after/comparison/optional-HUD JSON and screenshot in this directory. Publication pending.
+
+
+## [Codex | 2026-10-17] v2.240 overhead controls and movement clarity
+
+Mouse attack/dodge now route canvas and transparent look/joystick surfaces through the same binding handler, avoiding blocked overhead clicks without firing on HUD/menu controls. J retained; K is a compatibility dodge alias only for the conventional Shift/Mouse2 mapping when K has no explicit binding; customized mappings win. Dash model afterimages now default off globally; Graphics & appearance offers persisted Dash afterimages toggle, clearing existing echoes immediately, with Reduce motion overriding on. Overhead minimap heading derives from rendered camera view, keeping map aligned while player turns; shoulder/FPS still follow camera yaw.
+
+Browser disposable pre-change level100 save:30 checks pass for six mouse press/release pairs, HUD exclusion, J/K, fixed overhead direction, shoulder/FPS headings, default-off/opt-in/clear trails and actual settings toggle.106 existing offline suites plus new focused overhead suite pass; inline parses. No production saves modified. Publication pending.

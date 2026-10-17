@@ -1937,3 +1937,8 @@ User rejects nested bag dropdowns and authorizes an intelligent major redesign. 
 ## [Codex | 2026-10-17] U-KEEP-PERFORMANCE-OPTIONALS-20261017
 
 User reports significant Ruined Keep frame drops, especially near water, suspects shared level costs. Active optional objectives must be directly visible in core HUD tracker, not hidden in a dropdown. Plan: measure actual default-camera Keep entry/water/movement CPU and render phases in disposable old-save browser fixture before changing performance code; inspect AI collision/pathing, camera occlusion, chunk/shadow work and water geometry, fix evidenced hot paths with reusable bounded caches/broadphase where appropriate. Preserve layout, collision, visuals and combat rules. Replace HUD optional fold with visible active rows, retain completed history in Journal, include optional progress in tracker signatures. Verify browser before/after timings, objectives/progress/no-overlap and offline regressions; report hardware/scene limits honestly.
+
+
+## [Codex | 2026-10-17] U-OVERHEAD-INPUT-20261017
+
+User requires mouse attack/dodge alongside keyboard in overhead, fixed camera-aligned minimap in that view, and no movement blur by default. Plan: route mouse events from canvas and transparent touch surfaces through shared binding handler (exclude actual HUD/buttons); retain touch and pointer-lock rules. Add persisted default-off dash afterimage setting with immediate trail clearing, retain combat effects. Set overhead map heading from rendered view direction, preserve shoulder/FPS heading. Verify inputs, rebindings, menu exclusion, trail switch and map orientation.

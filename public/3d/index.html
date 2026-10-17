@@ -1189,7 +1189,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.239.0-keep-performance';
+const VERSION3D='2.240.0-overhead-controls';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1250,7 +1250,7 @@ function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}ca
 const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
 const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -1260,7 +1260,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 }
 _g.legacyHubDialogue=_g.legacyHubDialogue||_g.hubDialogue||{};
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,autoSellEquipment:false,camMode:'shoulder',lookSens:1,fpsFov:92,shoulderZoom:1,overheadZoom:1,renderDist:1,silhouette:true,dmgNumbers:true,
+  motionTrails:false,soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,autoSellEquipment:false,camMode:'shoulder',lookSens:1,fpsFov:92,shoulderZoom:1,overheadZoom:1,renderDist:1,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -10040,7 +10040,7 @@ window.addEventListener('wheel',e=>{
 window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
 function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||_codeToAction[code]||['Escape','KeyQ','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
 function resetKeyAction(id){const a=KEYACTIONS.find(a=>a.id===id);if(!a)return;for(const other of KEYACTIONS)meta.keybinds[other.id]=(meta.keybinds[other.id]||[]).filter(c=>!a.def.includes(c));meta.keybinds[id]=a.def.slice();rebuildKeyLookup();}
-function keyAction(code){ return _codeToAction[code]||null; }
+function keyAction(code){ return _codeToAction[code]||(code==='KeyK'&&meta.keybinds?.dodge?.includes('ShiftLeft')&&meta.keybinds.dodge.includes('Mouse2')?'dodge':null); }
 ensureKeybinds();
 /* Is the level editor open? Read in the pointer-lock paths and the key handler. A function rather
    than a cached flag because the editor module loads after this script and toggles at any time. */
@@ -10139,7 +10139,7 @@ window.addEventListener('pointerdown',e=>{
   const sx=sp[0]/DPR, sy=sp[1]/DPR;
   if(Math.hypot(e.clientX-sx,e.clientY-sy)<64){ e.preventDefault(); e.stopPropagation(); initAudio(); openShade(); }
 },true);
-canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='play') return;
+window.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='play'||![canvas,document.getElementById('lookzone'),document.getElementById('joyzone')].includes(e.target)) return;
   const act=keyAction('Mouse'+e.button); if(!act) return;
   e.preventDefault(); initAudio();
   if(MOVE_ACTS[act]){
@@ -11802,7 +11802,7 @@ const ECHO_LIFE = 0.34;      // how long an echo lingers after it is dropped
 let _echoes = [];
 
 function dodgeEchoTick(dt){
-  if(!G || !G.p) return;
+  if(meta.motionTrails!==true||meta.reduceMotion||!G||!G.p){_echoes.length=0;return;}
   const p = G.p;
 
   if((p.dodgeTimer || 0) > 0){
@@ -11825,7 +11825,7 @@ function dodgeEchoTick(dt){
 /* Drawn from the render pass, so the echoes are posed in the same frame they are seen. Returns the
    pose keys it used, which the sweep needs or they would be hidden the moment the dash ends. */
 function dodgeEchoDraw(keep){
-  if(!_echoes.length || !window.__hero3dAt) return;
+  if(meta.motionTrails!==true||meta.reduceMotion||!_echoes.length||!window.__hero3dAt) return;
   for(let i = 0; i < _echoes.length; i++){
     const e = _echoes[i];
     /* Older samples are fainter AND slightly smaller, which sells depth along the path better than
@@ -20222,6 +20222,7 @@ function openPause(){
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Controller setup</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="motionTrailsBtn">Dash afterimages: ${meta.motionTrails===true?'On':'Off'}</button>
       <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
@@ -20253,6 +20254,7 @@ function openPause(){
   { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
   { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ BFController.open(meta,persistGlobal); }; }
   { const _sk=document.getElementById('shakeBtn'); if(_sk) _sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPause(); }; }
+  {const b=document.getElementById('motionTrailsBtn');if(b)b.onclick=()=>{meta.motionTrails=meta.motionTrails!==true;_echoes.length=0;persistGlobal();openPause();};}
   { const _rm=document.getElementById('reduceMoBtn'); if(_rm) _rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPause(); }; }
   { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
   { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
@@ -20270,7 +20272,7 @@ function organizePauseSettings(){
   const back=document.getElementById('settingsBack'),card=back.closest('.card');
   const groups=[
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
-    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn','resolutionBtn','fpsBtn']],
+    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','motionTrailsBtn','armFxBtn','resolutionBtn','fpsBtn']],
     ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
@@ -20305,6 +20307,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Controller setup</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="motionTrailsBtn">Dash afterimages: ${meta.motionTrails===true?'On':'Off'}</button>
       <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
@@ -20335,6 +20338,7 @@ function openPauseSettingsV2(){
   { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
   { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ BFController.open(meta,persistGlobal); }; }
   { const sk=document.getElementById('shakeBtn'); if(sk) sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPauseSettingsV2(); }; }
+  {const b=document.getElementById('motionTrailsBtn');if(b)b.onclick=()=>{meta.motionTrails=meta.motionTrails!==true;_echoes.length=0;persistGlobal();openPauseSettingsV2();};}
   { const rm=document.getElementById('reduceMoBtn'); if(rm) rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPauseSettingsV2(); }; }
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);
   document.getElementById('tutTogBtn').onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPauseSettingsV2(); };
@@ -24313,7 +24317,7 @@ function awardChessCape(){
 window.__BF_SOCIAL_API={awardChessCape,g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,project:(x,y,z)=>{const p=project(x,y,z);return p?{x:p[0]/DPR,y:p[1]/DPR}:null;},openTalk:n=>openNpcTalk(n,true),
  enter:m=>{releaseKeyboard();mode=m;showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:resumePlay,
  listen:(n,line)=>BFHubDialogue.listen(n,{meta,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line)};
-window.__BF_MAP_PARTY=()=>({heading:meta.camMode==='far'?G?.p?.yaw:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
+window.__BF_MAP_PARTY=()=>({heading:meta.camMode==='far'?Math.atan2(VIEW[2],VIEW[10])+Math.PI:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
 function devBeta(){return G?.devBriar?BFBriarBeta:BFKeepBeta;}
 const betaApi={
   g:()=>G,classes:CLASSES,box:bx,spawn:spawnEnemy,spawnClassBot:(cls,x,z)=>{const old=ARENA_LOADOUT.botClass;ARENA_LOADOUT.botClass=cls;const b=spawnBot('normal');ARENA_LOADOUT.botClass=old;if(b){Object.assign(b,{x,z,y:G.devBriar?.terrain.height(x,z)||0,betaClassOpponent:true,betaId:'duel:challenger',betaOrigin:{x,z},hp:Math.round(b.hp*.78),maxHp:Math.round(b.hp*.78)});}return b;},toast,maxHp:()=>effMaxHp(G.p),

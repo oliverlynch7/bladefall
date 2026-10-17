@@ -1720,3 +1720,9 @@ Raise Rank 5 to the existing Rank 10 construction quality while preserving its d
 User: "Now the Rank 5 classes look better, but now the rank 10 ones look too much like the rank 5 ones. I would experiment with, like, auras, glows, extra pizzazz and flair. They need to be differentiated, similar to the progression of the chests."
 
 Accept the user's visual assessment: extra small fittings did not differentiate Rank 10 adequately. Keep the improved Rank 5 intact. Give each Rank 10 an immediately legible, class-specific aura silhouette, brighter small inlays and distinctive slow motion. Preview branch only; preserve production, cosmetic-only stats, ranks, save IDs and per-class colors. Use depth-tested effects, bounded draw/particle budgets, reduced-motion and low-quality paths. New effects are explicitly authorized here, superseding the previous design packet's no-particle scope. Do not equate rig tests with visible quality. Plan: docs/design/RANK10_FLAIR_2026-10-16.md.
+
+## [Codex | 2026-10-16] U-SFX-STARTER-20261016
+
+User: "Ok I upgraded to Starter. Please check the credits and then generate the most important SFX and put them into the game, replacing the old ones."
+
+Verified Starter, 40,000 credits remaining. Authorized paid SFX generation and game slot replacement; first batch capped at 10,000 credits, no overages or unknown-outcome retries. Preserve originals and generation/license records in repo. Prioritize real existing weapon/mob/reward slots plus selected procedural player cues; preserve saves, volume/mute and fallback. Evidence must separate decoded/signal checks from subjective listening and browser tests.

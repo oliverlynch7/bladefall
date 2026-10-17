@@ -1849,3 +1849,17 @@ Checks pass across 51 combinations, 4,080 rig samples, 204 unlock-boundary asser
 
 Cloudflare confirms successful isolated deployment of 2854f256: https://0d8579e4.bladefall.pages.dev/3d/class-skins.html?preview=1 . Includes smooth endpoint fading for rising/falling motes; 2,352 aura assertions now pass. Production unchanged. Browser/rendered aesthetic and clipping review remain open.
 
+
+## [Codex | 2026-10-16] U-SFX-STARTER-20261016
+
+User: "Ok I upgraded to Starter. Please check the credits and then generate the most important SFX and put them into the game, replacing the old ones."
+
+Verified Starter, 40,000 credits remaining. Authorized paid SFX generation and game slot replacement; first batch capped at 10,000 credits, no overages or unknown-outcome retries. Preserve originals and generation/license records in repo. Prioritize real existing weapon/mob/reward slots plus selected procedural player cues; preserve saves, volume/mute and fallback. Evidence must separate decoded/signal checks from subjective listening and browser tests.
+
+## [Codex | 2026-10-16] Paid priority SFX implemented — candidate v2.207.0
+
+Generated 64 ElevenLabs v2 SFX under verified Starter subscription; 557 credits reported by generation response headers. Replaced 56 existing registry paths and eight procedural methods, plus bow-only release routing. Untouched MP3 originals, prompts, request identifiers and paid-plan records are in audio-source/sfx/starter-20261016; old file backups in audio-source/sfx/legacy-before-starter-20261016. Runtime stereo derivatives and before/after audition page: public/sfx/custom/starter-20261016/. Credentials remain external and are not shipped.
+
+580 integration checks pass, all audio decodes, processing checks useful energy/finite samples/peaks, mute/volume bus/prominence are retained, and missing-file fallback succeeds. Generation was resumed after a read-only balance request rate limit; no paid request was repeated. Provider balance endpoint lags the 557 billed response total. No human audition or browser playback proof: Chrome connection remains unavailable. Publish separate preview only; production remains unchanged and pending Keep/Reaper/wardrobe must not be merged wholesale. See docs/art-validation/priority-sfx-20261016/summary.json.
+
+Accounting reconciliation: subsequent read-only subscription check confirms exactly 557 credits consumed and 39,443 remaining. Resumable runner skipped all 64 existing masters without additional generation.

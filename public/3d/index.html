@@ -1151,6 +1151,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2116"></script>
+<script src="./priority-sfx.js?v=2207"></script>
 <script>
 (function(){
 "use strict";
@@ -1161,7 +1162,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.206.0-rank10-flair';
+const VERSION3D='2.207.0-priority-sfx';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1759,6 +1760,8 @@ const FXDEF={
   atk1:{f:'atk1',v:0.4}, atk2:{f:'atk2',v:0.4}, ma_stomp:{f:'ma_stomp',v:0.5},
   mimicroar:{f:'mimicroar',v:0.58}, chestthunk:{f:'chestthunk',v:0.5}, gamblecoins:{f:'gamblecoins',v:0.48}
 };
+// Paid custom files replace their old slots; keep each old path for network/decode fallback.
+if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={
   thornboar:{v:'v_boargrunt',d:'die1'}, charger:{v:'v_boarroar',d:'die2'}, dustjackal:{v:'v_jackalbark',d:'die3'},
@@ -1786,8 +1789,11 @@ function bufRms(buf){ let s=0,n=0; const ch=Math.min(buf.numberOfChannels,2);
   return Math.sqrt(s/Math.max(1,n)); }
 const FX_TARGET_RMS=0.09;                                // Phase 20: every file SFX auto-levels to this
 function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
-  for(const k in FXDEF){ (function(key){ fetch(SFXDIR+FXDEF[key].f+'.mp3').then(r=>r.arrayBuffer()).then(b=>actx.decodeAudioData(b)).then(buf=>{FXBUF[key]=buf;
-    const rms=bufRms(buf); FXDEF[key]._norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1; }).catch(()=>{}); })(k); } }
+  const decode=f=>fetch(SFXDIR+f+'.mp3').then(r=>{if(!r.ok)throw new Error('SFX unavailable');return r.arrayBuffer();}).then(b=>actx.decodeAudioData(b));
+  for(const k in FXDEF){ (function(key){const def=FXDEF[key];decode(def.f).catch(err=>{if(def.legacyF)return decode(def.legacyF);throw err;}).then(buf=>{FXBUF[key]=buf;
+    const rms=bufRms(buf);let norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1;
+    if(def.f.startsWith('custom/')){let peak=0;for(let c=0;c<buf.numberOfChannels;c++){const data=buf.getChannelData(c);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}if(peak>0)norm=Math.min(norm,.85/peak);}
+    def._norm=norm; }).catch(()=>{}); })(k); } }
 const _fxLoop={};
 function playFx(key,volMul){ if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
   try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul);
@@ -1892,6 +1898,7 @@ const SFX={
     noise({dur:0.5,f0:5000,f1:9000,type:'highpass',vol:0.035,a:0.05,at:0.35}); }
 };
 
+if(window.BFPrioritySfx)window.BFPrioritySfx.bind(SFX,playFx);
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
   common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
@@ -2036,7 +2043,7 @@ const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
   if(w.arche==='axe') return 'axeswing';                     // axes
-  if(w.art==='sword'&&w.sch==='phys') return null;           // physical swords: the crisp synth SFX.slash only (the swordswing sample sounded like a lingering scrape on hit)
+  if(w.art==='sword'&&w.sch==='phys') return 'swordswing';    // new isolated swing replaces the former lingering scrape
   if(w.arche==='javelin') return 'spearswing';               // spears / javelins
   return null; }
 function weaponFireFx(w){ if(!w) return null;
@@ -12036,7 +12043,7 @@ function playerAttack(cdMul){
     burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
     return;
   }
-  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else { SFX.shoot(); if(w.arche==='crossbow') playFx('xbowclick',0.7); } }   // Phase 20: wands use the new procedural zap; crossbow gets its mechanical click
+  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else { if(w.arche!=='bow'||!playFx('custom_shoot'))SFX.shoot(); if(w.arche==='crossbow') playFx('xbowclick',0.7); } }   // Phase 20: wands use the new procedural zap; crossbow gets its mechanical click
   else { p.atkTimer=0.26; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
     if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
       p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);

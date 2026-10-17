@@ -1,0 +1,24 @@
+<script>
+window.runBagEquipMatrix=async function(b){
+ const rows=[],check=(v,label)=>{rows.push({label,pass:!!v});if(!v)throw Error(label);},resume=()=>__BF_SOCIAL_API.resume(),clone=o=>JSON.parse(JSON.stringify(o));
+ const make=(slot,name,type='vigor')=>{const tr=['ring','amulet'].includes(slot),a=tr?b.makeTrinket('common',slot,type):b.makeArmor('common',slot,type);a.name=name;return {[tr?'trinket':'armor']:a};};
+ function swap(slot,label,{full=false,pause=false,type='vigor'}={}){
+  resume();b.update(.016);const old=b.G.p.gear[slot],entry=make(slot,label,type);b.meta.stash=[entry,...Array.from({length:full?29:0},(_,i)=>make('helmet','Filler '+i))];
+  if(pause){b.openPause();document.getElementById('bagBtnP').click();}else b.openBag(resume);
+  const captured=b.meta.hero;b.G.time+=9;b.update(.016);if(b.G.hub)check(b.meta.hero!==captured,label+' autosave replaced snapshot');document.querySelector('[data-eq="0"]').click();
+  check(b.G.p.gear[slot]?.name===label,label+' equips live');check(!b.meta.stash.includes(entry),label+' consumed once');if(old)check(b.meta.stash.some(x=>(x.armor||x.trinket)?.name===old.name),label+' old piece returned');
+  if(full)check(b.meta.stash.length===(old?30:29),label+' full bag count conserved');if(b.G.hub)check(b.meta.hero.gear[slot]?.name===label&&JSON.parse(localStorage.getItem(b.MKEY('rl'))).hero.gear[slot]?.name===label,label+' saved immediately');
+  check([...document.querySelectorAll('.bagslotname')].some(n=>n.textContent===label),label+' equipped panel updated');
+ }
+ for(const [slot,type]of [['helmet','warding'],['chest','vigor'],['legs','swift'],['amulet','focus'],['ring','sanguine']])swap(slot,'QA '+slot,{type});
+ for(const slot of ['helmet','chest','legs','amulet','ring'])swap(slot,'Full bag '+slot,{full:true});
+ resume();b.update(.016);const weapon=b.makeWeapon('sword','common','QA Swap Sword');b.meta.stash=[{weapon}];b.openBag(resume);b.G.time+=9;b.update(.016);document.querySelector('[data-eq="0"]').click();check(b.G.p.weapon.name===weapon.name&&b.meta.hero.weapon.name===weapon.name,'weapon equip survives autosave');b.G.time+=9;b.update(.016);document.getElementById('unequipBtn').click();check(b.G.p.weapon.name!==weapon.name&&b.meta.stash.some(x=>x.weapon?.name===weapon.name),'Use Class Default returns weapon after snapshot replacement');
+ const locked={armor:b.makeArmor('legendary','chest','might')};b.meta.stash=[locked];b.openBag(resume);const old=b.G.p.gear.chest.name;document.querySelector('[data-eq="0"]').click();check(b.meta.stash[0]===locked&&b.G.p.gear.chest.name===old,'level-locked armor remains untouched');
+ resume();const expected=clone(b.G.p.gear);b.meta.hero=b.snapOf(b.G.p);b.persist();b.loadMode('rl');b.openHub();check(Object.keys(expected).every(k=>b.G.p.gear[k]?.name===expected[k]?.name),'hub save reload preserves all five equipped slots');check(b.G.p.level===4&&b.G.p.xp===52&&b.meta.gold===1145&&b.meta.classes.warrior.rank===4,'old save growth and gold unchanged');
+ Object.assign(b.MP,{active:true,isHost:true,zone:b.MP.HUB,myId:'equip-local',conns:[]});swap('ring','Co-op paused ring',{pause:true});b.MP.active=false;
+ resume();b.enterZone(0);b.G._tutorialSafe=true;swap('chest','Campaign swap chest');
+ // Checkpoint reload preserves its original item ownership contract (gear may rewind, items cannot disappear).
+ resume();const entry=make('helmet','Checkpoint helmet');b.meta.stash=[entry];b.captureCampaignCheckpoint();b.openBag(resume);document.querySelector('[data-eq="0"]').click();check(b.G.p.gear.helmet?.name==='Checkpoint helmet','checkpoint scene equips correctly');b.restartCampaignCheckpoint();check(b.meta.stash.some(x=>x.armor?.name==='Checkpoint helmet')||b.G.p.gear.helmet?.name==='Checkpoint helmet','checkpoint retry retains item ownership');
+ b.openHub();return rows;
+};
+</script>

@@ -1168,7 +1168,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.221.0-safe-hub-return';
+const VERSION3D='2.222.0-safe-equipment-swap';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5291,12 +5291,36 @@ function bagDollRender(){
  const cnv=document.getElementById('bagDollCanvas');if(!bagDoll||!cnv)return;
  window.__hero3dBagPreview?.(cnv,{player:bagDoll.p,pet:bagDoll.pet,yaw:bagDoll.yaw});
 }
+function bagEquipmentActor(){return G?.p||meta.hero;}
+// Prepare the complete swap before consuming the selected bag entry. Autosave can replace
+// meta.hero while this menu stays open, so a captured snapshot is never an equip target.
+function equipBagItem(entry,world=G){
+  if(G!==world){toast('Reopen your bag in the current area.');return false;}
+  const actor=bagEquipmentActor(),index=meta.stash.indexOf(entry),item=entry?.weapon||entry?.armor||entry?.trinket;
+  if(!actor||index<0||!item){toast('That item is no longer in this bag.');return false;}
+  if(!entry.weapon&&!GEARSLOTS.includes(item.slot)){toast('This item has no valid equipment slot. It is still in your bag.');return false;}
+  if(entry.weapon&&(!classFamilyOk(normWeapon(checkpointClone(item)))||monkBlocksWeapons(item))){toast('This weapon belongs to another class. Switch class at the Drillmaster.');return false;}
+  if(item.rarity&&(actor.level||1)<rarityReq(item.rarity)){toast('🔒 Requires Level '+rarityReq(item.rarity));return false;}
+  let staged,snapshot,nextStash;
+  try{
+    staged={...actor,gear:cloneGear(actor.gear)};
+    const old=entry.weapon?actor.weapon:actor.gear?.[item.slot];
+    if(entry.weapon)staged.weapon=normWeapon(checkpointClone(item));else staged.gear[item.slot]=checkpointClone(item);
+    recomputeArmor(staged);staged.hp=Math.min(actor.hp,effMaxHp(staged));
+    snapshot=(!G||G.hub)?snapOf(staged):null;
+    nextStash=meta.stash.slice();nextStash.splice(index,1);
+    if(old&&(!entry.weapon||!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)))nextStash.push(entry.weapon?{weapon:old}:TRINKETIDS.includes(item.slot)?{trinket:old}:{armor:old});
+  }catch(e){console.warn('[bag] Equip cancelled before consuming item',e);toast('This item could not be equipped. It is still in your bag.');return false;}
+  Object.assign(actor,{weapon:staged.weapon,gear:staged.gear,armorMods:staged.armorMods,maxMana:staged.maxMana,mana:staged.mana,hp:staged.hp});
+  meta.stash=nextStash;if(snapshot)meta.hero=snapshot;
+  persist();SFX.pickup();hudUpdate();return true;
+}
 function openBag(back,keepOpen=false){
   const expanded=keepOpen?new Set([...document.querySelectorAll('details.baggroup[open]')].map(e=>e.dataset.group)):new Set();
   migrateClassEquipment();
   mode='menu';
   menuTip('tip_bag','your <b>Pack</b>. New gear goes here. When full, gear stays on the ground. Enable <b>Auto-sell</b> only if you want pickups sold for gold.');
-  const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
+  const bagWorld=G,HR=bagEquipmentActor();   // live actor; saved snapshots may refresh while the bag is open
   // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
   const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
   const order=meta.stash.map((it,i)=>({it,i})).filter(x=>oOf(x));
@@ -5346,28 +5370,18 @@ function openBag(back,keepOpen=false){
   document.getElementById('bagAutoSell').onchange=e=>setAutoSell(e.target.checked);
   document.getElementById('charStatsBtn').onclick=()=>openCharacterStats(()=>openBag(back));
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back,true); };
-  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
-    if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
-    if(it.weapon&&(!classFamilyOk(normWeapon(it.weapon))||monkBlocksWeapons(it.weapon))){toast('This weapon belongs to another class. Switch class at the Drillmaster.');return;}
-    const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
-    if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
-    else { const g=it.armor||it.trinket, isT=TRINKETIDS.includes(g.slot); const old=HR.gear[g.slot]; HR.gear[g.slot]=g; meta.stash.splice(i,1); if(old) meta.stash.push(isT?{trinket:old}:{armor:old}); }
-    if(G&&G.hub&&HR===meta.hero){
-      // The Pause-menu bag edits the banked snapshot. Mirror that change into the live hub
-      // player immediately; otherwise Resume keeps showing/using the old weapon until a
-      // keeper exit or full hub reload happens to call wsResume().
-      G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon)));
-      G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p));
-    } else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
-    persist(); SFX.pickup(); hudUpdate(); openBag(back,true); });
+  document.querySelectorAll('[data-eq]').forEach(b=>{
+    const entry=meta.stash[+b.dataset.eq];
+    b.onclick=()=>{if(equipBagItem(entry,bagWorld))openBag(back,true);};
+  });
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
     const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back,true); });
-  { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(!HR) return;
+  { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(G!==bagWorld)return;const HR=bagEquipmentActor();if(!HR)return;
       const old=HR.weapon;
       if(old&&!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
       HR.weapon=classStartWeapon(meta.classId);
-      if(G&&G.hub&&HR===meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
-      else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+      recomputeArmor(HR);HR.hp=Math.min(HR.hp,effMaxHp(HR));
+      if(!G||G.hub)meta.hero=snapOf(HR);
       persist(); SFX.pickup(); hudUpdate(); toast('Class default ready'); openBag(back,true); }; }
   document.getElementById('backBtn').onclick=back;
   document.getElementById('gearInspect').onclick=()=>openMirror(()=>openBag(back));

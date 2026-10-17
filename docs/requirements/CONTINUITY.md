@@ -2371,3 +2371,8 @@ Ready Waystation return requests go directly from keeper interaction to delivery
 ## [Codex | 2026-10-17] v2.249.0 — Bag pause protection
 
 Shared openBag now begins the same pause session as Esc, covering keyboard, HUD and NPC bag access, refreshed filters and nested equipment panels. Solo time freezes; co-op world continues with held, visible invulnerable avatar and Paused presence. Resume clears protection; PvP exception unchanged. Browser checked old level100 save, Tab/HUD entry, Tab/Q exit, nested Stats, direct damage and simulated co-op state. Evidence: docs/art-validation/bag-pause-20261017.
+
+
+## [Codex | 2026-10-17] v2.250.0 — Chess scroll-wheel zoom
+
+Added board-centered wheel zoom to existing 3D orbit camera, range32..240, retained current default view and rotation. Side-panel scrolling, flat view and browser zoom shortcuts excluded; gameplay camera preferences and chess state untouched. Added short control hint.19 new zoom regressions pass plus existing chess experience, clock, choreography, rules and cape suites. Actual isolated old-save browser verifies7 cases and visibly checks close/wide extremes. Evidence: docs/art-validation/chess-zoom-20261017.

@@ -1987,3 +1987,8 @@ User wants ready NPC quest hand-ins replace stale reminder/question branches, wi
 ## [Codex | 2026-10-17] U-BAG-PAUSE-20261017
 
 Opening the bag must use main-menu pause protection: solo simulation freezes; co-op world continues while the visible player is protected and peers see paused presence. Initialize existing pause session at the shared openBag entry, including direct keyboard/HUD access and nested equipment panels. Resume clears protection; preserve competitive-play exception and saves. Verify actual bag entry, nested panels, damage, resume and world replacement.
+
+
+## [Codex | 2026-10-17] U-CHESS-WHEEL-ZOOM-20261017
+
+User requests broad scroll-wheel zoom while seated at the 3D chessboard. Plan: local orbit radius bounded32..240 world units (current default132 desktop/140mobile), normalize pixel/line/page wheel units and clamp extreme deltas. Wheel over world/hit layers zooms toward board center, while side-panel/flat-board scrolling and browser Ctrl/Meta zoom remain untouched. Preserve orbit angle, seat orientation, move drag and gameplay camera preferences. Verify zoom bounds, both directions, actual board visibility and UI exclusions.

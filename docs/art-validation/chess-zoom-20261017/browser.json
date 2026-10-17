@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "Pre-change level100 save loaded in isolated storage",
+    "Scroll in decreases actual chess camera radius",
+    "Scroll out reverses zoom",
+    "Close limit32, board fully visible and pieces clear",
+    "Wide limit240, table and both seated players visible",
+    "Settings panel scrolling does not zoom",
+    "Flat view wheel unchanged",
+    "Gameplay camera preferences unchanged"
+  ],
+  "method": "Actual browser, WheelEvent dispatched from disposable fixture through real world-layer handler; both extremes visually inspected."
+}

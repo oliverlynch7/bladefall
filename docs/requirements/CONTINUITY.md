@@ -2110,3 +2110,8 @@ User supplies Desktop/Ancient Golden-Pip Relic Dice.png and requests it for all 
 U-RELIC-DICE-RANDOMIZE-20261016 implemented. Exact supplied transparent PNG reused for all seven active randomize controls: character face/stat rolls, Stylist face, Arena bot-class roll/random class/loadout/random respec. Shared30px decorative image,26px icon-only roll, accessible bot-class label, existing visible text and handlers preserved. Old dice emoji removed from randomization toasts. No random-generation/economy/save behavior changes. Original and copied SHA256 match FC646ADFB8BDCC17D368EB4ECB1EBE52FF9A1F9374816E689EE3700F0E054BD9.
 
 Actual browser menus from isolated pre-change save: all seven images complete/natural width1254, all seven buttons clicked; Random Respec confirmation retained. Creator14-handler checks, face option bounds/randomization, Stylist purchase validations and game inline parser pass. Screenshots inspected. Evidence: docs/art-validation/relic-dice-20261016. Publication pending.
+
+
+## [Codex | 2026-10-16] v2.228 production confirmed
+
+Functional df1aa23b deployed successfully as 2bb4a5c4-8957-4d78-9eb7-d4e4c3ef9dd0. Public browser confirms v2.228.0-relic-dice and the supplied PNG renders at1254x1254. No launch errors. Exact local original/copy SHA256 match recorded above; direct CLI image download was403 while real browser image loads successfully. Seven actual menu controls verified locally with isolated storage.

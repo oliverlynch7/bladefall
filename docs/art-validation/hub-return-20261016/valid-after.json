@@ -1,0 +1,127 @@
+{
+  "done": true,
+  "checks": [
+    {
+      "label": "old save XP, character level and class rank retained",
+      "pass": true
+    },
+    {
+      "label": "legitimate canyon portal enters Marksman arena",
+      "pass": true
+    },
+    {
+      "label": "hub cannot run campaign builders",
+      "pass": true
+    },
+    {
+      "label": "hub has no level hazards or hostile enemies",
+      "pass": true
+    },
+    {
+      "label": "standing in previously missing floor loses no health",
+      "pass": true
+    },
+    {
+      "label": "entire hub ground footprint remains walkable (437 samples)",
+      "pass": true
+    }
+  ],
+  "rows": [
+    {
+      "label": "normal return 0",
+      "hub": true,
+      "area": 0,
+      "stage": 0,
+      "haz": null,
+      "segments": 1,
+      "enemies": 0,
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "hp": 154.44,
+      "gold": 1455,
+      "level": 4
+    },
+    {
+      "label": "normal return 1",
+      "hub": true,
+      "area": 0,
+      "stage": 0,
+      "haz": null,
+      "segments": 1,
+      "enemies": 0,
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "hp": 154.44,
+      "gold": 1765,
+      "level": 4
+    },
+    {
+      "label": "normal return 2",
+      "hub": true,
+      "area": 0,
+      "stage": 0,
+      "haz": null,
+      "segments": 1,
+      "enemies": 0,
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "hp": 154.44,
+      "gold": 2075,
+      "level": 4
+    },
+    {
+      "label": "before walking",
+      "hub": true,
+      "area": 0,
+      "stage": 0,
+      "haz": null,
+      "segments": 1,
+      "enemies": 0,
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "hp": 154.44,
+      "gold": 2075,
+      "level": 4
+    },
+    {
+      "label": "after walking",
+      "hub": true,
+      "area": 0,
+      "stage": 0,
+      "haz": null,
+      "segments": 1,
+      "enemies": 0,
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "hp": 154.44,
+      "gold": 2075,
+      "level": 4
+    }
+  ],
+  "version": "2.221.0-safe-hub-return"
+}

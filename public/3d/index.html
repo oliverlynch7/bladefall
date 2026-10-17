@@ -1168,7 +1168,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.220.0-instant-minimap';
+const VERSION3D='2.221.0-safe-hub-return';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5545,6 +5545,8 @@ function enterZone(zi){
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
+  if(!G||G.hub)return;
+  cancelPortalWarp();
   BFChestReveal.clear();
   clearTimeout(storyToast._t);const oldStoryCard=document.getElementById('storycard');if(oldStoryCard){oldStoryCard.classList.remove('show');oldStoryCard.textContent='';}
  G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
@@ -5940,7 +5942,7 @@ function securePendingSecret(){
     if(!meta.sideFound[ps.id]){ meta.sideFound[ps.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; grantIansShard(ps.id); checkCosmetics(); persist();
       toast('✦ '+ps.name+' secured — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
 }
-function nextArea(){ if(G?.kingFinal)return;
+function nextArea(){ if(!G||G.hub||G.kingFinal)return;
  if(inLongAscent()&&!BFLongAscent.ready(adventureStoryState()))return;
  if(inCastleGates()&&!BFCastleGates.ready(adventureStoryState()))return;
   if(G?.marbleArena&&!adventureStoryState().flags['mc.answer'])return;
@@ -9330,6 +9332,7 @@ const BOSS_ARENAS={
    than called at each `return` inside loadStage: that function has three early exits today and a
    fourth would silently skip the edits, which would look like the editor losing his work. */
 function loadStage(i){
+  if(!G||G.hub)return;
   BFChestReveal.clear();
   G.marbleArena=null;G.bruteArena=null; G.marksmanArena=null; G.fallenArena=null; G.frostOfficers=null;G.colossusArena=null;G.hydraArena=null;G._hydraPaid=false;G._hydraIntro=false;G._hydraHit=-1;document.getElementById('bosshpwrap').classList.remove('officer-team'); loadStageRaw(i); applyEditsNow(); }
 function applyEditsNow(){
@@ -14885,7 +14888,7 @@ const MP={
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
-    const msg={t:'state',players:all, en:this.enemySnap(), ek,social:window.BFSocial?.snapshot()};if(inBriar())msg.millStatus=BFBriarJourney.status(G);if(inBriar()&&G.homeBell)msg.bellStatus=BFHomeBellDefense.status(G,adventureStoryState());if(G?.escape)msg.prison=BFPrisonRun.packet();if(inPrison())msg.prisonLift=BFPrison.status(G);if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(inSkyLibrary())msg.libraryLens=BFSkyLibrary.status(G);if(inIronHalls())msg.ironDrive={clock:G.iron.clock,sledZ:G.iron.sledZ,sledHitCycle:G.iron.sledHitCycle??null};if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
+    const msg={t:'state',scene:this.worldStateScene(),players:all, en:this.enemySnap(), ek,social:window.BFSocial?.snapshot()};if(inBriar())msg.millStatus=BFBriarJourney.status(G);if(inBriar()&&G.homeBell)msg.bellStatus=BFHomeBellDefense.status(G,adventureStoryState());if(G?.escape)msg.prison=BFPrisonRun.packet();if(inPrison())msg.prisonLift=BFPrison.status(G);if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(inSkyLibrary())msg.libraryLens=BFSkyLibrary.status(G);if(inIronHalls())msg.ironDrive={clock:G.iron.clock,sledZ:G.iron.sledZ,sledHitCycle:G.iron.sledHitCycle??null};if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
     const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }window.BFSocial?.reset();
@@ -14952,7 +14955,7 @@ const MP={
       ARENA_LOADOUT.map=d.map||'flat'; if(d.fair && d.ld){ Object.assign(ARENA_LOADOUT,d.ld); ARENA_LOADOUT.fair=true; }
       if(!IN_ARENA){ try{ enterArena(); }catch(e){} } }
     else if(d.t==='teams'){ this.teamMap=d.map||{}; this.teams=!!d.on; }
-    else if(d.t==='state'){if(inBriar()&&d.millStatus)BFBriarJourney.apply(G,d.millStatus);if(d.social)window.BFSocial?.apply(d.social);if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return;if(inSkyLibrary()&&d.libraryLens)G.library.remote=d.libraryLens;if(inPrison()&&d.prisonLift)BFPrison.apply(G,d.prisonLift);if(inIronHalls()&&d.ironDrive){G.iron.remote={...(G.iron.remote||{}),...d.ironDrive};if(Number.isFinite(d.ironDrive.clock))G.iron.clock=d.ironDrive.clock;}if(inBriar()&&G.homeBell&&d.bellStatus){const was=G.homeBell.remote;G.homeBell.remote=d.bellStatus;if(!was||was.wave!==d.bellStatus.wave||was.alive!==d.bellStatus.alive||was.open!==d.bellStatus.open)questUpdate();} const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
+    else if(d.t==='state'){if(!this.acceptWorldState(d))return;if(inBriar()&&d.millStatus)BFBriarJourney.apply(G,d.millStatus);if(d.social)window.BFSocial?.apply(d.social);if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return;if(inSkyLibrary()&&d.libraryLens)G.library.remote=d.libraryLens;if(inPrison()&&d.prisonLift)BFPrison.apply(G,d.prisonLift);if(inIronHalls()&&d.ironDrive){G.iron.remote={...(G.iron.remote||{}),...d.ironDrive};if(Number.isFinite(d.ironDrive.clock))G.iron.clock=d.ironDrive.clock;}if(inBriar()&&G.homeBell&&d.bellStatus){const was=G.homeBell.remote;G.homeBell.remote=d.bellStatus;if(!was||was.wave!==d.bellStatus.wave||was.alive!==d.bellStatus.alive||was.open!==d.bellStatus.open)questUpdate();} const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
       if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
@@ -15011,6 +15014,14 @@ const MP={
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
   placeMsg(){if(G?.trialSession)return partyTrialPacket(); if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
+  // Hub/arena/sprint worlds have independent local seeds; campaign and trial seeds identify attempts.
+  worldStateScene(){return JSON.stringify([this.zone,G?.sparringRoom?'sparring':G?.hub?'hub':G?.arena?'arena':'level',!!G?.riftHall,G?.area,(G?.hub||G?.arena||G?.sprintFun)?null:G?.runSeed,G?.trialSession||null,G?.floor||0,G?.brIdx||0]);},
+  acceptWorldState(d){
+    if(!G)return false;
+    if(typeof d.scene==='string')return d.scene===this.worldStateScene();
+    const host=d.players?.[0];
+    return !!host&&host.zone===this.zone&&host.area===G.area&&!!host.hall===!!G.riftHall;
+  },
   combatScene(){return JSON.stringify([this.zone,G?.area,G?.runSeed,G?.trialSession||null,G?.floor||0,G?.brIdx||0]);},
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null, art=null;
     for(const e of G.combatArt||[])if(!e._mp&&!e.visual){e._mp=1;(art=art||[]).push(BF_COMBAT_ART.packet(e));}
@@ -15225,7 +15236,7 @@ const MP={
     classHeal(G.p,d.dealt*(d.executed?0:h.rate)+(d.executed?0:h.flat)+Math.max(0,Number(d.bonusHeal)||0));hudUpdate();
   },
   // guest: reconcile local enemy list to the host's authoritative set + process kills
-  applyEnemies(en,ek){ if(!this.guest()||!G) return; this._gotEn=true;
+  applyEnemies(en,ek){ if(!this.guest()||!G||(G.hub&&!G.sparringRoom)) return; this._gotEn=true;
     const seen={};
     for(const a of en){ const mid=a[0]; seen[mid]=1; if(this._killed[mid]) continue; let e=this.byMid(mid);
       if(!e){ const type=this.ekey(a[1]); if(!type) continue; let ne=null; try{ ne=spawnEnemy(type,a[2],a[3]); }catch(err){ continue; }
@@ -16960,13 +16971,24 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
 }
 // a quick fade-warp instead of an instant snap: black out, load the next area at the dark midpoint, fade back in
-function warpTo(fn){ if(warpTo._busy) return; warpTo._busy=true;
+function cancelPortalWarp(){
+  clearTimeout(warpTo._timer);warpTo._timer=null;warpTo._ticket=null;warpTo._busy=false;
+  document.getElementById('fadeveil')?.classList.remove('on');
+}
+function warpTo(fn){ if(warpTo._busy||!G||G.hub) return;
+  const ticket={world:G,portal:G.portal,area:G.area,stage:G.stageIndex};
+  warpTo._ticket=ticket;warpTo._busy=true;
   const v=document.getElementById('fadeveil'); try{ SFX.magic('void'); }catch(e){}
   if(v) v.classList.add('on');
-  const mid=()=>{ try{ fn(); } finally { if(v) v.classList.remove('on'); warpTo._busy=false; } };
-  if(v) setTimeout(mid,190); else mid();
+  const mid=()=>{
+    if(warpTo._ticket!==ticket)return;
+    try{
+      if(G===ticket.world&&G.portal===ticket.portal&&G.area===ticket.area&&G.stageIndex===ticket.stage&&mode==='play'&&!backgroundMenuMode&&!G.hub&&!G.p.dead&&!G.p.downed)fn();
+    }finally{if(warpTo._ticket===ticket)cancelPortalWarp();}
+  };
+  if(v) warpTo._timer=setTimeout(mid,190); else mid();
 }
-function nextStage(){ if(mode!=='play'||backgroundMenuMode||G?.trialCompleted)return;warpTo(nextArea); }    // the portal now advances the ZONE's area chain, with a warp transition
+function nextStage(){ if(mode!=='play'||backgroundMenuMode||!G||G.hub||G.trialCompleted)return;warpTo(nextArea); }
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=classStartWeapon(meta.classId); else p.weapon=normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
@@ -18326,6 +18348,7 @@ function drawRiftHallFallback(t){
  if(!window.__npc3dDrawn?.('riftkeeper')){pushM();mv(0,0,-645);hubNpcModel({id:'shade'},t);popM();}
 }
 function enterWaystation(riftHall=false){
+ cancelPortalWarp();
  clearTimeout(storyToast._t);document.getElementById('storycard')?.classList.remove('show');
   if(BFHubDialogue.active)BFHubDialogue.close(false,true);briarPending=null;
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),

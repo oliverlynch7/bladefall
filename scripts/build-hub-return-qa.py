@@ -1,0 +1,22 @@
+from pathlib import Path
+import json,sys
+root=Path(__file__).resolve().parent.parent
+s=(root/'public/3d/index.html').read_text(encoding='utf8')
+s=s.replace('<head>',"""<head><base href='/3d/'><script>(()=>{const d=new Map(),s={getItem:k=>d.get(k)??null,setItem:(k,v)=>d.set(k,String(v)),removeItem:k=>d.delete(k),clear:()=>d.clear(),key:i=>[...d.keys()][i]??null,get length(){return d.size}};Object.defineProperty(window,'localStorage',{value:s});Object.defineProperty(window,'sessionStorage',{value:s});})();</script>""",1)
+s=s.replace('if(m && m[1]!==VERSION3D)','if(false && m && m[1]!==VERSION3D)').replace('window.__BF3={','window.__BF3={warpTo,nextStage,',1)
+save=json.loads((root/'docs/art-validation/hollow-review-20261015/canyon-arrival-before.json').read_text(encoding='utf8'))['save']
+payload="""<pre id='hubResult' style='position:fixed;left:8px;bottom:8px;max-height:30vh;overflow:auto;z-index:200001;background:#102331;color:white'>Loading</pre><script>
+(async()=>{const wait=ms=>new Promise(r=>setTimeout(r,ms)),out=document.getElementById('hubResult'),rows=[];while(!window.__BF3||!window.HERO3D?.ready)await wait(50);const b=__BF3;await b.briarReady;b.loadMode('rl');Object.assign(b.meta,SAVE,{originSeen:true,hubTutDone:true,tutOff:true});b.continueRun();
+const snapshot=label=>{const g=b.G,p=g.p,v={label,hub:g.hub,area:g.area,stage:g.stageIndex,haz:g.haz,segments:g.segments.length,enemies:g.enemies.filter(e=>!e.dummy&&!e.practice&&!e.dead).length,floors:[[-800,-400],[800,-400],[-800,650],[800,650],[0,420]].map(([x,z])=>b.floorAt(x,z,13,0)),hp:p.hp,gold:b.meta.gold,level:p.level};rows.push(v);return v;};
+try{for(let i=0;i<3;i++){b.enterZone(1);b.G.area=1;b.loadArea();b.G.area=-1;b.loadArea();b.zoneClear();document.getElementById('hubBtn').click();snapshot('normal return '+i);await wait(200);}
+const kind=new URLSearchParams(location.search).get('case'),checks=[],check=(v,label)=>{checks.push({label,pass:!!v});if(!v)throw Error(label);};
+check(b.G.p.level===4&&b.G.p.xp===52&&b.meta.classes.warrior.rank===4,'old save XP, character level and class rank retained');
+if(kind==='valid'){b.enterZone(1);b.G.area=1;b.loadArea();b.nextStage();await wait(350);check(b.G.area===-1&&!!b.G.marksmanArena,'legitimate canyon portal enters Marksman arena');b.openHub();const old=b.G;b.nextArea();b.loadArea();b.loadStage(3);check(b.G===old&&b.G.segments.length===1&&b.G.enemies.every(e=>e.dummy),'hub cannot run campaign builders');}
+if(kind==='quit'){b.enterZone(1);b.G.area=1;b.loadArea();b.nextStage();b.openPause();document.getElementById('qmenu').click();await wait(350);check(b.G.hub&&b.G.area===0&&b.G.haz===null,'actual pause Quit to Hub cancels pending warp');}
+if(kind==='race'){b.enterZone(1);b.G.area=1;b.loadArea();b.warpTo(b.nextArea);b.openHub();await wait(300);snapshot('delayed portal after hub');}
+if(kind==='state'){b.enterZone(1);const mp=b.MP;Object.assign(mp,{active:true,isHost:true,conns:[],myId:'hub-local',zone:1});let packet;mp.conns=[{open:true,send:d=>{if(d.t==='state')packet=structuredClone(d);}}];mp.broadcast();mp.isHost=false;mp.hostConn={open:true,send(){}};const sample=packet.en.find(a=>a[4]>1);sample[4]-=1;mp.onGuestData(packet);check(b.G.enemies.find(e=>e.mid===sample[0])?.hp===sample[4],'same-scene co-op snapshot still updates enemy HP');mp.isHost=true;b.openHub();mp.isHost=false;mp.conns=[];mp.onGuestData(packet);snapshot('late canyon state after hub');mp.active=false;}
+const before=snapshot('before walking');Object.assign(b.G.p,{x:700,z:580,y:0,onGround:true,vx:0,vy:0,vz:0});await wait(2000);const after=snapshot('after walking');check(after.hub&&after.haz===null&&after.enemies===0,'hub has no level hazards or hostile enemies');check(after.hp===before.hp,'standing in previously missing floor loses no health');let missing=0,sampled=0;for(let x=-880;x<=880;x+=80)for(let z=-610;z<=850;z+=80){sampled++;if(!Number.isFinite(b.floorAt(x,z,13,0)))missing++;}check(!missing,'entire hub ground footprint remains walkable ('+sampled+' samples)');out.textContent=JSON.stringify({done:true,checks,rows,version:b.snap().version},null,2);
+}catch(e){out.textContent=JSON.stringify({error:String(e.stack),rows},null,2);}})();</script>""".replace('SAVE',json.dumps(save))
+suffix=sys.argv[1] if len(sys.argv)>1 else 'current'
+(root/f'public/3d/.qa-hub-return-{suffix}.html').write_text(s.replace('</body>',payload+'</body>'),encoding='utf8')
+print('Built isolated hub return fixture: '+suffix)

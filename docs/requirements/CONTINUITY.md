@@ -1825,3 +1825,7 @@ User reports several generated replacements are worse than the originals and can
 ## [Codex | 2026-10-16] Original SFX candidate verified
 
 Restored all 56 file slots and all eight procedural defaults. All 64 paid takes/masters remain intact and inactive. Real muted browser decodes 105 original slots, zero candidate slots; progression animation module still present. 255 audio assertions and 43 progression assertions pass. Original audio bytes match their backups. No API credits spent. Future direction is distinct new event identities with old fallback, not blanket replacement. docs/audio/SFX_PRESERVATION_AND_GAPS.md and source inventory record 17 classes/136 skill choices/30 campaign voice mappings; boss/dungeon/interactable audit remains to be completed before a new generation budget. Production release follows.
+
+## [Codex | 2026-10-16] v2.210 SFX preservation deployed
+
+Production 7acbdca5 is active (657608d2-e93e-46b1-a9ac-3d4df047f56a); real browser confirms v2.210.0-preserve-original-sfx and priority-sfx?v2210 on the immutable release. Old file/procedural defaults restored, all 64 takes kept inactive, zero new credits. New event-identity generation remains the next audio work after completing the source-bound boss/dungeon/interactable inventory. Main remains isolated from pending campaign/Reaper work.

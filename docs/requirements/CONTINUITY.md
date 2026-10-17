@@ -2199,3 +2199,8 @@ Grounded plan: preserve canon research->surprise obedience->conquest and one cen
 Five-slide cause-and-effect opening, final Skip hidden; purpose-first hub tour ordered Waystone/Briar/continuing campaign/services, live Bag and Interact hints, larger merchants and lower tour framing. Replaced fake mirror actor with confined front/distance-gated planar reflection; themed activity entrances. Straw target dummy with fixed heading, named red Lv0 HP bar and10,000 base HP. Canonical shared mob module/cache, loading-time rig/shader/texture/animation/dash-ghost preparation and cached bone-copy pairs.
 
 99 offline suites pass; focused suites, parser and module syntax rechecked after final tour framing. Actual browser verifies old level100 save, correct story final action, actual tour entry/HUD, mirror, dummy, successful hub/trial loading and real mapped dashes. No production storage touched. Frame trace median7.9ms/p95 10.8ms but183.4ms maximum: intermittent stutters are improved at known first-use paths, not declared solved. Evidence docs/art-validation/welcome-hub-20261017/summary.md. Production pending.
+
+
+## [Codex | 2026-10-17] v2.233 production confirmed
+
+Functional45e211b9 deployed successfully ase74efc40-f379-4d97-ae76-833582a0a410. Actual public browser confirmsv2.233.0-waystation-welcome, hero2233g, hub-tour2233d and loading2233. Public release includes new story/tour, real mirror, themed activity entrances, visible merchants and straw training dummy.99 offline suites plus focused final checks; full evidence and remaining intermittent-frame-spike limitation:docs/art-validation/welcome-hub-20261017/summary.md. No production save data touched. Primary's unrelated articulated-rigs.json preserved.

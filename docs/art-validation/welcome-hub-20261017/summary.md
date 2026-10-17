@@ -27,3 +27,5 @@ Performance: game imports canonicalize mob rendering, helper loading and teardow
 The first-use changes address proven work in the movement path. Remaining intermittent stalls still need a focused frame-profile capture on the affected hardware. No claim of a complete new-player playtest or live two-device co-op validation.
 
 Final visual follow-up: the Quartermaster now uses an unhooded human merchant model so his face is readable above the counter. A 390x844 embedded browser view confirms the longest lore slide and its controls fit without cropping. Cosmetic-only change and final framing were checked in the actual browser and focused checks rerun.
+
+Production confirmed:45e211b9, Cloudflare deployment e74efc40-f379-4d97-ae76-833582a0a410 succeeded. Actual public browser displaysv2.233 and the current renderer/tour/loading assets.

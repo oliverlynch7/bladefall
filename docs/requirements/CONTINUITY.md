@@ -1937,3 +1937,8 @@ User: every nearby enemy needs an intuitive red HP bar; basic Mage attacks one-s
 ## [Codex | 2026-10-16] v2.217.0 — campaign threat and enemy health readability
 
 U-CAMPAIGN-THREAT-20261016: all nearby living enemies show full-health red meters; elite fill red, friendly/prisoner colors retained, neutral training targets. Cached height-aware camera/solid ray checks hide meters through walls; canvas reused. Tutorial attack page mentions red bars. Added authored campaign-only health curve and modest regional damage progression; Brute health 684→1129 (+65%), Hollow Marksman 1318→1713 (+30%) on Normal solo. Reference common-staff Mage's ordinary hits unchanged (39 Briar / 44 Hollow), grunt HP 20→59 / 24→77. All 24 class/zone damage samples unchanged; no Mage ordinary-soldier one-shots at reference gear. Strong gear, skills and crits still reward progression; no per-player auto-scaling. All real campaign exclusions tested, party 1.6× and current HP fraction retained, old character/class save preserved. Source tests and real WebGL evidence: docs/art-validation/campaign-durability-20261016. Real player challenge still needs playtest. Production deployment pending.
+
+
+## [Codex | 2026-10-16] v2.217 campaign threat production confirmed
+
+Functional commit 3882ad97 deployed as 97ac8065-7e7c-4fe3-97d3-919be818445c; Cloudflare deploy stage success. Public browser confirms v2.217.0-campaign-threat-readability, campaign-threat/enemy-health/guided-tutorial v2217 and no launch errors. Local real WebGL proof and 24 deterministic class/zone damage comparisons are recorded; experienced combat challenge still awaits user playtest. Optional question about user's character level/rank/weapon remains unanswered and does not block this fixed campaign curve.

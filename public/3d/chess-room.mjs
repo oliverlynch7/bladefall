@@ -14,11 +14,12 @@ export class ChessRoom{
    const from=this.invites[pid];if(!from||!this.valid(from))return false;
    let s=this.sessions.get('duel');const occupied=Object.values(s.seats).filter(Boolean),same=occupied.includes(pid)&&occupied.includes(from);
    if(!same&&occupied.some(p=>p!==pid&&p!==from&&this.valid(p)))return false;
-   if(!same||s.result){s.dispose();s=new ChessSession('duel',null,{now:this.now});s.seats={w:from,b:pid};s.controller=from;this.sessions.set('duel',s);}
+   if(!same||s.result){const nextRound=s.round+1;s.dispose();s=new ChessSession('duel',null,{now:this.now});s.round=nextRound;s.seats={w:from,b:pid};s.controller=from;this.sessions.set('duel',s);}
    this.views[from]={gameId:'duel',watching:false};this.views[pid]={gameId:'duel',watching:false};delete this.invites[pid];delete this.invites[from];return true;
   }
   if(c.type==='resume'){const s=this.sessions.get(c.gameId);if(!s||!Object.values(s.seats).includes(pid))return false;this.views[pid]={gameId:s.key,watching:false};return true;}
   const view=this.views[pid],s=this.sessions.get(c.gameId);if(!view||view.watching||view.gameId!==c.gameId||!s)return false;
+  if(c.round!==s.round)return false;
   if(s.kind==='duel'&&c.type==='move'&&!Object.values(s.seats).every(p=>p&&this.valid(p)))return false;
   return s.command(pid,c);
  }

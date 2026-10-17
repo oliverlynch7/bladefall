@@ -3,3 +3,6 @@
 A/D and left/right review history, clamp ends, return to Live at latest; typing/modifiers ignored. A co-op lobby supports one independent retained Thomas game per player, explicit challenge/accept for shared friend match and read-only watch. Sessions own rules, revision, clock, engine, animation and history. Host validates membership, view and game IDs; spectators cannot send actions. Private games pause when owner leaves/watches; disconnect suspends timed friend match. No character-save schema change.
 
 114 regression suites passed. New session/room suite now70 checks covering concurrent engines, late cancellation, invite lifecycle, seat/clock/config, cross-session and spectator rejection, premoves, rules including fivefold, keyboard handler and owner-specific co-op cape reward. Focused suites/syntax rerun after final UI-only refinements. Two isolated browser clients plus solo loaded old save, actual bots replied, both-side moves/premove synchronized and watch/history/lobby behavior verified. See browser.json for transport limitation.
+
+
+v2.252.1 final safety: all match-control requests carry a round token as well as moves using latest revision. Rematches advance round monotonically.76 room/session checks now pass, including delayed prior-game move/resignation rejection and actual host/guest UI wrapper stamping.

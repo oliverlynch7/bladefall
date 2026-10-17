@@ -2,8 +2,8 @@ import {thomasHardVictory} from './chess-rewards.js?v=2227a';
 import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation.js?v=2226e';
 import './chess-pieces.js?v=2119';
 import {ChessOpponent} from './chess-opponent.mjs?v=2119';
-import {ChessRoom} from './chess-room.mjs?v=2252';
-import {createChessTable} from './chess-table.js?v=2252';
+import {ChessRoom} from './chess-room.mjs?v=2252p1';
+import {createChessTable} from './chess-table.js?v=2252p1';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000,botId='chess-thomas';
 let opened=false,origin=null,parkedPet=null,remote=null,remoteAt=0,talks={},pendingTalk=null,lastTalk='',talkRev=0,wasCoop=false,lastView='',lastDisplay='',lastLobby='',ambientGame='duel',nextRewardAttempt=0;
 const id=()=>A.mp().active?A.mp().myId:'solo',host=()=>!A.mp().active||A.mp().isHost;
@@ -23,7 +23,7 @@ function apply(packet){if(!packet||!packet.games||host()||remote&&packet.serial<
  const decoded={};try{for(const [key,st]of Object.entries(packet.games)){if(!st||typeof st.fen!=='string'||!Array.isArray(st.moves))continue;const cache=st.round+':'+st.moves.join('|'),prior=remote?.games?.[key];decoded[key]={...st,history:prior?._historyKey===cache?prior.history:chessHistoryFromSAN(st.moves,st.initialFen),_historyKey:cache};}}catch{return;}
  remote={...packet,games:decoded};remoteAt=performance.now();syncView();claimReward();followTalk();
 }
-function send(cmd){const c={...cmd,gameId:cmd.gameId||view()?.gameId};if(host())receive(id(),c);else A.mp().hostConn?.send({t:'socialRequest',command:c});}
+function send(cmd){const c={...cmd,round:cmd.round??current()?.round,gameId:cmd.gameId||view()?.gameId};if(host())receive(id(),c);else A.mp().hostConn?.send({t:'socialRequest',command:c});}
 function receive(pid,c){syncMode();if(!host()||!c||typeof c.type!=='string')return false;
  if(c.type.startsWith('talk')){const n=A.g()?.hubNpcs?.find(n=>n.id===c.npc);if(!n||!valid(pid,n))return false;const t=talks[c.npc];if(c.type==='talkStart'){if(!t)talks[c.npc]={owner:pid,line:null};}else if(t?.owner===pid){if(c.type==='talkEnd')delete talks[c.npc];else if(c.type==='talkLine'&&(c.line===null||typeof c.line==='string'&&c.line.length<120))t.line=c.line;}talkRev++;followTalk();return true;}
  if(!owned())return false;const accepted=room.command(pid,c);if(accepted){room.tick();syncView();claimReward();}return accepted;

@@ -1663,3 +1663,10 @@ User requests pre-moves on 3D and flat boards. Plan: one private local queued mo
 ## [Codex | 2026-10-17] U-CHESS-LOBBY-HISTORY-20261017
 
 User requests A/D plus arrow move-history navigation and co-op options to play Thomas independently, spectate friend, or play each other. Plan: host-authoritative isolated chess sessions (one retained Thomas match per player plus shared friend match), lobby with explicit challenge/accept and watch/resume choices, read-only spectators, per-game revisions/clock/bot/animation/history, pause private match when owner leaves/watches. Keep existing chess rules/controls, host-owned furniture and hard-Thomas reward eligibility for the actual winning player. Keyboard history uses A/Left and D/Right, guards text/select inputs/modifiers and clamps ends; reaching latest returns Live. Verify isolation, unauthorized commands, invite/accept, simultaneous bot turns, guest updates, disconnect/rejoin, clocks, premoves, spectator safety and browser controls.
+
+
+## [Codex | 2026-10-17] v2.252.1 — Chess rematch packet safety
+
+Final review: new friend match instances now advance round identity, and human move requests carry/validate both round and revision. A delayed prior-match move is rejected even if its revision matches a newly reset match. New-round presentation clears the previous move-sound identifier. Existing private and shared game logic unchanged; regression covers stale and current-round requests.
+
+Round checks also protect resignation, configuration and other match controls, not only moves. The actual host and guest UI send wrappers are exercised to ensure they stamp the current match round.

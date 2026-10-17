@@ -1,0 +1,51 @@
+{
+  "label": "briar-start",
+  "frames": 578,
+  "gapMean": 7.794982698961937,
+  "gapP95": 11.200000000000728,
+  "main": 6.877162629770676,
+  "update": 0.2986159169704856,
+  "base": 2.4596885813071445,
+  "hero": 4.085986159226267,
+  "boxes": 1572.1730103806228,
+  "last": {
+    "gap": 5.5,
+    "main": 7.600000001490116,
+    "update": 0.8000000007450581,
+    "base": 2.5,
+    "hero": 4.300000000745058,
+    "boxes": 1583,
+    "three": {
+      "shadows": true,
+      "triangles": 211782,
+      "calls": 346,
+      "geometries": 203
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||0|plains|0|false|||||||||1225|outskirts|-530,-842;510,137;2481,-2070",
+      "counts": {
+        "outskirtsArt": true,
+        "floorTiles": 7601,
+        "roadTiles": 0,
+        "tree": 178,
+        "totalTriangles": 514138,
+        "instances": 16083,
+        "chunks": 412,
+        "drawCalls": 986,
+        "visibleTriangles": 73732,
+        "visibleDrawCalls": 171,
+        "artObstacles": true,
+        "craft": {
+          "models": 355,
+          "drawCalls": 298,
+          "visibleDrawCalls": 66
+        }
+      },
+      "err": null
+    },
+    "npcs": 3,
+    "enemies": 26
+  }
+}

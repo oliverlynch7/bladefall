@@ -1,0 +1,51 @@
+{
+  "label": "woods",
+  "frames": 809,
+  "gapMean": 5.56946847960445,
+  "gapP95": 5.600000000000364,
+  "main": 3.784425216341306,
+  "update": 0.10679851660253975,
+  "base": 1.2855377008882898,
+  "hero": 2.372187886304223,
+  "boxes": 827,
+  "last": {
+    "gap": 5.600000000000364,
+    "main": 3.699999999254942,
+    "update": 0,
+    "base": 1.199999999254942,
+    "hero": 2.400000002235174,
+    "boxes": 827,
+    "three": {
+      "shadows": true,
+      "triangles": 124448,
+      "calls": 241,
+      "geometries": 138
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||1|forest|1|false|||||||||358|outskirts|1390,-1780;-885,-4980;-2640,616",
+      "counts": {
+        "outskirtsArt": true,
+        "floorTiles": 5379,
+        "roadTiles": 0,
+        "tree": 214,
+        "totalTriangles": 129137,
+        "instances": 6209,
+        "chunks": 202,
+        "drawCalls": 396,
+        "visibleTriangles": 23152,
+        "visibleDrawCalls": 86,
+        "artObstacles": true,
+        "craft": {
+          "models": 399,
+          "drawCalls": 335,
+          "visibleDrawCalls": 44
+        }
+      },
+      "err": null
+    },
+    "npcs": 3,
+    "enemies": 12
+  }
+}

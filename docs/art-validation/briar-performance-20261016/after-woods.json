@@ -1,0 +1,167 @@
+{
+  "label": "woods",
+  "frames": 811,
+  "gapMean": 5.555856966707768,
+  "gapP95": 5.600000000000364,
+  "main": 3.395314426676964,
+  "update": 0.10357583237010365,
+  "base": 1.2565967940326903,
+  "hero": 2.0154130703157547,
+  "boxes": 827,
+  "last": {
+    "gap": 5.599999999999454,
+    "main": 3.199999999254942,
+    "update": 0,
+    "base": 1.300000000745058,
+    "hero": 1.8999999985098839,
+    "boxes": 827,
+    "three": {
+      "shadows": true,
+      "triangles": 92288,
+      "calls": 198,
+      "geometries": 138
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||1|forest|1|false|||||||||358|outskirts|1390,-1780;-885,-4980;-2640,616",
+      "counts": {
+        "outskirtsArt": true,
+        "floorTiles": 5379,
+        "roadTiles": 0,
+        "tree": 214,
+        "totalTriangles": 129137,
+        "instances": 6209,
+        "chunks": 202,
+        "drawCalls": 396,
+        "visibleTriangles": 23152,
+        "visibleDrawCalls": 86,
+        "artObstacles": true,
+        "craft": {
+          "models": 399,
+          "drawCalls": 335,
+          "visibleDrawCalls": 44
+        }
+      },
+      "err": null
+    },
+    "npcs": 3,
+    "mob": {
+      "on": true,
+      "live": 4,
+      "culled": 8,
+      "corpses": 0,
+      "pooled": 7,
+      "models": [
+        "enemy-assets/upgraded/grunt-v2142",
+        "enemy-assets/upgraded/caster-v2142",
+        "enemy-assets/upgraded/flyer-v2142",
+        "enemy-assets/upgraded/thornboar-v2142"
+      ],
+      "pending": [],
+      "missing": [],
+      "err": null,
+      "actors": [
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.7595000000000063,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.7595000000000063,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "caster",
+          "clip": "Idle",
+          "time": 1.7595000000000063,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1.078946515917778
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 0.17210000000149014,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "flyer",
+          "clip": "Idle",
+          "time": 0.3488999999985099,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.25600000000000006,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.4621000000014956,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        }
+      ]
+    },
+    "enemies": 12
+  }
+}

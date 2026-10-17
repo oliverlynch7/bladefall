@@ -1,0 +1,350 @@
+{
+  "label": "village",
+  "frames": 700,
+  "gapMean": 6.436714285714285,
+  "gapP95": 11.100000000000364,
+  "main": 5.573999999899949,
+  "update": 0.18100000003618855,
+  "base": 2.5315714284617985,
+  "hero": 2.8195714285543985,
+  "boxes": 1778,
+  "last": {
+    "gap": 11.099999999998545,
+    "main": 7.799999997019768,
+    "update": 0.3999999985098839,
+    "base": 3.699999999254942,
+    "hero": 3.699999999254942,
+    "boxes": 1778,
+    "three": {
+      "shadows": true,
+      "triangles": 144540,
+      "calls": 235,
+      "geometries": 236
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||0|plains|0|false|||||||||1225|outskirts|-530,-842;510,137;2481,-2070",
+      "counts": {
+        "outskirtsArt": true,
+        "floorTiles": 7601,
+        "roadTiles": 0,
+        "tree": 178,
+        "totalTriangles": 514138,
+        "instances": 16083,
+        "chunks": 412,
+        "drawCalls": 986,
+        "visibleTriangles": 78462,
+        "visibleDrawCalls": 216,
+        "artObstacles": true,
+        "craft": {
+          "models": 355,
+          "drawCalls": 298,
+          "visibleDrawCalls": 40
+        }
+      },
+      "err": null
+    },
+    "npcs": 3,
+    "mob": {
+      "on": true,
+      "live": 8,
+      "culled": 18,
+      "corpses": 0,
+      "pooled": 20,
+      "models": [
+        "enemy-assets/upgraded/grunt-v2142",
+        "enemy-assets/upgraded/thornboar-v2142",
+        "enemy-assets/upgraded/sporeback-v2142",
+        "enemy-assets/upgraded/flyer-v2142",
+        "enemy-assets/upgraded/caster-v2142"
+      ],
+      "pending": [],
+      "missing": [],
+      "err": null,
+      "actors": [
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 0.3688999999985098,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 0.39089999999850983,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.6288000000007453,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.4928000000007451,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 0.5546000000014903,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 0.48569999999925495,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.501699999999255,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "flyer",
+          "clip": "Idle",
+          "time": 0.5763000000007453,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.04780000000074505,
+          "weights": {
+            "Idle": 0.5975000262260437
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.10509999999776483,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.22510000000149014,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 0.14669999999925495,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.4690999999977619,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.4535999999977611,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 1.4535999999977611,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 1.4535999999977611,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "flyer",
+          "clip": "Idle",
+          "time": 1.4535999999977611,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.3576999999992516,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.3409999999999958,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.323499999999996,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        }
+      ]
+    },
+    "enemies": 26
+  }
+}

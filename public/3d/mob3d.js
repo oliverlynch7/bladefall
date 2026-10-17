@@ -146,7 +146,7 @@ function acquireMob(type,e){
     for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||/^(Attack|Windup|Recover)(_|$)/.test(c.name)||['Hit','Death','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
-  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null,lastAttackKey:null});
+  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,suspended:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null,lastAttackKey:null});
   rec.mixer.stopAllAction();rec.root.visible=true;_actors.set(e,rec);return rec;
 }
 function play(rec,name,duration){
@@ -167,15 +167,19 @@ function disposeActor(rec){
   for(const m of rec.materials)m.dispose();
 }
 window.__mob3dEnabled=v=>{if(_mobGroup)_mobGroup.visible=!!v;};
-export function syncMobs(scene,dt){
+export function syncMobs(scene,dt,camera){
   if(!MOB3D.on)return false;
-  try{return syncMobsInner(scene,Math.min(.1,Math.max(0,dt||0)));}
+  try{return syncMobsInner(scene,Math.min(.1,Math.max(0,dt||0)),camera);}
   catch(e){MOB3D.err=String(e?.stack||e);MOB3D.on=false;if(_mobGroup)_mobGroup.visible=false;_drawn=new WeakSet();console.warn('[mob3d]',e);return false;}
 }
-function syncMobsInner(scene,dt){
+// Skinned mesh bind-pose bounds are unreliable. Cull whole actors against a
+// generous gameplay-sized sphere instead; gameplay simulation remains untouched.
+const actorFrustum=new THREE.Frustum(),actorProjection=new THREE.Matrix4(),actorSphere=new THREE.Sphere();
+function syncMobsInner(scene,dt,camera){
   const w=window.__BF_WORLD?.();if(!w?.enemies)return false;
   if(!_mobGroup){_mobGroup=new THREE.Group();_mobGroup.name='mob3d';scene.add(_mobGroup);}
-  _drawn=new WeakSet();const present=new Set(w.enemies);let live=0,corpses=0;
+  _drawn=new WeakSet();const present=new Set(w.enemies);let live=0,corpses=0,culled=0;
+  if(camera)actorFrustum.setFromProjectionMatrix(actorProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
   // Ordinary corpses are removed by gameplay in the same tick as the kill. Keep only
   // their presentation record long enough to finish the death, without restoring an enemy.
   const foes=w.enemies.concat([..._actors.keys()].filter(e=>e.dead&&!present.has(e)));
@@ -185,6 +189,16 @@ function syncMobsInner(scene,dt){
     if(!e.dead)requestModel(cast.file);
     let rec=_actors.get(e);
     if(rec&&rec.type!==type){release(rec);rec=null;}
+    // Protect close combat and leave a large margin for weapons, leaps and bosses.
+    // Camera matrices also cover overhead, first-person and inspection views.
+    const radius=Math.max(160,(e.h||38)*2.5);
+    actorSphere.center.set(e.x,(e.y||0)+(e.h||38)*.5,e.z);actorSphere.radius=radius;
+    const offscreen=!e.dead&&camera&&Math.hypot(e.x-w.p.x,e.z-w.p.z)>250&&!actorFrustum.intersectsSphere(actorSphere);
+    if(offscreen){
+      _drawn.add(e);culled++; // handled: do not draw the old voxel fallback
+      if(rec){rec.root.visible=false;rec.suspended=true;rec.x=e.x;rec.z=e.z;rec.attack=0;rec.recover=0;const state=enemyActionState(e);rec.phase=state.phase;rec.phaseKey=state.key;rec.hit=e.hitFlash||0;}
+      continue;
+    }
     if(!rec&&!e.dead)rec=acquireMob(type,e);
     if(!rec)continue;
     if(e.dead){
@@ -195,6 +209,7 @@ function syncMobsInner(scene,dt){
       rec.mixer.update(dt);corpses++;continue;
     }
     // Training targets and resurrected skeletons can reuse the same gameplay object.
+    if(rec.suspended){rec.suspended=false;rec.cur=null;rec.restart=true;rec.mixer.stopAllAction();}
     if(rec.wasDead){rec.wasDead=false;rec.cur=null;rec.mixer.stopAllAction();}
     const s=(e.h||38)/(cast.fitHeight||rec.src._nativeH);
     rec.root.scale.set(s*(e.briarRole==='guard'?1.12:e.briarRole==='runner'?.92:1),s,s*(e.briarRole==='guard'?1.12:1));
@@ -247,12 +262,12 @@ function syncMobsInner(scene,dt){
     reserve[r.type]=(reserve[r.type]||0)+1;
     if(reserve[r.type]>2){disposeActor(r);_mobPool.splice(i,1);}
   }
-  Object.assign(MOB3D,{live,corpses,pooled:_mobPool.length});return true;
+  Object.assign(MOB3D,{live,culled,corpses,pooled:_mobPool.length});return true;
 }
 export function clearMobs(){
   for(const r of _mobPool)disposeActor(r);
-  _mobPool.length=0;_actors.clear();_drawn=new WeakSet();MOB3D.pooled=0;MOB3D.live=0;
+  _mobPool.length=0;_actors.clear();_drawn=new WeakSet();MOB3D.pooled=0;MOB3D.live=0;MOB3D.culled=0;MOB3D.corpses=0;
 }
 export function mobDrawn(e){return MOB3D.on&&!!e&&typeof e==='object'&&_drawn.has(e);}
 window.__mob3dDrawn=mobDrawn;
-window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,time:r.actions[r.cur]?.time,weights:Object.fromEntries(Object.entries(r.actions).filter(([,a])=>a.getEffectiveWeight()>.01&&a.enabled&&a.isScheduled()).map(([k,a])=>[k,a.getEffectiveWeight()])),phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead,opacity:r.materials[0]?.opacity,flash:r.materials[0]?.emissiveIntensity}))});
+window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,culled:MOB3D.culled||0,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,time:r.actions[r.cur]?.time,weights:Object.fromEntries(Object.entries(r.actions).filter(([,a])=>a.getEffectiveWeight()>.01&&a.enabled&&a.isScheduled()).map(([k,a])=>[k,a.getEffectiveWeight()])),phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead,opacity:r.materials[0]?.opacity,flash:r.materials[0]?.emissiveIntensity}))});

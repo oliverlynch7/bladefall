@@ -76,6 +76,10 @@ function builder(root){
         m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.frustumCulled=true;m.castShadow=!['tile','grass','crop'].includes(name);m.receiveShadow=true;m.userData.tri=rec.tri*list.length;g.add(m);triangles+=m.userData.tri;instances+=list.length;
       }
       for(const s of structures){s.group=groups.get(s.id);if(s.group)s.group.userData.obstacle=s.o}
+      for(const g of groups.values()){
+        const ob=g.userData.obstacle,a=ob?null:g.userData.cell.split(',').map(Number);
+        g.userData.rangeBounds=ob?{x:ob.x,z:ob.z,r:Math.max(ob.w||10,ob.d||10)*.6}:{x:(a[0]+.5)*CHUNK,z:(a[1]+.5)*CHUNK,r:CHUNK*.72};
+      }
       return {groups:[...groups.values()],structures,triangles,instances,lamps};
     }};
 }
@@ -192,8 +196,7 @@ export function updateOutskirts(w){
   const low=window.__BF_META?.().quality==='low',distance=low?700:1050;
   st.journey?.userData.tick(w);
   let tris=0,calls=0;
-  for(const g of st.groups){let x,z,r=CHUNK*.72;const ob=g.userData.obstacle;
-    if(ob){x=ob.x;z=ob.z;r=Math.max(ob.w||10,ob.d||10)*.6}else{const a=g.userData.cell.split(',').map(Number);x=(a[0]+.5)*CHUNK;z=(a[1]+.5)*CHUNK}
+  for(const g of st.groups){const {x,z,r}=g.userData.rangeBounds,ob=g.userData.obstacle;
     g.visible=Math.hypot(x-p.x,z-p.z)<distance+r;
     if(ob?.granaryRoof&&p.x>875&&p.x<1425&&p.z>-355&&p.z<310)g.visible=false;
     if(g.visible&&ob){const base=ob.y0||0,top=ob.kind==='plat'?ob.h:base+(ob.h||0);if(window.BFCameraOcclusion.blocks(w,ob,base,top,window.__BF_META?.().camMode,5))g.visible=false;}
@@ -202,8 +205,12 @@ export function updateOutskirts(w){
   if(st.signalCanopy){st.signalCanopy.visible=st.signalPerches.some(o=>Math.hypot(o.x-p.x,o.z-p.z)<1200);if(st.signalCanopy.visible){tris+=st.signalTriangles;calls+=st.signalCanopy.children.length;}}
   if(st.matureTrees){const t=st.matureTrees.userData.tick(w);tris+=t.triangles;calls+=t.calls;}
   st.stats.visibleTriangles=tris;st.stats.visibleDrawCalls=calls;
-  const lamps=st.lamps.map(v=>({v,d:(v.x-p.x)**2+(v.y-(p.y||0))**2+(v.z-p.z)**2})).sort((a,b)=>a.d-b.d);
-  st.points.forEach((l,i)=>{l.visible=!!lamps[i]&&lamps[i].d<250*250;if(l.visible)l.position.copy(lamps[i].v)});
+  const nearest=st.nearestLamps||(st.nearestLamps=[null,null,null]),dist=st.nearestDistances||(st.nearestDistances=[0,0,0]);
+  nearest.fill(null);dist.fill(250*250);
+  for(const v of st.lamps){const d=(v.x-p.x)**2+(v.y-(p.y||0))**2+(v.z-p.z)**2;
+    for(let i=0;i<3;i++)if(d<dist[i]){for(let j=2;j>i;j--){dist[j]=dist[j-1];nearest[j]=nearest[j-1];}dist[i]=d;nearest[i]=v;break;}
+  }
+  st.points.forEach((l,i)=>{l.visible=!!nearest[i];if(l.visible)l.position.copy(nearest[i]);});
   const sx=Math.round(p.x/300)*300,sz=Math.round(p.z/300)*300;
   const shadowKey=sx+','+sz+','+low;
   if(st.shadowKey!==shadowKey){st.key.position.set(sx-600,1000,sz+600);st.key.target.position.set(sx,0,sz);st.key.target.updateMatrixWorld();st.shadowKey=shadowKey;window.__OUTSKIRTS_SHADOW_DIRTY=true;}

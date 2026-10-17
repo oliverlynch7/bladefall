@@ -1,0 +1,100 @@
+{
+  "transition": true,
+  "oldActors": 9,
+  "oldActorsDetached": true,
+  "before": {
+    "pooled": 9,
+    "live": 8
+  },
+  "after": {
+    "on": true,
+    "live": 4,
+    "culled": 8,
+    "corpses": 0,
+    "pooled": 5,
+    "models": [
+      "enemy-assets/upgraded/grunt-v2142",
+      "enemy-assets/upgraded/thornboar-v2142",
+      "enemy-assets/upgraded/sporeback-v2142",
+      "enemy-assets/upgraded/flyer-v2142",
+      "enemy-assets/upgraded/caster-v2142"
+    ],
+    "pending": [],
+    "missing": [],
+    "err": null,
+    "actors": [
+      {
+        "type": "grunt",
+        "clip": "Idle",
+        "time": 1.9041999999992545,
+        "weights": {
+          "Idle": 1
+        },
+        "phase": null,
+        "phaseKey": null,
+        "timeScale": 1,
+        "dead": false,
+        "opacity": 1,
+        "flash": 1
+      },
+      {
+        "type": "grunt",
+        "clip": "Idle",
+        "time": 1.9041999999992545,
+        "weights": {
+          "Idle": 1
+        },
+        "phase": null,
+        "phaseKey": null,
+        "timeScale": 1,
+        "dead": false,
+        "opacity": 1,
+        "flash": 1
+      },
+      {
+        "type": "caster",
+        "clip": "Idle",
+        "time": 1.9041999999992545,
+        "weights": {
+          "Idle": 1
+        },
+        "phase": null,
+        "phaseKey": null,
+        "timeScale": 1,
+        "dead": false,
+        "opacity": 1,
+        "flash": 1.078946515917778
+      },
+      {
+        "type": "thornboar",
+        "clip": "Idle",
+        "time": 0.22009999999776483,
+        "weights": {
+          "Idle": 1
+        },
+        "phase": null,
+        "phaseKey": null,
+        "timeScale": 1,
+        "dead": false,
+        "opacity": 1,
+        "flash": 1
+      },
+      {
+        "type": "flyer",
+        "clip": "Idle",
+        "time": 1.768199999999255,
+        "weights": {
+          "Idle": 1
+        },
+        "phase": null,
+        "phaseKey": null,
+        "timeScale": 1,
+        "dead": false,
+        "opacity": 1,
+        "flash": 1
+      }
+    ]
+  },
+  "area": 1,
+  "worldError": null
+}

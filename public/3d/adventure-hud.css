@@ -9,8 +9,8 @@ body.adventure-hud{--hud-edge:#76958b;--hud-panel:#12252eed;--hud-gold:#efd794;-
 .adventure-hud #hud .left{display:block}.adventure-hud .hudidentity{margin:0 22px 3px 0}
 .adventure-hud .hudplayername{font:700 18px Georgia;letter-spacing:0;color:#fff0d7;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .adventure-hud #lvlbadge{padding:0;border:0;background:none;font:11px/1.2 system-ui;color:#d2d4c4;letter-spacing:0}
-.adventure-hud #hud .meta>div:last-child{display:block!important}
-.adventure-hud #hud .meta>div:last-child>span:not(#lvlbadge),.adventure-hud #weapontag{display:none!important}
+
+.adventure-hud #hud .meta>div:last-child>span:not(#lvlbadge):not(#hudGold),.adventure-hud #weapontag{display:none!important}
 .adventure-hud #hud.details-open #weapontag{display:block!important;position:absolute;left:0;top:112px;max-width:250px;padding:7px 10px;background:var(--hud-panel);font:11px system-ui}
 .adventure-hud #hudDetails{position:absolute;right:8px;top:7px;border:0;background:transparent;color:#cbd6ca;font:bold 16px system-ui;cursor:pointer;padding:3px 5px}
 .adventure-hud .hudvitals{margin:0}.adventure-hud .hudvitals .barwrap{margin:4px 0;gap:0}
@@ -114,3 +114,47 @@ body.adventure-hud{--hud-edge:#76958b;--hud-panel:#12252eed;--hud-gold:#efd794;-
 .adventure-hud #xpfill{background:linear-gradient(90deg,#c28c29,#ffe18a)}
 .adventure-hud #clsfill{background:linear-gradient(90deg,#8c62cd,#c3a2ff)}
 @media(max-width:899px),(pointer:coarse){.adventure-hud .hudpanel{border-bottom-width:2px;border-radius:5px}.adventure-hud .hudportrait{border-width:1px;box-shadow:0 0 0 1px #937e51}.adventure-hud #adventureSkills{border:0;background:none;box-shadow:none}.adventure-hud #questbox{border-top-width:2px}.adventure-hud #localMap{box-shadow:0 0 0 2px #18283a,0 4px 12px #04111a77}}
+/* Readable progression and reward layout, October17. */
+.adventure-hud #hud .meta>.hud-class-row{display:flex!important;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.adventure-hud #hud .hud-class-row>#lvlbadge{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;flex:1}
+.adventure-hud #hud .meta>.hud-class-row>#hudGold{display:inline-flex!important;align-items:center;gap:4px;flex:0 0 auto;white-space:nowrap;max-width:60%;font:700 12px/1.3 system-ui;color:#ffe09a;font-variant-numeric:tabular-nums}
+.adventure-hud #hudGoldValue{overflow:hidden;text-overflow:ellipsis}.adventure-hud #hudGold .ico{flex:none}
+.adventure-hud #localMap{border-radius:16px!important;width:216px!important;height:216px!important;right:28px!important;top:62px!important}
+.adventure-hud #mapCaption{top:290px!important;right:16px;width:244px;text-align:center}
+.adventure-hud #questbox{left:var(--hud-margin);right:auto;top:206px;width:300px;max-width:300px;max-height:min(230px,calc(100vh - 410px))}
+.adventure-hud #journalNotice{left:auto!important;right:22px!important;top:345px!important;width:288px;max-height:min(265px,calc(100vh - 465px))}
+.adventure-hud #journalNotice .jn-reading{max-height:min(155px,calc(100vh - 565px))}
+.adventure-hud #fpsCounter{position:fixed;right:12px;bottom:8px;z-index:30;padding:4px 7px;border:1px solid #a88f5b88;border-radius:4px;background:#142536cc;color:#dbe9dc;font:600 11px/1.3 system-ui;font-variant-numeric:tabular-nums;pointer-events:none}
+.adventure-hud #fpsCounter[hidden]{display:none}
+@media(min-width:900px) and (pointer:fine){
+ body.adventure-hud{--hud-dock-bottom:62px}
+ .adventure-hud #adventureCombat{bottom:56px}
+ .adventure-hud #hudprogress{position:absolute;top:calc(100% + 9px);bottom:auto;left:50%;width:min(780px,calc(100vw - 80px));transform:translateX(-50%);margin:0;gap:18px}
+ .adventure-hud #hudprogress .progtitle{font-size:12px;letter-spacing:.02em}.adventure-hud #hudprogress .prognum{font-size:11px}
+ .adventure-hud #hudprogress .bar{height:10px;border-radius:4px;overflow:hidden;position:relative}
+ .adventure-hud #hudprogress .bar::after{content:'';display:block;position:absolute;inset:0;z-index:2;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),#081522aa calc(10% - 1px),#e3d9b833 10%);pointer-events:none}
+ .adventure-hud #inventoryDock{bottom:62px}.adventure-hud #equipmentFeed{max-height:210px;overflow:auto}
+}
+@media(max-width:899px),(pointer:coarse){
+ .adventure-hud #localMap{width:140px!important;height:140px!important;top:58px!important;right:14px!important;border-radius:12px!important}
+ .adventure-hud #mapCaption{top:207px!important;right:10px;width:150px}
+ .adventure-hud #questbox{top:184px;left:12px;right:auto;width:calc(100vw - 182px);max-width:260px;max-height:22vh}
+ .adventure-hud #journalNotice{left:auto!important;right:12px!important;top:252px!important;width:calc(50vw - 18px);max-height:200px}
+ .adventure-hud #journalNotice .jn-reading{max-height:105px}
+ .adventure-hud #hudprogress{position:fixed;left:12px;right:12px;top:auto;bottom:4px;width:calc(100vw - 24px);display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .adventure-hud #hudprogress .progbox{height:32px;padding:4px;border-radius:4px}.adventure-hud #hudprogress .proghead{height:14px;margin-bottom:3px}
+ .adventure-hud #hudprogress .progtitle{font-size:10px}.adventure-hud #hudprogress .bar{height:7px;position:relative}.adventure-hud #hudprogress .bar::after{content:'';display:block;position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),#081522aa calc(10% - 1px),#e3d9b833 10%)}
+ .adventure-hud #inventoryDock{bottom:44px}.adventure-hud #equipmentFeed{top:calc(184px + 22vh + 12px);max-height:130px}
+ .adventure-hud #fpsCounter{right:12px;bottom:40px;font-size:10px}
+}
+@media(max-height:600px) and (min-width:900px){.adventure-hud #questbox{top:198px;max-height:100px}.adventure-hud #journalNotice{top:333px!important;max-height:140px}.adventure-hud #journalNotice .jn-reading{max-height:45px}.adventure-hud #equipmentFeed{max-height:150px}}
+/* Keep the tracker immediately below the identity, allowing room for an active companion. */
+@media(min-width:900px) and (pointer:fine){
+ .adventure-hud #questbox{top:154px}
+ .adventure-hud:has(#pethud:not(.hide)) #questbox{top:206px}
+}
+@media(max-width:899px),(pointer:coarse){
+ .adventure-hud #hud{width:min(310px,calc(100vw - 180px))}
+ .adventure-hud #questbox{top:145px;width:calc(50vw - 18px);max-width:260px}
+ .adventure-hud:has(#pethud:not(.hide)) #questbox{top:184px}
+}

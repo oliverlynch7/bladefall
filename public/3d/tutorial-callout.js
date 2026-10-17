@@ -78,7 +78,7 @@
   if(!svg){svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.id='lessonArrow';svg.setAttribute('aria-hidden','true');svg.innerHTML='<defs><marker id="lessonHead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3.5 L0,7 Z" fill="#f4d492"/></marker></defs><rect class="lesson-ring-shadow"/><rect class="lesson-ring"/><path class="lesson-line-shadow"/><path class="lesson-line" marker-end="url(#lessonHead)"/><circle r="3" class="lesson-dot"/>';document.body.append(svg);}
   svg.hidden=false;svg.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);
   const halo=grow(t,4);
-  for(const e of svg.querySelectorAll('rect')){for(const [k,v]of Object.entries({x:halo.x,y:halo.y,width:halo.w,height:halo.h,rx:target.id==='localMap'?halo.w/2:7}))e.setAttribute(k,v);}
+  for(const e of svg.querySelectorAll('rect')){for(const [k,v]of Object.entries({x:halo.x,y:halo.y,width:halo.w,height:halo.h,rx:target.id==='localMap'?14:7}))e.setAttribute(k,v);}
   for(const e of svg.querySelectorAll('path[class]')){e.setAttribute('d',result.leader?.d||'');}
   const dot=svg.querySelector('circle');dot.style.display=result.leader?'':'none';if(result.leader){dot.setAttribute('cx',result.leader.s.x);dot.setAttribute('cy',result.leader.s.y);}
   return result;

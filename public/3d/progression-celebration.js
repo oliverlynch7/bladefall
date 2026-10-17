@@ -2,7 +2,7 @@
 (function(root){'use strict';
 function createClock(now=()=>performance.now()){
  let pending=null;
- return {get active(){return !!pending;},begin(valid,done,cancel,duration=850){if(pending)return false;pending={valid,done,cancel,duration,elapsed:0,last:now()};return true;},
+ return {get active(){return !!pending;},begin(valid,done,cancel,duration=2800){if(pending)return false;pending={valid,done,cancel,duration,elapsed:0,last:now()};return true;},
  tick(hidden=false){const p=pending;if(!p)return;if(!p.valid()){pending=null;p.cancel?.();return;}const t=now(),delta=Math.max(0,Math.min(100,t-p.last));p.last=t;if(hidden)return;p.elapsed+=delta;if(p.elapsed>=p.duration){pending=null;p.done();}},
  clear(){const p=pending;pending=null;p?.cancel?.();}};
 }
@@ -17,10 +17,12 @@ function notify(kind,world,info){if(!world?.p)return;ensure();const old=events[k
  const flare=document.createElement('div');flare.className='progress-flare '+kind;flare.setAttribute('aria-hidden','true');flare.append(document.createElement('i'),document.createElement('i'),document.createElement('i'));host.append(flare);
  events[kind]={world,player:world.p,card,flare,info,elapsed:0,last:performance.now()};lastWorld=world;
 }
+function lockHud(locked){for(const id of ['hud','inventoryDock','controls','pausebtn','questbox']){const el=document.getElementById(id);if(el)el.inert=locked;}}
 function beforeChoice(valid,done,cancel,info){
  if(clock.active)return false;
- const e=events.class;if(e){e.card.classList.add('opening');e.card.querySelector('p').textContent=info.detail;}
- return clock.begin(valid,()=>{events.class?.card.classList.add('departing');done();},cancel);
+ const e=events.class;if(e){e.elapsed=0;e.last=performance.now();e.card.classList.add('opening');e.card.querySelector('p').textContent=info.detail;const wait=document.createElement('small');wait.className='progress-next';wait.textContent='Choose your upgrade next · combat is paused';e.card.querySelector('div').append(wait);}
+ lockHud(true);const abort=()=>{lockHud(false);cancel?.();};
+ return clock.begin(valid,()=>{e?.card.classList.add('departing');clock.begin(valid,()=>{if(events.class===e){e?.card.remove();e?.flare.remove();delete events.class;}lockHud(false);done();},abort,300);},abort);
 }
 function tick(world,mode,project,opts={}){
  document.body.classList.toggle('progress-reduced',!!opts.reduceMotion);
@@ -36,7 +38,7 @@ function tick(world,mode,project,opts={}){
   const at=project?.(world.p.x,(world.p.y||0)+8,world.p.z);
   e.flare.hidden=!at||opts.particles===false||mode!=='play'&&!clock.active;
   if(at){e.flare.style.left=at[0]+'px';e.flare.style.top=at[1]+'px';}
-  if(e.elapsed>(kind==='class'?2100:2600)&&!clock.active){e.card.remove();e.flare.remove();delete events[kind];}
+  if(e.elapsed>(kind==='class'?3200:2600)&&!clock.active){e.card.remove();e.flare.remove();delete events[kind];}
  }
 }
 const api={createClock,notify,beforeChoice,tick,get active(){return clock.active;}};root.BFProgressCelebration=api;if(typeof module!=='undefined')module.exports=api;

@@ -1025,8 +1025,8 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.dragon-riding #bSk2,body.dragon-riding #bSk3{opacity:.4;filter:grayscale(.8)}
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
-<link rel="stylesheet" href="./adventure-hud.css?v=2213">
-<script src="./adventure-hud.js?v=2200"></script>
+<link rel="stylesheet" href="./adventure-hud.css?v=2232">
+<script src="./adventure-hud.js?v=2232"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
@@ -1166,15 +1166,15 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2192">
-<script src="./tutorial-callout.js?v=2192"></script>
-<script src="./guided-tutorial.js?v=2220"></script>
+<script src="./tutorial-callout.js?v=2232"></script>
+<script src="./guided-tutorial.js?v=2232"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2116"></script>
 <script src="./priority-sfx.js?v=2210"></script>
-<link rel="stylesheet" href="./progression-celebration.css?v=2208">
-<script src="./progression-celebration.js?v=2208"></script>
+<link rel="stylesheet" href="./progression-celebration.css?v=2232">
+<script src="encounter-rewards.js?v=2232"></script><script src="./progression-celebration.js?v=2232"></script>
 <script>
 (function(){
 "use strict";
@@ -1185,7 +1185,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.231.0-headwear-tuning';
+const VERSION3D='2.232.0-progression-chests-hud';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1243,7 +1243,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}catch(e){return null;} }
-const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
+const GLOBAL_FIELDS=['showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -2762,8 +2762,9 @@ function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) ret
   return out; }
 function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) return false; const S=curSkills(); return S[i]?cs.rank>=S[i].rank:false; }
 function gainClassXp(n){ if(G?.devKeep)return; const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return; if(inBeginnerTrial()&&cs.rank===1&&G.trialKills<3)n=Math.min(n,Math.max(0,RANK_XP(1)-1-cs.xp));
+  if(inBeginnerTrial()&&cs.rank>=2)n=Math.min(n,Math.max(0,RANK_XP(cs.rank)-1-cs.xp));
   cs.xp+=n; let up=false;
-  while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
+  while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)&&(!inBeginnerTrial()||cs.rank<2)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
     const S=curSkills(meta.classId);
     const sk=S.find((s,idx)=>s&&s.rank===cs.rank&&(idx===0||cs.sub));   // slot 0 (the shared skill) unlocks regardless of a chosen path
     // The visible celebration is coalesced after awarding all ranks in this transaction.
@@ -5242,7 +5243,7 @@ function hudBagUpdate(){
  const message=sell?'New gear sells for gold':!free?'Full · gear stays on the ground':free+' slots free';
  document.getElementById('hudBagState').textContent=message;el.title='Bag · '+used+' / '+STASH_CAP+' · '+message;el.setAttribute('aria-label',el.title);
  const toggle=document.getElementById('hudAutoSell');toggle.textContent='Auto-sell '+(sell?'ON':'OFF');toggle.dataset.on=String(sell);toggle.setAttribute('aria-pressed',String(sell));toggle.title=controlHint('loot')+' · '+(sell?'Collected equipment sells for gold. Click to keep new gear.':'Equipment enters your bag; if full, it stays on the ground. Click to enable selling.');
- document.getElementById('hudGoldValue').textContent=meta.gold||0;
+ const goldCount=document.getElementById('hudGoldValue'),goldValue=Math.max(0,Number(meta.gold)||0);goldCount.textContent=BFEncounterRewards.gold(goldValue);goldCount.parentElement.title=goldValue.toLocaleString()+' gold';goldCount.parentElement.setAttribute('aria-label',goldValue.toLocaleString()+' gold');
 }
 function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; hudBagUpdate(); }
 // Free starter/intrinsic weapons need no storage when replaced; real equipment does.
@@ -5693,7 +5694,7 @@ const HELP_ENTRIES=[
  {cat:'Controls',title:'Attack and charge',get body(){return 'Face your target and tap '+controlHint('attack')+' for a basic attack. Chargeable weapons power up when held; release to launch the charged attack. Other weapons can repeat while held.';}},
  {cat:'Controls',title:'Dodge and air dash',get body(){return 'Use '+controlHint('dodge')+' to dodge. It briefly protects you from hits. Jump with '+controlHint('jump')+'; hold for more height, then dash in the air to cross wider gaps.';}},
  {cat:'Controls',title:'Menus and tutorials',get body(){return controlHint('pause')+' opens the menu. In solo play, the menu pauses time. In co-op, you stay visible and protected while friends keep playing. Guided control practice is protected; later HUD tips are optional. Use '+controlHint('interact')+' to continue a tip, or '+controlHint('pause')+' to close the guide.';}},
- {cat:'Gear',title:'Bag capacity and auto-sell',get body(){return 'Gear pickups enter free bag slots automatically. With Auto-sell OFF, a full bag leaves gear on the ground and chests unopened. ON sells new equipment pickups for gold, even with empty slots. Check the bottom-left label. Open your bag with '+controlHint('bag')+'. Buy Magic Packs at the Quartermaster for more space.';}},
+ {cat:'Gear',title:'Bag capacity and auto-sell',get body(){return 'Chests reveal one equipment item and fill free bag slots automatically. Enemies rarely drop a chest, never loose gear. With Auto-sell OFF, a full bag leaves chests unopened. ON sells new equipment pickups for gold, even with empty slots. Check the bottom-left label. Open your bag with '+controlHint('bag')+'. Buy Magic Packs at the Quartermaster for more space.';}},
  {cat:'Gear',title:'Pickup comparisons',body:'The bottom-left pickup card compares new gear with your equipped item. It says Added to bag, Auto-sold, or Bag full. Use Loot beside the bag to reopen the latest card. New gear is not automatically equipped: choose it in your bag.'},
  {cat:'Gear',title:'Rarity and equipment requirements',body:'Common is grey, Uncommon green, Rare blue, Epic purple, Legendary gold. The same character-level requirements apply to weapons, armor, rings and amulets. Class rank does not meet a gear level requirement; your class must also support the weapon.'},
  {cat:'Gear',title:'Chests and mimics',get body(){return 'Better chests offer better chances of rare gear. Each chest gives one equipment item. Use '+controlHint('interact')+' to finish its reveal faster. Some chests are mimics: be ready for a fight.';}},
@@ -10055,6 +10056,7 @@ window.addEventListener('keydown',e=>{
     if(mode==='mirror'){ if(mirrorPanelMode){ mirrorPanelMode=null; buildMirrorPanel(); } else exitMirror(); return; }
     if(mode==='play') openPause();
     else if(mode==='pause'){ resumeGameAudio(true); resumePlay(); }
+    else if(mode==='upgrade'&&document.querySelector('.classpick')){ classTutorialAction('cancel'); }
     else if(mode==='menu'||mode==='upgrade'){ const b=BFMenuKeys.backButton(ovcard);if(b)b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
     else if(mode==='weapon'){ const b=document.querySelector('#stashBtn'); if(b) b.click(); else resumePlay(); }        // loot card: Esc stashes (keeps the item), never silently drops it
     return; }
@@ -10102,6 +10104,7 @@ function pollGamepad(dt){
  const p=BFController.read(mode+':'+BFController.active);
  if(p&&!meta.padOff&&(p.buttons.some(Boolean)||Math.abs(p.x)+Math.abs(p.z)+Math.abs(p.rx)+Math.abs(p.ry)>.15))hudDevice('controller');
  if(p&&!meta.padOff&&BFShipwreckShore.aiming()){release();BFShipwreckShore.control(p,dt);return;}
+ if(window.BFProgressCelebration?.active){release();return;}
  if(p&&!meta.padOff&&!BFController.active){if(BFHubTour.control(p)||BFGuidedTutorial.control(p))return;if(BFChestReveal.active&&p.edge('interact')){BFChestReveal.skip();return;}if(classTutorialAction(p.edge('interact')?'interact':p.edge('dodge')?'cancel':null))return;}
  if(!p||meta.padOff||BFController.active||mode!=='play'){release();if(p&&(!meta.padOff||BFController.active)){if(p.edge('pause')&&mode==='pause'&&!BFController.active){resumeGameAudio(true);resumePlay();}else BFController.menu(p);}return;}
  if(p.edge('pause')){release();openPause();return;}
@@ -10960,7 +10963,7 @@ function reconcileWorldHeights(){ if(!G) return;
   const lift=(o,r=16)=>{ if(o&&!o.taken&&!o.done) o.y=Math.max(o.y||0, (G.ascent?floorAt(o.x,o.z,r,(Number(o.y??o.y0)||0)+30):highestSurfaceAt(o.x,o.z,r))); };
   lift(G.portal); lift(G.bonusPortal); lift(G.waystone); if(G.qmarks) for(const qm of G.qmarks) lift(qm); lift(G.secret); lift(G.secretTrigger);   // exits, find-objectives, secrets/vaults never sit buried under a mesa
   for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, (G.ascent?floorAt(pk.x,pk.z,8,(pk.y0||0)+30):highestSurfaceAt(pk.x,pk.z)));
-  for(const ch of (G.chests||[])){prepareChest(ch);if(!ch.opened)seatChest(ch);}
+  restoreEnemyChests();for(const ch of (G.chests||[])){prepareChest(ch);if(!ch.opened)seatChest(ch);}
 }
 /* ── E1: COLLISION NORMALISATION ───────────────────────────────────────────
    Oliver: "four green lamps by the Waystation have collision; the taller ones around them do not.
@@ -12468,8 +12471,7 @@ function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
   showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Change choices later at the Drillmaster.</p></div>
-    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q / Esc</button></div><button class="bigbtn ghost" data-menu-back id="classChoiceLater">Choose later · Q / Esc</button></div>`);
-  document.getElementById('classChoiceLater').onclick=()=>{queueChoiceRank=0;resumePlay();toast('Choice kept for later. Select a locked skill or visit the Drillmaster.');};
+    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q / Esc</button></div><p class="hint choice-required">Choose one to continue. You can change it at the Drillmaster.</p></div>`);
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
     const selected=[R.a,R.b].find(o=>o.id===b.dataset.pick);if(!selected)return;
     const confirmAt=Date.now();
@@ -13680,19 +13682,11 @@ function killEnemy(e,weaponKill){
     if(e.type==='tyrant') meta.tyrantKills=(meta.tyrantKills||0)+1;
     rollDrop(e); persist(); checkAchievements();
     if(G.stageIndex===STAGES.length-1 && !G.bossRush){ winGame(); return; }   // Gauntlet's final boss doesn't trigger the campaign win
-  } else if(e.kind==='goblin'){ // caught the treasure goblin: premium loot burst
-    SFX.god(); toast('💰 Treasure goblin slain!');
-    for(let i=0;i<2;i++){
-      let rid=rollRarity(); while(RARITY[rid].tier<2) rid=RORDER[Math.min(4,RARITY[rid].tier+2)];
-      const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
-                                   :{weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)};
-      pushLoot(e.x+(i?26:-26),e.z+16,0,item);
-    }
-  } else if(e.mimicE){ // Phase 18: the mimic's hoard — the risk PAYS: two elite-band drops + a fat purse (vs a chest's one band-0 roll + 70g)
-    SFX.enemyDie(); playFx('wallbreak'); SFX.god(); toast('💰 The mimic disgorges its hoard');
-    const mg=awardGold(150+zoneTier()*50); addText(e.x,e.y+e.h+8,e.z,'+'+mg+'g','#ffd24a');
-    for(let i=0;i<2;i++) pushLoot(e.x+(i?28:-28),e.z+18,0,randomLoot(bandedRarity(1)));
-    checkAchievements();
+  } else if(e.kind==='goblin'){
+    SFX.god();toast('Treasure goblin slain!');rollDrop(e);
+  } else if(e.mimicE){
+    SFX.enemyDie();playFx('wallbreak');SFX.god();toast('The mimic drops a treasure chest');
+    const mg=awardGold(150+zoneTier()*50);addText(e.x,e.y+e.h+8,e.z,'+'+mg+'g','#ffd24a');rollDrop(e);checkAchievements();
   } else {
     // per-mob death voice (batch-2): grunt + a couple of assigned mobs, else the procedural die
     if(e.deathpuff){ SFX.magic('poison'); noise({dur:.32,f0:900,f1:180,type:'lowpass',vol:.045,a:.01}); mobDie(e); }
@@ -13702,7 +13696,7 @@ function killEnemy(e,weaponKill){
     // FEWER, MEANINGFUL drops: even elites are no longer guaranteed loot, so long runs cannot flood the bag.
     // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
     // Bosses, chests, mimics, and goblins remain the reliable gear sources.
-    if(!e.frostOfficer&&Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
+    if(!e.frostOfficer&&Math.random()<BFEncounterRewards.chance(e,enemyEncounterLevel(e)))rollDrop(e);
     if(e.look==='slime' && !e.noSplit && !(MP.active&&!MP.isHost)){ // slimes split into two slimelets (host-authoritative in co-op)
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
         if(e.patrolGroup)Object.assign(sl,{patrolGroup:e.patrolGroup,patrolParent:e.mid,patrolReturn:true,label:'Tide slimelet',y:e.y,sy:e.y});
@@ -13730,10 +13724,10 @@ function mimicReveal(ch){
 }
 function prepareChest(ch){
  if(!ch)return null;if(ch._rewardRecord)return ch._rewardRecord;
- const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=layout.rarity;ch.challenge=layout.challenge;
+ const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=layout.rarity;ch.challenge=ch.enemyReward?false:layout.challenge;
  if(ch.challenge)ch.mimic=false;
  const scene=[G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex,G.bonusActive?G.bonusCourse?.seed||G.bonusVisits||0:0].join(':');
- const key=scene+':'+Math.round(ch.x)+','+Math.round(ch.z);
+ const key=ch.rewardKey||scene+':'+Math.round(ch.x)+','+Math.round(ch.z);
  const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
  const records=owner.chestRecords||(owner.chestRecords={});
  let rec=records[key];
@@ -13756,7 +13750,7 @@ function descentRewardChest(){
  const ch={x:0,z:-160,y:0,rarity,descentReward:true,opened:false,bob:0};G.chests.push(ch);prepareChest(ch);
 }
 function openChest(ch){
-  if(!ch||ch.opened)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;
+  if(!ch||ch.opened||(ch.dropReadyAt||0)>G.time)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;
   if(!(ch.bonus&&G.sprintFun&&G.bonusActive)&&meta.autoSellEquipment!==true&&(meta.stash||[]).length>=STASH_CAP){fullBagNotice(null,null,'chest');return;}record.claimed=true;
   ch.opened=true; SFX.pickup(); if(ch.bonus&&G.sprintFun&&G.bonusActive)SFX.achieve(); playFx('chestopen');
   /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
@@ -13781,7 +13775,7 @@ function openChest(ch){
   }
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
-  const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
+  const cg=ch.enemyReward?0:awardGold(ch.bonus?150:70);if(cg)addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
   if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Treasure secured — take the exit','#ffd24a','event-treasure-chest'); }
   // The compact result and gold HUD replace the redundant center-screen chest toast.
   const item=checkpointClone(record.item),kind=item.weapon?'weapon':item.armor?'armor':'trinket',gear=item[kind];
@@ -13809,23 +13803,33 @@ function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, t
   if(tier>=4){ G.slowmo=Math.max(G.slowmo||0,0.32); }                                      // a brief triumphant hitch on a legendary
   return o;
 }
+function enemyEncounterLevel(e){return BFEncounterRewards.level(G,e);}
+function enemyChestScene(){return [G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex].join(':');}
+function restoreEnemyChests(){
+ const scene=enemyChestScene();if(G._enemyChestScene===scene)return;G._enemyChestScene=scene;
+ const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
+ for(const [key,r]of Object.entries(owner.chestRecords||{}))if(r.source==='enemy'&&r.scene===scene&&!r.claimed&&!G.chests.some(c=>c.rewardKey===key)){
+  G.chests.push({x:r.x,z:r.z,y:r.y||0,rarity:r.rarity,challenge:false,enemyReward:true,rewardKey:key,opened:false,bob:0});
+ }
+}
 function rollDrop(e){
-  if(e.type==='tyrant') return;
-  if(e.type==='king'){ pushLoot(e.x,e.z,0,{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')});
-    pushLoot(e.x-40,e.z+20,0,{armor:makeArmor('legendary','chest')}); meta.legendaryFound=(meta.legendaryFound||0)+1; return; }
-  let rid=e.boss?bandedRarity(1):rollOrganicRarity();
-  if(!e.boss){ const cap=Math.min(3,rarityCap(e.elite?1:0)); while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; } // organic mob kills cap at Epic
-  if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
-  if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
-  if(!e.boss && Math.random()<0.45){
-    // within a gear drop, ~24% is a trinket (ring/amulet) — rarer than armor, but reliably findable now (was quest-only before)
-    if(Math.random()<0.24) pushLoot(e.x,e.z,0,{trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])});
-    else pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
-  else { const aid=DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)];
-    pushLoot(e.x,e.z,0,{weapon:makeWeapon(aid,rid)});
-    if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)];
-      if(Math.random()<0.28) pushLoot(e.x-40,e.z+20,0,{trinket:makeTrinket(lr,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])});
-      else pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
+ if(!e||e.type==='tyrant'||e.dummy||e.practice||e.bot||e.duel||G.hub||G.trial||G.arena)return;
+ const scene=enemyChestScene(),owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
+ const records=owner.chestRecords||(owner.chestRecords={});
+ const drops=e.type==='king'?[
+  {weapon:makeWeapon('voidscythe','legendary','Abyss Blade')},
+  {armor:makeArmor('legendary','chest')}
+ ]:[null];
+ drops.forEach((fixed,i)=>{
+  const key=scene+':enemy:'+(e.mid??(e.sx??e.x)+','+(e.sz??e.z))+':'+i;
+  if(records[key]?.claimed||G.chests.some(c=>c.rewardKey===key))return;
+  const rarity=fixed?'legendary':BFEncounterRewards.grade(e,enemyEncounterLevel(e),Math.random());
+  const x=e.x+i*76,z=e.z+18,y=Math.max(0,floorAt(x,z,10,(e.y||0)+30));
+  const ch={x,z,y,rarity,challenge:false,enemyReward:true,rewardKey:key,opened:false,bob:0,dropReadyAt:G.time+.8};
+  if(!records[key])records[key]={source:'enemy',scene,x,z,y,rarity,challenge:false,item:fixed||randomLoot(BFChestRules.reward(rarity,false,Math.random())),claimed:false};
+  G.chests.push(ch);prepareChest(ch);SFX.drop(RARITY[ch.rarity].tier);burst(x,y+16,z,RARITY[ch.rarity].color,10);
+ });
+ persist();if(G.escape)BFPrisonRun.checkpoint();
 }
 // Phase 9: no more roguelite pick-3. Every level bakes in automatic stat growth (folds the old
 // upgrade pool's power in), so the game is stronger — not weaker — for losing the menu.
@@ -13833,8 +13837,8 @@ function autoLevelGrow(p){ p.maxHp+=11; p.stats.power*=1.035; p.stats.atkSpeed*=
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){ if(G?.devKeep)return;
   const p=G.p,previousLevel=p.level; p.xp+=Math.round(n*(isCampaignAdventure()?1.5:1));
-  const classAward=n>0?Math.max(1,Math.round(n*(isCampaignAdventure()?4:.8))):0;
-  gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // Campaign training supports learning multiple classes; other modes retain their pace.
+  const classAward=n>0?Math.max(1,Math.round(n*(isCampaignAdventure()?3.2:.8))):0;
+  gainClassXp(classAward); // Campaign training supports learning multiple classes; other modes retain their pace.
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);
     autoLevelGrow(p); recomputeArmor(p);
     p.hp=Math.min(effMaxHp(p),p.hp+(G.escape?0:20));      // Prison Break preserves health attrition across level-ups.
@@ -15307,14 +15311,14 @@ const MP={
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
-      else { const type=this.ekey(k[1]); this.creditKill(type,k[4],!!k[2],!!k[3]); } }
+      else { const type=this.ekey(k[1]); this.creditKill(type,k[4],!!k[2],!!k[3],mid); } }
     // cull mirror enemies the host no longer reports (despawned/removed), after a grace window
     if(this._gotEn) for(const e of G.enemies){ if(e.dead||e.mid==null||e.practice||e.dummy) continue;
       if(seen[e.mid]){ e._miss=0; } else { e._miss=(e._miss||0)+1; if(e._miss>120){ e.dead=true; } } } },
   // guest: a host kill for an enemy we never had locally — still grant instanced XP/loot/quest credit
-  creditKill(type,xp,elite,boss){ if(!G||!G.p) return; try{ if(xp>0) gainXp(xp); }catch(e){}
+  creditKill(type,xp,elite,boss,mid){ if(!G||!G.p) return; try{ if(xp>0) gainXp(xp); }catch(e){}
     try{ if(type) questKill(type); }catch(e){}
-    try{ const e={type,elite,boss,xp,x:G.p.x,z:G.p.z,y:0,h:20,color:'#fff'}; if(typeof rollDrop==='function' && Math.random()<(elite?0.33:0.053)) rollDrop(e); }catch(e){} },
+    try{ const e={type,kind:ENEMY[type]?.kind,mimicE:type==='mimic',elite,boss,xp,x:G.p.x,z:G.p.z,y:0,h:20,color:'#fff'};e.mid=mid??('credit-'+(this._creditChestSeq=(this._creditChestSeq||0)+1));if(boss||Math.random()<BFEncounterRewards.chance(e,enemyEncounterLevel(e)))rollDrop(e); }catch(e){} },
   // ================= P1.3 DOWNED / REVIVE (co-op death is not the end) =================
   anyAllyUp(){ for(const id in this.peers){ const q=this.peers[id]; if(q.zone===this.zone && !q.downed && (q.hp==null||q.hp>0)) return true; } return false; },
   goDown(){ if(!G||!G.p) return; const p=G.p; if(p.downed) return; p.downed=true; p.hp=0; p.vx=0; p.vz=0; p.dead=false;
@@ -20203,7 +20207,7 @@ function organizePauseSettings(){
   const back=document.getElementById('settingsBack'),card=back.closest('.card');
   const groups=[
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
-    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn']],
+    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn','fpsBtn']],
     ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
@@ -20230,6 +20234,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
+      <button class="bigbtn ghost" id="fpsBtn" aria-pressed="${meta.showFps===true}">FPS counter: ${meta.showFps===true?'On':'Off'}</button>
       <button class="bigbtn ghost" id="particlesBtn">✨ Particles: ${meta.particles!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="objectiveArrowsBtn">Main objective arrows: ${meta.objectiveArrows!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="friendArrowsBtn">Friend arrows: ${meta.friendArrows!==false?'On':'Off'}</button>
@@ -20250,6 +20255,7 @@ function openPauseSettingsV2(){
   const reading=document.createElement('button');reading.id='readingSizeBtn';reading.className='bigbtn ghost';reading.textContent='Reading text: '+({1:'Standard',1.15:'Larger',1.3:'Largest'}[meta.readingSize||1]||'Standard');document.getElementById('settingsBack').before(reading);
   reading.onclick=()=>{const sizes=[1,1.15,1.3];meta.readingSize=sizes[(sizes.indexOf(meta.readingSize||1)+1)%sizes.length];persistGlobal();openPauseSettingsV2();document.getElementById('readingSizeBtn').focus();};
   organizePauseSettings();
+  document.getElementById('fpsBtn').onclick=()=>{meta.showFps=meta.showFps!==true;persistGlobal();openPauseSettingsV2();};
   for(const key of ['objectiveArrows','friendArrows'])document.getElementById(key+'Btn').onclick=()=>{meta[key]=meta[key]===false;persistGlobal();openPauseSettingsV2();};
   document.getElementById('settingsBack').onclick=openPauseV2;
   document.getElementById('fsBtn').onclick=()=>{ toggleFullscreen(); setTimeout(openPauseSettingsV2,120); };
@@ -22420,9 +22426,9 @@ function drawHpBar3(e){
   const namedElite=!!e.campaignElite;
   const s=project(e.x,(e.y||0)+(e.h||38)+(namedElite?32:18),e.z);
   if(!s||s[0]<-60||s[0]>VW+60||s[1]<-40||s[1]>VH+40||!BFEnemyHealth.visible(G,e,G.time||0))return;
-  hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/Math.max(1,e.maxHp))),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:namedElite||e.briarRole||e.homeRaid||e.patrolGroup?e.label:null,training:!!(e.dummy||e.practice)});
+  hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/Math.max(1,e.maxHp))),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:e.label&&!/^(elite|boss)$/i.test(e.label)?e.label:(e.elite?'Elite ':'')+bestiaryName(e.type||'enemy'),level:enemyEncounterLevel(e),training:!!(e.dummy||e.practice)});
   if(e.st){const keys=[];for(const k in e.st){const n=Math.floor(e.st[k]);if(n>=1)keys.push([k,n]);}
-    if(keys.length){const sp=project(e.x,(e.y||0)+(e.h||38)+(namedElite?75:e.boss?36:30),e.z);if(sp)statPips.push({x:sp[0],y:sp[1],keys});}}
+    if(keys.length){statPips.push({x:s[0],y:s[1]-30*DPR,keys});}}
 }
 
 let hpBars=[], statPips=[];
@@ -22484,16 +22490,16 @@ function drawHpBars(){
     }
     if(b.elite){
       const w=104*DPR,h=8*DPR;c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(12*DPR)+'px system-ui,sans-serif';
-      c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText('◆ '+b.name,b.x,b.y-7*DPR);c.fillStyle='#f0c36c';c.fillText('◆ '+b.name,b.x,b.y-7*DPR);
+      c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText('◆ '+b.name+' · Lv '+b.level,b.x,b.y-7*DPR);c.fillStyle='#f0c36c';c.fillText('◆ '+b.name+' · Lv '+b.level,b.x,b.y-7*DPR);
       c.fillStyle='#161923';c.fillRect(b.x-w/2-2*DPR,b.y-2*DPR,w+4*DPR,h+4*DPR);c.strokeStyle='#a47a37';c.lineWidth=DPR;c.strokeRect(b.x-w/2-DPR,b.y-DPR,w+2*DPR,h+2*DPR);
       c.fillStyle='#e8453d';c.fillRect(b.x-w/2,b.y,w*b.f,h);continue;
     }
-    if(b.raider&&b.name){c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(10*DPR)+'px system-ui,sans-serif';c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText(b.name,b.x,b.y-6*DPR);c.fillStyle='#ead6af';c.fillText(b.name,b.x,b.y-6*DPR);}
+    if(!b.pet&&b.name){c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(10*DPR)+'px system-ui,sans-serif';c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText(b.name+(b.training?'':' · Lv '+b.level),b.x,b.y-6*DPR);c.fillStyle='#ead6af';c.fillText(b.name+(b.training?'':' · Lv '+b.level),b.x,b.y-6*DPR);}
     if(b.pet&&b.name){   // ally pet: small name label above its bar
       c.textAlign='center'; c.textBaseline='alphabetic'; c.font='bold 9px system-ui,sans-serif';
       c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(b.name, b.x+0.6, b.y-4.4);
       c.fillStyle='#9be7b0'; c.fillText(b.name, b.x, b.y-5); }
-    const width=b.pet?32:46,height=b.pet?3:5;
+    const width=(b.pet?32:62)*DPR,height=(b.pet?3:6)*DPR;
     c.fillStyle='#171b24';c.fillRect(b.x-width/2-2,b.y-2,width+4,height+4);
     c.fillStyle='#4a2426';c.fillRect(b.x-width/2,b.y,width,height);
     c.fillStyle=b.pet?'#55d78b':b.training?'#aeb7bf':'#ed4845';c.fillRect(b.x-width/2,b.y,width*b.f,height); }
@@ -23328,6 +23334,7 @@ function itemAv(item){
 function ensureSize(){ const dpr=targetRenderDpr(), tw=Math.round(window.innerWidth*dpr), th=Math.round(window.innerHeight*dpr);
   if(VW!==window.innerWidth||VH!==window.innerHeight||canvas.width!==tw||canvas.height!==th) resize(); }
 function frame(ts){
+  BFAdventureHud.fps(ts,meta.showFps===true,!!G&&!['title','story','hubtour'].includes(mode)&&!document.hidden&&!window.BF_LOADING?.active);
  if(window.__BF_GRAPHICS_LOST){lastT=ts;acc=0;window.BF_LOADING?.tick(G,mode);requestAnimationFrame(frame);return;}
   const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();
@@ -23895,7 +23902,7 @@ window.__BF3={pauseState,openStylistMakeover,openCharacterStats,openCharCreate,a
   surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy, partySize, partyHpMul,
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
-  prepareChest, descentRewardChest, canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
+  enemyEncounterLevel, rollDrop, restoreEnemyChests, prepareChest, descentRewardChest, canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   briarReady, briarRequest, briarReceive, briarApply, briarPacket, briarSync, briarObjects, briarInteract, buildBriarOpening,
   openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,

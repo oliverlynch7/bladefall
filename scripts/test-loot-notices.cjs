@@ -3,6 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const elements=new Map();
 function element(id){if(elements.has(id))return elements.get(id);const e={hidden:true,textContent:'',dataset:{},style:{setProperty(){}},classList:{add(){},toggle(){},contains(){return false;}},append(){},addEventListener(){},setAttribute(){},getBoundingClientRect:()=>({left:0,right:250,top:400,bottom:700,height:100}),matches:()=>false,contains:()=>false,querySelector:s=>element(id+' '+s)};elements.set(id,e);return e;}
 const ctx={window:{},document:{getElementById:element,createElement:()=>element('created-'+elements.size),body:{classList:{add(){}},style:{setProperty(){}}}},ResizeObserver:class{observe(){}},innerWidth:1280,innerHeight:720};
+element('lvlbadge').parentElement=element('identityClassRow');ctx.document.body.append=()=>{};
 vm.runInNewContext(fs.readFileSync('public/3d/adventure-hud.js','utf8'),ctx);const hud=ctx.window.BFAdventureHud,g={},panel=element('equipmentFeed');hud.mount({bag(){},toggleSell(){},journal(){},hint:()=> 'I'});
 const a={name:'Sword',rarity:'rare',dmg:40,cd:.5},b={name:'Shield',rarity:'rare',defense:8};
 const notice=(item,extra={})=>({item,kind:item===a?'weapon':'armor',equipped:{dmg:20,cd:.6},rarity:{name:'Rare'},type:'Equipment',...extra});

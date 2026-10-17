@@ -3,8 +3,8 @@ const {createClock}=require('../public/3d/progression-celebration.js');
 let checks=0;const ok=(v,n)=>{assert(v,n);checks++;};
 let now=0,done=0,cancel=0,valid=true;const clock=createClock(()=>now);
 ok(clock.begin(()=>valid,()=>done++,()=>cancel++),'first transition starts');ok(!clock.begin(()=>true,()=>done++),'no duplicate transition');
-for(let i=0;i<8;i++){now+=100;clock.tick();ok(done===0,'choice remains closed before 850ms');}
-now+=50;clock.tick();ok(done===1&&!clock.active,'850ms opens exactly once');now+=100;clock.tick();ok(done===1,'no duplicate completion');
+for(let i=0;i<27;i++){now+=100;clock.tick();ok(done===0,'choice remains closed before 2800ms');}
+now+=100;clock.tick();ok(done===1&&!clock.active,'2800ms opens exactly once');now+=100;clock.tick();ok(done===1,'no duplicate completion');
 clock.begin(()=>valid,()=>done++,()=>cancel++);for(let i=0;i<20;i++){now+=100;clock.tick(true);}ok(clock.active&&done===1,'hidden tabs retain the heads-up');
 valid=false;clock.tick();ok(!clock.active&&cancel===1,'stale world/class/death cancels');
 valid=true;clock.begin(()=>valid,()=>done++,()=>cancel++);clock.clear();ok(!clock.active&&cancel===2,'clear cancels safely');
@@ -30,4 +30,16 @@ ok(html.includes('p[0]/DPR,p[1]/DPR'),'world pulse respects display pixel ratio'
 const css=fs.readFileSync('public/3d/progression-celebration.css','utf8');ok(css.includes('pointer-events:none'),'celebration cannot block combat input');ok(css.includes('prefers-reduced-motion'),'OS motion preference');ok(css.includes('.progress-celebration.reduced'),'game motion preference');
 const tutorial=fs.readFileSync('public/3d/guided-tutorial.js','utf8');ok(tutorial.includes('combat waits while you choose'),'first-choice warning');
 const sfx=JSON.parse(fs.readFileSync('public/sfx/custom/starter-20261016/manifest.json','utf8'));ok(sfx.cues.find(c=>c.id==='custom_classup').sha256!==sfx.cues.find(c=>c.id==='levelcheer').sha256,'distinct custom SFX assets');
-console.log(JSON.stringify({checks,introMs:850,multiAward:true,staleOwnerGuards:true,playerNeverPauses:true,distinctSounds:true}));
+console.log(JSON.stringify({checks,introMs:2800,multiAward:true,staleOwnerGuards:true,playerNeverPauses:true,distinctSounds:true}));
+// Exercise the actual DOM transition, including its fade and input lock, against a virtual clock.
+{
+ let ms=0,opened=0,cancelled=0;
+ function node(tag){const classes=new Set();return {tag,children:[],style:{},append(...x){this.children.push(...x);},setAttribute(){},remove(){this.removed=true;},classList:{add(...s){s.forEach(x=>classes.add(x));},toggle(s,on){on?classes.add(s):classes.delete(s);}},querySelector(t){let all=this.children.slice();while(all.length){const n=all.shift();if(n.tag===t)return n;all.push(...n.children);}return null;}};}
+ const ids=Object.fromEntries(['hud','inventoryDock','controls','pausebtn','questbox'].map(x=>[x,node('div')]));const body=node('body');
+ const env={window:{},performance:{now:()=>ms},document:{createElement:node,getElementById:id=>ids[id],body}};vm.createContext(env);vm.runInContext(fs.readFileSync('public/3d/progression-celebration.js','utf8'),env);const ui=env.window.BFProgressCelebration,world={p:{hp:100,x:0,y:0,z:0}};
+ ui.notify('class',world,{name:'Mage',value:2,detail:'First skill ready'});ui.beforeChoice(()=>true,()=>opened++,()=>cancelled++,{detail:'Choose your first skill next'});assert(ids.hud.inert&&ids.inventoryDock.inert,'HUD cannot bypass required choice');
+ for(let i=0;i<27;i++){ms+=100;ui.tick(world,'upgrade',null,{});}assert.equal(opened,0,'choice closed throughout readable hold');ms+=100;ui.tick(world,'upgrade',null,{});assert.equal(opened,0,'fade before new screen');assert(ui.active,'transition stays protected during fade');
+ for(let i=0;i<3;i++){ms+=100;ui.tick(world,'upgrade',null,{});}assert.equal(opened,1);assert(!ids.hud.inert,'input restored only after transition');assert(!ui.active);assert.equal(cancelled,0);
+ ui.notify('class',world,{name:'Mage',value:3});let valid=true;ui.beforeChoice(()=>valid,()=>opened++,()=>cancelled++,{detail:'Passive choice'});valid=false;ms+=16;ui.tick(world,'upgrade',null,{});assert.equal(cancelled,1);assert(!ids.hud.inert,'stale transition releases input');
+ console.log('11 actual staged rank-banner / fade / HUD-lock / cancellation checks passed.');
+}

@@ -10,9 +10,9 @@ const lessons=[
  {id:'dodge',title:'Dodge or dash',body:'Dodge through an attack to avoid the hit. The same control lets you dash in mid-air.',action:'dodge',safe:true},
  {id:'vitals',title:'Watch health and mana',body:'HP is your health. Mana fuels skills. Enemies are active now: keep moving while you read these optional tips.',target:['#hud .hudvitals']},
  {id:'objective',title:'Your next task',body:'Defeat 6 enemies. After the first 3, your class ranks up. A purple banner announces your first skill choice; combat waits while you choose. Try it on the rest, then find the exit portal.',target:['#questbox']},
- {id:'progress',title:'Two kinds of progress',body:'Gold: your player leveled up. Keep fighting; spend stat points in Bag later. Purple: your class ranked up. A short celebration leads into a skill or passive choice.',target:['#hudprogress']},
+ {id:'progress',title:'Two kinds of progress',body:'Gold: your player leveled up. Keep fighting; spend stat points in Bag later. Purple: your class ranked up. Combat pauses, then you must choose a skill or passive. Each bar has ten progress marks.',target:['#hudprogress']},
  {id:'skills',title:'Skills, costs and cooldowns',body:'Unlocked skills show their mana cost at the top left and a countdown while recharging. Padlocks show the rank you need.',target:['#bSk0']},
- {id:'bag',title:'Pickups and your bag',body:'Gear goes straight into free bag slots. The pickup card compares it with equipped gear. Bag full + Auto-sell OFF leaves gear behind.',target:['#inventoryDock']},
+ {id:'bag',title:'Chests and your bag',body:'Chests reveal one piece of gear and put it in your bag. Enemies rarely drop chests. Bag full + Auto-sell OFF leaves a chest unopened.',target:['#inventoryDock']},
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
  {id:'journal',title:'Keep your clues close',body:'New clues appear on paper notices until dismissed. Open Journal to read them again, search clues or check side quests.',target:['#hudJournal'],anchor:'#inventoryDock'},
  {id:'navigation',title:'Follow your map',body:'Gold marks the next objective or exit. Blue marks friends; cyan marks pings; red marks enemies. The map rotates as you turn.',target:['#localMap']},
@@ -129,13 +129,13 @@ function map(g,mode){
  const nav=window.__BF_MAP_PARTY?.()||{},heading=nav.heading;
  const mapHeading=Number.isFinite(heading)?heading:(g.p.yaw||0);
  const turn=mapHeading+Math.PI,c=mapCanvas.getContext('2d'),p=g.p,scale=145/800,mid=160;
- c.clearRect(0,0,320,320);c.save();c.beginPath();c.arc(mid,mid,156,0,Math.PI*2);c.clip();c.fillStyle='#101923';c.fillRect(0,0,320,320);c.translate(mid,mid);c.rotate(turn);
+ c.clearRect(0,0,320,320);c.save();c.beginPath();c.roundRect(4,4,312,312,24);c.clip();c.fillStyle='#101923';c.fillRect(0,0,320,320);c.translate(mid,mid);c.rotate(turn);
  const xy=o=>[(o.x-p.x)*scale,(o.z-p.z)*scale];c.fillStyle='#435747';for(const o of g.segments||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
  for(const o of g.obstacles||[]){c.fillStyle=o.kind==='plat'?'#819488':'#56636a';const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
  c.fillStyle='#26302d';for(const o of g.walls||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
- const marker=(o,color,r,edge=false)=>{if(!o||!Number.isFinite(o.x)||!Number.isFinite(o.z))return;let [x,y]=xy(o);const d=Math.hypot(x,y);if(d>138){if(!edge)return;x*=138/d;y*=138/d;}c.fillStyle=color;c.strokeStyle='#101923';c.lineWidth=2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.stroke();};
+ const marker=(o,color,r,edge=false)=>{if(!o||!Number.isFinite(o.x)||!Number.isFinite(o.z))return;let [x,y]=xy(o);const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),d=Math.max(Math.abs(rx),Math.abs(ry));if(d>138){if(!edge)return;x*=138/d;y*=138/d;}c.fillStyle=color;c.strokeStyle='#101923';c.lineWidth=2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.stroke();};
  if(g.hub&&!g.hubArt?.riftHall){
-   const landmark=(o,color,glyph)=>{if(!o)return;let [x,y]=xy(o);const d=Math.hypot(x,y);if(d>136){x*=136/d;y*=136/d;}c.fillStyle='#111c24';c.beginPath();c.arc(x,y,11,0,Math.PI*2);c.fill();c.fillStyle=color;c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();c.fillStyle='#182126';c.font='bold 12px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(glyph,x,y+.5);};
+   const landmark=(o,color,glyph)=>{if(!o)return;let [x,y]=xy(o);const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),d=Math.max(Math.abs(rx),Math.abs(ry));if(d>136){x*=136/d;y*=136/d;}c.fillStyle='#111c24';c.beginPath();c.arc(x,y,11,0,Math.PI*2);c.fill();c.fillStyle=color;c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();c.fillStyle='#182126';c.font='bold 12px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(glyph,x,y+.5);};
    landmark(g.gates?.find(q=>q.zi===0&&!q.side),'#e9c77c','1');
    landmark({x:-610,z:145},'#e7af76','$');
    landmark({x:610,z:145},'#91c5da','★');
@@ -150,7 +150,7 @@ function map(g,mode){
  c.fillStyle='#fff0c7';c.font='bold 18px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('N',mid+Math.sin(turn)*148,mid-Math.cos(turn)*148);
 }
 
-const mapStyle=document.createElement('style');mapStyle.textContent='#localMap{width:176px!important;height:176px!important}@media(max-width:650px){#localMap{width:128px!important;height:128px!important}}';document.head.append(mapStyle);
+const mapStyle=document.createElement('style');mapStyle.textContent='#localMap{width:216px!important;height:216px!important}@media(max-width:650px){#localMap{width:140px!important;height:140px!important}}';document.head.append(mapStyle);
 function control(p){if(!canReceive())return false;if(p.edge('pause')){stop();return true;}if(p.edge('interact')&&!coreActions.includes(guide.steps[guide.i].action)){next();return true;}return false;}
 window.BFGuidedTutorial={start,skill,tick,map,stop,suspend,control,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,id:guide.steps[guide.i]?.id,title:guide.steps[guide.i]?.title}:null}};
 })();

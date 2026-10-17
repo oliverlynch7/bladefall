@@ -4,6 +4,8 @@
  const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function mount(a){
   api=a;document.body.classList.add('adventure-hud');
+  const gold=$('hudGold');const row=$('lvlbadge').parentElement;row.classList.add('hud-class-row');row.append(gold);
+  const fps=document.createElement('output');fps.id='fpsCounter';fps.hidden=true;fps.setAttribute('aria-label','Frames per second');fps.setAttribute('aria-live','off');document.body.append(fps);
   const dock=document.createElement('div');dock.id='adventureCombat';
   const skills=document.createElement('div');skills.id='adventureSkills';
   ['bLMB','bSk0','bSk1','bSk2','bSk3','bSpace'].forEach(id=>skills.append($(id)));
@@ -57,5 +59,11 @@
   panel.querySelector('.loot-waiting').textContent=queue.length?'+'+queue.length+' more':'';
   if(left<=0){current=null;panel.hidden=true;}
  }
- window.BFAdventureHud={mount,show,tick};
+ let fpsStart=null,fpsFrames=0,fpsLast=null;
+ function fps(ts,enabled,visible){const el=$('fpsCounter');if(!el)return;el.hidden=!enabled||!visible;
+  if(el.hidden||!Number.isFinite(ts)){fpsStart=null;fpsFrames=0;fpsLast=null;return;}
+  if(fpsStart===null||fpsLast!==null&&ts-fpsLast>1000){fpsStart=ts;fpsFrames=0;el.textContent='FPS …';}else fpsFrames++;
+  fpsLast=ts;const elapsed=ts-fpsStart;if(elapsed>=500){el.textContent=Math.round(fpsFrames*1000/elapsed)+' FPS';fpsStart=ts;fpsFrames=0;}
+ }
+ window.BFAdventureHud={mount,show,tick,fps};
 })();

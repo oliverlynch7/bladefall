@@ -1967,3 +1967,8 @@ User requests local first-person body invisible except equipped weapon; allies m
 ## [Codex | 2026-10-16] v2.219 — first-person weapon-only view and wheel zoom
 
 U-CAMERA-LOCAL-VIEW-20261016: renderer-local body/cosmetic hiding with finally restore, preserving stock/equipped weapon attachments and full co-op rigs. Removed fallback arm/fist geometry. Wheel on gameplay canvas adjusts first-person FOV 70–115°, shoulder optical zoom 75–140%, overhead 70–150%; independent saved settings, debounced persistence, normalized wheel deltas, modifiers/menus/special cameras preserved. Optical zoom leaves camera positioning/collision intact. Active-view Settings slider and Help updated. Real WebGL 17 checks each for Warrior, Mage, rank-10 Mage: local body 0, weapon rendered, 62 legendary renderables restored, synthetic co-op body visible, actual zoom projection and settings persistence. Older level-4/rank-4 save retained. Camera/appearance 23 and relevant regressions pass. Evidence docs/art-validation/camera-controls-20261016. No native hardware/two-device co-op claim. Deployment pending.
+
+
+## [Codex | 2026-10-16] v2.219 camera release production confirmed
+
+Functional commit 1ef3e4f0 deployed successfully as c1c6b8e8-ed6d-404b-8283-fe291bb38452. Public browser confirms v2.219.0-local-camera-controls, camera-controls v2219 and hero3d v2219 without launch errors. Real WebGL local-draw visibility, synthetic peer, settings/wheel and old-save evidence recorded; no native wheel hardware or two-device multiplayer claim.

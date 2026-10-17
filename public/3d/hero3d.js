@@ -4,7 +4,7 @@ import { pauseAppearance } from './pause-appearance3d.js?v=2212';
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
-import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2209';
+import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2231';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
@@ -1459,13 +1459,14 @@ function castleHelmet(root,enabled){
 const LEGION_UNIFORM={id:"castle_supply_uniform",metal:"#85828d",cloth:"#56313d",leather:"#4c4443",lift:1.13};
 function castleDisguise(){const g=window.__BF3?.G;return !!(g?.castleGates&&g.storyState?.flags["cg.disguise"]&&!g.storyState?.flags["cg.alarm"]);}
 function paintClassBody(root,cls,packOriginal=false,override=null){
+  // Restore source mesh/material ownership before applying a new palette.
+  clearClassLook(root);
   const skin=override||window.BFClassLooks?.palette(cls,0)||CLASS_SKINS[cls];if(!root||!skin)return 0;
   let painted=0;
   root.traverse(o=>{
-    const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls])||(cls==='paladin'&&!!override?.rank);
+    const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls]);
     const protectedHead=!hooded&&(/^(Head|Face)(?:_|$)/.test(o.name)||(cls==='monk'&&o.name==='Monk001'));
     if(!o.isMesh||o.userData.classLookPart||o.userData._disguisePart||o.userData._eye||o.userData._mouth||o.userData._weap||(protectedHead&&!o.userData._lookHeadPainted))return;
-    if(cls==='paladin'&&override?.rank&&/^(Head|Face)(?:_|$)/.test(o.name))o.userData._lookHeadPainted=true;
     // Skeleton clones share source materials. Always isolate before touching a palette.
     if(o.userData._paletteOwner!==o.uuid){
       // Material.clone JSON-copies userData. Preserve the real source Texture for same-body allies.

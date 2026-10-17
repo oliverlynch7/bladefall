@@ -13,7 +13,7 @@ const catalog={
    "accent": "#84baff",
    "inlay": "#84baff",
    "lift": 1.15,
-   "detail": "Simple cobalt steel, leather straps and a compact knight helm."
+   "detail": "Cobalt steel, leather straps and an uncovered head."
   },
   {
    "name": "Cobalt Knight",
@@ -26,7 +26,7 @@ const catalog={
    "accent": "#a8d6ff",
    "inlay": "#a8d6ff",
    "lift": 1.15,
-   "detail": "Layered cobalt plate, gold borders and a swept knight crest."
+   "detail": "Layered cobalt plate, gold borders and a fitted royal circlet."
   },
   {
    "name": "Royal Vanguard",
@@ -67,7 +67,7 @@ const catalog={
    "accent": "#ff885c",
    "inlay": "#ff885c",
    "lift": 1.15,
-   "detail": "Oxblood armor, ivory shoulder teeth and a horned war crown."
+   "detail": "Oxblood armor, ivory shoulder teeth and fitted temple horns."
   },
   {
    "name": "Infernal Warchief",
@@ -272,7 +272,7 @@ const catalog={
    "accent": "#fff1bd",
    "inlay": "#fff1bd",
    "lift": 1.15,
-   "detail": "Radiant sun plate, gilded head wings and an ivory tabard."
+   "detail": "Radiant sun plate, a golden halo and an ivory tabard."
   },
   {
    "name": "Radiant Champion",
@@ -285,7 +285,7 @@ const catalog={
    "accent": "#fff7cd",
    "inlay": "#fff7cd",
    "lift": 1.15,
-   "detail": "Solar crown, layered sun wings and luminous golden rays."
+   "detail": "A bright double solar halo, layered sun wings and golden rays."
   }
  ],
  "monk": [
@@ -354,7 +354,7 @@ const catalog={
    "accent": "#c0eb9f",
    "inlay": "#c0eb9f",
    "lift": 1.15,
-   "detail": "Layered forest leaves, gold hood branches and fitted scout guards."
+   "detail": "Layered forest leaves, the original scout hood and fitted guards."
   },
   {
    "name": "Wildwood Warden",
@@ -436,7 +436,7 @@ const catalog={
    "accent": "#c4e8ff",
    "inlay": "#c4e8ff",
    "lift": 1.15,
-   "detail": "Layered feather wings, golden spars and a swept flight crown."
+   "detail": "Layered feather wings, golden spars and paired feather crests."
   },
   {
    "name": "Celestial Lancer",
@@ -477,7 +477,7 @@ const catalog={
    "accent": "#9dceff",
    "inlay": "#9dceff",
    "lift": 1.15,
-   "detail": "Gold-trimmed blue robes, crystal crown and sapphire shoulders."
+   "detail": "Gold-trimmed blue robes, an uncovered head and sapphire shoulders."
   },
   {
    "name": "Sapphire Archmage",
@@ -490,7 +490,7 @@ const catalog={
    "accent": "#a3e6ff",
    "inlay": "#a3e6ff",
    "lift": 1.15,
-   "detail": "Grand sapphire crystal crown, orbiting crystals and blue constellation light."
+   "detail": "A single celestial halo, two orbiting stars and blue constellation light."
   }
  ],
  "pyromancer": [
@@ -518,7 +518,7 @@ const catalog={
    "accent": "#ffc15b",
    "inlay": "#ffc15b",
    "lift": 1.15,
-   "detail": "Crimson-black robes, gold flame crown and burning shoulders."
+   "detail": "Crimson-black robes, living ember flames and glowing shoulder seams."
   },
   {
    "name": "Phoenix Sovereign",

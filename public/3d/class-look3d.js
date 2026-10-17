@@ -30,7 +30,7 @@ function weave(cls,tier){
  if(tier===2){x.strokeStyle=p.inlay||p.accent||p.metal;x.lineWidth=1.2;for(let y=32;y<482;y+=23)for(const s of [-1,1])line([[128+s*101,y-9],[128+s*94,y],[128+s*101,y+9],[128+s*107,y],[128+s*101,y-9]]);}
  const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=2;textures.set(key,tex);return tex;
 }
-export function clearClassLook(root){const r=records.get(root);if(!r)return;r.aura?.dispose();r.groups.forEach(g=>g.removeFromParent());for(const o of r.hidden){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}r.geometries.forEach(g=>g.dispose());r.materials.forEach(m=>m.dispose());records.delete(root);}
+export function clearClassLook(root){const r=records.get(root);if(!r)return;r.aura?.dispose();for(const a of r.faceOverrides||[]){a.node.geometry=a.geometry;a.node.material=a.material;}r.groups.forEach(g=>g.removeFromParent());for(const o of r.hidden){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}r.geometries.forEach(g=>g.dispose());r.materials.forEach(m=>m.dispose());records.delete(root);}
 export function classLookStats(root){const r=records.get(root);return r?{key:r.key,meshes:r.meshes,triangles:r.triangles,animated:r.moving.length,aura:r.aura?.stats||null,anchors:r.groups.map(g=>g.userData.classLookBone)}:{meshes:0,triangles:0,animated:0,aura:null,anchors:[]};}
 function build(root,cls,tier){
  const p=window.BFClassLooks?.palette(cls,tier),r={key:cls+':'+tier,groups:[],moving:[],hidden:[],geometries:new Set(),materials:new Set(),meshes:0,triangles:0};records.set(root,r);
@@ -96,20 +96,20 @@ if(tier===0){
  }
  else if(cls==='warrior'){
   eachShoulder((g,s)=>{shell(g,s,1);if(rich)for(let i=0;i<3;i++)feather(g,s,s*(.14+i*.058),.19+i*.013,-.03,.28-i*.04,.10,metal,.42);});motif();clothPanels(true);
-  if(rich){tube(head,[[-.32,.60,.02],[-.25,.59,.26],[0,.64,.30],[.25,.59,.26],[.32,.60,.02]],.022,metal);for(let i=0;i<7;i++)plaque(head,LEAF,.055,.22,0,.84+Math.sin(i/6*Math.PI)*.1,-.22+i*.068,enamel);tube(head,[[0,.77,-.3],[0,.87,0],[0,.77,.22]],.023,metal);}
+
  }else if(cls==='ranger'){
-  eachShoulder((g,s)=>{for(let i=0;i<(rich?4:3);i++)feather(g,s,s*(.05+i*.072),.11-i*.014,.015-i*.028,rich?.40:.31,.16,i%2?metal:enamel,.5+i*.08);});motif();clothPanels(true);if(rich){for(const s of [-1,1]){feather(head,s,s*.23,.63,.28,.28,.12,metal,.60);tube(head,[[s*.32,.53,.25],[s*.20,.62,.38],[0,.64,.41]],.014,metal);}gem(head,0,.65,.435,.046);}
+  eachShoulder((g,s)=>{for(let i=0;i<(rich?4:3);i++)feather(g,s,s*(.05+i*.072),.11-i*.014,.015-i*.028,rich?.40:.31,.16,i%2?metal:enamel,.5+i*.08);});motif();clothPanels(true);
  }else if(cls==='mage'){
   clothPanels();eachShoulder((g,s)=>{shell(g,s);for(let i=0;i<3;i++)gem(g,s*(.08+i*.066),.20,.10-i*.06,.041);});chestSigil();limbDetails(true);
-  if(rich){const sky=group(head,0,1.10,-.02),halo=ring(sky,0,0,0,.49,metal,Math.PI/2-.18,.2);animate(halo,'spinZ',.12);ring(sky,0,0,0,.43,light,Math.PI/2+.18,-.2);for(let i=0;i<5;i++){const star=group(sky);gem(star,0,0,0,.085,light);plaque(star,BLADE,.022,.17,0,0,0,metal);animate(star,'orbit',i*Math.PI*2/5);}}
+  if(rich){const sky=group(head,0,1.23,-.04);sky.name='Archmage quiet celestial halo';sky.userData.legendaryFeature='Quiet celestial halo';ring(sky,0,0,0,.48,light,Math.PI/2);for(let i=0;i<2;i++){const star=group(sky);gem(star,0,0,0,.042,light);animate(star,'orbit',i*Math.PI);}}
  }else if(cls==='reaper'){
   eachShoulder((g,s)=>{shell(g,s);for(let i=0;i<(rich?3:2);i++)horn(g,[[s*.04,.12,-.14+i*.14],[s*.20,.23,-.16+i*.14],[s*.36,.04,-.13+i*.14]],.041,metal);});for(const s of [-1,1])for(let i=0;i<3;i++)tube(body,[[s*.055,.15-i*.13,.34],[s*.17,.14-i*.13,.34],[s*.23,.24-i*.13,.20]],rich?.029:.021,metal);gem(body,0,.01,.36,rich?.085:.056);limbDetails(true);if(tier>0)plaque(head,BLADE,.17,rich?.40:.25,0,.68,.37,metal);
  }else if(cls==='paladin'){
-  eachShoulder((g,s)=>{shell(g,s,1);if(rich)for(let i=0;i<4;i++)feather(g,s,s*(.09+i*.065),.23-i*.02,-.03-i*.02,.34-i*.035,.12,i%2?light:metal,.25+i*.16);});clothPanels();motif('sun');if(rich)for(const s of [-1,1])feather(head,s,s*.25,.57,-.17,.29,.11,metal,.70);
+  eachShoulder((g,s)=>{shell(g,s,1);if(rich)for(let i=0;i<4;i++)feather(g,s,s*(.09+i*.065),.23-i*.02,-.03-i*.02,.34-i*.035,.12,i%2?light:metal,.25+i*.16);});clothPanels();motif('sun');
  }else if(cls==='necromancer'){
   clothPanels();eachShoulder((g,s)=>{shell(g,s);horn(g,[[s*.04,.09,-.09],[s*.17,.21,-.12],[s*.3,.04,-.16]],.034,ivory);if(rich){tube(body,[[s*.26,.35,-.20],[s*.46,.48,-.16],[s*.58,.49,-.12]],.018,metal);const q=group(body,s*.58,.49,-.12);ring(q,0,0,0,.092,metal,Math.PI/2);ring(q,0,.20,0,.066,metal,Math.PI/2);for(let i=0;i<4;i++){let a=i*Math.PI/2;tube(q,[[Math.cos(a)*.088,0,Math.sin(a)*.088],[Math.cos(a)*.08,.12,Math.sin(a)*.08],[Math.cos(a)*.06,.2,Math.sin(a)*.06]],.010,ivory);}animate(gem(q,0,.09,0,.047),'breathe',s);}});for(let i=0;i<3;i++)for(const s of [-1,1])tube(body,[[s*.025,.12-i*.12,.355],[s*.18,.13-i*.12,.335],[s*.22,.23-i*.12,.20]],.018,ivory);limbDetails(true);
  }else if(cls==='ninja'){
-  eachShoulder((g,s)=>{for(let i=0;i<3;i++)inset(g,SHIELD,.18,.18,s*(.055+i*.07),.07-i*.032,.15-i*.02,dark,-s*.4);});motif();if(rich){for(const s of [-1,1]){plaque(head,BLADE,.18,.35,s*.29,.74,-.05,metal,-s*.28);plaque(head,BLADE,.095,.24,s*.29,.74,-.023,enamel,-s*.28);}gem(head,0,.59,.31,.036);}
+  eachShoulder((g,s)=>{for(let i=0;i<3;i++)inset(g,SHIELD,.18,.18,s*(.055+i*.07),.07-i*.032,.15-i*.02,dark,-s*.4);});motif();
  }else if(cls==='berserker'){
   eachShoulder((g,s)=>{shell(g,s,1);for(let i=0;i<(rich?3:2);i++){let k=rich&&s===1?1.15:1;horn(g,[[s*.1,.07,-.17+i*.14],[s*.24,.27*k,-.16+i*.14],[s*.45,.22*k,-.10+i*.14]],rich?.062:.044,rich?ivory:metal);}});motif();for(const s of [-1,1])for(let i=0;i<4;i++)bead(body,s*(.09+i*.045),.16-i*.09,.31,.027,metal);
  }else if(cls==='pirate'){
@@ -126,7 +126,7 @@ if(tier===0){
  }else if(cls==='warlock'){
   clothPanels();limbDetails(true);chestSigil();eachShoulder((g,s)=>{shell(g,s);if(rich){const seal=group(g,s*.15,.13,.16);ring(seal,0,0,0,.105,metal);for(let i=0;i<3;i++)plaque(seal,BLADE,.033,.14,Math.sin(i*2.094)*.05,Math.cos(i*2.094)*.05,.012,light,-i*2.094);animate(seal,'spinZ',s*.13);}});if(rich)for(const s of [-1,1])horn(head,[[s*.29,.60,-.17],[s*.44,.94,-.22],[s*.28,1.16,-.24]],.067,metal);
  }else if(cls==='skylancer'){
-  eachShoulder((g,s)=>{for(let i=0;i<(rich?5:3);i++)feather(g,s,s*(.06+i*.065),.11-i*.025,-.09+i*.038,(rich?.49:.32)+i*.022,rich?.15:.11,i%2?enamel:metal,.8+i*.065);});motif();if(rich)for(const s of [-1,1])feather(head,s,s*.27,.57,-.14,.30,.10,metal,.8);
+  eachShoulder((g,s)=>{for(let i=0;i<(rich?5:3);i++)feather(g,s,s*(.06+i*.065),.11-i*.025,-.09+i*.038,(rich?.49:.32)+i*.022,rich?.15:.11,i%2?enamel:metal,.8+i*.065);});motif();
  }else if(cls==='bladedancer'){
   eachShoulder((g,s)=>{for(let i=0;i<(rich?(s===1?5:3):2);i++)feather(g,s,s*(.06+i*.05),.13-i*.022,.04-i*.025,rich?.40:.25,rich?.19:.14,i%2?enamel:metal,.3+i*.24);});motif();for(const s of [-1,1])for(let i=0;i<(rich?3:1);i++)feather(hips,s,s*(.23+i*.025),.095,.20,.21,.09,metal,s*.1+i*.22);
  }else if(cls==='beastmaster'){
@@ -138,24 +138,14 @@ if(tier===0){
 
  // Headpieces follow the measured six source heads (the Wizard is taller).
  // Open hoods retain the editable face; helmets intentionally cover the lower face.
- function hood(){
-  const pts=[[-.44,-.34],[-.44,.16],[-.30,.43],[0,.57],[.30,.43],[.44,.16],[.44,-.34],[.27,-.29],[.27,.13],[.17,.31],[0,.36],[-.17,.31],[-.27,.13],[-.27,-.29]];
-  plaque(head,pts,1,1,0,.42,.28,enamel);
-  const back=new T.SphereGeometry(1,12,7,Math.PI,Math.PI);back.scale(.43,.51,.48);mesh(head,back,enamel,0,.43,-.19);
-  for(const d of [-1,1])tube(head,[[d*.29,.12,.30],[d*.30,.53,.30],[d*.20,.75,.30],[0,.85,.30]],.012,metal);
+ // Preserve the source Ranger/Rogue hoods: a second shell covered their sculpted folds.
+ if(cls==='warrior'&&tier>0){const band=[];for(let i=0;i<=32;i++){const a=i*Math.PI/16;band.push([Math.sin(a)*.32,.66,Math.cos(a)*.39-.14]);}tube(head,band,.018,metal);}
+ if(cls==='paladin'&&tier>0){
+  // No floating cheek plates: the solar halo is the complete earned head fitting.
+  const halo=group(head,0,1.15,-.12);halo.name='Paladin solar halo';
+  ring(halo,0,0,0,rich?.49:.42,light,Math.PI/2);
+  if(rich){ring(halo,0,0,0,.53,metal,Math.PI/2);for(const d of [-1,1])gem(halo,d*.49,0,0,.026,light);}
  }
- function helmet(){
-  const cap=new T.CylinderGeometry(.34,.39,.87,8,1);cap.scale(1,1,1.38);mesh(head,cap,enamel,0,.43,-.18);
-  // Cheek guards and split visor leave a narrow sight line at eye height.
-  for(const d of [-1,1]){inset(head,BLADE,.15,.40,d*.28,.27,.22,enamel,-d*.10);plaque(head,SHIELD,.26,.32,d*.11,.22,.30,enamel,-d*.12);}
-  // Closed faceted knight visor: this covers source hair, unlike the old cap-and-mask.
-  const front=[[-.34,.34],[-.28,.47],[0,.53],[.28,.47],[.34,.34],[.32,-.27],[0,-.43],[-.32,-.27]];
-  inset(head,front,1,1,0,.40,.43,enamel);
-  for(const d of [-1,1]){plaque(head,[[-.12,.02],[.12,.035],[.11,-.015],[-.10,-.025]],1,1,d*.14,.51,.49,dark,-d*.1);tube(head,[[d*.28,.28,.48],[d*.14,.15,.49],[0,.05,.48]],.012,metal);}
-  plaque(head,BLADE,.045,.46,0,.36,.50,metal);
- }
- if(['ninja','bladedancer','reaper','ranger','warlock'].includes(cls))hood();
- if(cls==='warrior'||cls==='paladin')helmet();
  if(['reaper','ninja'].includes(cls)){
   // Face wrap hides the jaw only: eyes, eyebrows and personal settings remain intact.
   plaque(head,[[-.28,.14],[.28,.14],[.25,-.10],[0,-.19],[-.25,-.10]],1,1,0,.24,.30,cls==='warlock'?dark:enamel);
@@ -173,9 +163,26 @@ if(tier===0){
   const crest=group(body,0,.35,.36);plaque(crest,SHIELD,.28,.30,0,0,0,ivory);for(const d of [-1,1]){gem(crest,d*.063,.025,.027,.021,dark);horn(crest,[[d*.09,.11,0],[d*.15,.23,-.025],[d*.13,.34,-.05]],.026,ivory);}plaque(crest,BLADE,.075,.15,0,-.10,.025,dark);
  }
 
- if(cls==='warlock'){
-  inset(head,SHIELD,.55,.79,0,.37,.38,dark);
-  for(const d of [-1,1]){plaque(head,BLADE,.052,.19,d*.10,.49,.43,light,-d*.57);tube(head,[[d*.20,.65,.40],[d*.10,.58,.43],[0,.69,.41]],.009,metal);}
+ // Warlock keeps its natural face; ruby pact motifs belong to its armor.
+
+ // Cleric's source head has a painted metal face plate, not bare skin.
+ // Isolate that connected front surface; retain all original white hair geometry/UVs.
+ if(cls==='paladin'){
+  let face;root.traverse(o=>{if(o.isMesh&&o.name==='Head_1')face=o;});
+  if(face){const original=face.geometry,geo=original.index?original.toNonIndexed():original.clone(),pos=geo.attributes.position,parents=Array.from({length:pos.count/3},(_,i)=>i),weld=new Map();
+   const find=i=>parents[i]===i?i:(parents[i]=find(parents[i]));
+   for(let i=0;i<pos.count;i++){const key=[pos.getX(i),pos.getY(i),pos.getZ(i)].map(v=>Math.round(v*10000)).join(',');if(weld.has(key))parents[find(Math.floor(i/3))]=find(weld.get(key));else weld.set(key,Math.floor(i/3));}
+   const parts=new Map();for(let i=0;i<pos.count;i++){const id=find(Math.floor(i/3)),box=parts.get(id)||new T.Box3();box.expandByPoint(V(pos.getX(i),pos.getY(i),pos.getZ(i)));parts.set(id,box);}
+   const exposed=new Set([...parts].filter(([,b])=>b.min.z>.30&&b.max.x-b.min.x>.60&&b.max.y-b.min.y>.80).map(([id])=>id));
+   if(exposed.size){geo.clearGroups();let start=0,last=-1;for(let i=0;i<pos.count;i+=3){const mat=exposed.has(find(i/3))?1:0;if(last!==mat){if(last>=0)geo.addGroup(start,i-start,last);start=i;last=mat;}}geo.addGroup(start,pos.count-start,last);
+    const hiddenPlate=new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false});r.materials.add(hiddenPlate);
+    const skin=new T.MeshStandardMaterial({color:'#bd8e6b',roughness:.92,metalness:0}),skull=new T.SphereGeometry(1,16,12);
+    const v=skull.attributes.position;for(let i=0;i<v.count;i++){const x=v.getX(i),y=v.getY(i),z=v.getZ(i);v.setXYZ(i,x*.33,.38+y*.44,z>0?.255-.035*x*x-.02*y*y:-.18+z*.41);}skull.computeVertexNormals();mesh(head,skull,skin);const nose=mesh(head,new T.SphereGeometry(.028,6,4),skin,0,.26,.272);nose.scale.set(.72,1.13,.9);r.materials.add(skin);r.geometries.add(geo);r.faceOverrides=[{node:face,geometry:original,material:face.material}];face.geometry=geo;face.material=[face.material,hiddenPlate];
+    root.traverse(node=>{if(!node.isSkinnedMesh)return;const headIndex=node.skeleton.bones.findIndex(b=>b.name==='Head');if(headIndex<0)return;const original=node.geometry,g=original.index?original.toNonIndexed():original.clone(),si=g.attributes.skinIndex,sw=g.attributes.skinWeight;if(!si||!sw){g.dispose();return;}
+     const weight=i=>{let w=0;for(let k=0;k<4;k++)if(si.getComponent(i,k)===headIndex)w+=sw.getComponent(i,k);return w;};g.clearGroups();let start=0,last=-1;for(let i=0;i<si.count;i+=3){const mat=(weight(i)+weight(i+1)+weight(i+2))/3>.4?1:0;if(mat!==last){if(last>=0)g.addGroup(start,i-start,last);start=i;last=mat;}}g.addGroup(start,si.count-start,last);r.faceOverrides.push({node,geometry:original,material:node.material});r.geometries.add(g);node.geometry=g;node.material=[node.material,hiddenPlate];
+    });
+   }else geo.dispose();
+  }
  }
  // High ranks grow authored solid silhouettes; effects never substitute for armor.
  if(tier>0){
@@ -201,19 +208,46 @@ if(tier===0){
   }
  }
  // Authored tier identities from the approved reference sheet.
- if(cls==='pirate'&&!rich){const crown=new T.SphereGeometry(1,12,6,0,Math.PI*2,0,Math.PI/2);crown.scale(.36,.25,.41);mesh(head,crown,tier===0?dark:enamel,0,.64,-.15);const pts=[[-.47,.72,-.25],[-.31,.83,.25],[0,.75,.39],[.31,.83,.25],[.47,.72,-.25],[0,.83,-.48],[-.47,.72,-.25]];tube(head,pts,tier===0?.047:.061,tier===0?dark:enamel);tube(head,pts.map(([x,y,z])=>[x,y+.025,z+.006]),.012,metal);}
- if(tier>0&&['warrior','paladin','mage','pyromancer','chronomancer','necromancer','bladedancer','ranger','skylancer','berserker'].includes(cls)){
+ if(cls==='pirate'&&!rich){
+  const hat=group(head,0,.61,-.19);hat.name='Pirate fitted tricorn';
+  const felt=material(tier===0?p.leather:p.cloth,0,.94),crown=new T.SphereGeometry(1,18,10,0,Math.PI*2,0,Math.PI/2);
+  crown.scale(.40,.30,.62);mesh(hat,crown,felt);
+  const brim=new T.Shape(),edge=[];
+  for(let i=0;i<=60;i++){const a=i*Math.PI/30,rad=.57+.065*Math.cos(3*a),x=Math.cos(a)*rad,z=Math.sin(a)*rad*1.17;i?brim.lineTo(x,z):brim.moveTo(x,z);edge.push([x,.025+.17*Math.pow(Math.max(0,Math.cos(3*a)),2),z]);}
+  const hole=new T.Path();hole.absellipse(0,0,.30,.39,0,Math.PI*2,true);brim.holes.push(hole);
+  const geo=new T.ShapeGeometry(brim,18);geo.rotateX(Math.PI/2);const pos=geo.attributes.position;
+  for(let i=0;i<pos.count;i++){const a=Math.atan2(pos.getZ(i)/1.17,pos.getX(i));pos.setY(i,.025+.17*Math.pow(Math.max(0,Math.cos(3*a)),2));}geo.computeVertexNormals();
+  const hatMat=felt.clone();hatMat.side=T.DoubleSide;r.materials.add(hatMat);mesh(hat,geo,hatMat);tube(hat,edge,.012,metal);
+  ring(hat,0,.065,0,.375,metal,Math.PI/2);if(tier===1)gem(hat,0,.14,.59,.04,light);
+ }
+
+ if(tier>0&&['warrior','chronomancer','necromancer'].includes(cls)){
   const count=rich?7:5;
-  for(let i=0;i<count;i++){const a=(i/(count-1)-.5)*2.6,x=Math.sin(a)*.29,z=Math.cos(a)*.39-.14,y=['mage','pyromancer','stormcaller','chronomancer','necromancer'].includes(cls)?.88:.79;
+  for(let i=0;i<count;i++){const a=(i/(count-1)-.5)*2.6,x=Math.sin(a)*.29,z=Math.cos(a)*.39-.14,y=cls==='warrior'?.70:.88;
    if(['berserker','necromancer'].includes(cls)){if(i%2===0)horn(head,[[x,y,z],[x*1.35,y+.17,z-.025],[x*1.30,y+(rich?.35:.23),z-.09]],rich?.036:.026,cls==='necromancer'?ivory:metal);}
    else{plaque(head,BLADE,rich?.083:.06,(rich?.28:.17)+(i===Math.floor(count/2)?.09:0),x,y+.06,z,metal,-a*.18);if(['mage','skylancer','chronomancer'].includes(cls))gem(head,x,y+(rich?.24:.16),z+.02,rich?.047:.032,light);}
+  }
+ }
+ if(cls==='berserker'&&tier>0){
+  for(const d of [-1,1]){const mount=group(head,d*.29,.66,-.05);mount.name='Berserker rooted temple horn';
+   mesh(mount,new T.CylinderGeometry(.064,.064,.035,6),dark,0,0,0,Math.PI/2);mesh(mount,new T.TorusGeometry(.055,.010,3,12),metal,0,0,.022);
+   horn(mount,[[0,0,0],[d*.14,.11,-.015],[d*.22,rich?.36:.26,-.08],[d*.10,rich?.53:.39,-.16]],rich?.070:.057,ivory);
+  }
+ }
+ if(cls==='skylancer'&&tier>0){
+  for(const d of [-1,1]){const clip=group(head,d*.28,.68,-.18);clip.name='Skylancer feather crest';bead(clip,0,0,0,.037,metal);
+   for(let i=0;i<(rich?3:2);i++){const f=group(clip,d*i*.035,i*.018,-i*.035);f.rotation.z=-d*(.50+i*.19);
+    const len=(rich?.33:.26)-i*.045;plaque(f,LEAF,.105,len,0,len*.40,0,i%2?enamel:ivory);
+    tube(f,[[0,-.015,.02],[.012,len*.4,.025],[0,len*.86,.02]],.006,metal);
+    for(let k=1;k<4;k++){const y=k*len*.20,w=.042*Math.sin(k/4*Math.PI);for(const side of [-1,1])tube(f,[[0,y,.022],[side*w,y+len*.09,.022]],.003,metal);}
+   }
   }
  }
  if(cls==='ninja'&&tier>0){eachShoulder((g,d)=>{for(let i=0;i<(rich?3:2);i++)inset(g,BLADE,.10,.29,d*(.12+i*.06),.17+i*.025,.04-i*.04,enamel,-d*(.45+i*.17));});}
  if(cls==='warlock'){
   // Ruby-black angular pact armor; never necromantic bone/skull imagery.
   for(const d of [-1,1])inset(body,BLADE,.12,.27,d*.23,.23,.26,enamel,-d*.5);
-  if(tier>0)for(const d of [-1,1]){plaque(head,BLADE,.12,rich?.43:.27,d*.32,.91,.10,metal,-d*.3);gem(head,d*.32,.95,.13,.035,light);}
+
  }
  if(cls==='bladedancer'&&tier>0)clothPanels();
  if(cls==='skylancer'&&tier>0){for(const d of [-1,1])for(let i=0;i<(rich?6:3);i++)feather(body,d,d*(.32+i*.09),.37-i*.07,-.28,(rich?.76:.43)-i*.015,.15,i%2?ivory:metal,.9+i*.05);}
@@ -224,7 +258,15 @@ if(tier===0){
   for(const d of [-1,1]){const jewel=gem(body,d*.41,.26,.02,.055,light);animate(jewel,'breathe',d);}
  }
  if(cls==='chronomancer'&&rich){const dial=group(head,0,.54,-.30);ring(dial,0,0,0,.51,metal);for(let i=0;i<12;i++){const a=i*Math.PI/6;plaque(dial,BLADE,.025,.07,Math.sin(a)*.45,Math.cos(a)*.45,.02,light,-a);}for(const d of [-1,1]){const jewel=gem(body,d*.48,.14,-.12,.066,light);animate(jewel,'breathe',d);}}
- if(cls==='pyromancer'&&tier>0){const crown=group(head);if(rich)animate(crown,'flame',.9);for(let i=0;i<(rich?7:5);i++){const x=(i-(rich?3:2))*.09;const flame=group(crown,x,.91,.14-Math.abs(x)*.7);horn(flame,[[0,0,0],[.025,.16,0],[-.012,(rich?.38:.24)-Math.abs(x)*.3,0]],.027,metal);horn(flame,[[0,0,.015],[.014,.11,.02],[0,rich?.27:.17,.015]],.013,light);}}
+ if(cls==='pyromancer'&&tier>0){
+  const crown=group(head,0,.86,0);crown.name='Pyromancer living flame crown';animate(crown,'flame',.9);
+  const orange=material('#ff6c16',0,.65,1.35),gold=material('#ffe28a',0,.65,1.7);orange.side=gold.side=T.DoubleSide;
+  const flameGeo=(w,h)=>{const f=new T.Shape();f.moveTo(-w*.48,0);f.bezierCurveTo(-w*.82,h*.23,w*.09,h*.47,-w*.12,h);f.bezierCurveTo(w*.67,h*.65,w*.18,h*.44,w*.49,h*.19);f.bezierCurveTo(w*.59,-h*.035,-w*.24,-h*.08,-w*.48,0);return new T.ShapeGeometry(f,14);};
+  for(let i=0;i<(rich?5:3);i++){const x=(i-(rich?2:1))*.105,q=group(crown,x,0,.08-Math.abs(x)*.5),h=(rich?.39:.27)-Math.abs(x)*.40;
+   mesh(q,flameGeo(.12,h),orange);mesh(q,flameGeo(.067,h*.69),gold,0,.012,.012);mesh(q,flameGeo(.10,h*.88),orange,0,.005,0,0,Math.PI/2);mesh(q,flameGeo(.055,h*.61),gold,.012,.017,0,0,Math.PI/2);
+  }
+ }
+
 
  // Legendary fittings add class-specific craft inside the existing fitted silhouette.
  // They do not scale the body, cover the face or add scene lights/particle emitters.
@@ -239,9 +281,7 @@ if(tier===0){
    const q=signature('Whitewood carved leaf collar');for(const s of [-1,1]){braid(q,[[s*.09,.28,.32],[s*.22,.34,.26],[s*.32,.32,.13]]);for(let i=0;i<3;i++)feather(q,s,s*(.14+i*.061),.30-i*.018,.30-i*.05,.15,.065,i%2?trim:enamel,.8);}
    const compass=group(q,0,-.16,.415);ring(compass,0,0,0,.057,trim);plaque(compass,BLADE,.024,.10,0,0,.016,light,.35);
   }else if(cls==='mage'){
-   const q=signature('Celestial armillary',head,0,1.10,-.02);
-   for(const [i,rx,ry]of [[0,.28,.45],[1,-.34,-.55]]){const g=group(q);g.rotation.set(rx,ry,0);ring(g,0,0,0,.56-i*.035,trim,Math.PI/2);animate(g,'spinY',i?-.11:.08);}
-   const moon=mesh(q,new T.TorusGeometry(.11,.025,5,18,Math.PI*1.45),light,0,.04,0,0,0,.3);animate(moon,'spinZ',.07);for(const s of [-1,1])gem(q,s*.15,.04,0,.025,trim);
+   // The single halo above is the head's complete celestial ornament.
   }else if(cls==='reaper'){
    const q=signature('Vaulted soul reliquary',body,0,.03,.39);
    for(const s of [-1,1])horn(q,[[s*.12,-.13,0],[s*.18,.05,0],[s*.12,.23,0],[0,.29,0]],.016,ivory);

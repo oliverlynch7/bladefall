@@ -1,0 +1,28 @@
+#progressCelebrations{position:fixed;inset:0;z-index:18;pointer-events:none;user-select:none}
+.progress-celebration{--progress:#ffd078;position:absolute;top:13%;left:50%;width:max-content;max-width:min(430px,88vw);box-sizing:border-box;display:flex;align-items:center;gap:16px;padding:14px 24px 14px 16px;border:1px solid color-mix(in srgb,var(--progress) 70%,transparent);border-radius:12px;background:linear-gradient(120deg,#16202ef5,#101723e8);box-shadow:0 8px 32px #0006,0 0 25px color-mix(in srgb,var(--progress) 16%,transparent);transform:translateX(-50%);color:#fff4de;text-align:left;animation:progress-arrive .24s ease-out both,progress-leave .25s 2.25s ease-in forwards}
+.progress-celebration.class{--progress:#b7a2ff;top:25%;animation:progress-arrive .24s ease-out both,progress-leave .25s 1.8s ease-in forwards}
+#progressCelebrations:has(.player):has(.class) .progress-celebration.player{top:8%}
+#progressCelebrations:has(.player):has(.class) .progress-celebration.class{top:calc(8% + 124px)}
+.progress-celebration.opening{animation:progress-arrive .24s ease-out both}
+.progress-celebration.departing{animation:progress-leave .16s ease-in forwards}
+.progress-crest{display:grid;place-items:center;flex:none;width:50px;height:50px;font:700 35px Georgia,serif;color:var(--progress);border:1px solid var(--progress);border-radius:50%;box-shadow:inset 0 0 17px color-mix(in srgb,var(--progress) 17%,transparent)}
+.progress-celebration small{display:block;color:var(--progress);font:800 10px system-ui;letter-spacing:.18em;margin-bottom:4px}
+.progress-celebration strong{display:block;font:750 clamp(19px,2.4vw,28px) system-ui;line-height:1.15}
+.progress-celebration p{font:12px/1.4 system-ui;color:#e4e7ef;margin:6px 0 0;max-width:290px}
+.progress-flare{--progress:#ffd078;position:absolute;width:140px;height:85px;transform:translate(-50%,-50%);isolation:isolate}
+.progress-flare.class{--progress:#b7a2ff}
+.progress-flare.class i:first-child{border-radius:12%;animation-name:progress-rune}
+.progress-flare i{position:absolute;inset:15px 3px;border:3px solid var(--progress);border-radius:50%;box-shadow:0 0 12px var(--progress),inset 0 0 13px var(--progress);animation:progress-ring .9s ease-out both}
+.progress-flare i:nth-child(2){animation-delay:.18s}.progress-flare i:nth-child(3){inset:-28px 51px 5px;border-width:0 2px;border-radius:40%;animation:progress-rise 1.15s ease-out both}
+.classpick,.skilltut,.classcard{animation:progress-choice-in .2s ease-out both}
+.progress-reduced .classpick,.progress-reduced .skilltut,.progress-reduced .classcard{animation:none}
+@keyframes progress-arrive{from{opacity:0;transform:translate(-50%,-8px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes progress-leave{to{opacity:0;transform:translate(-50%,-5px)}}
+@keyframes progress-ring{from{opacity:.8;transform:scale(.35)}to{opacity:0;transform:scale(1.5)}}
+@keyframes progress-rise{from{opacity:.7;transform:translateY(0) scaleY(.3)}to{opacity:0;transform:translateY(-40px) scaleY(1.4)}}
+@keyframes progress-rune{from{opacity:.8;transform:scale(.3) rotate(45deg)}to{opacity:0;transform:scale(1.3) rotate(80deg)}}
+@keyframes progress-choice-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.progress-celebration.reduced,.progress-celebration.reduced.opening{animation:none}
+.progress-flare.reduced i,.progress-flare.class.reduced i:first-child{animation:none;opacity:.35;transform:none}.progress-flare.reduced i:nth-child(n+2){display:none}
+@media(prefers-reduced-motion:reduce){.progress-celebration,.progress-celebration.opening,.classpick,.skilltut,.classcard{animation:none}.progress-flare i,.progress-flare.class i:first-child{animation:none;opacity:.35}.progress-flare i:nth-child(n+2){display:none}}
+@media(max-width:650px){.progress-celebration{top:17%;padding:10px 14px;gap:10px;max-width:88vw}.progress-celebration.class{top:30%}.progress-crest{width:36px;height:36px;font-size:26px}.progress-celebration p{font-size:11px}.progress-flare{width:100px;height:60px}}

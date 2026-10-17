@@ -1867,3 +1867,17 @@ Accounting reconciliation: subsequent read-only subscription check confirms exac
 ## [Codex | 2026-10-16] Paid SFX preview deployed
 
 Cloudflare confirms successful deployment of cbc7fb42: https://b508f398.bladefall.pages.dev/3d/ . Mobile before/after audition: https://b508f398.bladefall.pages.dev/sfx/custom/starter-20261016/ . Branch sfx-preview-20261016. Generated 64 paid-plan files, 56 legacy registry replacements, eight file-backed player methods; all masters/backups and provenance pushed. Confirmed 557 credits spent and 39,443 remaining. 580 integration checks pass. Production unchanged; real browser playback and listening acceptance remain pending.
+
+## [Codex | 2026-10-16] U-PROGRESSION-CELEBRATION-20261016
+
+User: "i also still need you to create some sort of level up animation for class rank up and for player level up, right now its not obvious when either happen, its too sudden of a jolt whent he passive or skill rnak up option come on screen, espcially in the tutorial there was no heads up that that was going to happen, it hsould be visually obivous that our class ranked up and it should trnasition nicely to the option screen  without taking too long. and when the player levels up there should an obivuios visual expericne of it without stoppping gameplay. both kinds of leveling up should have unqwiue sfx"
+
+Approved: distinct short class-rank and player-level celebrations. Class-rank celebration precedes the existing paused choice with a smooth short transition; explain the first choice in the tutorial. Player-level celebration never pauses or slows gameplay. Use the two distinct paid sounds already generated; no further API credits needed. Preserve upgrade choice arming/confirmation and saved progression. Guard stale world/class/death transitions, simultaneous and multi-level rewards, reduced motion, controls and non-interactive HUD overlays. Source checks and interactive preview are not rendered acceptance; production verification gate remains.
+
+## [Codex | 2026-10-16] Progression celebrations and isolated audio release candidate
+
+U-PROGRESSION-CELEBRATION-20261016 implemented as v2.208.0. Gold player-level banner/pulse/sparks never pauses or adds slow motion; purple class-rank rune/banner holds the existing local upgrade pause for 850 visible milliseconds before a 200ms choice entrance. Rank choice confirmation no longer repeats rank-up audio. Tutorial explains both and the first skill choice. Already-generated paid player/class sounds are distinct; zero new API credits spent.
+
+Browser connection recovered. Staged rank-2, rank-3 passive, simultaneous notifications, player-only running simulation, E confirmation and reduced-motion paths checked; fixed menu host removal and reduced-motion rune specificity during verification. 43 state checks + 580 audio tests + inline syntax pass. Actual old save retained level 4, rank 4, 1,145 gold, 52 XP and all three existing choices. All 64 custom sounds decode in real WebAudio. Browser muted: no subjective listening claim.
+
+Isolated release checkout ../bladefall-audio-release starts at production ab457fa9 and contains ONLY paid SFX/progression changes. No pending wardrobe/Reaper/Keep candidate imported. Browser fixtures use in-memory storage and do not alter real saves. Production deployment follows verification; evidence docs/art-validation/progression-20261016/summary.json.

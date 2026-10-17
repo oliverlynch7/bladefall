@@ -1,0 +1,92 @@
+{
+  "done": true,
+  "cid": "warrior",
+  "rows": [
+    {
+      "label": "first-person hides all local body/cosmetic renderables during draw",
+      "pass": true
+    },
+    {
+      "label": "equipped weapon remains rendered",
+      "pass": true
+    },
+    {
+      "label": "local body visibility restored after drawing",
+      "pass": true
+    },
+    {
+      "label": "wheel zooms first-person FOV inward",
+      "pass": true
+    },
+    {
+      "label": "first-person minimum bounded",
+      "pass": true
+    },
+    {
+      "label": "first-person maximum bounded",
+      "pass": true
+    },
+    {
+      "label": "browser Ctrl-wheel preserved",
+      "pass": true
+    },
+    {
+      "label": "wheel ignored while paused",
+      "pass": true
+    },
+    {
+      "label": "FOV slider shown in Settings",
+      "pass": true
+    },
+    {
+      "label": "FOV setting changes preference",
+      "pass": true
+    },
+    {
+      "label": "shoulder wheel changes actual projection",
+      "pass": true
+    },
+    {
+      "label": "overhead zoom independent",
+      "pass": true
+    },
+    {
+      "label": "zoom slider shown in Settings",
+      "pass": true
+    },
+    {
+      "label": "zoom slider updates overhead",
+      "pass": true
+    },
+    {
+      "label": "co-op peer renders full body while local view is first-person",
+      "pass": true
+    },
+    {
+      "label": "local still weapon-only during peer render",
+      "pass": true
+    },
+    {
+      "label": "camera settings persisted without save-schema change",
+      "pass": true
+    }
+  ],
+  "local": {
+    "body": 0,
+    "weapon": 5
+  },
+  "peer": {
+    "body": 26,
+    "weapon": 5
+  },
+  "restored": {
+    "body": 26,
+    "weapon": 5
+  },
+  "heroError": null,
+  "settings": {
+    "fov": 92,
+    "shoulder": 1.161834242728283,
+    "overhead": 1.25
+  }
+}

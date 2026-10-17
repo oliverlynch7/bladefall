@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2218"></script>
+<script src="./camera-controls.js?v=2219"></script>
 <script src="./keep-beta-isolation.js?v=2115"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>BLADEFALL 3D</title>
@@ -1167,7 +1168,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.218.0-menu-shortcuts';
+const VERSION3D='2.219.0-local-camera-controls';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1225,7 +1226,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
+const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -1238,7 +1239,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 }
 _g.legacyHubDialogue=_g.legacyHubDialogue||_g.hubDialogue||{};
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,autoSellEquipment:false,camMode:'shoulder',lookSens:1,fpsFov:92,renderDist:1,silhouette:true,dmgNumbers:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,autoSellEquipment:false,camMode:'shoulder',lookSens:1,fpsFov:92,shoulderZoom:1,overheadZoom:1,renderDist:1,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -5631,7 +5632,7 @@ function controlKey(id){return controlHint(id).split(' / ')[0].replace('Left Cli
 function hudDevice(device){if(hudInputDevice===device)return;hudInputDevice=device;updateHudKeys();if(G)skillbarUpdate();}
 window.addEventListener('keydown',()=>hudDevice('keyboard'),true);
 window.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')hudDevice('keyboard');},true);
-function beginnerControls(){return [['Move',[...new Set(['up','left','down','right'].map(controlHint))].join(' · ')],['Jump · hold for height',controlHint('jump')],['Basic attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Toggle auto-sell',controlHint('loot')],['Menu / release mouse',controlHint('pause')]];}
+function beginnerControls(){return [['Move',[...new Set(['up','left','down','right'].map(controlHint))].join(' · ')],['Jump · hold for height',controlHint('jump')],['Basic attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Toggle auto-sell',controlHint('loot')],['Camera zoom / first-person FOV','Scroll wheel · Settings → Controls & camera'],['Menu / release mouse',controlHint('pause')]];}
 function showTutorial(cid){mode='menu';
  showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="tutSkip">Skip practice · ${htmlSafe(hudInputDevice==='controller'?controlKey('dodge'):'Esc')}</button></div>`);
  document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
@@ -9970,6 +9971,12 @@ function ensureKeybinds(){
 let _codeToAction={};
 const heldKeyboard=new Map();
 function releaseKeyboard(){for(const act of Object.keys(MOVE_ACTS))input[act]=false;input.jx=0;input.jz=0;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
+let cameraSaveTimer=null;
+window.addEventListener('wheel',e=>{
+ if(mode!=='play'||!G||e.ctrlKey||e.metaKey||e.altKey||_edOpen()||window.BFSocial?.camera()||G.shore?.ballista?.aiming||G.kingFinal&&['charge','cut'].includes(G.boss?.akStage))return;
+ if(e.target!==canvas&&document.pointerLockElement!==canvas)return;
+ e.preventDefault();if(BFCameraControls.wheel(meta,e.deltaY,e.deltaMode)){clearTimeout(cameraSaveTimer);cameraSaveTimer=setTimeout(persistGlobal,300);}
+},{passive:false});
 window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
 function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||_codeToAction[code]||['Escape','KeyQ','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
 function resetKeyAction(id){const a=KEYACTIONS.find(a=>a.id===id);if(!a)return;for(const other of KEYACTIONS)meta.keybinds[other.id]=(meta.keybinds[other.id]||[]).filter(c=>!a.def.includes(c));meta.keybinds[id]=a.def.slice();rebuildKeyLookup();}
@@ -20028,7 +20035,7 @@ function openPause(){
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
-    ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
+    ${cameraViewSettings()}
     <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <div class="sect">Leave</div>
@@ -20044,7 +20051,7 @@ function openPause(){
   { const _st=document.getElementById('skipTrialBtn');
     if(_st) _st.onclick=()=>{ resumeGameAudio(false); if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); }; }
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
-  var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
+  bindCameraZoom();var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=BFCameraControls.fov({fpsFov:_fv.value}); var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
   var _rd0=document.getElementById('rdSlider'); if(_rd0) _rd0.addEventListener('input',()=>{ meta.renderDist=parseFloat(_rd0.value)||1; var rv=document.getElementById('rdVal'); if(rv) rv.textContent=Math.round(meta.renderDist*100)+'%'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
@@ -20069,7 +20076,7 @@ function openPause(){
 function organizePauseSettings(){
   const back=document.getElementById('settingsBack'),card=back.closest('.card');
   const groups=[
-    ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider']],
+    ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
     ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn']],
     ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
@@ -20081,6 +20088,11 @@ function organizePauseSettings(){
   }
   card.querySelectorAll(':scope > .pgrid,:scope > .sect').forEach(e=>e.remove());
 }
+function cameraViewSettings(){
+ if(meta.camMode==='fps'){const f=Math.round(BFCameraControls.fov(meta));return `<div class="setrow"><label><span>First-person field of view · scroll wheel</span><b id="fovVal">${f}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${f}"></div>`;}
+ const far=meta.camMode==='far',z=Math.round(BFCameraControls.zoom(meta)*100);return `<div class="setrow"><label><span>${far?'Overhead':'Shoulder'} zoom · scroll wheel</span><b id="cameraZoomVal">${z}%</b></label><input id="cameraZoomSlider" type="range" min="${far?70:75}" max="${far?150:140}" step="1" value="${z}"></div>`;
+}
+function bindCameraZoom(){const slider=document.getElementById('cameraZoomSlider');if(slider)slider.oninput=()=>{const field=meta.camMode==='far'?'overheadZoom':'shoulderZoom';meta[field]=Number(slider.value)/100;meta[field]=BFCameraControls.zoom(meta);document.getElementById('cameraZoomVal').textContent=Math.round(meta[field]*100)+'%';persistGlobal();};}
 function openPauseSettingsV2(){
   mode='menu';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
@@ -20105,7 +20117,7 @@ function openPauseSettingsV2(){
       ${G&&G.trial?`<button class="bigbtn ghost" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
-    ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
+    ${cameraViewSettings()}
     <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
@@ -20117,7 +20129,7 @@ function openPauseSettingsV2(){
   document.getElementById('fsBtn').onclick=()=>{ toggleFullscreen(); setTimeout(openPauseSettingsV2,120); };
   document.getElementById('camBtn').onclick=()=>{ const o=['far','shoulder','fps']; meta.camMode=o[(o.indexOf(meta.camMode)+1)%3]; persist(); openPauseSettingsV2(); };
   const ss=document.getElementById('sensSlider'); if(ss) ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(ss.value)||1; const v=document.getElementById('sensVal'); if(v) v.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
-  const fv=document.getElementById('fovSlider'); if(fv) fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(fv.value)||92; const v=document.getElementById('fovVal'); if(v) v.textContent=meta.fpsFov+'°'; persistGlobal(); });
+  bindCameraZoom();const fv=document.getElementById('fovSlider'); if(fv) fv.addEventListener('input',()=>{ meta.fpsFov=BFCameraControls.fov({fpsFov:fv.value}); const v=document.getElementById('fovVal'); if(v) v.textContent=meta.fpsFov+'°'; persistGlobal(); });
   const rd=document.getElementById('rdSlider'); if(rd) rd.addEventListener('input',()=>{ meta.renderDist=parseFloat(rd.value)||1; const v=document.getElementById('rdVal'); if(v) v.textContent=Math.round(meta.renderDist*100)+'%'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPauseSettingsV2(); };
   document.getElementById('dmgNumBtn').onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPauseSettingsV2(); };
@@ -21034,11 +21046,6 @@ function drawFPWeapon(p,t){
   pushM(); mv(wx,wy,wz); rotY(cy); rotX(-pit);
     // everything below shares ONE frame (forearm → wrist → fist → weapon) so the hand physically holds the blade
     rotY(-0.26+ryA); rotZ(-0.28+rzA); rotX(rxA);
-    pushM(); mv(0,-22,-3); rotX(0.22); box(8,22,8, AL); popM();                             // forearm sleeve trailing to the corner
-    bx(0,-10,-0.5, 8.5,10,8.5, AL);                                                          // wrist / gauntlet cuff
-    bx(0,-1,2.5, 9.5,9,9, HAND);                                                             // fist wrapped around the grip
-    bx(0,3.5,5.2, 9.5,4,3.4, tint(HAND,'#000',0.18));                                        // fingers curling over the front of the grip
-    bx(0,-4,5.2, 9.5,3.4,3, tint(HAND,'#000',0.28));                                         // thumb
     pushM(); mv(0,3,2.5); if(!thrownWeaponHidden(p,w)) weaponMesh(w); popM();                  // thrown charge weapons visibly leave the fist
     if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; const ty=(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?34:(w.art==='hammer'||w.art==='great'||w.art==='axe')?30:24; bx(0,ty,8, s,s,s, col,col,0.7); }   // orb rides the weapon's tip, not the grip
   popM();
@@ -22562,7 +22569,7 @@ function render(t){
        yourself hold what you are wielding. */
     const EYE_FWD=three3DLive()?4:26;
     const ex=p.x+fx*EYE_FWD, ey=p.y+42+fy*EYE_FWD, ez=p.z+fz*EYE_FWD;
-    PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
+    PROJ=mPersp(BFCameraControls.fov(meta)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
     VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
     if(G) G.eye={x:ex,y:ey,z:ez};
     gl.uniform2f(U.uFogNF,210,820*_rd);
@@ -22587,7 +22594,7 @@ function render(t){
     G.eye={x:tx,y:640*zoom+cyy*.35,z:tz+800*zoom};gl.uniform2f(U.uFogNF,1100,2800*_rd);
   }
   if(G && G.hub){   // HUB ONLY: push the far plane + fog way out so you can see cleanly from one edge of the Waystation to the other
-    const fov = meta.camMode==='fps'?(meta.fpsFov||92):meta.camMode==='shoulder'?62:50;
+    const fov = meta.camMode==='fps'?BFCameraControls.fov(meta):meta.camMode==='shoulder'?62:50;
     const near = meta.camMode==='fps'?3:meta.camMode==='shoulder'?18:45;
     PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 4600);   // tighter far + bigger near = far better depth precision across the big hub (no z-fighting)
     gl.uniform2f(U.uFogNF, 3000, 6500);
@@ -22678,6 +22685,7 @@ function render(t){
   if(chessCamera&&G?.hub){const c=chessCamera;PROJ=mPersp(c.fov*Math.PI/180,VW/VH,1,4600);if(c.panel)PROJ[8]=c.panel/innerWidth;else PROJ[9]=-.36;VIEW=mLookAt([c.eye.x,c.eye.y,c.eye.z],[c.look.x,c.look.y,c.look.z],[0,1,0]);G.eye=c.eye;}
   const shoreSight=G?.shore&&BFShipwreckShore.camera(G);
   if(shoreSight){const c=shoreSight;PROJ=mPersp(42*Math.PI/180,VW/VH,4,3100);VIEW=mLookAt([c.eye.x,c.eye.y,c.eye.z],[c.look.x,c.look.y,c.look.z],[0,1,0]);G.eye=c.eye;gl.uniform2f(U.uFogNF,1600,3100);}
+  if(G&&meta.camMode!=='fps'&&!_ed?.on&&!talkFocus&&!tourCamera&&!chessCamera&&!shoreSight&&!(G.kingFinal&&['charge','cut'].includes(G.boss?.akStage))){const zoom=BFCameraControls.zoom(meta);PROJ[0]*=zoom;PROJ[5]*=zoom;}
   // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
   // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and
   // whole walls of deco could hide the hero (the Hollow spawn bug). Every ray test uses G.eye now.
@@ -24147,7 +24155,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2216"></script>
+<script type="module" src="./hero3d.js?v=2219"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

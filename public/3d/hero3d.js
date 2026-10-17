@@ -1,3 +1,4 @@
+import {weaponOnly} from './first-person-appearance3d.js?v=2219';
 import { pauseAppearance } from './pause-appearance3d.js?v=2212';
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
@@ -2140,15 +2141,14 @@ export function drawHero3D(p, t){
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
     if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
-    // Hide only the local head for this draw, never the rig in saved/peer/portrait state.
-    const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!p.sitting&&!window.BFHubDialogue?.active;
-    const head=fp?findHeadBone({root:actor}):null,headScale=head?.scale.clone();
-    if(head){head.scale.setScalar(.001);wrap.updateMatrixWorld(true);}
+    // Local draw only. Never change a peer rig, network state or a portrait.
+    const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!p.sitting&&!window.BFHubDialogue?.active&&!window.BFInspection?.active&&!window.BFHubTour?.camera()&&!window.__bfEd?.EDITOR?.on&&!(window.__BF3?.G?.kingFinal&&['charge','cut'].includes(window.__BF3.G.boss?.akStage));
+    const restoreFirstPerson=fp?weaponOnly(wrap):null;
     const chessFade=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera();
     const fadeChessActor=root=>root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.16;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});
     if(chessLocal){fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
     const restorePause=p.pausedSafe?pauseAppearance(wrap):null;
-    try{renderer.render(scene, cam);}finally{restorePause?.();for(const [n,m]of chessFade)n.material=m;if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    try{renderer.render(scene, cam);}finally{restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;

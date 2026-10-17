@@ -2044,3 +2044,8 @@ User requests chest purchase rarity unlocked by character level, with significan
 ## [Codex | 2026-10-16] v2.224 chest shop verified locally
 
 Implemented U-SHOP-CHESTS-20261016. Level gates1/5/12/20/30; gold150/600/2400/9600/38400. Existing chest odds reused and disclosed. Reward/payment conserved before reveal, no paid auto-sell, save-write rollback, live level and scene/generation guards. 38 unit checks plus 27 browser checks, old save reload, narrow/desktop visual review and adjacent regressions pass. Public deployment confirmation pending. No user save mutated; no two-device/pacing claim.
+
+
+## [Codex | 2026-10-16] v2.224 production confirmed
+
+Functional d1fdb9cc deployed successfully as ac8a9010-298f-41bb-8118-59611648e675. Fresh public browser shows v2.224.0-shop-chests with no launch errors. Purchase/reload integration remains verified against local identical production source with isolated pre-change save; no real player save touched.

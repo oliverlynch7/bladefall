@@ -1696,3 +1696,16 @@ User: "Ok continue on what you were doing before the poster". Resume U-HOLLOW-RE
 Implemented cart/bridge timing and clue guidance, completed rope-note repair, required alarm/player escort explanations, locked-object feedback, Waystone reach and canyon fall attribution. Targeted logic/syntax checks pass. Prior rendered fixtures cover gate/cage collision, all alarm/freight jumps, continuous missed-jump recovery, live prisoner damage/failure/retry, 16 local host/guest checks and an old partial-save load (level 10, rank 6, 913 gold and flags retained).
 
 The earned Warrior reached north escort wave 1, then rank-5 passive selection paused the driver at 20% rescue progress. Last persisted evidence: canyon-alarm-earned.json. Full scope, fixture corrections and test limits: docs/art-validation/hollow-review-20261015/summary.json. Browser discovery currently returns no available browser. Remaining: earned escort/Marksman approach, rendered Waystone front interaction and final production browser smoke check. Do not claim the entire review complete or infer novice fun/difficulty. Unrelated companion/rig changes remain untouched. Deployment confirmation follows.
+
+## [Codex | 2026-10-16] U-SFX-STARTER-20261016
+
+User: "Ok I upgraded to Starter. Please check the credits and then generate the most important SFX and put them into the game, replacing the old ones."
+
+Verified Starter, 40,000 credits remaining. Authorized paid SFX generation and game slot replacement; first batch capped at 10,000 credits, no overages or unknown-outcome retries. Preserve originals and generation/license records in repo. Prioritize real existing weapon/mob/reward slots plus selected procedural player cues; preserve saves, volume/mute and fallback. Evidence must separate decoded/signal checks from subjective listening and browser tests.
+
+
+## [Codex | 2026-10-16] U-PROGRESSION-CELEBRATION-20261016
+
+User: "i also still need you to create some sort of level up animation for class rank up and for player level up, right now its not obvious when either happen, its too sudden of a jolt whent he passive or skill rnak up option come on screen, espcially in the tutorial there was no heads up that that was going to happen, it hsould be visually obivous that our class ranked up and it should trnasition nicely to the option screen  without taking too long. and when the player levels up there should an obivuios visual expericne of it without stoppping gameplay. both kinds of leveling up should have unqwiue sfx"
+
+Approved: distinct short class-rank and player-level celebrations. Class-rank celebration precedes the existing paused choice with a smooth short transition; explain the first choice in the tutorial. Player-level celebration never pauses or slows gameplay. Use the two distinct paid sounds already generated; no further API credits needed. Preserve upgrade choice arming/confirmation and saved progression. Guard stale world/class/death transitions, simultaneous and multi-level rewards, reduced motion, controls and non-interactive HUD overlays. Source checks and interactive preview are not rendered acceptance; production verification gate remains.

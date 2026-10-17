@@ -1787,3 +1787,11 @@ Final file validation found a truncated alarm export and corrupted aggregate fix
 ## [Codex | 2026-10-16] Hollow guidance deployed
 
 Gameplay commit 66b1fc66 passed the Cloudflare Pages deployment check. Evidence corrections are in 5a6a60e0. Version v2.203.0-hollow-guidance; deployment evidence: docs/art-validation/hollow-review-20261015/deployment.json. No production browser smoke claim: browser discovery was empty and direct HTTP fetch returned 403. Generated review pages were removed; unrelated companion/rig changes remain untouched. Continue earned escort/rank-5 choice, Marksman approach and rendered Waystone checks when browser reconnects.
+
+## [Codex | 2026-10-16] Progression celebrations and isolated audio release candidate
+
+U-PROGRESSION-CELEBRATION-20261016 implemented as v2.208.0. Gold player-level banner/pulse/sparks never pauses or adds slow motion; purple class-rank rune/banner holds the existing local upgrade pause for 850 visible milliseconds before a 200ms choice entrance. Rank choice confirmation no longer repeats rank-up audio. Tutorial explains both and the first skill choice. Already-generated paid player/class sounds are distinct; zero new API credits spent.
+
+Browser connection recovered. Staged rank-2, rank-3 passive, simultaneous notifications, player-only running simulation, E confirmation and reduced-motion paths checked; fixed menu host removal and reduced-motion rune specificity during verification. 43 state checks + 580 audio tests + inline syntax pass. Actual old save retained level 4, rank 4, 1,145 gold, 52 XP and all three existing choices. All 64 custom sounds decode in real WebAudio. Browser muted: no subjective listening claim.
+
+Isolated release checkout ../bladefall-audio-release starts at production ab457fa9 and contains ONLY paid SFX/progression changes. No pending wardrobe/Reaper/Keep candidate imported. Browser fixtures use in-memory storage and do not alter real saves. Production deployment follows verification; evidence docs/art-validation/progression-20261016/summary.json.

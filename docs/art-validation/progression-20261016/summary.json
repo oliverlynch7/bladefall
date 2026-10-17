@@ -1,0 +1,39 @@
+{
+  "version": "2.208.0-progression-celebrations",
+  "status": "Production-baseline candidate verified locally; deployment pending",
+  "scope": [
+    "Distinct gold player-level celebration without pause or added slow motion",
+    "Purple class-rank celebration and 850ms safe pre-choice transition",
+    "Updated tutorial guidance and distinct paid SFX",
+    "64 custom SFX from prior authorized batch integrated"
+  ],
+  "verification": {
+    "logic_checks": 43,
+    "audio_integration_checks": 580,
+    "javascript_syntax": true,
+    "rendered_browser": true,
+    "class_intro_and_choice": true,
+    "passive_choice": true,
+    "simultaneous_events_no_overlap": true,
+    "player_only_mode_play_and_time_advances": true,
+    "skill_confirmation_E": true,
+    "game_reduced_motion_all_animation_none": true,
+    "custom_files_decoded_in_browser": 64,
+    "old_save": {
+      "level": 4,
+      "rank": 4,
+      "gold": 1145,
+      "xp": 52,
+      "choices_preserved": true
+    }
+  },
+  "limits": [
+    "Staged progression grants, not a full earned novice campaign run",
+    "Browser was muted: decoding/routing verified, subjective sound taste remains unapproved",
+    "Live co-op progression not exercised this session",
+    "Wardrobe/Reaper/Keep experiments excluded from this isolated production baseline"
+  ],
+  "api_credits_spent_this_task": 0,
+  "prior_sfx_batch_credits": 557,
+  "prior_sfx_remaining_verified": 39443
+}

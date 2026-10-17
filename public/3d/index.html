@@ -1146,11 +1146,14 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2192">
 <script src="./tutorial-callout.js?v=2192"></script>
-<script src="./guided-tutorial.js?v=2192"></script>
+<script src="./guided-tutorial.js?v=2208"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2116"></script>
+<script src="./priority-sfx.js?v=2207"></script>
+<link rel="stylesheet" href="./progression-celebration.css?v=2208">
+<script src="./progression-celebration.js?v=2208"></script>
 <script>
 (function(){
 "use strict";
@@ -1161,7 +1164,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.203.0-hollow-guidance';
+const VERSION3D='2.208.0-progression-celebrations';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1759,6 +1762,8 @@ const FXDEF={
   atk1:{f:'atk1',v:0.4}, atk2:{f:'atk2',v:0.4}, ma_stomp:{f:'ma_stomp',v:0.5},
   mimicroar:{f:'mimicroar',v:0.58}, chestthunk:{f:'chestthunk',v:0.5}, gamblecoins:{f:'gamblecoins',v:0.48}
 };
+// Paid custom files replace their old slots; keep each old path for network/decode fallback.
+if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={
   thornboar:{v:'v_boargrunt',d:'die1'}, charger:{v:'v_boarroar',d:'die2'}, dustjackal:{v:'v_jackalbark',d:'die3'},
@@ -1786,8 +1791,11 @@ function bufRms(buf){ let s=0,n=0; const ch=Math.min(buf.numberOfChannels,2);
   return Math.sqrt(s/Math.max(1,n)); }
 const FX_TARGET_RMS=0.09;                                // Phase 20: every file SFX auto-levels to this
 function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
-  for(const k in FXDEF){ (function(key){ fetch(SFXDIR+FXDEF[key].f+'.mp3').then(r=>r.arrayBuffer()).then(b=>actx.decodeAudioData(b)).then(buf=>{FXBUF[key]=buf;
-    const rms=bufRms(buf); FXDEF[key]._norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1; }).catch(()=>{}); })(k); } }
+  const decode=f=>fetch(SFXDIR+f+'.mp3').then(r=>{if(!r.ok)throw new Error('SFX unavailable');return r.arrayBuffer();}).then(b=>actx.decodeAudioData(b));
+  for(const k in FXDEF){ (function(key){const def=FXDEF[key];decode(def.f).catch(err=>{if(def.legacyF)return decode(def.legacyF);throw err;}).then(buf=>{FXBUF[key]=buf;
+    const rms=bufRms(buf);let norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1;
+    if(def.f.startsWith('custom/')){let peak=0;for(let c=0;c<buf.numberOfChannels;c++){const data=buf.getChannelData(c);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}if(peak>0)norm=Math.min(norm,.85/peak);}
+    def._norm=norm; }).catch(()=>{}); })(k); } }
 const _fxLoop={};
 function playFx(key,volMul){ if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
   try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul);
@@ -1892,6 +1900,7 @@ const SFX={
     noise({dur:0.5,f0:5000,f1:9000,type:'highpass',vol:0.035,a:0.05,at:0.35}); }
 };
 
+if(window.BFPrioritySfx)window.BFPrioritySfx.bind(SFX,playFx);
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
   common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
@@ -2036,7 +2045,7 @@ const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
   if(w.arche==='axe') return 'axeswing';                     // axes
-  if(w.art==='sword'&&w.sch==='phys') return null;           // physical swords: the crisp synth SFX.slash only (the swordswing sample sounded like a lingering scrape on hit)
+  if(w.art==='sword'&&w.sch==='phys') return 'swordswing';    // new isolated swing replaces the former lingering scrape
   if(w.arche==='javelin') return 'spearswing';               // spears / javelins
   return null; }
 function weaponFireFx(w){ if(!w) return null;
@@ -2738,9 +2747,10 @@ function gainClassXp(n){ if(G?.devKeep)return; const cs=classState(meta.classId)
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
     const S=curSkills(meta.classId);
     const sk=S.find((s,idx)=>s&&s.rank===cs.rank&&(idx===0||cs.sub));   // slot 0 (the shared skill) unlocks regardless of a chosen path
-    toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':'')));
+    // The visible celebration is coalesced after awarding all ranks in this transaction.
     if(!c2def()&&cs.rank===1&&S[0]&&!(meta.tut&&meta.tut.skill)) queueSkillTut=S[0]; }   // first rank-up teaches the shared skill, once
   if(up){ SFX.classup();
+    window.BFProgressCelebration?.notify('class',G,{name:curClass().disp,value:cs.rank,detail:cs.rank>=10?'Class mastered · capstone unlocked':'New class choice earned'});
     if(c2def()){ const nx=c2NextChoice(); if(nx) queueChoiceRank=nx; }   // v2: queue the next unmade rank choice
     else if(cs.rank>=2&&!cs.sub) queueSubclass=true;                     // legacy fork at rank 2
     skillbarUpdate(); }
@@ -12036,7 +12046,7 @@ function playerAttack(cdMul){
     burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
     return;
   }
-  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else { SFX.shoot(); if(w.arche==='crossbow') playFx('xbowclick',0.7); } }   // Phase 20: wands use the new procedural zap; crossbow gets its mechanical click
+  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else { if(w.arche!=='bow'||!playFx('custom_shoot'))SFX.shoot(); if(w.arche==='crossbow') playFx('xbowclick',0.7); } }   // Phase 20: wands use the new procedural zap; crossbow gets its mechanical click
   else { p.atkTimer=0.26; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
     if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
       p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);
@@ -12394,6 +12404,16 @@ function c2SkillOfSlot(slot){ const def=c2def(); if(!def) return null; const ran
 function c2CurSkills(){ return [0,1,2,3].map(c2SkillOfSlot); }
 function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classState(meta.classId), ch=c2ch();
   for(const r of CLASS2_CHOICE_RANKS){ const R=def['r'+r];if(cs.rank>=r&&R&&ch[r]!==R.a.id&&ch[r]!==R.b.id)return r; } return 0; }
+function beginProgressChoice(kind,rank,open){
+ const ui=window.BFProgressCelebration;if(!ui){open();return;}if(ui.active)return;
+ const owner=G,hero=G.p,cid=meta.classId,cs=classState(cid);
+ const detail=kind==='passive'?'Passive unlocked · choose an automatic bonus next':rank===2?'Your first skill is ready · choose one of two abilities next':'Skill unlocked · choose your new ability next';
+ ui.notify('class',owner,{name:curClass().disp,value:cs.rank,detail});
+ mode='upgrade';showOverlay(false);ovcard.innerHTML='';showGameUI(true);releaseKeyboard();
+ input.attack=false;input.jumpEdge=false;input.dodgeEdge=false;hero.attackHeld=false;hero.holdT=0;document.exitPointerLock?.();
+ const valid=()=>G===owner&&G.p===hero&&meta.classId===cid&&mode==='upgrade'&&!hero.dead&&!hero.downed&&hero.hp>0&&(!rank||!c2def()||c2NextChoice()===rank);
+ ui.beforeChoice(valid,()=>{if(valid())open();},()=>{if(G===owner&&G.p===hero&&mode==='upgrade'&&!hero.dead&&!hero.downed&&hero.hp>0)resumePlay();},{detail});
+}
 function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed) return; const cs=classState(cid),R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
@@ -12409,7 +12429,7 @@ function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||
     document.getElementById('choiceReview').hidden=false;document.getElementById('choiceSelected').textContent=selected.n;
     let committed=false;
     document.getElementById('classChoiceBack').onclick=()=>{document.getElementById('choiceReview').hidden=true;document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline='';el.setAttribute('aria-pressed','false');});};
-    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.classup();
+    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.pickup();
       const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
     };
   });
@@ -13763,19 +13783,22 @@ function rollDrop(e){
 function autoLevelGrow(p){ p.maxHp+=11; p.stats.power*=1.035; p.stats.atkSpeed*=1.018; p.stats.speed*=1.004; p.tunedLevels=(p.tunedLevels||0)+1; }
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){ if(G?.devKeep)return;
-  const p=G.p; p.xp+=Math.round(n*(isCampaignAdventure()?1.5:1));
+  const p=G.p,previousLevel=p.level; p.xp+=Math.round(n*(isCampaignAdventure()?1.5:1));
   const classAward=n>0?Math.max(1,Math.round(n*(isCampaignAdventure()?4:.8))):0;
   gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // Campaign training supports learning multiple classes; other modes retain their pace.
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);
     autoLevelGrow(p); recomputeArmor(p);
     p.hp=Math.min(effMaxHp(p),p.hp+(G.escape?0:20));      // Prison Break preserves health attrition across level-ups.
-    SFX.levelup(); playFx('levelcheer'); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
-    addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true); burst(p.x,p.y+30,p.z,'#ffd24a',16); G.slowmo=Math.max(G.slowmo||0,0.12);
+    meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
     const unlocked=rarityUnlockedAt(p.level);
     if(unlocked) storyToast('Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.','item-key');
-    else if(p.level%5===0) storyToast('▲ Level '+p.level+' — markedly stronger.');
-    else toast('Level '+p.level+' · +HP +Power',null,'event-level-up');
-    if(p.level<=91)toast('Stat point earned — spend it in Bag → Character Stats.','#ffd485'); }
+  }
+  if(p.level>previousLevel){
+    if(!playFx('levelcheer'))SFX.levelup();
+    const points=Math.max(0,Math.min(91,p.level)-Math.min(91,previousLevel));
+    window.BFProgressCelebration?.notify('player',G,{value:p.level,detail:points?'Stronger hero · +'+points+' stat point'+(points===1?'':'s')+' · spend in Bag':'Stronger hero · health and power increased'});
+    addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true);burst(p.x,p.y+30,p.z,'#ffd24a',16);
+  }
   checkAchievements(); hudUpdate(); autosaveRun();
 }
 function checkStageClear(){ if(G?.kingFinal||G?.escape)return;
@@ -16559,9 +16582,9 @@ function updateWorld(dt){
     for(const e of G.enemies){ if(e.practice&&!e.dead){ e.active=inPit;   // only wake (aggro) once you step into the ring
       e.x=Math.max(P.minX+16,Math.min(P.maxX-16,e.x)); e.z=Math.max(P.minZ+16,Math.min(P.maxZ-16,e.z)); } } }   // and never let them leave it
   if(!backgroundMenuMode&&mode==='play'&&!p.dead&&!p.downed&&p.hp>0){
-    if(queueSkillTut){ const s=queueSkillTut; queueSkillTut=null; openSkillTutorial(s); }   // first-skill lesson takes priority
-    else if(queueChoiceRank){ const r=c2NextChoice(); queueChoiceRank=0; if(r)openClassChoice(r); }   // Revalidate after a scene, save or class transition.
-    else if(queueSubclass){ queueSubclass=false; openSubclass(); }   // legacy path-fork
+    if(queueSkillTut){ const s=queueSkillTut;queueSkillTut=null;beginProgressChoice('skill',0,()=>openSkillTutorial(s)); }
+    else if(queueChoiceRank){ const r=c2NextChoice();queueChoiceRank=0;if(r)beginProgressChoice(c2def()['r'+r]?.kind,r,()=>openClassChoice(r)); }
+    else if(queueSubclass){ queueSubclass=false;beginProgressChoice('skill',0,openSubclass); }
   }
   class2Innate(G.p,dt);
 
@@ -16991,12 +17014,12 @@ function openLevelUp(){
 }
 function openSubclassFrom(then){
   const C=curClass(), cs=classState(meta.classId);
-  mode='upgrade'; _offerT=Date.now(); SFX.classup();
+  mode='upgrade'; _offerT=Date.now();
   showOverlayHTML(`<div class="card classcard"><p class="ovkicker" style="color:#c98cff">${C.icon} ${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
     <h2 class="ovh" style="color:#e6d2ff">Choose your path</h2><p class="ovsub">This choice shapes every skill you unlock after it. Respec later at the trainer.</p>
     <div class="choices">${C.subs.map((s,i)=>{ const nx=s.skills?s.skills[0]:C.skills[1];
       return `<button class="choice arm classchoice" data-i="${i}"><div class="cname" style="color:#c98cff">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}<br><b style="color:#e6d2ff">Next: ${nx?nx.icon+' '+nx.n:'?'}</b> <span style="opacity:.6">— skills 3 &amp; 4 reveal as you rank up</span></div></button>`; }).join('')}</div></div>`);
-  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.classup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.pickup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
 }
 function openSubclass(){ openSubclassFrom(resumePlay); }
 function fmt(n){ return Math.round(n*100)/100; }
@@ -23178,6 +23201,7 @@ function frame(ts){
   flushDeferred();                    // ...then the entities, depth-tested against what it just drew
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   BFGuidedTutorial.map(G,mode);
+  window.BFProgressCelebration?.tick(G,mode,(x,y,z)=>{const p=project(x,y,z);return p?[p[0]/DPR,p[1]/DPR]:null;},{hidden:document.hidden,reduceMotion:meta.reduceMotion,particles:meta.particles});
   const mapCaption=document.getElementById('mapCaption');mapCaption.classList.toggle('hide',mode!=='play'||!G||!!G.bonusActive);if(G&&mode==='play')document.getElementById('mapPlace').textContent=G.hub?'THE WAYSTATION':G.areaName||curZone().name;
   requestAnimationFrame(frame);
 }

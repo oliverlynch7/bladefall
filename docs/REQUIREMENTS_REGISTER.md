@@ -1957,3 +1957,8 @@ User requests0 fullscreen shortcut. Add rebindable Toggle fullscreen action defa
 ## [Codex | 2026-10-17] U-DIALOGUE-KEYBOARD-20261017
 
 User requires obvious yellow dialogue selection, W/S or Up/Down browsing and E confirmation. Plan: shared visible/enabled dialogue focus selection for hub/campaign/Rift Keeper and legacy Shade, wrap navigation, auto-select first main choice after arming, include optional question summaries and footer exits, visible keyboard hint; respect rebound interact, typing/modifiers, disabled spectator choices and held-E arming guard. Preserve mouse, Tab, Escape/Q, quest authority and dialogue endings. Verify actual browser conversation paths and regression suites.
+
+
+## [Codex | 2026-10-17] U-CAMPAIGN-REPLAY-ENTRY-20261017
+
+User requests after completing each campaign region three replay starts: first district, second district, boss, from gate or travel selection; first clear must still follow normal order. Plan: add completed-only shared replay picker on portal/Waystone UI paths; preserve low-level enterZone for new runs/network, accept validated target area only after zoneDone (authoritative guest sync exception). Load selected authored area directly before checkpoint/party broadcast, not by simulating quest completions. Guard stale/double menu callbacks, preserve hero/gold/optional progress, cancel without entering, test all8regions×3areas and incomplete gating, boss/checkpoint states and existing authority/save suites.

@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.243.0-dialogue-selection';
+const VERSION3D='2.244.0-campaign-replay';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5592,13 +5592,28 @@ function newG(p,extra){
     side:false,trial:null,trialKills:0,tip:0,tipT:0,meteors:[],fx:[],slowmo:0,interact:null,
     cam:{x:0,y:0,z:0}},extra||{});
 }
-function enterZone(zi){
+function openCampaignEntry(zi,back=wsResume){
+ const Z=ZONES[zi];if(!Z||zi>(meta.zoneMax||0))return;
+ if(!meta.zoneDone?.[Z.id]){enterZone(zi);return;}
+ const world=G;let used=false;releaseKeyboard();mode='menu';showGameUI(false);
+ const entries=[...Z.areas.map((a,area)=>({area,title:a.name,detail:'Part '+(area+1)+' · Explore and complete quests'})),{area:-1,title:Z.boss.name,detail:'Boss fight · Start at the boss arena'}];
+ showOverlayHTML(`<div class="card narrow" data-dialogue-menu><p class="ovkicker">Completed campaign level</p><h2 class="ovh">${Z.name}</h2><p class="ovsub">Where would you like to start?</p><div class="replay-destinations">${entries.map(e=>`<button class="bigbtn ghost" data-replay-area="${e.area}" style="text-align:left;margin:10px 0"><strong>${e.area<0?'⚔':'◇'} ${e.title}</strong><small style="display:block;font-size:13px;margin-top:6px;color:#d8dfdb">${e.detail}</small></button>`).join('')}</div><p class="dialogue-key-hint">W / S or ↑ / ↓ · ${controlHint('interact')} choose</p><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+ const card=document.querySelector('[data-dialogue-menu]');
+ for(const button of card.querySelectorAll('[data-replay-area]'))button.onclick=()=>{if(used||G!==world||mode!=='menu'||!button.isConnected||!meta.zoneDone?.[Z.id])return;used=true;enterZone(zi,Number(button.dataset.replayArea));};
+ document.getElementById('backBtn').onclick=()=>{if(used||G!==world||!card.isConnected)return;used=true;back();};
+ BFHubDialogue.selectFirst(card);
+}
+function enterZone(zi,startArea=0,partySync=false){
+  if(!Number.isInteger(zi)||!ZONES[zi])return false;
+  const target=Number.isInteger(startArea)&&(startArea===-1||startArea>=0&&startArea<ZONES[zi].areas.length)?startArea:0;
+  const replayAllowed=!!meta.zoneDone?.[ZONES[zi].id]||partySync===true&&MP.active&&!MP.isHost;
+
   const Z=zoneOf(zi);
   initAudio(); queueLevelUp=0; queueSubclass=false;
   // Preserve the explicit auto-sell preference across scene changes.
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
-  G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
+  G=newG(p,{zone:zi,area:Z.areas.length?(replayAllowed?target:0):-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
   if(MP.active && !MP.isHost && MP.rseed) G.runSeed=MP.rseed;   // co-op: adopt the host's run seed so we build the SAME dungeon + mobs (matching mids)
   meta.run=null; persist(); checkAchievements();
   loadArea(); captureCampaignCheckpoint(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast(); questUpdate();
@@ -15046,7 +15061,7 @@ const MP={
            The line directly above already distinguishes the hub this exact way. */
         if(d.restart&&campaignCheckpoint()&&G?.zone===d.zone&&G.area===d.area&&G.runSeed===d.rseed){if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);restartCampaignCheckpoint(true);if(d.story)briarApply(d.story,true);return;}
         const entering=!(isCampaignAdventure()&&G.zone===d.zone&&(d.rseed==null||G.runSeed===d.rseed));
-        if(entering){ try{ if(campaignCheckpoint())restoreBank();enterZone(d.zone); }catch(e){} }
+        if(entering){ try{ if(campaignCheckpoint())restoreBank();enterZone(d.zone,d.area,true); }catch(e){} }
         // A zone contains several authored districts plus area -1 (its boss arena). Older
         // packets carried only the zone, so a guest already inside that zone never rebuilt
         // when the host crossed a portal. That left the guest rendering the old room while
@@ -17871,6 +17886,7 @@ function openLevelEntry(o){
   const go=document.getElementById('leGo'); if(go) go.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; o.onEnter(); };
 }
 function openGateEntry(g){ const Z=ZONES[g.zi], sd=g.side?Z.side:null, artId=(sd?sd.id:Z.id);
+  if(!g.side&&g.open&&meta.zoneDone?.[Z.id]){openCampaignEntry(g.zi);return;}
   openLevelEntry({
     icon:`<img class="lecrestimg" src="${destinationArt(artId)}" alt="">`,   // the same stylized destination art the Waystone travel menu uses
     name:(sd?sd.name:Z.name),
@@ -17878,7 +17894,7 @@ function openGateEntry(g){ const Z=ZONES[g.zi], sd=g.side?Z.side:null, artId=(sd
     desc:(sd?sd.blurb:Z.blurb),
     col:(g.side?'#c47bff':(ZONE_ACCENT[Z.id]||'#e8a33d')),
     locked:!g.open, lockMsg:'Clear '+((ZONES[g.zi-1]&&ZONES[g.zi-1].name)||'the road')+' first',
-    onEnter:()=>{ if(g.side) enterSide(g.zi); else enterZone(g.zi); } });
+    onEnter:()=>{ if(g.side) enterSide(g.zi); else openCampaignEntry(g.zi); } });
 }
 function enterEndlessFromTitle(){
   initAudio(); if(!meta.diff) meta.diff='normal'; loadMode(diffMode(meta.diff));
@@ -19270,7 +19286,7 @@ function openHubMenu(){
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.getElementById('riseBtn').onclick=wsResume;
-  document.querySelectorAll('.destcard[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
+  document.querySelectorAll('.destcard[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); openCampaignEntry(+r.dataset.z,openHubMenu); });
   document.getElementById('riftHallTravel').onclick=()=>travelRiftHall(true);
   document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
@@ -23992,7 +24008,7 @@ window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPAN
   enemyEncounterLevel, rollDrop, restoreEnemyChests, prepareChest, descentRewardChest, canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   briarReady, briarRequest, briarReceive, briarApply, briarPacket, briarSync, briarObjects, briarInteract, buildBriarOpening,
   openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
-  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
+  ZONES, openCampaignEntry, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
   PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, pvpPetHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,

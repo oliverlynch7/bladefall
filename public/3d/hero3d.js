@@ -1,7 +1,8 @@
+import {warmSceneGeometry} from './render-warmup3d.js?v=2234b';
 import {chessBlocksBoard} from './chess-visibility3d.js?v=2226e';
 import {weaponOnly} from './first-person-appearance3d.js?v=2219';
 import { pauseAppearance } from './pause-appearance3d.js?v=2212';
-import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
+import {syncCampaignObjects} from './campaign-object3d.js?v=2234';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
 import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2231';
@@ -11,7 +12,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2227a';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2233e';
+import {syncNpcs} from './npc3d.js?v=2234';
 import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2226e';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2233';
+import { WORLD3D, syncWorld } from './world3d.js?v=2234b';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2233a';
 import { PROP3D, syncProps } from './prop3d.js?v=2184';
 
@@ -904,11 +905,12 @@ function storedWeapFrame(model, name){
 
 /* Serialize mesh attachment. Each request owns its body/weapon fit snapshot, so an ally
    or live tuning change cannot alter another request while its asset is loading. */
-let _equipQ = Promise.resolve();
+let _equipQ = Promise.resolve(),_equipPending=0;
 function queueEquip(fn){
+  _equipPending++;
   const run = () => { try { return Promise.resolve(fn()).catch(() => null); }
                       catch(e){ return null; } };
-  _equipQ = _equipQ.then(run, run);
+  _equipQ = _equipQ.then(run, run).finally(()=>{_equipPending--;});
   return _equipQ;
 }
 const weapFrameSave = () => {};        // no persistence in the game build; presets are the source
@@ -2073,7 +2075,7 @@ export function drawHero3D(p, t){
       if(!p._portrait)syncCompanions(scene,dt);
       syncNpcs(scene,dt);
       syncRiftShards(scene);
-      if(!p._portrait){syncCampaignRest(scene);syncCampaignObjects(scene);}
+      if(!p._portrait){syncCampaignRest(scene);syncCampaignObjects(scene,dt);}
   syncProjectiles(scene);
       syncProps(scene, dt);           // chests and the other objects you interact with
       syncClass();                    // respec or a different save changes the body
@@ -2165,18 +2167,22 @@ export function drawHero3D(p, t){
     const restorePause=p.pausedSafe?pauseAppearance(wrap):null;
     window.__BF_MIRROR_CHARACTER=()=>{restoreFirstPerson?.();return ()=>{if(fp)weaponOnly(wrap);};};
     try{renderer.render(scene, cam);}finally{window.__BF_MIRROR_CHARACTER=null;restoreMount?.();restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
-    if(window.BF_LOADING?.active&&window.BF_LOADING.resourcesReady){
+    const preparing=window.BF_LOADING?.active&&window.BF_LOADING.resourcesReady;
+    const artPending=preparing?((window.__mob3d?.().pending?.length||0)+(window.__companionStats?.pending||0)+(window.__npcArtStats?.pending||0)):0;
+    // Loading.tick runs before this draw. Recheck the just-synced scene here,
+    // otherwise last frame's ready world can warm the wrong scene and release play.
+    if(preparing&&(!WORLD3D.on||WORLD3D.ready)&&!artPending&&!_equipPending&&!_reArming){
       const world=window.__BF3?.G;
-      if(world&&window.__BF_RENDER_WARMUP?.world!==world){
-        const state=window.__BF_RENDER_WARMUP={world,ready:false,error:null};
+      if(world&&(window.__BF_RENDER_WARMUP?.world!==world||window.__BF_RENDER_WARMUP?.sceneKey!==WORLD3D.built)){
+        const state=window.__BF_RENDER_WARMUP={world,sceneKey:WORLD3D.built,ready:false,error:null};
         try{
           for(let i=0;i<6;i++){const key='echo'+i;window.__hero3dAt?.(key,{x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,ghost:.001});}
           const textures=new Set();scene.traverse(n=>{for(const m of Array.isArray(n.material)?n.material:[n.material]){if(!m)continue;for(const value of Object.values(m))if(value?.isTexture)textures.add(value);}});
           for(const texture of textures)renderer.initTexture(texture);
           // Compile alone does not upload skinned geometry or bone textures. Draw the pooled
           // afterimages once under the loading curtain, then hide them before play resumes.
-          try{renderer.render(scene,cam);}finally{for(let i=0;i<6;i++)window.__hero3dAt?.('echo'+i,null);}
-          Promise.resolve(renderer.compileAsync?renderer.compileAsync(scene,cam):renderer.compile(scene,cam)).then(()=>{state.ready=true;},e=>{state.error=String(e);state.ready=true;});
+          try{warmSceneGeometry(renderer,scene,cam);}finally{for(let i=0;i<6;i++)window.__hero3dAt?.('echo'+i,null);}
+          state.ready=true;
         }catch(e){state.error=String(e);state.ready=true;}
       }
     }

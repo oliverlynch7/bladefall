@@ -1,3 +1,4 @@
+import {createCoinCoffer,animateCoinCoffer} from './coin-coffer3d.js?v=2234';
 import * as T from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 
@@ -162,15 +163,15 @@ function build(name){
 function model(name){const group=new T.Group(),spec=build(name);for(const item of spec.meshes){const m=new T.Mesh(item.geometry,item.material);m.receiveShadow=true;m.castShadow=true;group.add(m);}group.userData.triangles=spec.triangles;return group;}
 export function campaignObjectMetrics(){return [...templates].map(([name,t])=>({name,triangles:t.triangles,meshes:t.meshes.length,min:t.bounds.min.toArray(),max:t.bounds.max.toArray(),finite:t.meshes.every(m=>[...m.geometry.attributes.position.array,...m.geometry.attributes.normal.array].every(Number.isFinite))}));}
 let group,world,objects,actors=[],drawn=new WeakSet();
-export function syncCampaignObjects(scene){
+export function syncCampaignObjects(scene,dt=1/60){
  const b=window.__BF3,g=b?.G,defs=window.BFCampaignObjects;
  const eligible=defs&&g&&!g.hub&&!g.trial&&!g.side&&!g.delve&&!g.devBriar&&g.area>=0&&g.zone>=0&&g.zone<8;
  if(!eligible){if(group)group.visible=false;drawn=new WeakSet();window.__campaignObjectDrawn=drawn;window.__CAMPAIGN_OBJECT_STATS={total:0,visible:0,triangles:0,meshes:0,templates:templates.size,items:[]};return;}
  if(world!==g||objects!==g.storyObjects){
   group?.removeFromParent();group=new T.Group();group.name='Campaign clues and supplies';world=g;objects=g.storyObjects;actors=[];drawn=new WeakSet();scene.add(group);
-  for(const o of objects||[]){const spec=defs.spec(o);if(!spec)continue;const node=new T.Group(),item=model(spec.model);node.name=o.key;
+  for(const o of objects||[]){const spec=defs.spec(o);if(!spec)continue;const node=new T.Group(),coffer=spec.currencyOnly?createCoinCoffer():null,item=coffer?.root||model(spec.model);node.name=o.key;
    if(spec.support){node.add(model(spec.support));item.position.y=spec.support==='bench'?35:33;}
-   node.add(item);group.add(node);actors.push({o,node,item,spec});
+   node.add(item);group.add(node);actors.push({o,node,item,spec,coffer});
   }
  }
  if(group.parent!==scene)scene.add(group);group.visible=true;let visible=0,triangles=0,meshes=0;
@@ -178,6 +179,7 @@ export function syncCampaignObjects(scene){
   const {o,node,item,spec}=a;node.position.set(o.x,o.y||0,o.z);node.rotation.y=o.artYaw||0;
   node.visible=Math.hypot(o.x-g.p.x,o.z-g.p.z)<1050&&Math.abs((o.y||0)-g.p.y)<650;
   if(!node.visible){drawn.delete(o);continue;}
+  if(a.coffer)animateCoinCoffer(a.coffer,!!g.storyState?.flags?.['event.'+o.key],dt);
   item.visible=!defs.taken(o,g.storyState);drawn.add(o);visible++;
   node.traverseVisible(n=>{if(n.isMesh){meshes++;triangles+=(n.geometry.index?.count||n.geometry.attributes.position.count)/3;}});
  }

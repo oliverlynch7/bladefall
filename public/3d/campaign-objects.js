@@ -11,6 +11,7 @@
  set('ff.camp gf.writings sc.record sc.hull.note sl.display.clue la.vault.note sl.history sl.shelf.clue','book');
  set('ff.reflect.clue tc.wind.note','trail');
  set('briar.root.1 briar.root.2 briar.root.3','herbs',{pickup:true});
+ set('home.bell.cache home.grain.cache home.orchard.cache','coin-coffer',{currencyOnly:true});
  set('briar.dressings','bandages',{pickup:true});
  set('briar.gus.tools','tools',{pickup:true});
  set('rk.tools','tools',{pickup:true,support:'crate',taken:'rk.tools'});

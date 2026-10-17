@@ -1108,6 +1108,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./camera-occlusion.js?v=2095"></script>
 <script src="./campaign-threat.js?v=2217"></script>
 <script src="./enemy-health.js?v=2217"></script>
+<script src="./rift-welcome.js?v=2234"></script>
+<script src="./currency-feedback.js?v=2234"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
 <script src="./brute-encounter.js?v=2202"></script>
@@ -1119,7 +1121,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./campaign-elites.js?v=2161"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
-<script src="./campaign-objects.js?v=2188"></script>
+<script src="./campaign-objects.js?v=2234"></script>
 <script src="./briar-journey.js?v=2201"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2203"></script>
@@ -1167,7 +1169,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2192">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2232"></script>
+<script src="./guided-tutorial.js?v=2234b"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1185,7 +1187,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.233.0-waystation-welcome';
+const VERSION3D='2.234.0-briar-playtest';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1243,11 +1245,11 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}catch(e){return null;} }
-const GLOBAL_FIELDS=['showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
+const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
@@ -1344,7 +1346,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]){meta.classId='warrior';meta.classUnlocked.warrior=true;}
   migrateClassEquipment();
 }
-function wipeMode(m){ meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
+function wipeMode(m){ meta.riftWelcomeSeen=false;meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -3241,7 +3243,7 @@ function areaQuests(ai){ if(G?.kingFinal)return [{id:"ak.final",k:"story",n:1,d:
 // J remains Attack for existing players; Journal defaults to remappable N.
 // Live Briar opening. Authored actions are shared; inventory and reward receipts stay personal.
 let briarBook=null,briarPending=null,briarSequence=0;
-async function loadStoryBook(id){for(let attempt=0;attempt<3;attempt++){try{const r=await fetch('./story/'+id+'.json?v=2203');if(!r.ok)throw Error('Story dialogue '+id+' unavailable ('+r.status+')');return BFVoiceContent.apply(await r.json());}catch(e){if(attempt===2)throw e;await new Promise(resolve=>setTimeout(resolve,200*(attempt+1)));}}}
+async function loadStoryBook(id){for(let attempt=0;attempt<3;attempt++){try{const r=await fetch('./story/'+id+'.json?v=2234');if(!r.ok)throw Error('Story dialogue '+id+' unavailable ('+r.status+')');return BFVoiceContent.apply(await r.json());}catch(e){if(attempt===2)throw e;await new Promise(resolve=>setTimeout(resolve,200*(attempt+1)));}}}
 const briarReady=Promise.all(['briar-foundation','rift-hall','hollow-cliffs','lost-canyon','broken-walls','prison-dungeons','snowbound-peaks','deep-ice-caves','iron-halls','great-furnace','shipwreck-shore','thunder-cliffs','palace-courtyard','sky-library','sunspire-orb','castle-gates','long-ascent','final-king','return-visits'].map(loadStoryBook)).then(books=>{briarBook={...books[0],npcs:Object.assign({},...books.map(b=>b.npcs)),nodes:Object.assign({},...books.map(b=>b.nodes)),events:Object.assign({},...books.map(b=>b.events))};return briarBook}).catch(e=>{console.warn(e);return null});
 function inBlackWoods(){return isCampaignAdventure()&&G.zone===0&&G.area===1;}
 function inLongAscent(){return isCampaignAdventure()&&G.zone===7&&G.area===1;}
@@ -3358,7 +3360,7 @@ function briarSync(){
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
   if(reward.kind.startsWith('return_')){if(applyReturnReward(id,reward))G.storyClaims[id]=true;}
   else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+Math.round(reward.amount*1.5)+' XP');}
-  else if(reward.kind==='gold'){const gold=awardGold(reward.amount);toast((id==='home.bells.cache'?'Tower chest opened':'Quest complete')+' · +'+gold+' gold');G.storyClaims[id]=true;}
+  else if(reward.kind==='gold'){const gold=awardGold(reward.amount);if(['home.bells.cache','home.grain.cache','home.orchard.cache','lc.cave.supplies'].includes(id)){BFCurrencyFeedback.show(gold,'Savings coffer opened · coins only');playFx('chestthunk');playFx('gamblecoins');}else toast('Quest complete · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast(reward.kind==='cliff_runner'?'Cliff Runner earned — an uncommon javelin.':'Cliff chest opened — uncommon leggings.');G.storyClaims[id]=true;}
   else if(reward.kind.startsWith('forgeguard_')){const art=reward.kind.slice(11),item=art==='armor'?{armor:makeArmor('rare','chest')}:{weapon:makeWeapon(art,'rare','Forgeguard')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Forgeguard earned — rare '+(art==='armor'?'chest armor':art)+'. Finish Iron Halls to keep it.');G.storyClaims[id]=true;}
   else if(reward.kind==='castle_armor'){const item={armor:makeArmor('rare','chest')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Roland’s armor — rare chest armor. Reach the tower to keep it.');G.storyClaims[id]=true;}
@@ -3385,6 +3387,7 @@ function briarSync(){
  if(inGreatFurnace()&&s.flags['gf.pet.feed.closed']&&!G._cageNoticeCleared){G._cageNoticeCleared=true;BFJournalNotice.queue.dismiss('gf.cage');}
  if(inGreatFurnace()&&s.flags['gf.cache']&&!G._cacheNoticeCleared&&G.p.x>630&&G.p.z<-5120&&G.p.z>-5680){G._cacheNoticeCleared=true;BFJournalNotice.queue.dismiss('gf.cache');}
  syncReturnField();syncReturnHubNpcs();
+ if(window.BFRiftWelcome?.active){questUpdate();hudUpdate();return;}
  const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(v)v.revision=s.revision;
  if(n&&(G.kingFinal||s.conversation.owner===briarId()||G._storyViewing===n.id)){
@@ -3681,7 +3684,7 @@ function buildBriarOpening(){
   {key:'briar.root.1',label:'Gather tangle root',x:-410,z:-130,y:0,kind:'root'},
   {key:'briar.root.2',label:'Gather tangle root',x:-505,z:-245,y:0,kind:'root'},
   {key:'briar.root.3',label:'Gather tangle root',x:-370,z:-335,y:0,kind:'root'},
-  {key:'briar.dressings',label:'Take the clean dressings',x:440,z:-255,y:20,kind:'dressings',range:70,bounds:{minX:370,maxX:510,minZ:-294,maxZ:-145}},
+  {key:'briar.dressings',label:'Take the clean dressings',x:440,z:-262,y:30,kind:'dressings',range:70,bounds:{minX:370,maxX:510,minZ:-294,maxZ:-145}},
   {key:'briar.water',label:'Close the water feed',x:475,z:-1635,y:0,kind:'water'},
   {key:'briar.jam',label:'Pull the timber from the wheel',x:300,z:-1700,y:0,kind:'jam'},
   {key:'briar.bridge',label:'Lower the mill crossing',x:310,z:-2030,y:0,kind:'handle'},
@@ -3698,20 +3701,23 @@ function buildBriarOpening(){
   for(let j=0;j<7;j++)G.deco.push({x:x-w/2+18+j*w/7,z:z+18,y0:7,w:10,h:13+(j%3)*4,d:10,c:j%2?'#67884a':'#91a456',kind:'flower',nocol:true});
  }
  for(const z of [-85,-375])G.deco.push({x:-435,z,y0:0,w:290,h:32,d:9,kind:'fence',lead:true,c:'#795735',nocol:true});
- // Shuttered store: blocked front, open rear window and two small climbable crates.
- const storeStart=G.deco.length;
- const wall=(x,z,w,h,d)=>vsolid(x,z,0,w,h,d,'#886440');
- wall(347,-220,15,160,180);wall(533,-220,15,160,180);wall(440,-130,200,160,15);
- wall(376,-310,73,160,15);wall(504,-310,73,160,15);wall(440,-310,55,84,15);
- G.deco.push({x:440,z:-310,y0:130,w:55,h:30,d:15,c:'#886440',nocol:true});vplat(440,-360,60,82,64,{checkpoint:true});vplat(440,-308,84,55,22,{checkpoint:true});
- G.deco.push({x:440,z:-220,y0:161,w:220,h:18,d:200,c:'#62482f',nocol:true});
- for(const x of [418,458])G.deco.push({x,z:-119,y0:20,w:16,h:80,d:8,c:'#b39b73',nocol:true});
- vsolid(440,-255,0,68,20,44,'#70573a');
+ // Village dispensary: a wide, level front doorway and a weatherproof timber shell.
+ const storeStart=G.deco.length,store=(x,z,y0,w,h,d,c,extra={})=>G.deco.push({x,z,y0,w,h,d,c,nocol:true,...extra});
+ const wall=(x,z,w,h,d)=>vsolid(x,z,0,w,h,d,'#ad9067');
+ wall(340,-220,16,164,200);wall(540,-220,16,164,200);wall(440,-320,216,164,16);
+ wall(364,-120,48,164,16);wall(516,-120,48,164,16);
+ store(440,-120,108,104,56,16,'#ad9067');G.obstacles.push({kind:'col',x:440,z:-120,y0:108,w:104,d:16,h:164,structure:true});
+ store(440,-220,0,198,2,184,'#8c734f');store(440,-105,0,104,2,44,'#a5987b');
+ for(const x of [340,540])for(const z of [-120,-220,-320])store(x,z,0,14,170,14,'#5a422c');
+ for(const x of [388,492])store(x,-109,0,11,110,12,'#705034');store(440,-109,108,115,12,12,'#705034');
+ for(const z of [-330,-110])store(440,z,165,235,12,16,'#5e4933',{roof:true});
+ for(let i=0;i<7;i++)store(440,-316+i*31,178,238,10,29,i%2?'#697d64':'#728a6c',{roof:true});
+ for(const x of [340,540])for(const y of [18,83,150])store(x,-220,y,5,6,188,'#795b3d');
+ // A cloth-and-cross sign marks the entrance; the table is behind the open walking aisle.
+ store(510,-108,67,29,31,4,'#e5dcc5');store(510,-104,76,4,15,2,'#a55545');store(510,-103,82,16,4,2,'#a55545');
+ vsolid(440,-272,0,86,25,45,'#795b3e');store(440,-272,25,89,3,47,'#e5d9bf');
+ for(let i=0;i<3;i++)store(373,-260+i*25,8,28,12,20,'#baac83');
  G.storyStore=G.deco.splice(storeStart);
- // Timber framing and a lintel make the rear entrance readable; walls fade only while inside.
- for(const x of [347,533])for(const z of [-130,-310])G.storyStore.push({x,z,y0:0,w:13,h:162,d:13,c:'#4d3827'});
- for(const z of [-128,-312])for(const y0 of [12,64,150])G.storyStore.push({x:440,z,y0,w:196,h:6,d:4,c:'#b29262'});
- G.storyStore.push({x:440,z:-314,y0:124,w:62,h:8,d:9,c:'#d0b478'});
  // Two modest cloth beds beside Mara; the restored pad has a distinct large footprint.
  for(const x of [-265,-330]){vsolid(x,225,0,44,13,90,'#78563b');G.deco.push({x,z:225,y0:14,w:40,h:5,d:78,c:'#bdb99b',nocol:true});}
  G.healpads.push({storyPad:true,infinite:true,locked:!adventureStoryState().flags['mara.healing'],x:-210,z:15,y:0,r:77,charge:1,_acc:0});
@@ -3803,7 +3809,7 @@ function buildHomefieldsGranary(){
  G.storyObjects.push({key:'home.grain.clue',label:'Read the grain keeper’s note',x:1260,z:255,y:0,kind:'grainnote'},
  {key:'home.grain.spout',label:'Swing the grain trough toward the basket',x:1310,z:100,y:0,kind:'grainspout'},
  {key:'home.grain.hopper',label:'Release grain from the loft hopper',x:1160,z:-55,y:100,kind:'grainhopper'},
- {key:'home.grain.cache',label:'Open the grain keeper’s chest',x:1150,z:-260,y:0,kind:'graincache',bounds:{minX:1040,maxX:1260,minZ:-335,maxZ:-150}});
+ {key:'home.grain.cache',label:'Open the grain keeper’s coin coffer',x:1150,z:-260,y:0,kind:'graincache',bounds:{minX:1040,maxX:1260,minZ:-335,maxZ:-150}});
  const f=adventureStoryState().flags,open=!!f['home.grain.open'];
  G.granary={x:1150,z:-130,open,spout:!!(f['home.grain.spout']||open),hopper:!!(f['home.grain.hopper']||open),spilled:!!(f['home.grain.hopper']&&!f['home.grain.spout']),openAt:-Infinity};
  if(!open)G.walls.push({x:1150,z:-130,w:110,d:22,h:280,invisible:true,grainDoor:true});
@@ -3818,6 +3824,9 @@ function syncHomefieldsGranary(s){
  if(f['home.grain.hopper']&&!f['home.grain.spout'])G.granary.spilled=true;
  if(s.flags['event.home.grain.clue']&&!G.granary.read){G.granary.read=true;toast('Grain keeper’s note added to your journal · J');}
  if(s.notes['home.grain']){const cache=!!s.flags['event.home.grain.cache'];s.notes['home.grain'].title=cache?'The granary store room':'The granary basket';s.notes['home.grain'].text=cache?'The grain filled the hanging basket and lifted the store door. We recovered the grain keeper’s saved coins.':open?'Grain filled the hanging basket and lifted the store door. The chest is inside.':'The store door rises when its hanging basket fills. The hopper above the loft still holds grain, but its trough points away from the basket.';}
+}
+function drawCoinCoffer(o,claimed){
+ if(!o||BFCampaignObjects.drawn(o))return;const y=o.y||0;bx(o.x,y+14,o.z,57,28,36,'#825b3b');for(const dx of [-24,24])bx(o.x+dx,y+14,o.z+19,5,28,3,'#637c7a');bx(o.x,y+(claimed?45:30),o.z+(claimed?-15:0),59,5,39,'#936a46');bx(o.x,y+17,o.z+20,14,14,2,'#c4a052');if(!claimed)bx(o.x,y+17,o.z+22,2,9,1,'#705c36');
 }
 function drawHomefieldsGranary(s,t){
  if(!G.granary)return;const f=s.flags,d=G.granary,aligned=d.spout||d.open,released=d.hopper||d.open,progress=d.open?Math.max(0,Math.min(1,(t-d.openAt)/1.5)):0,y=235*progress;
@@ -3850,7 +3859,7 @@ function drawHomefieldsGranary(s,t){
   for(let k=0;k<8;k++){const q=(t*.6+k/8)%1;bx(end.x+(k%3-1)*6,119-96*q,end.z+(k%2?5:-5),5,5,5,'#e4bb65');}}
  if(d.spilled){bx(1215,3,93,78,5,60,'#927343');bx(1215,7,93,57,6,44,'#b49255');bx(1215,11,93,31,5,25,'#c8a765');for(let k=0;k<8;k++)bx(1179+k*9,4,69+(k%3)*25,5,4,4,k%2?'#d2b470':'#aa8b52');}
  const note=G.storyObjects.find(o=>o.kind==='grainnote');if(note&&!BFCampaignObjects.drawn(note)){bx(note.x,32,note.z,8,64,8,'#66563b');bx(note.x,63,note.z,52,35,7,'#c2b991');for(let k=0;k<3;k++)bx(note.x,55+k*8,note.z+5,36-k*4,2,2,'#605b49');}
- if(!f['event.home.grain.cache']){bx(1150,18,-260,68,36,40,'#806039');bx(1150,38,-260,70,6,43,'#b39b61');for(const x of [1127,1173])bx(x,20,-238,5,36,4,'#4b4e41');}
+ drawCoinCoffer(G.storyObjects.find(o=>o.key==='home.grain.cache'),!!f['event.home.grain.cache']);
 }
 
 function buildHomefieldsExploration(){
@@ -3870,11 +3879,13 @@ function buildHomefieldsExploration(){
  }
  for(const x of [-2720,-1870]){vsolid(x,-680,0,110,75,110,'#a88d50');G.deco.push({x,z:-680,y0:76,w:135,h:20,d:130,c:'#725235',nocol:true});}
  // Orchard climb has a broad ground route beneath it and recovery shelves.
- const steps=[[-2700,-1490,24],[-2700,-1610,52],[-2700,-1730,80],[-2620,-1840,108],[-2490,-1840,136],[-2360,-1840,164]];
- for(const [x,z,y]of steps)vplat(x,z,y,70,56,{terrace:true,checkpoint:true});
+ const steps=[];
+ for(let i=0;i<10;i++){const step=[-2700,-1450-(i+1)*32,(i+1)*8.2];steps.push(step);vplat(step[0],step[1],step[2],96,34,{orchardStair:true,interior:true,checkpoint:true});}
+ vplat(-2700,-1840,82,130,150,{interior:true,checkpoint:true});
+ for(let i=0;i<11;i++){const step=[-2700+(i+1)*34,-1840,82+(i+1)*82/11];steps.push(step);vplat(step[0],step[1],step[2],36,96,{orchardStair:true,interior:true,checkpoint:true});}
  vplat(-2210,-1840,164,230,240,{terrace:true,checkpoint:true});
  G.chests.push({x:-2210,z:-1840,y:164,opened:false,bob:0});
- for(const [x,z]of [[-2750,-2000],[-2520,-2030],[-1950,-1900],[-1950,-1540]]){G.deco.push({x,z,y0:0,w:34,h:145,d:34,c:'#66503b',nocol:true});G.deco.push({x,z,y0:115,w:145,h:85,d:150,c:'#708449',nocol:true});}
+ for(const [x,z]of [[-2750,-2000],[-2520,-2030],[-1950,-1900],[-1950,-1540]]){G.deco.push({kind:'tree',lead:true,x,z,y0:125,trunkH:125,w:145,h:85,d:145,c:'#708449',nocol:true});G.obstacles.push({kind:'col',treeCol:true,invisible:true,x,z,w:30,d:30,h:130});}
  // Ridge approach rises in short reachable steps to a roofless bell tower.
  for(let k=0;k<7;k++)vplat(2350,-1080-k*100,24+k*24,200,140,{terrace:true,checkpoint:true});
  vplat(2350,-1810,168,540,430,{terrace:true,checkpoint:true});
@@ -3890,13 +3901,13 @@ function buildHomefieldsExploration(){
  for(const x of [2150,2550])G.deco.push({x,z:-1950,y0:168,w:90,h:65,d:35,c:'#747564',nocol:true});
  G.storyObjects.push({key:'home.bell.clue',label:'Read the watchtower notice',x:2180,z:-1750,y:168,kind:'bellstone'},
  {key:'home.bell.alarm',label:'Ring the warning bell',x:2350,z:-1940,y:168,kind:'bell'},
- {key:'home.bell.cache',label:'Open the tower chest',x:2500,z:-1830,y:168,kind:'bellcache'});
+ {key:'home.bell.cache',label:'Open the tower coin coffer',x:2500,z:-1830,y:168,kind:'bellcache'});
  for(const [key,x,z,w,d,h]of [['home.bell.clue',2180,-1750,70,60,68],['home.bell.alarm',2350,-1940,77,46,100],['home.bell.cache',2500,-1830,67,47,54]])G.obstacles.push({kind:'col',x,z,y0:168,w,d,h:168+h,invisible:true,watchtowerProp:true,interactionKey:key});
  G.healpads.push({x:-2300,z:-1350,y:0,r:32,charge:1,_acc:0});
  // Small separate engagements: melee among hay shelters; mixed patrol in open pasture.
  for(const [type,x,z]of [['grunt',-2430,-800],['caster',-2190,-930],['grunt',-2040,-700],['grunt',-2380,-1060],['grunt',2130,-860],['flyer',2060,-550]]){const e=spawnEnemy(type,x,z,false);if(e){e.homefieldsWing=true;if(x<-1900)BFCampaignPatrols.dressRaider(e,type==='caster'?'caster':x===-2040?'heavy':'runner');}}
  G.bounds.minX=Math.min(G.bounds.minX,-3030);G.bounds.maxX=Math.max(G.bounds.maxX,2850);
- G.homefieldsExploration={districts,paths,orchardSteps:steps,revision:2};
+ G.homefieldsExploration={districts,paths,orchardSteps:steps,revision:3};
  G.homeBell=BFHomeBellDefense.create();
 }
 function buildHomefieldsFarmDiscovery(){
@@ -3904,8 +3915,8 @@ function buildHomefieldsFarmDiscovery(){
  G.deco=G.deco.filter(o=>!(Math.abs(o.x+2490)<70+(o.w||0)/2&&o.z<-1910&&o.z>-2240));
  vseg(-2520,-2290,850,690,{meadow:true});vseg(-1940,-2090,440,380,{meadow:true});vseg(-2860,-1760,210,800,{meadow:true});
  const end={x:-2490,z:-2370,y:136};vplat(end.x,end.z,end.y,310,240,{slab:14,checkpoint:true});
- const descent=[[-2700,-2380,112],[-2790,-2280,84],[-2790,-2160,56],[-2790,-2040,28]];
- for(const [x,z,y]of descent)vplat(x,z,y,150,145,{checkpoint:true});
+ vplat(-2688,-2370,136,90,36,{slab:14,interior:true,checkpoint:true});vseg(-2706,-1950,210,520,{meadow:true});
+ const descent=[];for(let i=0;i<14;i++){const y=136-(i+1)*136/14,x=-2706,z=-2370+(i+1)*34;descent.push([x,z,y]);vplat(x,z,y,130,36,{checkpoint:true,orchardStair:true,interior:true});}
  // Thin timber supports, weathered roof and baskets mark a working lookout.
  for(const x of [-2610,-2370])for(const z of [-2460,-2280]){
   G.deco.push({x,z,y0:0,w:17,h:260,d:17,c:'#695035',nocol:true});
@@ -3913,18 +3924,13 @@ function buildHomefieldsFarmDiscovery(){
  G.orchardRoof=Array.from({length:5},(_,k)=>({x:-2490,z:-2460+k*45,y0:265,w:335,h:9,d:37,c:k%2?'#8d744c':'#a68a5e'}));
  for(const x of [-2600,-2375])G.deco.push({x,z:-2400,y0:137,w:43,h:30,d:43,c:'#9a7742',nocol:true});
  for(const [x,z]of [[-2770,-2510],[-2320,-2560],[-2180,-2190]]){
-  vsolid(x,z,0,32,130,32,'#62503a');
-  for(const [dx,dz,h]of [[0,0,130],[-45,12,114],[36,-25,148]])G.deco.push({x:x+dx,z:z+dz,y0:h,w:100,h:68,d:104,c:'#7b8c45',nocol:true});
-  for(let j=0;j<4;j++)G.deco.push({x:x-35+j*22,z:z+35,y0:1,w:9,h:8,d:9,c:'#b26743',nocol:true});
- }
- // Staggered low defenses leave broad escape lanes around the wagon.
- for(const [x,z,w,d]of [[-2670,-790,175,28],[-2670,-450,160,28],[-2090,-1070,28,150]]){
-  vsolid(x,z,0,w,46,d,'#77745a');G.deco.push({x,z,y0:47,w:w+8,h:7,d:d+8,c:'#9b9674',nocol:true});
+  G.deco.push({kind:'tree',lead:true,x,z,y0:120,trunkH:120,w:108,h:75,d:108,c:'#77924e',nocol:true});
+  G.obstacles.push({kind:'col',treeCol:true,invisible:true,x,z,w:30,d:30,h:125});
  }
  G.storyObjects.push({key:'home.farm.supplies',label:'Recover the wagon supplies',x:-2510,z:-630,y:0,kind:'farmcart',range:100},
  {key:'home.orchard.clue',label:'Read the fruit pickers’ note',x:-2580,z:-1440,y:0,kind:'orchardnote'},
  {key:'home.orchard.wheel',label:'Lower the orchard walkway',x:-2490,z:-1840,y:136,kind:'orchardwheel',range:70,bounds:{minX:-2570,maxX:-2410,minZ:-1910,maxZ:-1770}},
- {key:'home.orchard.cache',label:'Open the lookout chest',x:end.x,z:end.z,y:end.y,kind:'orchardcache',range:65,bounds:{minX:-2615,maxX:-2365,minZ:-2465,maxZ:-2280}});
+ {key:'home.orchard.cache',label:'Open the lookout coin coffer',x:end.x,z:end.z,y:end.y,kind:'orchardcache',range:65,bounds:{minX:-2615,maxX:-2365,minZ:-2465,maxZ:-2280}});
  for(const [x,z]of [[-2480,-2130],[-2200,-2300]]){const e=spawnEnemy('thornboar',x,z,false);if(e){e.homefieldsOrchard=true;e.role=null;e.roleCol=null;}}
  G.homefieldsOrchard={end,descent,deployed:false};G.bounds.minZ=Math.min(G.bounds.minZ,-2680);
 }
@@ -3946,8 +3952,7 @@ function drawHomefieldsFarmDiscovery(s,t){
  bx(-2490,163,-1840,14,54,14,'#705035');for(let k=0;k<8;k++){const a=k*Math.PI/4;bx(-2490+Math.cos(a)*22,174+Math.sin(a)*22,-1827,9,9,7,'#b79758');}bx(-2490,174,-1827,48,5,7,'#8c6c3b');
  if(open){for(let k=0;k<19;k++)bx(-2490,138,-1850-k*23,116,4,18,k%2?'#a18455':'#b59968');for(const x of [-2547,-2433]){bx(x,176,-2060,4,4,456,'#b09b6c');for(const z of [-1850,-2060,-2270])bx(x,155,z,7,40,7,'#735737');}}
  else {for(let k=0;k<7;k++)bx(-2490,143+k*20,-1910,116,16,8,'#a18455');}
- bx(-2490,153,-2370,60,34,42,claimed?'#756746':'#a18243');for(const x of [-2510,-2470])bx(x,153,-2348,6,35,4,'#c5b47f');
- if(claimed)bx(-2490,179,-2390,60,8,38,'#756746');
+ drawCoinCoffer(G.storyObjects.find(o=>o.key==='home.orchard.cache'),claimed);
 }
 function buildGusWorkshop(){
  // A real optional destination between the village approach and orchard return path.
@@ -3997,12 +4002,11 @@ function drawGusWorkshop(s){
 }
 function drawBriarStory(t){
  if(!inBriar())return;const s=adventureStoryState(),f=s.flags;
+ bx(-135,13,145,9,26,9,'#725538');bx(-135,28,145,62,5,48,'#b3a78c');
  drawHomefieldsGranary(s,t);
  drawGusWorkshop(s);
  drawHomefieldsFarmDiscovery(s,t);
- const inside=G.p.x>335&&G.p.x<545&&G.p.z>-320&&G.p.z<-120;
- const nearStore=Math.hypot(G.p.x-440,G.p.z+260)<340;
- for(const part of G.storyStore||[])bx(part.x,(part.y0||0)+part.h/2,part.z,part.w,part.h,part.d,part.c,null,inside?.16:nearStore&&((part.y0||0)+part.h)>95?.10:1);
+ for(const part of G.storyStore||[]){const bottom=part.y0||0,top=bottom+part.h,occluded=part.roof&&window.BFCameraOcclusion.blocks(G,part,bottom,top,meta.camMode,0);bx(part.x,bottom+part.h/2,part.z,part.w,part.h,part.d,part.c,null,occluded?.12:1);}
  for(const n of G.storyNpcs||[]){
   if(!window.__npc3dDrawn?.(n.id)){pushM();mv(n.x,n.y,n.z);bx(0,27,0,22,34,14,n.id==='mara'?'#b4c0ad':'#886b49');bx(0,51,0,16,16,16,'#d1ad88');popM();}
   const available=n.id==='gus'?f['thomas.ready']&&!f['gus.closed']&&!f['gus.shortcut']:n.id==='thomas'?!f['thomas.ready']:f['thomas.ready']&&!f['briar.depart'];
@@ -4016,7 +4020,7 @@ function drawBriarStory(t){
    bx(o.x,o.y+82,o.z,7,18,7,'#483f31');for(let k=0;k<5;k++)bx(o.x,o.y+71-k*7,o.z,17+k*7,8,17+k*7,k===4?'#e5be66':'#ad8546');bx(o.x,o.y+32,o.z,8,10,8,'#4d4031');
    bx(o.x+23,o.y+41,o.z+9,4,58,4,'#d5b97e');bx(o.x+23,o.y+12,o.z+12,16,9,16,rung?'#f7d38a':'#a78a55');
   }
-  if(o.kind==='bellcache'){const open=!!f['home.bells.open'],claimed=!!f['event.home.bell.cache'];bx(o.x,o.y+18,o.z,64,35,43,claimed?'#806a44':open?'#b9985b':'#665b4a');bx(o.x,o.y+(claimed?47:open?50:39),o.z+(open?13:0),69,9,46,open?'#d9b875':'#8b7757');bx(o.x,o.y+27,o.z+23,9,17,4,open?'#efe0a7':'#b29862');for(const dx of [-23,23])bx(o.x+dx,o.y+19,o.z+23,4,28,4,'#c6a361');}
+  if(o.kind==='bellcache')drawCoinCoffer(o,!!f['event.home.bell.cache']);
   if(o.kind==='root'){for(let k=0;k<3;k++){bx(o.x+(k-1)*8,8,o.z,8,12+k*3,9,'#b4935a');bx(o.x+(k-1)*9,19+k*3,o.z,16,5,8,'#829d50');}}
   if(o.kind==='dressings'){bx(o.x,o.y+6,o.z,29,10,20,'#e0ddc4');bx(o.x,o.y+12,o.z,7,2,21,'#8d4d44');}
   if((o.kind==='water'||o.kind==='handle')&&!window.__BRIAR_MILL_3D_ACTIVE){bx(o.x,18,o.z,18,36,18,'#78674e');bx(o.x,43,o.z,55,7,9,'#c2a669');}
@@ -4384,7 +4388,9 @@ function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
   let dpr=q==='low'?Math.min(raw,1)*0.66:q==='medium'?Math.min(raw,1):Math.min(raw,2);
   // Keep every render target legal even on 5K/8K and heavily scaled displays.
-  const maxTex=gl?gl.getParameter(gl.MAX_TEXTURE_SIZE):4096, w=Math.max(1,window.innerWidth), h=Math.max(1,window.innerHeight);
+  const maxTex=targetRenderDpr.maxTexture||(targetRenderDpr.maxTexture=gl?gl.getParameter(gl.MAX_TEXTURE_SIZE):4096), w=Math.max(1,window.innerWidth), h=Math.max(1,window.innerHeight);
+  const budget=q==='low'?1280*720:q==='medium'?1920*1080:2560*1440;
+  if(meta.nativeResolution!==true)dpr=Math.min(dpr,Math.sqrt(budget/(w*h)));
   return Math.min(dpr,maxTex/w,maxTex/h);
 }
 function resize(){
@@ -5903,7 +5909,7 @@ function worldRiftShards(){
  if(G?.marksmanArena&&G.portal&&G.boss?.dead)return [{id:'HP-05',x:680,z:-1670,y:0}];
  if(inLostCanyon())return BFLostCanyon.shards(adventureStoryState());
  if(inWindingCliffs())return BFHollowCliffs.shards(adventureStoryState());
- if(inBriar()&&adventureStoryState().flags['mara.healing'])return [{id:'BR-01',x:-240,z:-95,y:0}];
+ if(inBriar()&&adventureStoryState().flags['mara.healing'])return [{id:'BR-01',x:-135,z:145,y:30,gift:'mara'}];
  if(inBlackWoods())return [{id:'BR-03',x:1480,z:-1950,y:240},{id:'BR-05',x:370,z:-3390,y:0},...(adventureStoryState().flags['woods.tracks.open']?[{id:'BR-04',x:-2130,z:-2530,y:0}]:[])];return [];
 }
 function riftShardTaken(id){const a=BFRiftShards.pending(G?.pendingRiftShards);return a.found.includes(id)||a.echoes.includes(id);}
@@ -5918,7 +5924,7 @@ function takeWorldRiftShard(id){
 function riftShardInteract(){
  if(!isCampaignAdventure())return null;
  const p=G.p,o=worldRiftShards().find(o=>!riftShardTaken(o.id)&&Math.hypot(o.x-p.x,o.z-p.z)<68&&Math.abs(p.y-o.y)<=45);
- return o?{x:o.x,z:o.z,y:o.y+74,label:meta.riftShards.includes(o.id)?'Collect the saved shard’s gold echo':'Collect the Rift Shard',act:()=>takeWorldRiftShard(o.id)}:null;
+ return o?{x:o.x,z:o.z,y:o.y+74,label:meta.riftShards.includes(o.id)?'Collect the saved shard’s gold echo':o.gift?'Take Mara’s Rift Shard':'Collect the Rift Shard',act:()=>takeWorldRiftShard(o.id)}:null;
 }
 function drawRiftShardCrystal(o,t,spent=false,scale=1){
  const col=spent?'#898397':'#9e57db',light=spent?'#b4adbe':'#e1b5ff';
@@ -5932,8 +5938,8 @@ function drawRiftShardCrystal(o,t,spent=false,scale=1){
 function drawRiftShardDiscovery(t){
  for(const o of worldRiftShards()){
   const spent=meta.riftShards.includes(o.id),taken=riftShardTaken(o.id);
-  bx(o.x,o.y+2,o.z,62,4,62,'#66616d');bx(o.x,o.y+5,o.z,43,3,43,spent?'#797482':'#8c6aa9');
-  for(let j=0;j<5;j++){const a=j*Math.PI*2/5;pushM();mv(o.x+Math.sin(a)*25,o.y+6,o.z+Math.cos(a)*25);rotY(a);box(5,2,9,spent?'#aaa3b0':'#d9adff');popM();}
+  if(!o.gift){bx(o.x,o.y+2,o.z,62,4,62,'#66616d');bx(o.x,o.y+5,o.z,43,3,43,spent?'#797482':'#8c6aa9');
+  for(let j=0;j<5;j++){const a=j*Math.PI*2/5;pushM();mv(o.x+Math.sin(a)*25,o.y+6,o.z+Math.cos(a)*25);rotY(a);box(5,2,9,spent?'#aaa3b0':'#d9adff');popM();}}
   if(!taken&&!window.__riftShard3dDrawn?.has(o.id))drawRiftShardCrystal(o,t,spent);
  }
  const r=G?.riftReveal,age=r?G.time-r.start:99;
@@ -5941,15 +5947,20 @@ function drawRiftShardDiscovery(t){
  let card=document.getElementById('riftDiscovery');
  if(!card){card=document.createElement('aside');card.id='riftDiscovery';card.setAttribute('role','status');card.style.cssText='position:fixed;right:18px;bottom:185px;width:min(280px,calc(100vw - 28px));box-sizing:border-box;padding:10px 12px;border:1px solid #b582de;border-radius:12px;background:rgba(27,17,40,.96);color:#ecddff;font:14px/1.5 system-ui;z-index:35;pointer-events:none;box-shadow:0 0 28px #a258c544';document.body.appendChild(card);}
  if(r&&r.noticeAt==null)r.noticeAt=performance.now();
- const visible=!!r&&r.first&&performance.now()-r.noticeAt<6000&&mode==='play'&&isCampaignAdventure();
+ const visible=!!r&&r.first&&!G.riftWelcomePending&&!window.BFRiftWelcome?.active&&performance.now()-r.noticeAt<4500&&mode==='play'&&isCampaignAdventure();
  card.style.display=visible?'block':'none';
  if(visible&&card._reveal!==r){card._reveal=r;card.innerHTML='<strong style="color:#dfb5ff">Rift Shard found</strong><div>Collect 5 matching shards for a class trial.</div><div><b>Finish this part to save it.</b></div><small>Details: Journal ('+htmlSafe(controlHint('journal'))+')</small>';}
+}
+function riftSpiritSpot(p){
+ const solid=[...(G.obstacles||[]),...(G.walls||[])];
+ for(const turn of [0,.8,-.8,1.6,-1.6,Math.PI]){const a=(p.yaw||0)+turn,x=p.x+Math.sin(a)*110,z=p.z+Math.cos(a)*110,y=floorAt(x,z,12,(p.y||0)+40);if(!Number.isFinite(y)||Math.abs(y-(p.y||0))>32)continue;if(solid.some(o=>!o.open&&(o.h||0)>y+5&&(o.y0||0)<y+65&&Math.abs(x-o.x)<(o.w||0)/2+16&&Math.abs(z-o.z)<(o.d||0)/2+16))continue;return{x,y,z};}
+ return {x:p.x+30,y:p.y||0,z:p.z+30};
 }
 function riftShardJournal(){
  if(!isCampaignAdventure())return '';
  const region=BFRiftShards.regions[G.zone],p=region&&BFRiftShards.progress(meta.riftShards,G.pendingRiftShards,region.id);
  if(!p||!(p.banked+p.pending))return '';
- return '<section aria-label="Rift Shards"><h3>Rift Shards</h3><p><strong>'+p.banked+' / 5 saved</strong> · '+p.pending+' carried this part</p><p style="color:#cdb5e4">'+RIFT_SHARD_HELP+'</p></section>';
+ return '<section aria-label="Rift Shards"><h3>Rift Shards</h3><p><strong>'+p.banked+' / 5 saved</strong> · '+p.pending+' carried this part</p><p>Complete this set to earn the <strong>'+htmlSafe(CLASSES[p.classId]?.disp||'new class')+'</strong> trial.</p><p style="color:#cdb5e4">'+RIFT_SHARD_HELP+'</p></section>';
 }
 function collectRiftShard(id){
  if(!isCampaignAdventure()||!G.p||G.p.dead)return 'invalid';
@@ -5959,6 +5970,7 @@ function collectRiftShard(id){
   playFx('secretget');toast('Rift Shard found — finish this part to keep it.','#c47bff','event-secret-rift');
   const first=!G._riftIntroShown&&!BFRiftShards.normalize(meta.riftShards).length;
   G.riftReveal={id,start:G.time,first,x:G.p.x,y:G.p.y,z:G.p.z};G._riftIntroShown=true;
+  if(first&&!meta.riftWelcomeSeen){const region=BFRiftShards.regions.find(r=>id.startsWith(r.prefix+'-'));G.riftWelcomePending={id,region:ZONES[BFRiftShards.regions.indexOf(region)]?.name||'this region',className:CLASSES[region?.classId]?.disp||'a new fighting class'};}
   burst(G.p.x,G.p.y+34,G.p.z,'#bd83f0',20);addText(G.p.x,G.p.y+85,G.p.z,'RIFT SHARD','#d9baff',true);
  }
  else if(result.outcome==='echo'){const gold=awardGold(120);toast('A shard you already saved — +'+gold+' gold.','#c9b6ff','event-secret-rift');}
@@ -10264,6 +10276,7 @@ const ECLIMB=44; // ground enemies can climb anything up to this height (all pla
    climbMax: obstacles at or below this height are climbable, not walls. */
 function resolveObstacles(ent,r,yRef,climbMax){
   if(!G||!G.obstacles) return;
+  const nearby=arguments[4],obstacles=nearby?.obstacles||G.obstacles;
   const ey=(yRef==null?ent.y:yRef);
   const push=(ob)=>{
     if(ey>=ob.h-2) return;
@@ -10277,14 +10290,14 @@ function resolveObstacles(ent,r,yRef,climbMax){
        one are pillars exactly as they have always been, which is every obstacle in every other zone,
        so this cannot change any of them. */
     if(ob.y0!=null && ey + (ent.hh || 56) <= ob.y0) return;
-    // A solid STRUCTURE (building) blocks phasing-through at ground level, but must never eject someone standing on an
-    // intended walkway that runs up over/through it (a climb step / plat at their feet). Check that before pushing.
-    if(ob.structure){ for(const p2 of G.obstacles){ if(p2.kind==='plat' && Math.abs((p2.h||0)-ent.y)<7 && Math.abs(ent.x-p2.x)<p2.w/2+r && Math.abs(ent.z-p2.z)<p2.d/2+r) return; } }
     const dx=ent.x-ob.x, dz=ent.z-ob.z, px=ob.w/2+r-Math.abs(dx), pz=ob.d/2+r-Math.abs(dz);
-    if(px>0&&pz>0){ if(px<pz) ent.x+=(dx>=0?1:-1)*px; else ent.z+=(dz>=0?1:-1)*pz; }
+    if(!(px>0&&pz>0))return;
+    // A walkway can pass through its supporting building. Check it only when this box overlaps.
+    if(ob.structure){for(const p2 of obstacles){if(p2.kind==='plat'&&Math.abs((p2.h||0)-ent.y)<7&&Math.abs(ent.x-p2.x)<p2.w/2+r&&Math.abs(ent.z-p2.z)<p2.d/2+r)return;}}
+    if(px<pz)ent.x+=(dx>=0?1:-1)*px;else ent.z+=(dz>=0?1:-1)*pz;
   };
-  for(const ob of G.obstacles){ if(climbMax && ob.h<=ey+climbMax) continue; push(ob); }
-  if(G.walls) for(const wl of G.walls) push(wl.courtWall?{...wl,h:(wl.y0||0)+wl.h}:wl);
+  for(const ob of obstacles){ if(climbMax && ob.h<=ey+climbMax) continue; push(ob); }
+  if(G.walls) for(const wl of nearby?.walls||G.walls) push(wl.courtWall?{...wl,h:(wl.y0||0)+wl.h}:wl);
   if(G.doors) for(const dr of G.doors){ if(!dr.open) push(dr); }
   if(G.torches) for(const tc of G.torches) push({x:tc.x,z:tc.z,w:16,d:16,h:60});   // torches are solid: a skinny invisible post so you bump the sconce instead of walking through it
 }
@@ -11066,27 +11079,32 @@ function unseenLanding(p,e){
  }return null;
 }
 function enemySupport(e){
-  let f=-Infinity;
-  for(const sg of G.segments){ if(Math.abs(e.x-sg.x)<sg.w/2+e.r*0.35 && Math.abs(e.z-sg.z)<sg.d/2+e.r*0.35){ f=G.devBriar?.terrain?G.devBriar.terrain.height(e.x,e.z):0; break; } }
-  for(const mv of G.movers){ if(Math.abs(e.x-mv.x)<mv.w/2+e.r*0.4 && Math.abs(e.z-mv.z)<mv.d/2+e.r*0.4) f=Math.max(f,mv.h); }
-  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(e.x-cr.x)<cr.w/2+e.r*0.4 && Math.abs(e.z-cr.z)<cr.d/2+e.r*0.4) f=Math.max(f,cr.h||0); }
-  for(const wl of (G.walls||[])){ if(wl.stand && e.y>=(wl.h||0)-3 && Math.abs(e.x-wl.x)<wl.w/2+e.r*0.4 && Math.abs(e.z-wl.z)<wl.d/2+e.r*0.4) f=Math.max(f,wl.h||0); }
-  for(const ob of G.obstacles){ if((ob.h<=e.y+ECLIMB) && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
+  const context=arguments[1]||G;let f=-Infinity;
+  for(const sg of context.segments){ if(Math.abs(e.x-sg.x)<sg.w/2+e.r*0.35 && Math.abs(e.z-sg.z)<sg.d/2+e.r*0.35){ f=G.devBriar?.terrain?G.devBriar.terrain.height(e.x,e.z):0; break; } }
+  for(const mv of context.movers){ if(Math.abs(e.x-mv.x)<mv.w/2+e.r*0.4 && Math.abs(e.z-mv.z)<mv.d/2+e.r*0.4) f=Math.max(f,mv.h); }
+  for(const cr of context.crumbles){ if(cr.state<2 && Math.abs(e.x-cr.x)<cr.w/2+e.r*0.4 && Math.abs(e.z-cr.z)<cr.d/2+e.r*0.4) f=Math.max(f,cr.h||0); }
+  for(const wl of (context.walls||[])){ if(wl.stand && e.y>=(wl.h||0)-3 && Math.abs(e.x-wl.x)<wl.w/2+e.r*0.4 && Math.abs(e.z-wl.z)<wl.d/2+e.r*0.4) f=Math.max(f,wl.h||0); }
+  for(const ob of context.obstacles){ if((ob.h<=e.y+ECLIMB) && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
 // A short local route respects the same collision/climb rules as actual enemy movement.
 function enemyRouteEdge(e,a,b){
- const length=Math.hypot(b.x-a.x,b.z-a.z),steps=Math.max(1,Math.ceil(length/12));let y=a.y;
+ const context=arguments[3];const length=Math.hypot(b.x-a.x,b.z-a.z),steps=Math.max(1,Math.ceil(length/12));let y=a.y;
  for(let i=1;i<=steps;i++){
   const x=a.x+(b.x-a.x)*i/steps,z=a.z+(b.z-a.z)*i/steps,q={x,z,y,r:e.r,hh:e.hh||e.h||56};
-  const floor=enemySupport(q);if(!Number.isFinite(floor)||floor>y+ECLIMB||floor<y-80)return null;
+  const floor=enemySupport(q,context);if(!Number.isFinite(floor)||floor>y+ECLIMB||floor<y-80)return null;
   // Require support beneath the feet, rather than the generous edge recovery tolerance.
   for(const [dx,dz]of [[e.r*.6,0],[-e.r*.6,0],[0,e.r*.6],[0,-e.r*.6]]){
-   const f=enemySupport({x:x+dx,z:z+dz,y:floor,r:0});if(!Number.isFinite(f)||f<floor-44)return null;
+   const f=enemySupport({x:x+dx,z:z+dz,y:floor,r:0},context);if(!Number.isFinite(f)||f<floor-44)return null;
   }
-  q.y=Math.max(y,floor);resolveObstacles(q,e.r,null,ECLIMB);
+  q.y=Math.max(y,floor);resolveObstacles(q,e.r,null,ECLIMB,context);
   if(Math.hypot(q.x-x,q.z-z)>.1)return null;y=floor;
  }return {x:b.x,z:b.z,y};
+}
+// A route never leaves its 8-cell search window. Filter broad-phase candidates once per search.
+function enemyRouteContext(e){
+ const margin=512+(e.r||0),near=o=>Math.abs(o.x-e.x)<=margin+(o.w||0)/2&&Math.abs(o.z-e.z)<=margin+(o.d||0)/2;
+ return {segments:G.segments.filter(near),obstacles:G.obstacles.filter(near),walls:(G.walls||[]).filter(near),movers:G.movers,crumbles:G.crumbles};
 }
 function moveGroundEnemy(e,dx,dz,speed,dt,range=300){
  if(speed<=0)return;const length=Math.hypot(dx,dz);if(length<.001)return;dx/=length;dz/=length;
@@ -11098,7 +11116,7 @@ function moveGroundEnemy(e,dx,dz,speed,dt,range=300){
   if(e._route&&Math.hypot(goal.x-e._routeGoal.x,goal.z-e._routeGoal.z)>180)e._route=null;
   if((!e._route||!e._route.length)&&(e._routeAt||0)<=G.time){
    if(G._navTime!==G.time){G._navTime=G.time;G._navCount=0;}
-   if(G._navCount<2){G._navCount++;e._route=BFEnemyNavigation.route(e,goal,(a,b)=>enemyRouteEdge(e,a,b));e._routeGoal=goal;e._routeAt=G.time+.6;}
+   if(G._navCount<2){G._navCount++;const context=enemyRouteContext(e);e._route=BFEnemyNavigation.route(e,goal,(a,b)=>enemyRouteEdge(e,a,b,context));e._routeGoal=goal;e._routeAt=G.time+.6;}
   }
   while(e._route?.length&&Math.hypot(e._route[0].x-e.x,e._route[0].z-e.z)<8)e._route.shift();
   node=e._route?.[0];
@@ -16010,6 +16028,7 @@ function updateWorld(dt){
   if(!backgroundMenuMode&&BFGuidedTutorial.tick(G,mode,dt,input,{hint:controlHint,release:releaseKeyboard}))return;
   BFEmotes.tick(G,mode,dt,input);
   if(mode!=='play') return;
+  if(BFRiftWelcome.tick(G,mode,{meta,current:()=>G,hint:controlHint,spot:riftSpiritSpot,enter:()=>{mode='npc';releaseKeyboard();stopAllLoops();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:resumePlay,save:persist}))return;
   if(G?.kingFinal&&finalKingTick(dt))return;
   if(G?.p?.saberSwingT>0)G.p.saberSwingT=Math.max(0,G.p.saberSwingT-dt);
   if(inBlackWoods()&&G.woodsTrail&&adventureStoryState().flags['woods.tracks.open'])G.woodsTrail.sealT=Math.min(1,G.woodsTrail.sealT+dt*1.35);
@@ -16020,7 +16039,7 @@ function updateWorld(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
-  if(inBriar()&&!G._storeJumpHint&&Math.hypot(G.p.x-440,G.p.z+360)<160){G._storeJumpHint=true;BFJournalNotice.push({id:'briar.store.jump',kind:'Movement tip',title:'The store’s rear window',text:'Jump onto the crate, then jump through the low window. Hold '+controlHint('jump')+' for a higher jump. The clean dressings are inside. Missing a jump leaves you safely on the ground.'});}
+
   if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:[G.p,...Object.values(MP.peers||{}).filter(p=>p.zone===G.zone&&!p.downed)],spawn:spawnEnemy,notice:()=>{const w=G.patrolWork,home=w.id==='combat.0.0';toast('Optional hunt: '+w.total+' '+(w.target|| (home?'farm raiders':'enemies'))+' · '+(w.place|| (home?'western supply wagon':'this area')));questUpdate();}});
   G._freezeT=Math.max(0,(G._freezeT||0)-dt);
   /* Headlong drives you forward and refuses to be steered - the whole point of it.
@@ -16685,6 +16704,7 @@ const AMBIENT={
   hub:{c:'#ffd98a',vy:8,n:1.0,e:1}                 // warm hearth fireflies
 };
 function updateAmbient(dt,s){
+  if(inBriar()||inBlackWoods()){G.ambient.length=0;return;}
   const cfg=AMBIENT[s.theme]; if(!cfg) return;
   if(!G.devBriar && meta.particles!==false && G.ambient.length<80 && Math.random()<cfg.n*0.6){
     G.ambient.push({x:G.p.x+(Math.random()-0.5)*760, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*760,
@@ -20207,7 +20227,7 @@ function organizePauseSettings(){
   const back=document.getElementById('settingsBack'),card=back.closest('.card');
   const groups=[
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
-    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn','fpsBtn']],
+    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn','resolutionBtn','fpsBtn']],
     ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
@@ -20234,6 +20254,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
+      <button class="bigbtn ghost" id="resolutionBtn">3D resolution: ${meta.nativeResolution===true?'Native display':'Auto · smoother play'}</button>
       <button class="bigbtn ghost" id="fpsBtn" aria-pressed="${meta.showFps===true}">FPS counter: ${meta.showFps===true?'On':'Off'}</button>
       <button class="bigbtn ghost" id="particlesBtn">✨ Particles: ${meta.particles!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="objectiveArrowsBtn">Main objective arrows: ${meta.objectiveArrows!==false?'On':'Off'}</button>
@@ -20255,6 +20276,7 @@ function openPauseSettingsV2(){
   const reading=document.createElement('button');reading.id='readingSizeBtn';reading.className='bigbtn ghost';reading.textContent='Reading text: '+({1:'Standard',1.15:'Larger',1.3:'Largest'}[meta.readingSize||1]||'Standard');document.getElementById('settingsBack').before(reading);
   reading.onclick=()=>{const sizes=[1,1.15,1.3];meta.readingSize=sizes[(sizes.indexOf(meta.readingSize||1)+1)%sizes.length];persistGlobal();openPauseSettingsV2();document.getElementById('readingSizeBtn').focus();};
   organizePauseSettings();
+  document.getElementById('resolutionBtn').onclick=()=>{meta.nativeResolution=meta.nativeResolution!==true;persistGlobal();resize();openPauseSettingsV2();};
   document.getElementById('fpsBtn').onclick=()=>{meta.showFps=meta.showFps!==true;persistGlobal();openPauseSettingsV2();};
   for(const key of ['objectiveArrows','friendArrows'])document.getElementById(key+'Btn').onclick=()=>{meta[key]=meta[key]===false;persistGlobal();openPauseSettingsV2();};
   document.getElementById('settingsBack').onclick=openPauseV2;
@@ -24294,7 +24316,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2233g"></script>
+<script type="module" src="./hero3d.js?v=2234h"></script>
 <script type="module" src="./social-hub.js?v=2227a"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

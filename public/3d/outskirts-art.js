@@ -118,6 +118,7 @@ export function buildOutskirts(scene,w){
     if(o.autoCol||o.treeCol||o.pillarCol||o.invisible||o.h<=0)continue;
     // A structure deco is the visible owner of this matching collider.
     if(o.structure||o.craftOwned){obstacles.add(o);continue;}
+    if(o.orchardStair){B.solid(o,'#8b704c',true);obstacles.add(o);continue;}
     const pieces=o.kind==='plat'?claimSurface(platformSurfaces,o,'top:'+o.h):[o];
     B.structure(o,()=>{for(const o of pieces){if(o.earth){
       const base=o.y0||0,h=o.h-base;
@@ -210,7 +211,9 @@ export function updateOutskirts(w){
   for(const v of st.lamps){const d=(v.x-p.x)**2+(v.y-(p.y||0))**2+(v.z-p.z)**2;
     for(let i=0;i<3;i++)if(d<dist[i]){for(let j=2;j>i;j--){dist[j]=dist[j-1];nearest[j]=nearest[j-1];}dist[i]=d;nearest[i]=v;break;}
   }
-  st.points.forEach((l,i)=>{l.visible=!!nearest[i];if(l.visible)l.position.copy(nearest[i]);});
+  // Keep the shader light count stable. Hiding a lamp changes NUM_POINT_LIGHTS
+  // and compiles a new material variant when crossing between districts.
+  st.points.forEach((l,i)=>{l.visible=true;l.intensity=nearest[i]?900:0;if(nearest[i])l.position.copy(nearest[i]);});
   const sx=Math.round(p.x/300)*300,sz=Math.round(p.z/300)*300;
   const shadowKey=sx+','+sz+','+low;
   if(st.shadowKey!==shadowKey){st.key.position.set(sx-600,1000,sz+600);st.key.target.position.set(sx,0,sz);st.key.target.updateMatrixWorld();st.shadowKey=shadowKey;window.__OUTSKIRTS_SHADOW_DIRTY=true;}

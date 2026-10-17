@@ -8,6 +8,7 @@ const lessons=[
  {id:'jump',title:'Hold to jump higher',body:'Tap for a short hop. Hold the jump control briefly for more height.',action:'jump',safe:true},
  {id:'attack',title:'Try a basic attack',body:'Red health bars mark enemies. Face one and tap to attack. Hold and release chargeable weapons for a stronger attack.',action:'attack',safe:true},
  {id:'dodge',title:'Dodge or dash',body:'Dodge through an attack to avoid the hit. The same control lets you dash in mid-air.',action:'dodge',safe:true},
+ {id:'charge',title:'Some weapons can charge',body:(g,hint)=>window.__BF3?.isChargeWeapon(g.p.weapon)?'Your weapon can charge. Hold '+hint('attack')+' until the charge is ready, then release for a stronger attack. Practice if you like, or continue.':'Your current weapon has no charged attack. Other weapons let you hold '+hint('attack')+' and release for a stronger hit. You do not need one to continue.',safe:true},
  {id:'vitals',title:'Watch health and mana',body:'HP is your health. Mana fuels skills. Enemies are active now: keep moving while you read these optional tips.',target:['#hud .hudvitals']},
  {id:'objective',title:'Your next task',body:'Defeat 6 enemies. After the first 3, your class ranks up. A purple banner announces your first skill choice; combat waits while you choose. Try it on the rest, then find the exit portal.',target:['#questbox']},
  {id:'progress',title:'Two kinds of progress',body:'Gold: your player leveled up. Keep fighting; spend stat points in Bag later. Purple: your class ranked up. Combat pauses, then you must choose a skill or passive. Each bar has ten progress marks.',target:['#hudprogress']},
@@ -60,12 +61,14 @@ function draw(hint){
  const meta=document.createElement('div');meta.className='lesson-meta';
  const stage=document.createElement('span');stage.textContent=step.safe?'Safe practice':step.id==='skill-use'?'New skill':'HUD guide';
  const count=document.createElement('span');count.className='lesson-count';
- count.textContent=guide.steps===lessons?(step.safe?guide.i+1+' / 5':guide.i-4+' / '+(lessons.length-5)):'Try it';
+ const group=lessons.filter(s=>!!s.safe===!!step.safe),within=group.indexOf(step)+1;
+ count.textContent=guide.steps===lessons?within+' / '+group.length:'Try it';
  meta.append(stage,count);
  const h=document.createElement('h2');h.textContent=step.title;
- const p=document.createElement('p');p.textContent=step.body;copy.append(meta,h,p);
+ const p=document.createElement('p');p.textContent=typeof step.body==='function'?step.body(guide.g,hint):step.body;copy.append(meta,h,p);
  let keys=[],label='';
  if(core){keys=step.action==='move'?movementHints(hint):[hint(step.action)];label=step.action==='jump'?'Hold to continue':'Try it to continue';}
+ else if(step.id==='charge'){keys=[hint('attack')];label='Optional · hold, then release';}
  else if(['skills','skill-use'].includes(step.id)){keys=[hint('skill1')];label=step.id==='skills'?'Skill 1 · unlocks at class rank 2':'Skill 1';}
  else if(step.id==='bag'){keys=[hint('bag')];label='Open bag · Loot reopens the latest pickup';}
  else if(step.id==='journal'){keys=[hint('journal')];label='Open journal';}

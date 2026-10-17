@@ -282,7 +282,7 @@
       }
     },
     "briar.mara.supplies": {
-      "text": "Bring three tangle roots from the garden and clean dressings from the shuttered store. Try the store's back entrance.",
+      "text": "Bring three tangle roots from the garden and clean dressings from the village store. Its front door is open.",
       "choices": [
         {
           "id": "accept",
@@ -299,7 +299,7 @@
               "id": "briar.supplies",
               "region": "outskirts",
               "title": "Mara’s supplies",
-              "text": "Find 3 tangle roots in the overgrown garden and clean dressings in the shuttered store. Check the back of the store. Bring both to Mara."
+              "text": "Gather 3 tangle roots in the garden. Walk through the store’s open front door for clean dressings. Bring both to Mara."
             }
           ],
           "when": []
@@ -405,7 +405,7 @@
       }
     },
     "briar.mara.heal": {
-      "text": "The large pad can heal you fully. Next, clear the mill crossing so our neighbors can leave.",
+      "text": "Thank you. The neighbors can rest now. I found this purple crystal in the fields—take it from my supply table. It may help on your journey. Next, clear the mill crossing.",
       "choices": [
         {
           "id": "next",
@@ -1376,18 +1376,64 @@
     },
     "home.grain.spout": {
       "once": true,
-      "when": [{"flag":"home.grain.open","is":false}],
+      "when": [
+        {
+          "flag": "home.grain.open",
+          "is": false
+        }
+      ],
       "effects": [
-        {"type":"flag","id":"home.grain.spout"},
-        {"type":"conditional","id":"home.grain.check.spout","when":[{"flag":"home.grain.hopper","is":true}],"effects":[{"type":"flag","id":"home.grain.open"}]}
+        {
+          "type": "flag",
+          "id": "home.grain.spout"
+        },
+        {
+          "type": "conditional",
+          "id": "home.grain.check.spout",
+          "when": [
+            {
+              "flag": "home.grain.hopper",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "home.grain.open"
+            }
+          ]
+        }
       ]
     },
     "home.grain.hopper": {
       "once": true,
-      "when": [{"flag":"home.grain.open","is":false}],
+      "when": [
+        {
+          "flag": "home.grain.open",
+          "is": false
+        }
+      ],
       "effects": [
-        {"type":"flag","id":"home.grain.hopper"},
-        {"type":"conditional","id":"home.grain.check.hopper","when":[{"flag":"home.grain.spout","is":true}],"effects":[{"type":"flag","id":"home.grain.open"}]}
+        {
+          "type": "flag",
+          "id": "home.grain.hopper"
+        },
+        {
+          "type": "conditional",
+          "id": "home.grain.check.hopper",
+          "when": [
+            {
+              "flag": "home.grain.spout",
+              "is": true
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "home.grain.open"
+            }
+          ]
+        }
       ]
     },
     "home.grain.cache": {

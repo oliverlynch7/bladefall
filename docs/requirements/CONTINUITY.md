@@ -1942,3 +1942,13 @@ U-CAMPAIGN-THREAT-20261016: all nearby living enemies show full-health red meter
 ## [Codex | 2026-10-16] v2.217 campaign threat production confirmed
 
 Functional commit 3882ad97 deployed as 97ac8065-7e7c-4fe3-97d3-919be818445c; Cloudflare deploy stage success. Public browser confirms v2.217.0-campaign-threat-readability, campaign-threat/enemy-health/guided-tutorial v2217 and no launch errors. Local real WebGL proof and 24 deterministic class/zone damage comparisons are recorded; experienced combat challenge still awaits user playtest. Optional question about user's character level/rank/weapon remains unanswered and does not block this fixed campaign curve.
+
+
+## [Codex | 2026-10-16] U-MENU-CANCEL-20261016
+
+User requests Tab to open/close the bag and Q as universal cancel/exit. Source: bag action only handles play; main Escape menu close searches four IDs and misses Settings/controls/creator and other Back buttons; independent dialogue/inspection/chess/tutorial handlers already support Escape. Q is currently ground-item sell. Plan: early Q→Escape input bridge through the focused target, respecting text entry/modifiers/editor and key-repeat; reserve Q and migrate old Q-only loot-sell binding to free X/Delete, update visible control guidance. Bag action closes the active bag through its existing Back callback, preserving opening context, rebound action support and focus traversal elsewhere. General menu cancel finds visible, non-destructive Back/Close/Cancel/Done buttons without guessing purchases, deletion, quit or retry. Verify bag/pause/nested settings/controls, text input, rebind cancellation, repeat, old bindings and independent modal Escape handling.
+
+
+## [Codex | 2026-10-16] v2.218 — Bag toggle and universal Q cancel
+
+U-MENU-CANCEL-20261016: Bag binding now closes its active screen through existing Back callback; pause-origin bag returns to Pause. Early Q→Escape bridge reuses modal cleanup, preserves text entry/modifiers/composition/editor, prevents key-repeat cascades and skips loot reels first. Reserved Q and moved default ground-sell to X; old Q sell migrates to free X/Delete without overwriting custom mappings. Broader visible safe Back/Cancel/Close/Done detection; Settings mode fixed so it returns to Pause. Class choice can cancel confirmation then choose later without losing rank/unanswered option. UI control copy updated. Real WebGL/DOM 26 checks and 18 source/policy/migration checks pass; other relevant regression suites pass. Evidence: docs/art-validation/menu-shortcuts-20261016. Synthetic keyboard events verified actual DOM callbacks; native hardware/two-device co-op not claimed. Deployment pending.

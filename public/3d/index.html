@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script src="./menu-shortcuts.js?v=2218"></script>
 <script src="./keep-beta-isolation.js?v=2115"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>BLADEFALL 3D</title>
@@ -1166,7 +1167,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.217.0-campaign-threat-readability';
+const VERSION3D='2.218.0-menu-shortcuts';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5339,7 +5340,7 @@ function openBag(back,keepOpen=false){
     <label class="bag-sale-setting"><input id="bagAutoSell" type="checkbox" ${meta.autoSellEquipment===true?'checked':''}> Auto-sell equipment pickups for gold</label><p class="hint">Off: keep gear in free slots; a full bag leaves gear on the ground.</p><div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
       <div class="achlist">${rows}</div></section>
       <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
-    <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn ghost" id="charStatsBtn">Character Stats${HR?` · ${BFCharacterStats.available(HR)} points`:""}</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+    <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back · Q / Esc · ${htmlSafe(controlKey('bag'))}</button><button class="bigbtn ghost" id="charStatsBtn">Character Stats${HR?` · ${BFCharacterStats.available(HR)} points`:""}</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
   setupBagDoll(HR);
   document.getElementById('bagAutoSell').onchange=e=>setAutoSell(e.target.checked);
   document.getElementById('charStatsBtn').onclick=()=>openCharacterStats(()=>openBag(back));
@@ -9943,7 +9944,7 @@ const KEYACTIONS=[
   {id:'loot',     label:'Toggle Equipment Auto-sell', def:['KeyV']},
   {id:'lootEquip',label:'Equip Dropped Item', def:['KeyF']},
   {id:'lootBag',  label:'Send Dropped Item to Bag', def:['KeyR']},
-  {id:'lootSell', label:'Sell Dropped Item',  def:['KeyQ']},
+  {id:'lootSell', label:'Sell Dropped Item',  def:['KeyX']},
   {id:'auto',    label:'Toggle Auto-Fight', def:['KeyL']},
   /* ensureKeybinds() fills any newly-added action into an existing save, so this arrives on old
      profiles without touching a binding anyone has customised. */
@@ -9951,7 +9952,7 @@ const KEYACTIONS=[
   {id:'partyTeleport',label:'Hold to teleport to friend',def:['KeyT']},
   {id:'partyNext',label:'Select next friend',def:['KeyY']},
   {id:'journal', label:'Open Journal', def:['KeyN']},
-  {id:'bag',label:'Open Bag',def:['Tab','KeyB']},
+  {id:'bag',label:'Toggle Bag',def:['Tab','KeyB']},
   {id:'emote',label:'Emote Wheel',def:['KeyM']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
@@ -9959,6 +9960,7 @@ function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def
 function ensureKeybinds(){
  if(!meta.keybinds||typeof meta.keybinds!=='object')meta.keybinds=defaultKeybinds();
  const kb=meta.keybinds,free=(code,id)=>!KEYACTIONS.some(a=>a.id!==id&&kb[a.id]?.includes(code)),same=(id,arr)=>JSON.stringify(kb[id])===JSON.stringify(arr);
+ if(kb.lootSell?.includes('KeyQ')){kb.lootSell=kb.lootSell.filter(c=>c!=='KeyQ');if(!kb.lootSell.length){const replacement=['KeyX','Delete'].find(c=>free(c,'lootSell'));if(replacement)kb.lootSell=[replacement];}}
  if(same('attack',['KeyJ'])&&free('Mouse0','attack'))kb.attack=['Mouse0','KeyJ'];
  if((same('dodge',['Mouse2','KeyK'])||same('dodge',['KeyK'])||same('dodge',['KeyK','ShiftLeft']))&&free('ShiftLeft','dodge'))kb.dodge=free('Mouse2','dodge')?['ShiftLeft','Mouse2']:['ShiftLeft','KeyK'];
  if((same('loot',['Tab'])||same('loot',['KeyQ']))&&free('KeyV','loot'))kb.loot=['KeyV'];
@@ -9969,7 +9971,7 @@ let _codeToAction={};
 const heldKeyboard=new Map();
 function releaseKeyboard(){for(const act of Object.keys(MOVE_ACTS))input[act]=false;input.jx=0;input.jz=0;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
 window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
-function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||_codeToAction[code]||['Escape','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
+function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||_codeToAction[code]||['Escape','KeyQ','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
 function resetKeyAction(id){const a=KEYACTIONS.find(a=>a.id===id);if(!a)return;for(const other of KEYACTIONS)meta.keybinds[other.id]=(meta.keybinds[other.id]||[]).filter(c=>!a.def.includes(c));meta.keybinds[id]=a.def.slice();rebuildKeyLookup();}
 function keyAction(code){ return _codeToAction[code]||null; }
 ensureKeybinds();
@@ -9990,15 +9992,16 @@ window.addEventListener('keydown',e=>{
     return;
   }
   if(mode==='npc'||mode==='hubtour')return;
+  if(mode==='menu'&&document.querySelector('#ovcard .bagmenu')&&keyAction(e.code)==='bag'&&!BFMenuKeys.typing(e.target)){e.preventDefault();if(!e.repeat)document.querySelector('#ovcard #backBtn')?.click();return;}
   if(!e.repeat&&!e.target?.matches?.('input,textarea,select')&&!e.target?.isContentEditable&&classTutorialAction(e.code==='Escape'?'cancel':keyAction(e.code))){e.preventDefault();e.stopImmediatePropagation();return;}
   if(mode==='journal'){ const typing=e.target?.matches?.('input,textarea,select')||e.target?.isContentEditable;if(e.code==='Escape'||!typing&&keyAction(e.code)==='journal'){e.preventDefault();if(!e.repeat)closeJournal();}return;}
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
-  if(e.code==='Escape'){ e.preventDefault();
+  if(e.code==='Escape'){ e.preventDefault();if(e.repeat)return;
     if(mode==='studio'){ exitStudio(); return; }
     if(mode==='mirror'){ if(mirrorPanelMode){ mirrorPanelMode=null; buildMirrorPanel(); } else exitMirror(); return; }
     if(mode==='play') openPause();
     else if(mode==='pause'){ resumeGameAudio(true); resumePlay(); }
-    else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
+    else if(mode==='menu'||mode==='upgrade'){ const b=BFMenuKeys.backButton(ovcard);if(b)b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
     else if(mode==='weapon'){ const b=document.querySelector('#stashBtn'); if(b) b.click(); else resumePlay(); }        // loot card: Esc stashes (keeps the item), never silently drops it
     return; }
   const _kt=e.target; if(_kt&&((_kt.matches&&_kt.matches('input,textarea,select'))||_kt.isContentEditable)) return;
@@ -12409,7 +12412,8 @@ function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
   showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Change choices later at the Drillmaster.</p></div>
-    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Esc</button></div></div>`);
+    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q / Esc</button></div><button class="bigbtn ghost" data-menu-back id="classChoiceLater">Choose later · Q / Esc</button></div>`);
+  document.getElementById('classChoiceLater').onclick=()=>{queueChoiceRank=0;resumePlay();toast('Choice kept for later. Select a locked skill or visit the Drillmaster.');};
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
     const selected=[R.a,R.b].find(o=>o.id===b.dataset.pick);if(!selected)return;
     const confirmAt=Date.now();
@@ -19964,7 +19968,7 @@ function openKeybinds(back){
     return `<button class="kbcap${listening?' listening':''}${code?'':' empty'}" data-a="${a.id}" data-s="${i}">${listening?'Press…':(code?keyLabel(code):'+')}</button>`; };
   const rows=KEYACTIONS.map(a=>`<div class="kbrow"><span class="kblabel">${a.label}</span><div class="kbcaps">${cap(a,0)}${cap(a,1)}</div><button class="kbreset" data-r="${a.id}" title="Reset to default">↺</button></div>`).join('');
   showOverlayHTML(`<div class="card kbcard"><p class="ovkicker">Settings · Controls</p><h2 class="ovh">⌨️ Key Bindings</h2>
-    <p class="ovsub">Choose either slot, then press a keyboard key or mouse button. <b>Esc</b> cancels. Every action holds two bindings. Menu keys (Esc, Enter) stay fixed.</p>
+    <p class="ovsub">Choose either slot, then press a keyboard key or mouse button. <b>Q / Esc</b> cancels or goes back. Every action holds two bindings. Q and Esc stay reserved for menus.</p>
     <p class="ovsub" id="keyboardTest" aria-live="polite">Control test: press any movement key here to see what your browser sends.</p><div class="kblist">${rows}</div>
     <div class="kbfoot"><button class="bigbtn ghost" id="kbResetAll">↺ Reset all to defaults</button><button class="bigbtn" id="kbDone">Done</button></div></div>`);
   const rerender=()=>openKeybinds(back);
@@ -20078,6 +20082,7 @@ function organizePauseSettings(){
   card.querySelectorAll(':scope > .pgrid,:scope > .sect').forEach(e=>e.remove());
 }
 function openPauseSettingsV2(){
+  mode='menu';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Game options</p><h2 class="ovh">Settings</h2>
     <p class="ovsub">Tune the view, feedback, and sound without leaving your adventure.</p>

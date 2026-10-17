@@ -1009,6 +1009,16 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 #ovcard :focus-visible{outline:3px solid #ffd275;outline-offset:3px}
 @media(max-width:600px){.classviewer .buildhead{max-height:45%;overflow:auto;flex-shrink:0}.classviewer .buildhead .ovkicker{font-size:12px!important;letter-spacing:.04em!important}.classviewer .buildhead .ovh{font-size:26px!important;line-height:1.2}.classviewer .ctabs{max-height:130px;overflow:auto}.classviewer .buildscroll{min-height:100px}.classviewer .viewerfoot{flex-shrink:0}}
 .journal-clue small{display:block;margin-top:4px}
+
+/* Chest odds must remain readable when the shop is narrow. */
+@media(max-width:600px){
+ .card.chestshop{padding:18px 14px;}
+ .chestshop .achlist{display:flex;flex-direction:column;max-height:42vh!important;}
+ .chestshop .gearrow{display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;width:100%;box-sizing:border-box;}
+ .chestshop .gearrow>.ico{width:34px!important;height:34px!important;}
+ .chestshop .gn{white-space:normal;overflow:visible;text-overflow:clip;}
+ .chestshop .chestbuy{grid-column:1 / -1;width:100%!important;}
+}
 </style>
 <link rel="stylesheet" href="./adventure-hud.css?v=2213">
 <script src="./adventure-hud.js?v=2200"></script>
@@ -1168,7 +1178,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.223.0-interaction-safety';
+const VERSION3D='2.224.0-shop-chests';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -19568,6 +19578,42 @@ function petRenameScreen(id,back){ mode='menu';
   document.getElementById('nameReset').onclick=()=>{ delete meta.petNames[id]; persist(); SFX.pickup(); openBeastkeeper(back); };
   document.getElementById('nameBack').onclick=()=>openBeastkeeper(back);
 }
+// Fixed prices keep earned levels meaningful; never scale prices to wallet size.
+const SHOP_CHEST_COSTS=Object.freeze({common:150,uncommon:600,rare:2400,epic:9600,legendary:38400});
+function purchaseShopChest(rid,owner=G){
+ if(!saveGenerationCurrent()||G!==owner||IN_ARENA||!G?.hub||mode!=='menu')return null;
+ const cost=Object.hasOwn(SHOP_CHEST_COSTS,rid)?SHOP_CHEST_COSTS[rid]:0;
+ if(!cost)return null;
+ if(((G.p&&G.p.level)||heroLevel())<rarityReq(rid)){toast('Reach character Level '+rarityReq(rid)+' to buy this chest.');return null;}
+ if((meta.stash||[]).length>=STASH_CAP){toast('Bag full · free one slot before buying a chest.');return null;}
+ if(!Number.isFinite(meta.gold)||meta.gold<cost){toast('Not enough gold');return null;}
+ // Roll before mutation, then commit payment and reward together before any animation.
+ const item=randomLoot(BFChestRules.reward(rid,false,Math.random()));
+ if(!(item?.weapon||item?.armor||item?.trinket))return null;
+ const priorGold=meta.gold,priorStash=meta.stash,stash=[...(meta.stash||[]),item];
+ meta.gold-=cost;meta.stash=stash;persist();
+ if(window.__saveStatus?.ok===false){meta.gold=priorGold;meta.stash=priorStash;toast('Could not save · chest purchase cancelled. Your gold is unchanged.');return null;}
+ return item;
+}
+function openChestShop(back){
+ mode='menu';
+ const owner=G,level=(G?.p&&G.p.level)||heroLevel(),full=(meta.stash||[]).length>=STASH_CAP;
+ const rows=RORDER.map((rid,i)=>{
+  const r=RARITY[rid],cost=SHOP_CHEST_COSTS[rid],locked=level<rarityReq(rid);
+  const odds=BFChestRules.contents[i].map((pct,j)=>pct?`${pct}% ${RARITY[RORDER[j]].name}`:'').filter(Boolean).join(' · ');
+  return `<div class="gearrow" style="--spine:${r.color};align-items:center"><span class="ico ico-event ico-event-treasure-chest" style="width:40px;height:40px;flex-shrink:0" aria-hidden="true"></span><div style="flex:1;min-width:0"><div class="gn" style="color:${r.color}">${r.name} Chest</div><div class="gd">${locked?'🔒 Requires':'Unlocked at'} character Level ${rarityReq(rid)}<br>${cost.toLocaleString()}g · ${odds}</div></div><button class="bigbtn chestbuy" data-chest="${rid}" style="width:auto;min-width:90px;margin:0;padding:9px;font-size:13px" ${locked||full||meta.gold<cost?'disabled':''}>${locked?'Lv '+rarityReq(rid):full?'Bag full':meta.gold<cost?'Need gold':'Buy & open'}</button></div>`;
+ }).join('');
+ showOverlayHTML(`<div class="card chestshop"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Equipment Chests</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold.toLocaleString()}g</b> · Character Level ${level} · Bag ${(meta.stash||[]).length}/${STASH_CAP}</p><p class="hint">One random weapon, armor piece or accessory goes straight into your bag. Prices are fixed. Higher-rarity rewards may require a higher level to equip.</p><div class="achlist" style="max-height:52vh">${rows}</div><p class="hint">Full bag? Free a slot first. Purchased rewards are never auto-sold.</p><button class="bigbtn ghost" id="chestShopBag">${actionIcon('bag-stash')}Manage bag</button><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+ document.querySelectorAll('.chestbuy').forEach(button=>button.onclick=()=>{
+  if(!button.isConnected||button.disabled||G!==owner||BFChestReveal.active)return;
+  const rid=button.dataset.chest,item=purchaseShopChest(rid,owner);
+  if(!item){openChestShop(back);return;}
+  openChestShop(back);hudUpdate();playFx('chestopen');
+  revealChestReward({rarity:rid,challenge:false},item,'Added to bag');
+ });
+ document.getElementById('chestShopBag').onclick=()=>openBag(()=>openChestShop(back));
+ document.getElementById('backBtn').onclick=back;
+}
 function openShop(back){
   mode='menu'; playFx('shopopen');
   menuTip('tip_shop','the <b>Quartermaster</b>. Spend gold on class weapons and <b>Perks</b> — permanent stat upgrades for this save. Also here: the double-jump, bigger bags, a gold gamble, and fortress upgrades. Scroll — there are several sections.');
@@ -19632,6 +19678,7 @@ function openShop(back){
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
     <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
     <button class="bigbtn ghost" id="shopBag" style="padding:8px 12px;font-size:13px">${actionIcon('bag-stash')}Bag ${meta.stash.length}/${STASH_CAP}${meta.stash.length>=STASH_CAP?' · Full':''}</button>
+    <button class="bigbtn ghost" id="shopChests" style="border-color:#d7ae58">${eventIcon('treasure-chest')}Equipment Chests · Level unlocks & prices ›</button>
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}${arcadeRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
@@ -19678,6 +19725,7 @@ function openShop(back){
   document.querySelectorAll('.hubbuy').forEach(b=>b.onclick=()=>{ const id=b.dataset.h, u=HUB_UPGRADES.find(x=>x.id===id); if(!u) return;
     if(meta.hubUpgrades&&meta.hubUpgrades[id]) return; if(meta.gold<u.cost){ toast('Not enough gold'); return; }
     meta.gold-=u.cost; if(!meta.hubUpgrades) meta.hubUpgrades={}; meta.hubUpgrades[id]=true; syncHubUpgradeFixtures(); SFX.god(); persist(); toast('🏰 '+u.name+' — the Waystation is reborn'); openShop(back); });
+  document.getElementById('shopChests').onclick=()=>openChestShop(()=>openShop(back));
   document.getElementById('shopBag').onclick=()=>openBag(()=>openShop(back));
   document.getElementById('backBtn').onclick=back;
 }

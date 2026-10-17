@@ -2034,3 +2034,13 @@ U-INTERACTION-AUDIT-20261016. Five reproduced defects fixed: purchased perk eras
 ## [Codex | 2026-10-16] v2.223 audit release production confirmed
 
 Functional 7cd8702d deployed successfully as 9b318823-8054-4bfc-98f8-1d9be1c427f0. Public browser confirms v2.223.0-interaction-safety without launch errors. Five reproduced save/reward/fade issues repaired; final 90 suites pass, 136 class casts no exceptions, browser interaction/save/tutorial checks recorded. Evidence/limits in interaction-audit summary. Real multi-device and complete campaign playthrough remain unverified.
+
+
+## [Codex | 2026-10-16] U-SHOP-CHESTS-20261016
+
+User requests chest purchase rarity unlocked by character level, with significantly increasing prices and appropriate scaling. Source: gear requirements are Common 1, Uncommon 5, Rare 12, Epic 20, Legendary 30; shop weapons cost 60/220/650/1600, Fortune bag 480, socks 1200, secret sense 30000. Plan: Quartermaster chest subpage, visible five-tier color-coded guide; fixed 150/600/2400/9600/38400 gold (4x each tier) using existing rarity level requirements. One random gear item directly into bag, existing BFChestRules odds shown explicitly, bonus higher-rarity gear may need its own equip level. Legendary 100% Legendary. Validate current save generation/world, live character level, capacity and funds at click; reject full bag even with auto-sell on; generate before spending and save gold/reward before reel. Reject detached/repeated purchase buttons; return to shop/bag through existing callbacks, no saved schema changes. Verify boundaries, current/old saved state, no-charge failures, conservation, stale callbacks and real browser desktop/phone. No world chest odds, difficulty, art or existing gold changed.
+
+
+## [Codex | 2026-10-16] v2.224 chest shop verified locally
+
+Implemented U-SHOP-CHESTS-20261016. Level gates1/5/12/20/30; gold150/600/2400/9600/38400. Existing chest odds reused and disclosed. Reward/payment conserved before reveal, no paid auto-sell, save-write rollback, live level and scene/generation guards. 38 unit checks plus 27 browser checks, old save reload, narrow/desktop visual review and adjacent regressions pass. Public deployment confirmation pending. No user save mutated; no two-device/pacing claim.

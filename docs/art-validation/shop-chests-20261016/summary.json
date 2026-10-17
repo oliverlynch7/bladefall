@@ -1,0 +1,39 @@
+{
+  "version": "2.224.0-shop-chests",
+  "unitChecks": 38,
+  "realWebGLChecks": 27,
+  "rarityIntervalSamples": 200000,
+  "regressionSuites": [
+    "loot-transactions",
+    "interaction-audit",
+    "bag-equip",
+    "menu-shortcuts",
+    "hub-transition",
+    "esc-pause",
+    "first-arrival",
+    "first-shop-upgrade"
+  ],
+  "levelGates": [
+    1,
+    5,
+    12,
+    20,
+    30
+  ],
+  "prices": [
+    150,
+    600,
+    2400,
+    9600,
+    38400
+  ],
+  "visualChecks": [
+    "desktop",
+    "390px iframe responsive viewport; not phone hardware"
+  ],
+  "limits": [
+    "No full human playthrough or economy pacing verdict",
+    "No two-device co-op session",
+    "Browser save is isolated; real player saves untouched"
+  ]
+}

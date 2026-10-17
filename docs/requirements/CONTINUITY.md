@@ -1982,3 +1982,8 @@ User reports delayed/clunky minimap direction and requests real-time turning. So
 ## [Codex | 2026-10-16] v2.220 — immediate minimap direction
 
 Removed secondary heading smoothing and angular speed cap. Map samples current navigation once per animation frame, retaining relative player arrow, objective and teammate markers. Actual canvas regression: 38 checks; browser WebGL: 31 checks across all three views, abrupt turns and angle wrap, plus older save level 4 / XP 52 / Warrior rank 4 / gold 1145 retained. Camera regressions: 23 passed. Evidence docs/art-validation/minimap-20261016. These are direction/render checks, not a hardware playtest.
+
+
+## [Codex | 2026-10-16] v2.220 production confirmed
+
+Functional af645876 deployed successfully as 2c155abc-7de9-49cd-99e8-2079a5a06f43. Public browser confirms v2.220.0-instant-minimap and guided-tutorial v2220 with no launch errors. Real WebGL direction and old-save checks passed; hardware feel awaits player feedback.

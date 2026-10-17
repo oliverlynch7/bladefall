@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="./save-safety.js?v=2229"></script>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2218"></script>
 <script src="./camera-controls.js?v=2219"></script>
@@ -1184,7 +1184,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.228.0-relic-dice';
+const VERSION3D='2.229.0-save-recovery';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1201,8 +1201,8 @@ const SAVE_EPOCH_KEY=MKEY('generation');
 const SAVE_EPOCH=(()=>{try{return localStorage.getItem(SAVE_EPOCH_KEY);}catch(e){return null;}})();
 function saveGenerationCurrent(){try{return localStorage.getItem(SAVE_EPOCH_KEY)===SAVE_EPOCH;}catch(e){return false;}}
 function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
-  let g={}; try{ g=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+'global')||'{}'); }catch(e){}
-  let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
+  let g={}; try{ g=loadJSON('bladefall3d_'+pfx+'global')||{}; }catch(e){}
+  let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=loadJSON('bladefall3d_'+pfx+m)||{}; }catch(e){}
     if(mv.hero||mv.gold||mv.zoneMax||mv.run?.p||Object.values(mv.classUnlocked||{}).some(Boolean)){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
   if(best?.run?.p) best={...best,hero:best.run.p};
   const cls=best&&best.classId, has=!!best;
@@ -1241,7 +1241,7 @@ function deleteSlot(sl){
   }catch(e){toast('Could not fully delete this save. Please check browser storage and retry.');return false;}
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
-function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
+function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}catch(e){return null;} }
 const GLOBAL_FIELDS=['readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
@@ -1340,6 +1340,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
+  if(!CLASSES[meta.classId]){meta.classId='warrior';meta.classUnlocked.warrior=true;}
   migrateClassEquipment();
 }
 function wipeMode(m){ meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
@@ -18034,7 +18035,7 @@ function titleScreen(){
       <button class="mmbtn" id="mmDev"><span class="mmtx">Dev Previews</span><span class="mmsub">Design plans &amp; beta proposals</span></button>
       <button class="mmbtn mmexit" id="mmExit"><span class="mmtx">Exit</span></button>
     </div>
-    <div class="tver">v${VERSION3D}</div>
+    <div class="tver">v${VERSION3D} · <a href="./recover.html" style="color:#dfbd83;pointer-events:auto">Save recovery</a></div>
     </div>
     <div class="tbegin" id="tbegin"><div class="tbeginpulse" id="tbeginpulse">⚔ PRESS TO ENTER</div><div class="tver">v${VERSION3D}</div></div>`);
   document.body.classList.add('t-title'); document.body.classList.add('t-attract'); titleEmbers();

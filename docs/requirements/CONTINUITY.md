@@ -2115,3 +2115,15 @@ Actual browser menus from isolated pre-change save: all seven images complete/na
 ## [Codex | 2026-10-16] v2.228 production confirmed
 
 Functional df1aa23b deployed successfully as 2bb4a5c4-8957-4d78-9eb7-d4e4c3ef9dd0. Public browser confirms v2.228.0-relic-dice and the supplied PNG renders at1254x1254. No launch errors. Exact local original/copy SHA256 match recorded above; direct CLI image download was403 while real browser image loads successfully. Seven actual menu controls verified locally with isolated storage.
+
+
+## [Codex | 2026-10-17] U-LEGACY-SAVE-LOCKOUT-20261017
+
+User reports opening a very old level100 save locks the game and refresh cannot recover; explicitly authorizes deleting current saves if needed. Priority hotfix before pending campaign quests/dialogue/stairs. Do not assume level100 itself is invalid: retain legitimate high-level snapshots, normalize malformed container/numeric data before slot previews and mode migration; remove null/nonobject stash entries. Add engine-independent save recovery page and startup-error escape, no dependence on crashed game. Recovery clears only Bladefall saves on that browser, including legacy keys, invalidates all three slot generations so old tabs cannot restore wiped data, no server-wide wipe of other players. Verify malformed JSON/null/primitive/wrong-shaped profiles, bad numeric snapshots, validlevel100, refresh/title and creating new character after reset. The requested farming/dialogue/stair work remains active after hotfix.
+
+
+## [Codex | 2026-10-17] v2.229 — legacy save recovery
+
+U-LEGACY-SAVE-LOCKOUT-20261017 implemented. Normalize malformed save roots, containers, null inventory entries, item affixes, class records and nonfinite player numbers before slot previews and migration; retain legitimate level100 characters. Unknown class falls back safely. Standalone /3d/recover.html clears this browser's Bladefall character/dungeon/legacy saves and invalidates stale-tab generations. Title and startup-error recovery links do not require a running game. No global player wipe.
+
+95 offline regression suites passed, including24 new save normalization/reset checks. Real browser reproduced null-stash crash on a modified genuine pre-change level100 save; repaired same fixture loads into hub with finite HP and level100 intact. Standalone reset verified only against isolated disposable storage. Exact user save was not inspected; recovery link covers other malformed legacy states. Evidence: docs/art-validation/save-recovery-20261017. Publication pending.

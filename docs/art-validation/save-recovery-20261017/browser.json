@@ -1,0 +1,21 @@
+{
+  "before": {
+    "fixture": "pre-change save modified with null stash and malformed equipment affixes",
+    "loaded": false,
+    "error": "Cannot read properties of null (reading 'weapon')"
+  },
+  "after": {
+    "loaded": true,
+    "level": 100,
+    "stash": 0,
+    "affixes": [],
+    "hub": true,
+    "finite": true
+  },
+  "recovery": {
+    "isolatedStorage": true,
+    "success": true,
+    "productionStorageTouched": false
+  },
+  "scope": "Synthetic corruption applied to genuine pre-change save. Exact user save not available."
+}

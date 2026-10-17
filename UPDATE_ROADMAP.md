@@ -3086,3 +3086,10 @@ Verified 30 isolated real-browser assertions with genuine pre-change save: actua
 U-RELIC-DICE-RANDOMIZE-20261016 implemented. Exact supplied transparent PNG reused for all seven active randomize controls: character face/stat rolls, Stylist face, Arena bot-class roll/random class/loadout/random respec. Shared30px decorative image,26px icon-only roll, accessible bot-class label, existing visible text and handlers preserved. Old dice emoji removed from randomization toasts. No random-generation/economy/save behavior changes. Original and copied SHA256 match FC646ADFB8BDCC17D368EB4ECB1EBE52FF9A1F9374816E689EE3700F0E054BD9.
 
 Actual browser menus from isolated pre-change save: all seven images complete/natural width1254, all seven buttons clicked; Random Respec confirmation retained. Creator14-handler checks, face option bounds/randomization, Stylist purchase validations and game inline parser pass. Screenshots inspected. Evidence: docs/art-validation/relic-dice-20261016. Publication pending.
+
+
+## [Codex | 2026-10-17] v2.229 — legacy save recovery
+
+U-LEGACY-SAVE-LOCKOUT-20261017 implemented. Normalize malformed save roots, containers, null inventory entries, item affixes, class records and nonfinite player numbers before slot previews and migration; retain legitimate level100 characters. Unknown class falls back safely. Standalone /3d/recover.html clears this browser's Bladefall character/dungeon/legacy saves and invalidates stale-tab generations. Title and startup-error recovery links do not require a running game. No global player wipe.
+
+95 offline regression suites passed, including24 new save normalization/reset checks. Real browser reproduced null-stash crash on a modified genuine pre-change level100 save; repaired same fixture loads into hub with finite HP and level100 intact. Standalone reset verified only against isolated disposable storage. Exact user save was not inspected; recovery link covers other malformed legacy states. Evidence: docs/art-validation/save-recovery-20261017. Publication pending.

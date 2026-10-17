@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {Chess} from '../public/3d/vendor/chess-1.4.0.mjs';
 globalThis.document={createElement:()=>({}),head:{append(){}}};
+globalThis.window={addEventListener(){},removeEventListener(){}};
 const {createChessTable}=await import('../public/3d/chess-table.js');
 for(const [fen,move,total,after] of [
  ['r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1','O-O',6,6],

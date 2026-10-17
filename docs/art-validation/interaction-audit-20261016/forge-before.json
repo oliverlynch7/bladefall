@@ -1,0 +1,36 @@
+{
+  "done": true,
+  "scene": "forge",
+  "rows": [
+    {
+      "label": "immediately after forge start",
+      "stash": [],
+      "stored": []
+    },
+    {
+      "label": "after leaving forge",
+      "stash": [
+        {
+          "armor": {
+            "slot": "helmet",
+            "rarity": "uncommon",
+            "type": "warding",
+            "accent": "#8fb7ff",
+            "defense": 11,
+            "color": "#5fd17a",
+            "name": "Uncommon Warding Helmet",
+            "affixes": [
+              {
+                "stat": "def",
+                "val": 26,
+                "label": "+26 Defense"
+              }
+            ]
+          }
+        }
+      ],
+      "mode": "play"
+    }
+  ],
+  "version": "2.222.0-safe-equipment-swap"
+}

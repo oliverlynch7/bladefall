@@ -1,0 +1,19 @@
+{
+  "done": true,
+  "scene": "tutorial",
+  "rows": [
+    {
+      "label": "creator starts unnamed tutorial",
+      "pass": true
+    },
+    {
+      "label": "tutorial death offers retry",
+      "pass": true
+    },
+    {
+      "label": "retry preserves tutorial character",
+      "pass": true
+    }
+  ],
+  "version": "2.223.0-interaction-safety"
+}

@@ -1,0 +1,422 @@
+[
+  {
+    "file": "scripts\\test-bag-equip.cjs",
+    "ok": true,
+    "output": "100 equipment conservation and autosave race regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-boss-combat-scope.cjs",
+    "ok": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed.\n"
+  },
+  {
+    "file": "scripts\\test-briar-journey.cjs",
+    "ok": true,
+    "output": "Briar mill: pressure/release, real obstacle blocking, owner arbitration, reset, disconnect/jump, weight completion, stale snapshot, delayed bridge collision, legacy states and lane bounds passed.\nMill sketch appears as a related clue only after discovery.\nSuperseded mill notices clear; discovered clues and permanent journal entries remain.\nMill fallback follows the active renderer, including a mid-level graphics switch.\n"
+  },
+  {
+    "file": "scripts\\test-briar-refinement.cjs",
+    "ok": true,
+    "output": "Briar: specific hunt, one-time reward, three-slot cap, respawn identity, discovered-only related clues pass.\n"
+  },
+  {
+    "file": "scripts\\test-broken-walls.cjs",
+    "ok": true,
+    "output": "Broken Walls content passed: 10 voiced graph nodes, independent chamber route, key route without Felix, guarded progression, once-only challenge, finite retreat notice and host-only spawns.\n"
+  },
+  {
+    "file": "scripts\\test-brute-encounter.cjs",
+    "ok": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-camera-controls.cjs",
+    "ok": true,
+    "output": "23 camera and local appearance regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-campaign-elites.cjs",
+    "ok": true,
+    "output": "{\"checks\":[\"raid replaces random role and preserves original body stats\",\"raid full harmless warning and locked aim\",\"raid snapshot carries complete phase geometry\",\"raid recovery leaves an attack opening\",\"forge replaces random role and preserves original body stats\",\"forge full harmless warning and locked aim\",\"forge snapshot carries complete phase geometry\",\"forge recovery leaves an attack opening\",\"shore replaces random role and preserves original body stats\",\"shore full harmless warning and locked aim\",\"shore snapshot carries complete phase geometry\",\"shore recovery leaves an attack opening\",\"tower replaces random role and preserves original body stats\",\"tower full harmless warning and locked aim\",\"tower snapshot carries complete phase geometry\",\"tower recovery leaves an attack opening\",\"raid hits front, misses rear/outside/above\",\"forge expands outward and jumping clears it\",\"shore hits three lanes, gaps and cover range stay safe\",\"tower cardinal lanes hit, diagonal gaps stay safe\",\"dead enemy or target cannot damage\",\"tall solid cover blocks, ground and overhead props do not\"]}\n"
+  },
+  {
+    "file": "scripts\\test-campaign-interaction.cjs",
+    "ok": true,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed.\n"
+  },
+  {
+    "file": "scripts\\test-campaign-journey.cjs",
+    "ok": true,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\n"
+  },
+  {
+    "file": "scripts\\test-campaign-placement.cjs",
+    "ok": true,
+    "output": "Campaign footing: supported feet, nearby clearance, stacked floors, unresolved preservation, exemptions and stable patrol slots passed.\n"
+  },
+  {
+    "file": "scripts\\test-campaign-refinement.cjs",
+    "ok": true,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed.\n"
+  },
+  {
+    "file": "scripts\\test-campaign-threat.cjs",
+    "ok": true,
+    "output": "60 campaign threat and health visibility checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-canyon-journey.cjs",
+    "ok": true,
+    "output": "Canyon journey: useful entry/guard guidance, restored completion, cage-door collision, two-prisoner clearance at every turn, paused walking, shared status and scaffold approach passed.\n"
+  },
+  {
+    "file": "scripts\\test-castle-gates.cjs",
+    "ok": true,
+    "output": "Castle Gates passed: quiet/recovery/assault routes, optional return/keep/refusal/apology, dialogue resume, finite three-wave guard, reward parity and voice graph.\n"
+  },
+  {
+    "file": "scripts\\test-chest-rules.cjs",
+    "ok": true,
+    "output": "Chest tables: 200,000 interval samples pass; challenge minimum and all depth boundaries pass.\n"
+  },
+  {
+    "file": "scripts\\test-class-progression.cjs",
+    "ok": true,
+    "output": "2873 rank, legacy-choice and ordered-choice checks passed across 17 classes.\nSkill/dash lesson persistence, legacy missing field and stale-save guard passed.\n"
+  },
+  {
+    "file": "scripts\\test-controller-invert.cjs",
+    "ok": true,
+    "output": "PASS controller invert: independent X/Y toggles, legacy Y migration, both axis signs verified\n"
+  },
+  {
+    "file": "scripts\\test-creator-camera.cjs",
+    "ok": true,
+    "output": "{\"checks\":14,\"scope\":\"Actual creator event handlers with a small DOM harness; native pointer gestures are outside this harness.\"}\n"
+  },
+  {
+    "file": "scripts\\test-dragon-rescue.cjs",
+    "ok": true,
+    "output": "Dragon rescue prerequisites, repeat safety, optional independence and delayed directional breath passed.\n"
+  },
+  {
+    "file": "scripts\\test-dungeon-quality.cjs",
+    "ok": true,
+    "output": "{\n  plans: 1080,\n  legacyPlans: 6480,\n  templates: [\n    'armory',    'barricades',\n    'cistern',   'gallery',\n    'infirmary', 'kennels',\n    'liftbay',   'refectory',\n    'watchpost'\n  ],\n  safeSpawns: 43200\n}\n"
+  },
+  {
+    "file": "scripts\\test-dungeon-rafters.cjs",
+    "ok": true,
+    "output": "{\n  newPlans: 1080,\n  oldRevision7Preserved: true,\n  optionalRafterRoom: true\n}\n"
+  },
+  {
+    "file": "scripts\\test-esc-pause.cjs",
+    "ok": true,
+    "output": "25 pause regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-face-options.cjs",
+    "ok": true,
+    "output": "PASS face defaults, bounds and randomized offset limits\n"
+  },
+  {
+    "file": "scripts\\test-fallen.cjs",
+    "ok": true,
+    "output": "Fallen: aim lock, delayed feint follow-up, swept thrust motion, pillar collision/recovery, directional damage, vertical/downed/dead safety, bounded pursuit and snapshots passed.\n"
+  },
+  {
+    "file": "scripts\\test-final-king.cjs",
+    "ok": true,
+    "output": "Final King: locked telegraphs, safe regions/height/cover, two lethal gates, finite summons, validated charge/retry/fifth-failure skip and complete voice/story graph passed.\n"
+  },
+  {
+    "file": "scripts\\test-first-arrival.cjs",
+    "ok": true,
+    "output": "20 first-arrival regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-first-shop-upgrade.cjs",
+    "ok": true,
+    "output": "{\"rows\":[{\"cls\":\"pyromancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"warrior\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"ranger\",\"starter\":7.9,\"shop\":8.6,\"loot\":9},{\"cls\":\"mage\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"pirate\",\"starter\":null,\"shop\":8.6,\"loot\":9},{\"cls\":\"ninja\",\"starter\":10.6,\"shop\":7.7,\"loot\":8},{\"cls\":\"paladin\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"berserker\",\"starter\":15.8,\"shop\":17.3,\"loot\":18},{\"cls\":\"necromancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"chronomancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"stormcaller\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"warlock\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"skylancer\",\"starter\":15,\"shop\":16.3,\"loot\":17},{\"cls\":\"bladedancer\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"beastmaster\",\"starter\":7.9,\"shop\":8.6,\"loot\":9}],\"passed\":true}\n"
+  },
+  {
+    "file": "scripts\\test-floor-surfaces.cjs",
+    "ok": true,
+    "output": "{ pieces: 3, pairs: 3, area: 11100, coverage: true }\n"
+  },
+  {
+    "file": "scripts\\test-frost-officers.cjs",
+    "ok": true,
+    "output": "Officers passed: all three roles, single major attack cap across 256 seconds, locked warnings, no early hits, height dodges, death cancellation and survivor tactic.\nAll three officers pursue players onto both shelves and the high northern exit.\n"
+  },
+  {
+    "file": "scripts\\test-furnace-colossus.cjs",
+    "ok": true,
+    "output": "Colossus passed: locked warnings, exact attack geometry, high-route sweep protection, cooling, limited repair budget, pressure benefit and snapshot fields.\n"
+  },
+  {
+    "file": "scripts\\test-great-furnace.cjs",
+    "ok": true,
+    "output": "Great Furnace passed: four main paths, physical cooling hold and reheating, three ambush waves, rescue and knowledge source, optional shards and Cinder.\n"
+  },
+  {
+    "file": "scripts\\test-gus-story.cjs",
+    "ok": true,
+    "output": "Gus passed: delivery gating, once-only reward, shortcut, resume, rollback, apology/repair, final refusal, main-path independence, fresh attempt.\n"
+  },
+  {
+    "file": "scripts\\test-hollow-cliffs.cjs",
+    "ok": true,
+    "output": "Winding Cliffs: freight cart, legacy bridge saves, rope, cargo release, once-only rewards, and dialogue links passed.\n"
+  },
+  {
+    "file": "scripts\\test-hollow-journey.cjs",
+    "ok": true,
+    "output": "Hollow journey: cart gate, delayed bridge collision, idempotence, completed save, patrol/quiet-route guidance and remote guard count passed.\n"
+  },
+  {
+    "file": "scripts\\test-hollow-readiness.cjs",
+    "ok": true,
+    "output": "31 Hollow readiness checks passed: timed cart guidance, clue discovery, legacy note repair, required rescue gates and terrain-correct falls.\n"
+  },
+  {
+    "file": "scripts\\test-home-trails.cjs",
+    "ok": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(!R.info({id:'beastkeeper'},{petOwned:[]}))\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-home-trails.cjs:1:438)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "file": "scripts\\test-homefields-granary.cjs",
+    "ok": true,
+    "output": "Granary passed: clue, both action orders, blocked early cache, one-time reward, old completed/partial saves and checkpoint rollback.\n"
+  },
+  {
+    "file": "scripts\\test-homefields-puzzle.cjs",
+    "ok": true,
+    "output": "Homefields warning bell passed: discovery, three combat waves, elite captain, chest reward, and save migration.\n"
+  },
+  {
+    "file": "scripts\\test-hub-transition.cjs",
+    "ok": true,
+    "output": "32 portal ownership and world snapshot regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-ice-caves.cjs",
+    "ok": true,
+    "output": "Ice Caves passed: both Ellis routes, delivery gate, main/optional independence, waterworks recovery, side plug and old partial state, Hugo safety order, reward deduplication, shard gates and voice graph.\n"
+  },
+  {
+    "file": "scripts\\test-iron-halls.cjs",
+    "ok": true,
+    "output": "Iron Halls passed: worker and cart gates, retired controls, drive-sled completion, dialogue, optional rewards, shards and voice graph.\n"
+  },
+  {
+    "file": "scripts\\test-journal-notice.cjs",
+    "ok": true,
+    "output": "Journal notice passed: restore, dedupe, queued changes, scene reset, dialogue/menu pause, hover hold, dismissal, length-based reading.\nPinned revisions, latest arrivals, unread recovery, queued replacement, title changes and repeated snapshots passed.\n"
+  },
+  {
+    "file": "scripts\\test-keep-journey.cjs",
+    "ok": true,
+    "output": "Broken Walls: lifecycle-safe status, both route choices, guard guidance, exact timing boundaries, matching wave warning/spawn, restored gates, host-owned health/retry, tower clearance and original scale passed.\n"
+  },
+  {
+    "file": "scripts\\test-long-ascent.cjs",
+    "ok": true,
+    "output": "Long Ascent passed: sequential catches, independent/shared rescue, dialogue branches/resume, permanent puzzle latch, physical shards, authored storeys and returning service lift.\n"
+  },
+  {
+    "file": "scripts\\test-loot-notices.cjs",
+    "ok": true,
+    "output": "PASS Blocked item shows its identity and truthful outcome\nPASS Collecting the same item immediately replaces the blocked outcome\nPASS Repeated notices for a queued item collapse into its latest outcome\nPASS Journal retains priority on a short screen without consuming the pending notice\nPASS Current rebound bag key is reflected in the notice\nPASS Changing scenes clears prior loot and queued outcomes\n{\"checks\":6,\"passed\":true,\"scope\":\"Presentation logic only; visual and live browser checks required.\"}\n"
+  },
+  {
+    "file": "scripts\\test-loot-transactions.cjs",
+    "ok": true,
+    "output": "PASS Comparison purchase bags gear without replacing equipped weapon\nPASS Full bag purchase preserves gold, inventory and equipped weapon\nPASS Successful comparison confirmation cannot spend twice\nPASS Last free slot accepts exactly one purchased item\nPASS Purchase validates level before spending\nPASS Purchase validates gold before spending\nPASS Purchase validates class before spending\nPASS Paid relic uses existing claim flow and preserves replaced gear capacity\nPASS weapon stays unclaimed with a full bag\nPASS weapon auto-sells only when explicitly enabled\nPASS weapon bags immediately in last free slot\nPASS armor stays unclaimed with a full bag\nPASS armor auto-sells only when explicitly enabled\nPASS armor bags immediately in last free slot\nPASS trinket stays unclaimed with a full bag\nPASS trinket auto-sells only when explicitly enabled\nPASS trinket bags immediately in last free slot\nPASS Repeated full-bag proximity does not flood comparison notices\nPASS Chest capacity warning does not expose its unopened reward\nPASS Full chest stays unclaimed and its fixed reward survives until space is available\nPASS Same-frame pickups fill only the last slot while quest items still collect\nPASS Auto-sell consumes each ground pickup once across repeated updates\n{\"cases\":22,\"passed\":true,\"scope\":\"Actual transaction functions under a DOM adapter; browser, render and integration checks still required.\"}\n"
+  },
+  {
+    "file": "scripts\\test-lost-canyon.cjs",
+    "ok": true,
+    "output": "Lost Canyon: order/bluff/side routes, required rescues, alarm order, Ruth consequence/repair, single shard reward, one-time freight brake and guard gates passed.\n"
+  },
+  {
+    "file": "scripts\\test-marble-guardian.cjs",
+    "ok": true,
+    "output": "Marble passed: locked warnings, screen interception/rearming, hit geometry and safe responses, three dialogue approaches, leave/resume, death gate, no finale spoilers.\n"
+  },
+  {
+    "file": "scripts\\test-marksman.cjs",
+    "ok": true,
+    "output": "Marksman aim lock, recovery, single relocation/wave, protected glide, safe landing, snapshot and dead-state tests passed.\n"
+  },
+  {
+    "file": "scripts\\test-menu-shortcuts.cjs",
+    "ok": true,
+    "output": "18 menu shortcut regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-minimap-heading.cjs",
+    "ok": true,
+    "output": "38 actual minimap canvas behavior checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-mob-imports.cjs",
+    "ok": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(urls.length===5)\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-mob-imports.cjs:3:1)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "file": "scripts\\test-mob-render-culling.cjs",
+    "ok": true,
+    "output": "15 enemy presentation regression checks passed.\n"
+  },
+  {
+    "file": "scripts\\test-music-score.cjs",
+    "ok": true,
+    "output": "Score passed: 40 original hashes, stereo/size, all halves/bosses, hub/hall/trials, final phases, dialogue, future scene cues.\n"
+  },
+  {
+    "file": "scripts\\test-palace-courtyard.cjs",
+    "ok": true,
+    "output": "Palace story passed: either balcony and either release, main independence, offense/recovery, mirror order, atomic delivery/deduplication, guard gates, shard identity and VO graph.\n"
+  },
+  {
+    "file": "scripts\\test-patrol-retirement.cjs",
+    "ok": true,
+    "output": "900 patrol respawns: bounded bodies, death fade retained, authored bodies retained, guest cleanup without spawning.\n"
+  },
+  {
+    "file": "scripts\\test-playtest-feedback.cjs",
+    "ok": true,
+    "output": "Combat quota/reward dedupe, delayed bounded respawn, proximity safety, host authority, conversation exit/resume passed.\n"
+  },
+  {
+    "file": "scripts\\test-priority-sfx.cjs",
+    "ok": true,
+    "output": "{\"checks\":255,\"candidateFilesPreserved\":64,\"originalFilesRestored\":56,\"proceduralOverrides\":0,\"unreviewedActiveReplacements\":0,\"subjectiveQuality\":\"Not inferred from technical tests\"}\n"
+  },
+  {
+    "file": "scripts\\test-prison-journey.cjs",
+    "ok": true,
+    "output": "Dungeons journey passed: lifecycle, floor-aware guidance, branch returns, restored gates, both winding directions, approach inertia, conversation independence and retry.\n"
+  },
+  {
+    "file": "scripts\\test-prison-press.cjs",
+    "ok": true,
+    "output": "Prison presses passed: distinct phases, warning, stopped save, retired inputs, once-only brake, RK-03 and nearby clue.\n"
+  },
+  {
+    "file": "scripts\\test-prison-revision10.cjs",
+    "ok": true,
+    "output": "{\n  plans: 1080,\n  oldLayoutsUnchanged: 9720,\n  sockets: 2160,\n  spawns: 25920\n}\n"
+  },
+  {
+    "file": "scripts\\test-prison-revision11.cjs",
+    "ok": true,
+    "output": "{ plans: 1080, gates: 6480, olderLayoutsUnchanged: 10800 }\n"
+  },
+  {
+    "file": "scripts\\test-prison-revision9.cjs",
+    "ok": true,
+    "output": "{\n  plans: 1080,\n  oldLayoutsUnchanged: 8640,\n  wingShapes: 9,\n  spawns: 64800,\n  campaignSpawns: 31680,\n  campaignShare: 0.49\n}\n"
+  },
+  {
+    "file": "scripts\\test-prison-routes-v6.cjs",
+    "ok": true,
+    "output": "{ tested: 1350, legacyPlans: 6750, routeShapes: 6 }\n"
+  },
+  {
+    "file": "scripts\\test-prison-story.cjs",
+    "ok": true,
+    "output": "Prison story passed: Sly routes, rescue winch, retired lower weights, press brake, old partial data, shards, rewards, voice graph and lift bounds.\n"
+  },
+  {
+    "file": "scripts\\test-progression-celebrations.cjs",
+    "ok": true,
+    "output": "{\"checks\":43,\"introMs\":850,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\n"
+  },
+  {
+    "file": "scripts\\test-puzzle-guidance.cjs",
+    "ok": true,
+    "output": "Puzzle notice coalescing, discovered-clue search, hammer warning boundaries and old-complete sled placement passed.\n"
+  },
+  {
+    "file": "scripts\\test-puzzle-overhaul.cjs",
+    "ok": true,
+    "output": "Puzzle overhaul passed: all water heights/retries, flow configurations, all 64 legacy shelf configurations/reset, saved solved states, feedback and atomic invalid-action rollback.\n"
+  },
+  {
+    "file": "scripts\\test-return-visits.cjs",
+    "ok": true,
+    "output": "Return quests: eligibility, decline/rejoin, puzzle gates, collection/delivery idempotency, graph and save normalization passed.\n"
+  },
+  {
+    "file": "scripts\\test-rift-hall.cjs",
+    "ok": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nundefined !== 1\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-rift-hall.cjs:7:296)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: undefined,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "file": "scripts\\test-rift-shards.cjs",
+    "ok": true,
+    "output": "Rift shard ledger passed: stable IDs, sanitization, individual collection, once-only echo, provisional/banked distinction, rollback, 5/5 gating and approved class mapping.\n"
+  },
+  {
+    "file": "scripts\\test-ship-crossing.cjs",
+    "ok": true,
+    "output": "Ship crossing passed: 80 safe course seeds, collisions, two waves, role swap, repair cap, disconnect/death, solo, pause, fixed steps, authority and stale snapshots.\n"
+  },
+  {
+    "file": "scripts\\test-shipwreck-shore.cjs",
+    "ok": true,
+    "output": "Shipwreck Shore passed: four Rose branches, main independence, deliveries, cave order, cargo release, ballista aim/reward dedupe and voice graph.\n"
+  },
+  {
+    "file": "scripts\\test-sky-library.cjs",
+    "ok": true,
+    "output": "Sky Library passed: main access, spatial display reflector, shelf branch, shards, guard/timer/retry checks, malformed rotation rejection and voice graph.\n"
+  },
+  {
+    "file": "scripts\\test-snowbound.cjs",
+    "ok": true,
+    "output": "Snowbound passed: both Heath branches, delivery gate, cornice release, optional ridge reward, replay safety, two physical shards, voice graph and gust phases.\n"
+  },
+  {
+    "file": "scripts\\test-story-authority.cjs",
+    "ok": true,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.\n"
+  },
+  {
+    "file": "scripts\\test-story-state.cjs",
+    "ok": true,
+    "output": "Story state passed: all Thomas branches, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links.\n"
+  },
+  {
+    "file": "scripts\\test-story-topics.cjs",
+    "ok": true,
+    "output": "29 topic menus: legacy cursor recovery, effect-free navigation, Simon side quest after core dialogue, refusal guard and forged navigation passed.\n"
+  },
+  {
+    "file": "scripts\\test-stylist.cjs",
+    "ok": true,
+    "output": "PASS invalid choices, long names, exact funds, unchanged purchase\n"
+  },
+  {
+    "file": "scripts\\test-sunspire-relay.cjs",
+    "ok": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(r.changed)\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-sunspire-relay.cjs:2:475)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "file": "scripts\\test-thunder-hydra.cjs",
+    "ok": true,
+    "output": "Thunder/Hydra passed: both Dash routes, main independence, race retry/deadline, three shard gates, graph, wind cycle, all warnings/hit shapes, cover, exposure, mercy and stale packets.\n"
+  },
+  {
+    "file": "scripts\\test-voice-content.cjs",
+    "ok": true,
+    "output": "Voice manifest: shared fetch, current-text filtering and failure recovery passed.\n"
+  },
+  {
+    "file": "scripts\\test-weapon-presence.cjs",
+    "ok": true,
+    "output": "{\"protectedPoints\":96,\"aliases\":true,\"rearShaftsUnchanged\":true}\n"
+  }
+]

@@ -1168,7 +1168,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.222.0-safe-equipment-swap';
+const VERSION3D='2.223.0-interaction-safety';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4888,16 +4888,18 @@ function perkRefundTotal(){ let s=0; for(const id of PERKIDS) s+=perkSpent(id); 
 function refundAllPerks(){
   const total=perkRefundTotal(); if(total<=0) return 0;
   meta.perks={};
-  if(meta.hero){ const snap=meta.hero, lvl=snap.level||1;
+  const source=G?.p?snapOf(G.p):meta.hero;
+  if(source){ const snap=source, lvl=snap.level||1;
     const p=freshPlayer();                                   // base stats with NO perks (meta.perks just cleared)
     for(let l=1;l<lvl;l++) autoLevelGrow(p);                 // replay per-level growth so the reset keeps your level power
     p.level=lvl; p.xp=Math.max(0,snap.xp||0); p.xpNext=CHARACTER_XP(lvl);
+    p.allocation=BFCharacterStats.normalize(snap.allocation,lvl);p.tunedLevels=snap.tunedLevels||0;
     p.weapon=snap.weapon?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):p.weapon;
     p.gear=cloneGear(snap.gear); p.maxMana=snap.maxMana||100; p.mana=p.maxMana;
     recomputeArmor(p); p.hp=effMaxHp(p); meta.hero=snapOf(p);
   }
   meta.gold+=total;
-  if(G&&G.p&&meta.hero){ const np=freshFromSnapshot(meta.hero); G.p.stats=Object.assign({},np.stats); G.p.maxHp=np.maxHp; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); hudUpdate&&hudUpdate(); }
+  if(G&&G.p&&meta.hero){ const np=freshFromSnapshot(meta.hero); G.p.stats=Object.assign({},np.stats); G.p.maxHp=np.maxHp; G.p.allocation={...np.allocation};G.p.tunedLevels=np.tunedLevels;recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p));if(G.hub)meta.hero=snapOf(G.p);hudUpdate&&hudUpdate(); }
   persist();
   return total;
 }
@@ -4930,8 +4932,8 @@ function applyPerks(p){
   if(meta.socks) p.maxJumps=Math.max(p.maxJumps||1,2);
 }
 function upgradeStoredHeroPerk(id,newLv){
-  if(!meta.hero) return;
-  const p=freshFromSnapshot(meta.hero); applyPerkRank(p,id,newLv); recomputeArmor(p); p.hp=effMaxHp(p); meta.hero=snapOf(p);
+  const p=G?.p||(meta.hero?freshFromSnapshot(meta.hero):null);if(!p)return;
+  applyPerkRank(p,id,newLv);recomputeArmor(p);p.hp=Math.min(p.hp,effMaxHp(p));meta.hero=snapOf(p);hudUpdate();
 }
 let creationAllocation=null;
 function freshPlayer(){
@@ -5477,12 +5479,17 @@ const GAMBLE_COST=480;
 const GAMBLE_ODDS=[['common',0.52],['uncommon',0.30],['rare',0.13],['epic',0.042],['legendary',0.008]];
 function gambleRarity(){ let r=Math.random(); for(const q of GAMBLE_ODDS){ if(r<q[1]) return q[0]; r-=q[1]; } return 'common'; }
 function gambleSpin(back){
+  if(!saveGenerationCurrent())return;
+  if(meta.gold<GAMBLE_COST){toast('Not enough gold');return;}
+  if(meta.stash.length>=STASH_CAP){toast('Bag full · free one slot before buying a Fortune’s Bag.');return;}
+  const owner=G;
   mode='menu'; playFx('dice'); playFx('forgespin',0.7); playFx('gamblecoins',0.8);
   const rid=gambleRarity(), item=randomLoot(rid), ro=item.weapon||item.armor||item.trinket, rc=RARITY[rid].color, tier=RARITY[rid].tier;
   // a teaser reel that flashes every rarity — anything could happen (it won't)
   const pool=[itemAv(makeWeapon('sword','common')),itemAv(makeArmor('uncommon','chest')),itemAv(makeWeapon('bow','rare')),
               itemAv(makeArmor('epic','helmet')),itemAv(makeWeapon('firestaff','uncommon')),itemAv(makeWeapon('great','legendary'))];
   const finalIcon=itemAv(ro);
+  meta.gold-=GAMBLE_COST;meta.stash.push(item);persist();
   showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">${actionIcon('fortunes-bag')}Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
     <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid #ffd24a;box-shadow:0 0 24px #ffd24a66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]}"></div></div>
     <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
@@ -5490,7 +5497,7 @@ function gambleSpin(back){
     <button class="bigbtn ghost hide" id="gamDone">Back to the shop</button></div>`);
   const img=document.getElementById('reelimg'), nameEl=document.getElementById('reelname'), box=document.getElementById('reelbox');
   let i=0, delay=45; const t0=Date.now();
-  const step=()=>{ img.src=pool[i%pool.length]; i++;
+  const step=()=>{ if(G!==owner||!img.isConnected)return;img.src=pool[i%pool.length]; i++;
     try{ tone({f0:520+(i%5)*40, dur:0.03, type:'square', vol:0.03}); }catch(e){}
     if(Date.now()-t0 < 1400 && delay<220){ delay*=1.12; setTimeout(step,delay); }
     else { // the landing — triumph or (usually) a thud
@@ -5498,11 +5505,9 @@ function gambleSpin(back){
       nameEl.innerHTML=`<span style="color:${rc};font-weight:800">${ro.name}</span> <span style="opacity:.6;font-size:12px">· ${RARITY[rid].name}</span>`;
       try{ if(tier>=2){ SFX.god(); playFx('forgedone'); } else { SFX.hurt(); playFx('bag'); } }catch(e){}
       if(tier>=3){ G&&(G.slowmo=Math.max(G.slowmo||0,0.2)); toast((tier>=4?'✦ LEGENDARY':'◆ EPIC')+' — the bag delivers', rc); }
-      if(!stashItem(item)){ meta.stash.push(item); persist(); }   // bag delivery, forge-payout pattern (force-past-cap parity)
-      persist();
       const ag=document.getElementById('gamAgain'), dn=document.getElementById('gamDone');
       dn.classList.remove('hide'); dn.onclick=()=>openShop(back);
-      if(meta.gold>=GAMBLE_COST){ ag.classList.remove('hide'); ag.onclick=()=>{ meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); }; }
+      if(meta.gold>=GAMBLE_COST){ ag.classList.remove('hide'); ag.onclick=()=>{if(ag.isConnected&&G===owner)gambleSpin(back);}; }
     } };
   setTimeout(step,delay);
 }
@@ -5513,30 +5518,30 @@ function forgeSpin(g,back){
   mode='menu'; playFx('forgespin');
   const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
   const result=forgeResult(g), ro=result.weapon||result.armor||result.trinket;
-  // consume the two inputs up front
-  const [hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x); meta.stash.splice(hi,1); meta.stash.splice(lo,1);
+  const owner=G;
   // precompute a reel of preview icons for this category (fast to cycle)
   const pool = g.kind==='w' ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : g.kind==='t' ? [itemAv(makeTrinket(nr,g.cat)),itemAv(ro)] : ARMOR_TYPE_IDS.slice(0,6).map(tid=>itemAv(makeArmor(nr,g.cat,tid)));
   const finalIcon=itemAv(ro);
+  const next=meta.stash.slice(),[hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x);next.splice(hi,1);next.splice(lo,1);next.push(result);meta.stash=next;persist();
   showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:${nc}">The Forge</p><h2 class="ovh">Forging…</h2>
     <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid ${nc};box-shadow:0 0 24px ${nc}66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]||finalIcon}"></div></div>
     <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
     <button class="bigbtn ghost hide" id="forgeGo">Take it</button></div>`);
   const img=document.getElementById('reelimg'), nameEl=document.getElementById('reelname'), goBtn=document.getElementById('forgeGo'), box=document.getElementById('reelbox');
   let i=0, delay=45; const t0=Date.now();
-  const step=()=>{ img.src=pool[i%pool.length]||finalIcon; i++;
+  const step=()=>{if(G!==owner||!img.isConnected)return;img.src=pool[i%pool.length]||finalIcon;i++;
     try{ tone({f0:520+ (i%5)*40, dur:0.03, type:'square', vol:0.03}); }catch(e){}    // ratchet tick
     if(Date.now()-t0 < 1500 && delay<220){ delay*=1.12; setTimeout(step,delay); }
     else { // land on the payout
       img.src=finalIcon; box.style.borderColor=nc; box.style.boxShadow='0 0 40px '+nc;
       nameEl.innerHTML=`<span style="color:${nc};font-weight:800">${ro.name}</span>`;
       try{ SFX.god(); playFx('forgeopen'); }catch(e){}   // Phase 20: the sharpening ring on the finished item (swapped with the clang)
-      if(!stashItem(result)){ meta.stash.push(result); persist(); }   // ensure it lands in the bag
-      persist(); goBtn.classList.remove('hide'); goBtn.onclick=()=>openForge(back);
+      goBtn.classList.remove('hide'); goBtn.onclick=()=>openForge(back);
     } };
   setTimeout(step,delay);
 }
 function newG(p,extra){
+  cancelDeathTransition();cancelPortalWarp();
   return Object.assign({p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
     shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
@@ -9347,6 +9352,7 @@ const BOSS_ARENAS={
    fourth would silently skip the edits, which would look like the editor losing his work. */
 function loadStage(i){
   if(!G||G.hub)return;
+  cancelDeathTransition();
   BFChestReveal.clear();
   G.marbleArena=null;G.bruteArena=null; G.marksmanArena=null; G.fallenArena=null; G.frostOfficers=null;G.colossusArena=null;G.hydraArena=null;G._hydraPaid=false;G._hydraIntro=false;G._hydraHit=-1;document.getElementById('bosshpwrap').classList.remove('officer-team'); loadStageRaw(i); applyEditsNow(); }
 function applyEditsNow(){
@@ -15368,7 +15374,7 @@ const MP={
     const dealt=Math.max(0,before-p.hp),killed=p.hp<=0;
     if(dealt>0&&m.slow>0)this.takePvpControl({by:m.by,seconds:m.slow});
     if(m.token)this.routeCombatMessage({t:'presult',id:m.by,by:this.myId,token:m.token,dealt,killed});
-    if(killed){p.hp=0;p._pvpDead=true;this.reportFrag(m.by);toast('Defeated — respawning…');setTimeout(()=>this.pvpRespawn(),2000);}
+    if(killed){p.hp=0;p._pvpDead=true;this.reportFrag(m.by);toast('Defeated — respawning…');const world=G;setTimeout(()=>{if(G===world&&G.p===p&&this.active&&this.pvp&&G.arena&&p._pvpDead)this.pvpRespawn();},2000);}
   },
   reportFrag(byId){ if(this.isHost) this.hostScore(byId); else if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'frag',by:byId});}catch(e){} },
   hostScore(byId){ if(!this.isHost) return; this.scores[byId]=(this.scores[byId]||0)+1; const n=this.scores[byId];
@@ -17160,6 +17166,9 @@ function regrabCam(){ if(!BFGuidedTutorial.blocksPointerLock && !_edOpen() && me
 // The single menu-to-game boundary. Active play must always have the full HUD restored;
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ pausedMenuWorld=null;mode='play'; musicForScene(); showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
+function cancelDeathTransition(){
+  clearTimeout(die._timer);die._timer=null;document.getElementById('deathfade')?.remove();
+}
 function die(){
   BFChestReveal.clear();
   window.BFInspection?.close();window.BFSocial?.close();if(BFHubDialogue.active)BFHubDialogue.close(false,true);
@@ -17184,8 +17193,9 @@ function die(){
   let fd=document.getElementById('deathfade');
   if(!fd){ fd=document.createElement('div'); fd.id='deathfade'; document.body.appendChild(fd); }
   fd.style.cssText='position:fixed;inset:0;z-index:19;background:#000;opacity:0;transition:opacity 1.6s ease-in;pointer-events:none';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ fd.style.opacity='1'; }));
-  setTimeout(showDeathScreen, 2000);
+  const world=G,player=G.p;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(G===world&&G.p===player&&player.dead&&fd.isConnected)fd.style.opacity='1';}));
+  clearTimeout(die._timer);die._timer=setTimeout(()=>{if(G===world&&G.p===player&&player.dead&&mode==='dying')showDeathScreen();},2000);
 }
 /* PLAYTEST REVIVE — free, unlimited, and until now shown on EVERY difficulty.
    That included Hardcore and Hitless, whose entire premise is that you get one life. A free revive
@@ -18362,7 +18372,7 @@ function drawRiftHallFallback(t){
  if(!window.__npc3dDrawn?.('riftkeeper')){pushM();mv(0,0,-645);hubNpcModel({id:'shade'},t);popM();}
 }
 function enterWaystation(riftHall=false){
- cancelPortalWarp();
+ cancelPortalWarp();cancelDeathTransition();
  clearTimeout(storyToast._t);document.getElementById('storycard')?.classList.remove('show');
   if(BFHubDialogue.active)BFHubDialogue.close(false,true);briarPending=null;
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
@@ -19658,7 +19668,7 @@ function openShop(back){
   const pb=document.querySelector('.packbuy'); if(pb) pb.onclick=()=>{ const cost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)); if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
   const gmb=document.querySelector('.gamblebuy'); if(gmb) gmb.onclick=()=>{ if(meta.gold<GAMBLE_COST){ toast('Not enough gold'); return; }
-    meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); };   // gold up front — the pull is the purchase
+    gambleSpin(back); };   // payment and reward commit together inside the purchase
   { const ab=document.querySelector('.arcadebuy'); if(ab) ab.onclick=()=>{
       if(meta.arcadeOwned) return; if(meta.gold<arcadeCost){ toast('Not enough gold'); return; }
       meta.gold-=arcadeCost; meta.arcadeOwned=true; persist();

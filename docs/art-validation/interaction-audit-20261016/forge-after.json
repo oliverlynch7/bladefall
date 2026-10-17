@@ -1,0 +1,74 @@
+{
+  "done": true,
+  "scene": "forge",
+  "rows": [
+    {
+      "label": "immediately after forge start",
+      "stash": [
+        {
+          "armor": {
+            "slot": "helmet",
+            "rarity": "uncommon",
+            "type": "nimble",
+            "accent": "#9fe0ff",
+            "defense": 9,
+            "color": "#5fd17a",
+            "name": "Uncommon Nimble Helmet",
+            "affixes": [
+              {
+                "stat": "dodgeMul",
+                "val": 0.07,
+                "label": "-7% Dodge CD"
+              }
+            ]
+          }
+        }
+      ],
+      "stored": [
+        {
+          "armor": {
+            "slot": "helmet",
+            "rarity": "uncommon",
+            "type": "nimble",
+            "accent": "#9fe0ff",
+            "defense": 9,
+            "color": "#5fd17a",
+            "name": "Uncommon Nimble Helmet",
+            "affixes": [
+              {
+                "stat": "dodgeMul",
+                "val": 0.07,
+                "label": "-7% Dodge CD"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "label": "after leaving forge",
+      "stash": [
+        {
+          "armor": {
+            "slot": "helmet",
+            "rarity": "uncommon",
+            "type": "nimble",
+            "accent": "#9fe0ff",
+            "defense": 9,
+            "color": "#5fd17a",
+            "name": "Uncommon Nimble Helmet",
+            "affixes": [
+              {
+                "stat": "dodgeMul",
+                "val": 0.07,
+                "label": "-7% Dodge CD"
+              }
+            ]
+          }
+        }
+      ],
+      "mode": "play"
+    }
+  ],
+  "version": "2.223.0-interaction-safety"
+}

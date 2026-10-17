@@ -1,0 +1,41 @@
+{
+  "version": "2.223.0-interaction-safety",
+  "fixes": [
+    "Shop perk purchases now modify the live player, surviving autosave and service exit.",
+    "Refunding perks preserves player stat allocation, earned level/XP and current equipment.",
+    "Forge inputs and resulting item commit in one immediate inventory save before reveal.",
+    "Fortunes Bag payment and reward commit before reveal; full bags cannot be charged.",
+    "Death fade/result callbacks and PvP respawn timers are scoped to their original world/player; scene creation/entry clears stale fades."
+  ],
+  "verification": {
+    "regressionSuites": 90,
+    "regressionFailures": 0,
+    "classSkillCasts": 136,
+    "classSkillRuntimeErrors": 0,
+    "classes": 17,
+    "browser": [
+      "actual shop purchases and background autosave",
+      "refund and hub reconstruction",
+      "forge/gamble immediate saved inventory and detached callbacks",
+      "death-to-hub fade ownership",
+      "new unnamed creator and tutorial death/retry",
+      "secondary and active save deletion/stale write protection",
+      "26 keyboard/menu callbacks",
+      "78 inventory conservation/save/campaign/co-op-pause checks"
+    ]
+  },
+  "testMaintenance": [
+    "Rift Keeper is informational; five saved shards open automatically.",
+    "Animal rescue can be accepted before owning a pet.",
+    "Sunspire mirror fixture must open its actual route gate.",
+    "Renderer sync/teardown ownership is separate from toolkit-only asset consumers.",
+    "Chess test supplies browser window event adapter.",
+    "Warden now has an authored heavy motion profile."
+  ],
+  "limits": [
+    "Staged local WebGL tests with isolated storage, not a complete human playthrough.",
+    "Co-op packet/pause checks simulated; no two-device network/hardware claim.",
+    "Skill smoke checks establish no thrown exception, not every damage/balance outcome.",
+    "External voice API suite deliberately not invoked; no paid generation or credentials used."
+  ]
+}

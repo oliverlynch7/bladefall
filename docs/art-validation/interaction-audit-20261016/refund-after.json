@@ -1,0 +1,35 @@
+{
+  "done": true,
+  "scene": "refund",
+  "rows": [
+    {
+      "label": "refund keeps character allocations",
+      "before": {
+        "health": 4,
+        "attack": 4,
+        "defense": 2,
+        "speed": 2,
+        "mana": 1
+      },
+      "live": {
+        "health": 4,
+        "attack": 4,
+        "defense": 2,
+        "speed": 2,
+        "mana": 1
+      },
+      "saved": {
+        "health": 4,
+        "attack": 4,
+        "defense": 2,
+        "speed": 2,
+        "mana": 1
+      },
+      "tuned": 3,
+      "gold": 10040,
+      "returned": 40,
+      "delta": 40
+    }
+  ],
+  "version": "2.223.0-interaction-safety"
+}

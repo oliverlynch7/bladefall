@@ -1,0 +1,959 @@
+{
+  "done": true,
+  "scene": "skills",
+  "rows": [
+    {
+      "cid": "pyromancer",
+      "branch": "a",
+      "slot": 0,
+      "name": "py_bolt",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "a",
+      "slot": 1,
+      "name": "py_blast",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "a",
+      "slot": 2,
+      "name": "py_lance",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "a",
+      "slot": 3,
+      "name": "py_inferno",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "b",
+      "slot": 0,
+      "name": "py_fan",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "b",
+      "slot": 1,
+      "name": "py_ward",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "b",
+      "slot": 2,
+      "name": "py_nova",
+      "error": null
+    },
+    {
+      "cid": "pyromancer",
+      "branch": "b",
+      "slot": 3,
+      "name": "py_sun",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "a",
+      "slot": 0,
+      "name": "w_cleave",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "a",
+      "slot": 1,
+      "name": "w_charge",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "a",
+      "slot": 2,
+      "name": "w_guard",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "a",
+      "slot": 3,
+      "name": "w_berserk",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "b",
+      "slot": 0,
+      "name": "w_bash",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "b",
+      "slot": 1,
+      "name": "w_whirl",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "b",
+      "slot": 2,
+      "name": "w_stomp",
+      "error": null
+    },
+    {
+      "cid": "warrior",
+      "branch": "b",
+      "slot": 3,
+      "name": "w_execute",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "a",
+      "slot": 0,
+      "name": "r_volley",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "a",
+      "slot": 1,
+      "name": "r_tumble",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "a",
+      "slot": 2,
+      "name": "r_spike",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "a",
+      "slot": 3,
+      "name": "r_mark",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "b",
+      "slot": 0,
+      "name": "r_pierce",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "b",
+      "slot": 1,
+      "name": "r_shadow",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "b",
+      "slot": 2,
+      "name": "r_smoke",
+      "error": null
+    },
+    {
+      "cid": "ranger",
+      "branch": "b",
+      "slot": 3,
+      "name": "r_deathmark",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "a",
+      "slot": 0,
+      "name": "m_bolt",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "a",
+      "slot": 1,
+      "name": "m_blink",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "a",
+      "slot": 2,
+      "name": "m_gravity",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "a",
+      "slot": 3,
+      "name": "m_tempest",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "b",
+      "slot": 0,
+      "name": "m_beam",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "b",
+      "slot": 1,
+      "name": "m_nova",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "b",
+      "slot": 2,
+      "name": "m_barrier",
+      "error": null
+    },
+    {
+      "cid": "mage",
+      "branch": "b",
+      "slot": 3,
+      "name": "m_overload",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "a",
+      "slot": 0,
+      "name": "x_reap",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "a",
+      "slot": 1,
+      "name": "x_step",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "a",
+      "slot": 2,
+      "name": "x_pull",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "a",
+      "slot": 3,
+      "name": "x_siphon",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "b",
+      "slot": 0,
+      "name": "x_cleave",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "b",
+      "slot": 1,
+      "name": "x_wraith",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "b",
+      "slot": 2,
+      "name": "x_bind",
+      "error": null
+    },
+    {
+      "cid": "reaper",
+      "branch": "b",
+      "slot": 3,
+      "name": "x_vortex",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "a",
+      "slot": 0,
+      "name": "pal_bash",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "a",
+      "slot": 1,
+      "name": "pal_taunt",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "a",
+      "slot": 2,
+      "name": "pal_guard",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "a",
+      "slot": 3,
+      "name": "pal_laststand",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "b",
+      "slot": 0,
+      "name": "pal_smite",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "b",
+      "slot": 1,
+      "name": "pal_ground",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "b",
+      "slot": 2,
+      "name": "pal_burst",
+      "error": null
+    },
+    {
+      "cid": "paladin",
+      "branch": "b",
+      "slot": 3,
+      "name": "pal_sky",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "a",
+      "slot": 0,
+      "name": "necro_summon",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "a",
+      "slot": 1,
+      "name": "necro_raise",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "a",
+      "slot": 2,
+      "name": "necro_wall",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "a",
+      "slot": 3,
+      "name": "necro_army",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "b",
+      "slot": 0,
+      "name": "necro_bolt",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "b",
+      "slot": 1,
+      "name": "necro_nova",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "b",
+      "slot": 2,
+      "name": "necro_grip",
+      "error": null
+    },
+    {
+      "cid": "necromancer",
+      "branch": "b",
+      "slot": 3,
+      "name": "necro_storm",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "a",
+      "slot": 0,
+      "name": "nin_strike",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "a",
+      "slot": 1,
+      "name": "nin_step",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "a",
+      "slot": 2,
+      "name": "nin_mark",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "a",
+      "slot": 3,
+      "name": "nin_fury",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "b",
+      "slot": 0,
+      "name": "nin_barrage",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "b",
+      "slot": 1,
+      "name": "nin_smoke",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "b",
+      "slot": 2,
+      "name": "nin_pierce",
+      "error": null
+    },
+    {
+      "cid": "ninja",
+      "branch": "b",
+      "slot": 3,
+      "name": "nin_storm",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "a",
+      "slot": 0,
+      "name": "bsk_cleave",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "a",
+      "slot": 1,
+      "name": "bsk_charge",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "a",
+      "slot": 2,
+      "name": "bsk_whirl",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "a",
+      "slot": 3,
+      "name": "bsk_berserk",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "b",
+      "slot": 0,
+      "name": "bsk_bash",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "b",
+      "slot": 1,
+      "name": "bsk_stomp",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "b",
+      "slot": 2,
+      "name": "bsk_execute",
+      "error": null
+    },
+    {
+      "cid": "berserker",
+      "branch": "b",
+      "slot": 3,
+      "name": "bsk_guard",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "a",
+      "slot": 0,
+      "name": "pir_pierce",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "a",
+      "slot": 1,
+      "name": "pir_shadow",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "a",
+      "slot": 2,
+      "name": "pir_smoke",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "a",
+      "slot": 3,
+      "name": "pir_deathmark",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "b",
+      "slot": 0,
+      "name": "pir_volley",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "b",
+      "slot": 1,
+      "name": "pir_tumble",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "b",
+      "slot": 2,
+      "name": "pir_goldrush",
+      "error": null
+    },
+    {
+      "cid": "pirate",
+      "branch": "b",
+      "slot": 3,
+      "name": "pir_spike",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "a",
+      "slot": 0,
+      "name": "chr_bolt",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "a",
+      "slot": 1,
+      "name": "chr_nova",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "a",
+      "slot": 2,
+      "name": "chr_gravity",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "a",
+      "slot": 3,
+      "name": "chr_tempest",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "b",
+      "slot": 0,
+      "name": "chr_beam",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "b",
+      "slot": 1,
+      "name": "chr_blink",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "b",
+      "slot": 2,
+      "name": "chr_barrier",
+      "error": null
+    },
+    {
+      "cid": "chronomancer",
+      "branch": "b",
+      "slot": 3,
+      "name": "chr_overload",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "a",
+      "slot": 0,
+      "name": "mon_flurry",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "a",
+      "slot": 1,
+      "name": "mon_deflect",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "a",
+      "slot": 2,
+      "name": "mon_whirl",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "a",
+      "slot": 3,
+      "name": "mon_thousand",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "b",
+      "slot": 0,
+      "name": "mon_palm",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "b",
+      "slot": 1,
+      "name": "mon_roll",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "b",
+      "slot": 2,
+      "name": "mon_stun",
+      "error": null
+    },
+    {
+      "cid": "monk",
+      "branch": "b",
+      "slot": 3,
+      "name": "mon_dragon",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "a",
+      "slot": 0,
+      "name": "st_bolt",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "a",
+      "slot": 1,
+      "name": "st_step",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "a",
+      "slot": 2,
+      "name": "st_orb",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "a",
+      "slot": 3,
+      "name": "st_storm",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "b",
+      "slot": 0,
+      "name": "st_lance",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "b",
+      "slot": 1,
+      "name": "st_nova",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "b",
+      "slot": 2,
+      "name": "st_barrier",
+      "error": null
+    },
+    {
+      "cid": "stormcaller",
+      "branch": "b",
+      "slot": 3,
+      "name": "st_overload",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "a",
+      "slot": 0,
+      "name": "war_bolt",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "a",
+      "slot": 1,
+      "name": "war_curse",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "a",
+      "slot": 2,
+      "name": "war_step",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "a",
+      "slot": 3,
+      "name": "war_storm",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "b",
+      "slot": 0,
+      "name": "war_lance",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "b",
+      "slot": 1,
+      "name": "war_drain",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "b",
+      "slot": 2,
+      "name": "war_orb",
+      "error": null
+    },
+    {
+      "cid": "warlock",
+      "branch": "b",
+      "slot": 3,
+      "name": "war_final",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "a",
+      "slot": 0,
+      "name": "sky_rise",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "a",
+      "slot": 1,
+      "name": "sky_dive",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "a",
+      "slot": 2,
+      "name": "sky_dash",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "a",
+      "slot": 3,
+      "name": "sky_crash",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "b",
+      "slot": 0,
+      "name": "sky_gale",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "b",
+      "slot": 1,
+      "name": "sky_lift",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "b",
+      "slot": 2,
+      "name": "sky_rain",
+      "error": null
+    },
+    {
+      "cid": "skylancer",
+      "branch": "b",
+      "slot": 3,
+      "name": "sky_cyclone",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "a",
+      "slot": 0,
+      "name": "bd_counter",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "a",
+      "slot": 1,
+      "name": "bd_riposte",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "a",
+      "slot": 2,
+      "name": "bd_mirror",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "a",
+      "slot": 3,
+      "name": "bd_steel",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "b",
+      "slot": 0,
+      "name": "bd_twin",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "b",
+      "slot": 1,
+      "name": "bd_step",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "b",
+      "slot": 2,
+      "name": "bd_cross",
+      "error": null
+    },
+    {
+      "cid": "bladedancer",
+      "branch": "b",
+      "slot": 3,
+      "name": "bd_perfect",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "a",
+      "slot": 0,
+      "name": "bst_sic",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "a",
+      "slot": 1,
+      "name": "bst_guardian",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "a",
+      "slot": 2,
+      "name": "bst_mend",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "a",
+      "slot": 3,
+      "name": "bst_stampede",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "b",
+      "slot": 0,
+      "name": "bst_coordinated",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "b",
+      "slot": 1,
+      "name": "bst_step",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "b",
+      "slot": 2,
+      "name": "bst_roar",
+      "error": null
+    },
+    {
+      "cid": "beastmaster",
+      "branch": "b",
+      "slot": 3,
+      "name": "bst_apex",
+      "error": null
+    }
+  ],
+  "version": "2.222.0-safe-equipment-swap"
+}

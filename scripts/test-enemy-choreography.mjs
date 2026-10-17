@@ -17,7 +17,9 @@ for(const type of types){
  signatures.add(JSON.stringify(choreographyPose(type,'Windup',1)));
 }
 assert.equal(signatures.size,types.length);
-assert.equal(choreographyPose('warden','Attack',.5),null,'authored boss pose preserved');
+assert.equal(choreographyProfile('warden').label,'Committed overhead blow','warden uses its authored heavy profile');
+for(const phase of ['Windup','Attack','Recover'])for(let i=0;i<=100;i++)assert(Object.values(choreographyPose('warden',phase,i/100)).flat().every(Number.isFinite),'warden pose remains finite');
+assert(Object.values(choreographyPose('warden','Recover',1)).flat().every(v=>v===0),'warden returns to authored rest');
 for(const type of ['caster','sunpriest'])for(const phase of ['Windup','Attack','Recover']){
  assert(choreographyPose(type,phase,.6).armR.every(n=>Math.abs(n)<.3),'staff stays in supporting hand');
 }

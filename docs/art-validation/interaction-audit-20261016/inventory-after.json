@@ -1,0 +1,337 @@
+{
+  "done": true,
+  "rows": [
+    {
+      "label": "equip after actual background autosave",
+      "snapshotRefreshed": true,
+      "stash": [],
+      "live": "QA Equip Chest",
+      "saved": "QA Equip Chest",
+      "ui": [
+        "Rusty Sword",
+        "Empty",
+        "QA Equip Chest",
+        "Empty",
+        "Empty",
+        "Empty",
+        "None"
+      ],
+      "level": 4,
+      "xp": 52,
+      "gold": 1145
+    },
+    {
+      "label": "QA helmet autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "QA helmet equips live",
+      "pass": true
+    },
+    {
+      "label": "QA helmet consumed once",
+      "pass": true
+    },
+    {
+      "label": "QA helmet saved immediately",
+      "pass": true
+    },
+    {
+      "label": "QA helmet equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "QA chest autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "QA chest equips live",
+      "pass": true
+    },
+    {
+      "label": "QA chest consumed once",
+      "pass": true
+    },
+    {
+      "label": "QA chest old piece returned",
+      "pass": true
+    },
+    {
+      "label": "QA chest saved immediately",
+      "pass": true
+    },
+    {
+      "label": "QA chest equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "QA legs autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "QA legs equips live",
+      "pass": true
+    },
+    {
+      "label": "QA legs consumed once",
+      "pass": true
+    },
+    {
+      "label": "QA legs saved immediately",
+      "pass": true
+    },
+    {
+      "label": "QA legs equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "QA amulet autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "QA amulet equips live",
+      "pass": true
+    },
+    {
+      "label": "QA amulet consumed once",
+      "pass": true
+    },
+    {
+      "label": "QA amulet saved immediately",
+      "pass": true
+    },
+    {
+      "label": "QA amulet equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "QA ring autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "QA ring equips live",
+      "pass": true
+    },
+    {
+      "label": "QA ring consumed once",
+      "pass": true
+    },
+    {
+      "label": "QA ring saved immediately",
+      "pass": true
+    },
+    {
+      "label": "QA ring equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet equips live",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet consumed once",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet full bag count conserved",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet saved immediately",
+      "pass": true
+    },
+    {
+      "label": "Full bag helmet equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest equips live",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest consumed once",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest full bag count conserved",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest saved immediately",
+      "pass": true
+    },
+    {
+      "label": "Full bag chest equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs equips live",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs consumed once",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs full bag count conserved",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs saved immediately",
+      "pass": true
+    },
+    {
+      "label": "Full bag legs equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet equips live",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet consumed once",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet full bag count conserved",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet saved immediately",
+      "pass": true
+    },
+    {
+      "label": "Full bag amulet equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring equips live",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring consumed once",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring full bag count conserved",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring saved immediately",
+      "pass": true
+    },
+    {
+      "label": "Full bag ring equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "weapon equip survives autosave",
+      "pass": true
+    },
+    {
+      "label": "Use Class Default returns weapon after snapshot replacement",
+      "pass": true
+    },
+    {
+      "label": "level-locked armor remains untouched",
+      "pass": true
+    },
+    {
+      "label": "hub save reload preserves all five equipped slots",
+      "pass": true
+    },
+    {
+      "label": "old save growth and gold unchanged",
+      "pass": true
+    },
+    {
+      "label": "Co-op paused ring autosave replaced snapshot",
+      "pass": true
+    },
+    {
+      "label": "Co-op paused ring equips live",
+      "pass": true
+    },
+    {
+      "label": "Co-op paused ring consumed once",
+      "pass": true
+    },
+    {
+      "label": "Co-op paused ring old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Co-op paused ring saved immediately",
+      "pass": true
+    },
+    {
+      "label": "Co-op paused ring equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "Campaign swap chest equips live",
+      "pass": true
+    },
+    {
+      "label": "Campaign swap chest consumed once",
+      "pass": true
+    },
+    {
+      "label": "Campaign swap chest old piece returned",
+      "pass": true
+    },
+    {
+      "label": "Campaign swap chest equipped panel updated",
+      "pass": true
+    },
+    {
+      "label": "checkpoint scene equips correctly",
+      "pass": true
+    },
+    {
+      "label": "checkpoint retry retains item ownership",
+      "pass": true
+    }
+  ],
+  "version": "2.223.0-interaction-safety"
+}

@@ -1,0 +1,187 @@
+{
+  "done": true,
+  "rows": [
+    {
+      "label": "Tab opens bag",
+      "pass": true
+    },
+    {
+      "label": "held Tab does not close immediately",
+      "pass": true
+    },
+    {
+      "label": "Tab closes bag from checkbox focus",
+      "pass": true
+    },
+    {
+      "label": "Q closes bag",
+      "pass": true
+    },
+    {
+      "label": "Tab returns pause-opened bag to pause",
+      "pass": true
+    },
+    {
+      "label": "Q resumes from pause",
+      "pass": true
+    },
+    {
+      "label": "held Q does not reopen pause",
+      "pass": true
+    },
+    {
+      "label": "Q returns settings to pause",
+      "pass": true
+    },
+    {
+      "label": "Q closes controls",
+      "pass": true
+    },
+    {
+      "label": "Q cancels rebind without binding Q",
+      "pass": true
+    },
+    {
+      "label": "second Q closes controls",
+      "pass": true
+    },
+    {
+      "label": "Q closes journal",
+      "pass": true
+    },
+    {
+      "label": "Q exits first creator step",
+      "pass": true
+    },
+    {
+      "label": "Q goes back one creator step",
+      "pass": true
+    },
+    {
+      "label": "name field found",
+      "pass": true
+    },
+    {
+      "label": "Q remains available for text input",
+      "pass": true
+    },
+    {
+      "label": "Q in name field does not leave creator",
+      "pass": true
+    },
+    {
+      "label": "Escape still exits focused name field",
+      "pass": true
+    },
+    {
+      "label": "NPC dialogue opened",
+      "pass": true
+    },
+    {
+      "label": "Q closes NPC conversation",
+      "pass": true
+    },
+    {
+      "label": "Q closes inspection",
+      "pass": true
+    },
+    {
+      "label": "emote wheel opened",
+      "pass": true
+    },
+    {
+      "label": "Q closes emote wheel",
+      "pass": true
+    },
+    {
+      "label": "Q cancels skill confirmation first",
+      "pass": true
+    },
+    {
+      "label": "second Q defers choice without losing rank unlock",
+      "pass": true
+    },
+    {
+      "label": "bag still opens after other interactions",
+      "pass": true
+    }
+  ],
+  "keys": {
+    "up": [
+      "KeyW",
+      "ArrowUp"
+    ],
+    "down": [
+      "KeyS",
+      "ArrowDown"
+    ],
+    "left": [
+      "KeyA",
+      "ArrowLeft"
+    ],
+    "right": [
+      "KeyD",
+      "ArrowRight"
+    ],
+    "jump": [
+      "Space"
+    ],
+    "attack": [
+      "Mouse0",
+      "KeyJ"
+    ],
+    "dodge": [
+      "ShiftLeft",
+      "Mouse2"
+    ],
+    "skill1": [
+      "Digit1"
+    ],
+    "skill2": [
+      "Digit2"
+    ],
+    "skill3": [
+      "Digit3"
+    ],
+    "skill4": [
+      "Digit4"
+    ],
+    "interact": [
+      "KeyE"
+    ],
+    "loot": [
+      "KeyV"
+    ],
+    "lootEquip": [
+      "KeyF"
+    ],
+    "lootBag": [
+      "KeyR"
+    ],
+    "lootSell": [
+      "KeyX"
+    ],
+    "auto": [
+      "KeyL"
+    ],
+    "ping": [
+      "KeyG"
+    ],
+    "partyTeleport": [
+      "KeyT"
+    ],
+    "partyNext": [
+      "KeyY"
+    ],
+    "journal": [
+      "KeyN"
+    ],
+    "bag": [
+      "Tab",
+      "KeyB"
+    ],
+    "emote": [
+      "KeyM"
+    ]
+  }
+}

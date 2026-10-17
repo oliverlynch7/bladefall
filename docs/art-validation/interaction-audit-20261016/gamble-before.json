@@ -1,0 +1,41 @@
+{
+  "done": true,
+  "scene": "gamble",
+  "rows": [
+    {
+      "label": "immediate paid reward",
+      "cost": 480,
+      "stash": [],
+      "stored": []
+    },
+    {
+      "label": "after leaving gamble",
+      "stash": [
+        {
+          "weapon": {
+            "arche": "umbrablade",
+            "art": "spellblade",
+            "cls": "melee",
+            "sch": "mag",
+            "el": "void",
+            "rarity": "common",
+            "chg": "spellsweep",
+            "reaper": false,
+            "anyClass": false,
+            "ians": false,
+            "name": "Common Shadow Edge",
+            "dmg": 17,
+            "cd": 0.46,
+            "kb": 230,
+            "lifesteal": 0,
+            "color": "#b9c0cc",
+            "blade": "#b06bff",
+            "range": 64
+          }
+        }
+      ],
+      "mode": "play"
+    }
+  ],
+  "version": "2.222.0-safe-equipment-swap"
+}

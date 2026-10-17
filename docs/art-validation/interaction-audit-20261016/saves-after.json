@@ -1,0 +1,23 @@
+{
+  "done": true,
+  "scene": "saves",
+  "rows": [
+    {
+      "label": "secondary slot staged",
+      "pass": true
+    },
+    {
+      "label": "secondary delete preserves active save",
+      "pass": true
+    },
+    {
+      "label": "active save still writes after secondary deletion",
+      "pass": true
+    },
+    {
+      "label": "deleted active save cannot resurrect through autosave",
+      "pass": true
+    }
+  ],
+  "version": "2.223.0-interaction-safety"
+}

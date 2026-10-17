@@ -1621,7 +1621,7 @@ export async function createClassDisplay(classId,tier=0){
  const remove=[];node.traverse(o=>{if(o.userData.classLookRoot||o.userData._eye||o.userData._mouth||o.userData._weap)remove.push(o);if(o.isMesh){o.frustumCulled=false;o.castShadow=false;}});remove.forEach(o=>o.removeFromParent());
  const holder={root:node,model},face=window.__npcBuildFace(node,model,'#9bd9e8',{mouthStyle:'line',browStyle:'natural'}),mixer=new THREE.AnimationMixer(node),A={mixer,cur:null};
  paintClassBody(node,classId,false,tier?window.BFClassLooks.palette(classId,tier):null);
- const defaultArt=({ranger:'bow',beastmaster:'bow',skylancer:'javelin',mage:'staff',pyromancer:'staff',necromancer:'staff',warlock:'staff',stormcaller:'staff',chronomancer:'staff',reaper:'scythe',monk:'fist',ninja:'dagger',berserker:'axe',pirate:'flintlock'})[classId]||'sword';
+ const defaultArt=({ranger:'bow',beastmaster:'bow',skylancer:'javelin',mage:'staff',pyromancer:'fist',necromancer:'staff',warlock:'staff',stormcaller:'staff',chronomancer:'staff',reaper:'scythe',monk:'fist',ninja:'dagger',berserker:'axe',pirate:'flintlock'})[classId]||'sword';
  let weapon,disposed=false,time=0,action,clipName;
  async function equip(art='class'){
   const a=art==='class'?defaultArt:art;weapon={art:a,rar:'common',name:'Preview weapon',...(classId==='pirate'&&art==='class'?{intrinsic:'pirate'}:{})};

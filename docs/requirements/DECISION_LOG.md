@@ -1583,3 +1583,8 @@ User reiterates that exhausted main dialogue must end in a clear primary Leave c
 ## [Codex | 2026-10-17] U-WORLD-SIGNS-20261017
 
 Remove campaign signs revealing puzzle controls, keys, secrets or tactical routes unless plausible in-world signage. Preserve town destinations and selected workplace/library labels. Audit shared authored sign arrays and Keep boards; remove associated collision through the same source arrays. Preserve routes, mechanics, HUD guidance, map scale and saves. Verify source contracts, syntax and browser before publication.
+
+
+## [Codex | 2026-10-17] U-PALM-FLAME-20261017
+
+User replaces Pyromancer magic/ranged equipment with intrinsic bare-handed fire combat: displaced weapon goes safely into bag, short-range basic palm flame burst, charged wider/longer and stronger flame fan. Warlock gains both ranged and magic weapon groups. Plan: use existing intrinsic class weapon/save/network conventions, rank-scaled fire weapon, shared target/LOS/damage path for PvE/PvP, bounded cosmetic flame ribbons and spell poses without a held model; preserve gear on switch/full bag/legacy reload, update class descriptions, verify attack reach/walls/charge/gear switching and browser presentation.

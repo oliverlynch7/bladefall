@@ -1160,7 +1160,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./campaign-journey.js?v=2236"></script>
 <script src="./party-navigation.js?v=2197"></script>
-<script src="./combat-art.js?v=2094"></script>
+<script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2215">
 <script src="./chest-rules.js?v=2122"></script>
@@ -1187,7 +1187,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.236.0-world-signs';
+const VERSION3D='2.237.0-palm-flames';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -2229,9 +2229,9 @@ const CLASSES={
 };
 // Broad access families; attack geometry remains specific to each weapon.
 const WEAPON_GROUPS={martial:['sword','great','axe','hammer'],ranged:['bow','cross','dagger','javelin'],magic:['staff','wand','spellblade']};
-const CLASS_GROUPS={pyromancer:['magic','ranged'],warrior:['martial'],berserker:['martial'],paladin:['martial','magic'],ninja:['martial','ranged'],ranger:['ranged'],pirate:['martial','ranged'],mage:['magic'],necromancer:['magic'],chronomancer:['magic'],stormcaller:['magic'],warlock:['magic'],skylancer:['ranged'],bladedancer:['martial','ranged'],beastmaster:['ranged'],monk:[],reaper:[]};
+const CLASS_GROUPS={pyromancer:[],warrior:['martial'],berserker:['martial'],paladin:['martial','magic'],ninja:['martial','ranged'],ranger:['ranged'],pirate:['martial','ranged'],mage:['magic'],necromancer:['magic'],chronomancer:['magic'],stormcaller:['magic'],warlock:['magic','ranged'],skylancer:['ranged'],bladedancer:['martial','ranged'],beastmaster:['ranged'],monk:[],reaper:[]};
 for(const [id,C] of Object.entries(CLASSES)) C.family=[...new Set((CLASS_GROUPS[id]||[]).flatMap(g=>WEAPON_GROUPS[g]))];
-CLASSES.monk.family=['fist']; CLASSES.reaper.family=['scythe']; CLASSES.pirate.family.push('flintlock');
+CLASSES.pyromancer.family=['palmfire']; CLASSES.monk.family=['fist']; CLASSES.reaper.family=['scythe']; CLASSES.pirate.family.push('flintlock');
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
 /* HOW THE THREE STARTERS ACTUALLY PLAY.
@@ -2268,8 +2268,8 @@ pyromancer:{
   "disp": "Pyromancer",
   "icon": classIcon('pyromancer'),
   "innate": {
-    "name": "Kindled Weapons",
-    "d": "Every third basic hit deals 25% extra damage. Works with magic and ranged weapons."
+    "name": "Kindled Palms",
+    "d": "Fight bare-handed with short palm flames. Hold attack for a wider flame fan. Every third basic hit deals 25% extra damage."
   },
   "cap": {
     "name": "Master of Flame",
@@ -2281,7 +2281,7 @@ pyromancer:{
       "id": "py_bolt",
       "n": "Firebolt",
       "role": "Aimed Damage",
-      "d": "Fire a fast bolt for 2.2 times weapon damage.",
+      "d": "Fire a fast bolt for 2.2 times flame damage.",
       "icon": "🔥",
       "cd": 4,
       "fx": "py_bolt"
@@ -2290,7 +2290,7 @@ pyromancer:{
       "id": "py_fan",
       "n": "Cinder Fan",
       "role": "Spread",
-      "d": "Fire three flames, each dealing 1.1 times weapon damage.",
+      "d": "Fire three flames, each dealing 1.1 times flame damage.",
       "icon": "🔥",
       "cd": 7,
       "fx": "py_fan"
@@ -2359,7 +2359,7 @@ pyromancer:{
       "id": "py_lance",
       "n": "Flame Lance",
       "role": "Piercing",
-      "d": "Fire a piercing flame for 3 times weapon damage.",
+      "d": "Fire a piercing flame for 3 times flame damage.",
       "icon": "🔥",
       "cd": 12,
       "fx": "py_lance"
@@ -2368,7 +2368,7 @@ pyromancer:{
       "id": "py_nova",
       "n": "Flame Ring",
       "role": "Area",
-      "d": "Strike nearby enemies for 2.4 times weapon damage.",
+      "d": "Strike nearby enemies for 2.4 times flame damage.",
       "icon": "🔥",
       "cd": 13,
       "fx": "py_nova"
@@ -2398,7 +2398,7 @@ pyromancer:{
       "id": "py_inferno",
       "n": "Inferno",
       "role": "Area",
-      "d": "Burn nearby foes once per second for 4 seconds. Each pulse deals weapon damage.",
+      "d": "Burn nearby foes once per second for 4 seconds. Each pulse deals flame damage.",
       "icon": "🔥",
       "cd": 24,
       "fx": "py_inferno"
@@ -2407,7 +2407,7 @@ pyromancer:{
       "id": "py_sun",
       "n": "Sunburst",
       "role": "Focused",
-      "d": "Strike your aimed enemy and nearby foes for 4 times weapon damage.",
+      "d": "Strike your aimed enemy and nearby foes for 4 times flame damage.",
       "icon": "🔥",
       "cd": 22,
       "fx": "py_sun"
@@ -2726,7 +2726,7 @@ function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
    twentieth attempt is nagging, not teaching. */
 function weaponFamilyName(w){ return (w&&w.art)||'that'; }
 function refuseOffclass(w){
-  const C=curClass(), fam=(C.family||[]).join(', ');
+  const C=curClass(), fam=(C.family||[]).join(', ').replace('palmfire','palm flames');
   if(!meta.taughtOffclass){
     meta.taughtOffclass=1; persistGlobal();
     showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">OFF-CLASS WEAPON</p>
@@ -2746,10 +2746,10 @@ function refuseOffclass(w){
 /* C4 Monk: equipping the class blocks EVERY weapon by design - it fights with its hands, and the
    fists are its weapon. Handled before the family test so the message is about the Monk rather
    than about a missing family entry. */
-function monkBlocksWeapons(w){ return meta.classId==='monk' && w && w.art!=='fist'; }
+function monkBlocksWeapons(w){ return (meta.classId==='monk' && w && w.art!=='fist') || (meta.classId==='pyromancer' && w && w.intrinsic!=='pyromancer'); }
 
-function classFamilyOk(w){ if(w&&w.art==='fist') return meta.classId==='monk'; return !w || w.anyClass || curClass().family.includes(w.art); }   // fists: on-class (full power) ONLY for the Monk
-function offclassMul(p){ if(p.weapon&&p.weapon.art==='fist') return meta.classId==='monk'?1:0.20;   // bare fists: full power for the Monk, near-useless for everyone else
+function classFamilyOk(w){ if(meta.classId==='pyromancer')return !!w&&w.intrinsic==='pyromancer'; if(w?.intrinsic==='pyromancer')return false; if(w&&w.art==='fist') return meta.classId==='monk'; return !w || w.anyClass || curClass().family.includes(w.art); }   // fists: on-class (full power) ONLY for the Monk
+function offclassMul(p){ if(p.weapon?.intrinsic==='pyromancer')return meta.classId==='pyromancer'?1:0.20; if(p.weapon&&p.weapon.art==='fist') return meta.classId==='monk'?1:0.20;   // bare fists: full power for the Monk, near-useless for everyone else
   return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
 function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
 function abilityMul(){ return 1; }   // legacy sorcerer hook retired — skill-damage bonuses now come from v2 passives (m_potent, etc.)
@@ -2880,12 +2880,13 @@ function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dm
 const CLASSSTART={pyromancer:['firestaff','Splintered Cinder Staff'],warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['axe','Notched Axe'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade'],beastmaster:['bow','Weathered Hunting Bow']};
 function isIntrinsicLoot(w){ return !!(w&&(w.intrinsic||['scythe','fist','flintlock'].includes(w.art)||['scythe','voidscythe','fist','flintlock'].includes(w.arche))); }
 function intrinsicWeapon(cid){
-  const spec={monk:['fist','Bare Fists'],reaper:['scythe',"Reaper’s Scythe"],pirate:['flintlock','Flintlock & Saber']}[cid];
+  const spec={pyromancer:['firestaff','Palm Flames'],monk:['fist','Bare Fists'],reaper:['scythe',"Reaper’s Scythe"],pirate:['flintlock','Flintlock & Saber']}[cid];
   if(!spec)return null;
   const w=makeWeapon(spec[0],'common',spec[1]);
   w.intrinsic=cid;w.rarity='none';w.color='#c9b986';w.fist=cid==='monk';w.chg=cid==='pirate'?'sabersweep':w.chg;
   w.cd=cid==='pirate'?.78:w.cd;
-  const base=cid==='pirate'?40:ARCHES[spec[0]].dmg;
+  const base=cid==='pyromancer'?24:cid==='pirate'?40:ARCHES[spec[0]].dmg;
+  if(cid==='pyromancer')Object.assign(w,{art:'fist',cls:'ranged',sch:'mag',el:'fire',range:130,cd:.55,kb:130,chg:'flamefan',proj:{range:130},lifesteal:0});
   // Derived, never compounded into saves or rarity upgrades. Enumerable for snapshots/network.
   Object.defineProperty(w,'dmg',{enumerable:true,configurable:true,get(){const rank=Math.max(1,Math.min(10,Number(meta.classes?.[cid]?.rank)||1));return +(base*(1+.12*(rank-1))).toFixed(2);}});
   return w;
@@ -2893,12 +2894,13 @@ function intrinsicWeapon(cid){
 function fistsWeapon(){ return intrinsicWeapon('monk'); }
 function migrateClassEquipment(){
   meta.stash=(meta.stash||[]).filter(it=>!isIntrinsicLoot(it.weapon));
-  const fix=(p,cid)=>{if(!p||!p.weapon)return;if(isIntrinsicLoot(p.weapon))p.weapon=intrinsicWeapon(cid)||classStartWeapon(cid);else normWeapon(p.weapon);};
+  const recovered=new Map(); // Deduplicate snapshot copies, never an independently owned matching bag item.
+  const fix=(p,cid,bag=meta.stash)=>{if(!p||!p.weapon)return;if(cid==='pyromancer'&&!isIntrinsicLoot(p.weapon)){const old=p.weapon,key=JSON.stringify(old);let seen=recovered.get(bag);if(!seen)recovered.set(bag,seen=new Set());if(!seen.has(key)){bag.push({weapon:old});seen.add(key);}p.weapon=intrinsicWeapon(cid);return;}if(isIntrinsicLoot(p.weapon))p.weapon=intrinsicWeapon(cid)||classStartWeapon(cid);else normWeapon(p.weapon);};
   fix(meta.hero,meta.classId);fix(meta.run?.p,meta.classId);fix(meta.run?.base,meta.classId);
-  if(meta.bank){fix(meta.bank.hero,meta.bank.classId||meta.classId);if(meta.bank.stash)meta.bank.stash=meta.bank.stash.filter(it=>!isIntrinsicLoot(it.weapon));}
+  if(meta.bank){fix(meta.bank.hero,meta.bank.classId||meta.classId,meta.bank.stash||(meta.bank.stash=[]));if(meta.bank.stash)meta.bank.stash=meta.bank.stash.filter(it=>!isIntrinsicLoot(it.weapon));}
 }
 function classStartWeapon(cid){
-  if(['monk','reaper','pirate'].includes(cid)) return intrinsicWeapon(cid);
+  if(['monk','reaper','pirate','pyromancer'].includes(cid)) return intrinsicWeapon(cid);
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
   /* 0.62 was the real starter number, not the 9 in startWeapon() above - THIS is the function every
@@ -2910,7 +2912,7 @@ function classStartWeapon(cid){
 }
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
    Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
-const SHOPWEAP={pyromancer:'firestaff',warrior:'sword',ranger:'bow',mage:'firestaff',pirate:'bow',ninja:'knives',paladin:'sword',berserker:'axe',necromancer:'firestaff',chronomancer:'firestaff',stormcaller:'firestaff',warlock:'firestaff',skylancer:'javelin',bladedancer:'sword',beastmaster:'bow'};   // archetype ids, not arts
+const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',pirate:'bow',ninja:'knives',paladin:'sword',berserker:'axe',necromancer:'firestaff',chronomancer:'firestaff',stormcaller:'firestaff',warlock:'firestaff',skylancer:'javelin',bladedancer:'sword',beastmaster:'bow'};   // archetype ids, not arts
 const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Reliable'};
 function shopWeapon(cid,rid){
   const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
@@ -5874,7 +5876,7 @@ function trialComplete(remote=false){
   const C=CLASSES[cid];
   showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">TRIAL COMPLETE</p>
     <h2 class="title" style="font-size:34px">${C.icon} ${C.disp}</h2>
-    <p class="ovsub">${C.disp} unlocked and equipped.<br>Favors <b>${C.family.join(', ')}</b>.</p>
+    <p class="ovsub">${C.disp} unlocked and equipped.<br>Favors <b>${C.family.join(', ').replace('palmfire','palm flames')}</b>.</p>
     ${cid==='reaper'?`<p class="ovsub" style="color:${elementColor('void')};font-weight:800">⚔ Your built-in Void Scythe grows with your Reaper rank and player level.</p>`:''}
     <button class="bigbtn" id="hubBtn">Enter the Hub</button></div>`);
   document.getElementById('hubBtn').onclick=()=>{if(MP.guest()){MP.hostConn?.send({t:'trialExit',session:G.trialSession});toast('Asking the party to return to the Waystation.');}else openHub();};
@@ -12079,8 +12081,9 @@ function playerAttack(cdMul){
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
   // Swift Steel's fourth-hit bonus is applied on impact, not as a second attack-speed multiplier.
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
-  const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
+  const t=w.intrinsic==='pyromancer'?projectileAimTarget(p,w.range):w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
+  if(w.intrinsic==='pyromancer'){palmFlame(p,w,0);return;}
   /* BLESSED BLADE (paladin r9 b): "Your oath can be sworn at any range — mark without closing."
      The oath is normally sworn inside the basic-attack hook (CLASS_BASIC.paladin, 11224), which
      hitEnemy calls only when a swing CONNECTS — so without this passive a Paladin has to walk into
@@ -12147,6 +12150,7 @@ function chargeRelease(p,w,amt){ if(partyChannel)return; if(!classFamilyOk(w)) r
   else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
   G._desig=true;                                        // a charged release is a "designated" attack: spends Rune Marks + ruptures Corruption on its melee hits
   switch(w.chg){
+    case 'flamefan': palmFlame(p,w,Math.max(.01,Math.min(1,Number(amt)||0))); break;
     case 'bolt': fireChargedBolt(p,w,amt); break;      // staff: a bigger elemental projectile
     case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
     case 'quake': chargeQuake(p,w,amt); break;         // hammer: radial shockwave + stun
@@ -12161,6 +12165,21 @@ function chargeRelease(p,w,amt){ if(partyChannel)return; if(!classFamilyOk(w)) r
   }
   if((p.swingId||0)===previousSwing)p.swingId=previousSwing+1; // Every accepted release restarts its animation, including rapid same-clip follow-ups.
   G._desig=false;
+}
+// One contact per burst; shared combat targets include arena/co-op opponents.
+function palmFlame(p,w,charge){
+  if(charge>0){const t=projectileAimTarget(p,220);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);}
+  const charged=charge>0,reach=charged?165+55*charge:130,half=charged?.62+.16*charge:.36;
+  const crit=Math.random()<.16+effCrit(p),fx=Math.sin(p.yaw),fz=Math.cos(p.yaw),dmg=w.dmg*effPower(p)*effMagPower(p)*(crit?1.5:1)*(charged?1.25+.55*charge:1);
+  p.flameReach=reach;p.atkTimer=charged?.4:.28;p.combatPose={serial:p.swingId,clip:charged?'Spell2':'Spell1',remaining:p.atkTimer};
+  const previousCrit=G._crit;G._crit=crit;try{for(const e of combatTargets()){
+    if(e.dead||!vOverlap(e,p))continue;
+    const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz),along=dx*fx+dz*fz;
+    if(along<0||d>reach+(e.r||0)||Math.abs(dx*fz-dz*fx)>Math.max(0,along)*Math.tan(half)+(e.r||0))continue;
+    if(losBlocked(p.x,p.z,e.x,e.z))continue;
+    hitEnemy(e,dmg,p,w.kb,effLifesteal(p),'fire');
+  }}finally{G._crit=previousCrit;}
+  SFX.magic('fire');
 }
 function throwDagger(p,w,amt){
   const range=260+amt*160,t=projectileAimTarget(p,range),sp=700,oy=p.y+24;if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
@@ -13201,8 +13220,9 @@ const BASIC_ATTACK_STYLES=['warrior','ranger','mage','reaper'];
 function classAttackStyle(cid){ const s=(CLASSES[cid]||{}).attackStyle; return BASIC_ATTACK_STYLES.includes(s)?s:'warrior'; }
 function auxSlotsUpdate(){
   const lmb=document.getElementById('bLMB'), spc=document.getElementById('bSpace'); if(!lmb||!spc) return;
-  const v='?v='+VERSION3D, attackStyle=classAttackStyle(meta.classId), attackKey=attackStyle+'-'+VERSION3D;
-  if(lmb.dataset.i!==attackKey){ lmb.dataset.i=attackKey; lmb.innerHTML=''; skIco(lmb).innerHTML='<span class="auxico"><img src="icons/hud-basic-attack-'+attackStyle+'.png'+v+'" alt=""></span>'; }
+  const v='?v='+VERSION3D, attackStyle=classAttackStyle(meta.classId), attackKey=meta.classId+'-'+attackStyle+'-'+VERSION3D;
+  if(lmb.dataset.i!==attackKey){ lmb.dataset.i=attackKey; lmb.innerHTML=''; skIco(lmb).innerHTML='<span class="auxico"><img src="icons/'+(meta.classId==='pyromancer'?'skill-pyromancer-firebolt':'hud-basic-attack-'+attackStyle)+'.png'+v+'" alt=""></span>'; }
+  lmb.title=meta.classId==='pyromancer'?'Palm Flames · Tap for a short burst. Hold and release for a wider flame fan.':'';
   if(spc.dataset.i!==VERSION3D){ spc.dataset.i=VERSION3D; spc.innerHTML=''; skIco(spc).innerHTML='<span class="auxico"><img src="icons/hud-dodge.png'+v+'" alt=""></span>'; } }
 function auxCoolPaint(p){
   const paint=(b,cd,mx)=>{if(!b)return;if(cd>0){b.style.setProperty('--cdf',(cd/Math.max(cd,mx||cd)).toFixed(3));const n=b.querySelector('.sk-cd');if(n)n.textContent=cd.toFixed(1);b.classList.add('cooling');}else{b.classList.remove('cooling');b.style.setProperty('--cdf','0');}};
@@ -15574,7 +15594,7 @@ function arenaApplyPet(cfg){
 }
 function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.classId},ARENA_FAIR):cfg;   // Fair Mode standardizes level/rank/gear/stats (your class stays your choice)
   arenaApplyClass({classId:cfg.classId,rank:L.rank,classBuilds:cfg.classBuilds}); const p=freshPlayer(); arenaSetLevel(p,L.level);
-  try{ p.weapon=makeWeapon(L.wArch,L.wRid); }catch(e){}
+  try{ p.weapon=cfg.classId==='pyromancer'?intrinsicWeapon('pyromancer'):makeWeapon(L.wArch,L.wRid); }catch(e){}
   for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(L.aRid,slot); }catch(e){} }
   p.maxJumps=2; recomputeArmor(p); p.mana=p.maxMana; p.hp=effMaxHp(p); return p; }
 // ENTER the Arena — a fully SEPARATE, save-protected room (like the Sparring Room). Snapshot the campaign,
@@ -17188,7 +17208,7 @@ function lootTick(){ const d=G&&G.lootCard; if(!d) return; const rem=Math.max(0,
 function lootEquipCurrent(){ const d=G&&G.lootCard; if(!d) return; const it=d.item;
   if(!canWield(it)){toast('Requires Level '+rarityReq(it.rarity)+' to equip this gear.');return;}
   if(d.kind==='weapon'){ if(typeof canWield==='function'&&!canWield(it)){ toast('🔒 Requires Level '+rarityReq(it.rarity)+' to wield'); return; }
-    if(monkBlocksWeapons(it)){ toast('The Monk fights with its hands'); return; }
+    if(monkBlocksWeapons(it)){ toast(meta.classId==='pyromancer'?'Pyromancers fight with palm flames':'The Monk fights with its hands'); return; }
     if(!classFamilyOk(it)){ refuseOffclass(it); return; }                    // C1: hard block, not a damage penalty
     bagReplaced(G.p.weapon,true); G.p.weapon=it; playFx('equip'); toast(it.name+' equipped'); }
   else { const old=G.p.gear[it.slot]; G.p.gear[it.slot]=it; if(old) meta.stash.push((TRINKETIDS&&TRINKETIDS.includes(it.slot))?{trinket:old}:{armor:old}); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); toast(it.name+' equipped'); }
@@ -19244,7 +19264,7 @@ function openClassPicker(){
   mode='menu'; showGameUI(false); _offerT=Date.now();
   const cards=STARTERS.map(cid=>{ const C=CLASSES[cid];
     return `<button class="choice" data-c="${cid}"><div class="cname"><span>${C.icon}</span>${C.disp}</div>
-      <div class="cdesc">${C.family.join(', ')}<br>${C.skills.map(s=>s.n).join(' · ')}</div></button>`; }).join('');
+      <div class="cdesc">${C.family.join(', ').replace('palmfire','palm flames')}<br>${C.skills.map(s=>s.n).join(' · ')}</div></button>`; }).join('');
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:36px">BLADEFALL</h2>
     <p class="ovsub">Choose how you fight. Its trial teaches you the rest.<br><span style="opacity:.6">You can unlock the others later — and more besides.</span></p>
     <div class="choices">${cards}</div></div>`);
@@ -19398,7 +19418,7 @@ function ensureClassWeapon(p){
   if(index>=0)p.weapon=normWeapon(meta.stash.splice(index,1)[0].weapon);
   else {p.weapon=classStartWeapon(meta.classId);if(!p.weapon.intrinsic){p.weapon.dmg=+(p.weapon.dmg*.70).toFixed(1);p.weapon.starter=true;}}
   // A full bag must never destroy the weapon displaced by an automatic class switch.
-  if(old&&!isIntrinsicLoot(old)&&!old.starter)meta.stash.push({weapon:old});
+  if(old&&!isIntrinsicLoot(old)&&(!old.starter||meta.classId==='pyromancer'))meta.stash.push({weapon:old});
 }
 function trainerEquipClass(cid){
   if(!CLASSES[cid]||!meta.classUnlocked[cid]) return false;
@@ -19439,7 +19459,7 @@ function openTrainer(back){
      and the Monk's card looked empty. Any art missing from this map is silently invisible, which
      is why the chart read as incomplete rather than as informative. */
   const FAM={sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Hammer',bow:'Bow',cross:'Crossbow',dagger:'Dagger',javelin:'Javelin',staff:'Staff',wand:'Wand',spellblade:'Spellblade',scythe:'Scythe',
-    flintlock:'Flintlock',tome:'Tome',orb:'Orb',fist:'Fists'};
+    flintlock:'Flintlock',tome:'Tome',orb:'Orb',fist:'Fists',palmfire:'Palm flames (built in)'};
   const rows=CLASSIDS.map(cid=>{ const C=CLASSES[cid], un=!!meta.classUnlocked[cid], cs=classState(cid), sel=meta.classId===cid;
     const sub=cs.sub?C.subs.find(s=>s.id===cs.sub):null;
     const acc=ACC[cid]||'#c9a86a';
@@ -19678,7 +19698,7 @@ function openShop(back){
       <div style="flex:1;min-width:0"><div class="gn">${P.name} <span style="color:${maxed?'#ffd24a':'var(--muted)'}">Lv ${Math.min(lv,P.max)}/${P.max}${maxed?' · MAX':''}</span></div>
         <div class="gd">Current: <b style="color:var(--good)">${P.unit(cur)}</b>${maxed?'':` · Next: ${P.unit(next)}`}<br><span style="color:#ffd24a">Rank 10 capstone: ${cap}</span></div></div>
       <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:9px 14px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');  const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
-  const wrows=(['monk','reaper'].includes(cid)?[]:['common','uncommon','rare','epic']).map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
+  const wrows=(['monk','reaper','pyromancer'].includes(cid)?[]:['common','uncommon','rare','epic']).map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
     const lock=!canWieldRid(rid);
     return `<div class="gearrow" style="--spine:${RARITY[rid].color}${lock?';opacity:.55':''}"><img class="bagav" src="${itemAv(w)}" alt="">
@@ -20883,6 +20903,7 @@ function drawCourse(s,t){
   if(_hubDeco) deferOff();
 }
 function weaponMesh(w,swing){
+  if(w?.intrinsic==='pyromancer')return; // Palm flames have no held weapon, including legacy/FPV render paths.
   // drawn in hand space: +y up along the blade
   const gcos=(G&&G.p&&G.p.weapon===w)?cosEquipped('glow'):null;    // cosmetic edge glow — only on YOUR equipped weapon
   // A cosmetic glow is an emissive outline, not a material replacement. Using its
@@ -23309,6 +23330,7 @@ function itemStaticAv(item){
     const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',venomedge:'aff_venom_sword',umbrablade:'aff_void_sword',sunblade:'aff_holy_sword',lightbringer:'aff_holy_sword',voidscythe:'voidscythe',iansblade:'iansblade',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
     const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
     // Dedicated signature-weapon portraits; legacy archetypes retain the same artwork.
+    if(item.intrinsic==='pyromancer')return BFUIIcons.url('class-pyromancer');
     if(['pirate','monk','reaper'].includes(item.intrinsic))return BFUIIcons.url('equipment-'+item.intrinsic);
     const placeholder={flintlock:BFUIIcons.url('equipment-pirate'),fist:BFUIIcons.url('equipment-monk')};
     const ph=placeholder[item.arche]; if(ph) return ph;
@@ -24316,7 +24338,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2236"></script>
+<script type="module" src="./hero3d.js?v=2237"></script>
 <script type="module" src="./social-hub.js?v=2227a"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

@@ -2254,3 +2254,12 @@ Removed artificial directional/puzzle boards from Black Woods, Winding Cliffs, L
 ## [Codex | 2026-10-17] v2.236 production confirmed
 
 Functional commit72a18a43 deployed successfully asceeb5beb-d4b0-44de-85b7-783b0c852d83. Actual public browser confirmsv2.236.0-world-signs, updated2236 modules and main-menu boot. Additional local browser checks cover Frostfell, Emberdeep, Storm Coast and Castle Gates; no errors, intended seven retained destination signs verified. Castle nextArea remains gated, so Long Ascent sign absence is source/regression-verified rather than traversed in this browser run. No production save changes.
+
+
+## [Codex | 2026-10-17] v2.237 Pyromancer palm flames / Warlock access
+
+Pyromancer now has intrinsic Palm Flames, no held weapon or external weapon access. Tap is a short 130-unit forward cone; full charge is a wider 220-unit fan with 1.8x base damage. Shared targets/LOS/height/damage handle PvE and PvP, with magic gear, critical hits, lifesteal, class-hit riders and guest authority following existing paths. Rank scales intrinsic damage like the other signature classes. Distinct bounded flame ribbon VFX and Spell1/Spell2 gestures, shared visual packets, fire basic-attack icon and descriptions. Quartermaster no longer offers an unusable Pyromancer weapon. Arena player also keeps palm flames.
+
+Switching bags the previous weapon, including starters/full bags. Legacy Pyromancer equipment migrates into its container's bag, recovering duplicate snapshot copies once while preserving separately owned identical items. Switching away uses ordinary equipment rules. Warlock now supports all magic and ranged families.
+
+104 regression suites passed; final focused palm-flame suite covers rank scaling, full-bag switches, legacy/idempotent migration, identical owned item conservation, range/cone/charge/wall/height/PvP target dispatch, remote VFX packet and bounded geometry. Parser passes. Actual disposable pre-change level100 browser save loads and switches, bags old weapon and fights without staff/projectiles; tap34 and charge59 damage in the isolated scene, no captured errors. Flame screenshot inspected. No two-device live network match or subjective balance claim. Evidence in this directory. Publication pending.

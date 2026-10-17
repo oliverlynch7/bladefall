@@ -31,7 +31,7 @@ function packet(e){return {id:e.profile.id,profile:e.profile.weapon?e.profile:nu
 function receive(g,rows){for(const a of (Array.isArray(rows)?rows:[]).slice(0,48)){
  if(!a||![a.x,a.y,a.z,a.yaw,a.life,a.t].every(Number.isFinite)||Math.abs(a.x)>1e7||Math.abs(a.z)>1e7)continue;
  let profile=profiles[a.id];
- if(a.profile?.weapon){const p=a.profile;if(!themes[p.cls]||!['slash','cross','execute','spiral','bash','lance','fan','bolt','quake'].includes(p.form))continue;profile={id:String(p.id||'').slice(0,64),cls:p.cls,form:p.form,slot:p.slot===2?2:-1,weapon:true,element:p.element};}
+ if(a.profile?.weapon){const p=a.profile;if(!themes[p.cls]||!['slash','cross','execute','spiral','bash','lance','fan','bolt','quake','palmflame'].includes(p.form))continue;profile={id:String(p.id||'').slice(0,64),cls:p.cls,form:p.form,slot:p.slot===2?2:-1,weapon:true,element:p.element};}
  if(!profile)continue;const life=Math.min(3,Math.max(.05,a.life)),t=Math.max(0,a.t);if(t>=life)continue;
  const origin=a.origin&&[a.origin.x,a.origin.y,a.origin.z].every(Number.isFinite)?{x:a.origin.x,y:a.origin.y,z:a.origin.z}:undefined;
  (g.combatArt||(g.combatArt=[])).push({profile,x:a.x,y:a.y,z:a.z,yaw:a.yaw,origin,radius:Number.isFinite(a.radius)?Math.max(0,Math.min(2000,a.radius)):undefined,t,life,serial:a.serial,visual:true,_mp:1});
@@ -46,10 +46,11 @@ function weapon(g,p,cls,charged){
  if(p.combatPose)p.combatPose.remaining=0;
  const w=p.weapon,art=w.art,forms={sword:'slash',spellblade:'slash',dagger:'cross',great:'slash',hammer:'execute',axe:'execute',scythe:'spiral',fist:'bash',bow:'lance',cross:'fan',javelin:'lance',flintlock:'bash',staff:'bolt',wand:'bolt'};
  const chargeForms={quake:'quake',spin:'spiral',spellsweep:'slash',hurl:'execute',daggerthrow:'lance',javelin:'lance',powershot:'lance',scythethrow:'spiral',bolt:'bolt'};
- if(charged&&art!=='cross')p.combatPose={serial:++serial,clip:({bow:'Bow_Shoot',dagger:'Staff_Attack',javelin:'Staff_Attack',staff:'Staff_Attack',wand:'Spell2',spellblade:'Sword_Attack2'})[art]||'Attack2',remaining:.45};
- const profile={id:w.arche,cls:cls||'warrior',form:charged?(chargeForms[w.chg]||'bolt'):(forms[art]||'slash'),slot:charged?2:-1,weapon:true,element:w.el};
+ if(w.intrinsic==='pyromancer'){p.combatPose={serial:++serial,clip:charged?'Spell2':'Spell1',remaining:charged?.4:.28};}
+ else if(charged&&art!=='cross')p.combatPose={serial:++serial,clip:({bow:'Bow_Shoot',dagger:'Staff_Attack',javelin:'Staff_Attack',staff:'Staff_Attack',wand:'Spell2',spellblade:'Sword_Attack2'})[art]||'Attack2',remaining:.45};
+ const profile={id:w.arche,cls:cls||'warrior',form:w.intrinsic==='pyromancer'?'palmflame':charged?(chargeForms[w.chg]||'bolt'):(forms[art]||'slash'),slot:charged?2:-1,weapon:true,element:w.el};
  const list=g.combatArt||(g.combatArt=[]);
- list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:charged?.55:Math.max(.16,p.atkTimer||.24),radius:w.range||48,serial:++serial});
+ list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:charged?.55:Math.max(.16,p.atkTimer||.24),radius:w.intrinsic==='pyromancer'?(p.flameReach||(charged?220:130)):w.range||48,serial:++serial});
  if(list.length>48)list.splice(0,list.length-48);
 }
 function tick(g,dt){if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
@@ -91,7 +92,15 @@ function render(g,d){
   pushM();mv(e.x,e.y+4,e.z);rotY(e.yaw);
   const f=pr.form;
   const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot});
-  if(custom){}else if(['slash','cross','spiral','execute','claw','flurry'].includes(f)){
+  if(custom){}else if(f==='palmflame'){
+   const wide=pr.slot===2,count=wide?9:5,spread=wide?.78:.36;
+   // Layered tapering tongues start at the palms, never a staff projectile.
+   for(let j=0;j<count;j++){const ang=(j/(count-1)*2-1)*spread,side=j%2?10:-10,len=r*(.82+.18*Math.sin(j*2+1));
+    let prev=[side,26,18];
+    for(let k=1;k<=5;k++){const t=k/5,next=[side+Math.sin(ang)*len*t,26+Math.sin(t*8+q*15+j)*5*t+8*t,18+Math.cos(ang)*len*t];
+     line(prev,next,(wide?9:7)*(1-t*.8),j%2?'#ff6525':'#ff9c32',a*.82);if(k<4)line([prev[0],prev[1]+1,prev[2]],next,2,hot,a*.8);prev=next;}
+   }
+  }else if(['slash','cross','spiral','execute','claw','flurry'].includes(f)){
    const count=f==='flurry'?5:f==='cross'?2:f==='spiral'?3:1;
    for(let j=0;j<count;j++){
     pushM(); if(f==='cross')rotX(j?-.6:.6); else if(f==='execute')rotX(Math.PI/2);

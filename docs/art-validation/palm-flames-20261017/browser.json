@@ -1,0 +1,88 @@
+{
+  "bagged": true,
+  "charge": {
+    "art": {
+      "life": 0.55,
+      "profile": {
+        "cls": "pyromancer",
+        "element": "fire",
+        "form": "palmflame",
+        "id": "firestaff",
+        "slot": 2,
+        "weapon": true
+      },
+      "radius": 220,
+      "serial": 4,
+      "t": 0,
+      "x": 270,
+      "y": 0,
+      "yaw": 3.141592653589793,
+      "z": -130
+    },
+    "damage": 59,
+    "pose": {
+      "clip": "Spell2",
+      "remaining": 0.4,
+      "serial": 3
+    },
+    "projectiles": 0
+  },
+  "classAllowed": true,
+  "errors": [],
+  "legacyLevel": 100,
+  "ready": true,
+  "switched": true,
+  "tap": {
+    "art": {
+      "life": 0.28,
+      "profile": {
+        "cls": "pyromancer",
+        "element": "fire",
+        "form": "palmflame",
+        "id": "firestaff",
+        "slot": -1,
+        "weapon": true
+      },
+      "radius": 130,
+      "serial": 2,
+      "t": 0.2833333333333333,
+      "x": 270,
+      "y": 0,
+      "yaw": 3.141592653589793,
+      "z": -130
+    },
+    "damage": 34,
+    "pose": {
+      "clip": "Spell1",
+      "remaining": 0,
+      "serial": 1
+    },
+    "projectiles": 0
+  },
+  "target": "grunt",
+  "weapon": {
+    "anyClass": false,
+    "arche": "firestaff",
+    "art": "fist",
+    "blade": "#ff7a3a",
+    "cd": 0.55,
+    "chg": "flamefan",
+    "cls": "ranged",
+    "color": "#c9b986",
+    "dmg": 24,
+    "el": "fire",
+    "fist": false,
+    "ians": false,
+    "intrinsic": "pyromancer",
+    "kb": 130,
+    "lifesteal": 0,
+    "name": "Palm Flames",
+    "proj": {
+      "range": 130
+    },
+    "range": 130,
+    "rarity": "none",
+    "reaper": false,
+    "sch": "mag"
+  }
+}

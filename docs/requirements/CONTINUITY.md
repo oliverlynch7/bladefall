@@ -1881,3 +1881,9 @@ U-PROGRESSION-CELEBRATION-20261016 implemented as v2.208.0. Gold player-level ba
 Browser connection recovered. Staged rank-2, rank-3 passive, simultaneous notifications, player-only running simulation, E confirmation and reduced-motion paths checked; fixed menu host removal and reduced-motion rune specificity during verification. 43 state checks + 580 audio tests + inline syntax pass. Actual old save retained level 4, rank 4, 1,145 gold, 52 XP and all three existing choices. All 64 custom sounds decode in real WebAudio. Browser muted: no subjective listening claim.
 
 Isolated release checkout ../bladefall-audio-release starts at production ab457fa9 and contains ONLY paid SFX/progression changes. No pending wardrobe/Reaper/Keep candidate imported. Browser fixtures use in-memory storage and do not alter real saves. Production deployment follows verification; evidence docs/art-validation/progression-20261016/summary.json.
+
+## [Codex | 2026-10-16] v2.208.0 production confirmed
+
+Isolated commit cfa8671d pushed to main from ../bladefall-audio-release. Cloudflare succeeded (52f523ad-e519-41a7-92bf-330dacda2ddb), and the real production browser shows v2.208.0-progression-celebrations with progression JS/CSS and priority SFX scripts present. Live: https://bladefall.pages.dev/3d/ . Includes the 64 paid SFX and the level/rank celebrations; zero extra generation credits. Title smoke plus staged gameplay/old-save/decoding checks are recorded; subjective listening and live co-op remain unclaimed. Pending wardrobe, Reaper and Keep work remain excluded.
+
+The development branch remains divergent and must not be pushed wholesale to main. Production main is now cfa8671d (later documentation-only commits may follow). Independent release checkout preserves the tested subset.

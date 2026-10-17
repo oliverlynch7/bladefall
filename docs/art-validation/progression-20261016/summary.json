@@ -1,6 +1,6 @@
 {
   "version": "2.208.0-progression-celebrations",
-  "status": "Production-baseline candidate verified locally; deployment pending",
+  "status": "Released to production; browser title/version/assets verified",
   "scope": [
     "Distinct gold player-level celebration without pause or added slow motion",
     "Purple class-rank celebration and 850ms safe pre-choice transition",
@@ -35,5 +35,10 @@
   ],
   "api_credits_spent_this_task": 0,
   "prior_sfx_batch_credits": 557,
-  "prior_sfx_remaining_verified": 39443
+  "prior_sfx_remaining_verified": 39443,
+  "production_commit": "cfa8671d65234aebbe3856a6ba3428794453c2e1",
+  "production_url": "https://bladefall.pages.dev/3d/",
+  "immutable_url": "https://52f523ad.bladefall.pages.dev/3d/",
+  "cloudflare_success": true,
+  "production_browser_version": "2.208.0-progression-celebrations"
 }

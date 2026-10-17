@@ -2366,3 +2366,8 @@ Explicitly marked28 authored hand-in/progression choices across11 campaign/hub-r
 Ready Waystation return requests go directly from keeper interaction to delivery dialogue, skipping services/questions until turn-in. Ready choice receives yellow quest badge and existing keyboard selector. Closing remains allowed. No story prose, quest conditions, rewards, stable IDs or co-op ownership protocol changed. Current-story and state/UI cache keys advanced.
 
 111 offline suites pass. New154checks cover28 hand-ins, ready-only filtering, missing items, stale requests, atomic/once-only effects and old saved reminder redirects. Castle/Rose tests now exercise refusal/apology before all requirements, explicitly test suppressed stale ready responses while retaining meaningful outcome/reward tests. Actual browser disposable level100 save verifies Mara incomplete/ready/delivery/receipt and Smith ready request skipping services;9checks pass, screenshot reviewed. No production saves modified or physical two-device claim.
+
+
+## [Codex | 2026-10-17] v2.249.0 — Bag pause protection
+
+Shared openBag now begins the same pause session as Esc, covering keyboard, HUD and NPC bag access, refreshed filters and nested equipment panels. Solo time freezes; co-op world continues with held, visible invulnerable avatar and Paused presence. Resume clears protection; PvP exception unchanged. Browser checked old level100 save, Tab/HUD entry, Tab/Q exit, nested Stats, direct damage and simulated co-op state. Evidence: docs/art-validation/bag-pause-20261017.

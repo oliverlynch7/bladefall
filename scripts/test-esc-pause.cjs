@@ -6,6 +6,11 @@ const part=src.slice(src.indexOf('let liveMenuWorld=null'),src.indexOf('function
 const ctx={G:{p:{hp:100,x:1,y:2,z:3,yaw:0,vx:4,vy:5,vz:6,onGround:true},time:0},mode:'play',MP:{active:false,pvp:false,tick(){ctx.network++;}},meta:{autoAttack:true},input:{},network:0,social:0,polls:0,document:{body:{classList:{contains:()=>false}},getElementById:()=>null},window:{BFSocial:{tick(){ctx.social++;}}},BFGuidedTutorial:{suspend(){}},BFShipwreckShore:{aiming:()=>false},releaseKeyboard(){},pollGamepad(){ctx.polls++;},updateWorld(dt){ctx.G.time+=dt;ctx.G.p.x+=50;ctx.hurtPlayer(9);},briarBook:null};
 vm.createContext(ctx);vm.runInContext(part+`\nmenuDamageWarning=()=>{}; function hurtPlayer(){if(pauseDamageBlocked())return;G.p.hp-=9;} function lavaHit(){if(pauseDamageBlocked())return;G.p.hp-=22;} function pause(){beginPause();mode='pause';}`,ctx);
 const run=s=>vm.runInContext(s,ctx);
+// Execute the real bag entry until inventory rendering; no menu policy duplicate.
+const bagEntry=src.slice(src.indexOf('function openBag(back,keepOpen=false){'),src.indexOf('  const active=document.activeElement',src.indexOf('function openBag(back,keepOpen=false){')));
+vm.runInContext(bagEntry+"mode='menu';}",ctx);
+run('openBag()');ok(run('pauseState().frozen'),'direct bag entry freezes solo world');let bagTime=ctx.G.time,bagHp=ctx.G.p.hp;run('update(.25);hurtPlayer();lavaHit()');ok(ctx.G.time===bagTime&&ctx.G.p.hp===bagHp,'bag blocks simulation and damage');ctx.mode='mirror';run('update(.25)');ok(ctx.G.time===bagTime,'bag inspection stays frozen');ctx.mode='play';run('update(.01)');ctx.MP.active=true;run('openBag()');bagTime=ctx.G.time;bagHp=ctx.G.p.hp;run('update(.1)');ok(ctx.G.time>bagTime&&ctx.G.p.hp===bagHp&&run('playerActivity()')==='Paused','direct co-op bag protects player with paused presence');ctx.mode='play';run('update(.01)');ok(!run('pauseState().active'),'closing bag clears protection');ctx.MP.active=false;ctx.social=0;
+
 run('update(.1);pause()');let time=ctx.G.time,hp=ctx.G.p.hp;
 run('update(.5);hurtPlayer();lavaHit()');ok(ctx.G.time===time&&ctx.G.p.hp===hp,'solo time and damage frozen');ok(ctx.polls>0,'controller can resume while frozen');ok(ctx.social===1,'social timers do not advance while frozen');
 ctx.mode='menu';run('update(.5)');ok(ctx.G.time===time,'nested Settings/Bag remains frozen');

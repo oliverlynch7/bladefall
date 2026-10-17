@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.248.0-ready-quest-turnin';
+const VERSION3D='2.249.0-bag-pause';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5366,6 +5366,7 @@ function equipBagItem(entry,world=G){
   persist();SFX.pickup();hudUpdate();return true;
 }
 function openBag(back,keepOpen=false){
+  beginPause();
   const active=document.activeElement,focusSelector=keepOpen?(active?.dataset?.bagcat?'[data-bagcat="'+active.dataset.bagcat+'"]':active?.dataset?.bagtype?'[data-bagtype="'+active.dataset.bagtype+'"]':active?.dataset?.bagslot?'[data-bagslot="'+active.dataset.bagslot+'"]':active?.id?'#'+active.id:null):null;
   const previousScroll=keepOpen?(document.getElementById('bagItems')?.scrollTop||0):0;
   if(!keepOpen)_bagView={category:'all',weaponType:'all',slot:null,readyOnly:false};

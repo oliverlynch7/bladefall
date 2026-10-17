@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Pre-change level 100 save loads in isolated browser storage",
+    "Tab opens bag",
+    "Solo bag freezes simulation and blocks direct damage",
+    "Stats panel retains freeze and protection",
+    "Q exits nested stats",
+    "HUD bag opens with same protection",
+    "Tab closes bag",
+    "Simulated co-op bag advances world, holds avatar, blocks damage and sends Paused presence"
+  ],
+  "passed": true,
+  "limitations": "Co-op networking state simulated in one browser; no two-device playtest."
+}

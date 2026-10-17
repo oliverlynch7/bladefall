@@ -1982,3 +1982,8 @@ User requires equipped weapon always visible in upper-left name card, companion 
 ## [Codex | 2026-10-17] U-READY-QUEST-TURNIN-20261017
 
 User wants ready NPC quest hand-ins replace stale reminder/question branches, with only turn-in/progression choices while requirements are met. Plan: explicitly mark audited authored hand-in choices (not guess from prose), filter ready choices in shared state view and reject hidden stale choices, suppress topic detours until hand-in; restore saved conversation to a reachable ready node through effect-free/already-applied navigation only. Prioritize ready hub return requests before service/lore landing. Preserve reward-type/real outcome choices, partial deliveries, unmet requirements, unrelated side quests after hand-in, once-only rewards, co-op authority and closing. Verify cross-book hand-ins and actual browser incomplete/ready/after flows.
+
+
+## [Codex | 2026-10-17] U-BAG-PAUSE-20261017
+
+Opening the bag must use main-menu pause protection: solo simulation freezes; co-op world continues while the visible player is protected and peers see paused presence. Initialize existing pause session at the shared openBag entry, including direct keyboard/HUD access and nested equipment panels. Resume clears protection; preserve competitive-play exception and saves. Verify actual bag entry, nested panels, damage, resume and world replacement.

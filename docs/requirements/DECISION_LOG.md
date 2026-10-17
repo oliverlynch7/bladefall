@@ -1695,3 +1695,10 @@ User requests finish and improve broken Treasure Sprint; confirms hub entry stal
 ## [Codex | 2026-10-17] Sprint movement/network follow-up
 
 Course audit also found static mover coordinates used by guide, phase obstacle index not invalidated, and vertical rider displacement applied after snapping to the current platform height. Sprint now tracks live mover height/position, invalidates phase collision changes, carries an existing rider once before integration, and leaves other campaign lift paths unchanged. Same-seed co-op retries carry an attempt number; stale attempts are ignored. Hub practice chest claims are ephemeral, score includes fall penalties, and practice autosave never replaces a campaign resume.
+
+
+## [Codex | 2026-10-17] U-COOP-INDEPENDENT-CHESTS-20261017
+
+User: "chest drops should be mirrored in coop and we should both be abl to collec the same chest indiependetly. so we both get grear at the same time"
+
+Inspection found guest kill replay and unseen-enemy credit roll separate random drops, and host world snapshots omit chests. Plan: host rolls enemy chest existence/location/rarity once; periodic scene-scoped chest manifests mirror placed/dynamic/enemy chests without sharing opened/claimed flags or reward inventory. Each save retains its own once-only reward record, capacity/auto-sell decision and reveal. Host-opened chests remain available to friends; late/repeated snapshots cannot reopen personal claims. Preserve claimed host drop descriptors across reloads for late join; shared mimic combat remains host-authoritative. Verify two isolated host/guest game instances, either opening order, full bag, duplicates/stale scenes, enemy location/rarity, late join, saved claim reload and special modes. No changes to drop rates or hub Sprint reward rules.

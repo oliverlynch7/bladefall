@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "name": "Both isolated pre-change level100 saves load",
+      "ok": true
+    },
+    {
+      "name": "Host and guest share actual campaign scene",
+      "ok": true
+    },
+    {
+      "name": "Two game instances connected by reliable WebRTC data channel",
+      "ok": true
+    },
+    {
+      "name": "Actual broadcast delivers chest at host kill location",
+      "ok": true
+    },
+    {
+      "name": "Shared chest rarity matches",
+      "ok": true
+    },
+    {
+      "name": "Claim records are separate objects",
+      "ok": true
+    },
+    {
+      "name": "Host receives one item; guest chest remains closed",
+      "ok": true
+    },
+    {
+      "name": "Guest independently receives one item and reveal",
+      "ok": true
+    },
+    {
+      "name": "Repeated state and opening cannot grant twice",
+      "ok": true
+    },
+    {
+      "name": "Guest can collect first without opening host chest",
+      "ok": true
+    },
+    {
+      "name": "Host can then claim the same chest",
+      "ok": true
+    },
+    {
+      "name": "Full guest bag leaves chest unclaimed",
+      "ok": true
+    },
+    {
+      "name": "Full guest bag does not block host reward",
+      "ok": true
+    },
+    {
+      "name": "Guest can free space and collect later",
+      "ok": true
+    },
+    {
+      "name": "Reloaded personal claim stays consumed",
+      "ok": true
+    },
+    {
+      "name": "Wrong scene cannot alter current chests",
+      "ok": true
+    },
+    {
+      "name": "Host retains claimed drop descriptors for late join",
+      "ok": true
+    },
+    {
+      "name": "Fresh late join sees host-claimed chests as unclaimed",
+      "ok": true
+    },
+    {
+      "name": "Guest cannot independently roll more drops",
+      "ok": true
+    },
+    {
+      "name": "Unique king reward templates are mirrored for guest",
+      "ok": true
+    },
+    {
+      "name": "Both players claim their guaranteed Abyss Blade",
+      "ok": true
+    },
+    {
+      "name": "Both rendered game instances have no errors",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "browserErrors": []
+}

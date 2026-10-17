@@ -1204,7 +1204,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.255.0-sprint-finish';
+const VERSION3D='2.256.0-coop-chests';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13820,16 +13820,47 @@ function mimicReveal(ch){
   G.shake=Math.min(G.shake+12,18); G.slowmo=Math.max(G.slowmo||0,0.18);
   toast('It was never a chest','var(--danger)','event-mimic');
 }
+function chestRewardKey(ch){
+ const scene=[G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex,G.bonusActive?G.bonusCourse?.seed||G.bonusVisits||0:0].join(':');
+ return ch.rewardKey||(ch.rewardKey=scene+':'+Math.round(ch.x)+','+Math.round(ch.z));
+}
+// The host shares chest existence, never personal rewards or claim state.
+function coopChestSnapshot(){
+ if(!G||G.hub||G.trial||G.arena||G.sprintFun)return null;
+ return {version:1,scene:enemyChestScene(),stream:MP._chestStream||(MP._chestStream=Math.random().toString(36).slice(2)),revision:(MP._chestRevision=(MP._chestRevision||0)+1),entries:(G.chests||[]).map(ch=>({
+  key:chestRewardKey(ch),x:ch.x,z:ch.z,y:ch.y||0,rarity:ch.rarity||BFChestRules.campaign(ch,G.zone||0,G.area||0).rarity,
+  challenge:!!ch.challenge,mimic:!!ch.mimic,enemyReward:!!ch.enemyReward,bonus:!!ch.bonus,descentReward:!!ch.descentReward,
+  prisonRoom:ch.prisonRoom||null,fixedReward:ch.fixedReward||ch._rewardRecord?.fixedReward||null,readyIn:Math.max(0,Math.min(2,(ch.dropReadyAt||0)-G.time))
+ }))};
+}
+function applyCoopChests(packet){
+ if(!MP.guest()||!G||G.hub||G.trial||G.arena||G.sprintFun||packet?.version!==1||packet.scene!==enemyChestScene()||!Array.isArray(packet.entries)||packet.entries.length>2048||!Number.isSafeInteger(packet.revision)||packet.revision<1||typeof packet.stream!=='string'||packet.stream.length>40||packet.stream===G._coopChestStream&&packet.revision<=(G._coopChestRevision||0))return;
+ const valid=a=>a&&typeof a.key==='string'&&a.key.length<=300&&a.key.startsWith(packet.scene+':')&&[a.x,a.y,a.z,a.readyIn].every(Number.isFinite)&&Math.max(Math.abs(a.x),Math.abs(a.y),Math.abs(a.z))<1000000&&RORDER.includes(a.rarity)&&[null,'abyssblade','kingarmor'].includes(a.fixedReward??null);
+ if(!packet.entries.every(valid))return;
+ G._coopChestRevision=packet.revision;G._coopChestStream=packet.stream;
+ const seen=new Set(),existing=new Map((G.chests||[]).map(c=>[chestRewardKey(c),c]));
+ let changed=false;
+ for(const a of packet.entries){
+  if(seen.has(a.key))continue;seen.add(a.key);
+  let ch=existing.get(a.key);
+  if(!ch){ch={x:a.x,y:a.y,z:a.z,rewardKey:a.key,opened:false,bob:0,dropReadyAt:G.time+Math.max(0,Math.min(2,a.readyIn))};G.chests.push(ch);changed=true;}
+  Object.assign(ch,{rarity:a.rarity,challenge:!!a.challenge,mimic:!!a.mimic,enemyReward:!!a.enemyReward,bonus:!!a.bonus,descentReward:!!a.descentReward,prisonRoom:a.prisonRoom||null,fixedReward:a.fixedReward||null,_coopChest:true});
+  const rec=prepareChest(ch); // Own record determines opened; host opening never consumes this claim.
+  if(a.enemyReward&&rec.source!=='enemy'){Object.assign(rec,{source:'enemy',scene:packet.scene,x:a.x,y:a.y,z:a.z});changed=true;}
+ }
+ // A revealed mimic is a shared enemy, not a second reward chest on the guest.
+ const retained=new Set();G.chests=G.chests.filter(ch=>{const key=chestRewardKey(ch);if((ch.enemyReward||ch.mimic||ch._coopChest)&&!seen.has(key)||retained.has(key))return false;retained.add(key);return true;});
+ if(changed){persist();if(G.escape)BFPrisonRun.checkpoint();}
+}
 function prepareChest(ch){
  if(!ch)return null;if(ch.bonus&&G.sprintFun&&G.bonusActive){ch.rarity='rare';ch.mimic=false;return ch._sprintRecord||(ch._sprintRecord={claimed:!!ch.opened});}if(ch._rewardRecord)return ch._rewardRecord;
  const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=layout.rarity;ch.challenge=ch.enemyReward?false:layout.challenge;
  if(ch.challenge)ch.mimic=false;
- const scene=[G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex,G.bonusActive?G.bonusCourse?.seed||G.bonusVisits||0:0].join(':');
- const key=ch.rewardKey||scene+':'+Math.round(ch.x)+','+Math.round(ch.z);
+ const key=chestRewardKey(ch);
  const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
  const records=owner.chestRecords||(owner.chestRecords={});
  let rec=records[key];
- if(!rec){const rid=BFChestRules.reward(ch.rarity,ch.challenge,BFChestRules.hash(key+':reward'));rec=records[key]={rarity:ch.rarity,challenge:ch.challenge,item:randomLoot(rid),claimed:!!ch.opened};
+ if(!rec){const rid=BFChestRules.reward(ch.rarity,ch.challenge,BFChestRules.hash(key+':reward'));rec=records[key]={rarity:ch.rarity,challenge:ch.challenge,item:ch.fixedReward==='abyssblade'?{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')}:ch.fixedReward==='kingarmor'?{armor:makeArmor('legendary','chest')}:randomLoot(rid),fixedReward:ch.fixedReward||null,claimed:!!ch.opened};
   // Keep recent expeditions bounded; an old discarded run is not resumable through normal saves.
   const keys=Object.keys(records);if(keys.length>2048)for(const k of keys.slice(0,keys.length-2048))delete records[k];
   persist();
@@ -13904,13 +13935,14 @@ function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, t
 function enemyEncounterLevel(e){return BFEncounterRewards.level(G,e);}
 function enemyChestScene(){return [G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex].join(':');}
 function restoreEnemyChests(){
- const scene=enemyChestScene();if(G._enemyChestScene===scene)return;G._enemyChestScene=scene;
+ const scene=enemyChestScene();if(MP.guest()||G._enemyChestScene===scene)return;G._enemyChestScene=scene;
  const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
- for(const [key,r]of Object.entries(owner.chestRecords||{}))if(r.source==='enemy'&&r.scene===scene&&!r.claimed&&!G.chests.some(c=>c.rewardKey===key)){
-  G.chests.push({x:r.x,z:r.z,y:r.y||0,rarity:r.rarity,challenge:false,enemyReward:true,rewardKey:key,opened:false,bob:0});
+ for(const [key,r]of Object.entries(owner.chestRecords||{}))if(r.source==='enemy'&&r.scene===scene&&!G.chests.some(c=>c.rewardKey===key)){
+  G.chests.push({x:r.x,z:r.z,y:r.y||0,rarity:r.rarity,challenge:false,enemyReward:true,rewardKey:key,fixedReward:r.fixedReward||(r.item?.weapon?.name==='Abyss Blade'?'abyssblade':key.endsWith(':1')&&owner.chestRecords[key.slice(0,-1)+'0']?.item?.weapon?.name==='Abyss Blade'?'kingarmor':null),opened:!!r.claimed,bob:0});
  }
 }
 function rollDrop(e){
+ if(MP.guest())return; // Only the host rolls chest drops; guests receive the shared manifest.
  if(!e||e.type==='tyrant'||e.dummy||e.practice||e.bot||e.duel||G.hub||G.trial||G.arena)return;
  const scene=enemyChestScene(),owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
  const records=owner.chestRecords||(owner.chestRecords={});
@@ -13923,8 +13955,8 @@ function rollDrop(e){
   if(records[key]?.claimed||G.chests.some(c=>c.rewardKey===key))return;
   const rarity=fixed?'legendary':BFEncounterRewards.grade(e,enemyEncounterLevel(e),Math.random());
   const x=e.x+i*76,z=e.z+18,y=Math.max(0,floorAt(x,z,10,(e.y||0)+30));
-  const ch={x,z,y,rarity,challenge:false,enemyReward:true,rewardKey:key,opened:false,bob:0,dropReadyAt:G.time+.8};
-  if(!records[key])records[key]={source:'enemy',scene,x,z,y,rarity,challenge:false,item:fixed||randomLoot(BFChestRules.reward(rarity,false,Math.random())),claimed:false};
+  const ch={x,z,y,rarity,challenge:false,enemyReward:true,rewardKey:key,fixedReward:fixed?(i===0?'abyssblade':'kingarmor'):null,opened:false,bob:0,dropReadyAt:G.time+.8};
+  if(!records[key])records[key]={source:'enemy',scene,x,z,y,rarity,challenge:false,item:fixed||randomLoot(BFChestRules.reward(rarity,false,Math.random())),fixedReward:ch.fixedReward,claimed:false};
   G.chests.push(ch);prepareChest(ch);SFX.drop(RARITY[ch.rarity].tier);burst(x,y+16,z,RARITY[ch.rarity].color,10);
  });
  persist();if(G.escape)BFPrisonRun.checkpoint();
@@ -15042,6 +15074,7 @@ const MP={
     const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
     const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
     const msg={t:'state',scene:this.worldStateScene(),players:all, en:this.enemySnap(), ek,social:window.BFSocial?.snapshot(true)};if(inBriar())msg.millStatus=BFBriarJourney.status(G);if(inBriar()&&G.homeBell)msg.bellStatus=BFHomeBellDefense.status(G,adventureStoryState());if(G?.escape)msg.prison=BFPrisonRun.packet();if(inPrison())msg.prisonLift=BFPrison.status(G);if(G?.trialSession)msg.trialProgress={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted};if(G?.hydraArena)msg.hydra=BFHydra.snapshot(G,briarEpoch());if(inSkyLibrary())msg.libraryLens=BFSkyLibrary.status(G);if(inIronHalls())msg.ironDrive={clock:G.iron.clock,sledZ:G.iron.sledZ,sledHitCycle:G.iron.sledHitCycle??null};if(G?.voyage)msg.voyage=BFShipCrossing.snapshot(G.voyage);if(G?.bruteArena)msg.bruteWaves=(G.shockwaves||[]).filter(w=>w.orchardId).map(w=>({orchardId:w.orchardId,x:w.x,z:w.z,y:w.y,r:w.r,maxR:w.maxR,dmg:w.dmg,life:w.life,spd:w.spd,fxType:'brute'}));
+    if(G&&(this._chestSentWorld!==G||this._chestSentCount!==G.chests?.length||performance.now()-(this._chestSentAt||0)>700)){const chests=coopChestSnapshot();if(chests)msg.chests=chests;this._chestSentWorld=G;this._chestSentCount=G.chests?.length;this._chestSentAt=performance.now();}
     const signature=G?briarEpoch()+':'+(G.storyState?.revision||0):'';if(this._storySig!==signature||performance.now()-(this._storySent||0)>700){msg.story=briarPacket();this._storySig=signature;this._storySent=performance.now();} this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }window.BFSocial?.reset();
@@ -15111,7 +15144,7 @@ const MP={
     else if(d.t==='state'){if(!this.acceptWorldState(d))return;if(inBriar()&&d.millStatus)BFBriarJourney.apply(G,d.millStatus);if(d.social)window.BFSocial?.apply(d.social);if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return;if(inSkyLibrary()&&d.libraryLens)G.library.remote=d.libraryLens;if(inPrison()&&d.prisonLift)BFPrison.apply(G,d.prisonLift);if(inIronHalls()&&d.ironDrive){G.iron.remote={...(G.iron.remote||{}),...d.ironDrive};if(Number.isFinite(d.ironDrive.clock))G.iron.clock=d.ironDrive.clock;}if(inBriar()&&G.homeBell&&d.bellStatus){const was=G.homeBell.remote;G.homeBell.remote=d.bellStatus;if(!was||was.wave!==d.bellStatus.wave||was.alive!==d.bellStatus.alive||was.open!==d.bellStatus.open)questUpdate();} const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
-      if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
+      if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.chests)applyCoopChests(d.chests);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pcontrol'){if(d.id===this.myId)this.takePvpControl(d);}
@@ -15420,7 +15453,8 @@ const MP={
   // guest: a host kill for an enemy we never had locally — still grant instanced XP/loot/quest credit
   creditKill(type,xp,elite,boss,mid){ if(!G||!G.p) return; try{ if(xp>0) gainXp(xp); }catch(e){}
     try{ if(type) questKill(type); }catch(e){}
-    try{ const e={type,kind:ENEMY[type]?.kind,mimicE:type==='mimic',elite,boss,xp,x:G.p.x,z:G.p.z,y:0,h:20,color:'#fff'};e.mid=mid??('credit-'+(this._creditChestSeq=(this._creditChestSeq||0)+1));if(boss||Math.random()<BFEncounterRewards.chance(e,enemyEncounterLevel(e)))rollDrop(e); }catch(e){} },
+    // Chest drops arrive at the host's kill position through the shared manifest.
+  },
   // ================= P1.3 DOWNED / REVIVE (co-op death is not the end) =================
   anyAllyUp(){ for(const id in this.peers){ const q=this.peers[id]; if(q.zone===this.zone && !q.downed && (q.hp==null||q.hp>0)) return true; } return false; },
   goDown(){ if(!G||!G.p) return; const p=G.p; if(p.downed) return; p.downed=true; p.hp=0; p.vx=0; p.vz=0; p.dead=false;

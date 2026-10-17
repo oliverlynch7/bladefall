@@ -17,3 +17,8 @@ Evidence:
 Limits: synthetic PointerEvents sent through real DOM input handlers, not hardware dragging. Host/guest packet delivery tested with local stub transport, not two devices. No production player save touched. No chess-engine strength or campaign changes.
 
 Additional solo browser check: ordinary UI clicks e2-e4 received a legal Thomas d7-d5 reply; last-move highlight and move-list visible, no warning/error logs. See flat-history-final.png.
+
+
+## [Codex | 2026-10-16] v2.226 production confirmed
+
+Functional cde36e16 deployed successfully as 29791293-a0df-4987-8e89-2d890ee4f158. Fresh public browser confirms v2.226.0-chess-experience with no warning/error logs. 28 isolated real-browser interaction assertions, 33 focused checks, all93 offline suites and inline parser pass. Ordinary UI click move received a legal Thomas reply. Real two-device/network latency and hardware mouse dragging remain playtest checks; no player save altered by QA.

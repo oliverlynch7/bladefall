@@ -1628,3 +1628,8 @@ User requests after completing each campaign region three replay starts: first d
 ## [Codex | 2026-10-17] U-WEAPON-AURA-ICONS-20261017
 
 User requires weapon glow cosmetics preserve weapon color, emit subtle visible surrounding aura, and requests missing icon list. Plan: replace emissive repaint/bright edge lines with separate depth-tested transparent normal-expanded aura shell, preserve source materials/shared geometry, isolate actors/IDs, dispose owned shell materials on weapon swap. Audit actual cosmetic filenames and live UI icon paths, use explicit existing fallback images for missing custom art, supply precise missing artwork names. Verify weapon types/unequip/material preservation and visible browser results.
+
+
+## [Codex | 2026-10-17] U-TUTORIAL-MENU-KEYS-20261017
+
+User requires tutorial clearly teach E select/continue and Q back/close for menus/dialogue. Plan: early short safe lesson with current Interact binding plus reservedQ and yellow-selector navigation, visible keycaps, accurate Q/Esc tip-dismiss captions. Ensure E activates focused enabled buttons/summaries in ordinary menu/pause without selecting arbitrary actions or typing/repeat side effects. Preserve dialogue owner/arming and existing Q cleanup. Update map tip to reflect fixed overhead orientation.

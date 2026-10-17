@@ -26,7 +26,7 @@
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
   delete root.dataset.dialogueArming;
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<p class="dialogue-key-hint">W / S or ↑ / ↓ · ${esc(window.__BF3?.controlHint?.('interact')||'E')} choose</p><footer>${!active.external&&!active.spectator&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<p class="dialogue-key-hint">W / S or ↑ / ↓ · ${esc(window.__BF3?.controlHint?.('interact')||'E')} choose</p><footer>${!active.external&&!active.spectator&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Q / Esc</small></button></footer></div>`;
   if(el('hubTopics'))el('hubTopics').onclick=landing;
   if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();selectFirst(root);
  }

@@ -11,6 +11,11 @@ function backButton(container){
  return explicit||buttons.find(b=>/^(back(?:\s+to\b.*)?|close|cancel|done|not now|choose later(?:\s*·.*)?|return to practice instructions)$/i.test(b.textContent.trim()));
 }
 function onKey(e){
+ const game=root.__BF3;
+ if(game&&['menu','pause'].includes(game.mode)&&game.keyAction?.(e.code)==='interact'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing&&!typing(e.target)&&!game.rebinding&&!root.__bfEd?.EDITOR?.on){
+  const button=e.target?.closest?.('button,summary');
+  if(button&&!button.disabled&&button.getClientRects().length&&!button.closest?.('[inert]')){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)button.click();return;}
+ }
  if(e.code!=='KeyQ'||e.ctrlKey||e.metaKey||e.altKey||e.isComposing||typing(e.target)||!root.__BF3||root.__bfEd?.EDITOR?.on)return;
  e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;
  if(root.BFChestReveal?.active){root.BFChestReveal.skip();return;}

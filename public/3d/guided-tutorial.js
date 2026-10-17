@@ -4,6 +4,7 @@ let guide=null,panel=null,mapCanvas=null,placedAt=0;
 const coreActions=['move','jump','attack','dodge'];
 const lessons=[
  {id:'welcome',title:'A safe place to learn',body:'Practice moving, jumping, attacking and dodging. Enemies wait until you finish these four controls.',safe:true},
+ {id:'menu-keys',title:'Choose or go back',body:(g,hint)=>hint('interact')+' chooses or continues. Q goes back or closes menus and conversations. In dialogue, use W/S or ↑/↓ to move the yellow selector.',safe:true},
  {id:'move',title:'Move around',body:'Try moving in different directions. You can change your camera view later in Settings.',action:'move',safe:true},
  {id:'jump',title:'Hold to jump higher',body:'Tap for a short hop. Hold the jump control briefly for more height.',action:'jump',safe:true},
  {id:'attack',title:'Try a basic attack',body:'Red health bars mark enemies. Face one and tap to attack. Hold and release chargeable weapons for a stronger attack.',action:'attack',safe:true},
@@ -16,7 +17,7 @@ const lessons=[
  {id:'bag',title:'Chests and your bag',body:'Chests reveal one piece of gear and put it in your bag. Enemies rarely drop chests. Bag full + Auto-sell OFF leaves a chest unopened.',target:['#inventoryDock']},
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
  {id:'journal',title:'Keep your clues close',body:'New clues appear on paper notices until dismissed. Open Journal to read them again, search clues or check side quests.',target:['#hudJournal'],anchor:'#inventoryDock'},
- {id:'navigation',title:'Follow your map',body:'Gold marks the next objective or exit. Blue marks friends; cyan marks pings; red marks enemies. The map rotates as you turn.',target:['#localMap']},
+ {id:'navigation',title:'Follow your map',body:()=> 'Gold marks your objective or exit. Blue marks friends; cyan marks pings; red marks enemies. '+(window.__BF3?.meta?.camMode==='far'?'Overhead view keeps the map aligned with the camera.':'The map turns with your camera.'),target:['#localMap']},
  {id:'menu',title:'Ready to explore',body:'Close these tips, then open the menu for Settings or Help. Esc pauses time in solo play. In co-op, you stay visible and protected while your friends keep playing.',target:['#pausebtn','#eschint']}
 ];
 const skillLesson={id:'skill-use',title:'Try your new skill',body:'Face an enemy within range, then use Skill 1. It spends mana and needs time to recharge.',action:'skill1',target:['#bSk0']};
@@ -72,12 +73,13 @@ function draw(hint){
  else if(['skills','skill-use'].includes(step.id)){keys=[hint('skill1')];label=step.id==='skills'?'Skill 1 · unlocks at class rank 2':'Skill 1';}
  else if(step.id==='bag'){keys=[hint('bag')];label='Open bag · Loot reopens the latest pickup';}
  else if(step.id==='journal'){keys=[hint('journal')];label='Open journal';}
+ else if(step.id==='menu-keys'){keys=[hint('interact'),'Q'];label='Choose / continue · Back / close';}
  else if(step.id==='menu'){keys=[pauseHint()];label='Open menu after closing tips';}
  if(keys.length){const k=document.createElement('div');k.className='lesson-control';for(const key of keys){const el=document.createElement('kbd');el.textContent=key; k.append(el);}const l=document.createElement('span');l.className='lesson-controls-label';l.textContent=label;k.append(l);copy.append(k);}
  panel.append(copy);
  const buttons=document.createElement('div');buttons.className='lesson-actions';
  if(!core){const b=document.createElement('button');b.type='button';b.textContent=(guide.i===guide.steps.length-1&&!guide.resume?'Finish':'Continue')+' · '+hint('interact');b.onclick=next;buttons.append(b);}
- const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=(step.safe?'Skip lessons':'Close tips')+' · '+pauseHint();skip.onclick=stop;buttons.append(skip);panel.append(buttons);
+ const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=(step.safe?'Skip lessons':'Close tips')+' · Q / '+pauseHint();skip.onclick=stop;buttons.append(skip);panel.append(buttons);
  const status=document.createElement('p');status.className='lesson-status';status.textContent=step.safe?'Enemies wait during control practice.':'Optional tip · movement and combat stay active.';panel.append(status);
  position(true);
 }
@@ -126,7 +128,7 @@ function tick(g,mode,dt,input,api){
  return false;
 }
 function map(g,mode){
- if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map rotates as you turn.');document.body.append(mapCanvas);}
+ if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map follows your camera orientation.');document.body.append(mapCanvas);}
  mapCanvas.hidden=!g||mode!=='play'||g.bonusActive;if(mapCanvas.hidden)return;
  // Draw the same heading as this frame's world; smoothing here makes navigation lag.
  const nav=window.__BF_MAP_PARTY?.()||{},heading=nav.heading;

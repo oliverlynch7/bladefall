@@ -1890,3 +1890,8 @@ User: "also when npcs in the hub have quests, there should be a ! icon next to t
 ## [Codex | 2026-10-16] v2.214.0 — hub quest-choice markers
 
 Added a yellow exclamation badge and accessible Quest label to new/ready return-request entries and authored accept/finish dialogue choices. Classification uses actual return_accept/return_finish reward effects; service, news, optional/later choices, active reminders and exit controls remain unmarked. Preserved callbacks, choice IDs, text, 250ms arming window and spectator restrictions. Real browser verified Quartermaster offer/decline, successful acceptance, marked delivery entry and completion, and original 300-gold payout (1145 to 1445) on an isolated older level-4 save. UI screenshot and completion evidence: docs/art-validation/quest-markers-20261016. Syntax, pause 25 and first-arrival 20 checks pass. Initial fixture omitted NPC interaction distance; corrected character position and reran the actual quest path successfully. No two-device co-op conversation test. Deployment confirmation pending.
+
+
+## [Codex | 2026-10-16] v2.214 quest-marker production confirmed
+
+Functional commit ffe22d54 deployed successfully as 8e70ed65-d95c-4021-8fb6-e3c4d8d997d2. Public browser confirms v2.214.0-quest-choice-markers and hub-dialogue CSS/JS v2214 with no launch console errors. Local actual quest offer, acceptance and delivery verified on isolated older-save state.

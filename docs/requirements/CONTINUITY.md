@@ -2014,3 +2014,8 @@ User reports certain armor disappears from inventory without equipping. Real Web
 ## [Codex | 2026-10-16] v2.222 — equipment swap item-loss fix
 
 Reproduced actual hub background-autosave replacing captured meta.hero while Bag stays open: Equip consumed chest item but changed only obsolete snapshot, leaving live/saved/UI slots empty. Bag now renders live actor; each equip resolves current actor, checks selected entry identity/world/slot/level/class, stages cloned gear/stats/snapshot before consuming selected entry, returns replaced item and snapshots hub hero together. Use Class Default also targets current actor. Real WebGL original race now equips correctly; 78 matrix checks cover five slots, full-bag swaps/old-piece return, immediate persisted slots, equipped panel, weapon/default, rarity rejection, actual save/load, unchanged old level4/XP52/rank4/gold1145, synthetic co-op paused autosave, campaign equip and checkpoint-retry item ownership. 100 unit conservation/race cases, 18 menu, 23 camera, 25 pause and 32 hub transition regressions pass. Evidence docs/art-validation/bag-equip-20261016. No two-device test or recovery of unknown previously lost gear is claimed.
+
+
+## [Codex | 2026-10-16] v2.222 production confirmed
+
+Functional 6e4f43f6 deployed successfully as 12e873dc-c1bd-4b84-bab6-54f4ddbfb802. Public browser confirms v2.222.0-safe-equipment-swap without launch errors. Original actual-autosave item-loss reproduction now succeeds; 78 real-WebGL interaction checks and 100 conservation/race checks recorded. Previously lost unidentified items were not restored.

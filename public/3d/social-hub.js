@@ -1,11 +1,12 @@
+import {thomasHardVictory} from './chess-rewards.js?v=2227a';
 import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation.js?v=2226e';
 import './chess-pieces.js?v=2119';
 import {ChessOpponent} from './chess-opponent.mjs?v=2119';
 import {ChessClock} from './chess-clock.mjs';
-import {createChessTable} from './chess-table.js?v=2226e';
+import {createChessTable} from './chess-table.js?v=2227a';
 import {Chess} from './vendor/chess-1.4.0.mjs';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000;
-let moveLog=[],round=1,parkedPet=null;
+let moveLog=[],round=1,parkedPet=null,nextRewardAttempt=0;
 let game=new Chess(),rev=0,seats={w:null,b:null},preferred='w',result='',remote=null,opened=false,selected=null,pendingTalk=null,talks={},lastTalk='',origin=null,positions=new Map(),drawOffer=null;
 let clock=new ChessClock({},performance.now()),motion=null,moveSerial=0,remoteAt=0;
 const botId='chess-thomas',opponent=new ChessOpponent();let difficulty='medium',botError='',botPending=false,botTicket=0,wasCoop=false,soloPaused=0;
@@ -18,8 +19,9 @@ const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 function positionKey(){return game.fen().split(' ').slice(0,4).join(' ')}
 function recordPosition(){const k=positionKey();positions.set(k,(positions.get(k)||0)+1)}
 recordPosition();
-function snapshot(network=false){return {...(network?{moves:moveLog.map(m=>m.san)}:{history:moveLog}),initialFen:moveLog[0]?.before||new Chess().fen(),round,solo:!A.mp().active,difficulty,botError,preferred,owned:!!A.meta().hubUpgrades?.chess,fen:game.fen(),rev,seats:{...seats},result,drawOffer,clock:clock.view(performance.now()),motion:motion?{...motion,elapsed:Math.min(motion.duration,(soloPaused||performance.now())-motion.at)}:null,talks:structuredClone(talks),claim:game.isThreefoldRepetition()||game.isDrawByFiftyMoves()};}
-function reset(){soloPaused=0;window.BFChessPieces?.hide();cancelBot();botError='';close();soloPaused=0;clock=new ChessClock({},performance.now());motion=null;moveSerial=0;game=new Chess();moveLog=[];round++;positions.clear();recordPosition();drawOffer=null;rev=0;seats={w:null,b:null};preferred='w';result='';remote=null;talks={};pendingTalk=null;lastTalk='';}
+function snapshot(network=false){return {...(network?{moves:moveLog.map(m=>m.san)}:{history:moveLog}),initialFen:moveLog[0]?.before||new Chess().fen(),round,solo:!A.mp().active,difficulty,botError,preferred,capeUnlocked:!!A.meta().cosmetics?.['cape:checkmate'],owned:!!A.meta().hubUpgrades?.chess,fen:game.fen(),rev,seats:{...seats},result,drawOffer,clock:clock.view(performance.now()),motion:motion?{...motion,elapsed:Math.min(motion.duration,(soloPaused||performance.now())-motion.at)}:null,talks:structuredClone(talks),claim:game.isThreefoldRepetition()||game.isDrawByFiftyMoves()};}
+function claimReward(){if(!host()||A.meta().cosmetics?.['cape:checkmate']||performance.now()<nextRewardAttempt||!thomasHardVictory({solo:!A.mp().active,difficulty,seats,result,playerId:id()}))return;nextRewardAttempt=performance.now()+5000;A.awardChessCape?.();}
+function reset(){nextRewardAttempt=0;soloPaused=0;window.BFChessPieces?.hide();cancelBot();botError='';close();soloPaused=0;clock=new ChessClock({},performance.now());motion=null;moveSerial=0;game=new Chess();moveLog=[];round++;positions.clear();recordPosition();drawOffer=null;rev=0;seats={w:null,b:null};preferred='w';result='';remote=null;talks={};pendingTalk=null;lastTalk='';}
 function apply(packet){if(!packet||typeof packet.fen!=='string')return;
  if(Array.isArray(packet.moves)){const key=packet.round+':'+packet.moves.join('|');try{packet={...packet,history:key===remote?._historyKey?remote.history:chessHistoryFromSAN(packet.moves,packet.initialFen),_historyKey:key};}catch{return;}}
  const changed=!remote||packet.rev!==remote.rev||packet.fen!==remote.fen;remote=packet;remoteAt=performance.now();if(changed&&opened){selected=null;render();}followTalk();}
@@ -53,7 +55,7 @@ function receive(pid,c){syncMode();if(!host()||!c||typeof c.type!=='string')retu
  else if(c.type==='resign'&&!result&&Object.values(seats).includes(pid)){result=(seats.w===pid?'Black':'White')+' wins by resignation';rev++;}
  else if(c.type==='new'&&result&&Object.values(seats).includes(pid)){cancelBot();botError='';game=new Chess();moveLog=[];round++;clock=new ChessClock(clock,performance.now());if(!A.mp().active)clock.confirm('b',game.turn(),performance.now());motion=null;positions.clear();recordPosition();drawOffer=null;result='';rev++;}
  else return false;
- if(result)clock.stop(performance.now());if(opened)render();return true;
+ if(result)clock.stop(performance.now());claimReward();if(opened)render();return true;
 }
 function advance(){if(!host()||soloPaused&&!A.mp().active)return;const now=performance.now();let changed=false;
  if(motion&&!motion.done&&now-motion.at>=motion.duration){motion.done=true;clock.finishMove(motion.color,game.turn(),motion.at+motion.duration,!!result||!clock.started);changed=true;}
@@ -72,7 +74,7 @@ function parkPet(){const g=A.g(),pet=g?.pet,pose=companionPose(g?.p);if(!pet||!p
 function tick(){
  parkPet();
  if(syncMode()&&opened)send({type:'sit'});
- advance();tableView.tick();
+ advance();claimReward();tableView.tick();
  if(!A.mp().active&&opened&&isHub()&&owned()&&!botPending&&!botError&&!result&&clock.started&&(!motion||motion.done)&&seats[game.turn()]===botId){
   const ticket=++botTicket,fen=game.fen();botPending=true;opponent.move(fen,difficulty).then(move=>{if(ticket!==botTicket)return;botPending=false;if(A.mp().active||!opened||!isHub()||result||game.fen()!==fen)return;advance();if(!result&&move)receive(botId,{type:'move',...move,rev});}).catch(e=>{if(ticket!==botTicket||e.message==='cancelled')return;botPending=false;botError=e.message;clock.stop(performance.now());rev++;render();});
  }

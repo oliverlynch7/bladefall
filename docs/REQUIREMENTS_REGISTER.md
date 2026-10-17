@@ -1817,3 +1817,15 @@ User requests chairs and players moved considerably back from table; both player
 ## [Codex | 2026-10-16] U-CHESS-SEATING-HISTORY-20261016 verified
 
 Implemented in v2.226.0-chess-experience: +/-34 seats, conditional actor/chair visibility, parked companions, flat drag/drop and click, opponent move highlights and live session-history review. 28 browser assertions, 33 focused checks and 93 offline suites pass. Evidence and testing limits: docs/art-validation/chess-experience-20261016/summary.md. Publication pending.
+
+
+## [Codex | 2026-10-16] U-THOMAS-HARD-CAPE-20261016
+
+User requests a black-and-white checkerboard cape unlocked only by defeating Thomas on Hard in chess. Plan grounded in existing solo chess authority, class-independent cosmetic wardrobe and cloth renderer: add Checkmate Cape with crisp checker fabric and matching wardrobe icon; locked hint names Thomas/Hard. Award once to active character after a legitimate solo Hard checkmate or time victory against Thomas, either player color. No reward for draws, losses, easier settings, human co-op wins or reviewing a winning position; difficulty already locked after first move. Save through existing character persistence, expose reward hint on Thomas chess panel, preserve existing cape/equipment without auto-equipping. Verify actual checkmate handler, exclusion cases, repeat/reload persistence, wardrobe equip and cloth render from old save.
+
+
+## [Codex | 2026-10-16] v2.227 — Checkmate Cape
+
+U-THOMAS-HARD-CAPE-20261016 implemented. Black-and-white checkerboard cloth cape with monochrome stitched edging and matching wardrobe SVG. Cosmetic only, no automatic equip. Defeating solo Thomas on Hard by checkmate or a legitimate time victory awards it once, either color; losses, draws, Easy/Medium, human co-op opponents and history review cannot award. Existing pre-move difficulty lock retained. Slot-profile cosmetic flag is written and read back immediately, rollback/retry if storage fails. Thomas chess panel explains the condition and confirms the earned reward; equip at the Stylist. Existing cosmetic ownership and equipped cape preserved. Stateless preview supports ?cape=checkmate.
+
+Verified 30 isolated real-browser assertions with genuine pre-change save: actual legal moves reaching checkmate, Hard loss, Easy/Medium wins, Hard win, visible confirmation, durable profile record, Stylist equip, mode reload, live cloth renderer and unchanged gold. Engine worker deliberately silent for scripted legal opponent moves; this is reward integration QA, not a claim to have beaten the actual Hard AI. 20 focused eligibility/save-failure/idempotency checks plus existing chess regression checks pass; 94 offline suites passed. Preview screenshots inspected on Warrior/Wizard; no production saves touched. Evidence: docs/art-validation/chess-cape-20261016. Publication pending.

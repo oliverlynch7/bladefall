@@ -2,6 +2,7 @@ import * as T from './three.module.js';
 
 // A bounded cloth grid per visible rig. No new textures are downloaded and no saves change.
 export const CAPE_STYLES={
+ checkmate:{name:'Checkmate Cape',base:'#efefe9',trim:'#17191d',mark:'checker',length:1.18},
  wanderer:{name:'Wanderer’s Cape',base:'#4d5765',trim:'#b4a184',mark:'compass',length:1.16},
  sail:{name:'Sailcloth Cape',base:'#cfc5a2',trim:'#32616b',mark:'sail',length:1.12},
  winter:{name:'Winter Cloak',base:'#849fa9',trim:'#e6e3cf',mark:'snow',length:1.24},
@@ -17,11 +18,12 @@ function fabric(id,accent){
  const key=id+accent;if(cache.has(key))return cache.get(key);
  const st=CAPE_STYLES[id],canvas=document.createElement('canvas');canvas.width=128;canvas.height=256;const c=canvas.getContext('2d');
  c.fillStyle=st.base;c.fillRect(0,0,128,256);
+ if(st.mark==='checker')for(let y=0;y<16;y++)for(let x=0;x<8;x++){c.fillStyle=(x+y)%2?'#17191d':'#f4f4ef';c.fillRect(x*16,y*16,16,16);}
  // Soft vertical folds, woven grain and stitched borders belong to one surface.
  for(let x=0;x<128;x++){c.fillStyle=`rgba(0,0,0,${.03+.12*(.5+.5*Math.cos(x*.27))})`;c.fillRect(x,0,1,256);}
  c.globalAlpha=.13;c.fillStyle='#fff';for(let y=1;y<256;y+=3)c.fillRect(0,y,128,1);c.globalAlpha=1;
  c.fillStyle=st.trim;c.fillRect(3,0,7,256);c.fillRect(118,0,7,256);c.fillRect(3,239,122,9);
- c.fillStyle=accent;c.fillRect(12,0,3,239);c.fillRect(113,0,3,239);
+ c.fillStyle=st.mark==='checker'?'#efefe9':accent;c.fillRect(12,0,3,239);c.fillRect(113,0,3,239);
  c.fillStyle=st.base;for(let y=5;y<248;y+=8){c.fillRect(6,y,2,3);c.fillRect(121,y,2,3);}
  c.strokeStyle=st.trim;c.fillStyle=st.trim;c.lineWidth=3;c.lineJoin='round';
  const line=pts=>{c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();};

@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {thomasHardVictory} from '../public/3d/chess-rewards.js';
+import {CAPE_STYLES} from '../public/3d/cosmetic3d.js';
+let n=0;const ok=(v,m)=>{assert(v,m);n++;};
+const base={solo:true,difficulty:'hard',seats:{w:'solo',b:'chess-thomas'},result:'White wins by checkmate',playerId:'solo'};
+ok(thomasHardVictory(base),'white hard checkmate');ok(thomasHardVictory({...base,seats:{w:'chess-thomas',b:'solo'},result:'Black wins by checkmate'}),'black hard checkmate');ok(thomasHardVictory({...base,result:'White wins on time'}),'hard time victory');
+for(const patch of [{difficulty:'easy'},{difficulty:'medium'},{solo:false},{result:'Black wins by checkmate'},{result:'White wins by resignation'},{result:'Draw · stalemate'},{result:''},{seats:{w:'solo',b:'friend'}},{playerId:'spectator'},{seats:null}])ok(!thomasHardVictory({...base,...patch}),'excludes '+JSON.stringify(patch));
+ok(CAPE_STYLES.checkmate.mark==='checker'&&CAPE_STYLES.checkmate.trim==='#17191d','real black-and-white cloth style');
+const html=fs.readFileSync('public/3d/index.html','utf8'),fn=html.match(/function awardChessCape\(\)\{[\s\S]*?\n\}/)[0];let saved=null,saves=0,fail=false,toasts=[];const meta={cosmetics:{'cape:sail':1},cosEquipped:{cape:'sail'},gold:1145};const ctx={meta,window:{},saveGenerationCurrent:()=>true,GKEY:'global',localStorage:{getItem:()=>JSON.stringify(saved)},persistGlobal:()=>{saves++;if(!fail)saved=structuredClone(meta);},toast:t=>toasts.push(t)};vm.createContext(ctx);vm.runInContext(fn,ctx);ok(ctx.awardChessCape()&&meta.cosmetics['cape:checkmate']===1,'grants earned flag');ok(saved.cosmetics['cape:checkmate']===1&&meta.gold===1145,'persists without gold cost');ok(meta.cosEquipped.cape==='sail'&&meta.cosmetics['cape:sail']===1,'preserves prior equipped and owned cosmetics');ctx.awardChessCape();ok(saves===1&&toasts.length===1,'repeat win is idempotent');delete meta.cosmetics['cape:checkmate'];saved=structuredClone(meta);fail=true;ok(!ctx.awardChessCape()&&!meta.cosmetics['cape:checkmate'],'failed save rolls back unlock for retry');fail=false;ok(ctx.awardChessCape(),'failed save can retry');
+console.log(n+' chess reward eligibility, persistence and cosmetic checks passed.');

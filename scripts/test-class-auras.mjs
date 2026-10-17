@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import * as T from '../public/3d/three.module.js';
 import {AURA_THEMES,createClassAura,syncClassAura} from '../public/3d/class-aura3d.js';
 const motifs=new Set(),shapes=new Set(),textures=new Set();let checks=0;
-const ok=(name,v)=>{assert(v,name);checks++;},snapshot=a=>JSON.stringify({points:[...a.motePositions.array],glow:a.glowMat.opacity,wash:a.wash.material.opacity,size:a.moteMat.size});
+const ok=(name,v)=>{assert(v,name);checks++;},snapshot=a=>JSON.stringify({points:[...a.motePositions.array],brightness:[...a.moteColors.array],glow:a.glowMat.opacity,wash:a.wash.material.opacity,size:a.moteMat.size});
 for(const [cls,theme]of Object.entries(AURA_THEMES)){
  const parent=new T.Group(),a=createClassAura(parent,cls),otherParent=new T.Group(),b=createClassAura(otherParent,cls);
  ok(cls+' attaches its own effect',a.group.parent===parent&&b.group.parent===otherParent&&a.group!==b.group);
@@ -13,7 +13,8 @@ for(const [cls,theme]of Object.entries(AURA_THEMES)){
  ok(cls+' at most four draws and twelve motes',draws.length===4&&a.stats.drawCalls===4&&a.motePositions.count===12);
  ok(cls+' transparent ribbons use one pass each',draws.filter(n=>n.isMesh).every(n=>n.material.forceSinglePass));
  const core=draws.find(n=>n.isMesh&&n.material===a.coreMat);shapes.add(createHash('sha256').update(Buffer.from(core.geometry.attributes.position.array.buffer)).digest('hex'));motifs.add(theme.motif);
- for(let i=0;i<120;i++){syncClassAura(a,i/30);ok(cls+' finite bounded particle cloud '+i,[...a.motePositions.array].every(Number.isFinite)&&Array.from({length:12},(_,j)=>Math.hypot(a.motePositions.getX(j),a.motePositions.getY(j)-.25,a.motePositions.getZ(j))).every(d=>d<2.3));}
+ for(let i=0;i<120;i++){syncClassAura(a,i/30);ok(cls+' finite bounded particle cloud '+i,[...a.motePositions.array].every(Number.isFinite)&&[...a.moteColors.array].every(v=>Number.isFinite(v)&&v>=0&&v<=1)&&Array.from({length:12},(_,j)=>Math.hypot(a.motePositions.getX(j),a.motePositions.getY(j)-.25,a.motePositions.getZ(j))).every(d=>d<2.3));}
+ syncClassAura(a,0);if(['rise','fall'].includes(theme.motion))ok(cls+' cycle endpoints fade instead of popping',a.moteColors.getX(0)===0);
  syncClassAura(a,3,false);const frozen=snapshot(a);syncClassAura(a,97,false);ok(cls+' reduced motion freezes all effect values',snapshot(a)===frozen);
  syncClassAura(a,2,true,true);ok(cls+' low quality removes wash and motes',!a.wash.visible&&!a.motes.visible&&core.visible);
  syncClassAura(a,2,true,false);ok(cls+' quality can restore effects',a.wash.visible&&a.motes.visible);

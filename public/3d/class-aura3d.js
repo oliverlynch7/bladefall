@@ -80,11 +80,11 @@ export function createClassAura(parent,cls){
  const glow=new T.Mesh(glowGeo,glowMat),core=new T.Mesh(coreGeo,coreMat);core.position.z=.008;group.add(glow,core);
  const washMat=new T.SpriteMaterial({map:texture('wash'),color:theme.color,opacity:.20,depthTest:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false});materials.push(washMat);
  const wash=new T.Sprite(washMat);wash.position.set(0,.27,-.08);wash.scale.set(2.05,2.3,1);group.add(wash);
- const moteGeo=new T.BufferGeometry(),motePositions=new T.Float32BufferAttribute(new Float32Array(12*3),3);moteGeo.setAttribute('position',motePositions);moteGeo.boundingSphere=new T.Sphere(V(0,.25,0),2.3);geometries.push(moteGeo);
- const moteMat=new T.PointsMaterial({map:texture(theme.shape),color:theme.core,size:.075,sizeAttenuation:true,transparent:true,opacity:.83,alphaTest:.015,depthTest:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false});materials.push(moteMat);
+ const moteGeo=new T.BufferGeometry(),motePositions=new T.Float32BufferAttribute(new Float32Array(12*3),3);moteGeo.setAttribute('position',motePositions);const moteColors=new T.Float32BufferAttribute(new Float32Array(12*3),3);moteGeo.setAttribute('color',moteColors);moteGeo.boundingSphere=new T.Sphere(V(0,.25,0),2.3);geometries.push(moteGeo);
+ const moteMat=new T.PointsMaterial({map:texture(theme.shape),color:theme.core,vertexColors:true,size:.075,sizeAttenuation:true,transparent:true,opacity:.83,alphaTest:.015,depthTest:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false});materials.push(moteMat);
  const motes=new T.Points(moteGeo,moteMat);motes.frustumCulled=false;group.add(motes);
  for(const n of [glow,core,wash,motes]){n.frustumCulled=false;n.userData.classLookPart=true;n.userData.rank10Aura=true;}
- return {group,theme,glowMat,coreMat,wash,motes,motePositions,moteMat,worldScale:V(),stats:{motif:theme.motif,drawCalls:4,motes:12,triangles:(glowGeo.index.count+coreGeo.index.count)/3+2},dispose(){group.removeFromParent();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
+ return {group,theme,glowMat,coreMat,wash,motes,motePositions,moteColors,moteMat,worldScale:V(),stats:{motif:theme.motif,drawCalls:4,motes:12,triangles:(glowGeo.index.count+coreGeo.index.count)/3+2},dispose(){group.removeFromParent();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
 }
 export function syncClassAura(a,time=0,motion=true,low=false){
  if(!a)return;const t=motion?time:0,{theme,group,motePositions}=a;
@@ -93,13 +93,13 @@ export function syncClassAura(a,time=0,motion=true,low=false){
  a.wash.material.opacity=theme.motion==='petals'?.20+(motion?Math.sin(t*.8)*.045:0):.18;
  if(low)return;
  for(let i=0;i<12;i++){
-  const phase=i/12,angle=phase*Math.PI*2+t*.28,s=i%2?-1:1;let x,y,z=-.04;
+  const phase=i/12,angle=phase*Math.PI*2+t*.28,s=i%2?-1:1;let x,y,z=-.04,fade=1;
   if(theme.motion==='orbit'){x=Math.cos(angle)*.91;y=.30+Math.sin(angle)*.91;z=Math.sin(angle)*.12;}
   else if(theme.motion==='petals'){x=Math.cos(angle)*.82;y=.14+Math.sin(angle)*.73;z=Math.sin(angle*2)*.10;}
   else if(theme.motion==='tide'){x=Math.cos(angle)*.97;y=-.35+Math.sin(angle*2)*.25;z=Math.sin(angle)*.20;}
-  else{const progress=(phase+t*(theme.motion==='fall'?.12:clsSpeed(theme)))%1;x=s*(.48+.35*Math.sin(phase*7+progress*2));y=theme.motion==='fall'?1.22-progress*2.12:-.87+progress*2.20;z=Math.sin(phase*9+progress)*.12;}
-  motePositions.setXYZ(i,x,y,z);
+  else{const progress=(phase+t*(theme.motion==='fall'?.12:clsSpeed(theme)))%1;fade=Math.pow(Math.max(0,Math.sin(progress*Math.PI)),.65);x=s*(.48+.35*Math.sin(phase*7+progress*2));y=theme.motion==='fall'?1.22-progress*2.12:-.87+progress*2.20;z=Math.sin(phase*9+progress)*.12;}
+  motePositions.setXYZ(i,x,y,z);a.moteColors.setXYZ(i,fade,fade,fade);
  }
- motePositions.needsUpdate=true;
+ motePositions.needsUpdate=a.moteColors.needsUpdate=true;
 }
 const clsSpeed=theme=>theme.shape==='ember'?.20:theme.shape==='diamond'?.17:.105;

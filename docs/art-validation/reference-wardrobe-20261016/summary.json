@@ -41,7 +41,13 @@
     "Simulated production co-op rendering, not a live two-player network test.",
     "Illustration detail is adapted to existing browser rigs, not a pixel-identical reproduction."
   ],
-  "release": "Isolated production-base candidate passed 51 GPU outfits / 3978 frames and 129 state checks",
+  "release": {
+    "status": "Production confirmed",
+    "commit": "83e89eb1",
+    "deployment": "26c50335-97d1-4024-9fc3-762dc5bc6918",
+    "gallery": "https://bladefall.pages.dev/3d/class-skins?class=warlock&v=2209",
+    "version": "2.209.0-reference-wardrobe"
+  },
   "mobile": {
     "width": 390,
     "contentWidth": 375,

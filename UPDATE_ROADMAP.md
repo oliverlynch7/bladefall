@@ -2977,3 +2977,7 @@ The development branch remains divergent and must not be pushed wholesale to mai
 ## [Codex | 2026-10-16] Reference wardrobe — v2.209.0 candidate
 
 Remade 51 looks for 17 classes from Oliver’s approved sheet: red Ninja, ruby Warlock, psychic Monk, coherent Warrior/Bladedancer starters and separate Beastmaster companion. Actual browser GPU: 51 outfits / 3,978 frames; 129 game-state checks; 51 simulated peers. Rigs: 4,080 samples / 204 rank gates. Saved choices and stats preserved. Isolated release verification follows. Evidence: docs/art-validation/reference-wardrobe-20261016/.
+
+## [Codex | 2026-10-16] v2.209.0 reference wardrobe is live
+
+Production commit 83e89eb1 deployed successfully (26c50335-97d1-4024-9fc3-762dc5bc6918). Real browser confirms new public gallery names and v2209 scripts; immutable game shows v2.209.0-reference-wardrobe. Gallery: https://bladefall.pages.dev/3d/class-skins?class=warlock&v=2209 . All 51 outfits implemented as reference adaptations on existing rigs, including every requested correction. Rank gates, saved choices, cheat unlocks and stat neutrality verified. Production excludes pending Keep/Reaper changes. Development branch remains divergent: never push it wholesale to main. Unrelated companion3d.js and articulated-rigs.json changes untouched.

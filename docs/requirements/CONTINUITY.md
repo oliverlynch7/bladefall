@@ -1812,3 +1812,7 @@ Grounded plan: replace palette catalog for all 51 looks; add compact class-speci
 ## [Codex | 2026-10-16] Reference wardrobe release verification
 
 All 51 outfits pass actual GPU rendering in both development and isolated production-base candidate (13 motions / 3,978 sampled frames). 129 Stylist/save/rank/stat/cheat checks pass in both. 51 simulated peer appearances pass; no live two-client claim. At 390px, gallery is loaded with no horizontal overflow. Existing level-4/rank-4 save retains 1,145 gold, 52 XP and all three choices. Added geometry remains below 10k triangles / 50 meshes (max 9,998 / 46). Main release excludes pending Keep guidance and Reaper grip. User aesthetic acceptance and exhaustive all-gear clipping remain unclaimed.
+
+## [Codex | 2026-10-16] v2.209.0 reference wardrobe is live
+
+Production commit 83e89eb1 deployed successfully (26c50335-97d1-4024-9fc3-762dc5bc6918). Real browser confirms new public gallery names and v2209 scripts; immutable game shows v2.209.0-reference-wardrobe. Gallery: https://bladefall.pages.dev/3d/class-skins?class=warlock&v=2209 . All 51 outfits implemented as reference adaptations on existing rigs, including every requested correction. Rank gates, saved choices, cheat unlocks and stat neutrality verified. Production excludes pending Keep/Reaper changes. Development branch remains divergent: never push it wholesale to main. Unrelated companion3d.js and articulated-rigs.json changes untouched.

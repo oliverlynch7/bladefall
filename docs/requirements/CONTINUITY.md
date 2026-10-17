@@ -2059,3 +2059,8 @@ User explicitly requests dragon mount and flight. COMP-03 previously approved sa
 ## [Codex | 2026-10-16] v2.225 dragon flight verified locally
 
 U-DRAGON-RIDE-20261016 and COMP-03 travel implemented. Riding/limited flight now exists; rider-combat question remains unanswered and conservatively disabled, not inferred approved. Active owned sunwing, outdoor campaign/hub only; H or contextual controller/keyboard Interact, Jump ascent, release glide, Dodge descent. Fuel8s, height180, grounded recharge2/s. Saves omit transient mount state; walls/doors/ceilings and safe landing preserved, co-op protected pause holds fuel/pose and mounted companion safety. Actual peer snapshots/rendering fixed for hub/area scoping. Local first-person dragon hidden for every render pass, restored after draw; peers unaffected. 51 pure checks, 20 hub and 24 campaign browser assertions, 92 offline suites pass. Camera/seat proof and limits in dragon-riding summary. No human/hardware-controller/two-device claim, no production saves touched. Deployment pending.
+
+
+## [Codex | 2026-10-16] v2.225 production confirmed
+
+Functional 5f37b2d4 deployed successfully as d938b880-8e7b-4a54-83ae-6c73929ddbee. Fresh public browser confirms v2.225.0-dragon-flight with no launch errors. Full flight/pause/peer checks remain against isolated local production source and genuine pre-change save; no real player save changed. Travel-only default retained pending optional mounted-combat preference.

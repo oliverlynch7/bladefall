@@ -1008,7 +1008,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 @media(max-width:600px){.classviewer .buildhead{max-height:45%;overflow:auto;flex-shrink:0}.classviewer .buildhead .ovkicker{font-size:12px!important;letter-spacing:.04em!important}.classviewer .buildhead .ovh{font-size:26px!important;line-height:1.2}.classviewer .ctabs{max-height:130px;overflow:auto}.classviewer .buildscroll{min-height:100px}.classviewer .viewerfoot{flex-shrink:0}}
 .journal-clue small{display:block;margin-top:4px}
 </style>
-<link rel="stylesheet" href="./adventure-hud.css?v=2201">
+<link rel="stylesheet" href="./adventure-hud.css?v=2213">
 <script src="./adventure-hud.js?v=2200"></script>
 </head>
 <body class="adventure-hud">
@@ -1072,7 +1072,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./prison-dungeon.js?v=2140"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
-<script src="./loading.js?v=2083"></script>
+<script src="./loading.js?v=2213"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2079">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
@@ -1164,7 +1164,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.212.0-esc-pause';
+const VERSION3D='2.213.0-first-arrival';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1205,8 +1205,7 @@ function createCharacterSlot(sl){
 }
 function beginCharacterCreation(){
   if(!slotSummary(SLOT).empty){openSlots();return;}
-  if(!meta.originSeen)playStory(STORY.origin,()=>{meta.originSeen=true;persistGlobal();openCharCreate();});
-  else openCharCreate();
+  openCharCreate(); // Learn the controls first; the illustrated opening follows practice.
 }
 function deleteSlot(sl){
   if(!Number.isInteger(sl)||sl<0||sl>2)return false;
@@ -1344,10 +1343,6 @@ const STORY={
     "They returned changed. Their eyes were empty. They could no longer refuse his orders. The lord became the Abyss King. His army became the Hollowed Legion.",
     "Now the Legion threatens Briar Town—your home. Your father, Thomas, helps your neighbors prepare. They have few weapons and no army. You decide to stand with them."
   ],
-  intro:[
-    "You are ready to help Briar Town. The Hollowed Legion is drawing closer, and your neighbors need you.",
-    "Find the path to Briar Town in the Waystation. Thomas and Mara can help you get started."
-  ],
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
     "Something in you straightens its back — something that was always there, waiting for its turn.",
     "You don't have a name for it. You don't need one yet.",
@@ -1453,7 +1448,7 @@ function playOpening(onDone){
   names.forEach(name=>{const im=new Image();im.src='assets/story/opening/'+name+'.jpg';});
   let page=0,done=false;
   const finish=()=>{if(done)return;done=true;document.removeEventListener('keydown',keys,true);root.remove();story._skip=null;if(onDone)onDone();};
-  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=page===4?'Create your character':'Next';};
+  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=page===4?'Enter the Waystation':'Next';};
   const next=()=>{if(page===4)finish();else{page++;render();}};
   const back=()=>{if(page>0){page--;render();}};
   const keys=e=>{if(!['Escape','Enter','Space','ArrowRight','ArrowLeft'].includes(e.code))return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(e.code==='Escape')finish();else if(e.code==='ArrowLeft')back();else if((e.code==='Enter'||e.code==='Space')&&e.target.tagName==='BUTTON')e.target.click();else next();};
@@ -5640,6 +5635,7 @@ function showTutorial(cid){mode='menu';
 }
 // second-stage onboarding: how the hub works, shown once after the first trial is done
 function hubTutorial(){
+ clearTimeout(storyToast._t);document.getElementById('storycard')?.classList.remove('show');
  if(!G?.hub||G.riftHall||G.sparringRoom)return;
  mode='hubtour';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();
  BFHubTour.start(G,HUB_STONE,()=>{meta.hubTutDone=true;persistGlobal();persist();releaseKeyboard();resumePlay();},!!meta.reduceMotion);
@@ -5691,11 +5687,10 @@ const TEACH_GAP = 6.5;
 
 function teachOnce(id, body, opts){
   meta.tutSeen = meta.tutSeen || {};
-  if(meta.tutOff || meta.tutSeen[id]) return;
-  /* Marked seen at QUEUE time, not at show time: otherwise the same condition re-fires every frame
-     while the lesson waits its turn and the queue fills with duplicates of one message. */
-  meta.tutSeen[id] = true; persistGlobal();
-  TEACH_Q.push({ body: body, icon: (opts && opts.icon) || '📖', pri: (opts && opts.pri) || 5 });
+  if(meta.tutOff || G?.hub || meta.tutSeen[id] || TEACH_Q.some(t=>t.id===id&&t.world===G)) return;
+  /* Queue identity prevents duplicates. Remember a tip only when it is actually shown,
+     so leaving the world cannot silently consume an unread lesson. */
+  TEACH_Q.push({id,world:G, body: body, icon: (opts && opts.icon) || '📖', pri: (opts && opts.pri) || 5 });
   /* Lower `pri` first. A lesson about the thing currently hurting you outranks a lesson about a
      creature standing across the room, and without an ordering the queue would teach them in
      whatever order the frame happened to evaluate its conditions. */
@@ -5733,11 +5728,6 @@ function hubGateLocked(n){
 
 function hubTeachTick(dt){
   if(!G || !G.hub || mode !== 'play' || meta.tutOff) return;
-  const p = G.p;
-
-  teachOnce('hub_first',
-    'Start your campaign at the Briar Town portal. The other shops and activities are here when you need them.',
-    {icon:'🏛', pri:1});
 
   /* The road out, marked until it has been walked. Not an arrow on everything - just the one door
      that is the game. */
@@ -5746,23 +5736,16 @@ function hubTeachTick(dt){
     return Z && !g.side && !(meta.zoneDone && meta.zoneDone[Z.id]);
   });
   G.hubWay = firstUncleared || null;
-
-  /* Contextual, and only once the player owns the thing the NPC is for. */
-  if((meta.gold || 0) >= 400)
-    teachOnce('hub_shop','You have coin. The Quartermaster sells gear, and the Smith upgrades what you already carry.',{icon:'🪙',pri:6});
-  const bagN = (meta.stash || []).length;
-  if(bagN >= 3)
-    teachOnce('hub_bag','Your bag is filling up. Sell spare gear at the Quartermaster. Campaign XP, gold and completed return requests stay with you when you leave.',{icon:'🎒',pri:6});
-  if((meta.zonesCleared || 0) >= 1)
-    teachOnce('hub_extras','Your first region is clear. Optional challenge doors are now open. Keep following the campaign gates to continue the story.',{icon:'⚔️',pri:6});
 }
 
 function teachQueueTick(dt){
+  for(let i=TEACH_Q.length-1;i>=0;i--)if(TEACH_Q[i].world!==G||G?.hub)TEACH_Q.splice(i,1);
   if(_teachT > 0) _teachT -= dt;
   if(_teachT > 0 || !TEACH_Q.length) return;
   /* Never during a menu or a cutscene - a lesson nobody is looking at is a lesson spent. */
   if(mode !== 'play' || BFGuidedTutorial.state) return;
   const t = TEACH_Q.shift();
+  meta.tutSeen=meta.tutSeen||{};meta.tutSeen[t.id]=true;persistGlobal();
   _teachT = TEACH_GAP;
   try{ storyToast(t.body, t.icon); }catch(e){ toast(t.body); }
 }
@@ -5962,7 +5945,7 @@ function nextArea(){ if(G?.kingFinal)return;
   if(MP.active&&!MP.isHost&&isCampaignAdventure()){MP.hostConn?.send({t:'campaignAdvance',zone:G.zone,area:G.area});return;}
   securePendingSecret();
   if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
-  if(G.trial){ trialComplete(); return; }
+  if(G.trial){ if(!G.trialCompleted)trialComplete(); return; }
   if(G.side){ sideClear(); return; }
   if(G.area<0){ zoneClear(); return; }                        // cleared the boss room
   const Z=curZone(), na=G.area+1;
@@ -16968,7 +16951,7 @@ function warpTo(fn){ if(warpTo._busy) return; warpTo._busy=true;
   const mid=()=>{ try{ fn(); } finally { if(v) v.classList.remove('on'); warpTo._busy=false; } };
   if(v) setTimeout(mid,190); else mid();
 }
-function nextStage(){ warpTo(nextArea); }    // the portal now advances the ZONE's area chain, with a warp transition
+function nextStage(){ if(mode!=='play'||backgroundMenuMode||G?.trialCompleted)return;warpTo(nextArea); }    // the portal now advances the ZONE's area chain, with a warp transition
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=classStartWeapon(meta.classId); else p.weapon=normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
@@ -18059,10 +18042,10 @@ function openHub(){
   document.getElementById('bosshpwrap').classList.remove('on');
   if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
   if(!Object.keys(meta.classUnlocked).length){ mode='menu'; showGameUI(false); musicPlay('hub'); openClassPicker(); return; }
-  if(!meta.introSeen){                         // first time you reach the hub as a Warden: the story opens
-    meta.introSeen=true; persistGlobal();
-    playStory(STORY.intro, openHub); return;
+  if(!meta.originSeen){
+    playStory(STORY.origin,()=>{meta.originSeen=true;meta.introSeen=true;persistGlobal();persist();openHub();});return;
   }
+  if(!meta.introSeen){meta.introSeen=true;persistGlobal();}
   ensureClassWeapon(meta.hero);persist();
   enterWaystation();
 }
@@ -18108,7 +18091,6 @@ function rebuildWaystationCitadel(){
     take('drillmaster',610,-110,{district:'warden'}), take('beastkeeper',610,65,{district:'warden'}),
     take('mirror',610,425,{district:'warden'}),
     take('sparring',610,245,{district:'warden'}),
-    take('bestiary',820,350,{district:'warden'}),
     take('abyss',-400,710,{district:'undercroft'}), take('delve',-200,710,{district:'undercroft'}),
     take('arena',0,710,{district:'undercroft'}), take('gauntlet',200,710,{district:'undercroft'}),
     take('sprint',400,710,{district:'undercroft'})
@@ -18329,6 +18311,7 @@ function drawRiftHallFallback(t){
  if(!window.__npc3dDrawn?.('riftkeeper')){pushM();mv(0,0,-645);hubNpcModel({id:'shade'},t);popM();}
 }
 function enterWaystation(riftHall=false){
+ clearTimeout(storyToast._t);document.getElementById('storycard')?.classList.remove('show');
   if(BFHubDialogue.active)BFHubDialogue.close(false,true);briarPending=null;
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
@@ -18466,7 +18449,6 @@ function enterWaystation(riftHall=false){
     {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
     {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
-    {id:'bestiary',ic:'📖',name:'Bestiary',role:'Enemy field guide',prop:'bestiary',verb:'Read the bestiary',direct:true,x:660,z:450,open:()=>openBestiary(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-235,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate(),needZones:1},
@@ -18593,7 +18575,8 @@ function enterWaystation(riftHall=false){
   if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('The Waystation · '+controlHint('interact')+' talks to nearby keepers.'); }
   if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('Your Reaper scythe is part of the class. Its power grows as your class rank and player level rise.'); }
   if(meta._iansBladeNotify){ meta._iansBladeNotify=false; meta._iansBladeAnnounced=true; persist(); storyToast("Ian's Blade now waits in the Shop."); }
-  if(!riftHall&&!meta.hubTutDone&&!meta.tutOff){hubTutorial();}   // one-time hub onboarding after the first trial
+  if(!riftHall&&!meta.hubTutDone&&!meta.tutOff){hubTutorial();}
+  window.BF_LOADING?.tick(G,mode);   // one-time hub onboarding after the first trial
 }
 // Hub services use the same authored, recordable lines as the Voice Studio.
 function openNpcTalk(n,granted=false){

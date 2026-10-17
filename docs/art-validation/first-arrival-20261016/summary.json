@@ -1,0 +1,44 @@
+{
+  "version": "2.213.0-first-arrival",
+  "sourceTests": 20,
+  "browser": {
+    "creatorBeforeStory": true,
+    "completionPortalSoundDispatches": 1,
+    "completionPortalRepeatedUpdateFrames": 240,
+    "illustratedPages": 5,
+    "lastPageAction": "Enter the Waystation",
+    "oldIntroVisible": false,
+    "coverAtHubEntry": "flex",
+    "uncoveredBeforeDetailedHubReady": 0,
+    "completionFlowPostTourMessages": [],
+    "skipPracticeThenNewOpening": true,
+    "outsideHubBestiary": false,
+    "interiorBestiary": true,
+    "phoneViewport": 390,
+    "phoneDocumentWidth": 390
+  },
+  "legacySave": {
+    "level": 4,
+    "rank": 4,
+    "gold": 1145,
+    "classXp": 1015,
+    "choices": [
+      "w_cleave",
+      "w_heavy",
+      "w_whirl"
+    ]
+  },
+  "otherRegressions": {
+    "pause": 25,
+    "creator": 14,
+    "progression": 43,
+    "audioPreservation": 255
+  },
+  "limits": [
+    "Portal sound dispatch tested with muted audio; no subjective listening claim.",
+    "Tutorial enemies and exit were arranged in the isolated fixture; not an earned end-to-end novice playthrough.",
+    "Co-op story presentation not exercised across two devices.",
+    "An earlier fixture called an unexported enterSparringRoom method; corrected to the actual hub service callback and rerun successfully."
+  ],
+  "storage": "Isolated in-memory localStorage and sessionStorage; real saves untouched."
+}

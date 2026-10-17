@@ -1,0 +1,15 @@
+from pathlib import Path
+R=Path(__file__).resolve().parents[1]
+isolation='''<script>(()=>{const d=new Map(),s={getItem:k=>d.get(k)??null,setItem:(k,v)=>d.set(k,String(v)),removeItem:k=>d.delete(k),clear:()=>d.clear(),key:i=>[...d.keys()][i]??null,get length(){return d.size}};Object.defineProperty(window,'localStorage',{value:s});Object.defineProperty(window,'sessionStorage',{value:s});})();</script>'''
+payload='''<section id="arrivalQA" style="position:fixed;right:4px;bottom:260px;z-index:200001;background:#162636;color:white;padding:8px;font:11px system-ui;max-width:280px"><button id="arrivalStart">New character</button><button id="arrivalPortal">Arrange tutorial exit</button><button id="arrivalCounts">Check sound count</button><button id="arrivalSpar">Enter sparring</button><button id="arrivalHide">Hide panel</button><pre id="arrivalResult" style="max-height:150px;overflow:auto">Ready</pre></section><script>
+(()=>{let sounds=0,leaks=0,postTour=[];const out=document.getElementById('arrivalResult'),report=extra=>out.textContent=JSON.stringify({sounds,leaks,mode:window.__BF3?.mode,originSeen:__BF3.meta.originSeen,tour:window.BFHubTour?.active,...extra},null,2);
+document.getElementById('arrivalStart').onclick=async()=>{while(!window.__BF3||!window.HERO3D?.ready)await new Promise(r=>setTimeout(r,50));__BF3.loadMode('rl');__BF3.openCharCreate();report();};
+document.getElementById('arrivalPortal').onclick=async()=>{const b=__BF3;BFGuidedTutorial.stop();__BF_SOCIAL_API.resume();b.G._tutorialSafe=true;b.G.enemies=[];b.G.trialKills=6;b.G.portal={x:b.G.p.x,y:b.G.p.y,z:b.G.p.z,t:0};const original=b.SFX.magic;b.SFX.magic=function(...a){sounds++;return original.apply(this,a);};for(let i=0;i<30;i++)b.update(.016);await new Promise(r=>setTimeout(r,500));report({trialCompleted:b.G.trialCompleted});};
+document.getElementById('arrivalCounts').onclick=async()=>{for(let j=0;j<4;j++){for(let i=0;i<60;i++)__BF3.update(.016);await new Promise(r=>setTimeout(r,220));}report({postTour,hubNpcs:__BF3.G.hubNpcs?.map(n=>n.id),trialCompleted:__BF3.G.trialCompleted,loading:BF_LOADING.active,art:!!window.__HUB_ART_ACTIVE});};
+document.getElementById('arrivalSpar').onclick=()=>{__BF3.G.hubNpcs.find(n=>n.id==='sparring').open();report({interior:__BF3.G.sparringRoom,bestiary:__BF3.G.hubNpcs?.some(n=>n.id==='bestiary')});};
+document.getElementById('arrivalHide').onclick=()=>document.getElementById('arrivalQA').hidden=true;
+setInterval(()=>{const b=window.__BF3;if(!b?.G?.hub)return;if(BFHubTour.active&&!window.__HUB_ART_ACTIVE&&getComputedStyle(document.getElementById('world-loading')).display==='none')leaks++;const card=document.getElementById('storycard');if(!BFHubTour.active&&card?.classList.contains('show')&&!postTour.includes(card.textContent))postTour.push(card.textContent);},20);
+})();</script>'''
+source=(R/'public/3d/index.html').read_text(encoding='utf8').replace('<head>','<head><base href="/3d/">'+isolation,1).replace('if(m && m[1]!==VERSION3D)','if(false && m && m[1]!==VERSION3D)')
+(R/'public/3d/.qa-first-arrival.html').write_text(source.replace('</body>',payload+'</body>'),encoding='utf8')
+print('Isolated fresh-player fixture built.')

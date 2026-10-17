@@ -86,3 +86,31 @@ body.adventure-hud{--hud-edge:#76958b;--hud-panel:#12252eed;--hud-gold:#efd794;-
 @media(max-width:899px),(pointer:coarse){.adventure-hud #hudprogress .progbox{height:20px;padding:1px 4px;box-sizing:border-box;clip-path:none;border-radius:3px}.adventure-hud #hudprogress .proghead{height:11px;line-height:11px;margin:0 0 2px}.adventure-hud #hudprogress .bar{height:3px}.adventure-hud #hudprogress .ico{width:10px;height:10px}}
 
 @media(max-width:899px),(pointer:coarse){.adventure-hud #journalNotice .jn-reading{padding:0 10px}.adventure-hud #journalNotice h3{font-size:17px}.adventure-hud #journalNotice .jn-kind{letter-spacing:0}.adventure-hud .jn-top,.adventure-hud .jn-bottom{padding:7px 9px}}
+
+/* Fantasy finish: existing Adventure HUD positions, content and controls stay intact. */
+.adventure-hud{--hud-panel:linear-gradient(145deg,#183e4ef5,#132638f5 58%,#101d30f5);--hud-line:#c6a461;--hud-gold:#ffe3a1}
+.adventure-hud .hudpanel{border:1px solid #bfa06a;border-bottom:3px solid #e5bd68;background:linear-gradient(115deg,#234a57f2,#163044f5 50%,#152239f5);box-shadow:inset 0 1px #fff2,inset 0 -4px #090f1b66,0 5px 18px #07121d66;border-radius:9px 9px 14px 4px}
+.adventure-hud .hudportrait{border:2px solid #e4c17e;background:radial-gradient(ellipse at 45% 30%,#416c7f,#132239 75%);box-shadow:inset 0 0 12px #010917,0 0 0 2px #16283d,0 0 0 3px #8a7045;border-radius:38% 38% 6px 6px}
+.adventure-hud .hudplayername{color:#ffebbb;text-shadow:0 2px 3px #070f1f}
+.adventure-hud #lvlbadge{color:#c6e1e6}.adventure-hud #hudDetails{color:#e7c88a}
+.adventure-hud .hudvitals .bar{border-color:#b89c6d;background:#0d1524;box-shadow:inset 0 2px 5px #0009,0 1px #fff1}
+.adventure-hud #hpfill{background:linear-gradient(180deg,#fa9984 0%,#e25d64 24%,#ad2e46 72%,#7f243a 100%);box-shadow:inset 0 1px #ffd1b688}
+.adventure-hud #manafill{background:linear-gradient(180deg,#b5e7ff,#5aa8f0 28%,#4266cc 74%,#304490);box-shadow:inset 0 1px #d6faff99}
+.adventure-hud #pethud{border:1px solid #a5915b;background:linear-gradient(120deg,#244e49ee,#142f3bee);box-shadow:inset 0 1px #e1eeb91a,0 3px 10px #0004}
+.adventure-hud #questbox{border:1px solid #b69a60;border-top:3px solid #e4bd72;background:linear-gradient(140deg,#203b4cf2,#13233af5 70%);box-shadow:inset 0 1px #fff2,0 5px 18px #08121c66;border-radius:5px 10px 5px 10px}
+.adventure-hud #questbox .qtitle,.adventure-hud #questbox h3{color:#ffdc90;text-shadow:0 1px 3px #060e1b}
+.adventure-hud #localMap{border-color:#dfbd78!important;box-shadow:0 0 0 3px #18283a,0 0 0 4px #8c7956,0 7px 20px #04111a88}
+.adventure-hud #mapCaption{color:#ffdf9d;text-shadow:0 2px 3px #030c15,0 0 5px #030c15}
+.adventure-hud #inventoryDock{border:1px solid #c3a46b;border-left:3px solid #e7c17c;background:linear-gradient(120deg,#234a48f2,#173242f5);box-shadow:inset 0 1px #fff2,0 5px 16px #06141c66;border-radius:8px 4px 8px 4px}
+.adventure-hud #equipmentFeed{border-color:#bfa16b;background:linear-gradient(140deg,#254541f5,#172f40f5);box-shadow:inset 0 1px #ffffff1a,0 8px 22px #06121e77}
+.adventure-hud .bag-tools button,.adventure-hud #bAuto{border-color:#b49a65;background:linear-gradient(180deg,#294b55f5,#193343f5);color:#f5e3ba;box-shadow:inset 0 1px #fff1}
+.adventure-hud #adventureSkills{border:1px solid #b99a61;border-bottom:2px solid #e4bf73;background:linear-gradient(180deg,#244858f2,#142a40f5 75%);box-shadow:inset 0 1px #fff2,0 5px 22px #06122066;border-radius:10px 10px 5px 5px}
+.adventure-hud #controls .btn.skl,.adventure-hud #bLMB,.adventure-hud #bSpace{border-color:#c8a76b;background:radial-gradient(ellipse at 50% 24%,#2d5167,#14283e 75%);box-shadow:inset 0 0 0 1px #0b1728,inset 0 2px #f4d59255,0 2px 4px #050f1b88;border-radius:6px}
+.adventure-hud #controls .btn.skl.lock{border-color:#6c797d;background:linear-gradient(150deg,#243746cc,#152638cc);box-shadow:inset 0 1px #c9c1a71a}
+.adventure-hud .btn.skl::before{color:#d2f0ff;background:#152d48ee;border-color:#6aa7c6;box-shadow:0 1px 3px #0008}
+.adventure-hud .btn.skl::after,.adventure-hud .btn.sklaux::after{color:#ffedc9;background:#162c42ee;text-shadow:0 1px #000}
+.adventure-hud .progtitle{color:#f4ddb0}.adventure-hud .prognum{color:#d7e7eb}
+.adventure-hud .progbox .bar{background:#0a1728;box-shadow:0 0 0 1px #aa8f5b77,inset 0 1px #0008}
+.adventure-hud #xpfill{background:linear-gradient(90deg,#c28c29,#ffe18a)}
+.adventure-hud #clsfill{background:linear-gradient(90deg,#8c62cd,#c3a2ff)}
+@media(max-width:899px),(pointer:coarse){.adventure-hud .hudpanel{border-bottom-width:2px;border-radius:5px}.adventure-hud .hudportrait{border-width:1px;box-shadow:0 0 0 1px #937e51}.adventure-hud #adventureSkills{border:0;background:none;box-shadow:none}.adventure-hud #questbox{border-top-width:2px}.adventure-hud #localMap{box-shadow:0 0 0 2px #18283a,0 4px 12px #04111a77}}

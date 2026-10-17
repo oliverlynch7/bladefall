@@ -1880,3 +1880,13 @@ U-FIRST-ARRIVAL-20261016: tutorial exit cannot replay warp audio from its comple
 ## [Codex | 2026-10-16] v2.213 first-arrival production confirmed
 
 Functional commit 0ce6082d deployed successfully as 94a249c7-f120-4334-a79b-64cc34d95fbf (deploy stage success). Public browser confirms v2.213.0-first-arrival with loading.js and adventure-hud.css v2213. No production console errors on launch. All scope-specific tests and limitations remain recorded in docs/art-validation/first-arrival-20261016/summary.json.
+
+
+## [Codex | 2026-10-16] U-HUB-QUEST-CHOICES-20261016
+
+User: "also when npcs in the hub have quests, there should be a ! icon next to the dialouge ioptions that progerss the quest". Add a yellow exclamation badge to available request/turn-in entry buttons and actual accepting/completing dialogue choices. Derive choice marking from authored return_accept/return_finish effects, preserving choice IDs, text, timing, saves and spectator restrictions. Shop actions, lore/news, decline/later and active-quest reminders are not progress choices and stay unmarked. Inspect source metadata before styling; verify the actual hub conversation states in-browser.
+
+
+## [Codex | 2026-10-16] v2.214.0 — hub quest-choice markers
+
+Added a yellow exclamation badge and accessible Quest label to new/ready return-request entries and authored accept/finish dialogue choices. Classification uses actual return_accept/return_finish reward effects; service, news, optional/later choices, active reminders and exit controls remain unmarked. Preserved callbacks, choice IDs, text, 250ms arming window and spectator restrictions. Real browser verified Quartermaster offer/decline, successful acceptance, marked delivery entry and completion, and original 300-gold payout (1145 to 1445) on an isolated older level-4 save. UI screenshot and completion evidence: docs/art-validation/quest-markers-20261016. Syntax, pause 25 and first-arrival 20 checks pass. Initial fixture omitted NPC interaction distance; corrected character position and reran the actual quest path successfully. No two-device co-op conversation test. Deployment confirmation pending.

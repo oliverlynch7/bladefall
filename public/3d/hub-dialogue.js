@@ -11,10 +11,13 @@
  function close(service=false,remote=false){if(!active)return;if(active.external&&!remote){active.a.requestClose();return;}generation++;stopVoice();const {n,a}=active;active=null;el('hubDialogue')?.remove();document.body.classList.remove('npc-conversation');a.leave(service);if(service)n.open()}
  function commit(){active.a.save()}
  function serviceButton(id,n){const icon={quartermaster:'🛒',anvil:'⚒️',keeper:'🎨',drillmaster:'⚔️',beastkeeper:'🐾'}[n.id]||'✦';return `<button id="${id}" class="hub-service-primary"><span class="hub-service-icon" aria-hidden="true">${icon}</span><span>${esc(book?.npcs[n.id]?.service||'Open services')}</span><span class="hub-service-arrow" aria-hidden="true">›</span></button>`}
+ const questBadge='<span class="hub-quest-badge" aria-hidden="true">!</span>';
+ function questProgress(choice){return (choice.effects||[]).some(e=>e.type==='reward'&&['return_accept','return_finish'].includes(e.kind));}
+ function markQuestButton(btn,text){btn.classList.add('hub-quest-choice');btn.setAttribute('aria-label','Quest: '+text);btn.innerHTML=questBadge+'<span>'+esc(text)+'</span>';}
  function landing(){
   if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book.npcs[n.id];s.cursor=null;commit();
   shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options">${serviceButton('hubService',n)}${a.returnInfo?.(n)?'<button id="hubReturnQuest">◆ '+esc(a.returnInfo(n).label)+'</button>':''}${hasNews(n,a)?'<button id="hubNews">◆ What has changed?</button>':''}<details class="hub-optional"><summary>More questions · optional</summary><button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></details></div>`);
-  if(el('hubReturnQuest'))el('hubReturnQuest').onclick=()=>a.returnQuest(n);
+  if(el('hubReturnQuest')){const info=a.returnInfo(n),btn=el('hubReturnQuest');btn.textContent=info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}
   el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function shell(content){
@@ -34,7 +37,7 @@
   const choices=el('hubChoices');let revealed=false;
   function unlock(){if(token!==generation||!active||revealed)return;revealed=true;cancelAnimationFrame(frame);el('hubLine').textContent=node.text;el('hubReveal').hidden=true;
    const optional=document.createElement('details');optional.className='hub-optional';optional.innerHTML='<summary>More questions · optional</summary>';
-   for(const choice of node.choices){const btn=document.createElement('button');btn.textContent=choice.text;btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};(choice.optional?optional:choices).append(btn)}
+   for(const choice of node.choices){const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};(choice.optional?optional:choices).append(btn)}
    if(optional.querySelector('button'))choices.append(optional);
    if(!node.choices.length){const btn=document.createElement('button');btn.textContent=finishLabel;btn.onclick=finish;choices.append(btn)}
    // A text-skip click cannot become a response click; all choices have a short arming window.
@@ -71,7 +74,7 @@
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
   const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;active.signature=signature;
-  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>({...c,optional:!!source.nodes[view.lineId].choices.find(o=>o.id===c.id)?.optional}))},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Return to the path',canChoose);
+  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:!!original?.optional,questProgress:!!original&&questProgress(original)}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Return to the path',canChoose);
  }
  function listen(n,a,lineId){
  if(!book)return;const same=active?.spectator&&active.n.id===n.id;

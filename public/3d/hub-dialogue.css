@@ -7,3 +7,8 @@
 #hubDialogue button.hub-service-primary{display:flex;align-items:center;gap:12px;width:100%;min-height:70px;padding:16px;font-size:18px;font-weight:700;border:2px solid #d4b478;background:linear-gradient(135deg,#51462c,#303c30);box-shadow:0 3px 14px #0004;margin-bottom:6px}#hubDialogue button.hub-service-primary:hover{background:#625438;border-color:#ffe2a4}#hubDialogue .hub-service-icon{font-size:28px;flex-shrink:0}#hubDialogue .hub-service-arrow{margin-left:auto;font-size:26px;color:#f0d5a1}#hubQuickService{margin-bottom:12px!important}
 
 #hubDialogue .hub-dialogue-line{min-height:0;line-height:1.5}#hubDialogue .hub-optional{border-top:1px solid #ffffff22;padding-top:12px}#hubDialogue .hub-optional summary{cursor:pointer;color:#c3cbbc;padding:8px 0}#hubDialogue .hub-optional button{display:block;width:100%;margin-top:8px}
+
+/* Quest progress stays distinct from services and optional conversation. */
+#hubDialogue button.hub-quest-choice{display:flex;align-items:center;gap:10px;text-align:left;border-color:#d5b551;background:linear-gradient(110deg,#40391e,#1d2c2b);color:#fff1bd}
+#hubDialogue button.hub-quest-choice:hover:not(:disabled){border-color:#ffe488;background:linear-gradient(110deg,#514525,#263832)}
+#hubDialogue .hub-quest-badge{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;height:27px;border:1px solid #ebca65;border-radius:7px;background:#ffd65a;color:#34240b;font:900 20px/1 system-ui;box-shadow:inset 0 1px #fff8,0 2px 5px #0005}

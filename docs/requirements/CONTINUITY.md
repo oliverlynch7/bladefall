@@ -2317,3 +2317,8 @@ Commit4113645b deployed successfully as534deb12-fabd-46fd-82c0-984c538399d3. Pub
 ## [Codex | 2026-10-17] v2.241 settings visual grouping
 
 Game options card now uses stronger2px group borders, gold expanded boundary/left inset, distinct header divider/background, stronger option/slider borders and keyboard focus outlines. Scoped to game-options; achievement Records styling unchanged. Browser old-save fixture passed all controls/settings checks, actual Controls/Graphics switching confirmed one open section and no horizontal overflow; screenshot reviewed. Inline parser passes. Cosmetic change only; no save/gameplay alterations.
+
+
+## [Codex | 2026-10-17] v2.242 fullscreen shortcut
+
+Added rebindable Toggle Fullscreen action default0/Num0, respects existing assigned keys. Routes before game/menu mode gating, ignores text fields, rebinding, modifier shortcuts, editor and repeats. Fullscreen button shows dynamic assigned keys and updates on browser fullscreenchange; unsupported/rejected API promises handled. Browser old-save settings/control fixture passes; instrumented real keyboard-event path requests0 times for typing/repeat/modifiers, once for0 and once forNum0. Browser event updated fullscreen label; embedded browser does not retain OS fullscreen, so no physical OS display claim. Inline syntax and focused controls/camera suites pass.

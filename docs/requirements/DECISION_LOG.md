@@ -1608,3 +1608,8 @@ User requires mouse attack/dodge alongside keyboard in overhead, fixed camera-al
 ## [Codex | 2026-10-17] U-SETTINGS-GROUP-CONTRAST-20261017
 
 User wants expanded Game options groups clearly separated from neighboring headings, with bolder option borders. Plan: scope visual-only CSS to Game options card, strengthen expanded amber outer boundary, header divider and inset blue contents, give buttons/sliders distinct borders and focus indication; preserve accordion/input behavior and records styling. Verify real browser expanded controls/graphics and compact layout.
+
+
+## [Codex | 2026-10-17] U-FULLSCREEN-SHORTCUT-20261017
+
+User requests0 fullscreen shortcut. Add rebindable Toggle fullscreen action default Digit0/Numpad0, fill only free bindings on existing saves, handle once per press outside typing/rebinding/editor/modifier combinations. Show assigned shortcut in fullscreen settings button, update actual state on fullscreenchange, catch rejected browser requests. Verify routing and browser fullscreen with a real gesture where permitted.

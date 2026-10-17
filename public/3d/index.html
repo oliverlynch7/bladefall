@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.241.0-settings-clarity';
+const VERSION3D='2.242.0-fullscreen-shortcut';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -10028,6 +10028,7 @@ const KEYACTIONS=[
   {id:'bag',label:'Toggle Bag',def:['Tab','KeyB']},
   {id:'emote',label:'Emote Wheel',def:['KeyM']},
   {id:'mount',label:'Mount / Land Dragon',def:['KeyH']},
+  {id:'fullscreen',label:'Toggle Fullscreen',def:['Digit0','Numpad0']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
@@ -10071,6 +10072,7 @@ window.addEventListener('keydown',e=>{
     for(const k in input) if(MOVE_ACTS[k]) input[k]=false;
     return;
   }
+  if(keyAction(e.code)==='fullscreen'&&!BFMenuKeys.typing(e.target)){e.preventDefault();if(!e.repeat)toggleFullscreen();return;}
   if(mode==='npc'||mode==='hubtour')return;
   if(mode==='menu'&&document.querySelector('#ovcard .bagmenu')&&keyAction(e.code)==='bag'&&!BFMenuKeys.typing(e.target)){e.preventDefault();if(!e.repeat)document.querySelector('#ovcard #backBtn')?.click();return;}
   if(!e.repeat&&!e.target?.matches?.('input,textarea,select')&&!e.target?.isContentEditable&&classTutorialAction(e.code==='Escape'?'cancel':keyAction(e.code))){e.preventDefault();e.stopImmediatePropagation();return;}
@@ -10167,6 +10169,7 @@ window.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='p
   else if(act==='lootSell'&&G.lootCard) lootSellCurrent();
   else if(act==='bag'){releaseKeyboard();openBag(resumePlay);}
   else if(act==='journal')openJournal();
+  else if(act==='fullscreen')toggleFullscreen();
   else if(act==='mount')toggleDragonRide();
   else if(act==='emote'&&!G?.p?.dragonRide)BFEmotes.open();
   else if(act==='loot') cycleLootMode();
@@ -20152,9 +20155,12 @@ function studioSetCat(cat){ if(!studio) return; studio.cat=cat; studio.design=(c
   else { if(ic) ic.classList.add('hide'); const first=DESIGNS.findIndex(e=>e.g===cat); designSet(first>=0?first:0); } }
 function fsOn(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
 function toggleFullscreen(){ try{
-  if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
-  else { const el=document.documentElement; (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
+  const el=fsOn()?document:document.documentElement;
+  const fn=fsOn()?(document.exitFullscreen||document.webkitExitFullscreen):(el.requestFullscreen||el.webkitRequestFullscreen);
+  if(fn){const request=fn.call(el);request?.catch?.(()=>{});}
 }catch(e){} }
+function fullscreenLabel(){return 'Fullscreen: '+(fsOn()?'On':'Off')+' · '+controlHint('fullscreen');}
+for(const event of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(event,()=>{const b=document.getElementById('fsBtn');if(b)b.textContent=fullscreenLabel();});
 // human-readable label for a physical key code
 function keyLabel(code){ if(!code) return '—';
   const m={Mouse0:'Left Click',Mouse1:'Middle Click',Mouse2:'Right Click',Space:'Space',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',ShiftLeft:'L-Shift',ShiftRight:'R-Shift',ControlLeft:'L-Ctrl',ControlRight:'R-Ctrl',AltLeft:'L-Alt',AltRight:'R-Alt',Enter:'Enter',Tab:'Tab',Backquote:'`',Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'\\',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/',CapsLock:'Caps'};
@@ -20227,7 +20233,7 @@ function openPause(){
     <div class="sect">Settings</div>
     <div class="pgrid">
       <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
-      <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="fsBtn">${fullscreenLabel()}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
@@ -20308,7 +20314,7 @@ function openPauseSettingsV2(){
     <p class="ovsub">Tune the view, feedback, and sound without leaving your adventure.</p>
     <div class="pgrid">
       <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
-      <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="fsBtn">${fullscreenLabel()}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>

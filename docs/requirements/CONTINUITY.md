@@ -2295,3 +2295,8 @@ Shared camera occlusion/sweep now uses scalar slabs plus conservative XZ broad p
 HUD active optional objectives are a visible section under main objective, with title and next step/count, no dropdown. Completed history remains in Journal. Progress included in signature; tracker has bounded scroll on crowded/short screens. Actual Sly family-picture quest fixture verifies initial visible row, changed return-to-Sly instruction and completed row removal; no hidden details, no captured errors. Screenshot inspected.
 
 106 offline suites pass. Existing scenes, puzzles, water collision, rewards and saves preserved; pre-change save loaded. No production save changes, physical mobile/controller or two-device co-op test claimed. Evidence before/after/comparison/optional-HUD JSON and screenshot in this directory. Publication pending.
+
+
+## [Codex | 2026-10-17] v2.239 production confirmed
+
+Functional commitfd1210bd deployed successfully as5ed85a15-58be-43db-b69a-80166d1f1b3b. Actual public browser confirmsv2.239.0-keep-performance, normal main-menu boot and2239 camera/hero/HUD asset references. Local106-suite,6000 camera/60 movement parity cases, old-save, reproduced lighting-transition before/after and visible optional progress evidence recorded in docs/art-validation/keep-performance-20261017. Profile artifacts omit repeated decorative item records while retaining counts and timings. No production character/save changes.

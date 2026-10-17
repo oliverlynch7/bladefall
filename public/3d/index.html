@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><script src="./save-safety.js?v=2229"></script>
+<script src="./skill-sfx.js?v=2230"></script>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2218"></script>
 <script src="./camera-controls.js?v=2219"></script>
@@ -1184,7 +1185,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.229.0-save-recovery';
+const VERSION3D='2.230.0-pyromancer-audio';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1780,6 +1781,7 @@ const FXDEF={
 };
 // Preserve existing files. The additive-only adapter activates only explicit new event slots.
 if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
+if(window.BFSkillSfx)window.BFSkillSfx.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={
   thornboar:{v:'v_boargrunt',d:'die1'}, charger:{v:'v_boarroar',d:'die2'}, dustjackal:{v:'v_jackalbark',d:'die3'},
@@ -13065,6 +13067,7 @@ function useSkill(i){
     finally{p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!oldShots.has(shot)&&shot.owner==='player')shot.desig=true;}
     // A rejected cast earns no healing, shields, echoes, pet orders or cast counters.
     if(r==='refund'){p._attuneI=priorAttune;if(soulFree)p._soulFree=1;else gainMana(p,manaSpent,false);return;}
+    if(window.BFSkillSfx)window.BFSkillSfx.cast(s.id,playFx);
     if(partyChannel)partyCancel('Skill interrupted your teleport');
     classCastCompanionOrder();
     if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=Math.max(p.shieldT||0,3);} if(c2Passive('m_echo')&&p._mageCasts%4===0){const shots=new Set(G.projectiles);try{p.weapon=castWeapon;G._desig=true;fx(p,classFamilyOk(p.weapon),(s.am??1)*.35);}finally{p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!shots.has(shot)&&shot.owner==='player')shot.desig=true;}} if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }

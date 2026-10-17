@@ -1,0 +1,105 @@
+{
+  "version": "pyromancer-20261017",
+  "plan_at_generation": "starter",
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "subjective_listening": "Human audition pending; signal checks cannot establish taste.",
+  "cues": [
+    {
+      "id": "py_bolt",
+      "file": "custom/pyromancer-20261017/py_bolt_v01",
+      "duration": 0.64,
+      "channels": 2,
+      "source_seconds": 0.65,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.6598,
+      "peak": 0.67801,
+      "rms": 0.08491,
+      "sha256": "e8094a91b07d8cc7356668132c57b0b44ee605105f3d659e91b59c18b2fc85e1"
+    },
+    {
+      "id": "py_fan",
+      "file": "custom/pyromancer-20261017/py_fan_v01",
+      "duration": 0.84,
+      "channels": 2,
+      "source_seconds": 0.85,
+      "trimmed_start_seconds": 0.0,
+      "gain": 1.6031,
+      "peak": 0.61891,
+      "rms": 0.08511,
+      "sha256": "559869364dd1ea05f820e9aa075987699e160ceda6a5b41d27665b1d187b633d"
+    },
+    {
+      "id": "py_blast",
+      "file": "custom/pyromancer-20261017/py_blast_v01",
+      "duration": 0.84,
+      "channels": 2,
+      "source_seconds": 0.85,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.5512,
+      "peak": 0.50729,
+      "rms": 0.08519,
+      "sha256": "418076f262f53741ea37c677d0fea82bcc494105da830efb5d9e73da2bff18c1"
+    },
+    {
+      "id": "py_ward",
+      "file": "custom/pyromancer-20261017/py_ward_v01",
+      "duration": 1.08,
+      "channels": 2,
+      "source_seconds": 1.1,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7238,
+      "peak": 0.70495,
+      "rms": 0.08566,
+      "sha256": "fd981f9988dfb63e2a10173c6f4fd5fd1ad44acf065585a86f025025b0703285"
+    },
+    {
+      "id": "py_lance",
+      "file": "custom/pyromancer-20261017/py_lance_v01",
+      "duration": 0.72,
+      "channels": 2,
+      "source_seconds": 0.75,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.64,
+      "peak": 0.61588,
+      "rms": 0.08475,
+      "sha256": "bff4969f1bea531154dba07d39e8f2444d3fbd0142f992fa0c8d037481287bbc"
+    },
+    {
+      "id": "py_nova",
+      "file": "custom/pyromancer-20261017/py_nova_v01",
+      "duration": 1.0,
+      "channels": 2,
+      "source_seconds": 1.0,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7751,
+      "peak": 0.61332,
+      "rms": 0.08525,
+      "sha256": "f825501d89b297df38dfa8c0dd6c1ef56ff43a7342fecda1e849ab6451e3f99f"
+    },
+    {
+      "id": "py_inferno",
+      "file": "custom/pyromancer-20261017/py_inferno_v01",
+      "duration": 1.24,
+      "channels": 2,
+      "source_seconds": 1.25,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.3133,
+      "peak": 0.30248,
+      "rms": 0.08543,
+      "sha256": "2fb0e28350e52fa32cf9bff89ea728ff3ec1bc90084d5023ef19ef89786ecae8"
+    },
+    {
+      "id": "py_sun",
+      "file": "custom/pyromancer-20261017/py_sun_v01",
+      "duration": 1.2,
+      "channels": 2,
+      "source_seconds": 1.2,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7021,
+      "peak": 0.73813,
+      "rms": 0.03299,
+      "sha256": "d73bf7ad0fee08e7734def1fd81b81138e4f71539b249cb982de933d3ef0e886"
+    }
+  ]
+}

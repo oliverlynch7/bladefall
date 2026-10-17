@@ -1,0 +1,251 @@
+{
+  "blocks": {
+    "local": false,
+    "thomas": false
+  },
+  "hits": [
+    {
+      "distance": 157.81706382083013,
+      "point": [
+        312.7235260704617,
+        1,
+        397.97700875410686
+      ],
+      "name": "",
+      "parent": "The Waystation · Lantern Court",
+      "grand": "",
+      "visible": true
+    }
+  ],
+  "hero": {
+    "on": true,
+    "err": null,
+    "stats": {
+      "shadows": true,
+      "triangles": 242206,
+      "calls": 343,
+      "geometries": 353
+    },
+    "cam": {
+      "P": [
+        1.3922363550466665,
+        0,
+        0,
+        0,
+        0,
+        2.475086853416296,
+        0,
+        0,
+        0.21875,
+        0,
+        -1.000434877147206,
+        -1,
+        0,
+        0,
+        -2.000434877147206,
+        0
+      ],
+      "V": [
+        -0.5311861979208836,
+        0.6891704438103547,
+        -0.49283397053834954,
+        0,
+        0,
+        0.5816830894638837,
+        0.8134155047893737,
+        0,
+        0.8472551110134161,
+        0.4320750893189637,
+        -0.3089820286871935,
+        0,
+        -171.0736339189672,
+        -388.05744594570774,
+        118.45804124414408,
+        1
+      ]
+    },
+    "scene": [
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "__heroPose:title",
+        "visible": false,
+        "children": 1
+      },
+      {
+        "name": "Player combat ribbons",
+        "visible": false,
+        "children": 0
+      },
+      {
+        "name": "mob3d",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Companion art",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Waystation citizens",
+        "visible": true,
+        "children": 6
+      },
+      {
+        "name": "Rift Shards",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "Projectile art",
+        "visible": true,
+        "children": 5
+      },
+      {
+        "name": "prop3d",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "__heroPose:mirror",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Carved chess pieces",
+        "visible": true,
+        "children": 32
+      },
+      {
+        "name": "The Waystation · Lantern Court",
+        "visible": true,
+        "children": 66
+      },
+      {
+        "name": "",
+        "visible": false,
+        "children": 1
+      }
+    ],
+    "wrap": {
+      "visible": true,
+      "pos": [
+        266,
+        -0.4204317541512399,
+        390
+      ],
+      "scale": [
+        20,
+        20,
+        20
+      ]
+    }
+  },
+  "camera": {
+    "eye": {
+      "x": 234.94591588893786,
+      "y": 129.37084663219733,
+      "z": 349.21437221329046
+    },
+    "look": {
+      "x": 300,
+      "y": 22,
+      "z": 390
+    },
+    "fov": 44,
+    "panel": 280
+  },
+  "mode": "chess",
+  "owned": true,
+  "state": {
+    "history": [],
+    "initialFen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "round": 4,
+    "solo": true,
+    "difficulty": "medium",
+    "botError": "",
+    "preferred": "w",
+    "owned": true,
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "rev": 28,
+    "seats": {
+      "w": "solo",
+      "b": "chess-thomas"
+    },
+    "result": "",
+    "drawOffer": null,
+    "clock": {
+      "enabled": false,
+      "base": 300,
+      "increment": 0,
+      "left": {
+        "w": 300,
+        "b": 300
+      },
+      "ready": {
+        "w": false,
+        "b": false
+      },
+      "running": null,
+      "started": true
+    },
+    "motion": null,
+    "talks": {},
+    "claim": false
+  },
+  "player": {
+    "x": 266,
+    "z": 390,
+    "hip": [
+      265.6738094050088,
+      14,
+      386.07479206800593
+    ]
+  },
+  "thomas": {
+    "peerId": "chess-thomas",
+    "sitting": true,
+    "x": 334,
+    "y": -4,
+    "z": 390,
+    "yaw": -1.5707963267948966
+  },
+  "thomasHip": [
+    334.3245577031982,
+    14,
+    393.9055589315628
+  ],
+  "pet": {
+    "x": 242,
+    "z": 436,
+    "sitting": true
+  },
+  "props": [
+    {
+      "x": 300,
+      "z": 390,
+      "w": 36,
+      "d": 40,
+      "h": 22
+    }
+  ]
+}

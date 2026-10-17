@@ -1,0 +1,383 @@
+{
+  "blocks": {
+    "local": true,
+    "thomas": false
+  },
+  "hits": [
+    {
+      "distance": 83.28145261004337,
+      "point": [
+        253.7546292999253,
+        37.32522589067201,
+        389.99999999999994
+      ],
+      "name": "",
+      "parent": "Class fitting · Head",
+      "grand": "Head",
+      "visible": true
+    },
+    {
+      "distance": 92.83533033502744,
+      "point": [
+        262.82350841650907,
+        34.31989543417682,
+        390
+      ],
+      "name": "Warrior_Body",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 99.93847508254181,
+      "point": [
+        269.566064990616,
+        32.085483621392775,
+        390
+      ],
+      "name": "Warrior_Body",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 102.03487574543772,
+      "point": [
+        271.5560427503283,
+        31.426026075192276,
+        390
+      ],
+      "name": "Warrior_Body",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 102.67000684903554,
+      "point": [
+        272.1589316889891,
+        31.22623506839318,
+        390
+      ],
+      "name": "Warrior_Body",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 155.68466233239334,
+      "point": [
+        323.2517638376267,
+        16.87147472496718,
+        383.43250302932677
+      ],
+      "name": "BowString",
+      "parent": "WeaponPalmGrip",
+      "grand": "WeaponR",
+      "visible": false
+    },
+    {
+      "distance": 158.5033763558825,
+      "point": [
+        325.7338203326673,
+        15.400694591848165,
+        383.2033193137231
+      ],
+      "name": "BowString",
+      "parent": "WeaponPalmGrip",
+      "grand": "WeaponR",
+      "visible": false
+    },
+    {
+      "distance": 169.10144192411198,
+      "point": [
+        335.21800273629583,
+        10.329127020033452,
+        390.0000000000001
+      ],
+      "name": "Monk",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 169.72206233831156,
+      "point": [
+        335.8071176146391,
+        10.133900590890535,
+        390.0000000000001
+      ],
+      "name": "Monk",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 170.05581945956578,
+      "point": [
+        336.1239316951708,
+        10.028911761176467,
+        390.00000000000006
+      ],
+      "name": "Ranger",
+      "parent": "CharacterArmature",
+      "grand": "__heroPeer:g",
+      "visible": true
+    },
+    {
+      "distance": 170.17976902154734,
+      "point": [
+        336.2415890094595,
+        9.989921373774058,
+        390.00000000000006
+      ],
+      "name": "Ranger",
+      "parent": "CharacterArmature",
+      "grand": "__heroPeer:g",
+      "visible": true
+    },
+    {
+      "distance": 198.7585262682368,
+      "point": [
+        363.3695575927974,
+        1,
+        390.00000000000006
+      ],
+      "name": "",
+      "parent": "The Waystation · Lantern Court",
+      "grand": "",
+      "visible": true
+    }
+  ],
+  "hero": {
+    "on": true,
+    "err": null,
+    "stats": {
+      "shadows": true,
+      "triangles": 248942,
+      "calls": 366,
+      "geometries": 286
+    },
+    "cam": {
+      "P": [
+        1.3922363550466665,
+        0,
+        0,
+        0,
+        0,
+        2.475086853416296,
+        0,
+        0,
+        0.21875,
+        0,
+        -1.000434877147206,
+        -1,
+        0,
+        0,
+        -2.000434877147206,
+        0
+      ],
+      "V": [
+        0,
+        0.3145665606161178,
+        -0.9492354180824408,
+        0,
+        0,
+        0.9492354180824408,
+        0.3145665606161178,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -390,
+        -115.25314738264905,
+        145.85016109117765,
+        1
+      ]
+    },
+    "scene": [
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "__heroPose:title",
+        "visible": false,
+        "children": 1
+      },
+      {
+        "name": "Player combat ribbons",
+        "visible": false,
+        "children": 0
+      },
+      {
+        "name": "mob3d",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Companion art",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Waystation citizens",
+        "visible": true,
+        "children": 6
+      },
+      {
+        "name": "Rift Shards",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "Projectile art",
+        "visible": true,
+        "children": 5
+      },
+      {
+        "name": "prop3d",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "__heroPose:mirror",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Carved chess pieces",
+        "visible": true,
+        "children": 32
+      },
+      {
+        "name": "The Waystation · Lantern Court",
+        "visible": true,
+        "children": 66
+      },
+      {
+        "name": "",
+        "visible": false,
+        "children": 1
+      }
+    ],
+    "wrap": {
+      "visible": true,
+      "pos": [
+        266,
+        -0.3891743906938725,
+        390
+      ],
+      "scale": [
+        20,
+        20,
+        20
+      ]
+    }
+  },
+  "camera": {
+    "eye": {
+      "x": 174.7009248131178,
+      "y": 63.52278600132755,
+      "z": 390
+    },
+    "look": {
+      "x": 300,
+      "y": 22,
+      "z": 390
+    },
+    "fov": 44,
+    "panel": 280
+  },
+  "mode": "chess",
+  "owned": true,
+  "state": {
+    "history": [],
+    "initialFen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "round": 4,
+    "solo": true,
+    "difficulty": "medium",
+    "botError": "",
+    "preferred": "w",
+    "owned": true,
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "rev": 22,
+    "seats": {
+      "w": "solo",
+      "b": "chess-thomas"
+    },
+    "result": "",
+    "drawOffer": null,
+    "clock": {
+      "enabled": false,
+      "base": 300,
+      "increment": 0,
+      "left": {
+        "w": 300,
+        "b": 300
+      },
+      "ready": {
+        "w": false,
+        "b": false
+      },
+      "running": null,
+      "started": true
+    },
+    "motion": null,
+    "talks": {},
+    "claim": false
+  },
+  "player": {
+    "x": 266,
+    "z": 390,
+    "hip": [
+      265.6738094794702,
+      14,
+      386.07479191517945
+    ]
+  },
+  "thomas": {
+    "peerId": "chess-thomas",
+    "sitting": true,
+    "x": 334,
+    "y": -4,
+    "z": 390,
+    "yaw": -1.5707963267948966
+  },
+  "thomasHip": [
+    334.3245576584994,
+    14,
+    393.905559003442
+  ],
+  "pet": {
+    "x": 242,
+    "z": 436,
+    "sitting": true
+  },
+  "props": [
+    {
+      "x": 300,
+      "z": 390,
+      "w": 36,
+      "d": 40,
+      "h": 22
+    }
+  ]
+}

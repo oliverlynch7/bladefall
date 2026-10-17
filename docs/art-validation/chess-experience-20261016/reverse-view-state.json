@@ -1,0 +1,335 @@
+{
+  "blocks": {
+    "local": false,
+    "thomas": true
+  },
+  "hits": [
+    {
+      "distance": 86.85129515234605,
+      "point": [
+        342.8567497219435,
+        36.202272800198756,
+        390
+      ],
+      "name": "",
+      "parent": "Class fitting · Head",
+      "grand": "Head",
+      "visible": true
+    },
+    {
+      "distance": 88.71674978277993,
+      "point": [
+        341.0859941159098,
+        35.61546315311778,
+        389.99999999999994
+      ],
+      "name": "Cloak",
+      "parent": "Head",
+      "grand": "Neck",
+      "visible": true
+    },
+    {
+      "distance": 92.80960185271834,
+      "point": [
+        337.2009139701522,
+        34.32798875436666,
+        390
+      ],
+      "name": "Ranger",
+      "parent": "CharacterArmature",
+      "grand": "__heroPeer:g",
+      "visible": true
+    },
+    {
+      "distance": 93.22347546055383,
+      "point": [
+        336.8080504829852,
+        34.19779795702007,
+        390
+      ],
+      "name": "Monk",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 101.27582302859243,
+      "point": [
+        329.16447697269297,
+        31.664798677656606,
+        390
+      ],
+      "name": "Ranger",
+      "parent": "CharacterArmature",
+      "grand": "__heroPeer:g",
+      "visible": true
+    },
+    {
+      "distance": 101.80600877585518,
+      "point": [
+        328.66120588322866,
+        31.498019970652486,
+        390
+      ],
+      "name": "Monk",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 172.00260003181606,
+      "point": [
+        262.02811523441443,
+        9.41651969228942,
+        390.0000000000001
+      ],
+      "name": "Warrior_Body",
+      "parent": "CharacterArmature",
+      "grand": "Scene",
+      "visible": true
+    },
+    {
+      "distance": 198.7585262682368,
+      "point": [
+        236.63044240720262,
+        1,
+        390.00000000000006
+      ],
+      "name": "",
+      "parent": "The Waystation · Lantern Court",
+      "grand": "",
+      "visible": true
+    }
+  ],
+  "hero": {
+    "on": true,
+    "err": null,
+    "stats": {
+      "shadows": true,
+      "triangles": 261443,
+      "calls": 474,
+      "geometries": 359
+    },
+    "cam": {
+      "P": [
+        1.3922363550466665,
+        0,
+        0,
+        0,
+        0,
+        2.475086853416296,
+        0,
+        0,
+        0.21875,
+        0,
+        -1.000434877147206,
+        -1,
+        0,
+        0,
+        -2.000434877147206,
+        0
+      ],
+      "V": [
+        -4.536619187015282e-16,
+        -0.3145665606161178,
+        0.9492354180824408,
+        0,
+        0,
+        0.9492354180824408,
+        0.3145665606161178,
+        0,
+        -1,
+        1.4270686944844857e-16,
+        -4.306319610667274e-16,
+        0,
+        390.0000000000001,
+        73.48678898702158,
+        -423.69108975828664,
+        1
+      ]
+    },
+    "scene": [
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "__heroPose:title",
+        "visible": false,
+        "children": 1
+      },
+      {
+        "name": "Player combat ribbons",
+        "visible": false,
+        "children": 0
+      },
+      {
+        "name": "mob3d",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Companion art",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Waystation citizens",
+        "visible": true,
+        "children": 6
+      },
+      {
+        "name": "Rift Shards",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "Projectile art",
+        "visible": true,
+        "children": 5
+      },
+      {
+        "name": "prop3d",
+        "visible": true,
+        "children": 0
+      },
+      {
+        "name": "__heroPose:mirror",
+        "visible": true,
+        "children": 1
+      },
+      {
+        "name": "Carved chess pieces",
+        "visible": true,
+        "children": 32
+      },
+      {
+        "name": "The Waystation · Lantern Court",
+        "visible": true,
+        "children": 66
+      },
+      {
+        "name": "",
+        "visible": false,
+        "children": 1
+      }
+    ],
+    "wrap": {
+      "visible": true,
+      "pos": [
+        266,
+        -0.5398667301181685,
+        390
+      ],
+      "scale": [
+        20,
+        20,
+        20
+      ]
+    }
+  },
+  "camera": {
+    "eye": {
+      "x": 425.2990751868822,
+      "y": 63.52278600132755,
+      "z": 389.99999999999994
+    },
+    "look": {
+      "x": 300,
+      "y": 22,
+      "z": 390
+    },
+    "fov": 44,
+    "panel": 280
+  },
+  "mode": "chess",
+  "owned": true,
+  "state": {
+    "history": [],
+    "initialFen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "round": 4,
+    "solo": true,
+    "difficulty": "medium",
+    "botError": "",
+    "preferred": "w",
+    "owned": true,
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "rev": 22,
+    "seats": {
+      "w": "solo",
+      "b": "chess-thomas"
+    },
+    "result": "",
+    "drawOffer": null,
+    "clock": {
+      "enabled": false,
+      "base": 300,
+      "increment": 0,
+      "left": {
+        "w": 300,
+        "b": 300
+      },
+      "ready": {
+        "w": false,
+        "b": false
+      },
+      "running": null,
+      "started": true
+    },
+    "motion": null,
+    "talks": {},
+    "claim": false
+  },
+  "player": {
+    "x": 266,
+    "z": 390,
+    "hip": [
+      265.6738094355599,
+      14,
+      386.07479191517945
+    ]
+  },
+  "thomas": {
+    "peerId": "chess-thomas",
+    "sitting": true,
+    "x": 334,
+    "y": -4,
+    "z": 390,
+    "yaw": -1.5707963267948966
+  },
+  "thomasHip": [
+    334.3245578009077,
+    14,
+    393.90555900344197
+  ],
+  "pet": {
+    "x": 242,
+    "z": 436,
+    "sitting": true
+  },
+  "props": [
+    {
+      "x": 300,
+      "z": 390,
+      "w": 36,
+      "d": 40,
+      "h": 22
+    }
+  ]
+}

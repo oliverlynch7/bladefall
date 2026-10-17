@@ -1,0 +1,13 @@
+PASS choreography: castling moves both pieces; en passant removes correct pawn; promotion survives transition; no duplicate pieces or non-finite geometry
+
+PASS clock: readiness, monotonic time, projection, animation pause, increment, flag, untimed, disconnect resume, validation
+
+33 chess layout, move review, compact replay and board-visibility checks passed.
+
+51 dragon eligibility, flight, collision, stamina and lifecycle checks passed.
+
+25 pause regression checks passed.
+
+20 first-arrival regression checks passed.
+
+PASS: illegal move, checkmate, castling, en passant, underpromotion, insufficient material, stalemate, repetition, fifty-move claim

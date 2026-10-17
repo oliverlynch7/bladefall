@@ -1,3 +1,4 @@
+import {chessBlocksBoard} from './chess-visibility3d.js?v=2226e';
 import {weaponOnly} from './first-person-appearance3d.js?v=2219';
 import { pauseAppearance } from './pause-appearance3d.js?v=2212';
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
@@ -10,9 +11,9 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2027';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2174';
+import {syncNpcs} from './npc3d.js?v=2226e';
 import {syncProjectiles} from './projectile3d.js?v=2094';
-import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2225';
+import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2226e';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 
@@ -1297,7 +1298,7 @@ function colorWeapon(holder,w){
 
 function restoreEmotePose(A){if(A.sitRoot){A.sitRoot[0].position.copy(A.sitRoot[1]);A.sitRoot=null;}for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];for(const [node,visible] of A.emoteWeapons||[])node.visible=visible;A.emoteWeapons=[];}
 window.__restoreChessNpc=restoreEmotePose;
-window.__poseChessNpc=(p,root,anim)=>applyEmotePose(p,root,anim);
+window.__poseChessNpc=(p,root,anim)=>{applyEmotePose(p,root,anim);if(p.sitting){root.updateMatrixWorld(true);const hip=root.getObjectByName('UpperLegL');if(hip){root.position.y+=(window.BFSocial?.seatHeight||14)-hip.getWorldPosition(new THREE.Vector3()).y;root.updateMatrixWorld(true);}}};
 function applyEmotePose(p,wrap,A){
  const e=p.dragonRide?{id:'ride',t:2}:p.sitting?{id:'sit',t:2}:p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
  const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5)),s=Math.sin(t*Math.PI*2);
@@ -2115,6 +2116,7 @@ export function drawHero3D(p, t){
       poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     }
     applyEmotePose(p,wrap,anim);
+    if(p.sitting&&window.BFSocial?.seatHeight){wrap.updateMatrixWorld(true);const hip=wrap.getObjectByName('UpperLegL');if(hip){wrap.position.y+=window.BFSocial.seatHeight-hip.getWorldPosition(new THREE.Vector3()).y;wrap.updateMatrixWorld(true);}}
     if(p.dragonRide){wrap.updateMatrixWorld(true);const hip=wrap.getObjectByName('UpperLegL');if(hip){const at=hip.getWorldPosition(new THREE.Vector3());wrap.position.y+=(p.y||0)+46-at.y;wrap.updateMatrixWorld(true);}}
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
@@ -2148,9 +2150,9 @@ export function drawHero3D(p, t){
     const restoreFirstPerson=fp?weaponOnly(wrap):null;
     const mountView=window.__BF3?.meta.camMode==='fps'&&window.__BF3?.G?.p?.dragonRide&&!p._portrait&&!window.BFHubDialogue?.active&&!window.BFInspection?.active&&!window.BFHubTour?.camera()&&!window.BFSocial?.camera()&&!window.__bfEd?.EDITOR?.on;
     const restoreMount=mountView?hideRiddenDragon(window.__BF3?.G?.pet):null;
-    const chessFade=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera();
-    const fadeChessActor=root=>root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.16;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});
-    if(chessLocal){fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
+    const chessFade=[],chessView=!!window.BFSocial?.camera(),chessTable=window.BFSocial?.table;
+    const fadeChessActor=root=>{if(!chessTable||!chessBlocksBoard(root,cam,chessTable))return;root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){if(n.userData.chessFade)for(const mat of Array.isArray(n.userData.chessFade)?n.userData.chessFade:[n.userData.chessFade])mat.dispose();const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.18;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});};
+    if(chessView){if(p.sitting)fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
     const restorePause=p.pausedSafe?pauseAppearance(wrap):null;
     try{renderer.render(scene, cam);}finally{restoreMount?.();restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};

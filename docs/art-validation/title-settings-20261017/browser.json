@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "Title Settings opens current grouped renderer",
+    "All five section headings present",
+    "Camera cycle exposes first-person FOV and preserves title return",
+    "Key bindings opens, Q returns to title-origin settings",
+    "Controller setup opens with independent X/Y invert and Done returns",
+    "Graphics FPS toggle retains title origin",
+    "Q and Escape both return to title",
+    "Reopening keeps changed global preferences",
+    "Old level100 Normal character loads after preferences changed",
+    "In-game pause Settings explicitly resets origin and Q returns to frozen pause menu"
+  ],
+  "productionSavesTouched": false
+}

@@ -1670,3 +1670,8 @@ User requests A/D plus arrow move-history navigation and co-op options to play T
 Final review: new friend match instances now advance round identity, and human move requests carry/validate both round and revision. A delayed prior-match move is rejected even if its revision matches a newly reset match. New-round presentation clears the previous move-sound identifier. Existing private and shared game logic unchanged; regression covers stale and current-round requests.
 
 Round checks also protect resignation, configuration and other match controls, not only moves. The actual host and guest UI send wrappers are exercised to ensure they stamp the current match round.
+
+
+## [Codex | 2026-10-17] U-TITLE-CURRENT-SETTINGS-20261017
+
+User requests title Settings match current in-game settings. Route title entry through the same grouped settings renderer; preserve title origin through toggles, camera refreshes, key bindings and help. Back/Q/Esc must return to title, while pause-origin Settings returns to pause. Hide trial-exit controls on title even if an old world remains in memory. Keep preferences persistent and avoid loading/writing a character just to adjust options.

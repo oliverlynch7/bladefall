@@ -2002,3 +2002,8 @@ User requests pre-moves on 3D and flat boards. Plan: one private local queued mo
 ## [Codex | 2026-10-17] U-CHESS-LOBBY-HISTORY-20261017
 
 User requests A/D plus arrow move-history navigation and co-op options to play Thomas independently, spectate friend, or play each other. Plan: host-authoritative isolated chess sessions (one retained Thomas match per player plus shared friend match), lobby with explicit challenge/accept and watch/resume choices, read-only spectators, per-game revisions/clock/bot/animation/history, pause private match when owner leaves/watches. Keep existing chess rules/controls, host-owned furniture and hard-Thomas reward eligibility for the actual winning player. Keyboard history uses A/Left and D/Right, guards text/select inputs/modifiers and clamps ends; reaching latest returns Live. Verify isolation, unauthorized commands, invite/accept, simultaneous bot turns, guest updates, disconnect/rejoin, clocks, premoves, spectator safety and browser controls.
+
+
+## [Codex | 2026-10-17] U-TITLE-CURRENT-SETTINGS-20261017
+
+User requests title Settings match current in-game settings. Route title entry through the same grouped settings renderer; preserve title origin through toggles, camera refreshes, key bindings and help. Back/Q/Esc must return to title, while pause-origin Settings returns to pause. Hide trial-exit controls on title even if an old world remains in memory. Keep preferences persistent and avoid loading/writing a character just to adjust options.

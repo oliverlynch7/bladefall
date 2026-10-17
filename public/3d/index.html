@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.252.1-chess-lobby';
+const VERSION3D='2.253.0-title-settings';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -18169,22 +18169,8 @@ function openDevPreviews(){
  document.getElementById('devBack').onclick=titleScreen;
 }
 function openTitleOptions(){
-  mode='menu'; showGameUI(false);
-  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Options</p><h2 class="ovh">More</h2>
-
-    <button class="bigbtn ghost" id="achBtn">${eventIcon('event-achievement')} Achievements</button>
-    <button class="bigbtn ghost" id="recBtn">📜 Records</button>
-    ${audioSettingsHTML()}
-    <button class="bigbtn ghost" id="creditsBtn">♪ Music & Credits</button>
-    <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">Classic 2D BLADEFALL</button>
-    <button class="bigbtn ghost" id="backBtn" style="margin-top:12px">Back</button></div>`);
-
-  document.getElementById('achBtn').onclick=()=>openAchievements(openTitleOptions);
-  { const rb=document.getElementById('recBtn'); if(rb) rb.onclick=()=>openRecords(openTitleOptions); }
-  bindAudioSettings();
-  document.getElementById('creditsBtn').onclick=()=>openCredits(openTitleOptions);
-  document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
-  document.getElementById('backBtn').onclick=titleScreen;
+  showGameUI(false);
+  openPauseSettingsV2(true);
 }
 function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
   initAudio();
@@ -20336,11 +20322,13 @@ function cameraViewSettings(){
  const far=meta.camMode==='far',z=Math.round(BFCameraControls.zoom(meta)*100);return `<div class="setrow"><label><span>${far?'Overhead':'Shoulder'} zoom · scroll wheel</span><b id="cameraZoomVal">${z}%</b></label><input id="cameraZoomSlider" type="range" min="${far?70:75}" max="${far?150:140}" step="1" value="${z}"></div>`;
 }
 function bindCameraZoom(){const slider=document.getElementById('cameraZoomSlider');if(slider)slider.oninput=()=>{const field=meta.camMode==='far'?'overheadZoom':'shoulderZoom';meta[field]=Number(slider.value)/100;meta[field]=BFCameraControls.zoom(meta);document.getElementById('cameraZoomVal').textContent=Math.round(meta[field]*100)+'%';persistGlobal();};}
-function openPauseSettingsV2(){
+function openPauseSettingsV2(fromTitle){
+  if(typeof fromTitle==='boolean')openPauseSettingsV2.fromTitle=fromTitle;
+  const titleOptions=openPauseSettingsV2.fromTitle===true;
   mode='menu';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
   showOverlayHTML(`<div class="card narrow game-options"><p class="ovkicker">Game options</p><h2 class="ovh">Settings</h2>
-    <p class="ovsub">Tune the view, feedback, and sound without leaving your adventure.</p>
+    <p class="ovsub">Choose your controls, view, feedback, and sound.</p>
     <div class="pgrid">
       <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
       <button class="bigbtn ghost" id="fsBtn">${fullscreenLabel()}</button>
@@ -20360,20 +20348,20 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
-      ${G&&G.trial?`<button class="bigbtn ghost" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
+      ${!titleOptions&&G&&G.trial?`<button class="bigbtn ghost" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
     ${cameraViewSettings()}
     <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
-    <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
+    <button class="bigbtn ghost" id="settingsBack" data-menu-back>${titleOptions?'Back to Title Screen':'Back to Pause Menu'}</button></div>`);
   const reading=document.createElement('button');reading.id='readingSizeBtn';reading.className='bigbtn ghost';reading.textContent='Reading text: '+({1:'Standard',1.15:'Larger',1.3:'Largest'}[meta.readingSize||1]||'Standard');document.getElementById('settingsBack').before(reading);
   reading.onclick=()=>{const sizes=[1,1.15,1.3];meta.readingSize=sizes[(sizes.indexOf(meta.readingSize||1)+1)%sizes.length];persistGlobal();openPauseSettingsV2();document.getElementById('readingSizeBtn').focus();};
   organizePauseSettings();
   document.getElementById('resolutionBtn').onclick=()=>{meta.nativeResolution=meta.nativeResolution!==true;persistGlobal();resize();openPauseSettingsV2();};
   document.getElementById('fpsBtn').onclick=()=>{meta.showFps=meta.showFps!==true;persistGlobal();openPauseSettingsV2();};
   for(const key of ['objectiveArrows','friendArrows'])document.getElementById(key+'Btn').onclick=()=>{meta[key]=meta[key]===false;persistGlobal();openPauseSettingsV2();};
-  document.getElementById('settingsBack').onclick=openPauseV2;
+  document.getElementById('settingsBack').onclick=titleOptions?titleScreen:openPauseV2;
   document.getElementById('fsBtn').onclick=()=>{ toggleFullscreen(); setTimeout(openPauseSettingsV2,120); };
   document.getElementById('camBtn').onclick=()=>{ const o=['far','shoulder','fps']; meta.camMode=o[(o.indexOf(meta.camMode)+1)%3]; persist(); openPauseSettingsV2(); };
   const ss=document.getElementById('sensSlider'); if(ss) ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(ss.value)||1; const v=document.getElementById('sensVal'); if(v) v.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
@@ -20416,7 +20404,7 @@ function openPauseV2(){
     </div>`);
   document.getElementById('titleBtnP').onclick=()=>{ persist(); resumeGameAudio(false); titleScreen(); };
   document.getElementById('resBtn').onclick=()=>{ resumeGameAudio(true); resumePlay(); };
-  document.getElementById('optBtn').onclick=openPauseSettingsV2;
+  document.getElementById('optBtn').onclick=()=>openPauseSettingsV2(false);
   document.getElementById('multiplayerBtnP').onclick=()=>openMPLobby(openPauseV2);
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseV2);
   document.getElementById('gearBtn').onclick=()=>openGear(openPauseV2);

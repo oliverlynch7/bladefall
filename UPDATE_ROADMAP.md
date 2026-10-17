@@ -3263,3 +3263,8 @@ Chess close-up uses viewed participants/Thomas and keeps unrelated seated player
 ## [Codex | 2026-10-17] v2.252.1 — Chess rematch packet safety
 
 Final review: new friend match instances now advance round identity, and human move requests carry/validate both round and revision. A delayed prior-match move is rejected even if its revision matches a newly reset match. New-round presentation clears the previous move-sound identifier. Existing private and shared game logic unchanged; regression covers stale and current-round requests.
+
+
+## [Codex | 2026-10-17] v2.253.0 — Current Settings from title
+
+Title Settings now opens the same organized current game-options renderer as pause, replacing legacy More/audio-only screen. Explicit title/pause origin survives option refreshes, camera changes, key binding and Help returns; controller dialog retains underlying screen. Back/Q/Esc return to title or pause correctly; in-game entry explicitly clears any earlier title context. Title never exposes stale world trial-exit controls. Shared preference persistence remains intact; no character save load required.30 new renderer/context checks pass plus menu shortcuts/controller invert/pause suites; inline syntax compiles. Actual isolated browser tests title settings, submenus/toggles/Q/Esc/persistence, loads old level100 Normal save and confirms pause Settings return. Evidence: docs/art-validation/title-settings-20261017.

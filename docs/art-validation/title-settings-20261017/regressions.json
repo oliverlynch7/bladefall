@@ -1,0 +1,22 @@
+[
+  {
+    "suite": "test-title-settings.cjs",
+    "pass": true,
+    "output": "30 title/current settings parity and return-context checks passed.\n"
+  },
+  {
+    "suite": "test-menu-shortcuts.cjs",
+    "pass": true,
+    "output": "18 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\n"
+  },
+  {
+    "suite": "test-controller-invert.cjs",
+    "pass": true,
+    "output": "PASS controller invert: independent X/Y toggles, legacy Y migration, both axis signs verified\n"
+  },
+  {
+    "suite": "test-esc-pause.cjs",
+    "pass": true,
+    "output": "30 pause regression checks passed.\n"
+  }
+]

@@ -2263,3 +2263,8 @@ Pyromancer now has intrinsic Palm Flames, no held weapon or external weapon acce
 Switching bags the previous weapon, including starters/full bags. Legacy Pyromancer equipment migrates into its container's bag, recovering duplicate snapshot copies once while preserving separately owned identical items. Switching away uses ordinary equipment rules. Warlock now supports all magic and ranged families.
 
 104 regression suites passed; final focused palm-flame suite covers rank scaling, full-bag switches, legacy/idempotent migration, identical owned item conservation, range/cone/charge/wall/height/PvP target dispatch, remote VFX packet and bounded geometry. Parser passes. Actual disposable pre-change level100 browser save loads and switches, bags old weapon and fights without staff/projectiles; tap34 and charge59 damage in the isolated scene, no captured errors. Flame screenshot inspected. No two-device live network match or subjective balance claim. Evidence in this directory. Publication pending.
+
+
+## [Codex | 2026-10-17] v2.237 production confirmed
+
+Functional commitb0b28674 deployed successfully as2f4cb0de-6e16-4246-8520-3db2a652e651. Actual public browser confirmsv2.237.0-palm-flames and normal main-menu boot. Local old-save/combat browser evidence and104 passing suites recorded in docs/art-validation/palm-flames-20261017. No production character/save changes.

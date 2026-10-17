@@ -2225,3 +2225,15 @@ Rebuilt level-doorway dressing store with opaque walls/floor and ray-only roof c
 ## [Codex | 2026-10-17] Production and final interaction verification
 
 Functional aec3c00d deployed successfully as71999df9-ef79-4ad7-acf3-ed78ec5f1abf. Actual public browser confirms v2.234.0-briar-playtest, updated hero2234h/guide2234b/spirit+currency2234 entry scripts and functioning main menu. Further disposable-browser checks physically walk in and out of the supply-store door at y0, collect dressings, and advance/finish the spirit with actual document keyboard handlers using E; acknowledgement stored, mode returns toplay, no errors. Evidence physical-door.json, spirit-keyboard.json and public-release.json. No production save manipulation. Primary’s unrelated changes preserved.
+
+
+## [Codex | 2026-10-17] U-DIALOGUE-ENDINGS-20261017
+
+User reiterates that exhausted main dialogue must end in a clear primary Leave conversation action, not loop back through the same lines indefinitely. Talking again may replay information. Preserve access to genuine side quests and optional lore, keep required quest/combat effects and co-op speaker authority intact, and retain intentional gameplay retries. Plan: audit campaign and service conversation engines; replace return-to-visited-dialogue continuations with endings, track all visited nodes within the current conversation (including explicit optional-topic navigation), expose remaining questions separately, use Leave conversation for ordinary terminal lines, prevent stale/replayed choices executing twice; verify real NPC paths, legacy cursors and shared authority before publishing.
+
+
+## [Codex | 2026-10-17] U-DIALOGUE-ENDINGS-20261017 implemented — v2.235
+
+Campaign dialogue now preserves per-conversation visited history across topic menus and ends read-line return edges. Terminal/informational endings show a primary Leave conversation; no duplicate footer exit. Remaining optional questions/quests stay separate, empty/redundant topic navigation is suppressed, and talking again can repeat information. Required effects commit before closure; no-op effects do not republish old notes/rewards. Explicit race retry remains repeatable. Service explanations close directly instead of returning to the same menu/auto-opening a shop. Listeners retain a local exit; only the speaker may advance shared dialogue.
+
+103 offline suites pass, including94 primary NPC/preset paths plus optional quest, legacy cursor, race retry, final trigger and co-op authority checks. Actual disposable old-level100 browser session verifies Caleb main/optional exhaustion, closure/reopen and Quartermaster exit; listener UI has an enabled local exit. No production save manipulation or two-device network test. Evidence docs/art-validation/dialogue-endings-20261017/summary.md. Production pending.

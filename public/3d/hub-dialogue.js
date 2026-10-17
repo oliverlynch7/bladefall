@@ -27,9 +27,11 @@
   if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();el('hubLeave').focus({preventScroll:true});
  }
  function line(id,lastChoice='',topic='intro'){
+  active.visited=active.visited||[];if(!active.visited.includes(id))active.visited.push(id);
   const {n,a}=active,s=state(a,n.id),node=book.nodes[id];if(!node){landing();return}
   s.cursor={id,lastChoice,topic};commit();
-  showLine(id,node,lastChoice,choice=>line(choice.next,choice.text,topic),()=>{if(topic==='intro'){s.introduced=true;s.cursor=null;commit();close(true)}else{if(topic==='news'){s.newsSeen=true;s.newsSeenId=id;}landing()}},topic==='intro'?'Show me.':'Back to services');
+  const finish=()=>{if(topic==='intro')s.introduced=true;if(topic==='news'){s.newsSeen=true;s.newsSeenId=id;}s.cursor=null;commit();close();};
+  showLine(id,{...node,choices:node.choices.map(c=>active.visited.includes(c.next)?{...c,text:'Leave conversation',end:true,optional:false}:c)},lastChoice,choice=>choice.end?finish():line(choice.next,choice.text,topic),finish,'Leave conversation');
  }
  function showLine(id,node,lastChoice,choose,finish,finishLabel,canChoose=true){
   stopVoice();const token=++generation,{a}=active;active.lineId=id;active.started=performance.now();
@@ -37,11 +39,16 @@
   const choices=el('hubChoices');let revealed=false;
   function unlock(){if(token!==generation||!active||revealed)return;revealed=true;cancelAnimationFrame(frame);el('hubLine').textContent=node.text;el('hubReveal').hidden=true;
    const optional=document.createElement('details');optional.className='hub-optional';optional.innerHTML='<summary>More questions · optional</summary>';
-   for(const choice of node.choices){const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};(choice.optional?optional:choices).append(btn)}
+   for(const choice of node.choices){if(!canChoose&&choice.end)continue;const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};(choice.optional?optional:choices).append(btn)}
    if(optional.querySelector('button'))choices.append(optional);
    if(!node.choices.length){const btn=document.createElement('button');btn.textContent=finishLabel;btn.onclick=finish;choices.append(btn)}
+   if(!node.choices.length||canChoose&&node.choices.some(c=>c.end)){el('hubLeave').hidden=true;const ending=[...choices.querySelectorAll('button')].find(b=>b.textContent===finishLabel||b.textContent==='Leave conversation');if(ending)ending.dataset.dialogueEnd='true';}
    // A text-skip click cannot become a response click; all choices have a short arming window.
-   for(const btn of choices.querySelectorAll('button'))btn.disabled=true;timer=setTimeout(()=>{if(token===generation)for(const btn of choices.querySelectorAll('button'))btn.disabled=!canChoose&&!!node.choices.length},250);
+   for(const btn of choices.querySelectorAll('button'))btn.disabled=true;
+   timer=setTimeout(()=>{if(token!==generation||!active)return;
+    for(const btn of choices.querySelectorAll('button'))btn.disabled=!canChoose&&!!node.choices.length;
+    const end=choices.querySelector('[data-dialogue-end]');if(canChoose&&end&&!document.activeElement?.closest?.('.hub-optional'))end.focus({preventScroll:true});
+   },250);
   }
   el('hubReveal').onclick=unlock;
   unlock(); // Read and choose immediately; narration never gates interaction.
@@ -74,7 +81,7 @@
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
   const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;active.signature=signature;
-  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:!!original?.optional,questProgress:!!original&&questProgress(original)}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Return to the path',canChoose);
+  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&!!original&&questProgress(original)}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose);
  }
  function listen(n,a,lineId){
  if(!book)return;const same=active?.spectator&&active.n.id===n.id;

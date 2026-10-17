@@ -117,14 +117,31 @@
     }
     return [];
   }
+  function seenNodes(c){return [...new Set([...(c.trail||[]),...(c.topics||[]),c.node])];}
+  function returnsToReadLine(s,option){return !option.repeatable&&seenNodes(s.conversation).includes(option.next);}
+  // A repeated flag/note is not new quest progress. Never replay rewards to decide this.
+  function addsProgress(s,option){
+    if(!(option.effects||[]).length)return false;
+    const probe=copy({flags:s.flags,items:s.items,quests:s.quests,rewards:s.rewards,notes:s.notes});try{effects(probe,option.effects);}catch(_){return true;}
+    const progress=v=>JSON.stringify([v.flags,v.items,v.quests,v.rewards,Object.fromEntries(Object.entries(v.notes).map(([id,n])=>[id,{region:n.region,title:n.title,text:n.text}]))]);
+    return progress(probe)!==progress(s);
+  }
+  function informationOnly(list){return (list||[]).every(e=>e.type==='note'||e.type==='conditional'&&informationOnly(e.effects));}
   function topicTarget(s,book){const c=s.conversation;if(!c)return null;
-    return [...(c.topics||[])].reverse().find(id=>id!==c.node&&node(book,id)?.topicMenu&&(node(book,id).choices||[]).some(x=>matches(s,x.when)))||null;
+    const direct=new Set((node(book,c.node)?.choices||[]).filter(x=>matches(s,x.when)).map(x=>x.next));
+    return [...(c.topics||[])].reverse().find(id=>id!==c.node&&node(book,id)?.topicMenu&&(node(book,id).choices||[]).some(x=>matches(s,x.when)&&!direct.has(x.next)&&(!seenNodes(c).includes(x.next)||addsProgress(s,x))))||null;
   }
   function view(s,book){
     const c=s.conversation,n=c&&node(book,c.node);if(!n)return null;
-    const result={npc:c.npc,lineId:c.node,text:n.text,lastChoice:c.lastChoice||'',choices:(n.choices||[]).filter(x=>matches(s,x.when)).map(x=>({id:x.id,text:(!(x.effects||[]).length&&(x.next===c.node||(c.trail||[]).includes(x.next)))?(node(book,x.next)?.topicMenu&&x.next!==c.node?'Other questions / quests':'Leave conversation'):x.text}))};
-    if(topicTarget(s,book)&&!result.choices.some(x=>x.text==='Other questions / quests'))result.choices.push({id:'__topics',text:'Other questions / quests'});
-    return result;
+    let endShown=false;const choices=[];
+    for(const x of (n.choices||[]).filter(x=>matches(s,x.when))){
+      const end=returnsToReadLine(s,x)&&(informationOnly(x.effects)||!addsProgress(s,x));
+      if(end&&endShown)continue;if(end)endShown=true;
+      choices.push({id:x.id,text:end?'Leave conversation':x.text,optional:end?false:!!x.optional,...(end?{end:true}:{})});
+    }
+    if(!endShown&&(c.browsingTopics||!choices.some(x=>!x.optional)))choices.unshift({id:'__leave',text:'Leave conversation',end:true});
+    if(topicTarget(s,book))choices.push({id:'__topics',text:'Other questions / quests',optional:true});
+    return {npc:c.npc,lineId:c.node,text:n.text,lastChoice:c.lastChoice||'',choices};
   }
   function transact(original,book,event){
     // Return the original on invalid/stale input. All effects commit together.
@@ -146,13 +163,16 @@
         const c=s.conversation,n=c&&node(book,c.node);
         if(!n||event.line!==c.node)return {state:original,changed:false};
         const target=event.choice==='__topics'&&topicTarget(s,book);
-        if(event.choice==='__topics'){
+        if(event.choice==='__leave'){
+          if(!view(s,book)?.choices.some(x=>x.id==='__leave'))return {state:original,changed:false};
+          s.cursors[c.npc]=copy(c);s.conversation=null;
+        }else if(event.choice==='__topics'){
           if(!target)return {state:original,changed:false};
-          c.node=target;c.trail=[target];c.lastChoice='Other questions / quests';s.cursors[c.npc]=copy(c);
+          c.trail=[...new Set([...(c.trail||[]),c.node,target])];c.node=target;c.browsingTopics=true;c.lastChoice='Other questions / quests';s.cursors[c.npc]=copy(c);
         }else{
         const option=n.choices?.find(x=>x.id===event.choice&&matches(s,x.when));
         if(!option||!node(book,option.next))return {state:original,changed:false};
-        if(!(option.effects||[]).length&&(option.next===c.node||(c.trail||[]).includes(option.next))&&!(option.next!==c.node&&node(book,option.next)?.topicMenu)){s.cursors[c.npc]=copy(c);s.conversation=null;}else{effects(s,option.effects);c.trail=[...new Set([...(c.trail||[]),c.node,option.next])];c.node=option.next;if(node(book,c.node)?.topicMenu){c.topics=[...new Set([...(c.topics||[]),c.node])];c.trail=[c.node];}c.lastChoice=option.text;s.cursors[c.npc]=copy(c);}
+        const ending=returnsToReadLine(s,option);if(addsProgress(s,option))effects(s,option.effects);c.trail=[...new Set([...(c.trail||[]),c.node,option.next])];c.node=option.next;if(node(book,c.node)?.topicMenu)c.topics=[...new Set([...(c.topics||[]),c.node])];c.lastChoice=option.text;s.cursors[c.npc]=copy(c);if(ending)s.conversation=null;
         }
       }else if(event.type==='world'){
         const e=own(book.events,event.key)&&book.events[event.key];

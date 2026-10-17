@@ -8,7 +8,7 @@ for(const [id,n]of Object.entries(book.nodes).filter(([,n])=>n.topicMenu)){
  const owner=Object.keys(book.npcs).find(npc=>{let todo=[book.npcs[npc].start],seen=new Set();while(todo.length){const k=todo.shift();if(k===id)return true;if(seen.has(k))continue;seen.add(k);todo.push(...(book.nodes[k]?.choices||[]).map(c=>c.next));}return false;});
  assert(owner,id+' owner');const child=n.choices.find(c=>c.next!==id);if(!child)continue;
  let s=E.create();for(const c of child.when||[]){if(c.flag)s.flags[c.flag]=c.is;if(c.item)s.items[c.item]=c.count||1;if(c.quest)s.quests[c.quest]=c.is;}s.conversation={npc:owner,node:child.next,trail:[id,child.next],topics:[id]};
- const snapshot=JSON.stringify([s.flags,s.quests,s.items,s.rewards]);s=act(s,'choose',{line:child.next,choice:'__topics'});assert.equal(s.conversation.node,id);assert.equal(snapshot,JSON.stringify([s.flags,s.quests,s.items,s.rewards]),'navigation executes no effects');
+ const snapshot=JSON.stringify([s.flags,s.quests,s.items,s.rewards]);const more=E.view(s,book).choices.some(c=>c.id==='__topics');s=act(s,'choose',{line:child.next,choice:'__topics'});assert.equal(s.conversation.node,more?id:child.next,more?'remaining topics open':'exhausted topic menu is not offered again');assert.equal(snapshot,JSON.stringify([s.flags,s.quests,s.items,s.rewards]),'navigation executes no effects');
  s=E.create();s.cursors[owner]={node:child.next,trail:[id,child.next]};for(const c of book.npcs[owner].when||[])if(c.flag)s.flags[c.flag]=c.is;
  s=act(s,'open',{npc:owner});assert(s.conversation,owner+' open');assert(s.conversation.topics.length,id+' legacy cursor topic access');count++;
 }

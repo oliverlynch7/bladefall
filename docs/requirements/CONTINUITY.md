@@ -1844,3 +1844,8 @@ Accept the user's visual assessment: extra small fittings did not differentiate 
 Implemented U-RANK10-FLAIR-20261016: Rank 5 is unchanged; each of the 17 Rank 10 outfits receives an authored aura silhouette, layered additive glow and bounded motes, with stronger small inlays. Examples: Paladin sun wings, Reaper soul mantle, Chronomancer clock dial, Stormcaller lightning cage, Skylancer slipstreams and Pyromancer flame mantle. Four single-pass draws at full quality; low quality hides wash/motes. Reduced motion freezes effects. No scene lights or screen-space bloom. Resources are actor-owned and shared textures are bounded.
 
 Checks pass across 51 combinations, 4,080 rig samples, 204 unlock-boundary assertions and 2,342 aura checks. Rank 5 geometry/animation counts match the prior preview exactly. All 17 aura geometry hashes differ. Maximum additional outfit geometry is 7,422 triangles / 44 draws, within existing 10,000/50 limits. See docs/art-validation/rank10-flair-20261016/summary.json. Browser remains unavailable: no new rendered aesthetic, clipping, GPU, bag framing or nameplate claim. Publish to wardrobe-preview-20261016 only; production stays v2.203.0. Exact new preview link follows successful deployment.
+
+## [Codex | 2026-10-16] Rank 10 aura preview deployed
+
+Cloudflare confirms successful isolated deployment of 2854f256: https://0d8579e4.bladefall.pages.dev/3d/class-skins.html?preview=1 . Includes smooth endpoint fading for rising/falling motes; 2,352 aura assertions now pass. Production unchanged. Browser/rendered aesthetic and clipping review remain open.
+

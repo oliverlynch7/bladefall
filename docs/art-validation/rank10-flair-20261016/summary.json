@@ -1,6 +1,6 @@
 {
   "version": "2.206.0-rank10-flair",
-  "status": "Isolated preview candidate, not production",
+  "status": "Deployed isolated preview; rendered review pending",
   "reason": "User found Rank 10 too similar to Rank 5; small fittings alone were insufficient.",
   "implementation": [
     "17 separately authored Rank 10 aura silhouettes",
@@ -38,6 +38,7 @@
   ],
   "publication": {
     "branch": "wardrobe-preview-20261016",
-    "productionChanged": false
+    "productionChanged": false,
+    "previewURL": "https://0d8579e4.bladefall.pages.dev/3d/class-skins.html?preview=1"
   }
 }

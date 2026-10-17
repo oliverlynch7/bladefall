@@ -1,26 +1,16 @@
-/* Authored junctions for the final five campaign regions. No reward locations. */
+/* Sparse in-world destination signs; never reveal puzzle solutions or secrets. */
 (function(root){'use strict';
 const areas={
- '3:0':{api:'BFSnowbound',theme:'frost',roads:['climb','liftHouse','summit','camp','cave'],signs:[
-  [-180,110,0,'MOUNTAIN TRAIL','Shelter ahead'],[-905,-785,130,'TRAIL FORK','Lift house west'],[145,-1920,380,'HEATH’S SHELTER','Crossing north'],[30,-4550,740,'CAVE APPROACH','Cornice ledges east']]},
- '3:1':{api:'BFIceCaves',theme:'frost',roads:['entry','laboratory','west','descent','channels','exit'],signs:[
-  [-155,-1280,240,'RESEARCH STATION','Laboratory west'],[-1450,-2130,300,'LABORATORY','Spring chamber ahead'],[140,-3425,180,'SPRING CHAMBER','Lower channel west'],[140,-4790,180,'CAVE EXIT','Keep to the upper path']]},
- '4:0':{api:'BFIronHalls',theme:'ember',roads:['entry','floor','stores','machine','mold','exit'],signs:[
-  [-280,250,100,'IRON HALLS','Worker station ahead'],[-405,-1370,100,'WORKER STATION','Stores west · gantry east'],[-1670,-2520,160,'WESTERN STORES','Service cart ahead'],[320,-3640,100,'MACHINE FLOOR','Follow the scrap track'],[-1030,-4500,100,'CASTING BAY','Cart crossing east']]},
- '4:1':{api:'BFGreatFurnace',theme:'ember',roads:['entry','main','transport','east','office','cooling','exit'],signs:[
-  [-250,-620,120,'INSPECTION GATE','Maintenance bay west'],[-320,-2170,120,'BREAK ROOM','Worker floor · west route'],[-1165,-3320,120,'WORKER FLOOR','Return to the break room'],[1465,-4050,260,'EAST GALLERY','Command office east'],[275,-4860,120,'COOLING ROOM','Pedal ahead · mind gaps']]},
- '5:0':{api:'BFShipwreckShore',theme:'coast',roads:['beach','wreck','lookout','cave','rose'],signs:[
-  [240,180,30,'OTTO’S LANDING','Boat left · repair bench ahead'],[165,-770,30,'SALVAGE ROUTES','Wreck west · lookout east'],[1890,-550,30,'STORAGE CAVE','Drain outside the doorway'],[-255,-2580,30,'SOUTHERN SHORE','Captain’s camp ahead']]},
- '5:1':{api:'BFThunderCliffs',theme:'coast',roads:['ascent','upper','arch','cave','tide'],signs:[
-  [-180,100,40,'EASTERN STEPS','Climb to the high trail'],[-190,-880,340,'CARGO LIFT','Optional return to shore'],[-415,-1805,340,'HIGH TRAIL','Climb west · arch beyond'],[-1050,-2375,430,'UPPER CLIFFS','High trail east · tide below'],[125,-4650,850,'HYDRA LEDGES','Barrier ahead']]},
- '6:0':{api:'BFPalaceCourtyard',theme:'palace',roads:['entry','water','westGarden','eastGarden','eastBalcony','westBalcony','mirror'],signs:[
-  [175,-1250,200,'FOUNTAIN COURT','Waterworks west'],[-1130,-850,80,'WATERWORKS','Wheel beside the channel'],[-1125,-2050,190,'WEST GARDENS','Lower lock ahead'],[855,-1160,160,'EAST GARDENS','Balcony via the court'],[100,-3330,380,'LIBRARY APPROACH','Sun mirrors ahead']]},
- '6:1':{api:'BFSkyLibrary',theme:'palace',roads:['main','maintenance','records','shelves','display','archive'],signs:[
-  [140,-505,120,'SKY LIBRARY','Service passage west'],[150,-1280,200,'READING HALLS','Records gallery east'],[-290,-3070,300,'CENTRAL ARCHIVE','Reading hall north'],[440,-3270,300,'EAST TERRACES','Folding shelves beyond'],[-240,-4580,400,'GUARDIAN HALL','Seal at the far doors']]},
- '7:0':{api:'BFCastleGates',theme:'castle',roads:['landing','yard','supply','court','store'],signs:[
-  [-150,-105,80,'CASTLE LANDING','Repair yard west'],[-660,-1080,120,'REPAIR YARD','Supply stores east'],[1190,-1750,120,'SUPPLY YARD','Gate approach west'],[190,-2910,200,'GATE CROSSING','Bridge brake down the drain'],[-320,-4540,280,'INNER COURT','Gatehouse ahead']]},
- '7:1':{api:'BFLongAscent',theme:'castle',roads:[],signs:[
-  [-130,930,0,'THE LONG ASCENT','Follow the rising stair'],[1040,95,250,'FIRST LANDING','Service rooms east'],[-145,-1100,500,'LOWER CATCH','Release the next flight'],[-1040,95,750,'WORKER CELLS','Cell entrance west'],[145,-1100,1500,'UPPER CATCH','Throne above · broken steps'],[-140,1020,2000,'THRONE DOORS','Clear the final guards']]}
+ '3:0':{api:'BFSnowbound',theme:'frost',roads:['climb','liftHouse','summit','camp','cave'],signs:[[-180, 110, 0, "MOUNTAIN TRAIL", "Shelter ahead"]]},
+ '3:1':{api:'BFIceCaves',theme:'frost',roads:['entry','laboratory','west','descent','channels','exit'],signs:[]},
+ '4:0':{api:'BFIronHalls',theme:'ember',roads:['entry','floor','stores','machine','mold','exit'],signs:[[-280, 250, 100, "IRON HALLS", "Worker station ahead"], [-405, -1370, 100, "WORKER STATION", "Stores west · gantry east"]]},
+ '4:1':{api:'BFGreatFurnace',theme:'ember',roads:['entry','main','transport','east','office','cooling','exit'],signs:[[-250, -620, 120, "INSPECTION GATE", "Maintenance bay west"]]},
+ '5:0':{api:'BFShipwreckShore',theme:'coast',roads:['beach','wreck','lookout','cave','rose'],signs:[]},
+ '5:1':{api:'BFThunderCliffs',theme:'coast',roads:['ascent','upper','arch','cave','tide'],signs:[]},
+ '6:0':{api:'BFPalaceCourtyard',theme:'palace',roads:['entry','water','westGarden','eastGarden','eastBalcony','westBalcony','mirror'],signs:[[175, -1250, 200, "FOUNTAIN COURT", "Waterworks west"]]},
+ '6:1':{api:'BFSkyLibrary',theme:'palace',roads:['main','maintenance','records','shelves','display','archive'],signs:[[140, -505, 120, "SKY LIBRARY", "Service passage west"], [150, -1280, 200, "READING HALLS", "Records gallery east"]]},
+ '7:0':{api:'BFCastleGates',theme:'castle',roads:['landing','yard','supply','court','store'],signs:[]},
+ '7:1':{api:'BFLongAscent',theme:'castle',roads:[],signs:[]}
 };
 const entry=g=>g&&!g.hub&&!g.trial&&!g.side&&!g.endless&&!g.delve&&!g.voyage&&!g.bonusActive&&!g.arena&&!g.bossRush&&!g.sprintFun&&!g.devKeep&&!g.devBriar?areas[g.zone+':'+g.area]:null;
 function install(g){const a=entry(g);if(!a)return;g.obstacles=g.obstacles.filter(o=>o.journeySign===undefined);g.journeySigns=a.signs.map((s,i)=>{

@@ -191,7 +191,7 @@ export function buildBriarBetaArt(world){
   if(p.kind==='mill'){const start=g.children.length,wheel=new T.Mesh(new T.TorusGeometry(65,7,6,16),mat('#715438'));wheel.position.set(x,55,z);g.add(wheel);for(let i=0;i<8;i++){const a=i*Math.PI/4;beam([x,55,z],[x+Math.cos(a)*65,55+Math.sin(a)*65,z],5,'#9c7b46');}const parts=g.children.slice(start),turn=new T.Group();turn.position.set(x,55,z);g.add(turn);g.updateMatrixWorld(true);for(const o of parts)turn.attach(o);g.userData.wheel=turn;box(x,55,z,24,25,40,'#61513b');beam([x,135,z],[-320,230,-960],3,'#c5ab74');box(x,78,z-20,12,156,16,'#67553d');box(-320,140,-960,10,280,10,'#67553d');sign(x,240,z,'MILL CROSSING');}
   if(p.kind==='camp'){box(x,40,z,160,80,100,'#676f4b');for(const dx of [-1,1]){const r=box(x+dx*43,97,z,105,9,135,'#92784d');r.rotation.z=-dx*.4;}sign(x,165,z,'LEWIS · REFUGE');}
   if(p.kind==='pen'||p.kind==='dogs'){for(const dx of [-125,125])for(let dz=-75;dz<=75;dz+=50)box(x+dx,55,z+dz,12,110,12,'#746243');for(const dx of [-125,125])for(const y of [30,75])box(x+dx,y,z,8,8,170,'#998459');for(const y of [30,75])box(x,y,z-80,250,8,8,'#998459');}
-   if(p.kind==='signal'){for(const dx of [-80,80])beam([x+dx,0,z],[x+dx*.6,270,z],9,'#655238');beam([x-80,40,z],[x+55,210,z],7,'#a08658');sign(x,325,z,'LEGION SIGNAL');}
+   if(p.kind==='signal'){for(const dx of [-80,80])beam([x+dx,0,z],[x+dx*.6,270,z],9,'#655238');beam([x-80,40,z],[x+55,210,z],7,'#a08658');}
    if(p.kind==='orchard'){
     // Cider press, fruit sorting trays and a canvas cover: a worked village
     // orchard rather than a second unmotivated pile of geometric crates.
@@ -250,7 +250,7 @@ export function buildBriarBetaArt(world){
     for(const dz of [-25,0,25]){const load=cylinder(x,83,z+dz,12,78,'#80603c');load.rotation.z=Math.PI/2;}
     beam([x-64,100,z-27],[x+64,100,z-27],2,'#d4bd80');beam([x-64,100,z+27],[x+64,100,z+27],2,'#d4bd80');
     for(const dx of [-46,46])for(let i=0;i<8;i++){const a=i*Math.PI/4;beam([x+dx,20,z],[x+dx+Math.cos(a)*16,20,z+Math.sin(a)*16],2,'#9e7951');}
-    sign(x,164,z+196,'DEFEND THE WAGON');
+
    }
    if(p.kind==='duel'){
     for(let i=0;i<16;i++){const a=i*Math.PI/8;sphere(x+Math.sin(a)*180,5,z+Math.cos(a)*180,28,11,20,'#a0a493');}
@@ -264,7 +264,7 @@ export function buildBriarBetaArt(world){
      for(const radius of [42,30,18,7]){const disk=cylinder(x+dx,110,z+dz,radius,2,radius===7?'#cba95a':radius===18?'#445f48':radius===30?'#d4c5a1':'#55483a');disk.rotation.x=Math.PI/2;}
     }
     for(let i=0;i<6;i++){const a=i*Math.PI/3;box(x+Math.sin(a)*125,2,z+Math.cos(a)*125,20,2,7,'#a69b75');}
-    sign(x,205,z-225,'RANGER CHALLENGE');
+
    }
    if(p.kind==='warcamp'){
      for(const side of [-1,1]){
@@ -285,7 +285,7 @@ export function buildBriarBetaArt(world){
       box(x,5,z+dz,310,9,19,'#514c3e');
       for(const dx of [-135,-45,45,135])box(x+dx,12,z+dz,13,24,12,'#7d6545');
      }
-     sign(x,205,z+370,'WARBEAST LOGGING YARD');
+
     }
   const base=s.terrain.height(x,z);for(const o of g.children.slice(first))o.position.y+=base;
  }
@@ -330,7 +330,7 @@ export function buildBriarBetaArt(world){
   for(const dx of [-64,64]){const end=cylinder(x+dx,y+16,z,18,3,'#b18b5c');end.rotation.z=Math.PI/2;}
   box(x+36,y+8,z-38,19,14,72,'#636b60');
  }
- if(!s.part){sign(-180,130,240,'BRIAR TOWN');sign(730,295,-490,'GRANARY LOFT');sign(-475,80,-490,'SLUICE PLATE');sign(0,155,-4250,'TO THE BLACK WOODS');
+ if(!s.part){sign(-180,130,240,'BRIAR TOWN');sign(730,295,-490,'GRANARY LOFT');sign(0,155,-4250,'TO THE BLACK WOODS');
   // The linkage makes the weight-operated gate legible from the yard.
   beam([-475,8,-490],[-600,8,-700],3,'#c4aa6c');
  }else{

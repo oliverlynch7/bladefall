@@ -1,4 +1,4 @@
-import {buildKeepJourneyArt} from './keep-journey-art.js?v=2195';
+import {buildKeepJourneyArt} from './keep-journey-art.js?v=2236';
 import {buildPrisonJourneyArt} from './prison-journey-art.js?v=2196';
 import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
 import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';

@@ -11,13 +11,7 @@
   alcoves:[[-1000,-1510,0],[-1500,-1920,0],[-1700,-2280,0],[-1350,-2620,0],[-650,-2550,0],[0,-2450,0]],
   ridge:[[900,-1670,200],[1230,-1770,270],[1530,-1930,340],[1730,-2210,400]]
  };
- const signs=[
-  {x:-235,z:-325,rows:['FREIGHT ROAD','Wagon: lower trail','Climber: high shelves']},
-  {x:-1220,z:-1760,rows:['BRIDGE WORKS','Follow the cart tracks','Cargo siding to the west']},
-  {x:-395,z:-2370,rows:['FREIGHT CROSSING','Cart on the left rail','Winch on the right']},
-  {x:245,z:-3220,rows:['CANYON LIFT','Patrol: lower road','Quiet route: high shelves']},
-  {x:180,z:-4410,rows:['LOST CANYON','Lift ahead','Prisoner holding yards']}
- ];
+ const signs=[]; // Terrain, architecture and quest guidance carry navigation here.
  function bridgeProgress(G){const c=G?.cliffs;if(!c?.bridge)return 0;return Math.max(0,Math.min(1,((G.time||0)-c.bridgeLowerAt)/1.5));}
  function settleBridge(G,seg){const c=G?.cliffs;if(c?.bridge&&!c.bridgeWalkable&&bridgeProgress(G)>=1&&seg){seg(0,-2820,260,560,{bridge:true});c.bridgeWalkable=true;return true;}return false;}
  function guards(G,remote){return Number.isFinite(remote)?remote:(G?.enemies||[]).filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length;}

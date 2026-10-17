@@ -35,3 +35,9 @@ const step=journey.guide(snow,{clueId:'ff.reflect',x:-185,z:-5200,y:965});assert
 console.log('Cornice guidance selects a reachable ledge without overriding unrelated tasks.');
 
 for(const mode of ['voyage','bonusActive','arena','bossRush','sprintFun','delve','endless','devKeep','devBriar'])assert.equal(journey.entry({zone:5,area:0,[mode]:true}),null,'No campaign dressing in '+mode);console.log('Campaign dressing stays out of voyages, challenges and beta maps.');
+
+// Sparse destination signs belong to workers/visitors, never puzzle walkthroughs.
+for(const key of ['3:1','5:0','5:1','7:0','7:1'])assert.equal(journey.areas[key].signs.length,0,key+' has no artificial trail boards');
+for(const a of Object.values(journey.areas))for(const sign of a.signs)assert.doesNotMatch(sign.slice(3).join(' '),/wheel|key|pedal|seal|brake|cut|release|optional|climb|mirror|lock/i);
+for(const [file,pattern] of [['hollow-cliffs.js',/const signs=\[\];/],['lost-canyon.js',/const signs=\[\];/],['prison-dungeons.js',/const SIGNS=\[\];/],['keep-journey-art.js',/const boards=\[\];/]])assert.match(fs.readFileSync(path.join(__dirname,'../public/3d',file),'utf8'),pattern,file+' removes boards at their shared visual/collision source');
+console.log('In-world signage policy and removal contracts passed.');

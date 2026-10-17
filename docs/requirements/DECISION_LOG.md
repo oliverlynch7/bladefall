@@ -1578,3 +1578,8 @@ Grounded implementation plan: capture default fresh-starter actual-browser villa
 ## [Codex | 2026-10-17] U-DIALOGUE-ENDINGS-20261017
 
 User reiterates that exhausted main dialogue must end in a clear primary Leave conversation action, not loop back through the same lines indefinitely. Talking again may replay information. Preserve access to genuine side quests and optional lore, keep required quest/combat effects and co-op speaker authority intact, and retain intentional gameplay retries. Plan: audit campaign and service conversation engines; replace return-to-visited-dialogue continuations with endings, track all visited nodes within the current conversation (including explicit optional-topic navigation), expose remaining questions separately, use Leave conversation for ordinary terminal lines, prevent stale/replayed choices executing twice; verify real NPC paths, legacy cursors and shared authority before publishing.
+
+
+## [Codex | 2026-10-17] U-WORLD-SIGNS-20261017
+
+Remove campaign signs revealing puzzle controls, keys, secrets or tactical routes unless plausible in-world signage. Preserve town destinations and selected workplace/library labels. Audit shared authored sign arrays and Keep boards; remove associated collision through the same source arrays. Preserve routes, mechanics, HUD guidance, map scale and saves. Verify source contracts, syntax and browser before publication.

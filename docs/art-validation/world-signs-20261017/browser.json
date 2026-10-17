@@ -1,0 +1,162 @@
+{
+  "areas": [
+    {
+      "area": 0,
+      "briar": [
+        {
+          "rows": [
+            "MILL & WOODS  ↑",
+            "WEST FARM  ←",
+            "GRANARY  →"
+          ],
+          "x": -285,
+          "z": -560
+        },
+        {
+          "rows": [
+            "GUS’S WORKSHOP  ↑",
+            "SUPPLY WAGON  ←",
+            "VILLAGE  →"
+          ],
+          "x": -1330,
+          "z": -670
+        },
+        {
+          "rows": [
+            "WATCHTOWER  ↑",
+            "GRANARY  ←"
+          ],
+          "x": 1730,
+          "z": -660
+        },
+        {
+          "rows": [
+            "ORCHARD  ↑",
+            "MILL  →"
+          ],
+          "x": -2260,
+          "z": -1280
+        },
+        {
+          "rows": [
+            "STONE BRIDGE  ↑",
+            "RIVERSIDE HOMES  ←",
+            "WINDMILL RISE  →"
+          ],
+          "x": 100,
+          "z": -2740
+        }
+      ],
+      "posts": 5,
+      "zone": 0
+    },
+    {
+      "area": 1,
+      "briar": [],
+      "posts": 0,
+      "zone": 0
+    },
+    {
+      "area": 0,
+      "posts": 0,
+      "zone": 1
+    },
+    {
+      "area": 1,
+      "posts": 0,
+      "zone": 1
+    },
+    {
+      "area": 0,
+      "keep": {
+        "cordCut": false,
+        "latchGreen": false,
+        "objects": [
+          "rk.breach",
+          "rk.arrow",
+          "rk.wheel",
+          "rk.timing"
+        ],
+        "signs": 0,
+        "triangles": 11033,
+        "warning": null
+      },
+      "posts": 0,
+      "zone": 2
+    },
+    {
+      "area": 1,
+      "posts": 0,
+      "prison": {
+        "chestOpen": 0,
+        "gates": [
+          {
+            "id": "hidden",
+            "open": 0
+          },
+          {
+            "id": "release",
+            "open": 0
+          },
+          {
+            "id": "depth",
+            "open": 0
+          },
+          {
+            "id": "holdingExit",
+            "open": 0
+          }
+        ],
+        "objects": [
+          "kd.hidden",
+          "kd.free",
+          "kd.return",
+          "kd.cache"
+        ],
+        "signs": 0,
+        "triangles": 10046
+      },
+      "zone": 2
+    },
+    {
+      "area": 0,
+      "journey": [
+        {
+          "detail": "Waterworks west",
+          "title": "FOUNTAIN COURT",
+          "x": 175,
+          "y": 200,
+          "z": -1250
+        }
+      ],
+      "posts": 1,
+      "zone": 6
+    },
+    {
+      "area": 1,
+      "journey": [
+        {
+          "detail": "Service passage west",
+          "title": "SKY LIBRARY",
+          "x": 140,
+          "y": 120,
+          "z": -505
+        },
+        {
+          "detail": "Records gallery east",
+          "title": "READING HALLS",
+          "x": 150,
+          "y": 200,
+          "z": -1280
+        }
+      ],
+      "posts": 2,
+      "zone": 6
+    }
+  ],
+  "done": true,
+  "errors": [],
+  "legacy": {
+    "level": 100
+  }
+}

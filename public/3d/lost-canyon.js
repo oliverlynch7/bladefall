@@ -17,14 +17,7 @@
  const cages={south:{x:-780,z:-2120,y:0},north:{x:640,z:-3550,y:0},extra:{x:-2200,z:-2300,y:90}};
  const alarmJumps=[[990,-2320,0],[865,-2400,58],[750,-2490,116],[635,-2505,174],[525,-2440,180],[395,-2490,180],[280,-2580,180]];
  const signalPosts=[[-520,-1690],[-490,-2450],[-780,-2780],[1050,-2740],[910,-3300]];
- const signs=[
-  {x:-230,z:-150,y:220,rows:['HOLDING YARD','Records: west desk','Service walk: east']},
-  {x:-220,z:-1510,rows:['SOUTH YARD','North cages: either road','Signal: east scaffold']},
-  {x:1135,z:-2240,rows:['SIGNAL PLATFORM','Climb the service brackets','Cut cable to stop patrols']},
-  {x:-1160,z:-2650,rows:['WEST SERVICE ROAD','Old cells and freight: west','North yard: ahead']},
-  {x:425,z:-3250,rows:['NORTH YARD','Prisoners need protection','Shelter past the east bend']},
-  {x:-330,z:-3830,rows:['REFUGE','Rest beneath the awning','Last crossing: north gate']}
- ];
+ const signs=[]; // Terrain, architecture and quest guidance carry navigation here.
  const gatePosts=[[-100,-620],[125,-520],[-70,-330]],northSpacing=68;
  const freightJumps=[[-1510,-2790,40],[-1625,-2900,70],[-1740,-3010,100],[-1855,-3120,130],[-1970,-3230,160],[-2085,-3340,190],[-2200,-3450,220],[-2320,-3560,230]];
  const railPath=[[-2280,-3830],[-2280,-3480],[-1750,-3480],[-1750,-3100]];

@@ -2242,3 +2242,10 @@ Campaign dialogue now preserves per-conversation visited history across topic me
 ## [Codex | 2026-10-17] v2.235 production confirmed
 
 Functional0534d0f9 deployed successfully asa1ea2e34-faa5-4735-aa04-0b9a0097904d. Actual public browser confirmsv2.235.0-dialogue-endings, hub-dialogue2235c and story-state2235a, and normal main-menu boot. Local103 suites and actual NPC/old-save/listener checks are recorded in docs/art-validation/dialogue-endings-20261017/summary.md. No production save manipulation.
+
+
+## [Codex | 2026-10-17] v2.236 world signage audit
+
+Removed artificial directional/puzzle boards from Black Woods, Winding Cliffs, Lost Canyon, Ruined Keep, prison dungeons, Ice Caves, Storm Coast and Castle Duskmore. Removed revealing waterworks/mirror/folding-shelf/control instructions elsewhere. Retained five Briar village destination signs and seven sparse mountain shelter, workplace and palace/library destination boards. Removed associated signpost collisions via shared definitions; no route, terrain, puzzle, reward or save changes. Beta Briar also loses five artificial puzzle/combat labels.
+
+103 offline suites pass. Actual disposable pre-change level100 save loads; browser traverses both halves of Briar, Hollow, Keep and Sunspire with no captured errors. Keep/prison art snapshots show zero signs and retain mechanisms; no phantom posts in removed areas, five village posts and selected Sunspire labels remain. Library screenshot inspected. Existing floor-aware quest navigation checks pass. No production saves touched. Publication pending.

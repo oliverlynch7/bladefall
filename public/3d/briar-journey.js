@@ -5,12 +5,9 @@ const signs=[
  [{x:-285,z:-560,rows:['MILL & WOODS  ↑','WEST FARM  ←','GRANARY  →']},
   {x:-1330,z:-670,rows:['GUS’S WORKSHOP  ↑','SUPPLY WAGON  ←','VILLAGE  →']},
   {x:1730,z:-660,rows:['WATCHTOWER  ↑','GRANARY  ←']},
-  {x:-2260,z:-1280,rows:['ORCHARD CLIMB  ↑','MILL  →']},
+  {x:-2260,z:-1280,rows:['ORCHARD  ↑','MILL  →']},
   {x:100,z:-2740,rows:['STONE BRIDGE  ↑','RIVERSIDE HOMES  ←','WINDMILL RISE  →']}],
- [{x:205,z:-640,rows:['LEGION CAMP  ←','CANOPY CLIMB  →','BOTH REACH THE SIGNAL']},
-  {x:-910,z:-2070,rows:['SIGNAL POST  →','OLD GROVE  ←']},
-  {x:1060,z:-970,rows:['CANOPY  ←','BETH’S TRAIL  →']},
-  {x:150,z:-3750,rows:['NORTH SHELTER  ↑']}]
+ [] // No tactical signposts in the occupied Black Woods.
 ];
 function build(G){
  if(G.zone!==0||G.area<0||G.hub||G.side||G.trial||G.devBriar||G.devKeep||G.endless||G.delve)return;

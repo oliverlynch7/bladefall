@@ -4,7 +4,7 @@ const paths={entry:[[0,300,300],[0,-200,300],[0,-650,180],[0,-1250,180],[0,-1850
 for(const name of ['drain','deadDrain','deadDrain2'])for(const p of paths[name])if(p[2]===40)p[2]=80;
 const drainJumpSegments=[6,8,10];
 const WINCH={x:0,z:-2500,r:88};
-const SIGNS=[{x:-205,z:-560,y:180,lines:['CELL BLOCK','West cells ←']},{x:-315,z:-2140,y:180,lines:['PRISONER LIFT','Board · turn the handle']},{x:-300,z:-3370,y:360,lines:['UPPER SHELTER','Release hall ahead']},{x:560,z:-3020,y:180,lines:['LOWER WORKS','Service stairs →']}];
+const SIGNS=[]; // A prison does not advertise escape routes or lift solutions.
 const PRESS_Z=[-3120,-2990,-2860],PRESS_PERIOD=4.6,PRESS_OFFSET=[0,1.5,3];
 function pressState(clock,i,open=false){
  if(open)return {bottom:134,warning:false,down:false};

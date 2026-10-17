@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.244.0-campaign-replay';
+const VERSION3D='2.245.0-weapon-aura';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -19558,13 +19558,18 @@ function openStylistMakeover(back=()=>openWardrobe(wsResume)){
   persist();hudUpdate();toast('Makeover saved · 25 gold');return true;}
  });
 }
+function cosmeticIcon(slot,id){
+ if(slot==='cape'&&id==='winter')return 'icons/cosmetics/cape-wanderer.png';
+ if(slot==='glow'&&id==='gauntlet')return 'icons/cosmetics/glow-blood.png';
+ return 'icons/cosmetics/'+slot+'-'+id+(['sail','checkmate'].includes(id)?'.svg':'.png');
+}
 function openWardrobe(back){
   mode='menu'; checkCosmetics();
   menuTip('tip_wardrobe','the <b>Stylist</b>. Change your name and face for gold, or choose your equipped class’s appearance. New looks unlock at <b>class ranks 5 and 10</b>. Each class remembers its choice. Cosmetic only.');
   const secs=COSSLOTS.map(s=>{
     const tiles=COSMETICS[s.k].map(c=>{ const un=c.has(), sel=meta.cosEquipped[s.k]===c.id;
       return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" style="--cos:${c.col}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
-        <img class="cosart" src="icons/cosmetics/${s.k}-${c.id}.${['sail','checkmate'].includes(c.id)?'svg':'png'}" alt="${un?c.name:'Locked cosmetic'}">
+        <img class="cosart" src="${cosmeticIcon(s.k,c.id)}" alt="${un?c.name:'Locked cosmetic'}">
         <div style="min-width:0"><div class="gn">${un?c.name:'🔒 Hidden Reward'}</div>
           <div class="gd">${c.hint}</div><span class="cosstate">${un?(sel?'Equipped':'Wear'):'Locked'}</span></div></div>`; }).join('');
     const cur=cosEquipped(s.k);
@@ -24400,7 +24405,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2239"></script>
+<script type="module" src="./hero3d.js?v=2245"></script>
 <script type="module" src="./social-hub.js?v=2227a"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

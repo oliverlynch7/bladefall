@@ -7,7 +7,7 @@ async page=>{
   await page.waitForFunction(name=>__hero3dWeapon()?.name===name&&!__hero3dSwapState().reArming,name);
   for(const id of ['gold','blood','soul','perfect','gauntlet',null]){
    await page.evaluate(id=>__BF3.meta.cosEquipped.glow=id,id);await page.waitForTimeout(90);
-   const result=await page.evaluate(async id=>{const {GLOW_COLORS}=await import('./weapon-glow.js?v=2109');const edges=[];HERO3D._wrap.traverse(o=>{if(o.userData.weaponGlowEdge)edges.push(o)});if(!edges.length||edges.some(e=>e.visible!==!!id))throw Error('Glow visibility '+id);if(id&&edges.some(e=>'#'+e.material.color.getHexString()!==GLOW_COLORS[id]))throw Error('Glow color');if(__BF3.cosmeticAppearance().glow!==id||__BF3.validCosmeticAppearance({glow:id}).glow!==id)throw Error('Network appearance');return edges.length;},id);
+   const result=await page.evaluate(async id=>{const {GLOW_COLORS}=await import('./weapon-glow.js?v=2245');const edges=[];HERO3D._wrap.traverse(o=>{if(o.userData.weaponGlowAura)edges.push(o)});if(!edges.length||edges.some(e=>e.visible!==!!id))throw Error('Glow visibility '+id);if(id&&edges.some(e=>'#'+e.material.uniforms.auraColor.value.getHexString()!==GLOW_COLORS[id]))throw Error('Glow color');if(__BF3.cosmeticAppearance().glow!==id||__BF3.validCosmeticAppearance({glow:id}).glow!==id)throw Error('Network appearance');return edges.length;},id);
    results.push([arche,id,result]);
    if(arche==='hammer'&&id==='soul')await page.screenshot({path:'output/playwright/hammer-soul-glow.png'});
   }

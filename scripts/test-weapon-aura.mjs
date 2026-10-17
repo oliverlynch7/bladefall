@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+import * as T from '../public/3d/three.module.js';
+import {syncWeaponGlow,GLOW_COLORS} from '../public/3d/weapon-glow.js';
+const geometry=new T.BoxGeometry(),material=new T.MeshLambertMaterial({color:'#765432',emissive:'#112233',emissiveIntensity:.12});
+const a=new T.Group(),b=new T.Group(),ma=new T.Mesh(geometry,material),mb=new T.Mesh(geometry,material);a.add(ma);b.add(mb);const ha={_weap:a},hb={_weap:b};
+for(const id of Object.keys(GLOW_COLORS)){syncWeaponGlow(ha,id);assert.equal(ma.material,material);assert.equal(material.color.getHexString(),'765432');assert.equal(material.emissive.getHexString(),'112233');assert.equal(material.emissiveIntensity,.12);assert.equal(ma.children.length,1);const aura=ma.children[0];assert.equal(aura.geometry,geometry);assert.equal(aura.material.depthWrite,false);assert.equal(aura.material.depthTest,true);assert.equal(aura.material.side,T.BackSide);assert.equal(aura.material.uniforms.auraColor.value.getHexString(),new T.Color(GLOW_COLORS[id]).getHexString());}
+syncWeaponGlow(hb,'gold');const aa=ma.children[0],bb=mb.children[0];assert.notEqual(aa.material,bb.material);syncWeaponGlow(ha,null);assert.equal(aa.visible,false);assert.equal(bb.visible,true);syncWeaponGlow(hb,'bad-id');assert.equal(bb.visible,false);syncWeaponGlow(ha,'soul');assert.equal(ma.children.length,1);assert.equal(aa.visible,true);
+const pirate=new T.Group(),saber=new T.Group();saber.name='PirateSaber';saber.add(new T.Mesh(geometry,material));pirate.add(saber);syncWeaponGlow({_weap:a,root:pirate},'blood');assert.equal(saber.children[0].children.length,1);assert.equal(material.emissive.getHexString(),'112233');
+console.log('All five aura colors, material identity/colors/emission, no recursive shells, geometry sharing, actor isolation, dual weapons and disabling pass');

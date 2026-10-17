@@ -4,7 +4,7 @@ import {weaponOnly} from './first-person-appearance3d.js?v=2219';
 import { pauseAppearance } from './pause-appearance3d.js?v=2212';
 import {syncCampaignObjects} from './campaign-object3d.js?v=2234';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
-import {syncWeaponGlow} from './weapon-glow.js?v=2109';
+import {syncWeaponGlow} from './weapon-glow.js?v=2245';
 import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2231';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
@@ -962,7 +962,7 @@ function clearWeapon(actor,dispose=true){
   const paintMaterials=new Set();
   for(const o of strays){for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m?.userData?._weaponPaint)paintMaterials.add(m);if(o.parent)o.parent.remove(o);}
   if(dispose)for(const m of paintMaterials)m.dispose();
-  if(dispose)for(const o of strays){if(o.userData.weaponGlowEdge){o.geometry?.dispose();o.material?.dispose();}if(o.userData.gripGeometryOwned)o.geometry?.dispose();if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
+  if(dispose)for(const o of strays){if(o.userData.weaponGlowAura)o.material?.dispose();if(o.userData.weaponGlowEdge){o.geometry?.dispose();o.material?.dispose();}if(o.userData.gripGeometryOwned)o.geometry?.dispose();if(o.userData.signaturePart){o.geometry?.dispose();if(!paintMaterials.has(o.material))o.material?.dispose();}}
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
@@ -1294,7 +1294,7 @@ function colorWeapon(holder,w){
  if(w.art==='cross'){paintCrossbow(holder._weap,w);return;}
  const tint=weaponTint(w)||w.blade||'#d8dce0',key=w.art+'|'+tint;
  if(holder._paintNode===holder._weap&&holder._paintKey===key)return;holder._paintNode=holder._weap;holder._paintKey=key;
- holder._weap.traverse(o=>{if(o.name==='BowString'){o.material.color.set(weaponTint(w)||'#e8dcc1');return;}if(!o.isMesh)return;const accentSurface=!!weaponTint(w)&&!!o.userData.elementSurface,elementGold=!!weaponTint(w)&&holder.fit?.name?.includes('Golden');const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=(m.userData._weaponPaint||o.userData.signaturePart)?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
+ holder._weap.traverse(o=>{if(o.userData.weaponGlowAura)return;if(o.name==='BowString'){o.material.color.set(weaponTint(w)||'#e8dcc1');return;}if(!o.isMesh)return;const accentSurface=!!weaponTint(w)&&!!o.userData.elementSurface,elementGold=!!weaponTint(w)&&holder.fit?.name?.includes('Golden');const list=Array.isArray(o.material)?o.material:[o.material];o.material=list.map(m=>{const out=(m.userData._weaponPaint||o.userData.signaturePart)?m:m.clone(),src=m.userData._weaponSource||m.map;out.userData._weaponSource=src;out.userData._weaponPaint=true;
  if(src?.image?.width){const k=src.uuid+'|'+tint+'|'+accentSurface+'|'+(o.userData.elementUvTriangles?.length?holder.fit?.name:'');let tex=weaponPaletteCache.get(k);if(!tex){const canvas=document.createElement('canvas');canvas.width=src.image.width;canvas.height=src.image.height;const ctx=canvas.getContext('2d');ctx.drawImage(src.image,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height),rgb=hexRGB(tint),head=weaponTint(w)?weaponHeadMask(o,canvas.width,canvas.height,src.flipY):null;for(let i=0;i<data.data.length;i+=4){const h=rgb2hsv(...data.data.slice(i,i+3));if((head?.[i+3]>0&&h[2]>.1)||(h[2]>.35&&(accentSurface||h[1]<.28||h[0]>65))){tintPixel(data.data,i,rgb,.18+h[2]*.82);}}ctx.putImageData(data,0,0);tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.flipY=src.flipY;weaponPaletteCache.set(k,tex);}out.map=tex;}else {const base=m.userData._weaponBaseColor||m.color.clone();out.userData._weaponBaseColor=base;const hsv=rgb2hsv(Math.round(base.r*255),Math.round(base.g*255),Math.round(base.b*255));if((accentSurface&&hsv[2]>.1)||(elementGold&&hsv[0]>=30&&hsv[0]<=65&&hsv[2]>.25))out.color.set(tint).multiplyScalar(.55+.45*hsv[2]);else if(hsv[2]>.35&&(hsv[1]<.28||hsv[0]>65))out.color.set(tint);else out.color.copy(base);}return out;});if(!Array.isArray(list)||list.length===1)o.material=o.material[0];});
 }
 

@@ -1623,3 +1623,8 @@ User requires obvious yellow dialogue selection, W/S or Up/Down browsing and E c
 ## [Codex | 2026-10-17] U-CAMPAIGN-REPLAY-ENTRY-20261017
 
 User requests after completing each campaign region three replay starts: first district, second district, boss, from gate or travel selection; first clear must still follow normal order. Plan: add completed-only shared replay picker on portal/Waystone UI paths; preserve low-level enterZone for new runs/network, accept validated target area only after zoneDone (authoritative guest sync exception). Load selected authored area directly before checkpoint/party broadcast, not by simulating quest completions. Guard stale/double menu callbacks, preserve hero/gold/optional progress, cancel without entering, test all8regions×3areas and incomplete gating, boss/checkpoint states and existing authority/save suites.
+
+
+## [Codex | 2026-10-17] U-WEAPON-AURA-ICONS-20261017
+
+User requires weapon glow cosmetics preserve weapon color, emit subtle visible surrounding aura, and requests missing icon list. Plan: replace emissive repaint/bright edge lines with separate depth-tested transparent normal-expanded aura shell, preserve source materials/shared geometry, isolate actors/IDs, dispose owned shell materials on weapon swap. Audit actual cosmetic filenames and live UI icon paths, use explicit existing fallback images for missing custom art, supply precise missing artwork names. Verify weapon types/unequip/material preservation and visible browser results.

@@ -1952,3 +1952,8 @@ User requests Tab to open/close the bag and Q as universal cancel/exit. Source: 
 ## [Codex | 2026-10-16] v2.218 — Bag toggle and universal Q cancel
 
 U-MENU-CANCEL-20261016: Bag binding now closes its active screen through existing Back callback; pause-origin bag returns to Pause. Early Q→Escape bridge reuses modal cleanup, preserves text entry/modifiers/composition/editor, prevents key-repeat cascades and skips loot reels first. Reserved Q and moved default ground-sell to X; old Q sell migrates to free X/Delete without overwriting custom mappings. Broader visible safe Back/Cancel/Close/Done detection; Settings mode fixed so it returns to Pause. Class choice can cancel confirmation then choose later without losing rank/unanswered option. UI control copy updated. Real WebGL/DOM 26 checks and 18 source/policy/migration checks pass; other relevant regression suites pass. Evidence: docs/art-validation/menu-shortcuts-20261016. Synthetic keyboard events verified actual DOM callbacks; native hardware/two-device co-op not claimed. Deployment pending.
+
+
+## [Codex | 2026-10-16] v2.218 menu shortcuts production confirmed
+
+Functional commit 13a0621d deployed successfully as d1486ac7-21db-4797-a867-fc60f19d42bf. Public browser confirms v2.218.0-menu-shortcuts and menu-shortcuts v2218 with no launch errors. Additional old-save load retains level 4 / XP 52 / rank 4 / class XP 1015 / gold 1145. DOM propagation fixture passed 26 actual menu callbacks, with separate policy/migration regressions; native hardware and two-device co-op remain outside these checks.

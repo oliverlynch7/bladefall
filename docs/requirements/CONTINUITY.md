@@ -1856,3 +1856,8 @@ Grounded plan: track the pause session by world identity, stop solo updates befo
 U-ESC-PAUSE-20261016: Esc freezes solo simulation and world animation; nested pause menus retain the pause. Co-op continues shared time, holds the paused avatar in place, rejects incoming damage/fall effects and relays Paused presence. Peers remain visible and opaque with temporarily desaturated materials; original colors return immediately on resume. No saved invulnerability or appearance changes. Competitive PvP stays live/unprotected; directly opened panels and conversations retain prior behavior. Updated pause captions, Help and tutorial guidance.
 
 25 targeted regression checks; actual browser solo/Settings/co-op simulation, presence relay, damage/resume and grey/color rendering checks passed. Existing level-4/rank-4 Warrior save loaded with 1145 gold, 1015 class XP and all three choices intact. Creator 14, progression 43 and audio preservation 255 checks remain passing. Evidence: docs/art-validation/esc-pause-20261016. Simulated peer coverage is not a two-device live co-op test. Production deployment pending confirmation.
+
+
+## [Codex | 2026-10-16] v2.212 pause production confirmed
+
+Functional commit 7695cfad deployed successfully as c7872571-ac8c-4580-add2-963de0f5544f (deploy stage success). Public browser reports v2.212.0-esc-pause and hero/tutorial scripts v2212, with no console errors. Solo, nested Settings, co-op protection/presence and grey/full-color restoration verified locally in the actual renderer. A real two-device co-op session remains untested. No save-schema changes; old-save compatibility verified.

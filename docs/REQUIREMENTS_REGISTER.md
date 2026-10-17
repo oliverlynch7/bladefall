@@ -1733,3 +1733,10 @@ User reports several generated replacements are worse than the originals and can
 ## [Codex | 2026-10-16] U-CREATOR-VIEW-20261016
 
 User requests a full-character / face close-up choice in the creator, full-character default, lower and centered face framing, and vertical as well as horizontal dragging. Source: draw() forcibly resets face mode/yaw on every edit; toggle handlers do not update pressed state; face framing uses whole-body/weapon bounds; pointer drag tracks only X. Preserve chosen view, yaw and pitch through edits and steps, default full body on open, update accessible toggle states immediately, and allow bounded vertical camera orbit. Fit close-up to the actual stored head frame transformed by the current head bone, independent of weapon/crown bounds. Hide fitted headgear and held weapon only in face preview so facial customization remains visible; restore in full view. Preserve six rigs, facial placement data, saves and gameplay cameras. Verify all starter classes plus UI edits, transitions, mouse/touch cancellation and mobile presentation in the real browser.
+
+
+## [Codex | 2026-10-16] U-ESC-PAUSE-20261016
+
+User retracts live Esc menus: single-player Esc freezes time. In co-op the paused player remains visible, invulnerable and grey to friends while the shared world continues. Protection lasts through nested pause menus and ends on resume; it is transient, never saved. Earlier live-pause direction is superseded. PvP retains live unprotected menus to avoid extending co-op protection into competitive play. Conversations and directly opened panels retain their existing behavior.
+
+Grounded plan: track the pause session by world identity, stop solo updates before world/social ticks, guard incoming damage and fall hazards, hold the co-op avatar in place, send Paused presence through the existing protocol and desaturate only that rendered actor with temporary material overrides. Preserve saves and normal peer visibility. Test solo/co-op/submenu/resume/world changes, existing saves and actual rendered appearance before release.

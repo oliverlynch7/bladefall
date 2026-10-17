@@ -1,0 +1,40 @@
+{
+  "version": "2.212.0-esc-pause",
+  "unitChecks": 25,
+  "browserChecks": [
+    "solo wall time and simulation frozen",
+    "solo hit rejected",
+    "Settings remains frozen",
+    "resume advances time",
+    "co-op simulation continues",
+    "co-op hits rejected",
+    "co-op paused position retained",
+    "presence packet carries Paused",
+    "host relay retains Paused",
+    "resume clears presence",
+    "resume permits damage",
+    "opaque grey Pyromancer friend rendered",
+    "full color restored when friend resumes"
+  ],
+  "legacySave": {
+    "characterLevel": 4,
+    "classRank": 4,
+    "gold": 1145,
+    "classXp": 1015,
+    "choices": [
+      "w_cleave",
+      "w_heavy",
+      "w_whirl"
+    ]
+  },
+  "otherRegressions": {
+    "creator": 14,
+    "progression": 43,
+    "audioPreservation": 255
+  },
+  "limitations": [
+    "Co-op presence, relay and rendering tested with a simulated peer in the real browser; no two-device live session.",
+    "Directly opened panels and conversations retain prior behavior. PvP menus remain live and unprotected."
+  ],
+  "storage": "Fixture uses in-memory storage; real saves untouched."
+}

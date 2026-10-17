@@ -16,7 +16,7 @@ const lessons=[
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
  {id:'journal',title:'Keep your clues close',body:'New clues appear on paper notices until dismissed. Open Journal to read them again, search clues or check side quests.',target:['#hudJournal'],anchor:'#inventoryDock'},
  {id:'navigation',title:'Follow your map',body:'Gold marks the next objective or exit. Blue marks friends; cyan marks pings; red marks enemies. The map rotates as you turn.',target:['#localMap']},
- {id:'menu',title:'Ready to explore',body:'Close these tips, then open the menu for Settings or Help. The world keeps moving in menus—find somewhere safe first.',target:['#pausebtn','#eschint']}
+ {id:'menu',title:'Ready to explore',body:'Close these tips, then open the menu for Settings or Help. Esc pauses time in solo play. In co-op, you stay visible and protected while your friends keep playing.',target:['#pausebtn','#eschint']}
 ];
 const skillLesson={id:'skill-use',title:'Try your new skill',body:'Face an enemy within range, then use Skill 1. It spends mana and needs time to recharge.',action:'skill1',target:['#bSk0']};
 const pauseHint=()=>guide?.hint?.('pause')||'Esc';

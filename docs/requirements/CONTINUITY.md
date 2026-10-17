@@ -1842,3 +1842,17 @@ U-CREATOR-VIEW-20261016 implemented. Browser confirmed centered Warrior/Ranger/M
 ## [Codex | 2026-10-16] v2.211 creator camera production confirmed
 
 Commit b7a88928 deployed successfully (7ba3d989-9596-4e60-ae19-dbbc2485c0a7). Public browser shows v2.211.0-creator-camera and creator/hero scripts v2211. Full body default, persistent toggles, centered head framing and bounded vertical drag are live. Three starter models and direct phone-width layout visually verified; 14 event-handler checks pass. No real saves touched by fixtures. Native drag gestures remain outside automated browser coverage; pointer deltas/cancel/capture guards tested by event harness. Unrelated companion/rig changes and pending Keep/Reaper work remain excluded.
+
+
+## [Codex | 2026-10-16] U-ESC-PAUSE-20261016
+
+User retracts live Esc menus: single-player Esc freezes time. In co-op the paused player remains visible, invulnerable and grey to friends while the shared world continues. Protection lasts through nested pause menus and ends on resume; it is transient, never saved. Earlier live-pause direction is superseded. PvP retains live unprotected menus to avoid extending co-op protection into competitive play. Conversations and directly opened panels retain their existing behavior.
+
+Grounded plan: track the pause session by world identity, stop solo updates before world/social ticks, guard incoming damage and fall hazards, hold the co-op avatar in place, send Paused presence through the existing protocol and desaturate only that rendered actor with temporary material overrides. Preserve saves and normal peer visibility. Test solo/co-op/submenu/resume/world changes, existing saves and actual rendered appearance before release.
+
+
+## [Codex | 2026-10-16] v2.212.0 — Esc pauses again
+
+U-ESC-PAUSE-20261016: Esc freezes solo simulation and world animation; nested pause menus retain the pause. Co-op continues shared time, holds the paused avatar in place, rejects incoming damage/fall effects and relays Paused presence. Peers remain visible and opaque with temporarily desaturated materials; original colors return immediately on resume. No saved invulnerability or appearance changes. Competitive PvP stays live/unprotected; directly opened panels and conversations retain prior behavior. Updated pause captions, Help and tutorial guidance.
+
+25 targeted regression checks; actual browser solo/Settings/co-op simulation, presence relay, damage/resume and grey/color rendering checks passed. Existing level-4/rank-4 Warrior save loaded with 1145 gold, 1015 class XP and all three choices intact. Creator 14, progression 43 and audio preservation 255 checks remain passing. Evidence: docs/art-validation/esc-pause-20261016. Simulated peer coverage is not a two-device live co-op test. Production deployment pending confirmation.

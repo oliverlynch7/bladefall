@@ -1,3 +1,4 @@
+import { pauseAppearance } from './pause-appearance3d.js?v=2212';
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
@@ -2045,7 +2046,7 @@ export function drawHero3D(p, t){
     const raw = clock.getDelta();
     const newFrame = raw > 0.0005;
     if(newFrame){ _frameDt = Math.min(0.05, raw); _frameNo++; }
-    const dt = _frameDt;
+    const dt = window.__BF3?.pauseState?.().frozen ? 0 : _frameDt;
 
     /* Build or refresh the 3D world before drawing. Cheap when nothing changed - it compares a
        level signature and returns. Deliberately in the SAME scene and render call as the hero,
@@ -2146,7 +2147,8 @@ export function drawHero3D(p, t){
     const chessFade=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera();
     const fadeChessActor=root=>root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.16;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});
     if(chessLocal){fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
-    try{renderer.render(scene, cam);}finally{for(const [n,m]of chessFade)n.material=m;if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    const restorePause=p.pausedSafe?pauseAppearance(wrap):null;
+    try{renderer.render(scene, cam);}finally{restorePause?.();for(const [n,m]of chessFade)n.material=m;if(head){head.scale.copy(headScale);wrap.updateMatrixWorld(true);}for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;

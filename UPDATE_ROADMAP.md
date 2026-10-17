@@ -2989,3 +2989,10 @@ User prefers several old sounds and cannot audition the batch now. Disabled all 
 ## [Codex | 2026-10-16] v2.211 creator preview camera
 
 Full-character view is the default, both view buttons update immediately and retain the chosen mode/angle through edits and navigation. Face framing uses the head frame, not weapon/crown bounds, and hides preview headgear/weapon. Added bounded vertical tilt alongside horizontal drag and pointer cancellation. Three starter faces visually checked; 390px direct viewport has no horizontal overflow. 14 event-handler regressions, 255 audio and 43 progression checks pass. Native drag gestures remain outside the browser API test; pointer behavior is covered by the DOM harness. No save/camera/gameplay changes.
+
+
+## [Codex | 2026-10-16] v2.212.0 — Esc pauses again
+
+U-ESC-PAUSE-20261016: Esc freezes solo simulation and world animation; nested pause menus retain the pause. Co-op continues shared time, holds the paused avatar in place, rejects incoming damage/fall effects and relays Paused presence. Peers remain visible and opaque with temporarily desaturated materials; original colors return immediately on resume. No saved invulnerability or appearance changes. Competitive PvP stays live/unprotected; directly opened panels and conversations retain prior behavior. Updated pause captions, Help and tutorial guidance.
+
+25 targeted regression checks; actual browser solo/Settings/co-op simulation, presence relay, damage/resume and grey/color rendering checks passed. Existing level-4/rank-4 Warrior save loaded with 1145 gold, 1015 class XP and all three choices intact. Creator 14, progression 43 and audio preservation 255 checks remain passing. Evidence: docs/art-validation/esc-pause-20261016. Simulated peer coverage is not a two-device live co-op test. Production deployment pending confirmation.

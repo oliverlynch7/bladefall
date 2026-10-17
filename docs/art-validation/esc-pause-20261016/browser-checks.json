@@ -1,0 +1,20 @@
+{
+  "passed": [
+    "real idle wall time frozen",
+    "solo simulation and damage frozen",
+    "Settings keeps time frozen",
+    "resume advances time",
+    "co-op world advances without paused damage",
+    "co-op paused position held",
+    "paused packet",
+    "host relay keeps paused status",
+    "resume clears presence",
+    "resume removes damage protection"
+  ],
+  "peer": "Paused",
+  "pause": {
+    "active": false,
+    "frozen": false,
+    "protected": false
+  }
+}

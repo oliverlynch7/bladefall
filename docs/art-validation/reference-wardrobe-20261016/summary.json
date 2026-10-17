@@ -1,0 +1,52 @@
+{
+  "request": "U-REFERENCE-SKINS-20261016",
+  "version": "2.209.0-reference-wardrobe",
+  "scope": "17 classes, 51 outfits on six preserved source rigs; reference interpretation with requested corrections",
+  "corrections": [
+    "Red Rogue row becomes Ninja; no Rogue class",
+    "Warlock uses ruby, rose-copper and black cherry; no bone skull crown or jade souls",
+    "Monk uses saffron, beads and a psychic lavender lotus; no knight plate",
+    "Warrior starter is cobalt steel; Bladedancer starter is teal and champagne",
+    "Beastmaster companion is separate; no wolf geometry added"
+  ],
+  "rigChecks": {
+    "outfits": 51,
+    "animationFrames": 4080,
+    "rankGateAssertions": 204,
+    "maxAddedTriangles": 9998,
+    "maxAddedMeshes": 46
+  },
+  "browserChecks": {
+    "gpuOutfits": 51,
+    "gpuAnimationFrames": 3978,
+    "motionsPerOutfit": 13,
+    "stateChecks": 129,
+    "simulatedPeerOutfits": 51,
+    "consoleErrors": []
+  },
+  "oldSave": {
+    "name": "First Journey QA",
+    "level": 4,
+    "classRank": 4,
+    "gold": 1145,
+    "xp": 52,
+    "choices": {
+      "2": "w_cleave",
+      "3": "w_heavy",
+      "4": "w_whirl"
+    }
+  },
+  "limitations": [
+    "Finite transforms and sampled animations do not prove zero intersection in every combination of gear and cape.",
+    "Simulated production co-op rendering, not a live two-player network test.",
+    "Illustration detail is adapted to existing browser rigs, not a pixel-identical reproduction."
+  ],
+  "release": "Isolated production-base candidate passed 51 GPU outfits / 3978 frames and 129 state checks",
+  "mobile": {
+    "width": 390,
+    "contentWidth": 375,
+    "loaded": true,
+    "images": true,
+    "view": "2"
+  }
+}

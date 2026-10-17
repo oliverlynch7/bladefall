@@ -30,9 +30,9 @@
  });
  act('stylist',b=>{b.enterWaystation();b.meta.classId='mage';b.meta.classLooks.mage=2;b.openSkins(()=>b.enterWaystation());out('Stylist open · rotate and inspect all three tiers');});
  act('bag',b=>{b.enterWaystation();b.meta.classId='mage';b.meta.classLooks.mage=2;setTimeout(()=>{b.openGear();out('Bag open');},300);});
- act('world',b=>{b.enterWaystation();b.meta.classId='mage';b.meta.classLooks.mage=2;out('World · Galaxy Archmage equipped');});
+ act('world',b=>{b.enterWaystation();b.meta.classId='mage';b.meta.classLooks.mage=2;out('World · Sapphire Archmage equipped');});
  act('peers',async b=>{
-  const {classLookStats}=await import('/3d/class-look3d.js?v=2191'),checks=[];b.loadMode('rl');b.enterWaystation();b.meta.classId='mage';b.meta.classLooks.mage=2;
+  const {classLookStats}=await import('/3d/class-look3d.js?v=2209'),checks=[];b.loadMode('rl');b.enterWaystation();b.meta.classId='mage';b.meta.classLooks.mage=2;
   const old={active:b.MP.active,isHost:b.MP.isHost,peers:b.MP.peers},state=(id,cid,tier,dx)=>({id,cid,cls:cid,name:id,lookTier:tier,zone:b.MP.zone,area:b.G.area,hp:100,hpm:100,x:b.G.p.x+dx,y:b.G.p.y,z:b.G.p.z+30,w:b.classStartWeapon(cid)});
   // No broker or network connection: exercise the normal MP packet and rendering path locally.
   try{

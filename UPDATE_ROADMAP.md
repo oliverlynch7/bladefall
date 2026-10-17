@@ -2972,3 +2972,8 @@ Isolated release checkout ../bladefall-audio-release starts at production ab457f
 Isolated commit cfa8671d pushed to main from ../bladefall-audio-release. Cloudflare succeeded (52f523ad-e519-41a7-92bf-330dacda2ddb), and the real production browser shows v2.208.0-progression-celebrations with progression JS/CSS and priority SFX scripts present. Live: https://bladefall.pages.dev/3d/ . Includes the 64 paid SFX and the level/rank celebrations; zero extra generation credits. Title smoke plus staged gameplay/old-save/decoding checks are recorded; subjective listening and live co-op remain unclaimed. Pending wardrobe, Reaper and Keep work remain excluded.
 
 The development branch remains divergent and must not be pushed wholesale to main. Production main is now cfa8671d (later documentation-only commits may follow). Independent release checkout preserves the tested subset.
+
+
+## [Codex | 2026-10-16] Reference wardrobe — v2.209.0 candidate
+
+Remade 51 looks for 17 classes from Oliver’s approved sheet: red Ninja, ruby Warlock, psychic Monk, coherent Warrior/Bladedancer starters and separate Beastmaster companion. Actual browser GPU: 51 outfits / 3,978 frames; 129 game-state checks; 51 simulated peers. Rigs: 4,080 samples / 204 rank gates. Saved choices and stats preserved. Isolated release verification follows. Evidence: docs/art-validation/reference-wardrobe-20261016/.

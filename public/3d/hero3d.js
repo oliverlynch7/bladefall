@@ -1,7 +1,7 @@
 import {syncCampaignObjects} from './campaign-object3d.js?v=2185';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2109';
-import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2191';
+import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2209';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
@@ -1455,11 +1455,11 @@ function castleHelmet(root,enabled){
 const LEGION_UNIFORM={id:"castle_supply_uniform",metal:"#85828d",cloth:"#56313d",leather:"#4c4443",lift:1.13};
 function castleDisguise(){const g=window.__BF3?.G;return !!(g?.castleGates&&g.storyState?.flags["cg.disguise"]&&!g.storyState?.flags["cg.alarm"]);}
 function paintClassBody(root,cls,packOriginal=false,override=null){
-  const skin=override||CLASS_SKINS[cls];if(!root||!skin)return 0;
+  const skin=override||window.BFClassLooks?.palette(cls,0)||CLASS_SKINS[cls];if(!root||!skin)return 0;
   let painted=0;
   root.traverse(o=>{
     const hooded=['Ranger','Rogue'].includes(CLASS_TO_MODEL[cls])||(cls==='paladin'&&!!override?.rank);
-    const protectedHead=!hooded&&/^(Head|Face)(?:_|$)/.test(o.name);
+    const protectedHead=!hooded&&(/^(Head|Face)(?:_|$)/.test(o.name)||(cls==='monk'&&o.name==='Monk001'));
     if(!o.isMesh||o.userData.classLookPart||o.userData._disguisePart||o.userData._eye||o.userData._mouth||o.userData._weap||(protectedHead&&!o.userData._lookHeadPainted))return;
     if(cls==='paladin'&&override?.rank&&/^(Head|Face)(?:_|$)/.test(o.name))o.userData._lookHeadPainted=true;
     // Skeleton clones share source materials. Always isolate before touching a palette.
@@ -1491,10 +1491,10 @@ function paintClassBody(root,cls,packOriginal=false,override=null){
 }
 function applyClassSkin(){
   if(!actor)return null;
-  const meta=window.__BF_META?.(),cls=meta?.classId||'warrior',tier=window.BFClassLooks?.tier(meta,cls)||0,skin=tier?BFClassLooks.palette(cls,tier):CLASS_SKINS[cls];if(!skin)return null;
+  const meta=window.__BF_META?.(),cls=meta?.classId||'warrior',tier=window.BFClassLooks?.tier(meta,cls)||0,skin=window.BFClassLooks?.palette(cls,tier)||CLASS_SKINS[cls];if(!skin)return null;
   const packOriginal=HERO3D.skinId==='pack-original';
   const disguised=castleDisguise(),painted=paintClassBody(actor,disguised?"warrior":cls,disguised?false:packOriginal,disguised?LEGION_UNIFORM:tier?skin:null);
-  syncClassLook(actor,cls,disguised?0:tier,headMetrics({root:actor,model:HERO3D.model}));
+  if(disguised)clearClassLook(actor);else syncClassLook(actor,cls,tier,headMetrics({root:actor,model:HERO3D.model}));
   castleHelmet(actor,disguised);
   HERO3D.skin={classId:cls,tier,disguised,skinId:packOriginal?'pack-original':skin.id,metal:skin.metal,painted};return HERO3D.skin;
 }
@@ -2115,7 +2115,7 @@ export function drawHero3D(p, t){
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;
-    const lookRoot=rec?rec.node:actor,lookTier=cosmeticLocal?(window.BFClassLooks?.tier(cosmeticMeta,cosmeticClass)||0):(p.lookTier||0);syncClassLook(lookRoot,cosmeticClass,(cosmeticLocal?castleDisguise():p.disguise)?0:lookTier,headMetrics({root:lookRoot,model:rec?rec.model:HERO3D.model}),performance.now()/1000,!cosmeticMeta?.reduceMotion);
+    const lookRoot=rec?rec.node:actor,lookTier=cosmeticLocal?(window.BFClassLooks?.tier(cosmeticMeta,cosmeticClass)||0):(p.lookTier||0);if(cosmeticLocal?castleDisguise():p.disguise)clearClassLook(lookRoot);else syncClassLook(lookRoot,cosmeticClass,lookTier,headMetrics({root:lookRoot,model:rec?rec.model:HERO3D.model}),performance.now()/1000,!cosmeticMeta?.reduceMotion);
     const cosmeticIds=cosmeticLocal?window.__BF3?.cosmeticAppearance?.():p.cosmetics||{};
     syncWeaponGlow(rec?rec.holder:localWeaponHolder(),cosmeticIds.glow);
     syncCosmetics(wrap,p,['play','mirror'].includes(window.__BF3?.mode)?dt:0,{...cosmeticIds,model:rec?rec.model:HERO3D.model,accent:CLASS_SKINS[cosmeticClass]?.metal||'#ae9671',particles:cosmeticMeta?.particles!==false,hidden:!!p.dead||!!p.downed,sceneKey:[window.__BF3?.G?.runSeed,window.__BF3?.G?.zone,window.__BF3?.G?.area,window.__BF3?.G?.trial,window.__BF3?.G?.hub,window.__BF3?.G?.riftHall].join('|')});

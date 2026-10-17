@@ -1922,3 +1922,8 @@ User reports severe frame drops in Briar Town first half, Black Woods smoother; 
 ## [Codex | 2026-10-16] v2.216.0 — Briar render performance
 
 U-BRIAR-PERFORMANCE-20261016: added conservative whole-actor camera culling and suspended offscreen animation, preserving nearby combat, tall/weapon margins, current-state animation return, hidden fallback suppression and death cleanup. Shared mob module between renderer/world cleanup fixes old actor pool surviving area rebuilds. Cached static Outskirts visibility bounds and reused nearest-light buffers. No scenery, map, collision, save schema, AI, enemy count or settings downgrade. Default entry draw calls 346→249 / triangles 211,782→139,810; village 334→235 / 215,368→144,540. Local mean main CPU/render submission 6.88→5.29ms entry, 6.54→5.57ms village; hardware-specific FPS not inferred. Woods also improves. Real WebGL camera/transition and old-save checks plus relevant regression suites recorded in docs/art-validation/briar-performance-20261016. Production release pending confirmation.
+
+
+## [Codex | 2026-10-16] v2.216 performance release confirmed
+
+Functional commit 3674bc0c deployed successfully as 44ca70ec-a145-45a9-a84e-adb6e0e559fd (Cloudflare deploy stage success). Public browser confirms v2.216.0-briar-render-performance / hero3d v2216 and no launch errors. Retest on Oliver's hardware still needed to establish experienced frame pacing; local measurements establish lower rendering work, not universal FPS guarantees.

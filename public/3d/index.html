@@ -1204,7 +1204,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.256.0-coop-chests';
+const VERSION3D='2.257.0-upgrade-protection';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5862,7 +5862,7 @@ function trialTeachTick(dt){ if(!G||!G.trial||G._guidedUsed||mode!=='play') retu
 }
 // The mid-air DASH lesson — fires once when you approach the Outskirts' required dash chasm.
 function openDashTutorial(){ if(!G) return; meta.tut=meta.tut||{}; meta.tut.dash=1; persistGlobal();
-  mode='upgrade'; showGameUI(false); _offerT=Date.now();
+  beginPause();mode='upgrade'; showGameUI(false); _offerT=Date.now();
   showOverlayHTML(`<div class="card skilltut" style="--tut:#3a9dd0">
     <p class="ovkicker">Traversal</p><h2 class="ovh">The Mid-Air Dash</h2>
     <div class="tutbody"><div class="tuticon">💨</div>
@@ -12539,7 +12539,7 @@ let queueChoiceRank=0;
 let queueSkillTut=null;
 // A quick, one-time lesson the first time you unlock a usable skill: what it does, and which key fires it.
 function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tut.skill=1; persist();
-  mode='upgrade'; showGameUI(false); _offerT=Date.now();
+  beginPause();mode='upgrade'; showGameUI(false); _offerT=Date.now();
   showOverlayHTML(`<div class="card skilltut"><p class="ovkicker">Skill unlocked</p><h2>${htmlSafe(s.n)}</h2><p>${htmlSafe(s.d)}</p><p>Use ${htmlSafe(controlHint('skill1'))} · ${s.cd}s recharge</p><button class="bigbtn" id="tutGo">Try it · ${htmlSafe(controlKey('interact'))}</button></div>`);
   document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); if(inBeginnerTrial())BFGuidedTutorial.skill(G); };
 }
@@ -12556,13 +12556,13 @@ function beginProgressChoice(kind,rank,open){
  const owner=G,hero=G.p,cid=meta.classId,cs=classState(cid);
  const detail=kind==='passive'?'Passive unlocked · choose an automatic bonus next':rank===2?'Your first skill is ready · choose one of two abilities next':'Skill unlocked · choose your new ability next';
  ui.notify('class',owner,{name:curClass().disp,value:cs.rank,detail});
- mode='upgrade';showOverlay(false);ovcard.innerHTML='';showGameUI(true);releaseKeyboard();
+ beginPause();mode='upgrade';showOverlay(false);ovcard.innerHTML='';showGameUI(true);releaseKeyboard();
  input.attack=false;input.jumpEdge=false;input.dodgeEdge=false;hero.attackHeld=false;hero.holdT=0;document.exitPointerLock?.();
  const valid=()=>G===owner&&G.p===hero&&meta.classId===cid&&mode==='upgrade'&&!hero.dead&&!hero.downed&&hero.hp>0&&(!rank||!c2def()||c2NextChoice()===rank);
  ui.beforeChoice(valid,()=>{if(valid())open();},()=>{if(G===owner&&G.p===hero&&mode==='upgrade'&&!hero.dead&&!hero.downed&&hero.hp>0)resumePlay();},{detail});
 }
 function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed) return; const cs=classState(cid),R=def['r'+rank]; if(!R) return;
-  mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
+  beginPause();mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
     return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span><span class="c2badge">Conditions below</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
@@ -16107,7 +16107,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arBack').onclick=back||titleScreen;
 }
 let liveMenuWorld=null,backgroundMenuMode=null,pausedMenuWorld=null;
-function pauseMenuActive(){return !!G&&pausedMenuWorld===G&&!G.p?.dead&&['pause','menu','journal','mirror'].includes(backgroundMenuMode||mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');}
+function pauseMenuActive(){return !!G&&pausedMenuWorld===G&&!G.p?.dead&&['pause','menu','journal','mirror','upgrade'].includes(backgroundMenuMode||mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');}
 function pauseState(){const active=pauseMenuActive();return {active,frozen:active&&!MP.active,protected:active&&MP.active&&!MP.pvp&&!G.p?.downed};}
 function pauseDamageBlocked(){const s=pauseState();return s.frozen||s.protected;}
 function beginPause(){pausedMenuWorld=G;liveMenuWorld=G;releaseKeyboard();input.jumpEdge=false;input.dodgeEdge=false;if(G?.p){G.p.attackHeld=false;G.p.holdT=0;}document.getElementById('menuDamage')?.setAttribute('hidden','');}
@@ -16124,7 +16124,7 @@ function update(dt){
  if(conv&&briarBook&&(!MP.active||MP.isHost)&&!G.kingFinal){const owner=conv.owner===briarId()?G.p:MP.peers[conv.owner];if(!owner||owner.dead||owner.hp<=0||conv.owner!==briarId()&&(owner.zone!==G.zone||owner.area!==G.area)){const r=BFStoryState.transact(G.storyState,briarBook,{id:'owner-left:'+G.storyState.revision,type:'close',revision:G.storyState.revision});if(r.changed){G.storyState=r.state;briarSync();if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket()});}catch{}}}}
  window.BFSocial?.tick();
  if(mode==='play')liveMenuWorld=G;
- const previous=mode,live=G&&liveMenuWorld===G&&!G.p?.dead&&['pause','menu','npc','journal','inspection','chess'].includes(mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');
+ const previous=mode,live=G&&liveMenuWorld===G&&!G.p?.dead&&['pause','menu','npc','journal','inspection','chess','upgrade'].includes(mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');
  if(!live){updateWorld(dt);if(MP.active&&mode!=='play'&&G?.p&&!G.p.dead)MP.tick(dt);return;}
  pollGamepad(dt);if(mode!==previous)return;
  const held=pauseState().protected?{world:G,p:G.p,x:G.p.x,y:G.p.y,z:G.p.z,yaw:G.p.yaw,vx:G.p.vx,vy:G.p.vy,vz:G.p.vz,onGround:G.p.onGround}:null;
@@ -17236,7 +17236,7 @@ function pick3(){
 }
 const ARM_MS=340;   // brief un-clickable window so you can't blind-tap through — short enough to feel like an invitation, not a timeout
 function openLevelUp(){
-  mode='upgrade'; _offerT=Date.now(); const opts=pick3(), KEYS=['J','K','L'];
+  beginPause();mode='upgrade'; _offerT=Date.now(); const opts=pick3(), KEYS=['J','K','L'];
   try{ SFX.achieve(); }catch(e){}   // audio cue the instant the choices appear
   showOverlayHTML(`<div class="card"><p class="ovkicker">Level ${G.p.level}</p>
     <h2 class="ovh">Level up</h2><p class="ovsub">Read, then choose an upgrade</p>
@@ -17245,7 +17245,7 @@ function openLevelUp(){
 }
 function openSubclassFrom(then){
   const C=curClass(), cs=classState(meta.classId);
-  mode='upgrade'; _offerT=Date.now();
+  beginPause();mode='upgrade'; _offerT=Date.now();
   showOverlayHTML(`<div class="card classcard"><p class="ovkicker" style="color:#c98cff">${C.icon} ${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
     <h2 class="ovh" style="color:#e6d2ff">Choose your path</h2><p class="ovsub">This choice shapes every skill you unlock after it. Respec later at the trainer.</p>
     <div class="choices">${C.subs.map((s,i)=>{ const nx=s.skills?s.skills[0]:C.skills[1];

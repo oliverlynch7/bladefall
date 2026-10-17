@@ -1702,3 +1702,10 @@ Course audit also found static mover coordinates used by guide, phase obstacle i
 User: "chest drops should be mirrored in coop and we should both be abl to collec the same chest indiependetly. so we both get grear at the same time"
 
 Inspection found guest kill replay and unseen-enemy credit roll separate random drops, and host world snapshots omit chests. Plan: host rolls enemy chest existence/location/rarity once; periodic scene-scoped chest manifests mirror placed/dynamic/enemy chests without sharing opened/claimed flags or reward inventory. Each save retains its own once-only reward record, capacity/auto-sell decision and reveal. Host-opened chests remain available to friends; late/repeated snapshots cannot reopen personal claims. Preserve claimed host drop descriptors across reloads for late join; shared mimic combat remains host-authoritative. Verify two isolated host/guest game instances, either opening order, full bag, duplicates/stale scenes, enemy location/rarity, late join, saved claim reload and special modes. No changes to drop rates or hub Sprint reward rules.
+
+
+## [Codex | 2026-10-17] U-UPGRADE-BAG-PROTECTION-20261017
+
+User: "also i should be invulvnerbale when im choosing my nexst skil or passive or open my bag. just like going to the menu"
+
+Inspection: bag already starts beginPause, but upgrade mode is absent from pause protection and the live co-op menu wrapper; class celebration/choice/tutorial entries do not start pause sessions. Plan: route rank-up celebration, skill/passive selection/review, first-skill lesson and legacy upgrade entries through the same world-scoped pause session as bag/Esc. Solo freezes; co-op world continues with held visible grey protected player. Preserve required choices, chained choices, controller/keyboard input, actual unlock transitions and resume cleanup; keep existing competitive PvP exception identical to the main menu. Verify incoming hits/falls, bag direct entry/nested panels, choice transition/confirmation, background updates/presence and old-save/browser behavior.

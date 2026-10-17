@@ -22,6 +22,12 @@ ctx.mode='play';run('update(.1)');ok(ctx.G.p.hp<hp&&!run('pauseState().protected
 ctx.MP.pvp=true;run('pause()');hp=ctx.G.p.hp;run('update(.1)');ok(ctx.G.p.hp<hp&&!run('pauseState().protected'),'competitive play does not inherit co-op invulnerability');
 ctx.MP.pvp=false;ctx.G={p:{hp:90},time:0};ok(!run('pauseState().active'),'world replacement clears protection');
 run('beginPause()');ctx.G.p.downed=true;ok(!run('pauseState().protected'),'cannot protect a downed player');ctx.G.p.dead=true;ok(!run('pauseState().active'),'death is not undone');
+// Rank choices and their celebration use the same session as a directly opened bag.
+ctx.G={p:{hp:100,x:0,y:0,z:0,vx:0,vy:0,vz:0},time:0};ctx.MP.active=false;
+run("beginPause();mode='upgrade';update(.2);hurtPlayer();lavaHit()");ok(ctx.G.time===0&&ctx.G.p.hp===100&&run('pauseState().frozen'),'solo upgrade selection freezes and blocks hits/falls');
+ctx.MP.active=true;run("beginPause();mode='upgrade';");time=ctx.G.time;hp=ctx.G.p.hp;run('update(.2);hurtPlayer();lavaHit()');ok(ctx.G.time>time&&ctx.G.p.hp===hp,'co-op upgrade world runs without hits/fall damage');ok(ctx.G.p.x===0&&run('playerActivity()')==='Paused','choice holds player and sends grey protected presence');
+ctx.mode='menu';run('update(.2)');ok(run('pauseState().protected'),'nested bag retains upgrade protection');ctx.mode='upgrade';run('update(.2)');ok(run('pauseState().protected'),'returning to required choice remains protected');ctx.mode='play';run('update(.2)');ok(!run('pauseState().active')&&ctx.G.p.hp<hp,'confirmed choice resumes normal vulnerability');
+for(const name of ['openDashTutorial','openSkillTutorial','beginProgressChoice','openClassChoice','openLevelUp','openSubclassFrom']){const a=src.indexOf('function '+name+'('),b=src.indexOf('\nfunction ',a+12);ok(src.slice(a,b).includes("beginPause();mode='upgrade'"),name+' starts pause before transition');}
 ok(src.includes('function hurtPlayer(dmg,sx,sz,by){\n if(pauseDamageBlocked())return;'),'real incoming-hit path guarded before side effects');ok(src.includes('function lavaHit(){\n  if(pauseDamageBlocked())return;'),'real fall damage guarded');ok(src.includes("pausedSafe=q.busy==='Paused'&&!this.pvp"),'peer appearance uses validated presence outside PvP');
 // Compile every inline script, including the changed gameplay closure.
 for(const m of src.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g))if(!/\bsrc\s*=|type=["'](?:module|importmap)/.test(m[1])&&m[2].trim())new vm.Script(m[2]);

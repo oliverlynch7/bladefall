@@ -1829,3 +1829,12 @@ Restored all 56 file slots and all eight procedural defaults. All 64 paid takes/
 ## [Codex | 2026-10-16] v2.210 SFX preservation deployed
 
 Production 7acbdca5 is active (657608d2-e93e-46b1-a9ac-3d4df047f56a); real browser confirms v2.210.0-preserve-original-sfx and priority-sfx?v2210 on the immutable release. Old file/procedural defaults restored, all 64 takes kept inactive, zero new credits. New event-identity generation remains the next audio work after completing the source-bound boss/dungeon/interactable inventory. Main remains isolated from pending campaign/Reaper work.
+
+
+## [Codex | 2026-10-16] U-CREATOR-VIEW-20261016
+
+User requests a full-character / face close-up choice in the creator, full-character default, lower and centered face framing, and vertical as well as horizontal dragging. Source: draw() forcibly resets face mode/yaw on every edit; toggle handlers do not update pressed state; face framing uses whole-body/weapon bounds; pointer drag tracks only X. Preserve chosen view, yaw and pitch through edits and steps, default full body on open, update accessible toggle states immediately, and allow bounded vertical camera orbit. Fit close-up to the actual stored head frame transformed by the current head bone, independent of weapon/crown bounds. Hide fitted headgear and held weapon only in face preview so facial customization remains visible; restore in full view. Preserve six rigs, facial placement data, saves and gameplay cameras. Verify all starter classes plus UI edits, transitions, mouse/touch cancellation and mobile presentation in the real browser.
+
+## [Codex | 2026-10-16] Creator camera candidate verified
+
+U-CREATOR-VIEW-20261016 implemented. Browser confirmed centered Warrior/Ranger/Mage close-ups, full-view retention after choosing green eyes/smile, and immediate pressed-state updates. Face view hides preview fittings attached to Head and held weapon, restored in full body. 14 creator event-handler assertions test edits/step preservation, two-axis deltas, capture release, other-touch rejection and pitch limits. Direct phone viewport 390px/310px card, no overflow. An iframe fixture failed before creator initialization; do not count that as a passing phone test. Native pointer drag automation unsupported; no claim of a native gesture test. Original SFX and progression tests still pass. Production-safe checkout receives only creator camera/UI changes.

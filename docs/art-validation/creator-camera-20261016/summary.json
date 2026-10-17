@@ -1,0 +1,30 @@
+{
+  "version": "2.211.0-creator-camera",
+  "changes": [
+    "Full-character default; both view buttons available throughout creation",
+    "View, yaw and pitch persist across face edits and steps",
+    "Close-up targets stored anatomical head frame instead of whole-model/weapon bounds",
+    "Fitted headgear and weapon hidden only in face preview",
+    "Horizontal yaw and bounded vertical pitch dragging; pointer cancellation and multi-touch guards"
+  ],
+  "tests": {
+    "creatorEventHandlerAssertions": 14,
+    "originalSoundAssertions": 255,
+    "progressionAssertions": 43,
+    "starterClassesVisuallyChecked": [
+      "warrior",
+      "ranger",
+      "mage"
+    ],
+    "desktopFaceAndFullToggle": true,
+    "faceEditsRetainFullView": true,
+    "phoneWidth": 390,
+    "phoneNoHorizontalOverflow": true,
+    "browserErrorsDesktop": []
+  },
+  "limits": [
+    "Native automated drag gestures unavailable in this browser API; actual pointer handlers tested in the DOM harness.",
+    "An early iframe-only responsive fixture failed to initialize; replaced by direct 390px viewport check."
+  ],
+  "release": "Pending"
+}

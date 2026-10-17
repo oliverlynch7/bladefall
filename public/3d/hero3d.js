@@ -2252,14 +2252,23 @@ window.__hero3dPreview = (canvas, opts={}) => {
   if(!rec.bounds)rec.bounds=new THREE.Box3().setFromObject(rec.wrap,true);
   const size=rec.bounds.getSize(new THREE.Vector3()),center=rec.bounds.getCenter(new THREE.Vector3());
   const radius=Math.max(size.x,size.z)*.5;
-  let target=center.clone(),height=size.y,width=radius*2;
-  if(opts.face){height=size.y*.30;width=height;target.y=rec.bounds.max.y-height*.46;}
-  const distance=Math.max(height/2,width/(2*rec.cam.aspect))/Math.tan(THREE.MathUtils.degToRad(16))*1.14+(opts.face?.12:radius*.45);
-  rec.cam.position.set(target.x,target.y,distance+target.z);rec.cam.lookAt(target);
   rec.wrap.rotation.y=opts.yaw||0;rec.wrap.updateMatrixWorld(true);
+  const headFrame=headMetrics({root:rec.holder.root,model:want});
+  let target=center.clone(),height=size.y,width=radius*2;
+  if(opts.face&&headFrame){
+   // Anatomical frame, not the top of a staff, crown or overall actor box.
+   target=headFrame.centre.clone().addScaledVector(headFrame.UP,-headFrame.h*.08).addScaledVector(headFrame.FWD,headFrame.d*.46);
+   headFrame.head.localToWorld(target);
+   height=headFrame.h*1.38;width=headFrame.w*1.55;
+  }
+  rec.holder.root.traverse(o=>{if(o.userData.classLookRoot&&o.userData.classLookBone==='Head')o.visible=!opts.face;});
+  if(rec.holder._weap)rec.holder._weap.visible=!opts.face;
+  const distance=Math.max(height/2,width/(2*rec.cam.aspect))/Math.tan(THREE.MathUtils.degToRad(16))*1.14+(opts.face?.12:radius*.45);
+  const pitch=THREE.MathUtils.clamp(Number.isFinite(opts.pitch)?opts.pitch:0,-.45,.45);
+  rec.cam.position.set(target.x,target.y+Math.sin(pitch)*distance,target.z+Math.cos(pitch)*distance);rec.cam.lookAt(target);
   rec.renderer.render(rec.scene,rec.cam);
   window.__creatorPreviewRoot=rec.wrap;
-  window.__creatorPreviewState={model:want,lookTier:opts.lookTier||0,eye:rec.eye,mouth:opts.mouthStyle,brow:opts.browStyle,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face};
+  window.__creatorPreviewState={model:want,lookTier:opts.lookTier||0,eye:rec.eye,mouth:opts.mouthStyle,brow:opts.browStyle,meshes:rec.wrap.children.length,bounds:size.toArray(),weapon:rec.holder._weap?.name||null,face:!!opts.face,pitch,cameraTarget:target.toArray(),cameraPosition:rec.cam.position.toArray(),faceHeight:height};
   return true;
  }catch(e){console.warn('Character preview',e);return false;}
 };

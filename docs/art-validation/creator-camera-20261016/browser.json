@@ -1,0 +1,292 @@
+[
+  {
+    "faceButton": "true",
+    "fullButton": "false",
+    "preview": {
+      "bounds": [
+        1.4180763426346816,
+        3.0361001237969925,
+        2.0300454203196847
+      ],
+      "brow": "natural",
+      "cameraPosition": [
+        0.00006697364962141863,
+        2.4315149109783354,
+        2.595903218055977
+      ],
+      "cameraTarget": [
+        0.00006697364962141863,
+        2.4315149109783354,
+        0.294214152181327
+      ],
+      "eye": "#8fd0ff",
+      "face": true,
+      "faceHeight": 1.0975250399999998,
+      "lookTier": 0,
+      "meshes": 1,
+      "model": "Warrior",
+      "mouth": "line",
+      "pitch": 0,
+      "weapon": "WeaponPalmGrip"
+    },
+    "wizard": {
+      "allocation": {
+        "attack": 1,
+        "defense": 3,
+        "health": 3,
+        "mana": 1,
+        "speed": 2
+      },
+      "brow": "natural",
+      "cls": "warrior",
+      "ended": false,
+      "eye": "#8fd0ff",
+      "face": true,
+      "faceAdjust": {
+        "eyeTilt": 0,
+        "eyeX": 0,
+        "eyeY": 0,
+        "mouthTilt": 0,
+        "mouthX": 0,
+        "mouthY": 0
+      },
+      "mouth": "line",
+      "name": "",
+      "pitch": 0,
+      "step": 0,
+      "yaw": 0
+    }
+  },
+  {
+    "faceButton": "true",
+    "fullButton": "false",
+    "preview": {
+      "bounds": [
+        1.0439890069758675,
+        3.0683930236559003,
+        1.547108529727435
+      ],
+      "brow": "natural",
+      "cameraPosition": [
+        0.00006648247203988968,
+        2.424092915314108,
+        2.455552023942683
+      ],
+      "cameraTarget": [
+        0.00006648247203988968,
+        2.424092915314108,
+        0.29991093679723735
+      ],
+      "eye": "#8fd0ff",
+      "face": true,
+      "faceHeight": 1.02405384,
+      "lookTier": 0,
+      "meshes": 1,
+      "model": "Ranger",
+      "mouth": "line",
+      "pitch": 0,
+      "weapon": "WeaponPalmGrip"
+    },
+    "wizard": {
+      "allocation": {
+        "attack": 2,
+        "defense": 1,
+        "health": 3,
+        "mana": 0,
+        "speed": 4
+      },
+      "brow": "natural",
+      "cls": "ranger",
+      "ended": false,
+      "eye": "#8fd0ff",
+      "face": true,
+      "faceAdjust": {
+        "eyeTilt": 0,
+        "eyeX": 0,
+        "eyeY": 0,
+        "mouthTilt": 0,
+        "mouthX": 0,
+        "mouthY": 0
+      },
+      "mouth": "line",
+      "name": "",
+      "pitch": 0,
+      "step": 0,
+      "yaw": 0
+    }
+  },
+  {
+    "faceButton": "true",
+    "fullButton": "false",
+    "preview": {
+      "bounds": [
+        1.412914466257124,
+        3.185615234232218,
+        1.5536297326451
+      ],
+      "brow": "natural",
+      "cameraPosition": [
+        0.00007560929381969256,
+        2.478804580298174,
+        2.8934848401953515
+      ],
+      "cameraTarget": [
+        0.00007560929381969256,
+        2.478804580298174,
+        0.30293404989989015
+      ],
+      "eye": "#8fd0ff",
+      "face": true,
+      "faceHeight": 1.2428404199999998,
+      "lookTier": 0,
+      "meshes": 1,
+      "model": "Wizard",
+      "mouth": "line",
+      "pitch": 0,
+      "weapon": "WeaponPalmGrip"
+    },
+    "wizard": {
+      "allocation": {
+        "attack": 4,
+        "defense": 1,
+        "health": 0,
+        "mana": 4,
+        "speed": 1
+      },
+      "brow": "natural",
+      "cls": "mage",
+      "ended": false,
+      "eye": "#8fd0ff",
+      "face": true,
+      "faceAdjust": {
+        "eyeTilt": 0,
+        "eyeX": 0,
+        "eyeY": 0,
+        "mouthTilt": 0,
+        "mouthX": 0,
+        "mouthY": 0
+      },
+      "mouth": "line",
+      "name": "",
+      "pitch": 0,
+      "step": 0,
+      "yaw": 0
+    }
+  },
+  {
+    "faceButton": "false",
+    "fullButton": "true",
+    "preview": {
+      "bounds": [
+        1.412914466257124,
+        3.185615234232218,
+        1.5536297326451
+      ],
+      "brow": "natural",
+      "cameraPosition": [
+        -0.013596636982403765,
+        1.4626112498264383,
+        6.9016507148263315
+      ],
+      "cameraTarget": [
+        -0.013596636982403765,
+        1.4626112498264383,
+        0.21963449416397107
+      ],
+      "eye": "#4be08a",
+      "face": false,
+      "faceHeight": 3.185615234232218,
+      "lookTier": 0,
+      "meshes": 1,
+      "model": "Wizard",
+      "mouth": "smile",
+      "pitch": 0,
+      "weapon": "WeaponPalmGrip"
+    },
+    "wizard": {
+      "allocation": {
+        "attack": 4,
+        "defense": 1,
+        "health": 0,
+        "mana": 4,
+        "speed": 1
+      },
+      "brow": "natural",
+      "cls": "mage",
+      "ended": false,
+      "eye": "#4be08a",
+      "face": false,
+      "faceAdjust": {
+        "eyeTilt": 0,
+        "eyeX": 0,
+        "eyeY": 0,
+        "mouthTilt": 0,
+        "mouthX": 0,
+        "mouthY": 0
+      },
+      "mouth": "smile",
+      "name": "",
+      "pitch": 0,
+      "step": 1,
+      "yaw": 0.45
+    }
+  },
+  {
+    "faceButton": "true",
+    "fullButton": "false",
+    "preview": {
+      "bounds": [
+        1.412914466257124,
+        3.185615234232218,
+        1.5536297326451
+      ],
+      "brow": "natural",
+      "cameraPosition": [
+        0.00007560929381969256,
+        2.478804580298174,
+        2.8934848401953515
+      ],
+      "cameraTarget": [
+        0.00007560929381969256,
+        2.478804580298174,
+        0.30293404989989015
+      ],
+      "eye": "#4be08a",
+      "face": true,
+      "faceHeight": 1.2428404199999998,
+      "lookTier": 0,
+      "meshes": 1,
+      "model": "Wizard",
+      "mouth": "smile",
+      "pitch": 0,
+      "weapon": "WeaponPalmGrip"
+    },
+    "wizard": {
+      "allocation": {
+        "attack": 4,
+        "defense": 1,
+        "health": 0,
+        "mana": 4,
+        "speed": 1
+      },
+      "brow": "natural",
+      "cls": "mage",
+      "ended": false,
+      "eye": "#4be08a",
+      "face": true,
+      "faceAdjust": {
+        "eyeTilt": 0,
+        "eyeX": 0,
+        "eyeY": 0,
+        "mouthTilt": 0,
+        "mouthX": 0,
+        "mouthY": 0
+      },
+      "mouth": "smile",
+      "name": "",
+      "pitch": 0,
+      "step": 1,
+      "yaw": 0
+    }
+  }
+]

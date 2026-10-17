@@ -2985,3 +2985,7 @@ Production commit 83e89eb1 deployed successfully (26c50335-97d1-4024-9fc3-762dc5
 ## [Codex | 2026-10-16] v2.210 original sound defaults restored
 
 User prefers several old sounds and cannot audition the batch now. Disabled all 56 file replacements and all eight procedural overrides; preserved every original and all 64 generated takes. Future policy is additive-only, with actual event/identity inventory first. 255 regression assertions pass, including byte-identical old files, original routing, mute, no unapproved candidate loading and no layering. No new API spend. Local browser verification and production deployment follow.
+
+## [Codex | 2026-10-16] v2.211 creator preview camera
+
+Full-character view is the default, both view buttons update immediately and retain the chosen mode/angle through edits and navigation. Face framing uses the head frame, not weapon/crown bounds, and hides preview headgear/weapon. Added bounded vertical tilt alongside horizontal drag and pointer cancellation. Three starter faces visually checked; 390px direct viewport has no horizontal overflow. 14 event-handler regressions, 255 audio and 43 progression checks pass. Native drag gestures remain outside the browser API test; pointer behavior is covered by the DOM harness. No save/camera/gameplay changes.

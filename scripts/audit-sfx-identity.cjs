@@ -1,0 +1,10 @@
+// Source inventory only: shared/generic coverage is not an assertion of silence or bad sound.
+const fs=require('fs'),vm=require('vm');
+const html=fs.readFileSync('public/3d/index.html','utf8');
+function literal(name){const start=html.indexOf('const '+name+'={'),end=html.indexOf('\n};',start)+3;if(start<0||end<3)throw Error(name);return html.slice(start,end)+';this.value='+name+';';}
+function read(name,extra={}){const ctx={...extra};vm.createContext(ctx);vm.runInContext(literal(name),ctx,{timeout:2000});return ctx.value;}
+const mobs=read('MOBSND'),classes=read('CLASS2',{classIcon:()=>''});
+const skills=[];for(const [cls,def] of Object.entries(classes))for(const rank of [2,4,6,8])for(const path of ['a','b']){const skill=def['r'+rank]?.[path];if(skill)skills.push({class:cls,rank,path,id:skill.id,name:skill.n||skill.name,existingFx:skill.fx||null,status:'Distinct event cue needs binding audit; generic audio may already play'});}
+const counts={};for(const [type,m] of Object.entries(mobs))for(const event of ['v','d']){const key=event+':'+m[event];(counts[key]??=[]).push(type);}
+const result={policy:'Keep all existing sounds. Add distinct event cues only after checking actual routes. No superiority inferred.',scope:'Authored campaign MOBSND and CLASS2. Not a complete boss/dungeon/interactable inventory.',classes:Object.keys(classes).length,skillChoices:skills.length,mobMappings:Object.keys(mobs).length,sharedMobCues:Object.entries(counts).filter(([,v])=>v.length>1).map(([cue,types])=>({cue,types})),mobEvents:Object.entries(mobs).map(([type,m])=>({type,aggro:m.v,death:m.d,attack:'Dedicated route not present in MOBSND',hurt:'Dedicated route not present in MOBSND'})),skills};
+fs.mkdirSync('docs/audio',{recursive:true});fs.writeFileSync('docs/audio/sfx-identity-inventory.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({classes:result.classes,skillChoices:result.skillChoices,mobMappings:result.mobMappings,sharedMobCues:result.sharedMobCues.length,scope:result.scope}));

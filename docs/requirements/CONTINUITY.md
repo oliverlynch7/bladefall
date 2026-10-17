@@ -1816,3 +1816,12 @@ All 51 outfits pass actual GPU rendering in both development and isolated produc
 ## [Codex | 2026-10-16] v2.209.0 reference wardrobe is live
 
 Production commit 83e89eb1 deployed successfully (26c50335-97d1-4024-9fc3-762dc5bc6918). Real browser confirms new public gallery names and v2209 scripts; immutable game shows v2.209.0-reference-wardrobe. Gallery: https://bladefall.pages.dev/3d/class-skins?class=warlock&v=2209 . All 51 outfits implemented as reference adaptations on existing rigs, including every requested correction. Rank gates, saved choices, cheat unlocks and stat neutrality verified. Production excludes pending Keep/Reaper changes. Development branch remains divergent: never push it wholesale to main. Unrelated companion3d.js and articulated-rigs.json changes untouched.
+
+
+## [Codex | 2026-10-16] U-SFX-PRESERVE-20261016
+
+User reports several generated replacements are worse than the originals and cannot audition the whole batch now. Preserve all old and generated files. Restore the existing file/procedural defaults rather than choosing favorites without human listening. Stop blanket replacement. Future authored audio targets distinct missing weapon, class-skill, enemy/boss and interactable event identities; generic fallback coverage is not unique coverage. Technical checks establish valid audio, not artistic superiority. Replacement of an existing favored cue requires a specific listening decision. No additional API spend for this preservation pass. Keep level/rank celebration animations; restore their prior distinct sounds with the other defaults. Inspect actual sound bindings before authoring new named cues.
+
+## [Codex | 2026-10-16] Original SFX candidate verified
+
+Restored all 56 file slots and all eight procedural defaults. All 64 paid takes/masters remain intact and inactive. Real muted browser decodes 105 original slots, zero candidate slots; progression animation module still present. 255 audio assertions and 43 progression assertions pass. Original audio bytes match their backups. No API credits spent. Future direction is distinct new event identities with old fallback, not blanket replacement. docs/audio/SFX_PRESERVATION_AND_GAPS.md and source inventory record 17 classes/136 skill choices/30 campaign voice mappings; boss/dungeon/interactable audit remains to be completed before a new generation budget. Production release follows.

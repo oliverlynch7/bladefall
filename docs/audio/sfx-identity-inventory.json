@@ -1,0 +1,1564 @@
+{
+  "policy": "Keep all existing sounds. Add distinct event cues only after checking actual routes. No superiority inferred.",
+  "scope": "Authored campaign MOBSND and CLASS2. Not a complete boss/dungeon/interactable inventory.",
+  "classes": 17,
+  "skillChoices": 136,
+  "mobMappings": 30,
+  "sharedMobCues": [
+    {
+      "cue": "d:die1",
+      "types": [
+        "thornboar",
+        "grunt",
+        "sentinel",
+        "siegeknight"
+      ]
+    },
+    {
+      "cue": "d:die2",
+      "types": [
+        "charger",
+        "emberling",
+        "magmaskit",
+        "embertotem"
+      ]
+    },
+    {
+      "cue": "d:die3",
+      "types": [
+        "dustjackal",
+        "shadeling",
+        "blinkstalker",
+        "voidtether",
+        "caster",
+        "sunpriest",
+        "royalarcanist"
+      ]
+    },
+    {
+      "cue": "v:v_slime1",
+      "types": [
+        "toxling",
+        "slime"
+      ]
+    },
+    {
+      "cue": "d:hurt1",
+      "types": [
+        "toxling",
+        "slime",
+        "goblin"
+      ]
+    },
+    {
+      "cue": "d:hurt2",
+      "types": [
+        "slimelet",
+        "galewisp",
+        "flyer"
+      ]
+    },
+    {
+      "cue": "d:die4",
+      "types": [
+        "cragspitter",
+        "revenant",
+        "bones"
+      ]
+    },
+    {
+      "cue": "v:v_ghost1",
+      "types": [
+        "shadeling",
+        "voidtether",
+        "sunpriest"
+      ]
+    },
+    {
+      "cue": "v:v_ghost2",
+      "types": [
+        "blinkstalker",
+        "caster",
+        "royalarcanist"
+      ]
+    },
+    {
+      "cue": "v:v_breath",
+      "types": [
+        "galewisp",
+        "flyer"
+      ]
+    },
+    {
+      "cue": "v:v_small1",
+      "types": [
+        "emberling",
+        "magmaskit",
+        "embertotem"
+      ]
+    },
+    {
+      "cue": "v:v_small2",
+      "types": [
+        "frostling",
+        "sparkling",
+        "frostlobber",
+        "frostshell"
+      ]
+    },
+    {
+      "cue": "d:shatter",
+      "types": [
+        "frostling",
+        "sparkling",
+        "frostlobber",
+        "frostshell"
+      ]
+    },
+    {
+      "cue": "v:v_clank",
+      "types": [
+        "sentinel",
+        "siegeknight"
+      ]
+    }
+  ],
+  "mobEvents": [
+    {
+      "type": "thornboar",
+      "aggro": "v_boargrunt",
+      "death": "die1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "charger",
+      "aggro": "v_boarroar",
+      "death": "die2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "dustjackal",
+      "aggro": "v_jackalbark",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "toxling",
+      "aggro": "v_slime1",
+      "death": "hurt1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "slime",
+      "aggro": "v_slime1",
+      "death": "hurt1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "slimelet",
+      "aggro": "v_slime2",
+      "death": "hurt2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "cragspitter",
+      "aggro": "v_spit",
+      "death": "die4",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "sporeback",
+      "aggro": "v_burble",
+      "death": "v_burble",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "shadeling",
+      "aggro": "v_ghost1",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "blinkstalker",
+      "aggro": "v_ghost2",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "voidtether",
+      "aggro": "v_ghost1",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "galewisp",
+      "aggro": "v_breath",
+      "death": "hurt2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "flyer",
+      "aggro": "v_breath",
+      "death": "hurt2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "revenant",
+      "aggro": "v_undead1",
+      "death": "die4",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "bones",
+      "aggro": "v_undead2",
+      "death": "die4",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "goblin",
+      "aggro": "v_goblin",
+      "death": "hurt1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "grunt",
+      "aggro": "v_troll",
+      "death": "die1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "emberling",
+      "aggro": "v_small1",
+      "death": "die2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "magmaskit",
+      "aggro": "v_small1",
+      "death": "die2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "embertotem",
+      "aggro": "v_small1",
+      "death": "die2",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "frostling",
+      "aggro": "v_small2",
+      "death": "shatter",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "sparkling",
+      "aggro": "v_small2",
+      "death": "shatter",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "frostlobber",
+      "aggro": "v_small2",
+      "death": "shatter",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "frostshell",
+      "aggro": "v_small2",
+      "death": "shatter",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "sentinel",
+      "aggro": "v_clank",
+      "death": "die1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "siegeknight",
+      "aggro": "v_clank",
+      "death": "die1",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "marblestatue",
+      "aggro": "v_stone",
+      "death": "v_stone",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "caster",
+      "aggro": "v_ghost2",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "sunpriest",
+      "aggro": "v_ghost1",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    },
+    {
+      "type": "royalarcanist",
+      "aggro": "v_ghost2",
+      "death": "die3",
+      "attack": "Dedicated route not present in MOBSND",
+      "hurt": "Dedicated route not present in MOBSND"
+    }
+  ],
+  "skills": [
+    {
+      "class": "pyromancer",
+      "rank": 2,
+      "path": "a",
+      "id": "py_bolt",
+      "name": "Firebolt",
+      "existingFx": "py_bolt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 2,
+      "path": "b",
+      "id": "py_fan",
+      "name": "Cinder Fan",
+      "existingFx": "py_fan",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 4,
+      "path": "a",
+      "id": "py_blast",
+      "name": "Backdraft",
+      "existingFx": "py_blast",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 4,
+      "path": "b",
+      "id": "py_ward",
+      "name": "Ember Shield",
+      "existingFx": "py_ward",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 6,
+      "path": "a",
+      "id": "py_lance",
+      "name": "Flame Lance",
+      "existingFx": "py_lance",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 6,
+      "path": "b",
+      "id": "py_nova",
+      "name": "Flame Ring",
+      "existingFx": "py_nova",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 8,
+      "path": "a",
+      "id": "py_inferno",
+      "name": "Inferno",
+      "existingFx": "py_inferno",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pyromancer",
+      "rank": 8,
+      "path": "b",
+      "id": "py_sun",
+      "name": "Sunburst",
+      "existingFx": "py_sun",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 2,
+      "path": "a",
+      "id": "w_cleave",
+      "name": "Cleave",
+      "existingFx": "w_cleave",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 2,
+      "path": "b",
+      "id": "w_bash",
+      "name": "Shield Bash",
+      "existingFx": "w_bash",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 4,
+      "path": "a",
+      "id": "w_charge",
+      "name": "Charge",
+      "existingFx": "w_charge",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 4,
+      "path": "b",
+      "id": "w_whirl",
+      "name": "Whirlwind",
+      "existingFx": "w_whirl",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 6,
+      "path": "a",
+      "id": "w_guard",
+      "name": "Iron Guard",
+      "existingFx": "w_guard",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 6,
+      "path": "b",
+      "id": "w_stomp",
+      "name": "Shockwave Stomp",
+      "existingFx": "w_stomp",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 8,
+      "path": "a",
+      "id": "w_berserk",
+      "name": "Warcry",
+      "existingFx": "w_berserk",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warrior",
+      "rank": 8,
+      "path": "b",
+      "id": "w_execute",
+      "name": "Execution",
+      "existingFx": "w_execute",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 2,
+      "path": "a",
+      "id": "r_volley",
+      "name": "Volley",
+      "existingFx": "r_volley",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 2,
+      "path": "b",
+      "id": "r_pierce",
+      "name": "Piercing Shot",
+      "existingFx": "r_pierce",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 4,
+      "path": "a",
+      "id": "r_tumble",
+      "name": "Tumble",
+      "existingFx": "r_tumble",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 4,
+      "path": "b",
+      "id": "r_shadow",
+      "name": "Shadowstrike",
+      "existingFx": "r_shadow",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 6,
+      "path": "a",
+      "id": "r_spike",
+      "name": "Spike Trap",
+      "existingFx": "r_spike",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 6,
+      "path": "b",
+      "id": "r_smoke",
+      "name": "Smoke Bomb",
+      "existingFx": "r_smoke",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 8,
+      "path": "a",
+      "id": "r_mark",
+      "name": "Hunter's Mark",
+      "existingFx": "r_mark",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ranger",
+      "rank": 8,
+      "path": "b",
+      "id": "r_deathmark",
+      "name": "Death Mark",
+      "existingFx": "r_deathmark",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 2,
+      "path": "a",
+      "id": "m_bolt",
+      "name": "Elemental Bolt",
+      "existingFx": "m_bolt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 2,
+      "path": "b",
+      "id": "m_beam",
+      "name": "Elemental Beam",
+      "existingFx": "m_beam",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 4,
+      "path": "a",
+      "id": "m_blink",
+      "name": "Blink",
+      "existingFx": "m_blink",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 4,
+      "path": "b",
+      "id": "m_nova",
+      "name": "Nova",
+      "existingFx": "m_nova",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 6,
+      "path": "a",
+      "id": "m_gravity",
+      "name": "Gravity Well",
+      "existingFx": "m_gravity",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 6,
+      "path": "b",
+      "id": "m_barrier",
+      "name": "Rune Barrier",
+      "existingFx": "m_barrier",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 8,
+      "path": "a",
+      "id": "m_tempest",
+      "name": "Attunement",
+      "existingFx": "m_tempest",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "mage",
+      "rank": 8,
+      "path": "b",
+      "id": "m_overload",
+      "name": "Elemental Overload",
+      "existingFx": "m_overload",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 2,
+      "path": "a",
+      "id": "x_reap",
+      "name": "Reap",
+      "existingFx": "x_reap",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 2,
+      "path": "b",
+      "id": "x_cleave",
+      "name": "Soul Cleave",
+      "existingFx": "x_cleave",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 4,
+      "path": "a",
+      "id": "x_step",
+      "name": "Shadow Step",
+      "existingFx": "x_step",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 4,
+      "path": "b",
+      "id": "x_wraith",
+      "name": "Wraith Form",
+      "existingFx": "x_wraith",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 6,
+      "path": "a",
+      "id": "x_pull",
+      "name": "Void Pull",
+      "existingFx": "x_pull",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 6,
+      "path": "b",
+      "id": "x_bind",
+      "name": "Soul Tether",
+      "existingFx": "x_bind",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 8,
+      "path": "a",
+      "id": "x_siphon",
+      "name": "Soul Siphon",
+      "existingFx": "x_siphon",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "reaper",
+      "rank": 8,
+      "path": "b",
+      "id": "x_vortex",
+      "name": "Death Vortex",
+      "existingFx": "x_vortex",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 2,
+      "path": "a",
+      "id": "pal_bash",
+      "name": "Shield Bash",
+      "existingFx": "pal_bash",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 2,
+      "path": "b",
+      "id": "pal_smite",
+      "name": "Smite",
+      "existingFx": "pal_smite",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 4,
+      "path": "a",
+      "id": "pal_taunt",
+      "name": "Taunt",
+      "existingFx": "pal_taunt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 4,
+      "path": "b",
+      "id": "pal_ground",
+      "name": "Holy Ground",
+      "existingFx": "pal_ground",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 6,
+      "path": "a",
+      "id": "pal_guard",
+      "name": "Guard Up",
+      "existingFx": "pal_guard",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 6,
+      "path": "b",
+      "id": "pal_burst",
+      "name": "Light Burst",
+      "existingFx": "pal_burst",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 8,
+      "path": "a",
+      "id": "pal_laststand",
+      "name": "Last Stand",
+      "existingFx": "pal_laststand",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "paladin",
+      "rank": 8,
+      "path": "b",
+      "id": "pal_sky",
+      "name": "Sky Hammer",
+      "existingFx": "pal_sky",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 2,
+      "path": "a",
+      "id": "necro_summon",
+      "name": "Summon Skeletons",
+      "existingFx": "necro_summon",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 2,
+      "path": "b",
+      "id": "necro_bolt",
+      "name": "Plague Bolt",
+      "existingFx": "necro_bolt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 4,
+      "path": "a",
+      "id": "necro_raise",
+      "name": "Raise the Dead",
+      "existingFx": "necro_raise",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 4,
+      "path": "b",
+      "id": "necro_nova",
+      "name": "Corpse Nova",
+      "existingFx": "necro_nova",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 6,
+      "path": "a",
+      "id": "necro_wall",
+      "name": "Bone Wall",
+      "existingFx": "necro_wall",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 6,
+      "path": "b",
+      "id": "necro_grip",
+      "name": "Death Grip",
+      "existingFx": "necro_grip",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 8,
+      "path": "a",
+      "id": "necro_army",
+      "name": "Army of the Dead",
+      "existingFx": "necro_army",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "necromancer",
+      "rank": 8,
+      "path": "b",
+      "id": "necro_storm",
+      "name": "Death Storm",
+      "existingFx": "necro_storm",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 2,
+      "path": "a",
+      "id": "nin_strike",
+      "name": "Shadow Strike",
+      "existingFx": "nin_strike",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 2,
+      "path": "b",
+      "id": "nin_barrage",
+      "name": "Shuriken Barrage",
+      "existingFx": "nin_barrage",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 4,
+      "path": "a",
+      "id": "nin_step",
+      "name": "Shadow Step",
+      "existingFx": "nin_step",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 4,
+      "path": "b",
+      "id": "nin_smoke",
+      "name": "Smoke Bomb",
+      "existingFx": "nin_smoke",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 6,
+      "path": "a",
+      "id": "nin_mark",
+      "name": "Death Mark",
+      "existingFx": "nin_mark",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 6,
+      "path": "b",
+      "id": "nin_pierce",
+      "name": "Piercing Star",
+      "existingFx": "nin_pierce",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 8,
+      "path": "a",
+      "id": "nin_fury",
+      "name": "Blade Fury",
+      "existingFx": "nin_fury",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "ninja",
+      "rank": 8,
+      "path": "b",
+      "id": "nin_storm",
+      "name": "Vanish",
+      "existingFx": "nin_storm",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 2,
+      "path": "a",
+      "id": "bsk_cleave",
+      "name": "Blood Sweep",
+      "existingFx": "bsk_cleave",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 2,
+      "path": "b",
+      "id": "bsk_bash",
+      "name": "Headbutt",
+      "existingFx": "bsk_bash",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 4,
+      "path": "a",
+      "id": "bsk_charge",
+      "name": "Charge",
+      "existingFx": "bsk_charge",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 4,
+      "path": "b",
+      "id": "bsk_stomp",
+      "name": "Shockwave",
+      "existingFx": "bsk_stomp",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 6,
+      "path": "a",
+      "id": "bsk_whirl",
+      "name": "Whirlwind",
+      "existingFx": "bsk_whirl",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 6,
+      "path": "b",
+      "id": "bsk_execute",
+      "name": "Execute",
+      "existingFx": "bsk_execute",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 8,
+      "path": "a",
+      "id": "bsk_berserk",
+      "name": "Berserk",
+      "existingFx": "bsk_berserk",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "berserker",
+      "rank": 8,
+      "path": "b",
+      "id": "bsk_guard",
+      "name": "Bloodguard",
+      "existingFx": "bsk_guard",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 2,
+      "path": "a",
+      "id": "pir_pierce",
+      "name": "Aimed Shot",
+      "existingFx": "pir_pierce",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 2,
+      "path": "b",
+      "id": "pir_volley",
+      "name": "Broadside",
+      "existingFx": "pir_volley",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 4,
+      "path": "a",
+      "id": "pir_shadow",
+      "name": "Boarding Strike",
+      "existingFx": "pir_shadow",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 4,
+      "path": "b",
+      "id": "pir_tumble",
+      "name": "Roll",
+      "existingFx": "pir_tumble",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 6,
+      "path": "a",
+      "id": "pir_smoke",
+      "name": "Powder Smoke",
+      "existingFx": "pir_smoke",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 6,
+      "path": "b",
+      "id": "pir_goldrush",
+      "name": "Gold Rush",
+      "existingFx": "pir_goldrush",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 8,
+      "path": "a",
+      "id": "pir_deathmark",
+      "name": "Cannonade",
+      "existingFx": "pir_deathmark",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "pirate",
+      "rank": 8,
+      "path": "b",
+      "id": "pir_spike",
+      "name": "Powder Keg",
+      "existingFx": "pir_spike",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 2,
+      "path": "a",
+      "id": "chr_bolt",
+      "name": "Time Bolt",
+      "existingFx": "chr_bolt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 2,
+      "path": "b",
+      "id": "chr_beam",
+      "name": "Time Lance",
+      "existingFx": "chr_beam",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 4,
+      "path": "a",
+      "id": "chr_nova",
+      "name": "Slow Field",
+      "existingFx": "chr_nova",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 4,
+      "path": "b",
+      "id": "chr_blink",
+      "name": "Time Step",
+      "existingFx": "chr_blink",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 6,
+      "path": "a",
+      "id": "chr_gravity",
+      "name": "Time Warp",
+      "existingFx": "chr_gravity",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 6,
+      "path": "b",
+      "id": "chr_barrier",
+      "name": "Aegis",
+      "existingFx": "chr_barrier",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 8,
+      "path": "a",
+      "id": "chr_tempest",
+      "name": "Stop Time",
+      "existingFx": "chr_tempest",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "chronomancer",
+      "rank": 8,
+      "path": "b",
+      "id": "chr_overload",
+      "name": "Singularity",
+      "existingFx": "chr_overload",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 2,
+      "path": "a",
+      "id": "mon_flurry",
+      "name": "Flurry",
+      "existingFx": "mon_flurry",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 2,
+      "path": "b",
+      "id": "mon_palm",
+      "name": "Palm Strike",
+      "existingFx": "mon_palm",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 4,
+      "path": "a",
+      "id": "mon_deflect",
+      "name": "Deflect",
+      "existingFx": "mon_deflect",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 4,
+      "path": "b",
+      "id": "mon_roll",
+      "name": "Roll",
+      "existingFx": "mon_roll",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 6,
+      "path": "a",
+      "id": "mon_whirl",
+      "name": "Whirl Kick",
+      "existingFx": "mon_whirl",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 6,
+      "path": "b",
+      "id": "mon_stun",
+      "name": "Stunning Palm",
+      "existingFx": "mon_stun",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 8,
+      "path": "a",
+      "id": "mon_thousand",
+      "name": "Stillness",
+      "existingFx": "mon_thousand",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "monk",
+      "rank": 8,
+      "path": "b",
+      "id": "mon_dragon",
+      "name": "Dragon Kick",
+      "existingFx": "mon_dragon",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 2,
+      "path": "a",
+      "id": "st_bolt",
+      "name": "Chain Bolt",
+      "existingFx": "st_bolt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 2,
+      "path": "b",
+      "id": "st_lance",
+      "name": "Lightning Lance",
+      "existingFx": "st_lance",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 4,
+      "path": "a",
+      "id": "st_step",
+      "name": "Thunder Step",
+      "existingFx": "st_step",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 4,
+      "path": "b",
+      "id": "st_nova",
+      "name": "Static Field",
+      "existingFx": "st_nova",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 6,
+      "path": "a",
+      "id": "st_orb",
+      "name": "Ball Lightning",
+      "existingFx": "st_orb",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 6,
+      "path": "b",
+      "id": "st_barrier",
+      "name": "Storm Barrier",
+      "existingFx": "st_barrier",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 8,
+      "path": "a",
+      "id": "st_storm",
+      "name": "Linked Lightning",
+      "existingFx": "st_storm",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "stormcaller",
+      "rank": 8,
+      "path": "b",
+      "id": "st_overload",
+      "name": "Chain Reaction",
+      "existingFx": "st_overload",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 2,
+      "path": "a",
+      "id": "war_bolt",
+      "name": "Shadow Bolt",
+      "existingFx": "war_bolt",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 2,
+      "path": "b",
+      "id": "war_lance",
+      "name": "Blood Lance",
+      "existingFx": "war_lance",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 4,
+      "path": "a",
+      "id": "war_curse",
+      "name": "Curse Circle",
+      "existingFx": "war_curse",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 4,
+      "path": "b",
+      "id": "war_drain",
+      "name": "Life Drain",
+      "existingFx": "war_drain",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 6,
+      "path": "a",
+      "id": "war_step",
+      "name": "Rift Step",
+      "existingFx": "war_step",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 6,
+      "path": "b",
+      "id": "war_orb",
+      "name": "Doom Orb",
+      "existingFx": "war_orb",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 8,
+      "path": "a",
+      "id": "war_storm",
+      "name": "Blood Offering",
+      "existingFx": "war_storm",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "warlock",
+      "rank": 8,
+      "path": "b",
+      "id": "war_final",
+      "name": "Final Curse",
+      "existingFx": "war_final",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 2,
+      "path": "a",
+      "id": "sky_rise",
+      "name": "Rising Spear",
+      "existingFx": "sky_rise",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 2,
+      "path": "b",
+      "id": "sky_gale",
+      "name": "Gale Shot",
+      "existingFx": "sky_gale",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 4,
+      "path": "a",
+      "id": "sky_dive",
+      "name": "Dive Strike",
+      "existingFx": "sky_dive",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 4,
+      "path": "b",
+      "id": "sky_lift",
+      "name": "Wind Lift",
+      "existingFx": "sky_lift",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 6,
+      "path": "a",
+      "id": "sky_dash",
+      "name": "Sky Dash",
+      "existingFx": "sky_dash",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 6,
+      "path": "b",
+      "id": "sky_rain",
+      "name": "Spear Rain",
+      "existingFx": "sky_rain",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 8,
+      "path": "a",
+      "id": "sky_crash",
+      "name": "Thunder Dive",
+      "existingFx": "sky_crash",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "skylancer",
+      "rank": 8,
+      "path": "b",
+      "id": "sky_cyclone",
+      "name": "Updraft",
+      "existingFx": "sky_cyclone",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 2,
+      "path": "a",
+      "id": "bd_counter",
+      "name": "Counter Stance",
+      "existingFx": "bd_counter",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 2,
+      "path": "b",
+      "id": "bd_twin",
+      "name": "Twin Cut",
+      "existingFx": "bd_twin",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 4,
+      "path": "a",
+      "id": "bd_riposte",
+      "name": "Riposte",
+      "existingFx": "bd_riposte",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 4,
+      "path": "b",
+      "id": "bd_step",
+      "name": "Dance Step",
+      "existingFx": "bd_step",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 6,
+      "path": "a",
+      "id": "bd_mirror",
+      "name": "Mirror Guard",
+      "existingFx": "bd_mirror",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 6,
+      "path": "b",
+      "id": "bd_cross",
+      "name": "Cross Slash",
+      "existingFx": "bd_cross",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 8,
+      "path": "a",
+      "id": "bd_steel",
+      "name": "Perfect Guard",
+      "existingFx": "bd_steel",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "bladedancer",
+      "rank": 8,
+      "path": "b",
+      "id": "bd_perfect",
+      "name": "Perfect Counter",
+      "existingFx": "bd_perfect",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 2,
+      "path": "a",
+      "id": "bst_sic",
+      "name": "Sic 'Em",
+      "existingFx": "bst_sic",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 2,
+      "path": "b",
+      "id": "bst_coordinated",
+      "name": "Coordinated Strike",
+      "existingFx": "bst_coordinated",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 4,
+      "path": "a",
+      "id": "bst_guardian",
+      "name": "Guardian Bond",
+      "existingFx": "bst_guardian",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 4,
+      "path": "b",
+      "id": "bst_step",
+      "name": "Pack Step",
+      "existingFx": "bst_step",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 6,
+      "path": "a",
+      "id": "bst_mend",
+      "name": "Mend the Pack",
+      "existingFx": "bst_mend",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 6,
+      "path": "b",
+      "id": "bst_roar",
+      "name": "Alpha Roar",
+      "existingFx": "bst_roar",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 8,
+      "path": "a",
+      "id": "bst_stampede",
+      "name": "Stampede",
+      "existingFx": "bst_stampede",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    },
+    {
+      "class": "beastmaster",
+      "rank": 8,
+      "path": "b",
+      "id": "bst_apex",
+      "name": "Apex Unleashed",
+      "existingFx": "bst_apex",
+      "status": "Distinct event cue needs binding audit; generic audio may already play"
+    }
+  ]
+}

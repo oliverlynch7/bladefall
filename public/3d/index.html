@@ -1151,7 +1151,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2116"></script>
-<script src="./priority-sfx.js?v=2207"></script>
+<script src="./priority-sfx.js?v=2210"></script>
 <link rel="stylesheet" href="./progression-celebration.css?v=2208">
 <script src="./progression-celebration.js?v=2208"></script>
 <script>
@@ -1164,7 +1164,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.209.0-reference-wardrobe';
+const VERSION3D='2.210.0-preserve-original-sfx';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1762,7 +1762,7 @@ const FXDEF={
   atk1:{f:'atk1',v:0.4}, atk2:{f:'atk2',v:0.4}, ma_stomp:{f:'ma_stomp',v:0.5},
   mimicroar:{f:'mimicroar',v:0.58}, chestthunk:{f:'chestthunk',v:0.5}, gamblecoins:{f:'gamblecoins',v:0.48}
 };
-// Paid custom files replace their old slots; keep each old path for network/decode fallback.
+// Preserve existing files. The additive-only adapter activates only explicit new event slots.
 if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={

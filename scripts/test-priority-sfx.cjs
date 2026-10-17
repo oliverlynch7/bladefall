@@ -13,22 +13,27 @@ async function fixture({missing=false,mute=false}={}){
  return {box,t:box.test,requests,starts,fallback,gains};
 }
 (async()=>{
- check(manifest.cues.length===64,'64 authored sounds');
- for(const c of manifest.cues){const path='public/sfx/'+c.file+'.mp3';check(fs.existsSync(path),'runtime exists '+c.id);check(c.channels===2&&c.peak<.95&&c.rms>.002,'signal '+c.id);check(c.duration>0&&c.duration<=c.source_seconds+.03,'bounded duration');if(c.legacy_file)check(fs.existsSync('audio-source/sfx/legacy-before-starter-20261016/'+c.legacy_file+'.mp3'),'old source backup');}
- const a=await fixture();a.t.SFX.hit();check(a.fallback.length>0,'procedural fallback before decoding');
- a.fallback.length=0;a.t.loadFxFiles();await new Promise(r=>setImmediate(r));
- check(a.requests.length===Object.keys(a.t.FXDEF).length,'one load per slot');
- for(const c of manifest.cues){check(a.t.FXDEF[c.id].f===c.file,'replacement '+c.id);check(!!a.t.FXBUF[c.id],'decoded '+c.id);check(a.t.FXDEF[c.id]._norm*.85<=.85001,'normalization peak ceiling');}
- for(const name of Object.keys(a.box.window.BFPrioritySfx.methods)){const n=a.starts.length;a.t.SFX[name]();check(a.starts.length===n+1,'one replacement per procedural cue '+name);}
- check(a.fallback.length===0,'no procedural layering after successful custom playback');
- check(a.t.FXDEF.swordswing.v===.42&&a.t.FXDEF.levelcheer.v===.6,'legacy prominence retained');
+ const crypto=require('crypto');
+ check(manifest.cues.length===64,'64 candidate takes preserved');
+ for(const c of manifest.cues){
+  check(fs.existsSync('public/sfx/'+c.file+'.mp3'),'candidate exists '+c.id);
+  if(c.legacy_file){const current=fs.readFileSync('public/sfx/'+c.legacy_file+'.mp3'),backup=fs.readFileSync('audio-source/sfx/legacy-before-starter-20261016/'+c.legacy_file+'.mp3');check(crypto.createHash('sha256').update(current).digest('hex')===crypto.createHash('sha256').update(backup).digest('hex'),'original byte-for-byte preserved '+c.id);}
+ }
+ const a=await fixture(),api=a.box.window.BFPrioritySfx;
+ check(api.policy==='additive-only'&&api.activeAdditions.length===0,'unreviewed batch inactive');
+ const keep={f:'my-favorite-original',v:.37},registry={swordswing:keep};api.apply(registry);check(registry.swordswing===keep,'existing definition identity untouched');check(Object.keys(registry).length===1,'no unapproved additions');
+ const fn=()=>42,methods={hit:fn,hurt:fn,jump:fn,land:fn,dodge:fn,classup:fn,pickup:fn,wand:fn};api.bind(methods,()=>true);check(Object.values(methods).every(x=>x===fn),'all original procedural methods retained');
+ for(const c of manifest.cues){if(c.legacy_file)check(a.t.FXDEF[c.id].f===c.legacy_file,'original slot restored '+c.id);else check(!a.t.FXDEF[c.id],'candidate-only slot inactive '+c.id);}
+ a.t.loadFxFiles();await new Promise(r=>setImmediate(r));
+ check(!a.requests.some(x=>x.includes('/custom/')),'inactive replacements are not loaded');
+ check(a.requests.length===Object.keys(a.t.FXDEF).length,'one request per original slot');
+ for(const c of manifest.cues.filter(x=>x.legacy_file))check(!!a.t.FXBUF[c.id],'original decodes '+c.id);
+ const n=a.starts.length;a.t.SFX.hit();check(a.fallback.length>0&&a.starts.length===n,'original procedural hit used');
+ check(!a.t.playFx('custom_shoot'),'bow naturally falls back to original shoot');
+ a.t.playFx('swordswing');check(a.starts.length===n+1,'original file plays once');
+ check(a.t.FXDEF.levelcheer.f==='fanfare-celebration'&&a.t.FXDEF.levelcheer.v===.6,'original level-up fanfare and volume');
  a.t.loadFxFiles();check(a.requests.length===Object.keys(a.t.FXDEF).length,'no duplicate loads');
- const b=await fixture({missing:true});b.t.loadFxFiles();await new Promise(r=>setImmediate(r));
- for(const c of manifest.cues.filter(c=>c.legacy_file)){check(b.requests.includes('/sfx/'+c.legacy_file+'.mp3'),'network fallback '+c.id);check(!!b.t.FXBUF[c.id],'legacy decoded '+c.id);}
- const n=b.fallback.length;b.t.SFX.hurt();check(b.fallback.length>n,'new-only missing file uses procedural fallback');
- const m=await fixture({mute:true});m.t.loadFxFiles();await new Promise(r=>setImmediate(r));m.t.SFX.hurt();m.t.SFX.classup();m.t.playFx('swordswing');check(m.starts.length===0&&m.fallback.length===0,'mute preserved');
- check(html.includes("if(w.arche!=='bow'||!playFx('custom_shoot'))SFX.shoot()"),'only bows use natural string release');
- const ledger=JSON.parse(fs.readFileSync('audio-source/sfx/starter-20261016/manifest.json','utf8'));
- check(ledger.license_plan_at_generation==='starter','paid provenance');check(ledger.cues.every(c=>c.status==='saved'),'no uncertain requests');check(ledger.cues.reduce((s,c)=>s+c.duration_seconds*40,0)<=10000,'batch budget');
- console.log(JSON.stringify({checks,runtimeFiles:64,existingSlotsReplaced:manifest.cues.filter(c=>c.legacy_file).length,proceduralMethodsReplaced:8,networkFallback:true,mute:true,subjectiveListening:'pending',browserVerified:false}));
+ const m=await fixture({mute:true});m.t.loadFxFiles();await new Promise(r=>setImmediate(r));m.t.SFX.hurt();m.t.SFX.classup();m.t.playFx('swordswing');check(m.starts.length===0&&m.fallback.length===0,'mute retained');
+ check(html.includes("if(w.arche!=='bow'||!playFx('custom_shoot'))SFX.shoot()"),'original bow fallback remains available');
+ console.log(JSON.stringify({checks,candidateFilesPreserved:64,originalFilesRestored:manifest.cues.filter(x=>x.legacy_file).length,proceduralOverrides:0,unreviewedActiveReplacements:0,subjectiveQuality:'Not inferred from technical tests'}));
 })().catch(err=>{console.error(err);process.exit(1);});

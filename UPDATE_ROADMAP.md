@@ -2981,3 +2981,7 @@ Remade 51 looks for 17 classes from Oliver’s approved sheet: red Ninja, ruby W
 ## [Codex | 2026-10-16] v2.209.0 reference wardrobe is live
 
 Production commit 83e89eb1 deployed successfully (26c50335-97d1-4024-9fc3-762dc5bc6918). Real browser confirms new public gallery names and v2209 scripts; immutable game shows v2.209.0-reference-wardrobe. Gallery: https://bladefall.pages.dev/3d/class-skins?class=warlock&v=2209 . All 51 outfits implemented as reference adaptations on existing rigs, including every requested correction. Rank gates, saved choices, cheat unlocks and stat neutrality verified. Production excludes pending Keep/Reaper changes. Development branch remains divergent: never push it wholesale to main. Unrelated companion3d.js and articulated-rigs.json changes untouched.
+
+## [Codex | 2026-10-16] v2.210 original sound defaults restored
+
+User prefers several old sounds and cannot audition the batch now. Disabled all 56 file replacements and all eight procedural overrides; preserved every original and all 64 generated takes. Future policy is additive-only, with actual event/identity inventory first. 255 regression assertions pass, including byte-identical old files, original routing, mute, no unapproved candidate loading and no layering. No new API spend. Local browser verification and production deployment follow.

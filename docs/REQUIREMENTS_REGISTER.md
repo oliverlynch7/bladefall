@@ -1752,3 +1752,8 @@ Source diagnosis: nextStage invokes warp audio again from live background comple
 ## [Codex | 2026-10-16] U-HUB-QUEST-CHOICES-20261016
 
 User: "also when npcs in the hub have quests, there should be a ! icon next to the dialouge ioptions that progerss the quest". Add a yellow exclamation badge to available request/turn-in entry buttons and actual accepting/completing dialogue choices. Derive choice marking from authored return_accept/return_finish effects, preserving choice IDs, text, timing, saves and spectator restrictions. Shop actions, lore/news, decline/later and active-quest reminders are not progress choices and stay unmarked. Inspect source metadata before styling; verify the actual hub conversation states in-browser.
+
+
+## [Codex | 2026-10-16] U-LOOT-REEL-20261016
+
+User requests a less visually invasive slot-machine loot reveal with SFX. Current overlay is up to 720px wide with 140px cards, 3.3s spin and 4.2s result. Plan: compact upper-center ribbon on desktop, tiny strip beneath vitals on phone, shorter 2.1s roll, collapsed result, retained skip/rebound controls and screen-reader result. Add quiet procedural reel ticks on card crossings; move the original chest reward chime to actual reveal instead of layering another replacement. Preserve chest art, old audio assets, probabilities, already-granted item, stash/auto-sell logic and gameplay timing. Ensure skips/queue/world clear stop tick scheduling, reveal sounds once and reduced motion skips rolling. Verify actual chest reward, keyboard skip, reduced motion, mute/volume routing, mobile bounds and old save in browser.

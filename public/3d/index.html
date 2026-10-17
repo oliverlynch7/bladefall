@@ -1139,9 +1139,9 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./party-navigation.js?v=2197"></script>
 <script src="./combat-art.js?v=2094"></script>
 <script src="./hostile-art.js?v=1978"></script>
-<link rel="stylesheet" href="./chest-reveal.css?v=2122">
+<link rel="stylesheet" href="./chest-reveal.css?v=2215">
 <script src="./chest-rules.js?v=2122"></script>
-<script src="./chest-reveal.js?v=2190"></script>
+<script src="./chest-reveal.js?v=2215"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2192">
@@ -1164,7 +1164,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.214.0-quest-choice-markers';
+const VERSION3D='2.215.0-compact-loot-reel';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1801,6 +1801,7 @@ function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key]
 function stopFx(key){ const h=_fxLoop[key]; if(h){ try{ h.s.stop(); }catch(e){} _fxLoop[key]=null; } }
 function stopAllLoops(){ for(const k in _fxLoop) if(_fxLoop[k]) stopFx(k); }   // kill every looping sfx (footsteps/heartbeat/etc) — used when a menu opens
 const SFX={
+  lootTick(){tone({f0:1300,f1:720,dur:0.025,type:'triangle',vol:0.012,a:0.002});},
   // blade cutting air: airy whoosh sweeping down, faint steel sing
   slash(){ noise({dur:0.16,f0:2600,f1:320,q:1.4,vol:0.15,a:0.012});
     tone({f0:1050,f1:260,dur:0.1,type:'triangle',vol:0.018}); },
@@ -13680,10 +13681,10 @@ function prepareChest(ch){
  ch.rarity=rec.rarity;ch.challenge=rec.challenge;ch.opened=!!rec.claimed;
  Object.defineProperty(ch,'_rewardRecord',{value:rec,writable:true,configurable:true,enumerable:false});return rec;
 }
-function revealChestReward(ch,item,result){
+function revealChestReward(ch,item,result,gold=0){
  const describe=box=>{const o=box.weapon||box.armor||box.trinket;return {name:o.name,rarity:o.rarity,color:RARITY[o.rarity].color,icon:itemStaticAv(o)};};
  const cards=[];for(let i=0;i<24;i++)cards.push(describe(i===20?item:randomLoot(BFChestRules.reward(ch.rarity,ch.challenge,Math.random()))));
- BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,result,cards,winner:20,reduceMotion:meta.reduceMotion||matchMedia('(prefers-reduced-motion: reduce)').matches});
+ BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,result:result+(gold>0?' · Chest +'+gold+'g':''),cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>SFX.achieve(),reduceMotion:meta.reduceMotion||matchMedia('(prefers-reduced-motion: reduce)').matches});
 }
 function descentRewardChest(){
  if(!G.endless||G.chests.some(c=>c.descentReward))return;
@@ -13693,7 +13694,7 @@ function descentRewardChest(){
 function openChest(ch){
   if(!ch||ch.opened)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;
   if(!(ch.bonus&&G.sprintFun&&G.bonusActive)&&meta.autoSellEquipment!==true&&(meta.stash||[]).length>=STASH_CAP){fullBagNotice(null,null,'chest');return;}record.claimed=true;
-  ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
+  ch.opened=true; SFX.pickup(); if(ch.bonus&&G.sprintFun&&G.bonusActive)SFX.achieve(); playFx('chestopen');
   /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
      2026-08-12. It was NOT one of docs/SKILL_TRIAGE.md section E's dead passives — the audit has
      always called `pir_swift` WIRED, and it is: its one reader is `effAtkSpeed`, where it grants
@@ -13718,7 +13719,7 @@ function openChest(ch){
   if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
   if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Treasure secured — take the exit','#ffd24a','event-treasure-chest'); }
-  else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
+  // The compact result and gold HUD replace the redundant center-screen chest toast.
   const item=checkpointClone(record.item),kind=item.weapon?'weapon':item.armor?'armor':'trinket',gear=item[kind];
   if(G.escape)gear.prisonLootKey='chest-'+G.runSeed+'-'+G.floor+'-'+ch.x+'-'+ch.z;
   let result,soldGold=0;
@@ -13728,7 +13729,7 @@ function openChest(ch){
     const cp=campaignCheckpoint();if(cp&&G._earningsCheckpoint===cp)cp.state.stash.push(checkpointClone(item));
   }else{const gold=G.escape?BFPrisonRun.overflow(gear):sellItem(gear);soldGold=gold;result='Auto-sold · +'+gold+' gold';}
   if(gear.rarity==='legendary')meta.legendaryFound=(meta.legendaryFound||0)+1;
-  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();equipmentNotice(kind,gear,meta.autoSellEquipment===true,soldGold);revealChestReward(ch,item,result);
+  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();equipmentNotice(kind,gear,meta.autoSellEquipment===true,soldGold);revealChestReward(ch,item,result,cg);
 
 }
 // every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)

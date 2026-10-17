@@ -1895,3 +1895,15 @@ Added a yellow exclamation badge and accessible Quest label to new/ready return-
 ## [Codex | 2026-10-16] v2.214 quest-marker production confirmed
 
 Functional commit ffe22d54 deployed successfully as 8e70ed65-d95c-4021-8fb6-e3c4d8d997d2. Public browser confirms v2.214.0-quest-choice-markers and hub-dialogue CSS/JS v2214 with no launch console errors. Local actual quest offer, acceptance and delivery verified on isolated older-save state.
+
+
+## [Codex | 2026-10-16] U-LOOT-REEL-20261016
+
+User requests a less visually invasive slot-machine loot reveal with SFX. Current overlay is up to 720px wide with 140px cards, 3.3s spin and 4.2s result. Plan: compact upper-center ribbon on desktop, tiny strip beneath vitals on phone, shorter 2.1s roll, collapsed result, retained skip/rebound controls and screen-reader result. Add quiet procedural reel ticks on card crossings; move the original chest reward chime to actual reveal instead of layering another replacement. Preserve chest art, old audio assets, probabilities, already-granted item, stash/auto-sell logic and gameplay timing. Ensure skips/queue/world clear stop tick scheduling, reveal sounds once and reduced motion skips rolling. Verify actual chest reward, keyboard skip, reduced motion, mute/volume routing, mobile bounds and old save in browser.
+
+
+## [Codex | 2026-10-16] v2.215.0 — compact loot reel and sound
+
+U-LOOT-REEL-20261016: desktop reel now 440px wide / 141px tall at 1280px, collapses to a 60px result strip after a 2.1s roll, then closes after 2.1s. Phone strip is 233x45px at (12,132), between vitals and XP and left of the minimap at 390px. Preserved comparison feed, bag outcomes and bound skip action. Removed redundant ordinary-chest center toast; collapsed result includes chest gold. New quiet procedural ticks follow card crossings with a 65ms limit; original reward chime now plays once on reveal rather than on opening. Audio uses existing SFX mute/volume routing. Skip, close, queue clear and reduced motion stop tick scheduling; reduced motion goes directly to the result. Winner centering uses the supplied index instead of hardcoded 20.
+
+Real browser: one item awarded despite duplicate open; selected name matches reward; 11 ticks / one natural reveal; auto-dismiss, skip/repeated close, queued cancellation and zero rolling ticks in reduced motion checked. Older level-4 save loaded and retained progression before fixture chest rewards. Final phone geometry and no center chest toast confirmed. Pause 25, first arrival 20, progression 43, audio-preservation 255 and 200,000 chest table samples pass. Audio tests muted; no subjective listening or native keyboard/controller/two-device co-op claim. Evidence: docs/art-validation/compact-loot-20261016. Deployment pending confirmation.

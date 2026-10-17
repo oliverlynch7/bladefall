@@ -1,0 +1,46 @@
+{
+  "version": "2.215.0-compact-loot-reel",
+  "spinMs": 2100,
+  "resultMs": 2100,
+  "desktop": {
+    "width": 440,
+    "rollingHeight": 141,
+    "settledHeight": 60,
+    "top": 20
+  },
+  "phone390": {
+    "x": 12,
+    "y": 132,
+    "width": 233,
+    "height": 45,
+    "hpBottom": 129,
+    "xpTop": 180,
+    "mapLeft": 258
+  },
+  "browserChecks": [
+    "one real chest adds one item despite duplicate open",
+    "selected item matches awarded gear",
+    "natural roll dispatches 11 quiet ticks and exactly one reveal cue",
+    "auto-dismiss stops ticks",
+    "skip dispatches one reveal and second skip closes without replay",
+    "clear stops current and queued reveals",
+    "reduced motion adds zero rolling ticks and one reveal cue",
+    "comparison feed remains visible",
+    "redundant ordinary-chest toast removed",
+    "final result includes chest gold",
+    "older level-4 save loads unchanged before test rewards"
+  ],
+  "audio": "New procedural lootTick uses existing SFX bus, mute and volume. Original achievement chime moved to reveal; existing assets preserved. Tests muted, no subjective listening claim.",
+  "regressions": {
+    "pause": 25,
+    "firstArrival": 20,
+    "progression": 43,
+    "audioPreservation": 255,
+    "chestIntervalSamples": 200000
+  },
+  "limits": [
+    "No native keyboard/controller gesture test; existing action bindings unchanged.",
+    "No two-device co-op test.",
+    "Art screenshots use an arranged hub chest, not an earned campaign chest."
+  ]
+}

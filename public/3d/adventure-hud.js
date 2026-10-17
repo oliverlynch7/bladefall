@@ -4,7 +4,7 @@
  const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function mount(a){
   api=a;document.body.classList.add('adventure-hud');
-  const gold=$('hudGold');const row=$('lvlbadge').parentElement;row.classList.add('hud-class-row');row.append(gold);
+  const gold=$('hudGold');const row=$('lvlbadge').parentElement;row.classList.add('hud-class-row');row.append(gold);row.after($('weapontag'));$('hudDetails').hidden=true;
   const fps=document.createElement('output');fps.id='fpsCounter';fps.hidden=true;fps.setAttribute('aria-label','Frames per second');fps.setAttribute('aria-live','off');document.body.append(fps);
   const dock=document.createElement('div');dock.id='adventureCombat';
   const skills=document.createElement('div');skills.id='adventureSkills';
@@ -15,7 +15,8 @@
   panel=$('equipmentFeed');panel.querySelector('[data-dismiss-loot]').onclick=()=>{current=null;panel.hidden=true;};
   new ResizeObserver(entries=>{const h=entries[0].target.getBoundingClientRect().height;if(h)document.body.style.setProperty('--hud-bag-height',h+'px');}).observe($('inventoryDock'));
   panel.querySelector('[data-loot-bag]').onclick=()=>api.bag();
-  $('hudDetails').onclick=()=>{$('hud').classList.toggle('details-open');$('hudDetails').setAttribute('aria-expanded',String($('hud').classList.contains('details-open')));};
+  const placeIdentity=()=>{const h=$('hud').getBoundingClientRect(),pet=$('pethud');if(h.height>0)document.body.style.setProperty('--hud-identity-bottom',h.bottom+'px');document.body.style.setProperty('--hud-companion-space',pet.classList.contains('hide')?'0px':(pet.getBoundingClientRect().height+8)+'px');};
+  const identitySize=new ResizeObserver(placeIdentity);identitySize.observe($('hud'));identitySize.observe($('pethud'));window.addEventListener('resize',placeIdentity);placeIdentity();
   // Never let clicks on HUD controls also swing a weapon or rotate the world.
   for(const el of [$('inventoryDock'),panel,$('hud')])for(const type of ['pointerdown','mousedown','touchstart'])el.addEventListener(type,e=>e.stopPropagation());
  }

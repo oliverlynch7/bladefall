@@ -1039,8 +1039,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
 <link rel="stylesheet" href="./bag-menu.css?v=2238">
-<link rel="stylesheet" href="./adventure-hud.css?v=2239">
-<script src="./adventure-hud.js?v=2232"></script>
+<link rel="stylesheet" href="./adventure-hud.css?v=2247">
+<script src="./adventure-hud.js?v=2247"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.246.0-tutorial-menu-keys';
+const VERSION3D='2.247.0-weapon-companion-hud';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1965,8 +1965,10 @@ const PETS={
   gravewraith:{name:'Grave Wraith',arch:'attacker',style:'ranged',rarity:'rare',   price:1500, dmg:11, cd:1.7, range:560, body:'#b06bff', accent:'#e0b0ff', flavor:'It hungers with you. Its bolts find the throat.'}
 };
 const PETIDS=Object.keys(PETS).filter(id=>!PETS[id].hidden);   // hidden pets (e.g. the Beastmaster's spectral wolf) never appear in the shop/pickers
-const PET_TRAIN_MAX=5;                                   // diminishing gold sink: +5% per level, 5 levels max
-function petTrainLvl(id){ return (meta.petTrain&&meta.petTrain[id])||0; }
+const PET_TRAIN_MAX=5;                                   // Five paid upgrades; display levels 1–6, preserving existing training bonuses.
+function petTrainLvl(id){const n=Number(meta.petTrain?.[id]);return Number.isFinite(n)?Math.max(0,Math.min(PET_TRAIN_MAX,Math.floor(n))):0;}
+function petLevel(id){return 1+petTrainLvl(id);}
+function petNameplate(id){return petDisplayName(id)+' · Lv '+petLevel(id);}
 function petTrainCost(id){ return Math.round(180*Math.pow(1.7,petTrainLvl(id))); }
 function petTrainMul(id){ return 1+petTrainLvl(id)*0.05; }
 function petRarityCol(id){ const P=PETS[id]; return P?RARITY[P.rarity].color:'#fff'; }
@@ -14768,7 +14770,7 @@ function updatePetLabel(){
   const sp=project(pet.x,pet.y+34,pet.z);
   if(!sp){ el.classList.add('hide'); return; }
   el.classList.remove('hide'); el.style.left=(sp[0]/DPR)+'px'; el.style.top=(sp[1]/DPR)+'px';
-  el.style.color=petRarityCol(pet.id); el.textContent=petDisplayName(pet.id);
+  el.style.color=petRarityCol(pet.id); el.textContent=petNameplate(pet.id);
 }
 /* ============================================================================
    MULTIPLAYER — Phase 1.1 (in-game lobby + presence). FULLY OPT-IN & ISOLATED.
@@ -14937,7 +14939,7 @@ const MP={
   },
   selfState(){ const p=G&&G.p; return {riding:!!p?.dragonRide,sitting:!!p?.sitting,busy:playerActivity(), id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
     tw:p?.warpSerial||0,area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0,warp:p.warp||0}:null,
-    cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petDisplayName(G.pet.id):undefined, zone:this.zone,
+    cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petNameplate(G.pet.id):undefined, zone:this.zone,
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
        is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
        an older build simply sends no cid and hero3d falls back to your model as before. */
@@ -19622,7 +19624,7 @@ function openQuestBoard(back){
    Hub-only (it's a hub NPC), so a pet can never be swapped mid-run. */
 const PET_ARCH_TAG={attacker:'⚔ Attacker',healer:'✚ Healer',utility:'💰 Utility'};
 function petIcon(id){ return 'icons/pets/pet-'+id+(['shepherd','cinder','sunwing'].includes(id)?'.svg':'.png'); }
-function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=(lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'')+(meta.hubUpgrades?.companionCare?' · Care shelter: +10% max HP':'');
+function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=` · Level ${petLevel(id)}/${PET_TRAIN_MAX+1}`+(meta.hubUpgrades?.companionCare?' · Care shelter: +10% max HP':'');
   if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petMaxHp(id)} HP · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
   if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · ${petMaxHp(id)} HP · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
   return `${PET_ARCH_TAG.utility} · ${petMaxHp(id)} HP · pulls loot within ${P.pull}${tag}`; }
@@ -19635,9 +19637,11 @@ function petBuy(id){if(!petShopUnlocked()){toast('Rescue both trapped animals in
 function petSell(id){ const P=PETS[id]; if(!P||P.questOnly||!meta.petOwned.includes(id)) return; const refund=Math.round(P.price*0.4);
   meta.petOwned=meta.petOwned.filter(x=>x!==id); if(meta.petActive===id){ meta.petActive=meta.petOwned[0]||null; if(G) G.pet=null; }
   delete meta.petNames[id]; delete meta.petTrain[id]; meta.gold+=refund; playFx('sell'); persist(); toast('Sold · +'+refund+'g'); }
-function petTrain(id){ const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('Already fully trained'); return; }
+function petTrain(id){if(!G?.hub||!PETS[id]||!meta.petOwned.includes(id))return false; const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('Already fully trained'); return; }
   const cost=petTrainCost(id); if(meta.gold<cost){ toast('Not enough gold'); SFX.hurt(); return; }
-  meta.gold-=cost; meta.petTrain[id]=lv+1; playFx('forgedone'); SFX.levelup(); persist(); toast('▲ '+petDisplayName(id)+' grows a little stronger'); }
+  meta.gold-=cost; meta.petTrain[id]=lv+1;
+  if(G.pet?.id===id){const pet=G.pet,missing=Math.max(0,(pet.maxHp||petMaxHp(id))-(pet.hp||0));pet.maxHp=petMaxHp(id);pet.hp=Math.max(0,pet.maxHp-missing);}
+  playFx('forgedone'); SFX.levelup(); persist();hudUpdate();updatePetLabel(); toast('▲ '+petNameplate(id));return true; }
 function petToggleLabel(){ meta.petLabel=!meta.petLabel; persist(); SFX.pickup(); }
 const COMPANION_WHISTLE_COST=7500;
 function buyCompanionWhistle(world=G){
@@ -19674,14 +19678,14 @@ function openBeastkeeper(back){
     else out.push(`<span class="petbadge">${P.pull} pickup range</span>`);
     if(id==='sunwing')out.push('<span class="petbadge">Ride outdoors · '+htmlSafe(controlHint('mount'))+' / Interact</span>','<span class="petbadge">8s flight · land to recharge</span>');
     return out.join(''); };
-  const training=id=>{ const lv=petTrainLvl(id); return `<div class="pettraining"><span>Training</span>${Array.from({length:PET_TRAIN_MAX},(_,i)=>`<i class="petpip ${i<lv?'on':''}"></i>`).join('')}<span>${lv}/${PET_TRAIN_MAX}</span></div>`; };
+  const training=id=>{ const lv=petTrainLvl(id); return `<div class="pettraining"><span>Level ${petLevel(id)}/${PET_TRAIN_MAX+1}</span>${Array.from({length:PET_TRAIN_MAX},(_,i)=>`<i class="petpip ${i<lv?'on':''}"></i>`).join('')}<span>${lv}/${PET_TRAIN_MAX} upgrades</span></div>`; };
   const btn=(label,data,extra='',disabled=false)=>`<button class="bigbtn buybtn ${extra}" ${data||''} ${disabled?'disabled style="opacity:.42;cursor:default"':''}>${label}</button>`;
   const petCard=(id,kind)=>{ const P=PETS[id], col=petRarityCol(id), afford=meta.gold>=P.price, display=kind==='shop'?P.name:petDisplayName(id);
     const actions=kind==='shop'?btn(`${P.price}g`,`data-buy="${id}"`,'',!afford):btn('Equip',`data-eq="${id}"`)+(P.questOnly?'':btn(`Sell · +${Math.round(P.price*.4)}g`,`data-sell="${id}"`,'ghost'));
     return `<article class="petcard ${kind==='shop'&&!afford?'dim':''}" style="--petcol:${col}" title="${htmlSafe(display)}">
       <img class="petcardart" src="${petIcon(id)}" alt="${htmlSafe(P.name)}"><div class="petcardinfo"><div class="petcardname">${htmlSafe(display)}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(id)}</div>${training(id)}</div><div class="petcardactions">${actions}</div></article>`; };
   const activeBlock=active?(()=>{ const P=PETS[active],col=petRarityCol(active),lv=petTrainLvl(active),max=lv>=PET_TRAIN_MAX;
-    return `<div class="petsection">Active companion</div><section class="pethero" style="--petcol:${col}"><img class="petheroart" src="${petIcon(active)}" alt="${htmlSafe(P.name)}"><div><div class="pettitle">${htmlSafe(petDisplayName(active))}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(active)}</div>${training(active)}</div><div class="petactions">${btn(max?'Fully trained':`Train · ${petTrainCost(active)}g`,max?'':`data-train="${active}"`,'',max)}${btn('Rename',`data-name="${active}"`,'ghost')}${btn('Stow','data-uneq="1"','ghost')}</div></section>`; })()
+    return `<div class="petsection">Active companion</div><section class="pethero" style="--petcol:${col}"><img class="petheroart" src="${petIcon(active)}" alt="${htmlSafe(P.name)}"><div><div class="pettitle">${htmlSafe(petDisplayName(active))}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(active)}</div>${training(active)}</div><div class="petactions">${btn(max?'Level '+petLevel(active)+' · Max':`Train to Lv ${petLevel(active)+1} · ${petTrainCost(active)}g`,max?'':`data-train="${active}"`,'',max)}${btn('Rename',`data-name="${active}"`,'ghost')}${btn('Stow','data-uneq="1"','ghost')}</div></section>`; })()
     :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
   const shop=petShopUnlocked()?unowned.map(id=>petCard(id,'shop')).join(''):'';
@@ -20445,7 +20449,7 @@ function hudUpdate(){
   const playerName=document.getElementById('playername'); if(playerName) playerName.textContent=(meta.heroName||'').trim()||'Player';
   document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
-  wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'');
+  wt.textContent='Weapon · '+p.weapon.name+(offF?' ⚠ off-class':'');wt.title=wt.textContent;
   wt.style.color=offF?'#ff8a82':(RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)');
   const at=document.getElementById('armortag'), rating=armorRating(p), red=Math.round(defenseR(p)*100);
   at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+rating+'%</b>';
@@ -20460,7 +20464,8 @@ function hudUpdate(){
       const pimg=document.getElementById('pethudimg');
       if(pimg.dataset.pid!==pid){ pimg.dataset.pid=pid; pimg.style.visibility='hidden';   // hide until it actually loads so a slow/first-load icon never shows a broken glyph
         pimg.onload=()=>{pimg.style.visibility='visible';}; pimg.onerror=()=>{pimg.style.visibility='hidden';}; pimg.src=petIcon(pid); }
-      document.getElementById('pethudname').textContent=petDisplayName(pid);
+      const petName=document.getElementById('pethudname'),caption=petNameplate(pid);
+      if(petName.dataset.caption!==caption){petName.dataset.caption=caption;petName.innerHTML='<span class="pet-hud-name">'+htmlSafe(petDisplayName(pid))+'</span><span class="pet-hud-level">Lv '+petLevel(pid)+'</span>';petName.title=caption+' / '+(PET_TRAIN_MAX+1)+' · Train at the Beastkeeper';}
       document.getElementById('pethudhp').textContent=Math.ceil(php)+' / '+Math.ceil(pmax)+' HP';
       document.getElementById('pethudfill').style.width=Math.max(0,Math.min(100,php/pmax*100))+'%';
     }
@@ -24016,7 +24021,7 @@ window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPAN
   ZONES, openCampaignEntry, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
-  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, pvpPetHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
+  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petLevel, petNameplate, petTrainLvl, PET_TRAIN_MAX, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, pvpPetHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   /* foeHit is exported for the same reason surfaceHeightAt is: harness/probes/bounceby.probe.js
      TRANSCRIBED its `{name, attack}` return to test who `hurtPlayer` is handed, and the day the

@@ -1633,3 +1633,8 @@ User requires weapon glow cosmetics preserve weapon color, emit subtle visible s
 ## [Codex | 2026-10-17] U-TUTORIAL-MENU-KEYS-20261017
 
 User requires tutorial clearly teach E select/continue and Q back/close for menus/dialogue. Plan: early short safe lesson with current Interact binding plus reservedQ and yellow-selector navigation, visible keycaps, accurate Q/Esc tip-dismiss captions. Ensure E activates focused enabled buttons/summaries in ordinary menu/pause without selecting arbitrary actions or typing/repeat side effects. Preserve dialogue owner/arming and existing Q cleanup. Update map tip to reflect fixed overhead orientation.
+
+
+## [Codex | 2026-10-17] U-HUD-WEAPON-PET-LEVEL-20261017
+
+User requires equipped weapon always visible in upper-left name card, companion level on HUD/nameplate tied to paid training. Existing training has5 upgrades; derive displayLv1+training (1..6) with no new XP/save field, retain current prices/stat multipliers, clamp malformed legacy training. Show level/next level/max in Beastkeeper, preserve custom names, update current pet maxHP after training while preserving missingHP. Restore weapon line inline below class/gold, remove hidden-details toggle and use measured HUD/companion heights to avoid tracker overlap. Verify weapon changes, trained save reload, all five purchases/max/cost/HP and browser layout.

@@ -1838,3 +1838,7 @@ User requests a full-character / face close-up choice in the creator, full-chara
 ## [Codex | 2026-10-16] Creator camera candidate verified
 
 U-CREATOR-VIEW-20261016 implemented. Browser confirmed centered Warrior/Ranger/Mage close-ups, full-view retention after choosing green eyes/smile, and immediate pressed-state updates. Face view hides preview fittings attached to Head and held weapon, restored in full body. 14 creator event-handler assertions test edits/step preservation, two-axis deltas, capture release, other-touch rejection and pitch limits. Direct phone viewport 390px/310px card, no overflow. An iframe fixture failed before creator initialization; do not count that as a passing phone test. Native pointer drag automation unsupported; no claim of a native gesture test. Original SFX and progression tests still pass. Production-safe checkout receives only creator camera/UI changes.
+
+## [Codex | 2026-10-16] v2.211 creator camera production confirmed
+
+Commit b7a88928 deployed successfully (7ba3d989-9596-4e60-ae19-dbbc2485c0a7). Public browser shows v2.211.0-creator-camera and creator/hero scripts v2211. Full body default, persistent toggles, centered head framing and bounded vertical drag are live. Three starter models and direct phone-width layout visually verified; 14 event-handler checks pass. No real saves touched by fixtures. Native drag gestures remain outside automated browser coverage; pointer deltas/cancel/capture guards tested by event harness. Unrelated companion/rig changes and pending Keep/Reaper work remain excluded.

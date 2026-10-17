@@ -26,5 +26,10 @@
     "Native automated drag gestures unavailable in this browser API; actual pointer handlers tested in the DOM harness.",
     "An early iframe-only responsive fixture failed to initialize; replaced by direct 390px viewport check."
   ],
-  "release": "Pending"
+  "release": {
+    "status": "Production confirmed",
+    "commit": "b7a88928",
+    "deployment": "7ba3d989-9596-4e60-ae19-dbbc2485c0a7",
+    "url": "https://bladefall.pages.dev/3d/?verify=2211"
+  }
 }

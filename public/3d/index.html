@@ -1040,7 +1040,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 </style>
 <link rel="stylesheet" href="./bag-menu.css?v=2238">
 <link rel="stylesheet" href="./adventure-hud.css?v=2247">
-<script src="./adventure-hud.js?v=2247"></script>
+<script src="./adventure-hud.js?v=2255"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
@@ -1104,7 +1104,9 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./prison-dungeon.js?v=2140"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
-<script src="./loading.js?v=2233"></script>
+<script src="./loading.js?v=2255"></script>
+<script src="./sprint-race.js?v=2255"></script>
+<link rel="stylesheet" href="./sprint-race.css?v=2255">
 <link rel="stylesheet" href="./hub-dialogue.css?v=2243">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
@@ -1202,7 +1204,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.254.0-onboarding-coop';
+const VERSION3D='2.255.0-sprint-finish';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1263,7 +1265,7 @@ function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}ca
 const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','sprintBests','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
 const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -1310,6 +1312,7 @@ function persist(){ if(!saveGenerationCurrent()||IN_ARENA) return;   // the Aren
 // Campaign keeps the route checkpoint while committing earned growth, gold and hub requests.
 // Secondary modes retain their own save contracts.
 function autosaveRun(){ try{
+    if(G?.sprintFun&&G.bonusActive){persistGlobal();return;} // practice never becomes a campaign resume
     if(typeof mode!=='undefined' && ['play','pause'].includes(mode) && G?.hub && G.p && !IN_ARENA) meta.hero=snapOf(G.p);
     if(campaignCheckpoint()){ persist(); return; }
     if(typeof mode!=='undefined' && ['play','pause','upgrade'].includes(mode) && G && G.p && !G.p.dead && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
@@ -9757,28 +9760,33 @@ function startBonus(){
   loadBonus(ret);
 }
 function loadBonus(returnIdx,forcedSeed){
-  const s=STAGES[G.stageIndex];
+  BFDragonRiding.stop(G,true);BFChestReveal.clear();BFGuidedTutorial.stop();releaseKeyboard();window.BFAdventureHud?.clear();window.BFJournalNotice?.queue?.reset('sprint',{});G.lootCard=null;G.lootQueue=[];
+  Object.assign(G,{hub:false,hubArt:null,hubLayout:null,hubNpcs:[],gates:[],storyNpcs:[],storyObjects:[],geography:null,campaignLayout:null,briarMill:null,briarJourney:null,storyState:null,secret:null,secretTrigger:null,haz:null,thorns:[],vents:[],phasers:[],debris:[],lights:[],shockwaves:[],trails:[],spikefields:[],beam:null,collapse:[],fx:[],combatArt:[],hostileArt:[],marks:[],texts:[],meteors:[],optionalMissions:[],interact:null,_obsIdx:null,_obsDirty:true,vertical:false,terraces:null,climbs:null,areaName:'Treasure Sprint',riftHall:false,sparringRoom:false,trial:null,side:false,arena:false,devKeep:null,devBriar:null,bossRush:false,endless:false,delve:false,kingFinal:null});
+  Object.assign(G.p,{dodgeTimer:0,dodgeCdT:0,chargeDash:0,castPlantT:0,recoverT:0,attackHeld:false,charging:false,chargeAmt:0,holdT:0,varJump:false,jumps:0,atkTimer:0,runAnim:0,sitting:false,emote:null});
+  delete G._cameraBoom;G._occN=0;G._freezeT=0;
+  document.getElementById('bosshpwrap').classList.remove('on');document.getElementById('bosscue').hidden=true;
+  document.body.classList.remove('npc-conversation','briefing');
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
-  G.bonusStarted=false;G.bonusGuideIndex=0;G.bonusSectionIndex=0;G.sprintFinish=null;
+  G.time=0;G.bonusStarted=false;G.bonusGuideIndex=0;G.bonusSectionIndex=0;G.sprintFinish=null;
   G.bonusVisits=(G.bonusVisits||0)+1;
   const seed=(forcedSeed!=null)?(forcedSeed>>>0):((((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0);
   const rnd=mulberry(seed||1), R=(lo,hi)=>lo+rnd()*(hi-lo), CLIMB=Math.min(72,JMPV-18);
   let cx=0,cz=0,cy=0,peak=0,budget=0;
   G.bonusPath=[];
-  const put=(x,z,y,w,d,extra)=>{peak=Math.max(peak,y);let o;if(y<=1){o=Object.assign({x,z,w,d},extra||{});G.segments.push(o);}else{o=vplat(x,z,y,w,d,extra);}if(!extra?.recovery)G.bonusPath.push({x,z,y,w,d,dash:!!(extra?._dash),checkpoint:!!(extra?.checkpoint)});return o;};
+  const put=(x,z,y,w,d,extra)=>{peak=Math.max(peak,y);let o;if(y<=1){o=Object.assign({x,z,w,d},extra||{});G.segments.push(o);}else{o=vplat(x,z,y,w,d,{slab:22,...extra});}if(!extra?.recovery)G.bonusPath.push({x,z,y,w,d,dash:!!(extra?._dash),checkpoint:!!(extra?.checkpoint)});return o;};
   const hop=(dx,dz,dy,w=96,d=86,ex)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);return put(cx,cz,cy,w,d,ex);};
   const mark=()=>{const last=G.bonusPath.at(-1);if(last&&!last.mover&&!last.crumble&&!last.phase&&Math.abs(last.x-cx)<1&&Math.abs(last.z-cz)<1&&Math.abs(last.y-cy)<1){last.checkpoint=true;for(const o of [...G.obstacles,...G.segments])if(Math.abs(o.x-cx)<1&&Math.abs(o.z-cz)<1&&Math.abs((o.h||0)-cy)<1)o.checkpoint=true;return;}hop(0,-82,0,150,126,{checkpoint:true});};
-  const mover=(dx,dz,dy,vamp=0)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy+vamp);const m={x0:cx,z:cz,w:92,d:82,h:cy,h0:cy,amp:R(18,38),sp:R(.55,.78),ph:R(0,6.28),vamp,vsp:R(.55,.78),vph:R(0,6.28),x:cx,px:cx,py:cy};G.movers.push(m);G.bonusPath.push({x:cx,z:cz,y:cy,w:m.w,d:m.d,mover:true});return m;};
+  const mover=(dx,dz,dy,vamp=0)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy+vamp);const m={x0:cx,z:cz,w:92,d:82,h:cy,h0:cy,amp:R(18,38),sp:R(.55,.78),ph:R(0,6.28),vamp,vsp:R(.55,.78),vph:R(0,6.28),x:cx,px:cx,py:cy};G.movers.push(m);G.bonusPath.push({x:cx,z:cz,y:cy,w:m.w,d:m.d,mover:true,moverIndex:G.movers.length-1});return m;};
   const crumble=(dx,dz,dy)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy);const c={x:cx,z:cz,h:cy,w:86,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0};G.crumbles.push(c);G.bonusPath.push({x:cx,z:cz,y:cy,w:c.w,d:c.d,crumble:true});};
   const families={
     spiral(){const dir=rnd()<.5?1:-1,ox=cx,oz=cz-190;for(let k=0;k<5;k++){const a=dir*(k+1)*.9;cx=ox+Math.sin(a)*82;cz=oz+Math.cos(a)*82;cy+=k===0?R(28,38):R(38,CLIMB);put(cx,cz,cy,k%2?88:116,k%2?82:104,k===2?{checkpoint:true}:null);}budget+=8;},
     switchback(){const dir=rnd()<.5?1:-1;for(let k=0;k<5;k++)hop(dir*(k%2?145:-145),-78,k===0?R(28,38):R(32,54),112,74,k===2?{checkpoint:true}:null);budget+=7;},
-    elevator(){mark();mover(R(-55,55),-118,CLIMB*.7,R(30,46));hop(R(-55,55),-116,CLIMB,142,104,{checkpoint:true});budget+=8;},
+    elevator(){mark();mover(R(-55,55),-118,CLIMB*.7,R(30,46));hop(R(-55,55),-116,CLIMB,156,124,{checkpoint:true});mover(68,-140,0);hop(-68,-136,-32,154,120,{checkpoint:true});budget+=12;},
     crumble(){for(let k=0;k<5;k++)crumble((k%2?1:-1)*R(24,62),-R(86,112),R(18,38));mark();budget+=7;},
-    springs(){for(let k=0;k<3;k++){G.pads.push({x:cx,z:cz,y:cy,r:24});hop(R(-90,90),-R(105,130),R(72,104),132,116,k===2?{checkpoint:true}:null);}budget+=7;},
+    springs(){for(let k=0;k<3;k++){G.pads.push({x:cx,z:cz,y:cy,r:24});if(G.bonusPath.length)G.bonusPath.at(-1).spring=true;hop(R(-90,90),-R(105,130),R(72,104),132,116,k===2?{checkpoint:true}:null);}budget+=7;},
     cascade(){for(let k=0;k<5;k++)hop((k%2?1:-1)*R(30,88),-R(88,118),-R(38,66),108,94,k===2?{checkpoint:true}:null);budget+=6;},
     beams(){const base=Math.max(0,cy-70);for(let k=0;k<5;k++){hop((k%2?1:-1)*R(82,122),-R(82,108),R(-8,18),k%2?48:72,k%2?126:68);put(cx,cz,base,170,92,{recovery:true});}mark();budget+=8;},
     phase(){for(let k=0;k<4;k++){const p=hop((k%2?1:-1)*R(45,85),-R(92,118),R(-8,24),100,88);const ph={ob:p,on:true,sp:R(.65,.85),off:k*1.35};G.bonusPhasers.push(ph);p.phase=ph;G.bonusPath.at(-1).phase=true;}mark();budget+=9;},
@@ -9786,8 +9794,9 @@ function loadBonus(returnIdx,forcedSeed){
     shaft(){mark();for(let k=0;k<5;k++){if(k===2)mover((k%2?1:-1)*72,-72,CLIMB*.8,28);else hop((k%2?1:-1)*72,k===0?-128:-72,k===0?R(28,38):R(42,CLIMB),98,72);}mark();budget+=9;},
     arches(){for(let k=0;k<5;k++){const dir=k%2?1:-1;hop(dir*R(70,112),-R(82,108),R(-22,28),54,132);hop(dir*22,-38,0,116,42);}mark();budget+=8;}
   };
-  put(0,0,0,168,168);
+  put(0,0,0,210,210,{checkpoint:true});
   G.p.x=0;G.p.z=0;G.p.y=0;G.p.vx=0;G.p.vy=0;G.p.vz=0;G.p.yaw=Math.PI;G.p.onGround=true;G.lastSafe={x:0,z:0,y:0};
+  hop(0,-190,24,148,116);hop(38,-130,32,150,126,{checkpoint:true});
   const pools=[['spiral','switchback','shaft'],['elevator','crumble','phase','springs'],['cascade','beams','arches']];
   const titles={spiral:'Spiral Ascent',switchback:'Stone Switchbacks',shaft:'Lift Shaft',elevator:'Moving Bridge',crumble:'Falling Stairs',phase:'Vanishing Walk',springs:'Spring Rise',cascade:'Downward Steps',beams:'Narrow Beams',arches:'Broken Arches'};
   const chosen=pools.map(pool=>pool[Math.floor(rnd()*pool.length)]); // the same seed must build the same co-op course on every client
@@ -9799,43 +9808,55 @@ function loadBonus(returnIdx,forcedSeed){
   const fin=hop(0,-92,0,210,200,{checkpoint:true});
   G.chests.push({x:fin.x,z:fin.z,y:cy,opened:false,bob:0,bonus:true});
   G.progressEnd=fin.z;G.goalPos={x:fin.x,z:fin.z,y:cy};
-  const firstLanding=G.bonusPath[1];if(firstLanding){G.camYaw=Math.atan2(firstLanding.x,firstLanding.z);G.p.yaw=G.camYaw;}
+  const firstLanding=G.bonusPath[1];if(firstLanding){G.camYaw=Math.atan2(firstLanding.x,firstLanding.z);G.p.yaw=G.camYaw;}G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camPitch=.18;G.startPos={x:0,y:0,z:0};
   const xs=G.bonusPath.map(p=>p.x),zs=G.bonusPath.map(p=>p.z);
   G.bounds={minX:Math.min(...xs)-240,maxX:Math.max(...xs)+240,minZ:Math.min(...zs)-240,maxZ:240};
   G.bonusTime=Math.round(15+G.bonusPath.length*2.35+G.movers.length*2.5+G.bonusPhasers.length*1.25);
   G.bonusCourse={seed,families:chosen,sections:G.bonusSections.map(s=>s.name),finale,peak:Math.round(peak),budget:G.bonusTime,bands:new Set(G.bonusPath.map(p=>Math.floor(p.y/100))).size};
-  const bt=document.getElementById('bonustimer');bt.style.display='block';
+  G.sprintRace=BFSprintRace.create(seed,G.bonusTime);G.sprintFinish=null;G.sprintCheckpoint=0;G.pet=null;
+  BF_LOADING.reset();window.__world3dRebuild?.();sprintHud();
   document.getElementById('stagetag').textContent='TREASURE SPRINT';
   toast('Treasure Sprint · follow the gold path. The clock starts when you move.');SFX.achieve();questUpdate();hudUpdate();
 }
-function endBonus(msg){
-  G.bonusActive=false; document.getElementById('bonustimer').style.display='none';
-  if(msg) toast(msg);
-  if(G.sprintReturnHub){
-    if(!MP.active){const result=G.sprintFinish,head=result?.failed?'Time ran out':result?.best?'New best time!':'Sprint complete',detail=result?.failed?'Try a new route and race the clock again.':`${result.time.toFixed(1)} seconds · Best ${meta.sprintBest.toFixed(1)} seconds`;
-      mode='menu';showGameUI(false);showOverlayHTML(`<div class="card" style="max-width:520px;margin:auto;text-align:center"><h2>${head}</h2><p>${detail}</p><p>Three changing sections. Falls cost time, never health.</p><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><button class="bigbtn" id="sprintAgain">Try Again</button><button class="bigbtn ghost" id="sprintHub">Return to Hub</button></div></div>`);document.getElementById('sprintAgain').onclick=()=>startHubSprint();document.getElementById('sprintHub').onclick=()=>enterWaystation();SFX.pickup();return;}
-    G.sprintReturnHub=false; G.sprintFun=false; enterWaystation(); SFX.pickup(); return; }
-  loadStage(G.bonusReturn); SFX.pickup();
+function sprintHud(){
+ const el=document.getElementById('bonustimer');if(!G?.bonusActive||G.sprintFinish){el.style.display='none';return;}
+ const hints=controlHint('jump')+'|'+controlHint('dodge');
+ if(el.dataset.sprintKeys!==hints||!el.querySelector('[data-sprint-clock]')){el.dataset.sprintKeys=hints;el.innerHTML='<div class="sprint-clockline"><b data-sprint-clock></b><span data-sprint-section></span></div><div class="sprint-meter"><i></i></div><div class="sprint-keyline"><span data-sprint-jump></span><span data-sprint-dash></span><span data-sprint-falls></span></div><div data-sprint-tip></div>';el.querySelector('[data-sprint-jump]').textContent=controlHint('jump')+' · hold to jump';el.querySelector('[data-sprint-dash]').textContent=controlHint('dodge')+' · air dash';}
+ el.style.display='block';const clock=G.bonusSecured?'SECURED':G.bonusStarted?Math.max(0,G.bonusTime).toFixed(1)+'s':'READY',label=G.bonusStarted?(G.bonusSections[G.bonusSectionIndex]?.name||'Final climb'):'Move to start · reach the chest';
+ for(const [sel,value] of [['[data-sprint-clock]',clock],['[data-sprint-section]',label],['[data-sprint-falls]',(G.sprintRace?.falls||0)+' falls · +'+(G.sprintRace?.penalty||0)+'s']]){const n=el.querySelector(sel);if(n.textContent!==value)n.textContent=value;}
+ const family=G.bonusSections[G.bonusSectionIndex]?.family,tip=(G.bonusGuideIndex||0)<2?'Hold Jump for height. The clock starts when you move.':family==='phase'?'Cyan outlines return. Amber warns a slab will vanish.':family==='crumble'?'Cracked stones fall. Keep moving to the next safe pad.':family==='elevator'||family==='shaft'?'Wait for the lift, ride it, then jump from its high point.':family==='springs'?'Step on a gold spring disc for an extra-high jump.':'Gold rims mark permanent landings. Reach the chest to finish.';const note=el.querySelector('[data-sprint-tip]');if(note.textContent!==tip)note.textContent=tip;
+ el.classList.toggle('sprint-urgent',G.bonusStarted&&G.bonusTime<15);el.querySelector('.sprint-meter i').style.width=(100*Math.min(1,(G.bonusGuideIndex||0)/Math.max(1,G.bonusPath.length-1)))+'%';
 }
-/* HUB Treasure Sprint — the exact same random parkour course, launched from the Waystation portal purely
-   for fun: NO loot, NO gold, just a time trial. Reaching the finale chest records your best time. */
+function endBonus(msg){
+ document.getElementById('bonustimer').style.display='none';if(msg)toast(msg);
+ if(G.sprintReturnHub){
+  if(G.sprintRace)G.sprintRace.finished=true;
+  const result=G.sprintFinish||{failed:true,...BFSprintRace.result(G.sprintRace)},seed=G.bonusCourse.seed,host=!MP.active||MP.isHost;
+  G.sprintFinish=result;beginPause();mode='menu';showGameUI(false);
+  const head=result.failed?'Time ran out':result.best?'New course best!':'Sprint complete',best=BFSprintRace.records(meta.sprintBests)[BFSprintRace.key(seed)],detail=result.failed?'Your next attempt starts on this same course.':result.time.toFixed(1)+' seconds'+(best?' · Course best '+best.toFixed(1)+'s':'');
+  showOverlayHTML(`<div class="card sprint-results" data-dialogue-menu><p class="ovkicker">TREASURE SPRINT · COURSE ${seed.toString(36).toUpperCase()}</p><h2>${head}</h2><p>${detail}</p><div class="sprint-result-stats"><span><b>${(result.running||0).toFixed(1)}s</b>Running time</span><span><b>${result.falls||0}</b>Falls</span><span><b>+${result.penalty||0}s</b>Fall penalty</span></div><p class="hint">Falls cost time, never health. No gold or gear is spent.</p>${MP.active?'<p class="hint">Your friends can finish their run. The host restarts or returns the party together.</p>':''}<div class="sprint-result-actions"><button class="bigbtn" id="sprintAgain" ${host?'':'disabled'}>${MP.active?'Restart party course':'Retry this course'} · ${htmlSafe(controlHint('interact'))}</button><button class="bigbtn ghost" id="sprintNew" ${host?'':'disabled'}>New course</button><button class="bigbtn ghost" id="sprintHub" data-menu-back>Return to Hub · Q</button></div></div>`);
+  document.getElementById('sprintAgain').onclick=()=>startHubSprint({seed});document.getElementById('sprintNew').onclick=()=>startHubSprint();document.getElementById('sprintHub').onclick=()=>{G.bonusActive=false;G.sprintFun=false;G.sprintReturnHub=false;enterWaystation();};document.getElementById(host?'sprintAgain':'sprintHub').focus();return;
+ }
+ G.bonusActive=false;loadStage(G.bonusReturn);SFX.pickup();
+}
+/* The hub course is practice: never replace a character's campaign checkpoint or grant loot. */
 function startHubSprint(opts){
-  opts=opts||{};
-  initAudio();
-  if(!G) enterZone(0);                                        // late-joining co-op guests need a live hero/world before the course can load
-  G.hub=false; G.sprintFun=true; G.sprintReturnHub=true; G.sprintStartT=G.time||0;
-  loadBonus(0,opts.seed);
-  // openLevelEntry left us in mode='menu' with the popup up — actually ENTER the course (this was the bug: the button did nothing)
-  mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate();
-  toast('🏁 TREASURE SPRINT — race the clock! Best: '+(meta.sprintBest?meta.sprintBest.toFixed(1)+'s':'—'));
-  if(MP.active&&!opts.remote) MP.enterSpecial('sprint');
+ opts=opts||{};if(MP.guest()&&!opts.remote){toast('Your host starts Treasure Sprint for the party.');return;}
+ initAudio();if(!G)enterZone(0);if(!G)return;
+ if(G.hub){meta.hero=snapOf(G.p);persist();}
+ G.sprintAttempt=Number.isSafeInteger(opts.attempt)?opts.attempt:(G.sprintAttempt||0)+1;
+ G.sprintFun=true;G.sprintReturnHub=true;loadBonus(0,opts.seed);
+ mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();questUpdate();
+ toast('Treasure Sprint · reach the chest. Falls cost 3 seconds.');if(MP.active&&!opts.remote)MP.enterSpecial('sprint');
 }
 function finishHubSprint(){
-  const s=Math.max(0,(G.time||0)-(G.sprintStartT||0)), prev=meta.sprintBest||0, best=(!prev||s<prev);
-  if(best){ meta.sprintBest=+s.toFixed(1); persistGlobal(); }
-  G.sprintFinish={time:s,best};
-  SFX.achieve();
-  endBonus('🏁 Finished in '+s.toFixed(1)+'s'+(best?' · NEW BEST!':' · best '+prev.toFixed(1)+'s'));
+ if(!G?.bonusActive||G.sprintFinish)return;
+ const result=BFSprintRace.result(G.sprintRace),record=BFSprintRace.record(meta.sprintBests,result.seed,result.time);meta.sprintBests=record.records;
+ if(!meta.sprintBest||result.time<meta.sprintBest)meta.sprintBest=+result.time.toFixed(1);persistGlobal();
+ G.sprintFinish={...result,best:record.best};G.sprintRace.finished=true;SFX.achieve();endBonus();
+}
+function sprintStep(step){
+ if(step?.mover){const m=G.movers[step.moverIndex];if(m)return {...step,x:m.x,z:m.z,y:m.h};}return step;
 }
 function sprintGuideTarget(){
   if(!G?.bonusActive)return null;
@@ -9843,14 +9864,14 @@ function sprintGuideTarget(){
   const path=G.bonusPath||[],i=Math.min(path.length-1,(G.bonusGuideIndex||0)+1),step=path[i];
   if(!step)return G.chests[0]?{...G.chests[0],navLabel:'Treasure chest',finish:true}:null;
   if(i===path.length-1)return {...G.chests[0],navLabel:'Treasure chest',finish:true};
-  if(step.mover){const mover=G.movers.find(m=>Math.abs(m.z-step.z)<1);if(mover)return {x:mover.x,z:mover.z,y:mover.h,navLabel:'Moving platform'};}
+  if(step.mover){const mover=G.movers[step.moverIndex];if(mover)return {x:mover.x,z:mover.z,y:mover.h,navLabel:'Moving platform'};}
   return {...step,navLabel:step.checkpoint?'Checkpoint':'Next landing'};
 }
 function updateSprintGuide(){
   if(!G?.bonusActive||!G.p.onGround)return;
   const path=G.bonusPath||[];let best=G.bonusGuideIndex||0;
-  for(let i=best+1;i<path.length;i++){const step=path[i];if(Math.abs(G.p.z-step.z)>Math.max(55,step.d/2+16)||Math.abs(G.p.x-step.x)>Math.max(55,step.w/2+16)||Math.abs(G.p.y-step.y)>24)continue;best=i;}
-  if(best!==G.bonusGuideIndex){G.bonusGuideIndex=best;const section=G.bonusSections?.findIndex(s=>best<=s.to);G.bonusSectionIndex=section<0?2:section;questUpdate();}
+  for(let i=best+1;i<path.length;i++){const step=sprintStep(path[i]);if(Math.abs(G.p.z-step.z)>Math.max(55,step.d/2+16)||Math.abs(G.p.x-step.x)>Math.max(55,step.w/2+16)||Math.abs(G.p.y-step.y)>24)continue;best=i;}
+  if(best!==G.bonusGuideIndex){G.bonusGuideIndex=best;const section=G.bonusSections?.findIndex(s=>best<=s.to);G.bonusSectionIndex=section<0?G.bonusSections.length:section;if(path[best]?.checkpoint&&best>G.sprintCheckpoint){G.sprintCheckpoint=best;toast('Checkpoint · '+(G.bonusSections[section]?.name||'Final climb'),'#a3f0d0');SFX.pickup();}questUpdate();}
 }
 // A BREAKABLE cracked wall: a solid barrier you can ATTACK down. Reuses the enemy hit-system so any
 // weapon/skill damages it and it shows an HP bar; killEnemy() removes the collision wall to open the path.
@@ -11246,9 +11267,9 @@ function updateGeysers(dt){
     }
   }
 }
-function updateMovers(dt){ if(G?.devKeep){devBeta().movePlatforms(dt);return;}for(const mv of G.movers){ if(mv.furnaceLift&&G.furnace){BFGreatFurnace.moveLift(G,mv);continue;}if(mv.furnaceCache&&G.furnace){BFGreatFurnace.moveCache(G,mv);continue;}if(mv.prisonLift&&G.prison){BFPrison.moveLift(G,mv);continue;} mv.px=mv.x; mv.py=mv.h; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
-  if(mv.vamp){ mv.h=mv.h0+Math.sin(G.time*(mv.vsp||1)+mv.vph)*mv.vamp; } } }
-function updateBonusPhasers(){ for(const ph of (G.bonusPhasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-.25; if(on!==ph.on){ ph.on=on; const ob=ph.ob,i=G.obstacles.indexOf(ob); if(on&&i<0)G.obstacles.push(ob); else if(!on&&i>=0)G.obstacles.splice(i,1); } } }   // Batch 5: vertical bob movers ride the player on y (via floorAt → p.y=floor)
+function updateMovers(dt){ if(G?.devKeep){devBeta().movePlatforms(dt);return;}for(const mv of G.movers){ if(mv.furnaceLift&&G.furnace){BFGreatFurnace.moveLift(G,mv);continue;}if(mv.furnaceCache&&G.furnace){BFGreatFurnace.moveCache(G,mv);continue;}if(mv.prisonLift&&G.prison){BFPrison.moveLift(G,mv);continue;} const rider=G.bonusActive&&G.p.onGround&&Math.abs(G.p.y-mv.h)<3&&Math.abs(G.p.x-mv.x)<mv.w/2+G.p.r*.4&&Math.abs(G.p.z-mv.z)<mv.d/2+G.p.r*.4;mv.px=mv.x; mv.py=mv.h; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
+  if(mv.vamp){ mv.h=mv.h0+Math.sin(G.time*(mv.vsp||1)+mv.vph)*mv.vamp; }if(rider){G.p.x+=mv.x-mv.px;G.p.y+=mv.h-mv.py;} } }
+function updateBonusPhasers(){ for(const ph of (G.bonusPhasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-.25; if(on!==ph.on){ G._obsDirty=true;ph.on=on; const ob=ph.ob,i=G.obstacles.indexOf(ob); if(on&&i<0)G.obstacles.push(ob); else if(!on&&i>=0)G.obstacles.splice(i,1); } } }   // Batch 5: vertical bob movers ride the player on y (via floorAt → p.y=floor)
 /* ---- Zone signature hazards (Phase 4): one per zone, applied every frame ---- */
 function curHaz(){ return (G&&G.haz)?HAZARDS[G.haz]:null; }
 function hazUpdate(dt){
@@ -11264,7 +11285,7 @@ function hazUpdate(dt){
     if(strong&&Math.random()<0.25*60*dt) G.particles.push({x:p.x-G.gustX*180+(Math.random()-0.5)*160,y:20+Math.random()*80,z:p.z+(Math.random()-0.5)*220,vx:G.gustX*420,vy:0,vz:0,life:0.5,color:'#cfe6ff',sz:2});
   } else if(G.haz==='phase'){                            // Phasing: some ground is only sometimes there
     for(const ph of (G.phasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-0.15;
-      if(on!==ph.on){ ph.on=on;
+      if(on!==ph.on){ G._obsDirty=true;ph.on=on;
         if(!on){ const s=ph.seg; if(s&&G.segments.indexOf(s)>=0) G.segments.splice(G.segments.indexOf(s),1); }
         else if(ph.seg && G.segments.indexOf(ph.seg)<0) G.segments.push(ph.seg); } }
   } else if(G.haz==='lava'){                             // Emberfall: the floor breathes fire on a rhythm
@@ -11892,7 +11913,7 @@ function lavaHit(){
   if(pauseDamageBlocked())return;
   const p=G.p;
   const fallTheme=G.escape?'dungeon':STAGES[G.stageIndex].theme;
-  if(G.bonusActive){G.bonusTime=Math.max(0,G.bonusTime-3);p.x=G.lastSafe.x;p.z=G.lastSafe.z;p.y=(G.lastSafe.y||0)+60;p.vx=0;p.vy=0;p.vz=0;p.onGround=false;p.invuln=1.2;p.recoverT=.7;toast('Fall recovered · 3 seconds lost','#ffd24a');return;}
+  if(G.bonusActive){if(G.sprintFinish)return;BFSprintRace.fall(G.sprintRace);G.bonusStarted=true;G.bonusTime=BFSprintRace.remaining(G.sprintRace);p.x=G.lastSafe.x;p.z=G.lastSafe.z;p.y=(G.lastSafe.y||0)+60;p.vx=0;p.vy=0;p.vz=0;p.onGround=false;p.warpSerial=(p.warpSerial||0)+1;p.invuln=1.2;p.recoverT=.7;G.cam={x:p.x,y:p.y,z:p.z};delete G._cameraBoom;toast('Fall recovered · 3 seconds lost','#ffd24a');return;}
   // Ordinary country/fortress ground is not a supernatural damage hazard.
   if(isCampaignAdventure()&&!isHitless()&&G.geography?.fall==='recover'){Object.assign(p,{x:G.lastSafe.x,z:G.lastSafe.z,y:(G.lastSafe.y||0)+24,vx:0,vy:0,vz:0,onGround:false,recoverT:.7,invuln:1.2});toast('Back on the path.');return;}
   G.lastHitBy = hazardCause(fallTheme);   // fall/hazard death cause for the death screen
@@ -13800,7 +13821,7 @@ function mimicReveal(ch){
   toast('It was never a chest','var(--danger)','event-mimic');
 }
 function prepareChest(ch){
- if(!ch)return null;if(ch._rewardRecord)return ch._rewardRecord;
+ if(!ch)return null;if(ch.bonus&&G.sprintFun&&G.bonusActive){ch.rarity='rare';ch.mimic=false;return ch._sprintRecord||(ch._sprintRecord={claimed:!!ch.opened});}if(ch._rewardRecord)return ch._rewardRecord;
  const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=layout.rarity;ch.challenge=ch.enemyReward?false:layout.challenge;
  if(ch.challenge)ch.mimic=false;
  const scene=[G.escape?'prison':G.endless?'descent':G.bonusActive?'bonus':'campaign',G.runSeed,G.zone,G.area,G.floor||0,G.stageIndex,G.bonusActive?G.bonusCourse?.seed||G.bonusVisits||0:0].join(':');
@@ -13829,7 +13850,7 @@ function descentRewardChest(){
 function openChest(ch){
   if(!ch||ch.opened||(ch.dropReadyAt||0)>G.time)return;const record=prepareChest(ch);if(record.claimed||ch.mimic)return;
   if(!(ch.bonus&&G.sprintFun&&G.bonusActive)&&meta.autoSellEquipment!==true&&(meta.stash||[]).length>=STASH_CAP){fullBagNotice(null,null,'chest');return;}record.claimed=true;
-  ch.opened=true; SFX.pickup(); if(ch.bonus&&G.sprintFun&&G.bonusActive)SFX.achieve(); playFx('chestopen');
+  ch.opened=true; SFX.pickup(); playFx('chestopen');
   /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
      2026-08-12. It was NOT one of docs/SKILL_TRIAGE.md section E's dead passives — the audit has
      always called `pir_swift` WIRED, and it is: its one reader is `effAtkSpeed`, where it grants
@@ -15111,7 +15132,7 @@ const MP={
     if(!G) return null;
     kind=kind||(G.endless?'endless':G.sprintFun&&G.bonusActive?'sprint':G.bossRush?'gauntlet':null);
     if(kind==='endless') return {t:'special',kind,runSeed:G.runSeed,floor:G.floor||1,cleared:G.floorCleared?1:0};
-    if(kind==='sprint') return {t:'special',kind,runSeed:G.runSeed,seed:G.bonusCourse&&G.bonusCourse.seed};
+    if(kind==='sprint') return {t:'special',kind,runSeed:G.runSeed,seed:G.bonusCourse&&G.bonusCourse.seed,attempt:G.sprintAttempt||0};
     if(kind==='gauntlet') return {t:'special',kind,runSeed:G.runSeed,tier:G.brTier||'normal',idx:G.brIdx||0};
     return null;
   },
@@ -15129,8 +15150,9 @@ const MP={
       if(G&&G.endless&&d.cleared&&!G.portal){ G.floorCleared=true; descentRewardChest(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0}; questUpdate(); }
     } else if(d.kind==='sprint'){
       this.zone=this.SPRINT;
-      const same=G&&G.sprintFun&&G.bonusActive&&G.bonusCourse&&G.bonusCourse.seed===d.seed;
-      if(!same) startHubSprint({remote:true,seed:d.seed});
+      if(G?.sprintFun&&G.bonusActive&&Number.isSafeInteger(d.attempt)&&d.attempt<(G.sprintAttempt||0))return;
+      const same=G&&G.sprintFun&&G.bonusActive&&G.bonusCourse&&G.bonusCourse.seed===d.seed&&(G.sprintAttempt||0)===(d.attempt||0);
+      if(!same) startHubSprint({remote:true,seed:d.seed,attempt:d.attempt||0});
     } else if(d.kind==='gauntlet'){
       this.zone=this.GAUNTLET;
       if(!(G&&G.bossRush)||G.brTier!==(d.tier||'normal')) startBossRush(d.tier||'normal',{remote:true,idx:d.idx||0,runSeed:d.runSeed});
@@ -16407,7 +16429,7 @@ function updateWorld(dt){
     if(mode==='play' && p.hp>0 && p.hp<=effMaxHp(p)*0.15){ loopFx('heartbeat'); } else { stopFx('heartbeat'); } }
   } // ordinary player physics
   // ride moving platforms
-  if(p.onGround&&!p.dragonRide) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; if(!mv.betaMover&&!mv.prisonLift&&!mv.furnaceLift)p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
+  if(!G.bonusActive&&p.onGround&&!p.dragonRide) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; if(!mv.betaMover&&!mv.prisonLift&&!mv.furnaceLift)p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
   // jump pads launch you
   if(p.onGround&&!p.dragonRide) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
   // HEALING PADS: stand on one to slowly recover HP (a lifeline for no-lifesteal/regen builds). Limited charge per pad.
@@ -16424,7 +16446,7 @@ function updateWorld(dt){
   if(p.onGround){ if(p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe={x:p.x,z:p.z,y:0}; }
     else if(G.obstacles) for(const ob of G.obstacles){ if(ob.checkpoint && Math.abs(p.y-ob.h)<3 && Math.abs(p.x-ob.x)<ob.w/2 && Math.abs(p.z-ob.z)<ob.d/2){ G.lastSafe={x:p.x,z:p.z,y:ob.h}; break; } } }
   // fell into the hazard
-  if(p.y<-34){ lavaHit(); }
+  if(p.y<-34||(G.bonusActive&&p.y<(G.lastSafe?.y||0)-180)){ lavaHit(); }
   updateCrumbles(dt); updateGeysers(dt); updateBonusPhasers();
   if(G.shockwaves){ for(const sw of G.shockwaves){ if(sw.delay>0){ sw.delay=Math.max(0,sw.delay-dt); continue; }   // staggered quake rings hold, then march
       sw.life+=dt; sw.r+=(sw.spd||270)*dt;   // expanding boss slam ring (radial, or arc for a directional cleave)
@@ -16475,15 +16497,16 @@ function updateWorld(dt){
   // golden bonus portal
   if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48 && Math.abs(p.y-(G.bonusPortal.y||0))<70){ startBonus(); return; }
   // bonus sprint clock
-  if(G.bonusActive){ const bt=document.getElementById('bonustimer');updateSprintGuide();if(!G.bonusStarted&&(Math.abs(p.z)>12||Math.abs(p.x)>12)){G.bonusStarted=true;G.sprintStartT=G.time||0;toast('Clock running · reach the treasure!','#ffd24a');}
-    if(G.bonusSecured){ bt.innerHTML=eventIcon('event-treasure-chest')+' SECURED'; bt.style.color='#3ad07f'; }
-    else { if(G.bonusStarted)G.bonusTime-=dt; bt.innerHTML=eventIcon('event-treasure-chest')+' '+(G.bonusStarted?Math.max(0,G.bonusTime).toFixed(1)+'s':'READY'); bt.style.color=G.bonusTime<5?'#ff5e54':'#ffd24a';
-      if(G.bonusTime<=0){G.sprintFinish={failed:true};endBonus(G.sprintFun?'⏱ Out of time — give it another go!':'⏱ Too slow — the vault seals!'); return; } } }
+  if(G.bonusActive&&!G.sprintFinish){updateSprintGuide();const moved=Math.abs(p.z)>12||Math.abs(p.x)>12;
+    if(BFSprintRace.step(G.sprintRace,dt,moved,pauseState().protected)){G.bonusStarted=true;toast('Clock running · reach the treasure!','#ffd24a');}
+    G.bonusTime=BFSprintRace.remaining(G.sprintRace);sprintHud();
+    if(!G.bonusSecured&&G.bonusTime<=0){G.sprintFinish={failed:true,...BFSprintRace.result(G.sprintRace)};endBonus(G.sprintFun?'Time ran out · try this course again!':'Too slow — the vault seals!');return;}
+  }
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
   { const mm=(p.maxMana||100)+(meta.classId==='mage'&&c2Passive('m_manafont')?10:0), regen=(meta.classId==='mage'&&c2Passive('m_manafont')?1.3:1)*classManaCfg().regen; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035*regen); }  // slow passive mana regen, scaled per class (CLASS_MANA.regen)
-  updateAmbient(dt,s);
+  if(!G.bonusActive)updateAmbient(dt,s);
   reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
   // Enemies wait continuously during basic-control practice, even while the player moves.
   for(const e of G.enemies){
@@ -18629,7 +18652,7 @@ function enterWaystation(riftHall=false){
        modes and belonging together makes the difference between them legible: one is a descent you
        fight through, the other one you navigate. */
     {id:'delve',ic:'🗝️',name:'The Endless Dungeon',role:'Prison Break roguelite',prop:'abyss',verb:'Enter the Dungeon',x:-95,z:660,c1:'#0e1a2a',c2:'#7fd6ff',open:()=>openDelveGate(),needZones:1},   // pulled in off the annex divider wall (was -300, clipped the x:-330 screen wall)
-    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:235,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:235,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:MP.guest()?'Your host starts this shared parkour course. Join them to race together.':'Race through climbing turns, moving platforms and narrow crossings. Reach the finish chest. Falls cost 3 seconds, never health. Retry the same course to improve your time. No gold or gear rewards.',col:'#ffd24a',onEnter:startHubSprint})},
     {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena(),needZones:1},
     {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:185,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}   // was x:340 (SAT ON the x:330 divider wall) → pulled inside the bay, beside the Arena
   ];
@@ -20595,6 +20618,11 @@ function drawCourse(s,t){
     if(G.bonusActive){for(const side of [-1,1])bx(mv.x+side*(mv.w/2-5),mv.h+2,mv.z,5,3,mv.d-9,'#b7a5fa','#9d82f2',.65);bx(mv.x,mv.h+2,mv.z,32,2,32,'#c8b8ff','#ad8cf7',.5);}
     bx(mv.x,mv.h-15,mv.z, mv.w*0.4,4,mv.d*0.4, G.bonusActive?'#9980df':hz[1], G.bonusActive?'#9980df':hz[1], 0.5); // thruster glow
   }
+  if(G.bonusActive)for(const ph of G.bonusPhasers||[]){
+    const o=ph.ob,warn=ph.on&&Math.cos(G.time*ph.sp+ph.off)<0&&Math.sin(G.time*ph.sp+ph.off)<.15,col=warn?'#ffd17a':'#76e0ed';
+    if(ph.on){bx(o.x,o.h-9,o.z,o.w,18,o.d,'#416d88');bx(o.x,o.h+1,o.z,o.w-9,2,o.d-9,'#86cbd7');}
+    for(const sign of [-1,1]){bx(o.x+sign*(o.w/2-4),o.h+3,o.z,4,3,o.d,col,col,ph.on?.5:.2);bx(o.x,o.h+3,o.z+sign*(o.d/2-4),o.w,3,4,col,col,ph.on?.5:.2);}
+  }
   // jump pads
   for(const pd of G.pads){
     const py=pd.y||0; bx(pd.x,py+1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
@@ -20828,7 +20856,7 @@ function drawCourse(s,t){
      no count, and the voxel post draws. */
   const _hubLamp = !!(_w3dOn && _w3d.counts && _w3d.counts.hubLamp > 0);
   deferOn();
-  if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
+  if(G.obstacles) for(const ob of G.obstacles){ if(G.bonusActive&&ob.phase)continue;if(cull(ob.x,ob.z)) continue;
     /* DERIVED COLLIDERS ARE INVISIBLE. E1 gives every solid prop a collision box sized to it - and
        obstacles are DRAWN, so every tree, rock and tuft of grass in the game sprouted a beige box
        around it. The collision is the point; the box was never meant to be seen. Same skip the
@@ -22751,6 +22779,7 @@ const SKYSUN={
    the end of a 300-line render function and is one frame late, i.e. invisible. */
 let _poseKeep = [];
 function render(t){
+  document.body.classList.toggle('sprint-racing',!!G?.bonusActive&&mode==='play');
   BFDragonRiding.hud(G,mode==='play'&&!backgroundMenuMode,controlHint,toggleDragonRide);
   if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,warp:q.def?.warp||0,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
   try{ if(window.__hero3dPoseSweep) window.__hero3dPoseSweep(_poseKeep); }catch(e){}
@@ -24408,7 +24437,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2254"></script>
+<script type="module" src="./hero3d.js?v=2255"></script>
 <script type="module" src="./social-hub.js?v=2252p1"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

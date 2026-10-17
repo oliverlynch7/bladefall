@@ -66,5 +66,5 @@
   if(fpsStart===null||fpsLast!==null&&ts-fpsLast>1000){fpsStart=ts;fpsFrames=0;el.textContent='FPS …';}else fpsFrames++;
   fpsLast=ts;const elapsed=ts-fpsStart;if(elapsed>=500){el.textContent=Math.round(fpsFrames*1000/elapsed)+' FPS';fpsStart=ts;fpsFrames=0;}
  }
- window.BFAdventureHud={mount,show,tick,fps};
+ window.BFAdventureHud={mount,show,tick,fps,clear(){queue=[];current=null;left=0;if(panel)panel.hidden=true;}};
 })();

@@ -1685,3 +1685,13 @@ User reports E/Q tutorial unclear, Skill 1 value unclear, journal prompt missing
 ## [Codex | 2026-10-17] Onboarding accessibility follow-up
 
 Browser old-save/class-switch check exposed a stale accessible skill name from the previous class on locked slots. Locked-slot refresh now resets the accessible label to current slot/rank/binding instead of retaining the previous class skill.
+
+
+## [Codex | 2026-10-17] U-TREASURE-SPRINT-FINISH-20261017
+
+User requests finish and improve broken Treasure Sprint; confirms hub entry stalls loading, recovery button reloads title, save survived. Inspection: loadBonus mutates hub world but leaves hubArt; loading readiness requires active hub renderer whenever hubArt exists, even outside hub. Retry changes course without changing loading identity; stale scene/camera/collision/story fields can survive. Plan: clean Sprint scene state, mode-aware loading key/readiness, explicit successful scene warmup, stable start/camera. Preserve hub no-gold/no-loot rule and campaign reward vault, character saves and deterministic co-op seed. Audit physical jumps and dynamic support, guide/checkpoints/falls, timer pause and penalties, chest/exit/result/retry/hub return. Improve deliberate three-section route readability, safe checkpoint landings, visible progress and contextual controls, same-course retry/new-course option and useful result feedback. Keep brighter colorful art, use existing detailed stone/crystal assets and avoid particle overload. Update blueprint/design packet before geometry changes. Verify actual portal entry and old save, real physics traversal/mistake/recovery, camera modes, forced timeout/completion/retry, no rewards in hub, campaign chest, seeded network entry and full regressions. Fun remains for human playtest, not guaranteed by tests.
+
+
+## [Codex | 2026-10-17] Sprint movement/network follow-up
+
+Course audit also found static mover coordinates used by guide, phase obstacle index not invalidated, and vertical rider displacement applied after snapping to the current platform height. Sprint now tracks live mover height/position, invalidates phase collision changes, carries an existing rider once before integration, and leaves other campaign lift paths unchanged. Same-seed co-op retries carry an attempt number; stale attempts are ignored. Hub practice chest claims are ephemeral, score includes fall penalties, and practice autosave never replaces a campaign resume.

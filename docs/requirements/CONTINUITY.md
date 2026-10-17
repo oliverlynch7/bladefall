@@ -2414,3 +2414,12 @@ Texture loader now retries transient image failures with bounded delays and a st
 ## [Codex | 2026-10-17] Onboarding accessibility follow-up
 
 Browser old-save/class-switch check exposed a stale accessible skill name from the previous class on locked slots. Locked-slot refresh now resets the accessible label to current slot/rank/binding instead of retaining the previous class skill.
+
+
+## [Codex | 2026-10-17] v2.255.0 — Treasure Sprint loading repair and finish pass
+
+Reproduced hub entry stall: stale hubArt on reused world blocked loading after Sprint renderer was ready. Clean Sprint scene state, mode-aware hub readiness, course/attempt loading identity and explicit warmup reset fix entry and same-course retries. Autosave protects campaign resume; practice finish claims are ephemeral and grant no gold/gear; campaign chest remains rewarded. Clear stale loot/clue overlays on entry.
+
+Added wide launch/clear first gap, extended lift crossing, matching thin colliders, brighter detailed palace-kit palette, readable race HUD/current controls/progress/contextual platform tips, visible timed outlines/amber warning, checkpoint recovery and scored three-second fall penalties. Per-course bests retained in bounded validated records; idle/loading/menus excluded. Results show running time/falls/penalty with keyboard retry same course, new course and hub return. Co-op finishing stays local/protected while friends race; explicit host retry starts a shared round, duplicate/stale attempt messages ignored. Live mover guidance, phase-index invalidation and single pre-integration rider carry repaired.
+
+119 regression suites pass, plus focused final HUD checks; 500 seeds /10,806 hops cover every active family. Actual isolated old-save browser integration verifies entry/warmup, clock, falls, pause/bag, finish/retry/timeout/new course/hub return, simulated host/guest rounds, lift/phase physics and campaign rewards/exit. Level1 Warrior physically traverses seed68 with basic inputs and no falls. Evidence: docs/art-validation/sprint-finish-20261017; blueprint: public/design/treasure-sprint/route.svg. Pacing/fun and Internet co-op latency still require human playtest.

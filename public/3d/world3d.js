@@ -13,7 +13,7 @@ import {buildSkyLibrary} from './sky-library-art.js?v=2239';
 import {buildPalaceCourt} from './palace-courtyard-art.js?v=2239';
 import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2197';
 import {buildStorm,updateStorm} from './storm-art.js?v=2197';
-import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2239';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2255';
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2234b';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
@@ -2013,7 +2013,7 @@ function signature(world){
   const d = world.deco || [];
   const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
   const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene,world.palaceScene,world.castleScene,world.finalStage].join('|')+'|';
-  if(world.bonus&&world.sprintFun)return prefix+JSON.stringify(world.course||[]);
+  if(world.bonus)return prefix+JSON.stringify(world.course||[]);
   if(!d.length) return prefix+'empty|'+world.segments.length+'|'+world.obstacles.length;
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];
   return prefix+d.length + '|' + (world.zone || '?') + '|' +

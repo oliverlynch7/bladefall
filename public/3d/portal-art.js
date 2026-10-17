@@ -16,7 +16,7 @@ function adapt(w){
  return {...w,zone,hub:false,trial:false,arena:false,bonus:false,delve:false,endless:false,bossRush:false,portalMode:mode,
   portalProfile:{name:names[mode],lamp,sun:mode==='descent'?'#cfbfe8':mode==='sprint'?'#f4d69a':'#dfd3d6',
    ...(mode==='descent'?{palette:descentStone[w.theme]||descentStone.void,body:'#4c4854',hazard:['#080711','#291a3b']}:{}),
-   ...(mode==='sprint'?{palette:['#6a656b','#777178','#5c5963','#898078'],body:'#46414e',fog:'#24263d',sky:[.12,.14,.23],sunGlow:[.11,.08,.05],hazard:['#14152b','#303054'],emissive:'#080914'}:{})},
+   ...(mode==='sprint'?{palette:['#a8c1c9','#b9ccd0','#d4c9a6','#8eafbb'],body:'#526b7b',fog:'#7ca8be',sky:[.24,.40,.60],sunGlow:[.13,.12,.08],hazard:['#24465d','#42748b'],emissive:'#090d12'}:{})},
   // The arena's y=0 segment is lava, not a safe stone platform.
   segments:w.arenaLava?[]:w.segments};
 }

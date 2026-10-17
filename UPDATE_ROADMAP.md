@@ -3035,3 +3035,8 @@ U-MENU-CANCEL-20261016: Bag binding now closes its active screen through existin
 ## [Codex | 2026-10-16] v2.219 — first-person weapon-only view and wheel zoom
 
 U-CAMERA-LOCAL-VIEW-20261016: renderer-local body/cosmetic hiding with finally restore, preserving stock/equipped weapon attachments and full co-op rigs. Removed fallback arm/fist geometry. Wheel on gameplay canvas adjusts first-person FOV 70–115°, shoulder optical zoom 75–140%, overhead 70–150%; independent saved settings, debounced persistence, normalized wheel deltas, modifiers/menus/special cameras preserved. Optical zoom leaves camera positioning/collision intact. Active-view Settings slider and Help updated. Real WebGL 17 checks each for Warrior, Mage, rank-10 Mage: local body 0, weapon rendered, 62 legendary renderables restored, synthetic co-op body visible, actual zoom projection and settings persistence. Older level-4/rank-4 save retained. Camera/appearance 23 and relevant regressions pass. Evidence docs/art-validation/camera-controls-20261016. No native hardware/two-device co-op claim. Deployment pending.
+
+
+## [Codex | 2026-10-16] v2.220 — immediate minimap direction
+
+Removed secondary heading smoothing and angular speed cap. Map samples current navigation once per animation frame, retaining relative player arrow, objective and teammate markers. Actual canvas regression: 38 checks; browser WebGL: 31 checks across all three views, abrupt turns and angle wrap, plus older save level 4 / XP 52 / Warrior rank 4 / gold 1145 retained. Camera regressions: 23 passed. Evidence docs/art-validation/minimap-20261016. These are direction/render checks, not a hardware playtest.

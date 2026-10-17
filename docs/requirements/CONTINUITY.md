@@ -1972,3 +1972,13 @@ U-CAMERA-LOCAL-VIEW-20261016: renderer-local body/cosmetic hiding with finally r
 ## [Codex | 2026-10-16] v2.219 camera release production confirmed
 
 Functional commit 1ef3e4f0 deployed successfully as c1c6b8e8-ed6d-404b-8283-fe291bb38452. Public browser confirms v2.219.0-local-camera-controls, camera-controls v2219 and hero3d v2219 without launch errors. Real WebGL local-draw visibility, synthetic peer, settings/wheel and old-save evidence recorded; no native wheel hardware or two-device multiplayer claim.
+
+
+## [Codex | 2026-10-16] U-MINIMAP-INSTANT-20261016
+
+User reports delayed/clunky minimap direction and requests real-time turning. Source: guided-tutorial map already draws after the world each animation frame, but applies exponential heading smoothing plus 3.5 rad/sec slew limit. Preserve current camera-relative shoulder/first-person heading and player-relative overhead heading. Read navigation once per draw and use its current finite heading directly; retain marker geometry, player arrow relative heading and edge indicators. No extra throttle, save fields or gameplay changes. Verify actual canvas transforms for abrupt turns, angle wrap, missing heading, peers/objectives and pause/resume; run real WebGL and old-save load.
+
+
+## [Codex | 2026-10-16] v2.220 — immediate minimap direction
+
+Removed secondary heading smoothing and angular speed cap. Map samples current navigation once per animation frame, retaining relative player arrow, objective and teammate markers. Actual canvas regression: 38 checks; browser WebGL: 31 checks across all three views, abrupt turns and angle wrap, plus older save level 4 / XP 52 / Warrior rank 4 / gold 1145 retained. Camera regressions: 23 passed. Evidence docs/art-validation/minimap-20261016. These are direction/render checks, not a hardware playtest.

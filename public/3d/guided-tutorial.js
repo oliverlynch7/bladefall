@@ -1,6 +1,6 @@
 /* Beginner practice and current Adventure HUD guidance. The map is shared by all modes. */
 (function(){'use strict';
-let guide=null,panel=null,mapCanvas=null,lastMap=0,mapOwner=null,mapHeading=0,placedAt=0;
+let guide=null,panel=null,mapCanvas=null,placedAt=0;
 const coreActions=['move','jump','attack','dodge'];
 const lessons=[
  {id:'welcome',title:'A safe place to learn',body:'Practice moving, jumping, attacking and dodging. Enemies wait until you finish these four controls.',safe:true},
@@ -125,8 +125,9 @@ function tick(g,mode,dt,input,api){
 function map(g,mode){
  if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map rotates as you turn.');document.body.append(mapCanvas);}
  mapCanvas.hidden=!g||mode!=='play'||g.bonusActive;if(mapCanvas.hidden)return;
- const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-lastMap)/1000));lastMap=now;
- const heading=window.__BF_MAP_PARTY?.().heading,target=Number.isFinite(heading)?heading:g.p.yaw||0;if(mapOwner!==g){mapOwner=g;mapHeading=target;}else{const delta=Math.atan2(Math.sin(target-mapHeading),Math.cos(target-mapHeading));mapHeading+=Math.max(-dt*3.5,Math.min(dt*3.5,delta*(1-Math.exp(-dt*7))));}
+ // Draw the same heading as this frame's world; smoothing here makes navigation lag.
+ const nav=window.__BF_MAP_PARTY?.()||{},heading=nav.heading;
+ const mapHeading=Number.isFinite(heading)?heading:(g.p.yaw||0);
  const turn=mapHeading+Math.PI,c=mapCanvas.getContext('2d'),p=g.p,scale=145/800,mid=160;
  c.clearRect(0,0,320,320);c.save();c.beginPath();c.arc(mid,mid,156,0,Math.PI*2);c.clip();c.fillStyle='#101923';c.fillRect(0,0,320,320);c.translate(mid,mid);c.rotate(turn);
  const xy=o=>[(o.x-p.x)*scale,(o.z-p.z)*scale];c.fillStyle='#435747';for(const o of g.segments||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
@@ -143,7 +144,7 @@ function map(g,mode){
    landmark({x:0,z:30},'#a4e8e8','◆');
  }
  for(const e of g.enemies||[])if(!e.dead&&e.hp>0&&!e.dummy)marker(e,'#ff7470',e.boss?7:3);
- const nav=window.__BF_MAP_PARTY?.()||{};for(const q of nav.peers||[])marker(q,'#67baff',6,true);for(const m of g.marks||[])marker(m,'#72fff0',6,true);
+ for(const q of nav.peers||[])marker(q,'#67baff',6,true);for(const m of g.marks||[])marker(m,'#72fff0',6,true);
  marker(window.BFPartyNavigation?.target?.(g)||g.portal,'#ffe047',7,true);
  c.restore();c.save();c.translate(mid,mid);c.rotate(mapHeading-(p.yaw||0));c.fillStyle='white';c.beginPath();c.moveTo(0,-11);c.lineTo(-7,7);c.lineTo(0,3);c.lineTo(7,7);c.fill();c.restore();
  c.fillStyle='#fff0c7';c.font='bold 18px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('N',mid+Math.sin(turn)*148,mid-Math.cos(turn)*148);

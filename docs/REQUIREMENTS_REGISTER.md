@@ -1997,3 +1997,8 @@ User requests broad scroll-wheel zoom while seated at the 3D chessboard. Plan: l
 ## [Codex | 2026-10-17] U-CHESS-PREMOVES-20261017
 
 User requests pre-moves on 3D and flat boards. Plan: one private local queued move via clicks or drag, purple origin/destination indicators, cancel button/right click, replaceable while waiting. Queue geometric candidate moves including pawn capture onto currently empty squares; execute only after authoritative opponent animation completes, turn/seat/round still match, clock started and engine confirms legality. Clear before send to avoid duplicate requests; cancel on illegal reply, game end, history review, leaving, new game/seat change. No protocol or save schema change; host retains move validation. Verify host/guest, legal/invalidated/cancel/promotion and both UI paths.
+
+
+## [Codex | 2026-10-17] U-CHESS-LOBBY-HISTORY-20261017
+
+User requests A/D plus arrow move-history navigation and co-op options to play Thomas independently, spectate friend, or play each other. Plan: host-authoritative isolated chess sessions (one retained Thomas match per player plus shared friend match), lobby with explicit challenge/accept and watch/resume choices, read-only spectators, per-game revisions/clock/bot/animation/history, pause private match when owner leaves/watches. Keep existing chess rules/controls, host-owned furniture and hard-Thomas reward eligibility for the actual winning player. Keyboard history uses A/Left and D/Right, guards text/select inputs/modifiers and clamps ends; reaching latest returns Live. Verify isolation, unauthorized commands, invite/accept, simultaneous bot turns, guest updates, disconnect/rejoin, clocks, premoves, spectator safety and browser controls.

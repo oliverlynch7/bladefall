@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.251.0-chess-premoves';
+const VERSION3D='2.252.0-chess-lobby';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15222,6 +15222,7 @@ const MP={
   drawPeers(t){ if(!G) return;
     for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue; this.drawPeer(q,t); } },
   drawPeer(q,t){
+    if(window.BFSocial?.peerVisible?.(q)===false)return;
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
     const tint=this.teams?(this.teamOf(q.id)===0?'#4aa3ff':'#ff5555'):'hsl('+(h%360)+',70%,60%)';   // team colour in 2v2
     if(q.downed){   // collapsed on the ground + a pulsing red distress beacon so an ally can find & revive you
@@ -15241,9 +15242,11 @@ const MP={
       const pp={ pausedSafe,dragonRide:q.riding?{}:null,sitting:!!q.sitting,lookTier:q.lookTier, cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:q.motion?q.motion.vx:(mv2>0.2?60:0), vz:q.motion?.vz||0, vy:q.motion?.vy||0, onGround:q.motion?.ground!==false, combatPose:q.motion?.pose||null, emote:q.motion?.emote?{...q.motion.emote,t:q.motion.emote.t+(performance.now()-q.motion.emote.stamp)/1000}:null,
         skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
         dead:false, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
+      const chessPose=window.BFSocial?.peerPose?.(q);if(chessPose)Object.assign(pp,chessPose);
       if(pausedSafe)Object.assign(pp,{vx:0,vy:0,vz:0,combatPose:null,emote:null,atkTimer:0,dodgeTimer:0,saberSwingT:0,chargeAmt:0,throwHideT:0});
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,pausedSafe?'#777777':'#6f86c9'); bx(0,38,0,12,12,12,pausedSafe?'#999999':'#d9b08c'); popM(); }
+      if(window.BFSocial?.camera())return; // Keep player labels and beacons off the chessboard.
       // team/id beacon so allies stay distinguishable at a glance
       pushM(); mv(q.x,(q.y||0)+58+(q.riding?24:0),q.z); bx(0,0,0, 5,5,5, tint, tint); popM();
     }
@@ -24411,8 +24414,8 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2245"></script>
-<script type="module" src="./social-hub.js?v=2251"></script>
+<script type="module" src="./hero3d.js?v=2252"></script>
+<script type="module" src="./social-hub.js?v=2252"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

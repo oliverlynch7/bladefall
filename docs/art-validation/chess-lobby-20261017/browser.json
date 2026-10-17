@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "checks": [
+    "Pre-change level100 saves load in isolated host, guest and solo browser clients",
+    "Co-op interaction opens lobby instead of forcing a seat",
+    "Host and guest each start own Thomas match",
+    "Guest changes own difficulty without changing host difficulty",
+    "Actual Stockfish replies in both simultaneous matches: host e4/d6, guest d4/d5",
+    "A and Left review previous move; D and Right return to Live",
+    "Host watches guest Thomas game read-only",
+    "Watching pauses host private game while guest game continues",
+    "Spectator has no resign controls and cannot queue moves; difficulty disabled",
+    "Friend challenge shown on board; opening lobby preserves invitation",
+    "Guest accepts challenge; both views join same duel",
+    "Guest Thomas position retained and paused during duel",
+    "Host e4, guest e5 and host pre-move Nf3 synchronize exactly once",
+    "Returning to Thomas resumes retained position",
+    "Final spectator view has no player nameplates or beacons over board",
+    "Standalone game still enters Thomas directly",
+    "Black-side timed game readiness and resume work",
+    "Lobby W/S moves yellow selector and E activates selected action"
+  ],
+  "transport": "Two real browser clients connected through an isolated BroadcastChannel adapter carrying the existing socialRequest and social snapshot payloads. Actual host-authoritative code and Stockfish workers exercised. Not a two-device Internet/PeerJS playtest.",
+  "productionSavesTouched": false
+}

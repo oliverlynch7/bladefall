@@ -2127,3 +2127,8 @@ User reports opening a very old level100 save locks the game and refresh cannot 
 U-LEGACY-SAVE-LOCKOUT-20261017 implemented. Normalize malformed save roots, containers, null inventory entries, item affixes, class records and nonfinite player numbers before slot previews and migration; retain legitimate level100 characters. Unknown class falls back safely. Standalone /3d/recover.html clears this browser's Bladefall character/dungeon/legacy saves and invalidates stale-tab generations. Title and startup-error recovery links do not require a running game. No global player wipe.
 
 95 offline regression suites passed, including24 new save normalization/reset checks. Real browser reproduced null-stash crash on a modified genuine pre-change level100 save; repaired same fixture loads into hub with finite HP and level100 intact. Standalone reset verified only against isolated disposable storage. Exact user save was not inspected; recovery link covers other malformed legacy states. Evidence: docs/art-validation/save-recovery-20261017. Publication pending.
+
+
+## [Codex | 2026-10-17] v2.229 production confirmed
+
+Functional d09cc80d deployed successfully as297e141e-0044-4596-a6dd-2d677aeaf30d. Actual public browser confirms v2.229.0-save-recovery launches and /3d/recover loads the independent reset page. Production reset was not clicked; player chooses when to erase their browser saves. Corrupted fixture and isolated reset verified locally,95 offline suites passed. Pending campaign farming/dialogue/stair request remains next.

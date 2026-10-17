@@ -1942,3 +1942,8 @@ User reports significant Ruined Keep frame drops, especially near water, suspect
 ## [Codex | 2026-10-17] U-OVERHEAD-INPUT-20261017
 
 User requires mouse attack/dodge alongside keyboard in overhead, fixed camera-aligned minimap in that view, and no movement blur by default. Plan: route mouse events from canvas and transparent touch surfaces through shared binding handler (exclude actual HUD/buttons); retain touch and pointer-lock rules. Add persisted default-off dash afterimage setting with immediate trail clearing, retain combat effects. Set overhead map heading from rendered view direction, preserve shoulder/FPS heading. Verify inputs, rebindings, menu exclusion, trail switch and map orientation.
+
+
+## [Codex | 2026-10-17] U-SETTINGS-GROUP-CONTRAST-20261017
+
+User wants expanded Game options groups clearly separated from neighboring headings, with bolder option borders. Plan: scope visual-only CSS to Game options card, strengthen expanded amber outer boundary, header divider and inset blue contents, give buttons/sliders distinct borders and focus indication; preserve accordion/input behavior and records styling. Verify real browser expanded controls/graphics and compact layout.

@@ -2312,3 +2312,8 @@ Browser disposable pre-change level100 save:30 checks pass for six mouse press/r
 ## [Codex | 2026-10-17] v2.240 production confirmed
 
 Commit4113645b deployed successfully as534deb12-fabd-46fd-82c0-984c538399d3. Public browser confirmsv2.240.0-overhead-controls boot.106 existing offline suites and focused new suite pass; disposable old-save browser verifies overhead surface input, release, HUD exclusion, J/K, map alignment and actual graphics toggle. No production save modifications.
+
+
+## [Codex | 2026-10-17] v2.241 settings visual grouping
+
+Game options card now uses stronger2px group borders, gold expanded boundary/left inset, distinct header divider/background, stronger option/slider borders and keyboard focus outlines. Scoped to game-options; achievement Records styling unchanged. Browser old-save fixture passed all controls/settings checks, actual Controls/Graphics switching confirmed one open section and no horizontal overflow; screenshot reviewed. Inline parser passes. Cosmetic change only; no save/gameplay alterations.

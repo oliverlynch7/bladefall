@@ -989,6 +989,19 @@
   }
 .baginventory .achlist{display:block}.bagequip .bagslots{width:42%;max-width:245px}.bagequip .bagdoll3d{width:56%;height:440px;right:0;top:70px}
 @media(max-width:700px){#riftDiscovery{right:14px!important;bottom:175px!important;width:calc(100vw - 28px)!important;font-size:12px!important;line-height:1.35!important}}
+
+.game-options .settingsSection{border:2px solid #536174;background:#151c27;margin:14px 0;padding:0;overflow:hidden;box-shadow:0 3px 10px #0003}
+.game-options .settingsSection>summary{padding:16px;color:#f2c771;background:#202a39;line-height:1.4}
+.game-options .settingsSection[open]{border-color:#c7a565;box-shadow:0 0 0 1px #c7a56533,0 5px 16px #0004}
+.game-options .settingsSection[open]>summary{background:#334052;border-bottom:2px solid #ad8e54;color:#ffe0a0}
+.game-options .settingsContents{margin:0;padding:16px;gap:10px;background:#101a28;box-shadow:inset 4px 0 #c7a565}
+.game-options .settingsContents .bigbtn{border:2px solid #687990;background:linear-gradient(#293548,#1a2433);box-shadow:0 2px 4px #0003}
+.game-options .settingsContents .bigbtn:hover{border-color:#e3bd78;background:#35445a}
+.game-options .settingsContents .setrow{padding:12px;border:2px solid #566b83;border-radius:9px;background:#1b293b;margin:0;min-width:0;box-sizing:border-box}
+.game-options .settingsContents .setrow label{color:#dce8f5;opacity:1}
+.game-options .settingsSection>summary:focus-visible,.game-options .settingsContents .bigbtn:focus-visible{outline:3px solid #ffe0a0;outline-offset:-4px}
+@media(max-width:600px){.game-options .settingsContents{padding:12px;gap:9px}.game-options .settingsSection>summary{padding:14px}}
+
 .settingsSection{text-align:left;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}.settingsSection>summary{cursor:pointer;font-weight:800;color:var(--amber);padding:5px}.settingsContents{display:grid;gap:8px;margin-top:12px}.settingsContents .bigbtn{margin:0;text-align:left}.settingsContents .setrow{margin:4px 0}
 details.baggroup[open]{grid-column:1 / -1;} details.baggroup summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px;}
 
@@ -1189,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.240.0-overhead-controls';
+const VERSION3D='2.241.0-settings-clarity';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -20291,7 +20304,7 @@ function bindCameraZoom(){const slider=document.getElementById('cameraZoomSlider
 function openPauseSettingsV2(){
   mode='menu';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
-  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Game options</p><h2 class="ovh">Settings</h2>
+  showOverlayHTML(`<div class="card narrow game-options"><p class="ovkicker">Game options</p><h2 class="ovh">Settings</h2>
     <p class="ovsub">Tune the view, feedback, and sound without leaving your adventure.</p>
     <div class="pgrid">
       <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>

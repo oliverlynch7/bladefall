@@ -319,6 +319,7 @@
       "choices": [
         {
           "id": "deliver",
+          "turnIn": true,
           "text": "Here are the roots and dressings.",
           "next": "briar.mara.heal",
           "effects": [
@@ -547,6 +548,7 @@
       "choices": [
         {
           "id": "deliver",
+          "turnIn": true,
           "text": "Your tools. All of them.",
           "next": "briar.gus.thanks",
           "effects": [

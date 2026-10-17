@@ -231,6 +231,7 @@
       "choices": [
         {
           "id": "return",
+          "turnIn": true,
           "text": "Here is your rope.",
           "next": "hp.skip.thanks",
           "effects": [

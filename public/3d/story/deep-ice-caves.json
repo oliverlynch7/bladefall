@@ -403,6 +403,7 @@
       "choices": [
         {
           "id": "safe",
+          "turnIn": true,
           "text": "You’re out. Take a breath.",
           "next": "ic.hugo.thanks",
           "effects": [

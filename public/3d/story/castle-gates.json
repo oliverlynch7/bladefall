@@ -99,6 +99,7 @@
       "choices": [
         {
           "id": "fit",
+          "turnIn": true,
           "text": "Here are the coat, helmet and papers.",
           "next": "cg.roland.fitted",
           "effects": [
@@ -255,6 +256,7 @@
         },
         {
           "id": "return",
+          "turnIn": true,
           "text": "This is yours.",
           "next": "cg.roland.thanks",
           "effects": [
@@ -298,6 +300,7 @@
         },
         {
           "id": "keep",
+          "turnIn": true,
           "text": "I found it. I need the armor myself.",
           "next": "cg.roland.kept",
           "effects": [

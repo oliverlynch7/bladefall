@@ -12,7 +12,7 @@
  function commit(){active.a.save()}
  function serviceButton(id,n){const icon={quartermaster:'🛒',anvil:'⚒️',keeper:'🎨',drillmaster:'⚔️',beastkeeper:'🐾'}[n.id]||'✦';return `<button id="${id}" class="hub-service-primary"><span class="hub-service-icon" aria-hidden="true">${icon}</span><span>${esc(book?.npcs[n.id]?.service||'Open services')}</span><span class="hub-service-arrow" aria-hidden="true">›</span></button>`}
  const questBadge='<span class="hub-quest-badge" aria-hidden="true">!</span>';
- function questProgress(choice){return (choice.effects||[]).some(e=>e.type==='reward'&&['return_accept','return_finish'].includes(e.kind));}
+ function questProgress(choice){return choice.turnIn===true||(choice.effects||[]).some(e=>e.type==='reward'&&['return_accept','return_finish'].includes(e.kind));}
  function markQuestButton(btn,text){btn.classList.add('hub-quest-choice');btn.setAttribute('aria-label','Quest: '+text);btn.innerHTML=questBadge+'<span>'+esc(text)+'</span>';}
  function landing(){
   if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book.npcs[n.id];s.cursor=null;commit();
@@ -80,6 +80,7 @@
  async function open(n,a){
   if(active)close();const token=++generation;active={n,a,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');shell('<p>Opening conversation…</p>');
   await ready;if(token!==generation||!active)return;if(!book?.npcs[n.id]){close(true);return}
+  if(a.returnInfo?.(n)?.status==='ready'){a.returnQuest(n);return;}
   const s=state(a,n.id);if(s.cursor&&book.nodes[s.cursor.id])line(s.cursor.id,s.cursor.lastChoice,s.cursor.topic);else landing();
  }
  function present(n,a,source,view,canChoose){

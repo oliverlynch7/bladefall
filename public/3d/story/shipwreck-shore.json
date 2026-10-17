@@ -81,6 +81,7 @@
       "choices": [
         {
           "id": "deliver.rudder",
+          "turnIn": true,
           "text": "Give Otto the rudder.",
           "next": "sc.otto.rudder",
           "effects": [
@@ -121,6 +122,7 @@
         },
         {
           "id": "deliver.sail",
+          "turnIn": true,
           "text": "Give Otto the sailcloth.",
           "next": "sc.otto.sail",
           "effects": [
@@ -161,6 +163,7 @@
         },
         {
           "id": "deliver.rope",
+          "turnIn": true,
           "text": "Give Otto the rope.",
           "next": "sc.otto.rope",
           "effects": [
@@ -201,6 +204,7 @@
         },
         {
           "id": "ready",
+          "turnIn": true,
           "text": "What should I know before crossing?",
           "next": "sc.otto.ready",
           "effects": [
@@ -473,6 +477,7 @@
       "choices": [
         {
           "id": "truth",
+          "turnIn": true,
           "text": "Your crew reached the beach. The log says they left together.",
           "next": "sc.rose.truth",
           "effects": [
@@ -695,6 +700,7 @@
       "choices": [
         {
           "id": "restore",
+          "turnIn": true,
           "text": "I set the crew board upright. Here is your bell.",
           "next": "sc.rose.kind",
           "effects": [

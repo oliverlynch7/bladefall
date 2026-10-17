@@ -250,6 +250,7 @@
       "choices": [
         {
           "id": "sword",
+          "turnIn": true,
           "text": "A sword.",
           "next": "ih.flint.reward",
           "effects": [
@@ -277,6 +278,7 @@
         },
         {
           "id": "ranged",
+          "turnIn": true,
           "text": "Something for throwing.",
           "next": "ih.flint.reward",
           "effects": [
@@ -304,6 +306,7 @@
         },
         {
           "id": "magic",
+          "turnIn": true,
           "text": "A focus for magic.",
           "next": "ih.flint.reward",
           "effects": [
@@ -331,6 +334,7 @@
         },
         {
           "id": "armor",
+          "turnIn": true,
           "text": "Armor. I have my weapon.",
           "next": "ih.flint.reward",
           "effects": [

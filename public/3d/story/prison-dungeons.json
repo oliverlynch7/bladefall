@@ -310,6 +310,7 @@
       "choices": [
         {
           "id": "returned",
+          "turnIn": true,
           "text": "His picture is back where it belongs.",
           "next": "kd.sly.quiet.reward",
           "effects": [
@@ -361,6 +362,7 @@
       "choices": [
         {
           "id": "returned",
+          "turnIn": true,
           "text": "The picture is back. Keep your word.",
           "next": "kd.sly.open.reward",
           "effects": [
@@ -458,6 +460,7 @@
       "choices": [
         {
           "id": "accept",
+          "turnIn": true,
           "text": "Then we both keep our word.",
           "next": "kd.sly.open.reward",
           "effects": [

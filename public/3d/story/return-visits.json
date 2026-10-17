@@ -133,6 +133,7 @@
       "choices": [
         {
           "id": "give",
+          "turnIn": true,
           "text": "It is yours.",
           "next": "rv.pattern.thanks",
           "when": [
@@ -275,6 +276,7 @@
       "choices": [
         {
           "id": "give",
+          "turnIn": true,
           "text": "It is yours.",
           "next": "rv.supplies.thanks",
           "when": [
@@ -417,6 +419,7 @@
       "choices": [
         {
           "id": "give",
+          "turnIn": true,
           "text": "They are both out of the traps.",
           "next": "rv.tracks.thanks",
           "when": [
@@ -566,6 +569,7 @@
       "choices": [
         {
           "id": "give",
+          "turnIn": true,
           "text": "Here you go, Dad.",
           "next": "rv.keepsake.thanks",
           "when": [

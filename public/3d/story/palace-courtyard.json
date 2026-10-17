@@ -341,6 +341,7 @@
         },
         {
           "id": "deliver",
+          "turnIn": true,
           "text": "The channel is open. Here are the seeds.",
           "next": "pc.grace.thanks",
           "effects": [
@@ -448,6 +449,7 @@
       "choices": [
         {
           "id": "deliver",
+          "turnIn": true,
           "text": "The channel is open. Here are the seeds.",
           "next": "pc.grace.thanks",
           "effects": [

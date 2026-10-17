@@ -127,19 +127,33 @@
     return progress(probe)!==progress(s);
   }
   function informationOnly(list){return (list||[]).every(e=>e.type==='note'||e.type==='conditional'&&informationOnly(e.effects));}
-  function topicTarget(s,book){const c=s.conversation;if(!c)return null;
+  function turnInChoices(s,n){return (n?.choices||[]).filter(c=>c.turnIn===true&&matches(s,c.when)&&addsProgress(s,c));}
+  function navigationOnly(s,c){
+    const probe=copy({flags:s.flags,items:s.items,quests:s.quests,rewards:s.rewards,notes:s.notes});
+    try{effects(probe,c.effects);}catch(_){return false;}
+    return JSON.stringify([probe.flags,probe.items,probe.quests,probe.rewards])===JSON.stringify([s.flags,s.items,s.quests,s.rewards]);
+  }
+  function readyNode(s,book,start){
+    const queue=[start],seen=new Set();
+    while(queue.length){const id=queue.shift();if(seen.has(id))continue;seen.add(id);const n=node(book,id);if(!n)continue;
+      if(turnInChoices(s,n).length)return id;
+      for(const c of n.choices||[])if(matches(s,c.when)&&node(book,c.next)&&navigationOnly(s,c))queue.push(c.next);
+    }
+    return start;
+  }
+  function topicTarget(s,book){const c=s.conversation;if(!c||turnInChoices(s,node(book,c.node)).length)return null;
     const direct=new Set((node(book,c.node)?.choices||[]).filter(x=>matches(s,x.when)).map(x=>x.next));
     return [...(c.topics||[])].reverse().find(id=>id!==c.node&&node(book,id)?.topicMenu&&(node(book,id).choices||[]).some(x=>matches(s,x.when)&&!direct.has(x.next)&&(!seenNodes(c).includes(x.next)||addsProgress(s,x))))||null;
   }
   function view(s,book){
     const c=s.conversation,n=c&&node(book,c.node);if(!n)return null;
-    let endShown=false;const choices=[];
-    for(const x of (n.choices||[]).filter(x=>matches(s,x.when))){
+    let endShown=false;const choices=[],handIns=turnInChoices(s,n);
+    for(const x of (handIns.length?handIns:(n.choices||[]).filter(x=>matches(s,x.when)))){
       const end=returnsToReadLine(s,x)&&(informationOnly(x.effects)||!addsProgress(s,x));
       if(end&&endShown)continue;if(end)endShown=true;
-      choices.push({id:x.id,text:end?'Leave conversation':x.text,optional:end?false:!!x.optional,...(end?{end:true}:{})});
+      choices.push({id:x.id,text:end?'Leave conversation':x.text,optional:handIns.length?false:end?false:!!x.optional,...(end?{end:true}:{})});
     }
-    if(!endShown&&(c.browsingTopics||!choices.some(x=>!x.optional)))choices.unshift({id:'__leave',text:'Leave conversation',end:true});
+    if(!handIns.length&&!endShown&&(c.browsingTopics||!choices.some(x=>!x.optional)))choices.unshift({id:'__leave',text:'Leave conversation',end:true});
     if(topicTarget(s,book))choices.push({id:'__topics',text:'Other questions / quests',optional:true});
     return {npc:c.npc,lineId:c.node,text:n.text,lastChoice:c.lastChoice||'',choices};
   }
@@ -153,7 +167,7 @@
       if(event.type==='open'){
         if(s.conversation||!own(book.npcs,event.npc))return {state:original,changed:false};
         const def=book.npcs[event.npc],saved=s.cursors[event.npc];
-        const start=saved?.node||def.start;if(!node(book,start))return {state:original,changed:false};
+        const start=readyNode(s,book,saved?.node||def.start);if(!node(book,start))return {state:original,changed:false};
         if(!matches(s,def.when))return {state:original,changed:false};
         s.conversation={npc:event.npc,node:start,lastChoice:saved?.lastChoice||'',trail:[start],topics:topicHistory(book,event.npc,saved,start)};
       }else if(event.type==='close'){
@@ -172,6 +186,7 @@
         }else{
         const option=n.choices?.find(x=>x.id===event.choice&&matches(s,x.when));
         if(!option||!node(book,option.next))return {state:original,changed:false};
+        const handIns=turnInChoices(s,n);if(handIns.length&&!handIns.some(c=>c.id===option.id))return {state:original,changed:false};
         const ending=returnsToReadLine(s,option);if(addsProgress(s,option))effects(s,option.effects);c.trail=[...new Set([...(c.trail||[]),c.node,option.next])];c.node=option.next;if(node(book,c.node)?.topicMenu)c.topics=[...new Set([...(c.topics||[]),c.node])];c.lastChoice=option.text;s.cursors[c.npc]=copy(c);if(ending)s.conversation=null;
         }
       }else if(event.type==='world'){

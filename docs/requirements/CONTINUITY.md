@@ -1863,3 +1863,7 @@ Generated 64 ElevenLabs v2 SFX under verified Starter subscription; 557 credits 
 580 integration checks pass, all audio decodes, processing checks useful energy/finite samples/peaks, mute/volume bus/prominence are retained, and missing-file fallback succeeds. Generation was resumed after a read-only balance request rate limit; no paid request was repeated. Provider balance endpoint lags the 557 billed response total. No human audition or browser playback proof: Chrome connection remains unavailable. Publish separate preview only; production remains unchanged and pending Keep/Reaper/wardrobe must not be merged wholesale. See docs/art-validation/priority-sfx-20261016/summary.json.
 
 Accounting reconciliation: subsequent read-only subscription check confirms exactly 557 credits consumed and 39,443 remaining. Resumable runner skipped all 64 existing masters without additional generation.
+
+## [Codex | 2026-10-16] Paid SFX preview deployed
+
+Cloudflare confirms successful deployment of cbc7fb42: https://b508f398.bladefall.pages.dev/3d/ . Mobile before/after audition: https://b508f398.bladefall.pages.dev/sfx/custom/starter-20261016/ . Branch sfx-preview-20261016. Generated 64 paid-plan files, 56 legacy registry replacements, eight file-backed player methods; all masters/backups and provenance pushed. Confirmed 557 credits spent and 39,443 remaining. 580 integration checks pass. Production unchanged; real browser playback and listening acceptance remain pending.

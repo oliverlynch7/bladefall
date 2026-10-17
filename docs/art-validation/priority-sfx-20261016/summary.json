@@ -1,6 +1,6 @@
 {
   "version": "2.207.0-priority-sfx",
-  "status": "Implemented; separate preview deployment pending",
+  "status": "Deployed isolated gameplay and audition preview; browser/listening acceptance pending",
   "generated": 64,
   "existing_slots_replaced": 56,
   "procedural_methods_replaced": 8,
@@ -30,5 +30,9 @@
     "No subjective audio quality or listening acceptance claimed",
     "Current preview ancestry includes unverified Keep/Reaper/wardrobe candidates; do not push wholesale to main"
   ],
-  "remaining_credits_verified": 39443
+  "remaining_credits_verified": 39443,
+  "preview": "https://b508f398.bladefall.pages.dev/3d/",
+  "audition": "https://b508f398.bladefall.pages.dev/sfx/custom/starter-20261016/",
+  "deployment_commit": "cbc7fb4299301b08cc52a65214990d24fc81e000",
+  "deployment_check": "Cloudflare Pages success via GitHub"
 }

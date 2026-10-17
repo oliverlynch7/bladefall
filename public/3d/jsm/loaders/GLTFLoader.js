@@ -1,3 +1,5 @@
+// Bladefall: recover transient texture fetch/decode failures before accepting a missing map.
+import { recoverTexture } from '../../texture-recovery.js?v=2254';
 import {
 	AnimationClip,
 	Bone,
@@ -3227,11 +3229,11 @@ class GLTFParser {
 
 		const promise = Promise.resolve( sourceURI ).then( function ( sourceURI ) {
 
-			return new Promise( function ( resolve, reject ) {
+			const attempt = activeLoader => new Promise( function ( resolve, reject ) {
 
 				let onLoad = resolve;
 
-				if ( loader.isImageBitmapLoader === true ) {
+				if ( activeLoader.isImageBitmapLoader === true ) {
 
 					onLoad = function ( imageBitmap ) {
 
@@ -3244,8 +3246,19 @@ class GLTFParser {
 
 				}
 
-				loader.load( LoaderUtils.resolveURL( sourceURI, options.path ), onLoad, undefined, reject );
+				activeLoader.load( LoaderUtils.resolveURL( sourceURI, options.path ), onLoad, undefined, reject );
 
+			} );
+			// An ImageBitmap decode failure must not permanently strip this material's map.
+			const fallback = loader.isImageBitmapLoader === true ? () => {
+				const imageLoader = new TextureLoader( options.manager );
+				imageLoader.setCrossOrigin( options.crossOrigin );
+				imageLoader.setRequestHeader( options.requestHeader );
+				return attempt( imageLoader );
+			} : null;
+			return recoverTexture( () => attempt( loader ), fallback, {
+				onRetry: () => { const d = globalThis.__BF_TEXTURE_RECOVERY ||= { retries: 0, failed: [] }; d.retries++; },
+				onFailure: () => { const d = globalThis.__BF_TEXTURE_RECOVERY ||= { retries: 0, failed: [] }; if ( d.failed.length < 20 ) d.failed.push( LoaderUtils.resolveURL( sourceURI, options.path ) ); }
 			} );
 
 		} ).then( function ( texture ) {

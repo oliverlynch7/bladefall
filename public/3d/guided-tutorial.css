@@ -18,3 +18,11 @@
 /* Compact screens retain the target's highlight; cards scroll rather than leave the viewport. */
 @media(max-width:699px),(max-height:520px){#guidedLesson{width:min(286px,calc(100vw - 24px));padding:10px 12px;font-size:12px;line-height:1.4}#guidedLesson h2{font-size:18px;margin:6px 0}#guidedLesson p{margin-bottom:7px}#guidedLesson .lesson-actions{gap:6px;margin-top:8px}#guidedLesson .lesson-status{font-size:10px;margin-top:7px}#guidedLesson button{padding:6px 8px;min-height:34px;font-size:11px}#guidedLesson kbd{padding:4px 7px}}
 #localMap{position:fixed;left:20px;bottom:115px;width:126px;height:126px;z-index:5;border:2px solid #c5a365;border-radius:50%;background:#101923dd;pointer-events:none}#localMap[hidden]{display:none}
+
+/* Distinct key/action pairs teach the two universal menu controls at a glance. */
+#guidedLesson .lesson-menu-keys{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+#guidedLesson .lesson-menu-keys>div{display:grid;justify-items:start;gap:5px;padding:10px;background:#0b1925;border:1px solid #a89462;border-radius:7px}
+#guidedLesson .lesson-menu-keys kbd{font-size:20px;color:#fff2bb;border-color:#e2ba68;min-width:32px;text-align:center}
+#guidedLesson .lesson-menu-keys strong{font-size:13px;color:#ffe4ac}
+#guidedLesson .lesson-menu-keys small{font-size:11px;line-height:1.4;color:#d1ddd9}
+body.npc-conversation #questbox{display:none!important}

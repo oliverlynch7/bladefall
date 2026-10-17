@@ -2400,3 +2400,17 @@ Round checks also protect resignation, configuration and other match controls, n
 ## [Codex | 2026-10-17] v2.253.0 — Current Settings from title
 
 Title Settings now opens the same organized current game-options renderer as pause, replacing legacy More/audio-only screen. Explicit title/pause origin survives option refreshes, camera changes, key binding and Help returns; controller dialog retains underlying screen. Back/Q/Esc return to title or pause correctly; in-game entry explicitly clears any earlier title context. Title never exposes stale world trial-exit controls. Shared preference persistence remains intact; no character save load required.30 new renderer/context checks pass plus menu shortcuts/controller invert/pause suites; inline syntax compiles. Actual isolated browser tests title settings, submenus/toggles/Q/Esc/persistence, loads old level100 Normal save and confirms pause Settings return. Evidence: docs/art-validation/title-settings-20261017.
+
+
+## [Codex | 2026-10-17] v2.254.0 — Clear menu keys, stable quest HUD and co-op faces
+
+Added prominent separate Choose/continue and Back/close tutorial key cards using current interaction binding; clearer Skill 1 combat purpose; journal notices show current keyboard shortcut and update on rebinding. Quest tracker now checks actual background menu mode before all render branches and cannot reappear during NPC conversations; immediate UI hiding plus conversation CSS protects transitions.
+
+Initial, position and host-relay packets now carry normalized eye/mouth/brow/offset settings. Peer rigs detach inherited source faces without disposing shared resources, build their own model-fitted faces, replace on customization changes and release owned face geometry/materials when reaped. Old packets receive deterministic defaults.
+
+Texture loader now retries transient image failures with bounded delays and a standard image decoder fallback after bitmap errors, retaining source sharing and sampler/orientation settings; shared loader import is versioned through import map and revalidated. Diagnostic failures capped at20. All referenced base-color files exist; this verified recovery path does not prove the friend's exact missing-texture cause is resolved.117 suites pass; actual isolated old-save browser verifies tutorial, rebinding, Caleb background ticks, six peer model faces/live changes and forced decoder failure recovery. Evidence: docs/art-validation/onboarding-coop-20261017.
+
+
+## [Codex | 2026-10-17] Onboarding accessibility follow-up
+
+Browser old-save/class-switch check exposed a stale accessible skill name from the previous class on locked slots. Locked-slot refresh now resets the accessible label to current slot/rank/binding instead of retaining the previous class skill.

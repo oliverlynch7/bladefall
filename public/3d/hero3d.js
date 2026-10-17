@@ -1939,7 +1939,7 @@ function peerModelFor(p){
 }
 
 function disposeRig(rec){
-  if(!rec) return;clearClassLook(rec.node);disposeCosmetics(rec.wrap);castleHelmet(rec.node,false);
+  if(!rec) return;rec.face?.dispose();clearClassLook(rec.node);disposeCosmetics(rec.wrap);castleHelmet(rec.node,false);
   if(rec.mixer) try { rec.mixer.stopAllAction(); rec.mixer.uncacheRoot(rec.node); } catch(e){}
   if(rec.node){clearWeapon(rec.holder);rec.node.traverse(o=>{if(o.userData._paletteOwner===o.uuid)for(const m of (Array.isArray(o.material)?o.material:[o.material]))m?.dispose();});if(rec.node.parent)rec.node.parent.remove(rec.node);}
 }
@@ -1966,6 +1966,11 @@ function peerRig(p, key){
     if(!src) return null;
     const node = SkeletonUtils.clone(src.scene);
     node.name = '__heroPeer:' + key;
+    // Clones may inherit the local hero's fitted face. Detach it without disposing
+    // shared source resources; each peer owns the replacement built below.
+    const inheritedFace=[];
+    node.traverse(o=>{if(o.userData?._eye||o.userData?._mouth)inheritedFace.push(o);});
+    inheritedFace.forEach(o=>o.removeFromParent());
     node.traverse(o => {
       if(!o.isMesh) return;
       o.castShadow = false; o.receiveShadow = false;
@@ -1986,6 +1991,8 @@ function peerRig(p, key){
     _peerRigs.set(key, rec);
   }
   if(rec.palette!==p.cid||rec.disguise!==!!p.disguise||rec.lookTier!==p.lookTier){paintClassBody(rec.node,p.disguise?'warrior':p.cid||'warrior',false,p.disguise?LEGION_UNIFORM:p.lookTier?window.BFClassLooks?.palette(p.cid,p.lookTier):null);rec.lookTier=p.lookTier;castleHelmet(rec.node,!!p.disguise);rec.palette=p.cid;rec.disguise=!!p.disguise;}
+  const face=window.BFFaceOptions.appearance(p),faceKey=JSON.stringify(face);
+  if(rec.faceKey!==faceKey){rec.face?.dispose();rec.face=window.__npcBuildFace(rec.node,want,face.eyeColor,face);rec.faceKey=faceKey;}
   rec.seen = _frameNo;
   return rec;
 }
@@ -2217,7 +2224,7 @@ window.__hero3dRigs = () => {
     local: { model: HERO3D.model, clip: _localAnim.cur, wrap: !!HERO3D._wrap,
              visible: !!(HERO3D._wrap && HERO3D._wrap.visible), weapon: HERO3D.weapon || null },
     peers: [..._peerRigs.entries()].map(([id, r]) => ({
-      id, model: r.model, classPalette:r.palette, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
+      id, model: r.model, face:r.face?.state, appearance:r.faceKey, classPalette:r.palette, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
       armed: wof(r.node), seen: r.seen, visible: !!r.wrap.visible,
       at: { x: Math.round(r.wrap.position.x), z: Math.round(r.wrap.position.z) },
     })),

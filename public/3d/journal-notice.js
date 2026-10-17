@@ -31,6 +31,7 @@ function tick(dt,visible){mount();if(!panel)return;
   if(root.innerWidth<1050)visible=false;
   else panel.style.left=(loot.getBoundingClientRect().right+48)+'px';
  }
+ const caption='Open journal ('+(root.__BF3?.controlKey?.('journal')||'N')+')',open=panel.querySelector('.jn-open');if(open.textContent!==caption)open.textContent=caption;
  const n=queue.tick(dt,visible,document.body.classList.contains('adventure-hud')||held||panel.contains(document.activeElement));panel.hidden=!visible||!n;if(!visible||!n)return;if(n!==shown){shown=n;panel.querySelector('.jn-kind').textContent=n.kind||'Journal updated';panel.querySelector('h3').textContent=n.title;panel.querySelector('p').textContent=n.text;panel.querySelector('.jn-reading').scrollTop=0;panel.classList.remove('jn-arrive');void panel.offsetWidth;panel.classList.add('jn-arrive');}
  const next=panel.querySelector('.jn-next');next.hidden=!queue.pending;next.textContent='Next note ('+queue.pending+')';panel.querySelector('.jn-time i').style.width=(100*queue.remaining/readingTime(n.title+' '+n.text))+'%';
 }

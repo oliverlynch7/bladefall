@@ -1,0 +1,587 @@
+[
+  {
+    "suite": "test-bag-browser.cjs",
+    "pass": true,
+    "output": "Bag filters, rarity sorting, item identity, empty slots, whistle purchase/gates, stale world, field vitals and save schema passed.\n"
+  },
+  {
+    "suite": "test-bag-equip.cjs",
+    "pass": true,
+    "output": "100 equipment conservation and autosave race regression checks passed.\n"
+  },
+  {
+    "suite": "test-boss-combat-scope.cjs",
+    "pass": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed.\n"
+  },
+  {
+    "suite": "test-briar-journey.cjs",
+    "pass": true,
+    "output": "Briar mill: pressure/release, real obstacle blocking, owner arbitration, reset, disconnect/jump, weight completion, stale snapshot, delayed bridge collision, legacy states and lane bounds passed.\nMill sketch appears as a related clue only after discovery.\nSuperseded mill notices clear; discovered clues and permanent journal entries remain.\nMill fallback follows the active renderer, including a mid-level graphics switch.\n"
+  },
+  {
+    "suite": "test-briar-performance.cjs",
+    "pass": true,
+    "output": "Collision behavior and bounded navigation pass; far-walkway reads 62500 -> 0. Auto pixel budget/native override/GPU-query cache pass.\nLamp proximity changes intensity, never shader light count.\n"
+  },
+  {
+    "suite": "test-briar-refinement.cjs",
+    "pass": true,
+    "output": "Briar: specific hunt, one-time reward, three-slot cap, respawn identity, discovered-only related clues pass.\n"
+  },
+  {
+    "suite": "test-briar-reward-introduction.mjs",
+    "pass": true,
+    "output": "Coin coffer: 4056 finite vertices, 6 meshes, independent hinge/coins. Local spirit, stale-world safety and optional weapon-aware charge lessons pass.\n"
+  },
+  {
+    "suite": "test-broken-walls.cjs",
+    "pass": true,
+    "output": "Broken Walls content passed: 10 voiced graph nodes, independent chamber route, key route without Felix, guarded progression, once-only challenge, finite retreat notice and host-only spawns.\n"
+  },
+  {
+    "suite": "test-brute-encounter.cjs",
+    "pass": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed.\n"
+  },
+  {
+    "suite": "test-camera-controls.cjs",
+    "pass": true,
+    "output": "23 camera and local appearance regression checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-elites.cjs",
+    "pass": true,
+    "output": "{\"checks\":[\"raid replaces random role and preserves original body stats\",\"raid full harmless warning and locked aim\",\"raid snapshot carries complete phase geometry\",\"raid recovery leaves an attack opening\",\"forge replaces random role and preserves original body stats\",\"forge full harmless warning and locked aim\",\"forge snapshot carries complete phase geometry\",\"forge recovery leaves an attack opening\",\"shore replaces random role and preserves original body stats\",\"shore full harmless warning and locked aim\",\"shore snapshot carries complete phase geometry\",\"shore recovery leaves an attack opening\",\"tower replaces random role and preserves original body stats\",\"tower full harmless warning and locked aim\",\"tower snapshot carries complete phase geometry\",\"tower recovery leaves an attack opening\",\"raid hits front, misses rear/outside/above\",\"forge expands outward and jumping clears it\",\"shore hits three lanes, gaps and cover range stay safe\",\"tower cardinal lanes hit, diagonal gaps stay safe\",\"dead enemy or target cannot damage\",\"tall solid cover blocks, ground and overhead props do not\"]}\n"
+  },
+  {
+    "suite": "test-campaign-interaction.cjs",
+    "pass": true,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed.\n"
+  },
+  {
+    "suite": "test-campaign-journey.cjs",
+    "pass": true,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\nIn-world signage policy and removal contracts passed.\n"
+  },
+  {
+    "suite": "test-campaign-placement.cjs",
+    "pass": true,
+    "output": "Campaign footing: supported feet, nearby clearance, stacked floors, unresolved preservation, exemptions and stable patrol slots passed.\n"
+  },
+  {
+    "suite": "test-campaign-refinement.cjs",
+    "pass": true,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed.\n"
+  },
+  {
+    "suite": "test-campaign-replay.cjs",
+    "pass": true,
+    "output": "103 replay start, unlock, invalid input, checkpoint, earnings and guest sync checks passed\n"
+  },
+  {
+    "suite": "test-campaign-threat.cjs",
+    "pass": true,
+    "output": "60 campaign threat and health visibility checks passed.\n"
+  },
+  {
+    "suite": "test-canyon-journey.cjs",
+    "pass": true,
+    "output": "Canyon journey: useful entry/guard guidance, restored completion, cage-door collision, two-prisoner clearance at every turn, paused walking, shared status and scaffold approach passed.\n"
+  },
+  {
+    "suite": "test-castle-gates.cjs",
+    "pass": true,
+    "output": "Castle Gates passed: quiet/recovery/assault routes, optional return/keep/refusal/apology, dialogue resume, finite three-wave guard, reward parity and voice graph.\n"
+  },
+  {
+    "suite": "test-chess-cape.mjs",
+    "pass": true,
+    "output": "20 chess reward eligibility, persistence and cosmetic checks passed.\n"
+  },
+  {
+    "suite": "test-chess-choreography.mjs",
+    "pass": true,
+    "output": "PASS choreography: castling moves both pieces; en passant removes correct pawn; promotion survives transition; no duplicate pieces or non-finite geometry\n"
+  },
+  {
+    "suite": "test-chess-clock.mjs",
+    "pass": true,
+    "output": "PASS clock: readiness, monotonic time, projection, animation pause, increment, flag, untimed, disconnect resume, validation\n"
+  },
+  {
+    "suite": "test-chess-experience.mjs",
+    "pass": true,
+    "output": "33 chess layout, move review, compact replay and board-visibility checks passed.\n"
+  },
+  {
+    "suite": "test-chess-premoves.mjs",
+    "pass": true,
+    "output": "23 premove candidate, legality, promotion and lifecycle checks passed.\n"
+  },
+  {
+    "suite": "test-chess-room.mjs",
+    "pass": true,
+    "output": "76 chess room, authority, concurrent bots, clocks and history checks passed.\n"
+  },
+  {
+    "suite": "test-chess-zoom.cjs",
+    "pass": true,
+    "output": "19 chess zoom regression checks passed.\n"
+  },
+  {
+    "suite": "test-chest-rules.cjs",
+    "pass": true,
+    "output": "Chest tables: 200,000 interval samples pass; challenge minimum and all depth boundaries pass.\n"
+  },
+  {
+    "suite": "test-class-auras.mjs",
+    "pass": true,
+    "output": "{\"checks\":2352,\"classes\":17,\"uniqueSilhouettes\":17,\"sharedTextures\":10,\"referenceOutfits\":51,\"depthTest\":true,\"resourcesIndependent\":true}\n"
+  },
+  {
+    "suite": "test-class-progression.cjs",
+    "pass": true,
+    "output": "2873 rank, legacy-choice and ordered-choice checks passed across 17 classes.\nSkill/dash lesson persistence, legacy missing field and stale-save guard passed.\n"
+  },
+  {
+    "suite": "test-companion-level.cjs",
+    "pass": true,
+    "output": "Companion Lv1\u20136, five paid upgrades, exact costs, max cap, legacy ranks, nameplates, HP continuity and purchase guards pass\n"
+  },
+  {
+    "suite": "test-controller-invert.cjs",
+    "pass": true,
+    "output": "PASS controller invert: independent X/Y toggles, legacy Y migration, both axis signs verified\n"
+  },
+  {
+    "suite": "test-creator-camera.cjs",
+    "pass": true,
+    "output": "{\"checks\":14,\"scope\":\"Actual creator event handlers with a small DOM harness; native pointer gestures are outside this harness.\"}\n"
+  },
+  {
+    "suite": "test-dialogue-endings.cjs",
+    "pass": true,
+    "output": "94 ordinary NPC/preset paths end; primary Leave, legacy replay, optional quest, legitimate retry, final trigger, note preservation and speaker authority pass.\n"
+  },
+  {
+    "suite": "test-dragon-rescue.cjs",
+    "pass": true,
+    "output": "Dragon rescue prerequisites, repeat safety, optional independence and delayed directional breath passed.\n"
+  },
+  {
+    "suite": "test-dragon-riding.cjs",
+    "pass": true,
+    "output": "51 dragon eligibility, flight, collision, stamina and lifecycle checks passed.\n"
+  },
+  {
+    "suite": "test-dungeon-quality.cjs",
+    "pass": true,
+    "output": "{\n  plans: 1080,\n  legacyPlans: 6480,\n  templates: [\n    'armory',    'barricades',\n    'cistern',   'gallery',\n    'infirmary', 'kennels',\n    'liftbay',   'refectory',\n    'watchpost'\n  ],\n  safeSpawns: 43200\n}\n"
+  },
+  {
+    "suite": "test-dungeon-rafters.cjs",
+    "pass": true,
+    "output": "{\n  newPlans: 1080,\n  oldRevision7Preserved: true,\n  optionalRafterRoom: true\n}\n"
+  },
+  {
+    "suite": "test-encounter-rewards.cjs",
+    "pass": true,
+    "output": "{\"checks\":300327,\"normalRate\":[0.015,0.03],\"eliteRate\":[0.08,0.12],\"personalChests\":true,\"saveRestoration\":true,\"requiredChoice\":true}\n4 actual co-op kill-packet / reconnect reward checks passed.\n"
+  },
+  {
+    "suite": "test-enemy-choreography.mjs",
+    "pass": true,
+    "output": "PASS: nine distinct bounded poses, continuous wind/strike/recovery, staff support, cancellation and explicit shot release\nPASS: cooled/countered bosses do not swing; valid brute slam and arrow volley still animate\n"
+  },
+  {
+    "suite": "test-esc-pause.cjs",
+    "pass": true,
+    "output": "30 pause regression checks passed.\n"
+  },
+  {
+    "suite": "test-face-options.cjs",
+    "pass": true,
+    "output": "PASS face defaults, bounds and randomized offset limits\n"
+  },
+  {
+    "suite": "test-fallen.cjs",
+    "pass": true,
+    "output": "Fallen: aim lock, delayed feint follow-up, swept thrust motion, pillar collision/recovery, directional damage, vertical/downed/dead safety, bounded pursuit and snapshots passed.\n"
+  },
+  {
+    "suite": "test-final-king.cjs",
+    "pass": true,
+    "output": "Final King: locked telegraphs, safe regions/height/cover, two lethal gates, finite summons, validated charge/retry/fifth-failure skip and complete voice/story graph passed.\n"
+  },
+  {
+    "suite": "test-first-arrival.cjs",
+    "pass": true,
+    "output": "24 first-arrival regression checks passed.\n"
+  },
+  {
+    "suite": "test-first-shop-upgrade.cjs",
+    "pass": true,
+    "output": "{\"rows\":[{\"cls\":\"warrior\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"ranger\",\"starter\":7.9,\"shop\":8.6,\"loot\":9},{\"cls\":\"mage\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"pirate\",\"starter\":null,\"shop\":8.6,\"loot\":9},{\"cls\":\"ninja\",\"starter\":10.6,\"shop\":7.7,\"loot\":8},{\"cls\":\"paladin\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"berserker\",\"starter\":15.8,\"shop\":17.3,\"loot\":18},{\"cls\":\"necromancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"chronomancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"stormcaller\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"warlock\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"skylancer\",\"starter\":15,\"shop\":16.3,\"loot\":17},{\"cls\":\"bladedancer\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"beastmaster\",\"starter\":7.9,\"shop\":8.6,\"loot\":9}],\"passed\":true}\n"
+  },
+  {
+    "suite": "test-floor-surfaces.cjs",
+    "pass": true,
+    "output": "{ pieces: 3, pairs: 3, area: 11100, coverage: true }\n"
+  },
+  {
+    "suite": "test-frost-officers.cjs",
+    "pass": true,
+    "output": "Officers passed: all three roles, single major attack cap across 256 seconds, locked warnings, no early hits, height dodges, death cancellation and survivor tactic.\nAll three officers pursue players onto both shelves and the high northern exit.\n"
+  },
+  {
+    "suite": "test-furnace-colossus.cjs",
+    "pass": true,
+    "output": "Colossus passed: locked warnings, exact attack geometry, high-route sweep protection, cooling, limited repair budget, pressure benefit and snapshot fields.\n"
+  },
+  {
+    "suite": "test-great-furnace.cjs",
+    "pass": true,
+    "output": "Great Furnace passed: four main paths, physical cooling hold and reheating, three ambush waves, rescue and knowledge source, optional shards and Cinder.\n"
+  },
+  {
+    "suite": "test-gus-story.cjs",
+    "pass": true,
+    "output": "Gus passed: delivery gating, once-only reward, shortcut, resume, rollback, apology/repair, final refusal, main-path independence, fresh attempt.\n"
+  },
+  {
+    "suite": "test-hollow-cliffs.cjs",
+    "pass": true,
+    "output": "Winding Cliffs: freight cart, legacy bridge saves, rope, cargo release, once-only rewards, and dialogue links passed.\n"
+  },
+  {
+    "suite": "test-hollow-journey.cjs",
+    "pass": true,
+    "output": "Hollow journey: cart gate, delayed bridge collision, idempotence, completed save, patrol/quiet-route guidance and remote guard count passed.\n"
+  },
+  {
+    "suite": "test-hollow-readiness.cjs",
+    "pass": true,
+    "output": "31 Hollow readiness checks passed: timed cart guidance, clue discovery, legacy note repair, required rescue gates and terrain-correct falls.\n"
+  },
+  {
+    "suite": "test-home-trails.cjs",
+    "pass": true,
+    "output": "Home/track eligibility, shared recipient eligibility, puzzle prerequisites, rescue order, one-time rewards, main-story independence and voice graph passed.\n"
+  },
+  {
+    "suite": "test-homefields-granary.cjs",
+    "pass": true,
+    "output": "Granary passed: clue, both action orders, blocked early cache, one-time reward, old completed/partial saves and checkpoint rollback.\n"
+  },
+  {
+    "suite": "test-homefields-puzzle.cjs",
+    "pass": true,
+    "output": "Homefields warning bell passed: discovery, three combat waves, elite captain, chest reward, and save migration.\n"
+  },
+  {
+    "suite": "test-hub-transition.cjs",
+    "pass": true,
+    "output": "32 portal ownership and world snapshot regression checks passed.\n"
+  },
+  {
+    "suite": "test-hud-progression-layout.cjs",
+    "pass": true,
+    "output": "11 render-FPS / gold-move / saved-setting integration checks passed.\n"
+  },
+  {
+    "suite": "test-ice-caves.cjs",
+    "pass": true,
+    "output": "Ice Caves passed: both Ellis routes, delivery gate, main/optional independence, waterworks recovery, side plug and old partial state, Hugo safety order, reward deduplication, shard gates and voice graph.\n"
+  },
+  {
+    "suite": "test-interaction-audit.cjs",
+    "pass": true,
+    "output": "12 paid reward, live perk and death ownership checks passed.\n"
+  },
+  {
+    "suite": "test-iron-halls.cjs",
+    "pass": true,
+    "output": "Iron Halls passed: worker and cart gates, retired controls, drive-sled completion, dialogue, optional rewards, shards and voice graph.\n"
+  },
+  {
+    "suite": "test-journal-notice.cjs",
+    "pass": true,
+    "output": "Journal notice passed: restore, dedupe, queued changes, scene reset, dialogue/menu pause, hover hold, dismissal, length-based reading.\nPinned revisions, latest arrivals, unread recovery, queued replacement, title changes and repeated snapshots passed.\n"
+  },
+  {
+    "suite": "test-keep-journey.cjs",
+    "pass": true,
+    "output": "Broken Walls: lifecycle-safe status, both route choices, guard guidance, exact timing boundaries, matching wave warning/spawn, restored gates, host-owned health/retry, tower clearance and original scale passed.\n"
+  },
+  {
+    "suite": "test-keep-performance.cjs",
+    "pass": true,
+    "output": "{\"parityCases\":6000,\"timings\":{\"beforeMs\":1231.3330999999998,\"afterMs\":32.930399999999736}}\nActive optional objectives are visible and progress-sensitive.\nKeep, Frostfell, deep regions and hub retain stable light pools, including low quality.\n60 actual enemy movement parity cases pass with bounded direct-step candidates.\n"
+  },
+  {
+    "suite": "test-long-ascent.cjs",
+    "pass": true,
+    "output": "Long Ascent passed: sequential catches, independent/shared rescue, dialogue branches/resume, permanent puzzle latch, physical shards, authored storeys and returning service lift.\n"
+  },
+  {
+    "suite": "test-loot-notices.cjs",
+    "pass": true,
+    "output": "PASS Blocked item shows its identity and truthful outcome\nPASS Collecting the same item immediately replaces the blocked outcome\nPASS Repeated notices for a queued item collapse into its latest outcome\nPASS Journal retains priority on a short screen without consuming the pending notice\nPASS Current rebound bag key is reflected in the notice\nPASS Changing scenes clears prior loot and queued outcomes\n{\"checks\":6,\"passed\":true,\"scope\":\"Presentation logic only; visual and live browser checks required.\"}\n"
+  },
+  {
+    "suite": "test-loot-transactions.cjs",
+    "pass": true,
+    "output": "PASS Comparison purchase bags gear without replacing equipped weapon\nPASS Full bag purchase preserves gold, inventory and equipped weapon\nPASS Successful comparison confirmation cannot spend twice\nPASS Last free slot accepts exactly one purchased item\nPASS Purchase validates level before spending\nPASS Purchase validates gold before spending\nPASS Purchase validates class before spending\nPASS Paid relic uses existing claim flow and preserves replaced gear capacity\nPASS weapon stays unclaimed with a full bag\nPASS weapon auto-sells only when explicitly enabled\nPASS weapon bags immediately in last free slot\nPASS armor stays unclaimed with a full bag\nPASS armor auto-sells only when explicitly enabled\nPASS armor bags immediately in last free slot\nPASS trinket stays unclaimed with a full bag\nPASS trinket auto-sells only when explicitly enabled\nPASS trinket bags immediately in last free slot\nPASS Repeated full-bag proximity does not flood comparison notices\nPASS Chest capacity warning does not expose its unopened reward\nPASS Full chest stays unclaimed and its fixed reward survives until space is available\nPASS Same-frame pickups fill only the last slot while quest items still collect\nPASS Auto-sell consumes each ground pickup once across repeated updates\n{\"cases\":22,\"passed\":true,\"scope\":\"Actual transaction functions under a DOM adapter; browser, render and integration checks still required.\"}\n"
+  },
+  {
+    "suite": "test-lost-canyon.cjs",
+    "pass": true,
+    "output": "Lost Canyon: order/bluff/side routes, required rescues, alarm order, Ruth consequence/repair, single shard reward, one-time freight brake and guard gates passed.\n"
+  },
+  {
+    "suite": "test-marble-guardian.cjs",
+    "pass": true,
+    "output": "Marble passed: locked warnings, screen interception/rearming, hit geometry and safe responses, three dialogue approaches, leave/resume, death gate, no finale spoilers.\n"
+  },
+  {
+    "suite": "test-marksman.cjs",
+    "pass": true,
+    "output": "Marksman aim lock, recovery, single relocation/wave, protected glide, safe landing, snapshot and dead-state tests passed.\n"
+  },
+  {
+    "suite": "test-menu-shortcuts.cjs",
+    "pass": true,
+    "output": "18 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\n"
+  },
+  {
+    "suite": "test-minimap-heading.cjs",
+    "pass": true,
+    "output": "38 actual minimap canvas behavior checks passed.\n"
+  },
+  {
+    "suite": "test-mob-imports.cjs",
+    "pass": true,
+    "output": "All game enemy loaders, renderers and teardown use one canonical module and asset cache.\n"
+  },
+  {
+    "suite": "test-mob-render-culling.cjs",
+    "pass": true,
+    "output": "15 enemy presentation regression checks passed.\n"
+  },
+  {
+    "suite": "test-music-score.cjs",
+    "pass": true,
+    "output": "Score passed: 40 original hashes, stereo/size, all halves/bosses, hub/hall/trials, final phases, dialogue, future scene cues.\n"
+  },
+  {
+    "suite": "test-onboarding-coop.cjs",
+    "pass": true,
+    "output": "20 onboarding/co-op face and dialogue visibility checks passed.\n"
+  },
+  {
+    "suite": "test-overhead-controls.cjs",
+    "pass": true,
+    "output": "Overhead input, key aliases, map and default-off afterimages pass\n"
+  },
+  {
+    "suite": "test-palace-courtyard.cjs",
+    "pass": true,
+    "output": "Palace story passed: either balcony and either release, main independence, offense/recovery, mirror order, atomic delivery/deduplication, guard gates, shard identity and VO graph.\n"
+  },
+  {
+    "suite": "test-palm-flames.cjs",
+    "pass": true,
+    "output": "Palm flames: intrinsic rank scaling, full-bag switches, legacy migration, Warlock access, cone/charge/walls/height/PvP dispatch passed.\nRemote palm flame packets and bounded render passed.\n"
+  },
+  {
+    "suite": "test-patrol-retirement.cjs",
+    "pass": true,
+    "output": "900 patrol respawns: bounded bodies, death fade retained, authored bodies retained, guest cleanup without spawning.\n"
+  },
+  {
+    "suite": "test-playtest-feedback.cjs",
+    "pass": true,
+    "output": "Combat quota/reward dedupe, delayed bounded respawn, proximity safety, host authority, conversation exit/resume passed.\n"
+  },
+  {
+    "suite": "test-priority-sfx.cjs",
+    "pass": true,
+    "output": "{\"checks\":255,\"candidateFilesPreserved\":64,\"originalFilesRestored\":56,\"proceduralOverrides\":0,\"unreviewedActiveReplacements\":0,\"subjectiveQuality\":\"Not inferred from technical tests\"}\n"
+  },
+  {
+    "suite": "test-prison-journey.cjs",
+    "pass": true,
+    "output": "Dungeons journey passed: lifecycle, floor-aware guidance, branch returns, restored gates, both winding directions, approach inertia, conversation independence and retry.\n"
+  },
+  {
+    "suite": "test-prison-press.cjs",
+    "pass": true,
+    "output": "Prison presses passed: distinct phases, warning, stopped save, retired inputs, once-only brake, RK-03 and nearby clue.\n"
+  },
+  {
+    "suite": "test-prison-revision10.cjs",
+    "pass": true,
+    "output": "{\n  plans: 1080,\n  oldLayoutsUnchanged: 9720,\n  sockets: 2160,\n  spawns: 25920\n}\n"
+  },
+  {
+    "suite": "test-prison-revision11.cjs",
+    "pass": true,
+    "output": "{ plans: 1080, gates: 6480, olderLayoutsUnchanged: 10800 }\n"
+  },
+  {
+    "suite": "test-prison-revision9.cjs",
+    "pass": true,
+    "output": "{\n  plans: 1080,\n  oldLayoutsUnchanged: 8640,\n  wingShapes: 9,\n  spawns: 64800,\n  campaignSpawns: 31680,\n  campaignShare: 0.49\n}\n"
+  },
+  {
+    "suite": "test-prison-routes-v6.cjs",
+    "pass": true,
+    "output": "{ tested: 1350, legacyPlans: 6750, routeShapes: 6 }\n"
+  },
+  {
+    "suite": "test-prison-story.cjs",
+    "pass": true,
+    "output": "Prison story passed: Sly routes, rescue winch, retired lower weights, press brake, old partial data, shards, rewards, voice graph and lift bounds.\n"
+  },
+  {
+    "suite": "test-progression-celebrations.cjs",
+    "pass": true,
+    "output": "{\"checks\":62,\"introMs\":2800,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\n11 actual staged rank-banner / fade / HUD-lock / cancellation checks passed.\n"
+  },
+  {
+    "suite": "test-puzzle-guidance.cjs",
+    "pass": true,
+    "output": "Puzzle notice coalescing, discovered-clue search, hammer warning boundaries and old-complete sled placement passed.\n"
+  },
+  {
+    "suite": "test-puzzle-overhaul.cjs",
+    "pass": true,
+    "output": "Puzzle overhaul passed: all water heights/retries, flow configurations, all 64 legacy shelf configurations/reset, saved solved states, feedback and atomic invalid-action rollback.\n"
+  },
+  {
+    "suite": "test-ready-turnins.cjs",
+    "pass": true,
+    "output": "28 explicitly authored hand-ins; 154 ready-only, unmet-requirement, stale-request, atomic/once-only and legacy-cursor checks pass\n"
+  },
+  {
+    "suite": "test-render-warmup.mjs",
+    "pass": true,
+    "output": "Off-camera preparation restores visibility, culling, viewport and shadow state after success or failure.\n"
+  },
+  {
+    "suite": "test-return-visits.cjs",
+    "pass": true,
+    "output": "Return quests: eligibility, decline/rejoin, puzzle gates, collection/delivery idempotency, graph and save normalization passed.\n"
+  },
+  {
+    "suite": "test-rift-hall.cjs",
+    "pass": true,
+    "output": "Rift Hall passed: personal five-shard assembly, no duplicate counts/unlocks, legacy class mapping, ending gate, absent class guard, dialogue resume and graph links.\n"
+  },
+  {
+    "suite": "test-rift-shards.cjs",
+    "pass": true,
+    "output": "Rift shard ledger passed: stable IDs, sanitization, individual collection, once-only echo, provisional/banked distinction, rollback, 5/5 gating and approved class mapping.\n"
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "pass": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "test-ship-crossing.cjs",
+    "pass": true,
+    "output": "Ship crossing passed: 80 safe course seeds, collisions, two waves, role swap, repair cap, disconnect/death, solo, pause, fixed steps, authority and stale snapshots.\n"
+  },
+  {
+    "suite": "test-shipwreck-shore.cjs",
+    "pass": true,
+    "output": "Shipwreck Shore passed: ready Rose hand-in and incomplete refusal/apology routes, main independence, deliveries, cave order, cargo release, ballista aim/reward dedupe and voice graph.\n"
+  },
+  {
+    "suite": "test-shop-chests.cjs",
+    "pass": true,
+    "output": "38 chest purchase conservation and gate checks passed.\n"
+  },
+  {
+    "suite": "test-skill-sfx.cjs",
+    "pass": true,
+    "output": "66 additive skill audio, actual cast gate and asset checks passed.\n"
+  },
+  {
+    "suite": "test-sky-library.cjs",
+    "pass": true,
+    "output": "Sky Library passed: main access, spatial display reflector, shelf branch, shards, guard/timer/retry checks, malformed rotation rejection and voice graph.\n"
+  },
+  {
+    "suite": "test-snowbound.cjs",
+    "pass": true,
+    "output": "Snowbound passed: both Heath branches, delivery gate, cornice release, optional ridge reward, replay safety, two physical shards, voice graph and gust phases.\n"
+  },
+  {
+    "suite": "test-social-chess.mjs",
+    "pass": true,
+    "output": "PASS: illegal move, checkmate, castling, en passant, underpromotion, insufficient material, stalemate, repetition, fifty-move claim\n"
+  },
+  {
+    "suite": "test-story-authority.cjs",
+    "pass": true,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.\n"
+  },
+  {
+    "suite": "test-story-state.cjs",
+    "pass": true,
+    "output": "Story state passed: all Thomas branches, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links.\n"
+  },
+  {
+    "suite": "test-story-topics.cjs",
+    "pass": true,
+    "output": "29 topic menus: legacy cursor recovery, effect-free navigation, Simon side quest after core dialogue, refusal guard and forged navigation passed.\n"
+  },
+  {
+    "suite": "test-stylist.cjs",
+    "pass": true,
+    "output": "PASS invalid choices, long names, exact funds, unchanged purchase\n"
+  },
+  {
+    "suite": "test-sunspire-relay.cjs",
+    "pass": true,
+    "output": "Sunspire relay: all 8 optical states, 24 control transitions, continuous rays, receiver agreement, light feedback and old solved save pass.\n"
+  },
+  {
+    "suite": "test-texture-recovery.mjs",
+    "pass": true,
+    "output": "Texture recovery passed: first load, retry, decoder fallback, bounded failure, source cache, sampler/orientation and loader configuration.\n"
+  },
+  {
+    "suite": "test-thunder-hydra.cjs",
+    "pass": true,
+    "output": "Thunder/Hydra passed: both Dash routes, main independence, race retry/deadline, three shard gates, graph, wind cycle, all warnings/hit shapes, cover, exposure, mercy and stale packets.\n"
+  },
+  {
+    "suite": "test-title-settings.cjs",
+    "pass": true,
+    "output": "30 title/current settings parity and return-context checks passed.\n"
+  },
+  {
+    "suite": "test-voice-content.cjs",
+    "pass": true,
+    "output": "Voice manifest: shared fetch, current-text filtering and failure recovery passed.\n"
+  },
+  {
+    "suite": "test-weapon-aura.mjs",
+    "pass": true,
+    "output": "All five aura colors, material identity/colors/emission, no recursive shells, geometry sharing, actor isolation, dual weapons and disabling pass\n"
+  },
+  {
+    "suite": "test-weapon-presence.cjs",
+    "pass": true,
+    "output": "{\"protectedPoints\":96,\"aliases\":true,\"rearShaftsUnchanged\":true}\n"
+  },
+  {
+    "suite": "test-welcome-hub.mjs",
+    "pass": true,
+    "output": "Welcome hub geometry, reflection bounds, tutorial ordering and rebound-control checks passed (1515 dummy vertices).\n"
+  }
+]

@@ -2007,3 +2007,8 @@ User requests A/D plus arrow move-history navigation and co-op options to play T
 ## [Codex | 2026-10-17] U-TITLE-CURRENT-SETTINGS-20261017
 
 User requests title Settings match current in-game settings. Route title entry through the same grouped settings renderer; preserve title origin through toggles, camera refreshes, key bindings and help. Back/Q/Esc must return to title, while pause-origin Settings returns to pause. Hide trial-exit controls on title even if an old world remains in memory. Keep preferences persistent and avoid loading/writing a character just to adjust options.
+
+
+## [Codex | 2026-10-17] U-ONBOARDING-COOP-FACES-20261017
+
+User reports E/Q tutorial unclear, Skill 1 value unclear, journal prompt missing key, quest tracker flashing during dialogue, blank face on friend and some textures permanently missing on guest. Grounded plan: prominent separate Choose/Back tutorial key cards with current bindings, concise combat benefit and journal shortcut; prevent quest renderer from reappearing during background dialogue simulation. Send bounded normalized face settings in initial/update/relay packets; build independent fitted peer faces and release only owned resources. Texture audit finds all referenced base-color images present; GLTFLoader currently silently caches a null texture after one load/decode error. Add bounded retries with ordinary image-decoder fallback, preserving sampler/orientation/cache and exposing failure diagnostics; this addresses that failure path, not yet proof of the friend's specific cause. Verify malformed/old packets, relay/live face updates, all six base rigs, rebinding, real browser dialogue ticks, cold assets and pre-change save. Preserve saves.

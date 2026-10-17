@@ -4,7 +4,7 @@ let guide=null,panel=null,mapCanvas=null,placedAt=0;
 const coreActions=['move','jump','attack','dodge'];
 const lessons=[
  {id:'welcome',title:'A safe place to learn',body:'Practice moving, jumping, attacking and dodging. Enemies wait until you finish these four controls.',safe:true},
- {id:'menu-keys',title:'Choose or go back',body:(g,hint)=>hint('interact')+' chooses or continues. Q goes back or closes menus and conversations. In dialogue, use W/S or ↑/↓ to move the yellow selector.',safe:true},
+ {id:'menu-keys',title:'Your two menu keys',body:'Use these throughout the game. In conversations, W/S or ↑/↓ moves the yellow selection. Practice now: choose Continue.',safe:true},
  {id:'move',title:'Move around',body:'Try moving in different directions. You can change your camera view later in Settings.',action:'move',safe:true},
  {id:'jump',title:'Hold to jump higher',body:'Tap for a short hop. Hold the jump control briefly for more height.',action:'jump',safe:true},
  {id:'attack',title:'Try a basic attack',body:'Red health bars mark enemies. Face one and tap to attack. Hold and release chargeable weapons for a stronger attack.',action:'attack',safe:true},
@@ -13,14 +13,14 @@ const lessons=[
  {id:'vitals',title:'Watch health and mana',body:'HP is your health. Mana fuels skills. Enemies are active now: keep moving while you read these optional tips.',target:['#hud .hudvitals']},
  {id:'objective',title:'Your next task',body:'Defeat 6 enemies. After the first 3, your class ranks up. A purple banner announces your first skill choice; combat waits while you choose. Try it on the rest, then find the exit portal.',target:['#questbox']},
  {id:'progress',title:'Two kinds of progress',body:'Gold: your player leveled up. Keep fighting; spend stat points in Bag later. Purple: your class ranked up. Combat pauses, then you must choose a skill or passive. Each bar has ten progress marks.',target:['#hudprogress']},
- {id:'skills',title:'Skills, costs and cooldowns',body:'Unlocked skills show their mana cost at the top left and a countdown while recharging. Padlocks show the rank you need.',target:['#bSk0']},
+ {id:'skills',title:'Skills are your stronger attacks',body:(g,hint)=>'Use '+hint('skill1')+' for Skill 1 after class rank 2. It hits harder or helps you fight in a way basic attacks cannot. Skills spend mana; the countdown shows when you can use one again.',target:['#bSk0']},
  {id:'bag',title:'Chests and your bag',body:'Chests reveal one piece of gear and put it in your bag. Enemies rarely drop chests. Bag full + Auto-sell OFF leaves a chest unopened.',target:['#inventoryDock']},
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
- {id:'journal',title:'Keep your clues close',body:'New clues appear on paper notices until dismissed. Open Journal to read them again, search clues or check side quests.',target:['#hudJournal'],anchor:'#inventoryDock'},
+ {id:'journal',title:'Keep your clues close',body:(g,hint)=>'New clues appear on paper notices. Open Journal ('+hint('journal')+') to reread clues or check quests at any time.',target:['#hudJournal'],anchor:'#inventoryDock'},
  {id:'navigation',title:'Follow your map',body:()=> 'Gold marks your objective or exit. Blue marks friends; cyan marks pings; red marks enemies. '+(window.__BF3?.meta?.camMode==='far'?'Overhead view keeps the map aligned with the camera.':'The map turns with your camera.'),target:['#localMap']},
  {id:'menu',title:'Ready to explore',body:'Close these tips, then open the menu for Settings or Help. Esc pauses time in solo play. In co-op, you stay visible and protected while your friends keep playing.',target:['#pausebtn','#eschint']}
 ];
-const skillLesson={id:'skill-use',title:'Try your new skill',body:'Face an enemy within range, then use Skill 1. It spends mana and needs time to recharge.',action:'skill1',target:['#bSk0']};
+const skillLesson={id:'skill-use',title:'Try your new skill',body:(g,hint)=>'Skill 1 is a powerful part of combat, not just an extra button. Face an enemy in range and press '+hint('skill1')+' to try it. Watch your mana and its recharge countdown.',action:'skill1',target:['#bSk0']};
 const pauseHint=()=>guide?.hint?.('pause')||'Esc';
 function suspend(){if(panel)panel.hidden=true;BFTutorialCallout.hide();}
 function stop(){if(guide)guide.g._tutorialSafe=false;guide=null;panel?.remove();panel=null;BFTutorialCallout.clear();}
@@ -75,6 +75,13 @@ function draw(hint){
  else if(step.id==='journal'){keys=[hint('journal')];label='Open journal';}
  else if(step.id==='menu-keys'){keys=[hint('interact'),'Q'];label='Choose / continue · Back / close';}
  else if(step.id==='menu'){keys=[pauseHint()];label='Open menu after closing tips';}
+ if(step.id==='menu-keys'){
+  const cards=document.createElement('div');cards.className='lesson-menu-keys';
+  for(const [key,title,description] of [[hint('interact'),'Choose / continue','Talk, interact and select'],['Q','Back / close','Leave menus and conversations']]){
+   const card=document.createElement('div'),keycap=document.createElement('kbd'),titleEl=document.createElement('strong'),text=document.createElement('small');
+   keycap.textContent=key;titleEl.textContent=title;text.textContent=description;card.append(keycap,titleEl,text);cards.append(card);
+  }copy.append(cards);keys=[];
+ }
  if(keys.length){const k=document.createElement('div');k.className='lesson-control';for(const key of keys){const el=document.createElement('kbd');el.textContent=key; k.append(el);}const l=document.createElement('span');l.className='lesson-controls-label';l.textContent=label;k.append(l);copy.append(k);}
  panel.append(copy);
  const buttons=document.createElement('div');buttons.className='lesson-actions';

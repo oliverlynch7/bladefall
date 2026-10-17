@@ -27,3 +27,7 @@
   X-Content-Type-Options: nosniff
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; media-src 'self' blob:; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'
   Permissions-Policy: microphone=(self), camera=()
+
+# Revalidate the shared loader so existing players receive texture recovery.
+/3d/jsm/loaders/GLTFLoader.js
+  Cache-Control: no-cache

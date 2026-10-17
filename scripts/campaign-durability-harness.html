@@ -1,0 +1,18 @@
+<section style="position:fixed;left:10px;top:10px;z-index:200001;background:#102331;color:white;font:12px system-ui;max-height:90vh;overflow:auto"><pre id="balanceResult">Loading</pre></section><script>
+(async()=>{const wait=ms=>new Promise(r=>setTimeout(r,ms));while(!window.__BF3||!window.HERO3D?.ready)await wait(50);const b=__BF3;await b.briarReady;const rows=[];
+const scenario=new URLSearchParams(location.search).get('scenario');
+if(scenario){
+ b.loadMode('rl');Object.assign(b.meta,{hero:null,run:null,bank:null,classes:{},perks:{},classId:'mage',classUnlocked:{mage:true},originSeen:true,introSeen:true,hubTutDone:true,tutOff:true,petActive:null});b.openHub();
+ if(scenario==='save'){const data=await fetch('/3d/.qa-old-save.json').then(r=>r.json());Object.assign(b.meta,data);b.continueRun();await wait(1800);document.getElementById('balanceResult').textContent=JSON.stringify({scenario,level:b.G.p.level,xp:b.G.p.xp,class:b.classState(b.meta.classId),gold:b.meta.gold,mode:b.mode});return;}
+ b.enterZone(0);while(BF_LOADING.active)await wait(50);b.G._tutorialSafe=true;const p=b.G.p,e=b.G.enemies.find(e=>e.briarRole==='guard')||b.G.enemies[0];Object.assign(p,{x:e.x,y:e.y,z:e.z+150,vx:0,vy:0,vz:0});b.G.camYaw=Math.PI;b.G.camPitch=.14;
+ if(scenario==='coop'){const q=b.spawnEnemy('grunt',p.x,p.z-100),max=q.maxHp;q.hp=q.maxHp*.37;b.MP.active=true;b.MP.isHost=true;b.MP.zone=b.G.zone;b.MP.peers={friend:{zone:b.G.zone}};b.syncCampaignPartyHealth();const duo={max:q.maxHp,fraction:q.hp/q.maxHp};b.MP.active=false;b.MP.peers={};b.syncCampaignPartyHealth();document.getElementById('balanceResult').textContent=JSON.stringify({scenario,solo:max,duo,returned:q.maxHp,fraction:q.hp/q.maxHp});return;}
+ if(scenario==='wall'){b.G.walls.push({x:e.x,z:e.z+75,y0:0,w:240,d:18,h:160});}
+ await wait(2000);document.getElementById('balanceResult').textContent=JSON.stringify({scenario,enemies:b.G.enemies.filter(e=>!e.dead).length,targetHp:e.hp,targetMax:e.maxHp,bars:b.healthBars(),mobError:window.__mob3d().err});return;
+}
+for(let z=0;z<8;z++)for(const cid of ['warrior','ranger','mage']){
+b.loadMode('rl');Object.assign(b.meta,{hero:null,run:null,bank:null,classes:{},perks:{},classId:cid,classUnlocked:{[cid]:true},introSeen:true,originSeen:true,hubTutDone:true,tutOff:true,petActive:null});b.openHub();let p=b.G.p;const level=[3,6,9,12,15,18,21,24][z],rarity=z<2?'common':z<5?'uncommon':'rare';for(let i=1;i<level;i++)b.autoLevelGrow(p);p.level=level;const roll=Math.random;try{Math.random=()=>.5;p.weapon=b.makeWeapon({warrior:'sword',ranger:'bow',mage:'firestaff'}[cid],rarity);}finally{Math.random=roll;}Object.assign(b.classState(cid),{rank:Math.min(10,2+z),xp:0});b.meta.hero=b.snapOf(p);b.enterZone(z);p=b.G.p;const enemy=b.spawnEnemy('grunt',p.x,p.z-100),naturalHp=enemy.maxHp;enemy.role=null;enemy.hp=enemy.maxHp=1000000;b.G.combo=0;p.mana=p.maxMana;const random=Math.random;let raw;
+try{Math.random=()=>.99;if(p.weapon.cls==='ranged'){b.fireProjectile(p,p.weapon);raw=b.G.projectiles.at(-1).dmg;}else raw=p.weapon.dmg*b.effPower(p)*b.classStyleMul(p);b.hitEnemy(enemy,raw,p,0,0,p.weapon.el);}finally{Math.random=random;}
+const damage=1000000-enemy.hp;b.G.area=-1;b.loadArea();const boss=b.G.boss;rows.push({zone:z,cid,level,rarity,weapon:p.weapon.name,basic:damage,enemyHp:naturalHp,basicHits:Math.ceil(naturalHp/damage),bossHp:boss?.maxHp,bossBasicHits:Math.ceil((boss?.maxHp||0)/damage)});document.getElementById('balanceResult').textContent=JSON.stringify({running:true,rows},null,2);await wait(30);
+}
+document.getElementById('balanceResult').textContent=JSON.stringify({done:true,rows},null,2);
+})().catch(e=>document.getElementById('balanceResult').textContent=JSON.stringify({error:String(e.stack)}));</script>

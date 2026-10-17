@@ -1088,6 +1088,8 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2211"></script>
 <script src="./emotes.js?v=2087"></script>
 <script src="./camera-occlusion.js?v=2095"></script>
+<script src="./campaign-threat.js?v=2217"></script>
+<script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
 <script src="./brute-encounter.js?v=2202"></script>
@@ -1146,7 +1148,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2192">
 <script src="./tutorial-callout.js?v=2192"></script>
-<script src="./guided-tutorial.js?v=2212"></script>
+<script src="./guided-tutorial.js?v=2217"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1164,7 +1166,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.216.0-briar-render-performance';
+const VERSION3D='2.217.0-campaign-threat-readability';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -9798,7 +9800,8 @@ function partySize(){
   } catch(e){ return 1; }
 }
 function partyHpMul(){ return NO_PARTY_SCALE ? 1 : (1 + PARTY_HP_PER_ALLY * (partySize() - 1)); }
-function campaignEnemyDamageMul(){return isCampaignAdventure()&&G.area>=0&&G.zone>0?1+Math.min(7,G.zone)*.10+(G.area===1?.03:0):1;}
+function campaignEnemyDamageMul(){return isCampaignAdventure()&&!G.briarBeta&&G.area>=0?BFCampaignThreat.damage(G.zone,G.area):1;}
+function campaignEnemyHealthMul(boss){return isCampaignAdventure()&&!G.briarBeta?BFCampaignThreat.hp(G.zone,G.area,boss):1;}
 function syncCampaignPartyHealth(){
   if(!isCampaignAdventure()||(MP.active&&!MP.isHost)||MP.pvp)return;
   const mul=partyHpMul();let changed=false;
@@ -9825,7 +9828,7 @@ function scaledEnemyDamage(base,boss,earnedTrial=false){
 function spawnEnemy(type,x,z,isBoss){
   if(G.trial&&ENEMY[type]?.boss){type='grunt';isBoss=false;} // Training never inherits campaign bosses.
   const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
-  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1)*partyHpMul();   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale); partyHpMul is 1 solo
+  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1)*partyHpMul()*campaignEnemyHealthMul(!!a.boss);   // Campaign progression is separate from difficulty, trial tuning and party health.
   const e={partyHealthMul:partyHpMul(),type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
     dmg:scaledEnemyDamage(a.dmg,a.boss,_earnedTrial),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
@@ -22275,13 +22278,15 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
   }
 }
 function drawHpBar3(e){
-  if(e.dead) return;
-  const namedElite=e.campaignElite&&dXZ(e.x,e.z,G.p.x,G.p.z)<900;
-  if(((e.briarRole||e.homeRaid||e.patrolGroup)&&dXZ(e.x,e.z,G.p.x,G.p.z)<420&&Math.abs(e.y-G.p.y)<130)||namedElite||(e.frostOfficer&&!e.dead)||!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+(namedElite?32:14),e.z); if(s) hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/e.maxHp)),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:namedElite||e.briarRole||e.homeRaid||e.patrolGroup?e.label:null}); }
-  // elemental status pips (shown even at full HP + on bosses)
-  if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
-    if(keys.length){ const sp=project(e.x,e.y+e.h+(namedElite?75:e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
+  if(e.dead||e.hp<=0)return;
+  const namedElite=!!e.campaignElite;
+  const s=project(e.x,(e.y||0)+(e.h||38)+(namedElite?32:18),e.z);
+  if(!s||s[0]<-60||s[0]>VW+60||s[1]<-40||s[1]>VH+40||!BFEnemyHealth.visible(G,e,G.time||0))return;
+  hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/Math.max(1,e.maxHp))),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:namedElite||e.briarRole||e.homeRaid||e.patrolGroup?e.label:null,training:!!(e.dummy||e.practice)});
+  if(e.st){const keys=[];for(const k in e.st){const n=Math.floor(e.st[k]);if(n>=1)keys.push([k,n]);}
+    if(keys.length){const sp=project(e.x,(e.y||0)+(e.h||38)+(namedElite?75:e.boss?36:30),e.z);if(sp)statPips.push({x:sp[0],y:sp[1],keys});}}
 }
+
 let hpBars=[], statPips=[];
 const hpCanvas=document.createElement('canvas');hpCanvas.id='enemyhealth'; // tiny 2D overlay for enemy hp bars
 hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;width:100%;height:100%;';
@@ -22316,8 +22321,8 @@ function updateHubTags(){
     tg.classList.toggle('near',dist<HUB_TAG_NEAR); });
 }
 function drawHpBars(){
-  hpCanvas.width=VW; hpCanvas.height=VH;
-  const c=hpCanvas.getContext('2d');
+  if(hpCanvas.width!==VW)hpCanvas.width=VW;if(hpCanvas.height!==VH)hpCanvas.height=VH;
+  const c=hpCanvas.getContext('2d');c.clearRect(0,0,VW,VH);
   for(const b of hpBars){
     if(b.escort){
       c.save();c.translate(b.x,b.y);c.scale(DPR,DPR);c.textAlign='center';c.textBaseline='alphabetic';
@@ -22343,15 +22348,17 @@ function drawHpBars(){
       const w=104*DPR,h=8*DPR;c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(12*DPR)+'px system-ui,sans-serif';
       c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText('◆ '+b.name,b.x,b.y-7*DPR);c.fillStyle='#f0c36c';c.fillText('◆ '+b.name,b.x,b.y-7*DPR);
       c.fillStyle='#161923';c.fillRect(b.x-w/2-2*DPR,b.y-2*DPR,w+4*DPR,h+4*DPR);c.strokeStyle='#a47a37';c.lineWidth=DPR;c.strokeRect(b.x-w/2-DPR,b.y-DPR,w+2*DPR,h+2*DPR);
-      c.fillStyle='#df9f46';c.fillRect(b.x-w/2,b.y,w*b.f,h);continue;
+      c.fillStyle='#e8453d';c.fillRect(b.x-w/2,b.y,w*b.f,h);continue;
     }
     if(b.raider&&b.name){c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(10*DPR)+'px system-ui,sans-serif';c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText(b.name,b.x,b.y-6*DPR);c.fillStyle='#ead6af';c.fillText(b.name,b.x,b.y-6*DPR);}
     if(b.pet&&b.name){   // ally pet: small name label above its bar
       c.textAlign='center'; c.textBaseline='alphabetic'; c.font='bold 9px system-ui,sans-serif';
       c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(b.name, b.x+0.6, b.y-4.4);
       c.fillStyle='#9be7b0'; c.fillText(b.name, b.x, b.y-5); }
-    c.fillStyle='rgba(0,0,0,0.62)'; c.fillRect(b.x-17,b.y,34,5);
-    c.fillStyle=b.pet?'#55d78b':'#e8453d'; c.fillRect(b.x-16,b.y+1,32*b.f,3); }
+    const width=b.pet?32:46,height=b.pet?3:5;
+    c.fillStyle='#171b24';c.fillRect(b.x-width/2-2,b.y-2,width+4,height+4);
+    c.fillStyle='#4a2426';c.fillRect(b.x-width/2,b.y,width,height);
+    c.fillStyle=b.pet?'#55d78b':b.training?'#aeb7bf':'#ed4845';c.fillRect(b.x-width/2,b.y,width*b.f,height); }
   // elemental status icons: the same readable voxel emblems used by affinity/status tooltips
   c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';
   for(const sp of statPips){ const n=sp.keys.length, pw=19, tot=n*pw, x0=sp.x-tot/2, y=sp.y-9;

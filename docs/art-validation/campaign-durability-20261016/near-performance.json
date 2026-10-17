@@ -1,0 +1,238 @@
+{
+  "label": "briar-start",
+  "frames": 809,
+  "gapMean": 5.569344870210138,
+  "gapP95": 5.600000000000364,
+  "main": 3.590605686019245,
+  "update": 0.1542645241323817,
+  "base": 0.7400494437568046,
+  "hero": 2.6669962916647547,
+  "boxes": 1591.9962917181706,
+  "last": {
+    "gap": 5.5,
+    "main": 3.699999999254942,
+    "update": 0.30000000074505806,
+    "base": 0.6999999992549419,
+    "hero": 2.600000001490116,
+    "boxes": 1592,
+    "three": {
+      "shadows": true,
+      "triangles": 139318,
+      "calls": 235,
+      "geometries": 222
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||0|plains|0|false|||||||||1225|outskirts|-530,-842;510,137;2481,-2070",
+      "counts": {
+        "outskirtsArt": true,
+        "floorTiles": 7601,
+        "roadTiles": 0,
+        "tree": 178,
+        "totalTriangles": 514138,
+        "instances": 16083,
+        "chunks": 412,
+        "drawCalls": 986,
+        "visibleTriangles": 80628,
+        "visibleDrawCalls": 201,
+        "artObstacles": true,
+        "craft": {
+          "models": 355,
+          "drawCalls": 298,
+          "visibleDrawCalls": 64
+        }
+      },
+      "err": null
+    },
+    "npcs": 3,
+    "mob": {
+      "on": true,
+      "live": 11,
+      "culled": 15,
+      "corpses": 0,
+      "pooled": 12,
+      "models": [
+        "enemy-assets/upgraded/grunt-v2142",
+        "enemy-assets/upgraded/thornboar-v2142",
+        "enemy-assets/upgraded/sporeback-v2142",
+        "enemy-assets/upgraded/flyer-v2142",
+        "enemy-assets/upgraded/caster-v2142"
+      ],
+      "pending": [],
+      "missing": [],
+      "err": null,
+      "actors": [
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "grunt",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "flyer",
+          "clip": "Idle",
+          "time": 1.7717999999970133,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 0.10240000000223519,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.4308999999985053,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "thornboar",
+          "clip": "Idle",
+          "time": 1.4056999999992505,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        },
+        {
+          "type": "sporeback",
+          "clip": "Idle",
+          "time": 1.4056999999992505,
+          "weights": {
+            "Idle": 1
+          },
+          "phase": null,
+          "phaseKey": null,
+          "timeScale": 1,
+          "dead": false,
+          "opacity": 1,
+          "flash": 1
+        }
+      ]
+    },
+    "enemies": 26
+  }
+}

@@ -6,7 +6,7 @@ const lessons=[
  {id:'welcome',title:'A safe place to learn',body:'Practice moving, jumping, attacking and dodging. Enemies wait until you finish these four controls.',safe:true},
  {id:'move',title:'Move around',body:'Try moving in different directions. You can change your camera view later in Settings.',action:'move',safe:true},
  {id:'jump',title:'Hold to jump higher',body:'Tap for a short hop. Hold the jump control briefly for more height.',action:'jump',safe:true},
- {id:'attack',title:'Try a basic attack',body:'Face your target and tap to attack. With chargeable weapons, hold and release for a stronger attack.',action:'attack',safe:true},
+ {id:'attack',title:'Try a basic attack',body:'Red health bars mark enemies. Face one and tap to attack. Hold and release chargeable weapons for a stronger attack.',action:'attack',safe:true},
  {id:'dodge',title:'Dodge or dash',body:'Dodge through an attack to avoid the hit. The same control lets you dash in mid-air.',action:'dodge',safe:true},
  {id:'vitals',title:'Watch health and mana',body:'HP is your health. Mana fuels skills. Enemies are active now: keep moving while you read these optional tips.',target:['#hud .hudvitals']},
  {id:'objective',title:'Your next task',body:'Defeat 6 enemies. After the first 3, your class ranks up. A purple banner announces your first skill choice; combat waits while you choose. Try it on the rest, then find the exit portal.',target:['#questbox']},

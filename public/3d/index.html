@@ -1105,10 +1105,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2233"></script>
-<link rel="stylesheet" href="./hub-dialogue.css?v=2214">
+<link rel="stylesheet" href="./hub-dialogue.css?v=2243">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
-<script src="./hub-dialogue.js?v=2235c"></script>
+<script src="./hub-dialogue.js?v=2243"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
 <script src="./hub-tour.js?v=2233d"></script>
 <script src="./controller.js?v=2190"></script>
@@ -1202,7 +1202,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.242.0-fullscreen-shortcut';
+const VERSION3D='2.243.0-dialogue-selection';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1510,7 +1510,7 @@ function openShade(){
   G.npc.talked=true; meta.shadeSeen=meta.shadeSeen||{}; meta.shadeSeen[Z.id]=1; persistGlobal();
   mode='menu'; SFX.magic('void');
   const qs=areaQuests(), qrows=qs.length?qs.map(q=>`<div class="qbq"><span class="qbico"></span><span>${q.d}</span></div>`).join(''):'<div class="qbq" style="opacity:.6"><span class="qbico"></span><span>No errands here — only the fight ahead.</span></div>';
-  showOverlayHTML(`<div class="card" style="--npc-accent:#c47bff"><div class="npcintro">
+  showOverlayHTML(`<div class="card" data-dialogue-menu style="--npc-accent:#c47bff"><div class="npcintro">
     ${npcPortrait('shade')}<div class="npcidentity"><p class="ovsub">A SHADE OF THE BLADEBORN</p><h2 class="ovh">Warden’s Shade</h2>
     <p class="npcrole">${Z.name} · Fallen Warden</p><p class="npcline">“${N.lore[0]}”</p></div></div>
     <div style="text-align:left;font-size:16px;line-height:1.78;color:#dfe4ec;margin:8px 0 4px">
@@ -1519,7 +1519,7 @@ function openShade(){
       <p style="margin:0;color:#f0a6a6;font-weight:600">“${N.boss}”</p></div>
     <div class="qhead"><span class="qbico"></span>Your Orders</div>${qrows}
     <button class="bigbtn" id="shadeGo" style="margin-top:16px">I'll see it done</button></div>`);
-  document.getElementById('shadeGo').onclick=resumePlay;
+  document.getElementById('shadeGo').onclick=resumePlay;BFHubDialogue.selectFirst(document.querySelector('[data-dialogue-menu]'));
 }
 function zoneCardMaybe(){                 // one card the FIRST time a zone is entered this save
   if(!G||G.trial||G.side||G.area<0) return;

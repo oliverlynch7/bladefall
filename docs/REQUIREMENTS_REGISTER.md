@@ -1952,3 +1952,8 @@ User wants expanded Game options groups clearly separated from neighboring headi
 ## [Codex | 2026-10-17] U-FULLSCREEN-SHORTCUT-20261017
 
 User requests0 fullscreen shortcut. Add rebindable Toggle fullscreen action default Digit0/Numpad0, fill only free bindings on existing saves, handle once per press outside typing/rebinding/editor/modifier combinations. Show assigned shortcut in fullscreen settings button, update actual state on fullscreenchange, catch rejected browser requests. Verify routing and browser fullscreen with a real gesture where permitted.
+
+
+## [Codex | 2026-10-17] U-DIALOGUE-KEYBOARD-20261017
+
+User requires obvious yellow dialogue selection, W/S or Up/Down browsing and E confirmation. Plan: shared visible/enabled dialogue focus selection for hub/campaign/Rift Keeper and legacy Shade, wrap navigation, auto-select first main choice after arming, include optional question summaries and footer exits, visible keyboard hint; respect rebound interact, typing/modifiers, disabled spectator choices and held-E arming guard. Preserve mouse, Tab, Escape/Q, quest authority and dialogue endings. Verify actual browser conversation paths and regression suites.

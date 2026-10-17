@@ -12,3 +12,7 @@
 #hubDialogue button.hub-quest-choice{display:flex;align-items:center;gap:10px;text-align:left;border-color:#d5b551;background:linear-gradient(110deg,#40391e,#1d2c2b);color:#fff1bd}
 #hubDialogue button.hub-quest-choice:hover:not(:disabled){border-color:#ffe488;background:linear-gradient(110deg,#514525,#263832)}
 #hubDialogue .hub-quest-badge{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;height:27px;border:1px solid #ebca65;border-radius:7px;background:#ffd65a;color:#34240b;font:900 20px/1 system-ui;box-shadow:inset 0 1px #fff8,0 2px 5px #0005}
+
+/* Every selectable dialogue control carries the same visible keyboard cursor. */
+#hubDialogue button.dialogue-selected,#hubDialogue summary.dialogue-selected,#hubDialogue button:focus-visible,#hubDialogue summary:focus-visible,[data-dialogue-menu] button:focus-visible,[data-dialogue-menu] .dialogue-selected{outline:3px solid #ffe35b!important;outline-offset:2px;box-shadow:0 0 0 5px #ffe35b22!important;background-color:#4a4225!important;color:#fff4c7!important}
+#hubDialogue .dialogue-key-hint,[data-dialogue-menu] .dialogue-key-hint{color:#eedb89;font:600 12px/1.5 system-ui;margin:14px 0 8px}

@@ -20,11 +20,15 @@
   if(el('hubReturnQuest')){const info=a.returnInfo(n),btn=el('hubReturnQuest');btn.textContent=info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}
   el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
+ function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
+ function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items[0])?.focus({preventScroll:true});}
+ document.addEventListener('focusin',e=>{const root=e.target.closest?.('#hubDialogue,[data-dialogue-menu]');if(!root)return;root.querySelectorAll('.dialogue-selected').forEach(b=>b.classList.remove('dialogue-selected'));if(e.target.matches('button,summary'))e.target.classList.add('dialogue-selected');});
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<footer>${!active.external&&!active.spectator&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
+  delete root.dataset.dialogueArming;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<p class="dialogue-key-hint">W / S or ↑ / ↓ · ${esc(window.__BF3?.controlHint?.('interact')||'E')} choose</p><footer>${!active.external&&!active.spectator&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Esc</small></button></footer></div>`;
   if(el('hubTopics'))el('hubTopics').onclick=landing;
-  if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();el('hubLeave').focus({preventScroll:true});
+  if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();selectFirst(root);
  }
  function line(id,lastChoice='',topic='intro'){
   active.visited=active.visited||[];if(!active.visited.includes(id))active.visited.push(id);
@@ -45,9 +49,10 @@
    if(!node.choices.length||canChoose&&node.choices.some(c=>c.end)){el('hubLeave').hidden=true;const ending=[...choices.querySelectorAll('button')].find(b=>b.textContent===finishLabel||b.textContent==='Leave conversation');if(ending)ending.dataset.dialogueEnd='true';}
    // A text-skip click cannot become a response click; all choices have a short arming window.
    for(const btn of choices.querySelectorAll('button'))btn.disabled=true;
+   el('hubDialogue').dataset.dialogueArming='true';
    timer=setTimeout(()=>{if(token!==generation||!active)return;
     for(const btn of choices.querySelectorAll('button'))btn.disabled=!canChoose&&!!node.choices.length;
-    const end=choices.querySelector('[data-dialogue-end]');if(canChoose&&end&&!document.activeElement?.closest?.('.hub-optional'))end.focus({preventScroll:true});
+    delete el('hubDialogue').dataset.dialogueArming;if(canChoose&&!document.activeElement?.closest?.('.hub-optional'))selectFirst(el('hubDialogue'));
    },250);
   }
   el('hubReveal').onclick=unlock;
@@ -91,6 +96,17 @@
  else{active.lineId=null;shell('<p class="hub-dialogue-line">Your teammate is browsing '+esc(book.npcs[n.id]?.service||'services')+'.</p><p>You are listening. They control this conversation.</p>');}
 }
 function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0),len=Math.hypot(p.x-x,p.z-z)||1;return {x,y:n.y||0,z,dx:(p.x-x)/len,dz:(p.z-z)/len,blend:a.meta.reduceMotion?1:Math.min(1,(performance.now()-active.start)/550),from:active.eye}}
- document.addEventListener('keydown',e=>{if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(e=>e.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);
- window.BFHubDialogue={open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id],get active(){return active},get speaking(){return speaking}};
+ document.addEventListener('keydown',e=>{
+ const root=active?el('hubDialogue'):document.querySelector('[data-dialogue-menu]');if(!root||!root.getClientRects().length)return;
+ if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing&&!window.BFMenuKeys?.typing(e.target)){
+  const direction=['KeyW','ArrowUp'].includes(e.code)?-1:['KeyS','ArrowDown'].includes(e.code)?1:0;
+  const choose=window.__BF3?.keyAction(e.code)==='interact';
+  if(direction||choose){e.preventDefault();e.stopImmediatePropagation();const items=navigationItems(root);if(!items.length)return;
+   if(direction){const i=items.indexOf(document.activeElement),next=i<0?(direction>0?0:items.length-1):(i+direction+items.length)%items.length;items[next].focus({preventScroll:true});items[next].scrollIntoView({block:'nearest'});}
+   else if(!e.repeat&&!root.dataset.dialogueArming){if(!items.includes(document.activeElement))selectFirst(root);document.activeElement?.click();}
+   return;
+  }
+ }
+ if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(e=>e.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);
+ window.BFHubDialogue={selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id],get active(){return active},get speaking(){return speaking}};
 })();

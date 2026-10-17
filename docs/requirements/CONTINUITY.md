@@ -2322,3 +2322,8 @@ Game options card now uses stronger2px group borders, gold expanded boundary/lef
 ## [Codex | 2026-10-17] v2.242 fullscreen shortcut
 
 Added rebindable Toggle Fullscreen action default0/Num0, respects existing assigned keys. Routes before game/menu mode gating, ignores text fields, rebinding, modifier shortcuts, editor and repeats. Fullscreen button shows dynamic assigned keys and updates on browser fullscreenchange; unsupported/rejected API promises handled. Browser old-save settings/control fixture passes; instrumented real keyboard-event path requests0 times for typing/repeat/modifiers, once for0 and once forNum0. Browser event updated fullscreen label; embedded browser does not retain OS fullscreen, so no physical OS display claim. Inline syntax and focused controls/camera suites pass.
+
+
+## [Codex | 2026-10-17] v2.243 dialogue keyboard selector
+
+Hub/campaign/Rift Spirit conversations now visibly select enabled choices with yellow outline and keyboard hint. W/S and Up/Down wrap among visible choices, optional summaries and exits; rebound Interact(defaultE) confirms, held E ignored and existing250ms arming respected. First main choice selected when ready, mouse/Tab/Escape/Q preserved. Legacy Shade also supported. Disabled listener responses remain excluded; no quest authority change. Reset arming flag on shell replacement to prevent stale lock. Browser disposable old-save campaign and Quartermaster paths verify actual focus/outline/wrap/optional expansion/single E activation; listener exits without host choice. Seven focused story/quest suites pass (94 ordinary endings,29 topic menus, authority, ledger/state/prison/Gus); parser/module syntax pass. No production save changes.

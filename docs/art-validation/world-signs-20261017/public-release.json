@@ -1,0 +1,11 @@
+{
+  "snapshot": "- text: LMB 1 2 3 4 Shift\n- button \"New Game Forge a new Warden\":\n  - generic: New Game\n  - generic: Forge a new Warden\n- button \"Continue No saved Warden yet\" [disabled]:\n  - generic: Continue\n  - generic: No saved Warden yet\n- button \"Load Character View & choose your saved Wardens\":\n  - generic: Load Character\n  - generic: View & choose your saved Wardens\n- button \"Multiplayer BETA Play a zone co-op with a friend\":\n  - generic: Multiplayer BETA\n  - generic: Play a zone co-op with a friend\n- button \"Settings Audio, controls & display\":\n  - generic: Settings\n  - generic: Audio, controls & display\n- button \"Design Studio Preview every voxel model & weapon\":\n  - generic: Design Studio\n  - generic: Preview every voxel model & weapon\n- button \"Dev Previews Design plans & beta proposals\":\n  - generic: Dev Previews\n  - generic: Design plans & beta proposals\n- button \"Exit\":\n  - generic: Exit\n- text: v2.236.0-world-signs ·\n- link \"Save recovery\":\n  - /url: ./recover.html",
+  "scripts": [
+    "https://bladefall.pages.dev/3d/briar-journey.js?v=2236",
+    "https://bladefall.pages.dev/3d/hollow-cliffs.js?v=2236",
+    "https://bladefall.pages.dev/3d/lost-canyon.js?v=2236",
+    "https://bladefall.pages.dev/3d/prison-dungeons.js?v=2236",
+    "https://bladefall.pages.dev/3d/campaign-journey.js?v=2236",
+    "https://bladefall.pages.dev/3d/hero3d.js?v=2236"
+  ]
+}

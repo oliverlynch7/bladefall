@@ -12,7 +12,7 @@ import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeapon
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2174';
 import {syncProjectiles} from './projectile3d.js?v=2094';
-import {syncCompanions,companionPortrait} from './companion3d.js?v=2073';
+import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2225';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
 
@@ -1299,11 +1299,12 @@ function restoreEmotePose(A){if(A.sitRoot){A.sitRoot[0].position.copy(A.sitRoot[
 window.__restoreChessNpc=restoreEmotePose;
 window.__poseChessNpc=(p,root,anim)=>applyEmotePose(p,root,anim);
 function applyEmotePose(p,wrap,A){
- const e=p.sitting?{id:'sit',t:2}:p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
+ const e=p.dragonRide?{id:'ride',t:2}:p.sitting?{id:'sit',t:2}:p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
  const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5)),s=Math.sin(t*Math.PI*2);
  const turn=(name,x=0,y=0,z=0)=>{const b=wrap.getObjectByName(name);if(!b)return;if(!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);b.rotateX(x*blend);b.rotateY(y*blend);b.rotateZ(z*blend);};
  // Model-space hand targets keep elbows outside the torso on every shared skeleton.
  const arm=(side,target,hint)=>{for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+side);if(b)if(!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);}armTo(wrap,side,wrap.localToWorld(new THREE.Vector3(...target)),wrap.localToWorld(new THREE.Vector3(...hint)),null,blend);};
+ if(e.id==='ride'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.05,0,side==='R'?.8:-.8);turn('LowerLeg'+side,1.25);arm(side,[side==='R'?-.29:.29,1.15,.56],[side==='R'?-.62:.62,1.30,.22]);}turn('Torso',.12);}
  if(e.id==='sit'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.45);turn('LowerLeg'+side,1.45);arm(side,[side==='R'?-.36:.36,1.05,.45],[side==='R'?-.62:.62,1.35,.12]);}const body=wrap.getObjectByName('Body');if(body){A.sitRoot=[body,body.position.clone()];body.position.y-=.4;}}
  const chess=p.sitting&&window.BFSocial?.poseFor(p);
  if(chess){const target=new THREE.Vector3(chess.target.x,chess.target.y,chess.target.z);
@@ -1786,7 +1787,7 @@ function playFor(p, A){
 
   const cast = p.combatPose?.remaining > 0 && !(p.dodgeTimer > 0) && !airborne;
   const want = p.dead ? 'Death'
-             : p.sitting || p.emote && p.emote.t<4 ? 'Idle'
+             : p.dragonRide || p.sitting || p.emote && p.emote.t<4 ? 'Idle'
              : cast ? p.combatPose.clip
              : charging ? CHG
              /* p.atkTimer, NOT p.attackTimer. The picker has tested `p.attackTimer > 0 ||
@@ -2088,7 +2089,7 @@ export function drawHero3D(p, t){
 
     const S = HERO3D.scale;
     wrap.scale.setScalar(S);
-    wrap.position.set(p.x, (p.y || 0) + HERO3D.yOff, p.z);
+    wrap.position.set(p.x, (p.y || 0) + HERO3D.yOff + (p.dragonRide?24:0), p.z);
     wrap.rotation.y = (p.yaw || 0) + HERO3D.yawOff;
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
@@ -2109,11 +2110,12 @@ export function drawHero3D(p, t){
         const q=l.quaternion.clone();l.quaternion.set(r.quaternion.x,-r.quaternion.y,-r.quaternion.z,r.quaternion.w);r.quaternion.set(q.x,-q.y,-q.z,q.w);
       }
     }
-    if(!p.sitting&&(!p.emote||p.emote.id==='bow'||p.emote.t>=4)){
+    if(!p.dragonRide&&!p.sitting&&(!p.emote||p.emote.id==='bow'||p.emote.t>=4)){
       pirateWeaponPose(p,wrap,anim,dt);
       poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     }
     applyEmotePose(p,wrap,anim);
+    if(p.dragonRide){wrap.updateMatrixWorld(true);const hip=wrap.getObjectByName('UpperLegL');if(hip){const at=hip.getWorldPosition(new THREE.Vector3());wrap.position.y+=(p.y||0)+46-at.y;wrap.updateMatrixWorld(true);}}
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
     else if(rec)colorWeapon(rec.holder,p.weapon);
     const cosmeticLocal=_isLocal||(!rec&&window.__BF3?.mode==='mirror'),cosmeticMeta=window.__BF_META?.(),cosmeticClass=cosmeticLocal?cosmeticMeta?.classId:p.cid;
@@ -2144,11 +2146,13 @@ export function drawHero3D(p, t){
     // Local draw only. Never change a peer rig, network state or a portrait.
     const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!p.sitting&&!window.BFHubDialogue?.active&&!window.BFInspection?.active&&!window.BFHubTour?.camera()&&!window.__bfEd?.EDITOR?.on&&!(window.__BF3?.G?.kingFinal&&['charge','cut'].includes(window.__BF3.G.boss?.akStage));
     const restoreFirstPerson=fp?weaponOnly(wrap):null;
+    const mountView=window.__BF3?.meta.camMode==='fps'&&window.__BF3?.G?.p?.dragonRide&&!p._portrait&&!window.BFHubDialogue?.active&&!window.BFInspection?.active&&!window.BFHubTour?.camera()&&!window.BFSocial?.camera()&&!window.__bfEd?.EDITOR?.on;
+    const restoreMount=mountView?hideRiddenDragon(window.__BF3?.G?.pet):null;
     const chessFade=[],chessLocal=_isLocal&&p.sitting&&!!window.BFSocial?.camera();
     const fadeChessActor=root=>root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.16;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});
     if(chessLocal){fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
     const restorePause=p.pausedSafe?pauseAppearance(wrap):null;
-    try{renderer.render(scene, cam);}finally{restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    try{renderer.render(scene, cam);}finally{restoreMount?.();restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;

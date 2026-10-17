@@ -1019,6 +1019,10 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
  .chestshop .gn{white-space:normal;overflow:visible;text-overflow:clip;}
  .chestshop .chestbuy{grid-column:1 / -1;width:100%!important;}
 }
+
+#dragonFlight{position:fixed;right:18px;bottom:176px;width:min(310px,calc(100vw - 36px));box-sizing:border-box;padding:12px 14px;border:1px solid #cda856;border-radius:12px;background:linear-gradient(145deg,#102d31f5,#152333f5);color:#f7e6b9;z-index:30;font:12px system-ui;box-shadow:0 6px 24px #0008;pointer-events:auto}
+body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.dragon-riding #bSk2,body.dragon-riding #bSk3{opacity:.4;filter:grayscale(.8)}
+#dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
 <link rel="stylesheet" href="./adventure-hud.css?v=2213">
 <script src="./adventure-hud.js?v=2200"></script>
@@ -1098,7 +1102,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./character-stats.js?v=2087"></script>
 <script src="./class-looks.js?v=2209"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2211"></script>
-<script src="./emotes.js?v=2087"></script>
+<script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2095"></script>
 <script src="./campaign-threat.js?v=2217"></script>
 <script src="./enemy-health.js?v=2217"></script>
@@ -1133,6 +1137,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 <script src="./palace-courtyard.js?v=2187a"></script>
 <script src="./dragon-rescue.js?v=2183b"></script>
 <script src="./dragon-combat.js?v=2024"></script>
+<script src="./dragon-riding.js?v=2225"></script>
 <script src="./sky-library.js?v=2190"></script>
 <script src="./marble-guardian.js?v=2019"></script>
 <script src="./hydra.js?v=2198"></script>
@@ -1178,7 +1183,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.224.0-shop-chests';
+const VERSION3D='2.225.0-dragon-flight';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5551,6 +5556,8 @@ function forgeSpin(g,back){
   setTimeout(step,delay);
 }
 function newG(p,extra){
+  if(G?.p?.dragonRide)BFDragonRiding.stop(G,true);
+  p.dragonRide=null;
   cancelDeathTransition();cancelPortalWarp();
   return Object.assign({p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
     shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
@@ -9362,6 +9369,7 @@ const BOSS_ARENAS={
    fourth would silently skip the edits, which would look like the editor losing his work. */
 function loadStage(i){
   if(!G||G.hub)return;
+  BFDragonRiding.stop(G,true);
   cancelDeathTransition();
   BFChestReveal.clear();
   G.marbleArena=null;G.bruteArena=null; G.marksmanArena=null; G.fallenArena=null; G.frostOfficers=null;G.colossusArena=null;G.hydraArena=null;G._hydraPaid=false;G._hydraIntro=false;G._hydraHit=-1;document.getElementById('bosshpwrap').classList.remove('officer-team'); loadStageRaw(i); applyEditsNow(); }
@@ -9988,6 +9996,7 @@ const KEYACTIONS=[
   {id:'journal', label:'Open Journal', def:['KeyN']},
   {id:'bag',label:'Toggle Bag',def:['Tab','KeyB']},
   {id:'emote',label:'Emote Wheel',def:['KeyM']},
+  {id:'mount',label:'Mount / Land Dragon',def:['KeyH']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
@@ -10065,6 +10074,7 @@ window.addEventListener('keydown',e=>{
   if(act==='partyTeleport'){e.preventDefault();if(mode==='play'&&!e.repeat){partyHeld=true;partyNeedsRelease=false;}return;}
   if(act==='partyNext'){e.preventDefault();if(mode==='play'&&!e.repeat){partyCancel();const a=partyFriends(),q=partySelected();partyChoice=a[(a.indexOf(q)+1)%a.length]?.id||null;}return;}
   if(act==='bag'){if(!e.repeat&&mode==='play'){e.preventDefault();releaseKeyboard();openBag(resumePlay);}return;}
+  if(act==='mount'){e.preventDefault();if(mode==='play'&&!e.repeat)toggleDragonRide();return;}
   if(act==='emote')return;
   if(act==='journal'){if(!e.repeat&&(mode==='play'||mode==='pause')){e.preventDefault();openJournal();}return;}
   if(MOVE_ACTS[act]){ if(mode!=='play')return;heldKeyboard.set(code,act);e.preventDefault(); initAudio();
@@ -10124,7 +10134,8 @@ canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='p
   else if(act==='lootSell'&&G.lootCard) lootSellCurrent();
   else if(act==='bag'){releaseKeyboard();openBag(resumePlay);}
   else if(act==='journal')openJournal();
-  else if(act==='emote')BFEmotes.open();
+  else if(act==='mount')toggleDragonRide();
+  else if(act==='emote'&&!G?.p?.dragonRide)BFEmotes.open();
   else if(act==='loot') cycleLootMode();
   else if(act==='auto') toggleAuto();
   else if(act==='interact') doInteract(); });
@@ -12037,7 +12048,7 @@ function autoAtkTarget(p,w){
   return t;
 }
 function playerAttack(cdMul){
-  if(partyChannel)return;
+  if(partyChannel||G?.p?.dragonRide)return;
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
   // Swift Steel's fourth-hit bonus is applied on impact, not as a second attack-speed multiplier.
@@ -13031,7 +13042,7 @@ function classCastCompanionOrder(){
 
 }
 function useSkill(i){
-  if(mode!=='play'||!G||!Number.isInteger(i)||i<0||i>3) return; const p=G.p; if(p.dead||p.downed||p._pvpDead) return;
+  if(mode!=='play'||!G||!Number.isInteger(i)||i<0||i>3) return; const p=G.p; if(p.dead||p.downed||p._pvpDead||p.dragonRide) return;
   if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
     if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
     if(p.skillCd[i]>0) return;
@@ -14432,11 +14443,14 @@ function hurtPlayer(dmg,sx,sz,by){
    ONE pet lives on G.pet, spawned lazily whenever an active pet is set. No per-frame
    allocation: enemy scans happen only on the pet's attack cadence; the name label reuses
    one pooled DOM node. */
+function dragonTravelWorld(){return {floor:floorAt,resolve:resolveObstacles,notice:toast,takeoff:()=>SFX.jump(),land:()=>SFX.land()};}
+function toggleDragonRide(){if(mode!=='play'||!G||IN_ARENA)return false;const ok=BFDragonRiding.toggle(G,meta,dragonTravelWorld());if(ok){input.jumpEdge=false;input.dodgeEdge=false;hudUpdate();}return ok;}
 function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G) G.pet=null; return; }
   if(G.petLost){ G.pet=null; return; }                         // a fallen companion returns only when a new hub session resets G
   const p=G.p, ang=p.yaw+2.5, P=PETS[id], grounded=(P.grounded||(P.arch==='attacker'&&P.style==='melee'));
   const mh=petMaxHp(id); G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:p.y+(grounded?0:15),bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28,hp:mh,maxHp:mh,hurtT:0}; }
 function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead||(pet.invuln||0)>0) return false;
+  if(pet.mounted&&pauseState().protected)return false;
   if(meta.classId==='beastmaster'&&c2Passive('bst_wildkeeper')&&pet.hp<pet.maxHp*.5)dmg*=.88;
   if((pet.shieldHp||0)>0){const a=Math.min(pet.shieldHp,dmg);pet.shieldHp-=a;dmg-=a;if(dmg<=0){burst(pet.x,pet.y+12,pet.z,'#8fd6ff',5);return true;}}
   pet.hp=Math.max(0,pet.hp-Math.max(1,Math.round(dmg))); pet.hurtT=.28;
@@ -14445,7 +14459,8 @@ function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead||(pet.invuln|
   if(pet.hp<=0){ pet.dead=true; G.petLost=true; toast(petDisplayName(pet.id)+' has fallen — protect them until you return to the hub.'); SFX.enemyDie(); G.pet=null; }
   return true; }
 function petUpdate(dt){
-  const pet=G.pet,p=G.p; if(!pet) return; const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
+  const pet=G.pet,p=G.p; if(!pet) return; if(p.dragonRide&&pet.id==='sunwing'){pet.t+=dt;pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);BFDragonRiding.sync(G);return;} const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
+  if(pet.id==='sunwing'&&p.onGround)G.dragonFuel=Math.min(BFDragonRiding.duration,(G.dragonFuel??BFDragonRiding.duration)+dt*2);
   if(pet.id==='sunwing')BFDragonCombat.tick(pet,dt,combatTargets(),(e,d)=>{hitEnemy(e,d,{x:pet.x,z:pet.z,pet:true},70,0,'fire');burst(e.x,e.y+20,e.z,'#f3ba65',5);},G.walls||[]);
   pet.t+=dt; pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);
   if((pet.orderT||0)>0) pet.orderT=Math.max(0,pet.orderT-dt);   // the Beastmaster's standing order (useSkill)
@@ -14670,7 +14685,7 @@ function drawPet3(pet,t){
 }
 function updatePetLabel(){
   const el=document.getElementById('petlabel'); if(!el) return;
-  const pet=(G&&G.pet), show=pet&&meta.petLabel&&mode==='play';
+  const pet=(G&&G.pet), show=pet&&!pet.mounted&&meta.petLabel&&mode==='play';
   if(!show){ el.classList.add('hide'); return; }
   const sp=project(pet.x,pet.y+34,pet.z);
   if(!sp){ el.classList.add('hide'); return; }
@@ -14833,7 +14848,7 @@ const MP={
   // reconstruct render-only minion objects from a synced [x,z,y,yaw] snapshot (drawPet3 uses the Grave Wraith model)
   _mnRender(raw){ if(!raw||!raw.length) return []; const out=[]; for(let i=0;i<raw.length;i++){ const a=raw[i]; out.push({id:'gravewraith',x:a[0],z:a[1],y:a[2]||0,yaw:a[3]||0,bob:0,t:0}); } return out; },
   _petRender(raw,old){ if(!raw||!raw.length)return null; const p=old&&old.id===raw[0]?old:{id:raw[0],x:raw[1],z:raw[2],y:raw[3]||0,yaw:raw[4]||0,bob:0,t:0};
-    p.tx=raw[1];p.tz=raw[2];p.ty=raw[3]||0;p.tyaw=raw[4]||0;p.hp=raw[5]||0;p.maxHp=raw[6]||1;p.dead=!!raw[7];p.breathT=Math.max(0,Math.min(.7,Number(raw[8])||0));p.breathYaw=Number(raw[9])||0;return p; },
+    p.tx=raw[1];p.tz=raw[2];p.ty=raw[3]||0;p.tyaw=raw[4]||0;p.hp=raw[5]||0;p.maxHp=raw[6]||1;p.dead=!!raw[7];p.breathT=Math.max(0,Math.min(.7,Number(raw[8])||0));p.breathYaw=Number(raw[9])||0;p.mounted=p.id==='sunwing'&&!!raw[10];p.flying=p.mounted&&!!raw[11];return p; },
   // Render-only motion; absent fields retain legacy peer behavior. Never changes movement authority.
   motion(raw){
     if(!raw||typeof raw!=='object')return null;
@@ -14842,7 +14857,7 @@ const MP={
     const pose=p&&allowed.includes(p.clip)&&Number.isSafeInteger(p.serial)&&p.serial>=0&&Number.isFinite(p.remaining)&&p.remaining>0?{clip:p.clip,serial:p.serial,remaining:Math.min(1,p.remaining)}:null;
     return {ground:raw.ground!==false,vx:velocity(raw.vx),vy:velocity(raw.vy),vz:velocity(raw.vz),pose,emote:BFEmotes.valid(raw.emote)};
   },
-  selfState(){ const p=G&&G.p; return {sitting:!!p?.sitting,busy:playerActivity(), id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
+  selfState(){ const p=G&&G.p; return {riding:!!p?.dragonRide,sitting:!!p?.sitting,busy:playerActivity(), id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
     tw:p?.warpSerial||0,area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0,warp:p.warp||0}:null,
     cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petDisplayName(G.pet.id):undefined, zone:this.zone,
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
@@ -14855,14 +14870,14 @@ const MP={
     w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0,
     am:p?this.motion({ground:p.onGround,vx:p.vx,vy:p.vy,vz:p.vz,pose:p.combatPose,emote:p.emote}):null,
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
-    pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3)]:undefined,
+    pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3),G.pet.mounted?1:0,G.pet.flying?1:0]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {riding:!!s.riding,sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn;q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn;q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -15142,23 +15157,23 @@ const MP={
          to them, wearing their class's body and their weapon. Without an id every ally was an
          anonymous plain object and the only rig available was yours. */
       const pausedSafe=q.busy==='Paused'&&!this.pvp;
-      const pp={ pausedSafe,sitting:!!q.sitting,lookTier:q.lookTier, cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:q.motion?q.motion.vx:(mv2>0.2?60:0), vz:q.motion?.vz||0, vy:q.motion?.vy||0, onGround:q.motion?.ground!==false, combatPose:q.motion?.pose||null, emote:q.motion?.emote?{...q.motion.emote,t:q.motion.emote.t+(performance.now()-q.motion.emote.stamp)/1000}:null,
+      const pp={ pausedSafe,dragonRide:q.riding?{}:null,sitting:!!q.sitting,lookTier:q.lookTier, cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:q.motion?q.motion.vx:(mv2>0.2?60:0), vz:q.motion?.vz||0, vy:q.motion?.vy||0, onGround:q.motion?.ground!==false, combatPose:q.motion?.pose||null, emote:q.motion?.emote?{...q.motion.emote,t:q.motion.emote.t+(performance.now()-q.motion.emote.stamp)/1000}:null,
         skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
         dead:false, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       if(pausedSafe)Object.assign(pp,{vx:0,vy:0,vz:0,combatPose:null,emote:null,atkTimer:0,dodgeTimer:0,saberSwingT:0,chargeAmt:0,throwHideT:0});
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,pausedSafe?'#777777':'#6f86c9'); bx(0,38,0,12,12,12,pausedSafe?'#999999':'#d9b08c'); popM(); }
       // team/id beacon so allies stay distinguishable at a glance
-      pushM(); mv(q.x,(q.y||0)+58,q.z); bx(0,0,0, 5,5,5, tint, tint); popM();
+      pushM(); mv(q.x,(q.y||0)+58+(q.riding?24:0),q.z); bx(0,0,0, 5,5,5, tint, tint); popM();
     }
     // this ally's summons (necromancer minions etc.) — synced from the owner, drawn with the same model
     if(q.minions&&q.minions.length && typeof drawPet3==='function'){
       for(let i=0;i<q.minions.length;i++){ const mm=q.minions[i]; mm.bob=Math.sin(t*3+i)*3; try{ drawPet3(mm,t+i*0.31); }catch(_){} } }
     if(q.pet&&!q.pet.dead&&q.pet.hp>0&&typeof drawPet3==='function'){
-      try{ drawPet3(q.pet,t); const ps=project(q.pet.x,q.pet.y+42,q.pet.z);
+      try{ drawPet3(q.pet,t); const ps=q.pet.mounted?null:project(q.pet.x,q.pet.y+42,q.pet.z);
         if(ps)hpBars.push({x:ps[0],y:ps[1],f:Math.max(0,Math.min(1,q.pet.hp/Math.max(1,q.pet.maxHp))),pet:true,name:q.petName||(PETS[q.pet.id]&&PETS[q.pet.id].name)||'Companion'}); }catch(_){} }
     // floating name + HP bar (uses the 2D overlay, like enemy/pet bars) + link ping
-    const s=project(q.x,(q.y||0)+72,q.z);
+    const s=project(q.x,(q.y||0)+72+(q.riding?24:0),q.z);
     if(s){ const hpm=q.hpm||100, f=Math.max(0,Math.min(1,(q.hp==null?hpm:q.hp)/hpm));
       hpBars.push({x:s[0],y:s[1],f:f,peer:true,name:(q.name||'Ally')+(q.busy?' · '+q.busy:''),cls:q.cls||'',lvl:q.lvl||0,col:tint,downed:!!q.downed,ping:this.ping||null}); } },
   // ================= P1.2 SHARED ENEMIES (host-authoritative existence/HP/death) =================
@@ -16218,6 +16233,7 @@ function updateWorld(dt){
     G.meteors=G.meteors.filter(m=>!m.done); }
   if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
   if(G.lootCard) lootTick();
+  if(!p.dragonRide){
   if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true;
     /* SKY ARMOR, the Skylancer's rank-9 option b: "Nothing can hit you in the first moment after a
        jump." Wired 2026-08-11 — it was one of the 35 in docs/SKILL_TRIAGE.md section E that the rank
@@ -16271,7 +16287,10 @@ function updateWorld(dt){
       if(input.attack) playerAttack(1);                                              // manual: always swings/fires
       else if(meta.autoAttack && autoAtkTarget(p,_w)) playerAttack(1.176); } }        // auto: only when a hittable enemy is in range + line of sight (15% slower)
   if(p.atkTimer>0) resolveSwing();
+  } // mounted travel owns jump, descent and combat input
   updateMovers(dt);
+  if(p.dragonRide){if(backgroundMenuMode&&pauseState().protected)BFDragonRiding.sync(G);else BFDragonRiding.step(G,dt,input,mx,mz,dragonTravelWorld());stopFx('footstep');}
+  else {
   if(!p.onGround) p.vy-=1500*dt;
   p.x+=p.vx*dt; p.z+=p.vz*dt;
   const yPrev=p.y;
@@ -16295,10 +16314,11 @@ function updateWorld(dt){
   { const mv2=Math.hypot(p.vx||0,p.vz||0)>25 && p.onGround;   // file-SFX loops: footsteps while walking, heartbeat when critical
     if(mv2 && mode==='play'){ loopFx('footstep'); } else { stopFx('footstep'); }
     if(mode==='play' && p.hp>0 && p.hp<=effMaxHp(p)*0.15){ loopFx('heartbeat'); } else { stopFx('heartbeat'); } }
+  } // ordinary player physics
   // ride moving platforms
-  if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; if(!mv.betaMover&&!mv.prisonLift&&!mv.furnaceLift)p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
+  if(p.onGround&&!p.dragonRide) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; if(!mv.betaMover&&!mv.prisonLift&&!mv.furnaceLift)p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
   // jump pads launch you
-  if(p.onGround) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
+  if(p.onGround&&!p.dragonRide) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
   // HEALING PADS: stand on one to slowly recover HP (a lifeline for no-lifesteal/regen builds). Limited charge per pad.
   if(G.healpads) for(const hp of G.healpads){ if(hp.locked||(!hp.infinite&&hp.charge<=0)) continue;
     if(Math.abs(p.y-(hp.y||0))<30 && dXZ(p.x,p.z,hp.x,hp.z)<hp.r+p.r*0.6){ const mx=effMaxHp(p);
@@ -17180,6 +17200,7 @@ function cancelDeathTransition(){
   clearTimeout(die._timer);die._timer=null;document.getElementById('deathfade')?.remove();
 }
 function die(){
+  if(G?.p?.dragonRide)BFDragonRiding.stop(G,true);
   BFChestReveal.clear();
   window.BFInspection?.close();window.BFSocial?.close();if(BFHubDialogue.active)BFHubDialogue.close(false,true);
   if(G?.sparringRoom){
@@ -18382,6 +18403,7 @@ function drawRiftHallFallback(t){
  if(!window.__npc3dDrawn?.('riftkeeper')){pushM();mv(0,0,-645);hubNpcModel({id:'shade'},t);popM();}
 }
 function enterWaystation(riftHall=false){
+  if(G?.p?.dragonRide)BFDragonRiding.stop(G,true);
  cancelPortalWarp();cancelDeathTransition();
  clearTimeout(storyToast._t);document.getElementById('storycard')?.classList.remove('show');
   if(BFHubDialogue.active)BFHubDialogue.close(false,true);briarPending=null;
@@ -18997,6 +19019,7 @@ function openTrainingArena(back){
 }
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
+  if(G?.p?.dragonRide){G.interact={x:G.p.x,y:G.p.y+120,z:G.p.z,label:G.p.onGround?'Dismount dragon':'Land dragon',act:toggleDragonRide};updateInteractPrompt();return;}
   if(G?.devKeep){G.interact=devBeta().interact();updateInteractPrompt();return;}
   let it=null; const p=G.p;
   const social=window.BFSocial?.interaction();if(social){G.interact=social;updateInteractPrompt();return;}
@@ -19025,6 +19048,7 @@ function updateInteract(){
   const storyInteraction=briarInteract();if(storyInteraction)it=storyInteraction;
   const windbreak=canyonWindInteract();if(windbreak)it=windbreak;
   const shardInteraction=riftShardInteract();if(shardInteraction)it=shardInteraction;
+  if(!it&&BFDragonRiding.allowed(G)&&meta.petActive==='sunwing'&&G.pet?.id==='sunwing'&&G.p.onGround&&!G.pet.dead&&Math.hypot(G.pet.x-p.x,G.pet.z-p.z)<180)it={x:G.pet.x,y:G.pet.y+80,z:G.pet.z,label:'Mount Sunspire Dragon',act:toggleDragonRide};
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
@@ -19540,6 +19564,7 @@ function openBeastkeeper(back){
     if(P.arch==='attacker') out.push(`<span class="petbadge">${petAtkDmg(id)} damage</span>`,`<span class="petbadge">Every ${P.cd}s</span>`,`<span class="petbadge">${P.style==='ranged'?'Ranged':'Melee'}</span>`);
     else if(P.arch==='healer') out.push(`<span class="petbadge">+${petHealAmt(id)} HP</span>`,`<span class="petbadge">Every ${P.cd}s</span>`);
     else out.push(`<span class="petbadge">${P.pull} pickup range</span>`);
+    if(id==='sunwing')out.push('<span class="petbadge">Ride outdoors · '+htmlSafe(controlHint('mount'))+' / Interact</span>','<span class="petbadge">8s flight · land to recharge</span>');
     return out.join(''); };
   const training=id=>{ const lv=petTrainLvl(id); return `<div class="pettraining"><span>Training</span>${Array.from({length:PET_TRAIN_MAX},(_,i)=>`<i class="petpip ${i<lv?'on':''}"></i>`).join('')}<span>${lv}/${PET_TRAIN_MAX}</span></div>`; };
   const btn=(label,data,extra='',disabled=false)=>`<button class="bigbtn buybtn ${extra}" ${data||''} ${disabled?'disabled style="opacity:.42;cursor:default"':''}>${label}</button>`;
@@ -19552,7 +19577,7 @@ function openBeastkeeper(back){
     :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
   const shop=petShopUnlocked()?unowned.map(id=>petCard(id,'shop')).join(''):'';
-  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. They help; they never carry.</p></header>
+  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. Equip, train and rename them here.</p></header>
     ${!petShopUnlocked()?'<p class="ovsub">Pet purchases unlock after A Kinder Trail. Ask the Beastkeeper about rescuing both trapped animals in Black Woods. You can still manage companions you already own.</p>':''}${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
     <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
   const reopen=()=>openBeastkeeper(back);
@@ -22604,6 +22629,7 @@ const SKYSUN={
    the end of a 300-line render function and is one frame late, i.e. invisible. */
 let _poseKeep = [];
 function render(t){
+  BFDragonRiding.hud(G,mode==='play'&&!backgroundMenuMode,controlHint,toggleDragonRide);
   if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,warp:q.def?.warp||0,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
   try{ if(window.__hero3dPoseSweep) window.__hero3dPoseSweep(_poseKeep); }catch(e){}
   _poseKeep = [];
@@ -22630,7 +22656,7 @@ function render(t){
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
-  const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0):0;
+  const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0)+(p.dragonRide?24:0):0;
   const _noShake=meta.shakeOff||meta.reduceMotion;   // accessibility: hold the camera steady
   const shx=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0, shy=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0;
   const _rd=Math.max(0.55,Math.min(2.2,meta.renderDist||1));   // Render Distance slider: pushes the fog wall out (see further) or pulls it in (better perf)
@@ -22663,7 +22689,7 @@ function render(t){
        the camera and leaves the weapon arm in front of you, which is the whole point of seeing
        yourself hold what you are wielding. */
     const EYE_FWD=three3DLive()?4:26;
-    const ex=p.x+fx*EYE_FWD, ey=p.y+42+fy*EYE_FWD, ez=p.z+fz*EYE_FWD;
+    const ex=p.x+fx*EYE_FWD, ey=p.y+42+(p.dragonRide?24:0)+fy*EYE_FWD, ez=p.z+fz*EYE_FWD;
     PROJ=mPersp(BFCameraControls.fov(meta)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
     VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
     if(G) G.eye={x:ex,y:ey,z:ez};
@@ -22671,9 +22697,9 @@ function render(t){
   } else if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pitR=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
     const pit=Math.max(-0.5,Math.min(0.9,pitR));   // over-the-shoulder keeps a sane frame even when the stored pitch is extreme
-    const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
+    const boom=p.dragonRide?260:180,hd=boom*Math.cos(pit),eh=(p.dragonRide?165:118)+boom*Math.sin(pit);
     PROJ=mPersp(62*Math.PI/180,VW/VH,18,2400);   // higher near plane = far better depth precision (kills z-fighting flicker)
-    VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72+cyy, cz+fz*120],[0,1,0]);
+    VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*(p.dragonRide?40:120), 50-Math.sin(pit)*72+cyy, cz+fz*(p.dragonRide?40:120)],[0,1,0]);
     if(G) G.eye={x:cx-fx*hd,y:eh+cyy,z:cz-fz*hd};
     gl.uniform2f(U.uFogNF,300,880*_rd);
   } else { // classic high chase overview
@@ -22727,7 +22753,7 @@ function render(t){
     PROJ=mPersp(65*Math.PI/180,VW/VH,6,2400);
   }
   if(G?.p&&G.eye&&meta.camMode!=='fps'&&(!G.hub||G.sparringRoom)&&!_ed?.on&&!G.shore?.ballista?.aiming){
-    const target={x:p.x,y:p.y+34,z:p.z},desired=G.eye;
+    const target={x:p.x,y:p.y+34+(p.dragonRide?24:0),z:p.z},desired=G.eye;
     const now=performance.now(),last=G._cameraBoom;
     const limit=BFCameraOcclusion.constrain(G,target,desired);
     const dt=last?Math.min(.05,Math.max(0,(now-last.time)/1000)):0;
@@ -23004,7 +23030,7 @@ function render(t){
   window.BFSocial?.draw();
   if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
   if(G.arena){ drawArenaProps(t); drawArenaPickups(t); }        // arena master + door, then powerup orbs
-  if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
+  if(G.pet){ drawPet3(G.pet,t); if(!G.pet.mounted&&G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
   if(inBrokenWalls()&&G.storyState?.flags?.['rk.breach.start']&&!G.storyState.flags['rk.breach.done']){
     const escort=G.keep.remote||G.keep;
     for(const [i,n]of G.keepPrisoners.entries())if(dXZ(n.x,n.z,p.x,p.z)<740){const at=project(n.x,n.y+113,n.z);if(at)hpBars.push({x:at[0],y:at[1],f:Math.max(0,Math.min(1,(n.hp||0)/(n.maxHp||90))),escort:true,index:i+1,hurt:(escort.escortHitT||0)>0});}
@@ -24250,7 +24276,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2219"></script>
+<script type="module" src="./hero3d.js?v=2225"></script>
 <script type="module" src="./social-hub.js?v=2126"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

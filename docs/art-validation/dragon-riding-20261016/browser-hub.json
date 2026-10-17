@@ -1,0 +1,26 @@
+{
+  "pass": true,
+  "checks": 20,
+  "rows": [
+    "pre-change save loads",
+    "default H mounts through key handler",
+    "mounted peer snapshot decoded",
+    "peer dismount updates",
+    "rider attacks and skills disabled",
+    "save excludes transient ride and airborne position",
+    "actual movement climbs",
+    "flight wing state replicates",
+    "interact requests landing",
+    "actual landing dismounts safely",
+    "flight recharges while dismounted on ground",
+    "rebound mount key works",
+    "solo pause freezes flight",
+    "unequip safely cancels riding",
+    "old save keeps earned dragon without riding state",
+    "hub return clears mounted state",
+    "controller Interact adapter mounts",
+    "co-op dragon renders in hub scene",
+    "other-area peer dragon hidden",
+    "co-op pause holds flight and protects mounted companion"
+  ]
+}

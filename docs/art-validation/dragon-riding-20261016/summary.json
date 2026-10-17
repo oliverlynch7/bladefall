@@ -1,0 +1,27 @@
+{
+  "version": "2.225.0-dragon-flight",
+  "unitChecks": 51,
+  "browserHubChecks": 20,
+  "browserCampaignChecks": 24,
+  "regressionSuitesPassed": 92,
+  "flightSeconds": 8,
+  "maxHeightAboveTakeoff": 180,
+  "rechargeSeconds": 4,
+  "riderHipY": 46,
+  "dragonBackY": 45.93,
+  "controls": {
+    "mount": "H (rebindable), or contextual Interact",
+    "ascend": "hold Jump",
+    "glide": "release Jump",
+    "descend": "hold Dodge",
+    "landDismount": "same Mount or Interact"
+  },
+  "limits": [
+    "Travel only; rider combat preference unanswered",
+    "Outdoor hub/campaign only; interiors and challenge modes excluded",
+    "Controller routing tested through a Gamepad adapter; no physical controller test",
+    "Co-op uses actual snapshot/render handlers in isolated browser; no live two-device WebRTC test",
+    "Rider alignment measured and visually inspected on Warrior; no exhaustive every-class/every-cosmetic clipping certification",
+    "No human playtest or fun/performance certification; real player saves untouched"
+  ]
+}

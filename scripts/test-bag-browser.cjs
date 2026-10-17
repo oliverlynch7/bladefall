@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),bag=require('../public/3d/bag-browser.js');
+const rows=[{weapon:{name:'Common sword',rarity:0,art:'sword'}},{armor:{name:'Helmet',slot:'helmet',rarity:2}},{trinket:{name:'Ring',slot:'ring',rarity:3}},{weapon:{name:'Rare staff',rarity:2,art:'staff'}},{weapon:{name:'Epic sword',rarity:3,art:'sword'}},{armor:{name:'Locked helmet',slot:'helmet',rarity:4}}];
+const api={weaponType:w=>w.art==='staff'?'magic':'melee',tier:w=>w.rarity,ready:(entry,w)=>w.rarity<4&&(!entry.weapon||w.art==='sword')},view={category:'all',weaponType:'all',slot:null,readyOnly:false,sort:'rarity'};
+assert.deepEqual(bag.list(rows,view,api).map(r=>r.index),[5,4,2,3,1,0]);
+assert.deepEqual(bag.list(rows,{...view,category:'armor',slot:'helmet',readyOnly:true},api).map(r=>r.index),[1]);
+assert.deepEqual(bag.list(rows,{...view,category:'weapons',slot:'weapon',readyOnly:true},api).map(r=>r.index),[4,0]);
+assert.equal(bag.list(rows,{...view,category:'weapons',weaponType:'magic'},api)[0].entry,rows[3]);
+for(const slot of ['helmet','chest','legs','ring','amulet'])for(const r of bag.list(rows,{...view,slot},api))assert.equal(r.item.slot,slot);
+assert.equal(bag.list([],view,api).length,0);assert.deepEqual(bag.list(rows,{...view,sort:'recent'},api).map(r=>r.index),[5,4,3,2,1,0]);
+const source=fs.readFileSync('public/3d/index.html','utf8'),part=source.slice(source.indexOf('const COMPANION_WHISTLE_COST='),source.indexOf('function openFieldCompanions('));
+let saved=0;const c={meta:{gold:10000,petOwned:['a','b'],petActive:'a'},G:{hub:true,p:{}},PETS:{a:{},b:{}},persist(){saved++;},toast(){},SFX:{pickup(){}},hudUpdate(){},spawnPet(){c.G.pet={id:c.meta.petActive,hp:100,maxHp:100,atkT:1,healT:2};}};vm.createContext(c);vm.runInContext(part,c);
+assert(!c.fieldEquipCompanion('b'));const world=c.G;assert(c.buyCompanionWhistle());assert.equal(c.meta.gold,2500);assert(c.meta.companionWhistle);assert(!c.buyCompanionWhistle());assert.equal(c.meta.gold,2500);assert(!c.buyCompanionWhistle({hub:true}));
+c.G.hub=false;c.G.pet={id:'a',hp:30,maxHp:100,atkT:.4,healT:1.5};assert(c.fieldEquipCompanion('b'));assert.equal(c.meta.petActive,'b');assert(c.fieldEquipCompanion('a'));assert.equal(c.G.pet.hp,30);assert.equal(c.G.pet.atkT,.4);assert(!c.fieldEquipCompanion('unknown'));assert.equal(c.meta.petActive,'a');assert(!c.fieldEquipCompanion('b',{}));c.G.p.dragonRide=true;assert(!c.fieldEquipCompanion('b'));c.G.p.dragonRide=false;c.G.petLost=true;assert(!c.fieldEquipCompanion('b'));c.G.petLost=false;assert(c.fieldEquipCompanion(null));assert.equal(c.meta.petActive,null);assert.equal(c.G.pet,null);assert(saved>=4);
+assert.match(source,/'companionWhistle'/);assert.match(source,/meta.companionWhistle=mv.companionWhistle===true/);assert(!source.slice(source.indexOf('function openBag('),source.indexOf("/* The Smith's forge")).includes('<details'));
+console.log('Bag filters, rarity sorting, item identity, empty slots, whistle purchase/gates, stale world, field vitals and save schema passed.');

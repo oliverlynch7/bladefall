@@ -1025,6 +1025,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.dragon-riding #bSk2,body.dragon-riding #bSk3{opacity:.4;filter:grayscale(.8)}
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
+<link rel="stylesheet" href="./bag-menu.css?v=2238">
 <link rel="stylesheet" href="./adventure-hud.css?v=2232">
 <script src="./adventure-hud.js?v=2232"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
@@ -1159,6 +1160,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./story-authority.js?v=2185"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./campaign-journey.js?v=2236"></script>
+<script src="./bag-browser.js?v=2238"></script>
 <script src="./party-navigation.js?v=2197"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
@@ -1187,7 +1189,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.237.0-palm-flames';
+const VERSION3D='2.238.0-equipment-workbench';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1249,7 +1251,7 @@ const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
+const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
@@ -1264,7 +1266,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},arcadeOwned:false,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
-  riftOpen:[],riftHallStory:null,riftShards:[],hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
+  riftOpen:[],riftHallStory:null,riftShards:[],hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,companionWhistle:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 // One-time: over-the-shoulder is the new default camera. Flip saves still on the old 'far' default
@@ -1338,6 +1340,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.classLooks=Object.fromEntries(Object.keys(BFClassLooks.catalog).map(c=>[c,BFClassLooks.valid(mv.classLooks?.[c])]));meta.eyeColor=mv.eyeColor||'#8fd0ff';meta.mouthStyle=['line','smile','frown','o','open'].includes(mv.mouthStyle)?mv.mouthStyle:'line';meta.faceAdjust=BFFaceOptions.normalize(mv.faceAdjust);meta.browStyle=['natural','straight','raised','focused','none'].includes(mv.browStyle)?mv.browStyle:'natural'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
   meta.optionalDone=mv.optionalDone&&typeof mv.optionalDone==='object'?mv.optionalDone:{}; meta.optionalProgress=mv.optionalProgress&&typeof mv.optionalProgress==='object'?mv.optionalProgress:{};
   meta.iansShards=Array.isArray(mv.iansShards)?mv.iansShards:[]; meta.iansComplete=!!mv.iansComplete;   // Ian's Blade progress (was not persisted before)
+  meta.companionWhistle=mv.companionWhistle===true;
   meta.masterSeal=!!mv.masterSeal; meta.masterSealSeen=!!mv.masterSealSeen;                             // Drillmaster's Seal (field class-swap/respec)
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
@@ -5213,7 +5216,7 @@ function retainCampaignEarnings(){
  // A retry restores the protected loadout's full effective health, including armor,
  // class and allocated stats. Newly found, unsecured gear must not raise this cap.
  hero.hp=effMaxHp(freshFromSnapshot(hero));hero.mana=hero.maxMana;
- for(const key of ['chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
+ for(const key of ['chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','petActive','companionWhistle','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
  meta.run.p=checkpointClone(hero);return true;
 }
 function restoreCampaignState(){
@@ -5298,7 +5301,8 @@ function openCharacterStats(back,respec=false){
  };draw();
 }
 
-let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
+let _bagSort='rarity';
+let _bagView={category:'all',weaponType:'all',slot:null,readyOnly:false};   // Phase 10 bag sort: type (default) | rarity | recency
 /* Independent inventory portrait: still hero and companion, rendered on demand. */
 let bagDoll=null;
 function setupBagDoll(HR,centered){
@@ -5347,66 +5351,59 @@ function equipBagItem(entry,world=G){
   persist();SFX.pickup();hudUpdate();return true;
 }
 function openBag(back,keepOpen=false){
-  const expanded=keepOpen?new Set([...document.querySelectorAll('details.baggroup[open]')].map(e=>e.dataset.group)):new Set();
+  const active=document.activeElement,focusSelector=keepOpen?(active?.dataset?.bagcat?'[data-bagcat="'+active.dataset.bagcat+'"]':active?.dataset?.bagtype?'[data-bagtype="'+active.dataset.bagtype+'"]':active?.dataset?.bagslot?'[data-bagslot="'+active.dataset.bagslot+'"]':active?.id?'#'+active.id:null):null;
+  const previousScroll=keepOpen?(document.getElementById('bagItems')?.scrollTop||0):0;
+  if(!keepOpen)_bagView={category:'all',weaponType:'all',slot:null,readyOnly:false};
   migrateClassEquipment();
   mode='menu';
-  menuTip('tip_bag','your <b>Pack</b>. New gear goes here. When full, gear stays on the ground. Enable <b>Auto-sell</b> only if you want pickups sold for gold.');
+  menuTip('tip_bag','your <b>equipment bag</b>. Click a slot to find replacements, or browse the tabs. A full bag leaves gear on the ground unless you enable Auto-sell.');
   const bagWorld=G,HR=bagEquipmentActor();   // live actor; saved snapshots may refresh while the bag is open
-  // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
-  const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
-  const order=meta.stash.map((it,i)=>({it,i})).filter(x=>oOf(x));
-  const catKey=x=>{ const o=oOf(x); return x.it.weapon?('1'+weapCat(o)):x.it.trinket?('3'+o.slot):('2'+o.slot); };
-  const catName=x=>{ const o=oOf(x); return x.it.weapon?catLabel(true,weapCat(o)):x.it.trinket?TRINKETS[o.slot].label:catLabel(false,o.slot); };
-  if(_bagSort==='rarity') order.sort((a,b)=>(RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier)||b.i-a.i);
-  else if(_bagSort==='recency') order.sort((a,b)=>b.i-a.i);
-  else order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; return RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier; });
-  const showHdr=false;
-  let _lc=''; const itemRows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
-    const sub=w?(w.dmg+' dmg · '+weapInfoLine(w)):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
-    const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${w?'':slotIcon(o.slot)}${_lc}s</div>`):'';
-    const off=!!w&&(!classFamilyOk(normWeapon(w))||monkBlocksWeapons(w)), lock=!canWield(o)||off;
-    return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
-      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${off?'Off-class':lock?'Lv '+rarityReq(o.rarity):actionIcon('equip')+'Equip'}</button>
-      <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">${actionIcon('sell')}+${itemGold(o)}g</button></div>`; }).join('')
-    :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
-  const groups=new Map();
-  const rowNodes=new DOMParser().parseFromString('<div>'+itemRows+'</div>','text/html').querySelectorAll('.gearrow');
-  order.forEach((x,i)=>{const o=oOf(x),key=x.it.weapon?'weapon-'+weapCat(o):'armor-'+o.slot;
-    if(!groups.has(key))groups.set(key,{name:x.it.weapon?({melee:'Physical',ranged:'Ranged',magic:'Magical'}[weapCat(o)]):slotLabel(o.slot),rows:[]});
-    if(rowNodes[i])groups.get(key).rows.push(rowNodes[i].outerHTML);});
-  const bagCategoryIcon=key=>key.startsWith('armor-')?slotIcon(key.slice(6)):`<span aria-hidden="true" class="ico ${key==='armor'?'ico-slot ico-slot-chest':'ico-damage ico-damage-'+({'weapon-ranged':'ranged','weapon-magic':'magic'}[key]||'physical')}" style="vertical-align:middle;margin-right:8px"></span>`;
-  const groupHtml=(key,name,count,body)=>`<details class="baggroup" data-group="${key}" ${expanded.has(key)?'open':''} style="border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:8px"><summary style="cursor:pointer;font-weight:800;padding:5px">${bagCategoryIcon(key)}${name} <span style="color:var(--muted)">(${count})</span></summary>${body}</details>`;
-  const weaponGroups=['melee','ranged','magic'].map(cat=>{const key='weapon-'+cat,g=groups.get(key);return groupHtml(key,{melee:'Physical',ranged:'Ranged',magic:'Magical'}[cat],g?.rows.length||0,g?g.rows.join(''):'<p class="hint">No weapons in this category.</p>');}).join('');
-  const armorGroups=GEARSLOTS.map(slot=>{const key='armor-'+slot,g=groups.get(key);return groupHtml(key,slotLabel(slot),g?.rows.length||0,g?g.rows.join(''):'<p class="hint">No items in this category.</p>');}).join('');
-  const weaponCount=order.filter(x=>x.it.weapon).length;
-  const rows=groupHtml('weapons','Weapons',weaponCount,weaponGroups)+groupHtml('armor','Armor',order.length-weaponCount,armorGroups||'<p class="hint">Armor, rings and amulets appear here.</p>');
-
-  const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
+  const bagLevelOk=item=>!item?.rarity||(HR?.level||1)>=rarityReq(item.rarity);
+  const ready=(entry,item)=>bagLevelOk(item)&&(!entry.weapon||classFamilyOk(normWeapon(checkpointClone(item)))&&!monkBlocksWeapons(item));
+  const all=meta.stash.filter(it=>BFBagBrowser.item(it));
+  const order=BFBagBrowser.list(meta.stash,{..._bagView,sort:_bagSort},{ready,weaponType:weapCat,tier:o=>RARITY[o.rarity]?.tier??0});
+  const counts={all:all.length,weapons:all.filter(it=>it.weapon).length,armor:all.filter(it=>!it.weapon).length};
+  const tabs=[['all','All items','bag-stash'],['weapons','Weapons','equip'],['armor','Armor & jewelry','equip']].map(([id,label,icon])=>`<button class="bagtab ${_bagView.category===id?'selected':''}" data-bagcat="${id}" aria-pressed="${_bagView.category===id}">${id==='armor'?slotIcon('chest'):id==='weapons'?'<span class="ico ico-damage ico-damage-physical"></span>':actionIcon(icon)}${label} <span>${counts[id]}</span></button>`).join('');
+  const subTabs=_bagView.category==='weapons'?`<div class="bagtypes">${[['all','All weapons'],['melee','Physical'],['ranged','Ranged'],['magic','Magical']].map(([id,label])=>`<button class="bagtab ${_bagView.weaponType===id?'selected':''}" data-bagtype="${id}" aria-pressed="${_bagView.weaponType===id}">${id==='all'?'':`<span class="ico ico-damage ico-damage-${id==='melee'?'physical':id}"></span>`}${label}</button>`).join('')}</div>`:'';
+  const currentItem=o=>o.weapon?HR?.weapon:HR?.gear?.[BFBagBrowser.item(o)?.slot];
+  const compare=(entry,item)=>{const current=currentItem(entry),value=entry.weapon?'dmg':entry.armor?'defense':null;
+    if(value){const amount=o=>(Number(o?.[value])||0)+(value==='defense'?(o?.affixes||[]).filter(a=>a.stat==='def').reduce((n,a)=>n+(Number(a.val)||0),0):0),before=amount(current),after=amount(item),diff=+(after-before).toFixed(1),unit=value==='dmg'?'damage / hit':'defense';return `<span class="bagcompare ${diff>0?'better':diff<0?'worse':''}">${before} → <b>${after} ${unit}</b> (${diff>0?'+':''}${diff})</span>${entry.weapon?`<span class="gd">Attack every ${item.cd}s${current?.cd?' · equipped '+current.cd+'s':''}</span>`:''}`;}
+    return `<span class="gd">Equipped: ${htmlSafe(current?.name||'Empty')}${current?.affixes?.length?' · '+htmlSafe(current.affixes.map(a=>a.label).join(', ')):''}</span>`;};
+  const rows=order.map(({entry:it,index:i,item:o})=>{const w=it.weapon,off=!!w&&(!classFamilyOk(normWeapon(checkpointClone(w)))||monkBlocksWeapons(w)),locked=!bagLevelOk(o),rc=RARITY[o.rarity]?.color||'#aab3c7';
+    const info=w?weapInfoLine(w):(o.affixes||[]).map(a=>a.label).join(' · ');
+    return `<article class="gearrow bagitem" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt=""><div class="bagitemcopy"><div class="gn" style="color:${rc}">${htmlSafe(o.name)}${w?.up?' +'+w.up:''}</div><div class="gd">${RARITY[o.rarity]?.name||''} · ${w?(info||weapFamily(w)):slotLabel(o.slot)+(info?' · '+htmlSafe(info):'')}</div>${compare(it,o)}${off?'<span class="bagrestriction">For another class</span>':locked?`<span class="bagrestriction">Unlocks at character level ${rarityReq(o.rarity)}</span>`:''}</div><div class="bagitemactions"><button class="bigbtn buybtn" data-eq="${i}" ${off||locked?'disabled':''}>${off?'Other class':locked?'Lv '+rarityReq(o.rarity):'Equip'}</button><button class="bagSell" data-sl="${i}" aria-label="Sell ${htmlSafe(o.name)} for ${itemGold(o)} gold">Sell · ${itemGold(o)}g</button></div></article>`;
+  }).join('')||`<div class="bagempty"><b>${_bagView.slot?'No ready replacements':counts.all?'No items in this category':'Your bag is empty'}</b><p>${_bagView.slot?(_bagView.slot==='weapon'&&HR?.weapon?.intrinsic?'Your class uses a built-in weapon. Change classes to use other weapons.':'Try turning off Ready to equip only or choose another slot.'):'Open chests to find equipment. Every category stays available here.'}</p></div>`;
+  const browseTitle=_bagView.slot?(_bagView.slot==='weapon'?'Weapon':slotLabel(_bagView.slot))+' replacements':'Your inventory';
   const eq=HR||{weapon:null,gear:{}};
   const slotRow=(id,label,item)=>{ const col=item&&item.rarity?RARITY[item.rarity].color:'#6e778b', fallback=id==='weapon'?`<span class="ico ico-damage ico-damage-physical"></span>`:slotIcon(id);
-    return `<div class="bagslot" style="--slotcol:${col}">${item?`<img class="bagslotimg" src="${itemAv(item)}" alt="">`:`<span class="bagslotempty">${fallback}</span>`}<span class="bagslotcopy"><span class="bagslotlabel">${label}</span><span class="bagslotname">${item?item.name:'Empty'}</span></span></div>`; };
+    return `<button class="bagslot ${_bagView.slot===id?'selected':''}" data-bagslot="${id}" aria-pressed="${_bagView.slot===id}" style="--slotcol:${col}" title="Choose ${label.toLowerCase()} replacements">${item?`<img class="bagslotimg" src="${itemAv(item)}" alt="">`:`<span class="bagslotempty">${fallback}</span>`}<span class="bagslotcopy"><span class="bagslotlabel">${label}</span><span class="bagslotname">${htmlSafe(item?(item.name||label+' equipped'):'Empty')}<small>Choose replacement →</small></span></span></button>`; };
   const petId=meta.petActive&&PETS[meta.petActive]?meta.petActive:null;
-  const petRow=`<div class="bagslot" style="--slotcol:${petId?(RARITY[PETS[petId].rarity]?RARITY[PETS[petId].rarity].color:'#c9a86a'):'#6e778b'}">${petId?`<img class="bagslotimg" src="${petIcon(petId)}" alt="">`:`<span class="bagslotempty"><span class="ico ico-pet-collar" style="width:30px;height:30px"></span></span>`}<span class="bagslotcopy"><span class="bagslotlabel">Companion</span><span class="bagslotname">${petId?petDisplayName(petId):'None'}</span></span></div>`;
+  const petRow=`<button class="bagslot bagpetslot" id="bagCompanion" ${meta.companionWhistle?'':'disabled'} style="--slotcol:#b5a77a" title="${meta.companionWhistle?'Choose a companion':"Buy the Beastkeeper’s Whistle at the Pet Yard"}">${petId?`<img class="bagslotimg" src="${petIcon(petId)}" alt="">`:`<span class="bagslotempty"><span class="ico ico-pet-collar"></span></span>`}<span class="bagslotcopy"><span class="bagslotlabel">Companion ${meta.companionWhistle?'':'· Locked'}</span><span class="bagslotname">${htmlSafe(petId?petDisplayName(petId):'None')}<small>${meta.companionWhistle?'Choose companion →':"Beastkeeper’s Whistle required"}</small></span></span></button>`;
   const equipped=[slotRow('weapon','Weapon',eq.weapon),...GEARSLOTS.map(s=>slotRow(s,slotLabel(s),eq.gear&&eq.gear[s])),petRow].join('');
   const C=CLASSES[meta.classId]||CLASSES.warrior, heroName=meta.heroName||'Your Warden';
   const doll=`<canvas id="bagDollCanvas" class="bagdoll3d" width="440" height="760"></canvas><div class="bagdollhint">drag to rotate</div>`;
-  showOverlayHTML(`<div class="card bagmenu"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag &amp; Equipment</h2>
-    <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    <label class="bag-sale-setting"><input id="bagAutoSell" type="checkbox" ${meta.autoSellEquipment===true?'checked':''}> Auto-sell equipment pickups for gold</label><p class="hint">Off: keep gear in free slots; a full bag leaves gear on the ground.</p><div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
-      <div class="achlist">${rows}</div></section>
-      <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
-    <div class="bagfoot">${(HR&&HR.weapon&&!HR.weapon.intrinsic)?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">Use Class Default</button>':''}<button class="bigbtn ghost" id="backBtn">Back · Q / Esc · ${htmlSafe(controlKey('bag'))}</button><button class="bigbtn ghost" id="charStatsBtn">Character Stats${HR?` · ${BFCharacterStats.available(HR)} points`:""}</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+  showOverlayHTML(`<div class="card bagmenu"><header class="bagheader"><div><p class="ovkicker">Your equipment</p><h2 class="ovh">Bag &amp; Equipment</h2></div><div class="bagcapacity"><b>${meta.stash.length} / ${STASH_CAP}</b> bag slots · <span>${meta.gold.toLocaleString()}g</span></div></header>
+    <div class="baglayout"><aside class="bagequip">${doll}<div class="bagequiphead"><span>Click a slot to find replacements</span><b>${htmlSafe(heroName)} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside>
+    <section class="baginventory"><nav class="bagtabs" aria-label="Bag categories">${tabs}</nav>${subTabs}<div class="bagbrowsehead"><b>${browseTitle} <span>(${order.length})</span></b><button class="bagclear" id="bagClear" ${_bagView.slot?'':'hidden'}>Clear slot filter</button></div>
+    <div class="bagtools"><label><input type="checkbox" id="bagReady" ${_bagView.readyOnly?'checked':''}> Ready to equip only</label><button class="bagclear" id="sortBtn">${_bagSort==='rarity'?'Highest rarity first':'Newest first'} ⇅</button></div><div class="achlist" id="bagItems">${rows}</div>
+    <div class="bagsale"><label><input id="bagAutoSell" type="checkbox" ${meta.autoSellEquipment===true?'checked':''}> Auto-sell pickups</label><span>${meta.autoSellEquipment===true?'Picked-up gear becomes gold.':'Full bag? Gear stays on the ground.'}</span></div></section></div>
+    <div class="bagfoot"><button class="bigbtn ghost" id="backBtn">Close · ${htmlSafe(controlKey('bag'))} / Q</button><button class="bigbtn ghost" id="charStatsBtn">Character Stats${HR?` · ${BFCharacterStats.available(HR)} points`:''}</button><button class="bigbtn ghost" id="gearInspect">Inspect Character</button>${HR?.weapon&&!HR.weapon.intrinsic?'<button class="bagclear" id="unequipBtn">Use class default weapon</button>':''}</div></div>`);
   setupBagDoll(HR);
-  document.getElementById('bagAutoSell').onchange=e=>setAutoSell(e.target.checked);
+  document.getElementById('bagItems').scrollTop=previousScroll;
+  document.getElementById('bagAutoSell').onchange=e=>{setAutoSell(e.target.checked);openBag(back,true);};
+  document.querySelectorAll('[data-bagcat]').forEach(b=>b.onclick=()=>{document.getElementById('bagItems').scrollTop=0;_bagView={category:b.dataset.bagcat,weaponType:'all',slot:null,readyOnly:false};openBag(back,true);});
+  document.querySelectorAll('[data-bagtype]').forEach(b=>b.onclick=()=>{document.getElementById('bagItems').scrollTop=0;_bagView.weaponType=b.dataset.bagtype;openBag(back,true);});
+  document.querySelectorAll('[data-bagslot]').forEach(b=>b.onclick=()=>{const slot=b.dataset.bagslot;document.getElementById('bagItems').scrollTop=0;_bagView={category:slot==='weapon'?'weapons':'armor',weaponType:'all',slot,readyOnly:true};_bagSort='rarity';openBag(back,true);});
+  document.getElementById('bagReady').onchange=e=>{document.getElementById('bagItems').scrollTop=0;_bagView.readyOnly=e.target.checked;openBag(back,true);};
+  document.getElementById('bagClear').onclick=()=>{document.getElementById('bagItems').scrollTop=0;_bagView.slot=null;_bagView.readyOnly=false;openBag(back,true);};
+  document.getElementById('bagCompanion').onclick=()=>{if(meta.companionWhistle)openFieldCompanions(()=>openBag(back,true));};
   document.getElementById('charStatsBtn').onclick=()=>openCharacterStats(()=>openBag(back));
-  document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back,true); };
+  document.getElementById('sortBtn').onclick=()=>{ document.getElementById('bagItems').scrollTop=0;_bagSort=_bagSort==='rarity'?'recent':'rarity'; openBag(back,true); };
   document.querySelectorAll('[data-eq]').forEach(b=>{
     const entry=meta.stash[+b.dataset.eq];
     b.onclick=()=>{if(equipBagItem(entry,bagWorld))openBag(back,true);};
   });
-  document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
-    const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back,true); });
+  document.querySelectorAll('[data-sl]').forEach(b=>{const entry=meta.stash[+b.dataset.sl];b.onclick=()=>{const i=meta.stash.indexOf(entry);if(G!==bagWorld||i<0)return;const item=BFBagBrowser.item(entry);if(!item)return;const g=sellItem(item);meta.stash.splice(i,1);persist();toast('Sold · +'+g+'g');openBag(back,true);};});
   { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(G!==bagWorld)return;const HR=bagEquipmentActor();if(!HR)return;
       const old=HR.weapon;
       if(old&&!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
@@ -5416,6 +5413,7 @@ function openBag(back,keepOpen=false){
       persist(); SFX.pickup(); hudUpdate(); toast('Class default ready'); openBag(back,true); }; }
   document.getElementById('backBtn').onclick=back;
   document.getElementById('gearInspect').onclick=()=>openMirror(()=>openBag(back));
+  if(focusSelector)document.querySelector(focusSelector)?.focus({preventScroll:true});
 }
 /* The Smith's forge: fuse two SAME-RARITY pieces of the same CATEGORY (melee/ranged/magic weapon,
    or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */
@@ -19603,10 +19601,32 @@ function petTrain(id){ const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('A
   const cost=petTrainCost(id); if(meta.gold<cost){ toast('Not enough gold'); SFX.hurt(); return; }
   meta.gold-=cost; meta.petTrain[id]=lv+1; playFx('forgedone'); SFX.levelup(); persist(); toast('▲ '+petDisplayName(id)+' grows a little stronger'); }
 function petToggleLabel(){ meta.petLabel=!meta.petLabel; persist(); SFX.pickup(); }
+const COMPANION_WHISTLE_COST=7500;
+function buyCompanionWhistle(world=G){
+ if(G!==world||!G?.hub||meta.companionWhistle||meta.gold<COMPANION_WHISTLE_COST)return false;
+ meta.gold-=COMPANION_WHISTLE_COST;meta.companionWhistle=true;persist();SFX.pickup();toast('Beastkeeper’s Whistle acquired · change companions from your bag.');return true;
+}
+function fieldEquipCompanion(id,world=G){
+ if(G!==world||!G?.p||!meta.companionWhistle||id!==null&&(!PETS[id]||!meta.petOwned.includes(id)))return false;
+ if(G.p.dragonRide){toast('Land and dismount before changing companions.');return false;}
+ if(G.petLost){toast('Your companion has fallen. Return to the hub first.');return false;}
+ if(id===meta.petActive)return true;
+ const vitals=G._fieldPetVitals||(G._fieldPetVitals={});
+ if(G.pet)vitals[G.pet.id]={hp:G.pet.hp,maxHp:G.pet.maxHp,atkT:G.pet.atkT,healT:G.pet.healT};
+ meta.petActive=id;G.pet=null;if(id){spawnPet();const saved=vitals[id];if(saved&&G.pet){G.pet.hp=Math.min(G.pet.maxHp,saved.hp/Math.max(1,saved.maxHp)*G.pet.maxHp);G.pet.atkT=saved.atkT;G.pet.healT=saved.healT;}}
+ persist();SFX.pickup();hudUpdate();return true;
+}
+function openFieldCompanions(back){
+ if(!meta.companionWhistle){toast('Buy the Beastkeeper’s Whistle at the Pet Yard.');back();return;}
+ const world=G;mode='menu';const owned=meta.petOwned.filter(id=>PETS[id]);
+ showOverlayHTML(`<div class="card fieldCompanions"><p class="ovkicker">Beastkeeper’s Whistle</p><h2 class="ovh">Choose your companion</h2><p class="ovsub">One companion at a time. Buying and training stay at the Beastkeeper.</p><div class="petgrid">${owned.map(id=>`<article class="petcard"><img class="petcardart" src="${petIcon(id)}" alt=""><div class="petcardinfo"><div class="petcardname">${htmlSafe(petDisplayName(id))}</div><p class="petflavor">${htmlSafe(PETS[id].arch)} · ${htmlSafe(PETS[id].flavor)}</p></div><button class="bigbtn" data-fieldpet="${id}" ${id===meta.petActive?'disabled':''}>${id===meta.petActive?'Equipped':'Equip'}</button></article>`).join('')||'<p class="hint">No companions owned yet. Visit the Beastkeeper to find one.</p>'}</div><div class="bagfoot">${meta.petActive?'<button class="bigbtn ghost" id="fieldPetStow">Stow companion</button>':''}<button class="bigbtn ghost" id="backBtn">Back to bag</button></div></div>`);
+ document.querySelectorAll('[data-fieldpet]').forEach(b=>b.onclick=()=>{if(fieldEquipCompanion(b.dataset.fieldpet,world))back();});
+ document.getElementById('fieldPetStow')?.addEventListener('click',()=>{if(fieldEquipCompanion(null,world))back();});document.getElementById('backBtn').onclick=back;
+}
 function openBeastkeeper(back){
   mode='menu';
   menuTip('tip_beast','Equip <b>one companion</b> at a time. Check its abilities before buying: pets can help you fight or recover. Train your active companion to improve it.');
-  const active=meta.petActive;
+  const active=meta.petActive,beastWorld=G;
   const owned=meta.petOwned.filter(id=>PETS[id]);
   const unowned=PETIDS.filter(id=>!PETS[id].questOnly&&!meta.petOwned.includes(id));
   const role=id=>{ const a=PETS[id].arch; return a.charAt(0).toUpperCase()+a.slice(1); };
@@ -19628,9 +19648,11 @@ function openBeastkeeper(back){
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
   const shop=petShopUnlocked()?unowned.map(id=>petCard(id,'shop')).join(''):'';
   showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. Equip, train and rename them here.</p></header>
+    <section class="whistleOffer"><div><b>Beastkeeper’s Whistle</b><p>Change your companion from the bag, anywhere. Permanent unlock.</p></div><button class="bigbtn" id="buyWhistle" ${meta.companionWhistle||meta.gold<COMPANION_WHISTLE_COST?'disabled':''}>${meta.companionWhistle?'Owned':COMPANION_WHISTLE_COST.toLocaleString()+'g'}</button></section>
     ${!petShopUnlocked()?'<p class="ovsub">Pet purchases unlock after A Kinder Trail. Ask the Beastkeeper about rescuing both trapped animals in Black Woods. You can still manage companions you already own.</p>':''}${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
     <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
   const reopen=()=>openBeastkeeper(back);
+  document.getElementById('buyWhistle').onclick=()=>{if(buyCompanionWhistle(beastWorld))reopen();};
   document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ petBuy(b.dataset.buy); reopen(); });
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ petEquip(b.dataset.eq); reopen(); });
   document.querySelectorAll('[data-sell]').forEach(b=>b.onclick=()=>{ petSell(b.dataset.sell); reopen(); });
@@ -23929,7 +23951,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
-window.__BF3={pauseState,openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,applyReturnReward,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemyPartyTarget,syncedMelee,enemySupport,enemyRouteEdge,moveGroundEnemy,enemyMeleeClear,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
+window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPANION_WHISTLE_COST,pauseState,openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,applyReturnReward,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemyPartyTarget,syncedMelee,enemySupport,enemyRouteEdge,moveGroundEnemy,enemyMeleeClear,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

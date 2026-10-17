@@ -1927,3 +1927,8 @@ Remove campaign signs revealing puzzle controls, keys, secrets or tactical route
 ## [Codex | 2026-10-17] U-PALM-FLAME-20261017
 
 User replaces Pyromancer magic/ranged equipment with intrinsic bare-handed fire combat: displaced weapon goes safely into bag, short-range basic palm flame burst, charged wider/longer and stronger flame fan. Warlock gains both ranged and magic weapon groups. Plan: use existing intrinsic class weapon/save/network conventions, rank-scaled fire weapon, shared target/LOS/damage path for PvE/PvP, bounded cosmetic flame ribbons and spell poses without a held model; preserve gear on switch/full bag/legacy reload, update class descriptions, verify attack reach/walls/charge/gear switching and browser presentation.
+
+
+## [Codex | 2026-10-17] U-BAG-REWORK-20261017
+
+User rejects nested bag dropdowns and authorizes an intelligent major redesign. Click equipment slots to browse compatible replacements, highest rarity first, retain a separate whole-bag browsing path. Companion slot remains unavailable until buying a permanent Beastkeeper field-equip item, analogous to Drillmaster Seal. Grounded plan: retain transactional equip backend and independent portrait; replace details with persistent category/type tabs, slot filters, explicit locked-item states and immediate current-vs-candidate comparisons. Use identity-safe sell/equip callbacks, preserve filter/scroll on updates, always show empty categories. Add Beastkeeper Whistle purchase (7500g), save/load/checkpoint field, owned-only field companion picker (no remote shop/training); guard stale world, riding and fallen-pet states and preserve pet vitals on swapping. Verify fixtures for every slot/category, full bag, key dismissal, purchase/reload/gating and browser layout.

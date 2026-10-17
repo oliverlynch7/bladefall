@@ -1490,3 +1490,15 @@ User requests a black-and-white checkerboard cape unlocked only by defeating Tho
 U-THOMAS-HARD-CAPE-20261016 implemented. Black-and-white checkerboard cloth cape with monochrome stitched edging and matching wardrobe SVG. Cosmetic only, no automatic equip. Defeating solo Thomas on Hard by checkmate or a legitimate time victory awards it once, either color; losses, draws, Easy/Medium, human co-op opponents and history review cannot award. Existing pre-move difficulty lock retained. Slot-profile cosmetic flag is written and read back immediately, rollback/retry if storage fails. Thomas chess panel explains the condition and confirms the earned reward; equip at the Stylist. Existing cosmetic ownership and equipped cape preserved. Stateless preview supports ?cape=checkmate.
 
 Verified 30 isolated real-browser assertions with genuine pre-change save: actual legal moves reaching checkmate, Hard loss, Easy/Medium wins, Hard win, visible confirmation, durable profile record, Stylist equip, mode reload, live cloth renderer and unchanged gold. Engine worker deliberately silent for scripted legal opponent moves; this is reward integration QA, not a claim to have beaten the actual Hard AI. 20 focused eligibility/save-failure/idempotency checks plus existing chess regression checks pass; 94 offline suites passed. Preview screenshots inspected on Warrior/Wizard; no production saves touched. Evidence: docs/art-validation/chess-cape-20261016. Publication pending.
+
+
+## [Codex | 2026-10-16] U-RELIC-DICE-RANDOMIZE-20261016
+
+User supplies Desktop/Ancient Golden-Pip Relic Dice.png and requests it for all randomize features. Found transparent RGBA1254-square original. Source audit finds seven active3D controls: creator face/stats, Stylist face, Arena bot class roll/random bot selection/loadout/random respec. Plan copy exact supplied PNG once, use shared-sized decorative image on all seven, retain visible labels and randomization handlers, add accessible label to icon-only bot-class button. Preserve asset alpha and avoid resynthesis or gameplay changes; verify actual menu rendering/clicks plus creator/style regressions and parser.
+
+
+## [Codex | 2026-10-16] v2.228 — relic dice randomize artwork
+
+U-RELIC-DICE-RANDOMIZE-20261016 implemented. Exact supplied transparent PNG reused for all seven active randomize controls: character face/stat rolls, Stylist face, Arena bot-class roll/random class/loadout/random respec. Shared30px decorative image,26px icon-only roll, accessible bot-class label, existing visible text and handlers preserved. Old dice emoji removed from randomization toasts. No random-generation/economy/save behavior changes. Original and copied SHA256 match FC646ADFB8BDCC17D368EB4ECB1EBE52FF9A1F9374816E689EE3700F0E054BD9.
+
+Actual browser menus from isolated pre-change save: all seven images complete/natural width1254, all seven buttons clicked; Random Respec confirmation retained. Creator14-handler checks, face option bounds/randomization, Stylist purchase validations and game inline parser pass. Screenshots inspected. Evidence: docs/art-validation/relic-dice-20261016. Publication pending.

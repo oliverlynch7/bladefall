@@ -2098,3 +2098,15 @@ Verified 30 isolated real-browser assertions with genuine pre-change save: actua
 ## [Codex | 2026-10-16] v2.227 production confirmed
 
 Functional edd64871 deployed successfully as d25dbf1c-74b5-4211-8214-59dbba4d06e0. Fresh public title confirms v2.227.0-checkmate-cape; public stateless preview confirms Checkmate Cape,192 cloth triangles, no launch/preview warnings or errors. Reward integration evidence remains isolated QA with scripted legal bot moves, no production save touched.
+
+
+## [Codex | 2026-10-16] U-RELIC-DICE-RANDOMIZE-20261016
+
+User supplies Desktop/Ancient Golden-Pip Relic Dice.png and requests it for all randomize features. Found transparent RGBA1254-square original. Source audit finds seven active3D controls: creator face/stats, Stylist face, Arena bot class roll/random bot selection/loadout/random respec. Plan copy exact supplied PNG once, use shared-sized decorative image on all seven, retain visible labels and randomization handlers, add accessible label to icon-only bot-class button. Preserve asset alpha and avoid resynthesis or gameplay changes; verify actual menu rendering/clicks plus creator/style regressions and parser.
+
+
+## [Codex | 2026-10-16] v2.228 — relic dice randomize artwork
+
+U-RELIC-DICE-RANDOMIZE-20261016 implemented. Exact supplied transparent PNG reused for all seven active randomize controls: character face/stat rolls, Stylist face, Arena bot-class roll/random class/loadout/random respec. Shared30px decorative image,26px icon-only roll, accessible bot-class label, existing visible text and handlers preserved. Old dice emoji removed from randomization toasts. No random-generation/economy/save behavior changes. Original and copied SHA256 match FC646ADFB8BDCC17D368EB4ECB1EBE52FF9A1F9374816E689EE3700F0E054BD9.
+
+Actual browser menus from isolated pre-change save: all seven images complete/natural width1254, all seven buttons clicked; Random Respec confirmation retained. Creator14-handler checks, face option bounds/randomization, Stylist purchase validations and game inline parser pass. Screenshots inspected. Evidence: docs/art-validation/relic-dice-20261016. Publication pending.

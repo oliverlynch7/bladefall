@@ -1,0 +1,48 @@
+{
+  "controls": [
+    {
+      "button": "ccRandomFace",
+      "label": "Randomize face",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    },
+    {
+      "button": "ccRoll",
+      "label": "Roll stats",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    },
+    {
+      "button": "styRandomFace",
+      "label": "Randomize face",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    },
+    {
+      "button": "arBotClsRand",
+      "label": "Randomize bot class",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    },
+    {
+      "button": "random",
+      "label": "Random",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    },
+    {
+      "button": "arRand",
+      "label": "Randomize",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    },
+    {
+      "button": "arRandSpec",
+      "label": "Random RespecWarrior skills + passives",
+      "loaded": true,
+      "source": "icons/actions/randomize-dice.png"
+    }
+  ],
+  "scope": "Actual menu rendering and clicks; isolated Map-backed storage with pre-change save",
+  "sha256": "FC646ADFB8BDCC17D368EB4ECB1EBE52FF9A1F9374816E689EE3700F0E054BD9"
+}

@@ -1026,6 +1026,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 </style>
 <link rel="stylesheet" href="./adventure-hud.css?v=2213">
 <script src="./adventure-hud.js?v=2200"></script>
+<style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
 <canvas id="gl"></canvas>
@@ -1098,10 +1099,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2089"></script>
-<script src="./stylist.js?v=2089"></script>
+<script src="./stylist.js?v=2228"></script>
 <script src="./character-stats.js?v=2087"></script>
 <script src="./class-looks.js?v=2209"></script>
-<link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2211"></script>
+<link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2228"></script>
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2095"></script>
 <script src="./campaign-threat.js?v=2217"></script>
@@ -1183,7 +1184,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.227.0-checkmate-cape';
+const VERSION3D='2.228.0-relic-dice';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15922,16 +15923,16 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
     <div style="display:flex;gap:14px;align-items:center;margin:2px 0 4px">
       <label style="flex:1">Count <b id="arBotsV">${cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${cfg.bots}" style="width:100%"></label>
       <div style="flex:2;display:flex;gap:5px">${BOT_DIFFS.map(dk=>`<button class="bigbtn ghost arbd" data-bd="${dk}" style="flex:1;margin:0;padding:7px 3px;font-size:12px;${cfg.botDiff===dk?'border-color:'+BOT_DIFF[dk].color+';color:'+BOT_DIFF[dk].color:''}">${BOT_DIFF[dk].label}</button>`).join('')}</div></div>
-    <div style="display:flex;align-items:center;gap:8px;margin:8px 0 3px"><span class="hint" style="margin:0"><b>Bot class</b> · they fight with that class's weapon &amp; skills</span><button class="bigbtn ghost" id="arBotClsRand" style="margin:0;padding:5px 9px;font-size:13px">🎲</button></div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0 3px"><span class="hint" style="margin:0"><b>Bot class</b> · they fight with that class's weapon &amp; skills</span><button class="bigbtn ghost" id="arBotClsRand" style="margin:0;padding:5px 9px;font-size:13px" aria-label="Randomize bot class" title="Randomize bot class"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true"></button></div>
     <div style="display:flex;gap:5px;flex-wrap:wrap">
-      <button class="bigbtn ghost arbotcls" data-botcls="random" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass==='random'?'border-color:#c78cff;color:#c78cff':''}">🎲 Random</button>
+      <button class="bigbtn ghost arbotcls" data-botcls="random" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass==='random'?'border-color:#c78cff;color:#c78cff':''}"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true">Random</button>
       ${Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arbotcls" data-botcls="${cid}" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass===cid?'border-color:#e8a33d;color:#e8a33d':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('')}</div>
     ${(MP.active&&MP.isHost)?`<button class="bigbtn ghost" id="arTeams" style="width:100%;margin:8px 0 0;${cfg.teams?'border-color:#7fd6ff;color:#7fd6ff':''}">👥 2v2 Team Mode${cfg.teams?' ✓':''} <span style="opacity:.6;font-size:11px">· friendly fire off</span></button>`:''}
     <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap">
       <button class="bigbtn ghost" id="arFair" style="flex:1;min-width:120px;margin:0;${cfg.fair?'border-color:#7de08a;color:#7de08a':''}">⚖️ Fair Mode${cfg.fair?' ✓':''}</button>
       <button class="bigbtn ghost" id="arPow" style="flex:1;min-width:120px;margin:0;${cfg.powerups?'border-color:#ff9a3a;color:#ff9a3a':''}">✨ Powerups${cfg.powerups?' ✓':''}</button>
-      <button class="bigbtn ghost" id="arRand" style="flex:1;min-width:120px;margin:0">🎲 Randomize</button>
-      <button class="bigbtn ghost" id="arRandSpec" style="flex:1;min-width:150px;margin:0;${randomized?'border-color:#c78cff;color:#e0b8ff;box-shadow:0 0 18px rgba(199,140,255,.14)':''}">&#127922; Random Respec${randomized?' &#10003;':''}<span style="display:block;opacity:.62;font-size:10px;margin-top:2px">${CLASSES[cfg.classId].disp} skills + passives</span></button>
+      <button class="bigbtn ghost" id="arRand" style="flex:1;min-width:120px;margin:0"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true">Randomize</button>
+      <button class="bigbtn ghost" id="arRandSpec" style="flex:1;min-width:150px;margin:0;${randomized?'border-color:#c78cff;color:#e0b8ff;box-shadow:0 0 18px rgba(199,140,255,.14)':''}"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true">Random Respec${randomized?' &#10003;':''}<span style="display:block;opacity:.62;font-size:10px;margin-top:2px">${CLASSES[cfg.classId].disp} skills + passives</span></button>
       ${inA?'<button class="bigbtn ghost" id="arRespec" style="flex:1;min-width:120px;margin:0">✨ Free Respec</button>':''}</div>
     <button class="bigbtn" id="arGo">${inA?'✓ Apply Loadout':'⚔️ Enter Arena'}</button>
     ${inA?'<button class="bigbtn ghost" id="arLeave" style="margin-top:8px;color:#ff8a82;border-color:#5a2a2a">Leave Arena</button>':''}
@@ -15948,11 +15949,11 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arBots').oninput=e=>{ cfg.bots=+e.target.value; g('arBotsV').textContent=cfg.bots; };
   document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
   document.querySelectorAll('[data-botcls]').forEach(b=>b.onclick=()=>{ cfg.botClass=b.dataset.botcls; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
-  { const rb=g('arBotClsRand'); if(rb) rb.onclick=()=>{ cfg.botClass=randomClassId(); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('🎲 Bots: '+CLASSES[cfg.botClass].disp); openArenaSetup(back); }; }
+  { const rb=g('arBotClsRand'); if(rb) rb.onclick=()=>{ cfg.botClass=randomClassId(); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('Bots: '+CLASSES[cfg.botClass].disp); openArenaSetup(back); }; }
   { const tb=g('arTeams'); if(tb) tb.onclick=()=>{ cfg.teams=!cfg.teams; try{SFX.pickup();}catch(e){} openArenaSetup(back); }; }
   { const pw=g('arPow'); if(pw) pw.onclick=()=>{ cfg.powerups=!cfg.powerups; try{SFX.pickup();}catch(e){} toast(cfg.powerups?'✨ Powerups ON — health / damage / speed orbs spawn in the arena.':'Powerups off.'); openArenaSetup(back); }; }
   g('arFair').onclick=()=>{ cfg.fair=!cfg.fair; try{SFX.pickup();}catch(e){} toast(cfg.fair?'⚖️ Fair Mode ON — everyone gets a standardized level, gear & stats.':'Fair Mode off — custom loadouts.'); openArenaSetup(back); };
-  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); cfg.botClass=R(Object.keys(CLASSES)); cfg.botDiff=R(BOT_DIFFS); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('🎲 Randomized loadout + bots!'); openArenaSetup(back); };
+  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); cfg.botClass=R(Object.keys(CLASSES)); cfg.botDiff=R(BOT_DIFFS); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('Randomized loadout + bots!'); openArenaSetup(back); };
   g('arRandSpec').onclick=()=>{ const r=arenaRandomRespec(cfg); try{SFX.pickup();}catch(e){} if(r)toast('Random '+CLASSES[r.classId].disp+' build: '+r.skills+' skills + '+r.passives+' passives. Apply the loadout to test it.'); openArenaSetup(back); };
   if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>{ if(cfg.classBuilds)delete cfg.classBuilds[cfg.classId]; openArenaSetup(back); }); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }

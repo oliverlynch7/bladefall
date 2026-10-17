@@ -2220,3 +2220,8 @@ Fixed measured enemy A* collision hot path, removed Briar ambient drifting speck
 Rebuilt level-doorway dressing store with opaque walls/floor and ray-only roof cutaway; seven orchard tree remnants now use mature trees/solid trunks; actual no-jump stair traversal reaches both landings. Mara explicitly offers her table-top shard; first collection introduces the Rift Keeper, five regional shards, banking and named class-trial unlock through local two-page dialogue. Three Briar savings coffers have unique wood/iron coin models, hinged lids, +gold UI and existing chest/coin SFX; replay pays once. Optional weapon-aware charge teaching cannot block a starter sword. Actual scene blueprint refreshed for Homefields only.
 
 102 offline suites plus parser/module syntax, actual browser interactions, pre-change level100 save, repeated trial/hub transitions and frame traces. No production storage touched; no two-device network test or human art/pacing approval claimed. Evidence: docs/art-validation/briar-playtest-20261017/summary.md. Production pending.
+
+
+## [Codex | 2026-10-17] Production and final interaction verification
+
+Functional aec3c00d deployed successfully as71999df9-ef79-4ad7-acf3-ed78ec5f1abf. Actual public browser confirms v2.234.0-briar-playtest, updated hero2234h/guide2234b/spirit+currency2234 entry scripts and functioning main menu. Further disposable-browser checks physically walk in and out of the supply-store door at y0, collect dressings, and advance/finish the spirit with actual document keyboard handlers using E; acknowledgement stored, mode returns toplay, no errors. Evidence physical-door.json, spirit-keyboard.json and public-release.json. No production save manipulation. Primary’s unrelated changes preserved.

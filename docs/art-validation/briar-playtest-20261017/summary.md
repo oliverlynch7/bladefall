@@ -22,3 +22,8 @@ Actual local in-app browser, disposable Map-backed storage, fresh level1 Mage, d
 - Final correctly loaded first movement/dash capture moving-correct-scene.json: median10.4ms, p9514.6ms, worst19ms, no frame over30ms in360frames; graphics preparation ready with no error. A prior warmed repeat peaked16.8ms. The final gate also passed pre-change level100 save loading and repeated trial/hub transitions.
 
 102 offline regression suites pass; inline parser and changed module syntax checked. Browser evidence includes actual Mara transaction, first-shard model/dialogue, stored acknowledgement, dressing interaction/doorway, coffer hinge/payout/audio dispatch/replay, physical stairs, tree collisions, optional charge pages and old-save/scene transitions. The co-op authority/receipt regressions pass, but no two-device/network playtest was performed. Subjective art/pacing and performance on the user's PC remain for human playtesting. Existing SFX reused; no credits spent or audio preference replacements.
+
+
+## [Codex | 2026-10-17] Production and final interaction verification
+
+Functional aec3c00d deployed successfully as71999df9-ef79-4ad7-acf3-ed78ec5f1abf. Actual public browser confirms v2.234.0-briar-playtest, updated hero2234h/guide2234b/spirit+currency2234 entry scripts and functioning main menu. Further disposable-browser checks physically walk in and out of the supply-store door at y0, collect dressings, and advance/finish the spirit with actual document keyboard handlers using E; acknowledgement stored, mode returns toplay, no errors. Evidence physical-door.json, spirit-keyboard.json and public-release.json. No production save manipulation. Primary’s unrelated changes preserved.

@@ -1,3 +1,4 @@
+import {makeStrawDummy} from './training-dummy3d.js?v=2233';
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
@@ -28,6 +29,7 @@ for(const type of Object.keys(MOB_CAST))if(type!=='colossus'&&type!=='marblecolo
     ['king','tyrant','brute','warden','archer','sorcerer','prison_bell','prison_unbound'].includes(type)?1.22:1.10;
   MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2142',fitHeight};
 }
+MOB_CAST.dummy={file:'enemy-assets/dummy',fitHeight:.88};
 MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
 MOB_CAST.marblecolossus={file:'enemy-assets/articulated/marblecolossus-v2126'};
 const ASSETS_DIR = '../slice3d/assets/';
@@ -82,6 +84,7 @@ function demetalise(root, label){
    body, two callers. The cache is shared too, so a chest and a mimic are one download. */
 export async function loadKitModel(file){
   if(_mobModels.has(file)) return _mobModels.get(file);
+  if(file==='enemy-assets/dummy'){const model=makeStrawDummy();_mobModels.set(file,model);return model;}
   try {
     /* A bare name is a creature in monsters/; a name with a slash carries its own kit folder.
        Extension is resolved rather than assumed - monsters/ ships .glb, the prop kits ship .gltf
@@ -142,7 +145,7 @@ function acquireMob(type,e){
       materials.push(o.material);
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
-    const clips=src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
+    const clips=type==='dummy'?[]:src._revisedAnimations||(src._revisedAnimations=type.startsWith('officer-')?officerClips(root,type.slice(8),revisedClips(root,type,src.animations)):revisedClips(root,type,src.animations));
     for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||/^(Attack|Windup|Recover)(_|$)/.test(c.name)||['Hit','Death','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
@@ -195,6 +198,7 @@ function syncMobsInner(scene,dt,camera){
     actorSphere.center.set(e.x,(e.y||0)+(e.h||38)*.5,e.z);actorSphere.radius=radius;
     const offscreen=!e.dead&&camera&&Math.hypot(e.x-w.p.x,e.z-w.p.z)>250&&!actorFrustum.intersectsSphere(actorSphere);
     if(offscreen){
+      if(!rec&&window.BF_LOADING?.active)rec=acquireMob(type,e);
       _drawn.add(e);culled++; // handled: do not draw the old voxel fallback
       if(rec){rec.root.visible=false;rec.suspended=true;rec.x=e.x;rec.z=e.z;rec.attack=0;rec.recover=0;const state=enemyActionState(e);rec.phase=state.phase;rec.phaseKey=state.key;rec.hit=e.hitFlash||0;}
       continue;

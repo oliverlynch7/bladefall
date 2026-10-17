@@ -1090,13 +1090,13 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./prison-dungeon.js?v=2140"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
-<script src="./loading.js?v=2213"></script>
+<script src="./loading.js?v=2233"></script>
 <link rel="stylesheet" href="./hub-dialogue.css?v=2214">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2214"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
-<script src="./hub-tour.js?v=2192"></script>
+<script src="./hub-tour.js?v=2233d"></script>
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2089"></script>
@@ -1185,7 +1185,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.232.0-progression-chests-hud';
+const VERSION3D='2.233.0-waystation-welcome';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1359,11 +1359,11 @@ function wipeMode(m){ meta.chestRecords={}; try{localStorage.removeItem(MKEY(m))
 const STORY={
   // Spoiler-safe opening. Supplied illustrations remain unchanged JPEG originals.
   origin:[
-    "For generations, Ian protected Aerth. He was a Bladeborn—a rare warrior with extraordinary power.",
-    "Ian lived a long life and died of old age. Years passed. No new Bladeborn appeared.",
-    "Then a wealthy lord promised a life without aging. People traveled to his castle to walk through the Eternal Gate.",
-    "They returned changed. Their eyes were empty. They could no longer refuse his orders. The lord became the Abyss King. His army became the Hollowed Legion.",
-    "Now the Legion threatens Briar Town—your home. Your father, Thomas, helps your neighbors prepare. They have few weapons and no army. You decide to stand with them."
+    "For generations, Ian protected Aerth. He was a Bladeborn: a rare warrior strong enough to face dangers that ordinary armies could not.",
+    "Ian eventually died of old age. People mourned him, and no new Bladeborn appeared. Meanwhile, a wealthy lord was searching for a way to stop aging and death.",
+    "The lord hired mages and scholars to find a cure. Together, they built the Eternal Gate at Castle Duskmoor. He promised that anyone who walked through it would never grow old. Families came, hoping to save the people they loved.",
+    "The travelers returned ageless, but changed. The lord discovered that they could not refuse his orders. He sent them home to bring more families through the Gate. With Ian gone, he turned his growing army against Aerth. The lord became the Abyss King; his army, the Hollowed Legion.",
+    "Now the Legion is coming for Briar Town, your home. Your father, Thomas, helps the neighbors build barricades, but they have no army to protect them. You choose to help. Your journey begins at the Waystation, a safe place to prepare."
   ],
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
     "Something in you straightens its back — something that was always there, waiting for its turn.",
@@ -1470,7 +1470,7 @@ function playOpening(onDone){
   names.forEach(name=>{const im=new Image();im.src='assets/story/opening/'+name+'.jpg';});
   let page=0,done=false;
   const finish=()=>{if(done)return;done=true;document.removeEventListener('keydown',keys,true);root.remove();story._skip=null;if(onDone)onDone();};
-  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=page===4?'Enter the Waystation':'Next';};
+  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=page===4?'Enter the Waystation':'Next';root.querySelector('#openingSkip').hidden=page===4;};
   const next=()=>{if(page===4)finish();else{page++;render();}};
   const back=()=>{if(page>0){page--;render();}};
   const keys=e=>{if(!['Escape','Enter','Space','ArrowRight','ArrowLeft'].includes(e.code))return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(e.code==='Escape')finish();else if(e.code==='ArrowLeft')back();else if((e.code==='Enter'||e.code==='Space')&&e.target.tagName==='BUTTON')e.target.click();else next();};
@@ -4288,7 +4288,7 @@ const ENEMY={
   // ── Ruined Keep bestiary (Phase 14) ──
   sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel',spec:'watch'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
   revenant:{hp:26,dmg:11,speed:80,r:14,h:40,xp:20,color:'#9aa0a8',kind:'charger',look:'revenant'},                    // fast undead: a quick telegraphed LUNGE — the kill target
-  dummy:{hp:400,dmg:0,speed:0,r:14,h:54,xp:0,color:'#c9b37e',kind:'walk',look:'dummy'},   // straw-and-hay damage checker: hits land, nothing dies
+  dummy:{hp:10000,dmg:0,speed:0,r:14,h:54,xp:0,color:'#c9b37e',kind:'walk',look:'dummy'},   // straw-and-hay damage checker: hits land, nothing dies
   bosscrystal:{hp:100,dmg:0,speed:0,r:15,h:56,xp:6,color:'#7fd6ff',kind:'walk',look:'bosscrystal',noSplit:true},   // boss shield anchor — destroy all to break the ward
   // ── Phase 20: unique bestiary for zones 4-8 (2 signature mobs each) ──
   // FROSTFELL
@@ -9891,7 +9891,7 @@ function spawnEnemy(type,x,z,isBoss){
   if(isCampaignAdventure()&&a.kind==='walk'&&(!a.spec||a.spec==='watch')&&!a.boss&&!isBoss)e.meleeReach=8;
   // The Galewisp's close dive needs the same wind-up and hit reach; it must still descend to contact height.
   if(isCampaignAdventure()&&a.kind==='fly'&&a.dive&&!a.boss&&!isBoss)e.meleeReach=12;
-  if(type==='dummy') e.hp=e.maxHp=trainingDummyHp(G&&G.p?G.p.level:1);
+  if(type==='dummy'){e.hp=e.maxHp=trainingDummyHp(G&&G.p?G.p.level:1);e.label='Training Dummy';e.fixedYaw=Math.atan2(-x,-z);e.yaw=e.fixedYaw;}
   if(e.boss) G.boss=e;
   e.mid=(G._midSeq=(G._midSeq||0)+1);   // stable multiplayer id (host & guest spawn in the same seeded order, so ids align)
   /* THE ROLE IS ROLLED FROM THE RUN SEED AND THE BODY'S OWN mid, not from Math.random. The mid on
@@ -16434,7 +16434,7 @@ function updateWorld(dt){
     const partyTarget=syncedMelee(e)?enemyPartyTarget(e,p):p;
     const meleeTarget=inBrokenWalls()&&e.keepEscort?BFBrokenWalls.target(G,e,partyTarget):inGreatFurnace()&&e.furnaceEscort?BFGreatFurnace.target(G,e,partyTarget):inLostCanyon()&&(e.canyonEscort||e.canyonAlarm)?BFLostCanyon.target(G,e,partyTarget):partyTarget;
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
-    if(!(MP.guest()&&e.normalMelee))e.yaw=Math.atan2(dirX,dirZ);
+    if(e.dummy)e.yaw=e.fixedYaw??0;else if(!(MP.guest()&&e.normalMelee))e.yaw=Math.atan2(dirX,dirZ);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
     if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
@@ -21348,9 +21348,6 @@ function drawLanternCourtEntities(t){
       drawShadow(x,z,12,.24);pushM();mv(x,0,z);rotY(hubNpcFacing(n,x,z));
       hubNpcModel(n.id==='anvil'?{...n,id:'smith'}:n,t);popM();
     }
-    if(n.id==='mirror'&&window.__hero3dMirror){
-      try{if(window.__hero3dMirror({x:n.x+4,y:12,z:n.z,yaw:Math.PI-(G.p.yaw||0)}))_poseKeep.push('mirror');}catch(e){}
-    }
     if(n.id==='beastkeeper')for(const s of [-1,1]){
       bx(n.x+2,31+Math.sin(t*2+s)*2,n.z+s*35,9,10,12,s<0?'#a1ae76':'#b2a077');
     }
@@ -22426,7 +22423,7 @@ function drawHpBar3(e){
   const namedElite=!!e.campaignElite;
   const s=project(e.x,(e.y||0)+(e.h||38)+(namedElite?32:18),e.z);
   if(!s||s[0]<-60||s[0]>VW+60||s[1]<-40||s[1]>VH+40||!BFEnemyHealth.visible(G,e,G.time||0))return;
-  hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/Math.max(1,e.maxHp))),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:e.label&&!/^(elite|boss)$/i.test(e.label)?e.label:(e.elite?'Elite ':'')+bestiaryName(e.type||'enemy'),level:enemyEncounterLevel(e),training:!!(e.dummy||e.practice)});
+  hpBars.push({x:s[0],y:s[1],f:Math.max(0,Math.min(1,e.hp/Math.max(1,e.maxHp))),elite:namedElite,raider:!!(e.briarRole||e.homeRaid||e.patrolGroup),name:e.label&&!/^(elite|boss)$/i.test(e.label)?e.label:(e.elite?'Elite ':'')+bestiaryName(e.type||'enemy'),level:e.dummy?0:enemyEncounterLevel(e),dummy:!!e.dummy,training:!!(e.dummy||e.practice)});
   if(e.st){const keys=[];for(const k in e.st){const n=Math.floor(e.st[k]);if(n>=1)keys.push([k,n]);}
     if(keys.length){statPips.push({x:s[0],y:s[1]-30*DPR,keys});}}
 }
@@ -22494,7 +22491,7 @@ function drawHpBars(){
       c.fillStyle='#161923';c.fillRect(b.x-w/2-2*DPR,b.y-2*DPR,w+4*DPR,h+4*DPR);c.strokeStyle='#a47a37';c.lineWidth=DPR;c.strokeRect(b.x-w/2-DPR,b.y-DPR,w+2*DPR,h+2*DPR);
       c.fillStyle='#e8453d';c.fillRect(b.x-w/2,b.y,w*b.f,h);continue;
     }
-    if(!b.pet&&b.name){c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(10*DPR)+'px system-ui,sans-serif';c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText(b.name+(b.training?'':' · Lv '+b.level),b.x,b.y-6*DPR);c.fillStyle='#ead6af';c.fillText(b.name+(b.training?'':' · Lv '+b.level),b.x,b.y-6*DPR);}
+    if(!b.pet&&b.name){c.textAlign='center';c.textBaseline='alphabetic';c.font='bold '+(10*DPR)+'px system-ui,sans-serif';c.lineWidth=3*DPR;c.strokeStyle='#13151c';c.strokeText(b.name+(b.training&&!b.dummy?'':' · Lv '+b.level),b.x,b.y-6*DPR);c.fillStyle='#ead6af';c.fillText(b.name+(b.training&&!b.dummy?'':' · Lv '+b.level),b.x,b.y-6*DPR);}
     if(b.pet&&b.name){   // ally pet: small name label above its bar
       c.textAlign='center'; c.textBaseline='alphabetic'; c.font='bold 9px system-ui,sans-serif';
       c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(b.name, b.x+0.6, b.y-4.4);
@@ -22502,7 +22499,7 @@ function drawHpBars(){
     const width=(b.pet?32:62)*DPR,height=(b.pet?3:6)*DPR;
     c.fillStyle='#171b24';c.fillRect(b.x-width/2-2,b.y-2,width+4,height+4);
     c.fillStyle='#4a2426';c.fillRect(b.x-width/2,b.y,width,height);
-    c.fillStyle=b.pet?'#55d78b':b.training?'#aeb7bf':'#ed4845';c.fillRect(b.x-width/2,b.y,width*b.f,height); }
+    c.fillStyle=b.pet?'#55d78b':b.training&&!b.dummy?'#aeb7bf':'#ed4845';c.fillRect(b.x-width/2,b.y,width*b.f,height); }
   // elemental status icons: the same readable voxel emblems used by affinity/status tooltips
   c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';
   for(const sp of statPips){ const n=sp.keys.length, pw=19, tot=n*pw, x0=sp.x-tot/2, y=sp.y-9;
@@ -24282,7 +24279,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
 </script>
 <!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
      default (window.HERO3D.on=true). If this file fails to load the game is unaffected. -->
-<script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./jsm/"}}</script>
+<script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2233a","./mob3d.js?v=2216":"./mob3d.js?v=2233a","./companion3d.js?v=2073":"./companion3d.js?v=2226e"}}</script>
 <script type="module">
   /* Exposed on window rather than imported by the game code: the game lives in a classic,
      non-module script tag and so cannot use `import`. Same bridge pattern as __BF_WORLD.
@@ -24297,7 +24294,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2231"></script>
+<script type="module" src="./hero3d.js?v=2233g"></script>
 <script type="module" src="./social-hub.js?v=2227a"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

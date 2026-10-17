@@ -11,7 +11,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2227a';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2226e';
+import {syncNpcs} from './npc3d.js?v=2233e';
 import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2226e';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -38,8 +38,8 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2216';
-import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2216';
+import { WORLD3D, syncWorld } from './world3d.js?v=2233';
+import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2233a';
 import { PROP3D, syncProps } from './prop3d.js?v=2184';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated
@@ -1534,7 +1534,10 @@ window.__npcBuildFace=(root,model,eyeColor,appearance={})=>{
  const savedEye={...EYE},savedMouth={...MOUTH},holder={root,model,eyeColor,mouthStyle:appearance.mouthStyle,browStyle:appearance.browStyle,faceAdjust:appearance.faceAdjust};
  try{addEyes(holder,true);addMouth(holder,true);}finally{Object.assign(EYE,savedEye);Object.assign(MOUTH,savedMouth);}
  const mouth=holder._mouth,base=mouth?.scale.y||1;
- return {tick(t,talking){if(mouth)mouth.scale.y=base*(talking ? .7+Math.abs(Math.sin(t*14))*1.8 : 1);},
+ root.updateMatrixWorld(true);const faceForward=new THREE.Vector3(0,0,1);
+ if(holder._eyes?.[0]){faceForward.transformDirection(holder._eyes[0].matrixWorld);faceForward.applyQuaternion(root.getWorldQuaternion(new THREE.Quaternion()).invert());}
+ const yawOffset=-Math.atan2(faceForward.x,faceForward.z);
+ return {yawOffset,tick(t,talking){if(mouth)mouth.scale.y=base*(talking ? .7+Math.abs(Math.sin(t*14))*1.8 : 1);},
   dispose(){for(const node of [...(holder._eyes||[]),...(mouth?[mouth]:[])]){node.removeFromParent();node.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();}});}},
   get state(){return {eyes:!!holder._eyes,mouth:!!mouth,scale:mouth?.scale.y,neutral:base};}};
 };
@@ -1745,6 +1748,11 @@ function pirateWeaponPose(p,wrap,A,dt){
   wrap.updateMatrixWorld(true);
 }
 function playFor(p, A){
+  // Bind every local animation while the loading curtain is up, rather than on its first dash.
+  if(A.local&&A.mixer&&A.preparedMixer!==A.mixer&&window.BF_LOADING?.active){
+    A.preparedMixer=A.mixer;
+    for(const clip of Object.values(clips)){if(!clip)continue;const action=A.mixer.clipAction(clip);action.play();A.mixer.update(0);action.stop();}
+  }
   // pick a clip from the game's own player state, so the 3D hero animates off real gameplay
   const moving = Math.hypot(p.vx || 0, p.vz || 0) > 20 && p.onGround;
   /* Clip selection from the game's own player state.
@@ -2155,7 +2163,23 @@ export function drawHero3D(p, t){
     const fadeChessActor=root=>{if(!chessTable||!chessBlocksBoard(root,cam,chessTable))return;root.traverse(n=>{if(!n.isMesh)return;const original=n.material;if(!n.userData.chessFade||n.userData.chessFadeSource!==original){if(n.userData.chessFade)for(const mat of Array.isArray(n.userData.chessFade)?n.userData.chessFade:[n.userData.chessFade])mat.dispose();const fade=m=>{const q=m.clone();q.transparent=true;q.opacity=(m.opacity??1)*.18;q.depthWrite=false;return q;};n.userData.chessFadeSource=original;n.userData.chessFade=Array.isArray(original)?original.map(fade):fade(original);}chessFade.push([n,original]);n.material=n.userData.chessFade;});};
     if(chessView){if(p.sitting)fadeChessActor(wrap);const thomas=window.BFSocial?.npcPose('thomas'),citizens=scene.getObjectByName('Waystation citizens');if(thomas&&citizens)for(const actor of citizens.children)if(Math.hypot(actor.position.x-thomas.x,actor.position.z-thomas.z)<2)fadeChessActor(actor);}
     const restorePause=p.pausedSafe?pauseAppearance(wrap):null;
-    try{renderer.render(scene, cam);}finally{restoreMount?.();restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    window.__BF_MIRROR_CHARACTER=()=>{restoreFirstPerson?.();return ()=>{if(fp)weaponOnly(wrap);};};
+    try{renderer.render(scene, cam);}finally{window.__BF_MIRROR_CHARACTER=null;restoreMount?.();restorePause?.();for(const [n,m]of chessFade)n.material=m;restoreFirstPerson?.();for(const child of hidden)child.visible=true;scene.background=bg;scene.fog=fog;}
+    if(window.BF_LOADING?.active&&window.BF_LOADING.resourcesReady){
+      const world=window.__BF3?.G;
+      if(world&&window.__BF_RENDER_WARMUP?.world!==world){
+        const state=window.__BF_RENDER_WARMUP={world,ready:false,error:null};
+        try{
+          for(let i=0;i<6;i++){const key='echo'+i;window.__hero3dAt?.(key,{x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,ghost:.001});}
+          const textures=new Set();scene.traverse(n=>{for(const m of Array.isArray(n.material)?n.material:[n.material]){if(!m)continue;for(const value of Object.values(m))if(value?.isTexture)textures.add(value);}});
+          for(const texture of textures)renderer.initTexture(texture);
+          // Compile alone does not upload skinned geometry or bone textures. Draw the pooled
+          // afterimages once under the loading curtain, then hide them before play resumes.
+          try{renderer.render(scene,cam);}finally{for(let i=0;i<6;i++)window.__hero3dAt?.('echo'+i,null);}
+          Promise.resolve(renderer.compileAsync?renderer.compileAsync(scene,cam):renderer.compile(scene,cam)).then(()=>{state.ready=true;},e=>{state.error=String(e);state.ready=true;});
+        }catch(e){state.error=String(e);state.ready=true;}
+      }
+    }
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};
     renderer.resetState();
     return true;
@@ -2313,7 +2337,9 @@ window.__hero3dAt = (key, o) => {
       node.name = '__heroPose:' + key;
       node.traverse(n => { if(n.isMesh){ n.frustumCulled = false; n.castShadow = false; } });
       scene.add(node);
-      rec = { node, ghosted: false, appearance };
+      const copiedBones=new Map();node.traverse(n=>{if(n.isBone&&!copiedBones.has(n.name))copiedBones.set(n.name,n);});
+      const bonePairs=[];actor.traverse(n=>{if(n.isBone&&copiedBones.has(n.name))bonePairs.push([n,copiedBones.get(n.name)]);});
+      rec = { node, ghosted: false, appearance, bonePairs };
       _poses.set(key, rec);
     }
     /* GHOST MODE - the afterimage trail.
@@ -2345,7 +2371,7 @@ window.__hero3dAt = (key, o) => {
         if(m.emissiveIntensity != null) m.emissiveIntensity = 0.35 + a * 0.9;
       }
     }
-    actor.traverse(n=>{if(n.isBone){const b=rec.node.getObjectByName(n.name);if(b){b.position.copy(n.position);b.quaternion.copy(n.quaternion);b.scale.copy(n.scale);}}});
+    for(const [n,b]of rec.bonePairs){b.position.copy(n.position);b.quaternion.copy(n.quaternion);b.scale.copy(n.scale);}
     for(const name of ['WeaponPalmGrip','CrossbowBolt']){const source=actor.getObjectByName(name),copy=rec.node.getObjectByName(name);if(source&&copy)copy.visible=source.visible;}
     rec.node.visible = true;
     const sc = HERO3D.scale * (o.scale != null ? o.scale : 1);

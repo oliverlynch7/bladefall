@@ -1,3 +1,4 @@
+import {makeHubMirror} from './hub-mirror3d.js?v=2233';
 import {buildHubUpgrades} from './hub-upgrades.js?v=2121';
 /* The Waystation: original, instanced Blender scenery. The layout is owned by
    rebuildWaystationSanctum; service callbacks and portal unlocks stay in the game. */
@@ -149,11 +150,35 @@ export function buildHubArt(scene,w){
     });continue;}
     if(n.district==='undercroft'){
       at(n.x,n.z,Math.PI,()=>{
-        add('arch',0,0,-20,25);block(0,1,14,110,2,64,'#66566c');
-        const col=n.c2||'#b99975';block(0,72,-21,44,85,3,'#202c43');
-        const ringGeo=new THREE.TorusGeometry(18,1.6,4,24),ringMat=new THREE.MeshBasicMaterial({color:col}),ring=new THREE.Mesh(ringGeo,ringMat),rp=point(0,-17);ring.position.set(rp.x,74,rp.z);ring.rotation.y=origin.ry;root.add(ring);owned.push(ringGeo,ringMat);
-        block(0,74,-16,5,25,3,col);block(0,74,-15,23,4,3,col);for(const side of [-1,1]){block(side*46,57,-6,3,75,3,col);block(side*46,20,-6,9,5,9,'#d8b670');}
-        if(n.id==='arena'||n.id==='gauntlet')for(const side of [-1,1]){beam(side*61,57,-21,4,110,4,'#d0ac64');block(side*61,91,-18,20,36,3,col);block(side*61,92,-15,3,26,2,'#f1d68e');}
+        // Each activity has a distinct silhouette and materials, within its existing station footprint.
+        const col=n.c2||'#b99975';block(0,1,14,110,2,64,'#66566c');
+        if(n.id==='abyss'){
+          // A braced mine entrance with a descending staircase, not a recolored magic arch.
+          for(const side of [-1,1]){beam(side*43,53,-22,16,106,18,'#705336');block(side*51,25,-20,15,50,24,'#6d7275');}
+          beam(0,108,-22,104,16,23,'#977348');block(0,63,-33,68,80,3,'#14242a');
+          for(let i=0;i<5;i++)block(0,7-i*3,14-i*7,67,5,8,'#8d9696');
+          for(const side of [-1,1]){block(side*35,84,-9,7,15,7,'#d99439');block(side*35,84,-4,4,10,2,'#ffe1a0');}
+        }else if(n.id==='delve'){
+          // Prison masonry, iron bars, a raised portcullis and broken chains.
+          for(const side of [-1,1])for(let j=0;j<4;j++)block(side*43,14+j*27,-21,23,26,26,j%2?'#7b8292':'#626e82');
+          beam(0,118,-21,108,13,28,'#a1acbc');block(0,60,-35,62,108,3,'#111d30');
+          for(let j=-3;j<=3;j++)beam(j*9,92,-13,3,49,4,'#b4b8c0');beam(0,73,-13,63,5,5,'#7e8c9e');
+          for(const side of [-1,1])for(let j=0;j<4;j++)block(side*(45+j%2*3),65-j*9,-5,5,7,3,'#b5ab8a');
+          block(0,122,-6,24,21,4,'#c6ad6f');block(0,122,-3,5,9,2,'#162239');
+        }else if(n.id==='arena'){
+          for(const side of [-1,1]){add('pillar',side*43,0,-21,23);block(side*43,111,-21,31,9,30,'#eee0bb');beam(side*59,58,-23,3,112,4,'#d5b36d');block(side*59,88,-19,18,40,3,'#c24d43');}
+          beam(0,121,-21,111,12,29,'#d9c598');block(0,61,-32,60,100,3,'#4e3441');
+          block(0,111,-3,22,26,5,'#b93f38');beam(-9,116,1,4,39,4,'#e8d99f',-.55);beam(9,116,2,4,39,4,'#e8d99f',.55);
+        }else if(n.id==='sprint'){
+          for(const side of [-1,1])beam(side*44,55,-22,9,110,10,'#d9b377');
+          beam(0,113,-22,100,21,13,'#f2dbad');
+          for(let row=0;row<2;row++)for(let j=0;j<10;j++)block(-45+j*10,108+row*10,-14,10,10,2,(j+row)%2?'#263b4b':'#fff0c3');
+          for(let j=0;j<3;j++){block(-25+j*25,22+j*18,-30,19,9,20,'#c9974f');block(-25+j*25,28+j*18,-28,14,2,16,'#f5de8c');}
+          block(0,83,-29,59,5,3,'#64b9b9');
+        }else if(n.id==='gauntlet'){
+          for(const side of [-1,1]){beam(side*43,49,-23,18,98,23,'#524b63');for(let j=0;j<3;j++)block(side*(36-j*6),99+j*7,-23,21,15,22,'#89758d');block(side*24,113,-8,10,13,4,'#e75c4b');block(side*18,94,-9,7,14,4,'#e7d9b9');}
+          block(0,123,-22,34,19,23,'#a2979c');block(0,113,-8,10,12,5,'#392f43');block(0,50,-36,61,74,3,'#241e32');
+        }else add('arch',0,0,-20,25);
         label(n.name,0,142,-18,165);
         for(let j=0;j<3;j++)block((j-1)*12,17,-17,5,5,3,col);
       });continue;
@@ -197,7 +222,7 @@ export function buildHubArt(scene,w){
         block(35,8,8,24,14,18,'#625e50');block(35,16,8,21,1,15,'#62888b');
       }else if(n.id==='board')add('board',0,1,-8,29,29,29,null,Math.PI);
       else if(n.id==='mirror'){
-        add('mirror',0,1,-6,30,30,30,null,Math.PI);panel(null,0,41,-2,35,73,.16);
+        add('mirror',0,1,-6,30,30,30,null,Math.PI);const glass=makeHubMirror(35,73),mp=point(0,1);glass.position.set(mp.x,41,mp.z);glass.rotation.y=origin.ry;root.add(glass);owned.push({dispose(){glass.geometry.dispose();glass.dispose();}});
       }else if(n.id==='keeper'){
         beam(28,12,0,23,24,24,'#70468c');beam(28,31,-10,23,36,5,'#70468c');for(let j=0;j<4;j++){block(-33+j*15,26,-18,12,45,7,['#c84d67','#427db4','#d6b752','#54866a'][j]);block(-33+j*15,52,-18,13,5,8,'#e6c983');}beam(-11,56,-18,64,4,5,'#b79563');
         for(const x of [-38,-23,-8,7]){beam(x,76,-19,2,35,2,'#cdbb95');block(x,59,-19,7,4,7,'#e8c887');}

@@ -3246,3 +3246,8 @@ Shared openBag now begins the same pause session as Esc, covering keyboard, HUD 
 ## [Codex | 2026-10-17] v2.250.0 — Chess scroll-wheel zoom
 
 Added board-centered wheel zoom to existing 3D orbit camera, range32..240, retained current default view and rotation. Side-panel scrolling, flat view and browser zoom shortcuts excluded; gameplay camera preferences and chess state untouched. Added short control hint.19 new zoom regressions pass plus existing chess experience, clock, choreography, rules and cape suites. Actual isolated old-save browser verifies7 cases and visibly checks close/wide extremes. Evidence: docs/art-validation/chess-zoom-20261017.
+
+
+## [Codex | 2026-10-17] v2.251.0 — Chess pre-moves
+
+Added one private pre-move via click/drag in3D or flat view, purple highlights, explicit queued-move/cancel control and right-click cancellation. Local queue waits for authoritative animation completion, rechecks engine legality and current seat/round/clock, then sends once using latest host revision. Discard invalidated moves; clear on leaving/history/new match. No network/save schema changes. Fixed immediate projected hit-target positioning after render so fast3D drags remain reliable.113 suites pass; focused chess tests rerun after hit-target fix. Actual isolated old-save browser verifies host execution, both views/click/drag, cancel and simulated guest rev91 request after acknowledgement. Evidence: docs/art-validation/chess-premoves-20261017.

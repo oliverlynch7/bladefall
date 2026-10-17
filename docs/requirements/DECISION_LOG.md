@@ -1653,3 +1653,8 @@ Opening the bag must use main-menu pause protection: solo simulation freezes; co
 ## [Codex | 2026-10-17] U-CHESS-WHEEL-ZOOM-20261017
 
 User requests broad scroll-wheel zoom while seated at the 3D chessboard. Plan: local orbit radius bounded32..240 world units (current default132 desktop/140mobile), normalize pixel/line/page wheel units and clamp extreme deltas. Wheel over world/hit layers zooms toward board center, while side-panel/flat-board scrolling and browser Ctrl/Meta zoom remain untouched. Preserve orbit angle, seat orientation, move drag and gameplay camera preferences. Verify zoom bounds, both directions, actual board visibility and UI exclusions.
+
+
+## [Codex | 2026-10-17] U-CHESS-PREMOVES-20261017
+
+User requests pre-moves on 3D and flat boards. Plan: one private local queued move via clicks or drag, purple origin/destination indicators, cancel button/right click, replaceable while waiting. Queue geometric candidate moves including pawn capture onto currently empty squares; execute only after authoritative opponent animation completes, turn/seat/round still match, clock started and engine confirms legality. Clear before send to avoid duplicate requests; cancel on illegal reply, game end, history review, leaving, new game/seat change. No protocol or save schema change; host retains move validation. Verify host/guest, legal/invalidated/cancel/promotion and both UI paths.

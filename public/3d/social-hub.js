@@ -3,7 +3,7 @@ import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation
 import './chess-pieces.js?v=2119';
 import {ChessOpponent} from './chess-opponent.mjs?v=2119';
 import {ChessClock} from './chess-clock.mjs';
-import {createChessTable} from './chess-table.js?v=2250';
+import {createChessTable} from './chess-table.js?v=2251';
 import {Chess} from './vendor/chess-1.4.0.mjs';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000;
 let moveLog=[],round=1,parkedPet=null,nextRewardAttempt=0;

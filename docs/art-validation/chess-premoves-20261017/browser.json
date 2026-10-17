@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "Pre-change level100 save loads in isolated storage",
+    "3D click queues g1-f3 after e4",
+    "Cancel button clears queued move",
+    "Flat click queues g1-f3",
+    "Host opponent e5 causes exactly one Nf3 after animation",
+    "Black guest flat drag queues e7-e5",
+    "Guest waits for host animation-done packet, sends exactly one socialRequest with latest rev91",
+    "Fast 3D drag queues e7-e5 with immediate hit-target layout",
+    "Right-click cancels without opening context menu",
+    "Flat drag retested after hit-target fix"
+  ],
+  "limitations": "Co-op host and guest state simulated in one browser, not a two-device test."
+}

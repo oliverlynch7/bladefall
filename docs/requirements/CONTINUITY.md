@@ -2237,3 +2237,8 @@ User reiterates that exhausted main dialogue must end in a clear primary Leave c
 Campaign dialogue now preserves per-conversation visited history across topic menus and ends read-line return edges. Terminal/informational endings show a primary Leave conversation; no duplicate footer exit. Remaining optional questions/quests stay separate, empty/redundant topic navigation is suppressed, and talking again can repeat information. Required effects commit before closure; no-op effects do not republish old notes/rewards. Explicit race retry remains repeatable. Service explanations close directly instead of returning to the same menu/auto-opening a shop. Listeners retain a local exit; only the speaker may advance shared dialogue.
 
 103 offline suites pass, including94 primary NPC/preset paths plus optional quest, legacy cursor, race retry, final trigger and co-op authority checks. Actual disposable old-level100 browser session verifies Caleb main/optional exhaustion, closure/reopen and Quartermaster exit; listener UI has an enabled local exit. No production save manipulation or two-device network test. Evidence docs/art-validation/dialogue-endings-20261017/summary.md. Production pending.
+
+
+## [Codex | 2026-10-17] v2.235 production confirmed
+
+Functional0534d0f9 deployed successfully asa1ea2e34-faa5-4735-aa04-0b9a0097904d. Actual public browser confirmsv2.235.0-dialogue-endings, hub-dialogue2235c and story-state2235a, and normal main-menu boot. Local103 suites and actual NPC/old-save/listener checks are recorded in docs/art-validation/dialogue-endings-20261017/summary.md. No production save manipulation.

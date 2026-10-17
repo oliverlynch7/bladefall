@@ -17,3 +17,8 @@ Verification:
 - Updated five existing tests to the requested ending contract: dead ends display Leave, fresh interaction may replay reminders, and another question after a completed response requires reopening the NPC. Reward/gate/progression assertions remain in place.
 - Actual local browser, disposable Map-backed pre-change level100 save: Caleb main path ends with primary Leave, unread question stays under More questions, reading it leaves exactly one Leave button, clicking closes to play, talking again can repeat the reminder. Quartermaster guide closes directly to play. Listener presentation has a working local exit and no clickable speaker action. No production save storage changed and no two-device network claim.
 - Inline parser, changed module syntax and primary-checkout focused checks. Production pending.
+
+
+## [Codex | 2026-10-17] v2.235 production confirmed
+
+Functional0534d0f9 deployed successfully asa1ea2e34-faa5-4735-aa04-0b9a0097904d. Actual public browser confirmsv2.235.0-dialogue-endings, hub-dialogue2235c and story-state2235a, and normal main-menu boot. Local103 suites and actual NPC/old-save/listener checks are recorded in docs/art-validation/dialogue-endings-20261017/summary.md. No production save manipulation.

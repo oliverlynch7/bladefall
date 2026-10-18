@@ -10,11 +10,11 @@ for(const dpr of [.5,.66,1,1.25,1.5,2])for(const guest of [false,true]){
   window:{__npc3dAnchor:()=>({x:13,y:80,z:0})},BFHubDialogue:{known:()=>false},returnHubInfo:()=>({fresh:true}),dXZ:()=>10,project:(x,y,z)=>{projected={x,y,z};return [640,360];},controlHint:()=> 'F',htmlSafe:s=>s,
   document:{getElementById:id=>({interactprompt:prompt,bInteract:button,hubtags:box})[id]}};
  vm.createContext(c);for(const name of ['npcLabelAnchor','updateInteractPrompt','hubTagAnchor','updateHubTags'])vm.runInContext(fn(name),c);
- c.updateInteractPrompt();ok(prompt.style.left==='640px'&&prompt.style.top==='352px','prompt uses CSS pixels at '+dpr+' guest='+guest);ok(projected.x===13&&projected.y===102,'prompt follows rendered top, including body offset');ok(prompt.innerHTML.includes('F'),'rebound interaction key retained');
+ c.updateInteractPrompt();ok(prompt.style.left===undefined&&prompt.style.top===undefined,'action dock is independent of projection at '+dpr+' guest='+guest);ok(prompt.innerHTML.includes('Talk to Quartermaster'),'dock identifies current target');ok(prompt.innerHTML.includes('F'),'rebound interaction key retained');
  c.updateHubTags();ok(tag.style.display==='none'&&prompt.innerHTML.includes('npcquest'),'focused quest badge merges into interaction pill');c.G.interact.anchorNpc=null;c.updateHubTags();ok(tag.style.left==='640px'&&tag.style.top==='346px','quest marker uses same CSS projection');ok(projected.x===13&&projected.y===98&&!quest.hidden,'quest attaches above rendered actor');
- c.G.interact.anchorNpc=n;c.window.__npc3dAnchor=()=>null;c.updateInteractPrompt();ok(projected.x===0&&projected.y===142,'unloaded NPC uses existing valid fallback');
+ c.G.interact.anchorNpc=n;c.window.__npc3dAnchor=()=>null;c.updateInteractPrompt();ok(prompt.innerHTML.includes('Talk to Quartermaster'),'dock remains available while model loads');
  c.mode='upgrade';c.updateInteractPrompt();ok(prompt.classList.contains('hide'),'prompt hidden in menus');
- c.mode='play';c.project=()=>null;c.updateInteractPrompt();c.updateHubTags();ok(prompt.classList.contains('hide')&&tag.style.display==='none','behind-camera labels hidden');
+ c.mode='play';c.project=()=>null;c.updateInteractPrompt();c.updateHubTags();ok(!prompt.classList.contains('hide')&&tag.style.display==='none','behind-camera world marker hides; reachable nearby action stays stable');
 }
 {
  const c={VW:1280,VH:720,DPR:2,PROJ:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],VIEW:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]};vm.createContext(c);vm.runInContext(fn('mMul')+fn('project'),c);

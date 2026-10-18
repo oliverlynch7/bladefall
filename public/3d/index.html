@@ -1099,7 +1099,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="toast"></div>
 <div id="titlebg"><div class="tbimg"></div><div class="tembers" id="tembers"></div><div class="tvign"></div></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
-<div id="interactprompt" class="hide"></div>
+<link rel="stylesheet" href="./npc-names.css?v=2262">
+<script src="./npc-names.js?v=2262"></script>
+<div id="npcNames" hidden></div>
+<button id="interactprompt" type="button" class="hide" aria-label="Interact"></button>
 <div id="petlabel" class="hide"></div>
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
@@ -1207,7 +1210,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.261.0-menu-close';
+const VERSION3D='2.262.0-npc-nameplates';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -6082,6 +6085,7 @@ function zoneClear(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 function showGameUI(v){
+  if(!v){window.BFNpcNames?.clear();document.getElementById('interactprompt')?.classList.add('hide');}
   if(v) document.body.classList.remove('t-title');
   ['hud','hudprogress','controls','pausebtn','eschint','inventoryDock','mapCaption'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
   if(!v){ const _ss=document.getElementById('secretsense'); if(_ss) _ss.classList.add('hide'); }   // heart only shows during play, via secretSenseUpdate
@@ -19296,16 +19300,22 @@ function openCheatMenu(back){
 function npcLabelAnchor(n,padding=22){const a=n&&window.__npc3dAnchor?.(n.id);return a?{x:a.x,y:a.y+padding,z:a.z}:null;}
 function updateInteractPrompt(){
  const pr=document.getElementById('interactprompt'),btn=document.getElementById('bInteract');
- const it=G?.interact&&mode==='play'?G.interact:null;
+ const it=G?.interact&&mode==='play'&&!window.BF_LOADING?.active?G.interact:null;
  if(!it){pr?.classList.add('hide');btn?.classList.add('hide');return;}
  btn?.classList.remove('hide');if(!pr)return;
- const a=npcLabelAnchor(it.anchorNpc)||it,sp=project(a.x,a.y||40,a.z);
- if(!sp){pr.classList.add('hide');return;}
- pr.classList.remove('hide');pr.style.left=sp[0]+'px';pr.style.top=(sp[1]-8)+'px';
- const quest=G.hub&&it.anchorNpc&&returnHubInfo(it.anchorNpc),badge=quest?.fresh?'<span class="npcquest" aria-label="'+(quest.status==='ready'?'Quest ready to turn in':'Quest available')+'">!</span>':'';
- const html=badge+'<span class="k">'+htmlSafe(controlHint('interact'))+'</span>'+htmlSafe(it.label)+(it.service?'<span style="color:#ffb65d;font-size:11px;margin-left:8px">('+htmlSafe(it.service)+')</span>':'');
- if(pr._labelHTML!==html){pr._labelHTML=html;pr.innerHTML=html;}
+ const quest=G.hub&&it.anchorNpc&&returnHubInfo(it.anchorNpc),badge=quest?.fresh?'<span class="npcquest" aria-hidden="true">!</span>':'';
+ const detail=quest?.fresh?(quest.status==='ready'?'Quest ready to turn in':'Quest available'):it.service||'Press the key or click to interact';
+ const key=controlHint('interact');
+ const html=badge+'<span class="k">'+htmlSafe(key)+'</span><span class="interact-copy"><span>'+htmlSafe(it.label)+'</span><small class="interact-detail">'+htmlSafe(detail)+'</small></span>';
+ if(pr._labelHTML!==html){pr._labelHTML=html;pr.innerHTML=html;pr.setAttribute('aria-label',it.label+' · '+key+(quest?.fresh?' · '+detail:''));}
+ pr.classList.remove('hide');
 }
+function bindInteractionDock(){
+ const dock=document.getElementById('interactprompt');
+ dock.addEventListener('pointerdown',e=>e.stopPropagation());
+ dock.addEventListener('click',e=>{e.stopPropagation();initAudio();doInteract();});
+}
+bindInteractionDock();
 
 function wsResume(){
   if(G&&G.hub){
@@ -22754,7 +22764,9 @@ function partyHud(){
 }
 function drawNavigation(c){
  if(!G||mode!=='play')return;
- const main=meta.objectiveArrows!==false?(G.bonusActive?sprintGuideTarget():BFPartyNavigation.target(G)):null;
+ let main=meta.objectiveArrows!==false?(G.bonusActive?sprintGuideTarget():BFPartyNavigation.target(G)):null;
+ // The nearby action dock replaces the direction marker once you reach this target.
+ if(main&&G.interact&&Math.hypot(main.x-G.interact.x,main.z-G.interact.z)<45&&Math.hypot(main.x-G.p.x,main.z-G.p.z)<140)main=null;
  const friends=meta.friendArrows!==false?partyPeers():[];
  const markers=[...(main?[{o:main,color:'#ffe07a',label:main.navLabel||'Main objective'}]:[]),...friends.map(q=>({o:q,friend:true,color:'#75ddff',label:q.name+(q.downed?' · Needs help':'')}))];
  for(const {o,color,label,friend}of markers){
@@ -22838,6 +22850,7 @@ const SKYSUN={
    the end of a 300-line render function and is one frame late, i.e. invisible. */
 let _poseKeep = [];
 function render(t){
+  if(mode!=='play')window.BFNpcNames?.clear();
   document.body.classList.toggle('sprint-racing',!!G?.bonusActive&&mode==='play');
   BFDragonRiding.hud(G,mode==='play'&&!backgroundMenuMode,controlHint,toggleDragonRide);
   if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,warp:q.def?.warp||0,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
@@ -23278,7 +23291,8 @@ function render(t){
     gl.depthMask(true); }
   drawHpBars();
   updateHubTags();
-  updateInteractPrompt(); // Current camera matrices: keep labels attached while turning/zooming.
+  updateInteractPrompt(); // One stable action dock; NPC identity follows the rendered head.
+  window.BFNpcNames?.update({g:G,mode,project,anchor:n=>npcLabelAnchor(n,6),intersects:BFCampaignInteraction.intersects,width:VW,height:VH});
   // combo DOM
   const cb=document.getElementById('combo');
   if(mode==='play'&&G.combo>=3){ cb.textContent=G.combo+' HITS'; cb.style.opacity=Math.min(1,G.comboT); cb.style.fontSize=(15+Math.min(6,G.combo*0.2))+'px'; }

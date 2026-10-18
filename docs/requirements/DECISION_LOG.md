@@ -1737,3 +1737,10 @@ Inspection/plan: openTrainer only defines five class accents; the other twelve f
 User: "also generally you should add a red x exit button in the top right of every menu screen as a way to exit the menu"
 
 Inspection/plan: most menus use showOverlayHTML and existing Back/Cancel/Resume controls; dialogue, chess and mirror use separate panels. Add a shared accessible red X that delegates to those existing safe controls without synthesizing destructive actions or bypassing required rank choices. Refresh when subpanels change. Keep top-right visible while scrolling, reserve header space, verify keyboard/touch, nested close, pause protection and representative old-save menus. Main title has no parent to exit to; mandatory choices retain their locked completion rule.
+
+
+## [Codex | 2026-10-17] Campaign NPC names and stable interaction prompt
+
+User: "also the npcs in the level should have their names above their model so you know whos who, the current press e to interact floating texct things its a semi bnroken system. please come up with somehting better to still help d the player know what to do"
+
+Inspection/plan: campaign NPCs have rendered-head anchors but no persistent name labels. Current interaction pill projects over their heads and can cover them or jump around. Separate identity from action: nearby campaign NPC nameplates follow each local rendered head, hide offscreen/behind walls/in menus, limit overlaps; a single stable bottom-center action prompt shows the current bound key, target/action and relevant quest/service cue. Preserve hub signs and quest marks (avoid duplicate hub names), original target selection/reachability/actions and co-op authority. Make the prompt clickable/accessibly labeled, keep touch controls and hide it cleanly during loading/dialogue. Reuse DOM nodes and throttle static visibility checks. Verify old-save campaign/hub, camera/quality/guest cases, rebinding and actual interaction.

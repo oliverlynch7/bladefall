@@ -1,0 +1,691 @@
+{
+  "checks": [
+    {
+      "name": "Old level100 save loads",
+      "ok": true
+    },
+    {
+      "name": "Thomas is real campaign NPC",
+      "ok": true
+    },
+    {
+      "name": "host/low/shoulder shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/low/shoulder attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/low/shoulder action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/low/shoulder action names target",
+      "ok": true
+    },
+    {
+      "name": "host/low/far shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/low/far attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/low/far action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/low/far action names target",
+      "ok": true
+    },
+    {
+      "name": "host/low/fps shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/low/fps attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/low/fps action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/low/fps action names target",
+      "ok": true
+    },
+    {
+      "name": "host/medium/shoulder shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/medium/shoulder attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/medium/shoulder action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/medium/shoulder action names target",
+      "ok": true
+    },
+    {
+      "name": "host/medium/far shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/medium/far attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/medium/far action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/medium/far action names target",
+      "ok": true
+    },
+    {
+      "name": "host/medium/fps shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/medium/fps attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/medium/fps action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/medium/fps action names target",
+      "ok": true
+    },
+    {
+      "name": "host/high/shoulder shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/high/shoulder attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/high/shoulder action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/high/shoulder action names target",
+      "ok": true
+    },
+    {
+      "name": "host/high/far shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/high/far attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/high/far action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/high/far action names target",
+      "ok": true
+    },
+    {
+      "name": "host/high/fps shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "host/high/fps attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "host/high/fps action stays centered",
+      "ok": true
+    },
+    {
+      "name": "host/high/fps action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/low/shoulder shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/low/shoulder attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/low/shoulder action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/low/shoulder action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/low/far shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/low/far attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/low/far action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/low/far action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/low/fps shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/low/fps attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/low/fps action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/low/fps action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/shoulder shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/shoulder attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/shoulder action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/shoulder action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/far shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/far attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/far action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/far action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/fps shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/fps attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/fps action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/medium/fps action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/high/shoulder shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/high/shoulder attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/high/shoulder action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/high/shoulder action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/high/far shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/high/far attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/high/far action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/high/far action names target",
+      "ok": true
+    },
+    {
+      "name": "guest/high/fps shows real NPC name",
+      "ok": true
+    },
+    {
+      "name": "guest/high/fps attaches name to rendered head",
+      "ok": true
+    },
+    {
+      "name": "guest/high/fps action stays centered",
+      "ok": true
+    },
+    {
+      "name": "guest/high/fps action names target",
+      "ok": true
+    },
+    {
+      "name": "Rebound key appears in action dock",
+      "ok": true
+    },
+    {
+      "name": "Turning camera keeps action dock stable",
+      "ok": true
+    },
+    {
+      "name": "Turning camera keeps action dock stable",
+      "ok": true
+    },
+    {
+      "name": "Names hide in menus",
+      "ok": true
+    },
+    {
+      "name": "Action hides in menus",
+      "ok": true
+    },
+    {
+      "name": "Clicking action opens Thomas conversation",
+      "ok": true
+    },
+    {
+      "name": "Conversation hides both labels and action",
+      "ok": true
+    }
+  ],
+  "samples": [
+    {
+      "name": "host/low/shoulder",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        671.0465257731079,
+        356.4286958705586
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/low/far",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        662.1535749848233,
+        244.28987051588672
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/low/fps",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        714.0889092802804,
+        234.61876891029465
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/medium/shoulder",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        671.0465257731079,
+        356.4286958705586
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/medium/far",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        662.1535749848233,
+        244.28987051588672
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/medium/fps",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        714.0889092802804,
+        234.61876891029465
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/high/shoulder",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        671.0465257731079,
+        356.4286958705586
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/high/far",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        662.1535749848233,
+        244.28987051588672
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "host/high/fps",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        714.0889092802804,
+        234.61876891029465
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/low/shoulder",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        671.0465257731079,
+        356.4286958705586
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/low/far",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        662.1535749848233,
+        244.28987051588672
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/low/fps",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        714.0889092802804,
+        234.61876891029465
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/medium/shoulder",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        671.0465257731079,
+        356.4286958705586
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/medium/far",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        662.1535749848233,
+        244.28987051588672
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/medium/fps",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        714.0889092802804,
+        234.61876891029465
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/high/shoulder",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        671.0465257731079,
+        356.4286958705586
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/high/far",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        662.1535749848233,
+        244.28987051588672
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    },
+    {
+      "name": "guest/high/fps",
+      "anchor": {
+        "x": 13,
+        "y": 58,
+        "z": 350
+      },
+      "project": [
+        714.0889092802804,
+        234.61876891029465
+      ],
+      "nameVisible": true,
+      "dock": {
+        "x": 520,
+        "y": 490.015625,
+        "w": 240,
+        "h": 57.1875
+      },
+      "text": "ETalk to ThomasPress the key or click to interact"
+    }
+  ],
+  "errors": []
+}

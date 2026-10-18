@@ -1204,8 +1204,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2261"></script>
 <script src="./priority-sfx.js?v=2210"></script>
-<link rel="stylesheet" href="./progression-celebration.css?v=2264">
-<script src="encounter-rewards.js?v=2270"></script><script src="./progression-celebration.js?v=2264"></script>
+<link rel="stylesheet" href="./progression-celebration.css?v=2278">
+<script src="encounter-rewards.js?v=2270"></script><script src="./progression-celebration.js?v=2278"></script>
 <script>
 (function(){
 "use strict";
@@ -1216,7 +1216,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.277.0-class-audio';
+const VERSION3D='2.278.0-premium-progression';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -2811,7 +2811,7 @@ function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) ret
   for(let i=0;i<3;i++){ const pid=(cs.mix&&cs.mix[i+1])||cs.sub; out.push(skillsOf(pid)[i]||C.skills[1+i]); }
   return out; }
 function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) return false; const S=curSkills(); return S[i]?cs.rank>=S[i].rank:false; }
-function gainClassXp(n){ if(G?.devKeep)return; const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return; if(inBeginnerTrial()&&cs.rank===1&&G.trialKills<3)n=Math.min(n,Math.max(0,RANK_XP(1)-1-cs.xp));
+function gainClassXp(n){ if(G?.devKeep)return; const cs=classState(meta.classId),previousRank=cs.rank; if(cs.rank>=10||n<=0) return; if(inBeginnerTrial()&&cs.rank===1&&G.trialKills<3)n=Math.min(n,Math.max(0,RANK_XP(1)-1-cs.xp));
   if(inBeginnerTrial()&&cs.rank>=2)n=Math.min(n,Math.max(0,RANK_XP(cs.rank)-1-cs.xp));
   cs.xp+=n; let up=false;
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)&&(!inBeginnerTrial()||cs.rank<2)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
@@ -2819,8 +2819,8 @@ function gainClassXp(n){ if(G?.devKeep)return; const cs=classState(meta.classId)
     const sk=S.find((s,idx)=>s&&s.rank===cs.rank&&(idx===0||cs.sub));   // slot 0 (the shared skill) unlocks regardless of a chosen path
     // The visible celebration is coalesced after awarding all ranks in this transaction.
     if(!c2def()&&cs.rank===1&&S[0]&&!(meta.tut&&meta.tut.skill)) queueSkillTut=S[0]; }   // first rank-up teaches the shared skill, once
-  if(up){ SFX.classup();
-    window.BFProgressCelebration?.notify('class',G,{name:curClass().disp,value:cs.rank,detail:cs.rank>=10?'Class mastered · capstone unlocked':'New class choice earned'});
+  if(up){ const sound=()=>SFX.classup();if(window.BFProgressCelebration?.awardSound)window.BFProgressCelebration.awardSound('class',G,sound);else sound();
+    window.BFProgressCelebration?.notify('class',G,{cid:meta.classId,name:curClass().disp,previous:previousRank,value:cs.rank,detail:cs.rank>=10?(c2def()?.cap?.name||'Capstone unlocked')+' · '+(c2def()?.cap?.d||'Class mastered'):'New class choice earned'});
     if(c2def()){ const nx=c2NextChoice(); if(nx) queueChoiceRank=nx; }   // v2: queue the next unmade rank choice
     else if(cs.rank>=2&&!cs.sub) queueSubclass=true;                     // legacy fork at rank 2
     skillbarUpdate(); }
@@ -10170,6 +10170,7 @@ window.addEventListener('keydown',e=>{
     if((e.code==='Backspace'||e.code==='Delete')&&fresh){ e.preventDefault(); const kb=document.getElementById('sellBtn'); if(kb) kb.click(); return; }
     if(e.code==='KeyJ'||e.code==='KeyK'){ e.preventDefault(); return; }
   }
+  if(mode==='upgrade'&&window.BFProgressCelebration?.choiceKey(e,keyAction(BFPartyNavigation.keyCode(e)))){e.preventDefault();return;}
   if(mode==='upgrade'){
     // pick a level-up card with J/K/L or 1/2/3 (guarded by the read-window so you must actually read it)
     const fresh=!e.repeat && (Date.now()-_offerT)>ARM_MS;
@@ -12586,7 +12587,7 @@ let queueSkillTut=null;
 // A quick, one-time lesson the first time you unlock a usable skill: what it does, and which key fires it.
 function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tut.skill=1; persist();
   beginPause();mode='upgrade'; showGameUI(false); _offerT=Date.now();
-  showOverlayHTML(`<div class="card skilltut"><p class="ovkicker">Skill unlocked</p><h2>${htmlSafe(s.n)}</h2><p>${htmlSafe(s.d)}</p><p>Use ${htmlSafe(controlHint('skill1'))} · ${s.cd}s recharge</p><button class="bigbtn" id="tutGo">Try it · ${htmlSafe(controlKey('interact'))}</button></div>`);
+  showOverlayHTML(`<div class="card skilltut premium-skill-ready" style="--pick:${window.BFProgressCelebration?.theme(meta.classId).color||'#c4b5ff'}"><p class="ovkicker">${htmlSafe(curClass().disp)} · First skill learned</p><div class="skill-ready-art">${C2_ICON[s.fx]||'✦'}</div><h2>${htmlSafe(s.n)}</h2><p>${htmlSafe(s.d)}</p><p class="skill-ready-key">Press <b>${htmlSafe(controlHint('skill1'))}</b></p><p class="skill-ready-detail">${s.cd}s recharge · use alongside your basic attack</p><button class="bigbtn" id="tutGo">Try it · ${htmlSafe(controlKey('interact'))}</button></div>`);
   document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); if(inBeginnerTrial())BFGuidedTutorial.skill(G); };
 }
 function c2def(id){ return CLASS2[id||meta.classId]; }
@@ -12603,7 +12604,7 @@ function beginProgressChoice(kind,rank,open,retry){
  // Catch-up choices at one earned rank share one announcement, not repeated waits.
  if(last?.world===owner&&last.hero===hero&&last.cid===cid&&last.rank===cs.rank){open();return;}
  const detail=kind==='passive'?'New passive · choose an automatic bonus':rank===2?'First skill unlocked · choose your ability':'New skill · choose your ability';
- ui.notify('class',owner,{name:curClass().disp,value:cs.rank,detail});
+ ui.notify('class',owner,{cid,name:curClass().disp,value:cs.rank,detail});
  const valid=()=>G===owner&&G.p===hero&&meta.classId===cid&&!hero.dead&&!hero.downed&&hero.hp>0&&(!rank||!c2def()||c2NextChoice()===rank);
  const requeue=()=>{if(meta.classId!==cid||!G?.p)return;if(retry)retry();else if(rank&&c2def())queueChoiceRank=c2NextChoice();else if(kind==='skill'&&rank===0&&!c2def())queueSubclass=true;};
  ui.beforeChoice(valid,()=>{if(valid()&&mode==='play'){beginProgressChoice._announced={world:owner,hero,cid,rank:cs.rank};open();}},requeue,{detail,ready:()=>!!(hero.onGround||hero.dragonRide)});
@@ -12612,25 +12613,27 @@ function beginProgressChoice(kind,rank,open,retry){
 function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed) return; const cs=classState(cid),R=def['r'+rank]; if(!R) return;
   beginPause();mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
-    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span><span class="c2badge">Conditions below</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
-  const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
-  showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><p class="ovkicker">Rank ${rank} reached · ${isSk?'New skill':'New passive'}</p><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
-    <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Change choices later at the Drillmaster.</p></div>
-    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q / Esc</button></div><p class="hint choice-required">Choose one to continue. You can change it at the Drillmaster.</p></div>`);
+    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
+  const pickCol=window.BFProgressCelebration?.theme(cid).color||'#8fd56d';
+  showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><p class="ovkicker">${cs.rank>rank?'Rank '+rank+' choice':'Rank '+rank+' reached'} · ${isSk?'New skill':'New passive'}</p><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${cs.rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
+    <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'Choose an automatic bonus.'} Change choices later at the Drillmaster.</p></div>
+    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q / Esc</button></div><p class="hint choice-required">W / S or arrows to browse · ${htmlSafe(controlKey('interact'))} to select / confirm · Q to change selection. Choose one to continue.</p></div>`);
+  const pickRoot=document.querySelector('.classpick');window.BFProgressCelebration?.enhanceChoice(pickRoot,{cid,rank,isSkill:isSk,options:[R.a,R.b],world:G});
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
     const selected=[R.a,R.b].find(o=>o.id===b.dataset.pick);if(!selected)return;
     const confirmAt=Date.now();
     document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline=el===b?'3px solid #ffd47d':'';el.setAttribute('aria-pressed',String(el===b));});
-    document.getElementById('choiceReview').hidden=false;document.getElementById('choiceSelected').textContent=selected.n;
+    document.getElementById('choiceReview').hidden=false;document.getElementById('choiceSelected').textContent=selected.n;window.BFProgressCelebration?.selected(pickRoot,selected.id);document.getElementById('classChoiceConfirm').textContent='Learn '+selected.n+' · '+controlKey('interact');
     let committed=false;
-    document.getElementById('classChoiceBack').onclick=()=>{document.getElementById('choiceReview').hidden=true;document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline='';el.setAttribute('aria-pressed','false');});};
-    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;c2ch()[rank]=selected.id;recomputeArmor(G.p);persist();SFX.pickup();
+    document.getElementById('classChoiceBack').onclick=()=>{window.BFProgressCelebration?.selected(pickRoot,null);document.getElementById('choiceReview').hidden=true;document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline='';el.setAttribute('aria-pressed','false');});};
+    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;const rect=b.getBoundingClientRect?.()||{left:0,top:0,width:0,height:0};c2ch()[rank]=selected.id;recomputeArmor(G.p);persist();SFX.pickup();window.BFProgressCelebration?.learned(G,{cid,name:selected.n,kind:R.kind,slot:isSk?R.slot:null,key:isSk?controlHint('skill'+slot):null,art:isSk?(C2_ICON[selected.fx]||'✦'):passiveIcon(selected.id),from:{x:rect.left+rect.width/2,y:rect.top+rect.height/2}});
       const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
     };
   });
 }
 function classTutorialAction(action){
  if(!['interact','cancel'].includes(action))return false;
+ if(mode==='upgrade'&&action==='interact'&&window.BFProgressCelebration?.choiceKey({code:'',repeat:false},action))return true;
  let b=null;const review=document.getElementById('choiceReview');
  if(mode==='upgrade'&&review&&!review.hidden)b=document.getElementById(action==='interact'?'classChoiceConfirm':'classChoiceBack');
  else if(['upgrade','menu'].includes(mode)&&document.getElementById('tutGo'))b=document.getElementById(action==='interact'?'tutGo':'tutSkip');
@@ -14037,9 +14040,9 @@ function gainXp(n){ if(G?.devKeep)return;
     if(unlocked) storyToast('Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.','item-key');
   }
   if(p.level>previousLevel){
-    if(!playFx('levelcheer'))SFX.levelup();
+    const sound=()=>{if(!playFx('levelcheer'))SFX.levelup();};if(window.BFProgressCelebration?.awardSound)window.BFProgressCelebration.awardSound('player',G,sound);else sound();
     const points=Math.max(0,Math.min(91,p.level)-Math.min(91,previousLevel));
-    window.BFProgressCelebration?.notify('player',G,{value:p.level,detail:points?'Stronger hero · +'+points+' stat point'+(points===1?'':'s')+' · spend in Bag':'Stronger hero · health and power increased'});
+    window.BFProgressCelebration?.notify('player',G,{previous:previousLevel,value:p.level,detail:points?'Stronger hero · +'+points+' stat point'+(points===1?'':'s')+' · spend in Bag':'Stronger hero · health and power increased'});
     addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true);burst(p.x,p.y+30,p.z,'#ffd24a',16);
   }
   checkAchievements(); hudUpdate(); autosaveRun();
@@ -20680,11 +20683,12 @@ function hudUpdate(){
   document.getElementById('manafill').style.width=Math.max(0,p.mana/maxMana*100)+'%';
   document.getElementById('mananum').textContent=Math.floor(p.mana)+' / '+maxMana;
   // AQW-style dual bars: character XP (blue) + class rank XP (violet→amber)
-  document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
+  if(window.BFProgressCelebration)window.BFProgressCelebration.paintBar(document.getElementById('xpfill'),p.xp/p.xpNext*100,p.level,G,'player',meta.reduceMotion);else document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
   document.getElementById('xplabel').innerHTML=eventIcon('resource-soul-essence')+'CHARACTER · LV '+p.level;
   document.getElementById('xpnum').textContent=Math.floor(p.xp)+'/'+p.xpNext;
+  window.BFProgressCelebration?.statPoints(document.querySelector('.charprog .proghead'),IN_ARENA?0:BFCharacterStats.available(p),()=>{if(mode!=='play'||!G?.p||G.p.dead||G.p.downed)return;beginPause();openCharacterStats(resumePlay);});
   const cs=classState(meta.classId), atMax=cs.rank>=10, need=RANK_XP(cs.rank);
-  document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
+  if(window.BFProgressCelebration)window.BFProgressCelebration.paintBar(document.getElementById('clsfill'),atMax?100:cs.xp/need*100,cs.rank,G,'class',meta.reduceMotion);else document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
   document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;
   document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
   const portrait=document.getElementById('hudportraitimg'), skinId=SKINS[p.skin]?p.skin:'knight';
@@ -24654,6 +24658,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
   ED.loadShipped();
 </script>
 <script type="module" src="./hero3d.js?v=2274"></script>
+<script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

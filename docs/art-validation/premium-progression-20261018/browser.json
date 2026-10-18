@@ -1,0 +1,411 @@
+{
+  "cases": [
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Choice does not jump straight onto screen",
+          "ok": true
+        },
+        {
+          "name": "Choice opens within bounded heads-up",
+          "ok": true
+        },
+        {
+          "name": "World continued advancing during heads-up",
+          "ok": true
+        },
+        {
+          "name": "Persistent current-class rank header",
+          "ok": true
+        },
+        {
+          "name": "Required choice has no later/skip option",
+          "ok": true
+        },
+        {
+          "name": "Choice protection is active",
+          "ok": true
+        },
+        {
+          "name": "Damage during choice cannot lower HP",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "skill",
+      "mode": "play",
+      "transition": false,
+      "rank": 2,
+      "level": 5,
+      "selected": {
+        "2": "m_beam"
+      },
+      "protected": {
+        "active": false,
+        "frozen": false,
+        "protected": false
+      },
+      "skin": 0,
+      "banner": [],
+      "choice": "Mage · Rank 2",
+      "flight": 0,
+      "observedHud": "Elemental Beam · 20 mana · 1",
+      "keyboard": "S then E selected Beam; Q cancelled review; E reselected and confirmed"
+    },
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Choice does not jump straight onto screen",
+          "ok": true
+        },
+        {
+          "name": "Choice opens within bounded heads-up",
+          "ok": true
+        },
+        {
+          "name": "World continued advancing during heads-up",
+          "ok": true
+        },
+        {
+          "name": "Persistent current-class rank header",
+          "ok": true
+        },
+        {
+          "name": "Required choice has no later/skip option",
+          "ok": true
+        },
+        {
+          "name": "Choice protection is active",
+          "ok": true
+        },
+        {
+          "name": "Rank5 actual outfit thumbnail loaded",
+          "ok": true
+        },
+        {
+          "name": "New look is unlocked without changing equipped appearance",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "five",
+      "mode": "upgrade",
+      "transition": false,
+      "rank": 5,
+      "level": 5,
+      "selected": {
+        "2": "m_bolt",
+        "3": "m_potent",
+        "4": "m_blink"
+      },
+      "protected": {
+        "active": true,
+        "frozen": true,
+        "protected": false
+      },
+      "skin": 0,
+      "banner": [],
+      "choice": "Mage · Rank 5",
+      "lookReady": "true",
+      "flight": 0
+    },
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Choice does not jump straight onto screen",
+          "ok": true
+        },
+        {
+          "name": "Choice opens within bounded heads-up",
+          "ok": true
+        },
+        {
+          "name": "World continued advancing during heads-up",
+          "ok": true
+        },
+        {
+          "name": "Persistent current-class rank header",
+          "ok": true
+        },
+        {
+          "name": "Required choice has no later/skip option",
+          "ok": true
+        },
+        {
+          "name": "Choice protection is active",
+          "ok": true
+        },
+        {
+          "name": "Rank5 actual outfit thumbnail loaded",
+          "ok": true
+        },
+        {
+          "name": "New look is unlocked without changing equipped appearance",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "five",
+      "mode": "play",
+      "transition": false,
+      "rank": 5,
+      "level": 5,
+      "selected": {
+        "2": "m_bolt",
+        "3": "m_potent",
+        "4": "m_blink",
+        "5": "m_glass"
+      },
+      "protected": {
+        "active": false,
+        "frozen": false,
+        "protected": false
+      },
+      "skin": 0,
+      "banner": [],
+      "choice": "Mage · Rank 5",
+      "lookReady": "true",
+      "flight": 0,
+      "confirmedPassive": true
+    },
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Character earns exactly one level",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Player level does not pause",
+          "ok": true
+        },
+        {
+          "name": "Unspent stat-point button exists",
+          "ok": true
+        },
+        {
+          "name": "Stat affordance opens actual protected allocation",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "player",
+      "mode": "pause",
+      "transition": false,
+      "rank": 10,
+      "level": 6,
+      "selected": {
+        "2": "m_bolt",
+        "3": "m_potent",
+        "4": "m_blink",
+        "5": "m_glass",
+        "6": "m_gravity",
+        "7": "m_savant",
+        "8": "m_tempest",
+        "9": "m_echo"
+      },
+      "protected": {
+        "active": true,
+        "frozen": true,
+        "protected": false
+      },
+      "skin": 0,
+      "banner": [],
+      "flight": 0,
+      "statPointAction": "Actual allocation opened, one Attack point applied, HUD now reports14 available"
+    },
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Choice does not jump straight onto screen",
+          "ok": true
+        },
+        {
+          "name": "Choice opens within bounded heads-up",
+          "ok": true
+        },
+        {
+          "name": "World continued advancing during heads-up",
+          "ok": true
+        },
+        {
+          "name": "Persistent current-class rank header",
+          "ok": true
+        },
+        {
+          "name": "Required choice has no later/skip option",
+          "ok": true
+        },
+        {
+          "name": "Choice protection is active",
+          "ok": true
+        },
+        {
+          "name": "Damage during choice cannot lower HP",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "coop",
+      "mode": "upgrade",
+      "transition": false,
+      "rank": 2,
+      "level": 5,
+      "selected": {},
+      "protected": {
+        "active": true,
+        "frozen": false,
+        "protected": true
+      },
+      "skin": 0,
+      "banner": [],
+      "choice": "Mage · Rank 2",
+      "flight": 0
+    },
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Character earns exactly one level",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Choice does not jump straight onto screen",
+          "ok": true
+        },
+        {
+          "name": "Choice opens within bounded heads-up",
+          "ok": true
+        },
+        {
+          "name": "World continued advancing during heads-up",
+          "ok": true
+        },
+        {
+          "name": "Persistent current-class rank header",
+          "ok": true
+        },
+        {
+          "name": "Required choice has no later/skip option",
+          "ok": true
+        },
+        {
+          "name": "Choice protection is active",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "both",
+      "mode": "upgrade",
+      "transition": false,
+      "rank": 2,
+      "level": 6,
+      "selected": {},
+      "protected": {
+        "active": true,
+        "frozen": true,
+        "protected": false
+      },
+      "skin": 0,
+      "banner": [],
+      "choice": "Mage · Rank 2",
+      "flight": 0
+    },
+    {
+      "checks": [
+        {
+          "name": "Old level100 save loads in isolated storage",
+          "ok": true
+        },
+        {
+          "name": "Announcement starts without stopping live control",
+          "ok": true
+        },
+        {
+          "name": "Class mastery does not force a nonexistent choice",
+          "ok": true
+        },
+        {
+          "name": "Capstone mastered banner remains visible",
+          "ok": true
+        },
+        {
+          "name": "Rank10 actual mastery outfit loaded",
+          "ok": true
+        }
+      ],
+      "errors": [],
+      "scenario": "ten",
+      "mode": "play",
+      "transition": false,
+      "rank": 10,
+      "level": 5,
+      "selected": {
+        "2": "m_bolt",
+        "3": "m_potent",
+        "4": "m_blink",
+        "5": "m_glass",
+        "6": "m_gravity",
+        "7": "m_savant",
+        "8": "m_tempest",
+        "9": "m_echo"
+      },
+      "protected": {
+        "active": false,
+        "frozen": false,
+        "protected": false
+      },
+      "skin": 0,
+      "banner": [],
+      "flight": 0
+    }
+  ],
+  "firstEverRebound": "{\"checks\":[{\"name\":\"Old level100 save loads in isolated storage\",\"ok\":true},{\"name\":\"Announcement starts without stopping live control\",\"ok\":true},{\"name\":\"Choice does not jump straight onto screen\",\"ok\":true},{\"name\":\"Choice opens within bounded heads-up\",\"ok\":true},{\"name\":\"World continued advancing during heads-up\",\"ok\":true},{\"name\":\"Persistent current-class rank header\",\"ok\":true},{\"name\":\"Required choice has no later/skip option\",\"ok\":true},{\"name\":\"Choice protection is active\",\"ok\":true}],\"errors\":[],\"scenario\":\"firstever\",\"mode\":\"upgrade\",\"transition\":false,\"rank\":2,\"level\":5,\"selected\":{\"2\":\"m_bolt\"},\"protected\":{\"active\":true,\"frozen\":true,\"protected\":false},\"skin\":0,\"banner\":[],\"flight\":0}",
+  "errors": []
+}

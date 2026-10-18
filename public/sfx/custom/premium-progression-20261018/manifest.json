@@ -1,0 +1,33 @@
+{
+  "version": "premium-progression-20261018",
+  "plan_at_generation": "starter",
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "subjective_listening": "Human audition pending; signal checks cannot establish taste.",
+  "cues": [
+    {
+      "id": "premium_player_level",
+      "file": "custom/premium-progression-20261018/premium_player_level_v01",
+      "duration": 2.0,
+      "channels": 2,
+      "source_seconds": 2.0,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.74,
+      "peak": 0.77903,
+      "rms": 0.08328,
+      "sha256": "d8a442960ca27d9c852a93dfea7001f1b7cad216cdb8f5f3ef837cf123f543ec"
+    },
+    {
+      "id": "premium_class_rank",
+      "file": "custom/premium-progression-20261018/premium_class_rank_v01",
+      "duration": 2.2,
+      "channels": 2,
+      "source_seconds": 2.2,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7459,
+      "peak": 0.69057,
+      "rms": 0.04403,
+      "sha256": "1e4d99fe8dc4a09b9d7a47ccc4c3c0f0f3ccb12a675eea5f3c9ee7db0c69eb40"
+    }
+  ]
+}

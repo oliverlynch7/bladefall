@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "license_plan_at_generation": "starter",
+  "commercial_review": "Paid-plan non-beta SFX; retain provider records. No claim of exclusive ownership.",
+  "started_utc": "2026-10-18T16:59:36.999215+00:00",
+  "starting_account_used": 2074,
+  "hard_credit_cap": 500,
+  "cues": [
+    {
+      "id": "premium_player_level",
+      "duration_seconds": 2.0,
+      "prompt": "A single heroic player level-up reward for a bright fantasy adventure game: immediate warm bronze strike, three clean rising crystal notes, a satisfying golden resolution and restrained sparkling tail. Confident, rewarding, refined, comfortable through laptop speakers. One isolated event, no speech, no music bed, no trailer boom, no long reverb.",
+      "status": "saved",
+      "used_before": 2074,
+      "requested_utc": "2026-10-18T16:59:38.216931+00:00",
+      "billed_header": "20",
+      "request_id": null,
+      "file": "premium_player_level_v01.mp3",
+      "bytes": 33061,
+      "sha256": "33db8b8e2539299385838fc7953f57e0f9b63d75876c0318782bc92654e26f77"
+    },
+    {
+      "id": "premium_class_rank",
+      "duration_seconds": 2.2,
+      "prompt": "A single fantasy class mastery rank-up: a short focused magical intake, three distinct ascending etched-metal and violet-crystal pulses, then a firm luminous seal locking into place and a delicate resonant finish. Clearly different from a warm bronze player-level chime. Immediate onset, polished and rewarding. One isolated event, no speech, no music bed, no long reverb.",
+      "status": "saved",
+      "used_before": 2074,
+      "requested_utc": "2026-10-18T16:59:41.252032+00:00",
+      "billed_header": "22",
+      "request_id": null,
+      "file": "premium_class_rank_v01.mp3",
+      "bytes": 36405,
+      "sha256": "00f4def4bd415d19ccdc18f27749ce799c55c2582be54ca0d11cd4ebd88f2ad5"
+    }
+  ],
+  "ending_account_used": 2074,
+  "account_usage_delta": 0,
+  "billed_response_total": 42.0,
+  "remaining_credits": 37926
+}

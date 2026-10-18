@@ -1,0 +1,2886 @@
+{
+  "source": "Current CLASS2/C2_ICON/PASSIVE_ART. Illustrations do not simulate damage.",
+  "classes": {
+    "pyromancer": {
+      "disp": "Pyromancer",
+      "icon": "<img src=\"icons/class-pyromancer.png\" alt=\"\">",
+      "innate": {
+        "name": "Kindled Palms",
+        "d": "Fight bare-handed with short palm flames. Hold attack for a wider flame fan. Every third basic hit deals 25% extra damage."
+      },
+      "cap": {
+        "name": "Master of Flame",
+        "d": "Deal 12% more damage and reduce skill cooldowns by 8%."
+      },
+      "r2": {
+        "kind": "skill",
+        "a": {
+          "id": "py_bolt",
+          "n": "Firebolt",
+          "role": "Aimed Damage",
+          "d": "Fire a fast bolt for 2.2 times flame damage.",
+          "icon": "🔥",
+          "cd": 4,
+          "fx": "py_bolt",
+          "art": "<img src=\"icons/skill-pyromancer-firebolt.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_fan",
+          "n": "Cinder Fan",
+          "role": "Spread",
+          "d": "Fire three flames, each dealing 1.1 times flame damage.",
+          "icon": "🔥",
+          "cd": 7,
+          "fx": "py_fan",
+          "art": "<img src=\"icons/skill-pyromancer-cinder-fan.png\" alt=\"\">"
+        },
+        "slot": 0
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "py_power",
+          "n": "Hotter Flame",
+          "role": "Damage",
+          "d": "Deal 10% more damage with attacks and skills.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-hotter-flame.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_quick",
+          "n": "Quick Hands",
+          "role": "Speed",
+          "d": "Basic attacks are 12% faster.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-quick-hands.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "a": {
+          "id": "py_blast",
+          "n": "Backdraft",
+          "role": "Escape",
+          "d": "Blast nearby enemies for 1.3 times damage and push them back.",
+          "icon": "🔥",
+          "cd": 10,
+          "fx": "py_blast",
+          "art": "<img src=\"icons/skill-pyromancer-backdraft.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_ward",
+          "n": "Ember Shield",
+          "role": "Defense",
+          "d": "Gain a shield worth 25% of maximum health for 5 seconds.",
+          "icon": "🔥",
+          "cd": 14,
+          "fx": "py_ward",
+          "art": "<img src=\"icons/skill-pyromancer-ember-shield.png\" alt=\"\">"
+        },
+        "slot": 1
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "py_guard",
+          "n": "Fireproof Training",
+          "role": "Defense",
+          "d": "Take 10% less damage from all attacks.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-fireproof-training.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_mana",
+          "n": "Careful Casting",
+          "role": "Mana",
+          "d": "Skills cost 15% less mana.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-careful-casting.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "a": {
+          "id": "py_lance",
+          "n": "Flame Lance",
+          "role": "Piercing",
+          "d": "Fire a piercing flame for 3 times flame damage.",
+          "icon": "🔥",
+          "cd": 12,
+          "fx": "py_lance",
+          "art": "<img src=\"icons/skill-pyromancer-flame-lance.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_nova",
+          "n": "Flame Ring",
+          "role": "Area",
+          "d": "Strike nearby enemies for 2.4 times flame damage.",
+          "icon": "🔥",
+          "cd": 13,
+          "fx": "py_nova",
+          "art": "<img src=\"icons/skill-pyromancer-flame-ring.png\" alt=\"\">"
+        },
+        "slot": 2
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "py_heal",
+          "n": "Second Wind",
+          "role": "Recovery",
+          "d": "Defeating an enemy restores 3% of maximum health.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-second-wind.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_flow",
+          "n": "Steady Flame",
+          "role": "Cooldowns",
+          "d": "Skill cooldowns are 10% shorter.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-steady-flame.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "a": {
+          "id": "py_inferno",
+          "n": "Inferno",
+          "role": "Area",
+          "d": "Burn nearby foes once per second for 4 seconds. Each pulse deals flame damage.",
+          "icon": "🔥",
+          "cd": 24,
+          "fx": "py_inferno",
+          "art": "<img src=\"icons/skill-pyromancer-inferno.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_sun",
+          "n": "Sunburst",
+          "role": "Focused",
+          "d": "Strike your aimed enemy and nearby foes for 4 times flame damage.",
+          "icon": "🔥",
+          "cd": 22,
+          "fx": "py_sun",
+          "art": "<img src=\"icons/skill-pyromancer-sunburst.png\" alt=\"\">"
+        },
+        "slot": 3
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "py_finish",
+          "n": "Last Ember",
+          "role": "Damage",
+          "d": "Deal 12% more damage with attacks and skills.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-last-ember.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "py_sustain",
+          "n": "Fuel the Fire",
+          "role": "Mana",
+          "d": "Defeating an enemy restores 8 mana.",
+          "icon": "🔥",
+          "art": "<img src=\"icons/passives/passive-pyromancer-fuel-the-fire.png\" alt=\"\">"
+        }
+      }
+    },
+    "warrior": {
+      "disp": "Warrior",
+      "icon": "<img src=\"icons/class-warrior.png\" alt=\"\">",
+      "innate": {
+        "name": "Battle Ready",
+        "d": "Every third basic hit on the same enemy briefly staggers it. Switching targets restarts the count."
+      },
+      "cap": {
+        "name": "Unbroken Champion",
+        "d": "Gain +10% damage, +10% attack speed, and 15% damage reduction. Casting a skill restores 2% max HP."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "w_cleave",
+          "n": "Cleave",
+          "cd": 2,
+          "am": 0.45,
+          "role": "Rapid · Group",
+          "fx": "w_cleave",
+          "d": "A quick sweep hits nearby enemies. Short cooldown and low damage per cast.",
+          "art": "<img src=\"icons/skill-cleave.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_bash",
+          "n": "Shield Bash",
+          "cd": 6,
+          "role": "Control",
+          "fx": "w_bash",
+          "d": "Drive forward for 1.7x damage, stun the first target, and briefly brace.",
+          "art": "<img src=\"icons/warrior_shield_bash.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "w_heavy",
+          "n": "Heavy Hand",
+          "role": "Commitment",
+          "d": "Basic attacks deal 20% more damage.",
+          "art": "<img src=\"icons/passives/passive-warrior-heavy-hand.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_swift",
+          "n": "Swift Steel",
+          "role": "Rhythm",
+          "d": "Attack 10% faster. Every fourth basic hit deals 25% more damage.",
+          "art": "<img src=\"icons/passives/passive-warrior-swift-steel.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "w_charge",
+          "n": "Charge",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "w_charge",
+          "d": "Rush through enemies for 1.6x damage and stun them.",
+          "art": "<img src=\"icons/skill-charge.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_whirl",
+          "n": "Whirlwind",
+          "cd": 10,
+          "role": "Group Damage",
+          "fx": "w_whirl",
+          "d": "A full-circle sweep deals 2.2 times weapon damage to nearby enemies.",
+          "art": "<img src=\"icons/warrior_whirlwind.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "w_second",
+          "n": "Second Wind",
+          "role": "Sustain",
+          "d": "Dropping below 35% HP restores 12% max HP once every 30s.",
+          "art": "<img src=\"icons/passives/passive-warrior-second-wind.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_unyield",
+          "n": "Unyielding",
+          "role": "Defense",
+          "d": "Take 18% less damage while below half health.",
+          "art": "<img src=\"icons/passives/passive-warrior-unyielding.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "w_guard",
+          "n": "Iron Guard",
+          "cd": 13,
+          "role": "Defense",
+          "fx": "w_guard",
+          "d": "Brace for 3s, reducing incoming damage by 60%.",
+          "art": "<img src=\"icons/warrior_iron_guard.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_stomp",
+          "n": "Shockwave Stomp",
+          "cd": 12,
+          "role": "Control",
+          "fx": "w_stomp",
+          "d": "Slam the ground for 1.5x damage and heavy knockback all around.",
+          "art": "<img src=\"icons/skill-stomp.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "w_bloodlust",
+          "n": "Bloodlust",
+          "role": "Offense",
+          "d": "Defeating an enemy grants 12% more damage and 12% faster attacks for 6 seconds. Another kill refreshes the duration.",
+          "art": "<img src=\"icons/passives/passive-warrior-bloodlust.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_tactical",
+          "n": "Tactical Guard",
+          "role": "Defense",
+          "d": "After dodging, gain 20% damage reduction for 2s.",
+          "art": "<img src=\"icons/passives/passive-warrior-tactical-guard.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "w_berserk",
+          "n": "Warcry",
+          "cd": 22,
+          "role": "Offense",
+          "fx": "w_berserk",
+          "d": "Draw nearby enemies toward you for 6 seconds, helping protect your allies.",
+          "art": "<img src=\"icons/skill-berserk.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_execute",
+          "n": "Execution",
+          "cd": 20,
+          "role": "Finisher",
+          "fx": "w_execute",
+          "d": "A crushing 4x strike that executes normal enemies below 20% HP.",
+          "art": "<img src=\"icons/warrior_execution.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "w_master",
+          "n": "Weapon Master",
+          "role": "Damage",
+          "d": "Compatible weapons deal 10% more damage; skills cost 10% less mana. Stagger the same enemy every second basic hit instead of every third.",
+          "art": "<img src=\"icons/passives/passive-warrior-weapon-master.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "w_juggernaut",
+          "n": "Juggernaut",
+          "role": "Defense",
+          "d": "+15% knockback resistance and +8% damage reduction while moving.",
+          "art": "<img src=\"icons/passives/passive-warrior-juggernaut.png\" alt=\"\">"
+        }
+      }
+    },
+    "ranger": {
+      "disp": "Ranger",
+      "icon": "<img src=\"icons/class-ranger.png\" alt=\"\">",
+      "innate": {
+        "name": "Clear Aim",
+        "d": "Avoid damage for 3 seconds to gain 10% damage and extra skill range until hit. Basic shots deal more damage at longer distances."
+      },
+      "cap": {
+        "name": "Perfect Hunt",
+        "d": "Clear Aim becomes Perfect Aim: +3% more damage, survives a 0.75s grace after a hit, and a kill while active cuts skill cooldowns by 0.5s."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "r_volley",
+          "n": "Volley",
+          "cd": 5,
+          "role": "Group Damage",
+          "fx": "r_volley",
+          "d": "Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.",
+          "art": "<img src=\"icons/skill-volley.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_pierce",
+          "n": "Piercing Shot",
+          "cd": 5,
+          "role": "Boss Damage",
+          "fx": "r_pierce",
+          "d": "One shot through a line — 2.2x first (−10% its armor), 1.5x rest.",
+          "art": "<img src=\"icons/skill-deadeye.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "r_longshot",
+          "n": "Longshot",
+          "role": "Range",
+          "d": "Deal 12% more damage to enemies at least 7 metres away.",
+          "art": "<img src=\"icons/passives/passive-ranger-longshot.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_closeq",
+          "n": "Close-Quarters Archer",
+          "role": "Reversal",
+          "d": "Basic hits push enemies within 4 metres farther away. Bosses resist the push.",
+          "art": "<img src=\"icons/passives/passive-ranger-close-quarters.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "r_tumble",
+          "n": "Tumble",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "r_tumble",
+          "d": "Roll backward with brief invulnerability and fire a parting shot for 75% weapon damage.",
+          "art": "<img src=\"icons/skill-tumble.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_shadow",
+          "n": "Shadowstrike",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "r_shadow",
+          "d": "Dash through a target (2.0x) and appear behind it; tap again within 1s to return.",
+          "art": "<img src=\"icons/ranger_quickshot.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "r_escape",
+          "n": "Escape Artist",
+          "role": "Defense",
+          "d": "After dodging or using a movement skill, take 15% less damage for 2 seconds.",
+          "art": "<img src=\"icons/passives/passive-ranger-escape-artist.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_ambush",
+          "n": "Ambusher",
+          "role": "Damage",
+          "d": "After Tumble or Shadowstrike, your next basic hit within 3 seconds deals 20% more damage. Can trigger once every 6 seconds.",
+          "art": "<img src=\"icons/passives/passive-ranger-ambusher.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "r_spike",
+          "n": "Spike Trap",
+          "cd": 10,
+          "role": "Control",
+          "fx": "r_spike",
+          "d": "Place a trap for 5 seconds that repeatedly damages and slows enemies inside.",
+          "art": "<img src=\"icons/ranger_snare_trap.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_smoke",
+          "n": "Smoke Bomb",
+          "cd": 11,
+          "role": "Support",
+          "fx": "r_smoke",
+          "d": "Become briefly invulnerable and slow nearby enemies with smoke.",
+          "art": "<img src=\"icons/ranger_camouflage.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "r_patient",
+          "n": "Patient Hunter",
+          "role": "Damage",
+          "d": "After 3 seconds without taking damage, your damage bonus rises from 10% to 18%.",
+          "art": "<img src=\"icons/passives/passive-ranger-patient-hunter.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_quick",
+          "n": "Quickdraw",
+          "role": "Uptime",
+          "d": "Your 10% damage bonus activates after 2 seconds without taking damage instead of 3.",
+          "art": "<img src=\"icons/passives/passive-ranger-quickdraw.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "r_mark",
+          "n": "Hunter's Mark",
+          "cd": 12,
+          "role": "Boss Damage",
+          "fx": "r_mark",
+          "d": "Mark one enemy: you deal +18% and +10% crit to it for 8s.",
+          "art": "<img src=\"icons/skill-hunters-mark.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_deathmark",
+          "n": "Death Mark",
+          "cd": 14,
+          "role": "Farming",
+          "fx": "r_deathmark",
+          "d": "Mark up to 5 enemies — they explode for 1.8x on death.",
+          "art": "<img src=\"icons/ranger_rapid_fire.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "r_elem",
+          "n": "Elemental Archer",
+          "role": "Elements",
+          "d": "Deal 12% more damage while using an elemental weapon.",
+          "art": "<img src=\"icons/passives/passive-ranger-elemental-archer.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "r_bounty",
+          "n": "Bounty Hunter",
+          "role": "Sustain",
+          "d": "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.",
+          "art": "<img src=\"icons/passives/passive-ranger-bounty-hunter.png\" alt=\"\">"
+        }
+      }
+    },
+    "mage": {
+      "disp": "Mage",
+      "icon": "<img src=\"icons/class-mage.png\" alt=\"\">",
+      "innate": {
+        "name": "Arcane Attunement",
+        "d": "Basic hits spend 6 mana for 35% extra damage while keeping 25% of your mana in reserve. Magic basic hits restore 2 extra mana, at most once every 0.65 seconds."
+      },
+      "cap": {
+        "name": "Archmage",
+        "d": "+12% magic damage, +10% cooldown reduction, and every third skill refunds half its mana cost."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "m_bolt",
+          "n": "Elemental Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "m_bolt",
+          "d": "Fire a quick elemental bolt. Short cooldown and low damage per cast.",
+          "art": "<img src=\"icons/mage_elemental_bolt.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_beam",
+          "n": "Elemental Beam",
+          "cd": 6,
+          "role": "Piercing Damage",
+          "fx": "m_beam",
+          "d": "Fire a piercing elemental lance for 2x damage through every target.",
+          "art": "<img src=\"icons/mage_elemental_beam.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "m_potent",
+          "n": "Potent Casting",
+          "role": "Power",
+          "d": "Empowered basic hits deal 55% extra damage instead of 35%, for the same 6 mana. Magic skills deal 12% more damage.",
+          "art": "<img src=\"icons/passives/passive-mage-potent-weave.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_efficient",
+          "n": "Efficient Casting",
+          "role": "Economy",
+          "d": "Skills cost 15% less mana.",
+          "art": "<img src=\"icons/passives/passive-mage-efficient-casting.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "m_blink",
+          "n": "Blink",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "m_blink",
+          "d": "Teleport forward and become untouchable during the displacement.",
+          "art": "<img src=\"icons/mage_blink.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_nova",
+          "n": "Nova",
+          "cd": 9,
+          "role": "Control",
+          "fx": "m_nova",
+          "d": "Detonate a 1.4x freezing burst that slows nearby enemies.",
+          "art": "<img src=\"icons/mage_nova.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "m_glass",
+          "n": "Last Reserve",
+          "role": "Gamble",
+          "d": "Below half health, skills cost 40% less mana.",
+          "art": "<img src=\"icons/passives/passive-mage-glass-cannon.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_ward",
+          "n": "Arcane Ward",
+          "role": "Defense",
+          "d": "Casting a skill grants a shield equal to 4% max HP for 3s.",
+          "art": "<img src=\"icons/passives/passive-mage-arcane-ward.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "m_gravity",
+          "n": "Gravity Well",
+          "cd": 13,
+          "role": "Control",
+          "fx": "m_gravity",
+          "d": "Create an implosion that pulls enemies inward and deals 1.3x damage.",
+          "art": "<img src=\"icons/mage_gravity_well.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_barrier",
+          "n": "Rune Barrier",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "m_barrier",
+          "d": "Create a shield that absorbs 35% of max HP.",
+          "art": "<img src=\"icons/mage_rune_barrier.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "m_savant",
+          "n": "Elemental Savant",
+          "role": "Elements",
+          "d": "Basic hits empowered by spending 6 mana also apply your weapon element.",
+          "art": "<img src=\"icons/passives/passive-mage-elemental-savant.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_temporal",
+          "n": "Temporal Focus",
+          "role": "Uptime",
+          "d": "After standing still for 1.5 seconds, skills you cast have 15% shorter cooldowns. Moving ends the bonus.",
+          "art": "<img src=\"icons/passives/passive-mage-temporal-focus.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "m_tempest",
+          "n": "Attunement",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "m_tempest",
+          "d": "Create a damaging storm for 4 seconds. For 10 seconds, your skills cycle through different elements. Your equipped weapon stays unchanged.",
+          "art": "<img src=\"icons/mage_arcane_tempest.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_overload",
+          "n": "Elemental Overload",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "m_overload",
+          "d": "Release a massive 3.4x elemental explosion around your target.",
+          "art": "<img src=\"icons/mage_elemental_overload.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "m_echo",
+          "n": "Spell Echo",
+          "role": "Burst",
+          "d": "Every fourth skill repeats for free. The repeat deals 35% of its normal damage; other effects keep their normal strength.",
+          "art": "<img src=\"icons/passives/passive-mage-spell-echo.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "m_manafont",
+          "n": "Manafont",
+          "role": "Sustain",
+          "d": "+30% mana regeneration and +10 maximum mana.",
+          "art": "<img src=\"icons/passives/passive-mage-manafont.png\" alt=\"\">"
+        }
+      }
+    },
+    "reaper": {
+      "disp": "Reaper",
+      "icon": "<img src=\"icons/class-reaper.png\" alt=\"\">",
+      "innate": {
+        "name": "Soul Hunger",
+        "d": "Your scythe drains health. Defeating an enemy restores 2 mana."
+      },
+      "cap": {
+        "name": "Avatar of Death",
+        "d": "+12% damage and lifesteal. Killing a marked or corrupted enemy reduces every cooldown by 0.75s."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "x_reap",
+          "n": "Reap",
+          "cd": 2,
+          "am": 0.45,
+          "role": "Rapid · Sustain",
+          "fx": "x_reap",
+          "d": "A quick scythe sweep damages nearby enemies and restores health when it hits.",
+          "art": "<img src=\"icons/reaper_reap.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_cleave",
+          "n": "Soul Cleave",
+          "cd": 6,
+          "role": "Ranged Damage",
+          "fx": "x_cleave",
+          "d": "Send a spectral scythe wave outward for 2.1x damage.",
+          "art": "<img src=\"icons/reaper_soul_cleave.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "x_strength",
+          "n": "Harvested Strength",
+          "role": "Harvest",
+          "d": "Defeating an enemy makes your next skill cost no mana. Stores one free cast at a time.",
+          "art": "<img src=\"icons/passives/passive-reaper-harvested-strength.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_doom",
+          "n": "Lingering Doom",
+          "role": "Doom",
+          "d": "Your damage-over-time marks last 20% longer.",
+          "art": "<img src=\"icons/passives/passive-reaper-lingering-doom.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "x_step",
+          "n": "Shadow Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "x_step",
+          "d": "Dash through shadow and become briefly untouchable.",
+          "art": "<img src=\"icons/reaper_shadow_step.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_wraith",
+          "n": "Wraith Form",
+          "cd": 10,
+          "role": "Defense",
+          "fx": "x_wraith",
+          "d": "Become spectral for 3s: faster movement and 65% damage reduction.",
+          "art": "<img src=\"icons/reaper_wraith_form.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "x_armor",
+          "n": "Soul Armor",
+          "role": "Defense",
+          "d": "Collecting a kill grants a 3% max-HP shield for 5s.",
+          "art": "<img src=\"icons/passives/passive-reaper-soul-armor.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_wraithwalk",
+          "n": "Wraithwalk",
+          "role": "Movement",
+          "d": "After using mobility, gain +18% move speed for 2.5s.",
+          "art": "<img src=\"icons/passives/passive-reaper-wraithwalk.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "x_pull",
+          "n": "Void Pull",
+          "cd": 12,
+          "role": "Control",
+          "fx": "x_pull",
+          "d": "Implode nearby enemies toward a central point and stagger them.",
+          "art": "<img src=\"icons/reaper_void_pull.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_bind",
+          "n": "Soul Tether",
+          "cd": 12,
+          "role": "Linkage",
+          "fx": "x_bind",
+          "d": "Bind enemies in front of you, rooting them for 2.5s.",
+          "art": "<img src=\"icons/reaper_gravebind.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "x_crimson",
+          "n": "Crimson Harvest",
+          "role": "Sustain",
+          "d": "Defeating an enemy while below half health restores 5% of your maximum health (at least 3 HP).",
+          "art": "<img src=\"icons/passives/passive-reaper-crimson-harvest.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_chill",
+          "n": "Grave Chill",
+          "role": "Control",
+          "d": "Enemies affected by your void weapon effect move 18% slower.",
+          "art": "<img src=\"icons/passives/passive-reaper-grave-chill.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "x_siphon",
+          "n": "Soul Siphon",
+          "cd": 18,
+          "role": "Sustain",
+          "fx": "x_siphon",
+          "d": "A powerful draining sweep damages nearby enemies and heals 5% of your maximum health per enemy damaged. Healing is halved against players.",
+          "art": "<img src=\"icons/reaper_soul_siphon.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_vortex",
+          "n": "Death Vortex",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "x_vortex",
+          "d": "Create a persistent soul storm that damages and corrupts enemies.",
+          "art": "<img src=\"icons/reaper_death_vortex.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "x_corrupt",
+          "n": "Corruption Mastery",
+          "role": "Rupture",
+          "d": "Your void weapon effect builds 25% faster. When a charged attack or skill bursts a fully affected target, the burst deals 15% more damage and spreads the effect to nearby enemies.",
+          "art": "<img src=\"icons/passives/passive-reaper-corruption-mastery.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "x_favor",
+          "n": "Death's Favor",
+          "role": "Sustain",
+          "d": "Hitting an elite or boss restores 1 mana, at most once every 0.75 seconds. Defeating an elite restores 8% max HP.",
+          "art": "<img src=\"icons/passives/passive-reaper-deaths-favor.png\" alt=\"\">"
+        }
+      }
+    },
+    "paladin": {
+      "disp": "Paladin",
+      "icon": "<img src=\"icons/class-paladin.png\" alt=\"\">",
+      "innate": {
+        "name": "Holy Warrior",
+        "d": "Your first basic-hit target takes 15% extra basic damage. While it lives, other enemies deal 33% less damage to you. Holy weapons heal 2% of health removed (1% against players)."
+      },
+      "cap": {
+        "name": "Avatar of Light",
+        "d": "Take 18% less damage and deal +10% damage. Holy weapons heal an extra 1% of health removed (0.5% against players)."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "pal_bash",
+          "n": "Shield Bash",
+          "cd": 6,
+          "role": "Control",
+          "fx": "pal_bash",
+          "d": "Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.",
+          "art": "<img src=\"icons/paladin_shield_bash.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_smite",
+          "n": "Smite",
+          "cd": 8,
+          "role": "Holy Damage",
+          "fx": "pal_smite",
+          "d": "Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.",
+          "art": "<img src=\"icons/paladin_smite.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_thick",
+          "n": "Thick Armor",
+          "role": "Defense",
+          "d": "Ignore an incoming hit after 5 seconds without being hit.",
+          "art": "<img src=\"icons/passives/passive-paladin-thick-armor.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_holypow",
+          "n": "Holy Power",
+          "role": "Judgement",
+          "d": "Skills deal double damage to the first enemy you hit in a fight, until that enemy dies.",
+          "art": "<img src=\"icons/passives/passive-paladin-holy-power.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "pal_taunt",
+          "n": "Taunt",
+          "cd": 9,
+          "role": "Control",
+          "fx": "pal_taunt",
+          "d": "Pull nearby foes to you and brace behind a shield.",
+          "art": "<img src=\"icons/paladin_taunt.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_ground",
+          "n": "Holy Ground",
+          "cd": 10,
+          "role": "Group Damage",
+          "fx": "pal_ground",
+          "d": "Scorch every foe around you with holy light for 2.2x damage.",
+          "art": "<img src=\"icons/paladin_holy_ground.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_second",
+          "n": "Second Wind",
+          "role": "Sustain",
+          "d": "Dropping below 35% HP heals you for 12% max HP (every 30s).",
+          "art": "<img src=\"icons/passives/passive-paladin-second-wind.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_burn",
+          "n": "Burning Light",
+          "role": "Spread",
+          "d": "Defeating the first enemy you hit in a fight spreads fire to nearby enemies.",
+          "art": "<img src=\"icons/passives/passive-paladin-burning-light.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "pal_guard",
+          "n": "Guard Up",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "pal_guard",
+          "d": "Raise a holy shield that absorbs up to 50% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+          "art": "<img src=\"icons/paladin_guard_up.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_burst",
+          "n": "Light Burst",
+          "cd": 9,
+          "role": "Control",
+          "fx": "pal_burst",
+          "d": "A radiant burst: damage and slow every nearby foe.",
+          "art": "<img src=\"icons/paladin_light_burst.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_bounce",
+          "n": "Bounce Back",
+          "role": "Defense",
+          "d": "Damage you block is returned to whoever dealt it.",
+          "art": "<img src=\"icons/passives/passive-paladin-bounce-back.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_heal",
+          "n": "Healing Light",
+          "role": "Sustain",
+          "d": "Casting a skill restores 4% of your maximum health.",
+          "art": "<img src=\"icons/passives/passive-paladin-healing-light.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "pal_laststand",
+          "n": "Last Stand",
+          "cd": 24,
+          "role": "Defense",
+          "fx": "pal_laststand",
+          "d": "Brace for 4 seconds, reducing incoming damage and reflecting nearby hits. Immediately restore 15% of your maximum health.",
+          "art": "<img src=\"icons/paladin_last_stand.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_sky",
+          "n": "Sky Hammer",
+          "cd": 22,
+          "role": "Burst",
+          "fx": "pal_sky",
+          "d": "Call a pillar of light down: heavy damage and knockback all around you.",
+          "art": "<img src=\"icons/paladin_sky_hammer.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "pal_will",
+          "n": "Guardian's Will",
+          "role": "Defense",
+          "d": "Take 15% less damage while below half HP.",
+          "art": "<img src=\"icons/passives/passive-paladin-guardians-will.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pal_blessed",
+          "n": "Blessed Blade",
+          "role": "Reach",
+          "d": "Your basic attack can select your first target before it hits, immediately granting your protection from other enemies.",
+          "art": "<img src=\"icons/passives/passive-paladin-blessed-blade.png\" alt=\"\">"
+        }
+      }
+    },
+    "necromancer": {
+      "disp": "Necromancer",
+      "icon": "<img src=\"icons/class-necromancer.png\" alt=\"\">",
+      "innate": {
+        "name": "Death's Embrace",
+        "d": "Kills restore 3 mana and leave bodies for Raise the Dead. Every fifth basic hit also creates a body, even if the enemy survives."
+      },
+      "cap": {
+        "name": "Lich",
+        "d": "+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "necro_summon",
+          "n": "Summon Skeletons",
+          "cd": 9,
+          "role": "Minions",
+          "fx": "necro_summon",
+          "d": "Raise a pack of skeletons that hunt down nearby enemies.",
+          "art": "<img src=\"icons/necro_summon_skeletons.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_bolt",
+          "n": "Plague Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "necro_bolt",
+          "d": "Rapid-fire bolts of necrotic plague (~2s, softer each).",
+          "art": "<img src=\"icons/necro_plague_bolt.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_legion",
+          "n": "Bone Legion",
+          "role": "Minions",
+          "d": "Summon one extra skeleton and your minions hit 20% harder.",
+          "art": "<img src=\"icons/passives/passive-necro-bone-legion.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_wither",
+          "n": "Withering Magic",
+          "role": "Decay",
+          "d": "Your own attacks and skills deal 12% more damage.",
+          "art": "<img src=\"icons/passives/passive-necro-withering.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "necro_raise",
+          "n": "Raise the Dead",
+          "cd": 12,
+          "role": "Minions",
+          "fx": "necro_raise",
+          "d": "Raise your most recently slain nearby enemy as an undead ally.",
+          "art": "<img src=\"icons/necro_raise_the_dead.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_nova",
+          "n": "Corpse Nova",
+          "cd": 9,
+          "role": "Control",
+          "fx": "necro_nova",
+          "d": "Detonate a burst of bone shards that slows nearby enemies.",
+          "art": "<img src=\"icons/necro_corpse_nova.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_bond",
+          "n": "Grave Bond",
+          "role": "Sustain",
+          "d": "Each minion attack restores 0.6% of your maximum health (at least 1 HP).",
+          "art": "<img src=\"icons/passives/passive-necro-grave-bond.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_plague",
+          "n": "Plague",
+          "role": "Spread",
+          "d": "Defeating an enemy poisons nearby enemies. The poison refreshes instead of stacking without limit.",
+          "art": "<img src=\"icons/passives/passive-necro-plague.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "necro_wall",
+          "n": "Bone Wall",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "necro_wall",
+          "d": "Raise a shield of bone that absorbs up to 35% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+          "art": "<img src=\"icons/necro_bone_wall.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_grip",
+          "n": "Death Grip",
+          "cd": 13,
+          "role": "Control",
+          "fx": "necro_grip",
+          "d": "A skeletal grip implodes enemies inward and deals damage.",
+          "art": "<img src=\"icons/necro_death_grip.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_undying",
+          "n": "Undying",
+          "role": "Defense",
+          "d": "Take 12% less damage. A lethal hit sacrifices one of your minions to save you, if one is available.",
+          "art": "<img src=\"icons/passives/passive-necro-undying.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_harvest",
+          "n": "Soul Harvest",
+          "role": "Sustain",
+          "d": "Kills restore an extra 8% of your max mana.",
+          "art": "<img src=\"icons/passives/passive-necro-soul-harvest.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "necro_army",
+          "n": "Army of the Dead",
+          "cd": 24,
+          "role": "Minions",
+          "fx": "necro_army",
+          "d": "Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+          "art": "<img src=\"icons/necro_army_of_the_dead.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_storm",
+          "n": "Death Storm",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "necro_storm",
+          "d": "A storm of decay rages around you for 4s.",
+          "art": "<img src=\"icons/necro_death_storm.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "necro_master",
+          "n": "Master of Death",
+          "role": "Minions",
+          "d": "Keep 6 more minions. Newly summoned minions deal 25% more damage.",
+          "art": "<img src=\"icons/passives/passive-necro-master-of-death.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "necro_pest",
+          "n": "Pestilence",
+          "role": "Swarm",
+          "d": "Your own attacks and skills deal 20% more damage to poisoned enemies.",
+          "art": "<img src=\"icons/passives/passive-necro-pestilence.png\" alt=\"\">"
+        }
+      }
+    },
+    "ninja": {
+      "disp": "Ninja",
+      "icon": "<img src=\"icons/class-ninja.png\" alt=\"\">",
+      "innate": {
+        "name": "Killer Instinct",
+        "d": "Stand still for 1 second to prepare a basic hit that teleports behind its target and deals 50% extra damage. Each automatic evasion adds 9% damage, up to 45%, for 5 seconds; another evasion refreshes it."
+      },
+      "cap": {
+        "name": "Phantom",
+        "d": "+12% damage, +10% attack speed, take 12% less damage, and evade even more often."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "nin_strike",
+          "n": "Shadow Strike",
+          "cd": 8,
+          "role": "Burst",
+          "fx": "nin_strike",
+          "d": "Blink to the nearest enemy and strike for heavy damage.",
+          "art": "<img src=\"icons/ninja_shadow_strike.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_barrage",
+          "n": "Shuriken Barrage",
+          "cd": 8,
+          "role": "Group Damage",
+          "fx": "nin_barrage",
+          "d": "Fire three back-to-back shotgun bursts of stars — shreds packs of enemies.",
+          "art": "<img src=\"icons/ninja_fan_of_knives.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_swift",
+          "n": "Swift",
+          "role": "Speed",
+          "d": "Stand still for only 0.5 seconds instead of 1 to prepare your next basic hit: teleport behind the target and deal 50% extra damage.",
+          "art": "<img src=\"icons/passives/passive-ninja-swift.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_deadly",
+          "n": "Deadly Precision",
+          "role": "Execution",
+          "d": "After standing still for 1 second, your next basic hit finishes a normal enemy below one-third health. Bosses and players take 25% extra damage instead.",
+          "art": "<img src=\"icons/passives/passive-ninja-deadly-precision.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "nin_step",
+          "n": "Shadow Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "nin_step",
+          "d": "Dash through shadow and become briefly untouchable.",
+          "art": "<img src=\"icons/ninja_shadow_step.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_smoke",
+          "n": "Smoke Bomb",
+          "cd": 14,
+          "role": "Escape",
+          "fx": "nin_smoke",
+          "d": "Vanish in smoke (briefly invulnerable) and slow nearby foes.",
+          "art": "<img src=\"icons/ninja_smoke_bomb.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_evasive",
+          "n": "Evasion",
+          "role": "Defense",
+          "d": "Gain 12 percentage points of automatic evasion and take 10% less damage.",
+          "art": "<img src=\"icons/passives/passive-ninja-evasion.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_combo",
+          "n": "Combo Edge",
+          "role": "Chain",
+          "d": "A kill with your prepared teleporting basic hit immediately prepares another, without needing to stand still.",
+          "art": "<img src=\"icons/passives/passive-ninja-combo-edge.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "nin_mark",
+          "n": "Death Mark",
+          "cd": 14,
+          "role": "Damage",
+          "fx": "nin_mark",
+          "d": "Mark a target: it takes extra damage from you.",
+          "art": "<img src=\"icons/ninja_death_mark.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_pierce",
+          "n": "Piercing Star",
+          "cd": 9,
+          "role": "Single Target",
+          "fx": "nin_pierce",
+          "d": "Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses.",
+          "art": "<img src=\"icons/ninja_shadow_strike.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_ghost",
+          "n": "Ghostwalk",
+          "role": "Defense",
+          "d": "+8% dodge chance and take 10% less damage — slip through crowds.",
+          "art": "<img src=\"icons/passives/passive-ninja-ghostwalk.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_bleed",
+          "n": "Bleeding Edge",
+          "role": "Damage",
+          "d": "+10% damage — your cuts run deep.",
+          "art": "<img src=\"icons/passives/passive-ninja-bleeding-edge.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "nin_fury",
+          "n": "Blade Fury",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "nin_fury",
+          "d": "Deal 35% more damage and attack 30% faster for 6 seconds.",
+          "art": "<img src=\"icons/ninja_blade_fury.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_storm",
+          "n": "Vanish",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "nin_storm",
+          "d": "Become invulnerable for 4 seconds and prepare your next teleporting basic hit immediately.",
+          "art": "<img src=\"icons/ninja_blade_storm.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "nin_shadowform",
+          "n": "Shadow Form",
+          "role": "Defense",
+          "d": "Take 18% less damage while below half health.",
+          "art": "<img src=\"icons/passives/passive-ninja-shadow-form.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "nin_assassin",
+          "n": "Assassinate",
+          "role": "Damage",
+          "d": "+12% damage.",
+          "art": "<img src=\"icons/passives/passive-ninja-assassinate.png\" alt=\"\">"
+        }
+      }
+    },
+    "berserker": {
+      "disp": "Berserker",
+      "icon": "<img src=\"icons/class-berserker.png\" alt=\"\">",
+      "innate": {
+        "name": "Bloodrage",
+        "d": "Basic damage increases as health falls, up to 85% extra near zero health. Below half health, all damage increases another 15%."
+      },
+      "cap": {
+        "name": "Undying Rage",
+        "d": "+12% damage, +10% attack speed, and +8% lifesteal."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "bsk_cleave",
+          "n": "Blood Sweep",
+          "cd": 5,
+          "role": "Group Damage",
+          "fx": "bsk_cleave",
+          "d": "Spend 10% of your maximum health to sweep nearby enemies for 2.6 times weapon damage. Cannot be used if the cost would leave you below 2 HP.",
+          "art": "<img src=\"icons/berserker_cleave.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_bash",
+          "n": "Headbutt",
+          "cd": 6,
+          "role": "Control",
+          "fx": "bsk_bash",
+          "d": "Strike nearby enemies for 2.2 times weapon damage and stun them for 2.2 seconds. On a hit, spend 6% maximum health and pause for 0.5 seconds.",
+          "art": "<img src=\"icons/berserker_reckless_bash.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_heavy",
+          "n": "Steady Fighter",
+          "role": "Commitment",
+          "d": "Take 12% less damage and resist enemy knockback. You can still dodge.",
+          "art": "<img src=\"icons/passives/passive-berserker-heavy-hands.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_reckless",
+          "n": "Growing Rage",
+          "role": "Sacrifice",
+          "d": "Each kill grants 4% more damage, up to 20%. The bonus ends after 6 seconds without a kill.",
+          "art": "<img src=\"icons/passives/passive-berserker-reckless.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "bsk_charge",
+          "n": "Charge",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "bsk_charge",
+          "d": "Rush forward, damaging and stunning in your path.",
+          "art": "<img src=\"icons/berserker_charge.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_stomp",
+          "n": "Shockwave",
+          "cd": 10,
+          "role": "Control",
+          "fx": "bsk_stomp",
+          "d": "Slam the ground for damage and heavy knockback.",
+          "art": "<img src=\"icons/berserker_shockwave.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_thick",
+          "n": "Thick Hide",
+          "role": "Defense",
+          "d": "Survive a lethal hit at 1 HP. Rearms after 5 seconds without taking damage.",
+          "art": "<img src=\"icons/passives/passive-berserker-thick-hide.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_blood",
+          "n": "Bloodthirst",
+          "role": "Sustain",
+          "d": "Each kill restores 4% of your maximum health.",
+          "art": "<img src=\"icons/passives/passive-berserker-bloodthirst.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "bsk_whirl",
+          "n": "Whirlwind",
+          "cd": 12,
+          "role": "Group Damage",
+          "fx": "bsk_whirl",
+          "d": "Sweep all nearby enemies for 2.2 times weapon damage.",
+          "art": "<img src=\"icons/berserker_whirlwind.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_execute",
+          "n": "Execute",
+          "cd": 14,
+          "role": "Finisher",
+          "fx": "bsk_execute",
+          "d": "A brutal strike that finishes low-HP foes.",
+          "art": "<img src=\"icons/berserker_execute.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_rage",
+          "n": "Rage",
+          "role": "Fury",
+          "d": "Basic attacks deal 50% more damage while below half health. Healing still works.",
+          "art": "<img src=\"icons/passives/passive-berserker-rage.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_frenzy",
+          "n": "Frenzy",
+          "role": "Speed",
+          "d": "Attack faster as health falls, up to 50% faster near zero health.",
+          "art": "<img src=\"icons/passives/passive-berserker-frenzy.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "bsk_berserk",
+          "n": "Berserk",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "bsk_berserk",
+          "d": "Deal 35% more damage and attack 30% faster for 6 seconds.",
+          "art": "<img src=\"icons/berserker_berserk.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_guard",
+          "n": "Bloodguard",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "bsk_guard",
+          "d": "Raise a guard: heavy damage reduction and pull foes in.",
+          "art": "<img src=\"icons/berserker_bloodguard.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "bsk_tough",
+          "n": "Unbreakable",
+          "role": "Defense",
+          "d": "Take 20% less damage while below half health.",
+          "art": "<img src=\"icons/passives/passive-berserker-unbreakable.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bsk_brutal",
+          "n": "Brutal",
+          "role": "Execution",
+          "d": "Basic hits finish normal enemies below one-quarter health. Bosses and players take 25% extra damage below that threshold.",
+          "art": "<img src=\"icons/passives/passive-berserker-brutal.png\" alt=\"\">"
+        }
+      }
+    },
+    "pirate": {
+      "disp": "Pirate",
+      "icon": "<img src=\"icons/class-pirate.png\" alt=\"\">",
+      "innate": {
+        "name": "Plunder",
+        "d": "Without an equipped weapon, fire your built-in pistol with basic attacks and swing your saber with a charged attack. Their damage grows with class rank and player level."
+      },
+      "cap": {
+        "name": "Dread Captain",
+        "d": "+12% damage and +10% move speed."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "pir_pierce",
+          "n": "Aimed Shot",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "pir_pierce",
+          "d": "Rapid piercing pistol shots (~2s, softer each) — a gunslinger's rhythm.",
+          "art": "<img src=\"icons/pirate_aimed_shot.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_volley",
+          "n": "Broadside",
+          "cd": 6,
+          "role": "Group Damage",
+          "fx": "pir_volley",
+          "d": "A spread of shots across your front.",
+          "art": "<img src=\"icons/pirate_broadside.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_deadly",
+          "n": "Dead Aim",
+          "role": "Powder",
+          "d": "Basic attacks deal 15% more damage, including your built-in pistol.",
+          "art": "<img src=\"icons/passives/passive-pirate-dead-aim.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_swift",
+          "n": "Quick Hands",
+          "role": "Reload",
+          "d": "Attack 15% faster with any compatible weapon, including your built-in pistol.",
+          "art": "<img src=\"icons/passives/passive-pirate-quick-hands.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "pir_shadow",
+          "n": "Boarding Strike",
+          "cd": 8,
+          "role": "Burst",
+          "fx": "pir_shadow",
+          "d": "Dash to a foe and strike hard.",
+          "art": "<img src=\"icons/pirate_boarding_strike.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_tumble",
+          "n": "Roll",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "pir_tumble",
+          "d": "Roll back with a parting shot and snare.",
+          "art": "<img src=\"icons/pirate_roll.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_tough",
+          "n": "Sea Legs",
+          "role": "Footing",
+          "d": "Take 12% less damage.",
+          "art": "<img src=\"icons/passives/passive-pirate-sea-legs.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_swagger",
+          "n": "Swagger",
+          "role": "Nerve",
+          "d": "Move 12% faster, with any compatible weapon.",
+          "art": "<img src=\"icons/passives/passive-pirate-swagger.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "pir_smoke",
+          "n": "Powder Smoke",
+          "cd": 14,
+          "role": "Escape",
+          "fx": "pir_smoke",
+          "d": "Vanish in smoke and slow nearby foes.",
+          "art": "<img src=\"icons/pirate_powder_smoke.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_goldrush",
+          "n": "Gold Rush",
+          "cd": 20,
+          "role": "Gold Farming",
+          "fx": "pir_goldrush",
+          "d": "For 12s, every kill drops gold straight into your purse — and a killstreak stacks the payout higher and higher. The pirate's farming tool.",
+          "art": "<img src=\"icons/event-treasure-chest.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_evasive",
+          "n": "Slippery",
+          "role": "Escape",
+          "d": "Dodge cooldown is 20% shorter.",
+          "art": "<img src=\"icons/passives/passive-pirate-slippery.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_luck",
+          "n": "Lucky",
+          "role": "Fortune",
+          "d": "Earn 25% more gold from defeated enemies and other gold rewards. Selling items is unchanged.",
+          "art": "<img src=\"icons/passives/passive-pirate-lucky.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "pir_deathmark",
+          "n": "Cannonade",
+          "cd": 24,
+          "role": "Farming",
+          "fx": "pir_deathmark",
+          "d": "Mark foes — they explode on death.",
+          "art": "<img src=\"icons/pirate_cannonade.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_spike",
+          "n": "Powder Keg",
+          "cd": 18,
+          "role": "Control",
+          "fx": "pir_spike",
+          "d": "Drop a trap that damages and snares.",
+          "art": "<img src=\"icons/pirate_powder_keg.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "pir_brutal",
+          "n": "Cutthroat",
+          "role": "Steel",
+          "d": "Deal 20% more damage to enemies below half health.",
+          "art": "<img src=\"icons/passives/passive-pirate-cutthroat.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "pir_greed",
+          "n": "Greed",
+          "role": "Plunder",
+          "d": "Deal 12% more damage with any compatible weapon. You do not need to hoard gold.",
+          "art": "<img src=\"icons/passives/passive-pirate-greed.png\" alt=\"\">"
+        }
+      }
+    },
+    "chronomancer": {
+      "disp": "Chronomancer",
+      "icon": "<img src=\"icons/class-chronomancer.png\" alt=\"\">",
+      "innate": {
+        "name": "Time Attunement",
+        "d": "Magic weapons deal 8% more damage; skills have 5% shorter cooldowns; kills restore 4 mana. Once per area, a lethal hit rewinds you to your position and health from 3 seconds earlier."
+      },
+      "cap": {
+        "name": "Timelord",
+        "d": "+12% damage and +10% cooldown reduction."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "chr_bolt",
+          "n": "Time Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Focused",
+          "fx": "chr_bolt",
+          "d": "Rapid-fire bolts of temporal energy (~2s, softer each).",
+          "art": "<img src=\"icons/chrono_time_bolt.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_beam",
+          "n": "Time Lance",
+          "cd": 6,
+          "role": "Piercing Damage",
+          "fx": "chr_beam",
+          "d": "A piercing lance through every foe.",
+          "art": "<img src=\"icons/chrono_time_lance.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_potent",
+          "n": "Potent",
+          "role": "Echo",
+          "d": "When a lethal hit triggers your automatic rewind, also restore the mana you had 3 seconds earlier, if it was higher.",
+          "art": "<img src=\"icons/passives/passive-chrono-potent.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_haste",
+          "n": "Haste",
+          "role": "Cooldowns",
+          "d": "Skills have 10% shorter cooldowns. Your automatic death-saving rewind also refreshes every skill.",
+          "art": "<img src=\"icons/passives/passive-chrono-haste.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "chr_nova",
+          "n": "Slow Field",
+          "cd": 8,
+          "role": "Control",
+          "fx": "chr_nova",
+          "d": "A burst that slows nearby foes.",
+          "art": "<img src=\"icons/chrono_slow_field.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_blink",
+          "n": "Time Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "chr_blink",
+          "d": "Teleport forward with brief invulnerability. Your automatic death-saving rewind is a separate class ability.",
+          "art": "<img src=\"icons/chrono_rewind.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_ward",
+          "n": "Time Ward",
+          "role": "Defense",
+          "d": "Take 12% less damage. After your automatic death-saving rewind, become invulnerable for 3 seconds instead of 1.2.",
+          "art": "<img src=\"icons/passives/passive-chrono-time-ward.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_glass",
+          "n": "Second Chance",
+          "role": "Recall",
+          "d": "Your automatic rewind can save you from death twice per area instead of once.",
+          "art": "<img src=\"icons/passives/passive-chrono-focus.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "chr_gravity",
+          "n": "Time Warp",
+          "cd": 13,
+          "role": "Control",
+          "fx": "chr_gravity",
+          "d": "Implode foes inward and deal damage.",
+          "art": "<img src=\"icons/chrono_time_warp.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_barrier",
+          "n": "Aegis",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "chr_barrier",
+          "d": "A shield that absorbs up to 35% of your max HP.",
+          "art": "<img src=\"icons/chrono_aegis.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_temporal",
+          "n": "Temporal Flow",
+          "role": "Stillness",
+          "d": "All skills have 10% shorter cooldowns.",
+          "art": "<img src=\"icons/passives/passive-chrono-temporal-flow.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_slow",
+          "n": "Weak Point",
+          "role": "Decay",
+          "d": "Deal 20% more damage to slowed enemies.",
+          "art": "<img src=\"icons/passives/passive-chrono-entropy.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "chr_tempest",
+          "n": "Stop Time",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "chr_tempest",
+          "d": "Stop enemies for 3 seconds. In PvP, slow opponents by 25% for up to 1.5 seconds instead of freezing their controls.",
+          "art": "<img src=\"icons/chrono_time_storm.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_overload",
+          "n": "Singularity",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "chr_overload",
+          "d": "A massive temporal explosion.",
+          "art": "<img src=\"icons/chrono_singularity.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "chr_echo",
+          "n": "Echo",
+          "role": "Repeat",
+          "d": "Your latest skill repeats for free after 3 seconds. Casting another skill before then replaces the pending repeat.",
+          "art": "<img src=\"icons/passives/passive-chrono-echo.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "chr_freeze",
+          "n": "Deep Chill",
+          "role": "Control",
+          "d": "Your skill hits slow enemies for 1.5 seconds. Bosses may resist slowing.",
+          "art": "<img src=\"icons/passives/passive-chrono-deep-freeze.png\" alt=\"\">"
+        }
+      }
+    },
+    "monk": {
+      "disp": "Monk",
+      "icon": "<img src=\"icons/class-monk.png\" alt=\"\">",
+      "innate": {
+        "name": "Focus",
+        "d": "Fists deal 15% more damage and attack 15% faster. Each hit builds 6% extra damage, up to 30%, ending after 4 seconds without a hit. Basic hits also shorten your remaining dodge cooldown by 0.35 seconds."
+      },
+      "cap": {
+        "name": "Grandmaster",
+        "d": "+12% damage, +10% attack speed, and your temporary damage bonus can build to 42% instead of 30% (56% with Focused Mind)."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "mon_flurry",
+          "n": "Flurry",
+          "cd": 2,
+          "am": 0.42,
+          "role": "Rapid · Focused",
+          "fx": "mon_flurry",
+          "d": "Deliver rapid punches. Each connecting hit builds your temporary damage bonus.",
+          "art": "<img src=\"icons/monk_flurry.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_palm",
+          "n": "Palm Strike",
+          "cd": 6,
+          "role": "Burst",
+          "fx": "mon_palm",
+          "d": "Dash in with a heavy palm that staggers the first foe.",
+          "art": "<img src=\"icons/monk_palm_strike.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_iron",
+          "n": "Iron Body",
+          "role": "Defense",
+          "d": "Take 12% less damage while your dodge is ready.",
+          "art": "<img src=\"icons/passives/passive-monk-iron-body.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_fire",
+          "n": "Inner Fire",
+          "role": "Flow",
+          "d": "Dodging restores 5 mana.",
+          "art": "<img src=\"icons/passives/passive-monk-inner-fire.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "mon_deflect",
+          "n": "Deflect",
+          "cd": 10,
+          "role": "Defense",
+          "fx": "mon_deflect",
+          "d": "A parry stance: for a moment take almost nothing and throw blows straight back.",
+          "art": "<img src=\"icons/monk_deflect.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_roll",
+          "n": "Roll",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "mon_roll",
+          "d": "Roll aside with brief i-frames and a parting strike.",
+          "art": "<img src=\"icons/monk_roll.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_flow",
+          "n": "Flow",
+          "role": "Rhythm",
+          "d": "Each basic hit removes 0.7 seconds from your remaining dodge cooldown instead of 0.35.",
+          "art": "<img src=\"icons/passives/passive-monk-flow.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_focused",
+          "n": "Focused Mind",
+          "role": "Damage",
+          "d": "Each hit builds 8% extra damage instead of 6%, up to 40% (56% at rank 10). The bonus ends after 5 seconds without a hit instead of 4.",
+          "art": "<img src=\"icons/passives/passive-monk-focused-mind.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "mon_whirl",
+          "n": "Whirl Kick",
+          "cd": 12,
+          "role": "Group Damage",
+          "fx": "mon_whirl",
+          "d": "A spinning kick that strikes everything around you.",
+          "art": "<img src=\"icons/monk_whirl_kick.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_stun",
+          "n": "Stunning Palm",
+          "cd": 12,
+          "role": "Control",
+          "fx": "mon_stun",
+          "d": "A shockwave palm that dazes and slows nearby foes.",
+          "art": "<img src=\"icons/monk_stunning_palm.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_med",
+          "n": "Meditation",
+          "role": "Sustain",
+          "d": "Restore 1.2% of your maximum health each second.",
+          "art": "<img src=\"icons/passives/passive-monk-meditation.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_killer",
+          "n": "Killer Focus",
+          "role": "Burst",
+          "d": "The first strike after a dodge hits for triple.",
+          "art": "<img src=\"icons/passives/passive-monk-killer-focus.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "mon_thousand",
+          "n": "Stillness",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "mon_thousand",
+          "d": "For 6 seconds, standing still reflects double incoming damage back to attackers. You still take damage.",
+          "art": "<img src=\"icons/monk_thousand_fists.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_dragon",
+          "n": "Dragon Kick",
+          "cd": 20,
+          "role": "Finisher",
+          "fx": "mon_dragon",
+          "d": "A soaring kick that erupts on impact, blasting everything around.",
+          "art": "<img src=\"icons/monk_dragon_kick.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "mon_still",
+          "n": "Still Water",
+          "role": "Calm",
+          "d": "After standing still for 1.5 seconds, restore 2% of your maximum health each second until you move.",
+          "art": "<img src=\"icons/passives/passive-monk-still-water.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "mon_master",
+          "n": "Master Striker",
+          "role": "Chain",
+          "d": "Every fourth hit within your temporary damage-bonus window also strikes nearby enemies. Waiting more than 4 seconds between hits breaks the chain (5 with Focused Mind).",
+          "art": "<img src=\"icons/passives/passive-monk-master-striker.png\" alt=\"\">"
+        }
+      }
+    },
+    "stormcaller": {
+      "disp": "Stormcaller",
+      "icon": "<img src=\"icons/class-stormcaller.png\" alt=\"\">",
+      "innate": {
+        "name": "Static Charge",
+        "d": "Basic hits send lightning to a nearby enemy for 34% damage. Each hit adds 3% attack speed and 2.5% move speed, up to 15% and 12.5%; bonuses end after 4 seconds without a hit."
+      },
+      "cap": {
+        "name": "Storm Lord",
+        "d": "+12% damage, +10% cooldown reduction, and your lightning arcs to more enemies."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "st_bolt",
+          "n": "Chain Bolt",
+          "cd": 2,
+          "am": 0.4,
+          "role": "Rapid · Chain",
+          "fx": "st_bolt",
+          "d": "Fire a quick lightning bolt with a short cooldown.",
+          "art": "<img src=\"icons/stormcaller_chain_bolt.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_lance",
+          "n": "Lightning Lance",
+          "cd": 6,
+          "role": "Piercing Damage",
+          "fx": "st_lance",
+          "d": "A piercing bolt through every foe in a line.",
+          "art": "<img src=\"icons/stormcaller_lightning_lance.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "st_conductor",
+          "n": "Conductor",
+          "role": "Conduct",
+          "d": "Lightning from basic hits deals 50% damage to the nearby enemy instead of 34%.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-conductor.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_overcharge",
+          "n": "Overcharge",
+          "role": "Chain",
+          "d": "Your lightning arcs to a third enemy as well as a second.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-overcharge.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "st_step",
+          "n": "Thunder Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "st_step",
+          "d": "Blink in a crack of lightning, briefly untouchable.",
+          "art": "<img src=\"icons/stormcaller_thunder_step.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_nova",
+          "n": "Static Field",
+          "cd": 8,
+          "role": "Control",
+          "fx": "st_nova",
+          "d": "A shock burst that slows nearby foes.",
+          "art": "<img src=\"icons/stormcaller_static_field.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "st_momentum",
+          "n": "Gathering Speed",
+          "role": "Speed",
+          "d": "Each hit grants 4.5% attack speed and 4% move speed, up to 22.5% and 20%. Bonuses end after 4 seconds without a hit.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-momentum.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_ward",
+          "n": "Storm Ward",
+          "role": "Defense",
+          "d": "Casting a skill grants a shield worth 4% of your maximum health for at least 3 seconds. Repeated casts refresh it, not add shields.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-storm-ward.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "st_orb",
+          "n": "Ball Lightning",
+          "cd": 13,
+          "role": "Control",
+          "fx": "st_orb",
+          "d": "A crackling orb that pulls foes in and zaps them.",
+          "art": "<img src=\"icons/stormcaller_ball_lightning.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_barrier",
+          "n": "Storm Barrier",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "st_barrier",
+          "d": "A shield that absorbs up to 35% of your max HP.",
+          "art": "<img src=\"icons/stormcaller_storm_barrier.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "st_charged",
+          "n": "Charged",
+          "role": "Reach",
+          "d": "Your chain jumps twice as far between targets.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-charged.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_amped",
+          "n": "Amped",
+          "role": "Power",
+          "d": "Lightning from basic hits deals 50% more damage to secondary enemies.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-amped.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "st_storm",
+          "n": "Linked Lightning",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "st_storm",
+          "d": "Link nearby enemies for 8 seconds. Hitting one also damages the others.",
+          "art": "<img src=\"icons/stormcaller_thunderstorm.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_overload",
+          "n": "Chain Reaction",
+          "cd": 24,
+          "role": "Burst",
+          "fx": "st_overload",
+          "d": "A massive electric explosion around your target.",
+          "art": "<img src=\"icons/stormcaller_chain_reaction.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "st_master",
+          "n": "Stunning Lightning",
+          "role": "Control",
+          "d": "Lightning from basic hits briefly stuns secondary enemies for 0.4 seconds. Bosses and players are excluded.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-static-master.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "st_galvanize",
+          "n": "Galvanize",
+          "role": "Return",
+          "d": "When no secondary enemy is in range, lightning strikes your original target for an extra 34% damage.",
+          "art": "<img src=\"icons/passives/passive-stormcaller-galvanize.png\" alt=\"\">"
+        }
+      }
+    },
+    "warlock": {
+      "disp": "Warlock",
+      "icon": "<img src=\"icons/class-warlock.png\" alt=\"\">",
+      "innate": {
+        "name": "Dark Bargain",
+        "d": "Magic weapons deal +12% damage. Every skill sacrifices 3% max HP, but the sacrifice can never defeat you. Power always has a price."
+      },
+      "cap": {
+        "name": "Dark Ascension",
+        "d": "+12% damage. Dark Bargain costs only 1.5% max HP, and defeating a cursed foe cuts every skill cooldown by 1 second."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "war_bolt",
+          "n": "Shadow Bolt",
+          "cd": 2.5,
+          "am": 0.62,
+          "role": "Rapid Damage",
+          "fx": "war_bolt",
+          "d": "Fire a fast void bolt that pierces one extra foe.",
+          "art": "<img src=\"icons/warlock_shadow_bolt.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_lance",
+          "n": "Blood Lance",
+          "cd": 6,
+          "role": "Boss Damage",
+          "fx": "war_lance",
+          "d": "Hurl a heavy crimson lance through every foe in a line.",
+          "art": "<img src=\"icons/warlock_blood_lance.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "war_frail",
+          "n": "Dark Power",
+          "role": "Damage",
+          "d": "Deal 15% more damage. Maximum health is unchanged.",
+          "art": "<img src=\"icons/passives/passive-warlock-frail-power.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_shield",
+          "n": "Soul Shield",
+          "role": "Defense",
+          "d": "Casting a skill grants a shield worth 4% of your maximum health for at least 3 seconds. Repeated casts refresh it, not add shields.",
+          "art": "<img src=\"icons/passives/passive-warlock-soul-shield.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "war_curse",
+          "n": "Curse Circle",
+          "cd": 9,
+          "role": "Control",
+          "fx": "war_curse",
+          "d": "Mark nearby foes for 7 seconds. Your damage against them is increased.",
+          "art": "<img src=\"icons/warlock_curse_circle.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_drain",
+          "n": "Life Drain",
+          "cd": 10,
+          "role": "Sustain",
+          "fx": "war_drain",
+          "d": "Damage the strongest nearby foe. Heal for 22% of health removed, or 11% against players. Blocked hits do not heal.",
+          "art": "<img src=\"icons/warlock_life_drain.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "war_deep",
+          "n": "Deep Curse",
+          "role": "Damage",
+          "d": "Cursed enemies take 30% extra damage from you instead of 15%.",
+          "art": "<img src=\"icons/passives/passive-warlock-deep-curse.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_swift",
+          "n": "Dark Step",
+          "role": "Movement",
+          "d": "Casting a skill grants +12% move speed for 2.5 seconds.",
+          "art": "<img src=\"icons/passives/passive-warlock-dark-step.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "war_step",
+          "n": "Rift Step",
+          "cd": 11,
+          "role": "Movement",
+          "fx": "war_step",
+          "d": "Blink forward and detonate shadow at your starting point and destination.",
+          "art": "<img src=\"icons/warlock_rift_step.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_orb",
+          "n": "Doom Orb",
+          "cd": 14,
+          "role": "Group Damage",
+          "fx": "war_orb",
+          "d": "Collapse a slow void orb on your target, damaging and pulling nearby foes.",
+          "art": "<img src=\"icons/warlock_doom_orb.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "war_pact",
+          "n": "Blood Pact",
+          "role": "Damage",
+          "d": "Deal +18% damage while below half HP.",
+          "art": "<img src=\"icons/passives/passive-warlock-blood-pact.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_safe",
+          "n": "Careful Casting",
+          "role": "Sustain",
+          "d": "Skills sacrifice 35% less health. Does not reduce the separate health cost of basic attacks or Blood Offering.",
+          "art": "<img src=\"icons/passives/passive-warlock-careful-casting.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "war_storm",
+          "n": "Blood Offering",
+          "cd": 23,
+          "role": "Group Damage",
+          "fx": "war_storm",
+          "d": "Spend half your current health to deal that much damage to every nearby enemy. Normal skill health cost also applies.",
+          "art": "<img src=\"icons/warlock_dark_storm.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_final",
+          "n": "Final Curse",
+          "cd": 24,
+          "role": "Boss Damage",
+          "fx": "war_final",
+          "d": "Condemn the strongest nearby foe with a massive delayed shadow blast.",
+          "art": "<img src=\"icons/warlock_final_curse.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "war_feast",
+          "n": "Soul Feast",
+          "role": "Sustain",
+          "d": "Defeating a cursed foe restores 5% max HP and 6 mana.",
+          "art": "<img src=\"icons/passives/passive-warlock-soul-feast.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "war_last",
+          "n": "Last Breath",
+          "role": "Defense",
+          "d": "Below 30% HP, gain 15% damage reduction.",
+          "art": "<img src=\"icons/passives/passive-warlock-last-breath.png\" alt=\"\">"
+        }
+      }
+    },
+    "skylancer": {
+      "disp": "Skylancer",
+      "icon": "<img src=\"icons/class-skylancer.png\" alt=\"\">",
+      "innate": {
+        "name": "Born to Fly",
+        "d": "Ranged weapons deal +10% damage. While airborne, you fall 20% slower and deal 10% more damage."
+      },
+      "cap": {
+        "name": "Sky Master",
+        "d": "+12% damage. Using a skill in the air renews one air jump and briefly holds you aloft."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "sky_rise",
+          "n": "Rising Spear",
+          "cd": 7,
+          "role": "Movement",
+          "fx": "sky_rise",
+          "d": "Sweep nearby enemies and launch high into the air.",
+          "art": "<img src=\"icons/skylancer_rising_spear.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_gale",
+          "n": "Gale Shot",
+          "cd": 5,
+          "role": "Rapid Damage",
+          "fx": "sky_gale",
+          "d": "Fire a fast wind spear that grows stronger while airborne.",
+          "art": "<img src=\"icons/skylancer_gale_shot.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_high",
+          "n": "High Ground",
+          "role": "Height",
+          "d": "Deal 15% more damage while airborne.",
+          "art": "<img src=\"icons/passives/passive-skylancer-high-ground.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_soft",
+          "n": "Soft Landing",
+          "role": "Defense",
+          "d": "Take 15% less damage in the air and for 2 seconds after landing.",
+          "art": "<img src=\"icons/passives/passive-skylancer-soft-landing.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "sky_dive",
+          "n": "Dive Strike",
+          "cd": 10,
+          "role": "Burst",
+          "fx": "sky_dive",
+          "d": "Dive forward. Your next landing damages nearby enemies.",
+          "art": "<img src=\"icons/skylancer_dive_strike.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_lift",
+          "n": "Wind Lift",
+          "cd": 12,
+          "role": "Control",
+          "fx": "sky_lift",
+          "d": "Create a rising wind that damages foes and launches you upward.",
+          "art": "<img src=\"icons/skylancer_wind_lift.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_tail",
+          "n": "Tailwind",
+          "role": "Movement",
+          "d": "Landing grants +15% move speed for 3 seconds.",
+          "art": "<img src=\"icons/passives/passive-skylancer-tailwind.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_guard",
+          "n": "Cloud Guard",
+          "role": "Defense",
+          "d": "Using a skill in the air grants a shield equal to 6% max HP.",
+          "art": "<img src=\"icons/passives/passive-skylancer-cloud-guard.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "sky_dash",
+          "n": "Sky Dash",
+          "cd": 11,
+          "role": "Movement",
+          "fx": "sky_dash",
+          "d": "Dash through the air, damaging every enemy in your path.",
+          "art": "<img src=\"icons/skylancer_sky_dash.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_rain",
+          "n": "Spear Rain",
+          "cd": 15,
+          "role": "Group Damage",
+          "fx": "sky_rain",
+          "d": "Call down five wind spears around your target.",
+          "art": "<img src=\"icons/skylancer_spear_rain.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_float",
+          "n": "Long Flight",
+          "role": "Movement",
+          "d": "Fall 45% slower instead of 20% slower.",
+          "art": "<img src=\"icons/passives/passive-skylancer-long-flight.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_eye",
+          "n": "Hunter’s Eye",
+          "role": "Dive",
+          "d": "Attacking while falling drives you down onto the target.",
+          "art": "<img src=\"icons/passives/passive-skylancer-hunters-eye.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "sky_crash",
+          "n": "Thunder Dive",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "sky_crash",
+          "d": "Drop like lightning. Your next landing creates a large shockwave.",
+          "art": "<img src=\"icons/skylancer_thunder_dive.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_cyclone",
+          "n": "Updraft",
+          "cd": 21,
+          "role": "Air Control",
+          "fx": "sky_cyclone",
+          "d": "Lift nearby normal enemies for 3.2 seconds and strike with a ring of wind blades.",
+          "art": "<img src=\"icons/skylancer_cyclone_volley.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "sky_reset",
+          "n": "Second Wind",
+          "role": "Movement",
+          "d": "An airborne kill restores one air jump and removes 1.5 seconds from your dodge cooldown.",
+          "art": "<img src=\"icons/passives/passive-skylancer-second-wind.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "sky_armor",
+          "n": "Sky Armor",
+          "role": "Defense",
+          "d": "Become invulnerable for 0.18 seconds after jumping.",
+          "art": "<img src=\"icons/passives/passive-skylancer-sky-armor.png\" alt=\"\">"
+        }
+      }
+    },
+    "bladedancer": {
+      "disp": "Bladedancer",
+      "icon": "<img src=\"icons/class-bladedancer.png\" alt=\"\">",
+      "innate": {
+        "name": "Perfect Timing",
+        "d": "Blade weapons deal 18% more damage. Parrying blocks a hit and empowers your next Riposte skill; only one empowered use can be saved at a time."
+      },
+      "cap": {
+        "name": "Endless Dance",
+        "d": "+12% damage. A successful parry refreshes your second skill and grants one second of speed and damage protection."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "bd_counter",
+          "n": "Counter Stance",
+          "cd": 8,
+          "role": "Defense",
+          "fx": "bd_counter",
+          "d": "Open a short parry window. A hit during it deals no damage and stores a Riposte.",
+          "art": "<img src=\"icons/bladedancer_counter_stance.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_twin",
+          "n": "Twin Cut",
+          "cd": 5,
+          "role": "Rapid Damage",
+          "fx": "bd_twin",
+          "d": "Cut twice in a wide arc. The second cut pushes enemies back.",
+          "art": "<img src=\"icons/bladedancer_twin_cut.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_sharp",
+          "n": "Sharp Counter",
+          "role": "Damage",
+          "d": "After a successful parry, Riposte hits for 4.4 times weapon damage instead of 3.3. Requires the Riposte skill.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-sharp-counter.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_feet",
+          "n": "Light Feet",
+          "role": "Footwork",
+          "d": "Move 10% faster. Dodging through an enemy opens a 0.65-second parry window.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-light-feet.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "bd_riposte",
+          "n": "Riposte",
+          "cd": 9,
+          "role": "Boss Damage",
+          "fx": "bd_riposte",
+          "d": "Lunge and slash. A stored Riposte greatly increases its damage and reach.",
+          "art": "<img src=\"icons/bladedancer_riposte.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_step",
+          "n": "Dance Step",
+          "cd": 8,
+          "role": "Movement",
+          "fx": "bd_step",
+          "d": "Dash through enemies and turn to face them for your next attack.",
+          "art": "<img src=\"icons/bladedancer_dance_step.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_patient",
+          "n": "Patient Guard",
+          "role": "Defense",
+          "d": "Parry windows last 0.2 seconds longer.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-patient-guard.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_fast",
+          "n": "Fast Hands",
+          "role": "Tempo",
+          "d": "Attack 12% faster. A successful parry also lets you attack again immediately.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-fast-hands.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "bd_mirror",
+          "n": "Mirror Guard",
+          "cd": 14,
+          "role": "Defense",
+          "fx": "bd_mirror",
+          "d": "Open a parry window that releases a shockwave when it catches an attack.",
+          "art": "<img src=\"icons/bladedancer_mirror_guard.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_cross",
+          "n": "Cross Slash",
+          "cd": 12,
+          "role": "Group Damage",
+          "fx": "bd_cross",
+          "d": "Cut an X ahead of you and leave enemies briefly stunned.",
+          "art": "<img src=\"icons/bladedancer_cross_slash.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_heal",
+          "n": "Healing Counter",
+          "role": "Sustain",
+          "d": "A successful parry restores 5% max HP.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-healing-counter.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_flow",
+          "n": "Keep Moving",
+          "role": "Momentum",
+          "d": "A successful parry grants 20% damage reduction for 3 seconds.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-keep-moving.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "bd_steel",
+          "n": "Perfect Guard",
+          "cd": 22,
+          "role": "Group Damage",
+          "fx": "bd_steel",
+          "d": "Prepare a parry for up to 3 seconds. The first incoming hit is blocked and prepares an empowered Riposte.",
+          "art": "<img src=\"icons/bladedancer_dance_of_steel.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_perfect",
+          "n": "Perfect Counter",
+          "cd": 24,
+          "role": "Boss Damage",
+          "fx": "bd_perfect",
+          "d": "Hold a long parry stance. Catching a hit unleashes a massive counterattack.",
+          "art": "<img src=\"icons/bladedancer_perfect_counter.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "bd_last",
+          "n": "Last Step",
+          "role": "Movement",
+          "d": "Below 35% HP, dodge cooldown is 20% shorter.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-last-step.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bd_guard",
+          "n": "Duelist Guard",
+          "role": "Defense",
+          "d": "Take 10% less damage from attackers within 6 metres.",
+          "art": "<img src=\"icons/passives/passive-bladedancer-duelist-guard.png\" alt=\"\">"
+        }
+      }
+    },
+    "beastmaster": {
+      "disp": "Beastmaster",
+      "icon": "<img src=\"icons/class-beastmaster.png\" alt=\"\">",
+      "innate": {
+        "name": "Bonded Companion",
+        "d": "Your companion gains +25% max HP and +15% damage or healing, and catches up quickly across climbs. Without an equipped pet, a spectral wolf answers your commands."
+      },
+      "cap": {
+        "name": "One Pack",
+        "d": "+10% damage for you and your companion. Once per level, a lethal hit leaves your companion at 1 HP, briefly untargetable and shielded. Commands empower your next basic attack; basic attacks empower your companion."
+      },
+      "r2": {
+        "kind": "skill",
+        "slot": 0,
+        "a": {
+          "id": "bst_sic",
+          "n": "Sic 'Em",
+          "cd": 5,
+          "role": "Control",
+          "fx": "bst_sic",
+          "d": "Your companion lunges for 1.6x damage and briefly stuns.",
+          "art": "<img src=\"icons/beastmaster_sic_em.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_coordinated",
+          "n": "Coordinated Strike",
+          "cd": 6,
+          "role": "Boss Damage",
+          "fx": "bst_coordinated",
+          "d": "You and your companion strike together; the target is marked for increased companion damage.",
+          "art": "<img src=\"icons/beastmaster_coordinated_strike.png\" alt=\"\">"
+        }
+      },
+      "r3": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_heavy",
+          "n": "Heavy Collar",
+          "role": "Power",
+          "d": "Your companion gains 25% more maximum health and deals 15% more damage.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-heavy-collar.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_swift",
+          "n": "Swift Paws",
+          "role": "Speed",
+          "d": "Your companion moves 18% faster and attacks 18% more often. Commands have 12% shorter cooldowns.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-swift-paws.png\" alt=\"\">"
+        }
+      },
+      "r4": {
+        "kind": "skill",
+        "slot": 1,
+        "a": {
+          "id": "bst_guardian",
+          "n": "Guardian Bond",
+          "cd": 12,
+          "role": "Defense",
+          "fx": "bst_guardian",
+          "d": "For 4s your companion intercepts part of incoming damage and gains a shield.",
+          "art": "<img src=\"icons/beastmaster_guardian_bond.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_step",
+          "n": "Pack Step",
+          "cd": 9,
+          "role": "Movement",
+          "fx": "bst_step",
+          "d": "You and your companion dash to opposite sides of the target with brief dodge protection.",
+          "art": "<img src=\"icons/beastmaster_pack_step.png\" alt=\"\">"
+        }
+      },
+      "r5": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_vitality",
+          "n": "Shared Vitality",
+          "role": "Sustain",
+          "d": "Healing either partner also heals the other for 30% of that amount.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-shared-vitality.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_rhythm",
+          "n": "Predator's Rhythm",
+          "role": "Uptime",
+          "d": "Basic attacks reduce all Beastmaster command cooldowns by 0.25s.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-predators-rhythm.png\" alt=\"\">"
+        }
+      },
+      "r6": {
+        "kind": "skill",
+        "slot": 2,
+        "a": {
+          "id": "bst_mend",
+          "n": "Mend the Pack",
+          "cd": 14,
+          "role": "Sustain",
+          "fx": "bst_mend",
+          "d": "Restore 30% companion HP and 10% player HP over time.",
+          "art": "<img src=\"icons/beastmaster_mend_the_pack.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_roar",
+          "n": "Alpha Roar",
+          "cd": 13,
+          "role": "Control",
+          "fx": "bst_roar",
+          "d": "A damaging roar slows nearby foes and turns their attention toward your companion.",
+          "art": "<img src=\"icons/beastmaster_alpha_roar.png\" alt=\"\">"
+        }
+      },
+      "r7": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_scent",
+          "n": "Blood Scent",
+          "role": "Damage",
+          "d": "Companion damage increases 20% against marked enemies, bosses, elites, and enemies below 35% health.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-blood-scent.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_wildkeeper",
+          "n": "Wildkeeper",
+          "role": "Defense",
+          "d": "+20% companion healing and 12% damage reduction while it is below half HP.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-wildkeeper.png\" alt=\"\">"
+        }
+      },
+      "r8": {
+        "kind": "skill",
+        "slot": 3,
+        "a": {
+          "id": "bst_stampede",
+          "n": "Stampede",
+          "cd": 24,
+          "role": "Group Damage",
+          "fx": "bst_stampede",
+          "d": "Call a spectral herd through a wide lane, striking and knocking enemies aside.",
+          "art": "<img src=\"icons/beastmaster_stampede.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_apex",
+          "n": "Apex Unleashed",
+          "cd": 22,
+          "role": "Companion",
+          "fx": "bst_apex",
+          "d": "For 8s your companion gains +35% damage/healing, +30% speed, and relentless pursuit.",
+          "art": "<img src=\"icons/beastmaster_apex_unleashed.png\" alt=\"\">"
+        }
+      },
+      "r9": {
+        "kind": "passive",
+        "a": {
+          "id": "bst_authority",
+          "n": "Alpha's Authority",
+          "role": "Damage",
+          "d": "Commands deal 15% more damage. Companion hits have a 28% chance to splash 35% damage onto nearby enemies.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-alphas-authority.png\" alt=\"\">"
+        },
+        "b": {
+          "id": "bst_handler",
+          "n": "Master Handler",
+          "role": "Economy",
+          "d": "Commands cost 15% less mana and have 12% shorter cooldowns. Casting one grants 10% move speed for 2 seconds.",
+          "art": "<img src=\"icons/passives/passive-beastmaster-master-handler.png\" alt=\"\">"
+        }
+      }
+    }
+  }
+}

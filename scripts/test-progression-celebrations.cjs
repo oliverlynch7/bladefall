@@ -34,7 +34,7 @@ console.log(JSON.stringify({checks,introMs:900,multiAward:true,staleOwnerGuards:
 // Exercise the actual DOM transition, including its fade and input lock, against a virtual clock.
 {
  let ms=0,opened=0,cancelled=0;
- function node(tag){const classes=new Set();return {tag,children:[],style:{},append(...x){this.children.push(...x);},setAttribute(){},remove(){this.removed=true;},classList:{add(...s){s.forEach(x=>classes.add(x));},toggle(s,on){on?classes.add(s):classes.delete(s);}},querySelector(t){let all=this.children.slice();while(all.length){const n=all.shift();if(n.tag===t)return n;all.push(...n.children);}return null;}};}
+ function node(tag){const classes=new Set();return {tag,dataset:{},children:[],style:{},append(...x){this.children.push(...x);},setAttribute(){},remove(){this.removed=true;},classList:{add(...s){s.forEach(x=>classes.add(x));},toggle(s,on){on?classes.add(s):classes.delete(s);}},querySelector(t){let all=this.children.slice();while(all.length){const n=all.shift();if(n.tag===t)return n;all.push(...n.children);}return null;}};}
  const ids=Object.fromEntries(['hud','inventoryDock','controls','pausebtn','questbox'].map(x=>[x,node('div')]));const body=node('body');
  const env={window:{},performance:{now:()=>ms},document:{createElement:node,getElementById:id=>ids[id],body}};vm.createContext(env);vm.runInContext(fs.readFileSync('public/3d/progression-celebration.js','utf8'),env);const ui=env.window.BFProgressCelebration,world={p:{hp:100,x:0,y:0,z:0}};
  ui.notify('class',world,{name:'Mage',value:2,detail:'First skill ready'});ui.beforeChoice(()=>true,()=>opened++,()=>cancelled++,{detail:'Choose your first skill next'});assert(!ids.hud.inert&&!ids.inventoryDock.inert,'rank heads-up keeps HUD and controls available');

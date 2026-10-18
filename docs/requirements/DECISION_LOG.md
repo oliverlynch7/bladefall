@@ -1723,3 +1723,10 @@ Inspection: project() returns CSS viewport pixels, but interaction prompts and h
 User: "i cant see my ftriends shepard dog it looks like a white cube please fix. make sure all the pets look perpolery in coop"
 
 Inspection: syncCompanions selects remote pets only when id===sunwing. All other peer pets bypass their detailed models, and legacy drawing lacks shepherd/cinder branches. Plan: include all living same-scene peer companions in the canonical detailed renderer, preserve stable per-peer actor identity/material ownership and exclude other zones/halves/Rift Hall/dead pets. Canonicalize old companion module aliases so shop/live rendering shares one registry/cache. Validate peer pet IDs/coordinates and preserve old packet compatibility; append attack animation timing while retaining existing dragon/sitting fields. Add dog/pup legacy fallbacks. Verify all10 defined pets, especially cold-load peer-only models, local/remote material/mesh independence, switch/death/disconnect/world cleanup, movement/sitting/dragon flags, screenshots and old saves. No inventory, combat power, shop price or save-format changes.
+
+
+## [Codex | 2026-10-17] Class trainer glows
+
+User: "please add background color glows to the other classes in the class trainer just like the start calssesw and reaper have. add that to al the toehrs int he same style"
+
+Inspection/plan: openTrainer only defines five class accents; the other twelve fall back to gold. Extend its accent map to all 17 classes, retaining the existing card gradient, icon glow, hover and equipped styling. Preserve existing five colors, locked states, class behavior and saves. Verify the actual trainer in a browser and run syntax/class progression checks.

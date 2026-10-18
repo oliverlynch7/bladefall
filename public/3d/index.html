@@ -1205,7 +1205,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.259.0-coop-companions';
+const VERSION3D='2.260.0-trainer-glows';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -19558,7 +19558,10 @@ function openTrainer(back){
   mode='menu';
   if(masteredStarters() && !meta.masterSealSeen){ meta.masterSealSeen=true; persist(); sealCongrats(()=>openTrainer(back)); return; }   // one-time congratulation on total mastery
   menuTip('tip_trainer','the <b>Drillmaster</b>. Switch your active class, take another class\'s <b>Trial</b> to unlock it, and <b>Respec</b> — re-pick every skill and passive choice you have made, for gold. This is where you reshape your build whenever you like.');
-  const ACC={pyromancer:'#ff963d',warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
+  const ACC={pyromancer:'#ff963d',warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff',
+    berserker:'#ed7054',pirate:'#42c4bb',ninja:'#e85b75',bladedancer:'#5ed9cf',
+    paladin:'#f5d576',monk:'#e7ae78',beastmaster:'#b4c66c',skylancer:'#78cefa',
+    stormcaller:'#b39aff',warlock:'#d77aba',necromancer:'#91ce9c',chronomancer:'#59d8ca'};
   /* C3: the Drillmaster teaches the weapon matrix. The class cards already listed families - what
      they could not do is NAME the newer types, so a Pirate's defining weapon rendered as a blank
      and the Monk's card looked empty. Any art missing from this map is silently invisible, which

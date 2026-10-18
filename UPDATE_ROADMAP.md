@@ -3314,3 +3314,8 @@ Reproduced double render-DPR division in CSS world labels: .66 rendering displac
 Fixed renderer's dragon-only peer filter, which sent shepherd and other companions to legacy fallback art. All10 living same-scene companion types now share the detailed local rendering path. Stable peer objects, own materials/skeletons and canonical old module aliases prevent model churn or cross-pet resource damage. Validated pet IDs/positions, legacy packet defaults and additive attack timing; existing dragon/rest fields preserved. Legacy shepherd/Cinder/dragon receive recognizable shapes, and peer fallback body rendering respects campaign-half/Rift Hall boundaries.
 
 122 suites pass;82 focused companion checks,73 actual old-save browser checks through reliable local WebRTC loopback and guest handler. All10 models visually inspected together, plus shepherd close-up. Tested movement/attack/rest, death/revive/switching, local/remote material isolation, disconnect/scene cleanup and mounted/flying dragon breath. Evidence: docs/art-validation/coop-pets-20261017. No save schema, combat balance or shop changes; Internet signaling/NAT unchanged.
+
+
+## [Codex | 2026-10-17] Shipped trainer class glows - v2.260.0
+
+All 17 trainer cards now define themed accents; the twelve previously generic gold cards use the same existing gradient/icon/hover/equipped glow treatment as the five colored classes. Browser-verified all cards with an isolated pre-change level100 save and no console errors. Class progression:2873 checks across17 classes; onboarding/co-op:21 checks plus lesson/save guards passed. Cosmetic only; saves and class mechanics unchanged. Evidence: docs/art-validation/trainer-glows-20261017/preview.png.

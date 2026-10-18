@@ -2675,3 +2675,8 @@ Guided lessons explicitly teach the three navigation keys, Settings rebinding an
 First main-menu visit highlights and explains its eight primary buttons with E/Next, Previous and Close; completion is remembered, and Explain these eight buttons replays it. It uses the existing protected pause state and cancels when leaving that screen. Narration draft updated to speak explicit default controls; no voice audio produced.
 
 Muted isolated Chrome loads prior level100 save, preserves progression, verifies all eight guide steps, no automatic repeat, Tab resume, B bag/Q close, Q harmless in live play and Menu rebound to9. Real held W and Space inputs show success before progression; quick bag and menu open/return also show success. Test harness pumps scene/update frames explicitly. Unit checks cover the two-second bound, jump landing, hidden/menu suspension, migration/custom conflicts and syntax. 26 onboarding,22 menu,219 guidance,514 premium and44 celebration checks plus focused bag and menu tests pass. No new two-human/controller-hardware playtest claimed. Evidence: docs/art-validation/onboarding-controls-20261018/.
+
+
+## [Codex | 2026-10-18] Menu toggle follow-through — v2.285.1-onboarding-controls
+
+Tab and Escape now close the first-use guide and main menu in the same press; Q closes the guide first as its nested Back action. Verified actual Tab open/close while the guide is visible with an isolated legacy100 save.

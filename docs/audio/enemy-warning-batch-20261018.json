@@ -1,0 +1,301 @@
+{
+  "cues": [
+    {
+      "id": "enemywarn_dustjackal",
+      "type": "dustjackal",
+      "name": "Dust Jackal / pounce / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A jackal growls low and shifts its paws. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Actual charger wind-up start (windT); species identity replaces only generic warning for this creature; original remains fallback",
+      "fallback": "Original atk1/atk2 charger telegraph when new cue unavailable",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_toxling",
+      "type": "toxling",
+      "name": "Toxling / melee / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A tight wet throat pressure gathers. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_slime",
+      "type": "slime",
+      "name": "Slime / hop / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Thick jelly compresses with a low elastic squeak. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_slimelet",
+      "type": "slimelet",
+      "name": "Slimelet / hop / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A tiny jelly body squeaks as it compresses. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_cragspitter",
+      "type": "cragspitter",
+      "name": "Crag Spitter / rock / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Stones grind inside a throaty intake. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_sporeback",
+      "type": "sporeback",
+      "name": "Sporeback / swipe / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A soft fungal body creaks under a slow inhale. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_shadeling",
+      "type": "shadeling",
+      "name": "Shadeling / melee / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Hollow air draws tightly inward. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_blinkstalker",
+      "type": "blinkstalker",
+      "name": "Blink Stalker / blink / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A directional thin spatial strain gathers at the destination. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_voidtether",
+      "type": "voidtether",
+      "name": "Void Tether / link / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A taut hollow string tone rises briefly. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_galewisp",
+      "type": "galewisp",
+      "name": "Gale Wisp / dive / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Wind gathers into a short rising whistle. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_flyer",
+      "type": "flyer",
+      "name": "Flyer / swoop / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Leathery wings tense with a brief rising screech. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_revenant",
+      "type": "revenant",
+      "name": "Revenant / lunge / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Dry joints tense and a dead breath catches. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Actual charger wind-up start (windT); species identity replaces only generic warning for this creature; original remains fallback",
+      "fallback": "Original atk1/atk2 charger telegraph when new cue unavailable",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_bones",
+      "type": "bones",
+      "name": "Skeleton / strike / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Dry skeletal joints click into a raised pose. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_grunt",
+      "type": "grunt",
+      "name": "Grunt / melee / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Iron and leather gather for a deliberate strike. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_emberling",
+      "type": "emberling",
+      "name": "Emberling / claw / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Hot claws scrape together with a dry intake. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_magmaskit",
+      "type": "magmaskit",
+      "name": "Magma Skitter / rush / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Small hot feet scrape and click rapidly. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Actual charger wind-up start (windT); species identity replaces only generic warning for this creature; original remains fallback",
+      "fallback": "Original atk1/atk2 charger telegraph when new cue unavailable",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_embertotem",
+      "type": "embertotem",
+      "name": "Ember Totem / eruption / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A stone furnace vent inhales and rattles under pressure. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_frostling",
+      "type": "frostling",
+      "name": "Frostling / claw / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Ice-covered claws creak under tension. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_sparkling",
+      "type": "sparkling",
+      "name": "Sparkling / contact / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Fine magical points buzz briefly before movement. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_frostlobber",
+      "type": "frostlobber",
+      "name": "Frost Lobber / shard / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A crystalline shard scrapes into position. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_frostshell",
+      "type": "frostshell",
+      "name": "Frostshell / strike / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A heavy ice shell creaks over tightening limbs. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_sentinel",
+      "type": "sentinel",
+      "name": "Animated Sentinel / strike / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Heavy hollow iron joints cock into a striking pose. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_siegeknight",
+      "type": "siegeknight",
+      "name": "Siege Knight / strike / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Iron armor shifts with a deliberate boot plant. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_marblestatue",
+      "type": "marblestatue",
+      "name": "Marble Statue / strike / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Massive marble joints grind into a raised position. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_caster",
+      "type": "caster",
+      "name": "Caster / orb / warn",
+      "duration_seconds": 0.55,
+      "prompt": "A rough unstable arcane tone gathers. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_sunpriest",
+      "type": "sunpriest",
+      "name": "Sun Priest / bolt / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Warm but unnervingly rigid brass light gathers. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    },
+    {
+      "id": "enemywarn_royalarcanist",
+      "type": "royalarcanist",
+      "name": "Royal Arcanist / volley / warn",
+      "duration_seconds": 0.55,
+      "prompt": "Three dissonant glass runes charge in measured sequence. One isolated event, immediate onset, clean short tail. Fantasy game SFX. No music or intelligible speech; only the described source. Very compact, quiet tactical warning; no loud impact, music or long tail.",
+      "source": "Visible rising attack wind-up in enemy update: meleeW/shotW/eruptW/knightW/blinkFx/fuseT",
+      "fallback": "Previously silent warning; preserve existing release/impact/aggro/death sounds",
+      "reuse": "No named current warning; existing charger/boar telegraph deliberately excluded",
+      "overlap": "Per-actor0.9s cooldown, global three warning starts per0.3s, distance-limited, no delayed replay"
+    }
+  ]
+}

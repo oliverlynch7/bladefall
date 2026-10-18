@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><link rel="stylesheet" href="./arena-setup.css?v=2274"><script src="./save-safety.js?v=2229"></script>
-<script src="./skill-sfx.js?v=2230"></script>
-<script src="./coop-audio.js?v=2269"></script>
+<script src="./skill-sfx.js?v=2277"></script>
+<script src="./coop-audio.js?v=2277"></script>
+<script src="./enemy-warning-sfx.js?v=2277"></script>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2246"></script>
 <script src="./menu-close.js?v=2261f"></script>
@@ -1215,7 +1216,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.276.0-boss-tactics';
+const VERSION3D='2.277.0-class-audio';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1749,7 +1750,7 @@ function resumeGameAudio(resumeExisting=true){
 function sOn(){ return meta.soundOn && actx && !gameAudioPaused; }
 function env(g,t,a,peak,dur){ g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); }
 function tone(o){ // {f0,f1,dur,type,vol,a,at,detune}
-  if(!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
+  if(window.BFSkillSfx?.suppressed||!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
   const os=actx.createOscillator(),g=actx.createGain();
   os.type=o.type||'sine'; if(o.detune) os.detune.value=o.detune;
   os.frequency.setValueAtTime(Math.max(20,o.f0),t);
@@ -1758,7 +1759,7 @@ function tone(o){ // {f0,f1,dur,type,vol,a,at,detune}
   os.connect(g); g.connect(procBus||master); os.start(t); os.stop(t+o.dur+0.03); }catch(e){}
 }
 function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
-  if(!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
+  if(window.BFSkillSfx?.suppressed||!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
   const s=actx.createBufferSource(); s.buffer=noiseBuf;
   const f=actx.createBiquadFilter(); f.type=o.type||'bandpass'; f.Q.value=o.q||1;
   f.frequency.setValueAtTime(o.f0||1000,t);
@@ -1814,6 +1815,7 @@ const FXDEF={
 // Preserve existing files. The additive-only adapter activates only explicit new event slots.
 if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
 if(window.BFSkillSfx)window.BFSkillSfx.apply(FXDEF);
+window.BFEnemyWarnings?.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={
   thornboar:{v:'v_boargrunt',d:'die1'}, charger:{v:'v_boarroar',d:'die2'}, dustjackal:{v:'v_jackalbark',d:'die3'},
@@ -1840,14 +1842,26 @@ function bufRms(buf){ let s=0,n=0; const ch=Math.min(buf.numberOfChannels,2);
     for(let i=0;i<d.length;i+=step){ s+=d[i]*d[i]; n++; } }
   return Math.sqrt(s/Math.max(1,n)); }
 const FX_TARGET_RMS=0.09;                                // Phase 20: every file SFX auto-levels to this
-function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
+function loadFxFiles(){ warmSkillFx();if(_fxLoaded||!actx) return; _fxLoaded=true;
   const decode=f=>fetch(SFXDIR+f+'.mp3').then(r=>{if(!r.ok)throw new Error('SFX unavailable');return r.arrayBuffer();}).then(b=>actx.decodeAudioData(b));
-  for(const k in FXDEF){ (function(key){const def=FXDEF[key];decode(def.f).catch(err=>{if(def.legacyF)return decode(def.legacyF);throw err;}).then(buf=>{FXBUF[key]=buf;
+  for(const k in FXDEF){ if(FXDEF[k].lazy)continue; (function(key){const def=FXDEF[key];decode(def.f).catch(err=>{if(def.legacyF)return decode(def.legacyF);throw err;}).then(buf=>{FXBUF[key]=buf;
     const rms=bufRms(buf);let norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1;
     if(def.f.startsWith('custom/')){let peak=0;for(let c=0;c<buf.numberOfChannels;c++){const data=buf.getChannelData(c);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}if(peak>0)norm=Math.min(norm,.85/peak);}
     def._norm=norm; }).catch(()=>{}); })(k); } }
+// Bound decode queue: active choices and heard ally cues only, never the whole class pack.
+const _skillFxJobs=new Set(),_skillFxRetry=new Map(),_skillFxQueue=[];let _skillFxActive=0;
+function queueSkillFx(key){
+ const def=FXDEF[key];if(!actx||!def?.lazy||FXBUF[key]||_skillFxJobs.has(key)||(_skillFxRetry.get(key)||0)>Date.now())return;
+ _skillFxJobs.add(key);_skillFxQueue.push(key);pumpSkillFx();
+}
+function pumpSkillFx(){while(_skillFxActive<3&&_skillFxQueue.length){const key=_skillFxQueue.shift(),def=FXDEF[key];_skillFxActive++;
+ fetch(SFXDIR+def.f+'.mp3').then(r=>{if(!r.ok)throw Error('Unavailable class cue');return r.arrayBuffer();}).then(b=>actx.decodeAudioData(b)).then(buf=>{
+ const rms=bufRms(buf);let peak=0;for(let c=0;c<buf.numberOfChannels;c++)for(const v of buf.getChannelData(c))peak=Math.max(peak,Math.abs(v));
+ def._norm=Math.min(rms>.0004?Math.max(.35,Math.min(3,FX_TARGET_RMS/rms)):1,peak>0?.85/peak:1);FXBUF[key]=buf;
+ }).catch(()=>_skillFxRetry.set(key,Date.now()+30000)).finally(()=>{_skillFxActive--;_skillFxJobs.delete(key);pumpSkillFx();});}}
+function warmSkillFx(){if(!actx||typeof c2CurSkills!=='function')return;try{for(const sk of c2CurSkills()||[])if(sk)queueSkillFx('skillcast_'+sk.id);}catch(_){}}
 const _fxLoop={};
-function playFx(key,volMul){ window.BFCoopAudio?.file(key,volMul);if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
+function playFx(key,volMul){ if(window.BFSkillSfx?.blocksFile(key))return null; window.BFCoopAudio?.file(key,volMul);if(FXDEF[key]?.lazy&&!FXBUF[key])queueSkillFx(key);if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
   try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul)*(window.BFCoopAudio?.gain??1);
     s.connect(g); g.connect(fxBus||master); s.start(); return {s,g}; }catch(e){ return null; } }
 function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return;
@@ -1952,6 +1966,7 @@ const SFX={
 };
 
 if(window.BFPrioritySfx)window.BFPrioritySfx.bind(SFX,playFx);
+window.BFSkillSfx?.bind(SFX);
 window.BFCoopAudio?.bind(SFX);
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
@@ -13207,7 +13222,7 @@ function useSkill(i){
     const originalWeapon=p.weapon,priorAttune=p._attuneI,priorDesignated=G._desig;
     classCastPreparation(p);
     const castWeapon=p.weapon,oldShots=new Set(G.projectiles),fx=SKILL_FX[s.fx];let r,cues;const audio=window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;
-    try{G._desig=true;r=fx?fx(p,classFamilyOk(p.weapon),(s.am??1)):'refund';if(r!=='refund'&&window.BFSkillSfx)window.BFSkillSfx.cast(s.id,playFx);}
+    try{G._desig=true;const perform=()=>fx?fx(p,classFamilyOk(p.weapon),(s.am??1)):'refund';r=window.BFSkillSfx?window.BFSkillSfx.run(s.id,typeof FXBUF!=='undefined'&&!!FXBUF['skillcast_'+s.id],perform):perform();if(r!=='refund'&&window.BFSkillSfx)window.BFSkillSfx.cast(s.id,playFx,false);}
     finally{if(audio)cues=window.BFCoopAudio.end(audio);p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!oldShots.has(shot)&&shot.owner==='player')shot.desig=true;}
     // A rejected cast earns no healing, shields, echoes, pet orders or cast counters.
     if(r==='refund'){p._manaRecoveryDelay=priorManaDelay;p._attuneI=priorAttune;if(soulFree)p._soulFree=1;else gainMana(p,manaSpent,false);return;}
@@ -13335,7 +13350,7 @@ function auxCoolPaint(p){
   paint(document.getElementById('bLMB'),p.atkCd||0,p.atkCdMax||Math.max(p.atkCd||0,(p.weapon?.cd||.7)/effAtkSpeed(p)));
   paint(document.getElementById('bSpace'),p.dodgeCdT||0,effDodgeCd(p));
 }
-function skillbarUpdate(){ auxSlotsUpdate();updateHudKeys(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+function skillbarUpdate(){ warmSkillFx();auxSlotsUpdate();updateHudKeys(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   // Rebuild from this save/class on resume and class changes. The queue itself is not saved.
   queueChoiceRank=c2def()?c2NextChoice():0;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
@@ -16675,6 +16690,7 @@ function updateWorld(dt){
     if(e.dead) continue;
     if(e.hydraChain)continue;
     if(!MP.guest()&&G.zone===0&&G.area>=0&&isCampaignAdventure())BFCampaignElites.briar(e);
+    window.BFEnemyWarnings?.warm(e,p,queueSkillFx);
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
     const bossTarget=e.boss?bossPartyTarget(e,p):null;
@@ -16777,10 +16793,11 @@ function updateWorld(dt){
       else if(e.windT>0){ e.windMax=e.windMax||e.windT; if(e.windT>.22){e.teleX=dirX;e.teleZ=dirZ;} e.windT-=dt;   // track aim so the danger-line follows you during the tell
         if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=e.teleX; e.cdz=e.teleZ; } }
       else { moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
-        if(d<300 && e.atkTimer<=0){ e.windT=G.trial?(e.elite?0.42:0.55):.7; e.windMax=e.windT;e.teleX=dirX;e.teleZ=dirZ; e.atkTimer=e.elite?1.8:2.8; playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
+        if(d<300 && e.atkTimer<=0){ e.windT=G.trial?(e.elite?0.42:0.55):.7; e.windMax=e.windT;e.teleX=dirX;e.teleZ=dirZ; e.atkTimer=e.elite?1.8:2.8; if(!window.BFEnemyWarnings?.emit(e,p,performance.now()/1000,playFx))playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
     }
+    window.BFEnemyWarnings?.tick(e,p,performance.now()/1000,playFx);
     if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
     if(e.tethered>0) e.tethered-=dt;                  // void-tether buff decays once the tether dies
     /* CO-OP: pull this body toward where the host says it is. Placed after every movement branch and

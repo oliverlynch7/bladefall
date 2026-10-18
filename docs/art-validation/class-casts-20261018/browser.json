@@ -1,0 +1,2165 @@
+{
+  "checks": [
+    {
+      "name": "Old level100 save loads in isolated storage",
+      "ok": true
+    },
+    {
+      "name": "136 unique current skill identities",
+      "ok": true
+    },
+    {
+      "name": "New batch lazy rather than eager",
+      "ok": true
+    },
+    {
+      "name": "All136 actual MP3s fetched and WebAudio decoded",
+      "ok": true
+    },
+    {
+      "name": "All27 enemy warnings fetched and decoded",
+      "ok": true
+    },
+    {
+      "name": "All27 creature state edges routed once",
+      "ok": true
+    },
+    {
+      "name": "py_bolt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_fan finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_blast finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_ward finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_lance finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_nova finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_inferno finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_sun finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_cleave finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_bash finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_charge finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_whirl finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_guard finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_stomp finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_berserk finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "w_execute finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_volley finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_pierce finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_tumble finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_shadow finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_spike finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_smoke finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_mark finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "r_deathmark finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_bolt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_beam finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_blink finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_nova finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_gravity finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_barrier finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_tempest finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "m_overload finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_reap finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_cleave finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_step finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_wraith finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_pull finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_bind finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_siphon finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "x_vortex finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_bash finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_smite finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_taunt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_ground finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_guard finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_burst finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_laststand finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pal_sky finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_summon finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_bolt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_raise finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_nova finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_wall finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_grip finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_army finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "necro_storm finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_strike finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_barrage finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_step finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_smoke finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_mark finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_pierce finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_fury finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "nin_storm finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_cleave finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_bash finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_charge finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_stomp finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_whirl finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_execute finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_berserk finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bsk_guard finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_pierce finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_volley finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_shadow finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_tumble finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_smoke finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_goldrush finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_deathmark finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "pir_spike finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_bolt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_beam finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_nova finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_blink finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_gravity finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_barrier finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_tempest finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "chr_overload finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_flurry finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_palm finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_deflect finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_roll finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_whirl finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_stun finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_thousand finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "mon_dragon finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_bolt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_lance finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_step finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_nova finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_orb finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_barrier finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_storm finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "st_overload finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_bolt finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_lance finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_curse finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_drain finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_step finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_orb finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_storm finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "war_final finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_rise finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_gale finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_dive finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_lift finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_dash finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_rain finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_crash finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "sky_cyclone finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_counter finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_twin finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_riposte finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_step finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_mirror finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_cross finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_steel finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bd_perfect finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_sic finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_coordinated finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_guardian finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_step finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_mend finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_roar finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_stampede finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "bst_apex finite short decoded clip",
+      "ok": true
+    },
+    {
+      "name": "py_bolt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_bolt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_blast actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_blast one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_lance actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_lance one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_inferno actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_inferno one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_fan actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_fan one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_ward actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_ward one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_nova actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "py_nova one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "py_sun actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_cleave actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_cleave one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_charge actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_charge one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_guard actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_guard one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_berserk actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_berserk one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_bash actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_bash one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_whirl actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_whirl one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_stomp actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "w_stomp one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "w_execute actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_volley actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_volley one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "r_tumble actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_tumble one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "r_spike actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_spike one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "r_mark actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_pierce actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_pierce one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "r_shadow actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_smoke actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_smoke one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "r_deathmark actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "r_deathmark one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_bolt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_bolt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_blink actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_blink one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_gravity actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_gravity one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_tempest actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_tempest one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_beam actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_beam one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_nova actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_nova one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_barrier actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_barrier one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "m_overload actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "m_overload one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_reap actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_reap one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_step actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_step one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_pull actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_pull one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_siphon actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_siphon one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_cleave actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_cleave one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_wraith actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_wraith one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_bind actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_bind one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "x_vortex actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "x_vortex one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_bash actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_bash one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_taunt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_taunt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_guard actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_guard one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_laststand actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_laststand one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_smite actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_smite one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_ground actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_ground one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_burst actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_burst one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pal_sky actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pal_sky one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_summon actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_summon one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_raise actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_raise one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_wall actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_wall one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_army actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_army one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_bolt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_bolt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_nova actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_nova one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_grip actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_grip one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "necro_storm actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "necro_storm one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "nin_strike actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_step actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_step one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "nin_mark actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_fury actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_fury one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "nin_barrage actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_barrage one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "nin_smoke actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_smoke one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "nin_pierce actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_pierce one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "nin_storm actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "nin_storm one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_cleave actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_cleave one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_charge actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_charge one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_whirl actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_whirl one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_berserk actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_berserk one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_bash actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_bash one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_stomp actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_stomp one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bsk_execute actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_guard actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bsk_guard one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_pierce actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_pierce one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_shadow actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_smoke actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_smoke one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_deathmark actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_deathmark one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_volley actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_volley one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_tumble actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_tumble one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_goldrush actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_goldrush one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "pir_spike actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "pir_spike one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_bolt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_bolt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_nova actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_nova one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_gravity actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_gravity one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_tempest actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_tempest one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_beam actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_beam one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_blink actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_blink one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_barrier actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_barrier one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "chr_overload actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "chr_overload one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_flurry actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_flurry one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_deflect actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_deflect one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_whirl actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_whirl one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_thousand actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_thousand one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_palm actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_palm one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_roll actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_roll one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_stun actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_stun one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "mon_dragon actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "mon_dragon one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_bolt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_bolt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_step actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_step one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_orb actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_orb one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_storm actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_storm one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_lance actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_lance one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_nova actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_nova one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_barrier actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_barrier one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "st_overload actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "st_overload one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_bolt actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_bolt one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_curse actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_curse one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_step actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_step one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_storm actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_storm one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_lance actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_lance one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_drain actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_drain one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "war_orb actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_final actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "war_final one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_rise actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_rise one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_dive actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_dive one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_dash actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_dash one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_crash actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_crash one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_gale actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_gale one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_lift actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_lift one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "sky_rain actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_cyclone actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "sky_cyclone one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_counter actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_counter one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_riposte actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_riposte one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_mirror actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_mirror one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_steel actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_steel one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_twin actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_twin one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_step actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_step one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_cross actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_cross one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bd_perfect actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bd_perfect one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bst_sic actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_guardian actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_guardian one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bst_mend actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_mend one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bst_stampede actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_stampede one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bst_coordinated actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_step actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_roar actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_roar one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "bst_apex actual handler does not crash",
+      "ok": true
+    },
+    {
+      "name": "bst_apex one co-op root cue",
+      "ok": true
+    },
+    {
+      "name": "Mute stays off for all checks",
+      "ok": true
+    },
+    {
+      "name": "Suppression and ally gain restored",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "done": true,
+  "decoded": 136,
+  "casts": [
+    {
+      "id": "py_bolt",
+      "result": "accepted"
+    },
+    {
+      "id": "py_blast",
+      "result": "accepted"
+    },
+    {
+      "id": "py_lance",
+      "result": "accepted"
+    },
+    {
+      "id": "py_inferno",
+      "result": "accepted"
+    },
+    {
+      "id": "py_fan",
+      "result": "accepted"
+    },
+    {
+      "id": "py_ward",
+      "result": "accepted"
+    },
+    {
+      "id": "py_nova",
+      "result": "accepted"
+    },
+    {
+      "id": "py_sun",
+      "result": "refund/no target"
+    },
+    {
+      "id": "w_cleave",
+      "result": "accepted"
+    },
+    {
+      "id": "w_charge",
+      "result": "accepted"
+    },
+    {
+      "id": "w_guard",
+      "result": "accepted"
+    },
+    {
+      "id": "w_berserk",
+      "result": "accepted"
+    },
+    {
+      "id": "w_bash",
+      "result": "accepted"
+    },
+    {
+      "id": "w_whirl",
+      "result": "accepted"
+    },
+    {
+      "id": "w_stomp",
+      "result": "accepted"
+    },
+    {
+      "id": "w_execute",
+      "result": "refund/no target"
+    },
+    {
+      "id": "r_volley",
+      "result": "accepted"
+    },
+    {
+      "id": "r_tumble",
+      "result": "accepted"
+    },
+    {
+      "id": "r_spike",
+      "result": "accepted"
+    },
+    {
+      "id": "r_mark",
+      "result": "refund/no target"
+    },
+    {
+      "id": "r_pierce",
+      "result": "accepted"
+    },
+    {
+      "id": "r_shadow",
+      "result": "refund/no target"
+    },
+    {
+      "id": "r_smoke",
+      "result": "accepted"
+    },
+    {
+      "id": "r_deathmark",
+      "result": "accepted"
+    },
+    {
+      "id": "m_bolt",
+      "result": "accepted"
+    },
+    {
+      "id": "m_blink",
+      "result": "accepted"
+    },
+    {
+      "id": "m_gravity",
+      "result": "accepted"
+    },
+    {
+      "id": "m_tempest",
+      "result": "accepted"
+    },
+    {
+      "id": "m_beam",
+      "result": "accepted"
+    },
+    {
+      "id": "m_nova",
+      "result": "accepted"
+    },
+    {
+      "id": "m_barrier",
+      "result": "accepted"
+    },
+    {
+      "id": "m_overload",
+      "result": "accepted"
+    },
+    {
+      "id": "x_reap",
+      "result": "accepted"
+    },
+    {
+      "id": "x_step",
+      "result": "accepted"
+    },
+    {
+      "id": "x_pull",
+      "result": "accepted"
+    },
+    {
+      "id": "x_siphon",
+      "result": "accepted"
+    },
+    {
+      "id": "x_cleave",
+      "result": "accepted"
+    },
+    {
+      "id": "x_wraith",
+      "result": "accepted"
+    },
+    {
+      "id": "x_bind",
+      "result": "accepted"
+    },
+    {
+      "id": "x_vortex",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_bash",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_taunt",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_guard",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_laststand",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_smite",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_ground",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_burst",
+      "result": "accepted"
+    },
+    {
+      "id": "pal_sky",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_summon",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_raise",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_wall",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_army",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_bolt",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_nova",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_grip",
+      "result": "accepted"
+    },
+    {
+      "id": "necro_storm",
+      "result": "accepted"
+    },
+    {
+      "id": "nin_strike",
+      "result": "refund/no target"
+    },
+    {
+      "id": "nin_step",
+      "result": "accepted"
+    },
+    {
+      "id": "nin_mark",
+      "result": "refund/no target"
+    },
+    {
+      "id": "nin_fury",
+      "result": "accepted"
+    },
+    {
+      "id": "nin_barrage",
+      "result": "accepted"
+    },
+    {
+      "id": "nin_smoke",
+      "result": "accepted"
+    },
+    {
+      "id": "nin_pierce",
+      "result": "accepted"
+    },
+    {
+      "id": "nin_storm",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_cleave",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_charge",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_whirl",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_berserk",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_bash",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_stomp",
+      "result": "accepted"
+    },
+    {
+      "id": "bsk_execute",
+      "result": "refund/no target"
+    },
+    {
+      "id": "bsk_guard",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_pierce",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_shadow",
+      "result": "refund/no target"
+    },
+    {
+      "id": "pir_smoke",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_deathmark",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_volley",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_tumble",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_goldrush",
+      "result": "accepted"
+    },
+    {
+      "id": "pir_spike",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_bolt",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_nova",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_gravity",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_tempest",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_beam",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_blink",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_barrier",
+      "result": "accepted"
+    },
+    {
+      "id": "chr_overload",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_flurry",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_deflect",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_whirl",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_thousand",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_palm",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_roll",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_stun",
+      "result": "accepted"
+    },
+    {
+      "id": "mon_dragon",
+      "result": "accepted"
+    },
+    {
+      "id": "st_bolt",
+      "result": "accepted"
+    },
+    {
+      "id": "st_step",
+      "result": "accepted"
+    },
+    {
+      "id": "st_orb",
+      "result": "accepted"
+    },
+    {
+      "id": "st_storm",
+      "result": "accepted"
+    },
+    {
+      "id": "st_lance",
+      "result": "accepted"
+    },
+    {
+      "id": "st_nova",
+      "result": "accepted"
+    },
+    {
+      "id": "st_barrier",
+      "result": "accepted"
+    },
+    {
+      "id": "st_overload",
+      "result": "accepted"
+    },
+    {
+      "id": "war_bolt",
+      "result": "accepted"
+    },
+    {
+      "id": "war_curse",
+      "result": "accepted"
+    },
+    {
+      "id": "war_step",
+      "result": "accepted"
+    },
+    {
+      "id": "war_storm",
+      "result": "accepted"
+    },
+    {
+      "id": "war_lance",
+      "result": "accepted"
+    },
+    {
+      "id": "war_drain",
+      "result": "accepted"
+    },
+    {
+      "id": "war_orb",
+      "result": "refund/no target"
+    },
+    {
+      "id": "war_final",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_rise",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_dive",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_dash",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_crash",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_gale",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_lift",
+      "result": "accepted"
+    },
+    {
+      "id": "sky_rain",
+      "result": "refund/no target"
+    },
+    {
+      "id": "sky_cyclone",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_counter",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_riposte",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_mirror",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_steel",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_twin",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_step",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_cross",
+      "result": "accepted"
+    },
+    {
+      "id": "bd_perfect",
+      "result": "accepted"
+    },
+    {
+      "id": "bst_sic",
+      "result": "refund/no target"
+    },
+    {
+      "id": "bst_guardian",
+      "result": "accepted"
+    },
+    {
+      "id": "bst_mend",
+      "result": "accepted"
+    },
+    {
+      "id": "bst_stampede",
+      "result": "accepted"
+    },
+    {
+      "id": "bst_coordinated",
+      "result": "refund/no target"
+    },
+    {
+      "id": "bst_step",
+      "result": "refund/no target"
+    },
+    {
+      "id": "bst_roar",
+      "result": "accepted"
+    },
+    {
+      "id": "bst_apex",
+      "result": "accepted"
+    }
+  ]
+}

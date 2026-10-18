@@ -1,0 +1,36 @@
+{
+  "version": "2.277.0-class-audio",
+  "new_skill_cues": 128,
+  "existing_pyromancer_cues": 8,
+  "all_active_skill_identities": 136,
+  "new_enemy_warnings": 27,
+  "generation_billed_credits": 1442,
+  "balance_before": 39368,
+  "balance_after_settlement": 37926,
+  "batches": {
+    "class-casts-20261018": 1280,
+    "enemy-warnings-20261018": 162
+  },
+  "budget_note": "Concurrent batch account-usage deltas overlap; do not add them. Response billing sums1442 and settled account difference39368-37926 independently agree.",
+  "original_sound_policy": "Existing sound files and FXDEF slots preserved. Missing buffers retain generic behavior. Suppress synchronous generic cast layers only with decoded named cue. Original hit/death feedback and later impacts retained.",
+  "loading": "Lazy three-at-a-time decode of chosen skills and nearby enemy species; first unheard ally cue uses matching generic fallback while loading; no deferred warning playback.",
+  "verification": {
+    "regression_suites": 138,
+    "class_focused_checks": 1553,
+    "enemy_focused_checks": 206,
+    "browser_checks": 403,
+    "enemy_ai_browser_checks": 28,
+    "actual_skill_handlers_attempted": 136,
+    "actual_accepted_skill_casts": 123,
+    "actual_refunded_or_target_limited_casts": 13,
+    "decode_checks": "All136 skill MP3s and27 enemy MP3s fetched and decoded in real Chrome WebAudio",
+    "save_scope": "Isolated existing level100 save loaded; production save data untouched",
+    "network_scope": "Recipe whitelist/capture/fallback/host relay tests; browser actual sendSound instrumentation; no fresh two-human Internet session",
+    "subjective_listening": "Human audition pending; signal checks do not establish taste."
+  },
+  "remaining_scope": [
+    "Current boss-specific attack and phase identity audit",
+    "World/puzzle/interactable cues and sustained skill lifecycles",
+    "Weapon handling identity audit; originals preserved"
+  ]
+}

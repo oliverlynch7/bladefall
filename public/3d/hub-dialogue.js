@@ -21,14 +21,14 @@
   el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
- function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items[0])?.focus({preventScroll:true});}
+ function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
  document.addEventListener('focusin',e=>{const root=e.target.closest?.('#hubDialogue,[data-dialogue-menu]');if(!root)return;root.querySelectorAll('.dialogue-selected').forEach(b=>b.classList.remove('dialogue-selected'));if(e.target.matches('button,summary'))e.target.classList.add('dialogue-selected');});
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
   delete root.dataset.dialogueArming;
   root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<p class="dialogue-key-hint">W / S or ↑ / ↓ · ${esc(window.__BF3?.controlHint?.('interact')||'E')} choose</p><footer>${!active.external&&!active.spectator&&active.lineId?'<button id="hubTopics">Other questions / quests</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Q / Esc</small></button></footer></div>`;
   if(el('hubTopics'))el('hubTopics').onclick=landing;
-  if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();selectFirst(root);
+  if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();window.BFMenuClose?.mount(root.querySelector('.hub-dialogue-panel'),()=>el('hubLeave'));selectFirst(root);
  }
  function line(id,lastChoice='',topic='intro'){
   active.visited=active.visited||[];if(!active.visited.includes(id))active.visited.push(id);

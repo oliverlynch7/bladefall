@@ -2456,3 +2456,10 @@ Fixed renderer's dragon-only peer filter, which sent shepherd and other companio
 ## [Codex | 2026-10-17] Shipped trainer class glows - v2.260.0
 
 All 17 trainer cards now define themed accents; the twelve previously generic gold cards use the same existing gradient/icon/hover/equipped glow treatment as the five colored classes. Browser-verified all cards with an isolated pre-change level100 save and no console errors. Class progression:2873 checks across17 classes; onboarding/co-op:21 checks plus lesson/save guards passed. Cosmetic only; saves and class mechanics unchanged. Evidence: docs/art-validation/trainer-glows-20261017/preview.png.
+
+
+## [Codex | 2026-10-17] Red menu exits - v2.261.0
+
+Added a shared top-right red X to overlay menus (pause, bag, shops, trainer, stats, records, settings, journal, character creation and nested confirmations), plus NPC conversations, chess lobby/board, inspection panels and mirror. Buttons delegate to the existing safe Back/Cancel/Resume handlers; scrolling retains access, keyboard focus stays on the primary dialogue option, and close never buys/deletes/resigns/disconnects. Required rank choices stay mandatory (X disabled until the cancellable review); main title has no parent menu. Observer is scoped to menu DOM with batched refresh, not the game world.
+
+Verified:36 actual-browser old-save checks plus manual scrolled red-X click/resume, screenshots and no console errors. Targeted checks:10 safe-exit,18 keyboard plus focused-E checks,21 onboarding/co-op,42 pause,76 chess-room,33 chess-experience,94 dialogue paths, inline syntax. Evidence: docs/art-validation/menu-close-20261017/.

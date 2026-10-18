@@ -4,6 +4,8 @@
 <script src="./skill-sfx.js?v=2230"></script>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2246"></script>
+<script src="./menu-close.js?v=2261f"></script>
+<link rel="stylesheet" href="./menu-close.css?v=2261f">
 <script src="./camera-controls.js?v=2219"></script>
 <script src="./keep-beta-isolation.js?v=2115"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1111,7 +1113,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <link rel="stylesheet" href="./hub-dialogue.css?v=2243">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
-<script src="./hub-dialogue.js?v=2248"></script>
+<script src="./hub-dialogue.js?v=2261"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2082">
 <script src="./hub-tour.js?v=2233d"></script>
 <script src="./controller.js?v=2190"></script>
@@ -1191,7 +1193,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
-<script src="./inspection-lab.js?v=2116"></script>
+<script src="./inspection-lab.js?v=2261"></script>
 <script src="./priority-sfx.js?v=2210"></script>
 <link rel="stylesheet" href="./progression-celebration.css?v=2232">
 <script src="encounter-rewards.js?v=2232"></script><script src="./progression-celebration.js?v=2232"></script>
@@ -1205,7 +1207,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.260.0-trainer-glows';
+const VERSION3D='2.261.0-menu-close';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -18941,12 +18943,11 @@ function buildMirrorPanel(){
   else pn.innerHTML='';
   pn.classList.toggle('hide',!mirrorPanelMode);
   pn.classList.toggle('rename',mirrorPanelMode==='name');
-  // Phase 19: an always-visible, CLICKABLE way out, top-left
+  // Keep a visible, keyboard-accessible way out at the top-right.
   let esc=document.getElementById('mirrorEsc');
-  if(!esc){ esc=document.createElement('div'); esc.id='mirrorEsc';
-    esc.style.cssText='position:absolute;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:9;background:rgba(12,13,18,.85);border:1px solid var(--amber);border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:800;color:var(--ink);cursor:pointer;box-shadow:0 0 12px rgba(232,163,61,.35)';
+  if(!esc){ esc=document.createElement('button'); esc.type='button'; esc.id='mirrorEsc';
     document.body.appendChild(esc); }
-  esc.innerHTML='<span style="background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900">ESC</span>Leave the mirror';
+  esc.className='menu-close-x'; esc.removeAttribute('style'); esc.textContent='×'; esc.setAttribute('aria-label','Leave the mirror'); esc.title='Leave the mirror · Q / Esc';
   esc.style.display='block'; esc.onclick=()=>exitMirror();
   let mt=document.getElementById('mirrorToggle'); if(!mt){ mt=document.createElement('button'); mt.id='mirrorToggle'; document.body.appendChild(mt); }
   let mn=document.getElementById('mirrorNameToggle'); if(!mn){ mn=document.createElement('button'); mn.id='mirrorNameToggle'; document.body.appendChild(mn); }
@@ -18955,6 +18956,7 @@ function buildMirrorPanel(){
   mn.onclick=()=>{if(!G?.hub){toast('Visit the Stylist in the Waystation to change your face or name.');return;}exitMirror();openStylistMakeover();};
   const close=document.getElementById('msClose'); if(close) close.onclick=()=>{mirrorPanelMode=null;buildMirrorPanel();};
   const spin=document.getElementById('msSpin'); if(spin) spin.onclick=()=>{mirror.spin=!mirror.spin;spin.textContent='🔄 Spin: '+(mirror.spin?'On':'Off');};
+  if(mirrorPanelMode) BFMenuClose.mount(pn,()=>document.getElementById('msClose'));
 
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
@@ -24496,7 +24498,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
   ED.loadShipped();
 </script>
 <script type="module" src="./hero3d.js?v=2259"></script>
-<script type="module" src="./social-hub.js?v=2252p1"></script>
+<script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

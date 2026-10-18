@@ -1,0 +1,69 @@
+{
+  "version": "2.276.0-boss-tactics",
+  "campaignOnly": true,
+  "encounters": {
+    "Brute": "Heavy guard; cart/stone stagger required to pass40percent HP, stagger1.3x/recovery0.65x/guard0.16x damage",
+    "Marksman": "Defended approach, first-perch55percent phase bound, covered shot gives4-second opening; same-height nest flank gives full damage;3-arrow locked volley at760speed; one relocation and guard wave preserved",
+    "Fallen": "Guard during blade patterns, full damage during recovery and1.35x pillar stagger; cannot burst below35percent before two attack patterns",
+    "Officers": "Shield protects nearby caster; separate officers or flank shield/wait recovery; visible ward tether",
+    "Furnace": "Hot armor4percent damage and cannot be killed before cooling;8-second valve opening with55percent maxHP damage budget; armor closes visibly on budget exhaustion",
+    "Hydra": "Existing3 restraint-specific openings remain; resting window4.5seconds; status damage now obeys taut/exposed protection",
+    "Marble": "Existing reflected-screen mechanic enforced for statuses too;7-second opening with55percent maxHP budget and visible reseal",
+    "King": "Guard during attack, recover opening, minimum early attack patterns, phase2 summon checkpoint, guards must be defeated before damage continues"
+  },
+  "sharedFixes": [
+    "Status damage obeys campaign tactical defenses",
+    "Guest execute cannot bypass bosses or Hydra restraints",
+    "Host uses actual peer/pet height for Marksman flank checks",
+    "Boss opening budgets scale proportionally when party HP scales",
+    "Rounded55percent Marksman boundary triggers relocation correctly"
+  ],
+  "tuning": {
+    "bossHealthByRegion": [
+      1.9,
+      1.9,
+      1.7,
+      1.6,
+      1.55,
+      1.5,
+      1.5,
+      1.45
+    ],
+    "previousBossHealthByRegion": [
+      1.65,
+      1.3,
+      1.15,
+      1.1,
+      1.05,
+      1,
+      1,
+      1
+    ],
+    "campaignBossDamageMultiplier": 1.18,
+    "notChanged": [
+      "Trial difficulty",
+      "PvP",
+      "Gauntlet/Descent generic combat",
+      "Campaign layouts/story",
+      "Player gear scaling"
+    ]
+  },
+  "verification": {
+    "regressionSuites": 136,
+    "focusedTacticalChecks": 59,
+    "browserChecks": 33,
+    "measurements": [
+      {
+        "boss": "officers",
+        "protectedHit": 26,
+        "exposedHit": 175
+      },
+      {
+        "boss": "colossus",
+        "valveToSwordSeconds": 2.880000000000002,
+        "openingRemaining": 5.119999999999997
+      }
+    ],
+    "scope": "Real muted browser, isolated old level100 save then staged level8 setup; actual direct/status/host-receive handlers across all8 campaign bosses, real valve interaction, actual movement and sword attack within opening, full scene renders, no console errors. Staged mechanics, not an earned back-to-back campaign completion, remote-human co-op test or subjective difficulty/fun validation. Screenshot stages Marksman recovery for cue visibility."
+  }
+}

@@ -23,7 +23,7 @@ function step(G,dt,p,cue){const h=G.hydraArena;if(!h)return;dt=Math.min(.05,Math
  h.clock=Math.max(0,h.clock-dt);if(h.clock)return;
  if(h.state==='recover'){const e=alive[h.beat%alive.length];h.head=e.hydraIndex;h.kind=['bite','sweep','blast'][h.beat++%3];h.state='wind';h.clock=h.kind==='blast'?2:1.6;h.x=p.x;h.z=p.z;h.y=p.y;cue?.('wind');}
  else if(h.state==='wind'){h.state='strike';h.clock=.45;h.seq++;cue?.('strike');}
- else{h.state='recover';h.clock=8;cue?.('rest');}
+ else{h.state='recover';h.clock=4.5;cue?.('rest');}
 }
 function exposed(G,e){const h=G.hydraArena;return !!h&&!h.freed&&h.state==='recover'&&h.head===e.hydraIndex;}
 function lineDistance(p,a,b){const dx=b.x-a.x,dz=b.z-a.z,l=dx*dx+dz*dz,u=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.z-a.z)*dz)/(l||1)));return Math.hypot(p.x-a.x-u*dx,p.z-a.z-u*dz);}

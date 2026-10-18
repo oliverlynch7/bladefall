@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),M=require('../public/3d/marble-guardian.js'),E=require('../public/3d/story-state.js'),book=require('../public/3d/story/sunspire-orb.json');
 const boss=()=>({marbleGuardian:true,x:0,z:0,y:0,hp:100,maxHp:100,mcClock:0,mcExposed:0,mcState:'recover',mcBeat:0,mcSeq:0,mcScreens:[1,0,0],mcUsed:[0,0,0]}),p={x:-650,z:0,y:0,hp:100,r:16};
-let e=boss();M.step(e,.05,p);assert.equal(e.mcState,'wind');const x=e.mcX;for(let i=0;i<45;i++)M.step(e,.05,{...p,x:400});assert.equal(e.mcX,x);assert(e.mcExposed>11);assert.equal(e.mcUsed[0],1);assert(!M.inAttack(e,p));
+let e=boss();M.step(e,.05,p);assert.equal(e.mcState,'wind');const x=e.mcX;for(let i=0;i<45;i++)M.step(e,.05,{...p,x:400});assert.equal(e.mcX,x);assert(e.mcExposed>6);assert.equal(e.mcUsed[0],1);assert(!M.inAttack(e,p));
 e=boss();e.mcScreens=[0,0,0];M.step(e,.05,p);assert(!M.inAttack(e,p));for(let i=0;i<44;i++)M.step(e,.05,p);assert.equal(e.mcState,'strike');assert(M.inAttack(e,p));assert(!M.inAttack(e,{...p,z:200}));assert(!M.inAttack(e,{...p,y:180}));
 e.mcKind='sweep';assert(M.inAttack(e,p));assert(!M.inAttack(e,{...p,y:100}));assert(!M.inAttack(e,{...p,x:850}));e.mcKind='fall';e.mcX=-650;e.mcZ=0;e.mcY=0;assert(M.inAttack(e,p));assert(!M.inAttack(e,{...p,z:200}));
 e=boss();e.mcState='wind';e.mcKind='hammer';e.mcDX=-1;e.mcDZ=0;e.mcX=-650;e.mcZ=0;e.mcUsed=[1,0,0];assert.equal(M.deflector(e),-1);e.mcScreens[0]=3;assert.equal(M.deflector(e),0);

@@ -47,7 +47,10 @@ function build({G,seg,plat,col,spawn}){const arena=G.frostOfficers={surfaces:[],
  const c=spawn('sorcerer',600,-420,null),base=c.maxHp,damage=c.dmg;for(const [e,role,x,z,y,weight]of [[c,'caster',600,-420,180,.5],[spawn('warden',-150,-100,null),'shield',-150,-100,0,.6],[spawn('sentinel',-600,-310,null),'spear',-600,-310,100,.45]])Object.assign(e,{frostOfficer:role,boss:true,kind:'boss',active:true,dropT:0,h:role==='caster'?78:70,r:22,x,z,y,sx:x,sz:z,hp:base*weight,maxHp:base*weight,dmg:damage*(role==='spear'?.8:.9),xp:Math.round(250*weight/1.55),speed:125,role:null,spec:null,lunge:0,home:null,label:{caster:'Frost Sorcerer',shield:'Shield Officer',spear:'Spear Officer'}[role]});
  G.boss=c;Object.assign(G.p,{...G.startPos,vy:0,vx:0,vz:0,onGround:true});G.camYaw=Math.PI;G.camPitch=.12;
 }
-function draw({G,bx,ring},t){for(const e of G.enemies){if(!e.frostOfficer||!busy(e))continue;const strike=e.offState==='strike',color=strike?'#e9fcff':e.frostOfficer==='caster'?'#75cde3':e.frostOfficer==='shield'?'#e6c47c':'#f0a478',y=e.offY+5;
+function draw({G,bx,ring},t){
+ const shield=G.enemies.find(e=>e.frostOfficer==='shield'&&alive(e)),caster=G.enemies.find(e=>e.frostOfficer==='caster'&&alive(e));
+ if(shield&&caster&&Math.hypot(shield.x-caster.x,shield.z-caster.z)<1000){for(let i=1;i<9;i++){const q=i/9;bx(shield.x+(caster.x-shield.x)*q,shield.y+(caster.y-shield.y)*q+35,shield.z+(caster.z-shield.z)*q,7,7,7,'#93d6eb','#73bed9',.6);}ring(caster.x,caster.y+5,caster.z,42,'#93d6eb',.6);}
+ for(const e of G.enemies){if(!e.frostOfficer||!busy(e))continue;const strike=e.offState==='strike',color=strike?'#e9fcff':e.frostOfficer==='caster'?'#75cde3':e.frostOfficer==='shield'?'#e6c47c':'#f0a478',y=e.offY+5;
  if(e.frostOfficer==='caster'){for(const offset of e.offTwin?[0,240]:[0]){ring(e.offX+offset,y,e.offZ,115,color,.9);if(strike)for(let i=0;i<7;i++){const a=i*Math.PI*2/7;bx(e.offX+offset+Math.cos(a)*70,y+40,e.offZ+Math.sin(a)*70,15,80,15,color);}}}
  else if(e.frostOfficer==='shield'){ring(e.offX,y,e.offZ,strike?35+295*(1-e.offClock/.9):330,color,.9,1.7,e.offDX,e.offDZ);}
  else for(let d=0;d<=e.offRange;d+=24)for(const side of [-1,1])bx(e.offX+e.offDX*d+e.offDZ*side*24,y,e.offZ+e.offDZ*d-e.offDX*side*24,7,3,9,color,color,.8);

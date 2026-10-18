@@ -1,6 +1,6 @@
 (function(root){
 'use strict';
-const fields=['bruteOrchard','bruteState','bruteClock','bruteTurns','bruteWaves','bruteWaveWarn','bruteWaveSide','windT','windMax','teleX','teleZ','lunge','slamW','staggerT','phase','yaw'];
+const fields=['bruteOrchard','bruteState','bruteStaggers','bruteClock','bruteTurns','bruteWaves','bruteWaveWarn','bruteWaveSide','windT','windMax','teleX','teleZ','lunge','slamW','staggerT','phase','yaw'];
 const CHARGE_SPEED=620,CHARGE_TIME=1.05,LOCK_TIME=.45;
 function impactAt(e,x,z,props){return props.find(p=>Math.abs(x-p.x)<p.w/2+e.r&&Math.abs(z-p.z)<p.d/2+e.r);}
 // Preview the same swept body and first blocking prop as the real charge. Small
@@ -45,7 +45,7 @@ function step(e,dt,target,env){
  }else if(e.bruteState==='charge'){
   e.yaw=Math.atan2(e.teleX,e.teleZ);e.lunge=e.bruteClock;const travel=CHARGE_SPEED*dt,n=Math.ceil(travel/10);
   for(let i=0;i<n;i++){const x=e.x+e.teleX*travel/n,z=e.z+e.teleZ*travel/n;const hit=impactAt(e,x,z,env.props);
-   if(hit){enter(e,'stagger',3);e.staggerT=3;env.impact(hit);return;}e.x=x;e.z=z;}
+   if(hit){e.bruteStaggers=(e.bruteStaggers||0)+1;enter(e,'stagger',3);e.staggerT=3;env.impact(hit);return;}e.x=x;e.z=z;}
   if(e.bruteClock===0)enter(e,'recover',1.15);
  }else if(e.bruteState==='slam'){
   e.slamW=e.bruteClock;if(e.bruteClock===0){env.slam();enter(e,'recover',1.1);}

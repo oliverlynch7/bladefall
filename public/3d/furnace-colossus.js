@@ -20,7 +20,7 @@ function build({G,seg,plat,spawn}){
  Object.assign(G.p,{...G.startPos,vy:0,vx:0,vz:0,onGround:true});G.camYaw=Math.PI;G.camPitch=.15;
 }
 function available(G){return alive(G.boss)&&!(G.boss.fcValveCd>0);}
-function cool(e,count,cue){if(!alive(e)||!count||count===(e._fcCool||0))return;e._fcCool=count;e.fcExposed=13;e.fcValveCd=18;e.fcState='recover';e.fcClock=2;e.slamW=0;cue?.('cool');}
+function cool(e,count,cue){if(!alive(e)||!count||count===(e._fcCool||0))return;e._fcCool=count;e.fcExposed=8;e.fcValveCd=18;e.fcState='recover';e.fcClock=2;e.slamW=0;cue?.('cool');}
 function step(e,dt,p,a){if(!alive(e))return;dt=Math.min(.05,Math.max(0,dt));e.fcClock=Math.max(0,e.fcClock-dt);e.fcExposed=Math.max(0,e.fcExposed-dt);e.fcValveCd=Math.max(0,e.fcValveCd-dt);e.atkT=Math.max(0,(e.atkT||0)-dt);
  if(!e.fcRepair&&e.hp<e.maxHp*.55){e.fcRepair=true;a.repair?.();}
  // One limited crew can repair at most eight percent of maximum health in total.

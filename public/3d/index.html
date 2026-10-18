@@ -1132,14 +1132,15 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2228"></script>
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2239"></script>
-<script src="./campaign-threat.js?v=2217"></script>
+<script src="./campaign-threat.js?v=2276"></script>
+<script src="./boss-tactics.js?v=2276"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2234"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
-<script src="./brute-encounter.js?v=2202"></script>
-<script src="./marksman-encounter.js?v=2004"></script>
+<script src="./brute-encounter.js?v=2276"></script>
+<script src="./marksman-encounter.js?v=2276"></script>
 <script src="./story-state.js?v=2248"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
 <script src="./campaign-geography.js?v=2196"></script>
@@ -1169,19 +1170,19 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./dragon-combat.js?v=2024"></script>
 <script src="./dragon-riding.js?v=2225"></script>
 <script src="./sky-library.js?v=2190"></script>
-<script src="./marble-guardian.js?v=2019"></script>
-<script src="./hydra.js?v=2198"></script>
+<script src="./marble-guardian.js?v=2276"></script>
+<script src="./hydra.js?v=2276"></script>
 <script src="./shipwreck-shore.js?v=2190"></script>
 <script src="./ship-crossing.js?v=2015"></script>
 <script src="./great-furnace.js?v=2186c"></script>
-<script src="./furnace-colossus.js?v=2014"></script>
+<script src="./furnace-colossus.js?v=2276"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2201">
 <script src="./journal-notice.js?v=2254"></script>
 <script src="./puzzle-feedback.js?v=2197"></script>
 <script src="./journal-clues.js?v=2203"></script>
 <script src="./music-score.js?v=2013"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
-<script src="./frost-officers.js?v=2010"></script>
+<script src="./frost-officers.js?v=2276"></script>
 <script src="./story-authority.js?v=2185"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./campaign-journey.js?v=2236"></script>
@@ -1214,7 +1215,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.275.0-party-transitions';
+const VERSION3D='2.276.0-boss-tactics';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8408,7 +8409,7 @@ function updateHydra(dt){
  if(!MP.guest()){const target=bossPartyTarget({x:0,z:-300},p);
  if(target)BFHydra.step(G,dt,target,k=>{playFx(k==='wind'?'atk2':k==='free'?'portalopen':'heavyhit',.5);});}
  if(BFHydra.inAttack(G,p)&&G._hydraHit!==h.seq){G._hydraHit=h.seq;const e=G.enemies.find(e=>e.hydraIndex===h.head);hurtPlayer(h.attackDamage||scaledEnemyDamage(ENEMY.grunt.dmg,true)*1.8,h.x,h.z,foeHit(e,'the hydra’s '+h.kind));}
- const bar=document.getElementById('bosshpwrap');bar.classList.add('officer-team');bar.classList.toggle('on',!h.freed);document.getElementById('bossnametx').textContent='Free the Sea Hydra · '+BFHydra.live(G).length+' chains';const es=G.enemies.filter(e=>e.hydraChain);document.querySelector('#bosshp > i').style.width=(es.reduce((n,e)=>n+Math.max(0,e.hp),0)/(h.totalHp||1)*100)+'%';
+ updateBossTactic(G.enemies.find(e=>e.hydraChain&&e.hydraIndex===h.head)||G.boss);const bar=document.getElementById('bosshpwrap');bar.classList.add('officer-team');bar.classList.toggle('on',!h.freed);document.getElementById('bossnametx').textContent='Free the Sea Hydra · '+BFHydra.live(G).length+' chains';const es=G.enemies.filter(e=>e.hydraChain);document.querySelector('#bosshp > i').style.width=(es.reduce((n,e)=>n+Math.max(0,e.hp),0)/(h.totalHp||1)*100)+'%';
  if(h.freed&&!G._hydraPaid){G._hydraPaid=true;gainXp(480);awardGold(700);adventureStoryState().notes['tc.hydra.free']={region:'storm',title:'The sea is its own again',text:'All three restraints are broken. The hydra returned to the sea. The stone climb beyond its ledges leads toward Sunspire.'};musicCue('hydra_release');toast('The hydra is free. The climb to Sunspire is open.');openWay();journalNoticeSync();}
  if(!G._hydraIntro){G._hydraIntro=true;toast('Free the three neck restraints. Dodge the marked attack, then strike its pale joint while that head rests. Stone blocks stop the water blast.');}questUpdate();
 }
@@ -8486,7 +8487,7 @@ function updateFallenDuel(e,dt,p,eff){
 function updateCrossingMarksman(e,dt,p){
  updateBossBar(e);if(MP.guest())return;
  const target=bossPartyTarget(e,p);if(!target)return;
- BFMarksman.step(e,dt,target,{tell:toast,cue:()=>playFx('atk2',.65),fire:aim=>{const first=G.projectiles.length;releaseEnemyShot(e,aim);for(const pr of G.projectiles.slice(first))pr.life=5;},reinforce:()=>{for(const z of [-740,-880]){const q=spawnEnemy('grunt',1180,z,false);q.active=true;q.dropT=0;q.marksmanGuard=true;}toast('Two guards on the east path. Her bow needs time to reset after landing.');}});
+ BFMarksman.step(e,dt,target,{tell:toast,cue:()=>playFx('atk2',.65),fire:aim=>{const cover=BFMarksman.coverBlock(e,aim,G.marksmanArena.cover);if(cover){e.markExposed=4;e.markTacticDone=true;addText(e.x,e.y+e.h+24,e.z,'COVERED SHOT — ATTACK','#a6edb5');}const first=G.projectiles.length;releaseEnemyShot(e,aim);for(const pr of G.projectiles.slice(first))pr.life=5;},reinforce:()=>{for(const z of [-740,-880]){const q=spawnEnemy('grunt',1180,z,false);q.active=true;q.dropT=0;q.marksmanGuard=true;}toast('Two guards on the east path. Her bow needs time to reset after landing.');}});
 }
 function syncOrchardWaves(waves){
  const arena=G.bruteArena;if(!arena)return;
@@ -9945,6 +9946,7 @@ function syncCampaignPartyHealth(){
     e.hp=Math.min(e.maxHp,e.maxHp*fraction);
     if(Number.isFinite(e.akBaseHP))e.akBaseHP*=ratio;
     if(Number.isFinite(e.shellHp))e.shellHp*=ratio;
+    for(const key of ['_bossBudgetSpent','_bossWindowFloor','_bossClosedFloor'])if(Number.isFinite(e[key]))e[key]*=ratio;
     e.partyHealthMul=mul;changed=true;
   }
   if(changed&&G.hydraArena)G.hydraArena.totalHp=G.enemies.filter(e=>e.hydraChain).reduce((n,e)=>n+e.maxHp/(e.partyHealthMul||mul)*mul,0);
@@ -9954,7 +9956,7 @@ function syncCampaignPartyHealth(){
 // Damage scales with the encounter, independently of the killable model used by it.
 // Hydra restraints are ordinary entities; the animal's attack still follows the boss curve.
 function scaledEnemyDamage(base,boss,earnedTrial=false){
- return base*DIFFICULTY*G.ngDmg*1.18*(boss?stageScale()*2.6:campaignEnemyDamageMul())*(earnedTrial?1.25:1)*tEnemyDmg()*(boss?dtune().boss:1);
+ return base*(boss&&isCampaignAdventure()&&G.area<0?1.18:1)*DIFFICULTY*G.ngDmg*1.18*(boss?stageScale()*2.6:campaignEnemyDamageMul())*(earnedTrial?1.25:1)*tEnemyDmg()*(boss?dtune().boss:1);
 }
 function spawnEnemy(type,x,z,isBoss){
   if(G.trial&&ENEMY[type]?.boss){type='grunt';isBoss=false;} // Training never inherits campaign bosses.
@@ -11960,9 +11962,22 @@ function estat(e){ return e.st||(e.st={burn:0,chill:0,venom:0,rune:0,radiance:0,
 function statTotal(e){ if(!e.st) return 0; let n=0; for(const k in e.st) n+=e.st[k]; return n; }
 // buildup per hit: normalized by attack speed (cd), with the Scythe specialization + boss resistance
 function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.2:1; return Math.min(2.4,(cd/0.4))*scy*(boss?0.5:1); }
+function campaignBossDamage(e,dmg,src,kind='direct'){
+ if(!isCampaignAdventure()||G.area>=0)return dmg;
+ const r=BFBossTactics.rule(G,e,src,kind),n=BFBossTactics.damage(G,e,src,dmg,kind);
+ if(r.hint&&n<dmg*.6&&(e._tacticHintAt||0)<G.time){e._tacticHintAt=G.time+3;addText(e.x,(e.y||0)+e.h+24,e.z,r.hint,'#ebcf8a');}
+ return n;
+}
+function updateBossTactic(e){
+ const wrap=document.getElementById('bosshpwrap');let tip=document.getElementById('bossTactic');
+ if(!tip){tip=document.createElement('div');tip.id='bossTactic';tip.style.cssText='font-size:13px;line-height:1.35;text-align:center;margin-top:5px;color:#ebcf8a;text-shadow:0 2px 3px #000';wrap.appendChild(tip);}
+ const r=isCampaignAdventure()?BFBossTactics.rule(G,e,G.p):null;
+ const text=r?.hint||'',color=r?.factor>=1?'#a6edb5':'#ebcf8a';if(tip.textContent!==text)tip.textContent=text;tip.hidden=!text;if(tip.style.color!==color)tip.style.color=color;
+}
 function statusDamage(e,dmg,flatHeal=0){
  if(e._peer){MP.sendPvp(e._peerId||e.id,dmg,G.p.x,G.p.z,{flatHeal});return;}
  if(MP.guest()&&e.mid!=null&&!e.dummy&&!e.practice)return; // mirrored enemies never own DoT/death
+ dmg=campaignBossDamage(e,dmg,null,'status');if(!(dmg>0))return;
  e.hp-=dmg;if(e.hp<=0)killEnemy(e);
 }
 function applyStatus(e,el,dmg,w,owner){
@@ -13589,7 +13604,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   /* The Abyss King's ward: while any of his court still stands he takes a fifth of the damage, so
      the fight is "clear the court" before it is ever "hit the king". */
   if(e.courtWard) dmg=dmg*0.2;
-  if(e.furnaceColossus&&!(e.fcExposed>0))dmg*=.12;
+  dmg=campaignBossDamage(e,dmg,src);if(!(dmg>0))return;
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   /* ROUND ONCE, HERE, before it is applied or shown.
      Oliver, playtesting: "I'm getting damage numbers in, like, the ten decimal places." Weapon
@@ -15447,8 +15462,9 @@ const MP={
       if(d.token&&c._hitReceipts.has(d.token)){try{c.send(c._hitReceipts.get(d.token).packet);}catch{}return;}}
     const e=this.byMid(d.m),before=e?Math.max(0,e.hp):0;
     let bonusHeal=0,executed=false;
-    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner};
-      if(owner.execute&&q&&dXZ(q.tx,q.tz,e.x,e.z)<200+e.r&&e.hp<e.maxHp*.25){
+    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,y:Number.isFinite(q?.ty)?q.ty:0,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner};
+      if(!owner.cid&&Number.isFinite(q?.pet?.ty))src.y=q.pet.ty;
+      if(owner.execute&&q&&!e.boss&&!e.hydraChain&&!e.marbleGuardian&&!e.furnaceColossus&&!e.finalKing&&dXZ(q.tx,q.tz,e.x,e.z)<200+e.r&&e.hp<e.maxHp*.25){
         e.hp=0;killEnemy(e);executed=true;addText(e.x,e.y+40,e.z,'EXECUTED','#ff2a1a',true);
       }else hitEnemy(e,d.d,src,d.kb||0,0,d.el||null);
       bonusHeal=src._guestHeal||0;
@@ -16957,6 +16973,7 @@ function onBossActivate(e){ SFX.boss();
     }
   } }
 function updateBossBar(e){
+ updateBossTactic(e);
  const cueNode=document.getElementById('bosscue'),cue=e.bruteOrchard?BFBruteEncounter.cue(e,{jump:controlHint('jump'),dodge:controlHint('dodge')}):null;
  if(cueNode){cueNode.hidden=!cue;if(cue){if(cueNode.textContent!==cue.text)cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}}
  if(e.hydraChain)return;if(e.finalKing){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',BFFinalKing.combat(e));document.getElementById('bossnametx').textContent=e.label;}if(e.marbleGuardian){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Marble Colossus'+(e.mcExposed>0?' · Armor seal open':' · Sealed armor');} if(e.furnaceColossus){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Ember Colossus'+(e.fcExposed>0?' · Armor cooled':' · Heated armor');}if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
@@ -19132,8 +19149,8 @@ const BESTIARY_INFO={
   siegeknight:{name:'Siege Knight',tell:'Raises its shield before a crushing overhead slam.',lore:'A Duskmoor gate-breaker condemned to defend the gate it once destroyed.'},
   royalarcanist:{name:'Royal Arcanist',tell:'Fires spreading volleys of arcane bolts.',lore:'The court mage kept casting after the court—and then the world—went dark.'},
   sparkling:{name:'Arc Spark',tell:'A quick flying attacker infused with Arcane power.',lore:'Loose palace magic condensed around a restless core.'},
-  brute:{name:'The Brute',tell:'Wide, heavy swings punish standing close.',lore:'It was livestock once. The nightmare made its anger larger than its body.'},
-  archer:{name:'Hollow Marksman',tell:'Locks her aim before firing. Stone cover and the outside paths let you reach her nests.',lore:'A Hollowed watcher ordered to stop prisoners escaping through the pass.'},
+  brute:{name:'The Brute',tell:'Bait a charge into a cart or stone to break its guard. Strike while it is staggered; jump its ground waves.',lore:'It was livestock once. The nightmare made its anger larger than its body.'},
+  archer:{name:'Hollow Marksman',tell:'Stone cover stops her volleys and opens a counterattack. Climb the outside paths to flank her nests.',lore:'A Hollowed watcher ordered to stop prisoners escaping through the pass.'},
   warden:{name:'The Fallen',tell:'Locks a long thrust, or lowers the blade before a warned sweep. Pillars stop the thrust.',lore:'A Hollowed champion ordered to prevent anyone leaving the prison. The name remembers a person who lost their freedom, not their courage.'},
   sorcerer:{name:'Frost Sorcerer',tell:'Kites away while firing a spread of freezing orbs.',lore:'A scholar who studied Frostfell until the ancient cold began studying him.'},
   colossus:{name:'The Colossus',tell:'Slow, massive attacks and arcing elemental shots.',lore:'A mountain-sized guardian forced upright by heat, stone, and nightmare.'},

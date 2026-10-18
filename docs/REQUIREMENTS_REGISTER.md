@@ -2031,3 +2031,10 @@ Inspection found guest kill replay and unseen-enemy credit roll separate random 
 User: "also i should be invulvnerbale when im choosing my nexst skil or passive or open my bag. just like going to the menu"
 
 Inspection: bag already starts beginPause, but upgrade mode is absent from pause protection and the live co-op menu wrapper; class celebration/choice/tutorial entries do not start pause sessions. Plan: route rank-up celebration, skill/passive selection/review, first-skill lesson and legacy upgrade entries through the same world-scoped pause session as bag/Esc. Solo freezes; co-op world continues with held visible grey protected player. Preserve required choices, chained choices, controller/keyboard input, actual unlock transitions and resume cleanup; keep existing competitive PvP exception identical to the main menu. Verify incoming hits/falls, bag direct entry/nested panels, choice transition/confirmation, background updates/presence and old-save/browser behavior.
+
+
+## [Codex | 2026-10-17] U-COOP-NPC-LABEL-ALIGNMENT-20261017
+
+User: "the exclam features above characteras as well as the e to interact features are not connecting well tot he nocs for my friend as they are for me. please fix"
+
+Inspection: project() returns CSS viewport pixels, but interaction prompts and hub quest marks divide by render DPR again. Guests with different display scaling, render quality or resolution get different offsets. Prompt positioning also occurs during update before the current render camera, while 3D NPC bodies include authored offsets and size changes. Plan: respect CSS projection coordinates, refresh interaction prompt after the current camera setup, and use world-scoped rendered NPC top anchors for hub/campaign NPCs with current fallback for unloaded models/props. Apply the same CSS-coordinate correction to closely related DOM world labels/adapters; do not change physics or network coordinates. Verify guest/host roles across low/high/non-unit DPR, camera turn/zoom, model loading/stale-world fallback, quest markers, current interaction binding and old saves in an actual browser.

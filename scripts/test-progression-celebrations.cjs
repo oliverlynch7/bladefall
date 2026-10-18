@@ -26,7 +26,7 @@ ok(f.box.mode==='upgrade'&&opened===0,'choice intro freezes simulation before me
 f.box.meta.classId='mage';ok(!guard(),'class swap invalidates old callback');callback();ok(opened===1,'stale callback does not open');cancelIntro();ok(f.box.mode==='play','cancel returns control');
 for(const condition of ['dead','downed']){f=context();f.box.window.BFProgressCelebration.beforeChoice=(v)=>guard=v;f.box.beginProgressChoice('passive',2,()=>{});f.box.G.p[condition]=true;ok(!guard(),condition+' cancels choice');}
 ok(!intro.includes("getElementById('overlay').innerHTML"),'overlay host never detached');
-ok(html.includes('p[0]/DPR,p[1]/DPR'),'world pulse respects display pixel ratio');
+ok(html.includes('p[0],p[1]'),'world pulse uses CSS viewport coordinates without double scaling');
 const css=fs.readFileSync('public/3d/progression-celebration.css','utf8');ok(css.includes('pointer-events:none'),'celebration cannot block combat input');ok(css.includes('prefers-reduced-motion'),'OS motion preference');ok(css.includes('.progress-celebration.reduced'),'game motion preference');
 const tutorial=fs.readFileSync('public/3d/guided-tutorial.js','utf8');ok(tutorial.includes('combat waits while you choose'),'first-choice warning');
 const sfx=JSON.parse(fs.readFileSync('public/sfx/custom/starter-20261016/manifest.json','utf8'));ok(sfx.cues.find(c=>c.id==='custom_classup').sha256!==sfx.cues.find(c=>c.id==='levelcheer').sha256,'distinct custom SFX assets');

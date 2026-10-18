@@ -1,0 +1,7 @@
+# NPC markers and interaction prompts — 2026-10-17
+
+v2.258.0-npc-labels. Root cause reproduced: project() returns CSS viewport pixels, but world DOM prompts/quest marks divided those coordinates by render DPR again. A .66 render scale produced a329.697px horizontal misalignment. Different guest display/graphics settings exposed this independently of multiplayer world coordinates.
+
+Corrected CSS coordinates for NPC/interaction/companion labels and related progression/social adapters. NPC renderer publishes a current-world top anchor including actual body placement/height; hub/campaign prompts and hub quest markers use it, with existing fallback while models load. Interaction prompt refreshes after current render camera. Close-up quest icon is included in the interaction pill, preventing icon/text overlap. Cached prompt content avoids extra DOM reconstruction during camera movement; current bindings remain visible.
+
+121 regression suites pass, with final focused reruns recorded.117 focused label checks cover6 render DPR values across host/guest roles, camera-coordinate contract, model placement, fallback/stale world, hiding and rebinding. Real-browser pre-change save checks cover18 host/guest x quality x camera combinations plus camera turns/rebinding;78 checks pass. The test uses a page-local simulated devicePixelRatio2 and actual rendering at.66/1/2; it does not change the operating system or user's settings/saves. No multiplayer protocol or enemy behavior changed.

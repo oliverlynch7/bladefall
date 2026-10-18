@@ -2136,3 +2136,10 @@ Inspection/plan: Rift Hall sets Three scene.background to a Color. Three WebGLBa
 User: "the icons for th rift hall portals are facing the wrong way"
 
 Inspection/plan: icons are DoubleSide PlaneGeometry children of side-wall portal frames, so they become edge-on along the approach and can be seen mirrored from behind. Replace only icon quads with camera-facing SpriteMaterial/Sprite using existing class textures, scale and opacity; mount just in front of portal surface so an opened rift does not veil the icon. Keep portal arch geometry, placement/order, labels, class mapping and interactions unchanged. Refresh imported asset chain and verify both rows and aisle view plus saved Hall progression tests.
+
+
+## [Codex | 2026-10-17] Appropriate weapons on PvP class change
+
+User: "in pvp, when i pick a new class to try, it shoudl autaomtaiclaly equip a proprer weapon for that class"
+
+Inspection/plan: Arena class buttons only set classId, leaving previous wArch; buildArenaPlayer equips it without family validation. Fair Mode forces sword regardless of class. Only Pyromancer currently receives its intrinsic weapon. Add deterministic class-compatible archetype resolution and class selection default, filter Arena weapon options by class, honor all four intrinsic class weapons. Validate in buildArenaPlayer even for stale/random/Fair configs; randomization selects an allowed family weapon. Preserve compatible manual choices and rarity, class builds, Apply flow, temporary Arena escrow and campaign equipment. Verify all17 classes, normal/Fair/stale/invalid configs, real class-selection UI, equipped attacks, and campaign restoration.

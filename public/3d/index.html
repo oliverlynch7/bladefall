@@ -1214,7 +1214,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.272.0-rift-portal-icons';
+const VERSION3D='2.273.0-pvp-class-weapons';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15723,6 +15723,10 @@ function familyWeaponArche(cid){ const fam=(CLASSES[cid]||CLASSES.warrior).famil
   if(fam.length===1&&fam[0]==='fist') return 'fist';   // Monk: fists ARE the class weapon (retired from loot, but on-class here)
   const pool=ARCHEIDS.filter(a=>{ const w=ARCHES[a]; return w && fam.includes(w.art) && !(typeof RETIRED_ARCHES!=='undefined'&&RETIRED_ARCHES.includes(a)); });
   return pool.length?pool[Math.floor(Math.random()*pool.length)]:'sword'; }   // an on-class weapon for a bot
+// Resolve against the requested class, never the previous live meta.classId.
+function arenaWeaponArches(cid){const C=CLASSES[cid]||CLASSES.warrior;return ARCHEIDS.filter(a=>C.family.includes(ARCHES[a]?.art)&&!RETIRED_ARCHES.includes(a));}
+function arenaWeaponArche(cid,preferred){const pool=arenaWeaponArches(cid);return pool.includes(preferred)?preferred:pool.includes(CLASSSTART[cid]?.[0])?CLASSSTART[cid][0]:pool[0]||CLASSSTART[cid]?.[0]||'sword';}
+function arenaSelectClass(cfg,cid){if(!CLASSES[cid])return false;cfg.classId=cid;cfg.wArch=arenaWeaponArche(cid);return true;}
 const ARENA_FAIR={ level:30, rank:10, wArch:'sword', wRid:'epic', aRid:'epic' };
 const ARENA_MAPS={
   flat:{ name:'Proving Ground', desc:'A clean flat arena — pure skill, no cover.', sky:[0.10,0.11,0.15], ground:'#3b4254',
@@ -15767,9 +15771,10 @@ function arenaApplyPet(cfg){
   meta.petTrain={};for(const id of PETIDS)meta.petTrain[id]=PET_TRAIN_MAX;
   meta.petActive=(cfg.petId&&PETS[cfg.petId])?cfg.petId:null;
 }
+function arenaEquipWeapon(p,cfg){const L=cfg.fair?ARENA_FAIR:cfg;p.weapon=intrinsicWeapon(cfg.classId)||makeWeapon(arenaWeaponArche(cfg.classId,L.wArch),L.wRid);}
 function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.classId},ARENA_FAIR):cfg;   // Fair Mode standardizes level/rank/gear/stats (your class stays your choice)
   arenaApplyClass({classId:cfg.classId,rank:L.rank,classBuilds:cfg.classBuilds}); const p=freshPlayer(); arenaSetLevel(p,L.level);
-  try{ p.weapon=cfg.classId==='pyromancer'?intrinsicWeapon('pyromancer'):makeWeapon(L.wArch,L.wRid); }catch(e){}
+  arenaEquipWeapon(p,cfg);
   for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(L.aRid,slot); }catch(e){} }
   p.maxJumps=2; recomputeArmor(p); p.mana=p.maxMana; p.hp=effMaxHp(p); return p; }
 // ENTER the Arena — a fully SEPARATE, save-protected room (like the Sparring Room). Snapshot the campaign,
@@ -16120,7 +16125,8 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   const randomized=cfg.classBuilds&&cfg.classBuilds[cfg.classId];
   const mapCard=(id)=>{ const m=ARENA_MAPS[id]; return `<button class="bigbtn ghost arenamap ${cfg.map===id?'sel':''}" data-map="${id}" style="text-align:left;${cfg.map===id?'border-color:#e8a33d;':''}"><b>${m.name}</b><br><span style="opacity:.7;font-size:12px">${m.desc}</span></button>`; };
   const classBtns=Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arenacls ${cfg.classId===cid?'sel':''}" data-cls="${cid}" style="width:auto;flex:1;min-width:90px;${cfg.classId===cid?'border-color:#e8a33d;':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('');
-  const archOpts=ARCHEIDS.map(a=>`<option value="${a}" ${cfg.wArch===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
+  const fixedWeapon=intrinsicWeapon(cfg.classId);cfg.wArch=arenaWeaponArche(cfg.classId,cfg.wArch);
+  const archOpts=fixedWeapon?`<option>${htmlSafe(fixedWeapon.name)} · Class weapon</option>`:arenaWeaponArches(cfg.classId).map(a=>`<option value="${a}" ${cfg.wArch===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
   const ridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.wRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
   const aridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.aRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
   const petBtns=`<button class="bigbtn ghost arenapet ${!cfg.petId?'sel':''}" data-pet="" style="flex:1;min-width:92px;margin:0;padding:8px 6px;${!cfg.petId?'border-color:#e8a33d;color:#f2c875':''}">No Pet</button>`+
@@ -16135,7 +16141,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
     <div style="display:flex;gap:14px;margin:12px 0 2px"><label style="flex:1">Level <b id="arLvlV">${cfg.level}</b><input id="arLvl" type="range" min="1" max="60" value="${cfg.level}" style="width:100%"></label>
       <label style="flex:1">Class Rank <b id="arRankV">${cfg.rank}</b><input id="arRank" type="range" min="1" max="10" value="${cfg.rank}" style="width:100%"></label></div>
     <div style="display:flex;gap:10px;margin:10px 0 2px;flex-wrap:wrap">
-      <label style="flex:1;min-width:140px">Weapon<br><select id="arArch" style="${sel};width:100%">${archOpts}</select></label>
+      <label style="flex:1;min-width:140px">Weapon<br><select id="arArch" ${fixedWeapon?'disabled aria-label="Built-in class weapon"':''} style="${sel};width:100%">${archOpts}</select></label>
       <label style="flex:1;min-width:110px">Weapon rarity<br><select id="arWRid" style="${sel};width:100%">${ridOpts}</select></label>
       <label style="flex:1;min-width:110px">Armor rarity<br><select id="arARid" style="${sel};width:100%">${aridOpts}</select></label></div>
     <p class="hint" style="text-align:left;margin:12px 0 5px"><b>Companion</b> &middot; every Arena pet is fully trained and scales to your selected level</p>
@@ -16160,10 +16166,10 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
     <button class="bigbtn ghost" id="arBack" style="margin-top:8px">Back</button></div>`);
   const g=id=>document.getElementById(id);
   document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{ cfg.map=b.dataset.map; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
-  document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ cfg.classId=b.dataset.cls; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
+  document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ arenaSelectClass(cfg,b.dataset.cls); try{SFX.pickup();}catch(e){} openArenaSetup(back); });
   g('arLvl').oninput=e=>{ cfg.level=+e.target.value; g('arLvlV').textContent=cfg.level; };
   g('arRank').oninput=e=>{ cfg.rank=+e.target.value; g('arRankV').textContent=cfg.rank; };
-  g('arArch').onchange=e=>{ cfg.wArch=e.target.value; };
+  g('arArch').onchange=e=>{ cfg.wArch=arenaWeaponArche(cfg.classId,e.target.value); };
   g('arWRid').onchange=e=>{ cfg.wRid=e.target.value; };
   g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
   document.querySelectorAll('[data-pet]').forEach(b=>b.onclick=()=>{ cfg.petId=b.dataset.pet||null; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
@@ -16174,9 +16180,9 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   { const tb=g('arTeams'); if(tb) tb.onclick=()=>{ cfg.teams=!cfg.teams; try{SFX.pickup();}catch(e){} openArenaSetup(back); }; }
   { const pw=g('arPow'); if(pw) pw.onclick=()=>{ cfg.powerups=!cfg.powerups; try{SFX.pickup();}catch(e){} toast(cfg.powerups?'✨ Powerups ON — health / damage / speed orbs spawn in the arena.':'Powerups off.'); openArenaSetup(back); }; }
   g('arFair').onclick=()=>{ cfg.fair=!cfg.fair; try{SFX.pickup();}catch(e){} toast(cfg.fair?'⚖️ Fair Mode ON — everyone gets a standardized level, gear & stats.':'Fair Mode off — custom loadouts.'); openArenaSetup(back); };
-  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); cfg.botClass=R(Object.keys(CLASSES)); cfg.botDiff=R(BOT_DIFFS); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('Randomized loadout + bots!'); openArenaSetup(back); };
+  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=arenaWeaponArche(cfg.classId,R(arenaWeaponArches(cfg.classId))); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); cfg.botClass=R(Object.keys(CLASSES)); cfg.botDiff=R(BOT_DIFFS); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('Randomized loadout + bots!'); openArenaSetup(back); };
   g('arRandSpec').onclick=()=>{ const r=arenaRandomRespec(cfg); try{SFX.pickup();}catch(e){} if(r)toast('Random '+CLASSES[r.classId].disp+' build: '+r.skills+' skills + '+r.passives+' passives. Apply the loadout to test it.'); openArenaSetup(back); };
-  if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>{ if(cfg.classBuilds)delete cfg.classBuilds[cfg.classId]; openArenaSetup(back); }); };
+  if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg);arenaEquipWeapon(G.p,cfg);recomputeArmor(G.p);openRespecTree(cfg.classId,()=>{ if(cfg.classBuilds)delete cfg.classBuilds[cfg.classId]; openArenaSetup(back); }); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
   g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}
     if(inA){ buildArenaRoom(); toast('Loadout applied — fresh arena.'); }   // rebuild the room so a new MAP + loadout + bots all take effect (still fully save-protected)

@@ -2554,3 +2554,10 @@ Verified22 actual flush/background composition tests (one/two/six queued bodies,
 Replaced wall-aligned double-sided class icon planes with upright camera-facing sprites. Same textures,86x86 size and opacity; shifted to front of portal surface so the open rift does not veil them. Both portal rows remain readable along aisle approach without mirrored backs. Portal arch/layout/labels/class mapping and interactions unchanged. Refreshed entire imported art cache chain.
 
 Verified24 actual Three icon orientation/depth/disposal checks,22 co-op party render checks,32 hub transition checks, Hall assembly and shard ledger suites. Muted old level100 save loads; inspected east row, west row and central aisle in game. Evidence:docs/art-validation/rift-portal-icons-20261017/.
+
+
+## [Codex | 2026-10-17] PvP class-appropriate weapon auto-selection - v2.273.0
+
+Arena class buttons now select a deterministic on-class weapon. Weapon picker lists only supported archetypes; intrinsic Pyromancer/Monk/Reaper/Pirate weapons display as fixed class weapons. Shared equip resolver validates stale/Fair/random loadouts when building the player and when changing class through Free Respec. Fair Mode no longer gives every class a sword. Compatible manual choices and chosen rarity retained; randomization chooses within class family. Apply behavior unchanged; no campaign bag exchanges are performed by resolver.
+
+Verified250 focused checks across all17 classes normal/Fair, intrinsic weapons, stale configs, compatible manual choices and bag preservation;133 regression suites;29 muted browser checks: old level100 save, real class-selection/Apply handlers, basic attacks across7 representative classes, Fair Mage, Free Respec and exact campaign gold/stash/hero/classes/classId restoration. Evidence:docs/art-validation/arena-class-weapons-20261017/.

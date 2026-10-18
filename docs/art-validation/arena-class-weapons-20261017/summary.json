@@ -1,0 +1,9 @@
+{
+  "version": "2.273.0-pvp-class-weapons",
+  "classes": 17,
+  "focusedChecks": 250,
+  "regressionSuites": 133,
+  "browserChecks": 29,
+  "behavior": "Arena class selection sets deterministic fitting weapon, filters manual choices; build validates stale/Fair/random loadouts. All4 intrinsic classes use native weapons. Free Respec uses same equip resolver.",
+  "browser": "Actual class/Apply UI handlers for Mage/Ranger/Reaper/Monk/Pirate/Pyromancer/Warrior; basic attacks, Fair Mage and Free Respec tested. Old level100 save loads; exact campaign gold/stash/hero/classes/classId restored on exit. Tests muted and isolated; no new network protocol."
+}

@@ -62,7 +62,7 @@ function draw(hint){
  panel.dataset.lesson=step.id;panel.innerHTML='';
  const copy=document.createElement('div');copy.setAttribute('aria-live','polite');copy.setAttribute('aria-atomic','true');
  const meta=document.createElement('div');meta.className='lesson-meta';
- const stage=document.createElement('span');stage.textContent=step.safe?'Safe practice':step.id==='skill-use'?'New skill':'HUD guide';
+ const stage=document.createElement('span');stage.textContent='Tutorial · '+(step.safe?'Safe practice':step.id==='skill-use'?'New skill':'HUD guide');
  const count=document.createElement('span');count.className='lesson-count';
  const group=lessons.filter(s=>!!s.safe===!!step.safe),within=group.indexOf(step)+1;
  count.textContent=guide.steps===lessons?within+' / '+group.length:'Try it';

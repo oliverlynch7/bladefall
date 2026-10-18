@@ -1,0 +1,3 @@
+## [Codex | 2026-10-18] Tutorial contrast — v2.282.0-tutorial-contrast
+
+Guided lessons and Waystation tour now use an opaque bright parchment surface, dark readable text, strong turquoise border and matching turquoise HUD leaders/highlights. Guided headers explicitly say Tutorial. Keycaps and Continue/Skip controls retain readable contrast and focus rings. No timing, placement, progression, pause or control logic changed. Updated resource cache keys. Existing guidance regression suite: 219 checks pass. Actual muted Chrome trial card inspected beside the dark gameplay HUD; text/control color pairs exceed4.5:1 against their surfaces. Private QA uses isolated legacy100 save storage. Evidence: docs/art-validation/tutorial-contrast-20261018/.

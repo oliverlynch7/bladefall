@@ -38,10 +38,29 @@ function beforeChoice(valid,done,cancel,info={}){
 function awardSound(kind,world,play){if(typeof play==='function')soundQueue.set(kind,{world,player:world?.p,play,at:now()});}
 function paintBar(node,ratio,value,world,kind,reduce=false){if(!node)return;ratio=Math.max(0,Math.min(100,ratio));const old=barState.get(node),previousWidth=node.style.width;barState.set(node,{value,world});const target=ratio+'%';node.style.width=target;
  if(!reduce&&!reduced()&&old?.world===world&&value>old.value&&events[kind]?.world===world&&node.animate){node.getAnimations?.().forEach(a=>a.cancel());node.animate([{width:previousWidth||'0%'},{width:'100%',offset:.32},{width:'0%',offset:.34},{width:target}],{duration:850,easing:'cubic-bezier(.2,.7,.3,1)'});node.parentElement?.classList.add('progress-bar-awarded');slotLights.push({node:node.parentElement,cls:'progress-bar-awarded',until:now()+1600});}}
-function statPoints(container,count,open,intro){if(!container)return;let button=container.querySelector?.('.progress-stat-points');if(!count){button?.remove();container.querySelector?.('.progress-stat-guide')?.remove();return;}if(!button){button=el('button','progress-stat-points');button.type='button';container.append(button);}button.textContent='+'+count+' point'+(count===1?'':'s');button.setAttribute('aria-label','Spend '+count+' available character stat points');button.onclick=()=>{intro?.dismiss?.();container.querySelector?.('.progress-stat-guide')?.remove();open();};
- let guide=container.querySelector?.('.progress-stat-guide');if(!intro?.show){guide?.remove();return;}
- if(!guide){guide=el('section','progress-stat-guide');guide.setAttribute('aria-label','Your first stat point');guide.append(el('strong',null,'Make your hero stronger'),el('p',null,'Player levels give stat points. Choose health, damage, defense, speed or mana. Points stay yours until you spend them.'));
- const buttons=el('div'),spend=el('button',null,'Choose an upgrade'),later=el('button',null,'Keep playing');spend.type=later.type='button';spend.onclick=()=>{intro.dismiss();guide.remove();open();};later.onclick=()=>{intro.dismiss();guide.remove();};buttons.append(spend,later);guide.append(buttons);container.append(guide);}}
+let statTip=null;
+function removeStatTip(){statTip?.node.remove();statTip=null;}
+function placeStatTip(){
+ if(!statTip||statTip.node.hidden)return;
+ const at=now();if(at-statTip.placed<150)return;statTip.placed=at;
+ const guide=statTip.node,target=statTip.container.querySelector('.progress-stat-points'),callout=root.BFTutorialCallout;
+ if(!target||!callout?.visible(target)){statTip.blocked=true;guide.hidden=true;return;}
+ const rect=e=>{const r=e.getBoundingClientRect();return {x:r.left,y:r.top,w:r.width,h:r.height};};
+ const obstacles=[...document.querySelectorAll('#hud,#pethud,#questbox,#localMap,#mapCaption,#adventureCombat,#adventureSkills,#hudprogress,#inventoryDock,#equipmentFeed,#journalNotice,#partyTravel,#joy,#bAttack,#bDodge,#bJump,#pausebtn,#guidedLesson,.progress-celebration')].filter(e=>callout.visible(e)&&e!==target).map(rect);
+ const result=callout.layout({width:root.innerWidth,height:root.innerHeight,card:{w:guide.offsetWidth,h:guide.offsetHeight},target:rect(target),obstacles});
+ const overlaps=obstacles.some(r=>result.x<r.x+r.w+6&&result.x+result.w>r.x-6&&result.y<r.y+r.h+6&&result.y+result.h>r.y-6);
+ statTip.blocked=overlaps;guide.hidden=overlaps;if(!overlaps){guide.style.left=result.x+'px';guide.style.top=result.y+'px';}
+}
+function statPoints(container,count,open,intro){if(!container)return;let button=container.querySelector?.('.progress-stat-points');if(!count){button?.remove();removeStatTip();return;}
+ if(!button){button=el('button','progress-stat-points');button.type='button';button.append(el('span','progress-stat-count'),el('kbd','progress-stat-key'));button.lastChild.dataset.actionHint='stats';container.append(button);}
+ const key=intro?.key||'C';button.querySelector('.progress-stat-count').textContent='+'+count+' point'+(count===1?'':'s');button.querySelector('kbd').textContent=key;button.setAttribute('aria-label','Spend '+count+' available character stat points · '+(intro?.hint||key));button.title='Character Stats · '+(intro?.hint||key);button.onclick=()=>{intro?.dismiss?.();removeStatTip();open();};
+ if(!intro?.show){removeStatTip();return;}
+ if(!statTip){const guide=el('section','progress-stat-guide');guide.id='progressStatGuide';guide.setAttribute('aria-label','Your first stat point');guide.append(el('strong',null,'Make your hero stronger'),el('p',null,'Player levels give stat points. Upgrade health, damage, defense, speed or mana. Your points stay saved until you use them.'));
+  const buttons=el('div'),spend=el('button'),later=el('button',null,'Keep playing'),hint=el('kbd','progress-stat-key',key);hint.dataset.actionHint='stats';spend.append(el('span',null,'Choose an upgrade'),hint);spend.type=later.type='button';spend.onclick=()=>{intro.dismiss();removeStatTip();open();};later.onclick=()=>{intro.dismiss();removeStatTip();};buttons.append(spend,later);guide.append(buttons);document.body.append(guide);statTip={node:guide,container,placed:-Infinity};
+ }
+ placeStatTip();
+}
+
 function previewKind(option){const s=(option.n+' '+option.d).toLowerCase();if(/summon|skeletons|army|raise the dead/.test(s))return 'summon';if(/teleport|blink|dash|rush through|drive forward|roll|tumble|step behind/.test(s))return 'dash';if(/shield|reducing incoming|reduce incoming|brace|reflect|block/.test(s))return 'shield';if(/heal|restore|drain|siphon/.test(s))return 'heal';if(/pull|draw nearby/.test(s))return 'pull';if(/beam|lance|pierc/.test(s))return 'beam';if(/fan|volley|barrage|three flames/.test(s))return 'fan';if(/bolt|shot|arrow|shuriken|star/.test(s))return 'bolt';if(/nearby|circle|circular|around|nova|ring|stomp|storm/.test(s))return 'area';return 'aura';}
 const illustrationImages=new Map();
 function illustrationImage(path){if(!illustrationImages.has(path)){const img=new Image();img.src=path;illustrationImages.set(path,img);}return illustrationImages.get(path);}
@@ -76,9 +95,10 @@ function learned(world,info){if(!world?.p)return;learnQueue.push({world,player:w
 function flight(info){const target=Number.isInteger(info.slot)?document.getElementById('bSk'+info.slot):document.getElementById('clsfill')?.parentElement;const rect=target?.getBoundingClientRect?.();if(!rect?.width)return;
  target.classList.add('progress-slot-ready');slotLights.push({node:target,cls:'progress-slot-ready',until:now()+2000});if(reduced())return;
  const n=el('span','progress-flight');variable(n,'--progress',theme(info.cid).color);if(info.art)n.innerHTML=info.art;else n.textContent='✦';host.append(n);const start=info.from||{x:root.innerWidth*.5,y:root.innerHeight*.42};const anim=n.animate?.([{left:start.x+'px',top:start.y+'px',opacity:1,transform:'translate(-50%,-50%) scale(1.3)'},{left:(rect.left+rect.width/2)+'px',top:(rect.top+rect.height/2)+'px',opacity:0,transform:'translate(-50%,-50%) scale(.55)'}],{duration:650,easing:'cubic-bezier(.35,0,.2,1)'});if(anim)anim.onfinish=()=>n.remove();else n.remove();}
-function clear(){clock.clear();for(const clean of transfers)clean();transfers.clear();host?.querySelectorAll?.('.progress-flight')?.forEach(n=>{n.getAnimations?.().forEach(a=>a.cancel());n.remove();});for(const k of Object.keys(events))removeEvent(k);learnQueue=[];soundQueue.clear();handoff=null;choice=null;slotLights.forEach(s=>s.node?.classList.remove(s.cls));slotLights=[];lastWorld=null;}
+function clear(){removeStatTip();clock.clear();for(const clean of transfers)clean();transfers.clear();host?.querySelectorAll?.('.progress-flight')?.forEach(n=>{n.getAnimations?.().forEach(a=>a.cancel());n.remove();});for(const k of Object.keys(events))removeEvent(k);learnQueue=[];soundQueue.clear();handoff=null;choice=null;slotLights.forEach(s=>s.node?.classList.remove(s.cls));slotLights=[];lastWorld=null;}
 function tick(world,mode,project,opts={}){
  document.body.classList.toggle('progress-reduced',!!opts.reduceMotion);const hidden=!!opts.hidden||!!root.BF_LOADING?.active;
+ if(statTip){statTip.node.hidden=mode!=='play'||hidden;if(!statTip.node.hidden){placeStatTip();if(statTip.blocked)statTip.node.hidden=true;}}
  const previousChoice=choice;clock.tick(hidden||mode!=='play');if(choice&&choice!==previousChoice)mode='upgrade';const alive=!!world?.p&&!world.p.dead&&!world.p.downed&&world.p.hp>0;
  if(lastWorld&&lastWorld!==world||!alive||mode==='title'||mode==='dead'){clear();return;}
  const time=now();for(const [k,s]of soundQueue)if(s.world!==world||s.player!==world.p||opts.hidden)soundQueue.delete(k);
@@ -95,5 +115,5 @@ function tick(world,mode,project,opts={}){
   if(e.elapsed>(e.tier?4400:kind==='player'?3000:kind==='learned'?2400:3200)&&!clock.active)removeEvent(kind);
  }
 }
-const api={createClock,theme,notify,beforeChoice,awardSound,paintBar,statPoints,previewKind,drawIllustration,enhanceChoice,choiceKey,selected,learned,clear,tick,get active(){return clock.active;}};root.BFProgressCelebration=api;if(typeof module!=='undefined')module.exports=api;
+const api={dismissStatTip:removeStatTip,createClock,theme,notify,beforeChoice,awardSound,paintBar,statPoints,previewKind,drawIllustration,enhanceChoice,choiceKey,selected,learned,clear,tick,get active(){return clock.active;}};root.BFProgressCelebration=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

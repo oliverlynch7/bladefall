@@ -1206,8 +1206,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2261"></script>
 <script src="./priority-sfx.js?v=2210"></script>
-<link rel="stylesheet" href="./progression-celebration.css?v=2279f">
-<script src="encounter-rewards.js?v=2270"></script><script src="./progression-celebration.js?v=2279"></script>
+<link rel="stylesheet" href="./progression-celebration.css?v=2284">
+<script src="encounter-rewards.js?v=2270"></script><script src="./progression-celebration.js?v=2284"></script>
 <script>
 (function(){
 "use strict";
@@ -1218,7 +1218,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.283.0-autosell-key-hint';
+const VERSION3D='2.284.0-stat-upgrade-access';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5349,6 +5349,11 @@ function bagFullPrompt(newItem,onDone){ mode='menu';
   document.getElementById('skipNew').onclick=()=>{ toast(no.name+' left behind'); onDone(); };
 }
 
+function openStatUpgrades(){
+ if(mode!=='play'||!G?.p||G.p.dead||G.p.downed||IN_ARENA)return;
+ meta.tut=meta.tut||{};if(!meta.tut.statPoints){meta.tut.statPoints=1;persist();}
+ window.BFProgressCelebration?.dismissStatTip();beginPause();openCharacterStats(resumePlay);
+}
 function openCharacterStats(back,respec=false){
  if(IN_ARENA){toast('Character stat allocation is disabled in the practice arena.');return;}
  const p=G?.p|| (meta.hero?freshFromSnapshot(meta.hero):null);if(!p){toast('Create a character first.');return;}
@@ -10114,6 +10119,7 @@ const KEYACTIONS=[
   {id:'partyNext',label:'Select next friend',def:['KeyY']},
   {id:'journal', label:'Open Journal', def:['KeyN']},
   {id:'bag',label:'Toggle Bag',def:['Tab','KeyB']},
+  {id:'stats',label:'Open Character Stats / Spend Points',def:['KeyC']},
   {id:'emote',label:'Emote Wheel',def:['KeyM']},
   {id:'mount',label:'Mount / Land Dragon',def:['KeyH']},
   {id:'fullscreen',label:'Toggle Fullscreen',def:['Digit0','Numpad0']},
@@ -10197,6 +10203,7 @@ window.addEventListener('keydown',e=>{
   if(act==='partyTeleport'){e.preventDefault();if(mode==='play'&&!e.repeat){partyHeld=true;partyNeedsRelease=false;}return;}
   if(act==='partyNext'){e.preventDefault();if(mode==='play'&&!e.repeat){partyCancel();const a=partyFriends(),q=partySelected();partyChoice=a[(a.indexOf(q)+1)%a.length]?.id||null;}return;}
   if(act==='bag'){if(!e.repeat&&mode==='play'){e.preventDefault();releaseKeyboard();openBag(resumePlay);}return;}
+  if(act==='stats'){if(mode==='play'&&!e.repeat){e.preventDefault();openStatUpgrades();}return;}
   if(act==='mount'){e.preventDefault();if(mode==='play'&&!e.repeat)toggleDragonRide();return;}
   if(act==='emote')return;
   if(act==='journal'){if(!e.repeat&&(mode==='play'||mode==='pause')){e.preventDefault();openJournal();}return;}
@@ -20716,7 +20723,7 @@ function hudUpdate(){
   if(window.BFProgressCelebration)window.BFProgressCelebration.paintBar(document.getElementById('xpfill'),p.xp/p.xpNext*100,p.level,G,'player',meta.reduceMotion);else document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
   document.getElementById('xplabel').innerHTML=eventIcon('resource-soul-essence')+'CHARACTER · LV '+p.level;
   document.getElementById('xpnum').textContent=Math.floor(p.xp)+'/'+p.xpNext;
-  window.BFProgressCelebration?.statPoints(document.querySelector('.charprog .proghead'),IN_ARENA?0:BFCharacterStats.available(p),()=>{if(mode!=='play'||!G?.p||G.p.dead||G.p.downed)return;beginPause();openCharacterStats(resumePlay);},{show:!IN_ARENA&&!meta.tutOff&&p.level>1&&!meta.tut?.statPoints,dismiss:()=>{if(!meta.tut?.statPoints){meta.tut=meta.tut||{};meta.tut.statPoints=1;persist();}}});
+  window.BFProgressCelebration?.statPoints(document.querySelector('.charprog .proghead'),IN_ARENA?0:BFCharacterStats.available(p),openStatUpgrades,{key:controlKey('stats'),hint:controlHint('stats'),show:!IN_ARENA&&!meta.tutOff&&p.level>1&&!meta.tut?.statPoints,dismiss:()=>{if(!meta.tut?.statPoints){meta.tut=meta.tut||{};meta.tut.statPoints=1;persist();}}});
   const cs=classState(meta.classId), atMax=cs.rank>=10, need=RANK_XP(cs.rank);
   if(window.BFProgressCelebration)window.BFProgressCelebration.paintBar(document.getElementById('clsfill'),atMax?100:cs.xp/need*100,cs.rank,G,'class',meta.reduceMotion);else document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
   document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;

@@ -19,6 +19,11 @@ const binds={meta:{keybinds:{lootSell:['KeyQ'],bag:['KeyI']}},window:{addEventLi
 ok(binds.meta.keybinds.lootSell[0]==='KeyX','old Q sale migrates to X');ok(binds.meta.keybinds.bag[0]==='KeyI','custom bag key preserved');ok(vm.runInContext("keyAction('KeyQ')===null",binds),'Q cannot trigger a gameplay action');
 ok(source.includes("keyAction(e.code)==='bag'&&!BFMenuKeys.typing(e.target)"),'bag close uses current binding');
 for(const m of source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g))if(!/\bsrc\s*=|type=["'](?:module|importmap)/.test(m[1])&&m[2].trim())new vm.Script(m[2]);
+ok(vm.runInContext("keyAction('KeyC')==='stats'",binds),'new Character Stats action defaults to C');
+binds.meta.keybinds.journal=['KeyC'];delete binds.meta.keybinds.stats;binds.ensureKeybinds();
+ok(binds.meta.keybinds.journal[0]==='KeyC'&&binds.meta.keybinds.stats.length===0,'new Stats action never steals a saved custom C binding');
+const access={window:{},mode:'play',G:{p:{hp:100}},IN_ARENA:false,meta:{},persist(){access.saved=(access.saved||0)+1},beginPause(){access.paused=(access.paused||0)+1},openCharacterStats(back){access.opened=(access.opened||0)+1;access.back=back},resumePlay(){}};vm.createContext(access);vm.runInContext(source.slice(source.indexOf('function openStatUpgrades(){'),source.indexOf('function openCharacterStats(')),access);access.openStatUpgrades();ok(access.opened===1&&access.paused===1&&access.meta.tut.statPoints===1,'Stats shortcut uses protected pause and dismisses first-point tip');
+for(const state of [{mode:'pause'},{mode:'play',IN_ARENA:true},{mode:'play',IN_ARENA:false,G:{p:{dead:true}}},{G:{p:{downed:true}}}]){Object.assign(access,state);access.openStatUpgrades();}ok(access.opened===1,'shortcut cannot interrupt menus, Arena, death or downing');
 console.log(`${checks} menu shortcut regression checks passed.`);
 
 let selected=0;const selectedButton={tagName:'BUTTON',disabled:false,getClientRects:()=>[{}],closest:()=>null,click(){selected++;}};selectedButton.closest=q=>q==='button,summary'?selectedButton:null;

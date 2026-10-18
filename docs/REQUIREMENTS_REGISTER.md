@@ -2234,3 +2234,17 @@ User requests a reasonable Auto-sell keybind visibly beside the bottom-left HUD 
 ## [Codex | 2026-10-18] Auto-sell HUD shortcut — v2.283.0-autosell-key-hint
 
 Made the existing conflict-free V shortcut visible as a key badge beside Auto-sell ON/OFF at the bottom-left of the HUD. Both initial markup and each bag refresh use the existing remapping-aware action hint. Custom assignments are preserved. Muted isolated Chrome with legacy100 save verifies V on/off, rebinding to9 updates the badge, old V stops toggling,9 toggles, and resetting restores V. Existing bag browser regression and219 guidance checks pass. No loot or economy rules changed. Evidence: docs/art-validation/autosell-key-20261018/hud.png.
+
+
+## [Codex | 2026-10-18] U-STAT-UPGRADE-ACCESS-20261018
+
+User reports the Make your hero stronger prompt lacks a shortcut and overlaps skill UI. Add remappable Character Stats action, default C (unused), with visible key hints on the points badge and prompt. Route keyboard and clicks through the same guarded pause/protection/open flow. Preserve allocations and saved custom bindings. Move the first-point prompt outside transformed HUD ancestors; use measured collision-aware placement around visible HUD/skills/tutorials and hide the larger tip if no clear space, retaining the points shortcut. No forced or automatic allocation. Verify actual input, remapping, safe resume and multiple viewport layouts before shipping.
+
+
+## [Codex | 2026-10-18] Stat upgrade access and placement — v2.284.0-stat-upgrade-access
+
+Added remappable Character Stats action, default C. Existing saved custom C assignments are preserved; if occupied, the new action remains unassigned rather than taking over another action. Points badge and first-point prompt show the current assigned key. Keyboard/click routes use the guarded protected pause flow; C cannot interrupt an existing menu, Arena, death or downing. The first-point tip is removed immediately on opening stats. Q returns; points change only on Apply.
+
+Moved the first-point tip to the document root, outside transformed skill/progress HUD ancestors. Use existing pure callout layout with measured visible HUD, skill rail, progress bars, tutorial and celebration obstacles; throttle placement to150ms. If no clear space fits, hide the larger tip while retaining the clickable points badge and shortcut. Restyled this tutorial card to match the bright parchment/turquoise teaching theme.
+
+Muted isolated actual Chrome: old level100 save loads; measured1747x820 and1280x720 show the tip on-screen with zero HUD intersections;390x844 and844x390 collapse it without overlaps, with points badge retained (phone badge measured inside viewport). C opens stats, removes tip immediately, Q returns, rebinding to9 updates badge, old C stops opening,9 opens, reset restores C;89 unspent points and original allocations remain unchanged. Menu shortcut/migration/guard regressions,219 guidance checks,514 premium coordination checks and44 progression checks plus actual nonblocking-banner tests pass. Evidence: docs/art-validation/stat-upgrade-access-20261018/.

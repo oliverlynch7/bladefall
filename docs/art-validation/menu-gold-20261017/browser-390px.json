@@ -1,0 +1,202 @@
+{
+  "checks": [
+    {
+      "name": "Pre-change save loads",
+      "ok": true
+    },
+    {
+      "name": "Drillmaster has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Drillmaster balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Trainer purchase available",
+      "ok": true
+    },
+    {
+      "name": "Trainer charter spends gold",
+      "ok": true
+    },
+    {
+      "name": "Drillmaster after purchase has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Drillmaster after purchase balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Respec has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Respec balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Respec alternate choice available",
+      "ok": true
+    },
+    {
+      "name": "Live gold updates without resetting staged menu",
+      "ok": true
+    },
+    {
+      "name": "Staged respec after gold gain has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Staged respec after gold gain balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Actual respec spends300 gold",
+      "ok": true
+    },
+    {
+      "name": "Trainer after respec has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Trainer after respec balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Quartermaster has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Quartermaster balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Weapon comparison has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Weapon comparison balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Equipment chests has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Equipment chests balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Actual chest purchase deducts its price",
+      "ok": true
+    },
+    {
+      "name": "Chest shop after purchase has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Chest shop after purchase balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Beastkeeper has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Beastkeeper balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Stylist wardrobe has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Stylist wardrobe balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Face and name has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Face and name balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Actual makeover spends25 gold",
+      "ok": true
+    },
+    {
+      "name": "Stylist after purchase has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Stylist after purchase balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Fortunes Bag has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Fortunes Bag balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Zero balance has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Zero balance balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Large balance has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Large balance balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Gold does not overlap red close button",
+      "ok": true
+    },
+    {
+      "name": "Dungeon preparation uses its separate currency has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Dungeon preparation uses its separate currency balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Dungeon upgrade available",
+      "ok": true
+    },
+    {
+      "name": "Dungeon purchase spends dungeon gold only",
+      "ok": true
+    },
+    {
+      "name": "Dungeon after upgrade has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Dungeon after upgrade balance stays within its row",
+      "ok": true
+    },
+    {
+      "name": "Final Drillmaster has exactly one clear gold balance",
+      "ok": true
+    },
+    {
+      "name": "Final Drillmaster balance stays within its row",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "done": true
+}

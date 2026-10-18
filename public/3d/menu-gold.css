@@ -1,0 +1,5 @@
+.card>.menu-wallet{position:sticky;top:0;z-index:12;box-sizing:border-box;display:flex;align-items:center;gap:9px;min-width:0;width:100%;margin:10px 0 14px;padding:10px 52px 10px 12px;border:1px solid #ae8745;border-radius:9px;background:linear-gradient(120deg,#2d2b24,#162736);box-shadow:0 3px 9px #0004;color:#ffe3a0;text-align:left}
+.menu-wallet .ico{width:24px;height:24px;flex:0 0 24px}
+.menu-wallet-label{font:700 12px system-ui;letter-spacing:.02em;color:#e5d5b4;flex:0 0 auto}
+.menu-wallet output{min-width:0;margin-left:auto;font:900 clamp(17px,2.3vw,23px) Georgia,serif;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.25}
+@media(max-width:560px){.card>.menu-wallet{gap:6px;padding:9px 50px 9px 9px}.menu-wallet-label{font-size:11px}.menu-wallet .ico{width:21px;height:21px;flex-basis:21px}}

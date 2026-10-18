@@ -2515,3 +2515,12 @@ Also refreshed the isolated palm-flame test fixture's missing recomputeArmor dep
 Removed the living teammate's5x5 team/id cube and downed ally's pulsing6x6 red cube from MP.drawPeer. Retained real character/downed body, names, class/level and health labels, team label colors, downed/revive state, paused grey presence and companions/summons. No save/network changes.
 
 Verified24 focused render-branch checks,82 co-op companion checks and42 pause regressions, plus inline syntax compilation. Muted real browser loaded an old level100 save and rendered a named80/100HP co-op ally without the obsolete overhead marker. Evidence:docs/art-validation/peer-markers-20261017/.
+
+
+## [Codex | 2026-10-17] Gold visible in every spending menu - v2.268.0
+
+Added one consistent coin/Your gold row to all10 spending screens: Drillmaster, paid respec, Quartermaster, weapon comparison, equipment chest shop, Fortune's Bag, Beastkeeper, Stylist wardrobe/makeover and dungeon preparation. Explicit data-menu-wallet opt-in keeps free/unrelated menus uncluttered. Row is sticky, comma-formatted, accessible, wraps large balances and reserves room for the red close button. Replaced duplicate prominent balance headings; existing prices and purchase/save code unchanged.
+
+Shared wallet mounts during showOverlayHTML and refreshes on existing HUD updates without rerendering staged options. Dungeon preparation reads the selected dungeon profile and labels Dungeon gold; it never displays campaign gold in its place.
+
+Verified:129/129 regression suites;28 focused wallet lifecycle/currency/format/coverage checks;49 desktop plus49390px browser checks with old saves. Actual charter/respec/chest/makeover/dungeon-upgrade purchases update balances, staged respec survives gold refresh, zero/large values remain readable without close-button overlap. Scrolled to last trainer charter by keyboard; wallet remained visible at y28-78.75 in720px viewport. Evidence:docs/art-validation/menu-gold-20261017/.

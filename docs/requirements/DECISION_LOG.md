@@ -1779,3 +1779,10 @@ Inspection: current two-instance WebRTC reproduction grants independent rewards 
 User: "we dont need the little boxes that float above your coop frinds head anymore that was an old feature"
 
 Inspection/plan: MP.drawPeer still emits a5x5 team/id cube above every living teammate and a pulsing6x6 red cube above downed allies. Remove those legacy floating markers; keep the actual character/downed body, modern name/HP/class labels, downed/revive information, team label colors, paused grey model and companion/summon rendering. Verify peer render branches and old-save browser appearance; no save or network change.
+
+
+## [Codex | 2026-10-17] Clear gold balances in spending menus
+
+User: "any menu in which you can spdn gold should cleanly display your godl amount *drill master menu* for ex"
+
+Inspection/plan: Drillmaster has charter/Seal purchases but no visible balance. Quartermaster and Pet Yard use different balances, weapon comparison and Fortune's Bag lack one, Stylist only shows it after editing, respec puts it below a long tree. Add an explicit shared gold-wallet row near the top of every spending screen: trainer, respec, shop, equipment comparison/chests, Fortune's Bag, Beastkeeper, Stylist wardrobe/makeover and dungeon preparation. Keep it sticky/readable with long amounts and clear of the red close button. Update from the current balance on menu render and HUD updates without resetting staged choices; dungeon preparation must read its selected dungeon profile rather than campaign gold. Consolidate duplicate balance headings. Preserve prices/purchase/save logic and verify real purchases, nested navigation, zero/large balances and old-save loading.

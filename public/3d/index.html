@@ -5,6 +5,8 @@
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2246"></script>
 <script src="./menu-close.js?v=2261f"></script>
+<script src="./menu-gold.js?v=2268"></script>
+<link rel="stylesheet" href="./menu-gold.css?v=2268">
 <link rel="stylesheet" href="./menu-close.css?v=2261f">
 <script src="./camera-controls.js?v=2219"></script>
 <script src="./keep-beta-isolation.js?v=2115"></script>
@@ -1123,7 +1125,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2254"></script>
-<script src="./stylist.js?v=2228"></script>
+<script src="./stylist.js?v=2268"></script>
 <script src="./character-stats.js?v=2087"></script>
 <script src="./class-looks.js?v=2231"></script>
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2228"></script>
@@ -1211,7 +1213,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.267.0-clean-teammates';
+const VERSION3D='2.268.0-menu-gold';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5549,7 +5551,7 @@ function gambleSpin(back){
               itemAv(makeArmor('epic','helmet')),itemAv(makeWeapon('firestaff','uncommon')),itemAv(makeWeapon('great','legendary'))];
   const finalIcon=itemAv(ro);
   meta.gold-=GAMBLE_COST;meta.stash.push(item);persist();
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">${actionIcon('fortunes-bag')}Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
+  showOverlayHTML(`<div class="card" data-menu-wallet="campaign"><p class="ovkicker" style="color:#ffd24a">${actionIcon('fortunes-bag')}Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
     <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid #ffd24a;box-shadow:0 0 24px #ffd24a66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]}"></div></div>
     <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
     <button class="bigbtn hide" id="gamAgain">Again · ${GAMBLE_COST}g</button>
@@ -18097,7 +18099,7 @@ function showOverlayHTML(html){
   // to the same box; setting scrollTop on a non-scrollable node is a harmless no-op.
   const pov=overlay.scrollTop, pcard=ovcard.scrollTop;
   const prevScroll=[...ovcard.querySelectorAll('*')].map(e=>[e.scrollTop,e.scrollLeft]);
-  ovcard.innerHTML=html; enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
+  ovcard.innerHTML=html;window.BFMenuGold?.mount(ovcard,kind=>kind==='dungeon'?window.BFPrisonRun?.profile()?.gold:meta.gold); enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
   if(_pendingMenuTip){ const card=ovcard.querySelector('.card')||ovcard.firstElementChild;   // first-time interactable explainer, injected once
     if(card){ const d=document.createElement('div'); d.style.cssText='text-align:left;background:linear-gradient(90deg,#2a2416,#191922);border:1px solid #5a4a20;border-left:3px solid #e8a33d;border-radius:8px;padding:9px 12px;margin:8px 0 4px;font-size:12.5px;line-height:1.5;color:#e9dcbb';
       d.innerHTML='<b style="color:#ffd24a">💡 First time here — </b>'+_pendingMenuTip; const h=card.querySelector('.ovh'); if(h&&h.parentNode) h.insertAdjacentElement('afterend',d); else card.insertBefore(d,card.firstChild); }
@@ -19545,7 +19547,7 @@ function openRespecTree(cid,back){
         tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA.id,pA.disp)}<div class="rankorb"><span>SKILL</span><b>${i+2}</b></div>${opt(b,pB.id,pB.disp)}</div><div class="buildspine"></div>`; }
       tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your build's defining passives reach their final strength.</div></div>`;
     }
-    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. Basic hits restore a little mana; stop casting for 4 seconds to recover faster. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · ${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
+    showOverlayHTML(`<div class="card buildtree" data-menu-wallet="campaign" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. Basic hits restore a little mana; stop casting for 4 seconds to recover faster. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
     document.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.rank]=b.dataset.pick; SFX.pickup(); render(); });
     document.querySelectorAll('[data-mixslot]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.mixslot]=b.dataset.mixpath; SFX.pickup(); render(); });
     document.getElementById('treeBack').onclick=back;
@@ -19637,7 +19639,7 @@ function openTrainer(back){
       <div style="flex:1;min-width:0"><div class="gn" style="color:#f0d78a">The Drillmaster's Seal</div>
         <div class="gd">${meta.masterSeal?'<b style="color:var(--good)">Acquired</b> · switch class &amp; respec from the pause menu, anywhere':'Switch class &amp; respec from the pause menu, anywhere — mid-run, no marching back'}</div></div>
       ${meta.masterSeal?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button>':`<button class="bigbtn sealbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${meta.gold>=SEAL_COST?'':'opacity:.5'}">${actionIcon('buy')}${SEAL_COST.toLocaleString()}g</button>`}</div></div>`:'';
-  showOverlayHTML(`<div class="card trainercard"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
+  showOverlayHTML(`<div class="card trainercard" data-menu-wallet="campaign"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
     <p class="ovsub">${meta.masterSeal?'Switch and respec here or, with the Seal, from the pause menu anywhere.':'Switch freely here. Never mid-zone.'}</p>
     <button class="bigbtn ghost" id="statRespec">Reassign character stats · Free</button><div class="trainergrid">${rows}</div>${sealRow}<button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('statRespec').onclick=()=>openCharacterStats(()=>openTrainer(back),true);
@@ -19696,7 +19698,7 @@ function openWardrobe(back){
     const slotCol=s.k==='cape'?'#e8a33d':s.k==='trail'?'#64d9ff':'#c47bff';
     return `<section class="cossection" style="--slot:${slotCol}"><div class="cossection-head"><span class="cossection-title">${s.label}</span><span class="cossection-current">Equipped: <b>${cur?cur.name:'None'}</b>${cur?`<span class="cosoff" data-off="${s.k}">Remove</span>`:''}</span></div><div class="cosgrid">${tiles}</div></section>`; }).join('');
   const owned=Object.keys(meta.cosmetics||{}).length, total=COSSLOTS.reduce((a,s)=>a+COSMETICS[s.k].length,0);
-  showOverlayHTML(`<div class="card wardrobe-card"><p class="ovkicker">The Stylist · ${owned}/${total} Discovered</p><h2 class="ovh">Wardrobe</h2>
+  showOverlayHTML(`<div class="card wardrobe-card" data-menu-wallet="campaign"><p class="ovkicker">The Stylist · ${owned}/${total} Discovered</p><h2 class="ovh">Wardrobe</h2>
     <p class="ovsub">Wear the victories you earned. Cosmetics change your legend—not your stats.</p>
     <button class="bigbtn" id="makeoverBtn">Face &amp; name · 25 gold</button><div class="wardrobe-body">${secs}</div>
     <div class="wardrobe-actions"><button class="bigbtn ghost" id="skinBtn2">${uiIcon('action-class-appearance')} Class appearances</button><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
@@ -19807,7 +19809,7 @@ function openBeastkeeper(back){
     :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
   const shop=petShopUnlocked()?unowned.map(id=>petCard(id,'shop')).join(''):'';
-  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. Equip, train and rename them here.</p></header>
+  showOverlayHTML(`<div class="card petyard" data-menu-wallet="campaign"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub">One companion at a time. Equip, train and rename them here.</p></header>
     <section class="whistleOffer"><div><b>Beastkeeper’s Whistle</b><p>Change your companion from the bag, anywhere. Permanent unlock.</p></div><button class="bigbtn" id="buyWhistle" ${meta.companionWhistle||meta.gold<COMPANION_WHISTLE_COST?'disabled':''}>${meta.companionWhistle?'Owned':COMPANION_WHISTLE_COST.toLocaleString()+'g'}</button></section>
     ${!petShopUnlocked()?'<p class="ovsub">Pet purchases unlock after A Kinder Trail. Ask the Beastkeeper about rescuing both trapped animals in Black Woods. You can still manage companions you already own.</p>':''}${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
     <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
@@ -19860,7 +19862,7 @@ function openChestShop(back){
   const odds=BFChestRules.contents[i].map((pct,j)=>pct?`${pct}% ${RARITY[RORDER[j]].name}`:'').filter(Boolean).join(' · ');
   return `<div class="gearrow" style="--spine:${r.color};align-items:center"><span class="ico ico-event ico-event-treasure-chest" style="width:40px;height:40px;flex-shrink:0" aria-hidden="true"></span><div style="flex:1;min-width:0"><div class="gn" style="color:${r.color}">${r.name} Chest</div><div class="gd">${locked?'🔒 Requires':'Unlocked at'} character Level ${rarityReq(rid)}<br>${cost.toLocaleString()}g · ${odds}</div></div><button class="bigbtn chestbuy" data-chest="${rid}" style="width:auto;min-width:90px;margin:0;padding:9px;font-size:13px" ${locked||full||meta.gold<cost?'disabled':''}>${locked?'Lv '+rarityReq(rid):full?'Bag full':meta.gold<cost?'Need gold':'Buy & open'}</button></div>`;
  }).join('');
- showOverlayHTML(`<div class="card chestshop"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Equipment Chests</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold.toLocaleString()}g</b> · Character Level ${level} · Bag ${(meta.stash||[]).length}/${STASH_CAP}</p><p class="hint">One random weapon, armor piece or accessory goes straight into your bag. Prices are fixed. Higher-rarity rewards may require a higher level to equip.</p><div class="achlist" style="max-height:52vh">${rows}</div><p class="hint">Full bag? Free a slot first. Purchased rewards are never auto-sold.</p><button class="bigbtn ghost" id="chestShopBag">${actionIcon('bag-stash')}Manage bag</button><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+ showOverlayHTML(`<div class="card chestshop" data-menu-wallet="campaign"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Equipment Chests</h2><p class="ovsub">Character Level ${level} · Bag ${(meta.stash||[]).length}/${STASH_CAP}</p><p class="hint">One random weapon, armor piece or accessory goes straight into your bag. Prices are fixed. Higher-rarity rewards may require a higher level to equip.</p><div class="achlist" style="max-height:52vh">${rows}</div><p class="hint">Full bag? Free a slot first. Purchased rewards are never auto-sold.</p><button class="bigbtn ghost" id="chestShopBag">${actionIcon('bag-stash')}Manage bag</button><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
  document.querySelectorAll('.chestbuy').forEach(button=>button.onclick=()=>{
   if(!button.isConnected||button.disabled||G!==owner||BFChestReveal.active)return;
   const rid=button.dataset.chest,item=purchaseShopChest(rid,owner);
@@ -19931,8 +19933,8 @@ function openShop(back){
     return `<div class="gearrow" style="--spine:#caa23a${owned?';opacity:.6':''}"><div class="gi">🏰</div>
       <div style="flex:1;min-width:0"><div class="gn" style="color:#e8c86a">${u.name}</div><div class="gd">${u.desc}</div></div>
       ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2>
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
+  showOverlayHTML(`<div class="card" data-menu-wallet="campaign"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2>
+
     <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
     <button class="bigbtn ghost" id="shopBag" style="padding:8px 12px;font-size:13px">${actionIcon('bag-stash')}Bag ${meta.stash.length}/${STASH_CAP}${meta.stash.length>=STASH_CAP?' · Full':''}</button>
     <button class="bigbtn ghost" id="shopChests" style="border-color:#d7ae58">${eventIcon('treasure-chest')}Equipment Chests · Level unlocks & prices ›</button>
@@ -20006,7 +20008,7 @@ function shopCompare(w,cost,back){
     const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
     return `<div class="vsrow"><span>${label}</span><span><b>${f(a)}</b> → <b class="${cls}">${f(b)}${arr}</b></span></div>`; };
   const rA=cur?(cur.cls==='ranged'?((cur.proj&&cur.proj.range)||0):(cur.range||0)):null, rB=w.cls==='ranged'?(w.proj.range||0):(w.range||0);
-  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:${RARITY[w.rarity].color};letter-spacing:.16em">${RARITY[w.rarity].name.toUpperCase()} · ${damageTypeHTML(w)}</p>
+  showOverlayHTML(`<div class="card" data-menu-wallet="campaign"><p class="ovsub" style="color:${RARITY[w.rarity].color};letter-spacing:.16em">${RARITY[w.rarity].name.toUpperCase()} · ${damageTypeHTML(w)}</p>
     <h2 class="ovh" style="color:${RARITY[w.rarity].color}">${w.name}</h2>
     <img class="itemav" src="${itemAv(w)}" alt="">
     <p class="hint" style="margin:-6px 0 8px">vs your <b>${cur?cur.name:'—'}</b></p>
@@ -20562,6 +20564,7 @@ function petHudUpdate(){
   }
 }
 function hudUpdate(){
+  window.BFMenuGold?.refresh();
   if(!G) return; const p=G.p;
   // Resource-sensitive passives can change costs without changing the chosen skill.
   const currentSkills=c2def()?c2CurSkills():curSkills();
@@ -24346,7 +24349,7 @@ function openPreparation(){
  const choices=p.classes.map(c=>`<option value="${c}">${CLASSES[c].disp}</option>`).join('');
  const shop=D.upgrades.map(u=>`<button class="bigbtn ghost" data-prbuy="${u.id}" ${p.gold<D.price(p,u.id)||p.upgrades[u.id]>=u.cap?'disabled':''}>${u.name} ${p.upgrades[u.id]}/${u.cap} · ${D.price(p,u.id)}g<br><small>${u.desc}</small></button>`).join('');
  const classes=D.offers.map(o=>`<button class="bigbtn ghost" data-prbuy="${o.id}" ${p.classes.includes(o.id)||p.tier<o.tier||p.progress[o.key]<o.goal||p.gold<o.cost?'disabled':''}>${CLASSES[o.id].disp} · Tier ${o.tier} · ${p.classes.includes(o.id)?'Owned':o.cost+'g'}<br><small>${o.desc} (${Math.min(o.goal,p.progress[o.key])}/${o.goal})</small></button>`).join('');
- showOverlayHTML(`<div class="card prison-menu"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2><div class="pr-itinerary"><span>1 · Prison cells</span><span>2 · Underworks</span><span>3 · Escape gate</span></div><p class="hint pr-wallet">${p.gold} dungeon gold · Kept after death · Spend between runs</p><label>Starting class <select id="prclass">${choices}</select></label> <label>Difficulty tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Your health carries between rooms. Side paths offer gold and class progress, but risk your run. A new escape replaces the unfinished one.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
+ showOverlayHTML(`<div class="card prison-menu" data-menu-wallet="dungeon"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2><div class="pr-itinerary"><span>1 · Prison cells</span><span>2 · Underworks</span><span>3 · Escape gate</span></div><p class="hint pr-wallet">Dungeon gold is kept after death. Spend it between runs.</p><label>Starting class <select id="prclass">${choices}</select></label> <label>Difficulty tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Your health carries between rooms. Side paths offer gold and class progress, but risk your run. A new escape replaces the unfinished one.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
  document.getElementById('prstart').onclick=()=>{const cid=document.getElementById('prclass').value,tier=+document.getElementById('prtier').value;const go=()=>startDelve(cid,{tier});if(p.checkpoint)confirmAction('Replace this escape?', 'Only the unfinished run in Save '+(library().active+1)+' will be replaced. Keep your gold, upgrades and unlocked classes.',go,openPreparation);else go();};document.getElementById('prresume')?.addEventListener('click',()=>startDelve(p.checkpoint.cid,{resume:true}));document.getElementById('prback').onclick=openHub;document.getElementById('prsaves').onclick=openDelveGate;
  document.querySelectorAll('[data-prbuy]').forEach(el=>el.onclick=()=>{editSaves(book=>D.buy(book.slots[book.active],el.dataset.prbuy));openPreparation();});
 };

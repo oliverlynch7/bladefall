@@ -17,7 +17,7 @@ import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './porta
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2234b';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
-import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2239';
+import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2272';
 import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2239';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2239';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2239';

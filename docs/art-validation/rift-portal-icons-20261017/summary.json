@@ -1,0 +1,13 @@
+{
+  "version": "2.272.0-rift-portal-icons",
+  "change": "Existing class icon textures now use upright camera-facing sprites mounted in front of portal surface; portal frames, label orientation, class mapping and progression unchanged.",
+  "checks": [
+    "24 icon billboard/orientation/depth/disposal checks using actual Three classes",
+    "22 party renderer checks",
+    "32 hub transition checks",
+    "Rift Hall progression/assembly suite",
+    "Rift shard ledger suite"
+  ],
+  "browser": "Muted old level100 save, east and west portal rows and central aisle visually inspected. Screenshots show west row and aisle.",
+  "assetCache": "index -> hero3d -> world3d -> hub-art -> rift-hall-art URLs refreshed."
+}

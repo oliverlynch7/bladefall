@@ -3410,3 +3410,10 @@ Verified encounter/reward suite300427 checks plus3 actual guest authority checks
 Reproduced symmetric missing local hero on both clients. Rift Hall sets a Three Color background, which forces a renderer clear even with autoClear=false; later queued peer renders erase earlier local hero. flushHero3D now explicitly marks first pass. Later hero passes temporarily suppress the background and restore it in existing finally cleanup; first pass still draws room background, and shared depth continues to occlude bodies normally. No player/network/save visibility flags changed. Cache refreshed for hero renderer.
 
 Verified22 actual flush/background composition tests (one/two/six queued bodies, single depth clear, restored background including exceptions),131 regression suites, both old level100 saves, paired local client hall entry and two exit/reentry cycles using actual host zone packets/guest handler. Before/after/reentry screenshots verify both heroes now appear on both clients. Local paired fixtures, not remote-human validation. Evidence:docs/art-validation/rift-party-visibility-20261017/.
+
+
+## [Codex | 2026-10-17] Rift Hall class icons face viewer - v2.272.0
+
+Replaced wall-aligned double-sided class icon planes with upright camera-facing sprites. Same textures,86x86 size and opacity; shifted to front of portal surface so the open rift does not veil them. Both portal rows remain readable along aisle approach without mirrored backs. Portal arch/layout/labels/class mapping and interactions unchanged. Refreshed entire imported art cache chain.
+
+Verified24 actual Three icon orientation/depth/disposal checks,22 co-op party render checks,32 hub transition checks, Hall assembly and shard ledger suites. Muted old level100 save loads; inspected east row, west row and central aisle in game. Evidence:docs/art-validation/rift-portal-icons-20261017/.

@@ -2129,3 +2129,10 @@ Inspection/plan: ordinary enemies currently roll1.5%-3% and elites8%-12%, scaled
 User: "when entering the rift hall in coop i turn invisible but not my friend same for hhim"
 
 Inspection/plan: Rift Hall sets Three scene.background to a Color. Three WebGLBackground forces a color/depth clear for Color backgrounds even though renderer.autoClear=false. flushHero3D draws local first then each peer; each later peer clears the previous hero. Pass explicit first-pass flag from the queue flush; suppress scene background on subsequent hero passes only and restore it in finally. Preserve first-pass room background, world depth, local-first queue, peer rigs, FP weapon-only view and separate mirror previews. Verify both clients entering/leaving/re-entering hall, actual screenshot before/after, normal hub, source render regression and old saves.
+
+
+## [Codex | 2026-10-17] Rift Hall portal icon facing
+
+User: "the icons for th rift hall portals are facing the wrong way"
+
+Inspection/plan: icons are DoubleSide PlaneGeometry children of side-wall portal frames, so they become edge-on along the approach and can be seen mirrored from behind. Replace only icon quads with camera-facing SpriteMaterial/Sprite using existing class textures, scale and opacity; mount just in front of portal surface so an opened rift does not veil the icon. Keep portal arch geometry, placement/order, labels, class mapping and interactions unchanged. Refresh imported asset chain and verify both rows and aisle view plus saved Hall progression tests.

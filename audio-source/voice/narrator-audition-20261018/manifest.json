@@ -1,0 +1,73 @@
+{
+  "status": "saved",
+  "provider": "ElevenLabs",
+  "model": "eleven_multilingual_ttv_v2",
+  "text": "Welcome to Bladefall. Let's get you ready. Press E to continue. Q takes you back. Tab opens the main menu, and B opens your bag. Hold Space to jump higher. There's no rush. The enemies can wait. The lord promised eternal life. Families came, hoping to save the people they loved.",
+  "voice_description": "An original male British English narrator in his fifties, with a clear educated southern English accent. Warm, rounded mid-to-low register, articulate consonants and a relaxed conversational pace. A quietly amused, dry sense of humour, like a patient and observant storyteller welcoming a new adventurer. Inviting and reassuring when teaching controls; sincere and gently compelling when explaining history. Natural human phrasing and small thoughtful pauses. Restrained theatrical confidence, no booming trailer delivery, no sneering, no breathy whispering. Clean close studio recording without music or sound effects.",
+  "text_sha256": "7008c05222addd0d80ed1707c6b5c69f9d7b9ce70704e7c5b5f0b6434ed5bfcf",
+  "plan": "starter",
+  "used_before": 3436,
+  "max_credit_reservation": 3000,
+  "requested_utc": "2026-10-18T23:36:34.928110+00:00",
+  "receipt": {
+    "request_id": null,
+    "character_cost": null
+  },
+  "previews": [
+    {
+      "option": "A",
+      "file": "voice-a.mp3",
+      "generated_voice_id": "lf05U7x90rzqDAhdx9lF",
+      "provider_duration": 23.721875,
+      "bytes": 379550,
+      "sha256": "f09f11d4509d6f68cb6372551435eb3e7c9b7028fa4f45630e1e989887613d80",
+      "library_status": "saved",
+      "voice_id": "lf05U7x90rzqDAhdx9lF",
+      "runtime": {
+        "file": "voice-a.mp3",
+        "duration_seconds": 23.719184,
+        "bytes": 380386,
+        "sha256": "7556b530dbb8b4af8b3919e4db7f05d1aa0bce89f003e6e66b816cec54c2b694",
+        "normalization": "ffmpeg loudnorm I=-18 TP=-2 LRA=9"
+      }
+    },
+    {
+      "option": "B",
+      "file": "voice-b.mp3",
+      "generated_voice_id": "A9dzChsFETVPsLuiViJr",
+      "provider_duration": 19.2288125,
+      "bytes": 307661,
+      "sha256": "7710c02d8070e2e9182dc48069c2d04e975193496ad1c78df4ca746ceeef06ae",
+      "library_status": "saved",
+      "voice_id": "A9dzChsFETVPsLuiViJr",
+      "runtime": {
+        "file": "voice-b.mp3",
+        "duration_seconds": 19.226122,
+        "bytes": 308497,
+        "sha256": "40fe2852d6941a9a834d5e596f9d76f18fc3f201538b2eec78dd5c3f418be780",
+        "normalization": "ffmpeg loudnorm I=-18 TP=-2 LRA=9"
+      }
+    },
+    {
+      "option": "C",
+      "file": "voice-c.mp3",
+      "generated_voice_id": "9Oeep6CzWvyqPdOIeZ9v",
+      "provider_duration": 23.4345625,
+      "bytes": 374953,
+      "sha256": "daa72c691611fa9bef1501e8e7fb1ba667d9f48ebf6019e1348f234a6b0b2888",
+      "library_status": "saved",
+      "voice_id": "9Oeep6CzWvyqPdOIeZ9v",
+      "runtime": {
+        "file": "voice-c.mp3",
+        "duration_seconds": 23.431837,
+        "bytes": 375789,
+        "sha256": "1ecb8af101ee855f9d4876abeefa4c3af568adc77a38062bf2a1569249bf5389",
+        "normalization": "ffmpeg loudnorm I=-18 TP=-2 LRA=9"
+      }
+    }
+  ],
+  "used_after": 3715,
+  "credits_remaining": 36285,
+  "observed_credit_delta": 279,
+  "billing_note": "Settled subsequent subscription read; initial response billing lagged."
+}

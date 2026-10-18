@@ -1961,3 +1961,15 @@ Guided lessons explicitly teach the three navigation keys, Settings rebinding an
 First main-menu visit highlights and explains its eight primary buttons with E/Next, Previous and Close; completion is remembered, and Explain these eight buttons replays it. It uses the existing protected pause state and cancels when leaving that screen. Narration draft updated to speak explicit default controls; no voice audio produced.
 
 Muted isolated Chrome loads prior level100 save, preserves progression, verifies all eight guide steps, no automatic repeat, Tab resume, B bag/Q close, Q harmless in live play and Menu rebound to9. Real held W and Space inputs show success before progression; quick bag and menu open/return also show success. Test harness pumps scene/update frames explicitly. Unit checks cover the two-second bound, jump landing, hidden/menu suspension, migration/custom conflicts and syntax. 26 onboarding,22 menu,219 guidance,514 premium and44 celebration checks plus focused bag and menu tests pass. No new two-human/controller-hardware playtest claimed. Evidence: docs/art-validation/onboarding-controls-20261018/.
+
+
+## [Codex | 2026-10-18] U-NARRATOR-AUDITION-20261018
+
+User approves previews of narrator options. Generate one short original British narrator Voice Design batch containing three distinct previews reading the same default-control, practice and lore sample. No performer cloning or game-wide voice rollout. Check paid Starter balance first; reserve at most3000 credits and never retry an uncertain generation automatically. Save candidate voices in available library slots so the chosen identity remains usable. Publish a phone-friendly comparison page with explicit Play/Stop, shared transcript and A/B/C labels; preserve existing gameplay audio and save data.
+
+
+## [Codex | 2026-10-18] Three narrator auditions — v2.286.0-narrator-auditions
+
+Created one ElevenLabs Voice Design batch with three original British narrator options A/B/C, all reading the same279-character controls/practice/lore sample. Saved each identity as Bladefall Narrator A/B/C in the available voice library slots, retaining originals, prompt, IDs, request receipt and hashes. No cloned performer and no game narration selected or installed. Settled cost279 credits;36285 remain.
+
+Published /3d/narrator-preview/ with native accessible players, one active audition at a time, Stop/volume, shared transcript, MP3 downloads and a private browser-local pick unrelated to game saves. No autoplay; pause on hidden/page exit. Normalize preview copies to -18LUFS target/-2dBTP limit for fair comparison, preserving originals. Muted real Chrome verifies all three decode and play, mutual pause, Stop, pick B persists after refresh, clear resets and no autoplay; phone layout has341px cards within375px content width and no horizontal overflow. Subjective voice/acting choice remains Oliver’s. No SFX or gameplay changed beyond the version marker. Evidence: docs/art-validation/narrator-audition-20261018/.

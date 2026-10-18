@@ -2680,3 +2680,10 @@ Muted isolated Chrome loads prior level100 save, preserves progression, verifies
 ## [Codex | 2026-10-18] Menu toggle follow-through — v2.285.1-onboarding-controls
 
 Tab and Escape now close the first-use guide and main menu in the same press; Q closes the guide first as its nested Back action. Verified actual Tab open/close while the guide is visible with an isolated legacy100 save.
+
+
+## [Codex | 2026-10-18] Three narrator auditions — v2.286.0-narrator-auditions
+
+Created one ElevenLabs Voice Design batch with three original British narrator options A/B/C, all reading the same279-character controls/practice/lore sample. Saved each identity as Bladefall Narrator A/B/C in the available voice library slots, retaining originals, prompt, IDs, request receipt and hashes. No cloned performer and no game narration selected or installed. Settled cost279 credits;36285 remain.
+
+Published /3d/narrator-preview/ with native accessible players, one active audition at a time, Stop/volume, shared transcript, MP3 downloads and a private browser-local pick unrelated to game saves. No autoplay; pause on hidden/page exit. Normalize preview copies to -18LUFS target/-2dBTP limit for fair comparison, preserving originals. Muted real Chrome verifies all three decode and play, mutual pause, Stop, pick B persists after refresh, clear resets and no autoplay; phone layout has341px cards within375px content width and no horizontal overflow. Subjective voice/acting choice remains Oliver’s. No SFX or gameplay changed beyond the version marker. Evidence: docs/art-validation/narrator-audition-20261018/.

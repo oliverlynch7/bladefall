@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-Draft direction and script, October 18, 2026. No voice selected or paid speech generated. Control and teaching-text changes below are implemented in v2.285; narration remains a draft. Settle the newcomer experience first; record a short audition before producing the complete script. Existing NPC recordings and preferred sound effects remain separate.
+Draft direction and script, October 18, 2026. No production voice selected. Three paid audition previews are now available separately at /3d/narrator-preview/. Control and teaching-text changes below are implemented in v2.285; narration remains a draft. Settle the newcomer experience first; record a short audition before producing the complete script. Existing NPC recordings and preferred sound effects remain separate.
 
 Grounding: `public/3d/guided-tutorial.js`, `hub-tour.js`, `index.html` (`STORY.origin`, `playOpening`, audio settings), `voice-content.js`, `docs/STORY_CANON.md`, current requirements and Voice Studio implementation. The tutorial currently has 18 regular lessons and one inserted first-skill lesson. The hub tour builds stops from actual hub objects, so its coverage must be checked against that generated list rather than a fixed count.
 
@@ -116,3 +116,7 @@ No provider pricing, credit estimate or exact voice/model availability is assume
 Tab opens the main menu; B toggles the bag; Q is Back/Close, E selects or continues. Escape remains a menu fallback. Preserve deliberate custom bindings and migrate known former Tab/Bag defaults. After a practice action succeeds, show success for two seconds of active play before advancing; do not lock movement or count menu/background time. The first menu opening explains Gear, Bag, Classes, Achievements, Settings, Multiplayer, Quit to Hub and Title Screen with a replay option. Skipping tutorial lessons is an explicit visible action, separate from opening or closing the menu. No narration audio has been generated or wired yet.
 
 The eight menu explanations now live in `public/3d/menu-tour.js`; use those entries as the source when preparing their spoken transcript rather than maintaining a second independent menu script. The published playback adapter and audio are still future work.
+
+## Narrator audition ready
+
+Three original Voice Design candidates A/B/C read the same279-character control, jumping and lore sample. Their stable voice identities are saved in the ElevenLabs library; no existing voice was removed. The public comparison page supports one active player, Stop, volume, a page-only personal pick and MP3 downloads. This is not narration integration or approval of the full script. Generation records and original takes: audio-source/voice/narrator-audition-20261018/. Settled balance changed36564→36285 (279 credits).

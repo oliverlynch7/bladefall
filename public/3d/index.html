@@ -2,6 +2,7 @@
 <html lang="en">
 <head><script src="./save-safety.js?v=2229"></script>
 <script src="./skill-sfx.js?v=2230"></script>
+<script src="./coop-audio.js?v=2269"></script>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2246"></script>
 <script src="./menu-close.js?v=2261f"></script>
@@ -1213,7 +1214,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.268.0-menu-gold';
+const VERSION3D='2.269.0-coop-combat-audio';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1752,7 +1753,7 @@ function tone(o){ // {f0,f1,dur,type,vol,a,at,detune}
   os.type=o.type||'sine'; if(o.detune) os.detune.value=o.detune;
   os.frequency.setValueAtTime(Math.max(20,o.f0),t);
   if(o.f1) os.frequency.exponentialRampToValueAtTime(Math.max(20,o.f1),t+o.dur);
-  env(g,t,o.a||0.006,o.vol||0.07,o.dur);
+  env(g,t,o.a||0.006,(o.vol||0.07)*(window.BFCoopAudio?.gain??1),o.dur);
   os.connect(g); g.connect(procBus||master); os.start(t); os.stop(t+o.dur+0.03); }catch(e){}
 }
 function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
@@ -1761,7 +1762,7 @@ function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
   const f=actx.createBiquadFilter(); f.type=o.type||'bandpass'; f.Q.value=o.q||1;
   f.frequency.setValueAtTime(o.f0||1000,t);
   if(o.f1) f.frequency.exponentialRampToValueAtTime(Math.max(40,o.f1),t+o.dur);
-  const g=actx.createGain(); env(g,t,o.a||0.004,o.vol||0.1,o.dur);
+  const g=actx.createGain(); env(g,t,o.a||0.004,(o.vol||0.1)*(window.BFCoopAudio?.gain??1),o.dur);
   s.connect(f); f.connect(g); g.connect(procBus||master); s.start(t,Math.random()*0.5); s.stop(t+o.dur+0.03); }catch(e){}
 }
 /* ---- File-based SFX (v1.59): real sourced sounds layered on the procedural engine. Decoded to
@@ -1845,8 +1846,8 @@ function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
     if(def.f.startsWith('custom/')){let peak=0;for(let c=0;c<buf.numberOfChannels;c++){const data=buf.getChannelData(c);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}if(peak>0)norm=Math.min(norm,.85/peak);}
     def._norm=norm; }).catch(()=>{}); })(k); } }
 const _fxLoop={};
-function playFx(key,volMul){ if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
-  try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul);
+function playFx(key,volMul){ window.BFCoopAudio?.file(key,volMul);if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
+  try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul)*(window.BFCoopAudio?.gain??1);
     s.connect(g); g.connect(fxBus||master); s.start(); return {s,g}; }catch(e){ return null; } }
 function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return;
   try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(d._norm||1)*(volMul==null?1:volMul);
@@ -1950,6 +1951,7 @@ const SFX={
 };
 
 if(window.BFPrioritySfx)window.BFPrioritySfx.bind(SFX,playFx);
+window.BFCoopAudio?.bind(SFX);
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
   common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
@@ -12148,6 +12150,7 @@ function autoAtkTarget(p,w){
 function playerAttack(cdMul){
   if(partyChannel||G?.p?.dragonRide)return;
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
+  const audio=typeof window!=='undefined'&&window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;try{
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
   // Swift Steel's fourth-hit bonus is applied on impact, not as a second attack-speed multiplier.
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
@@ -12195,6 +12198,7 @@ function playerAttack(cdMul){
       if(p.scytheCombo===2){ p.atkTimer=0.34; p.atkCd*=1.12; SFX.magic(w.el||'void'); G.shake=Math.min(G.shake+6,14); }   // the finisher costs a beat more
     } else p.swingCombo=-1;
   }
+  }finally{if(audio)MP.sendSound(window.BFCoopAudio.end(audio));}
 }
 /* Class combat styles: the Ranger trades peaks for versatility — his shots trail a
    Mage's catalysts and his steel trails a Warrior's, but he owns both ranges. */
@@ -12215,6 +12219,7 @@ function beginThrownWeapon(p,w,returns){
 }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
 function chargeRelease(p,w,amt){ if(partyChannel)return; if(!classFamilyOk(w)) return;
+  const audio=typeof window!=='undefined'&&window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;try{
   const previousSwing=p.swingId||0;
   if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
   else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
@@ -12235,6 +12240,7 @@ function chargeRelease(p,w,amt){ if(partyChannel)return; if(!classFamilyOk(w)) r
   }
   if((p.swingId||0)===previousSwing)p.swingId=previousSwing+1; // Every accepted release restarts its animation, including rapid same-clip follow-ups.
   G._desig=false;
+  }finally{if(audio)MP.sendSound(window.BFCoopAudio.end(audio));}
 }
 // One contact per burst; shared combat targets include arena/co-op opponents.
 function palmFlame(p,w,charge){
@@ -13185,12 +13191,12 @@ function useSkill(i){
     initAudio();
     const originalWeapon=p.weapon,priorAttune=p._attuneI,priorDesignated=G._desig;
     classCastPreparation(p);
-    const castWeapon=p.weapon,oldShots=new Set(G.projectiles),fx=SKILL_FX[s.fx];let r;
-    try{G._desig=true;r=fx?fx(p,classFamilyOk(p.weapon),(s.am??1)):'refund';}
-    finally{p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!oldShots.has(shot)&&shot.owner==='player')shot.desig=true;}
+    const castWeapon=p.weapon,oldShots=new Set(G.projectiles),fx=SKILL_FX[s.fx];let r,cues;const audio=window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;
+    try{G._desig=true;r=fx?fx(p,classFamilyOk(p.weapon),(s.am??1)):'refund';if(r!=='refund'&&window.BFSkillSfx)window.BFSkillSfx.cast(s.id,playFx);}
+    finally{if(audio)cues=window.BFCoopAudio.end(audio);p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!oldShots.has(shot)&&shot.owner==='player')shot.desig=true;}
     // A rejected cast earns no healing, shields, echoes, pet orders or cast counters.
     if(r==='refund'){p._manaRecoveryDelay=priorManaDelay;p._attuneI=priorAttune;if(soulFree)p._soulFree=1;else gainMana(p,manaSpent,false);return;}
-    if(window.BFSkillSfx)window.BFSkillSfx.cast(s.id,playFx);
+    if(cues)MP.sendSound(cues.length?cues:window.BFCoopAudio.fallback(meta.classId));
     if(partyChannel)partyCancel('Skill interrupted your teleport');
     classCastCompanionOrder();
     if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=Math.max(p.shieldT||0,3);} if(c2Passive('m_echo')&&p._mageCasts%4===0){const shots=new Set(G.projectiles);try{p.weapon=castWeapon;G._desig=true;fx(p,classFamilyOk(p.weapon),(s.am??1)*.35);}finally{p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!shots.has(shot)&&shot.owner==='player')shot.desig=true;}} if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
@@ -13245,9 +13251,10 @@ function useSkillLegacy(i){
   const priorManaDelay=p._manaRecoveryDelay||0,manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return;
   initAudio();
   G._desig=true;                                          // abilities are "designated" attacks: they spend Rune Marks + rupture Corruption
-  const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
+  const audio=window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;let r,cues;try{r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());}finally{if(audio)cues=window.BFCoopAudio.end(audio);}
   G._desig=false;
   if(r==='refund'){ p._manaRecoveryDelay=priorManaDelay;gainMana(p,manaSpent,false); return; }
+  if(cues)MP.sendSound(cues.length?cues:window.BFCoopAudio.fallback(meta.classId));
   let cd=s.cd;
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate();
@@ -13630,7 +13637,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     if(sid===G._sfxSwing && (now-(G._sfxAt||-9))<0.25) _sfx=false;
     else { G._sfxSwing=sid; G._sfxAt=now; }
   }
-  if(_sfx) SFX.hit();
+  if(_sfx){if(guestOwner&&window.BFCoopAudio)BFCoopAudio.withGain(BFCoopAudio.volume(G.p,MP.peers[guestOwner.id]),()=>SFX.hit());else SFX.hit();}
   if(_pl && _sfx && e.hp>0){ const w=G.p.weapon;                            // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
     weaponImpact(w);                                                        // curated heavy-weapon impact (axe/great/hammer/scythe)
     if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
@@ -15108,6 +15115,7 @@ const MP={
       else if(d.t==='pdmg'){ this.routePvp({...d,by:c._pid}); }           // host relays PvP damage to the target
       else if(d.t==='petdmg'){ this.routePetPvp(d); }      // owner-authoritative companion damage
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
+      else if(d.t==='sound'){this.recvSound(d,c);}
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
       else if(d.t==='mark'){ this.recvMark(d,c); }          // a guest's world ping — draw + relay to the rest of the party
       else if(d.t==='campaignAdvance'&&isCampaignAdventure()&&G.portal&&d.zone===G.zone&&d.area===G.area){nextArea();}
@@ -15201,6 +15209,7 @@ const MP={
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
     else if(d.t==='petdmg'){ if(d.id===this.myId) this.takePetPvpDamage(d); }
     else if(d.t==='score'){ this.showScore(d.id,d.n); }
+    else if(d.t==='sound'){this.recvSound(d);}
     else if(d.t==='cfx'){ this.recvCombat(d); }   // the host's (or a relayed guest's) projectiles/skill rings
     else if(d.t==='mark'){ this.recvMark(d); }    // somebody in the party pinged the world
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
@@ -15258,6 +15267,26 @@ const MP={
     return !!host&&host.zone===this.zone&&host.area===G.area&&!!host.hall===!!G.riftHall;
   },
   combatScene(){return JSON.stringify([this.zone,G?.area,G?.runSeed,G?.trialSession||null,G?.floor||0,G?.brIdx||0]);},
+  // Owner-approved cast/swing sounds, separate from visual FX and HP authority.
+  sendSound(cues){
+    if(!this.active||!G||!window.BFCoopAudio)return;
+    cues=BFCoopAudio.clean(cues);if(!cues.length)return;
+    const d={t:'sound',by:this.myId,seq:(this._soundSeq=(this._soundSeq||0)+1),scene:this.worldStateScene(),cues};
+    if(this.isHost){for(const c of this.conns)if(c.open)try{c.send(d);}catch{}}
+    else if(this.hostConn?.open)try{this.hostConn.send(d);}catch{}
+  },
+  recvSound(d,fromConn){
+    if(!this.active||!G||!window.BFCoopAudio||!d)return;
+    const by=this.isHost?fromConn?._pid:d.by,q=this.peers[by];
+    if(!by||by===this.myId||!q||d.scene!==this.worldStateScene()||q.zone!==this.zone||(q.area!=null&&q.area!==G.area)||!!q.hall!==!!G.riftHall||!Number.isSafeInteger(d.seq)||d.seq<1)return;
+    const cues=BFCoopAudio.clean(d.cues);if(!cues.length)return;
+    const seen=G._soundSeen||(G._soundSeen=new Map()),now=performance.now();let state=seen.get(by);
+    if(!state){state={seq:0,tokens:8,at:now};seen.set(by,state);}
+    if(d.seq<=state.seq)return;state.seq=d.seq;state.tokens=Math.min(8,state.tokens+Math.max(0,now-state.at)*.01);state.at=now;
+    if(state.tokens<1)return;state.tokens--;
+    BFCoopAudio.play(cues,BFCoopAudio.volume(G.p,q),SFX,playFx);
+    if(this.isHost){const packet={t:'sound',by,seq:d.seq,scene:d.scene,cues};for(const c of this.conns)if(c!==fromConn&&c.open)try{c.send(packet);}catch{}}
+  },
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null, art=null;
     for(const e of G.combatArt||[])if(!e._mp&&!e.visual){e._mp=1;(art=art||[]).push(BF_COMBAT_ART.packet(e));}
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(

@@ -3387,3 +3387,12 @@ Added one consistent coin/Your gold row to all10 spending screens: Drillmaster, 
 Shared wallet mounts during showOverlayHTML and refreshes on existing HUD updates without rerendering staged options. Dungeon preparation reads the selected dungeon profile and labels Dungeon gold; it never displays campaign gold in its place.
 
 Verified:129/129 regression suites;28 focused wallet lifecycle/currency/format/coverage checks;49 desktop plus49390px browser checks with old saves. Actual charter/respec/chest/makeover/dungeon-upgrade purchases update balances, staged respec survives gold refresh, zero/large values remain readable without close-button overlap. Scrolled to last trainer charter by keyboard; wallet remained visible at y28-78.75 in720px viewport. Evidence:docs/art-validation/menu-gold-20261017/.
+
+
+## [Codex | 2026-10-17] Quieter co-op combat audio - v2.269.0
+
+Teammates now hear successful basic/charged attacks and skill casts. Bounded audio-only recipes capture existing procedural and file cues, including Pyromancer skills; otherwise-silent skills get one thematic fallback. Nearby ally gain is0.55, fades beyond260 world units, silent at1600. Own audio and listener mute/SFX settings remain unchanged. Guest impact sound on host follows same quieter distance mix.
+
+Host authenticates sender, relays to other guests excluding source; scene/peer/sequence checks reject echoes, duplicates and stale-world packets; bounded cues/token bucket limit spam. Cooldown, insufficient-mana and refunded casts do not send sounds. Muted/unloaded senders still transmit recipes without duplicate fallback cues. No save or combat authority changes.
+
+Verified52 focused capture/protocol/actual gain checks and130 regression suites;16 muted browser checks across two old-save game instances using bidirectional local WebRTC, actual attack/charge/skill dispatch and host wireGuest handler. Third-connection relay observed; no subjective or remote-hardware sound mix claim. Evidence:docs/art-validation/coop-combat-audio-20261017/.

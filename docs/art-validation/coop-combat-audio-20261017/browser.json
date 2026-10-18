@@ -1,0 +1,70 @@
+{
+  "checks": [
+    {
+      "name": "Both isolated old level100 saves load",
+      "ok": true
+    },
+    {
+      "name": "Hub scene agrees despite independent saves",
+      "ok": true
+    },
+    {
+      "name": "Actual bidirectional reliable WebRTC connected",
+      "ok": true
+    },
+    {
+      "name": "Host actual basic attack reaches guest",
+      "ok": true
+    },
+    {
+      "name": "Nearby guest mix uses55percent gain",
+      "ok": true
+    },
+    {
+      "name": "Muted sender still sends cues",
+      "ok": true
+    },
+    {
+      "name": "Guest actual basic attack reaches host",
+      "ok": true
+    },
+    {
+      "name": "Host relays guest sound once to other guest",
+      "ok": true
+    },
+    {
+      "name": "Sender does not hear network echo",
+      "ok": true
+    },
+    {
+      "name": "Cooldown blocked basic attack is silent remotely",
+      "ok": true
+    },
+    {
+      "name": "Actual charged staff attack reaches guest",
+      "ok": true
+    },
+    {
+      "name": "Actual successful skill reaches guest",
+      "ok": true
+    },
+    {
+      "name": "Cooldown blocked skill sends no duplicate cue",
+      "ok": true
+    },
+    {
+      "name": "Insufficient mana sends no skill sound",
+      "ok": true
+    },
+    {
+      "name": "Remote replay restores own gain to1",
+      "ok": true
+    },
+    {
+      "name": "Both listeners remain muted throughout test",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "done": true
+}

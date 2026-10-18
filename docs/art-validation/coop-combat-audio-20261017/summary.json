@@ -1,0 +1,12 @@
+{
+  "version": "2.269.0-coop-combat-audio",
+  "nearbyGain": 0.55,
+  "fullGainRadius": 260,
+  "silentDistance": 1600,
+  "focusedChecks": 52,
+  "regressionSuites": 130,
+  "browserChecks": 16,
+  "transport": "Two actual game instances over bidirectional reliable local WebRTC; actual host wireGuest and guest onGuestData handlers; relay to third connection observed.",
+  "audioValidation": "Muted during browser QA; actual file and procedural gain nodes verified numerically in focused tests. Subjective mix and geographically remote friend hardware not human-playtested.",
+  "saves": "Both isolated pre-change level100 saves load; no format changes."
+}

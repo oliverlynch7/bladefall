@@ -1786,3 +1786,10 @@ Inspection/plan: MP.drawPeer still emits a5x5 team/id cube above every living te
 User: "any menu in which you can spdn gold should cleanly display your godl amount *drill master menu* for ex"
 
 Inspection/plan: Drillmaster has charter/Seal purchases but no visible balance. Quartermaster and Pet Yard use different balances, weapon comparison and Fortune's Bag lack one, Stylist only shows it after editing, respec puts it below a long tree. Add an explicit shared gold-wallet row near the top of every spending screen: trainer, respec, shop, equipment comparison/chests, Fortune's Bag, Beastkeeper, Stylist wardrobe/makeover and dungeon preparation. Keep it sticky/readable with long amounts and clear of the red close button. Update from the current balance on menu render and HUD updates without resetting staged choices; dungeon preparation must read its selected dungeon profile rather than campaign gold. Consolidate duplicate balance headings. Preserve prices/purchase/save logic and verify real purchases, nested navigation, zero/large balances and old-save loading.
+
+
+## [Codex | 2026-10-17] Quieter co-op attack and skill audio
+
+User: "i wan tto be able to hear the sfx of my coop friends attacks and skill sbut the volume shoul dbe a bit lower so it doesnt get confuses with youtr own"
+
+Inspection/plan: sendCombat/recvCombat share visuals only. Add bounded audio-only events from accepted basic/charged attacks and successful skill casts, capturing their existing approved combat SFX recipes rather than running remote skill effects or replacing sounds. Scope replay gain to55% near the listener with distance falloff; preserve recipient mute/SFX slider and local/music loudness. Use sender identity from host connection, shared world scene, sequence duplicate protection, whitelisted finite recipes and rate limits. Work even if sender is muted; avoid transmitting UI/loot/progression sounds and omit failed/refunded casts. Preserve existing visuals, damage, saves and older packets. Verify capture/mix/filters, actual host-to-guest and guest-to-host/relay transport, hub/campaign scenes, old saves and regression suites in muted browser tests.

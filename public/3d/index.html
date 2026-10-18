@@ -1193,7 +1193,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2254">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2254"></script>
+<script src="./guided-tutorial.js?v=2265"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.264.0-smooth-rank-up';
+const VERSION3D='2.265.0-mana-economy';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -2493,7 +2493,7 @@ pyromancer:{
                         b:{id:'r_bounty',n:'Bounty Hunter',role:'Sustain',d:'Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.'}}
   },
   mage:{ disp:'Mage', icon:classIcon('mage'),
-    innate:{name:'Arcane Attunement',d:"Basic hits spend 6 mana for 35% extra damage when enough mana is available. Magic basic hits also restore 2 mana."},
+    innate:{name:'Arcane Attunement',d:"Basic hits spend 6 mana for 35% extra damage while keeping 25% of your mana in reserve. Magic basic hits restore 2 extra mana, at most once every 0.65 seconds."},
     cap:{name:'Archmage',d:'+12% magic damage, +10% cooldown reduction, and every third skill refunds half its mana cost.'},
     r2:{kind:'skill',slot:0,a:{id:'m_bolt',n:'Elemental Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'m_bolt',d:"Fire a quick elemental bolt. Short cooldown and low damage per cast."},b:{id:'m_beam',n:'Elemental Beam',cd:6,role:'Piercing Damage',fx:'m_beam',d:'Fire a piercing elemental lance for 2x damage through every target.'}},
     r3:{kind:'passive',a:{id:'m_potent',n:"Potent Casting",role:'Power',d:"Empowered basic hits deal 55% extra damage instead of 35%, for the same 6 mana. Magic skills deal 12% more damage."},b:{id:'m_efficient',n:'Efficient Casting',role:'Economy',d:'Skills cost 15% less mana.'}},
@@ -5024,7 +5024,7 @@ function recomputeArmor(p){
     for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a){ normArmor(a); fold(a); } } }
   m.defense=(total+defBonus)/((total+defBonus)+200);
   p.armorMods=m;
-  p.maxMana=classMaxMana()+BFCharacterStats.value(p,'mana')*3+(meta.classId==='mage'?10:0);                         // per-class mana pool (see CLASS_MANA)
+  p.maxMana=classMaxMana()+BFCharacterStats.value(p,'mana')*3+(meta.classId==='mage'?10+(c2Passive('m_manafont')?10:0):0);                         // per-class mana pool (see CLASS_MANA)
   if(p.mana!=null && p.mana>p.maxMana) p.mana=p.maxMana;
 }
 /* Per-class mana ECONOMY. pool = max-mana ×, regen = idle-regen ×, cost = skill-mana-cost ×.
@@ -12586,7 +12586,7 @@ function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||
     document.getElementById('choiceReview').hidden=false;document.getElementById('choiceSelected').textContent=selected.n;
     let committed=false;
     document.getElementById('classChoiceBack').onclick=()=>{document.getElementById('choiceReview').hidden=true;document.querySelectorAll('.c2opt').forEach(el=>{el.style.outline='';el.setAttribute('aria-pressed','false');});};
-    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;c2ch()[rank]=selected.id;persist();SFX.pickup();
+    document.getElementById('classChoiceConfirm').onclick=()=>{if(committed||Date.now()-confirmAt<ARM_MS||mode!=='upgrade'||meta.classId!==cid||classState(cid)!==cs||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed)return;committed=true;c2ch()[rank]=selected.id;recomputeArmor(G.p);persist();SFX.pickup();
       const nx=c2NextChoice();if(nx)openClassChoice(nx);else{skillbarUpdate();const first=c2CurSkills()[0];if(first&&!(meta.tut&&meta.tut.skill))openSkillTutorial(first);else resumePlay();}
     };
   });
@@ -13026,36 +13026,32 @@ SKILL_FX.bd_perfect=function(p,ok,am){p.bdParryT=c2Passive('bd_patient')?1.65:1.
    repeatable attacks are cheap, mobility is cheapest, control/sustain sits mid-band,
    and major immunity/burst/room-clearing effects carry the premium. */
 const SKILL_MANA={
-  // Low-CD "spam" damage skills — cheap so mana naturally paces the spam (see s.am/cd on these skills).
-  // (w_cleave/m_bolt/x_reap are set to 6 in their class rows below; these three have no other entry.)
-  chr_bolt:6,necro_bolt:6,pir_pierce:6,
-  cleave:12,stomp:16,wcharge:14,berserk:22,
-  bulwark:14,ironwave:18,laststand:26,
-  deadeye:14,volley:12,tumble:8,mark:16,
-  shadowstrike:13,smokebomb:12,deathmark:20,
-  bolt:13,nova:16,blink:8,tempest:24,
-  frostchains:15,barrier:18,meteor:26,
-  reap:14,harvest:18,shadowstep:9,deathsdoor:24,
-  execute:18,grimscythe:17,reapingstorm:25,
-  r_volley:11,r_pierce:14,r_tumble:8,r_shadow:12,
-  r_spike:13,r_smoke:11,r_mark:16,r_deathmark:20,
-  w_cleave:6,w_bash:11,w_charge:13,w_whirl:16,w_guard:15,w_stomp:17,w_berserk:22,w_execute:20,
-  m_bolt:6,m_beam:14,m_blink:8,m_nova:15,m_gravity:17,m_barrier:18,m_tempest:23,m_overload:26,
-  x_reap:6,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24,
-  mon_flurry:5,mon_palm:9,mon_deflect:14,mon_roll:6,mon_whirl:14,mon_stun:13,mon_thousand:22,mon_dragon:16,
-  st_bolt:6,st_lance:14,st_step:8,st_nova:15,st_orb:17,st_barrier:18,st_storm:23,st_overload:26,
-  war_bolt:6,war_lance:14,war_curse:15,war_drain:17,war_step:9,war_orb:19,war_storm:24,war_final:27,
-  sky_rise:10,sky_gale:7,sky_dive:12,sky_lift:16,sky_dash:11,sky_rain:20,sky_crash:25,sky_cyclone:24,
-  bd_counter:8,bd_twin:7,bd_riposte:13,bd_step:10,bd_mirror:17,bd_cross:16,bd_steel:25,bd_perfect:27,
-  bst_sic:12,bst_coordinated:16,bst_guardian:18,bst_step:14,bst_mend:20,bst_roar:22,bst_stampede:32,bst_apex:28
+  // Current class choices: early skills / movement-control / specialist skills / finishers.
+  py_bolt:12,py_fan:16,py_blast:19,py_ward:18,py_lance:22,py_nova:24,py_inferno:33,py_sun:32,
+  w_cleave:10,w_bash:14,w_charge:17,w_whirl:19,w_guard:18,w_stomp:21,w_berserk:28,w_execute:26,
+  r_volley:14,r_pierce:17,r_tumble:11,r_shadow:15,r_spike:18,r_smoke:16,r_mark:22,r_deathmark:26,
+  m_bolt:9,m_beam:17,m_blink:11,m_nova:18,m_gravity:21,m_barrier:22,m_tempest:30,m_overload:33,
+  x_reap:10,x_cleave:18,x_step:11,x_wraith:18,x_pull:20,x_bind:19,x_siphon:25,x_vortex:31,
+  pal_bash:14,pal_smite:17,pal_taunt:16,pal_ground:20,pal_guard:21,pal_burst:19,pal_laststand:30,pal_sky:28,
+  necro_summon:13,necro_bolt:9,necro_raise:19,necro_nova:18,necro_wall:21,necro_grip:22,necro_army:30,necro_storm:29,
+  nin_strike:17,nin_barrage:18,nin_step:12,nin_smoke:18,nin_mark:21,nin_pierce:20,nin_fury:31,nin_storm:29,
+  bsk_cleave:13,bsk_bash:15,bsk_charge:18,bsk_stomp:19,bsk_whirl:21,bsk_execute:21,bsk_berserk:29,bsk_guard:20,
+  pir_pierce:10,pir_volley:16,pir_shadow:15,pir_tumble:11,pir_smoke:18,pir_goldrush:24,pir_deathmark:31,pir_spike:26,
+  chr_bolt:9,chr_beam:17,chr_nova:18,chr_blink:11,chr_gravity:21,chr_barrier:22,chr_tempest:30,chr_overload:33,
+  mon_flurry:10,mon_palm:13,mon_deflect:18,mon_roll:10,mon_whirl:18,mon_stun:18,mon_thousand:28,mon_dragon:24,
+  st_bolt:9,st_lance:17,st_step:11,st_nova:18,st_orb:21,st_barrier:22,st_storm:30,st_overload:33,
+  war_bolt:10,war_lance:17,war_curse:19,war_drain:22,war_step:11,war_orb:24,war_storm:31,war_final:34,
+  sky_rise:15,sky_gale:11,sky_dive:17,sky_lift:20,sky_dash:16,sky_rain:25,sky_crash:32,sky_cyclone:31,
+  bd_counter:12,bd_twin:11,bd_riposte:18,bd_step:13,bd_mirror:22,bd_cross:21,bd_steel:32,bd_perfect:33,
+  bst_sic:14,bst_coordinated:18,bst_guardian:20,bst_step:16,bst_mend:23,bst_roar:24,bst_stampede:34,bst_apex:31,
+  // Legacy saved skill identifiers remain supported.
+  cleave:16,stomp:21,wcharge:18,berserk:29,bulwark:18,ironwave:23,laststand:34,deadeye:18,volley:16,tumble:10,mark:21,shadowstrike:17,smokebomb:16,deathmark:26,bolt:17,nova:21,blink:10,tempest:31,frostchains:20,barrier:23,meteor:34,reap:18,harvest:23,shadowstep:12,deathsdoor:31,execute:23,grimscythe:22,reapingstorm:32
 };
-/* GLASS CANNON, rewritten: below a quarter health your skills cost nothing. Was "+15% magic damage,
-   take 8% more" - two numbers that cancelled into a wash you could not feel. This is a real gamble:
-   the class is strongest exactly where it is closest to dying. */
+// Low-health and efficiency passives retain their stated cost reductions.
 function skillManaCost(i,s){
   s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
   let v=(s&&SKILL_MANA[s.id])||12;
-  /* Glass Cannon: below a quarter health your skills are free. */
+  /* Last Reserve: 40% lower costs below half health. */
   if(c2Passive('m_glass') && G && G.p && G.p.hp < effMaxHp(G.p)*0.5) v*=.60;
   if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
   if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;}
@@ -13065,8 +13061,8 @@ function skillManaCost(i,s){
   return Math.max(1,Math.round(v));
 }
 function gainMana(p,n,announce){
-  if(!p) return 0;
-  const max=p.maxMana||100, before=p.mana==null?max:p.mana;
+  if(!p||!Number.isFinite(n)||n<=0) return 0;
+  const max=p.maxMana||100, before=Number.isFinite(p.mana)?Math.max(0,Math.min(max,p.mana)):max;
   p.maxMana=max; p.mana=Math.min(max,before+n);
   const gained=Math.round(p.mana-before);
   if(gained>0){
@@ -13075,10 +13071,25 @@ function gainMana(p,n,announce){
   }
   return gained;
 }
+function recoverMana(p,dt){
+  if(!p||!Number.isFinite(dt)||dt<=0||p.dead||p.downed||p._pvpDead||p.hp<=0)return;
+  const max=p.maxMana||100,delay=Math.max(0,p._manaRecoveryDelay||0),slow=Math.min(dt,delay);
+  p._manaRecoveryDelay=Math.max(0,delay-dt);
+  const regen=classManaCfg().regen*(meta.classId==='mage'&&c2Passive('m_manafont')?1.3:1);
+  if(!Number.isFinite(p.mana))p.mana=max;
+  p.mana=Math.min(max,Math.max(0,p.mana)+max*regen*(slow*.0125+(dt-slow)*.035));
+}
+function recoverBasicMana(p){
+  if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0)return 0;
+  const now=G.time||0;
+  if(Number.isFinite(p._manaHitAt)&&now>=p._manaHitAt&&now-p._manaHitAt<.65)return 0;
+  p._manaHitAt=now;
+  return gainMana(p,1+(meta.classId==='mage'&&p.weapon?.sch==='mag'?2:0),false);
+}
 function spendSkillMana(p,i,s){
   const cost=skillManaCost(i,s), cur=p.mana==null?(p.maxMana||100):p.mana;
   if(cur<cost){ toast('Not enough mana · '+Math.floor(cur)+' / '+cost); return 0; }
-  p.mana=cur-cost; hudUpdate(); skillbarUpdate(); return cost;
+  p.mana=cur-cost; p._manaRecoveryDelay=4; hudUpdate(); skillbarUpdate(); return cost;
 }
 SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160*ca;
   const tx=p.x+Math.sin(p.yaw)*120, tz=p.z+Math.cos(p.yaw)*120;   // a spike field ahead of you (slow + element on entry)
@@ -13166,6 +13177,7 @@ function useSkill(i){
        up (skillManaCost returns 0): the line below reads a zero as "the cast could not be paid for"
        and returns, so zeroing the cost stops the skill firing at all. */
     const soulFree = meta.classId==='reaper' && !!p._soulFree && c2Passive('x_strength');
+    const priorManaDelay=p._manaRecoveryDelay||0;
     const manaSpent = soulFree ? skillManaCost(i,s) : spendSkillMana(p,i,s); if(!manaSpent) return;
     if(soulFree){ p._soulFree=0; addText(p.x,p.y+p.h+24,p.z,'SOUL SPENT','#c47bff',true); hudUpdate(); skillbarUpdate(); }
     initAudio();
@@ -13175,7 +13187,7 @@ function useSkill(i){
     try{G._desig=true;r=fx?fx(p,classFamilyOk(p.weapon),(s.am??1)):'refund';}
     finally{p.weapon=originalWeapon;G._desig=priorDesignated;for(const shot of G.projectiles)if(!oldShots.has(shot)&&shot.owner==='player')shot.desig=true;}
     // A rejected cast earns no healing, shields, echoes, pet orders or cast counters.
-    if(r==='refund'){p._attuneI=priorAttune;if(soulFree)p._soulFree=1;else gainMana(p,manaSpent,false);return;}
+    if(r==='refund'){p._manaRecoveryDelay=priorManaDelay;p._attuneI=priorAttune;if(soulFree)p._soulFree=1;else gainMana(p,manaSpent,false);return;}
     if(window.BFSkillSfx)window.BFSkillSfx.cast(s.id,playFx);
     if(partyChannel)partyCancel('Skill interrupted your teleport');
     classCastCompanionOrder();
@@ -13228,12 +13240,12 @@ function useSkillLegacy(i){
   const s=curSkills()[i]; if(!s) return;
   if(!skillUnlocked(i)){ toast('🔒 '+s.n+' — unlocks at '+C.disp+' rank '+s.rank); return; }
   if(p.skillCd[i]>0) return;
-  const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return;
+  const priorManaDelay=p._manaRecoveryDelay||0,manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return;
   initAudio();
   G._desig=true;                                          // abilities are "designated" attacks: they spend Rune Marks + rupture Corruption
   const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
   G._desig=false;
-  if(r==='refund'){ gainMana(p,manaSpent,false); return; }
+  if(r==='refund'){ p._manaRecoveryDelay=priorManaDelay;gainMana(p,manaSpent,false); return; }
   let cd=s.cd;
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate();
@@ -13394,7 +13406,6 @@ function guestHitOffense(e,dmg,kb){
  const beforeHp=p.hp,beforeMana=p.mana,beforeBlood=p._bloodOwed||0;
  if(!designated){
    if(cid==='warrior'&&c2Passive('w_swift')){p._swiftHits=(p._swiftHits||0)+1;if(p._swiftHits%4===0)dmg*=1.25;}
-   if(cid==='mage'&&c2def('mage')&&p.weapon?.sch==='mag')gainMana(p,2,false);
    if(cid!=='pyromancer'&&CLASS_BASIC[cid]){
      G._guestBasicStatus=[];
      try{const result=CLASS_BASIC[cid](p,e,dmg);if(typeof result==='number')dmg=result;}
@@ -13466,7 +13477,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      effect of a netcode fix. A separate marker keeps the two apart. */
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
     const offense=src===G.p?guestHitOffense(e,dmg,kb):{dmg,kb,owner:{guest:true,cid:null,bits:0,designated:false,weapon:null}};dmg=offense.dmg;kb=offense.kb;
-    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0});
+    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,basicMana:src===G.p&&!G._desig,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0});
     if(e.prisonFoe)dmg=BFPrisonCombat.guardDamage(e,src,dmg);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
@@ -13511,7 +13522,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     if(guestOwner.cid==='necromancer'&&hasGuestPerk(guestOwner,'necro_pest')&&(e.st?.venom||0)>0)dmg*=1.20;
   }
   let mod=elemMod(el,e.element);
-  if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}if(meta.classId==='mage'&&c2def('mage')&&src.weapon&&src.weapon.sch==='mag')gainMana(src,2,false);}
+  if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}}
   if(src===G.p&&meta.classId==='reaper'&&c2Passive('x_favor')&&(e.elite||e.boss)&&(G.time-(src._favorHitT||-9))>=.75){src._favorHitT=G.time;gainMana(src,1,false);}
   if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
@@ -13581,7 +13592,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
   if(e._peer){
-    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0,refund:src===G.p?G.p._bloodOwed||0:0,healRatio});
+    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0,refund:src===G.p?G.p._bloodOwed||0:0,healRatio,basicMana:src===G.p&&!G._desig});
     if(src===G.p)G.p._bloodOwed=0;e.hitFlash=.12;return;
   }
   const dealt=Math.min(Math.max(0,e.hp),dmg);
@@ -13627,7 +13638,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     const lsMul = meta.classId==='reaper'?0.5:0.3;
     classHeal(G.p,dealt*lifesteal*lsMul); }
   const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
-  if(weaponManaHit) gainMana(G.p,4,false);
+  if(weaponManaHit&&dealt>0) recoverBasicMana(G.p);
   /* MASTER STRIKER (monk r9 b): "Every fourth unbroken strike hits everything around you."
      Wired 2026-08-11 — one of the passives in docs/SKILL_TRIAGE.md section E that the rank menu
      offers, describes, and no code has ever read: `mon_master` appeared exactly twice in the whole of
@@ -13748,7 +13759,7 @@ function killEnemy(e,weaponKill){
   e.dead=true;e.defeatedAt=G.time; if(isCampaignAdventure()&&BFCampaignPatrols.killed(G,adventureStoryState(),e,{host:!MP.guest(),party:MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'],notice:(title,text)=>presentStoryNotice({id:(G.patrolWork?.id||'combat')+':'+adventureStoryState().revision+':'+title,title,text,kind:'Task complete'})})){briarSync();questUpdate();} G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5,sourceType:e.type==='colossus'&&__BF_WORLD().theme==='marble'?'marblecolossus':e.type,sourceH:e.h,ranged:['archer','caster','frostlobber','sunpriest','royalarcanist','cragspitter','voidtether'].includes(e.type)}); G.lastSlainEnemy=G.corpses[G.corpses.length-1]; if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
-  if(weaponKill) gainMana(G.p,12,true);
+  // Baseline kills give no mana; class-specific kill sustain remains in c2OnKill.
   if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p,e);   // class kill riders receive the defeated target for conditional capstones
   // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)
   if((e.exposed>0 || (e.st&&e.st.radiance>=STCAP.radiance-1)) && G.p && (G.time-(G._radHeal||-9))>1.0 && G.p.hp<effMaxHp(G.p)){
@@ -14270,9 +14281,9 @@ const CLASS_BASIC = {
      The only class whose ordinary attack has a resource decision inside it - a Mage holding mana
      for a skill is choosing to punch softer. */
   mage(p, e, dmg){
-    const potent = c2Passive('m_potent');                 // Potent Weave: costs double, hits double
+    const potent = c2Passive('m_potent'); // Same cost; 55% rather than 35% bonus damage.
     const cost = 6;
-    if((p.mana || 0) < cost) return;
+    if((p.mana || 0) < cost+Math.ceil((p.maxMana||140)*.25)) return;
     p.mana -= cost;
     /* Elemental Savant: an overcharged hit applies your weapon's element outright. */
     if(c2Passive('m_savant') && p.weapon && p.weapon.el){
@@ -15444,7 +15455,7 @@ const MP={
     if(!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
     const token=this.myId+':e:'+((this._enemyHitSerial=(this._enemyHitSerial||0)+1));this._pendingEnemyHits=this._pendingEnemyHits||new Map();
     for(const [k,h]of this._pendingEnemyHits)if(performance.now()-h.at>10000)this._pendingEnemyHits.delete(k);
-    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0});
+    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,basicMana:!!effects.basicMana,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0});
     try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0),owner:effects.owner||null});}catch{this._pendingEnemyHits.delete(token);}
   },
   sendStatus(mid,el,dmg,w){
@@ -15459,6 +15470,7 @@ const MP={
     const h=this._pendingEnemyHits?.get(d.token);if(!h)return;this._pendingEnemyHits.delete(d.token);
     if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt))return;
     if(d.dealt<=0){const p=G.p;p.hp=Math.max(0,Math.min(effMaxHp(p),p.hp-h.hpDelta));p.mana=Math.max(0,Math.min(p.maxMana||100,p.mana-h.manaDelta));p._bloodOwed=Math.max(0,(p._bloodOwed||0)-h.bloodDelta);hudUpdate();return;}
+    if(h.basicMana)recoverBasicMana(G.p);
     classHeal(G.p,d.dealt*(d.executed?0:h.rate)+(d.executed?0:h.flat)+Math.max(0,Number(d.bonusHeal)||0));hudUpdate();
   },
   // guest: reconcile local enemy list to the host's authoritative set + process kills
@@ -15537,7 +15549,7 @@ const MP={
     this._hitSerial=(this._hitSerial||0)+1;const token=this.myId+':'+this._hitSerial;
     this._pendingHits=this._pendingHits||new Map();
     for(const [k,v] of this._pendingHits)if(performance.now()-v.time>10000)this._pendingHits.delete(k);
-    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,player:G.p,world:G,refund:Math.max(0,effects.refund||0),healRatio:Math.max(0,Math.min(1,Number(effects.healRatio)||0)),element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId});
+    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,player:G.p,world:G,basicMana:!!effects.basicMana,refund:Math.max(0,effects.refund||0),healRatio:Math.max(0,Math.min(1,Number(effects.healRatio)||0)),element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId});
     const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId,token,slow:Math.min(1.5,effects.slow||0),element:effects.element,reflected:!!this._receivingHit};
     this.routeCombatMessage(m);
   },
@@ -15557,6 +15569,7 @@ const MP={
     this._pendingHits.delete(m.token);if(hit.cls!==meta.classId||hit.player!==G?.p||hit.world!==G)return;
     const dealt=Math.max(0,Math.min(hit.damage,Number(m.dealt)||0));
     classHeal(G.p,dealt*.5*(hit.ls*(meta.classId==='reaper'?.5:.3)+(hit.healRatio||0)));
+    if(dealt>0&&hit.basicMana)recoverBasicMana(G.p);
     if(dealt>0){classHeal(G.p,hit.flatHeal*.5+(hit.refund||0));const target=this.peers[m.by];if(target){if(hit.element)applyElement(target,hit.element,dealt);if(hit.designated){consumeRunes(target);ruptureCorrupt(target,G.p);}}}
     if(m.killed&&dealt>0)c2OnKill(G.p,this.peers[m.by]||{x:0,z:0});
     hudUpdate();
@@ -16576,7 +16589,7 @@ function updateWorld(dt){
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
-  { const mm=(p.maxMana||100)+(meta.classId==='mage'&&c2Passive('m_manafont')?10:0), regen=(meta.classId==='mage'&&c2Passive('m_manafont')?1.3:1)*classManaCfg().regen; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035*regen); }  // slow passive mana regen, scaled per class (CLASS_MANA.regen)
+  recoverMana(p,dt); // Skills briefly slow recovery; basic attacks can be used while saving mana.
   if(!G.bonusActive)updateAmbient(dt,s);
   reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
   // Enemies wait continuously during basic-control practice, even while the player moves.
@@ -19499,7 +19512,7 @@ function openClasses(back){
       tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(b,pB)}</div><div class="buildspine"></div>`; }
     tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE${cs.rank>=10?' · ACTIVE':''}</span></div><div class="sdesc">Your chosen discipline's defining passive reaches its final strength.</div></div>`;
   }
-  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · ${meta.masterSeal?'Your <b style="color:#f0d78a">Drillmaster\'s Seal</b> lets you equip &amp; respec right here.':'Chosen options are highlighted. Visit the Drillmaster to change them.'}</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="viewerfoot">${meta.masterSeal?`${(meta.classUnlocked[view]&&view!==meta.classId)?`<button class="bigbtn" id="clsEquip">${C.icon} Equip ${C.disp}</button>`:''}${(cs.rank>=2&&(cs.sub||c2def(view)))?`<button class="bigbtn ghost" id="clsRespec">✚ Respec</button>`:''}`:''}<button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
+  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · ${meta.masterSeal?'Your <b style="color:#f0d78a">Drillmaster\'s Seal</b> lets you equip &amp; respec right here.':'Chosen options are highlighted. Visit the Drillmaster to change them.'}</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. Basic hits restore a little mana; stop casting for 4 seconds to recover faster. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="viewerfoot">${meta.masterSeal?`${(meta.classUnlocked[view]&&view!==meta.classId)?`<button class="bigbtn" id="clsEquip">${C.icon} Equip ${C.disp}</button>`:''}${(cs.rank>=2&&(cs.sub||c2def(view)))?`<button class="bigbtn ghost" id="clsRespec">✚ Respec</button>`:''}`:''}<button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
   document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
   if(meta.masterSeal){
     const eq=document.getElementById('clsEquip'); if(eq) eq.onclick=()=>{ if(trainerEquipClass(view)){ SFX.pickup(); toast('⚔️ Now playing as '+C.disp,'#f0d78a'); openClasses(back); } };
@@ -19535,14 +19548,14 @@ function openRespecTree(cid,back){
         tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA.id,pA.disp)}<div class="rankorb"><span>SKILL</span><b>${i+2}</b></div>${opt(b,pB.id,pB.disp)}</div><div class="buildspine"></div>`; }
       tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your build's defining passives reach their final strength.</div></div>`;
     }
-    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · ${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
+    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll"><details><summary>Skills and stats explained</summary><p>Skills are actions you use. Passives work automatically. Cooldown is the wait before using a skill again; mana is what it costs. Basic hits restore a little mana; stop casting for 4 seconds to recover faster. A stack is one repeatable bonus, up to the limit in its description. Class rank unlocks choices; character level strengthens your hero.</p></details>${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · ${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
     document.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.rank]=b.dataset.pick; SFX.pickup(); render(); });
     document.querySelectorAll('[data-mixslot]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.mixslot]=b.dataset.mixpath; SFX.pickup(); render(); });
     document.getElementById('treeBack').onclick=back;
     const confirm=document.getElementById('treeConfirm');
     confirm.onclick=()=>{ if(!changed||meta.gold<cost) return; meta.gold-=cost;
       if(def) cs.ch=Object.assign({},staged); else { cs.mix=Object.assign({},staged); if(!cs.sub) cs.sub=staged[1]; }
-      persist(); if(cid===meta.classId) skillbarUpdate(); SFX.levelup(); toast(C.disp+' build reforged'); back(); };
+      if(cid===meta.classId&&G?.p){recomputeArmor(G.p);if(G.hub)meta.hero=snapOf(G.p);}persist(); if(cid===meta.classId){skillbarUpdate();hudUpdate();} SFX.levelup(); toast(C.disp+' build reforged'); back(); };
   }
   render();
 }
@@ -19564,7 +19577,7 @@ function trainerEquipClass(cid){
   // changing class so wsResume cannot restore an older weapon/armor snapshot.
   if(G&&G.hub&&G.p) meta.hero=snapOf(G.p);
   meta.classId=cid;
-  const equipped=G?.p||meta.hero;ensureClassWeapon(equipped);if(G?.hub&&equipped)meta.hero=snapOf(equipped);
+  const equipped=G?.p||meta.hero;ensureClassWeapon(equipped);if(equipped)recomputeArmor(equipped);if(G?.hub&&equipped)meta.hero=snapOf(equipped);
   persist();
   if(G&&G.p){ skillbarUpdate(); hudUpdate(); }
   return true;

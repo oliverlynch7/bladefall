@@ -1,0 +1,274 @@
+{
+  "checks": [
+    {
+      "name": "Pre-change level100 save loads",
+      "ok": true
+    },
+    {
+      "name": "pyromancer four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "pyromancer casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "pyromancer rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "monk four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "monk casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "monk rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "stormcaller four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "stormcaller casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "stormcaller rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "warrior four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "warrior casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "warrior rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "ranger four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "ranger casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "ranger rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "mage four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "mage casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "mage rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "reaper four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "reaper casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "reaper rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "paladin four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "paladin casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "paladin rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "necromancer four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "necromancer casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "necromancer rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "ninja four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "ninja casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "ninja rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "berserker four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "berserker casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "berserker rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "pirate four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "pirate casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "pirate rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "chronomancer four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "chronomancer casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "chronomancer rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "warlock four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "warlock casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "warlock rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "skylancer four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "skylancer casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "skylancer rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "bladedancer four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "bladedancer casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "bladedancer rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "beastmaster four skills have real costs fitting its pool",
+      "ok": true
+    },
+    {
+      "name": "beastmaster casting recovery is slower than resting",
+      "ok": true
+    },
+    {
+      "name": "beastmaster rested recovery remains available",
+      "ok": true
+    },
+    {
+      "name": "Actual Warrior skill spends displayed mana",
+      "ok": true
+    },
+    {
+      "name": "Successful skill starts recovery delay",
+      "ok": true
+    },
+    {
+      "name": "Empty mana blocks cast without cooldown or projectile",
+      "ok": true
+    },
+    {
+      "name": "A multi-target attack cannot refill mana per victim",
+      "ok": true
+    },
+    {
+      "name": "Rejected no-target strike refunds its cost",
+      "ok": true
+    },
+    {
+      "name": "Rejected strike leaves recovery unchanged",
+      "ok": true
+    },
+    {
+      "name": "Actual solo basic hits share recovery cadence",
+      "ok": true
+    },
+    {
+      "name": "Actual skill hit does not refund basic mana",
+      "ok": true
+    },
+    {
+      "name": "Guest hit waits for authoritative receipt",
+      "ok": true
+    },
+    {
+      "name": "Actual guest receipt restores same1 mana",
+      "ok": true
+    },
+    {
+      "name": "Repeated guest receipt cannot duplicate mana",
+      "ok": true
+    },
+    {
+      "name": "Manafont adds10 to actual maximum",
+      "ok": true
+    },
+    {
+      "name": "Mage basic leaves skill reserve intact",
+      "ok": true
+    },
+    {
+      "name": "Manafont regen never overfills HUD max",
+      "ok": true
+    },
+    {
+      "name": "HUD skill mana costs reflect rebalance",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "done": true
+}

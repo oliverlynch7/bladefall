@@ -1,0 +1,478 @@
+[
+  {
+    "class": "pyromancer",
+    "path": "a",
+    "pool": 115,
+    "costs": [
+      12,
+      19,
+      22,
+      33
+    ],
+    "firstMissedCastSec": 12,
+    "casts90sec": 21,
+    "spent90sec": 297
+  },
+  {
+    "class": "pyromancer",
+    "path": "b",
+    "pool": 115,
+    "costs": [
+      16,
+      18,
+      24,
+      32
+    ],
+    "firstMissedCastSec": 14.100000000000001,
+    "casts90sec": 18,
+    "spent90sec": 330
+  },
+  {
+    "class": "warrior",
+    "path": "a",
+    "pool": 75,
+    "costs": [
+      9,
+      14,
+      15,
+      24
+    ],
+    "firstMissedCastSec": 4,
+    "casts90sec": 21,
+    "spent90sec": 215
+  },
+  {
+    "class": "warrior",
+    "path": "b",
+    "pool": 75,
+    "costs": [
+      12,
+      16,
+      18,
+      22
+    ],
+    "firstMissedCastSec": 10,
+    "casts90sec": 18,
+    "spent90sec": 236
+  },
+  {
+    "class": "ranger",
+    "path": "a",
+    "pool": 90,
+    "costs": [
+      13,
+      10,
+      17,
+      21
+    ],
+    "firstMissedCastSec": 10.100000000000001,
+    "casts90sec": 20,
+    "spent90sec": 252
+  },
+  {
+    "class": "ranger",
+    "path": "b",
+    "pool": 90,
+    "costs": [
+      16,
+      14,
+      15,
+      25
+    ],
+    "firstMissedCastSec": 10.100000000000001,
+    "casts90sec": 18,
+    "spent90sec": 274
+  },
+  {
+    "class": "mage",
+    "path": "a",
+    "pool": 140,
+    "costs": [
+      11,
+      13,
+      25,
+      36
+    ],
+    "firstMissedCastSec": 12,
+    "casts90sec": 25,
+    "spent90sec": 318
+  },
+  {
+    "class": "mage",
+    "path": "b",
+    "pool": 140,
+    "costs": [
+      20,
+      22,
+      26,
+      40
+    ],
+    "firstMissedCastSec": 12.100000000000001,
+    "casts90sec": 17,
+    "spent90sec": 370
+  },
+  {
+    "class": "reaper",
+    "path": "a",
+    "pool": 100,
+    "costs": [
+      10,
+      11,
+      20,
+      25
+    ],
+    "firstMissedCastSec": 8.05,
+    "casts90sec": 24,
+    "spent90sec": 266
+  },
+  {
+    "class": "reaper",
+    "path": "b",
+    "pool": 100,
+    "costs": [
+      18,
+      18,
+      19,
+      31
+    ],
+    "firstMissedCastSec": 10,
+    "casts90sec": 16,
+    "spent90sec": 302
+  },
+  {
+    "class": "paladin",
+    "path": "a",
+    "pool": 100,
+    "costs": [
+      15,
+      17,
+      22,
+      32
+    ],
+    "firstMissedCastSec": 9.05,
+    "casts90sec": 17,
+    "spent90sec": 283
+  },
+  {
+    "class": "paladin",
+    "path": "b",
+    "pool": 100,
+    "costs": [
+      18,
+      21,
+      20,
+      29
+    ],
+    "firstMissedCastSec": 9.05,
+    "casts90sec": 15,
+    "spent90sec": 294
+  },
+  {
+    "class": "necromancer",
+    "path": "a",
+    "pool": 135,
+    "costs": [
+      17,
+      25,
+      27,
+      39
+    ],
+    "firstMissedCastSec": 14,
+    "casts90sec": 16,
+    "spent90sec": 344
+  },
+  {
+    "class": "necromancer",
+    "path": "b",
+    "pool": 135,
+    "costs": [
+      12,
+      23,
+      29,
+      38
+    ],
+    "firstMissedCastSec": 8,
+    "casts90sec": 21,
+    "spent90sec": 306
+  },
+  {
+    "class": "ninja",
+    "path": "a",
+    "pool": 85,
+    "costs": [
+      14,
+      10,
+      18,
+      26
+    ],
+    "firstMissedCastSec": 16.1,
+    "casts90sec": 20,
+    "spent90sec": 264
+  },
+  {
+    "class": "ninja",
+    "path": "b",
+    "pool": 85,
+    "costs": [
+      15,
+      15,
+      17,
+      25
+    ],
+    "firstMissedCastSec": 14,
+    "casts90sec": 17,
+    "spent90sec": 273
+  },
+  {
+    "class": "berserker",
+    "path": "a",
+    "pool": 70,
+    "costs": [
+      10,
+      14,
+      17,
+      23
+    ],
+    "firstMissedCastSec": 9.05,
+    "casts90sec": 19,
+    "spent90sec": 214
+  },
+  {
+    "class": "berserker",
+    "path": "b",
+    "pool": 70,
+    "costs": [
+      12,
+      15,
+      17,
+      16
+    ],
+    "firstMissedCastSec": 10,
+    "casts90sec": 17,
+    "spent90sec": 219
+  },
+  {
+    "class": "pirate",
+    "path": "a",
+    "pool": 95,
+    "costs": [
+      10,
+      15,
+      18,
+      31
+    ],
+    "firstMissedCastSec": 6,
+    "casts90sec": 22,
+    "spent90sec": 254
+  },
+  {
+    "class": "pirate",
+    "path": "b",
+    "pool": 95,
+    "costs": [
+      16,
+      11,
+      24,
+      26
+    ],
+    "firstMissedCastSec": 12.100000000000001,
+    "casts90sec": 18,
+    "spent90sec": 266
+  },
+  {
+    "class": "chronomancer",
+    "path": "a",
+    "pool": 125,
+    "costs": [
+      11,
+      22,
+      25,
+      36
+    ],
+    "firstMissedCastSec": 8,
+    "casts90sec": 22,
+    "spent90sec": 292
+  },
+  {
+    "class": "chronomancer",
+    "path": "b",
+    "pool": 125,
+    "costs": [
+      20,
+      13,
+      26,
+      40
+    ],
+    "firstMissedCastSec": 12.100000000000001,
+    "casts90sec": 18,
+    "spent90sec": 330
+  },
+  {
+    "class": "monk",
+    "path": "a",
+    "pool": 80,
+    "costs": [
+      8,
+      14,
+      14,
+      22
+    ],
+    "firstMissedCastSec": 10,
+    "casts90sec": 24,
+    "spent90sec": 218
+  },
+  {
+    "class": "monk",
+    "path": "b",
+    "pool": 80,
+    "costs": [
+      10,
+      8,
+      14,
+      19
+    ],
+    "firstMissedCastSec": 18.150000000000002,
+    "casts90sec": 23,
+    "spent90sec": 227
+  },
+  {
+    "class": "stormcaller",
+    "path": "a",
+    "pool": 115,
+    "costs": [
+      9,
+      12,
+      22,
+      32
+    ],
+    "firstMissedCastSec": 10,
+    "casts90sec": 26,
+    "spent90sec": 276
+  },
+  {
+    "class": "stormcaller",
+    "path": "b",
+    "pool": 115,
+    "costs": [
+      18,
+      19,
+      23,
+      35
+    ],
+    "firstMissedCastSec": 8.05,
+    "casts90sec": 17,
+    "spent90sec": 330
+  },
+  {
+    "class": "warlock",
+    "path": "a",
+    "pool": 115,
+    "costs": [
+      11,
+      20,
+      12,
+      33
+    ],
+    "firstMissedCastSec": 9.05,
+    "casts90sec": 22,
+    "spent90sec": 274
+  },
+  {
+    "class": "warlock",
+    "path": "b",
+    "pool": 115,
+    "costs": [
+      18,
+      23,
+      25,
+      36
+    ],
+    "firstMissedCastSec": 10,
+    "casts90sec": 16,
+    "spent90sec": 318
+  },
+  {
+    "class": "skylancer",
+    "path": "a",
+    "pool": 95,
+    "costs": [
+      14,
+      16,
+      15,
+      30
+    ],
+    "firstMissedCastSec": 11,
+    "casts90sec": 18,
+    "spent90sec": 279
+  },
+  {
+    "class": "skylancer",
+    "path": "b",
+    "pool": 95,
+    "costs": [
+      10,
+      19,
+      24,
+      29
+    ],
+    "firstMissedCastSec": 12,
+    "casts90sec": 21,
+    "spent90sec": 252
+  },
+  {
+    "class": "bladedancer",
+    "path": "a",
+    "pool": 90,
+    "costs": [
+      11,
+      16,
+      20,
+      29
+    ],
+    "firstMissedCastSec": 14,
+    "casts90sec": 18,
+    "spent90sec": 269
+  },
+  {
+    "class": "bladedancer",
+    "path": "b",
+    "pool": 90,
+    "costs": [
+      10,
+      12,
+      19,
+      30
+    ],
+    "firstMissedCastSec": 12,
+    "casts90sec": 21,
+    "spent90sec": 243
+  },
+  {
+    "class": "beastmaster",
+    "path": "a",
+    "pool": 100,
+    "costs": [
+      14,
+      20,
+      23,
+      34
+    ],
+    "firstMissedCastSec": 10.100000000000001,
+    "casts90sec": 18,
+    "spent90sec": 287
+  },
+  {
+    "class": "beastmaster",
+    "path": "b",
+    "pool": 100,
+    "costs": [
+      18,
+      16,
+      24,
+      31
+    ],
+    "firstMissedCastSec": 9.05,
+    "casts90sec": 16,
+    "spent90sec": 293
+  }
+]

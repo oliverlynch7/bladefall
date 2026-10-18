@@ -1,0 +1,28 @@
+{
+  "version": "2.265.0-mana-economy",
+  "classes": 17,
+  "explicitSkillChoices": 136,
+  "previouslyFallbackCosts": 53,
+  "baselineHitMana": 1,
+  "hitRecoveryIntervalSec": 0.65,
+  "genericBasicKillMana": 0,
+  "castRecoveryDelaySec": 4,
+  "slowRegenMaxPerSec": 0.0125,
+  "restedRegenMaxPerSec": 0.035,
+  "simulation": {
+    "description": "Actual cost/recovery helpers;90s constant cooldown casting, baseline pool, no gear/stat allocation/basic attacks/kill rewards or optional mana passives. Does not establish encounter difficulty or fun.",
+    "paths": 34,
+    "firstManaBlockedCastSec": [
+      4,
+      18.150000000000002
+    ],
+    "openingRotationAffordableAllPaths": true
+  },
+  "verification": {
+    "focusedChecks": 537,
+    "browserChecks": 67,
+    "regressionSuites": 126,
+    "errors": 0,
+    "networkCoverage": "Actual guest hit dispatch/receipt path in browser with test transport; guest and PvP receipt duplicate/stale/rejected-hit tests in Node. No two-person remote playtest claimed."
+  }
+}

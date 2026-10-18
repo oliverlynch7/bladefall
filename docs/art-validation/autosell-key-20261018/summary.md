@@ -1,0 +1,3 @@
+## [Codex | 2026-10-18] Auto-sell HUD shortcut — v2.283.0-autosell-key-hint
+
+Made the existing conflict-free V shortcut visible as a key badge beside Auto-sell ON/OFF at the bottom-left of the HUD. Both initial markup and each bag refresh use the existing remapping-aware action hint. Custom assignments are preserved. Muted isolated Chrome with legacy100 save verifies V on/off, rebinding to9 updates the badge, old V stops toggling,9 toggles, and resetting restores V. Existing bag browser regression and219 guidance checks pass. No loot or economy rules changed. Evidence: docs/art-validation/autosell-key-20261018/hud.png.

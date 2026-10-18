@@ -1078,7 +1078,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><span class="ssword">cold</span></div>
 <div id="inventoryDock" class="hide">
  <button id="hudbag"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span class="bag-copy"><span class="bag-count">Bag <b id="hudbagnum">0 / 30</b></span><small id="hudBagState">30 slots free</small></span><kbd class="hud-key" data-action-hint="bag">Tab</kbd></button>
- <div class="bag-tools"><button id="hudAutoSell" data-on="false" aria-pressed="false">Auto-sell OFF</button><button id="hudJournal"><span data-action-hint="journal">N</span> Journal</button><button id="hudLootHistory" title="Show your most recent equipment pickup">Loot</button><span id="hudGold"><span class="ico ico-coin"></span><span id="hudGoldValue">0</span></span></div>
+ <div class="bag-tools"><button id="hudAutoSell" data-on="false" aria-pressed="false">Auto-sell OFF <kbd class="hud-key" data-action-hint="loot">V</kbd></button><button id="hudJournal"><span data-action-hint="journal">N</span> Journal</button><button id="hudLootHistory" title="Show your most recent equipment pickup">Loot</button><span id="hudGold"><span class="ico ico-coin"></span><span id="hudGoldValue">0</span></span></div>
 </div>
 <aside id="equipmentFeed" hidden aria-label="Equipment pickup"><button class="loot-close" data-dismiss-loot aria-label="Dismiss equipment notice">×</button><div class="loot-head"><img class="loot-icon" alt=""><div><strong class="loot-name"></strong><small class="loot-rarity"></small></div></div><div class="loot-outcome" role="status" aria-live="polite"></div><div class="loot-comparison"></div><div class="loot-usability"></div><div class="loot-foot"><button data-loot-bag>Bag</button><span class="loot-waiting"></span></div></aside>
 <div id="mapCaption" class="hide"><span id="mapPlace"></span><small><span style="color:#ffe07a">◆ Objective</span> · <span style="color:#75ddff">◇ Friends</span></small></div>
@@ -1218,7 +1218,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.282.0-tutorial-contrast';
+const VERSION3D='2.283.0-autosell-key-hint';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5314,7 +5314,7 @@ function hudBagUpdate(){
  num.textContent=used+' / '+STASH_CAP;el.classList.toggle('full',!free);el.classList.toggle('near',free>0&&free<=3);
  const message=sell?'New gear sells for gold':!free?'Full · gear stays on the ground':free+' slots free';
  document.getElementById('hudBagState').textContent=message;el.title='Bag · '+used+' / '+STASH_CAP+' · '+message;el.setAttribute('aria-label',el.title);
- const toggle=document.getElementById('hudAutoSell');toggle.textContent='Auto-sell '+(sell?'ON':'OFF');toggle.dataset.on=String(sell);toggle.setAttribute('aria-pressed',String(sell));toggle.title=controlHint('loot')+' · '+(sell?'Collected equipment sells for gold. Click to keep new gear.':'Equipment enters your bag; if full, it stays on the ground. Click to enable selling.');
+ const toggle=document.getElementById('hudAutoSell');toggle.innerHTML='Auto-sell '+(sell?'ON':'OFF')+' <kbd class="hud-key" data-action-hint="loot">'+htmlSafe(controlKey('loot'))+'</kbd>';toggle.dataset.on=String(sell);toggle.setAttribute('aria-pressed',String(sell));toggle.title=controlHint('loot')+' · '+(sell?'Collected equipment sells for gold. Click to keep new gear.':'Equipment enters your bag; if full, it stays on the ground. Click to enable selling.');
  const goldCount=document.getElementById('hudGoldValue'),goldValue=Math.max(0,Number(meta.gold)||0);goldCount.textContent=BFEncounterRewards.gold(goldValue);goldCount.parentElement.title=goldValue.toLocaleString()+' gold';goldCount.parentElement.setAttribute('aria-label',goldValue.toLocaleString()+' gold');
 }
 function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; hudBagUpdate(); }

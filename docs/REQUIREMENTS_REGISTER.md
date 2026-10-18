@@ -2224,3 +2224,13 @@ User requests tutorial text boxes stand out from the HUD for new players. Replac
 ## [Codex | 2026-10-18] Tutorial contrast — v2.282.0-tutorial-contrast
 
 Guided lessons and Waystation tour now use an opaque bright parchment surface, dark readable text, strong turquoise border and matching turquoise HUD leaders/highlights. Guided headers explicitly say Tutorial. Keycaps and Continue/Skip controls retain readable contrast and focus rings. No timing, placement, progression, pause or control logic changed. Updated resource cache keys. Existing guidance regression suite: 219 checks pass. Actual muted Chrome trial card inspected beside the dark gameplay HUD; text/control color pairs exceed4.5:1 against their surfaces. Private QA uses isolated legacy100 save storage. Evidence: docs/art-validation/tutorial-contrast-20261018/.
+
+
+## [Codex | 2026-10-18] U-AUTOSELL-HUD-KEY-20261018
+
+User requests a reasonable Auto-sell keybind visibly beside the bottom-left HUD button. Existing default V already maps to the two-state toggle without a default overlap. Preserve custom bindings; expose a persistent keyboard/key hint beside ON/OFF using the existing remapping-aware controlKey/data-action-hint system, rather than hiding it in a tooltip. Confirm visible ON/OFF and remapped hints in an isolated muted browser.
+
+
+## [Codex | 2026-10-18] Auto-sell HUD shortcut — v2.283.0-autosell-key-hint
+
+Made the existing conflict-free V shortcut visible as a key badge beside Auto-sell ON/OFF at the bottom-left of the HUD. Both initial markup and each bag refresh use the existing remapping-aware action hint. Custom assignments are preserved. Muted isolated Chrome with legacy100 save verifies V on/off, rebinding to9 updates the badge, old V stops toggling,9 toggles, and resetting restores V. Existing bag browser regression and219 guidance checks pass. No loot or economy rules changed. Evidence: docs/art-validation/autosell-key-20261018/hud.png.

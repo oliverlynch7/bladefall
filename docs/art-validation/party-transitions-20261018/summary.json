@@ -1,0 +1,21 @@
+{
+  "version": "2.275.0-party-transitions",
+  "fixes": [
+    "Campaign reconnect carries quest counters into room construction and checkpoints; same-room follow-up counters are applied without resetting the hero",
+    "Arena host map/Fair/teams/powerup changes rebuild guest rooms; duplicate packets do not heal or reset fighters; Fair toggles preserve custom loadout preferences",
+    "One complete campaign escrow restore for explicit Arena exit, host hub return and fallback entry, including companions/names/training",
+    "Dedicated Sparring Room scene and authenticated proximity entrance/exit requests; selected companion immediately present; independent practice bouts retained",
+    "Changed Abyssal/Gauntlet run seed rebuilds guests even at same floor/index",
+    "Arena world snapshots distinguish maps, rejecting old map payloads"
+  ],
+  "verification": {
+    "regressionSuites": 135,
+    "focusedTransitionChecks": 63,
+    "allCampaignBrowserChecks": 57,
+    "networkHostChecks": 16,
+    "networkGuestChecks": 1,
+    "chestChecks": 44,
+    "companionChecks": 82,
+    "scope": "Muted isolated old level100 saves. All eight campaign levels at areas0,1,boss. Separate host/guest Chrome tabs over actual ordered local WebRTC, using production packet handlers; guest initiated practice entrance, Arena Fair/map changes, personal economy restoration and independent chest claims. Not remote-human/Internet NAT testing, and not a complete combat playthrough."
+  }
+}

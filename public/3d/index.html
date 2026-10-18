@@ -1214,7 +1214,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.274.0-arena-polish';
+const VERSION3D='2.275.0-party-transitions';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5626,7 +5626,7 @@ function openCampaignEntry(zi,back=wsResume){
  document.getElementById('backBtn').onclick=()=>{if(used||G!==world||!card.isConnected)return;used=true;back();};
  BFHubDialogue.selectFirst(card);
 }
-function enterZone(zi,startArea=0,partySync=false){
+function enterZone(zi,startArea=0,partySync=false,partyQuests=null){
   if(!Number.isInteger(zi)||!ZONES[zi])return false;
   const target=Number.isInteger(startArea)&&(startArea===-1||startArea>=0&&startArea<ZONES[zi].areas.length)?startArea:0;
   const replayAllowed=!!meta.zoneDone?.[ZONES[zi].id]||partySync===true&&MP.active&&!MP.isHost;
@@ -5636,7 +5636,7 @@ function enterZone(zi,startArea=0,partySync=false){
   // Preserve the explicit auto-sell preference across scene changes.
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
-  G=newG(p,{zone:zi,area:Z.areas.length?(replayAllowed?target:0):-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
+  G=newG(p,{qs:partySync&&MP.active&&!MP.isHost&&partyQuests?checkpointClone(partyQuests):{},zone:zi,area:Z.areas.length?(replayAllowed?target:0):-1,zoneTier:Z.tier,ngPlus:meta.ngPlus||0,ngHp:meta.ngPlus?meta.campaignNgHp||1:1,ngDmg:meta.ngPlus?meta.campaignNgDmg||1:1});
   if(MP.active && !MP.isHost && MP.rseed) G.runSeed=MP.rseed;   // co-op: adopt the host's run seed so we build the SAME dungeon + mobs (matching mids)
   meta.run=null; persist(); checkAchievements();
   loadArea(); captureCampaignCheckpoint(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast(); questUpdate();
@@ -15007,7 +15007,7 @@ const MP={
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
   kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
-  HUB:-100, ARENA:-200, ENDLESS:-300, SPRINT:-301, GAUNTLET:-302, TRIAL:-303, // shared-scene sentinels; never collide with campaign zone ids
+  HUB:-100, ARENA:-200, ENDLESS:-300, SPRINT:-301, GAUNTLET:-302, TRIAL:-303, SPARRING:-304, // shared-scene sentinels; never collide with campaign zone ids
   pvp:false, scores:{}, arenaMsg:null,     // Phase 3 PvP duel + shared-arena state
   teams:false, teamMap:{},  // team (2v2) mode: id -> team index (0/1)
   hasZone(){ return this.zone!=null && this.zone!==-1; },
@@ -15108,6 +15108,10 @@ const MP={
       else if(d.t==='shipCommand'){voyageReceive(c._pid,d.command);}
       else if(d.t==='socialRequest'){window.BFSocial?.receive(c._pid,d.command);}
       else if(d.t==='storyRequest'){const q=this.peers[c._pid];briarReceive(d.request,c._pid,q?{...q,x:q.tx,y:q.ty,z:q.tz}:null);}
+      else if(d.t==='sparringRoom'){
+        const q=this.peers[c._pid],enter=d.enter===true,n=G?.hubNpcs?.find(n=>n.id===(enter?'sparring':'sparringexit'));
+        if(G?.hub&&!G.riftHall&&!!G.sparringRoom!==enter&&mode==='play'&&q&&q.zone===this.zone&&n&&!q.dead&&!q.downed&&q.hp>0&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130){if(enter)enterSparringRoom();else enterWaystation();}
+      }
       else if(d.t==='riftRoom'){const q=this.peers[c._pid],n=G?.hubNpcs?.find(n=>n.id===(d.hall?'rifthall':'riftexit'));if(G?.hub&&mode==='play'&&q&&n&&!q.dead&&!q.downed&&(q.hp==null||q.hp>0)&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130)travelRiftHall(!!d.hall);}
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pcontrol'){this.routeCombatMessage({...d,by:c._pid});}
@@ -15167,8 +15171,15 @@ const MP={
     else if(d.t==='story'){briarApply(d.story,false,d.ack);}
     else if(d.t==='special'){ this.applySpecial(d); }
     else if(d.t==='campaignClear'){if(isCampaignAdventure()&&G.zone===d.zone&&G.runSeed===d.rseed){securePendingSecret();zoneClear();}}
-    else if(d.t==='zone'){if(d.zone!==this.HUB&&(!Number.isInteger(d.zone)||!ZONES[d.zone]))return;if(G?.trialSession){if(d.trialEnd?.session!==G.trialSession)return;this._trialExitSession=G.trialSession;if(d.trialEnd.complete){applyTrialProgress(d.trialEnd);if(!G.trialCompleted)return;}closedPartyTrials.add(G.trialSession);if(!G.trialCompleted)restoreTrialExit();} this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
-      if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)||!!G.riftHall!==!!d.hall){try{if(!G?.hub){openHub();if(d.hall)enterWaystation(true);}else enterWaystation(!!d.hall);}catch(e){console.error(e)}}if(d.story){if(d.rseed!=null)G.runSeed=d.rseed;briarApply(d.story,true);} }   // follow the host into the shared Waystation
+    else if(d.t==='zone'){if(d.zone!==this.HUB&&d.zone!==this.SPARRING&&(!Number.isInteger(d.zone)||!ZONES[d.zone]))return;if(G?.trialSession){if(d.trialEnd?.session!==G.trialSession)return;this._trialExitSession=G.trialSession;if(d.trialEnd.complete){applyTrialProgress(d.trialEnd);if(!G.trialCompleted)return;}closedPartyTrials.add(G.trialSession);if(!G.trialCompleted)restoreTrialExit();} this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
+      if(d.zone===this.HUB||d.zone===this.SPARRING){
+        const sparring=d.zone===this.SPARRING;this.zone=d.zone;
+        if(!G?.hub||!!G.sparringRoom!==sparring||!!G.riftHall!==!!d.hall){try{
+          if(!G?.hub)openHub();
+          if(sparring)enterSparringRoom(true);else if(!!G.riftHall!==!!d.hall||G.sparringRoom)enterWaystation(!!d.hall);
+        }catch(e){console.error('co-op hub room sync failed',e);}}
+        if(d.story){if(d.rseed!=null)G.runSeed=d.rseed;briarApply(d.story,true);}
+      }   // follow the host into the shared Waystation
       else { this.zone=d.zone;
         /* `!G.hub` is not defensive - without it a guest NEVER follows the host into zone 0, which
            is the zone every party walks through first (startRun is enterZone(0)).
@@ -15180,7 +15191,7 @@ const MP={
            The line directly above already distinguishes the hub this exact way. */
         if(d.restart&&campaignCheckpoint()&&G?.zone===d.zone&&G.area===d.area&&G.runSeed===d.rseed){if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);restartCampaignCheckpoint(true);if(d.story)briarApply(d.story,true);return;}
         const entering=!(isCampaignAdventure()&&G.zone===d.zone&&(d.rseed==null||G.runSeed===d.rseed));
-        if(entering){ try{ if(campaignCheckpoint())restoreBank();enterZone(d.zone,d.area,true); }catch(e){} }
+        if(entering){ try{ if(campaignCheckpoint())restoreBank();enterZone(d.zone,d.area,true,d.qs); }catch(e){} }
         // A zone contains several authored districts plus area -1 (its boss arena). Older
         // packets carried only the zone, so a guest already inside that zone never rebuilt
         // when the host crossed a portal. That left the guest rendering the old room while
@@ -15192,10 +15203,20 @@ const MP={
           if(d.rseed!=null) G.runSeed=d.rseed;
           try{ loadArea();if(d.story)briarApply(d.story,true);captureCampaignCheckpoint();if(entering&&d.story?.checkpointStory){meta.run.campaign.storyState=checkpointClone(d.story.checkpointStory);persist();}this.onEnter(d.zone); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); }
           catch(e){ console.error('co-op room sync failed',e); }
-        }else if(d.story){briarApply(d.story,true);if(entering&&d.story.checkpointStory&&meta.run?.campaign){meta.run.campaign.storyState=checkpointClone(d.story.checkpointStory);persist();}} } }
-    else if(d.t==='arena'){ this.arenaMsg=d; this.zone=this.ARENA; this.pvp=true; this.teams=!!d.teams;   // follow the host into the shared Arena
-      ARENA_LOADOUT.map=d.map||'flat'; if(d.fair && d.ld){ Object.assign(ARENA_LOADOUT,d.ld); ARENA_LOADOUT.fair=true; }
-      if(!IN_ARENA){ try{ enterArena(); }catch(e){} } }
+        }else {
+          if(d.qs){G.qs=checkpointClone(d.qs);if(meta.run?.campaign)meta.run.campaign.qs=checkpointClone(d.qs);persist();questUpdate();}
+          if(d.story){briarApply(d.story,true);if(entering&&d.story.checkpointStory&&meta.run?.campaign){meta.run.campaign.storyState=checkpointClone(d.story.checkpointStory);persist();}}
+        } } }
+    else if(d.t==='arena'){
+      const map=Object.hasOwn(ARENA_MAPS,d.map)?d.map:'flat',fair=!!d.fair;
+      const changed=!G?.arena||ARENA_LOADOUT.map!==map||!!ARENA_LOADOUT.fair!==fair||
+        (typeof d.powerups==='boolean'&&!!ARENA_LOADOUT.powerups!==d.powerups)||this.teams!==!!d.teams;
+      this.arenaMsg=d;this.zone=this.ARENA;this.pvp=true;this.teams=!!d.teams;
+      ARENA_LOADOUT.map=map; // Fair values come from ARENA_FAIR; keep the guest's own custom loadout for Off.
+      ARENA_LOADOUT.fair=fair;if(typeof d.powerups==='boolean')ARENA_LOADOUT.powerups=d.powerups;
+      // Repeated hello/place packets must not heal/reset a fighter; map/rule changes must rebuild.
+      if(!IN_ARENA||changed){try{enterArena();}catch(e){console.error('co-op Arena sync failed',e);}}
+    }
     else if(d.t==='teams'){ this.teamMap=d.map||{}; this.teams=!!d.on; }
     else if(d.t==='state'){if(!this.acceptWorldState(d))return;if(inBriar()&&d.millStatus)BFBriarJourney.apply(G,d.millStatus);if(d.social)window.BFSocial?.apply(d.social);if(G?.trialSession&&d.trialProgress?.session!==G.trialSession||!G?.trialSession&&d.trialProgress)return;if(inSkyLibrary()&&d.libraryLens)G.library.remote=d.libraryLens;if(inPrison()&&d.prisonLift)BFPrison.apply(G,d.prisonLift);if(inIronHalls()&&d.ironDrive){G.iron.remote={...(G.iron.remote||{}),...d.ironDrive};if(Number.isFinite(d.ironDrive.clock))G.iron.clock=d.ironDrive.clock;}if(inBriar()&&G.homeBell&&d.bellStatus){const was=G.homeBell.remote;G.homeBell.remote=d.bellStatus;if(!was||was.wave!==d.bellStatus.wave||was.alive!==d.bellStatus.alive||was.open!==d.bellStatus.open)questUpdate();} const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
@@ -15235,7 +15256,7 @@ const MP={
     this.pvp=false; if(d.runSeed!=null)this.rseed=d.runSeed;
     if(d.kind==='endless'){
       this.zone=this.ENDLESS;
-      if(!(G&&G.endless)) startEndless({remote:true,floor:d.floor||1,runSeed:d.runSeed});
+      if(!(G&&G.endless)||(d.runSeed!=null&&G.runSeed!==d.runSeed)) startEndless({remote:true,floor:d.floor||1,runSeed:d.runSeed});
       else if((G.floor||1)!==(d.floor||1)){ if(d.runSeed!=null)G.runSeed=d.runSeed; loadEndlessArena(d.floor||1); }
       if(G&&G.endless&&d.cleared&&!G.portal){ G.floorCleared=true; descentRewardChest(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0}; questUpdate(); }
     } else if(d.kind==='sprint'){
@@ -15245,21 +15266,21 @@ const MP={
       if(!same) startHubSprint({remote:true,seed:d.seed,attempt:d.attempt||0});
     } else if(d.kind==='gauntlet'){
       this.zone=this.GAUNTLET;
-      if(!(G&&G.bossRush)||G.brTier!==(d.tier||'normal')) startBossRush(d.tier||'normal',{remote:true,idx:d.idx||0,runSeed:d.runSeed});
+      if(!(G&&G.bossRush)||G.brTier!==(d.tier||'normal')||(d.runSeed!=null&&G.runSeed!==d.runSeed)) startBossRush(d.tier||'normal',{remote:true,idx:d.idx||0,runSeed:d.runSeed});
       else if((G.brIdx||0)!==(d.idx||0)){ if(d.runSeed!=null)G.runSeed=d.runSeed; loadBossRushArena(d.idx||0); }
     }
     mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); questUpdate();
   },
   // shared Arena: the host tells guests which map to load (+ a fair-mode standardized loadout)
-  broadcastArena(cfg){ this.teams=!!cfg.teams; this.arenaMsg={t:'arena',map:cfg.map,fair:cfg.fair?1:0,ld:cfg.fair?ARENA_FAIR:null,teams:this.teams?1:0}; this.zone=this.ARENA;
+  broadcastArena(cfg){ this.teams=!!cfg.teams; this.arenaMsg={t:'arena',map:cfg.map,fair:cfg.fair?1:0,ld:cfg.fair?ARENA_FAIR:null,teams:this.teams?1:0,powerups:!!cfg.powerups}; this.zone=this.ARENA;
     if(this.isHost){ this.assignTeams(); this.conns.forEach(c=>{try{c.send(this.arenaMsg);}catch(e){}}); } },
   teamOf(id){ return this.teamMap[id]||0; },
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
-  placeMsg(){if(G?.trialSession)return partyTrialPacket(); if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,story:briarPacket()}; return null; },
+  placeMsg(){if(G?.trialSession)return partyTrialPacket(); if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
   // Hub/arena/sprint worlds have independent local seeds; campaign and trial seeds identify attempts.
-  worldStateScene(){return JSON.stringify([this.zone,G?.sparringRoom?'sparring':G?.hub?'hub':G?.arena?'arena':'level',!!G?.riftHall,G?.area,(G?.hub||G?.arena||G?.sprintFun)?null:G?.runSeed,G?.trialSession||null,G?.floor||0,G?.brIdx||0]);},
+  worldStateScene(){return JSON.stringify([this.zone,G?.sparringRoom?'sparring':G?.hub?'hub':G?.arena?'arena':'level',!!G?.riftHall,G?.area,(G?.hub||G?.arena||G?.sprintFun)?null:G?.runSeed,G?.trialSession||null,G?.floor||0,G?.brIdx||0,G?.arena?(G.arenaMap||'flat'):null]);},
   acceptWorldState(d){
     if(!G)return false;
     if(typeof d.scene==='string')return d.scene===this.worldStateScene();
@@ -15794,7 +15815,7 @@ function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
   arenaApplyPet(cfg);
   const map=ARENA_MAPS[cfg.map]||ARENA_MAPS.flat; ARENA_STAGE={name:map.name,theme:'arena',sky:map.sky,ground:map.ground,aw:1600,ad:1600};
   const p=buildArenaPlayer(cfg);
-  G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;G.areaName=map.name;
+  G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;G.arenaMap=Object.hasOwn(ARENA_MAPS,cfg.map)?cfg.map:'flat';G.areaName=map.name;
   G.segments=[];G.walls=[];G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.rooms=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.enemies=[];G.pickups=[];G.projectiles=[];G.gates=[];G.hubNpcs=[];G.arenaLava=null;
   G.bounds={minX:-740,maxX:740,minZ:-740,maxZ:820};
   try{ map.build(); }catch(e){}
@@ -15821,10 +15842,16 @@ function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
   { const st=document.getElementById('stagetag'); if(st) st.textContent='ARENA · '+map.name.toUpperCase(); }
   if(MP.active){ MP.pvp=true; MP.zone=MP.ARENA; if(MP.isHost) MP.broadcastArena(cfg); }   // co-op: shared PvP arena — sync the map to guests
 }
-function exitArena(){ IN_ARENA=false; try{ mpHideBanner(); }catch(e){}
-  if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked;
-    meta.petOwned=b.petOwned;meta.petActive=b.petActive;meta.petNames=b.petNames;meta.petTrain=b.petTrain;ARENA_BACKUP=null; }
-  if(MP.active){ MP.pvp=false; MP.arenaMsg=null; MP.scores={}; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} refreshBagCap&&refreshBagCap(); openHub(); }
+// A single complete escrow restore for explicit exits and unexpected party/hub transitions.
+function restoreArenaCampaign(){
+  if(!IN_ARENA&&!ARENA_BACKUP)return false;
+  IN_ARENA=false;
+  if(ARENA_BACKUP){Object.assign(meta,ARENA_BACKUP);ARENA_BACKUP=null;}
+  if(MP.active){MP.pvp=false;MP.arenaMsg=null;MP.scores={};}
+  ARENA_STAGE=null;try{mpHideBanner();updateArenaHud();}catch(e){}
+  refreshBagCap();return true;
+}
+function exitArena(){restoreArenaCampaign();openHub();}
 function arenaRespawn(){ if(!G||!G.p) return; const p=G.p; p.dead=false; p.downed=false; p._pvpDead=false;
   const sp=G.arenaSpawn||{x:0,z:0,y:60}; p.x=sp.x; p.z=sp.z; p.y=(sp.y||0)+8; p.vx=0;p.vy=0;p.vz=0; p.hp=effMaxHp(p); p.invuln=2;
   G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.b++; try{ updateArenaHud(); }catch(_){}
@@ -18348,6 +18375,7 @@ function openDiffSelect(){
    THE WAYSTATION — the walkable hub (Firelink, not a menu)
    ============================================================ */
 function openHub(){
+  restoreArenaCampaign();
   BFChestReveal.clear();
   if(G?.trialSession)document.getElementById('deathfade')?.remove();
   if(MP.active&&G?.trialSession){if(MP.guest()&&MP._trialExitSession!==G.trialSession){MP.hostConn?.send({t:'trialExit',session:G.trialSession});toast('Asking the party to return together.');return;}if(MP.isHost)MP.trialReceipt={session:G.trialSession,cid:G.trial,kills:G.trialKills||0,complete:!!G.trialCompleted,story:briarPacket()};}
@@ -18629,7 +18657,7 @@ function enterWaystation(riftHall=false){
   if(BFHubDialogue.active)BFHubDialogue.close(false,true);briarPending=null;
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
-  if(IN_ARENA){ IN_ARENA=false; if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; } if(MP.active){ MP.pvp=false; MP.arenaMsg=null; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} }
+  restoreArenaCampaign();
   initAudio(); queueLevelUp=0; queueSubclass=false;
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
@@ -19037,7 +19065,12 @@ function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-
     (THEMEMOBS[th]||[]).forEach(m=>{ if(!seen[m]&&ENEMY[m]&&!ENEMY[m].boss){ seen[m]=1; out.push(m); } }); }
   for(let i=0;i<=maxZ;i++){ const st=STAGES[ZONES[i].boss.stage], m=st&&st.boss; if(m&&ENEMY[m]&&!seen[m]){ seen[m]=1; out.push(m); } }
   return out; }
-function enterSparringRoom(){
+function leaveSparringRoom(){
+  if(MP.guest()){MP.hostConn?.send({t:'sparringRoom',enter:false});toast('Asking the party to return to the Waystation.');return;}
+  enterWaystation();
+}
+function enterSparringRoom(remote=false){
+  if(MP.guest()&&!remote){MP.hostConn?.send({t:'sparringRoom',enter:true});toast('Asking the party to enter the Sparring Room.');return;}
   initAudio(); const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   Object.assign(TRAIN_UI,{selected:null,filter:'all',query:'',count:1});
   G=newG(p,{hub:true,sparringRoom:true,zone:0,area:0,zoneTier:1}); G.stageIndex=0;
@@ -19057,7 +19090,7 @@ function enterSparringRoom(){
   G.hubNpcs=[
     {id:'sparringcontrol',ic:'⚔️',name:'Training Desk',role:'Choose a bout',prop:'sparring',verb:'Set up a practice bout',direct:true,x:-155,z:335,open:()=>openTrainingArena(wsResume)},
     {id:'bestiary',ic:'📖',name:'Bestiary',role:'Enemy field guide',prop:'bestiary',verb:'Read the bestiary',direct:true,x:155,z:335,open:()=>openBestiary(wsResume)},
-    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:435,z:470,open:()=>enterWaystation()}
+    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:435,z:470,open:()=>leaveSparringRoom()}
   ];
   G.walls.push({x:-155,z:335,w:104,d:58,h:44,invisible:true});
   G.walls.push({x:155,z:335,w:44,d:34,h:68,invisible:true});
@@ -19068,6 +19101,7 @@ function enterSparringRoom(){
   G.lastSafe={x:0,z:420};G.startPos={x:0,z:420};G.goalPos={x:0,z:RZ};G.bounds={minX:-560,maxX:560,minZ:-560,maxZ:560};G.progressEnd=RZ;
   p.x=0;p.z=420;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
   document.getElementById('stagetag').textContent='SPARRING HALL';questUpdate();toast('Training desk on the left; bestiary on the right. Practice has no penalties or rewards.');
+  spawnPet();if(MP.active)MP.onEnter(MP.SPARRING);
 }
 const BESTIARY_INFO={
   grunt:{name:'Hollowed Soldier',tell:'Closes in, then pauses before striking. Step away during the warning.',lore:'A living soldier forced to obey the Abyss King. Their empty eyes reveal the Hollowing.'},

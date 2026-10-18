@@ -1,0 +1,44 @@
+[
+  {
+    "case": "stat draft",
+    "state": "{\"checks\":[{\"name\":\"Old level100 save loads\",\"ok\":true},{\"name\":\"Actual level2 earns one unspent point\",\"ok\":true},{\"name\":\"Stat explanation is visible without pausing\",\"ok\":true}],\"errors\":[],\"mode\":\"pause\",\"tutorial\":null,\"guide\":false,\"seen\":1,\"points\":1,\"allocation\":{\"health\":2,\"attack\":2,\"defense\":2,\"speed\":2,\"mana\":2}}",
+    "screen": "×\nCharacter Stats\n\nMage foundation: +10 mana, on top of the class mana pool.\n\nEach player level earns a point for a permanent upgrade. Choose + to preview it; Apply saves your choice. Attack helps every weapon and skill. Each stat holds up to 20 points.\n\n0 points available · 1 point per player level\n\nHealth\n+2% maximum health per point\n115 HP → 118 HP\n−\n3\n+\nAttack\n+1.5% all damage per point\n103.0% base damage → 103.0% base damage\n−\n2\n+\nDefense\n+0.5% damage reduction; shared cap 50%\n1.0% damage blocked → 1.0% damage blocked\n−\n2\n+\nSpeed\n+0.5% movement speed per point\n101.0% base speed → 101.0% base speed\n−\n2\n+\nMana\n+3 maximum mana per point\n146 mana → 146 mana\n−\n2\n+\n\nSpend now or save points for later. Reassign spent points for free at the Drillmaster.\n\nApply\nBack"
+  },
+  {
+    "case": "stat applied",
+    "state": "{\"checks\":[{\"name\":\"Old level100 save loads\",\"ok\":true},{\"name\":\"Actual level2 earns one unspent point\",\"ok\":true},{\"name\":\"Stat explanation is visible without pausing\",\"ok\":true}],\"errors\":[],\"mode\":\"play\",\"tutorial\":null,\"guide\":false,\"seen\":1,\"points\":0,\"allocation\":{\"health\":3,\"attack\":2,\"defense\":2,\"speed\":2,\"mana\":2}}"
+  },
+  {
+    "case": "rebound bag practice",
+    "state": "{\"checks\":[{\"name\":\"Old level100 save loads\",\"ok\":true},{\"name\":\"Actual beginner tutorial opened\",\"ok\":true}],\"errors\":[],\"mode\":\"play\",\"tutorial\":{\"step\":3,\"id\":\"pause-practice\",\"title\":\"Pause when you need a break\"},\"guide\":false,\"seen\":1,\"points\":89,\"allocation\":{\"health\":4,\"attack\":1,\"defense\":3,\"speed\":1,\"mana\":2}}"
+  },
+  {
+    "case": "Esc pause and Q resume",
+    "state": "{\"checks\":[{\"name\":\"Old level100 save loads\",\"ok\":true},{\"name\":\"Actual beginner tutorial opened\",\"ok\":true}],\"errors\":[],\"mode\":\"play\",\"tutorial\":{\"step\":4,\"id\":\"move\",\"title\":\"Move around\"},\"guide\":false,\"seen\":1,\"points\":89,\"allocation\":{\"health\":4,\"attack\":1,\"defense\":3,\"speed\":1,\"mana\":2}}"
+  },
+  {
+    "case": "independent sound choice and mute",
+    "screen": "Player level-up sound\nOriginal\nNew ElevenLabs\nListen\nSound is muted. Raise Sound effects volume to listen.",
+    "classChoice": null,
+    "state": "{\"checks\":[{\"name\":\"Old level100 save loads\",\"ok\":true},{\"name\":\"Both reward sound selectors exist\",\"ok\":true}],\"errors\":[],\"mode\":\"menu\",\"tutorial\":null,\"guide\":true,\"points\":89,\"allocation\":{\"health\":4,\"attack\":1,\"defense\":3,\"speed\":1,\"mana\":2},\"choice\":\"new\"}"
+  },
+  {
+    "case": "independent choices",
+    "choices": [
+      {
+        "id": "rewardSelectplayer",
+        "value": "new"
+      },
+      {
+        "id": "rewardSelectclass",
+        "value": "original"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "case": "audio decoding and shared state",
+    "state": "{\"checks\":[{\"name\":\"Old level100 save loads\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_brute\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_marksman\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_fallen\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_officer_caster\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_officer_shield\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_officer_spear\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_furnace\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_marble\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_king\",\"ok\":true},{\"name\":\"Browser decodes bosswarn_hydra\",\"ok\":true},{\"name\":\"Browser decodes boss_king_awaken\",\"ok\":true},{\"name\":\"Browser decodes boss_hydra_free\",\"ok\":true},{\"name\":\"Browser decodes boss_furnace_cool\",\"ok\":true},{\"name\":\"Browser decodes boss_marble_open\",\"ok\":true},{\"name\":\"Browser decodes world_mill_start\",\"ok\":true},{\"name\":\"Browser decodes world_bridge_lower\",\"ok\":true},{\"name\":\"Browser decodes world_lift\",\"ok\":true},{\"name\":\"Browser decodes world_press_brake\",\"ok\":true},{\"name\":\"Browser decodes world_rail_cart\",\"ok\":true},{\"name\":\"Browser decodes world_water_fill\",\"ok\":true},{\"name\":\"Browser decodes world_water_drain\",\"ok\":true},{\"name\":\"Browser decodes world_water_freeze\",\"ok\":true},{\"name\":\"Browser decodes world_library_seal\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_hurl\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_quake\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_spin\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_daggerthrow\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_javelin\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_scythethrow\",\"ok\":true},{\"name\":\"Browser decodes weaponcharge_flamefan\",\"ok\":true},{\"name\":\"Shared boss state dispatches one named warning\",\"ok\":true},{\"name\":\"Same state does not repeat\",\"ok\":true},{\"name\":\"Armor opening dispatches cooling cue\",\"ok\":true}],\"errors\":[],\"done\":true,\"mode\":\"play\",\"tutorial\":null,\"guide\":true,\"points\":89,\"allocation\":{\"health\":4,\"attack\":1,\"defense\":3,\"speed\":1,\"mana\":2}}",
+    "errors": []
+  }
+]

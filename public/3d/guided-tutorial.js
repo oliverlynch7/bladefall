@@ -5,6 +5,8 @@ const coreActions=['move','jump','attack','dodge'];
 const lessons=[
  {id:'welcome',title:'A safe place to learn',body:'Practice moving, jumping, attacking and dodging. Enemies wait until you finish these four controls.',safe:true},
  {id:'menu-keys',title:'Your two menu keys',body:'Use these throughout the game. In conversations, W/S or ↑/↓ moves the yellow selection. Practice now: choose Continue.',safe:true},
+ {id:'bag-practice',title:'Your bag is one key away',body:(g,hint)=>'Press '+hint('bag')+' to open your bag. Press it again, or Q, to close it. Try it now, or continue.',practice:'bag',safe:true},
+ {id:'pause-practice',title:'Pause when you need a break',body:(g,hint)=>'Press '+hint('pause')+' to open the menu. Resume or press Q to return. Solo time stops; in co-op you stay visible and protected.',practice:'pause',safe:true},
  {id:'move',title:'Move around',body:'Try moving in different directions. You can change your camera view later in Settings.',action:'move',safe:true},
  {id:'jump',title:'Hold to jump higher',body:'Tap for a short hop. Hold the jump control briefly for more height.',action:'jump',safe:true},
  {id:'attack',title:'Try a basic attack',body:'Red health bars mark enemies. Face one and tap to attack. Hold and release chargeable weapons for a stronger attack.',action:'attack',safe:true},
@@ -12,7 +14,7 @@ const lessons=[
  {id:'charge',title:'Some weapons can charge',body:(g,hint)=>window.__BF3?.isChargeWeapon(g.p.weapon)?'Your weapon can charge. Hold '+hint('attack')+' until the charge is ready, then release for a stronger attack. Practice if you like, or continue.':'Your current weapon has no charged attack. Other weapons let you hold '+hint('attack')+' and release for a stronger hit. You do not need one to continue.',safe:true},
  {id:'vitals',title:'Watch health and mana',body:'HP is your health. Mana fuels skills. Basic hits restore a little mana. Wait 4 seconds between skills for faster recovery. Keep moving: enemies are active.',target:['#hud .hudvitals']},
  {id:'objective',title:'Your next task',body:'Defeat 6 enemies. After the first 3, your class ranks up. A purple banner announces your first skill choice; combat waits while you choose. Try it on the rest, then find the exit portal.',target:['#questbox']},
- {id:'progress',title:'Two kinds of progress',body:'Gold: your player leveled up. Keep fighting; spend stat points in Bag later. Purple: your class ranked up. Combat pauses, then you must choose a skill or passive. Each bar has ten progress marks.',target:['#hudprogress']},
+ {id:'progress',title:'Two kinds of progress',body:'Gold: your player leveled up. Spend points with the gold + points button beside your character bar, now or later. Purple: your class ranked up. Combat pauses, then you must choose a skill or passive. Each bar has ten progress marks.',target:['#hudprogress']},
  {id:'skills',title:'Skills are your stronger attacks',body:(g,hint)=>'Use '+hint('skill1')+' for Skill 1 after class rank 2. It hits harder or helps you fight in a way basic attacks cannot. Skills spend mana; the countdown shows when you can use one again.',target:['#bSk0']},
  {id:'bag',title:'Chests and your bag',body:'Chests reveal one piece of gear and put it in your bag. Enemies rarely drop chests. Bag full + Auto-sell OFF leaves a chest unopened.',target:['#inventoryDock']},
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
@@ -22,7 +24,7 @@ const lessons=[
 ];
 const skillLesson={id:'skill-use',title:'Try your new skill',body:(g,hint)=>'Skill 1 is a powerful part of combat, not just an extra button. Face an enemy in range and press '+hint('skill1')+' to try it. Watch your mana and its recharge countdown.',action:'skill1',target:['#bSk0']};
 const pauseHint=()=>guide?.hint?.('pause')||'Esc';
-function suspend(){if(panel)panel.hidden=true;BFTutorialCallout.hide();}
+function suspend(){if(guide){const practice=guide.steps[guide.i].practice;if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;}if(panel)panel.hidden=true;BFTutorialCallout.hide();}
 function stop(){if(guide)guide.g._tutorialSafe=false;guide=null;panel?.remove();panel=null;BFTutorialCallout.clear();}
 function start(g){if(!g)return;stop();g._guidedUsed=true;g._tutorialSafe=true;document.exitPointerLock?.();guide={g,i:0,steps:lessons,hold:0,run:0};}
 function skill(g){
@@ -33,7 +35,7 @@ function skill(g){
  g._tutorialSafe=false;
 }
 function next(){
- if(!guide)return;guide.i++;guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;
+ if(!guide)return;guide.i++;guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;guide.practiceOpened=false;
  if(guide.i>=guide.steps.length){
   if(guide.resume){guide=guide.resume;guide.rendered=null;}
   else{stop();return;}
@@ -71,6 +73,7 @@ function draw(hint){
  if(core){keys=step.action==='move'?movementHints(hint):[hint(step.action)];label=step.action==='jump'?'Hold to continue':'Try it to continue';}
  else if(step.id==='charge'){keys=[hint('attack')];label='Optional · hold, then release';}
  else if(['skills','skill-use'].includes(step.id)){keys=[hint('skill1')];label=step.id==='skills'?'Skill 1 · unlocks at class rank 2':'Skill 1';}
+ else if(step.practice){keys=[hint(step.practice),'Q'];label='Open · then close to finish practice';}
  else if(step.id==='bag'){keys=[hint('bag')];label='Open bag · Loot reopens the latest pickup';}
  else if(step.id==='journal'){keys=[hint('journal')];label='Open journal';}
  else if(step.id==='menu-keys'){keys=[hint('interact'),'Q'];label='Choose / continue · Back / close';}
@@ -86,7 +89,7 @@ function draw(hint){
  panel.append(copy);
  const buttons=document.createElement('div');buttons.className='lesson-actions';
  if(!core){const b=document.createElement('button');b.type='button';b.textContent=(guide.i===guide.steps.length-1&&!guide.resume?'Finish':'Continue')+' · '+hint('interact');b.onclick=next;buttons.append(b);}
- const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=(step.safe?'Skip lessons':'Close tips')+' · Q / '+pauseHint();skip.onclick=stop;buttons.append(skip);panel.append(buttons);
+ const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=(step.safe?'Skip lessons':'Close tips')+(step.practice==='pause'?' · Q':' · Q / '+pauseHint());skip.onclick=stop;buttons.append(skip);panel.append(buttons);
  const status=document.createElement('p');status.className='lesson-status';status.textContent=step.safe?'Enemies wait during control practice.':'Optional tip · movement and combat stay active.';panel.append(status);
  position(true);
 }
@@ -94,6 +97,7 @@ function canReceive(){return guide&&panel&&!panel.hidden&&window.__BF3?.mode==='
 window.addEventListener('keydown',e=>{
  if(!canReceive()||e.repeat||e.target.closest?.('input,textarea,select,[contenteditable=true]'))return;
  const action=window.__BF3?.keyAction(window.BFPartyNavigation?.keyCode(e)||e.code);
+ if(guide.steps[guide.i].practice&&(action===guide.steps[guide.i].practice||guide.steps[guide.i].practice==='pause'&&e.code==='Escape'))return;
  if(e.code==='Escape'||action==='interact'&&!coreActions.includes(guide.steps[guide.i].action)){
   e.preventDefault();e.stopImmediatePropagation();e.code==='Escape'?stop():next();
  }
@@ -113,7 +117,9 @@ function tick(g,mode,dt,input,api){
  }
  if(!guide)return false;
  if(g!==guide.g||!g.trial){stop();return false;}
- if(mode!=='play'){suspend();return false;}
+ const practice=guide.steps[guide.i].practice;
+ if(mode!=='play'){if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;suspend();return false;}
+ if(practice&&guide.practiceOpened){guide.practiceOpened=false;next();if(!guide)return false;}
  if(panel)panel.hidden=false;draw(api.hint);position();
  const step=guide.steps[guide.i],a=step.action,core=coreActions.includes(a);g._tutorialSafe=!!step.safe;
  if(step.safe)g.p.invuln=Math.max(g.p.invuln||0,1);
@@ -163,6 +169,6 @@ function map(g,mode){
 }
 
 const mapStyle=document.createElement('style');mapStyle.textContent='#localMap{width:216px!important;height:216px!important}@media(max-width:650px){#localMap{width:140px!important;height:140px!important}}';document.head.append(mapStyle);
-function control(p){if(!canReceive())return false;if(p.edge('pause')){stop();return true;}if(p.edge('interact')&&!coreActions.includes(guide.steps[guide.i].action)){next();return true;}return false;}
+function control(p){if(!canReceive())return false;if(guide.steps[guide.i].practice&&p.edge(guide.steps[guide.i].practice))return false;if(p.edge('pause')){stop();return true;}if(p.edge('interact')&&!coreActions.includes(guide.steps[guide.i].action)){next();return true;}return false;}
 window.BFGuidedTutorial={start,skill,tick,map,stop,suspend,control,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,id:guide.steps[guide.i]?.id,title:guide.steps[guide.i]?.title}:null}};
 })();

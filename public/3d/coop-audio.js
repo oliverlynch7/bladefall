@@ -4,6 +4,7 @@ const methods=new Set(['slash','shoot','wand','magic','dodge','growl']);
 const elements=new Set(['fire','ice','storm','poison','holy','void','arcane']);
 const files=new Set(['swordswing','axeswing','spearswing','custom_shoot','xbowclick','xbowlatch','wandfire','wandcharge','firecharge','fireshot','fireball','warskill1','warcharge','arcaneskill','cast1','cast2','cast3','cast4','cast5','cast6','cast7',...['py_bolt','py_fan','py_blast','py_ward','py_lance','py_nova','py_inferno','py_sun'].map(id=>'skillcast_'+id)]);
 for(const id of root.BFSkillSfx?.ids||[])files.add('skillcast_'+id);
+for(const id of root.BFWorldSfx?.charges||[])files.add('weaponcharge_'+id);
 let capture=null,depth=0,gain=1;
 function recipe(cue){
  if(!Array.isArray(cue)||cue.length>3)return null;const [name,arg,volume]=cue;
@@ -32,7 +33,7 @@ function withGain(level,fn){const before=gain;gain=Number.isFinite(level)?Math.m
 function play(cues,level,sfx,playFile){
  if(!Number.isFinite(level)||level<=0)return 0;const before=gain;gain=Math.min(.55,level);let played=0;
  try{for(const c of clean(cues)){try{if(c[0]==='file'){
-   const done=playFile(c[1],c[2]);if(!done&&c[1]==='custom_shoot')sfx.shoot();else if(!done&&c[1].startsWith('skillcast_')){const id=c[1].slice(10),fallback=root.BFSkillSfx?.fallback(id)||'cast1';if(!playFile(fallback,.65)){const cls=root.BFSkillSfx?.classes[id]||'pyromancer';for(const f of clean(fallbackRecipe(cls))){if(f[0]==='magic')sfx.magic.call(Object.create(sfx),f[1]);else if(f[0]==='slash')sfx.slash();}}}
+   const done=playFile(c[1],c[2]);if(!done&&c[1]==='custom_shoot')sfx.shoot();else if(!done&&c[1].startsWith('weaponcharge_')){if(c[1]==='weaponcharge_flamefan')sfx.magic('fire');else sfx.slash();}else if(!done&&c[1].startsWith('skillcast_')){const id=c[1].slice(10),fallback=root.BFSkillSfx?.fallback(id)||'cast1';if(!playFile(fallback,.65)){const cls=root.BFSkillSfx?.classes[id]||'pyromancer';for(const f of clean(fallbackRecipe(cls))){if(f[0]==='magic')sfx.magic.call(Object.create(sfx),f[1]);else if(f[0]==='slash')sfx.slash();}}}
   }else{const receiver=Object.create(sfx);receiver._castT=-Infinity;sfx[c[0]].call(receiver,c[1]);}played++;}catch(_){} }
  }finally{gain=before;}return played;
 }

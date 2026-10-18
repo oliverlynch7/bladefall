@@ -1,0 +1,216 @@
+{
+  "scope": "Source-audited additive boss warnings, phase openings, mechanisms and charged weapon identities. Existing weapons/impacts/UI remain preserved.",
+  "hard_credit_cap": 4000,
+  "cues": [
+    {
+      "id": "bosswarn_brute",
+      "name": "Orchard Brute \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. Heavy iron chains tighten with a deep wooden barn creak and restrained creature breath, preparing a charge. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_marksman",
+      "name": "Hollow Marksman \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A tense laminated bow bends and three arrow shafts click softly together, preparing a volley. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_fallen",
+      "name": "The Fallen \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A heavy worn sword is lifted into guard with a brief metallic ring and leather armor tension. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_officer_caster",
+      "name": "Frost Officer \u00b7 caster \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. Ice crystals gather into a compact rising cold magical shimmer. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_officer_shield",
+      "name": "Frost Officer \u00b7 shield \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A heavy shield braces with a low iron scrape and a short icy resonance. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_officer_spear",
+      "name": "Frost Officer \u00b7 spear \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A spear slides into a locked thrust with a thin steel scrape and sharp air tension. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_furnace",
+      "name": "Ember Colossus \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A massive furnace piston draws back, iron machinery locks and contained hot steam hisses. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_marble",
+      "name": "Marble Colossus \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. Ancient carved stone joints grind as a huge marble arm draws back, with a delicate celestial ring. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_king",
+      "name": "Abyss King \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A dark royal blade gathers energy with a resonant low Void swell and one bright ominous edge. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "bosswarn_hydra",
+      "name": "Sea Hydra \u00b7 attack warning",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A huge sea creature inhales through wet scales and draws back, compact water-pressure rumble. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Current visible wind-up state, observed locally on host and guest; original warning retained if clip unavailable."
+    },
+    {
+      "id": "boss_king_awaken",
+      "name": "King awakens",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A dark magical shell tears open with a deep resonant rupture and renewed bright energy. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1.3,
+      "source": "akStage changes to fight2"
+    },
+    {
+      "id": "boss_hydra_free",
+      "name": "Hydra freed",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. Huge iron restraints snap apart and splash into water, followed by a restrained airy release. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1.4,
+      "source": "hydraArena.freed rising edge"
+    },
+    {
+      "id": "boss_furnace_cool",
+      "name": "Furnace armor cooled",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A heavy pressure valve opens into a short forceful steam release, followed by a cooling metal tick. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1,
+      "source": "fcExposed rising edge"
+    },
+    {
+      "id": "boss_marble_open",
+      "name": "Marble armor opened",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A stone armor seal cracks with a clear bright magical fracture, tiny fragments settle. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.9,
+      "source": "mcExposed rising edge"
+    },
+    {
+      "id": "world_mill_start",
+      "name": "Mill starts",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A wooden water wheel catches flowing water, then two deliberate wooden gear clunks. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1,
+      "source": "briarMill.water rises from stopped"
+    },
+    {
+      "id": "world_bridge_lower",
+      "name": "Timber bridge lowers",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A compact timber drawbridge lowers on rope and iron fittings and settles firmly. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1,
+      "source": "briar.bridge rising flag"
+    },
+    {
+      "id": "world_lift",
+      "name": "Prison lift opens",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A heavy prison lift ratchet releases and wooden platform rises on taut ropes. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1,
+      "source": "kd.lift.open rising flag"
+    },
+    {
+      "id": "world_press_brake",
+      "name": "Press brake engages",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A heavy industrial brake clamps down and a spinning metal press stops firmly. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.85,
+      "source": "kd.deep.open rising flag"
+    },
+    {
+      "id": "world_rail_cart",
+      "name": "Rail cart crossing",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A short heavy mine cart rolls across steel rails with two wheel clacks and settles. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 1,
+      "source": "ih.cart rising flag"
+    },
+    {
+      "id": "world_water_fill",
+      "name": "Waterworks pump",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A hand pump makes two firm mechanical strokes and cold water surges into a basin. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "ic.lock.level increases"
+    },
+    {
+      "id": "world_water_drain",
+      "name": "Waterworks drain",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A stone sluice opens and water rushes downward into a drain, brief and controlled. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.9,
+      "source": "ic.lock.level decreases"
+    },
+    {
+      "id": "world_water_freeze",
+      "name": "Waterworks freeze",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. Water rapidly crystallizes into a sheet of ice, delicate icy crackles with a solid finish. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.85,
+      "source": "ic.lock.frozen or ic.channel.open rising flag"
+    },
+    {
+      "id": "world_library_seal",
+      "name": "Library seal opens",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A celestial library stone seal unlocks with a precise glass chime and brief turning stone. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.9,
+      "source": "sl.display.open rising flag"
+    },
+    {
+      "id": "weaponcharge_hurl",
+      "name": "Axe throw",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A weighty axe launches end over end with a low rotational whoosh and metallic edge. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for hurl; existing charge sound retained when unavailable; co-op signature whitelist."
+    },
+    {
+      "id": "weaponcharge_quake",
+      "name": "Warhammer charge",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A heavy warhammer strikes earth with a rounded stone thud and short outward rocky shockwave. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for quake; existing charge sound retained when unavailable; co-op signature whitelist."
+    },
+    {
+      "id": "weaponcharge_spin",
+      "name": "Greatsword charged sweep",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A huge steel sword makes one powerful circular cut through air with a clean ringing edge. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for spin; existing charge sound retained when unavailable; co-op signature whitelist."
+    },
+    {
+      "id": "weaponcharge_daggerthrow",
+      "name": "Dagger throw",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A small dagger flicks forward with a short sharp steel hiss, dry and precise. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for daggerthrow; existing charge sound retained when unavailable; co-op signature whitelist."
+    },
+    {
+      "id": "weaponcharge_javelin",
+      "name": "Javelin throw",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A long spear is thrown with a strong wooden shaft rush and pointed airy whistle. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for javelin; existing charge sound retained when unavailable; co-op signature whitelist."
+    },
+    {
+      "id": "weaponcharge_scythethrow",
+      "name": "Scythe throw",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A broad spectral scythe launches spinning, two airy rotations with a faint ghostly metal ring. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for scythethrow; existing charge sound retained when unavailable; co-op signature whitelist."
+    },
+    {
+      "id": "weaponcharge_flamefan",
+      "name": "Palm flame fan",
+      "prompt": "Single isolated fantasy game sound effect, no music, no voice or speech, no ambience. A controlled wide burst of flame pushes outward from both palms, short fiery rush without explosion. Clean short onset, controlled tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "Successful chargeRelease for flamefan; existing charge sound retained when unavailable; co-op signature whitelist."
+    }
+  ]
+}

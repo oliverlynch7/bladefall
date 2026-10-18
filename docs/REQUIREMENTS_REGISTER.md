@@ -2066,3 +2066,10 @@ Inspection/plan: most menus use showOverlayHTML and existing Back/Cancel/Resume 
 User: "also the npcs in the level should have their names above their model so you know whos who, the current press e to interact floating texct things its a semi bnroken system. please come up with somehting better to still help d the player know what to do"
 
 Inspection/plan: campaign NPCs have rendered-head anchors but no persistent name labels. Current interaction pill projects over their heads and can cover them or jump around. Separate identity from action: nearby campaign NPC nameplates follow each local rendered head, hide offscreen/behind walls/in menus, limit overlaps; a single stable bottom-center action prompt shows the current bound key, target/action and relevant quest/service cue. Preserve hub signs and quest marks (avoid duplicate hub names), original target selection/reachability/actions and co-op authority. Make the prompt clickable/accessibly labeled, keep touch controls and hide it cleanly during loading/dialogue. Reuse DOM nodes and throttle static visibility checks. Verify old-save campaign/hub, camera/quality/guest cases, rebinding and actual interaction.
+
+
+## [Codex | 2026-10-17] Companion pad healing and stale death health
+
+User: "healing pads should also heal companions ionf they step on it. also my friend pet died but then it still showed it had 10hp"
+
+Inspection/plan: pad update only checks the player; hurtPet changes/removes G.pet without refreshing HUD, leaving its prior HP visible. Extend pads to owner-authoritative living player/companion occupants with height/radius checks, shared finite charge and existing heal cadence; preserve locked/infinite behavior and never revive fallen pets or mutate peer proxies. Refresh companion HUD on damage/death and present Fallen/0 HP until hub return. Normalize contradictory dead peer packets to0 HP. Verify player-full/pet-injured, pet-only contact, simultaneous/finite/infinite/locked/height/death, owner/peer packet cleanup and Beastmaster last stand. Preserve saves and no new network authority.

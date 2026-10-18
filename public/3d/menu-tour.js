@@ -1,0 +1,20 @@
+/* Local menu orientation. It never changes world state, purchases or quest progress. */
+(()=>{'use strict';
+ const entries=[
+  ['gearBtn','Gear','See what you have equipped and how it changes your stats.'],
+  ['bagBtnP','Bag','Compare, equip or sell the items you collect.'],
+  ['classesBtn','Classes','Read your class skills, chosen bonuses and future unlocks. Visit the Drillmaster to change your class.'],
+  ['achBtn','Achievements','See your achievements and records.'],
+  ['optBtn','Settings','Change sound, graphics and camera settings. Under Controls & camera, rebind keys or set up an Xbox or PlayStation controller.'],
+  ['multiplayerBtnP','Multiplayer','Host a co-op room or join a friend. You keep using your current character.'],
+  ['qmenu','Quit to Hub','Return to the Waystation. You keep earned gold, experience and completed quest progress.'],
+  ['titleBtnP','Title Screen','Save your character and return to the title screen.']
+ ];
+ let state=null;
+ function close(){if(!state)return;const s=state;state=null;s.observer?.disconnect();document.getElementById('menuTour')?.remove();document.querySelectorAll('.menu-tour-target').forEach(e=>e.classList.remove('menu-tour-target'));s.done?.();}
+ function draw(){if(!state)return;const [id,title,text]=entries[state.i],root=document.getElementById('menuTour');document.querySelectorAll('.menu-tour-target').forEach(e=>e.classList.remove('menu-tour-target'));const target=document.getElementById(id);target?.classList.add('menu-tour-target');target?.scrollIntoView({block:'nearest'});root.querySelector('h3').textContent=title;root.querySelector('p').textContent=text;root.querySelector('.menu-tour-count').textContent='Menu guide · '+(state.i+1)+' / '+entries.length;root.querySelector('[data-next]').textContent=(state.i===entries.length-1?'Finish':'Next')+' · '+(window.__BF3?.controlKey('interact')||'E');root.querySelector('[data-back]').disabled=state.i===0;}
+ function next(){if(!state)return;if(state.i===entries.length-1)close();else{state.i++;draw();}}
+ function start(done){close();const card=document.querySelector('#ovcard .pausecard');if(!card||!entries.every(([id])=>document.getElementById(id)))return;state={i:0,done};const root=document.createElement('section');root.id='menuTour';root.setAttribute('aria-label','Game menu guide');root.innerHTML='<div class="menu-tour-count"></div><h3></h3><p></p><div class="menu-tour-actions"><button data-back>Previous</button><button data-next>Next</button><button data-close>Close guide · Q</button></div>';card.prepend(root);root.querySelector('[data-back]').onclick=()=>{state.i--;draw();};root.querySelector('[data-next]').onclick=next;root.querySelector('[data-close]').onclick=close;state.observer=new MutationObserver(()=>{if(!root.isConnected)close();});state.observer.observe(document.getElementById('ovcard'),{childList:true});draw();root.querySelector('[data-next]').focus();}
+ function key(e){if(!state)return false;if(!document.getElementById('menuTour')?.isConnected){close();return false;}const action=window.__BF3?.keyAction(e.code);if(e.code!=='KeyQ'&&e.code!=='Escape'&&action!=='interact'&&action!=='pause')return false;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat){if(action==='interact')next();else close();}return true;}
+ window.BFMenuTour={start,close,key,get active(){return !!state;},get index(){return state?.i;}};
+})();

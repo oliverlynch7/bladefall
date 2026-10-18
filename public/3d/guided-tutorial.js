@@ -1,12 +1,16 @@
 /* Beginner practice and current Adventure HUD guidance. The map is shared by all modes. */
 (function(){'use strict';
 let guide=null,panel=null,mapCanvas=null,placedAt=0;
+const SUCCESS_SECONDS=2;
+function complete(){if(!guide||guide.success!=null)return;guide.success=0;paintSuccess();}
+function paintSuccess(){const status=panel?.querySelector('.lesson-status');if(status){status.textContent='Well done! Next lesson in a moment…';status.setAttribute('role','status');}panel?.classList?.add('lesson-success');}
+
 const coreActions=['move','jump','attack','dodge'];
 const lessons=[
  {id:'welcome',title:'A safe place to learn',body:'Practice moving, jumping, attacking and dodging. Enemies wait until you finish these four controls.',safe:true},
- {id:'menu-keys',title:'Your two menu keys',body:'Use these throughout the game. In conversations, W/S or ↑/↓ moves the yellow selection. Practice now: choose Continue.',safe:true},
+ {id:'menu-keys',title:'Choose, go back, open the menu',body:(g,hint)=>hint('interact')+' selects or continues. Q goes back or closes a menu. '+hint('pause')+' opens the main menu. In conversations, W/S or ↑/↓ moves the yellow selection. Choose Continue now.',safe:true},
  {id:'bag-practice',title:'Your bag is one key away',body:(g,hint)=>'Press '+hint('bag')+' to open your bag. Press it again, or Q, to close it. Try it now, or continue.',practice:'bag',safe:true},
- {id:'pause-practice',title:'Pause when you need a break',body:(g,hint)=>'Press '+hint('pause')+' to open the menu. Resume or press Q to return. Solo time stops; in co-op you stay visible and protected.',practice:'pause',safe:true},
+ {id:'pause-practice',title:'Pause when you need a break',body:(g,hint)=>'Press '+hint('pause')+' to open the main menu. Settings → Controls & camera lets you rebind keys or set up an Xbox or PlayStation controller. Choose Resume or press Q to return. Solo time stops; in co-op you stay protected.',practice:'pause',safe:true},
  {id:'move',title:'Move around',body:'Try moving in different directions. You can change your camera view later in Settings.',action:'move',safe:true},
  {id:'jump',title:'Hold to jump higher',body:'Tap for a short hop. Hold the jump control briefly for more height.',action:'jump',safe:true},
  {id:'attack',title:'Try a basic attack',body:'Red health bars mark enemies. Face one and tap to attack. Hold and release chargeable weapons for a stronger attack.',action:'attack',safe:true},
@@ -20,10 +24,11 @@ const lessons=[
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
  {id:'journal',title:'Keep your clues close',body:(g,hint)=>'New clues appear on paper notices. Open Journal ('+hint('journal')+') to reread clues or check quests at any time.',target:['#hudJournal'],anchor:'#inventoryDock'},
  {id:'navigation',title:'Follow your map',body:()=> 'Gold marks your objective or exit. Blue marks friends; cyan marks pings; red marks enemies. '+(window.__BF3?.meta?.camMode==='far'?'Overhead view keeps the map aligned with the camera.':'The map turns with your camera.'),target:['#localMap']},
- {id:'menu',title:'Ready to explore',body:'Close these tips, then open the menu for Settings or Help. Esc pauses time in solo play. In co-op, you stay visible and protected while your friends keep playing.',target:['#pausebtn','#eschint']}
+ {id:'menu',title:'Ready to explore',body:(g,hint)=>'Open the main menu with '+hint('pause')+' for Settings or Help. You can rebind keys and set up a controller in Settings → Controls & camera. Q closes menus; '+hint('interact')+' selects or continues.',target:['#pausebtn','#eschint']}
 ];
 const skillLesson={id:'skill-use',title:'Try your new skill',body:(g,hint)=>'Skill 1 is a powerful part of combat, not just an extra button. Face an enemy in range and press '+hint('skill1')+' to try it. Watch your mana and its recharge countdown.',action:'skill1',target:['#bSk0']};
-const pauseHint=()=>guide?.hint?.('pause')||'Esc';
+const pauseHint=()=>guide?.hint?.('pause')||'Tab';
+function practice(action){if(guide?.steps[guide.i]?.practice===action){guide.practiceOpened=true;suspend();}}
 function suspend(){if(guide){const practice=guide.steps[guide.i].practice;if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;}if(panel)panel.hidden=true;BFTutorialCallout.hide();}
 function stop(){if(guide)guide.g._tutorialSafe=false;guide=null;panel?.remove();panel=null;BFTutorialCallout.clear();}
 function start(g){if(!g)return;stop();g._guidedUsed=true;g._tutorialSafe=true;document.exitPointerLock?.();guide={g,i:0,steps:lessons,hold:0,run:0};}
@@ -35,7 +40,7 @@ function skill(g){
  g._tutorialSafe=false;
 }
 function next(){
- if(!guide)return;guide.i++;guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;guide.practiceOpened=false;
+ if(!guide)return;guide.i++;guide.success=null;panel?.classList?.remove('lesson-success');guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;guide.practiceOpened=false;
  if(guide.i>=guide.steps.length){
   if(guide.resume){guide=guide.resume;guide.rendered=null;}
   else{stop();return;}
@@ -80,7 +85,7 @@ function draw(hint){
  else if(step.id==='menu'){keys=[pauseHint()];label='Open menu after closing tips';}
  if(step.id==='menu-keys'){
   const cards=document.createElement('div');cards.className='lesson-menu-keys';
-  for(const [key,title,description] of [[hint('interact'),'Choose / continue','Talk, interact and select'],['Q','Back / close','Leave menus and conversations']]){
+  for(const [key,title,description] of [[hint('interact'),'Choose / continue','Talk, interact and select'],['Q','Back / close','Leave menus and conversations'],[hint('pause'),'Main menu','Settings, controller setup and more']]){
    const card=document.createElement('div'),keycap=document.createElement('kbd'),titleEl=document.createElement('strong'),text=document.createElement('small');
    keycap.textContent=key;titleEl.textContent=title;text.textContent=description;card.append(keycap,titleEl,text);cards.append(card);
   }copy.append(cards);keys=[];
@@ -89,8 +94,9 @@ function draw(hint){
  panel.append(copy);
  const buttons=document.createElement('div');buttons.className='lesson-actions';
  if(!core){const b=document.createElement('button');b.type='button';b.textContent=(guide.i===guide.steps.length-1&&!guide.resume?'Finish':'Continue')+' · '+hint('interact');b.onclick=next;buttons.append(b);}
- const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=(step.safe?'Skip lessons':'Close tips')+(step.practice==='pause'?' · Q':' · Q / '+pauseHint());skip.onclick=stop;buttons.append(skip);panel.append(buttons);
+ const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=step.safe?'Skip lessons':'Close tips';skip.onclick=stop;buttons.append(skip);panel.append(buttons);
  const status=document.createElement('p');status.className='lesson-status';status.textContent=step.safe?'Enemies wait during control practice.':'Optional tip · movement and combat stay active.';panel.append(status);
+ if(guide.success!=null)paintSuccess();
  position(true);
 }
 function canReceive(){return guide&&panel&&!panel.hidden&&window.__BF3?.mode==='play';}
@@ -98,15 +104,15 @@ window.addEventListener('keydown',e=>{
  if(!canReceive()||e.repeat||e.target.closest?.('input,textarea,select,[contenteditable=true]'))return;
  const action=window.__BF3?.keyAction(window.BFPartyNavigation?.keyCode(e)||e.code);
  if(guide.steps[guide.i].practice&&(action===guide.steps[guide.i].practice||guide.steps[guide.i].practice==='pause'&&e.code==='Escape'))return;
- if(e.code==='Escape'||action==='interact'&&!coreActions.includes(guide.steps[guide.i].action)){
-  e.preventDefault();e.stopImmediatePropagation();e.code==='Escape'?stop():next();
+ if(action==='interact'&&!coreActions.includes(guide.steps[guide.i].action)){
+  e.preventDefault();e.stopImmediatePropagation();if(guide.success==null)next();
  }
 },true);
 // Short mouse clicks can fall between simulation frames; remember the performed input.
 window.addEventListener('pointerdown',e=>{
  if(!canReceive()||e.pointerType!=='mouse'||e.target.closest?.('button,input,select,#guidedLesson,#inventoryDock,#equipmentFeed,#journalNotice,#hud,#questbox'))return;
  const b=window.__BF3,a=b?.keyAction('Mouse'+e.button);
- if(a==='interact'&&!coreActions.includes(guide.steps[guide.i].action)){e.preventDefault();e.stopImmediatePropagation();next();return;}
+ if(a==='interact'&&!coreActions.includes(guide.steps[guide.i].action)){e.preventDefault();e.stopImmediatePropagation();if(guide.success==null)next();return;}
  if(!['attack','dodge','jump'].includes(a))return;
  guide.tapped=a;b.input[a]=true;if(a!=='attack')b.input[a+'Edge']=true;e.preventDefault();
 },true);
@@ -119,11 +125,12 @@ function tick(g,mode,dt,input,api){
  if(g!==guide.g||!g.trial){stop();return false;}
  const practice=guide.steps[guide.i].practice;
  if(mode!=='play'){if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;suspend();return false;}
- if(practice&&guide.practiceOpened){guide.practiceOpened=false;next();if(!guide)return false;}
+ if(practice&&guide.practiceOpened){guide.practiceOpened=false;complete();}
  if(panel)panel.hidden=false;draw(api.hint);position();
  const step=guide.steps[guide.i],a=step.action,core=coreActions.includes(a);g._tutorialSafe=!!step.safe;
  if(step.safe)g.p.invuln=Math.max(g.p.invuln||0,1);
- if(a==='skill1'){if(g.p.skillCd?.[0]>0)next();return false;}
+ if(guide.success!=null){if(!document.hidden)guide.success+=Math.min(dt,.1);if(guide.success>=SUCCESS_SECONDS)next();return false;}
+ if(a==='skill1'){if(g.p.skillCd?.[0]>0)complete();return false;}
  if(!core)return step.id==='welcome';
  const pressed=a==='move'?input.up||input.left||input.down||input.right||Math.hypot(input.jx||0,input.jz||0)>.2:input[a]||guide.tapped===a;
  // Finish a jump/fall before waiting for the next input. Never freeze a learner mid-air.
@@ -134,10 +141,10 @@ function tick(g,mode,dt,input,api){
   guide.qualified=guide.qualified||guide.hold>=.33;
   guide.airborne=guide.airborne||g.p.onGround===false;
   if(guide.airborne&&g.p.onGround){
-   if(guide.qualified)next();
+   if(guide.qualified)complete();
    else{guide.hold=0;guide.run=0;guide.airborne=false;guide.tapped=null;}
   }
- }else{guide.hold+=dt;if(guide.hold>=.3)next();}
+ }else{guide.hold+=dt;if(guide.hold>=.3)complete();}
  return false;
 }
 function map(g,mode){
@@ -169,6 +176,6 @@ function map(g,mode){
 }
 
 const mapStyle=document.createElement('style');mapStyle.textContent='#localMap{width:216px!important;height:216px!important}@media(max-width:650px){#localMap{width:140px!important;height:140px!important}}';document.head.append(mapStyle);
-function control(p){if(!canReceive())return false;if(guide.steps[guide.i].practice&&p.edge(guide.steps[guide.i].practice))return false;if(p.edge('pause')){stop();return true;}if(p.edge('interact')&&!coreActions.includes(guide.steps[guide.i].action)){next();return true;}return false;}
-window.BFGuidedTutorial={start,skill,tick,map,stop,suspend,control,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,id:guide.steps[guide.i]?.id,title:guide.steps[guide.i]?.title}:null}};
+function control(p){if(!canReceive())return false;if(guide.steps[guide.i].practice&&p.edge(guide.steps[guide.i].practice))return false;if(p.edge('pause'))return false;if(p.edge('interact')&&!coreActions.includes(guide.steps[guide.i].action)){if(guide.success==null)next();return true;}return false;}
+window.BFGuidedTutorial={start,skill,tick,map,stop,suspend,practice,control,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,id:guide.steps[guide.i]?.id,title:guide.steps[guide.i]?.title,success:guide.success!=null}:null}};
 })();

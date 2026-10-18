@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-Draft direction and script, October 18, 2026. No voice selected, paid speech generated, or game text changed. Settle the newcomer experience first; record a short audition before producing the complete script. Existing NPC recordings and preferred sound effects remain separate.
+Draft direction and script, October 18, 2026. No voice selected or paid speech generated. Control and teaching-text changes below are implemented in v2.285; narration remains a draft. Settle the newcomer experience first; record a short audition before producing the complete script. Existing NPC recordings and preferred sound effects remain separate.
 
 Grounding: `public/3d/guided-tutorial.js`, `hub-tour.js`, `index.html` (`STORY.origin`, `playOpening`, audio settings), `voice-content.js`, `docs/STORY_CANON.md`, current requirements and Voice Studio implementation. The tutorial currently has 18 regular lessons and one inserted first-skill lesson. The hub tour builds stops from actual hub objects, so its coverage must be checked against that generated list rather than a fixed count.
 
@@ -30,27 +30,27 @@ These are draft spoken lines. The final approved line must also appear as its su
 | Stable ID | Spoken line |
 |---|---|
 | tutorial.welcome | Welcome. Let's try the controls somewhere safe. The enemies can wait. |
-| tutorial.menu-keys | Use Select to choose the highlighted option, and Back to close a menu. Try choosing Continue. |
-| tutorial.bag-practice | Open your bag. Use the same control, or Back, to close it. |
-| tutorial.pause-practice | Open the pause menu when you need a break. Alone, time stops. With friends, you stay protected while they keep playing. |
-| tutorial.move | Try moving in different directions. |
-| tutorial.jump | Tap Jump for a short hop. Hold it briefly to jump higher. |
-| tutorial.attack | Red health bars mark enemies. Face one and try a basic attack. |
-| tutorial.dodge | Dodge through an attack to avoid the hit. In the air, this control makes you dash. |
-| tutorial.charge.available | This weapon can charge. Hold Attack until it's ready, then release for a stronger hit. |
+| tutorial.menu-keys | Press E to choose or continue, and Q to go back. Tab opens the main menu. Press E to continue. |
+| tutorial.bag-practice | Press B to open your bag. Press B again, or Q, to close it. |
+| tutorial.pause-practice | Press Tab to open the main menu. Settings lets you change controls and set up an Xbox or PlayStation controller. Press Q to return. |
+| tutorial.move | Use W, A, S and D to move in different directions. |
+| tutorial.jump | Tap Space for a short hop. Hold it briefly to jump higher. |
+| tutorial.attack | Red health bars mark enemies. Face one and left-click to attack. You can also press J. |
+| tutorial.dodge | Press left Shift or right-click to dodge an attack. In the air, the same control makes you dash. |
+| tutorial.charge.available | This weapon can charge. Hold the left mouse button until it's ready, then release for a stronger hit. |
 | tutorial.charge.unavailable | Some weapons have a charged attack. Yours doesn't, so there's nothing to practice here. |
 | tutorial.vitals | Health keeps you alive. Mana fuels your skills. Basic hits restore a little mana; a break from skills helps it recover. |
 | tutorial.objective | Defeat six enemies. After three, you'll choose your first skill. After six, find the exit portal. |
 | tutorial.progress | Your character level gives you points to spend on stats. Your class rank unlocks skills and automatic bonuses. |
 | tutorial.skills | Skills give you powerful attacks and other ways to fight. Watch their mana cost and recharge time. |
-| tutorial.skill-use | Your first skill is ready. Face an enemy and try it. |
+| tutorial.skill-use | Your first skill is ready. Face an enemy and press the number 1 to try it. |
 | tutorial.bag | Chests give equipment. If your bag is full and Auto-sell is off, the chest stays closed. |
 | tutorial.autosell | Auto-sell turns new equipment into gold, even when your bag has space. Leave it off to keep your finds. |
-| tutorial.journal | The journal keeps your clues and quest information. You can open it whenever you need a reminder. |
+| tutorial.journal | Press N to open the journal for your clues and quest information. |
 | tutorial.navigation | Gold marks your next objective. Blue marks friends, cyan marks pings, and red marks enemies. |
-| tutorial.finish | You're ready to explore. The pause menu has Settings and Help if you need them. |
+| tutorial.finish | You're ready to explore. Press Tab for the main menu. Settings and Help are there if you need them. |
 
-There are 20 candidate tutorial clips for 19 prompts because charge has mutually exclusive weapon variants. Do not play both. The current attack prompt already mentions charging; remove that duplication only when the new text is integrated. The current stat lesson should also highlight the new remappable Stats shortcut, rather than relying only on the points button. Do not speak literal key names: current E/Q, Tab, C and other bindings stay visible in live badges, including controller mappings. “Select” and “Back” must be consistent visible action labels so these words do not become another unexplained control vocabulary.
+There are 20 candidate tutorial clips for 19 prompts because charge has mutually exclusive weapon variants. Do not play both. The current attack prompt already mentions charging; remove that duplication only when the new text is integrated. The current stat lesson should also highlight the new remappable Stats shortcut, rather than relying only on the points button. Latest user direction: speak the default keys explicitly. Default keyboard takes say E to select/continue, Q to go back, Tab for the main menu and B for the bag; movement uses W/A/S/D, jump Space, attack left click (J alternative), dodge left Shift or right click, Skill 1 the number 1, and journal N. Teach rebinding and Xbox/PlayStation controller support in Settings → Controls & camera. Generate explicit controller variants and a custom-binding-safe alternative; never play default-key instructions when the active binding differs. Keep exact current bindings onscreen. These replace the earlier action-name-only proposal.
 
 ## Proposed five card lore script
 
@@ -110,3 +110,9 @@ Candidate coverage includes optional bestiary and arcade entries; record only ac
 4. Verify slow network, audio failure, rapid Next/Back, skip during loading, mute while speaking, background tab, replay, and co-op players on different screens. Fail stale mappings closed to text, not outdated speech. Only then publish narration.
 
 No provider pricing, credit estimate or exact voice/model availability is assumed here. Check current ElevenLabs documentation and account balance when scheduling the audition.
+
+## October 18 control and pacing clarification
+
+Tab opens the main menu; B toggles the bag; Q is Back/Close, E selects or continues. Escape remains a menu fallback. Preserve deliberate custom bindings and migrate known former Tab/Bag defaults. After a practice action succeeds, show success for two seconds of active play before advancing; do not lock movement or count menu/background time. The first menu opening explains Gear, Bag, Classes, Achievements, Settings, Multiplayer, Quit to Hub and Title Screen with a replay option. Skipping tutorial lessons is an explicit visible action, separate from opening or closing the menu. No narration audio has been generated or wired yet.
+
+The eight menu explanations now live in `public/3d/menu-tour.js`; use those entries as the source when preparing their spoken transcript rather than maintaining a second independent menu script. The published playback adapter and audio are still future work.

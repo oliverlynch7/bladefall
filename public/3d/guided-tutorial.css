@@ -29,3 +29,7 @@ body.npc-conversation #questbox{display:none!important}
 
 /* One teaching color connects the card, leader and highlighted HUD target. */
 #lessonArrow marker path{fill:#66ffe0}
+
+#guidedLesson.lesson-success{border-color:#248243}#guidedLesson.lesson-success .lesson-status{font-weight:800;color:#155e31;background:#dff6cf;padding:8px;border-radius:5px}
+#guidedLesson .lesson-menu-keys{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+#menuTour{position:sticky;top:0;z-index:3;box-sizing:border-box;text-align:left;padding:14px 17px;margin:0 0 16px;border:2px solid #08776b;border-top:5px solid #33d8b6;border-radius:9px;background:linear-gradient(135deg,#fff8e5,#f9ebc5);color:#24352f;font:14px/1.5 system-ui,sans-serif}#menuTour h3{font:700 21px Georgia,serif;color:#133d34;margin:6px 0}#menuTour p{margin:7px 0 12px}.menu-tour-count{font-size:11px;color:#075a50;font-weight:800}.menu-tour-actions{display:flex;flex-wrap:wrap;gap:8px}#menuTour button{padding:8px 12px;border:1px solid #08776b;border-radius:6px;background:#e4f1df;color:#174b3d;font:700 13px system-ui;cursor:pointer}#menuTour button[data-next]{background:#a83c12;color:#fff9eb;border-color:#7c2b0b}#menuTour button:disabled{opacity:.45}#menuTour button:focus-visible{outline:3px solid #bd6800;outline-offset:2px}.pausecard .menu-tour-target{outline:3px solid #ffe05b!important;outline-offset:3px;box-shadow:0 0 16px #ffe05b66!important}

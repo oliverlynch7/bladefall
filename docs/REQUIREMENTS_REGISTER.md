@@ -2253,3 +2253,19 @@ Muted isolated actual Chrome: old level100 save loads; measured1747x820 and1280x
 ## [Codex | 2026-10-18] U-NARRATOR-ONBOARDING-20261018
 
 User wants ElevenLabs narration for tutorial and lore, with The Stanley Parable as a delivery reference, after crystallizing the new player experience and language to avoid obsolete or missing lines. Prepare original voice direction and a source-grounded draft before bulk recording. Source-inspected proposal: docs/audio/NARRATOR_ONBOARDING_PLAN.md. No voice selected, paid speech generated, game text changed or runtime narration shipped.
+
+
+## [Codex | 2026-10-18] U-ONBOARDING-CONTROLS-20261018
+
+User wants the narrator to say default controls explicitly, teach rebinding and controller support in Settings, explain all eight main menu buttons on first opening, and allow roughly two seconds after successful tutorial actions before advancing. Adopt latest proposed Tab=main menu, B=Bag (interpreting final back/bag wording from context), Q=Back/Close and E=Continue/Select. Preserve Escape as menu fallback and saved custom bindings; migrate only known old Bag defaults. Tutorial skipping remains an explicit visible button, not a menu/back key side effect. Update live hints, help and narration draft; no paid recording until wording/flow is settled. Grounded implementation: remappable pause action; guarded mode-specific routing; protected first-use eight-button menu tour; success feedback/delay measured only during active play and paused in menus; input/old-save/rebinding/browser checks.
+
+
+## [Codex | 2026-10-18] Onboarding controls and calmer practice — v2.285.0-onboarding-controls
+
+Tab is the remappable Main Menu action, B toggles Bag, E selects/continues and Q backs out of menus without opening one during live play. Escape remains a fixed fallback. Only recognized previous Bag defaults migrate; deliberate custom assignments remain untouched, with Escape shown if the new action cannot claim Tab. HUD hints and Help derive from actual bindings; hub tour no longer advertises the menu key as Skip.
+
+Guided lessons explicitly teach the three navigation keys, Settings rebinding and Xbox/PlayStation support. Successful movement, held jump, attack, dodge, first skill and bag/menu practice show Well done for two seconds of active play before advancing; menus and hidden tabs do not consume that dwell, movement remains available, and jumps must land first. Explicit menu-open hooks capture even rapid open/close. Tutorial Skip remains a visible button, separate from Q/Escape/menu input.
+
+First main-menu visit highlights and explains its eight primary buttons with E/Next, Previous and Close; completion is remembered, and Explain these eight buttons replays it. It uses the existing protected pause state and cancels when leaving that screen. Narration draft updated to speak explicit default controls; no voice audio produced.
+
+Muted isolated Chrome loads prior level100 save, preserves progression, verifies all eight guide steps, no automatic repeat, Tab resume, B bag/Q close, Q harmless in live play and Menu rebound to9. Real held W and Space inputs show success before progression; quick bag and menu open/return also show success. Test harness pumps scene/update frames explicitly. Unit checks cover the two-second bound, jump landing, hidden/menu suspension, migration/custom conflicts and syntax. 26 onboarding,22 menu,219 guidance,514 premium and44 celebration checks plus focused bag and menu tests pass. No new two-human/controller-hardware playtest claimed. Evidence: docs/art-validation/onboarding-controls-20261018/.

@@ -7,7 +7,7 @@
 <script src="./coop-audio.js?v=2281"></script>
 <script src="./enemy-warning-sfx.js?v=2277"></script>
 <meta charset="UTF-8">
-<script src="./menu-shortcuts.js?v=2246"></script>
+<script src="./menu-shortcuts.js?v=2285"></script>
 <script src="./menu-close.js?v=2261f"></script>
 <script src="./menu-gold.js?v=2268"></script>
 <link rel="stylesheet" href="./menu-gold.css?v=2268">
@@ -1074,10 +1074,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="bonustimer" style="position:absolute;left:60%;top:calc(env(safe-area-inset-top) + 18px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:20px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;background:#101626d9;border:1px solid #d8ad58;border-radius:12px;padding:5px 14px;"></div>
 <style>@media(max-width:650px){#bonustimer{left:auto!important;right:10px!important;top:calc(env(safe-area-inset-top) + 196px)!important;transform:none!important;font-size:15px!important;padding:4px 9px!important}}</style>
 <button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
-<div id="eschint" class="hide" aria-hidden="true"><span class="ico ico-pause"></span><span class="eschk">Esc</span></div>
+<div id="eschint" class="hide" aria-hidden="true"><span class="ico ico-pause"></span><span class="eschk" data-action-hint="pause">Tab</span></div>
 <div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><span class="ssword">cold</span></div>
 <div id="inventoryDock" class="hide">
- <button id="hudbag"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span class="bag-copy"><span class="bag-count">Bag <b id="hudbagnum">0 / 30</b></span><small id="hudBagState">30 slots free</small></span><kbd class="hud-key" data-action-hint="bag">Tab</kbd></button>
+ <button id="hudbag"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span class="bag-copy"><span class="bag-count">Bag <b id="hudbagnum">0 / 30</b></span><small id="hudBagState">30 slots free</small></span><kbd class="hud-key" data-action-hint="bag">B</kbd></button>
  <div class="bag-tools"><button id="hudAutoSell" data-on="false" aria-pressed="false">Auto-sell OFF <kbd class="hud-key" data-action-hint="loot">V</kbd></button><button id="hudJournal"><span data-action-hint="journal">N</span> Journal</button><button id="hudLootHistory" title="Show your most recent equipment pickup">Loot</button><span id="hudGold"><span class="ico ico-coin"></span><span id="hudGoldValue">0</span></span></div>
 </div>
 <aside id="equipmentFeed" hidden aria-label="Equipment pickup"><button class="loot-close" data-dismiss-loot aria-label="Dismiss equipment notice">×</button><div class="loot-head"><img class="loot-icon" alt=""><div><strong class="loot-name"></strong><small class="loot-rarity"></small></div></div><div class="loot-outcome" role="status" aria-live="polite"></div><div class="loot-comparison"></div><div class="loot-usability"></div><div class="loot-foot"><button data-loot-bag>Bag</button><span class="loot-waiting"></span></div></aside>
@@ -1125,7 +1125,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2261"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
-<script src="./hub-tour.js?v=2233d"></script>
+<script src="./hub-tour.js?v=2285"></script>
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2254"></script>
@@ -1198,9 +1198,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./chest-reveal.js?v=2266"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
-<link rel="stylesheet" href="./guided-tutorial.css?v=2282">
+<link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2282g"></script>
+<script src="./guided-tutorial.js?v=2285"></script>
+<script src="./menu-tour.js?v=2285"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1218,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.284.0-stat-upgrade-access';
+const VERSION3D='2.285.0-onboarding-controls';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5419,6 +5420,7 @@ function equipBagItem(entry,world=G){
   persist();SFX.pickup();hudUpdate();return true;
 }
 function openBag(back,keepOpen=false){
+  window.BFGuidedTutorial?.practice('bag');
   beginPause();
   const active=document.activeElement,focusSelector=keepOpen?(active?.dataset?.bagcat?'[data-bagcat="'+active.dataset.bagcat+'"]':active?.dataset?.bagtype?'[data-bagtype="'+active.dataset.bagtype+'"]':active?.dataset?.bagslot?'[data-bagslot="'+active.dataset.bagslot+'"]':active?.id?'#'+active.id:null):null;
   const previousScroll=keepOpen?(document.getElementById('bagItems')?.scrollTop||0):0;
@@ -5760,7 +5762,7 @@ function startTrial(cid,fromZone,opts={}){
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
 function controlHint(id){
  if(hudInputDevice==='controller'&&!meta.padOff){const hint=BFController.hint(id);if(hint)return hint;}
- if(id==='pause')return 'Esc';
+ if(id==='pause'&&!(meta.keybinds?.pause||[]).length)return 'Esc';
  const bindings=meta.keybinds?.[id]||KEYACTIONS.find(a=>a.id===id)?.def||[];
  return bindings.filter(Boolean).map(keyLabel).join(' / ')||'Unassigned';
 }
@@ -10118,7 +10120,8 @@ const KEYACTIONS=[
   {id:'partyTeleport',label:'Hold to teleport to friend',def:['KeyT']},
   {id:'partyNext',label:'Select next friend',def:['KeyY']},
   {id:'journal', label:'Open Journal', def:['KeyN']},
-  {id:'bag',label:'Toggle Bag',def:['Tab','KeyB']},
+  {id:'bag',label:'Toggle Bag',def:['KeyB']},
+  {id:'pause',label:'Toggle Main Menu',def:['Tab']},
   {id:'stats',label:'Open Character Stats / Spend Points',def:['KeyC']},
   {id:'emote',label:'Emote Wheel',def:['KeyM']},
   {id:'mount',label:'Mount / Land Dragon',def:['KeyH']},
@@ -10133,6 +10136,8 @@ function ensureKeybinds(){
  if(same('attack',['KeyJ'])&&free('Mouse0','attack'))kb.attack=['Mouse0','KeyJ'];
  if((same('dodge',['Mouse2','KeyK'])||same('dodge',['KeyK'])||same('dodge',['KeyK','ShiftLeft']))&&free('ShiftLeft','dodge'))kb.dodge=free('Mouse2','dodge')?['ShiftLeft','Mouse2']:['ShiftLeft','KeyK'];
  if((same('loot',['Tab'])||same('loot',['KeyQ']))&&free('KeyV','loot'))kb.loot=['KeyV'];
+ // Only migrate recognized old defaults. Keep deliberate custom Tab assignments.
+ if(same('bag',['Tab','KeyB'])||same('bag',['Tab']))kb.bag=free('KeyB','bag')?['KeyB']:[];
  for(const a of KEYACTIONS)if(!Array.isArray(kb[a.id]))kb[a.id]=a.def.filter(c=>free(c,a.id));
  rebuildKeyLookup();try{updateHudKeys();}catch(e){}
 }
@@ -10172,7 +10177,7 @@ window.addEventListener('keydown',e=>{
   if(!e.repeat&&!e.target?.matches?.('input,textarea,select')&&!e.target?.isContentEditable&&classTutorialAction(e.code==='Escape'?'cancel':keyAction(e.code))){e.preventDefault();e.stopImmediatePropagation();return;}
   if(mode==='journal'){ const typing=e.target?.matches?.('input,textarea,select')||e.target?.isContentEditable;if(e.code==='Escape'||!typing&&keyAction(e.code)==='journal'){e.preventDefault();if(!e.repeat)closeJournal();}return;}
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
-  if(e.code==='Escape'){ e.preventDefault();if(e.repeat)return;
+  if(e.code==='Escape'||keyAction(e.code)==='pause'&&['play','pause'].includes(mode)&&!BFMenuKeys.typing(e.target)){ e.preventDefault();if(e.repeat)return;
     if(mode==='studio'){ exitStudio(); return; }
     if(mode==='mirror'){ if(mirrorPanelMode){ mirrorPanelMode=null; buildMirrorPanel(); } else exitMirror(); return; }
     if(mode==='play') openPause();
@@ -20656,6 +20661,7 @@ function openPauseSettingsV2(fromTitle){
   bindAudioSettings();
 }
 function openPauseV2(){
+  window.BFGuidedTutorial?.practice('pause');
   beginPause();
   if(G?.devKeep){devBeta().pause();return;}
   autosaveRun(); resumeGameAudio(true); mode='pause';
@@ -20672,7 +20678,7 @@ function openPauseV2(){
         ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}
         ${navCard('titleBtnP',`icons/title-screen-exit.png?v=${VERSION3D}`,'Title Screen','Save and leave the game')}
       </div></section>
-    <button class="bigbtn ghost" id="helpBtn">Help &amp; controls</button>
+    <button class="bigbtn ghost" id="helpBtn">Help &amp; controls</button><button class="bigbtn ghost" id="menuGuideBtn">Explain these eight buttons</button>
     ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
     </div>`);
   document.getElementById('titleBtnP').onclick=()=>{ persist(); resumeGameAudio(false); titleScreen(); };
@@ -20686,6 +20692,9 @@ function openPauseV2(){
   document.getElementById('achBtn').onclick=()=>openAchievements(openPauseV2);
   { const rb=document.getElementById('recBtn'); if(rb) rb.onclick=()=>openRecords(openPauseV2); }
   document.getElementById('qmenu').onclick=()=>{ persist(); resumeGameAudio(false); openHub(); };
+  document.getElementById('menuGuideBtn').onclick=()=>BFMenuTour.start(()=>{});
+  meta.tutSeen=meta.tutSeen||{};
+  if(!meta.tutOff&&!meta.tutSeen.pauseMenuGuideV1)BFMenuTour.start(()=>{meta.tutSeen.pauseMenuGuideV1=1;persistGlobal();});
 }
 openPause=openPauseV2;
 document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(mode==='play') openPause(); });

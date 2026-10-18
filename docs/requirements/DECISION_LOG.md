@@ -1800,3 +1800,10 @@ Inspection/plan: sendCombat/recvCombat share visuals only. Add bounded audio-onl
 User: "make chest drops frmo enemiew slgihtyk mroe common"
 
 Inspection/plan: ordinary enemies currently roll1.5%-3% and elites8%-12%, scaled by encounter level; bosses/mimics/goblins guarantee rewards. Increase only non-guaranteed probabilities by25% (ordinary1.875%-3.75%, elites10%-15%). Keep rarity weights, unique guaranteed rewards, exclusions, host authority and independent co-op claim logic unchanged. Bump asset URL/version; verify exact progression probabilities, excluded mobs, chest persistence/co-op tests and old-save browser load.
+
+
+## [Codex | 2026-10-17] Local hero disappears in co-op Rift Hall
+
+User: "when entering the rift hall in coop i turn invisible but not my friend same for hhim"
+
+Inspection/plan: Rift Hall sets Three scene.background to a Color. Three WebGLBackground forces a color/depth clear for Color backgrounds even though renderer.autoClear=false. flushHero3D draws local first then each peer; each later peer clears the previous hero. Pass explicit first-pass flag from the queue flush; suppress scene background on subsequent hero passes only and restore it in finally. Preserve first-pass room background, world depth, local-first queue, peer rigs, FP weapon-only view and separate mirror previews. Verify both clients entering/leaving/re-entering hall, actual screenshot before/after, normal hub, source render regression and old saves.

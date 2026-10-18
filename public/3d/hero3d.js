@@ -2029,7 +2029,7 @@ function syncLocalEquipment(){
   _lastWeaponKey=key;_lastArt=w?.art;_lastRar=w?.rarity;_reArming=true;
   equipForClass().finally(()=>{_reArming=false;});
 }
-export function drawHero3D(p, t){
+export function drawHero3D(p, t, firstPass=true){
   /* Swap the model when the weapon changes. equipWeapon runs only on load and on class change, so
      without this the right model appeared only if you happened to spawn holding it - picking up a
      legendary axe mid-run changed the stats and not the hand.
@@ -2162,6 +2162,9 @@ export function drawHero3D(p, t){
     if(window.__HOLLOW_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HOLLOW_SHADOW_DIRTY=false;}
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
+    // A Color background forces Three to clear even with autoClear=false.
+    // Later party passes must composite over the first hero, not erase it.
+    if(!firstPass)scene.background=null;
     if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
     // Local draw only. Never change a peer rig, network state or a portrait.
     const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!p.sitting&&!window.BFHubDialogue?.active&&!window.BFInspection?.active&&!window.BFHubTour?.camera()&&!window.__bfEd?.EDITOR?.on&&!(window.__BF3?.G?.kingFinal&&['charge','cut'].includes(window.__BF3.G.boss?.akStage));

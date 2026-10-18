@@ -3403,3 +3403,10 @@ Verified52 focused capture/protocol/actual gain checks and130 regression suites;
 Raised non-guaranteed enemy chest chances by25%: ordinary1.875%-3.75%, elites10%-15%, preserving encounter-level progression. Early ordinary average changes from one per67 kills to one per53. Rarity tables, guaranteed boss/mimic/goblin rewards, unique relics, training exclusions and host-only rolls/independent co-op claims unchanged. Updated encounter script cache key.
 
 Verified encounter/reward suite300427 checks plus3 actual guest authority checks;44 co-op chest checks;200000 rarity-table interval samples;18 reveal and38 shop checks. Six muted browser checks load pre-change level100 save and verify actual loaded rates, guarantees and exclusions. Evidence:docs/art-validation/chest-drop-rate-20261017/browser.json.
+
+
+## [Codex | 2026-10-17] Co-op Rift Hall local hero visibility - v2.271.0
+
+Reproduced symmetric missing local hero on both clients. Rift Hall sets a Three Color background, which forces a renderer clear even with autoClear=false; later queued peer renders erase earlier local hero. flushHero3D now explicitly marks first pass. Later hero passes temporarily suppress the background and restore it in existing finally cleanup; first pass still draws room background, and shared depth continues to occlude bodies normally. No player/network/save visibility flags changed. Cache refreshed for hero renderer.
+
+Verified22 actual flush/background composition tests (one/two/six queued bodies, single depth clear, restored background including exceptions),131 regression suites, both old level100 saves, paired local client hall entry and two exit/reentry cycles using actual host zone packets/guest handler. Before/after/reentry screenshots verify both heroes now appear on both clients. Local paired fixtures, not remote-human validation. Evidence:docs/art-validation/rift-party-visibility-20261017/.

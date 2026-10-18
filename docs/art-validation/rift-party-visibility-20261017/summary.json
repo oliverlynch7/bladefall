@@ -1,0 +1,8 @@
+{
+  "version": "2.271.0-rift-party-visibility",
+  "cause": "Rift Hall Color background forces Three renderer clear for every queued hero, erasing earlier local hero when peer renders.",
+  "fix": "Explicit first-pass flag from flushHero3D. Subsequent hero renders temporarily suppress background and finally restore it.",
+  "verification": "Actual before screenshot reproduces missing local hero on both clients; fixed screenshot shows local plus peer on both. Repeated host room notifications through guest onGuestData keep both rooms aligned and screenshot still shows both after two exit/reentry cycles. Both pre-change level100 saves load. Browser transport is local paired fixtures; prior real WebRTC protocol unchanged.",
+  "focusedChecks": 22,
+  "regressionSuites": 131
+}

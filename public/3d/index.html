@@ -1214,7 +1214,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.270.0-chest-drop-rate';
+const VERSION3D='2.271.0-rift-party-visibility';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4808,7 +4808,7 @@ function flushHero3D(){
   /* One depth clear for the whole group, then each body in turn. renderer.autoClear is false - the
      game owns clearing - so successive render() calls COMPOSITE instead of wiping, and Three keeps
      its own depth internally, so two heroes occlude each other correctly. */
-  for(let i = 0; i < q.length; i++) window.drawHero3D(q[i][0], q[i][1]);
+  for(let i = 0; i < q.length; i++) window.drawHero3D(q[i][0], q[i][1], i===0);
 }
 function flushBatch(){
   /* The 3D layer is NOT drawn here any more - see flushHero3D(), called after PostFX.end().
@@ -24579,7 +24579,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2259"></script>
+<script type="module" src="./hero3d.js?v=2271"></script>
 <script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

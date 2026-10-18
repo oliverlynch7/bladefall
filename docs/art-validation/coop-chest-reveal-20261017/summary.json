@@ -1,0 +1,19 @@
+{
+  "version": "2.266.0-coop-chest-reveal",
+  "regressionSuites": 127,
+  "focusedAnimationChecks": 18,
+  "twoInstanceBrowserChecks": 28,
+  "transport": "Reliable local WebRTC data channel between independent game instances and old saves",
+  "verified": [
+    "guest transform changes over time across host updates",
+    "correct actual reward settles",
+    "auto proximity pickup opens both reels",
+    "OS Reduce plus explicit in-game Off",
+    "Element.animate unavailable",
+    "duplicate claims/full bag/reconnect/host-first/guest-first"
+  ],
+  "limits": [
+    "Friend hardware/browser configuration and exact original symptom not reproduced.",
+    "Browser harness console included a MutationObserver.observe null-target error during initial loading; in-game window error collectors were empty and all chest flows passed. No claim that this unrelated console message is resolved."
+  ]
+}

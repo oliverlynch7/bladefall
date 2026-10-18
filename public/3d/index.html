@@ -1186,9 +1186,9 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./party-navigation.js?v=2197"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
-<link rel="stylesheet" href="./chest-reveal.css?v=2215">
+<link rel="stylesheet" href="./chest-reveal.css?v=2266">
 <script src="./chest-rules.js?v=2122"></script>
-<script src="./chest-reveal.js?v=2215"></script>
+<script src="./chest-reveal.js?v=2266"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2254">
@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.265.0-mana-economy';
+const VERSION3D='2.266.0-coop-chest-reveal';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13892,7 +13892,7 @@ function prepareChest(ch){
 function revealChestReward(ch,item,result,gold=0){
  const describe=box=>{const o=box.weapon||box.armor||box.trinket;return {name:o.name,rarity:o.rarity,color:RARITY[o.rarity].color,icon:itemStaticAv(o)};};
  const cards=[];for(let i=0;i<24;i++)cards.push(describe(i===20?item:randomLoot(BFChestRules.reward(ch.rarity,ch.challenge,Math.random()))));
- BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,result:result+(gold>0?' · Chest +'+gold+'g':''),cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>SFX.achieve(),reduceMotion:meta.reduceMotion||matchMedia('(prefers-reduced-motion: reduce)').matches});
+ BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,result:result+(gold>0?' · Chest +'+gold+'g':''),cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>SFX.achieve(),reduceMotion:BFChestReveal.motionReduced(meta.reduceMotion,matchMedia('(prefers-reduced-motion: reduce)').matches)});
 }
 function descentRewardChest(){
  if(!G.endless||G.chests.some(c=>c.descentReward))return;

@@ -3,7 +3,8 @@
 <head><link rel="stylesheet" href="./arena-setup.css?v=2274"><script src="./save-safety.js?v=2229"></script>
 <script src="./skill-sfx.js?v=2277"></script>
 <script src="./world-signature-sfx.js?v=2279"></script>
-<script src="./coop-audio.js?v=2279"></script>
+<script src="./combat-detail-sfx.js?v=2281"></script>
+<script src="./coop-audio.js?v=2281"></script>
 <script src="./enemy-warning-sfx.js?v=2277"></script>
 <meta charset="UTF-8">
 <script src="./menu-shortcuts.js?v=2246"></script>
@@ -1217,7 +1218,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.280.0-campaign-readiness';
+const VERSION3D='2.281.0-combat-sound-detail';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1277,7 +1278,7 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}catch(e){return null;} }
 const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
-  'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol','progressPlayerSound','progressClassSound',
+  'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol','progressPlayerSound','progressClassSound','combatDetailAudio',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','sprintBests','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
 const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
 let _g=loadJSON(GKEY);
@@ -1686,8 +1687,8 @@ function setSfxVol(v){
   if(master) master.gain.value=0.6*v;
 }
 function rewardSound(kind,original){const selected=kind==='player'?meta.progressPlayerSound:meta.progressClassSound;if(selected==='new'&&playFx('reward_'+kind))return;original();}
-function rewardAudioSettings(){return ['player','class'].map(kind=>{const field=kind==='player'?'progressPlayerSound':'progressClassSound';return `<div class="setrow reward-sound-row" id="rewardSound${kind}"><label for="rewardSelect${kind}">${kind==='player'?'Player level-up':'Class rank-up'} sound</label><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="rewardSelect${kind}" style="min-height:40px;background:#192b37;color:#fff0cc;border:1px solid #96784e;border-radius:7px;padding:8px"><option value="original" ${meta[field]!=='new'?'selected':''}>Original</option><option value="new" ${meta[field]==='new'?'selected':''}>New ElevenLabs</option></select><button type="button" id="rewardListen${kind}" class="bigbtn ghost" style="width:auto;margin:0">Listen</button></div><small id="rewardStatus${kind}" role="status">Your original sound stays selected until you change it.</small></div>`;}).join('')+'<p class="ovsub" id="rewardPreviewLink"><a href="progression-preview.html" target="_blank" rel="noopener" style="color:#f3ce87">Compare the full reward experiences ↗</a></p>';}
-function bindRewardAudio(){for(const kind of ['player','class']){const select=document.getElementById('rewardSelect'+kind),listen=document.getElementById('rewardListen'+kind),status=document.getElementById('rewardStatus'+kind);if(!select||!listen)continue;const field=kind==='player'?'progressPlayerSound':'progressClassSound';select.onchange=()=>{meta[field]=select.value==='new'?'new':'original';persistGlobal();queueSkillFx('reward_'+kind);status.textContent='Selected for future '+(kind==='player'?'level-ups.':'class ranks.');};listen.onclick=()=>{initAudio();if(!sOn()){status.textContent='Sound is muted. Raise Sound effects volume to listen.';return;}const play=()=>kind==='player'?rewardSound('player',()=>{if(!playFx('levelcheer'))SFX.levelup();}):rewardSound('class',()=>SFX.classup());if(select.value!=='new'||FXBUF['reward_'+kind]){play();status.textContent='Playing your selected sound.';return;}queueSkillFx('reward_'+kind);listen.disabled=true;status.textContent='Loading preview…';const start=Date.now();const wait=()=>{if(!listen.isConnected)return;if(document.hidden){listen.disabled=false;status.textContent='Preview stopped. Press Listen when ready.';return;}if(FXBUF['reward_'+kind]){listen.disabled=false;play();status.textContent='Playing your selected sound.';}else if(Date.now()-start<6000)setTimeout(wait,80);else{listen.disabled=false;status.textContent='Could not load. Original sound remains available.';}};setTimeout(wait,80);};}}
+function rewardAudioSettings(){return ['player','class'].map(kind=>{const field=kind==='player'?'progressPlayerSound':'progressClassSound';return `<div class="setrow reward-sound-row" id="rewardSound${kind}"><label for="rewardSelect${kind}">${kind==='player'?'Player level-up':'Class rank-up'} sound</label><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="rewardSelect${kind}" style="min-height:40px;background:#192b37;color:#fff0cc;border:1px solid #96784e;border-radius:7px;padding:8px"><option value="original" ${meta[field]!=='new'?'selected':''}>Original</option><option value="new" ${meta[field]==='new'?'selected':''}>New ElevenLabs</option></select><button type="button" id="rewardListen${kind}" class="bigbtn ghost" style="width:auto;margin:0">Listen</button></div><small id="rewardStatus${kind}" role="status">Your original sound stays selected until you change it.</small></div>`;}).join('')+`<div class="setrow" id="combatDetailRow"><label for="combatDetailAudio">Extra combat sound detail<input id="combatDetailAudio" type="checkbox" ${meta.combatDetailAudio!==false?'checked':''}></label><small>Adds skill impact effects and creature voices. Original sounds stay intact. <a href="combat-sound-preview/" target="_blank" rel="noopener" style="color:#f3ce87">Listen to the new sounds ↗</a></small></div>`+'<p class="ovsub" id="rewardPreviewLink"><a href="progression-preview.html" target="_blank" rel="noopener" style="color:#f3ce87">Compare the full reward experiences ↗</a></p>';}
+function bindRewardAudio(){const detail=document.getElementById('combatDetailAudio');if(detail)detail.onchange=()=>{meta.combatDetailAudio=detail.checked;persistGlobal();};for(const kind of ['player','class']){const select=document.getElementById('rewardSelect'+kind),listen=document.getElementById('rewardListen'+kind),status=document.getElementById('rewardStatus'+kind);if(!select||!listen)continue;const field=kind==='player'?'progressPlayerSound':'progressClassSound';select.onchange=()=>{meta[field]=select.value==='new'?'new':'original';persistGlobal();queueSkillFx('reward_'+kind);status.textContent='Selected for future '+(kind==='player'?'level-ups.':'class ranks.');};listen.onclick=()=>{initAudio();if(!sOn()){status.textContent='Sound is muted. Raise Sound effects volume to listen.';return;}const play=()=>kind==='player'?rewardSound('player',()=>{if(!playFx('levelcheer'))SFX.levelup();}):rewardSound('class',()=>SFX.classup());if(select.value!=='new'||FXBUF['reward_'+kind]){play();status.textContent='Playing your selected sound.';return;}queueSkillFx('reward_'+kind);listen.disabled=true;status.textContent='Loading preview…';const start=Date.now();const wait=()=>{if(!listen.isConnected)return;if(document.hidden){listen.disabled=false;status.textContent='Preview stopped. Press Listen when ready.';return;}if(FXBUF['reward_'+kind]){listen.disabled=false;play();status.textContent='Playing your selected sound.';}else if(Date.now()-start<6000)setTimeout(wait,80);else{listen.disabled=false;status.textContent='Could not load. Original sound remains available.';}};setTimeout(wait,80);};}}
 function audioSettingsHTML(){
   const mv=meta.musicOn===false?0:Math.round((meta.musicVol!=null?meta.musicVol:1)*100);
   const sv=meta.soundOn===false?0:Math.round((meta.sfxVol!=null?meta.sfxVol:1)*100);
@@ -1823,6 +1824,7 @@ if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
 if(window.BFSkillSfx)window.BFSkillSfx.apply(FXDEF);
 window.BFEnemyWarnings?.apply(FXDEF);
 window.BFWorldSfx?.apply(FXDEF);
+window.BFCombatDetailSfx?.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={
   thornboar:{v:'v_boargrunt',d:'die1'}, charger:{v:'v_boarroar',d:'die2'}, dustjackal:{v:'v_jackalbark',d:'die3'},
@@ -1868,7 +1870,8 @@ function pumpSkillFx(){while(_skillFxActive<3&&_skillFxQueue.length){const key=_
  }).catch(()=>_skillFxRetry.set(key,Date.now()+30000)).finally(()=>{_skillFxActive--;_skillFxJobs.delete(key);pumpSkillFx();});}}
 function warmSkillFx(){if(!actx||typeof c2CurSkills!=='function')return;if(meta.progressPlayerSound==='new')queueSkillFx('reward_player');if(meta.progressClassSound==='new')queueSkillFx('reward_class');try{for(const sk of c2CurSkills()||[])if(sk)queueSkillFx('skillcast_'+sk.id);}catch(_){}}
 const _fxLoop={};
-function playFx(key,volMul){ if(window.BFSkillSfx?.blocksFile(key))return null; window.BFCoopAudio?.file(key,volMul);if(FXDEF[key]?.lazy&&!FXBUF[key])queueSkillFx(key);if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
+function playFx(key,volMul){
+  if(meta.combatDetailAudio===false&&Object.hasOwn(window.BFCombatDetailSfx?.definitions||{},key))return null; if(window.BFSkillSfx?.blocksFile(key))return null; window.BFCoopAudio?.file(key,volMul);if(FXDEF[key]?.lazy&&!FXBUF[key])queueSkillFx(key);if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
   try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul)*(window.BFCoopAudio?.gain??1);
     s.connect(g); g.connect(fxBus||master); s.start(); return {s,g}; }catch(e){ return null; } }
 function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return;
@@ -12665,7 +12668,7 @@ window.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.target.c
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
  if(!p||p.dead||p.downed||p._pvpDead||p.hp<=0)return;
- if(meta.classId==='pyromancer'&&p.pyInfernoT>0){p.pyInfernoT=Math.max(0,p.pyInfernoT-dt);p.pyPulse-=dt;while(p.pyPulses>0&&p.pyPulse<=0){p.pyPulse+=1;p.pyPulses--;pyroArea(p,190,1,0);}}
+ if(meta.classId==='pyromancer'&&p.pyInfernoT>0){p.pyInfernoT=Math.max(0,p.pyInfernoT-dt);p.pyPulse-=dt;while(p.pyPulses>0&&p.pyPulse<=0){p.pyPulse+=1;p.pyPulses--;if(window.BFCombatDetailSfx)window.BFCombatDetailSfx.withContext(window.BFCombatDetailSfx.timer(p,'pyInfernoT'),()=>pyroArea(p,190,1,0));else pyroArea(p,190,1,0);}}
   for(const key of ['_controlResist','slowT','rageKillT','escapeGuardT','counterGuardT','_attuneT','_noRetreatT'])p[key]=Math.max(0,(p[key]||0)-dt);
   if(!p.rageKillT)p.rageKills=0;
   if(meta.classId==='monk'&&c2Passive('mon_still')&&(p._stillT||0)>=1.5&&!p.dead)p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*.02*dt);
@@ -12707,7 +12710,7 @@ function class2Innate(p,dt){
     if(p._skyWasGround===false&&p.onGround){
       if(c2Passive('sky_tail'))p.skyTailT=3;
       if((p.skyLandDmg||0)>0){const R=p.skyLandR||170;skillRing(p.x,p.z,p.skyLandCol||'#8fdcff','#ffffff',R);
-        for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<R+e.r)hitEnemy(e,p.skyLandDmg,p,360,0,'ice');
+        for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<R+e.r)hitEnemy(e,p.skyLandDmg,p,360,0,'ice',window.BFCombatDetailSfx?.timer(p,'skyLandDmg'));
         burst(p.x,p.y+8,p.z,p.skyLandCol||'#8fdcff',24);G.shake=Math.min(18,G.shake+11);p.skyLandDmg=0;}
       p.skyGuardT=2;
     }
@@ -12974,11 +12977,11 @@ SKILL_FX.nin_pierce=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,
     size:12,color:'#e6e6ec',shape:'orb',glow:1,trail:'#e8354a',dmg:(w?w.dmg:8)*effPower(p)*3.4*am*(ok?1:OFFCLASS_MUL),
     kb:200,pierce:ok?6:2,el:ok?(w&&w.el):null,life:1.3,hitSet:[]});
   p.atkTimer=0.18; SFX.shoot&&SFX.shoot(); G.shake=Math.min(G.shake+4,9); };
-SKILL_FX.nin_barrage=function(p,ok,am){ const w=p.weapon;
+SKILL_FX.nin_barrage=function(p,ok,am){ const w=p.weapon;const soundContext=window.BFCombatDetailSfx?.current;
   const one=()=>{ if(mode!=='play'||!G||!G.p) return; const pp=G.p, t=projectileAimTarget(pp,720); if(t) pp.yaw=Math.atan2(t.x-pp.x,t.z-pp.z);
     const oy=pp.y+24,N=6,sp=780,dmg=(w?w.dmg:8)*effPower(pp)*0.9*am*(ok?1:OFFCLASS_MUL);
     for(let i=0;i<N;i++){ const a=pp.yaw+(i-(N-1)/2)*0.14;
-      G.projectiles.push({owner:'player',x:pp.x+Math.sin(a)*16,y:oy,z:pp.z+Math.cos(a)*16,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,gravity:0,size:6,color:'#e6e6ec',shape:'orb',fxClass:'ninja',fxSkill:'nin_barrage',glow:1,dmg,kb:90,pierce:1,el:ok?(w&&w.el):null,life:660/sp,hitSet:[]}); }
+      G.projectiles.push({owner:'player',x:pp.x+Math.sin(a)*16,y:oy,z:pp.z+Math.cos(a)*16,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,gravity:0,size:6,color:'#e6e6ec',shape:'orb',fxClass:'ninja',fxSkill:'nin_barrage',glow:1,dmg,kb:90,pierce:1,el:ok?(w&&w.el):null,life:660/sp,hitSet:[]});window.BFCombatDetailSfx?.tag(G.projectiles[G.projectiles.length-1],soundContext); }
     burst(pp.x,oy,pp.z,'#e8354a',5); SFX.shoot&&SFX.shoot(); };
   one(); setTimeout(one,150); setTimeout(one,300); p.atkTimer=0.2; };
 SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
@@ -13496,6 +13499,7 @@ function guestOwnerFromPacket(raw,peer){
    healFlat:Math.max(3,Math.min(400,(peer?.hpm||100)*.04))};
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+ const impactContext=arguments[6]||window.BFCombatDetailSfx?.current;
  if(src?.projSrc&&!src.pet)src=G.p;
 
  if(e?.marbleGuardian&&!(e.mcExposed>0)){if((e._mcHint||0)<G.time){e._mcHint=G.time+2;addText(e.x,e.y+150,e.z,'BREAK THE ARMOR SEAL','#e4d5a7');}return;}
@@ -13541,7 +13545,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      effect of a netcode fix. A separate marker keeps the two apart. */
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
     const offense=src===G.p?guestHitOffense(e,dmg,kb):{dmg,kb,owner:{guest:true,cid:null,bits:0,designated:false,weapon:null}};dmg=offense.dmg;kb=offense.kb;
-    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,basicMana:src===G.p&&!G._desig,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0});
+    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,basicMana:src===G.p&&!G._desig,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0,impactContext,impactPosition:{x:e.x,y:e.y||0,z:e.z}});
     if(e.prisonFoe)dmg=BFPrisonCombat.guardDamage(e,src,dmg);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
@@ -13656,10 +13660,11 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
   if(e._peer){
-    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0,refund:src===G.p?G.p._bloodOwed||0:0,healRatio,basicMana:src===G.p&&!G._desig});
+    MP.sendPvp(e._peerId||e.id,dmg,src.x,src.z,{lifesteal:src===G.p?lifesteal:0,slow:e.slowT||0,element:el,designated:!!G._desig,flatHeal:G._hitHeal||0,refund:src===G.p?G.p._bloodOwed||0:0,healRatio,basicMana:src===G.p&&!G._desig,impactContext,impactPosition:{x:e.x,y:e.y||0,z:e.z}});
     if(src===G.p)G.p._bloodOwed=0;e.hitFlash=.12;return;
   }
   const dealt=Math.min(Math.max(0,e.hp),dmg);
+  window.BFCombatDetailSfx?.impact(G,e,dealt,impactContext);
   if(G.sparringRoom&&(e.practice||e.dummy&&!G.trainState?.active)&&G.trainState){
     if(e.dummy&&G.trainState.name!=='Training Dummy'){
       G.trainState={name:'Training Dummy',start:G.time,hits:0,dealt:0,taken:0,defeats:0,active:false,result:'Damage test'};
@@ -13835,7 +13840,7 @@ function killEnemy(e,weaponKill){
     if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
   if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // host alone owns Death Mark's burst damage; guests still see the ring
     if(!(MP.guest()&&e.mid!=null)){const src=e.markBurstOwner?{x:e.x,z:e.z,_guestCtx:e.markBurstOwner}:G.p;
-      for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,src,180,0,'fire'); } } }
+      for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,src,180,0,'fire',window.BFCombatDetailSfx?.timer(e,'markExplode')); } } }
   questKill(e.type); try{ questHuntKill(e); }catch(err){}
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
     if(fq && !fq.placed && !e.boss && Math.random()<0.62){ const x=e.x+10,z=e.z+10; G.pickups.push({x,z,y0:highestSurfaceAt(x,z),questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); } }
@@ -14436,7 +14441,7 @@ function hurtPlayer(dmg,sx,sz,by){
     const _atk = attackerOf(by);
     /* The floater lives INSIDE the guard: telling the player RETURNED while returning nothing to
        nobody is worse than saying nothing at all. */
-    if(_atk){ try{ hitEnemy(_atk, Math.round(dmg*2), G.p, 120, 0, null);
+    if(_atk){ try{ hitEnemy(_atk, Math.round(dmg*2), G.p, 120, 0, null,window.BFCombatDetailSfx?.timer(G.p,'_stillnessT'));
                    addText(G.p.x,G.p.y+40,G.p.z,'RETURNED','#ffe6ad'); }catch(e){} }
   }
   dmg=dmg*(by?.pvp?1:tPlayerTake());
@@ -14478,7 +14483,7 @@ function hurtPlayer(dmg,sx,sz,by){
        A no-op when nothing was pending, which is correct: a parry with no swing behind it has no
        time to give back. */
     if(c2Passive('bd_fast'))p.atkCd=0; if(c2Passive('bd_flow'))p.counterGuardT=3;
-    const counter=p.bdPerfectDmg||p.bdMirrorDmg||0;if(counter>0){const R=p.bdPerfectDmg?260:190;for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<R+e.r)hitEnemy(e,counter,p,420,0,null);G.shake=Math.min(18,G.shake+10);}
+    const counter=p.bdPerfectDmg||p.bdMirrorDmg||0;if(counter>0){const R=p.bdPerfectDmg?260:190;for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<R+e.r)hitEnemy(e,counter,p,420,0,null,window.BFCombatDetailSfx?.timer(p,'bdParryT'));G.shake=Math.min(18,G.shake+10);}
     p.bdPerfectDmg=0;p.bdMirrorDmg=0;if(classState('bladedancer').rank>=10){if(p.skillCd)p.skillCd[1]=0;p.bdCapT=1;}hudUpdate();SFX.dodge();return;
   }
   if(typeof sx==='number' && meta.classId==='ninja'){ const ev=effEvade(p); if(ev>0 && Math.random()<ev){ ninjaEvade(p,sx,sz); return; } }   // NINJA: dodge the hit entirely
@@ -14553,7 +14558,7 @@ function hurtPlayer(dmg,sx,sz,by){
                      addText(p.x,p.y+46,p.z,'BOUNCED','#ffe6ad'); }catch(e){} }
     }
   }
-  if(!by?.reflected&&p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
+  if(!by?.reflected&&p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null,window.BFCombatDetailSfx?.timer(p,'reflectT')); } }   // Last Stand throws it back
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;if(G.sparringRoom&&G.trainState)G.trainState.taken+=dmg;if(backgroundMenuMode||['pause','menu','npc','journal','inspection','chess'].includes(mode))menuDamageWarning();
@@ -14792,12 +14797,12 @@ function minionUpdate(dt){
       if(tgt._peer){ // PvP: damage the rival player through the host-authoritative PvP channel
         if(p._minionPvpCd>0)continue;
         p._minionPvpCd=.22;
-        MP.sendPvp(tgt._peerId||tgt.id, Math.max(1,Math.round(m.dmg*.35)), m.x, m.z);
+        MP.sendPvp(tgt._peerId||tgt.id, Math.max(1,Math.round(m.dmg*.35)), m.x, m.z,{impactContext:window.BFCombatDetailSfx?.of(m),impactPosition:{x:tgt.x,y:tgt.y||0,z:tgt.z}});
         if(m.ranged) burst(m.x,m.y+16,m.z,'#8be0a0',4);
         else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; }
         try{ burst(tgt.x,(tgt.y||0)+18,tgt.z,'#8be0a0',5); addText(tgt.x,(tgt.y||0)+52,tgt.z,'HIT','#8be0a0'); }catch(_){} }
-      else if(m.ranged){ const oy=m.y+16,sp=520,d=Math.max(1,dXZ(m.x,m.z,tgt.x,tgt.z)); G.projectiles.push({owner:'player',x:m.x,y:oy,z:m.z,vx:(tgt.x-m.x)/d*sp,vy:((tgt.y+tgt.h*0.5)-oy)/d*sp,vz:(tgt.z-m.z)/d*sp,gravity:0,size:6,color:'#8be0a0',shape:'orb',glow:1,dmg:m.dmg,kb:40,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true}); }
-      else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; hitEnemy(tgt,m.dmg,{x:m.x,z:m.z,pet:true},80,0,null); burst(tgt.x,tgt.y+tgt.h*0.4,tgt.z,'#8be0a0',5); }
+      else if(m.ranged){ const oy=m.y+16,sp=520,d=Math.max(1,dXZ(m.x,m.z,tgt.x,tgt.z)); G.projectiles.push({owner:'player',x:m.x,y:oy,z:m.z,vx:(tgt.x-m.x)/d*sp,vy:((tgt.y+tgt.h*0.5)-oy)/d*sp,vz:(tgt.z-m.z)/d*sp,gravity:0,size:6,color:'#8be0a0',shape:'orb',glow:1,dmg:m.dmg,kb:40,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true});window.BFCombatDetailSfx?.tag(G.projectiles[G.projectiles.length-1],window.BFCombatDetailSfx?.of(m)); }
+      else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; hitEnemy(tgt,m.dmg,{x:m.x,z:m.z,pet:true},80,0,null,window.BFCombatDetailSfx?.of(m)); burst(tgt.x,tgt.y+tgt.h*0.4,tgt.z,'#8be0a0',5); }
       if(bond&&p.hp>0){ const h=Math.max(1,Math.round(effMaxHp(p)*0.006)); p.hp=Math.min(effMaxHp(p),p.hp+h); } } }
   }
   G.minions=G.minions.filter(m=>!m.dead);
@@ -15560,7 +15565,7 @@ const MP={
     if(!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
     const token=this.myId+':e:'+((this._enemyHitSerial=(this._enemyHitSerial||0)+1));this._pendingEnemyHits=this._pendingEnemyHits||new Map();
     for(const [k,h]of this._pendingEnemyHits)if(performance.now()-h.at>10000)this._pendingEnemyHits.delete(k);
-    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,basicMana:!!effects.basicMana,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0});
+    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,basicMana:!!effects.basicMana,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0,impactContext:effects.impactContext,impactPosition:effects.impactPosition});
     try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0),owner:effects.owner||null});}catch{this._pendingEnemyHits.delete(token);}
   },
   sendStatus(mid,el,dmg,w){
@@ -15575,6 +15580,7 @@ const MP={
     const h=this._pendingEnemyHits?.get(d.token);if(!h)return;this._pendingEnemyHits.delete(d.token);
     if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt))return;
     if(d.dealt<=0){const p=G.p;p.hp=Math.max(0,Math.min(effMaxHp(p),p.hp-h.hpDelta));p.mana=Math.max(0,Math.min(p.maxMana||100,p.mana-h.manaDelta));p._bloodOwed=Math.max(0,(p._bloodOwed||0)-h.bloodDelta);hudUpdate();return;}
+    window.BFCombatDetailSfx?.impact(G,h.impactPosition,d.dealt,h.impactContext);
     if(h.basicMana)recoverBasicMana(G.p);
     classHeal(G.p,d.dealt*(d.executed?0:h.rate)+(d.executed?0:h.flat)+Math.max(0,Number(d.bonusHeal)||0));hudUpdate();
   },
@@ -15654,7 +15660,7 @@ const MP={
     this._hitSerial=(this._hitSerial||0)+1;const token=this.myId+':'+this._hitSerial;
     this._pendingHits=this._pendingHits||new Map();
     for(const [k,v] of this._pendingHits)if(performance.now()-v.time>10000)this._pendingHits.delete(k);
-    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,player:G.p,world:G,basicMana:!!effects.basicMana,refund:Math.max(0,effects.refund||0),healRatio:Math.max(0,Math.min(1,Number(effects.healRatio)||0)),element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId});
+    this._pendingHits.set(token,{target:id,time:performance.now(),damage:dmg,player:G.p,world:G,basicMana:!!effects.basicMana,refund:Math.max(0,effects.refund||0),healRatio:Math.max(0,Math.min(1,Number(effects.healRatio)||0)),element:effects.element,designated:!!effects.designated,flatHeal:Math.min(effMaxHp(G.p)*.15,Math.max(0,effects.flatHeal||0)),ls:Math.max(0,Math.min(1,effects.lifesteal||0)),cls:meta.classId,impactContext:effects.impactContext,impactPosition:effects.impactPosition});
     const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId,token,slow:Math.min(1.5,effects.slow||0),element:effects.element,reflected:!!this._receivingHit};
     this.routeCombatMessage(m);
   },
@@ -15673,6 +15679,7 @@ const MP={
     const hit=this._pendingHits?.get(m.token);if(!hit||hit.target!==m.by||performance.now()-hit.time>10000)return;
     this._pendingHits.delete(m.token);if(hit.cls!==meta.classId||hit.player!==G?.p||hit.world!==G)return;
     const dealt=Math.max(0,Math.min(hit.damage,Number(m.dealt)||0));
+    window.BFCombatDetailSfx?.impact(G,hit.impactPosition,dealt,hit.impactContext);
     classHeal(G.p,dealt*.5*(hit.ls*(meta.classId==='reaper'?.5:.3)+(hit.healRatio||0)));
     if(dealt>0&&hit.basicMana)recoverBasicMana(G.p);
     if(dealt>0){classHeal(G.p,hit.flatHeal*.5+(hit.refund||0));const target=this.peers[m.by];if(target){if(hit.element)applyElement(target,hit.element,dealt);if(hit.designated){consumeRunes(target);ruptureCorrupt(target,G.p);}}}
@@ -16526,11 +16533,11 @@ function updateWorld(dt){
   skillCoolPaint(p);
   if(p.berserkT>0){ p.berserkT-=dt; if(Math.random()<0.35) G.particles.push({x:p.x+(Math.random()-0.5)*20,y:p.y+30+Math.random()*18,z:p.z+(Math.random()-0.5)*20,vx:0,vy:60,vz:0,life:0.4,color:'#ff5a3a',sz:2.6}); }
   if(p.chargeDash>0){ p.chargeDash-=dt; p.x+=p.dashX*880*dt; p.z+=p.dashZ*880*dt;
-    for(const e of combatTargets()){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null); playFx('warcharge'); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }
+    for(const e of combatTargets()){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null,window.BFCombatDetailSfx?.timer(p,'chargeDash')); playFx('warcharge'); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }
   if(p.tempestT>0){ p.tempestT-=dt; p.tempAcc+=dt;
     if(Math.random()<0.5){ const a2=Math.random()*6.283, rr=40+Math.random()*130; G.particles.push({x:p.x+Math.cos(a2)*rr,y:10+Math.random()*50,z:p.z+Math.sin(a2)*rr,vx:-Math.sin(a2)*120,vy:30,vz:Math.cos(a2)*120,life:0.5,color:'#c47bff',sz:2.8}); }
     if(p.tempAcc>=0.3){ p.tempAcc-=0.3;
-      for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._tmpDmg||8,p,60,0,p._tmpVoid?'void':null); } }
+      for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._tmpDmg||8,p,60,0,p._tmpVoid?'void':null,window.BFCombatDetailSfx?.timer(p,'tempestT')); } }
     if(p.tempestT<=0) p._tmpVoid=0; }
   // path-B upkeep: Guardian braces, Wizard barrier + meteors, Reaper reaping-storm
   if(p.guardT>0){ p.guardT-=dt; if(Math.random()<0.4) G.particles.push({x:p.x+(Math.random()-0.5)*24,y:p.y+10+Math.random()*30,z:p.z+(Math.random()-0.5)*24,vx:0,vy:40,vz:0,life:0.3,color:'#9fd0ff',sz:2.4}); }
@@ -16538,11 +16545,11 @@ function updateWorld(dt){
   if(p.shieldT>0){ p.shieldT-=dt; if(p.shieldT<=0) p.shieldHp=0; }
   if(p.stormT>0){ p.stormT-=dt; p.stormAcc=(p.stormAcc||0)+dt; p.atkTimer=Math.max(p.atkTimer,0.12); p.swingId+=(Math.random()<0.3?1:0);
     if(Math.random()<0.6){ const a2=Math.random()*6.283,rr=30+Math.random()*110; G.particles.push({x:p.x+Math.cos(a2)*rr,y:p.y+10+Math.random()*30,z:p.z+Math.sin(a2)*rr,vx:0,vy:20,vz:0,life:0.3,color:'#b06bff',sz:3}); }
-    if(p.stormAcc>=0.28){ p.stormAcc-=0.28; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<150+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._stormDmg||10,p,120,effLifesteal(p),null); } } }
+    if(p.stormAcc>=0.28){ p.stormAcc-=0.28; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<150+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._stormDmg||10,p,120,effLifesteal(p),null,window.BFCombatDetailSfx?.timer(p,'stormT')); } } }
   if(G.meteors&&G.meteors.length){ for(const mt of G.meteors){ mt.t-=dt;
       if(mt.t<=0.6&&!mt.warned){ mt.warned=true; }
       if(mt.t<=0){ mt.done=true; skillRing(mt.x,mt.z,'#ff7a3a','#c33',mt.r+40); G.shake=Math.min(G.shake+9,16); burst(mt.x,10,mt.z,'#ff7a3a',24);
-        for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,mt.x,mt.z)<mt.r+e.r) hitEnemy(e,mt.dmg,mt.src||p,300,0,'fire'); } } }
+        for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,mt.x,mt.z)<mt.r+e.r) hitEnemy(e,mt.dmg,mt.src||p,300,0,'fire',window.BFCombatDetailSfx?.of(mt)); } } }
     G.meteors=G.meteors.filter(m=>!m.done); }
   if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
   if(G.lootCard) lootTick();
@@ -16670,7 +16677,7 @@ function updateWorld(dt){
       for(const e of combatTargets()){ if(e.dead||!e.active) continue; if(dXZ(e.x,e.z,sf.x,sf.z)>sf.r+e.r) continue;
         e.slowT=Math.max(e.slowT||0,0.4);
         if(sf.hitSet.indexOf(e)<0){ sf.hitSet.push(e); const w=G.p.weapon; if(w&&w.el) applyElement(e,w.el,1); }   // element once, on first entry
-        if(dot) hitEnemy(e,sf.dmg,G.p,0,effLifesteal(G.p),null); } }
+        if(dot) hitEnemy(e,sf.dmg,G.p,0,effLifesteal(G.p),null,window.BFCombatDetailSfx?.of(sf)); } }
     G.spikefields=G.spikefields.filter(sf=>sf.life>0); }
   // healing spring (once per stage)
   for(const sp2 of G.springs){ if(!sp2.used && Math.abs(p.y-(sp2.y||0))<18 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
@@ -16725,7 +16732,7 @@ function updateWorld(dt){
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
     if((e.warCurseT||0)>0)e.warCurseT=Math.max(0,e.warCurseT-dt);
-    if((e.warBurstT||0)>0){e.warBurstT-=dt;if(e.warBurstT<=0&&e.warBurstDmg>0){const wd=e.warBurstDmg,ws=e.warBurstSrc||p;e.warBurstDmg=0;if(!MP.guest())hitEnemy(e,wd,ws,420,0,'void');skillRing(e.x,e.z,'#ff5475','#3b0920',210);burst(e.x,e.y+e.h*.5,e.z,'#d04cff',22);}}
+    if((e.warBurstT||0)>0){e.warBurstT-=dt;if(e.warBurstT<=0&&e.warBurstDmg>0){const wd=e.warBurstDmg,ws=e.warBurstSrc||p;e.warBurstDmg=0;if(!MP.guest())hitEnemy(e,wd,ws,420,0,'void',window.BFCombatDetailSfx?.timer(e,'warBurstT'));skillRing(e.x,e.z,'#ff5475','#3b0920',210);burst(e.x,e.y+e.h*.5,e.z,'#d04cff',22);}}
     const _chillMul=statusTick(e,dt); if(e.dead) continue;   // elemental stacks: DoT + decay; returns the Chill move-speed factor
     let eff=e.speed*(e.slowT>0?0.5:1)*_chillMul; if(meta.classId==='reaper'&&c2Passive('x_chill')&&e.st&&e.st.corrupt>0)eff*=.82; if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
     if(e.tauntT>0)e.tauntT=Math.max(0,e.tauntT-dt);if(e.petTauntT>0)e.petTauntT=Math.max(0,e.petTauntT-dt);if(e.beastMarkT>0)e.beastMarkT=Math.max(0,e.beastMarkT-dt);
@@ -16877,7 +16884,7 @@ function updateWorld(dt){
              why a guest's projectiles dealt nothing that survived the next host snapshot.
              NOT named `shot`: enemies already carry `.shot` as their ranged-attack config, so that
              name would be true on any enemy-shaped src and relay hits that must not be relayed. */
-          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true,pet:!!pr.petSeek},pr.kb,pr.petSeek?0:effLifesteal(G.p),pr.el);
+          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true,pet:!!pr.petSeek},pr.kb,pr.petSeek?0:effLifesteal(G.p),pr.el,window.BFCombatDetailSfx?.of(pr));
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
       G._desig=false; G._crit=false;
     } else if(G.duel && pr.foeBot){                          // DUEL: a bot's shot hits only its opponent, never the parked player
@@ -23736,6 +23743,7 @@ function frame(ts){
   flushDeferred();                    // ...then the entities, depth-tested against what it just drew
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   window.BFWorldSfx?.tick(G,mode,{queue:queueSkillFx,play:playFx},performance.now()/1000,document.hidden||!!window.BF_LOADING?.active);
+  window.BFCombatDetailSfx?.tick(G,backgroundMenuMode||mode,document.hidden||!!window.BF_LOADING?.active,performance.now()/1000,meta.combatDetailAudio!==false);
   BFGuidedTutorial.map(G,mode);
   window.BFProgressCelebration?.tick(G,mode,(x,y,z)=>{const p=project(x,y,z);return p?[p[0],p[1]]:null;},{hidden:document.hidden,reduceMotion:meta.reduceMotion,particles:meta.particles});
   const mapCaption=document.getElementById('mapCaption');mapCaption.classList.toggle('hide',mode!=='play'||!G||!!G.bonusActive);if(G&&mode==='play')document.getElementById('mapPlace').textContent=G.hub?'THE WAYSTATION':G.areaName||curZone().name;
@@ -24272,6 +24280,15 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
+// Audio metadata lives outside actors/saves. Every final handler retains its return value.
+if(window.BFCombatDetailSfx){
+ const detail=window.BFCombatDetailSfx;
+ detail.configure({play:playFx,queue:queueSkillFx,skills:()=>c2CurSkills().filter(Boolean).map(s=>s.id),relay:id=>{if(MP.active)MP.sendSound([['file',id,.8]]);}});
+ for(const id of detail.ids.filter(id=>id.startsWith('skillimpact_')).map(id=>id.slice(12))){
+  const original=SKILL_FX[id];if(!original)continue;
+  SKILL_FX[id]=function(...args){return detail.run(G,id,()=>original.apply(this,args));};
+ }
+}
 window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPANION_WHISTLE_COST,pauseState,openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,applyReturnReward,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemyPartyTarget,syncedMelee,enemySupport,enemyRouteEdge,moveGroundEnemy,enemyMeleeClear,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },

@@ -1,0 +1,631 @@
+{
+  "checks": [
+    {
+      "name": "Pre-change level100 save loaded",
+      "ok": true
+    },
+    {
+      "name": "Actual Mage Nova hits and emits once",
+      "ok": true
+    },
+    {
+      "name": "Untargetable real enemy makes no impact accent",
+      "ok": true
+    },
+    {
+      "name": "Actual projectile retains its cast context",
+      "ok": true
+    },
+    {
+      "name": "Actual delayed projectile damage emits impact",
+      "ok": true
+    },
+    {
+      "name": "Expired or missed projectile makes no hit noise",
+      "ok": true
+    },
+    {
+      "name": "Guest predicted hit stays silent until receipt",
+      "ok": true
+    },
+    {
+      "name": "No audio context enters gameplay packet",
+      "ok": true
+    },
+    {
+      "name": "Authoritative guest receipt emits once",
+      "ok": true
+    },
+    {
+      "name": "Duplicate receipt stays silent",
+      "ok": true
+    },
+    {
+      "name": "All136 current skill handlers callable",
+      "ok": true
+    },
+    {
+      "name": "Shared settings expose additive toggle",
+      "ok": true
+    },
+    {
+      "name": "Additive audio preference persisted",
+      "ok": true
+    },
+    {
+      "name": "All182 runtime files decode in actual browser",
+      "ok": true
+    },
+    {
+      "name": "No sound played during verification",
+      "ok": true
+    }
+  ],
+  "casts": [
+    {
+      "id": "py_bolt",
+      "ok": true
+    },
+    {
+      "id": "py_fan",
+      "ok": true
+    },
+    {
+      "id": "py_blast",
+      "ok": true
+    },
+    {
+      "id": "py_ward",
+      "ok": true
+    },
+    {
+      "id": "py_lance",
+      "ok": true
+    },
+    {
+      "id": "py_nova",
+      "ok": true
+    },
+    {
+      "id": "py_inferno",
+      "ok": true
+    },
+    {
+      "id": "py_sun",
+      "ok": true
+    },
+    {
+      "id": "w_cleave",
+      "ok": true
+    },
+    {
+      "id": "w_bash",
+      "ok": true
+    },
+    {
+      "id": "w_charge",
+      "ok": true
+    },
+    {
+      "id": "w_whirl",
+      "ok": true
+    },
+    {
+      "id": "w_guard",
+      "ok": true
+    },
+    {
+      "id": "w_stomp",
+      "ok": true
+    },
+    {
+      "id": "w_berserk",
+      "ok": true
+    },
+    {
+      "id": "w_execute",
+      "ok": true
+    },
+    {
+      "id": "r_volley",
+      "ok": true
+    },
+    {
+      "id": "r_pierce",
+      "ok": true
+    },
+    {
+      "id": "r_tumble",
+      "ok": true
+    },
+    {
+      "id": "r_shadow",
+      "ok": true
+    },
+    {
+      "id": "r_spike",
+      "ok": true
+    },
+    {
+      "id": "r_smoke",
+      "ok": true
+    },
+    {
+      "id": "r_mark",
+      "ok": true
+    },
+    {
+      "id": "r_deathmark",
+      "ok": true
+    },
+    {
+      "id": "m_bolt",
+      "ok": true
+    },
+    {
+      "id": "m_beam",
+      "ok": true
+    },
+    {
+      "id": "m_blink",
+      "ok": true
+    },
+    {
+      "id": "m_nova",
+      "ok": true
+    },
+    {
+      "id": "m_gravity",
+      "ok": true
+    },
+    {
+      "id": "m_barrier",
+      "ok": true
+    },
+    {
+      "id": "m_tempest",
+      "ok": true
+    },
+    {
+      "id": "m_overload",
+      "ok": true
+    },
+    {
+      "id": "x_reap",
+      "ok": true
+    },
+    {
+      "id": "x_cleave",
+      "ok": true
+    },
+    {
+      "id": "x_step",
+      "ok": true
+    },
+    {
+      "id": "x_wraith",
+      "ok": true
+    },
+    {
+      "id": "x_pull",
+      "ok": true
+    },
+    {
+      "id": "x_bind",
+      "ok": true
+    },
+    {
+      "id": "x_siphon",
+      "ok": true
+    },
+    {
+      "id": "x_vortex",
+      "ok": true
+    },
+    {
+      "id": "pal_bash",
+      "ok": true
+    },
+    {
+      "id": "pal_smite",
+      "ok": true
+    },
+    {
+      "id": "pal_taunt",
+      "ok": true
+    },
+    {
+      "id": "pal_ground",
+      "ok": true
+    },
+    {
+      "id": "pal_guard",
+      "ok": true
+    },
+    {
+      "id": "pal_burst",
+      "ok": true
+    },
+    {
+      "id": "pal_laststand",
+      "ok": true
+    },
+    {
+      "id": "pal_sky",
+      "ok": true
+    },
+    {
+      "id": "necro_summon",
+      "ok": true
+    },
+    {
+      "id": "necro_bolt",
+      "ok": true
+    },
+    {
+      "id": "necro_raise",
+      "ok": true
+    },
+    {
+      "id": "necro_nova",
+      "ok": true
+    },
+    {
+      "id": "necro_wall",
+      "ok": true
+    },
+    {
+      "id": "necro_grip",
+      "ok": true
+    },
+    {
+      "id": "necro_army",
+      "ok": true
+    },
+    {
+      "id": "necro_storm",
+      "ok": true
+    },
+    {
+      "id": "nin_strike",
+      "ok": true
+    },
+    {
+      "id": "nin_barrage",
+      "ok": true
+    },
+    {
+      "id": "nin_step",
+      "ok": true
+    },
+    {
+      "id": "nin_smoke",
+      "ok": true
+    },
+    {
+      "id": "nin_mark",
+      "ok": true
+    },
+    {
+      "id": "nin_pierce",
+      "ok": true
+    },
+    {
+      "id": "nin_fury",
+      "ok": true
+    },
+    {
+      "id": "nin_storm",
+      "ok": true
+    },
+    {
+      "id": "bsk_cleave",
+      "ok": true
+    },
+    {
+      "id": "bsk_bash",
+      "ok": true
+    },
+    {
+      "id": "bsk_charge",
+      "ok": true
+    },
+    {
+      "id": "bsk_stomp",
+      "ok": true
+    },
+    {
+      "id": "bsk_whirl",
+      "ok": true
+    },
+    {
+      "id": "bsk_execute",
+      "ok": true
+    },
+    {
+      "id": "bsk_berserk",
+      "ok": true
+    },
+    {
+      "id": "bsk_guard",
+      "ok": true
+    },
+    {
+      "id": "pir_pierce",
+      "ok": true
+    },
+    {
+      "id": "pir_volley",
+      "ok": true
+    },
+    {
+      "id": "pir_shadow",
+      "ok": true
+    },
+    {
+      "id": "pir_tumble",
+      "ok": true
+    },
+    {
+      "id": "pir_smoke",
+      "ok": true
+    },
+    {
+      "id": "pir_goldrush",
+      "ok": true
+    },
+    {
+      "id": "pir_deathmark",
+      "ok": true
+    },
+    {
+      "id": "pir_spike",
+      "ok": true
+    },
+    {
+      "id": "chr_bolt",
+      "ok": true
+    },
+    {
+      "id": "chr_beam",
+      "ok": true
+    },
+    {
+      "id": "chr_nova",
+      "ok": true
+    },
+    {
+      "id": "chr_blink",
+      "ok": true
+    },
+    {
+      "id": "chr_gravity",
+      "ok": true
+    },
+    {
+      "id": "chr_barrier",
+      "ok": true
+    },
+    {
+      "id": "chr_tempest",
+      "ok": true
+    },
+    {
+      "id": "chr_overload",
+      "ok": true
+    },
+    {
+      "id": "mon_flurry",
+      "ok": true
+    },
+    {
+      "id": "mon_palm",
+      "ok": true
+    },
+    {
+      "id": "mon_deflect",
+      "ok": true
+    },
+    {
+      "id": "mon_roll",
+      "ok": true
+    },
+    {
+      "id": "mon_whirl",
+      "ok": true
+    },
+    {
+      "id": "mon_stun",
+      "ok": true
+    },
+    {
+      "id": "mon_thousand",
+      "ok": true
+    },
+    {
+      "id": "mon_dragon",
+      "ok": true
+    },
+    {
+      "id": "st_bolt",
+      "ok": true
+    },
+    {
+      "id": "st_lance",
+      "ok": true
+    },
+    {
+      "id": "st_step",
+      "ok": true
+    },
+    {
+      "id": "st_nova",
+      "ok": true
+    },
+    {
+      "id": "st_orb",
+      "ok": true
+    },
+    {
+      "id": "st_barrier",
+      "ok": true
+    },
+    {
+      "id": "st_storm",
+      "ok": true
+    },
+    {
+      "id": "st_overload",
+      "ok": true
+    },
+    {
+      "id": "war_bolt",
+      "ok": true
+    },
+    {
+      "id": "war_lance",
+      "ok": true
+    },
+    {
+      "id": "war_curse",
+      "ok": true
+    },
+    {
+      "id": "war_drain",
+      "ok": true
+    },
+    {
+      "id": "war_step",
+      "ok": true
+    },
+    {
+      "id": "war_orb",
+      "ok": true
+    },
+    {
+      "id": "war_storm",
+      "ok": true
+    },
+    {
+      "id": "war_final",
+      "ok": true
+    },
+    {
+      "id": "sky_rise",
+      "ok": true
+    },
+    {
+      "id": "sky_gale",
+      "ok": true
+    },
+    {
+      "id": "sky_dive",
+      "ok": true
+    },
+    {
+      "id": "sky_lift",
+      "ok": true
+    },
+    {
+      "id": "sky_dash",
+      "ok": true
+    },
+    {
+      "id": "sky_rain",
+      "ok": true
+    },
+    {
+      "id": "sky_crash",
+      "ok": true
+    },
+    {
+      "id": "sky_cyclone",
+      "ok": true
+    },
+    {
+      "id": "bd_counter",
+      "ok": true
+    },
+    {
+      "id": "bd_twin",
+      "ok": true
+    },
+    {
+      "id": "bd_riposte",
+      "ok": true
+    },
+    {
+      "id": "bd_step",
+      "ok": true
+    },
+    {
+      "id": "bd_mirror",
+      "ok": true
+    },
+    {
+      "id": "bd_cross",
+      "ok": true
+    },
+    {
+      "id": "bd_steel",
+      "ok": true
+    },
+    {
+      "id": "bd_perfect",
+      "ok": true
+    },
+    {
+      "id": "bst_sic",
+      "ok": true
+    },
+    {
+      "id": "bst_coordinated",
+      "ok": true
+    },
+    {
+      "id": "bst_guardian",
+      "ok": true
+    },
+    {
+      "id": "bst_step",
+      "ok": true
+    },
+    {
+      "id": "bst_mend",
+      "ok": true
+    },
+    {
+      "id": "bst_roar",
+      "ok": true
+    },
+    {
+      "id": "bst_stampede",
+      "ok": true
+    },
+    {
+      "id": "bst_apex",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "done": true,
+  "novaDiagnostic": {
+    "hp": 99955,
+    "heard": [
+      {
+        "id": "skillimpact_m_nova",
+        "gain": 1
+      },
+      {
+        "id": "enemyhurt_grunt",
+        "gain": 1
+      }
+    ],
+    "mode": "pause",
+    "position": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    }
+  }
+}

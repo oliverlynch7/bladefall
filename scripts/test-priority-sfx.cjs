@@ -8,7 +8,7 @@ async function fixture({missing=false,mute=false}={}){
  const requests=[],starts=[],fallback=[],gains=[];const bus={};
  const buffer={numberOfChannels:2,getChannelData:()=>new Float32Array([.1,-.2,.85,-.05])};
  const actx={currentTime:2,decodeAudioData:async()=>buffer,createBufferSource(){return {connect(){},start(){starts.push(this.buffer);},stop(){}};},createGain(){const g={gain:{value:0},connect(b){check(b===bus,'same effects bus');}};gains.push(g);return g;}};
- const box={window:{},module:{exports:{}},console,actx,fxBus:bus,master:bus,Math,sOn:()=>!mute,noise:()=>{if(!mute)fallback.push('noise');},tone:()=>{if(!mute)fallback.push('tone');},fetch:async url=>{requests.push(url);return {ok:!missing||!url.includes('custom/'),arrayBuffer:async()=>new ArrayBuffer(4)};}};
+ const box={window:{},meta:{},module:{exports:{}},console,actx,fxBus:bus,master:bus,Math,sOn:()=>!mute,noise:()=>{if(!mute)fallback.push('noise');},tone:()=>{if(!mute)fallback.push('tone');},fetch:async url=>{requests.push(url);return {ok:!missing||!url.includes('custom/'),arrayBuffer:async()=>new ArrayBuffer(4)};}};
  vm.createContext(box);vm.runInContext(config,box);vm.runInContext(source+';this.test={FXDEF,FXBUF,SFX,loadFxFiles,playFx,loopFx,stopAllLoops};',box);
  return {box,t:box.test,requests,starts,fallback,gains};
 }

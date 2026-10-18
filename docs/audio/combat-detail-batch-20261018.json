@@ -1,0 +1,3122 @@
+{
+  "scope": "Additive effect-impact, creature release/vocal reaction and boss release detail. All original contact/weapon/death/UI cues preserved.",
+  "hard_credit_cap": 35000,
+  "starting_balance_checked": 37634,
+  "cues": [
+    {
+      "id": "skillimpact_py_bolt",
+      "name": "Pyromancer \u00b7 Firebolt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_bolt",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_bolt; Fire a fast bolt for 2.2 times flame damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Firebolt. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_py_fan",
+      "name": "Pyromancer \u00b7 Cinder Fan \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_fan",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_fan; Fire three flames, each dealing 1.1 times flame damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Cinder Fan. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_py_blast",
+      "name": "Pyromancer \u00b7 Backdraft \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_blast",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_blast; Blast nearby enemies for 1.3 times damage and push them back.",
+      "prompt": "Isolated fantasy game terminal effect impact for Backdraft. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_py_lance",
+      "name": "Pyromancer \u00b7 Flame Lance \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_lance",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_lance; Fire a piercing flame for 3 times flame damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Flame Lance. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_py_nova",
+      "name": "Pyromancer \u00b7 Flame Ring \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_nova",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_nova; Strike nearby enemies for 2.4 times flame damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Flame Ring. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_py_inferno",
+      "name": "Pyromancer \u00b7 Inferno \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_inferno",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_inferno; Burn nearby foes once per second for 4 seconds. Each pulse deals flame damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Inferno. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_py_sun",
+      "name": "Pyromancer \u00b7 Sunburst \u00b7 effect impact",
+      "group": "skill",
+      "skill": "py_sun",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from py_sun; Strike your aimed enemy and nearby foes for 4 times flame damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Sunburst. compact flame pressure bursting with embers and a hot airy tail. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_w_cleave",
+      "name": "Warrior \u00b7 Cleave \u00b7 effect impact",
+      "group": "skill",
+      "skill": "w_cleave",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from w_cleave; A quick sweep hits nearby enemies. Short cooldown and low damage per cast.",
+      "prompt": "Isolated fantasy game terminal effect impact for Cleave. firm steel edge and shield rim resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_w_bash",
+      "name": "Warrior \u00b7 Shield Bash \u00b7 effect impact",
+      "group": "skill",
+      "skill": "w_bash",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from w_bash; Drive forward for 1.7x damage, stun the first target, and briefly brace.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shield Bash. firm steel edge and shield rim resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_w_charge",
+      "name": "Warrior \u00b7 Charge \u00b7 effect impact",
+      "group": "skill",
+      "skill": "w_charge",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from w_charge; Rush through enemies for 1.6x damage and stun them.",
+      "prompt": "Isolated fantasy game terminal effect impact for Charge. firm steel edge and shield rim resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_w_whirl",
+      "name": "Warrior \u00b7 Whirlwind \u00b7 effect impact",
+      "group": "skill",
+      "skill": "w_whirl",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from w_whirl; A full-circle sweep deals 2.2 times weapon damage to nearby enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Whirlwind. firm steel edge and shield rim resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_w_stomp",
+      "name": "Warrior \u00b7 Shockwave Stomp \u00b7 effect impact",
+      "group": "skill",
+      "skill": "w_stomp",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from w_stomp; Slam the ground for 1.5x damage and heavy knockback all around.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shockwave Stomp. firm steel edge and shield rim resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_w_execute",
+      "name": "Warrior \u00b7 Execution \u00b7 effect impact",
+      "group": "skill",
+      "skill": "w_execute",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from w_execute; A crushing 4x strike that executes normal enemies below 20% HP.",
+      "prompt": "Isolated fantasy game terminal effect impact for Execution. firm steel edge and shield rim resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_r_volley",
+      "name": "Ranger \u00b7 Volley \u00b7 effect impact",
+      "group": "skill",
+      "skill": "r_volley",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from r_volley; Fan of arrows \u2014 up to 5 enemies, 1.4x each. Applies your element once each.",
+      "prompt": "Isolated fantasy game terminal effect impact for Volley. tight arrow shaft vibration and a crisp small steel bite. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_r_pierce",
+      "name": "Ranger \u00b7 Piercing Shot \u00b7 effect impact",
+      "group": "skill",
+      "skill": "r_pierce",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from r_pierce; One shot through a line \u2014 2.2x first (\u221210% its armor), 1.5x rest.",
+      "prompt": "Isolated fantasy game terminal effect impact for Piercing Shot. tight arrow shaft vibration and a crisp small steel bite. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_r_tumble",
+      "name": "Ranger \u00b7 Tumble \u00b7 effect impact",
+      "group": "skill",
+      "skill": "r_tumble",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from r_tumble; Roll backward with brief invulnerability and fire a parting shot for 75% weapon damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Tumble. tight arrow shaft vibration and a crisp small steel bite. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_r_shadow",
+      "name": "Ranger \u00b7 Shadowstrike \u00b7 effect impact",
+      "group": "skill",
+      "skill": "r_shadow",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from r_shadow; Dash through a target (2.0x) and appear behind it; tap again within 1s to return.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shadowstrike. tight arrow shaft vibration and a crisp small steel bite. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_r_spike",
+      "name": "Ranger \u00b7 Spike Trap \u00b7 effect impact",
+      "group": "skill",
+      "skill": "r_spike",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from r_spike; Place a trap for 5 seconds that repeatedly damages and slows enemies inside.",
+      "prompt": "Isolated fantasy game terminal effect impact for Spike Trap. tight arrow shaft vibration and a crisp small steel bite. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_r_deathmark",
+      "name": "Ranger \u00b7 Death Mark \u00b7 effect impact",
+      "group": "skill",
+      "skill": "r_deathmark",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from r_deathmark; Mark up to 5 enemies \u2014 they explode for 1.8x on death.",
+      "prompt": "Isolated fantasy game terminal effect impact for Death Mark. tight arrow shaft vibration and a crisp small steel bite. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_m_bolt",
+      "name": "Mage \u00b7 Elemental Bolt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "m_bolt",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from m_bolt; Fire a quick elemental bolt. Short cooldown and low damage per cast.",
+      "prompt": "Isolated fantasy game terminal effect impact for Elemental Bolt. clean crystalline arcane energy, glassy blue sparkle. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_m_beam",
+      "name": "Mage \u00b7 Elemental Beam \u00b7 effect impact",
+      "group": "skill",
+      "skill": "m_beam",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from m_beam; Fire a piercing elemental lance for 2x damage through every target.",
+      "prompt": "Isolated fantasy game terminal effect impact for Elemental Beam. clean crystalline arcane energy, glassy blue sparkle. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_m_nova",
+      "name": "Mage \u00b7 Nova \u00b7 effect impact",
+      "group": "skill",
+      "skill": "m_nova",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from m_nova; Detonate a 1.4x freezing burst that slows nearby enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Nova. clean crystalline arcane energy, glassy blue sparkle. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_m_gravity",
+      "name": "Mage \u00b7 Gravity Well \u00b7 effect impact",
+      "group": "skill",
+      "skill": "m_gravity",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from m_gravity; Create an implosion that pulls enemies inward and deals 1.3x damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Gravity Well. clean crystalline arcane energy, glassy blue sparkle. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_m_tempest",
+      "name": "Mage \u00b7 Attunement \u00b7 effect impact",
+      "group": "skill",
+      "skill": "m_tempest",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from m_tempest; Create a damaging storm for 4 seconds. For 10 seconds, your skills cycle through different elements. Your equipped weapon stays unchanged.",
+      "prompt": "Isolated fantasy game terminal effect impact for Attunement. clean crystalline arcane energy, glassy blue sparkle. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_m_overload",
+      "name": "Mage \u00b7 Elemental Overload \u00b7 effect impact",
+      "group": "skill",
+      "skill": "m_overload",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from m_overload; Release a massive 3.4x elemental explosion around your target.",
+      "prompt": "Isolated fantasy game terminal effect impact for Elemental Overload. clean crystalline arcane energy, glassy blue sparkle. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_x_reap",
+      "name": "Reaper \u00b7 Reap \u00b7 effect impact",
+      "group": "skill",
+      "skill": "x_reap",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from x_reap; A quick scythe sweep damages nearby enemies and restores health when it hits.",
+      "prompt": "Isolated fantasy game terminal effect impact for Reap. spectral scythe edge, hollow violet soul resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_x_cleave",
+      "name": "Reaper \u00b7 Soul Cleave \u00b7 effect impact",
+      "group": "skill",
+      "skill": "x_cleave",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from x_cleave; Send a spectral scythe wave outward for 2.1x damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Soul Cleave. spectral scythe edge, hollow violet soul resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_x_pull",
+      "name": "Reaper \u00b7 Void Pull \u00b7 effect impact",
+      "group": "skill",
+      "skill": "x_pull",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from x_pull; Implode nearby enemies toward a central point and stagger them.",
+      "prompt": "Isolated fantasy game terminal effect impact for Void Pull. spectral scythe edge, hollow violet soul resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_x_siphon",
+      "name": "Reaper \u00b7 Soul Siphon \u00b7 effect impact",
+      "group": "skill",
+      "skill": "x_siphon",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from x_siphon; A powerful draining sweep damages nearby enemies and heals 5% of your maximum health per enemy damaged. Healing is halved against players.",
+      "prompt": "Isolated fantasy game terminal effect impact for Soul Siphon. spectral scythe edge, hollow violet soul resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_x_vortex",
+      "name": "Reaper \u00b7 Death Vortex \u00b7 effect impact",
+      "group": "skill",
+      "skill": "x_vortex",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from x_vortex; Create a persistent soul storm that damages and corrupts enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Death Vortex. spectral scythe edge, hollow violet soul resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pal_bash",
+      "name": "Paladin \u00b7 Shield Bash \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pal_bash",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pal_bash; Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shield Bash. warm radiant bell harmonics and a restrained holy shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pal_smite",
+      "name": "Paladin \u00b7 Smite \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pal_smite",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pal_smite; Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash \u2014 great against bosses and elites.",
+      "prompt": "Isolated fantasy game terminal effect impact for Smite. warm radiant bell harmonics and a restrained holy shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pal_ground",
+      "name": "Paladin \u00b7 Holy Ground \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pal_ground",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pal_ground; Scorch every foe around you with holy light for 2.2x damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Holy Ground. warm radiant bell harmonics and a restrained holy shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pal_burst",
+      "name": "Paladin \u00b7 Light Burst \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pal_burst",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pal_burst; A radiant burst: damage and slow every nearby foe.",
+      "prompt": "Isolated fantasy game terminal effect impact for Light Burst. warm radiant bell harmonics and a restrained holy shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pal_laststand",
+      "name": "Paladin \u00b7 Last Stand \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pal_laststand",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pal_laststand; Brace for 4 seconds, reducing incoming damage and reflecting nearby hits. Immediately restore 15% of your maximum health.",
+      "prompt": "Isolated fantasy game terminal effect impact for Last Stand. warm radiant bell harmonics and a restrained holy shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pal_sky",
+      "name": "Paladin \u00b7 Sky Hammer \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pal_sky",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pal_sky; Call a pillar of light down: heavy damage and knockback all around you.",
+      "prompt": "Isolated fantasy game terminal effect impact for Sky Hammer. warm radiant bell harmonics and a restrained holy shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_summon",
+      "name": "Necromancer \u00b7 Summon Skeletons \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_summon",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_summon; Raise a pack of skeletons that hunt down nearby enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Summon Skeletons. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_bolt",
+      "name": "Necromancer \u00b7 Plague Bolt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_bolt",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_bolt; Rapid-fire bolts of necrotic plague (~2s, softer each).",
+      "prompt": "Isolated fantasy game terminal effect impact for Plague Bolt. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_raise",
+      "name": "Necromancer \u00b7 Raise the Dead \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_raise",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_raise; Raise your most recently slain nearby enemy as an undead ally.",
+      "prompt": "Isolated fantasy game terminal effect impact for Raise the Dead. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_nova",
+      "name": "Necromancer \u00b7 Corpse Nova \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_nova",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_nova; Detonate a burst of bone shards that slows nearby enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Corpse Nova. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_grip",
+      "name": "Necromancer \u00b7 Death Grip \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_grip",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_grip; A skeletal grip implodes enemies inward and deals damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Death Grip. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_army",
+      "name": "Necromancer \u00b7 Army of the Dead \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_army",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_army; Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+      "prompt": "Isolated fantasy game terminal effect impact for Army of the Dead. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_necro_storm",
+      "name": "Necromancer \u00b7 Death Storm \u00b7 effect impact",
+      "group": "skill",
+      "skill": "necro_storm",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from necro_storm; A storm of decay rages around you for 4s.",
+      "prompt": "Isolated fantasy game terminal effect impact for Death Storm. dry bone fragments and sickly hollow necrotic energy. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_nin_strike",
+      "name": "Ninja \u00b7 Shadow Strike \u00b7 effect impact",
+      "group": "skill",
+      "skill": "nin_strike",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from nin_strike; Blink to the nearest enemy and strike for heavy damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shadow Strike. precise thin throwing steel and a brief shadow hiss. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_nin_barrage",
+      "name": "Ninja \u00b7 Shuriken Barrage \u00b7 effect impact",
+      "group": "skill",
+      "skill": "nin_barrage",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from nin_barrage; Fire three back-to-back shotgun bursts of stars \u2014 shreds packs of enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shuriken Barrage. precise thin throwing steel and a brief shadow hiss. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_nin_pierce",
+      "name": "Ninja \u00b7 Piercing Star \u00b7 effect impact",
+      "group": "skill",
+      "skill": "nin_pierce",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from nin_pierce; Hurl one massive shuriken that pierces straight through \u2014 huge single-target damage for bosses.",
+      "prompt": "Isolated fantasy game terminal effect impact for Piercing Star. precise thin throwing steel and a brief shadow hiss. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bsk_cleave",
+      "name": "Berserker \u00b7 Blood Sweep \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bsk_cleave",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bsk_cleave; Spend 10% of your maximum health to sweep nearby enemies for 2.6 times weapon damage. Cannot be used if the cost would leave you below 2 HP.",
+      "prompt": "Isolated fantasy game terminal effect impact for Blood Sweep. raw heavy iron and a dry brutal crack. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bsk_bash",
+      "name": "Berserker \u00b7 Headbutt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bsk_bash",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bsk_bash; Strike nearby enemies for 2.2 times weapon damage and stun them for 2.2 seconds. On a hit, spend 6% maximum health and pause for 0.5 seconds.",
+      "prompt": "Isolated fantasy game terminal effect impact for Headbutt. raw heavy iron and a dry brutal crack. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bsk_charge",
+      "name": "Berserker \u00b7 Charge \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bsk_charge",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bsk_charge; Rush forward, damaging and stunning in your path.",
+      "prompt": "Isolated fantasy game terminal effect impact for Charge. raw heavy iron and a dry brutal crack. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bsk_stomp",
+      "name": "Berserker \u00b7 Shockwave \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bsk_stomp",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bsk_stomp; Slam the ground for damage and heavy knockback.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shockwave. raw heavy iron and a dry brutal crack. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bsk_whirl",
+      "name": "Berserker \u00b7 Whirlwind \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bsk_whirl",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bsk_whirl; Sweep all nearby enemies for 2.2 times weapon damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Whirlwind. raw heavy iron and a dry brutal crack. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bsk_execute",
+      "name": "Berserker \u00b7 Execute \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bsk_execute",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bsk_execute; A brutal strike that finishes low-HP foes.",
+      "prompt": "Isolated fantasy game terminal effect impact for Execute. raw heavy iron and a dry brutal crack. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pir_pierce",
+      "name": "Pirate \u00b7 Aimed Shot \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pir_pierce",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pir_pierce; Rapid piercing pistol shots (~2s, softer each) \u2014 a gunslinger's rhythm.",
+      "prompt": "Isolated fantasy game terminal effect impact for Aimed Shot. dry black powder snap and wood splinters, no cannon rumble unless named. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pir_volley",
+      "name": "Pirate \u00b7 Broadside \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pir_volley",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pir_volley; A spread of shots across your front.",
+      "prompt": "Isolated fantasy game terminal effect impact for Broadside. dry black powder snap and wood splinters, no cannon rumble unless named. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pir_shadow",
+      "name": "Pirate \u00b7 Boarding Strike \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pir_shadow",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pir_shadow; Dash to a foe and strike hard.",
+      "prompt": "Isolated fantasy game terminal effect impact for Boarding Strike. dry black powder snap and wood splinters, no cannon rumble unless named. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pir_tumble",
+      "name": "Pirate \u00b7 Roll \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pir_tumble",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pir_tumble; Roll back with a parting shot and snare.",
+      "prompt": "Isolated fantasy game terminal effect impact for Roll. dry black powder snap and wood splinters, no cannon rumble unless named. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pir_deathmark",
+      "name": "Pirate \u00b7 Cannonade \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pir_deathmark",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pir_deathmark; Mark foes \u2014 they explode on death.",
+      "prompt": "Isolated fantasy game terminal effect impact for Cannonade. dry black powder snap and wood splinters, no cannon rumble unless named. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_pir_spike",
+      "name": "Pirate \u00b7 Powder Keg \u00b7 effect impact",
+      "group": "skill",
+      "skill": "pir_spike",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from pir_spike; Drop a trap that damages and snares.",
+      "prompt": "Isolated fantasy game terminal effect impact for Powder Keg. dry black powder snap and wood splinters, no cannon rumble unless named. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_chr_bolt",
+      "name": "Chronomancer \u00b7 Time Bolt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "chr_bolt",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from chr_bolt; Rapid-fire bolts of temporal energy (~2s, softer each).",
+      "prompt": "Isolated fantasy game terminal effect impact for Time Bolt. a sharp clock tick fracture and a short reversed temporal shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_chr_beam",
+      "name": "Chronomancer \u00b7 Time Lance \u00b7 effect impact",
+      "group": "skill",
+      "skill": "chr_beam",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from chr_beam; A piercing lance through every foe.",
+      "prompt": "Isolated fantasy game terminal effect impact for Time Lance. a sharp clock tick fracture and a short reversed temporal shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_chr_nova",
+      "name": "Chronomancer \u00b7 Slow Field \u00b7 effect impact",
+      "group": "skill",
+      "skill": "chr_nova",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from chr_nova; A burst that slows nearby foes.",
+      "prompt": "Isolated fantasy game terminal effect impact for Slow Field. a sharp clock tick fracture and a short reversed temporal shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_chr_gravity",
+      "name": "Chronomancer \u00b7 Time Warp \u00b7 effect impact",
+      "group": "skill",
+      "skill": "chr_gravity",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from chr_gravity; Implode foes inward and deal damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Time Warp. a sharp clock tick fracture and a short reversed temporal shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_chr_overload",
+      "name": "Chronomancer \u00b7 Singularity \u00b7 effect impact",
+      "group": "skill",
+      "skill": "chr_overload",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from chr_overload; A massive temporal explosion.",
+      "prompt": "Isolated fantasy game terminal effect impact for Singularity. a sharp clock tick fracture and a short reversed temporal shimmer. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_flurry",
+      "name": "Monk \u00b7 Flurry \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_flurry",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_flurry; Deliver rapid punches. Each connecting hit builds your temporary damage bonus.",
+      "prompt": "Isolated fantasy game terminal effect impact for Flurry. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_palm",
+      "name": "Monk \u00b7 Palm Strike \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_palm",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_palm; Dash in with a heavy palm that staggers the first foe.",
+      "prompt": "Isolated fantasy game terminal effect impact for Palm Strike. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_deflect",
+      "name": "Monk \u00b7 Deflect \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_deflect",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_deflect; A parry stance: for a moment take almost nothing and throw blows straight back.",
+      "prompt": "Isolated fantasy game terminal effect impact for Deflect. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_roll",
+      "name": "Monk \u00b7 Roll \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_roll",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_roll; Roll aside with brief i-frames and a parting strike.",
+      "prompt": "Isolated fantasy game terminal effect impact for Roll. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_whirl",
+      "name": "Monk \u00b7 Whirl Kick \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_whirl",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_whirl; A spinning kick that strikes everything around you.",
+      "prompt": "Isolated fantasy game terminal effect impact for Whirl Kick. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_stun",
+      "name": "Monk \u00b7 Stunning Palm \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_stun",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_stun; A shockwave palm that dazes and slows nearby foes.",
+      "prompt": "Isolated fantasy game terminal effect impact for Stunning Palm. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_thousand",
+      "name": "Monk \u00b7 Stillness \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_thousand",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_thousand; For 6 seconds, standing still reflects double incoming damage back to attackers. You still take damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Stillness. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_mon_dragon",
+      "name": "Monk \u00b7 Dragon Kick \u00b7 effect impact",
+      "group": "skill",
+      "skill": "mon_dragon",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from mon_dragon; A soaring kick that erupts on impact, blasting everything around.",
+      "prompt": "Isolated fantasy game terminal effect impact for Dragon Kick. focused palm air pressure and a short resonant breath-like energy snap, no speech. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_st_bolt",
+      "name": "Stormcaller \u00b7 Chain Bolt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "st_bolt",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from st_bolt; Fire a quick lightning bolt with a short cooldown.",
+      "prompt": "Isolated fantasy game terminal effect impact for Chain Bolt. tight electrical discharge and sharp crackling lightning. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_st_lance",
+      "name": "Stormcaller \u00b7 Lightning Lance \u00b7 effect impact",
+      "group": "skill",
+      "skill": "st_lance",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from st_lance; A piercing bolt through every foe in a line.",
+      "prompt": "Isolated fantasy game terminal effect impact for Lightning Lance. tight electrical discharge and sharp crackling lightning. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_st_nova",
+      "name": "Stormcaller \u00b7 Static Field \u00b7 effect impact",
+      "group": "skill",
+      "skill": "st_nova",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from st_nova; A shock burst that slows nearby foes.",
+      "prompt": "Isolated fantasy game terminal effect impact for Static Field. tight electrical discharge and sharp crackling lightning. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_st_orb",
+      "name": "Stormcaller \u00b7 Ball Lightning \u00b7 effect impact",
+      "group": "skill",
+      "skill": "st_orb",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from st_orb; A crackling orb that pulls foes in and zaps them.",
+      "prompt": "Isolated fantasy game terminal effect impact for Ball Lightning. tight electrical discharge and sharp crackling lightning. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_st_storm",
+      "name": "Stormcaller \u00b7 Linked Lightning \u00b7 effect impact",
+      "group": "skill",
+      "skill": "st_storm",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from st_storm; Link nearby enemies for 8 seconds. Hitting one also damages the others.",
+      "prompt": "Isolated fantasy game terminal effect impact for Linked Lightning. tight electrical discharge and sharp crackling lightning. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_st_overload",
+      "name": "Stormcaller \u00b7 Chain Reaction \u00b7 effect impact",
+      "group": "skill",
+      "skill": "st_overload",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from st_overload; A massive electric explosion around your target.",
+      "prompt": "Isolated fantasy game terminal effect impact for Chain Reaction. tight electrical discharge and sharp crackling lightning. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_bolt",
+      "name": "Warlock \u00b7 Shadow Bolt \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_bolt",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_bolt; Fire a fast void bolt that pierces one extra foe.",
+      "prompt": "Isolated fantasy game terminal effect impact for Shadow Bolt. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_lance",
+      "name": "Warlock \u00b7 Blood Lance \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_lance",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_lance; Hurl a heavy crimson lance through every foe in a line.",
+      "prompt": "Isolated fantasy game terminal effect impact for Blood Lance. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_drain",
+      "name": "Warlock \u00b7 Life Drain \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_drain",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_drain; Damage the strongest nearby foe. Heal for 22% of health removed, or 11% against players. Blocked hits do not heal.",
+      "prompt": "Isolated fantasy game terminal effect impact for Life Drain. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_step",
+      "name": "Warlock \u00b7 Rift Step \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_step",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_step; Blink forward and detonate shadow at your starting point and destination.",
+      "prompt": "Isolated fantasy game terminal effect impact for Rift Step. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_orb",
+      "name": "Warlock \u00b7 Doom Orb \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_orb",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_orb; Collapse a slow void orb on your target, damaging and pulling nearby foes.",
+      "prompt": "Isolated fantasy game terminal effect impact for Doom Orb. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_storm",
+      "name": "Warlock \u00b7 Blood Offering \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_storm",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_storm; Spend half your current health to deal that much damage to every nearby enemy. Normal skill health cost also applies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Blood Offering. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_war_final",
+      "name": "Warlock \u00b7 Final Curse \u00b7 effect impact",
+      "group": "skill",
+      "skill": "war_final",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from war_final; Condemn the strongest nearby foe with a massive delayed shadow blast.",
+      "prompt": "Isolated fantasy game terminal effect impact for Final Curse. dark crimson magical pressure and brittle blood-glass resonance. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_rise",
+      "name": "Skylancer \u00b7 Rising Spear \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_rise",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_rise; Sweep nearby enemies and launch high into the air.",
+      "prompt": "Isolated fantasy game terminal effect impact for Rising Spear. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_gale",
+      "name": "Skylancer \u00b7 Gale Shot \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_gale",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_gale; Fire a fast wind spear that grows stronger while airborne.",
+      "prompt": "Isolated fantasy game terminal effect impact for Gale Shot. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_dive",
+      "name": "Skylancer \u00b7 Dive Strike \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_dive",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_dive; Dive forward. Your next landing damages nearby enemies.",
+      "prompt": "Isolated fantasy game terminal effect impact for Dive Strike. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_lift",
+      "name": "Skylancer \u00b7 Wind Lift \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_lift",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_lift; Create a rising wind that damages foes and launches you upward.",
+      "prompt": "Isolated fantasy game terminal effect impact for Wind Lift. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_dash",
+      "name": "Skylancer \u00b7 Sky Dash \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_dash",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_dash; Dash through the air, damaging every enemy in your path.",
+      "prompt": "Isolated fantasy game terminal effect impact for Sky Dash. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_rain",
+      "name": "Skylancer \u00b7 Spear Rain \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_rain",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_rain; Call down five wind spears around your target.",
+      "prompt": "Isolated fantasy game terminal effect impact for Spear Rain. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_crash",
+      "name": "Skylancer \u00b7 Thunder Dive \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_crash",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_crash; Drop like lightning. Your next landing creates a large shockwave.",
+      "prompt": "Isolated fantasy game terminal effect impact for Thunder Dive. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_sky_cyclone",
+      "name": "Skylancer \u00b7 Updraft \u00b7 effect impact",
+      "group": "skill",
+      "skill": "sky_cyclone",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from sky_cyclone; Lift nearby normal enemies for 3.2 seconds and strike with a ring of wind blades.",
+      "prompt": "Isolated fantasy game terminal effect impact for Updraft. fast feather-light wind and a bright spear-point ring. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bd_twin",
+      "name": "Bladedancer \u00b7 Twin Cut \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bd_twin",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bd_twin; Cut twice in a wide arc. The second cut pushes enemies back.",
+      "prompt": "Isolated fantasy game terminal effect impact for Twin Cut. clean paired steel rings with a precise dancing blade rhythm. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bd_riposte",
+      "name": "Bladedancer \u00b7 Riposte \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bd_riposte",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bd_riposte; Lunge and slash. A stored Riposte greatly increases its damage and reach.",
+      "prompt": "Isolated fantasy game terminal effect impact for Riposte. clean paired steel rings with a precise dancing blade rhythm. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bd_step",
+      "name": "Bladedancer \u00b7 Dance Step \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bd_step",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bd_step; Dash through enemies and turn to face them for your next attack.",
+      "prompt": "Isolated fantasy game terminal effect impact for Dance Step. clean paired steel rings with a precise dancing blade rhythm. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bd_mirror",
+      "name": "Bladedancer \u00b7 Mirror Guard \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bd_mirror",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bd_mirror; Open a parry window that releases a shockwave when it catches an attack.",
+      "prompt": "Isolated fantasy game terminal effect impact for Mirror Guard. clean paired steel rings with a precise dancing blade rhythm. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bd_cross",
+      "name": "Bladedancer \u00b7 Cross Slash \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bd_cross",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bd_cross; Cut an X ahead of you and leave enemies briefly stunned.",
+      "prompt": "Isolated fantasy game terminal effect impact for Cross Slash. clean paired steel rings with a precise dancing blade rhythm. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bd_perfect",
+      "name": "Bladedancer \u00b7 Perfect Counter \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bd_perfect",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bd_perfect; Hold a long parry stance. Catching a hit unleashes a massive counterattack.",
+      "prompt": "Isolated fantasy game terminal effect impact for Perfect Counter. clean paired steel rings with a precise dancing blade rhythm. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bst_sic",
+      "name": "Beastmaster \u00b7 Sic 'Em \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bst_sic",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bst_sic; Your companion lunges for 1.6x damage and briefly stuns.",
+      "prompt": "Isolated fantasy game terminal effect impact for Sic 'Em. wild claw energy and a brief spectral animal force, no long roar. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bst_coordinated",
+      "name": "Beastmaster \u00b7 Coordinated Strike \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bst_coordinated",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bst_coordinated; You and your companion strike together; the target is marked for increased companion damage.",
+      "prompt": "Isolated fantasy game terminal effect impact for Coordinated Strike. wild claw energy and a brief spectral animal force, no long roar. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bst_step",
+      "name": "Beastmaster \u00b7 Pack Step \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bst_step",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bst_step; You and your companion dash to opposite sides of the target with brief dodge protection.",
+      "prompt": "Isolated fantasy game terminal effect impact for Pack Step. wild claw energy and a brief spectral animal force, no long roar. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bst_roar",
+      "name": "Beastmaster \u00b7 Alpha Roar \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bst_roar",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bst_roar; A damaging roar slows nearby foes and turns their attention toward your companion.",
+      "prompt": "Isolated fantasy game terminal effect impact for Alpha Roar. wild claw energy and a brief spectral animal force, no long roar. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "skillimpact_bst_stampede",
+      "name": "Beastmaster \u00b7 Stampede \u00b7 effect impact",
+      "group": "skill",
+      "skill": "bst_stampede",
+      "duration_seconds": 0.55,
+      "source": "Confirmed positive damage from bst_stampede; Call a spectral herd through a wide lane, striking and knocking enemies aside.",
+      "prompt": "Isolated fantasy game terminal effect impact for Stampede. wild claw energy and a brief spectral animal force, no long roar. No music, speech, ambience, windup, generic flesh thud or weapon swing. Crisp onset, short restrained tail; existing contact foley is retained. Clean mix, no clipping."
+    },
+    {
+      "id": "enemyrelease_thornboar",
+      "name": "Thornboar \u00b7 attack release",
+      "group": "enemy",
+      "type": "thornboar",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: tough boar, hoof scrape and tusk air swipe. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_charger",
+      "name": "Charger \u00b7 attack release",
+      "group": "enemy",
+      "type": "charger",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: large muscular beast, heavy hoof launch and horn rush. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_dustjackal",
+      "name": "Dustjackal \u00b7 attack release",
+      "group": "enemy",
+      "type": "dustjackal",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: lean desert jackal, quick claws and a short dry canine snarl. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_toxling",
+      "name": "Toxling \u00b7 attack release",
+      "group": "enemy",
+      "type": "toxling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: small toxic sac creature, wet elastic lash and acidic fizz. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_slime",
+      "name": "Slime \u00b7 attack release",
+      "group": "enemy",
+      "type": "slime",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: gelatinous blob, elastic wet slap and tiny bubbles. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_slimelet",
+      "name": "Slimelet \u00b7 attack release",
+      "group": "enemy",
+      "type": "slimelet",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: tiny gelatinous blob, light sticky snap. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_cragspitter",
+      "name": "Cragspitter \u00b7 attack release",
+      "group": "enemy",
+      "type": "cragspitter",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: stone-plated spitting creature, rough throat spit and pebble rattle. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_sporeback",
+      "name": "Sporeback \u00b7 attack release",
+      "group": "enemy",
+      "type": "sporeback",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: fungal-backed beast, leathery sweep and dusty spore puff. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_shadeling",
+      "name": "Shadeling \u00b7 attack release",
+      "group": "enemy",
+      "type": "shadeling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: small shadow creature, thin spectral swipe. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_blinkstalker",
+      "name": "Blinkstalker \u00b7 attack release",
+      "group": "enemy",
+      "type": "blinkstalker",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: teleporting predator, clipped phase snap and claw air cut. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_voidtether",
+      "name": "Voidtether \u00b7 attack release",
+      "group": "enemy",
+      "type": "voidtether",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: void creature, taut magical tendril whip. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_galewisp",
+      "name": "Galewisp \u00b7 attack release",
+      "group": "enemy",
+      "type": "galewisp",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: wind spirit, airy condensed gust. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_flyer",
+      "name": "Flyer \u00b7 attack release",
+      "group": "enemy",
+      "type": "flyer",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: winged predator, short feather wingbeat and talon swipe. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_revenant",
+      "name": "Revenant \u00b7 attack release",
+      "group": "enemy",
+      "type": "revenant",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: heavy undead attacker, stiff joints and ragged weapon air. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_bones",
+      "name": "Bones \u00b7 attack release",
+      "group": "enemy",
+      "type": "bones",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: walking skeleton, dry bone joints and rusty steel swipe. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_grunt",
+      "name": "Grunt \u00b7 attack release",
+      "group": "enemy",
+      "type": "grunt",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: rough armored foot soldier, leather tension and broad steel air swipe. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_emberling",
+      "name": "Emberling \u00b7 attack release",
+      "group": "enemy",
+      "type": "emberling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: small fire creature, flicking hot ember lash. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_magmaskit",
+      "name": "Magmaskit \u00b7 attack release",
+      "group": "enemy",
+      "type": "magmaskit",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: small molten skittering creature, stony claws and hot grit. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_embertotem",
+      "name": "Embertotem \u00b7 attack release",
+      "group": "enemy",
+      "type": "embertotem",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: stationary fire totem, a small pressure jet of flames. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_frostling",
+      "name": "Frostling \u00b7 attack release",
+      "group": "enemy",
+      "type": "frostling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: small ice creature, brittle frozen claw cut. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_sparkling",
+      "name": "Sparkling \u00b7 attack release",
+      "group": "enemy",
+      "type": "sparkling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: small electrical creature, tiny charged snap. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_frostlobber",
+      "name": "Frostlobber \u00b7 attack release",
+      "group": "enemy",
+      "type": "frostlobber",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: ice projectile creature, frozen chunks launch with cold air. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_frostshell",
+      "name": "Frostshell \u00b7 attack release",
+      "group": "enemy",
+      "type": "frostshell",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: armored frozen creature, ice carapace sweep. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_sentinel",
+      "name": "Sentinel \u00b7 attack release",
+      "group": "enemy",
+      "type": "sentinel",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: heavy armored guard, purposeful iron weapon sweep. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_siegeknight",
+      "name": "Siegeknight \u00b7 attack release",
+      "group": "enemy",
+      "type": "siegeknight",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: massive armored knight, heavy plate movement and descending hammer air. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_marblestatue",
+      "name": "Marblestatue \u00b7 attack release",
+      "group": "enemy",
+      "type": "marblestatue",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: animated marble figure, carved stone scrape and a forceful stone swing. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_caster",
+      "name": "Caster \u00b7 attack release",
+      "group": "enemy",
+      "type": "caster",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: hooded spectral spellcaster, a compact dark magic discharge. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_sunpriest",
+      "name": "Sunpriest \u00b7 attack release",
+      "group": "enemy",
+      "type": "sunpriest",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: radiant priest, a small bright ringing light discharge. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyrelease_royalarcanist",
+      "name": "Royalarcanist \u00b7 attack release",
+      "group": "enemy",
+      "type": "royalarcanist",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short attack release through air, not a warning or contact impact: royal arcane caster, precise glassy magical pulse. Forceful movement with a very short tail. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_thornboar",
+      "name": "Thornboar \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "thornboar",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: tough boar, hoof scrape and tusk air swipe. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_charger",
+      "name": "Charger \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "charger",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: large muscular beast, heavy hoof launch and horn rush. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_dustjackal",
+      "name": "Dustjackal \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "dustjackal",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: lean desert jackal, quick claws and a short dry canine snarl. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_toxling",
+      "name": "Toxling \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "toxling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: small toxic sac creature, wet elastic lash and acidic fizz. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_slime",
+      "name": "Slime \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "slime",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: gelatinous blob, elastic wet slap and tiny bubbles. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_slimelet",
+      "name": "Slimelet \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "slimelet",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: tiny gelatinous blob, light sticky snap. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_cragspitter",
+      "name": "Cragspitter \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "cragspitter",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: stone-plated spitting creature, rough throat spit and pebble rattle. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_sporeback",
+      "name": "Sporeback \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "sporeback",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: fungal-backed beast, leathery sweep and dusty spore puff. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_shadeling",
+      "name": "Shadeling \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "shadeling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: small shadow creature, thin spectral swipe. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_blinkstalker",
+      "name": "Blinkstalker \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "blinkstalker",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: teleporting predator, clipped phase snap and claw air cut. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_voidtether",
+      "name": "Voidtether \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "voidtether",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: void creature, taut magical tendril whip. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_galewisp",
+      "name": "Galewisp \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "galewisp",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: wind spirit, airy condensed gust. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_flyer",
+      "name": "Flyer \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "flyer",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: winged predator, short feather wingbeat and talon swipe. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_revenant",
+      "name": "Revenant \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "revenant",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: heavy undead attacker, stiff joints and ragged weapon air. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_bones",
+      "name": "Bones \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "bones",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: walking skeleton, dry bone joints and rusty steel swipe. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_grunt",
+      "name": "Grunt \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "grunt",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: rough armored foot soldier, leather tension and broad steel air swipe. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_emberling",
+      "name": "Emberling \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "emberling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: small fire creature, flicking hot ember lash. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_magmaskit",
+      "name": "Magmaskit \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "magmaskit",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: small molten skittering creature, stony claws and hot grit. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_embertotem",
+      "name": "Embertotem \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "embertotem",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: stationary fire totem, a small pressure jet of flames. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_frostling",
+      "name": "Frostling \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "frostling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: small ice creature, brittle frozen claw cut. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_sparkling",
+      "name": "Sparkling \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "sparkling",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: small electrical creature, tiny charged snap. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_frostlobber",
+      "name": "Frostlobber \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "frostlobber",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: ice projectile creature, frozen chunks launch with cold air. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_frostshell",
+      "name": "Frostshell \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "frostshell",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: armored frozen creature, ice carapace sweep. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_sentinel",
+      "name": "Sentinel \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "sentinel",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: heavy armored guard, purposeful iron weapon sweep. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_siegeknight",
+      "name": "Siegeknight \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "siegeknight",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: massive armored knight, heavy plate movement and descending hammer air. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_marblestatue",
+      "name": "Marblestatue \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "marblestatue",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: animated marble figure, carved stone scrape and a forceful stone swing. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_caster",
+      "name": "Caster \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "caster",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: hooded spectral spellcaster, a compact dark magic discharge. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_sunpriest",
+      "name": "Sunpriest \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "sunpriest",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: radiant priest, a small bright ringing light discharge. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "enemyhurt_royalarcanist",
+      "name": "Royalarcanist \u00b7 hurt reaction",
+      "group": "enemy",
+      "type": "royalarcanist",
+      "duration_seconds": 0.5,
+      "source": "Actual attack release edge after a windup, or confirmed positive HP loss with per-creature reaction cooldown; original aggro/death/contact retained.",
+      "prompt": "Single isolated fantasy game sound, no music, speech or ambience. A short restrained creature pain reaction, not a death cry or weapon hit: royal arcane caster, precise glassy magical pulse. Biologically fitting material or breath reaction, no human words, no long scream, suitable to repeat sparingly. Clean onset, controlled levels, no clipping."
+    },
+    {
+      "id": "bossrelease_brute_charge",
+      "name": "Orchard Brute \u00b7 charge launch",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. Massive iron-armored body surges forward, chain snap and heavy rushing air. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_brute_slam",
+      "name": "Orchard Brute \u00b7 ground wave",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A compact huge hammer ground fracture with an expanding low stone wave. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_marksman_volley",
+      "name": "Marksman \u00b7 volley release",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. Several tight bowstring snaps release together with fast arrow air. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_fallen_thrust",
+      "name": "Fallen \u00b7 thrust release",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A very heavy straight sword thrust cuts the air with a focused low steel ring. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_fallen_sweep",
+      "name": "Fallen \u00b7 sweep release",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A massive sword sweeps across, broad metal air and a tight ringing tail. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_officer_caster",
+      "name": "Frost Officer \u00b7 ice burst",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. Dense cold ice magic fractures into a short sharp burst. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_officer_shield",
+      "name": "Frost Officer \u00b7 shield wave",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. An iron shield drives a low expanding wave of ice and air. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_officer_spear",
+      "name": "Frost Officer \u00b7 spear thrust",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A cold spear rush cuts forward with thin steel air. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_furnace_slam",
+      "name": "Ember Colossus \u00b7 hammer strike",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A furnace piston hammers stone, short pressure vent and hot iron clang. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_furnace_sweep",
+      "name": "Ember Colossus \u00b7 low sweep",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A low fiery iron sweep sends a compact heated shockwave. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_furnace_vents",
+      "name": "Ember Colossus \u00b7 vent eruption",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. Two contained hot steam jets erupt sharply with brief glowing grit. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_marble_hammer",
+      "name": "Marble Colossus \u00b7 heavy strike",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A gigantic marble arm strikes with clean stone fracture and a faint celestial ring. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_marble_sweep",
+      "name": "Marble Colossus \u00b7 low sweep",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. Broad carved stone slides through the air into a compact low shockwave. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_marble_fall",
+      "name": "Marble Colossus \u00b7 falling stone",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A heavy marble block lands, a precise huge stone crack with restrained debris. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_king_sweep",
+      "name": "Abyss King \u00b7 royal sweep",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A regal immense blade cuts a wide arc with a dark resonant metal edge. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_king_line",
+      "name": "Abyss King \u00b7 soul beam",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A focused soul energy beam discharges with a sharp hollow core and restrained hiss. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_king_burst",
+      "name": "Abyss King \u00b7 void burst",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A dense violet pressure implosion snaps outward into a short dimensional crack. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_king_wave",
+      "name": "Abyss King \u00b7 ground wave",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A deep royal soul pulse travels through stone, clear sharp onset not a drone. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_hydra_bite",
+      "name": "Hydra \u00b7 bite",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A massive reptile jaw snaps with a powerful breath burst and short tooth clack. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_hydra_sweep",
+      "name": "Hydra \u00b7 tail sweep",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A huge scaled tail sweeps through air with a compact heavy rush. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    },
+    {
+      "id": "bossrelease_hydra_blast",
+      "name": "Hydra \u00b7 blast",
+      "group": "boss",
+      "duration_seconds": 0.8,
+      "source": "Named actual boss strike/charge state transition, locally observed for host and guest; existing warnings, generic impacts and win/death cues retained.",
+      "prompt": "Single isolated fantasy boss game sound effect. A restrained massive reptile throat blast launches as a short pressurized elemental burst. Actual release or environmental impact, not anticipation. No music, voice, speech, ambience or long cinematic boom. Powerful distinct onset, restrained tail shorter than one second, clear in combat, clean levels, no clipping."
+    }
+  ],
+  "skill_audit": [
+    {
+      "cls": "pyromancer",
+      "rank": 2,
+      "id": "py_bolt",
+      "name": "Firebolt",
+      "fx": "py_bolt",
+      "description": "Fire a fast bolt for 2.2 times flame damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 2,
+      "id": "py_fan",
+      "name": "Cinder Fan",
+      "fx": "py_fan",
+      "description": "Fire three flames, each dealing 1.1 times flame damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 4,
+      "id": "py_blast",
+      "name": "Backdraft",
+      "fx": "py_blast",
+      "description": "Blast nearby enemies for 1.3 times damage and push them back.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 4,
+      "id": "py_ward",
+      "name": "Ember Shield",
+      "fx": "py_ward",
+      "description": "Gain a shield worth 25% of maximum health for 5 seconds.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 6,
+      "id": "py_lance",
+      "name": "Flame Lance",
+      "fx": "py_lance",
+      "description": "Fire a piercing flame for 3 times flame damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 6,
+      "id": "py_nova",
+      "name": "Flame Ring",
+      "fx": "py_nova",
+      "description": "Strike nearby enemies for 2.4 times flame damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 8,
+      "id": "py_inferno",
+      "name": "Inferno",
+      "fx": "py_inferno",
+      "description": "Burn nearby foes once per second for 4 seconds. Each pulse deals flame damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pyromancer",
+      "rank": 8,
+      "id": "py_sun",
+      "name": "Sunburst",
+      "fx": "py_sun",
+      "description": "Strike your aimed enemy and nearby foes for 4 times flame damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warrior",
+      "rank": 2,
+      "id": "w_cleave",
+      "name": "Cleave",
+      "fx": "w_cleave",
+      "description": "A quick sweep hits nearby enemies. Short cooldown and low damage per cast.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warrior",
+      "rank": 2,
+      "id": "w_bash",
+      "name": "Shield Bash",
+      "fx": "w_bash",
+      "description": "Drive forward for 1.7x damage, stun the first target, and briefly brace.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warrior",
+      "rank": 4,
+      "id": "w_charge",
+      "name": "Charge",
+      "fx": "w_charge",
+      "description": "Rush through enemies for 1.6x damage and stun them.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warrior",
+      "rank": 4,
+      "id": "w_whirl",
+      "name": "Whirlwind",
+      "fx": "w_whirl",
+      "description": "A full-circle sweep deals 2.2 times weapon damage to nearby enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warrior",
+      "rank": 6,
+      "id": "w_guard",
+      "name": "Iron Guard",
+      "fx": "w_guard",
+      "description": "Brace for 3s, reducing incoming damage by 60%.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "warrior",
+      "rank": 6,
+      "id": "w_stomp",
+      "name": "Shockwave Stomp",
+      "fx": "w_stomp",
+      "description": "Slam the ground for 1.5x damage and heavy knockback all around.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warrior",
+      "rank": 8,
+      "id": "w_berserk",
+      "name": "Warcry",
+      "fx": "w_berserk",
+      "description": "Draw nearby enemies toward you for 6 seconds, helping protect your allies.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "warrior",
+      "rank": 8,
+      "id": "w_execute",
+      "name": "Execution",
+      "fx": "w_execute",
+      "description": "A crushing 4x strike that executes normal enemies below 20% HP.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ranger",
+      "rank": 2,
+      "id": "r_volley",
+      "name": "Volley",
+      "fx": "r_volley",
+      "description": "Fan of arrows \u2014 up to 5 enemies, 1.4x each. Applies your element once each.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ranger",
+      "rank": 2,
+      "id": "r_pierce",
+      "name": "Piercing Shot",
+      "fx": "r_pierce",
+      "description": "One shot through a line \u2014 2.2x first (\u221210% its armor), 1.5x rest.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ranger",
+      "rank": 4,
+      "id": "r_tumble",
+      "name": "Tumble",
+      "fx": "r_tumble",
+      "description": "Roll backward with brief invulnerability and fire a parting shot for 75% weapon damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ranger",
+      "rank": 4,
+      "id": "r_shadow",
+      "name": "Shadowstrike",
+      "fx": "r_shadow",
+      "description": "Dash through a target (2.0x) and appear behind it; tap again within 1s to return.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ranger",
+      "rank": 6,
+      "id": "r_spike",
+      "name": "Spike Trap",
+      "fx": "r_spike",
+      "description": "Place a trap for 5 seconds that repeatedly damages and slows enemies inside.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ranger",
+      "rank": 6,
+      "id": "r_smoke",
+      "name": "Smoke Bomb",
+      "fx": "r_smoke",
+      "description": "Become briefly invulnerable and slow nearby enemies with smoke.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "ranger",
+      "rank": 8,
+      "id": "r_mark",
+      "name": "Hunter's Mark",
+      "fx": "r_mark",
+      "description": "Mark one enemy: you deal +18% and +10% crit to it for 8s.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "ranger",
+      "rank": 8,
+      "id": "r_deathmark",
+      "name": "Death Mark",
+      "fx": "r_deathmark",
+      "description": "Mark up to 5 enemies \u2014 they explode for 1.8x on death.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "mage",
+      "rank": 2,
+      "id": "m_bolt",
+      "name": "Elemental Bolt",
+      "fx": "m_bolt",
+      "description": "Fire a quick elemental bolt. Short cooldown and low damage per cast.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "mage",
+      "rank": 2,
+      "id": "m_beam",
+      "name": "Elemental Beam",
+      "fx": "m_beam",
+      "description": "Fire a piercing elemental lance for 2x damage through every target.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "mage",
+      "rank": 4,
+      "id": "m_blink",
+      "name": "Blink",
+      "fx": "m_blink",
+      "description": "Teleport forward and become untouchable during the displacement.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "mage",
+      "rank": 4,
+      "id": "m_nova",
+      "name": "Nova",
+      "fx": "m_nova",
+      "description": "Detonate a 1.4x freezing burst that slows nearby enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "mage",
+      "rank": 6,
+      "id": "m_gravity",
+      "name": "Gravity Well",
+      "fx": "m_gravity",
+      "description": "Create an implosion that pulls enemies inward and deals 1.3x damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "mage",
+      "rank": 6,
+      "id": "m_barrier",
+      "name": "Rune Barrier",
+      "fx": "m_barrier",
+      "description": "Create a shield that absorbs 35% of max HP.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "mage",
+      "rank": 8,
+      "id": "m_tempest",
+      "name": "Attunement",
+      "fx": "m_tempest",
+      "description": "Create a damaging storm for 4 seconds. For 10 seconds, your skills cycle through different elements. Your equipped weapon stays unchanged.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "mage",
+      "rank": 8,
+      "id": "m_overload",
+      "name": "Elemental Overload",
+      "fx": "m_overload",
+      "description": "Release a massive 3.4x elemental explosion around your target.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "reaper",
+      "rank": 2,
+      "id": "x_reap",
+      "name": "Reap",
+      "fx": "x_reap",
+      "description": "A quick scythe sweep damages nearby enemies and restores health when it hits.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "reaper",
+      "rank": 2,
+      "id": "x_cleave",
+      "name": "Soul Cleave",
+      "fx": "x_cleave",
+      "description": "Send a spectral scythe wave outward for 2.1x damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "reaper",
+      "rank": 4,
+      "id": "x_step",
+      "name": "Shadow Step",
+      "fx": "x_step",
+      "description": "Dash through shadow and become briefly untouchable.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "reaper",
+      "rank": 4,
+      "id": "x_wraith",
+      "name": "Wraith Form",
+      "fx": "x_wraith",
+      "description": "Become spectral for 3s: faster movement and 65% damage reduction.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "reaper",
+      "rank": 6,
+      "id": "x_pull",
+      "name": "Void Pull",
+      "fx": "x_pull",
+      "description": "Implode nearby enemies toward a central point and stagger them.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "reaper",
+      "rank": 6,
+      "id": "x_bind",
+      "name": "Soul Tether",
+      "fx": "x_bind",
+      "description": "Bind enemies in front of you, rooting them for 2.5s.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "reaper",
+      "rank": 8,
+      "id": "x_siphon",
+      "name": "Soul Siphon",
+      "fx": "x_siphon",
+      "description": "A powerful draining sweep damages nearby enemies and heals 5% of your maximum health per enemy damaged. Healing is halved against players.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "reaper",
+      "rank": 8,
+      "id": "x_vortex",
+      "name": "Death Vortex",
+      "fx": "x_vortex",
+      "description": "Create a persistent soul storm that damages and corrupts enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "paladin",
+      "rank": 2,
+      "id": "pal_bash",
+      "name": "Shield Bash",
+      "fx": "pal_bash",
+      "description": "Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "paladin",
+      "rank": 2,
+      "id": "pal_smite",
+      "name": "Smite",
+      "fx": "pal_smite",
+      "description": "Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash \u2014 great against bosses and elites.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "paladin",
+      "rank": 4,
+      "id": "pal_taunt",
+      "name": "Taunt",
+      "fx": "pal_taunt",
+      "description": "Pull nearby foes to you and brace behind a shield.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "paladin",
+      "rank": 4,
+      "id": "pal_ground",
+      "name": "Holy Ground",
+      "fx": "pal_ground",
+      "description": "Scorch every foe around you with holy light for 2.2x damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "paladin",
+      "rank": 6,
+      "id": "pal_guard",
+      "name": "Guard Up",
+      "fx": "pal_guard",
+      "description": "Raise a holy shield that absorbs up to 50% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "paladin",
+      "rank": 6,
+      "id": "pal_burst",
+      "name": "Light Burst",
+      "fx": "pal_burst",
+      "description": "A radiant burst: damage and slow every nearby foe.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "paladin",
+      "rank": 8,
+      "id": "pal_laststand",
+      "name": "Last Stand",
+      "fx": "pal_laststand",
+      "description": "Brace for 4 seconds, reducing incoming damage and reflecting nearby hits. Immediately restore 15% of your maximum health.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "paladin",
+      "rank": 8,
+      "id": "pal_sky",
+      "name": "Sky Hammer",
+      "fx": "pal_sky",
+      "description": "Call a pillar of light down: heavy damage and knockback all around you.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 2,
+      "id": "necro_summon",
+      "name": "Summon Skeletons",
+      "fx": "necro_summon",
+      "description": "Raise a pack of skeletons that hunt down nearby enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 2,
+      "id": "necro_bolt",
+      "name": "Plague Bolt",
+      "fx": "necro_bolt",
+      "description": "Rapid-fire bolts of necrotic plague (~2s, softer each).",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 4,
+      "id": "necro_raise",
+      "name": "Raise the Dead",
+      "fx": "necro_raise",
+      "description": "Raise your most recently slain nearby enemy as an undead ally.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 4,
+      "id": "necro_nova",
+      "name": "Corpse Nova",
+      "fx": "necro_nova",
+      "description": "Detonate a burst of bone shards that slows nearby enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 6,
+      "id": "necro_wall",
+      "name": "Bone Wall",
+      "fx": "necro_wall",
+      "description": "Raise a shield of bone that absorbs up to 35% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 6,
+      "id": "necro_grip",
+      "name": "Death Grip",
+      "fx": "necro_grip",
+      "description": "A skeletal grip implodes enemies inward and deals damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 8,
+      "id": "necro_army",
+      "name": "Army of the Dead",
+      "fx": "necro_army",
+      "description": "Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "necromancer",
+      "rank": 8,
+      "id": "necro_storm",
+      "name": "Death Storm",
+      "fx": "necro_storm",
+      "description": "A storm of decay rages around you for 4s.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ninja",
+      "rank": 2,
+      "id": "nin_strike",
+      "name": "Shadow Strike",
+      "fx": "nin_strike",
+      "description": "Blink to the nearest enemy and strike for heavy damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ninja",
+      "rank": 2,
+      "id": "nin_barrage",
+      "name": "Shuriken Barrage",
+      "fx": "nin_barrage",
+      "description": "Fire three back-to-back shotgun bursts of stars \u2014 shreds packs of enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ninja",
+      "rank": 4,
+      "id": "nin_step",
+      "name": "Shadow Step",
+      "fx": "nin_step",
+      "description": "Dash through shadow and become briefly untouchable.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "ninja",
+      "rank": 4,
+      "id": "nin_smoke",
+      "name": "Smoke Bomb",
+      "fx": "nin_smoke",
+      "description": "Vanish in smoke (briefly invulnerable) and slow nearby foes.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "ninja",
+      "rank": 6,
+      "id": "nin_mark",
+      "name": "Death Mark",
+      "fx": "nin_mark",
+      "description": "Mark a target: it takes extra damage from you.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "ninja",
+      "rank": 6,
+      "id": "nin_pierce",
+      "name": "Piercing Star",
+      "fx": "nin_pierce",
+      "description": "Hurl one massive shuriken that pierces straight through \u2014 huge single-target damage for bosses.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "ninja",
+      "rank": 8,
+      "id": "nin_fury",
+      "name": "Blade Fury",
+      "fx": "nin_fury",
+      "description": "Deal 35% more damage and attack 30% faster for 6 seconds.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "ninja",
+      "rank": 8,
+      "id": "nin_storm",
+      "name": "Vanish",
+      "fx": "nin_storm",
+      "description": "Become invulnerable for 4 seconds and prepare your next teleporting basic hit immediately.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "berserker",
+      "rank": 2,
+      "id": "bsk_cleave",
+      "name": "Blood Sweep",
+      "fx": "bsk_cleave",
+      "description": "Spend 10% of your maximum health to sweep nearby enemies for 2.6 times weapon damage. Cannot be used if the cost would leave you below 2 HP.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "berserker",
+      "rank": 2,
+      "id": "bsk_bash",
+      "name": "Headbutt",
+      "fx": "bsk_bash",
+      "description": "Strike nearby enemies for 2.2 times weapon damage and stun them for 2.2 seconds. On a hit, spend 6% maximum health and pause for 0.5 seconds.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "berserker",
+      "rank": 4,
+      "id": "bsk_charge",
+      "name": "Charge",
+      "fx": "bsk_charge",
+      "description": "Rush forward, damaging and stunning in your path.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "berserker",
+      "rank": 4,
+      "id": "bsk_stomp",
+      "name": "Shockwave",
+      "fx": "bsk_stomp",
+      "description": "Slam the ground for damage and heavy knockback.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "berserker",
+      "rank": 6,
+      "id": "bsk_whirl",
+      "name": "Whirlwind",
+      "fx": "bsk_whirl",
+      "description": "Sweep all nearby enemies for 2.2 times weapon damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "berserker",
+      "rank": 6,
+      "id": "bsk_execute",
+      "name": "Execute",
+      "fx": "bsk_execute",
+      "description": "A brutal strike that finishes low-HP foes.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "berserker",
+      "rank": 8,
+      "id": "bsk_berserk",
+      "name": "Berserk",
+      "fx": "bsk_berserk",
+      "description": "Deal 35% more damage and attack 30% faster for 6 seconds.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "berserker",
+      "rank": 8,
+      "id": "bsk_guard",
+      "name": "Bloodguard",
+      "fx": "bsk_guard",
+      "description": "Raise a guard: heavy damage reduction and pull foes in.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "pirate",
+      "rank": 2,
+      "id": "pir_pierce",
+      "name": "Aimed Shot",
+      "fx": "pir_pierce",
+      "description": "Rapid piercing pistol shots (~2s, softer each) \u2014 a gunslinger's rhythm.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pirate",
+      "rank": 2,
+      "id": "pir_volley",
+      "name": "Broadside",
+      "fx": "pir_volley",
+      "description": "A spread of shots across your front.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pirate",
+      "rank": 4,
+      "id": "pir_shadow",
+      "name": "Boarding Strike",
+      "fx": "pir_shadow",
+      "description": "Dash to a foe and strike hard.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pirate",
+      "rank": 4,
+      "id": "pir_tumble",
+      "name": "Roll",
+      "fx": "pir_tumble",
+      "description": "Roll back with a parting shot and snare.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pirate",
+      "rank": 6,
+      "id": "pir_smoke",
+      "name": "Powder Smoke",
+      "fx": "pir_smoke",
+      "description": "Vanish in smoke and slow nearby foes.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "pirate",
+      "rank": 6,
+      "id": "pir_goldrush",
+      "name": "Gold Rush",
+      "fx": "pir_goldrush",
+      "description": "For 12s, every kill drops gold straight into your purse \u2014 and a killstreak stacks the payout higher and higher. The pirate's farming tool.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "pirate",
+      "rank": 8,
+      "id": "pir_deathmark",
+      "name": "Cannonade",
+      "fx": "pir_deathmark",
+      "description": "Mark foes \u2014 they explode on death.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "pirate",
+      "rank": 8,
+      "id": "pir_spike",
+      "name": "Powder Keg",
+      "fx": "pir_spike",
+      "description": "Drop a trap that damages and snares.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 2,
+      "id": "chr_bolt",
+      "name": "Time Bolt",
+      "fx": "chr_bolt",
+      "description": "Rapid-fire bolts of temporal energy (~2s, softer each).",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 2,
+      "id": "chr_beam",
+      "name": "Time Lance",
+      "fx": "chr_beam",
+      "description": "A piercing lance through every foe.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 4,
+      "id": "chr_nova",
+      "name": "Slow Field",
+      "fx": "chr_nova",
+      "description": "A burst that slows nearby foes.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 4,
+      "id": "chr_blink",
+      "name": "Time Step",
+      "fx": "chr_blink",
+      "description": "Teleport forward with brief invulnerability. Your automatic death-saving rewind is a separate class ability.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 6,
+      "id": "chr_gravity",
+      "name": "Time Warp",
+      "fx": "chr_gravity",
+      "description": "Implode foes inward and deal damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 6,
+      "id": "chr_barrier",
+      "name": "Aegis",
+      "fx": "chr_barrier",
+      "description": "A shield that absorbs up to 35% of your max HP.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 8,
+      "id": "chr_tempest",
+      "name": "Stop Time",
+      "fx": "chr_tempest",
+      "description": "Stop enemies for 3 seconds. In PvP, slow opponents by 25% for up to 1.5 seconds instead of freezing their controls.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "chronomancer",
+      "rank": 8,
+      "id": "chr_overload",
+      "name": "Singularity",
+      "fx": "chr_overload",
+      "description": "A massive temporal explosion.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 2,
+      "id": "mon_flurry",
+      "name": "Flurry",
+      "fx": "mon_flurry",
+      "description": "Deliver rapid punches. Each connecting hit builds your temporary damage bonus.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 2,
+      "id": "mon_palm",
+      "name": "Palm Strike",
+      "fx": "mon_palm",
+      "description": "Dash in with a heavy palm that staggers the first foe.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 4,
+      "id": "mon_deflect",
+      "name": "Deflect",
+      "fx": "mon_deflect",
+      "description": "A parry stance: for a moment take almost nothing and throw blows straight back.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 4,
+      "id": "mon_roll",
+      "name": "Roll",
+      "fx": "mon_roll",
+      "description": "Roll aside with brief i-frames and a parting strike.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 6,
+      "id": "mon_whirl",
+      "name": "Whirl Kick",
+      "fx": "mon_whirl",
+      "description": "A spinning kick that strikes everything around you.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 6,
+      "id": "mon_stun",
+      "name": "Stunning Palm",
+      "fx": "mon_stun",
+      "description": "A shockwave palm that dazes and slows nearby foes.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 8,
+      "id": "mon_thousand",
+      "name": "Stillness",
+      "fx": "mon_thousand",
+      "description": "For 6 seconds, standing still reflects double incoming damage back to attackers. You still take damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "monk",
+      "rank": 8,
+      "id": "mon_dragon",
+      "name": "Dragon Kick",
+      "fx": "mon_dragon",
+      "description": "A soaring kick that erupts on impact, blasting everything around.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 2,
+      "id": "st_bolt",
+      "name": "Chain Bolt",
+      "fx": "st_bolt",
+      "description": "Fire a quick lightning bolt with a short cooldown.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 2,
+      "id": "st_lance",
+      "name": "Lightning Lance",
+      "fx": "st_lance",
+      "description": "A piercing bolt through every foe in a line.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 4,
+      "id": "st_step",
+      "name": "Thunder Step",
+      "fx": "st_step",
+      "description": "Blink in a crack of lightning, briefly untouchable.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 4,
+      "id": "st_nova",
+      "name": "Static Field",
+      "fx": "st_nova",
+      "description": "A shock burst that slows nearby foes.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 6,
+      "id": "st_orb",
+      "name": "Ball Lightning",
+      "fx": "st_orb",
+      "description": "A crackling orb that pulls foes in and zaps them.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 6,
+      "id": "st_barrier",
+      "name": "Storm Barrier",
+      "fx": "st_barrier",
+      "description": "A shield that absorbs up to 35% of your max HP.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 8,
+      "id": "st_storm",
+      "name": "Linked Lightning",
+      "fx": "st_storm",
+      "description": "Link nearby enemies for 8 seconds. Hitting one also damages the others.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "stormcaller",
+      "rank": 8,
+      "id": "st_overload",
+      "name": "Chain Reaction",
+      "fx": "st_overload",
+      "description": "A massive electric explosion around your target.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 2,
+      "id": "war_bolt",
+      "name": "Shadow Bolt",
+      "fx": "war_bolt",
+      "description": "Fire a fast void bolt that pierces one extra foe.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 2,
+      "id": "war_lance",
+      "name": "Blood Lance",
+      "fx": "war_lance",
+      "description": "Hurl a heavy crimson lance through every foe in a line.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 4,
+      "id": "war_curse",
+      "name": "Curse Circle",
+      "fx": "war_curse",
+      "description": "Mark nearby foes for 7 seconds. Your damage against them is increased.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "warlock",
+      "rank": 4,
+      "id": "war_drain",
+      "name": "Life Drain",
+      "fx": "war_drain",
+      "description": "Damage the strongest nearby foe. Heal for 22% of health removed, or 11% against players. Blocked hits do not heal.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 6,
+      "id": "war_step",
+      "name": "Rift Step",
+      "fx": "war_step",
+      "description": "Blink forward and detonate shadow at your starting point and destination.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 6,
+      "id": "war_orb",
+      "name": "Doom Orb",
+      "fx": "war_orb",
+      "description": "Collapse a slow void orb on your target, damaging and pulling nearby foes.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 8,
+      "id": "war_storm",
+      "name": "Blood Offering",
+      "fx": "war_storm",
+      "description": "Spend half your current health to deal that much damage to every nearby enemy. Normal skill health cost also applies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "warlock",
+      "rank": 8,
+      "id": "war_final",
+      "name": "Final Curse",
+      "fx": "war_final",
+      "description": "Condemn the strongest nearby foe with a massive delayed shadow blast.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 2,
+      "id": "sky_rise",
+      "name": "Rising Spear",
+      "fx": "sky_rise",
+      "description": "Sweep nearby enemies and launch high into the air.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 2,
+      "id": "sky_gale",
+      "name": "Gale Shot",
+      "fx": "sky_gale",
+      "description": "Fire a fast wind spear that grows stronger while airborne.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 4,
+      "id": "sky_dive",
+      "name": "Dive Strike",
+      "fx": "sky_dive",
+      "description": "Dive forward. Your next landing damages nearby enemies.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 4,
+      "id": "sky_lift",
+      "name": "Wind Lift",
+      "fx": "sky_lift",
+      "description": "Create a rising wind that damages foes and launches you upward.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 6,
+      "id": "sky_dash",
+      "name": "Sky Dash",
+      "fx": "sky_dash",
+      "description": "Dash through the air, damaging every enemy in your path.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 6,
+      "id": "sky_rain",
+      "name": "Spear Rain",
+      "fx": "sky_rain",
+      "description": "Call down five wind spears around your target.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 8,
+      "id": "sky_crash",
+      "name": "Thunder Dive",
+      "fx": "sky_crash",
+      "description": "Drop like lightning. Your next landing creates a large shockwave.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "skylancer",
+      "rank": 8,
+      "id": "sky_cyclone",
+      "name": "Updraft",
+      "fx": "sky_cyclone",
+      "description": "Lift nearby normal enemies for 3.2 seconds and strike with a ring of wind blades.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 2,
+      "id": "bd_counter",
+      "name": "Counter Stance",
+      "fx": "bd_counter",
+      "description": "Open a short parry window. A hit during it deals no damage and stores a Riposte.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 2,
+      "id": "bd_twin",
+      "name": "Twin Cut",
+      "fx": "bd_twin",
+      "description": "Cut twice in a wide arc. The second cut pushes enemies back.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 4,
+      "id": "bd_riposte",
+      "name": "Riposte",
+      "fx": "bd_riposte",
+      "description": "Lunge and slash. A stored Riposte greatly increases its damage and reach.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 4,
+      "id": "bd_step",
+      "name": "Dance Step",
+      "fx": "bd_step",
+      "description": "Dash through enemies and turn to face them for your next attack.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 6,
+      "id": "bd_mirror",
+      "name": "Mirror Guard",
+      "fx": "bd_mirror",
+      "description": "Open a parry window that releases a shockwave when it catches an attack.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 6,
+      "id": "bd_cross",
+      "name": "Cross Slash",
+      "fx": "bd_cross",
+      "description": "Cut an X ahead of you and leave enemies briefly stunned.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 8,
+      "id": "bd_steel",
+      "name": "Perfect Guard",
+      "fx": "bd_steel",
+      "description": "Prepare a parry for up to 3 seconds. The first incoming hit is blocked and prepares an empowered Riposte.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "bladedancer",
+      "rank": 8,
+      "id": "bd_perfect",
+      "name": "Perfect Counter",
+      "fx": "bd_perfect",
+      "description": "Hold a long parry stance. Catching a hit unleashes a massive counterattack.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 2,
+      "id": "bst_sic",
+      "name": "Sic 'Em",
+      "fx": "bst_sic",
+      "description": "Your companion lunges for 1.6x damage and briefly stuns.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 2,
+      "id": "bst_coordinated",
+      "name": "Coordinated Strike",
+      "fx": "bst_coordinated",
+      "description": "You and your companion strike together; the target is marked for increased companion damage.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 4,
+      "id": "bst_guardian",
+      "name": "Guardian Bond",
+      "fx": "bst_guardian",
+      "description": "For 4s your companion intercepts part of incoming damage and gains a shield.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 4,
+      "id": "bst_step",
+      "name": "Pack Step",
+      "fx": "bst_step",
+      "description": "You and your companion dash to opposite sides of the target with brief dodge protection.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 6,
+      "id": "bst_mend",
+      "name": "Mend the Pack",
+      "fx": "bst_mend",
+      "description": "Restore 30% companion HP and 10% player HP over time.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 6,
+      "id": "bst_roar",
+      "name": "Alpha Roar",
+      "fx": "bst_roar",
+      "description": "A damaging roar slows nearby foes and turns their attention toward your companion.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 8,
+      "id": "bst_stampede",
+      "name": "Stampede",
+      "fx": "bst_stampede",
+      "description": "Call a spectral herd through a wide lane, striking and knocking enemies aside.",
+      "audio_event": "effect_impact",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "Confirmed HP loss with cast, projectile, trap, channel, summon or delayed-effect provenance; no inferred hit from projectile removal."
+    },
+    {
+      "cls": "beastmaster",
+      "rank": 8,
+      "id": "bst_apex",
+      "name": "Apex Unleashed",
+      "fx": "bst_apex",
+      "description": "For 8s your companion gains +35% damage/healing, +30% speed, and relentless pursuit.",
+      "audio_event": "existing_cast_only_non_damage_or_setup",
+      "existing": "Original SFX.hit, curated weaponImpact and cast cues remain.",
+      "binding": "No terminal impact generated for a purely preparatory effect."
+    }
+  ]
+}

@@ -1793,3 +1793,10 @@ Inspection/plan: Drillmaster has charter/Seal purchases but no visible balance. 
 User: "i wan tto be able to hear the sfx of my coop friends attacks and skill sbut the volume shoul dbe a bit lower so it doesnt get confuses with youtr own"
 
 Inspection/plan: sendCombat/recvCombat share visuals only. Add bounded audio-only events from accepted basic/charged attacks and successful skill casts, capturing their existing approved combat SFX recipes rather than running remote skill effects or replacing sounds. Scope replay gain to55% near the listener with distance falloff; preserve recipient mute/SFX slider and local/music loudness. Use sender identity from host connection, shared world scene, sequence duplicate protection, whitelisted finite recipes and rate limits. Work even if sender is muted; avoid transmitting UI/loot/progression sounds and omit failed/refunded casts. Preserve existing visuals, damage, saves and older packets. Verify capture/mix/filters, actual host-to-guest and guest-to-host/relay transport, hub/campaign scenes, old saves and regression suites in muted browser tests.
+
+
+## [Codex | 2026-10-17] Slightly more enemy chest drops
+
+User: "make chest drops frmo enemiew slgihtyk mroe common"
+
+Inspection/plan: ordinary enemies currently roll1.5%-3% and elites8%-12%, scaled by encounter level; bosses/mimics/goblins guarantee rewards. Increase only non-guaranteed probabilities by25% (ordinary1.875%-3.75%, elites10%-15%). Keep rarity weights, unique guaranteed rewards, exclusions, host authority and independent co-op claim logic unchanged. Bump asset URL/version; verify exact progression probabilities, excluded mobs, chest persistence/co-op tests and old-save browser load.

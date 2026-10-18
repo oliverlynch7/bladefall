@@ -3396,3 +3396,10 @@ Teammates now hear successful basic/charged attacks and skill casts. Bounded aud
 Host authenticates sender, relays to other guests excluding source; scene/peer/sequence checks reject echoes, duplicates and stale-world packets; bounded cues/token bucket limit spam. Cooldown, insufficient-mana and refunded casts do not send sounds. Muted/unloaded senders still transmit recipes without duplicate fallback cues. No save or combat authority changes.
 
 Verified52 focused capture/protocol/actual gain checks and130 regression suites;16 muted browser checks across two old-save game instances using bidirectional local WebRTC, actual attack/charge/skill dispatch and host wireGuest handler. Third-connection relay observed; no subjective or remote-hardware sound mix claim. Evidence:docs/art-validation/coop-combat-audio-20261017/.
+
+
+## [Codex | 2026-10-17] Modest enemy chest frequency increase - v2.270.0
+
+Raised non-guaranteed enemy chest chances by25%: ordinary1.875%-3.75%, elites10%-15%, preserving encounter-level progression. Early ordinary average changes from one per67 kills to one per53. Rarity tables, guaranteed boss/mimic/goblin rewards, unique relics, training exclusions and host-only rolls/independent co-op claims unchanged. Updated encounter script cache key.
+
+Verified encounter/reward suite300427 checks plus3 actual guest authority checks;44 co-op chest checks;200000 rarity-table interval samples;18 reveal and38 shop checks. Six muted browser checks load pre-change level100 save and verify actual loaded rates, guarantees and exclusions. Evidence:docs/art-validation/chest-drop-rate-20261017/browser.json.

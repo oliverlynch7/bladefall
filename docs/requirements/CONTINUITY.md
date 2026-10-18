@@ -2481,3 +2481,12 @@ Healing pads now heal living local player and companion occupants independently 
 Pet damage/death now updates the HUD immediately; fallen companion identity/max health is retained transiently with a desaturated portrait and Fallen/0 HP instead of stale10 HP. A lightweight health-change check also refreshes passive/other heals without rebuilding the whole HUD each render. Contradictory dead co-op pet packets normalize to0 HP, absent pet snapshots clear the prior peer model/health, and existing Beastmaster1 HP last stand stays alive. Return to the Waystation restores normal companion behavior. No save-format/network-packet changes.
 
 Verified:125/125 regression suites.36 focused health/pad/HUD/peer checks.20 actual-browser old-save checks include all10 companions healing via the engine pad update with a full-health owner outside the pad, simultaneous player/pet healing, immediate10-to6-tofallen0 HUD, owner snapshots through a real reliable WebRTC loopback into shipped mkPeer/applyPos, peer death cleanup and no pad resurrection. No browser errors. Evidence: docs/art-validation/companion-health-20261017/.
+
+
+## [Codex | 2026-10-17] Nonblocking rank-up - v2.264.0
+
+Removed the2800ms frozen announcement plus300ms fade. A compact rank/reward banner now plays for900ms while movement, attacks, HUD and controller input remain live. It allows a bounded800ms landing window, then opens the existing mandatory protected skill/passive choice immediately. Choice header explicitly states earned rank and reward type. Chained rewards do not repeat the wait. Player level-up presentation and distinct SFX remain.
+
+Pause/menu/loading/hidden-tab activity suspends the prelude; world/player/class/death and pending-rank guards prevent stale modals, with interrupted rewards requeued. Input clearing, solo freeze, co-op grey presence/invulnerability still begin at the actual choice through beginPause. No choose-later or skip path was added. Retains reduced-motion and one rank sound per XP transaction.
+
+Verified:125/125 regression suites.24 actual-browser old-save checks cover movement and attacks during banner, real controller polling, usable HUD, rank context, forced selection/confirmation, manual pause/resume, co-op world/presence/damage protection and chained rewards. Progression tests cover short clock, hidden/menu suspension, stale/dead/downed/class transitions, bounded landing wait and distinct player/class notifications. No browser errors. Evidence: docs/art-validation/smooth-rank-up-20261017/.

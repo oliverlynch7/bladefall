@@ -1751,3 +1751,10 @@ Inspection/plan: campaign NPCs have rendered-head anchors but no persistent name
 User: "healing pads should also heal companions ionf they step on it. also my friend pet died but then it still showed it had 10hp"
 
 Inspection/plan: pad update only checks the player; hurtPet changes/removes G.pet without refreshing HUD, leaving its prior HP visible. Extend pads to owner-authoritative living player/companion occupants with height/radius checks, shared finite charge and existing heal cadence; preserve locked/infinite behavior and never revive fallen pets or mutate peer proxies. Refresh companion HUD on damage/death and present Fallen/0 HP until hub return. Normalize contradictory dead peer packets to0 HP. Verify player-full/pet-injured, pet-only contact, simultaneous/finite/infinite/locked/height/death, owner/peer packet cleanup and Beastmaster last stand. Preserve saves and no new network authority.
+
+
+## [Codex | 2026-10-17] Smooth nonblocking class rank-up
+
+User: "now the classs rank up animation freezes the charcer for too long, please come up wtha  new ideadfor this that s way smoother and clear"
+
+Inspection/plan: beginProgressChoice enters protected upgrade mode, clears inputs, and beforeChoice makes the HUD inert for2800ms plus300ms fade. Replace the frozen prelude with a compact900ms rank/reward banner while gameplay and all controls continue, then enter the existing protected mandatory choice. Briefly wait for landing (bounded) to avoid cutting off jumps; suspend the lead-in during menus/loading/hidden tabs. Retain world/player/class/rank validity guards, requeue interrupted rewards, avoid repeating the announcement for chained choices at one earned rank, and label the choice itself with the earned rank. Preserve distinct SFX, reduced-motion support, mandatory selection and co-op choice protection. Verify movement/controller, pause/resume, stale/death/class/scene transitions, chained choices and old-save tutorial.

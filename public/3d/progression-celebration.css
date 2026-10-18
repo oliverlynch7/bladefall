@@ -26,13 +26,14 @@
 .progress-flare.reduced i,.progress-flare.class.reduced i:first-child{animation:none;opacity:.35;transform:none}.progress-flare.reduced i:nth-child(n+2){display:none}
 @media(prefers-reduced-motion:reduce){.progress-celebration,.progress-celebration.opening,.classpick,.skilltut,.classcard{animation:none}.progress-flare i,.progress-flare.class i:first-child{animation:none;opacity:.35}.progress-flare i:nth-child(n+2){display:none}}
 @media(max-width:650px){.progress-celebration{top:17%;padding:10px 14px;gap:10px;max-width:88vw}.progress-celebration.class{top:30%}.progress-crest{width:36px;height:36px;font-size:26px}.progress-celebration p{font-size:11px}.progress-flare{width:100px;height:60px}}
-.progress-celebration.class{max-width:min(500px,90vw);padding:22px 28px;top:26%;animation:progress-arrive .35s ease-out both,progress-leave .3s 2.9s ease-in forwards}
-.progress-celebration.class.opening{animation:progress-arrive .35s ease-out both}
-.progress-celebration.class small{font-size:12px}.progress-celebration.class strong{font-size:clamp(25px,3vw,34px)}.progress-celebration.class p{font-size:14px;max-width:350px;line-height:1.5}
-.progress-celebration .progress-next{margin:14px 0 0;color:#c8d9e9;letter-spacing:.02em;font-weight:500;font-size:11px}
-.progress-celebration.class.opening::after{content:'';position:absolute;bottom:0;left:12px;right:12px;height:3px;border-radius:2px;background:linear-gradient(90deg,#8466d3,#e7d4ff);transform-origin:left;animation:progress-hold 2.8s linear both}
-.progress-celebration.class.departing{animation:progress-leave .3s ease-in forwards}
+.progress-celebration.class{top:13%;max-width:min(430px,88vw);padding:12px 18px;gap:12px;animation:progress-arrive .18s ease-out both,progress-leave .2s 2.7s ease-in forwards}
+.progress-celebration.class.opening{animation:progress-arrive .18s ease-out both}
+.progress-celebration.class strong{font-size:clamp(21px,2.7vw,29px)}
+.progress-celebration.class p{font-size:12px;max-width:320px}
+.progress-celebration .progress-next{margin:6px 0 0;color:#d7caed;letter-spacing:.02em;font-weight:600;font-size:11px}
+.progress-celebration.class.opening::after{content:'';position:absolute;bottom:0;left:12px;right:12px;height:2px;background:#cbb5ff;transform-origin:left;animation:progress-hold .9s linear both}
+.progress-celebration[hidden],.progress-flare[hidden]{display:none!important}
 @keyframes progress-hold{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .progress-reduced .progress-celebration.class,.progress-reduced .progress-celebration.class.opening,.progress-reduced .progress-celebration.class.opening::after{animation:none}
 @media(prefers-reduced-motion:reduce){.progress-celebration.class,.progress-celebration.class.opening,.progress-celebration.class.opening::after{animation:none}}
-@media(max-width:650px){.progress-celebration.class{top:29%;padding:18px 16px}.progress-celebration.class p{font-size:13px}}
+@media(max-width:650px){.progress-celebration.class{top:13%;padding:10px 14px}.progress-celebration.class p{font-size:11px}}

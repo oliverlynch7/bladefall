@@ -1199,8 +1199,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./briar-beta.js?v=2131"></script>
 <script src="./inspection-lab.js?v=2261"></script>
 <script src="./priority-sfx.js?v=2210"></script>
-<link rel="stylesheet" href="./progression-celebration.css?v=2232">
-<script src="encounter-rewards.js?v=2232"></script><script src="./progression-celebration.js?v=2232"></script>
+<link rel="stylesheet" href="./progression-celebration.css?v=2264">
+<script src="encounter-rewards.js?v=2232"></script><script src="./progression-celebration.js?v=2264"></script>
 <script>
 (function(){
 "use strict";
@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.263.0-companion-health';
+const VERSION3D='2.264.0-smooth-rank-up';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -10184,7 +10184,6 @@ function pollGamepad(dt){
  const p=BFController.read(mode+':'+BFController.active);
  if(p&&!meta.padOff&&(p.buttons.some(Boolean)||Math.abs(p.x)+Math.abs(p.z)+Math.abs(p.rx)+Math.abs(p.ry)>.15))hudDevice('controller');
  if(p&&!meta.padOff&&BFShipwreckShore.aiming()){release();BFShipwreckShore.control(p,dt);return;}
- if(window.BFProgressCelebration?.active){release();return;}
  if(p&&!meta.padOff&&!BFController.active){if(BFHubTour.control(p)||BFGuidedTutorial.control(p))return;if(BFChestReveal.active&&p.edge('interact')){BFChestReveal.skip();return;}if(classTutorialAction(p.edge('interact')?'interact':p.edge('dodge')?'cancel':null))return;}
  if(!p||meta.padOff||BFController.active||mode!=='play'){release();if(p&&(!meta.padOff||BFController.active)){if(p.edge('pause')&&mode==='pause'&&!BFController.active){resumeGameAudio(true);resumePlay();}else BFController.menu(p);}return;}
  if(p.edge('pause')){release();openPause();return;}
@@ -12560,22 +12559,24 @@ function c2SkillOfSlot(slot){ const def=c2def(); if(!def) return null; const ran
 function c2CurSkills(){ return [0,1,2,3].map(c2SkillOfSlot); }
 function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classState(meta.classId), ch=c2ch();
   for(const r of CLASS2_CHOICE_RANKS){ const R=def['r'+r];if(cs.rank>=r&&R&&ch[r]!==R.a.id&&ch[r]!==R.b.id)return r; } return 0; }
-function beginProgressChoice(kind,rank,open){
+function beginProgressChoice(kind,rank,open,retry){
  const ui=window.BFProgressCelebration;if(!ui){open();return;}if(ui.active)return;
- const owner=G,hero=G.p,cid=meta.classId,cs=classState(cid);
- const detail=kind==='passive'?'Passive unlocked · choose an automatic bonus next':rank===2?'Your first skill is ready · choose one of two abilities next':'Skill unlocked · choose your new ability next';
+ const owner=G,hero=G.p,cid=meta.classId,cs=classState(cid),last=beginProgressChoice._announced;
+ // Catch-up choices at one earned rank share one announcement, not repeated waits.
+ if(last?.world===owner&&last.hero===hero&&last.cid===cid&&last.rank===cs.rank){open();return;}
+ const detail=kind==='passive'?'New passive · choose an automatic bonus':rank===2?'First skill unlocked · choose your ability':'New skill · choose your ability';
  ui.notify('class',owner,{name:curClass().disp,value:cs.rank,detail});
- beginPause();mode='upgrade';showOverlay(false);ovcard.innerHTML='';showGameUI(true);releaseKeyboard();
- input.attack=false;input.jumpEdge=false;input.dodgeEdge=false;hero.attackHeld=false;hero.holdT=0;document.exitPointerLock?.();
- const valid=()=>G===owner&&G.p===hero&&meta.classId===cid&&mode==='upgrade'&&!hero.dead&&!hero.downed&&hero.hp>0&&(!rank||!c2def()||c2NextChoice()===rank);
- ui.beforeChoice(valid,()=>{if(valid())open();},()=>{if(G===owner&&G.p===hero&&mode==='upgrade'&&!hero.dead&&!hero.downed&&hero.hp>0)resumePlay();},{detail});
+ const valid=()=>G===owner&&G.p===hero&&meta.classId===cid&&!hero.dead&&!hero.downed&&hero.hp>0&&(!rank||!c2def()||c2NextChoice()===rank);
+ const requeue=()=>{if(meta.classId!==cid||!G?.p)return;if(retry)retry();else if(rank&&c2def())queueChoiceRank=c2NextChoice();else if(kind==='skill'&&rank===0&&!c2def())queueSubclass=true;};
+ ui.beforeChoice(valid,()=>{if(valid()&&mode==='play'){beginProgressChoice._announced={world:owner,hero,cid,rank:cs.rank};open();}},requeue,{detail,ready:()=>!!(hero.onGround||hero.dragonRide)});
 }
+
 function openClassChoice(rank){ const cid=meta.classId,def=c2def(cid); if(!def||rank!==c2NextChoice()||!G?.p||G.p.dead||G.p.downed) return; const cs=classState(cid),R=def['r'+rank]; if(!R) return;
   beginPause();mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
     return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Works automatically</span><span class="c2badge">Conditions below</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
-  showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
+  showOverlayHTML(`<div class="card classpick" style="--pick:${pickCol}"><div class="pickhead"><p class="ovkicker">Rank ${rank} reached · ${isSk?'New skill':'New passive'}</p><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Change choices later at the Drillmaster.</p></div>
     <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div><div id="choiceReview" hidden><p id="choiceSelected"></p><button class="bigbtn" id="classChoiceConfirm">Confirm · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="classChoiceBack">Cancel · Q / Esc</button></div><p class="hint choice-required">Choose one to continue. You can change it at the Drillmaster.</p></div>`);
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
@@ -16836,8 +16837,8 @@ function updateWorld(dt){
   if(G.hub&&G.pit){ const P=G.pit, inPit=(G.p.x>=P.minX&&G.p.x<=P.maxX&&G.p.z>=P.minZ&&G.p.z<=P.maxZ);
     for(const e of G.enemies){ if(e.practice&&!e.dead){ e.active=inPit;   // only wake (aggro) once you step into the ring
       e.x=Math.max(P.minX+16,Math.min(P.maxX-16,e.x)); e.z=Math.max(P.minZ+16,Math.min(P.maxZ-16,e.z)); } } }   // and never let them leave it
-  if(!backgroundMenuMode&&mode==='play'&&!p.dead&&!p.downed&&p.hp>0){
-    if(queueSkillTut){ const s=queueSkillTut;queueSkillTut=null;beginProgressChoice('skill',0,()=>openSkillTutorial(s)); }
+  if(!backgroundMenuMode&&mode==='play'&&!window.BFProgressCelebration?.active&&!p.dead&&!p.downed&&p.hp>0){
+    if(queueSkillTut){ const s=queueSkillTut;queueSkillTut=null;beginProgressChoice('skill',0,()=>openSkillTutorial(s),()=>{queueSkillTut=s;}); }
     else if(queueChoiceRank){ const r=c2NextChoice();queueChoiceRank=0;if(r)beginProgressChoice(c2def()['r'+r]?.kind,r,()=>openClassChoice(r)); }
     else if(queueSubclass){ queueSubclass=false;beginProgressChoice('skill',0,openSubclass); }
   }

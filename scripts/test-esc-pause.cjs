@@ -27,7 +27,7 @@ ctx.G={p:{hp:100,x:0,y:0,z:0,vx:0,vy:0,vz:0},time:0};ctx.MP.active=false;
 run("beginPause();mode='upgrade';update(.2);hurtPlayer();lavaHit()");ok(ctx.G.time===0&&ctx.G.p.hp===100&&run('pauseState().frozen'),'solo upgrade selection freezes and blocks hits/falls');
 ctx.MP.active=true;run("beginPause();mode='upgrade';");time=ctx.G.time;hp=ctx.G.p.hp;run('update(.2);hurtPlayer();lavaHit()');ok(ctx.G.time>time&&ctx.G.p.hp===hp,'co-op upgrade world runs without hits/fall damage');ok(ctx.G.p.x===0&&run('playerActivity()')==='Paused','choice holds player and sends grey protected presence');
 ctx.mode='menu';run('update(.2)');ok(run('pauseState().protected'),'nested bag retains upgrade protection');ctx.mode='upgrade';run('update(.2)');ok(run('pauseState().protected'),'returning to required choice remains protected');ctx.mode='play';run('update(.2)');ok(!run('pauseState().active')&&ctx.G.p.hp<hp,'confirmed choice resumes normal vulnerability');
-for(const name of ['openDashTutorial','openSkillTutorial','beginProgressChoice','openClassChoice','openLevelUp','openSubclassFrom']){const a=src.indexOf('function '+name+'('),b=src.indexOf('\nfunction ',a+12);ok(src.slice(a,b).includes("beginPause();mode='upgrade'"),name+' starts pause before transition');}
+for(const name of ['openDashTutorial','openSkillTutorial','openClassChoice','openLevelUp','openSubclassFrom']){const a=src.indexOf('function '+name+'('),b=src.indexOf('\nfunction ',a+12);ok(src.slice(a,b).includes("beginPause();mode='upgrade'"),name+' starts pause before transition');}
 ok(src.includes('function hurtPlayer(dmg,sx,sz,by){\n if(pauseDamageBlocked())return;'),'real incoming-hit path guarded before side effects');ok(src.includes('function lavaHit(){\n  if(pauseDamageBlocked())return;'),'real fall damage guarded');ok(src.includes("pausedSafe=q.busy==='Paused'&&!this.pvp"),'peer appearance uses validated presence outside PvP');
 // Compile every inline script, including the changed gameplay closure.
 for(const m of src.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g))if(!/\bsrc\s*=|type=["'](?:module|importmap)/.test(m[1])&&m[2].trim())new vm.Script(m[2]);
@@ -36,3 +36,5 @@ ok(true,'inline syntax compiles');
 
 
 
+
+{const a=src.indexOf('function beginProgressChoice('),b=src.indexOf('function openClassChoice(',a);ok(!src.slice(a,b).includes('beginPause()'),'rank announcement plays before the protected choice');}

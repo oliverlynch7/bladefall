@@ -1217,7 +1217,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.279.0-guidance-sound-signatures';
+const VERSION3D='2.280.0-campaign-readiness';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1494,6 +1494,7 @@ function playStory(lines, onDone, opts){
 }
 // Manual pacing keeps every opening card readable at the player's own speed.
 function playOpening(onDone){
+  clearWorldTexts();
   const root=document.createElement('section'); root.id='openingStory';
   root.setAttribute('role','dialog'); root.setAttribute('aria-modal','true'); root.setAttribute('aria-label','The story of Aerth');
   root.innerHTML=`<img id="openingArt" alt=""><div class="openingCopy"><p id="openingCount"></p><h1 id="openingTitle"></h1><p id="openingText" aria-live="polite"></p><nav aria-label="Story controls"><button id="openingBack">Back</button><button id="openingNext">Next</button><button id="openingSkip">Skip story</button></nav><small>Read at your own pace · Arrow keys to turn pages</small></div>`;
@@ -5628,6 +5629,7 @@ function forgeSpin(g,back){
   setTimeout(step,delay);
 }
 function newG(p,extra){
+  clearWorldTexts();
   if(G?.p?.dragonRide)BFDragonRiding.stop(G,true);
   p.dragonRide=null;
   cancelDeathTransition();cancelPortalWarp();
@@ -5668,6 +5670,7 @@ function enterZone(zi,startArea=0,partySync=false,partyQuests=null){
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
+  clearWorldTexts();
   if(!G||G.hub)return;
   cancelPortalWarp();
   BFChestReveal.clear();
@@ -10325,6 +10328,10 @@ document.addEventListener('touchend',e=>{
    COMBAT + UPDATE (3D)
    ============================================================ */
 const worldTexts=[]; // DOM floating texts projected from world space
+function clearWorldTexts(){
+  for(const t of worldTexts)t.el.remove();
+  worldTexts.length=0;
+}
 function addText(wx,wy,wz,txt,color,big,kind){
   // Phase 19: combat numbers read BIG — dmg 19px, heal 22px, CRIT 32px (with a shout of an
   // outline); everything else 17/26. kind'd combat numbers respect the settings toggle.
@@ -11186,9 +11193,16 @@ function enemySupport(e){
   for(const ob of context.obstacles){ if((ob.h<=e.y+ECLIMB) && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
+// Support and collision probes along one edge only need boxes overlapping its swept footprint.
+// Build this once per edge, rather than rescan the whole A* search window for every foot probe.
+function enemyRouteSweepContext(e,a,b,context){
+ const pad=Math.max(0,e.r||0)+2,minX=Math.min(a.x,b.x)-pad,maxX=Math.max(a.x,b.x)+pad,minZ=Math.min(a.z,b.z)-pad,maxZ=Math.max(a.z,b.z)+pad;
+ const overlaps=o=>o.x+o.w/2>=minX&&o.x-o.w/2<=maxX&&o.z+o.d/2>=minZ&&o.z-o.d/2<=maxZ;
+ return {segments:context.segments.filter(overlaps),obstacles:context.obstacles.filter(overlaps),walls:(context.walls||[]).filter(overlaps),movers:context.movers.filter(overlaps),crumbles:context.crumbles.filter(overlaps)};
+}
 // A short local route respects the same collision/climb rules as actual enemy movement.
 function enemyRouteEdge(e,a,b){
- const context=arguments[3];const length=Math.hypot(b.x-a.x,b.z-a.z),steps=Math.max(1,Math.ceil(length/12));let y=a.y;
+ const scope=arguments[3],context=scope&&(scope.segments.length+scope.obstacles.length+(scope.walls||[]).length+scope.movers.length+scope.crumbles.length>24)?enemyRouteSweepContext(e,a,b,scope):scope;const length=Math.hypot(b.x-a.x,b.z-a.z),steps=Math.max(1,Math.ceil(length/12));let y=a.y;
  for(let i=1;i<=steps;i++){
   const x=a.x+(b.x-a.x)*i/steps,z=a.z+(b.z-a.z)*i/steps,q={x,z,y,r:e.r,hh:e.hh||e.h||56};
   const floor=enemySupport(q,context);if(!Number.isFinite(floor)||floor>y+ECLIMB||floor<y-80)return null;
@@ -18298,6 +18312,7 @@ function openSlots(){
   document.getElementById('backBtn').onclick=titleScreen;
 }
 function titleScreen(){
+  clearWorldTexts();
   BFChestReveal.clear();window.BFSocial?.reset();liveMenuWorld=null;pausedMenuWorld=null; musicPlay('village_vigil');   // the home theme introduces the ordinary person at the story's center
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   const currentSlot=slotSummary(SLOT);

@@ -1873,3 +1873,22 @@ Generate two compact ElevenLabs sound candidates under a conservative500-credit 
 ## [Codex | 2026-10-18] U-ONBOARDING-AUDIO-FOLLOWUP-20261018
 
 User approves unfinished items1/2/3: first-time stat-point introduction, remaining source-audited custom audio, and sound selection. Also approves clearer menu/Bag/Interact/Back tutorial after correcting A to Esc (A remains movement). Keep player stat upgrades optional and nonblocking, one-time guidance with direct stat screen, real before/after values and draft confirmation; preserve class required choices. Teach actual current bindings with Bag open/close practice and Esc menu; retain tutorial skip and safe practice. Add explicit original/new reward sound choices and audition in Settings rather than guessing user taste or replacing originals by default. Audit boss state transitions, weapon charges and physical story mechanisms before paid generation; preserve existing good audio/fallbacks, lazy bounded load, current mute/volume/co-op behavior and provenance. Conservative4000-credit cap for this batch, paid plan check, no uncertain paid retries. No balance, XP, class model, quest or save reset changes.
+
+
+## [Codex | 2026-10-18] U-READINESS-REVIEW-20261018
+
+User approves the next performance, beginner-journey, co-op regression and normal-gear combat review. Start with measured default shoulder/high profiling in Briar start/village/Orchard and Ruined Keep courtyard/prison water, preserving authored detail and map scale. Use isolated old-save and fresh-character browser fixtures. Target expensive work shown by traces; do not lower visual quality blindly or claim machine-wide FPS guarantees from local samples. Review creation/tutorial/story/hub/campaign/reload boundaries and connected local host/guest prompt/pet/chest/menu/transition paths. Check ordinary-enemy and boss pacing with normal starter gear; preserve intentionally forgiving beginner trial and existing boss environmental strategies. Fix reproduced issues, add meaningful regressions, verify current saves, and publish with measured evidence and explicit limits. No new campaign layout, class or audio-generation scope inferred.
+
+
+## [Codex | 2026-10-18] Readiness review: stale world text reproduced
+
+Muted fresh-tutorial browser lifecycle reproduced combat floating DOM messages (IT RISES, XP, gold) persisting above the illustrated opening and first hub tour. `worldTexts` is global, only ages during gameplay, and is never cleared by scene construction. Fix within U-READINESS-REVIEW: dispose the old world-text nodes when constructing/loading a scene, entering the illustrated story or title; leave ordinary same-scene text lifetime unchanged. Verify a clean tutorial-to-story-to-hub handoff and retain the existing tutorial, save and reward behavior.
+
+
+## [Codex | 2026-10-18] Readiness review verification
+
+Measured Orchard route-search spikes led to per-edge swept-footprint geometry filtering before repeated support/collision probes; 6,217 old/new parity cases pass, with no art/quality, terrain, combat or XP cuts. Sample route peak21.1ms→10.6ms (repeat8.4ms), overall worst29.6→19.7/20.8ms. Typical overall frame times varied upward in after samples, so no general FPS gain is claimed. Entrance/village/Keep courtyard/water also measured.
+
+Fixed global floating combat DOM text persisting into frozen opening/hub tour: dispose on scene construction/load, illustrated opening and title. Fresh tutorial→required skill→six deaths→delayed exit→five story pages→18-stop hub tour→actual title Continue/Normal reload retains class/rank/skill/name/face/story/tour, with no stale combat text. Final old100 save loads. Private fixtures use isolated synthetic storage; staged deaths/positions are not a natural campaign playthrough.
+
+141 regression suites and100 controlled browser combat/retry/reward checks pass. Real local ordered WebRTC pair verifies area/boss/hub/Rift Hall/sparring/Arena transitions, personal economy/pet selection and independent claims of the same chest. Updated browser combat harness to current story flag/background loading, and Marble two-real-reflection completion rather than obsolete one-hit shortcut. Evidence: docs/art-validation/readiness-review-20261018/. No new two-human Internet or cross-PC rendering claim. Earned Hollow north escort/Marksman and natural campaign traversal remain outstanding; whole campaign audit is not marked complete.

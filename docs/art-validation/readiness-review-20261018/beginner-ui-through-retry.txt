@@ -1,0 +1,72 @@
+- img "Equipped skin"
+- generic: Readiness Mage
+- generic: Mage
+- generic "89 gold":
+  - generic: "89"
+- generic "Weapon · Splintered Staff"
+- generic: HP
+- generic: 104 / 104
+- generic: MANA
+- generic: 152 / 152
+- generic: Trial of the Staff
+- generic: ☐
+- generic: Defeat the keepers
+- generic: 4/6
+- button "N Journal · all tasks & clues"
+- button "Pause"
+- generic: Esc
+- button "Bag · 0 / 30 · 30 slots free":
+  - text: Bag
+  - generic: 0 / 30
+  - generic: 30 slots free
+  - generic: Tab
+- button "Auto-sell OFF"
+- button "N Journal"
+- button "Loot"
+- text: Trial of the Staff
+- generic: ◆ Objective · ◇ Friends
+- button "Basic attack · Left Click / J": LMB
+- button "Elemental Beam · 20 mana · 1":
+  - text: "20"
+  - text: "1"
+- button "Skill 2 — unlocks at rank 4 · 2":
+  - generic: 🔒
+  - generic: Unlocks
+  - generic: Rank 4
+  - text: "2"
+- button "Skill 3 — unlocks at rank 6 · 3":
+  - generic: 🔒
+  - generic: Unlocks
+  - generic: Rank 6
+  - text: "3"
+- button "Skill 4 — unlocks at rank 8 · 4":
+  - generic: 🔒
+  - generic: Unlocks
+  - generic: Rank 8
+  - text: "4"
+- button "Dodge · L-Shift / Right Click": Shift
+- generic: CHARACTER · LV 1
+- generic: 162/230
+- generic: MAGE · RANK 2
+- generic: 34/487
+- button "Auto OFF L":
+  - text: Auto OFF
+  - generic: L
+- generic: The goblin escaped!
+- 'generic "Map: gold objective, blue teammates, cyan pings, red enemies. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map follows your camera orientation."'
+- button "Create fresh test character"
+- button "Read test state"
+- button "Advance 120 frames" [active]
+- button "Perform current control"
+- button "Fight one keeper with starter staff"
+- button "Walk into trial exit"
+- button "Bank and inspect save"
+- generic: "{\"mode\":\"play\",\"trial\":\"mage\",\"hub\":false,\"area\":0,\"zone\":0,\"level\":1,\"rank\":2,\"name\":\"Readiness Mage\",\"guide\":{\"step\":9,\"id\":\"vitals\",\"title\":\"Watch health and mana\"},\"loading\":false,\"classes\":{},\"trials\":{},\"errors\":[]}"
+- region "Adventure tutorial":
+  - generic: HUD guide
+  - generic: 1 / 9
+  - heading "Watch health and mana" [level=2]
+  - paragraph: "HP is your health. Mana fuels skills. Basic hits restore a little mana. Wait 4 seconds between skills for faster recovery. Keep moving: enemies are active."
+  - button "Continue · E"
+  - button "Close tips · Q / Esc"
+  - paragraph: Optional tip · movement and combat stay active.

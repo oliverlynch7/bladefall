@@ -1,3 +1,4 @@
+import {syncArenaArt} from './arena-art.js?v=2274';
 import {warmSceneGeometry} from './render-warmup3d.js?v=2234b';
 import {chessBlocksBoard} from './chess-visibility3d.js?v=2226e';
 import {weaponOnly} from './first-person-appearance3d.js?v=2219';
@@ -2077,6 +2078,7 @@ export function drawHero3D(p, t, firstPass=true){
     if(_syncedFrame !== _frameNo){
       _syncedFrame = _frameNo;
       syncWorld(scene);
+      syncArenaArt(scene);
       syncCombatArt(scene,cam);
       syncMobs(scene, dt, cam);
       if(!p._portrait)syncCompanions(scene,dt);

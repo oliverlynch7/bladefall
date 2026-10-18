@@ -2143,3 +2143,12 @@ Inspection/plan: icons are DoubleSide PlaneGeometry children of side-wall portal
 User: "in pvp, when i pick a new class to try, it shoudl autaomtaiclaly equip a proprer weapon for that class"
 
 Inspection/plan: Arena class buttons only set classId, leaving previous wArch; buildArenaPlayer equips it without family validation. Fair Mode forces sword regardless of class. Only Pyromancer currently receives its intrinsic weapon. Add deterministic class-compatible archetype resolution and class selection default, filter Arena weapon options by class, honor all four intrinsic class weapons. Validate in buildArenaPlayer even for stale/random/Fair configs; randomization selects an allowed family weapon. Preserve compatible manual choices and rarity, class builds, Apply flow, temporary Arena escrow and campaign equipment. Verify all17 classes, normal/Fair/stale/invalid configs, real class-selection UI, equipped attacks, and campaign restoration.
+
+
+## [Codex | 2026-10-18] PvP setup clarity and Arena station art
+
+User: "Also the PvP selector menu is a mess please improve it. Also please improve the red equip station and th exit portal assets"
+
+Inspection/plan: openArenaSetup is one long undifferentiated list of map/class sliders, weapons, every pet, bots and toggles. Keep existing config/purchase-free sandbox/Apply handlers and class-weapon resolver; author responsive Fighter/Arena & Rules/Practice Bots tabs with selected-loadout summary and persistent footer. Group classes, gear and progression, keep companion optional in a clearly titled section. Explain Fair Mode and host/solo restrictions; prevent misleading bot controls in multiplayer. Preserve random loadout/builds/respec, team/powerup settings, all companions, keyboard close and campaign escrow.
+
+Current arena props are inline cubes: tiny crimson podium/cube attendant and generic sparringdoor. Add a bounded original Three armory station (red cloth, brass/steel frame, actual weapon/armor displays, detailed console) and distinct cyan/green Waystation arch (stone courses, inlays, flowing portal, clear sign). Anchor at existing interactables and staging height, add fitted colliders without obstructing approach, retain voxel fallback if Three unavailable. Own/dispose scene resources on Arena replacement/exit; respect reduced motion; no expensive new lighting or external asset dependencies. Verify geometry budgets, placement/colliders, menu flows at desktop/phone width, classes/Fair/bots/pets/randomize/Apply/exit and old-save preservation in muted browser.

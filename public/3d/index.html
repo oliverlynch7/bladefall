@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="./save-safety.js?v=2229"></script>
+<head><link rel="stylesheet" href="./arena-setup.css?v=2274"><script src="./save-safety.js?v=2229"></script>
 <script src="./skill-sfx.js?v=2230"></script>
 <script src="./coop-audio.js?v=2269"></script>
 <meta charset="UTF-8">
@@ -1214,7 +1214,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.273.0-pvp-class-weapons';
+const VERSION3D='2.274.0-arena-polish';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4265,7 +4265,7 @@ function questUpdate(){
      Hidden at the DISPLAY rather than by clearing G.qs: questUpdate and the kill tracker both read
      that object and expect it to exist, and nulling it threw on the first frame. */
   if(G?.kingFinal){const el=document.getElementById('questbox');if(!BFFinalKing.combat(G.boss)){el.classList.add('hide');return;}applyQuest(el,'Castle Duskmoor',qrow(false,'⚔',areaQuests()[0].d,null),'final:'+G.boss.akStage,false);return;}
-  if(G?.riftHall){const el=document.getElementById('questbox');if(el)el.classList.add('hide');return;}
+  if(G?.riftHall||G?.arena){const el=document.getElementById('questbox');if(el)el.classList.add('hide');return;}
   if(G && G.delve){ const _el=document.getElementById('questbox'); if(_el) _el.classList.add('hide'); return; }
   const el=document.getElementById('questbox'); if(!el) return;
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
@@ -15794,14 +15794,14 @@ function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
   arenaApplyPet(cfg);
   const map=ARENA_MAPS[cfg.map]||ARENA_MAPS.flat; ARENA_STAGE={name:map.name,theme:'arena',sky:map.sky,ground:map.ground,aw:1600,ad:1600};
   const p=buildArenaPlayer(cfg);
-  G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;
+  G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;G.areaName=map.name;
   G.segments=[];G.walls=[];G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.rooms=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.enemies=[];G.pickups=[];G.projectiles=[];G.gates=[];G.hubNpcs=[];G.arenaLava=null;
   G.bounds={minX:-740,maxX:740,minZ:-740,maxZ:820};
   try{ map.build(); }catch(e){}
   G.segments.push({x:0,z:0,w:1560,d:1560});   // SOLID arena floor at y=0 (for lava this floor IS the lava surface; islands are plats above it).
   // SAFE ENTRANCE STAGING PLATFORM (south) — always hazard-free — where you spawn and the Arena Master + exit door live.
-  const eh=(cfg.map==='lava')?34:0; G.obstacles.push({kind:'plat',x:0,z:340,w:560,d:230,h:eh});
-  G.deco.push({x:0,z:340,y0:eh,w:560,h:2.4,d:230,c:'#241a22'}); if(eh) G.deco.push({x:0,z:340,y0:0,w:560,h:eh,d:230,c:'#140e14'});
+  const eh=(cfg.map==='lava')?34:0; G.obstacles.push({kind:'plat',x:0,z:340,w:560,d:270,h:eh});
+  G.deco.push({x:0,z:340,y0:eh,w:560,h:2.4,d:270,c:'#241a22'}); if(eh) G.deco.push({x:0,z:340,y0:0,w:560,h:eh,d:270,c:'#140e14'});
   for(const s of [-1,1]) G.torches.push({x:s*230,z:300,ph:Math.random()*6.28});
   const sy=eh; G.arenaSpawn={x:0,z:340,y:sy}; G.startPos={x:0,z:340}; G.lastSafe={x:0,z:340,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
   G.arenaCombat={x:0,z:-80,y:(cfg.map==='lava'?26:0)};   // where bots spawn — the combat heart, away from the entrance
@@ -15811,6 +15811,9 @@ function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
     {id:'arenamaster',ic:'⚔️',name:'Arena Master',role:'Loadout, maps & bots',prop:'arenamaster',verb:'Set loadout & map',direct:true,x:-150,z:400,c1:'#3a1618',c2:'#e8453d',open:()=>openArenaSetup(resumePlay)},
     {id:'arenaexit',ic:'🚪',name:'Leave the Arena',role:'Return to the Waystation',prop:'sparringdoor',verb:'Leave the Arena',direct:true,x:150,z:400,open:()=>exitArena()}
   ];
+  // Fitted service colliders leave the center approach and return-gate opening clear.
+  G.walls.push({x:-150,z:429,w:120,d:16,h:150+eh,invisible:true,arenaService:true},{x:-150,z:390,w:110,d:48,h:50+eh,invisible:true,arenaService:true},...[-52,52].map(dx=>({x:150+dx,z:400,w:19,d:26,h:120+eh,invisible:true,arenaService:true})));
+  spawnPet(); // Apply the companion selected in the Arena loadout.
   G.arenaPk=[]; G._pkT=4; G.arenaScore={p:0,b:0}; G.arenaTarget=(MP.active)?5:(cfg.bots>0?10:0);
   if(cfg.bots>0 && !MP.active){ for(let i=0;i<cfg.bots;i++) spawnBot(cfg.botDiff); }   // AI bots are a solo feature (MP arena = player duel)
   updateArenaHud();
@@ -15846,7 +15849,7 @@ function applyArenaPickup(kind,p){
   else if(kind==='dmg'){ p.stats.power*=1.5; try{ addText(p.x,p.y+60,p.z,'⚔ DAMAGE UP','#ff9a3a',true); burst(p.x,p.y+30,p.z,'#ff9a3a',12); SFX.levelup&&SFX.levelup(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.power/=1.5; },9000); }
   else if(kind==='speed'){ p.stats.speed*=1.5; try{ addText(p.x,p.y+60,p.z,'💨 SPEED UP','#7fd6ff',true); burst(p.x,p.y+30,p.z,'#7fd6ff',12); SFX.dodge&&SFX.dodge(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.speed/=1.5; },9000); }
 }
-function drawArenaProps(t){ if(!G||!G.arena||!G.hubNpcs) return;
+function drawArenaProps(t){ if(!G||!G.arena||!G.hubNpcs||(window.__ARENA_ART_ACTIVE&&deferArmed())) return;
   for(const n of G.hubNpcs){ const yb=(()=>{ try{ return highestSurfaceAt(n.x,n.z); }catch(e){ return 0; } })();
     if(n.prop==='arenamaster'){ drawShadow(n.x,n.z,20,0.3);
       bx(n.x,yb+10,n.z, 46,20,46,'#2a1216'); bx(n.x,yb+22,n.z, 52,6,52,'#3a1a1e','#c0392b',0.4);      // crimson podium
@@ -16123,57 +16126,54 @@ function drawBotHero(e,t){ const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal, body=D.
 function openArenaSetup(back){ mode='menu'; showGameUI(false);
   const cfg=ARENA_LOADOUT, inA=IN_ARENA;
   const randomized=cfg.classBuilds&&cfg.classBuilds[cfg.classId];
-  const mapCard=(id)=>{ const m=ARENA_MAPS[id]; return `<button class="bigbtn ghost arenamap ${cfg.map===id?'sel':''}" data-map="${id}" style="text-align:left;${cfg.map===id?'border-color:#e8a33d;':''}"><b>${m.name}</b><br><span style="opacity:.7;font-size:12px">${m.desc}</span></button>`; };
-  const classBtns=Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arenacls ${cfg.classId===cid?'sel':''}" data-cls="${cid}" style="width:auto;flex:1;min-width:90px;${cfg.classId===cid?'border-color:#e8a33d;':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('');
+  const tab=['fighter','arena','bots'].includes(openArenaSetup._tab)?openArenaSetup._tab:'fighter',fair=cfg.fair;
   const fixedWeapon=intrinsicWeapon(cfg.classId);cfg.wArch=arenaWeaponArche(cfg.classId,cfg.wArch);
-  const archOpts=fixedWeapon?`<option>${htmlSafe(fixedWeapon.name)} · Class weapon</option>`:arenaWeaponArches(cfg.classId).map(a=>`<option value="${a}" ${cfg.wArch===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
-  const ridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.wRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
-  const aridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.aRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
-  const petBtns=`<button class="bigbtn ghost arenapet ${!cfg.petId?'sel':''}" data-pet="" style="flex:1;min-width:92px;margin:0;padding:8px 6px;${!cfg.petId?'border-color:#e8a33d;color:#f2c875':''}">No Pet</button>`+
-    PETIDS.map(id=>`<button class="bigbtn ghost arenapet ${cfg.petId===id?'sel':''}" data-pet="${id}" style="flex:1;min-width:112px;margin:0;padding:6px;${cfg.petId===id?'border-color:'+petRarityCol(id)+';color:'+petRarityCol(id):''}"><img src="${petIcon(id)}" alt="" style="width:42px;height:42px;object-fit:contain;display:block;margin:0 auto 3px"><b style="font-size:11px">${PETS[id].name}</b><span style="display:block;opacity:.65;font-size:9px">MAX 5/5</span></button>`).join('');
-  const sel=`background:#131a26;border:1px solid #2b3040;color:#f3f1ea;border-radius:8px;padding:8px;font-size:13px`;
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Arena · sandbox</p><h2 class="ovh">⚔️ Arena Loadout</h2>
-    <p class="ovsub">A save-protected battleground. Everything here is <b>temporary</b> — you keep nothing you set and lose nothing from your campaign.</p>
-    <p class="hint" style="text-align:left;margin:6px 0 4px"><b>Map</b></p>
-    <div style="display:flex;flex-direction:column;gap:6px">${['flat','parkour','lava'].map(mapCard).join('')}</div>
-    <p class="hint" style="text-align:left;margin:12px 0 4px"><b>Class</b> · free respec inside</p>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">${classBtns}</div>
-    <div style="display:flex;gap:14px;margin:12px 0 2px"><label style="flex:1">Level <b id="arLvlV">${cfg.level}</b><input id="arLvl" type="range" min="1" max="60" value="${cfg.level}" style="width:100%"></label>
-      <label style="flex:1">Class Rank <b id="arRankV">${cfg.rank}</b><input id="arRank" type="range" min="1" max="10" value="${cfg.rank}" style="width:100%"></label></div>
-    <div style="display:flex;gap:10px;margin:10px 0 2px;flex-wrap:wrap">
-      <label style="flex:1;min-width:140px">Weapon<br><select id="arArch" ${fixedWeapon?'disabled aria-label="Built-in class weapon"':''} style="${sel};width:100%">${archOpts}</select></label>
-      <label style="flex:1;min-width:110px">Weapon rarity<br><select id="arWRid" style="${sel};width:100%">${ridOpts}</select></label>
-      <label style="flex:1;min-width:110px">Armor rarity<br><select id="arARid" style="${sel};width:100%">${aridOpts}</select></label></div>
-    <p class="hint" style="text-align:left;margin:12px 0 5px"><b>Companion</b> &middot; every Arena pet is fully trained and scales to your selected level</p>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">${petBtns}</div>
-    <p class="hint" style="text-align:left;margin:12px 0 4px"><b>Practice Bots</b> · AI opponents (respawn on defeat)</p>
-    <div style="display:flex;gap:14px;align-items:center;margin:2px 0 4px">
-      <label style="flex:1">Count <b id="arBotsV">${cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${cfg.bots}" style="width:100%"></label>
-      <div style="flex:2;display:flex;gap:5px">${BOT_DIFFS.map(dk=>`<button class="bigbtn ghost arbd" data-bd="${dk}" style="flex:1;margin:0;padding:7px 3px;font-size:12px;${cfg.botDiff===dk?'border-color:'+BOT_DIFF[dk].color+';color:'+BOT_DIFF[dk].color:''}">${BOT_DIFF[dk].label}</button>`).join('')}</div></div>
-    <div style="display:flex;align-items:center;gap:8px;margin:8px 0 3px"><span class="hint" style="margin:0"><b>Bot class</b> · they fight with that class's weapon &amp; skills</span><button class="bigbtn ghost" id="arBotClsRand" style="margin:0;padding:5px 9px;font-size:13px" aria-label="Randomize bot class" title="Randomize bot class"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true"></button></div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap">
-      <button class="bigbtn ghost arbotcls" data-botcls="random" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass==='random'?'border-color:#c78cff;color:#c78cff':''}"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true">Random</button>
-      ${Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arbotcls" data-botcls="${cid}" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass===cid?'border-color:#e8a33d;color:#e8a33d':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('')}</div>
-    ${(MP.active&&MP.isHost)?`<button class="bigbtn ghost" id="arTeams" style="width:100%;margin:8px 0 0;${cfg.teams?'border-color:#7fd6ff;color:#7fd6ff':''}">👥 2v2 Team Mode${cfg.teams?' ✓':''} <span style="opacity:.6;font-size:11px">· friendly fire off</span></button>`:''}
-    <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap">
-      <button class="bigbtn ghost" id="arFair" style="flex:1;min-width:120px;margin:0;${cfg.fair?'border-color:#7de08a;color:#7de08a':''}">⚖️ Fair Mode${cfg.fair?' ✓':''}</button>
-      <button class="bigbtn ghost" id="arPow" style="flex:1;min-width:120px;margin:0;${cfg.powerups?'border-color:#ff9a3a;color:#ff9a3a':''}">✨ Powerups${cfg.powerups?' ✓':''}</button>
-      <button class="bigbtn ghost" id="arRand" style="flex:1;min-width:120px;margin:0"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true">Randomize</button>
-      <button class="bigbtn ghost" id="arRandSpec" style="flex:1;min-width:150px;margin:0;${randomized?'border-color:#c78cff;color:#e0b8ff;box-shadow:0 0 18px rgba(199,140,255,.14)':''}"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="" aria-hidden="true">Random Respec${randomized?' &#10003;':''}<span style="display:block;opacity:.62;font-size:10px;margin-top:2px">${CLASSES[cfg.classId].disp} skills + passives</span></button>
-      ${inA?'<button class="bigbtn ghost" id="arRespec" style="flex:1;min-width:120px;margin:0">✨ Free Respec</button>':''}</div>
-    <button class="bigbtn" id="arGo">${inA?'✓ Apply Loadout':'⚔️ Enter Arena'}</button>
-    ${inA?'<button class="bigbtn ghost" id="arLeave" style="margin-top:8px;color:#ff8a82;border-color:#5a2a2a">Leave Arena</button>':''}
-    <button class="bigbtn ghost" id="arBack" style="margin-top:8px">Back</button></div>`);
+  const C=CLASSES[cfg.classId],effective=fair?ARENA_FAIR:cfg;
+  const archOpts=fixedWeapon?`<option>${htmlSafe(fixedWeapon.name)} · Class weapon</option>`:arenaWeaponArches(cfg.classId).map(a=>`<option value="${a}" ${arenaWeaponArche(cfg.classId,effective.wArch)===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
+  const rarityOptions=val=>RORDER.map(r=>`<option value="${r}" ${val===r?'selected':''}>${RARITY[r].name}</option>`).join('');
+  const selected=(on)=>`aria-pressed="${!!on}" class="arena-choice${on?' is-selected':''}"`;
+  const classIds=[...STARTERS,...Object.keys(CLASSES).filter(cid=>!STARTERS.includes(cid))];
+  const classBtns=classIds.map(cid=>`<button ${selected(cfg.classId===cid)} data-cls="${cid}"><span class="arena-choice-icon">${CLASSES[cid].icon}</span><b>${CLASSES[cid].disp}</b></button>`).join('');
+  const mapCards=['flat','parkour','lava'].map(id=>`<button ${selected(cfg.map===id)} data-map="${id}"><span class="arena-map-icon" aria-hidden="true">${id==='flat'?'⚔':id==='parkour'?'↗':'♨'}</span><b>${ARENA_MAPS[id].name}</b><small>${ARENA_MAPS[id].desc}</small></button>`).join('');
+  const petBtns=`<button ${selected(!cfg.petId)} data-pet=""><span class="arena-no-pet">—</span><b>No companion</b></button>`+PETIDS.map(id=>`<button ${selected(cfg.petId===id)} data-pet="${id}"><img src="${petIcon(id)}" alt="" loading="lazy"><b>${PETS[id].name}</b><small>Fully trained</small></button>`).join('');
+  const botDisabled=MP.active?'disabled':'';
+  showOverlayHTML(`<div class="card arena-setup"><header class="arena-header"><p class="ovkicker">The Arena · PvP & practice</p><h2>Arena setup</h2><p>Try any class. Your campaign gear and progress stay safe.</p></header>
+    <nav class="arena-tabs" role="tablist" aria-label="Arena setup sections">${[['fighter','Fighter','Class & equipment'],['arena','Arena & rules','Map & match options'],['bots','Practice bots','Solo opponents']].map(([id,title,sub])=>`<button role="tab" aria-selected="${tab===id}" aria-controls="arena-panel-${id}" id="arena-tab-${id}" data-arenatab="${id}">${title}<small>${sub}</small></button>`).join('')}</nav>
+    <div class="arena-layout"><main class="arena-scroll">
+      <section role="tabpanel" aria-labelledby="arena-tab-fighter" id="arena-panel-fighter" ${tab!=='fighter'?'hidden':''}>
+        <div class="arena-section-heading"><div><h3>Choose your class</h3><p>A fitting weapon is selected automatically.</p></div><span class="arena-chip">${htmlSafe(C.disp)}</span></div><div class="arena-class-grid">${classBtns}</div>
+        <section class="arena-section"><h3>Equipment & strength</h3><p>${fair?'Fair Mode uses level 30, rank 10 and Epic gear. Turn it off in Arena & rules to customize these.':'Set your fighter’s strength, then choose compatible equipment.'}</p>
+          <div class="arena-fields"><label>Character level <b id="arLvlV">${effective.level}</b><input id="arLvl" type="range" min="1" max="60" value="${effective.level}" ${fair?'disabled':''}></label><label>Class rank <b id="arRankV">${effective.rank}</b><input id="arRank" type="range" min="1" max="10" value="${effective.rank}" ${fair?'disabled':''}></label>
+          <label>Weapon<select id="arArch" ${fixedWeapon||fair?'disabled':''}>${archOpts}</select></label><label>Weapon rarity<select id="arWRid" ${fixedWeapon||fair?'disabled':''}>${rarityOptions(effective.wRid)}</select></label><label>Armor rarity<select id="arARid" ${fair?'disabled':''}>${rarityOptions(effective.aRid)}</select></label></div>
+          <div class="arena-build-actions"><button class="arena-minor" id="arRandSpec"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="">Random skill build</button>${inA?'<button class="arena-minor" id="arRespec">Choose skills · Free</button>':''}<small>${randomized?'Custom randomized build ready.':'Skills and passives are ready to try.'}</small></div>
+        </section>
+        <details class="arena-section arena-pets" ${cfg.petId?'open':''}><summary>Companion <span>${cfg.petId?htmlSafe(PETS[cfg.petId]?.name||'Selected'):'None equipped'}</span></summary><p>Optional. Every Arena companion is fully trained.</p><div class="arena-pet-grid">${petBtns}</div></details>
+      </section>
+      <section role="tabpanel" aria-labelledby="arena-tab-arena" id="arena-panel-arena" ${tab!=='arena'?'hidden':''}>
+        <div class="arena-section-heading"><div><h3>Choose the battleground</h3><p>${MP.active&&!MP.isHost?'The host chooses the shared map.':'Applying a map starts a fresh Arena round.'}</p></div></div><div class="arena-map-grid">${mapCards}</div>
+        <section class="arena-section"><h3>Match rules</h3><div class="arena-rules"><button id="arFair" ${selected(cfg.fair)}><b>Fair Mode <span>${cfg.fair?'ON':'OFF'}</span></b><small>Equal level 30, rank 10 and Epic gear. Your class stays your choice.</small></button><button id="arPow" ${selected(cfg.powerups)}><b>Arena powerups <span>${cfg.powerups?'ON':'OFF'}</span></b><small>Healing, damage and speed pickups appear during the round.</small></button>${MP.active&&MP.isHost?`<button id="arTeams" ${selected(cfg.teams)}><b>Team match <span>${cfg.teams?'ON':'OFF'}</span></b><small>Split the party into two teams. Friendly fire is off.</small></button>`:''}</div></section>
+        <section class="arena-section arena-random"><h3>Try something unexpected</h3><p>Randomize your class, gear, strength and practice opponents.</p><button class="arena-minor" id="arRand"><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="">Randomize loadout</button></section>
+      </section>
+      <section role="tabpanel" aria-labelledby="arena-tab-bots" id="arena-panel-bots" ${tab!=='bots'?'hidden':''}>
+        <div class="arena-section-heading"><div><h3>Practice opponents</h3><p>${MP.active?'Bots are solo-only. Your friends are your opponents in multiplayer.':'Fight class-based bots. They return after defeat so you can keep practicing.'}</p></div></div>
+        <section class="arena-section"><div class="arena-fields"><label>Number of bots <b id="arBotsV">${MP.active?0:cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${MP.active?0:cfg.bots}" ${botDisabled}></label></div><h4>Difficulty</h4><div class="arena-difficulty">${BOT_DIFFS.map(dk=>`<button ${selected(cfg.botDiff===dk)} data-bd="${dk}" ${botDisabled}>${BOT_DIFF[dk].label}</button>`).join('')}</div></section>
+        <section class="arena-section"><div class="arena-section-heading"><h3>Opponent class</h3><button class="arena-minor" id="arBotClsRand" ${botDisabled}><img class="randomize-dice" src="icons/actions/randomize-dice.png" alt="">Randomize</button></div><div class="arena-bot-grid"><button ${selected(cfg.botClass==='random')} data-botcls="random" ${botDisabled}><b>Random class</b></button>${Object.keys(CLASSES).map(cid=>`<button ${selected(cfg.botClass===cid)} data-botcls="${cid}" ${botDisabled}>${CLASSES[cid].icon}<b>${CLASSES[cid].disp}</b></button>`).join('')}</div></section>
+      </section>
+    </main><aside class="arena-summary" aria-label="Selected loadout"><p class="ovkicker">Ready to try</p><div class="arena-summary-class">${C.icon}<h3>${htmlSafe(C.disp)}</h3></div><dl><div><dt>Strength</dt><dd>Level ${effective.level} · Rank ${effective.rank}</dd></div><div><dt>Weapon</dt><dd>${htmlSafe(fixedWeapon?.name||ARCHES[arenaWeaponArche(cfg.classId,effective.wArch)]?.disp||'Class weapon')}</dd></div><div><dt>Gear</dt><dd>${fixedWeapon?'Class weapon':RARITY[effective.wRid].name+' weapon'} · ${RARITY[effective.aRid].name} armor</dd></div><div><dt>Battleground</dt><dd>${ARENA_MAPS[cfg.map].name}</dd></div><div><dt>Opponents</dt><dd>${MP.active?'Your party':cfg.bots?cfg.bots+' practice bot'+(cfg.bots===1?'':'s'):'Free practice · no bots'}</dd></div></dl><div class="arena-safe-note">Campaign save protected<br><small>Changes apply only inside the Arena.</small></div></aside></div>
+    <footer class="arena-footer"><button class="arena-minor" id="arBack">Back</button>${inA?'<button class="arena-leave" id="arLeave">Leave Arena</button>':''}<button class="bigbtn" id="arGo">${inA?'Apply loadout':'Enter Arena'} <span aria-hidden="true">→</span></button></footer></div>`);
+  document.querySelectorAll('[data-arenatab]').forEach(b=>b.onclick=()=>{openArenaSetup._tab=b.dataset.arenatab;openArenaSetup(back);document.querySelector('#arena-tab-'+openArenaSetup._tab)?.focus();});
+  if(MP.active&&!MP.isHost)document.querySelectorAll('[data-map],#arPow,#arFair').forEach(b=>b.disabled=true);
   const g=id=>document.getElementById(id);
+  const summary=()=>{const pos=document.querySelector('.arena-scroll')?.scrollTop||0;openArenaSetup(back);document.querySelector('.arena-scroll').scrollTop=pos;};
   document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{ cfg.map=b.dataset.map; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
   document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ arenaSelectClass(cfg,b.dataset.cls); try{SFX.pickup();}catch(e){} openArenaSetup(back); });
-  g('arLvl').oninput=e=>{ cfg.level=+e.target.value; g('arLvlV').textContent=cfg.level; };
-  g('arRank').oninput=e=>{ cfg.rank=+e.target.value; g('arRankV').textContent=cfg.rank; };
-  g('arArch').onchange=e=>{ cfg.wArch=arenaWeaponArche(cfg.classId,e.target.value); };
-  g('arWRid').onchange=e=>{ cfg.wRid=e.target.value; };
-  g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
+  g('arLvl').oninput=e=>{cfg.level=+e.target.value;g('arLvlV').textContent=cfg.level;};g('arLvl').onchange=summary;
+  g('arRank').oninput=e=>{cfg.rank=+e.target.value;g('arRankV').textContent=cfg.rank;};g('arRank').onchange=summary;
+  g('arArch').onchange=e=>{ cfg.wArch=arenaWeaponArche(cfg.classId,e.target.value);summary();};
+  g('arWRid').onchange=e=>{cfg.wRid=e.target.value;summary();};
+  g('arARid').onchange=e=>{cfg.aRid=e.target.value;summary();};
   document.querySelectorAll('[data-pet]').forEach(b=>b.onclick=()=>{ cfg.petId=b.dataset.pet||null; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
-  g('arBots').oninput=e=>{ cfg.bots=+e.target.value; g('arBotsV').textContent=cfg.bots; };
+  g('arBots').oninput=e=>{cfg.bots=+e.target.value;g('arBotsV').textContent=cfg.bots;};g('arBots').onchange=summary;
   document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
   document.querySelectorAll('[data-botcls]').forEach(b=>b.onclick=()=>{ cfg.botClass=b.dataset.botcls; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
   { const rb=g('arBotClsRand'); if(rb) rb.onclick=()=>{ cfg.botClass=randomClassId(); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('Bots: '+CLASSES[cfg.botClass].disp); openArenaSetup(back); }; }
@@ -19251,9 +19251,9 @@ function updateInteract(){
       const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
       if(eff<best){ best=eff; it=make(); } };
     for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({anchorNpc:n,x:n.x,z:n.z,y:(n.y||0)+(n.direct?155:142),service:n.role||'',label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
-    if(!G.riftHall&&!G.sparringRoom)consider(0,30,100,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal & travel',act:activateHubWaystone}));
+    if(G.hub&&!G.riftHall&&!G.sparringRoom)consider(0,30,100,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
-    if(!G.riftHall&&!G.sparringRoom)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner
+    if(G.hub&&!G.riftHall&&!G.sparringRoom)consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner
   }
   else if(G.qmarks && G.qmarks.some(function(m){ return !m.done && (m.k==='kindle'||m.k==='purge'); })){
     const fy=playerAimYaw(p), fx=Math.sin(fy), fz=Math.cos(fy); let best=1e9;
@@ -24585,7 +24585,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2272"></script>
+<script type="module" src="./hero3d.js?v=2274"></script>
 <script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

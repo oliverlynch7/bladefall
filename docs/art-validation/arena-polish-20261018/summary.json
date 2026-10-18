@@ -1,0 +1,58 @@
+{
+  "version": "2.274.0-arena-polish",
+  "menu": [
+    "Fighter: class cards, fitting equipment, level/rank, builds and optional companion",
+    "Arena & rules: map cards, Fair Mode, powerups, host team option",
+    "Practice bots: count, difficulty, class; clear solo-only state in multiplayer",
+    "Selected loadout summary, sticky Apply/Back/Leave footer, red close; responsive390px"
+  ],
+  "models": {
+    "triangles": 4074,
+    "drawCallsWithSigns": 36,
+    "beforeBatchDrawCalls": 110,
+    "newLights": 0,
+    "design": [
+      "Crimson armory console, drawers/planks/brass rivets, banner, weapon and shield displays",
+      "Waystation arch with stone courses, brass inlay, animated cyan portal and readable sign"
+    ],
+    "lifecycle": "Own geometry/materials/textures and instance buffers disposed on world replacement/exit; correct lava staging height, fitted invisible colliders, expanded supported staging footprint; reduced motion and voxel fallback."
+  },
+  "additionalFixes": [
+    "Arena selected companion now actually spawns",
+    "Arena minimap caption uses its map name",
+    "Campaign quest tracker hidden in Arena",
+    "Hub Waystone and hidden cheat interaction no longer leak into Arena"
+  ],
+  "verification": {
+    "regressionSuites": 134,
+    "focusedArtMenuChecks": 40,
+    "classWeaponChecks": 250,
+    "desktopBrowserChecks": 22,
+    "mobile390BrowserChecks": 21,
+    "mobileLayout": {
+      "card": {
+        "bottom": 818.671875,
+        "left": 25,
+        "right": 365,
+        "top": 25.3125
+      },
+      "close": {
+        "bottom": 75.3125,
+        "left": 307,
+        "right": 351,
+        "top": 31.3125
+      },
+      "footer": {
+        "bottom": 818.671875,
+        "top": 749.671875
+      },
+      "horizontalOverflow": false,
+      "scrollable": true,
+      "viewport": {
+        "height": 844,
+        "width": 390
+      }
+    },
+    "notes": "Muted isolated pre-change level100 save. Actual menu handlers for class/gear/Fair/map/build/bot/pet/randomization/Apply and exact campaign restoration. Guest restrictions checked in local guest mode, no new Internet transport test. Red close actual click returns to Arena. Before/after instancing counts verified; screenshots inspected."
+  }
+}

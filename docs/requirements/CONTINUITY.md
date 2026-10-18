@@ -2508,3 +2508,10 @@ The two-instance baseline did show guest rewards and scrolling; the friend's exa
 Verification:127/127 regression suites,18 focused animation/preference/skip/hidden-tab/queue checks,28 real-browser two-instance checks with independent old saves over reliable WebRTC. Measured the guest reel transform changing through host snapshots, correct settlement, explicit Off with OS Reduce On and Element.animate absent, actual updateWorld proximity pickup in both clients, host/guest opening order, full bags, reconnects and duplicate prevention. The harness console records a MutationObserver null-target error during initial loading; game-window error collectors are empty and all chest assertions pass. Exact remote friend environment still needs confirmation. Evidence:docs/art-validation/coop-chest-reveal-20261017/.
 
 Also refreshed the isolated palm-flame test fixture's missing recomputeArmor dependency introduced by the previous mana-pool change; it now asserts pool recomputation on class switch. No additional combat behavior changed in this pass.
+
+
+## [Codex | 2026-10-17] Remove obsolete teammate cubes - v2.267.0
+
+Removed the living teammate's5x5 team/id cube and downed ally's pulsing6x6 red cube from MP.drawPeer. Retained real character/downed body, names, class/level and health labels, team label colors, downed/revive state, paused grey presence and companions/summons. No save/network changes.
+
+Verified24 focused render-branch checks,82 co-op companion checks and42 pause regressions, plus inline syntax compilation. Muted real browser loaded an old level100 save and rendered a named80/100HP co-op ally without the obsolete overhead marker. Evidence:docs/art-validation/peer-markers-20261017/.

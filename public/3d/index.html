@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.266.0-coop-chest-reveal';
+const VERSION3D='2.267.0-clean-teammates';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15333,12 +15333,11 @@ const MP={
     if(window.BFSocial?.peerVisible?.(q)===false)return;
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
     const tint=this.teams?(this.teamOf(q.id)===0?'#4aa3ff':'#ff5555'):'hsl('+(h%360)+',70%,60%)';   // team colour in 2v2
-    if(q.downed){   // collapsed on the ground + a pulsing red distress beacon so an ally can find & revive you
+    if(q.downed){   // The downed nameplate identifies allies who need reviving.
       const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null, skinc=sk&&sk.skin?sk.skin:'#d9b08c';
       pushM(); mv(q.x,4,q.z); rotY(q.yaw||0);
       bx(0,6,0, 20,8,12, '#7a2b2b'); bx(0,6,10, 10,8,10, skinc);   // slumped body + head
-      const pu=0.5+0.5*Math.sin(t*6);
-      bx(0,40+pu*8,0, 6,6,6, '#ff5e54', '#ff5e54'); popM();
+      popM();
     } else {
       // render allies with the SAME renderer as you — so their skin AND equipped weapon show through.
       const mv2=Math.hypot((q.tx-q.x)||0,(q.tz-q.z)||0);   // some walk anim if they're moving
@@ -15355,8 +15354,6 @@ const MP={
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,pausedSafe?'#777777':'#6f86c9'); bx(0,38,0,12,12,12,pausedSafe?'#999999':'#d9b08c'); popM(); }
       if(window.BFSocial?.camera())return; // Keep player labels and beacons off the chessboard.
-      // team/id beacon so allies stay distinguishable at a glance
-      pushM(); mv(q.x,(q.y||0)+58+(q.riding?24:0),q.z); bx(0,0,0, 5,5,5, tint, tint); popM();
     }
     // this ally's summons (necromancer minions etc.) — synced from the owner, drawn with the same model
     if(q.minions&&q.minions.length && typeof drawPet3==='function'){

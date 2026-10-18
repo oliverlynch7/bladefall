@@ -1,0 +1,17 @@
+[
+  {
+    "suite": "test-peer-markers.cjs",
+    "pass": true,
+    "output": "24 teammate model, no-cube, name/health, downed, mount, pause, fallback and companion checks passed.\n"
+  },
+  {
+    "suite": "test-coop-companions.cjs",
+    "pass": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}\n"
+  },
+  {
+    "suite": "test-esc-pause.cjs",
+    "pass": true,
+    "output": "42 pause regression checks passed.\n"
+  }
+]

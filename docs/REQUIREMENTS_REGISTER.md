@@ -2094,3 +2094,10 @@ Inspection/plan: baseline regeneration is3.5%max/sec during casting; each basic 
 User: "the chest loot scrolling aniomaton isnt working for my friend on coop"
 
 Inspection: current two-instance WebRTC reproduction grants independent rewards and the guest reel does scroll through host snapshots; the friend's exact failure is not yet reproduced. Found presentation edge cases: OS reduced-motion always overrides an explicit in-game Off; scrolling relies entirely on Element.animate; and an interaction edge in the opening frame can immediately skip it. Plan: respect explicit in-game motion preference, drive the small reel with requestAnimationFrame with hidden-tab elapsed-time protection, and arm manual skip after a short opening grace period. Preserve reduced-motion instant result, winner/reward identity, queue/scene cleanup, bound interact key, SFX and independent claim records. Refresh asset URLs; verify actual guest reel movement/landing plus preference and input edge cases, without claiming two-person remote validation.
+
+
+## [Codex | 2026-10-17] Remove legacy overhead teammate cubes
+
+User: "we dont need the little boxes that float above your coop frinds head anymore that was an old feature"
+
+Inspection/plan: MP.drawPeer still emits a5x5 team/id cube above every living teammate and a pulsing6x6 red cube above downed allies. Remove those legacy floating markers; keep the actual character/downed body, modern name/HP/class labels, downed/revive information, team label colors, paused grey model and companion/summon rendering. Verify peer render branches and old-save browser appearance; no save or network change.

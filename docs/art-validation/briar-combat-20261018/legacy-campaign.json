@@ -1,0 +1,578 @@
+{
+  "mode": "play",
+  "area": 0,
+  "hero": {
+    "class": "warrior",
+    "hp": 154.44,
+    "maxHp": 133,
+    "weapon": {
+      "arche": "sword",
+      "art": "sword",
+      "cls": "melee",
+      "sch": "phys",
+      "el": null,
+      "rarity": "common",
+      "chg": null,
+      "reaper": false,
+      "anyClass": false,
+      "ians": false,
+      "name": "Rusty Sword",
+      "dmg": 10.6,
+      "cd": 0.38,
+      "kb": 260,
+      "lifesteal": 0,
+      "color": "#b9c0cc",
+      "blade": "#bcae8a",
+      "range": 84,
+      "affixes": []
+    },
+    "level": 100
+  },
+  "placement": {
+    "moved": [
+      {
+        "moved": true,
+        "type": "sporeback",
+        "from": {
+          "x": 1240,
+          "y": 40,
+          "z": -1840
+        },
+        "to": {
+          "x": 1240,
+          "y": 0,
+          "z": -1840
+        },
+        "mid": 6
+      },
+      {
+        "moved": true,
+        "type": "thornboar",
+        "from": {
+          "x": 1045,
+          "y": 40,
+          "z": -1744.7372055837118
+        },
+        "to": {
+          "x": 1045,
+          "y": 0,
+          "z": -1744.7372055837118
+        },
+        "mid": 7
+      }
+    ],
+    "unresolved": []
+  },
+  "footprints": [
+    {
+      "mid": 1,
+      "at": [
+        110,
+        0,
+        -520
+      ],
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "mid": 2,
+      "at": [
+        230,
+        0,
+        -910
+      ],
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "mid": 27,
+      "at": [
+        20,
+        0,
+        -2570
+      ],
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "mid": 28,
+      "at": [
+        -110,
+        0,
+        -2810
+      ],
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "name": "Briar Homes",
+      "x": 0,
+      "z": 400,
+      "y": 0
+    },
+    {
+      "name": "Overrun Fields",
+      "x": 140,
+      "z": -220,
+      "y": 0
+    },
+    {
+      "name": "Watchpost Approach",
+      "x": -180,
+      "z": -860,
+      "y": 0
+    },
+    {
+      "name": "Watchpost",
+      "x": -700,
+      "z": -1060,
+      "y": 140
+    },
+    {
+      "name": "Mill Commons",
+      "x": 120,
+      "z": -1660,
+      "y": 0
+    },
+    {
+      "name": "West Cornlands",
+      "x": -900,
+      "z": -1710,
+      "y": 0
+    },
+    {
+      "name": "Eastwood Orchard",
+      "x": 1110,
+      "z": -1840,
+      "y": 40
+    },
+    {
+      "name": "Flooded Hamlet",
+      "x": -1030,
+      "z": -2710,
+      "y": 0
+    },
+    {
+      "name": "Millrace Ford",
+      "x": 50,
+      "z": -2620,
+      "y": 0
+    },
+    {
+      "name": "Windmill Rise",
+      "x": 1080,
+      "z": -2800,
+      "y": 80
+    },
+    {
+      "name": "Old Stone Bridge",
+      "x": 230,
+      "z": -3490,
+      "y": 80
+    },
+    {
+      "name": "Secluded Grove",
+      "x": -1700,
+      "z": -2400,
+      "y": 0
+    },
+    {
+      "name": "Wagon Gate",
+      "x": -210,
+      "z": -4350,
+      "y": 160
+    },
+    {
+      "name": "West Farm Valley",
+      "x": -2300,
+      "z": -850,
+      "y": 0
+    },
+    {
+      "name": "Orchard Lookout",
+      "x": -2380,
+      "z": -1760,
+      "y": 0
+    },
+    {
+      "name": "East Pastures",
+      "x": 2030,
+      "z": -760,
+      "y": 0
+    },
+    {
+      "name": "Bell Tower Ridge",
+      "x": 2220,
+      "z": -1740,
+      "y": 0
+    }
+  ],
+  "enemies": [
+    {
+      "mid": 1,
+      "type": "grunt",
+      "x": 110,
+      "y": 0,
+      "z": -520,
+      "hp": 72,
+      "dmg": 9.345600000000001,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "group": "village-watch",
+      "elite": false
+    },
+    {
+      "mid": 2,
+      "type": "grunt",
+      "x": 230,
+      "y": 0,
+      "z": -910,
+      "hp": 83,
+      "dmg": 9.345600000000001,
+      "speed": 66,
+      "role": "guard",
+      "phase": "hunt",
+      "group": "village-watch",
+      "elite": false
+    },
+    {
+      "mid": 3,
+      "type": "thornboar",
+      "x": -770,
+      "y": 0,
+      "z": -1710,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 4,
+      "type": "thornboar",
+      "x": -965,
+      "y": 0,
+      "z": -1614.7372055837118,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 69,
+      "elite": false
+    },
+    {
+      "mid": 5,
+      "type": "sporeback",
+      "x": -965,
+      "y": 0,
+      "z": -1805.2627944162882,
+      "hp": 92,
+      "dmg": 10.5138,
+      "speed": 40,
+      "elite": false
+    },
+    {
+      "mid": 6,
+      "type": "sporeback",
+      "x": 1240,
+      "y": 0,
+      "z": -1840,
+      "hp": 92,
+      "dmg": 10.5138,
+      "speed": 40,
+      "elite": false
+    },
+    {
+      "mid": 7,
+      "type": "thornboar",
+      "x": 1045,
+      "y": 0,
+      "z": -1744.7372055837118,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 8,
+      "type": "flyer",
+      "x": 1045,
+      "y": 40,
+      "z": -1935.2627944162882,
+      "hp": 43,
+      "dmg": 8.1774,
+      "speed": 52,
+      "elite": false
+    },
+    {
+      "mid": 9,
+      "type": "grunt",
+      "x": -900,
+      "y": 0,
+      "z": -2710,
+      "hp": 83,
+      "dmg": 9.345600000000001,
+      "speed": 66,
+      "role": "guard",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 10,
+      "type": "thornboar",
+      "x": -1095,
+      "y": 0,
+      "z": -2614.737205583712,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 11,
+      "type": "sporeback",
+      "x": -1095,
+      "y": 0,
+      "z": -2805.262794416288,
+      "hp": 92,
+      "dmg": 10.5138,
+      "speed": 40,
+      "elite": false
+    },
+    {
+      "mid": 12,
+      "type": "sporeback",
+      "x": 1210,
+      "y": 80,
+      "z": -2800,
+      "hp": 166,
+      "dmg": 15.7707,
+      "speed": 43.2,
+      "elite": true
+    },
+    {
+      "mid": 13,
+      "type": "flyer",
+      "x": 950,
+      "y": 80,
+      "z": -2800,
+      "hp": 43,
+      "dmg": 8.1774,
+      "speed": 52,
+      "elite": false
+    },
+    {
+      "mid": 14,
+      "type": "grunt",
+      "x": 360,
+      "y": 80,
+      "z": -3490,
+      "hp": 83,
+      "dmg": 9.345600000000001,
+      "speed": 66,
+      "role": "guard",
+      "phase": "hunt",
+      "guard": true,
+      "elite": false
+    },
+    {
+      "mid": 15,
+      "type": "grunt",
+      "x": 165.00000000000003,
+      "y": 80,
+      "z": -3394.737205583712,
+      "hp": 72,
+      "dmg": 9.345600000000001,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "guard": true,
+      "elite": false
+    },
+    {
+      "mid": 16,
+      "type": "grunt",
+      "x": 164.99999999999994,
+      "y": 80,
+      "z": -3585.262794416288,
+      "hp": 83,
+      "dmg": 9.345600000000001,
+      "speed": 66,
+      "role": "guard",
+      "phase": "hunt",
+      "guard": true,
+      "elite": false
+    },
+    {
+      "mid": 17,
+      "type": "thornboar",
+      "x": -1570,
+      "y": 0,
+      "z": -2400,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 18,
+      "type": "sporeback",
+      "x": -1830,
+      "y": 0,
+      "z": -2400,
+      "hp": 92,
+      "dmg": 10.5138,
+      "speed": 51.2,
+      "elite": false
+    },
+    {
+      "mid": 19,
+      "type": "grunt",
+      "x": -2430,
+      "y": 0,
+      "z": -800,
+      "hp": 72,
+      "dmg": 9.345600000000001,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "homeRaid": "runner",
+      "elite": false
+    },
+    {
+      "mid": 20,
+      "type": "caster",
+      "x": -2190,
+      "y": 0,
+      "z": -930,
+      "hp": 64,
+      "dmg": 11.682,
+      "speed": 62,
+      "role": "hex",
+      "phase": "hunt",
+      "homeRaid": "caster",
+      "elite": false
+    },
+    {
+      "mid": 21,
+      "type": "grunt",
+      "x": -2040,
+      "y": 0,
+      "z": -700,
+      "hp": 159,
+      "dmg": 14.018400000000002,
+      "speed": 50.220000000000006,
+      "phase": "hunt",
+      "homeRaid": "heavy",
+      "elite": true
+    },
+    {
+      "mid": 22,
+      "type": "grunt",
+      "x": -2380,
+      "y": 22,
+      "z": -1060,
+      "hp": 72,
+      "dmg": 9.345600000000001,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "homeRaid": "runner",
+      "elite": false
+    },
+    {
+      "mid": 23,
+      "type": "grunt",
+      "x": 2130,
+      "y": 0,
+      "z": -860,
+      "hp": 72,
+      "dmg": 9.345600000000001,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 24,
+      "type": "flyer",
+      "x": 2060,
+      "y": 78.90204774511578,
+      "z": -550,
+      "hp": 43,
+      "dmg": 8.1774,
+      "speed": 52,
+      "elite": false
+    },
+    {
+      "mid": 25,
+      "type": "thornboar",
+      "x": -2480,
+      "y": 0,
+      "z": -2130,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 26,
+      "type": "thornboar",
+      "x": -2200,
+      "y": 0,
+      "z": -2300,
+      "hp": 92,
+      "dmg": 12.850200000000001,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 27,
+      "type": "grunt",
+      "x": 20,
+      "y": 0,
+      "z": -2570,
+      "hp": 72,
+      "dmg": 9.345600000000001,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "group": "millrace-patrol",
+      "elite": false
+    },
+    {
+      "mid": 28,
+      "type": "caster",
+      "x": -110,
+      "y": 0,
+      "z": -2810,
+      "hp": 64,
+      "dmg": 11.682,
+      "speed": 62,
+      "role": "hex",
+      "phase": "hunt",
+      "group": "millrace-patrol",
+      "elite": false
+    }
+  ]
+}

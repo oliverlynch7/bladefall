@@ -5,11 +5,12 @@ const CHARGE_SPEED=620,CHARGE_TIME=1.05,LOCK_TIME=.45;
 function impactAt(e,x,z,props){return props.find(p=>Math.abs(x-p.x)<p.w/2+e.r&&Math.abs(z-p.z)<p.d/2+e.r);}
 // Preview the same swept body and first blocking prop as the real charge. Small
 // steps match step()'s collision resolution (at most 10 units), including corners.
-function chargePreview(e,props=[]){
+function chargePreview(e,props=[],walkable){
  const distance=CHARGE_SPEED*CHARGE_TIME,steps=Math.ceil(distance/5);
  for(let i=1;i<=steps;i++){
   const d=distance*i/steps,x=e.x+e.teleX*d,z=e.z+e.teleZ*d,hit=impactAt(e,x,z,props);
   if(hit)return {distance:d,width:e.r*2,hit:hit.id};
+  if(walkable&&!walkable(x,z))return {distance:Math.max(0,d-distance/steps),width:e.r*2,hit:null,edge:true};
  }
  return {distance,width:e.r*2,hit:null};
 }
@@ -38,15 +39,16 @@ function step(e,dt,target,env){
  e.bruteClock=Math.max(0,e.bruteClock-dt);
  if(e.bruteState==='hunt'){
   if(d>115){const v=Math.min(d-115,(env.speed||90)*dt);e.x+=ux*v;e.z+=uz*v;}
-  if(e.bruteClock===0&&d<760){e.bruteTurns++;if(e.bruteTurns%3===0&&d<260){enter(e,'slam',.95);e.slamW=.95;env.tell('Jump the ground wave!');}else{enter(e,'wind',1.15);e.windMax=1.15;e.windT=1.15;e.teleX=ux;e.teleZ=uz;env.tell('Bait the charge into a cart or stone!');}}
+  if(e.bruteClock===0&&d<760){e.bruteTurns++;if(e.bruteTurns%3===0&&d<(e.phase>=2?420:280)){enter(e,'slam',.95);e.slamW=.95;env.tell('Jump the ground wave!');}else{const wind=e.phase===3?.9:e.phase===2?1.02:1.15;enter(e,'wind',wind);e.windMax=wind;e.windT=wind;e.teleX=ux;e.teleZ=uz;env.tell('Bait the charge into a cart or stone!');}}
  }else if(e.bruteState==='wind'){
   e.windT=e.bruteClock;if(e.bruteClock>LOCK_TIME){e.teleX=ux;e.teleZ=uz;}e.yaw=Math.atan2(e.teleX,e.teleZ);
   if(e.bruteClock===0){enter(e,'charge',CHARGE_TIME);e.lunge=CHARGE_TIME;}
  }else if(e.bruteState==='charge'){
   e.yaw=Math.atan2(e.teleX,e.teleZ);e.lunge=e.bruteClock;const travel=CHARGE_SPEED*dt,n=Math.ceil(travel/10);
   for(let i=0;i<n;i++){const x=e.x+e.teleX*travel/n,z=e.z+e.teleZ*travel/n;const hit=impactAt(e,x,z,env.props);
-   if(hit){e.bruteStaggers=(e.bruteStaggers||0)+1;enter(e,'stagger',3);e.staggerT=3;env.impact(hit);return;}e.x=x;e.z=z;}
-  if(e.bruteClock===0)enter(e,'recover',1.15);
+   if(hit){e.bruteStaggers=(e.bruteStaggers||0)+1;enter(e,'stagger',3);e.staggerT=3;env.impact(hit);return;}
+   if(env.walkable&&!env.walkable(x,z)){enter(e,'recover',1.4);return;}e.x=x;e.z=z;}
+  if(e.bruteClock===0)enter(e,'recover',1.4);
  }else if(e.bruteState==='slam'){
   e.slamW=e.bruteClock;if(e.bruteClock===0){env.slam();enter(e,'recover',1.1);}
  }else if(e.bruteState==='stagger'){e.staggerT=e.bruteClock;if(e.bruteClock===0)enter(e,'hunt',1.15);}

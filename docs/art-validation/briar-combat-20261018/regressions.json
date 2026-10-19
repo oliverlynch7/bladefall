@@ -1,0 +1,117 @@
+[
+  {
+    "suite": "test-briar-combat.cjs",
+    "pass": true,
+    "output": "75 Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.\nBrute phase 2/3 ground-wave variation and first-phase charge preserved.\n"
+  },
+  {
+    "suite": "test-campaign-elites.cjs",
+    "pass": true,
+    "output": "{\"checks\":[\"raid replaces random role and preserves original body stats\",\"raid full harmless warning and locked aim\",\"raid snapshot carries complete phase geometry\",\"raid recovery leaves an attack opening\",\"forge replaces random role and preserves original body stats\",\"forge full harmless warning and locked aim\",\"forge snapshot carries complete phase geometry\",\"forge recovery leaves an attack opening\",\"shore replaces random role and preserves original body stats\",\"shore full harmless warning and locked aim\",\"shore snapshot carries complete phase geometry\",\"shore recovery leaves an attack opening\",\"tower replaces random role and preserves original body stats\",\"tower full harmless warning and locked aim\",\"tower snapshot carries complete phase geometry\",\"tower recovery leaves an attack opening\",\"raid hits front, misses rear/outside/above\",\"forge expands outward and jumping clears it\",\"shore hits three lanes, gaps and cover range stay safe\",\"tower cardinal lanes hit, diagonal gaps stay safe\",\"dead enemy or target cannot damage\",\"tall solid cover blocks, ground and overhead props do not\"]}\n"
+  },
+  {
+    "suite": "test-brute-encounter.cjs",
+    "pass": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed.\n"
+  },
+  {
+    "suite": "test-boss-tactics.cjs",
+    "pass": true,
+    "output": "59 campaign boss armor, phase, status, cover, flank, co-op authority and isolation checks passed.\n"
+  },
+  {
+    "suite": "test-boss-combat-scope.cjs",
+    "pass": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed.\n"
+  },
+  {
+    "suite": "test-campaign-threat.cjs",
+    "pass": true,
+    "output": "60 campaign threat and health visibility checks passed.\n"
+  },
+  {
+    "suite": "test-briar-refinement.cjs",
+    "pass": true,
+    "output": "Briar: specific hunt, one-time reward, three-slot cap, respawn identity, discovered-only related clues pass.\n"
+  },
+  {
+    "suite": "test-briar-performance.cjs",
+    "pass": true,
+    "output": "Collision behavior and bounded navigation pass; far-walkway reads 62500 -> 0. Auto pixel budget/native override/GPU-query cache pass.\nLamp proximity changes intensity, never shader light count.\n"
+  },
+  {
+    "suite": "test-briar-journey.cjs",
+    "pass": true,
+    "output": "Briar mill: pressure/release, real obstacle blocking, owner arbitration, reset, disconnect/jump, weight completion, stale snapshot, delayed bridge collision, legacy states and lane bounds passed.\nMill sketch appears as a related clue only after discovery.\nSuperseded mill notices clear; discovered clues and permanent journal entries remain.\nMill fallback follows the active renderer, including a mid-level graphics switch.\n"
+  },
+  {
+    "suite": "test-mana-economy.cjs",
+    "pass": true,
+    "output": "537 mana coverage,34 class paths, recovery, reserve, area-hit and co-op/PvP receipt checks passed.\n"
+  },
+  {
+    "suite": "test-class-progression.cjs",
+    "pass": true,
+    "output": "2873 rank, legacy-choice and ordered-choice checks passed across 17 classes.\nSkill/dash lesson persistence, legacy missing field and stale-save guard passed.\n"
+  },
+  {
+    "suite": "test-enemy-warning-sfx.cjs",
+    "pass": true,
+    "output": "206 species cue, rising-edge, distance, density, original-fallback and asset checks passed.\n"
+  },
+  {
+    "suite": "test-combat-detail-sfx.cjs",
+    "pass": true,
+    "output": "794 additive event, actual-hit, delayed, receipt, lifecycle, density, preservation and asset checks passed.\n"
+  },
+  {
+    "suite": "test-class-cast-sfx.cjs",
+    "pass": true,
+    "output": "1553 complete cast identity, actual gate, suppression, relay, lazy decode and asset checks passed.\n"
+  },
+  {
+    "suite": "test-coop-audio.cjs",
+    "pass": true,
+    "output": "52 capture, fallback, mute-independent dispatch, safe relay, rate/scene/duplicate and actual gain checks passed.\n"
+  },
+  {
+    "suite": "test-coop-chests.cjs",
+    "pass": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\n"
+  },
+  {
+    "suite": "test-coop-companions.cjs",
+    "pass": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}\n"
+  },
+  {
+    "suite": "test-party-transitions.cjs",
+    "pass": true,
+    "output": "56 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed.\n"
+  },
+  {
+    "suite": "test-onboarding-coop.cjs",
+    "pass": true,
+    "output": "21 onboarding/co-op face and dialogue visibility checks passed.\n"
+  },
+  {
+    "suite": "test-premium-progression.cjs",
+    "pass": true,
+    "output": "514 premium award coordination, rollover, class choice, model, accessibility and sound-candidate checks passed.\n"
+  },
+  {
+    "suite": "test-progression-celebrations.cjs",
+    "pass": true,
+    "output": "{\"checks\":44,\"introMs\":900,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\nActual nonblocking rank-banner / menu suspension / cancellation checks passed.\n"
+  },
+  {
+    "suite": "test-dialogue-categories.cjs",
+    "pass": true,
+    "output": "1431 category, single-path, retired-choice authority, side/lore access and sequential delivery checks passed.\n"
+  },
+  {
+    "suite": "test-onboarding-narration.cjs",
+    "pass": true,
+    "output": "264 narration transcript/hash, binding, mute, cancellation, late load/play and recovery checks passed.\n"
+  }
+]

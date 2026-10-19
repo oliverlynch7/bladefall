@@ -1137,20 +1137,21 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2239"></script>
 <script src="./campaign-threat.js?v=2276"></script>
-<script src="./boss-tactics.js?v=2276"></script>
+<script src="./boss-tactics.js?v=2289"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2234"></script>
 <script src="./rift-shards.js?v=1992"></script>
 <script src="./rift-hall.js?v=2076"></script>
-<script src="./brute-encounter.js?v=2276"></script>
+<script src="./brute-encounter.js?v=2289"></script>
 <script src="./marksman-encounter.js?v=2276"></script>
 <script src="./story-state.js?v=2288"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
 <script src="./campaign-geography.js?v=2196"></script>
 <script src="./campaign-patrols.js?v=2183a"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
-<script src="./campaign-elites.js?v=2161"></script>
+<script src="./briar-combat.js?v=2289"></script>
+<script src="./campaign-elites.js?v=2289"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2234"></script>
 <script src="./briar-journey.js?v=2236"></script>
@@ -1220,7 +1221,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.288.0-clear-dialogue';
+const VERSION3D='2.289.0-briar-combat';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5712,6 +5713,7 @@ function loadArea(){
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
   if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignJourney.install(G);}
   G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
+  if(isCampaignAdventure()&&G.area>=0)BFBriarCombat.build(G,{spawn:spawnEnemy,support:enemySupport});
   if(isCampaignAdventure()&&G.area>=0)BFCampaignPlacement.settle(G,{floor:floorAt,resolve:resolveObstacles});
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
@@ -8391,7 +8393,8 @@ function updateCampaignElite(e,dt,p,eff){
  if(!MP.guest()){
   let target=p.hp>0&&!p.downed?p:null;
   for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
-  BFCampaignElites.step(e,dt,target,eff);
+  const command=(inBriar()||inBlackWoods())?BFBriarCombat.decision(G,e,target,!!target&&enemyMeleeClear(e,target),partySize()):{target,attack:true};
+  BFCampaignElites.step(e,dt,command.target,eff,command.attack);
  }
  if(['wind','strike'].includes(e.ceState))e.yaw=Math.atan2(e.ceDX,e.ceDZ);
  // Use the existing body wind-up/release clips, without generic contact damage.
@@ -8408,9 +8411,11 @@ function updateCampaignElite(e,dt,p,eff){
  }
 }
 function drawCampaignEliteDanger(e){
- const k=BFCampaignElites.kits[e.ceKind];if(!k||!['wind','strike'].includes(e.ceState))return;
- const strike=e.ceState==='strike',color=strike?'#fff1d0':k.color,alpha=strike?1:.86,x=e.ceX,z=e.ceZ;
- const mark=(px,pz,width,alpha2=alpha)=>{const floor=floorAt(px,pz,2,e.ceY+65);if(Number.isFinite(floor)&&floor>=e.ceY-45)bx(px,floor+5,pz,width,3,width,color,color,alpha2);};
+ const k=BFCampaignElites.kits[e.ceKind];if(!k)return;
+ if(e.briarRole&&e.ceState==='recover'){for(let i=0;i<12;i++){const a=i*Math.PI/6,r=e.r+15;bx(e.x+Math.cos(a)*r,e.y+4,e.z+Math.sin(a)*r,4,2,4,'#9ce3b1','#173a24',.6);}return;}
+ if(!['wind','strike'].includes(e.ceState))return;
+ const strike=e.ceState==='strike',color=strike?(e.briarRole?'#ff7655':'#fff1d0'):k.color,alpha=strike?1:.86,x=e.ceX,z=e.ceZ;
+ const mark=(px,pz,width,alpha2=alpha)=>{const floor=floorAt(px,pz,2,e.ceY+65);if(Number.isFinite(floor)&&floor>=e.ceY-45)bx(px,floor+5,pz,width,3,width,color,e.briarRole?(strike?'#4a170d':e.briarRole==='hex'?'#2d173b':'#392615'):color,alpha2);};
  const ring=(radius,arc=Math.PI)=>{const base=Math.atan2(e.ceDZ,e.ceDX),n=Math.max(10,Math.ceil(radius*arc*2/18));for(let i=0;i<=n;i++){const a=base-arc+2*arc*i/n;mark(x+Math.cos(a)*radius,z+Math.sin(a)*radius,5);}if(arc<Math.PI)for(const side of [-1,1]){const a=base+side*arc;line(x,z,x+Math.cos(a)*radius,z+Math.sin(a)*radius,4);}};
  const line=(ax,az,bx2,bz2,width)=>{const len=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(len/22));for(let i=0;i<=n;i++)mark(ax+(bx2-ax)*i/n,az+(bz2-az)*i/n,width);};
  const point=(f,a)=>({x:x+e.ceDX*f+e.ceDZ*a,z:z+e.ceDZ*f-e.ceDX*a});
@@ -8434,14 +8439,23 @@ function bossPartyTarget(origin,p){
  }
  return target;
 }
+function bruteChargeGround(e,x,z){
+ const body={...e,x,z};resolveObstacles(body,e.r,null,0);if(Math.hypot(body.x-x,body.z-z)>.1)return false;
+ return [[0,0],[e.r*.6,0],[-e.r*.6,0],[0,e.r*.6],[0,-e.r*.6]].every(([dx,dz])=>{const h=enemySupport({...e,r:0,x:x+dx,z:z+dz});return Number.isFinite(h)&&h>-1e8;});
+}
+function bruteChargePath(e){
+ const key=[Math.round(e.x),Math.round(e.z),Math.round(e.teleX*1000),Math.round(e.teleZ*1000),e.r].join(':');
+ if(e._brutePathKey!==key){e._brutePathKey=key;e._brutePath=BFBruteEncounter.chargePreview(e,G.bruteArena.props,(x,z)=>bruteChargeGround(e,x,z));}
+ return e._brutePath;
+}
 function updateOrchardBrute(e,dt,p,eff){
  updateBossBar(e);if(MP.guest()){if(['wind','charge'].includes(e.bruteState))e.yaw=Math.atan2(e.teleX,e.teleZ);return;}
  // Pick the nearest living co-op player, then lock the charge before it begins.
  const target=bossPartyTarget(e,p);if(!target)return;
- BFBruteEncounter.step(e,dt,target,{props:G.bruteArena.props,speed:Math.max(35,eff*1.9),
+ BFBruteEncounter.step(e,dt,target,{props:G.bruteArena.props,speed:Math.max(35,eff*1.9),walkable:(x,z)=>bruteChargeGround(e,x,z),
   tell:line=>{e._orchardHints=e._orchardHints||new Set();if(!e._orchardHints.has(line)){e._orchardHints.add(line);toast(line);}},
   impact:q=>{q.flashUntil=G.time+.45;G.shake=Math.min(9,G.shake+5);playFx('heavyhit');burst(e.x,e.y+35,e.z,'#c8ac73',12);addText(e.x,e.y+e.h+24,e.z,'STAGGERED!','#ffd47a');},
-  slam:()=>{const id=++G.bruteArena.waveSeq;G.shockwaves.push({orchardId:id,fxType:'brute',x:e.x,z:e.z,y:e.y,r:22,maxR:230,dmg:e.dmg*1.25,life:0,spd:270});G.shake=Math.min(8,G.shake+4);playFx('heavyhit');},
+  slam:()=>{const id=++G.bruteArena.waveSeq;G.shockwaves.push({orchardId:id,fxType:'brute',x:e.x,z:e.z,y:e.y,r:22,maxR:e.phase>=2?310:250,dmg:e.dmg*1.25,life:0,spd:e.phase>=2?300:270});G.shake=Math.min(8,G.shake+4);playFx('heavyhit');},
   handlers:wave=>{const side=wave===1?-1:1;for(let i=0;i<2;i++){const h=spawnEnemy(wave===2&&i===1?'caster':'grunt',side*1000,-120+i*150,true);h.orchardHandler=true;h.active=true;h.dropT=0;h.y=16;h.sx=h.x;h.sz=h.z;h.shootT=1.2;}toast(wave===1?'Handlers have entered the barn!':'Handlers are coming through the orchard!');}
  });
 }
@@ -8561,7 +8575,7 @@ function drawBruteOrchard(t){
  const e=G.boss;if(!e||e.dead)return;
  if(e.windT>0){
   const tx=e.teleX,tz=e.teleZ,locked=e.windT<=.45,c=locked?'#ff7044':'#e9b367';
-  const path=BFBruteEncounter.chargePreview(e,G.bruteArena.props),half=path.width/2;
+  const path=bruteChargePath(e),half=path.width/2;
   // Borders show the moving body's full width; the player's own radius still
   // matters at the edge. Stop at the cart/stone that actually blocks this rush.
   for(let d=20;d<=path.distance;d+=24){
@@ -13674,6 +13688,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      and every downstream multiplier - power, elements, crits, difficulty - then carried the
      fraction into the floating-point tail. Rounding at the point of application keeps the number on
      screen and the number subtracted from HP identical, which a display-only round would not. */
+  if(BFBriarCombat.active(G))dmg=BFBriarCombat.damage(e,dmg);
   dmg = Math.max(1, Math.round(dmg));
   if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
@@ -13689,7 +13704,9 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     }
     G.trainState.dealt+=dealt;G.trainState.hits++;
   }
-  e.hp-=dmg; e.hitFlash=0.12; e.hitYaw=Math.atan2(e.x-(src?.x??e.x),e.z-(src?.z??e.z));
+  e.hp-=dmg;
+  if(BFBriarCombat.active(G)){const feedback=BFBriarCombat.hit(e,dealt);if(feedback){addText(e.x,e.y+e.h+25,e.z,feedback,'#a6edb5');if(feedback==='CAST INTERRUPTED')playFx('heavyhit',.45);}}
+  e.hitFlash=0.12; e.hitYaw=Math.atan2(e.x-(src?.x??e.x),e.z-(src?.z??e.z));
   if(healRatio>0)classHeal(G.p,dealt*healRatio);
   if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.immobile)?0:kb)*(e.boss?0.25:1);   // Stationary targets stay fixed; sparring opponents react like campaign foes.
@@ -17054,7 +17071,7 @@ function drawEnemyDanger(e){
   if(e.ceKind){drawCampaignEliteDanger(e);return;}
   if(e.marbleGuardian)return;
   if(e.blinkFx>0&&e.blinkTarget)dangerRing(e.blinkTarget.x,e.y,e.blinkTarget.z,e.r+20,'#c49bff',.9);
-  const cues=[['slamW',230,e.bruteOrchard?.95:.7],['cleaveW',300,.75],['novaW',260,.7],['poundW',300,.7],['knightW',170,.6],['eruptW',210,.7],['fuseT',150,.55],['meleeW',e.r+G.p.r,.65]];
+  const cues=[['slamW',e.bruteOrchard?(e.phase>=2?310:250):230,e.bruteOrchard?.95:.7],['cleaveW',300,.75],['novaW',260,.7],['poundW',300,.7],['knightW',170,.6],['eruptW',210,.7],['fuseT',150,.55],['meleeW',e.r+G.p.r,.65]];
   for(const [key,r,max]of cues)if(e[key]>0){const arc=key==='cleaveW'?.95:Math.PI;
     dangerRing(e.x,e.y,e.z,r,'#f5ad58',.85,arc,e.cleaveX,e.cleaveZ);
     dangerRing(e.x,e.y+1,e.z,r*Math.max(.08,1-e[key]/max),'#ff6653',.7,arc,e.cleaveX,e.cleaveZ);}

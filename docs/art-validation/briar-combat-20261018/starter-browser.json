@@ -1,0 +1,51 @@
+{
+  "starterProbe": [
+    {
+      "cid": "warrior",
+      "weapon": "sword",
+      "attacks": 5,
+      "hits": [
+        15,
+        15,
+        15,
+        15,
+        22
+      ],
+      "enemyMax": 72,
+      "killed": true,
+      "mode": "play",
+      "playerHp": 110
+    },
+    {
+      "cid": "ranger",
+      "weapon": "bow",
+      "attacks": 6,
+      "hits": [
+        11,
+        11,
+        11,
+        12,
+        18,
+        12
+      ],
+      "enemyMax": 72,
+      "killed": true,
+      "mode": "play",
+      "playerHp": 100
+    },
+    {
+      "cid": "mage",
+      "weapon": "firestaff",
+      "attacks": 3,
+      "hits": [
+        34,
+        36,
+        34
+      ],
+      "enemyMax": 72,
+      "killed": true,
+      "mode": "play",
+      "playerHp": 100
+    }
+  ]
+}

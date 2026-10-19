@@ -1,0 +1,294 @@
+{
+  "mode": "play",
+  "area": 1,
+  "hero": {
+    "class": "mage",
+    "hp": 100,
+    "maxHp": 100,
+    "weapon": {
+      "arche": "firestaff",
+      "art": "staff",
+      "cls": "ranged",
+      "sch": "mag",
+      "el": "fire",
+      "rarity": "common",
+      "chg": "bolt",
+      "reaper": false,
+      "anyClass": false,
+      "ians": false,
+      "name": "Splintered Staff",
+      "dmg": 17.6,
+      "cd": 0.54,
+      "kb": 150,
+      "lifesteal": 0,
+      "color": "#b9c0cc",
+      "blade": "#bcae8a",
+      "proj": {
+        "speed": 470,
+        "size": 9,
+        "pierce": 0,
+        "range": 360,
+        "color": "#ff7a3a",
+        "shape": "fireball",
+        "glow": 1
+      }
+    },
+    "level": 1
+  },
+  "placement": {
+    "moved": [],
+    "unresolved": []
+  },
+  "footprints": [
+    {
+      "mid": 13,
+      "at": [
+        65,
+        0,
+        -690
+      ],
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "mid": 14,
+      "at": [
+        -165,
+        0,
+        -930
+      ],
+      "floors": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "name": "Forest Arrival",
+      "x": 0,
+      "z": 200,
+      "y": 0
+    },
+    {
+      "name": "Split Roots",
+      "x": 0,
+      "z": -650,
+      "y": 0
+    },
+    {
+      "name": "Occupied Camp",
+      "x": -650,
+      "z": -1850,
+      "y": 0
+    },
+    {
+      "name": "Hunting Platforms",
+      "x": 850,
+      "z": -1650,
+      "y": 0
+    },
+    {
+      "name": "Track Grove",
+      "x": -1850,
+      "z": -2320,
+      "y": 0
+    },
+    {
+      "name": "Signal Clearing",
+      "x": 0,
+      "z": -3100,
+      "y": 0
+    },
+    {
+      "name": "North Shelter",
+      "x": 0,
+      "z": -4400,
+      "y": 0
+    }
+  ],
+  "enemies": [
+    {
+      "mid": 1,
+      "type": "grunt",
+      "x": -570,
+      "y": 0,
+      "z": -1360,
+      "hp": 94,
+      "dmg": 9.685440000000002,
+      "speed": 66,
+      "role": "guard",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 2,
+      "type": "grunt",
+      "x": -820,
+      "y": 0,
+      "z": -1800,
+      "hp": 82,
+      "dmg": 9.685440000000002,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 3,
+      "type": "caster",
+      "x": -400,
+      "y": 0,
+      "z": -1870,
+      "hp": 72,
+      "dmg": 12.1068,
+      "speed": 62,
+      "role": "hex",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 4,
+      "type": "grunt",
+      "x": -650,
+      "y": 0,
+      "z": -2220,
+      "hp": 82,
+      "dmg": 9.685440000000002,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 5,
+      "type": "flyer",
+      "x": 1040,
+      "y": 68.16865809489369,
+      "z": -2120,
+      "hp": 49,
+      "dmg": 8.474760000000002,
+      "speed": 52,
+      "elite": false
+    },
+    {
+      "mid": 6,
+      "type": "thornboar",
+      "x": -1600,
+      "y": 0,
+      "z": -2180,
+      "hp": 104,
+      "dmg": 13.31748,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 7,
+      "type": "thornboar",
+      "x": -1920,
+      "y": 0,
+      "z": -2770,
+      "hp": 104,
+      "dmg": 13.31748,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 8,
+      "type": "grunt",
+      "x": -200,
+      "y": 0,
+      "z": -2860,
+      "hp": 82,
+      "dmg": 9.685440000000002,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 9,
+      "type": "caster",
+      "x": 240,
+      "y": 0,
+      "z": -3250,
+      "hp": 72,
+      "dmg": 12.1068,
+      "speed": 62,
+      "role": "hex",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 10,
+      "type": "grunt",
+      "x": -170,
+      "y": 0,
+      "z": -3600,
+      "hp": 94,
+      "dmg": 9.685440000000002,
+      "speed": 66,
+      "role": "guard",
+      "phase": "hunt",
+      "elite": false
+    },
+    {
+      "mid": 11,
+      "type": "thornboar",
+      "x": 2370,
+      "y": 0,
+      "z": -1550,
+      "hp": 104,
+      "dmg": 13.31748,
+      "speed": 69,
+      "elite": false
+    },
+    {
+      "mid": 12,
+      "type": "thornboar",
+      "x": 2740,
+      "y": 0,
+      "z": -1600,
+      "hp": 104,
+      "dmg": 13.31748,
+      "speed": 60,
+      "elite": false
+    },
+    {
+      "mid": 13,
+      "type": "grunt",
+      "x": 65,
+      "y": 0,
+      "z": -690,
+      "hp": 82,
+      "dmg": 9.685440000000002,
+      "speed": 96,
+      "role": "runner",
+      "phase": "hunt",
+      "group": "forest-searchers",
+      "elite": false
+    },
+    {
+      "mid": 14,
+      "type": "caster",
+      "x": -165,
+      "y": 0,
+      "z": -930,
+      "hp": 72,
+      "dmg": 12.1068,
+      "speed": 62,
+      "role": "hex",
+      "phase": "hunt",
+      "group": "forest-searchers",
+      "elite": false
+    }
+  ]
+}

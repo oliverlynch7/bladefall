@@ -98,7 +98,7 @@ function render(g,d){
   pushM();mv(e.x,e.y+(pr.form==='reapcombo'?0:4),e.z);rotY(e.yaw);
   const f=pr.form;
   const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,trail,glow,surface,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot,event:e,detail:d.quality==='low'?24:48});
-  if(custom){}else if(f==='reapcombo'&&root.BFReaperCombo){root.BFReaperCombo.render(pr.combo,q,{trail,glow,arc,line,col,hot,a,offset:root.BFReaperCombo.frame(e.actorId,pr.combo)?.offset,detail:d.quality==='low'?24:48});}else if(f==='palmflame'){
+  if(custom){}else if(f==='reapcombo'&&root.BFReaperCombo){root.BFReaperCombo.render(pr.combo,q,{trail,glow,arc,line,col,hot,a,frame:root.BFReaperCombo.frame(e.actorId,pr.combo),event:e,detail:d.quality==='low'?24:48});}else if(f==='palmflame'){
    const wide=pr.slot===2,count=wide?9:5,spread=wide?.78:.36;
    // Layered tapering tongues start at the palms, never a staff projectile.
    for(let j=0;j<count;j++){const ang=(j/(count-1)*2-1)*spread,side=j%2?10:-10,len=r*(.82+.18*Math.sin(j*2+1));

@@ -29,7 +29,7 @@ export function applyReaperPose(p,root,a,body,dt,override){
  for(let i=0;i<3&&shoulder&&elbow;i++){const at=shoulder.getWorldPosition(new T.Vector3()),e=elbow.getWorldPosition(new T.Vector3()),w=left.getWorldPosition(new T.Vector3()),reach=(at.distanceTo(e)+e.distanceTo(w))*.98,delta=sup.target.clone().sub(at);if(delta.length()<=reach)break;const adjust=at.add(delta.setLength(reach)).sub(sup.target);armTo(root,'R',right.getWorldPosition(new T.Vector3()).add(adjust),root.localToWorld(new T.Vector3(-.82,1.25,.08)),right.getWorldQuaternion(new T.Quaternion()),weight);sup=support();}
  armTo(root,'L',sup.target,root.localToWorld(new T.Vector3(.72,1.30,.12)),sup.q,weight);root.updateMatrixWorld(true);
  s.actualGrip=root.worldToLocal(grip.getWorldPosition(new T.Vector3())).toArray();s.gripAdjustment=new T.Vector3(...s.actualGrip).distanceTo(new T.Vector3(...s.grip));
- api.publish(p.peerId||'local',s.hit,s.actualGrip.map((v,i)=>v-s.grip[i]));
+ api.publish(p.peerId||'local',s.hit,s.actualGrip.map((v,i)=>v-s.grip[i]),{x:p.x||0,y:p.y||0,z:p.z||0,yaw:p.yaw||0});
  s.supportError=left.getWorldPosition(new T.Vector3()).distanceTo(sup.target)/(root.getWorldScale(new T.Vector3()).x||1);
  if(a.local)window.HERO3D.reaperCombo={hit:s.hit,phase:s.q,supportError:s.supportError,recovery:s.q>.73};return s;
 }

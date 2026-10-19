@@ -1,6 +1,6 @@
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2332b';
-import {applyReaperPose,restoreReaperPose} from './reaper-combo3d.js?v=2332b';
+import {createClassDisplay} from './hero3d.js?v=2332c';
+import {applyReaperPose,restoreReaperPose} from './reaper-combo3d.js?v=2332c';
 import {syncCombatArt} from './combat-art-three.js?v=2330f';
 const $=id=>document.getElementById(id),api=window.BFReaperCombo,canvas=$('view'),renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.outputColorSpace=T.SRGBColorSpace;
 const scene=new T.Scene();scene.background=new T.Color('#152735');scene.add(new T.HemisphereLight('#e3efff','#6f6b55',2.2));const sun=new T.DirectionalLight('#ffefdb',3);sun.position.set(-3,6,5);scene.add(sun);scene.add(new T.GridHelper(12,24,'#667d81','#30434e'));const camera=new T.PerspectiveCamera(39,1,.01,80),clock=new T.Clock();

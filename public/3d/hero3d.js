@@ -13,7 +13,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2227a';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2258';
+import {syncNpcs} from './npc3d.js?v=2305';
 import {syncProjectiles} from './projectile3d.js?v=2094';
 import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2259';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1301,15 +1301,15 @@ function colorWeapon(holder,w){
 
 function restoreEmotePose(A){if(A.sitRoot){A.sitRoot[0].position.copy(A.sitRoot[1]);A.sitRoot=null;}for(const [bone,q] of A.emoteBones||[])bone.quaternion.copy(q);A.emoteBones=[];for(const [node,visible] of A.emoteWeapons||[])node.visible=visible;A.emoteWeapons=[];}
 window.__restoreChessNpc=restoreEmotePose;
-window.__poseChessNpc=(p,root,anim)=>{applyEmotePose(p,root,anim);if(p.sitting){root.updateMatrixWorld(true);const hip=root.getObjectByName('UpperLegL');if(hip){root.position.y+=(window.BFSocial?.seatHeight||14)-hip.getWorldPosition(new THREE.Vector3()).y;root.updateMatrixWorld(true);}}};
+window.__poseChessNpc=(p,root,anim)=>{applyEmotePose(p,root,anim);if(p.sitting){root.updateMatrixWorld(true);const hip=root.getObjectByName('UpperLegL');if(hip){root.position.y+=((window.BFSocial?.seatHeight||14)-hip.getWorldPosition(new THREE.Vector3()).y)*(p.seatBlend??1);root.updateMatrixWorld(true);}}};
 function applyEmotePose(p,wrap,A){
  const e=p.dragonRide?{id:'ride',t:2}:p.sitting?{id:'sit',t:2}:p.emote;if(!e||e.t>=4||p.dead||p.downed)return;
- const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5)),s=Math.sin(t*Math.PI*2);
+ const t=e.t,smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},blend=smooth(Math.min(t/.45,(4-t)/.5))*(e.id==='sit'&&Number.isFinite(p.seatBlend)?Math.max(0,Math.min(1,p.seatBlend)):1),s=Math.sin(t*Math.PI*2);
  const turn=(name,x=0,y=0,z=0)=>{const b=wrap.getObjectByName(name);if(!b)return;if(!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);b.rotateX(x*blend);b.rotateY(y*blend);b.rotateZ(z*blend);};
  // Model-space hand targets keep elbows outside the torso on every shared skeleton.
  const arm=(side,target,hint)=>{for(const name of ['UpperArm','LowerArm','Fist','Fist1','Fist2']){const b=wrap.getObjectByName(name+side);if(b)if(!A.emoteBones.some(v=>v[0]===b))A.emoteBones.push([b,b.quaternion.clone()]);}armTo(wrap,side,wrap.localToWorld(new THREE.Vector3(...target)),wrap.localToWorld(new THREE.Vector3(...hint)),null,blend);};
  if(e.id==='ride'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.05,0,side==='R'?.8:-.8);turn('LowerLeg'+side,1.25);arm(side,[side==='R'?-.29:.29,1.15,.56],[side==='R'?-.62:.62,1.30,.22]);}turn('Torso',.12);}
- if(e.id==='sit'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.45);turn('LowerLeg'+side,1.45);arm(side,[side==='R'?-.36:.36,1.05,.45],[side==='R'?-.62:.62,1.35,.12]);}const body=wrap.getObjectByName('Body');if(body){A.sitRoot=[body,body.position.clone()];body.position.y-=.4;}}
+ if(e.id==='sit'){for(const side of ['R','L']){turn('UpperLeg'+side,-1.45);turn('LowerLeg'+side,1.45);arm(side,[side==='R'?-.36:.36,1.05,.45],[side==='R'?-.62:.62,1.35,.12]);}const body=wrap.getObjectByName('Body');if(body){A.sitRoot=[body,body.position.clone()];body.position.y-=.4*blend;}}
  const chess=p.sitting&&window.BFSocial?.poseFor(p);
  if(chess){const target=new THREE.Vector3(chess.target.x,chess.target.y,chess.target.z);
   // The seated pose stays planted. Only the reaching arm moves; rotating Body

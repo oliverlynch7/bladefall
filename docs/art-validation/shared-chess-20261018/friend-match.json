@@ -1,0 +1,54 @@
+{
+  "status": "Hosted",
+  "mode": "chess",
+  "version": "2.305.0-shared-chess-table",
+  "hub": true,
+  "host": true,
+  "active": true,
+  "id": "h",
+  "code": "7NNC",
+  "zone": -100,
+  "level": 100,
+  "gold": 1145,
+  "sitting": true,
+  "pos": {
+    "x": 266,
+    "z": 390
+  },
+  "peers": [
+    {
+      "id": "619tp",
+      "name": "First Journey QA",
+      "sitting": true,
+      "x": 334,
+      "z": 390,
+      "zone": -100
+    }
+  ],
+  "table": "duel",
+  "views": {
+    "h": {
+      "gameId": "duel",
+      "watching": false
+    },
+    "619tp": {
+      "gameId": "duel",
+      "watching": false
+    }
+  },
+  "games": {
+    "duel": {
+      "seats": {
+        "w": "h",
+        "b": "619tp"
+      },
+      "result": "",
+      "moves": [
+        "e4",
+        "e5"
+      ],
+      "paused": false
+    }
+  },
+  "thomas": null
+}

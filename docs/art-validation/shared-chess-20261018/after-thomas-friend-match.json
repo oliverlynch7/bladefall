@@ -1,0 +1,60 @@
+{
+  "status": "Hosted",
+  "mode": "chess",
+  "version": "2.305.0-shared-chess-table",
+  "hub": true,
+  "host": true,
+  "active": true,
+  "id": "h",
+  "code": "UXY8",
+  "zone": -100,
+  "level": 100,
+  "gold": 1145,
+  "sitting": true,
+  "pos": {
+    "x": 334,
+    "z": 390
+  },
+  "peers": [
+    {
+      "id": "mn3pe",
+      "name": "First Journey QA",
+      "sitting": true,
+      "x": 266,
+      "z": 390,
+      "zone": -100
+    }
+  ],
+  "table": "duel",
+  "views": {
+    "h": {
+      "gameId": "duel",
+      "watching": false
+    },
+    "mn3pe": {
+      "gameId": "duel",
+      "watching": false
+    }
+  },
+  "games": {
+    "duel": {
+      "seats": {
+        "w": "mn3pe",
+        "b": "h"
+      },
+      "result": "",
+      "moves": [],
+      "paused": false
+    },
+    "thomas:h": {
+      "seats": {
+        "w": "h",
+        "b": "chess-thomas"
+      },
+      "result": "Black wins by resignation",
+      "moves": [],
+      "paused": true
+    }
+  },
+  "thomas": null
+}

@@ -1,0 +1,60 @@
+{
+  "status": "Joined",
+  "mode": "chess",
+  "version": "2.305.0-shared-chess-table",
+  "hub": true,
+  "host": false,
+  "active": true,
+  "id": "j9d58",
+  "code": "ZYUQ",
+  "zone": -100,
+  "level": 100,
+  "gold": 1145,
+  "sitting": true,
+  "pos": {
+    "x": 266,
+    "z": 390
+  },
+  "peers": [
+    {
+      "id": "h",
+      "name": "First Journey QA",
+      "sitting": true,
+      "x": 334,
+      "z": 390,
+      "zone": -100
+    }
+  ],
+  "table": "duel",
+  "views": {
+    "h": {
+      "gameId": "duel",
+      "watching": false
+    },
+    "j9d58": {
+      "gameId": "duel",
+      "watching": false
+    }
+  },
+  "games": {
+    "duel": {
+      "seats": {
+        "w": "j9d58",
+        "b": "h"
+      },
+      "result": "",
+      "moves": [],
+      "paused": false
+    },
+    "thomas:h": {
+      "seats": {
+        "w": "h",
+        "b": "chess-thomas"
+      },
+      "result": "Black wins by resignation",
+      "moves": [],
+      "paused": true
+    }
+  },
+  "thomas": null
+}

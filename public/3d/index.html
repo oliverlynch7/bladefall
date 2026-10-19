@@ -1226,7 +1226,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.319.0-authored-chest-upgrade';
+const VERSION3D='2.320.0-hub-full-recovery';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -18854,8 +18854,10 @@ function enterWaystation(riftHall=false){
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
   restoreArenaCampaign();
   initAudio(); queueLevelUp=0; queueSubclass=false;
-  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p);
   G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
+  // Restore against the destination's caps, never a departing dungeon's temporary HP multiplier.
+  p.hp=effMaxHp(p);p.mana=p.maxMana;
   G.stageIndex=0;
   // scene arrays normally come from loadStage — the waystation builds its own room
   G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
@@ -19105,7 +19107,7 @@ function enterWaystation(riftHall=false){
   applyEditsNow();          // the hub is built here, not by loadStage, so it needs its own call
   setupReturnHub();
   G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
-  meta.run=null; persist();
+  meta.hero=snapOf(p);meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   if(MP.active) MP.onEnter(MP.HUB);   // co-op: the Waystation is a shared space — allies appear here too (Phase 2)
   document.getElementById('stagetag').textContent=G.riftHall?'RIFT HALL':'THE WAYSTATION'; questUpdate(); hudUpdate();
@@ -19252,9 +19254,10 @@ function leaveSparringRoom(){
 }
 function enterSparringRoom(remote=false){
   if(MP.guest()&&!remote){MP.hostConn?.send({t:'sparringRoom',enter:true});toast('Asking the party to enter the Sparring Room.');return;}
-  initAudio(); const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  initAudio(); const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p);
   Object.assign(TRAIN_UI,{selected:null,filter:'all',query:'',count:1});
   G=newG(p,{hub:true,sparringRoom:true,zone:0,area:0,zoneTier:1}); G.stageIndex=0;
+  p.hp=effMaxHp(p);p.mana=p.maxMana;
   // A sunken training court: the ring, arrival apron and practice fixtures have distinct jobs and clear routes.
   G.segments=[{x:0,z:0,w:1560,d:1380}]; G.rooms=[{x:0,z:0,w:1560,d:1380,monsters:[],encounter:false,cleared:true}];
   G.walls=[{x:0,z:-690,w:1580,d:30,h:190},{x:0,z:690,w:1580,d:30,h:190},{x:-780,z:0,w:30,d:1380,h:190},{x:780,z:0,w:30,d:1380,h:190}];
@@ -19282,6 +19285,7 @@ function enterSparringRoom(remote=false){
   G.lastSafe={x:0,z:420};G.startPos={x:0,z:420};G.goalPos={x:0,z:RZ};G.bounds={minX:-560,maxX:560,minZ:-560,maxZ:560};G.progressEnd=RZ;
   p.x=0;p.z=420;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
   document.getElementById('stagetag').textContent='SPARRING HALL';questUpdate();toast('Training desk on the left; bestiary on the right. Practice has no penalties or rewards.');
+  meta.hero=snapOf(p);persist();
   spawnPet();if(MP.active)MP.onEnter(MP.SPARRING);
 }
 const BESTIARY_INFO={

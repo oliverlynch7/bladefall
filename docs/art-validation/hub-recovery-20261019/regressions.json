@@ -1,0 +1,22 @@
+[
+  {
+    "script": "test-hub-recovery.cjs",
+    "code": 0,
+    "output": "{\"checks\":257,\"passed\":true}"
+  },
+  {
+    "script": "test-save-safety.cjs",
+    "code": 0,
+    "output": "24 save normalization and isolated recovery checks passed."
+  },
+  {
+    "script": "test-campaign-compatibility.cjs",
+    "code": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed."
+  },
+  {
+    "script": "test-story-authority.cjs",
+    "code": 0,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility."
+  }
+]

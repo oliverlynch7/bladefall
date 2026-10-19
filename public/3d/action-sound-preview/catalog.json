@@ -1,0 +1,1262 @@
+[
+  {
+    "id": "life_m_barrier_active",
+    "name": "Rune Barrier \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_m_barrier_active_v01.mp3"
+  },
+  {
+    "id": "life_m_barrier_end",
+    "name": "Rune Barrier \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_m_barrier_end_v01.mp3"
+  },
+  {
+    "id": "life_m_tempest_active",
+    "name": "Attunement \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_m_tempest_active_v01.mp3"
+  },
+  {
+    "id": "life_m_tempest_end",
+    "name": "Attunement \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_m_tempest_end_v01.mp3"
+  },
+  {
+    "id": "life_x_wraith_active",
+    "name": "Wraith Form \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_x_wraith_active_v01.mp3"
+  },
+  {
+    "id": "life_x_wraith_end",
+    "name": "Wraith Form \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_x_wraith_end_v01.mp3"
+  },
+  {
+    "id": "life_py_inferno_active",
+    "name": "Inferno \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_py_inferno_active_v01.mp3"
+  },
+  {
+    "id": "life_py_inferno_end",
+    "name": "Inferno \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_py_inferno_end_v01.mp3"
+  },
+  {
+    "id": "life_x_vortex_active",
+    "name": "Death Vortex \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_x_vortex_active_v01.mp3"
+  },
+  {
+    "id": "life_x_vortex_end",
+    "name": "Death Vortex \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_x_vortex_end_v01.mp3"
+  },
+  {
+    "id": "life_necro_wall_active",
+    "name": "Bone Wall \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_necro_wall_active_v01.mp3"
+  },
+  {
+    "id": "life_necro_wall_end",
+    "name": "Bone Wall \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_necro_wall_end_v01.mp3"
+  },
+  {
+    "id": "life_necro_storm_active",
+    "name": "Death Storm \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_necro_storm_active_v01.mp3"
+  },
+  {
+    "id": "life_necro_storm_end",
+    "name": "Death Storm \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_necro_storm_end_v01.mp3"
+  },
+  {
+    "id": "life_st_barrier_active",
+    "name": "Storm Barrier \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_st_barrier_active_v01.mp3"
+  },
+  {
+    "id": "life_st_barrier_end",
+    "name": "Storm Barrier \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_st_barrier_end_v01.mp3"
+  },
+  {
+    "id": "life_chr_barrier_active",
+    "name": "Aegis \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_chr_barrier_active_v01.mp3"
+  },
+  {
+    "id": "life_chr_barrier_end",
+    "name": "Aegis \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_chr_barrier_end_v01.mp3"
+  },
+  {
+    "id": "life_chr_tempest_active",
+    "name": "Stopped Clock \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_chr_tempest_active_v01.mp3"
+  },
+  {
+    "id": "life_chr_tempest_end",
+    "name": "Stopped Clock \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_chr_tempest_end_v01.mp3"
+  },
+  {
+    "id": "life_bsk_guard_active",
+    "name": "Bloodguard \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_bsk_guard_active_v01.mp3"
+  },
+  {
+    "id": "life_bsk_guard_end",
+    "name": "Bloodguard \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_bsk_guard_end_v01.mp3"
+  },
+  {
+    "id": "life_pir_goldrush_active",
+    "name": "Gold Rush \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_pir_goldrush_active_v01.mp3"
+  },
+  {
+    "id": "life_pir_goldrush_end",
+    "name": "Gold Rush \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_pir_goldrush_end_v01.mp3"
+  },
+  {
+    "id": "life_bst_guardian_active",
+    "name": "Guardian Bond \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_bst_guardian_active_v01.mp3"
+  },
+  {
+    "id": "life_bst_guardian_end",
+    "name": "Guardian Bond \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_bst_guardian_end_v01.mp3"
+  },
+  {
+    "id": "life_bst_mend_active",
+    "name": "Mend the Pack \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_bst_mend_active_v01.mp3"
+  },
+  {
+    "id": "life_bst_mend_end",
+    "name": "Mend the Pack \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_bst_mend_end_v01.mp3"
+  },
+  {
+    "id": "life_bst_apex_active",
+    "name": "Apex Unleashed \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_bst_apex_active_v01.mp3"
+  },
+  {
+    "id": "life_bst_apex_end",
+    "name": "Apex Unleashed \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_bst_apex_end_v01.mp3"
+  },
+  {
+    "id": "life_py_ward_active",
+    "name": "Ember Shield \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_py_ward_active_v01.mp3"
+  },
+  {
+    "id": "life_py_ward_end",
+    "name": "Ember Shield \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_py_ward_end_v01.mp3"
+  },
+  {
+    "id": "life_w_guard_active",
+    "name": "Iron Guard \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_w_guard_active_v01.mp3"
+  },
+  {
+    "id": "life_w_guard_end",
+    "name": "Iron Guard \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_w_guard_end_v01.mp3"
+  },
+  {
+    "id": "life_nin_storm_active",
+    "name": "Vanish \u00b7 active pulse",
+    "group": "lifecycle",
+    "description": "A quiet pulse while this effect is active.",
+    "file": "custom/rich-actions-20261019/life_nin_storm_active_v01.mp3"
+  },
+  {
+    "id": "life_nin_storm_end",
+    "name": "Vanish \u00b7 effect ends",
+    "group": "lifecycle",
+    "description": "A short cue when this effect ends.",
+    "file": "custom/rich-actions-20261019/life_nin_storm_end_v01.mp3"
+  },
+  {
+    "id": "charge_hurl_start",
+    "name": "Battle Axe \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_hurl_start_v01.mp3"
+  },
+  {
+    "id": "charge_hurl_ready",
+    "name": "Battle Axe \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_hurl_ready_v01.mp3"
+  },
+  {
+    "id": "charge_spin_start",
+    "name": "Greatsword \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_spin_start_v01.mp3"
+  },
+  {
+    "id": "charge_spin_ready",
+    "name": "Greatsword \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_spin_ready_v01.mp3"
+  },
+  {
+    "id": "charge_quake_start",
+    "name": "Warhammer \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_quake_start_v01.mp3"
+  },
+  {
+    "id": "charge_quake_ready",
+    "name": "Warhammer \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_quake_ready_v01.mp3"
+  },
+  {
+    "id": "charge_scythethrow_start",
+    "name": "Scythe \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_scythethrow_start_v01.mp3"
+  },
+  {
+    "id": "charge_scythethrow_ready",
+    "name": "Scythe \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_scythethrow_ready_v01.mp3"
+  },
+  {
+    "id": "charge_spellsweep_start",
+    "name": "Spellblade \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_spellsweep_start_v01.mp3"
+  },
+  {
+    "id": "charge_spellsweep_ready",
+    "name": "Spellblade \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_spellsweep_ready_v01.mp3"
+  },
+  {
+    "id": "charge_powershot_start",
+    "name": "Longbow \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_powershot_start_v01.mp3"
+  },
+  {
+    "id": "charge_powershot_ready",
+    "name": "Longbow \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_powershot_ready_v01.mp3"
+  },
+  {
+    "id": "charge_daggerthrow_start",
+    "name": "Daggers \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_daggerthrow_start_v01.mp3"
+  },
+  {
+    "id": "charge_daggerthrow_ready",
+    "name": "Daggers \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_daggerthrow_ready_v01.mp3"
+  },
+  {
+    "id": "charge_javelin_start",
+    "name": "Javelins \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_javelin_start_v01.mp3"
+  },
+  {
+    "id": "charge_javelin_ready",
+    "name": "Javelins \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_javelin_ready_v01.mp3"
+  },
+  {
+    "id": "charge_bolt_start",
+    "name": "Staff \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_bolt_start_v01.mp3"
+  },
+  {
+    "id": "charge_bolt_ready",
+    "name": "Staff \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_bolt_ready_v01.mp3"
+  },
+  {
+    "id": "charge_flamefan_start",
+    "name": "Fire palms \u00b7 charge begins",
+    "group": "charge",
+    "description": "Holding a charged attack begins.",
+    "file": "custom/rich-actions-20261019/charge_flamefan_start_v01.mp3"
+  },
+  {
+    "id": "charge_flamefan_ready",
+    "name": "Fire palms \u00b7 fully charged",
+    "group": "charge",
+    "description": "Your attack reaches full charge.",
+    "file": "custom/rich-actions-20261019/charge_flamefan_ready_v01.mp3"
+  },
+  {
+    "id": "move_human_06",
+    "name": "Human movement \u00b7 take 6",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_human_06_v01.mp3"
+  },
+  {
+    "id": "move_human_02",
+    "name": "Human movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_human_02_v01.mp3"
+  },
+  {
+    "id": "move_human_03",
+    "name": "Human movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_human_03_v01.mp3"
+  },
+  {
+    "id": "move_human_04",
+    "name": "Human movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_human_04_v01.mp3"
+  },
+  {
+    "id": "move_human_05",
+    "name": "Human movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_human_05_v01.mp3"
+  },
+  {
+    "id": "move_bone_01",
+    "name": "Bone movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_bone_01_v01.mp3"
+  },
+  {
+    "id": "move_bone_02",
+    "name": "Bone movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_bone_02_v01.mp3"
+  },
+  {
+    "id": "move_bone_03",
+    "name": "Bone movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_bone_03_v01.mp3"
+  },
+  {
+    "id": "move_bone_04",
+    "name": "Bone movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_bone_04_v01.mp3"
+  },
+  {
+    "id": "move_bone_05",
+    "name": "Bone movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_bone_05_v01.mp3"
+  },
+  {
+    "id": "move_slime_01",
+    "name": "Slime movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_slime_01_v01.mp3"
+  },
+  {
+    "id": "move_slime_02",
+    "name": "Slime movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_slime_02_v01.mp3"
+  },
+  {
+    "id": "move_slime_03",
+    "name": "Slime movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_slime_03_v01.mp3"
+  },
+  {
+    "id": "move_slime_04",
+    "name": "Slime movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_slime_04_v01.mp3"
+  },
+  {
+    "id": "move_slime_05",
+    "name": "Slime movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_slime_05_v01.mp3"
+  },
+  {
+    "id": "move_hoof_01",
+    "name": "Hoof movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_hoof_01_v01.mp3"
+  },
+  {
+    "id": "move_hoof_02",
+    "name": "Hoof movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_hoof_02_v01.mp3"
+  },
+  {
+    "id": "move_hoof_03",
+    "name": "Hoof movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_hoof_03_v01.mp3"
+  },
+  {
+    "id": "move_hoof_04",
+    "name": "Hoof movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_hoof_04_v01.mp3"
+  },
+  {
+    "id": "move_hoof_05",
+    "name": "Hoof movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_hoof_05_v01.mp3"
+  },
+  {
+    "id": "move_canine_01",
+    "name": "Canine movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_canine_01_v01.mp3"
+  },
+  {
+    "id": "move_canine_02",
+    "name": "Canine movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_canine_02_v01.mp3"
+  },
+  {
+    "id": "move_canine_03",
+    "name": "Canine movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_canine_03_v01.mp3"
+  },
+  {
+    "id": "move_canine_04",
+    "name": "Canine movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_canine_04_v01.mp3"
+  },
+  {
+    "id": "move_canine_05",
+    "name": "Canine movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_canine_05_v01.mp3"
+  },
+  {
+    "id": "move_wing_01",
+    "name": "Wing movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_wing_01_v01.mp3"
+  },
+  {
+    "id": "move_wing_02",
+    "name": "Wing movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_wing_02_v01.mp3"
+  },
+  {
+    "id": "move_wing_03",
+    "name": "Wing movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_wing_03_v01.mp3"
+  },
+  {
+    "id": "move_wing_04",
+    "name": "Wing movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_wing_04_v01.mp3"
+  },
+  {
+    "id": "move_wing_05",
+    "name": "Wing movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_wing_05_v01.mp3"
+  },
+  {
+    "id": "move_spore_01",
+    "name": "Spore movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spore_01_v01.mp3"
+  },
+  {
+    "id": "move_spore_02",
+    "name": "Spore movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spore_02_v01.mp3"
+  },
+  {
+    "id": "move_spore_03",
+    "name": "Spore movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spore_03_v01.mp3"
+  },
+  {
+    "id": "move_spore_04",
+    "name": "Spore movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spore_04_v01.mp3"
+  },
+  {
+    "id": "move_spore_05",
+    "name": "Spore movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spore_05_v01.mp3"
+  },
+  {
+    "id": "move_stone_01",
+    "name": "Stone movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_stone_01_v01.mp3"
+  },
+  {
+    "id": "move_stone_02",
+    "name": "Stone movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_stone_02_v01.mp3"
+  },
+  {
+    "id": "move_stone_03",
+    "name": "Stone movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_stone_03_v01.mp3"
+  },
+  {
+    "id": "move_stone_04",
+    "name": "Stone movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_stone_04_v01.mp3"
+  },
+  {
+    "id": "move_stone_05",
+    "name": "Stone movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_stone_05_v01.mp3"
+  },
+  {
+    "id": "move_ember_01",
+    "name": "Ember movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_ember_01_v01.mp3"
+  },
+  {
+    "id": "move_ember_02",
+    "name": "Ember movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_ember_02_v01.mp3"
+  },
+  {
+    "id": "move_ember_03",
+    "name": "Ember movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_ember_03_v01.mp3"
+  },
+  {
+    "id": "move_ember_04",
+    "name": "Ember movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_ember_04_v01.mp3"
+  },
+  {
+    "id": "move_ember_05",
+    "name": "Ember movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_ember_05_v01.mp3"
+  },
+  {
+    "id": "move_frost_01",
+    "name": "Frost movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_frost_01_v01.mp3"
+  },
+  {
+    "id": "move_frost_02",
+    "name": "Frost movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_frost_02_v01.mp3"
+  },
+  {
+    "id": "move_frost_03",
+    "name": "Frost movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_frost_03_v01.mp3"
+  },
+  {
+    "id": "move_frost_04",
+    "name": "Frost movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_frost_04_v01.mp3"
+  },
+  {
+    "id": "move_frost_05",
+    "name": "Frost movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_frost_05_v01.mp3"
+  },
+  {
+    "id": "move_spectral_01",
+    "name": "Spectral movement \u00b7 take 1",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spectral_01_v01.mp3"
+  },
+  {
+    "id": "move_spectral_02",
+    "name": "Spectral movement \u00b7 take 2",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spectral_02_v01.mp3"
+  },
+  {
+    "id": "move_spectral_03",
+    "name": "Spectral movement \u00b7 take 3",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spectral_03_v01.mp3"
+  },
+  {
+    "id": "move_spectral_04",
+    "name": "Spectral movement \u00b7 take 4",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spectral_04_v01.mp3"
+  },
+  {
+    "id": "move_spectral_05",
+    "name": "Spectral movement \u00b7 take 5",
+    "group": "movement",
+    "description": "One of five small variations, used only while a nearby creature moves.",
+    "file": "custom/rich-actions-20261019/move_spectral_05_v01.mp3"
+  },
+  {
+    "id": "detail_home_bell_alarm",
+    "name": "Watchtower warning bell",
+    "group": "world",
+    "description": "Watchtower warning bell.",
+    "file": "custom/rich-actions-20261019/detail_home_bell_alarm_v01.mp3"
+  },
+  {
+    "id": "detail_home_grain_spout",
+    "name": "Grain trough aimed",
+    "group": "world",
+    "description": "Grain trough aimed.",
+    "file": "custom/rich-actions-20261019/detail_home_grain_spout_v01.mp3"
+  },
+  {
+    "id": "detail_home_grain_hopper",
+    "name": "Grain hopper opened",
+    "group": "world",
+    "description": "Grain hopper opened.",
+    "file": "custom/rich-actions-20261019/detail_home_grain_hopper_v01.mp3"
+  },
+  {
+    "id": "detail_home_farm_supplies",
+    "name": "Wagon supplies recovered",
+    "group": "world",
+    "description": "Wagon supplies recovered.",
+    "file": "custom/rich-actions-20261019/detail_home_farm_supplies_v01.mp3"
+  },
+  {
+    "id": "detail_home_orchard_wheel",
+    "name": "Orchard walkway lowered",
+    "group": "world",
+    "description": "Orchard walkway lowered.",
+    "file": "custom/rich-actions-20261019/detail_home_orchard_wheel_v01.mp3"
+  },
+  {
+    "id": "detail_woods_signal_crank",
+    "name": "Signal mechanism stopped",
+    "group": "world",
+    "description": "Signal mechanism stopped.",
+    "file": "custom/rich-actions-20261019/detail_woods_signal_crank_v01.mp3"
+  },
+  {
+    "id": "detail_woods_tracks_release",
+    "name": "Root binding released",
+    "group": "world",
+    "description": "Root binding released.",
+    "file": "custom/rich-actions-20261019/detail_woods_tracks_release_v01.mp3"
+  },
+  {
+    "id": "detail_woods_rescue_release",
+    "name": "Rescue rope hauled",
+    "group": "world",
+    "description": "Rescue rope hauled.",
+    "file": "custom/rich-actions-20261019/detail_woods_rescue_release_v01.mp3"
+  },
+  {
+    "id": "detail_rk_gate",
+    "name": "Keep side gate opened",
+    "group": "world",
+    "description": "Keep side gate opened.",
+    "file": "custom/rich-actions-20261019/detail_rk_gate_v01.mp3"
+  },
+  {
+    "id": "detail_rk_wheel",
+    "name": "Dungeon gate wheel turned",
+    "group": "world",
+    "description": "Dungeon gate wheel turned.",
+    "file": "custom/rich-actions-20261019/detail_rk_wheel_v01.mp3"
+  },
+  {
+    "id": "detail_rk_tools",
+    "name": "Locksmith tools recovered",
+    "group": "world",
+    "description": "Locksmith tools recovered.",
+    "file": "custom/rich-actions-20261019/detail_rk_tools_v01.mp3"
+  },
+  {
+    "id": "detail_rk_wall",
+    "name": "Chamber bar removed",
+    "group": "world",
+    "description": "Chamber bar removed.",
+    "file": "custom/rich-actions-20261019/detail_rk_wall_v01.mp3"
+  },
+  {
+    "id": "detail_cg_catch_west",
+    "name": "Drawbridge brake freed",
+    "group": "world",
+    "description": "Drawbridge brake freed.",
+    "file": "custom/rich-actions-20261019/detail_cg_catch_west_v01.mp3"
+  },
+  {
+    "id": "detail_cg_bridge",
+    "name": "Castle drawbridge lowered",
+    "group": "world",
+    "description": "Castle drawbridge lowered.",
+    "file": "custom/rich-actions-20261019/detail_cg_bridge_v01.mp3"
+  },
+  {
+    "id": "detail_cg_break",
+    "name": "Castle alarm disabled",
+    "group": "world",
+    "description": "Castle alarm disabled.",
+    "file": "custom/rich-actions-20261019/detail_cg_break_v01.mp3"
+  },
+  {
+    "id": "detail_gf_gate",
+    "name": "Furnace access opened",
+    "group": "world",
+    "description": "Furnace access opened.",
+    "file": "custom/rich-actions-20261019/detail_gf_gate_v01.mp3"
+  },
+  {
+    "id": "detail_gf_passage",
+    "name": "Furnace passage cleared",
+    "group": "world",
+    "description": "Furnace passage cleared.",
+    "file": "custom/rich-actions-20261019/detail_gf_passage_v01.mp3"
+  },
+  {
+    "id": "detail_gf_pet_feed",
+    "name": "Heat feed shut off",
+    "group": "world",
+    "description": "Heat feed shut off.",
+    "file": "custom/rich-actions-20261019/detail_gf_pet_feed_v01.mp3"
+  },
+  {
+    "id": "detail_gf_pet_release",
+    "name": "Cinder cage opened",
+    "group": "world",
+    "description": "Cinder cage opened.",
+    "file": "custom/rich-actions-20261019/detail_gf_pet_release_v01.mp3"
+  },
+  {
+    "id": "detail_hp_cart_push",
+    "name": "Loaded cart moved",
+    "group": "world",
+    "description": "Loaded cart moved.",
+    "file": "custom/rich-actions-20261019/detail_hp_cart_push_v01.mp3"
+  },
+  {
+    "id": "detail_hp_brake_right",
+    "name": "Cliff bridge winch freed",
+    "group": "world",
+    "description": "Cliff bridge winch freed.",
+    "file": "custom/rich-actions-20261019/detail_hp_brake_right_v01.mp3"
+  },
+  {
+    "id": "detail_hp_lift",
+    "name": "Canyon lift released",
+    "group": "world",
+    "description": "Canyon lift released.",
+    "file": "custom/rich-actions-20261019/detail_hp_lift_v01.mp3"
+  },
+  {
+    "id": "detail_ih_handles",
+    "name": "Insulated handles recovered",
+    "group": "world",
+    "description": "Insulated handles recovered.",
+    "file": "custom/rich-actions-20261019/detail_ih_handles_v01.mp3"
+  },
+  {
+    "id": "detail_ih_blank",
+    "name": "Blade blank recovered",
+    "group": "world",
+    "description": "Blade blank recovered.",
+    "file": "custom/rich-actions-20261019/detail_ih_blank_v01.mp3"
+  },
+  {
+    "id": "detail_ih_mold",
+    "name": "Casting mold opened",
+    "group": "world",
+    "description": "Casting mold opened.",
+    "file": "custom/rich-actions-20261019/detail_ih_mold_v01.mp3"
+  },
+  {
+    "id": "detail_ih_return",
+    "name": "Return steps lowered",
+    "group": "world",
+    "description": "Return steps lowered.",
+    "file": "custom/rich-actions-20261019/detail_ih_return_v01.mp3"
+  },
+  {
+    "id": "detail_la_vault_brake",
+    "name": "Vault brake released",
+    "group": "world",
+    "description": "Vault brake released.",
+    "file": "custom/rich-actions-20261019/detail_la_vault_brake_v01.mp3"
+  },
+  {
+    "id": "detail_lc_wagon",
+    "name": "Prison wagon shifted",
+    "group": "world",
+    "description": "Prison wagon shifted.",
+    "file": "custom/rich-actions-20261019/detail_lc_wagon_v01.mp3"
+  },
+  {
+    "id": "detail_sc_drain",
+    "name": "Wreck bilge drained",
+    "group": "world",
+    "description": "Wreck bilge drained.",
+    "file": "custom/rich-actions-20261019/detail_sc_drain_v01.mp3"
+  },
+  {
+    "id": "detail_sc_hull_release",
+    "name": "Cargo released",
+    "group": "world",
+    "description": "Cargo released.",
+    "file": "custom/rich-actions-20261019/detail_sc_hull_release_v01.mp3"
+  },
+  {
+    "id": "detail_sc_code_fire",
+    "name": "Wreck ballista fired",
+    "group": "world",
+    "description": "Wreck ballista fired.",
+    "file": "custom/rich-actions-20261019/detail_sc_code_fire_v01.mp3"
+  },
+  {
+    "id": "detail_dr_brace",
+    "name": "Dragon rescue brace fitted",
+    "group": "world",
+    "description": "Dragon rescue brace fitted.",
+    "file": "custom/rich-actions-20261019/detail_dr_brace_v01.mp3"
+  },
+  {
+    "id": "detail_dr_winch",
+    "name": "Dragon chain slackened",
+    "group": "world",
+    "description": "Dragon chain slackened.",
+    "file": "custom/rich-actions-20261019/detail_dr_winch_v01.mp3"
+  },
+  {
+    "id": "detail_dr_release",
+    "name": "Dragon restraints released",
+    "group": "world",
+    "description": "Dragon restraints released.",
+    "file": "custom/rich-actions-20261019/detail_dr_release_v01.mp3"
+  },
+  {
+    "id": "detail_ff_reflect_3",
+    "name": "Cornice anchor released",
+    "group": "world",
+    "description": "Cornice anchor released.",
+    "file": "custom/rich-actions-20261019/detail_ff_reflect_3_v01.mp3"
+  },
+  {
+    "id": "state_down",
+    "name": "You are downed",
+    "group": "state",
+    "description": "You are downed.",
+    "file": "custom/rich-actions-20261019/state_down_v01.mp3"
+  },
+  {
+    "id": "state_revive_start",
+    "name": "Reviving your teammate",
+    "group": "state",
+    "description": "Reviving your teammate.",
+    "file": "custom/rich-actions-20261019/state_revive_start_v01.mp3"
+  },
+  {
+    "id": "state_revive_cancel",
+    "name": "Revive interrupted",
+    "group": "state",
+    "description": "Revive interrupted.",
+    "file": "custom/rich-actions-20261019/state_revive_cancel_v01.mp3"
+  },
+  {
+    "id": "state_revived",
+    "name": "You are revived",
+    "group": "state",
+    "description": "You are revived.",
+    "file": "custom/rich-actions-20261019/state_revived_v01.mp3"
+  },
+  {
+    "id": "state_travel_start",
+    "name": "Teammate teleport starts",
+    "group": "state",
+    "description": "Teammate teleport starts.",
+    "file": "custom/rich-actions-20261019/state_travel_start_v01.mp3"
+  },
+  {
+    "id": "state_travel_cancel",
+    "name": "Teammate teleport cancelled",
+    "group": "state",
+    "description": "Teammate teleport cancelled.",
+    "file": "custom/rich-actions-20261019/state_travel_cancel_v01.mp3"
+  },
+  {
+    "id": "state_travel_arrive",
+    "name": "You arrive beside a teammate",
+    "group": "state",
+    "description": "You arrive beside a teammate.",
+    "file": "custom/rich-actions-20261019/state_travel_arrive_v01.mp3"
+  },
+  {
+    "id": "state_peer_join",
+    "name": "Teammate joins",
+    "group": "state",
+    "description": "Teammate joins.",
+    "file": "custom/rich-actions-20261019/state_peer_join_v01.mp3"
+  },
+  {
+    "id": "state_peer_leave",
+    "name": "Teammate leaves",
+    "group": "state",
+    "description": "Teammate leaves.",
+    "file": "custom/rich-actions-20261019/state_peer_leave_v01.mp3"
+  },
+  {
+    "id": "state_peer_down",
+    "name": "Teammate is downed",
+    "group": "state",
+    "description": "Teammate is downed.",
+    "file": "custom/rich-actions-20261019/state_peer_down_v01.mp3"
+  },
+  {
+    "id": "state_peer_revived",
+    "name": "Teammate revived",
+    "group": "state",
+    "description": "Teammate revived.",
+    "file": "custom/rich-actions-20261019/state_peer_revived_v01.mp3"
+  },
+  {
+    "id": "state_peer_spectate",
+    "name": "Teammate now spectating",
+    "group": "state",
+    "description": "Teammate now spectating.",
+    "file": "custom/rich-actions-20261019/state_peer_spectate_v01.mp3"
+  },
+  {
+    "id": "state_dungeon_room",
+    "name": "Dungeon room cleared",
+    "group": "state",
+    "description": "Dungeon room cleared.",
+    "file": "custom/rich-actions-20261019/state_dungeon_room_v01.mp3"
+  },
+  {
+    "id": "state_dungeon_floor",
+    "name": "Dungeon floor cleared",
+    "group": "state",
+    "description": "Dungeon floor cleared.",
+    "file": "custom/rich-actions-20261019/state_dungeon_floor_v01.mp3"
+  },
+  {
+    "id": "state_ship_repaired",
+    "name": "Boat repaired",
+    "group": "state",
+    "description": "Boat repaired.",
+    "file": "custom/rich-actions-20261019/state_ship_repaired_v01.mp3"
+  },
+  {
+    "id": "state_ship_shelter",
+    "name": "Boat reaches shelter",
+    "group": "state",
+    "description": "Boat reaches shelter.",
+    "file": "custom/rich-actions-20261019/state_ship_shelter_v01.mp3"
+  },
+  {
+    "id": "care_canine_hurt",
+    "name": "Canine companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_canine_hurt_v01.mp3"
+  },
+  {
+    "id": "care_canine_care",
+    "name": "Canine companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_canine_care_v01.mp3"
+  },
+  {
+    "id": "care_ember_hurt",
+    "name": "Ember companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_ember_hurt_v01.mp3"
+  },
+  {
+    "id": "care_ember_care",
+    "name": "Ember companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_ember_care_v01.mp3"
+  },
+  {
+    "id": "care_wolf_hurt",
+    "name": "Wolf companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_wolf_hurt_v01.mp3"
+  },
+  {
+    "id": "care_wolf_care",
+    "name": "Wolf companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_wolf_care_v01.mp3"
+  },
+  {
+    "id": "care_stone_hurt",
+    "name": "Stone companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_stone_hurt_v01.mp3"
+  },
+  {
+    "id": "care_stone_care",
+    "name": "Stone companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_stone_care_v01.mp3"
+  },
+  {
+    "id": "care_wisp_hurt",
+    "name": "Wisp companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_wisp_hurt_v01.mp3"
+  },
+  {
+    "id": "care_wisp_care",
+    "name": "Wisp companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_wisp_care_v01.mp3"
+  },
+  {
+    "id": "care_wraith_hurt",
+    "name": "Wraith companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_wraith_hurt_v01.mp3"
+  },
+  {
+    "id": "care_wraith_care",
+    "name": "Wraith companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_wraith_care_v01.mp3"
+  },
+  {
+    "id": "care_dragon_hurt",
+    "name": "Dragon companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_dragon_hurt_v01.mp3"
+  },
+  {
+    "id": "care_dragon_care",
+    "name": "Dragon companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_dragon_care_v01.mp3"
+  },
+  {
+    "id": "care_mender_hurt",
+    "name": "Mender companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_mender_hurt_v01.mp3"
+  },
+  {
+    "id": "care_mender_care",
+    "name": "Mender companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_mender_care_v01.mp3"
+  },
+  {
+    "id": "care_coin_hurt",
+    "name": "Coin companion \u00b7 hurt",
+    "group": "companion",
+    "description": "A short reaction to losing health.",
+    "file": "custom/rich-actions-20261019/care_coin_hurt_v01.mp3"
+  },
+  {
+    "id": "care_coin_care",
+    "name": "Coin companion \u00b7 healing",
+    "group": "companion",
+    "description": "A gentle cue after recovering a meaningful amount of health.",
+    "file": "custom/rich-actions-20261019/care_coin_care_v01.mp3"
+  }
+]

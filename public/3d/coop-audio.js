@@ -6,6 +6,7 @@ const files=new Set(['swordswing','axeswing','spearswing','custom_shoot','xbowcl
 for(const id of root.BFSkillSfx?.ids||[])files.add('skillcast_'+id);
 for(const id of root.BFWorldSfx?.charges||[])files.add('weaponcharge_'+id);
 for(const id of root.BFCompanionSfx?.ids||[])files.add(id);
+for(const row of root.BFRichSfxData?.ids||[])if(['lifecycle','charge'].includes(row.group))files.add(row.id);
 for(const id of root.BFCombatDetailSfx?.ids||[])if(id.startsWith('skillimpact_'))files.add(id);
 let capture=null,depth=0,gain=1;
 function recipe(cue){

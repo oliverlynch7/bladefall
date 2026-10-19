@@ -1,0 +1,499 @@
+{
+ "checks": 35,
+ "rows": [
+  {
+   "name": "Actual authored world prop home.bell.alarm",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop home.grain.spout",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop home.grain.hopper",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop home.farm.supplies",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop home.orchard.wheel",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop woods.signal.crank",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop woods.tracks.release",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop woods.rescue.release",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop rk.gate",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop rk.wheel",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop rk.tools",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop rk.wall",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop cg.catch.west",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop cg.bridge",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop cg.break",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop gf.gate",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop gf.passage",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop gf.pet.feed",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop gf.pet.release",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop hp.cart.push",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop hp.brake.right",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop hp.lift",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop ih.handles",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop ih.blank",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop ih.mold",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop ih.return",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop la.vault.brake",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop lc.wagon",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop sc.drain",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop sc.hull.release",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop sc.code.fire",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop dr.brace",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop dr.winch",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop dr.release",
+   "passed": true
+  },
+  {
+   "name": "Actual authored world prop ff.reflect.3",
+   "passed": true
+  }
+ ],
+ "passed": true,
+ "found": [
+  [
+   "home.bell.alarm",
+   {
+    "zone": 0,
+    "area": 0,
+    "x": 2350,
+    "y": 168,
+    "z": -1940
+   }
+  ],
+  [
+   "home.grain.spout",
+   {
+    "zone": 0,
+    "area": 0,
+    "x": 1310,
+    "y": 0,
+    "z": 100
+   }
+  ],
+  [
+   "home.grain.hopper",
+   {
+    "zone": 0,
+    "area": 0,
+    "x": 1160,
+    "y": 100,
+    "z": -55
+   }
+  ],
+  [
+   "home.farm.supplies",
+   {
+    "zone": 0,
+    "area": 0,
+    "x": -2510,
+    "y": 0,
+    "z": -630
+   }
+  ],
+  [
+   "home.orchard.wheel",
+   {
+    "zone": 0,
+    "area": 0,
+    "x": -2490,
+    "y": 136,
+    "z": -1840
+   }
+  ],
+  [
+   "woods.signal.crank",
+   {
+    "zone": 0,
+    "area": 1,
+    "x": 80,
+    "y": 0,
+    "z": -3060
+   }
+  ],
+  [
+   "woods.tracks.release",
+   {
+    "zone": 0,
+    "area": 1,
+    "x": -2140,
+    "y": 138,
+    "z": -2650
+   }
+  ],
+  [
+   "woods.rescue.release",
+   {
+    "zone": 0,
+    "area": 1,
+    "x": 2480,
+    "y": 0,
+    "z": -1790
+   }
+  ],
+  [
+   "hp.cart.push",
+   {
+    "zone": 1,
+    "area": 0,
+    "x": -530,
+    "y": 0,
+    "z": -2610
+   }
+  ],
+  [
+   "hp.brake.right",
+   {
+    "zone": 1,
+    "area": 0,
+    "x": 230,
+    "y": 0,
+    "z": -2680
+   }
+  ],
+  [
+   "hp.lift",
+   {
+    "zone": 1,
+    "area": 0,
+    "x": 40,
+    "y": 0,
+    "z": -4600
+   }
+  ],
+  [
+   "lc.wagon",
+   {
+    "zone": 1,
+    "area": 1,
+    "x": 1350,
+    "y": 0,
+    "z": -2460
+   }
+  ],
+  [
+   "rk.gate",
+   {
+    "zone": 2,
+    "area": 0,
+    "x": 0,
+    "y": 0,
+    "z": -830
+   }
+  ],
+  [
+   "rk.wheel",
+   {
+    "zone": 2,
+    "area": 0,
+    "x": 650,
+    "y": 200,
+    "z": -3650
+   }
+  ],
+  [
+   "rk.tools",
+   {
+    "zone": 2,
+    "area": 0,
+    "x": 1500,
+    "y": 0,
+    "z": -3020
+   }
+  ],
+  [
+   "rk.wall",
+   {
+    "zone": 2,
+    "area": 0,
+    "x": -1730,
+    "y": 80,
+    "z": -3310
+   }
+  ],
+  [
+   "ff.reflect.3",
+   {
+    "zone": 3,
+    "area": 0,
+    "x": -185,
+    "y": 965,
+    "z": -5200
+   }
+  ],
+  [
+   "ih.handles",
+   {
+    "zone": 4,
+    "area": 0,
+    "x": -1730,
+    "y": 160,
+    "z": -2770
+   }
+  ],
+  [
+   "ih.blank",
+   {
+    "zone": 4,
+    "area": 0,
+    "x": 1870,
+    "y": 400,
+    "z": -3200
+   }
+  ],
+  [
+   "ih.mold",
+   {
+    "zone": 4,
+    "area": 0,
+    "x": -1310,
+    "y": 100,
+    "z": -4710
+   }
+  ],
+  [
+   "ih.return",
+   {
+    "zone": 4,
+    "area": 0,
+    "x": 1110,
+    "y": 80,
+    "z": -3740
+   }
+  ],
+  [
+   "gf.gate",
+   {
+    "zone": 4,
+    "area": 1,
+    "x": 230,
+    "y": 120,
+    "z": -1580
+   }
+  ],
+  [
+   "gf.passage",
+   {
+    "zone": 4,
+    "area": 1,
+    "x": -1190,
+    "y": 120,
+    "z": -2880
+   }
+  ],
+  [
+   "gf.pet.feed",
+   {
+    "zone": 4,
+    "area": 1,
+    "x": 2050,
+    "y": 140,
+    "z": -3410
+   }
+  ],
+  [
+   "gf.pet.release",
+   {
+    "zone": 4,
+    "area": 1,
+    "x": 2375,
+    "y": 140,
+    "z": -3690
+   }
+  ],
+  [
+   "sc.drain",
+   {
+    "zone": 5,
+    "area": 0,
+    "x": 2230,
+    "y": 0,
+    "z": -690
+   }
+  ],
+  [
+   "sc.hull.release",
+   {
+    "zone": 5,
+    "area": 0,
+    "x": -1540,
+    "y": 300,
+    "z": -2090
+   }
+  ],
+  [
+   "sc.code.fire",
+   {
+    "zone": 5,
+    "area": 0,
+    "x": -1510,
+    "y": 130,
+    "z": -3310
+   }
+  ],
+  [
+   "dr.brace",
+   {
+    "zone": 6,
+    "area": 1,
+    "x": -3090,
+    "y": 600,
+    "z": -3450
+   }
+  ],
+  [
+   "dr.winch",
+   {
+    "zone": 6,
+    "area": 1,
+    "x": -3310,
+    "y": 600,
+    "z": -3290
+   }
+  ],
+  [
+   "dr.release",
+   {
+    "zone": 6,
+    "area": 1,
+    "x": -3630,
+    "y": 690,
+    "z": -3440
+   }
+  ],
+  [
+   "cg.catch.west",
+   {
+    "zone": 7,
+    "area": 0,
+    "x": -1050,
+    "y": 100,
+    "z": -3390
+   }
+  ],
+  [
+   "cg.bridge",
+   {
+    "zone": 7,
+    "area": 0,
+    "x": -120,
+    "y": 200,
+    "z": -2850
+   }
+  ],
+  [
+   "cg.break",
+   {
+    "zone": 7,
+    "area": 0,
+    "x": -270,
+    "y": 280,
+    "z": -4890
+   }
+  ],
+  [
+   "la.vault.brake",
+   {
+    "zone": 7,
+    "area": 1,
+    "x": 1910,
+    "y": 460,
+    "z": -345
+   }
+  ]
+ ],
+ "missing": []
+}

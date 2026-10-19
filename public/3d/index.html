@@ -1220,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.306.0-dungeon-recovery';
+const VERSION3D='2.307.0-middle-click-fullscreen';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5806,7 +5806,7 @@ function controlKey(id){return controlHint(id).split(' / ')[0].replace('Left Cli
 function hudDevice(device){if(hudInputDevice===device)return;hudInputDevice=device;updateHudKeys();if(G)skillbarUpdate();}
 window.addEventListener('keydown',()=>hudDevice('keyboard'),true);
 window.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')hudDevice('keyboard');},true);
-function beginnerControls(){return [['Move',[...new Set(['up','left','down','right'].map(controlHint))].join(' · ')],['Jump · hold for height',controlHint('jump')],['Basic attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Toggle auto-sell',controlHint('loot')],['Camera zoom / first-person FOV','Scroll wheel · Settings → Controls & camera'],['Menu / release mouse',controlHint('pause')]];}
+function beginnerControls(){return [['Move',[...new Set(['up','left','down','right'].map(controlHint))].join(' · ')],['Jump · hold for height',controlHint('jump')],['Basic attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Toggle auto-sell',controlHint('loot')],['Camera zoom / first-person FOV','Scroll wheel · Settings → Controls & camera'],['Menu / release mouse',controlHint('pause')],['Fullscreen',controlHint('fullscreen')+' · Middle-click']];}
 function showTutorial(cid){mode='menu';
  showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="tutSkip">Skip practice · ${htmlSafe(hudInputDevice==='controller'?controlKey('dodge'):'Esc')}</button></div>`);
  document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
@@ -10206,6 +10206,12 @@ function ensureKeybinds(){
 let _codeToAction={};
 const heldKeyboard=new Map();
 function releaseKeyboard(){for(const act of Object.keys(MOVE_ACTS))input[act]=false;input.jx=0;input.jz=0;heldKeyboard.clear();partyHeld=false;partyNeedsRelease=false;partyCancel();}
+function fullscreenMouseAllowed(e){return e.button===1&&(!e.pointerType||e.pointerType==='mouse')&&!BFMenuKeys.typing(e.target)&&!(typeof _rebindState!=='undefined'&&_rebindState);}
+window.addEventListener('pointerdown',e=>{if(!fullscreenMouseAllowed(e))return;e.preventDefault();e.stopImmediatePropagation();},true);
+// Browsers grant middle-button activation on release, not on pointerdown.
+window.addEventListener('pointerup',e=>{if(!fullscreenMouseAllowed(e))return;e.preventDefault();e.stopImmediatePropagation();toggleFullscreen();},true);
+// Cancel browser autoscroll and the later auxiliary click without toggling twice.
+for(const type of ['mousedown','auxclick'])window.addEventListener(type,e=>{if(!fullscreenMouseAllowed(e))return;e.preventDefault();e.stopImmediatePropagation();},true);
 let cameraSaveTimer=null;
 window.addEventListener('wheel',e=>{
  if(mode!=='play'||!G||e.ctrlKey||e.metaKey||e.altKey||_edOpen()||window.BFSocial?.camera()||G.shore?.ballista?.aiming||G.kingFinal&&['charge','cut'].includes(G.boss?.akStage))return;
@@ -10213,7 +10219,7 @@ window.addEventListener('wheel',e=>{
  e.preventDefault();if(BFCameraControls.wheel(meta,e.deltaY,e.deltaMode)){clearTimeout(cameraSaveTimer);cameraSaveTimer=setTimeout(persistGlobal,300);}
 },{passive:false});
 window.addEventListener('blur',releaseKeyboard);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeyboard();});
-function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||_codeToAction[code]||['Escape','KeyQ','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
+function rebuildKeyLookup(){_codeToAction={};for(const a of KEYACTIONS){meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(code=>{if(!code||code==='Mouse1'&&a.id!=='fullscreen'||_codeToAction[code]||['Escape','KeyQ','F2','F5','F11','F12'].includes(code))return false;_codeToAction[code]=a.id;return true;}).slice(0,2);}try{updateHudKeys();}catch(e){}}
 function resetKeyAction(id){const a=KEYACTIONS.find(a=>a.id===id);if(!a)return;for(const other of KEYACTIONS)meta.keybinds[other.id]=(meta.keybinds[other.id]||[]).filter(c=>!a.def.includes(c));meta.keybinds[id]=a.def.slice();rebuildKeyLookup();}
 function keyAction(code){ return _codeToAction[code]||(code==='KeyK'&&meta.keybinds?.dodge?.includes('ShiftLeft')&&meta.keybinds.dodge.includes('Mouse2')?'dodge':null); }
 ensureKeybinds();
@@ -20506,7 +20512,7 @@ function toggleFullscreen(){ try{
   const fn=fsOn()?(document.exitFullscreen||document.webkitExitFullscreen):(el.requestFullscreen||el.webkitRequestFullscreen);
   if(fn){const request=fn.call(el);request?.catch?.(()=>{});}
 }catch(e){} }
-function fullscreenLabel(){return 'Fullscreen: '+(fsOn()?'On':'Off')+' · '+controlHint('fullscreen');}
+function fullscreenLabel(){return 'Fullscreen: '+(fsOn()?'On':'Off')+' · '+controlHint('fullscreen')+' / Middle-click';}
 for(const event of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(event,()=>{const b=document.getElementById('fsBtn');if(b)b.textContent=fullscreenLabel();});
 // human-readable label for a physical key code
 function keyLabel(code){ if(!code) return '—';
@@ -20546,7 +20552,7 @@ function openKeybinds(back){
 function startRebind(id,slot,rerender){
   _rebindState={id,slot}; rerender();
   const cleanup=()=>{ window.removeEventListener('keydown',onKey,true); window.removeEventListener('pointerdown',onPointer,true); window.removeEventListener('contextmenu',onContext,true); };
-  const bindCode=(code)=>{ cleanup();
+  const bindCode=(code)=>{ if(code==='Mouse1'&&id!=='fullscreen'){toast('Middle-click is the fullscreen shortcut. Choose another button.');return;}cleanup();
     for(const a of KEYACTIONS){ meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(c=>c!==code); }  // no duplicate bindings anywhere (swap-style)
     const arr=meta.keybinds[id]; while(arr.length<=slot) arr.push(null); arr[slot]=code;
     meta.keybinds[id]=arr.filter(c=>c).slice(0,2);

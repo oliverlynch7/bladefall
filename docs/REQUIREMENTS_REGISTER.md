@@ -2431,3 +2431,7 @@ User requests better chess UI and predictable co-op seating: table interaction d
 User cannot enter Endless Dungeon: loading crashes into recovery screen asking to delete saves. Fix entry without deleting campaign or dungeon profiles. Audit real start/resume/render/room advancement/return and co-op state. Reuse existing detailed environment materials/props and mainstream enemy roster, retaining roguelite slots, earned gold/upgrades, attrition and tier unlocks. Inspect actual crash first, then improve concrete weaknesses with compatible fresh-layout versioning; old checkpoint geometry remains unchanged. Verify muted real WebGL and save isolation before shipping.
 
 Implementation complete in v2.306.0-dungeon-recovery: native campaign roster/art, guarded entry/resume, safe retry/hub recovery, separate sale wallet, clearer preparation and HUD. See continuity and dungeon-recovery-20261018 evidence for checks and the limitation that the original user-specific entry exception was not reproduced. No save deletion performed.
+
+
+## [Codex | 2026-10-18] Middle-click fullscreen shortcut
+User requests scroll-wheel click to toggle fullscreen alongside0. Keep existing0/Numpad0 and rebound keyboard action. Add mouse-middle press as an additional shortcut; suppress autoscroll/auxiliary navigation and prevent camera/menu drag from consuming the same press. Preserve text-field middle-click and rebinding capture. Update visible control hints. Verify actual trusted browser fullscreen enter/exit and existing keyboard shortcut.

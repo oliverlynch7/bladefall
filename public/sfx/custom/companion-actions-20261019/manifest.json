@@ -1,0 +1,129 @@
+{
+  "version": "companion-actions-20261019",
+  "plan_at_generation": "starter",
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "subjective_listening": "Human audition pending; signal checks cannot establish taste.",
+  "cues": [
+    {
+      "id": "pet_canine_bite",
+      "file": "custom/companion-actions-20261019/pet_canine_bite_v01",
+      "duration": 0.6,
+      "channels": 2,
+      "source_seconds": 0.6,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.4204,
+      "peak": 0.39538,
+      "rms": 0.08521,
+      "sha256": "09fa67c269b55c151a51882e20540f16ebc832a2e633a9eddf3bc6686408fcbe"
+    },
+    {
+      "id": "pet_ember_bite",
+      "file": "custom/companion-actions-20261019/pet_ember_bite_v01",
+      "duration": 0.64,
+      "channels": 2,
+      "source_seconds": 0.65,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.9323,
+      "peak": 0.71187,
+      "rms": 0.0528,
+      "sha256": "485d105c7f22933576858ee7c5da366621307dc887301b677fe5886b214b19c9"
+    },
+    {
+      "id": "pet_spirit_swipe",
+      "file": "custom/companion-actions-20261019/pet_spirit_swipe_v01",
+      "duration": 0.6802,
+      "channels": 2,
+      "source_seconds": 0.7,
+      "trimmed_start_seconds": 0.0,
+      "gain": 1.468,
+      "peak": 0.48586,
+      "rms": 0.08526,
+      "sha256": "a342be7cbae08f3ceb9b8dc18bce42b651b804855d060fb84a57b212c7d4ba71"
+    },
+    {
+      "id": "pet_stone_ram",
+      "file": "custom/companion-actions-20261019/pet_stone_ram_v01",
+      "duration": 0.64,
+      "channels": 2,
+      "source_seconds": 0.65,
+      "trimmed_start_seconds": 0.0,
+      "gain": 1.5816,
+      "peak": 0.73031,
+      "rms": 0.04396,
+      "sha256": "2472abfa34711c6ebcfd6502d7794d14a3f956672ecb54269e922de09d787bbf"
+    },
+    {
+      "id": "pet_wisp_bolt",
+      "file": "custom/companion-actions-20261019/pet_wisp_bolt_v01",
+      "duration": 0.64,
+      "channels": 2,
+      "source_seconds": 0.65,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.8781,
+      "peak": 0.68511,
+      "rms": 0.08624,
+      "sha256": "aafea46afc0c840579a4ec47e57a6957627c4bf961f9d8c98af12a72dc813045"
+    },
+    {
+      "id": "pet_wraith_bolt",
+      "file": "custom/companion-actions-20261019/pet_wraith_bolt_v01",
+      "duration": 0.6802,
+      "channels": 2,
+      "source_seconds": 0.7,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7304,
+      "peak": 0.4834,
+      "rms": 0.08472,
+      "sha256": "c613584c4429255fdb401df07f21a533fa0d721f780bd09dd160b024fe773ed6"
+    },
+    {
+      "id": "pet_dragon_breath",
+      "file": "custom/companion-actions-20261019/pet_dragon_breath_v01",
+      "duration": 0.92,
+      "channels": 2,
+      "source_seconds": 0.95,
+      "trimmed_start_seconds": 0.0,
+      "gain": 4,
+      "peak": 0.59151,
+      "rms": 0.03532,
+      "sha256": "b288edf01148bacb89500078cf10cdae5de7a32f5bb99408a900e3f450bb3725"
+    },
+    {
+      "id": "pet_mender_heal",
+      "file": "custom/companion-actions-20261019/pet_mender_heal_v01",
+      "duration": 0.84,
+      "channels": 2,
+      "source_seconds": 0.85,
+      "trimmed_start_seconds": 0.0,
+      "gain": 4,
+      "peak": 0.52547,
+      "rms": 0.07059,
+      "sha256": "337d29212a36db7f6b5c317f47fd93c6adfccd34e052aa571b7c4dadab7841e0"
+    },
+    {
+      "id": "pet_dragon_takeoff",
+      "file": "custom/companion-actions-20261019/pet_dragon_takeoff_v01",
+      "duration": 0.8,
+      "channels": 2,
+      "source_seconds": 0.8,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.3835,
+      "peak": 0.35848,
+      "rms": 0.08537,
+      "sha256": "01c1f04d4774c9252e58141c1672893a15ec34c5a42b265ae2832e5c8978cca6"
+    },
+    {
+      "id": "pet_dragon_land",
+      "file": "custom/companion-actions-20261019/pet_dragon_land_v01",
+      "duration": 0.8,
+      "channels": 2,
+      "source_seconds": 0.8,
+      "trimmed_start_seconds": 0.0,
+      "gain": 2.1843,
+      "peak": 0.75075,
+      "rms": 0.07037,
+      "sha256": "584d8d671b1541edd19e84a19bf0164a4be536cabe264269c707a875f6a61387"
+    }
+  ]
+}

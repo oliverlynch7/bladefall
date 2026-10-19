@@ -5,6 +5,7 @@ const elements=new Set(['fire','ice','storm','poison','holy','void','arcane']);
 const files=new Set(['swordswing','axeswing','spearswing','custom_shoot','xbowclick','xbowlatch','wandfire','wandcharge','firecharge','fireshot','fireball','warskill1','warcharge','arcaneskill','cast1','cast2','cast3','cast4','cast5','cast6','cast7',...['py_bolt','py_fan','py_blast','py_ward','py_lance','py_nova','py_inferno','py_sun'].map(id=>'skillcast_'+id)]);
 for(const id of root.BFSkillSfx?.ids||[])files.add('skillcast_'+id);
 for(const id of root.BFWorldSfx?.charges||[])files.add('weaponcharge_'+id);
+for(const id of root.BFCompanionSfx?.ids||[])files.add(id);
 for(const id of root.BFCombatDetailSfx?.ids||[])if(id.startsWith('skillimpact_'))files.add(id);
 let capture=null,depth=0,gain=1;
 function recipe(cue){

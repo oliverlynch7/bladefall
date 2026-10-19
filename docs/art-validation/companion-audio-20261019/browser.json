@@ -1,0 +1,259 @@
+{
+  "passed": true,
+  "checks": 63,
+  "rows": [
+    {
+      "name": "Pre-change level100 save loads",
+      "passed": true
+    },
+    {
+      "name": "Hub ready",
+      "passed": true
+    },
+    {
+      "name": "Old gold retained",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_canine_bite",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_canine_bite",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_ember_bite",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_ember_bite",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_spirit_swipe",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_spirit_swipe",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_stone_ram",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_stone_ram",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_wisp_bolt",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_wisp_bolt",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_wraith_bolt",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_wraith_bolt",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_dragon_breath",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_dragon_breath",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_mender_heal",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_mender_heal",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_dragon_takeoff",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_dragon_takeoff",
+      "passed": true
+    },
+    {
+      "name": "Browser decodes pet_dragon_land",
+      "passed": true
+    },
+    {
+      "name": "Registry lazy pet_dragon_land",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_canine_bite",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_ember_bite",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_spirit_swipe",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_stone_ram",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_wisp_bolt",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_wraith_bolt",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_dragon_breath",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_mender_heal",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_dragon_takeoff",
+      "passed": true
+    },
+    {
+      "name": "Lazy loader decoded pet_dragon_land",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio shepherd",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat shepherd",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event shepherd",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio cinder",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat cinder",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event cinder",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio emberpup",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat emberpup",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event emberpup",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio spiritwolf",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat spiritwolf",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event spiritwolf",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio stonewhelp",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat stonewhelp",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event stonewhelp",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio wisp",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat wisp",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event wisp",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio gravewraith",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat gravewraith",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event gravewraith",
+      "passed": true
+    },
+    {
+      "name": "Actual attack invokes named audio sunwing",
+      "passed": true
+    },
+    {
+      "name": "Actual attack retains combat sunwing",
+      "passed": true
+    },
+    {
+      "name": "Muted local still relays one event sunwing",
+      "passed": true
+    },
+    {
+      "name": "Real healer adds HP and one cue",
+      "passed": true
+    },
+    {
+      "name": "Full HP healing is silent",
+      "passed": true
+    },
+    {
+      "name": "Real takeoff callback uses new cue",
+      "passed": true
+    },
+    {
+      "name": "Real landing callback uses new cue",
+      "passed": true
+    },
+    {
+      "name": "Mute retained",
+      "passed": true
+    },
+    {
+      "name": "No save progression mutation",
+      "passed": true
+    }
+  ],
+  "console": []
+}

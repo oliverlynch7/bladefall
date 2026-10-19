@@ -4,7 +4,8 @@
 <script src="./skill-sfx.js?v=2277"></script>
 <script src="./world-signature-sfx.js?v=2324"></script>
 <script src="./combat-detail-sfx.js?v=2281"></script>
-<script src="./coop-audio.js?v=2281"></script>
+<script src="./companion-sfx.js?v=2326"></script>
+<script src="./coop-audio.js?v=2326"></script>
 <script src="./enemy-warning-sfx.js?v=2277"></script>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./narration.css?v=2287"><script src="./onboarding-script.js?v=2287"></script><script src="./narration.js?v=2287"></script>
@@ -1228,7 +1229,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.325.0-repeatable-campaign-hunts';
+const VERSION3D='2.326.0-companion-sound-identities';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1844,6 +1845,7 @@ if(window.BFPrioritySfx)window.BFPrioritySfx.apply(FXDEF);
 if(window.BFSkillSfx)window.BFSkillSfx.apply(FXDEF);
 window.BFEnemyWarnings?.apply(FXDEF);
 window.BFWorldSfx?.apply(FXDEF);
+window.BFCompanionSfx?.apply(FXDEF);
 window.BFCombatDetailSfx?.apply(FXDEF);
 // per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
 const MOBSND={
@@ -14754,7 +14756,7 @@ function hurtPlayer(dmg,sx,sz,by){
    ONE pet lives on G.pet, spawned lazily whenever an active pet is set. No per-frame
    allocation: enemy scans happen only on the pet's attack cadence; the name label reuses
    one pooled DOM node. */
-function dragonTravelWorld(){return {floor:floorAt,resolve:resolveObstacles,notice:toast,takeoff:()=>SFX.jump(),land:()=>SFX.land()};}
+function dragonTravelWorld(){return {floor:floorAt,resolve:resolveObstacles,notice:toast,takeoff:()=>{if(!window.BFCompanionSfx?.action('dragon_takeoff',G.pet))SFX.jump();},land:()=>{if(!window.BFCompanionSfx?.action('dragon_land',G.pet))SFX.land();}};}
 function toggleDragonRide(){if(mode!=='play'||!G||IN_ARENA)return false;const ok=BFDragonRiding.toggle(G,meta,dragonTravelWorld());if(ok){input.jumpEdge=false;input.dodgeEdge=false;hudUpdate();}return ok;}
 function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G) G.pet=null; return; }
   if(G.petLost){ G.pet=null; return; }                         // a fallen companion returns only when a new hub session resets G
@@ -14834,13 +14836,14 @@ function petUpdate(dt){
     if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ let cd=P.cd;if(meta.classId==='beastmaster'&&c2Passive('bst_swift'))cd/=1.18;if((pet.apexT||0)>0)cd*=.77;pet.atkT=cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
   else if(P.arch==='healer'){ pet.healT-=dt;
     if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
-      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
+      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;if(h>0)window.BFCompanionSfx?.action('heal',pet);
         addText(p.x,p.y+80,p.z,'+'+h+' ♥','#7de08a',true,'heal'); skillRing(p.x,p.z,'#7de08a','#4be08a',64);   // Phase 19: the heal READS now — big green number + a soft ring
         burst(pet.x,pet.y,pet.z,'#7de08a',8); hudUpdate(); } } }
   else if(P.arch==='utility'){ const R=P.pull||220;         // loot vacuum: draw nearby drops toward the hero
     for(const pk of G.pickups){ if(pk.questItem||pk.localItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
 }
 function petAttack(pet,P,e){
+  window.BFCompanionSfx?.action('attack',pet);
   let dmg=petAtkDmg(pet.id);if(meta.classId==='beastmaster'){if((e.beastMarkT||0)>0)dmg*=1.18;if(c2Passive('bst_scent')&&(e.elite||e.boss||e.hp<e.maxHp*.35||(e.beastMarkT||0)>0))dmg*=1.20;if(G.p.beastPetEmpower){dmg*=1.25;G.p.beastPetEmpower=0;}}
   if(pet.id==='sunwing'){BFDragonCombat.start(pet,dmg);return;}
   if(P.style==='ranged'){ const oy=pet.y+pet.bob, sp=560, d=Math.max(1,dXZ(pet.x,pet.z,e.x,e.z));
@@ -23890,6 +23893,7 @@ function frame(ts){
   flushDeferred();                    // ...then the entities, depth-tested against what it just drew
   }finally{restoreMotion();}
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
+  window.BFCompanionSfx?.tick(G,MP.active?Object.values(MP.peers):[]);
   window.BFWorldSfx?.tick(G,mode,{queue:queueSkillFx,play:playFx},performance.now()/1000,document.hidden||!!window.BF_LOADING?.active);
   window.BFCombatDetailSfx?.tick(G,backgroundMenuMode||mode,document.hidden||!!window.BF_LOADING?.active,performance.now()/1000,meta.combatDetailAudio!==false);
   BFGuidedTutorial.map(G,mode);
@@ -24428,6 +24432,7 @@ if(window.BF_COMBAT_ART){
   chargeRelease=function(p,w,amt){const shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok)art.weapon(G,p,meta.classId,true);return result;};
 }
 
+window.BFCompanionSfx?.configure({world:()=>G,allowed:()=>mode==='play'&&!document.hidden&&!window.BF_LOADING?.active&&!G?.p?.dead&&!G?.p?.downed&&!pauseState().active&&!G?._tutorialSafe,play:playFx,queue:queueSkillFx,relay:(id,gain)=>{if(MP.active)MP.sendSound([['file',id,gain]]);}});
 // Audio metadata lives outside actors/saves. Every final handler retains its return value.
 if(window.BFCombatDetailSfx){
  const detail=window.BFCombatDetailSfx;

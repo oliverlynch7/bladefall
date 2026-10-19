@@ -1,0 +1,106 @@
+{
+  "scope": "Additive companion action identities; preserve original sounds",
+  "hard_credit_cap": 1000,
+  "cues": [
+    {
+      "id": "pet_canine_bite",
+      "name": "Shepherd bite",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A brave medium shepherd dog gives one short focused low bark and a quick jaw snap, close dry canine bite, not a scream. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.6,
+      "source": "petAttack shepherd melee",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_ember_bite",
+      "name": "Ember companion bite",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A small fire creature darts forward, quick crackling fiery bite and soft ember fizz, compact dry impact. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "petAttack cinder/emberpup melee",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_spirit_swipe",
+      "name": "Spirit Wolf strike",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A spectral wolf pounces with a low airy canine breath, soft icy spectral swipe and short ghostly shimmer. No long howl. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.7,
+      "source": "petAttack spiritwolf melee",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_stone_ram",
+      "name": "Stone Whelp headbutt",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A little stone creature delivers one heavy blunt rock headbutt, tiny gravel rattle, earthy compact knock. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "petAttack stonewhelp melee",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_wisp_bolt",
+      "name": "Pale Wisp bolt",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A small pale spirit releases a bright clean dart of light, tiny glassy onset and airy spectral zip, delicate but clear. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.65,
+      "source": "petAttack wisp projectile release",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_wraith_bolt",
+      "name": "Grave Wraith bolt",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A grave spirit releases a dark violet magical bolt, hollow breathy suction into a short low spectral whip, restrained tail. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.7,
+      "source": "petAttack gravewraith projectile release",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_dragon_breath",
+      "name": "Sunspire Dragon flame breath",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A small powerful dragon draws a quick breath for one quarter second then exhales a short forceful cone of fire, warm low throat rumble and crisp flame rush. No long roar. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.95,
+      "source": "petAttack sunwing BFDragonCombat.start with .3s windup",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_mender_heal",
+      "name": "Mending Sprite heal",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A tiny woodland healing sprite releases a soft green restorative pulse, warm wooden chime with gentle leafy sparkle, short reassuring bloom. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.85,
+      "source": "petUpdate healer actual positive HP restored",
+      "existing_fallback": "Existing hit and death sounds preserved; no companion action identity.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_dragon_takeoff",
+      "name": "Dragon takeoff",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. One powerful leathery dragon wing downstroke, broad air displacement and soft claw push against earth. Tight immediate whoosh, no roar. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "dragonTravelWorld takeoff callback",
+      "existing_fallback": "SFX.jump / SFX.land retained as fallback when new file is unavailable.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    },
+    {
+      "id": "pet_dragon_land",
+      "name": "Dragon landing",
+      "prompt": "Single isolated fantasy action game sound effect. No speech, no music, no background ambience. A small heavy dragon lands on stone, two padded claw footfalls and one soft wing fold rustle, controlled weight, no crash. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "dragonTravelWorld land callback",
+      "existing_fallback": "SFX.jump / SFX.land retained as fallback when new file is unavailable.",
+      "reuse_decision": "Existing skill, enemy, boss and world catalogs inspected. Add specific friendly companion action rather than replacing existing event slots.",
+      "overlap": "Per actor .55s, global three starts per300ms, quiet gain and distance attenuation; no delayed replay. Co-op existing whitelist, sequence, scene and volume validation."
+    }
+  ]
+}

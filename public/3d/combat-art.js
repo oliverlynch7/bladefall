@@ -65,6 +65,7 @@ function render(g,d){
   const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],len=Math.hypot(dx,dy,dz);if(len<.01)return;
   pushM();mv((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);rotY(Math.atan2(dx,dz));rotX(-Math.atan2(dy,Math.hypot(dx,dz)));box(width,width,len,col,col,alpha);popM();
  }
+ function surface(shape,scale,color,alpha,style){if(!shape||!d.surface)return;const cost=Math.ceil(shape.faces.length/6);if(cost>budget)return;budget-=cost;d.surface(shape,scale,color,alpha,style);}
  function trail(points,widths,color,alpha){const count=Math.min(points.length-1,Math.max(0,budget));if(count<1)return;if(d.trail){budget-=count;d.trail(points.slice(0,count+1),widths.slice(0,count+1),color,alpha);}else for(let i=0;i<count;i++)line(points[i],points[i+1],widths[i],color,alpha);}
  function glow(point,radius,color,alpha){if(--budget<0)return;if(d.glow)d.glow(point,radius,color,alpha);else{const [x,y,z]=point;line([x-radius*.3,y,z],[x+radius*.3,y,z],radius*.45,color,alpha*.5);}}
  function arc(r,y,start,end,col,alpha,width=2,segments=16){
@@ -95,7 +96,7 @@ function render(g,d){
   const pr=e.profile,theme=themes[pr.cls],kind=theme[2],hot=theme[1],col=({fire:'#ff8845',ice:'#87ddff',arcane:'#cd9bff',poison:'#a9df69',void:'#b48be8',holy:'#ffe6a1'})[pr.element]||theme[0],ultimate=pr.slot===3,scale=ultimate?1.35:1,r=e.radius?(12+v*(e.radius-12)):(24+v*48)*scale;
   pushM();mv(e.x,e.y+4,e.z);rotY(e.yaw);
   const f=pr.form;
-  const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,trail,glow,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot,event:e,detail:d.quality==='low'?24:48});
+  const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,trail,glow,surface,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot,event:e,detail:d.quality==='low'?24:48});
   if(custom){}else if(f==='palmflame'){
    const wide=pr.slot===2,count=wide?9:5,spread=wide?.78:.36;
    // Layered tapering tongues start at the palms, never a staff projectile.

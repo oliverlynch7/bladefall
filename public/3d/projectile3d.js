@@ -2,9 +2,9 @@ import * as T from './three.module.js';
 // Bounded shared batches: clean silhouettes and directional wakes, never striped spheres.
 const CAP=768,root=new T.Group(),pose=new T.Object3D(),tint=new T.Color(),forward=new T.Vector3(0,0,1),direction=new T.Vector3();
 root.name='Projectile art';
-const cone=new T.ConeGeometry(1,2,6);cone.rotateX(Math.PI/2);
-const shaft=new T.CylinderGeometry(.32,.65,2,12);shaft.rotateX(Math.PI/2);
-const geometries={round:new T.SphereGeometry(1,16,12),shaft,gem:new T.OctahedronGeometry(1),seed:new T.IcosahedronGeometry(1,0),tip:cone,bar:new T.BoxGeometry(1,1,1),ring:new T.TorusGeometry(1,.065,4,16)};
+const cone=new T.ConeGeometry(1,2,10);cone.rotateX(Math.PI/2);
+const shaft=new T.CylinderGeometry(.32,.65,2,16);shaft.rotateX(Math.PI/2);
+const geometries={round:new T.SphereGeometry(1,20,14),shaft,gem:new T.OctahedronGeometry(1),seed:new T.IcosahedronGeometry(1,1),tip:cone,bar:new T.BoxGeometry(1,1,1),ring:new T.TorusGeometry(1,.065,6,24)};
 const batches={};
 for(const [name,geometry] of Object.entries(geometries)){
  const material=new T.MeshBasicMaterial({color:0xffffff,transparent:name==='ring',opacity:name==='ring'?.65:1,depthWrite:name!=='ring',toneMapped:false});

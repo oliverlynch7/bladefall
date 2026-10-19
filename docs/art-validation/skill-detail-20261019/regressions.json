@@ -1,0 +1,140 @@
+[
+  {
+    "suite": "test-skill-motion.cjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"checks\":42045,\"skills\":136}",
+    "error": null
+  },
+  {
+    "suite": "test-rich-sfx.cjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"checks\":572}",
+    "error": null
+  },
+  {
+    "suite": "test-companion-sfx.cjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"checks\":131}",
+    "error": null
+  },
+  {
+    "suite": "test-coop-audio.cjs",
+    "passed": true,
+    "output": "52 capture, fallback, mute-independent dispatch, safe relay, rate/scene/duplicate and actual gain checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-skill-sfx.cjs",
+    "passed": true,
+    "output": "66 additive skill audio, actual cast gate and asset checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-mechanism-details-sfx.cjs",
+    "passed": true,
+    "output": "162 mechanism audio source, delivery, assets, proximity, restoration and pause checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-guidance-sound-signatures.cjs",
+    "passed": true,
+    "output": "219 stat/tutorial, reward preference, boss/physical state, charge, fallback, lifecycle and asset checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-combat-detail-sfx.cjs",
+    "passed": true,
+    "output": "794 additive event, actual-hit, delayed, receipt, lifecycle, density, preservation and asset checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-dragon-riding.cjs",
+    "passed": true,
+    "output": "51 dragon eligibility, flight, collision, stamina and lifecycle checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-hub-recovery.cjs",
+    "passed": true,
+    "output": "{\"checks\":257,\"passed\":true}",
+    "error": null
+  },
+  {
+    "suite": "test-companion-health.cjs",
+    "passed": true,
+    "output": "36 companion pad healing, death HUD and peer-state checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-companion-level.cjs",
+    "passed": true,
+    "output": "Companion Lv1\u00e2\u20ac\u201c6, five paid upgrades, exact costs, max cap, legacy ranks, nameplates, HP continuity and purchase guards pass",
+    "error": null
+  },
+  {
+    "suite": "test-coop-companions.cjs",
+    "passed": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}",
+    "error": null
+  },
+  {
+    "suite": "test-menu-experience.cjs",
+    "passed": true,
+    "output": "{\"checks\":16,\"passed\":true}",
+    "error": null
+  },
+  {
+    "suite": "test-menu-routing.cjs",
+    "passed": true,
+    "output": "{\"checks\":15,\"passed\":true}",
+    "error": null
+  },
+  {
+    "suite": "test-story-authority.cjs",
+    "passed": true,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.",
+    "error": null
+  },
+  {
+    "suite": "test-campaign-hunts.cjs",
+    "passed": true,
+    "output": "2567 repeatable hunt source,3-round lifecycle,group kill,save,reward and shared authority checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-party-feedback.cjs",
+    "passed": true,
+    "output": "36 rescue reachability, timing, relay, duplicates, menu, legacy and presentation checks passed.\n6 downed rig selection/clamping/recovery checks passed.\n3 fallen-body grounding and get-up transition checks passed.",
+    "error": null
+  },
+  {
+    "suite": "test-ship-crossing.cjs",
+    "passed": true,
+    "output": "Ship crossing passed: 80 safe course seeds, collisions, two waves, role swap, repair cap, disconnect/death, solo, pause, fixed steps, authority and stale snapshots.",
+    "error": null
+  },
+  {
+    "suite": "test-skill-effects-preview.cjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"skills\":136,\"finiteStrokes\":28502,\"emptyEffects\":0}",
+    "error": null
+  },
+  {
+    "suite": "test-distinct-skill-effects.cjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"skills\":136,\"checks\":217300,\"uniqueGeometrySignatures\":136,\"maxStrokes\":710,\"projectileShapes\":[{\"round\":5,\"shaft\":0,\"gem\":3,\"seed\":0,\"tip\":0,\"bar\":0,\"ring\":0},{\"round\":0,\"shaft\":1,\"gem\":3,\"seed\":0,\"tip\":0,\"bar\":0,\"ring\":2}]}",
+    "error": null
+  },
+  {
+    "suite": "test-skill-surfaces.cjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"checks\":6146,\"skills\":136,\"maxFullEffectCostLow\":290,\"maxFullEffectCostHigh\":895,\"withSurfaces\":90,\"maxSurfaceVertices\":11904,\"maxRibbonVertices\":12516,\"shieldCpu250TicksMs\":40.48}",
+    "error": null
+  }
+]

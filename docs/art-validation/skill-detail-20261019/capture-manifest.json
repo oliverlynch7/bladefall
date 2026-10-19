@@ -1,0 +1,682 @@
+[
+  {
+    "id": "w_cleave",
+    "name": "Cleave",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_bash",
+    "name": "Shield Bash",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_charge",
+    "name": "Charge",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_whirl",
+    "name": "Whirlwind",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_guard",
+    "name": "Iron Guard",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_stomp",
+    "name": "Shockwave Stomp",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_berserk",
+    "name": "Warcry",
+    "cls": "warrior"
+  },
+  {
+    "id": "w_execute",
+    "name": "Execution",
+    "cls": "warrior"
+  },
+  {
+    "id": "r_volley",
+    "name": "Volley",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_pierce",
+    "name": "Piercing Shot",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_tumble",
+    "name": "Tumble",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_shadow",
+    "name": "Shadowstrike",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_spike",
+    "name": "Spike Trap",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_smoke",
+    "name": "Smoke Bomb",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_mark",
+    "name": "Hunter's Mark",
+    "cls": "ranger"
+  },
+  {
+    "id": "r_deathmark",
+    "name": "Death Mark",
+    "cls": "ranger"
+  },
+  {
+    "id": "m_bolt",
+    "name": "Elemental Bolt",
+    "cls": "mage"
+  },
+  {
+    "id": "m_beam",
+    "name": "Elemental Beam",
+    "cls": "mage"
+  },
+  {
+    "id": "m_blink",
+    "name": "Blink",
+    "cls": "mage"
+  },
+  {
+    "id": "m_nova",
+    "name": "Nova",
+    "cls": "mage"
+  },
+  {
+    "id": "m_gravity",
+    "name": "Gravity Well",
+    "cls": "mage"
+  },
+  {
+    "id": "m_barrier",
+    "name": "Rune Barrier",
+    "cls": "mage"
+  },
+  {
+    "id": "m_tempest",
+    "name": "Attunement",
+    "cls": "mage"
+  },
+  {
+    "id": "m_overload",
+    "name": "Elemental Overload",
+    "cls": "mage"
+  },
+  {
+    "id": "py_bolt",
+    "name": "Firebolt",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_fan",
+    "name": "Cinder Fan",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_blast",
+    "name": "Backdraft",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_ward",
+    "name": "Ember Shield",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_lance",
+    "name": "Flame Lance",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_nova",
+    "name": "Flame Ring",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_inferno",
+    "name": "Inferno",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "py_sun",
+    "name": "Sunburst",
+    "cls": "pyromancer"
+  },
+  {
+    "id": "x_reap",
+    "name": "Reap",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_cleave",
+    "name": "Soul Cleave",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_step",
+    "name": "Shadow Step",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_wraith",
+    "name": "Wraith Form",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_pull",
+    "name": "Void Pull",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_bind",
+    "name": "Soul Tether",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_siphon",
+    "name": "Soul Siphon",
+    "cls": "reaper"
+  },
+  {
+    "id": "x_vortex",
+    "name": "Death Vortex",
+    "cls": "reaper"
+  },
+  {
+    "id": "pal_bash",
+    "name": "Shield Bash",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_smite",
+    "name": "Smite",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_taunt",
+    "name": "Taunt",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_ground",
+    "name": "Holy Ground",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_guard",
+    "name": "Guard Up",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_burst",
+    "name": "Light Burst",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_laststand",
+    "name": "Last Stand",
+    "cls": "paladin"
+  },
+  {
+    "id": "pal_sky",
+    "name": "Sky Hammer",
+    "cls": "paladin"
+  },
+  {
+    "id": "necro_summon",
+    "name": "Summon Skeletons",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_bolt",
+    "name": "Plague Bolt",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_raise",
+    "name": "Raise the Dead",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_nova",
+    "name": "Corpse Nova",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_wall",
+    "name": "Bone Wall",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_grip",
+    "name": "Death Grip",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_army",
+    "name": "Army of the Dead",
+    "cls": "necromancer"
+  },
+  {
+    "id": "necro_storm",
+    "name": "Death Storm",
+    "cls": "necromancer"
+  },
+  {
+    "id": "nin_strike",
+    "name": "Shadow Strike",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_barrage",
+    "name": "Shuriken Barrage",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_step",
+    "name": "Shadow Step",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_smoke",
+    "name": "Smoke Bomb",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_mark",
+    "name": "Death Mark",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_pierce",
+    "name": "Piercing Star",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_fury",
+    "name": "Blade Fury",
+    "cls": "ninja"
+  },
+  {
+    "id": "nin_storm",
+    "name": "Vanish",
+    "cls": "ninja"
+  },
+  {
+    "id": "bsk_cleave",
+    "name": "Blood Sweep",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_bash",
+    "name": "Headbutt",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_charge",
+    "name": "Charge",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_stomp",
+    "name": "Shockwave",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_whirl",
+    "name": "Whirlwind",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_execute",
+    "name": "Execute",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_berserk",
+    "name": "Berserk",
+    "cls": "berserker"
+  },
+  {
+    "id": "bsk_guard",
+    "name": "Bloodguard",
+    "cls": "berserker"
+  },
+  {
+    "id": "pir_pierce",
+    "name": "Aimed Shot",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_volley",
+    "name": "Broadside",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_shadow",
+    "name": "Boarding Strike",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_tumble",
+    "name": "Roll",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_smoke",
+    "name": "Powder Smoke",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_goldrush",
+    "name": "Gold Rush",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_deathmark",
+    "name": "Cannonade",
+    "cls": "pirate"
+  },
+  {
+    "id": "pir_spike",
+    "name": "Powder Keg",
+    "cls": "pirate"
+  },
+  {
+    "id": "chr_bolt",
+    "name": "Time Bolt",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_beam",
+    "name": "Time Lance",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_nova",
+    "name": "Slow Field",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_blink",
+    "name": "Time Step",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_gravity",
+    "name": "Time Warp",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_barrier",
+    "name": "Aegis",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_tempest",
+    "name": "Stop Time",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "chr_overload",
+    "name": "Singularity",
+    "cls": "chronomancer"
+  },
+  {
+    "id": "mon_flurry",
+    "name": "Flurry",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_palm",
+    "name": "Palm Strike",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_deflect",
+    "name": "Deflect",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_roll",
+    "name": "Roll",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_whirl",
+    "name": "Whirl Kick",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_stun",
+    "name": "Stunning Palm",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_thousand",
+    "name": "Stillness",
+    "cls": "monk"
+  },
+  {
+    "id": "mon_dragon",
+    "name": "Dragon Kick",
+    "cls": "monk"
+  },
+  {
+    "id": "st_bolt",
+    "name": "Chain Bolt",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_lance",
+    "name": "Lightning Lance",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_step",
+    "name": "Thunder Step",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_nova",
+    "name": "Static Field",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_orb",
+    "name": "Ball Lightning",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_barrier",
+    "name": "Storm Barrier",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_storm",
+    "name": "Linked Lightning",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "st_overload",
+    "name": "Chain Reaction",
+    "cls": "stormcaller"
+  },
+  {
+    "id": "war_bolt",
+    "name": "Shadow Bolt",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_lance",
+    "name": "Blood Lance",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_curse",
+    "name": "Curse Circle",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_drain",
+    "name": "Life Drain",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_step",
+    "name": "Rift Step",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_orb",
+    "name": "Doom Orb",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_storm",
+    "name": "Blood Offering",
+    "cls": "warlock"
+  },
+  {
+    "id": "war_final",
+    "name": "Final Curse",
+    "cls": "warlock"
+  },
+  {
+    "id": "sky_rise",
+    "name": "Rising Spear",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_gale",
+    "name": "Gale Shot",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_dive",
+    "name": "Dive Strike",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_lift",
+    "name": "Wind Lift",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_dash",
+    "name": "Sky Dash",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_rain",
+    "name": "Spear Rain",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_crash",
+    "name": "Thunder Dive",
+    "cls": "skylancer"
+  },
+  {
+    "id": "sky_cyclone",
+    "name": "Updraft",
+    "cls": "skylancer"
+  },
+  {
+    "id": "bd_counter",
+    "name": "Counter Stance",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_twin",
+    "name": "Twin Cut",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_riposte",
+    "name": "Riposte",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_step",
+    "name": "Dance Step",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_mirror",
+    "name": "Mirror Guard",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_cross",
+    "name": "Cross Slash",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_steel",
+    "name": "Perfect Guard",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bd_perfect",
+    "name": "Perfect Counter",
+    "cls": "bladedancer"
+  },
+  {
+    "id": "bst_sic",
+    "name": "Sic 'Em",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_coordinated",
+    "name": "Coordinated Strike",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_guardian",
+    "name": "Guardian Bond",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_step",
+    "name": "Pack Step",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_mend",
+    "name": "Mend the Pack",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_roar",
+    "name": "Alpha Roar",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_stampede",
+    "name": "Stampede",
+    "cls": "beastmaster"
+  },
+  {
+    "id": "bst_apex",
+    "name": "Apex Unleashed",
+    "cls": "beastmaster"
+  }
+]

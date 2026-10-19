@@ -1,0 +1,693 @@
+{
+  "passed": true,
+  "checks": 6146,
+  "skills": 136,
+  "maxFullEffectCostLow": 290,
+  "maxFullEffectCostHigh": 895,
+  "withSurfaces": 90,
+  "maxSurfaceVertices": 11904,
+  "maxRibbonVertices": 12516,
+  "shieldCpu250TicksMs": 40.48,
+  "rows": [
+    {
+      "id": "py_bolt",
+      "surfaces": 1104,
+      "strokes": 3498
+    },
+    {
+      "id": "py_fan",
+      "surfaces": 2016,
+      "strokes": 5202
+    },
+    {
+      "id": "py_blast",
+      "surfaces": 0,
+      "strokes": 8244
+    },
+    {
+      "id": "py_ward",
+      "surfaces": 4032,
+      "strokes": 6084
+    },
+    {
+      "id": "py_lance",
+      "surfaces": 2904,
+      "strokes": 6096
+    },
+    {
+      "id": "py_nova",
+      "surfaces": 6048,
+      "strokes": 8694
+    },
+    {
+      "id": "py_inferno",
+      "surfaces": 6048,
+      "strokes": 9654
+    },
+    {
+      "id": "py_sun",
+      "surfaces": 1320,
+      "strokes": 12516
+    },
+    {
+      "id": "w_cleave",
+      "surfaces": 480,
+      "strokes": 2652
+    },
+    {
+      "id": "w_bash",
+      "surfaces": 1956,
+      "strokes": 1446
+    },
+    {
+      "id": "w_charge",
+      "surfaces": 0,
+      "strokes": 2880
+    },
+    {
+      "id": "w_whirl",
+      "surfaces": 1440,
+      "strokes": 7848
+    },
+    {
+      "id": "w_guard",
+      "surfaces": 1956,
+      "strokes": 2268
+    },
+    {
+      "id": "w_stomp",
+      "surfaces": 576,
+      "strokes": 2100
+    },
+    {
+      "id": "w_berserk",
+      "surfaces": 0,
+      "strokes": 2652
+    },
+    {
+      "id": "w_execute",
+      "surfaces": 0,
+      "strokes": 3216
+    },
+    {
+      "id": "r_volley",
+      "surfaces": 1080,
+      "strokes": 5310
+    },
+    {
+      "id": "r_pierce",
+      "surfaces": 216,
+      "strokes": 1932
+    },
+    {
+      "id": "r_tumble",
+      "surfaces": 216,
+      "strokes": 1926
+    },
+    {
+      "id": "r_shadow",
+      "surfaces": 480,
+      "strokes": 5208
+    },
+    {
+      "id": "r_spike",
+      "surfaces": 1728,
+      "strokes": 1206
+    },
+    {
+      "id": "r_smoke",
+      "surfaces": 0,
+      "strokes": 3372
+    },
+    {
+      "id": "r_mark",
+      "surfaces": 0,
+      "strokes": 1146
+    },
+    {
+      "id": "r_deathmark",
+      "surfaces": 1296,
+      "strokes": 1932
+    },
+    {
+      "id": "m_bolt",
+      "surfaces": 432,
+      "strokes": 3522
+    },
+    {
+      "id": "m_beam",
+      "surfaces": 216,
+      "strokes": 3480
+    },
+    {
+      "id": "m_blink",
+      "surfaces": 0,
+      "strokes": 1800
+    },
+    {
+      "id": "m_nova",
+      "surfaces": 576,
+      "strokes": 2262
+    },
+    {
+      "id": "m_gravity",
+      "surfaces": 432,
+      "strokes": 6054
+    },
+    {
+      "id": "m_barrier",
+      "surfaces": 1320,
+      "strokes": 4608
+    },
+    {
+      "id": "m_tempest",
+      "surfaces": 1296,
+      "strokes": 10476
+    },
+    {
+      "id": "m_overload",
+      "surfaces": 1440,
+      "strokes": 10500
+    },
+    {
+      "id": "x_reap",
+      "surfaces": 480,
+      "strokes": 3480
+    },
+    {
+      "id": "x_cleave",
+      "surfaces": 480,
+      "strokes": 2616
+    },
+    {
+      "id": "x_step",
+      "surfaces": 0,
+      "strokes": 2484
+    },
+    {
+      "id": "x_wraith",
+      "surfaces": 672,
+      "strokes": 1734
+    },
+    {
+      "id": "x_pull",
+      "surfaces": 0,
+      "strokes": 4326
+    },
+    {
+      "id": "x_bind",
+      "surfaces": 4608,
+      "strokes": 2592
+    },
+    {
+      "id": "x_siphon",
+      "surfaces": 480,
+      "strokes": 8664
+    },
+    {
+      "id": "x_vortex",
+      "surfaces": 1296,
+      "strokes": 3630
+    },
+    {
+      "id": "pal_bash",
+      "surfaces": 1704,
+      "strokes": 2808
+    },
+    {
+      "id": "pal_smite",
+      "surfaces": 576,
+      "strokes": 1866
+    },
+    {
+      "id": "pal_taunt",
+      "surfaces": 1704,
+      "strokes": 1188
+    },
+    {
+      "id": "pal_ground",
+      "surfaces": 0,
+      "strokes": 984
+    },
+    {
+      "id": "pal_guard",
+      "surfaces": 1704,
+      "strokes": 1908
+    },
+    {
+      "id": "pal_burst",
+      "surfaces": 0,
+      "strokes": 4122
+    },
+    {
+      "id": "pal_laststand",
+      "surfaces": 3408,
+      "strokes": 2970
+    },
+    {
+      "id": "pal_sky",
+      "surfaces": 336,
+      "strokes": 3972
+    },
+    {
+      "id": "necro_summon",
+      "surfaces": 3552,
+      "strokes": 3024
+    },
+    {
+      "id": "necro_bolt",
+      "surfaces": 432,
+      "strokes": 2664
+    },
+    {
+      "id": "necro_raise",
+      "surfaces": 1776,
+      "strokes": 2844
+    },
+    {
+      "id": "necro_nova",
+      "surfaces": 5376,
+      "strokes": 2196
+    },
+    {
+      "id": "necro_wall",
+      "surfaces": 3360,
+      "strokes": 1158
+    },
+    {
+      "id": "necro_grip",
+      "surfaces": 0,
+      "strokes": 4326
+    },
+    {
+      "id": "necro_army",
+      "surfaces": 8880,
+      "strokes": 6264
+    },
+    {
+      "id": "necro_storm",
+      "surfaces": 5760,
+      "strokes": 2280
+    },
+    {
+      "id": "nin_strike",
+      "surfaces": 0,
+      "strokes": 2622
+    },
+    {
+      "id": "nin_barrage",
+      "surfaces": 144,
+      "strokes": 3456
+    },
+    {
+      "id": "nin_step",
+      "surfaces": 0,
+      "strokes": 3456
+    },
+    {
+      "id": "nin_smoke",
+      "surfaces": 0,
+      "strokes": 2910
+    },
+    {
+      "id": "nin_mark",
+      "surfaces": 48,
+      "strokes": 2880
+    },
+    {
+      "id": "nin_pierce",
+      "surfaces": 48,
+      "strokes": 2016
+    },
+    {
+      "id": "nin_fury",
+      "surfaces": 960,
+      "strokes": 5304
+    },
+    {
+      "id": "nin_storm",
+      "surfaces": 0,
+      "strokes": 5010
+    },
+    {
+      "id": "bsk_cleave",
+      "surfaces": 480,
+      "strokes": 2688
+    },
+    {
+      "id": "bsk_bash",
+      "surfaces": 0,
+      "strokes": 3786
+    },
+    {
+      "id": "bsk_charge",
+      "surfaces": 0,
+      "strokes": 1782
+    },
+    {
+      "id": "bsk_stomp",
+      "surfaces": 576,
+      "strokes": 4428
+    },
+    {
+      "id": "bsk_whirl",
+      "surfaces": 1920,
+      "strokes": 10464
+    },
+    {
+      "id": "bsk_execute",
+      "surfaces": 0,
+      "strokes": 2598
+    },
+    {
+      "id": "bsk_berserk",
+      "surfaces": 1344,
+      "strokes": 1824
+    },
+    {
+      "id": "bsk_guard",
+      "surfaces": 1956,
+      "strokes": 4824
+    },
+    {
+      "id": "pir_pierce",
+      "surfaces": 0,
+      "strokes": 1488
+    },
+    {
+      "id": "pir_volley",
+      "surfaces": 0,
+      "strokes": 120
+    },
+    {
+      "id": "pir_shadow",
+      "surfaces": 480,
+      "strokes": 3480
+    },
+    {
+      "id": "pir_tumble",
+      "surfaces": 0,
+      "strokes": 888
+    },
+    {
+      "id": "pir_smoke",
+      "surfaces": 0,
+      "strokes": 2718
+    },
+    {
+      "id": "pir_goldrush",
+      "surfaces": 3024,
+      "strokes": 6174
+    },
+    {
+      "id": "pir_deathmark",
+      "surfaces": 672,
+      "strokes": 1806
+    },
+    {
+      "id": "pir_spike",
+      "surfaces": 480,
+      "strokes": 2742
+    },
+    {
+      "id": "chr_bolt",
+      "surfaces": 432,
+      "strokes": 5220
+    },
+    {
+      "id": "chr_beam",
+      "surfaces": 216,
+      "strokes": 6072
+    },
+    {
+      "id": "chr_nova",
+      "surfaces": 1320,
+      "strokes": 3714
+    },
+    {
+      "id": "chr_blink",
+      "surfaces": 1296,
+      "strokes": 8550
+    },
+    {
+      "id": "chr_gravity",
+      "surfaces": 432,
+      "strokes": 8034
+    },
+    {
+      "id": "chr_barrier",
+      "surfaces": 1620,
+      "strokes": 4218
+    },
+    {
+      "id": "chr_tempest",
+      "surfaces": 1320,
+      "strokes": 3036
+    },
+    {
+      "id": "chr_overload",
+      "surfaces": 432,
+      "strokes": 5316
+    },
+    {
+      "id": "mon_flurry",
+      "surfaces": 0,
+      "strokes": 3480
+    },
+    {
+      "id": "mon_palm",
+      "surfaces": 432,
+      "strokes": 924
+    },
+    {
+      "id": "mon_deflect",
+      "surfaces": 0,
+      "strokes": 2592
+    },
+    {
+      "id": "mon_roll",
+      "surfaces": 0,
+      "strokes": 2016
+    },
+    {
+      "id": "mon_whirl",
+      "surfaces": 960,
+      "strokes": 5232
+    },
+    {
+      "id": "mon_stun",
+      "surfaces": 1320,
+      "strokes": 2598
+    },
+    {
+      "id": "mon_thousand",
+      "surfaces": 0,
+      "strokes": 1764
+    },
+    {
+      "id": "mon_dragon",
+      "surfaces": 1872,
+      "strokes": 2760
+    },
+    {
+      "id": "st_bolt",
+      "surfaces": 0,
+      "strokes": 1128
+    },
+    {
+      "id": "st_lance",
+      "surfaces": 0,
+      "strokes": 1146
+    },
+    {
+      "id": "st_step",
+      "surfaces": 0,
+      "strokes": 1182
+    },
+    {
+      "id": "st_nova",
+      "surfaces": 0,
+      "strokes": 4812
+    },
+    {
+      "id": "st_orb",
+      "surfaces": 1320,
+      "strokes": 5448
+    },
+    {
+      "id": "st_barrier",
+      "surfaces": 1320,
+      "strokes": 4248
+    },
+    {
+      "id": "st_storm",
+      "surfaces": 0,
+      "strokes": 1710
+    },
+    {
+      "id": "st_overload",
+      "surfaces": 0,
+      "strokes": 5646
+    },
+    {
+      "id": "war_bolt",
+      "surfaces": 432,
+      "strokes": 3492
+    },
+    {
+      "id": "war_lance",
+      "surfaces": 216,
+      "strokes": 96
+    },
+    {
+      "id": "war_curse",
+      "surfaces": 0,
+      "strokes": 1080
+    },
+    {
+      "id": "war_drain",
+      "surfaces": 0,
+      "strokes": 2598
+    },
+    {
+      "id": "war_step",
+      "surfaces": 0,
+      "strokes": 3492
+    },
+    {
+      "id": "war_orb",
+      "surfaces": 1320,
+      "strokes": 9540
+    },
+    {
+      "id": "war_storm",
+      "surfaces": 0,
+      "strokes": 8646
+    },
+    {
+      "id": "war_final",
+      "surfaces": 1296,
+      "strokes": 3630
+    },
+    {
+      "id": "sky_rise",
+      "surfaces": 1680,
+      "strokes": 5544
+    },
+    {
+      "id": "sky_gale",
+      "surfaces": 216,
+      "strokes": 1782
+    },
+    {
+      "id": "sky_dive",
+      "surfaces": 480,
+      "strokes": 4344
+    },
+    {
+      "id": "sky_lift",
+      "surfaces": 0,
+      "strokes": 2592
+    },
+    {
+      "id": "sky_dash",
+      "surfaces": 2688,
+      "strokes": 9216
+    },
+    {
+      "id": "sky_rain",
+      "surfaces": 1080,
+      "strokes": 1134
+    },
+    {
+      "id": "sky_crash",
+      "surfaces": 3264,
+      "strokes": 9828
+    },
+    {
+      "id": "sky_cyclone",
+      "surfaces": 480,
+      "strokes": 6072
+    },
+    {
+      "id": "bd_counter",
+      "surfaces": 0,
+      "strokes": 900
+    },
+    {
+      "id": "bd_twin",
+      "surfaces": 960,
+      "strokes": 5232
+    },
+    {
+      "id": "bd_riposte",
+      "surfaces": 480,
+      "strokes": 3480
+    },
+    {
+      "id": "bd_step",
+      "surfaces": 0,
+      "strokes": 2880
+    },
+    {
+      "id": "bd_mirror",
+      "surfaces": 504,
+      "strokes": 2592
+    },
+    {
+      "id": "bd_cross",
+      "surfaces": 0,
+      "strokes": 1788
+    },
+    {
+      "id": "bd_steel",
+      "surfaces": 936,
+      "strokes": 1806
+    },
+    {
+      "id": "bd_perfect",
+      "surfaces": 504,
+      "strokes": 4320
+    },
+    {
+      "id": "bst_sic",
+      "surfaces": 0,
+      "strokes": 2700
+    },
+    {
+      "id": "bst_coordinated",
+      "surfaces": 216,
+      "strokes": 3654
+    },
+    {
+      "id": "bst_guardian",
+      "surfaces": 1872,
+      "strokes": 2046
+    },
+    {
+      "id": "bst_step",
+      "surfaces": 0,
+      "strokes": 2592
+    },
+    {
+      "id": "bst_mend",
+      "surfaces": 0,
+      "strokes": 204
+    },
+    {
+      "id": "bst_roar",
+      "surfaces": 0,
+      "strokes": 5184
+    },
+    {
+      "id": "bst_stampede",
+      "surfaces": 11904,
+      "strokes": 912
+    },
+    {
+      "id": "bst_apex",
+      "surfaces": 0,
+      "strokes": 3492
+    }
+  ]
+}

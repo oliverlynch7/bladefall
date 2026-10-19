@@ -1,0 +1,709 @@
+{
+  "passed": true,
+  "skills": 136,
+  "checks": 217300,
+  "uniqueGeometrySignatures": 136,
+  "maxStrokes": 710,
+  "projectileShapes": [
+    {
+      "round": 5,
+      "shaft": 0,
+      "gem": 3,
+      "seed": 0,
+      "tip": 0,
+      "bar": 0,
+      "ring": 0
+    },
+    {
+      "round": 0,
+      "shaft": 1,
+      "gem": 3,
+      "seed": 0,
+      "tip": 0,
+      "bar": 0,
+      "ring": 2
+    }
+  ],
+  "rows": [
+    {
+      "id": "py_bolt",
+      "hash": "2bf30e97acbe696c0fca66f5563437e14f7278441a84caf2dae2eac43e1905ad",
+      "maxStrokes": 199
+    },
+    {
+      "id": "py_fan",
+      "hash": "30927d49d19257bb1452a51e088ed59f13d248c0216697c2ea12a652409941d1",
+      "maxStrokes": 291
+    },
+    {
+      "id": "py_blast",
+      "hash": "9ff6510b76a8512ba1a1a1cea5905de4770a0a7d6d363cfa2e43c1bc850e28fd",
+      "maxStrokes": 462
+    },
+    {
+      "id": "py_ward",
+      "hash": "cf31e824bf6addfbff0ca2596425a0ad0caf6c0f713e76d981d14942456a65e2",
+      "maxStrokes": 342
+    },
+    {
+      "id": "py_lance",
+      "hash": "cea5df52f1011e90931c0baa53d3a5d94db59777e198e014c27e46b9f85ffe57",
+      "maxStrokes": 342
+    },
+    {
+      "id": "py_nova",
+      "hash": "970c2137ef3a4a4ef40d23d6e55217bfe511a3db923dcf193e9dea5ec99dbe92",
+      "maxStrokes": 489
+    },
+    {
+      "id": "py_inferno",
+      "hash": "5d1d383c653abd5f4b61585598c412eb9bed1780af09a86264efa1520952a8bd",
+      "maxStrokes": 553
+    },
+    {
+      "id": "py_sun",
+      "hash": "d89dd68fb77139945f6fb6812de26da0e984b2b45b2c7608d09197e127ef042e",
+      "maxStrokes": 710
+    },
+    {
+      "id": "w_cleave",
+      "hash": "1e7626a3ec783d606fc2d9493f272097ca73809424d06a3203f41edd343cadb3",
+      "maxStrokes": 154
+    },
+    {
+      "id": "w_bash",
+      "hash": "531bf58e759401528afa5ed44ba74418ebd983c79eab07874b53250949a1e914",
+      "maxStrokes": 81
+    },
+    {
+      "id": "w_charge",
+      "hash": "45b1bc9cc5b07a05843451683b35f74ee70e44a3e3c9e4f6f6a9a3c332e5f0e4",
+      "maxStrokes": 160
+    },
+    {
+      "id": "w_whirl",
+      "hash": "6978f117b4a4e6b67f6e3d29ad9bf7796bc4917611ee9c388e50dbff7060982e",
+      "maxStrokes": 444
+    },
+    {
+      "id": "w_guard",
+      "hash": "048afe6a62483731d315da41a6e8a75594b9592ef66b961f2a22b329caaa126e",
+      "maxStrokes": 126
+    },
+    {
+      "id": "w_stomp",
+      "hash": "e50641a084e2a52c9b68fc7ad597607489b66ecc0ebad4bfc46d80f1a2683ada",
+      "maxStrokes": 130
+    },
+    {
+      "id": "w_berserk",
+      "hash": "76c82232c07c108672ae7d791b9fbf15232ede8b420b77636e7b91a802b12b61",
+      "maxStrokes": 154
+    },
+    {
+      "id": "w_execute",
+      "hash": "2ecc0a860ffaa61e2328269349275e4ca38eb95f57e90118c1647241188422f6",
+      "maxStrokes": 184
+    },
+    {
+      "id": "r_volley",
+      "hash": "34263227b52ce0d1e4078c2ba2cea18309310d98c264ee55f97533a80b6fc6c3",
+      "maxStrokes": 295
+    },
+    {
+      "id": "r_pierce",
+      "hash": "945167e7a8a9e4dc012f8eca1cf0b461a7dc0b777e43854ac310390dc741007b",
+      "maxStrokes": 108
+    },
+    {
+      "id": "r_tumble",
+      "hash": "01a90eb260d323ce7af926ab818f217f94d816478b737562a0e8afeaddc3da09",
+      "maxStrokes": 107
+    },
+    {
+      "id": "r_shadow",
+      "hash": "99db93b9d4977868a81f7dde675ef410fb07110d3f91463854b98346c0762abb",
+      "maxStrokes": 292
+    },
+    {
+      "id": "r_spike",
+      "hash": "57cbe7f47d815a9b7b2509e1d24781d84a1c834980dd353c3aea429990e67ed2",
+      "maxStrokes": 67
+    },
+    {
+      "id": "r_smoke",
+      "hash": "b614e8b0b8c4e374aa63f25813502ab612a885b692e1663938f7c921f22a2dce",
+      "maxStrokes": 202
+    },
+    {
+      "id": "r_mark",
+      "hash": "7f5735b5b32560072e8473fcb202595481739763784f5ca112e492f430296e51",
+      "maxStrokes": 67
+    },
+    {
+      "id": "r_deathmark",
+      "hash": "f1f1ba0a57767ff428c798a619bf4cebbb17c2e8bbd5873ba3fe39ad6b43c0f8",
+      "maxStrokes": 112
+    },
+    {
+      "id": "m_bolt",
+      "hash": "552e50256d8eb4b84f9a08157f7e8885c20cb7fe15eb3e9cfe5b2ae6ffedf0fc",
+      "maxStrokes": 203
+    },
+    {
+      "id": "m_beam",
+      "hash": "6436b45fb37b3c97f0671291ce891bf15fa1144aafbd4c9a4716ec721775dd29",
+      "maxStrokes": 194
+    },
+    {
+      "id": "m_blink",
+      "hash": "3b65d51a3372e8dd2236f96a6079341d254ac54eb82872726684a3bc144d8454",
+      "maxStrokes": 108
+    },
+    {
+      "id": "m_nova",
+      "hash": "e46e56c97cd69ee8cf1fef2a06e8a738790525b88139e8a5e8a24ca8027017d5",
+      "maxStrokes": 131
+    },
+    {
+      "id": "m_gravity",
+      "hash": "60ddcf1bf9661c94d56fad9721f2844783fcf0dac3aade5c3eb82ce84e38e2d7",
+      "maxStrokes": 337
+    },
+    {
+      "id": "m_barrier",
+      "hash": "e23327b8620e262628285c71a6c9bad4b44118507455e868a758236f3f5fc6cc",
+      "maxStrokes": 256
+    },
+    {
+      "id": "m_tempest",
+      "hash": "64b8725bc5e8748bbf5250750ad744d177ac034c361e5d38847e1bac5745ca51",
+      "maxStrokes": 594
+    },
+    {
+      "id": "m_overload",
+      "hash": "843629db947869777a716600450f1d2bab56f8d827541bdd90621427341191eb",
+      "maxStrokes": 598
+    },
+    {
+      "id": "x_reap",
+      "hash": "74418d43a12f3fd909267d3f0b9ccefc942893e32e18c3c7cfa276a4d605e188",
+      "maxStrokes": 196
+    },
+    {
+      "id": "x_cleave",
+      "hash": "5b361b8ac577d948538ad38fd3c0d336fc7ae3b94ead82fe31b81e3317fca085",
+      "maxStrokes": 148
+    },
+    {
+      "id": "x_step",
+      "hash": "22717e25c00f2a771172279150b607609f0dfab2f2390de4fd37e5901efd9902",
+      "maxStrokes": 142
+    },
+    {
+      "id": "x_wraith",
+      "hash": "4ed3d79b5976a2062a8455500835816755a90ba20c1fcd2c245afeacc05fbbfc",
+      "maxStrokes": 97
+    },
+    {
+      "id": "x_pull",
+      "hash": "f0e72aee63ccb4f0edeeab6db460ebc6718f5326fa2aa70892b2f4b2a681af05",
+      "maxStrokes": 241
+    },
+    {
+      "id": "x_bind",
+      "hash": "6f563c4f53e36592dcab86910587e51128d923fdd202f0b8d18fa974350c9747",
+      "maxStrokes": 144
+    },
+    {
+      "id": "x_siphon",
+      "hash": "dfa028917be3cde42911434503b298cfb6b469d7c304218a66a359946a25acf0",
+      "maxStrokes": 484
+    },
+    {
+      "id": "x_vortex",
+      "hash": "20e84574ee6aa0bf62d55616054c39bacfab6ea7759f6407675c6541968fe084",
+      "maxStrokes": 203
+    },
+    {
+      "id": "pal_bash",
+      "hash": "3cc6641615927c36c6caaaabeee45d4dfc065f2f03bef43044a923067b9ef677",
+      "maxStrokes": 160
+    },
+    {
+      "id": "pal_smite",
+      "hash": "b39437d8bba47a8f5d761130b2706288d66fd9a6849cb9acea94eda838b6aba0",
+      "maxStrokes": 117
+    },
+    {
+      "id": "pal_taunt",
+      "hash": "c87097e39ecf902f22caa8b03f339be244842e5f60ff37264579b2e5bd13528c",
+      "maxStrokes": 66
+    },
+    {
+      "id": "pal_ground",
+      "hash": "b10c331af367fe7244efce27f5ac47495438c0a1a7fe0841c4aeeb6a3e5f177c",
+      "maxStrokes": 60
+    },
+    {
+      "id": "pal_guard",
+      "hash": "d966f1a9cdf4fce2c5ec0acacfadb57916a04345bf49406b6bcc67471df5fcb9",
+      "maxStrokes": 106
+    },
+    {
+      "id": "pal_burst",
+      "hash": "ff0d3e7e83b30cd7e3eb5a7fb22aa0aae6b25a4335591eb4a9716e7fa6b7a9e5",
+      "maxStrokes": 239
+    },
+    {
+      "id": "pal_laststand",
+      "hash": "b434abe03be9d345dde2ade27bbb65229567eef2cd9e5b0b43cc7d903e16bec0",
+      "maxStrokes": 167
+    },
+    {
+      "id": "pal_sky",
+      "hash": "9ca58dc797b42718caf933ffc80d7733783c255c6dceee9e2f30465497c022f5",
+      "maxStrokes": 228
+    },
+    {
+      "id": "necro_summon",
+      "hash": "0f1efe7d7826cda25dbf39ac0db7248f20fd077603727ab280e742becd530093",
+      "maxStrokes": 176
+    },
+    {
+      "id": "necro_bolt",
+      "hash": "22a9fdf04ef67fad2d204b8bdbe6610a1662acd2bcf0d797400e9ddb97774151",
+      "maxStrokes": 156
+    },
+    {
+      "id": "necro_raise",
+      "hash": "0373e62c9bfc54350d6389aa2d048cadee04155ee7c2d52b8b6fa3baea9a84f4",
+      "maxStrokes": 162
+    },
+    {
+      "id": "necro_nova",
+      "hash": "5ddf223a702649e8d6b20657199e33cefc503a41c3be57c3d0e421092e2284cc",
+      "maxStrokes": 154
+    },
+    {
+      "id": "necro_wall",
+      "hash": "a569284407a6d217aa0de4eb272b023d18f80b2308e650efe8a51e876eb83fdb",
+      "maxStrokes": 83
+    },
+    {
+      "id": "necro_grip",
+      "hash": "6e0c2f2488e73467f3d3d1936d0552acacd23a3e65e391f6610c1c19c0bb20eb",
+      "maxStrokes": 241
+    },
+    {
+      "id": "necro_army",
+      "hash": "4274fcb4cc4ec98b465d6d0435dfc550353eb506e37e14c7a7321e5d2a3932bf",
+      "maxStrokes": 368
+    },
+    {
+      "id": "necro_storm",
+      "hash": "66ec457f360146840329f241f9995f9360ef239b76804f0b865b4db8d691f224",
+      "maxStrokes": 164
+    },
+    {
+      "id": "nin_strike",
+      "hash": "cdca9ee87045fce186d5e09f8a9fb12e295c683c55c5e96861734d9236000402",
+      "maxStrokes": 149
+    },
+    {
+      "id": "nin_barrage",
+      "hash": "c5abee22d2be6552ef59da07c756677c0fcc82f46a7d2072fcf2be83d249c4eb",
+      "maxStrokes": 192
+    },
+    {
+      "id": "nin_step",
+      "hash": "22b5d860d67e21ee659b019d8d0f07770773384ee6069e4659e2ce1347e9140a",
+      "maxStrokes": 192
+    },
+    {
+      "id": "nin_smoke",
+      "hash": "eec3dca93170c86aa51655f7d98c8e10c39d617486e82e027387e7f16c2475aa",
+      "maxStrokes": 173
+    },
+    {
+      "id": "nin_mark",
+      "hash": "f943ae594caf2894b3ee8bf20d53cc60af3565e4aa0248cdaa123fb2fd4e35ff",
+      "maxStrokes": 160
+    },
+    {
+      "id": "nin_pierce",
+      "hash": "2b00b744f2facb3b1b3b874b93b8b57033305a93758cccf2f211c8a704ece3f1",
+      "maxStrokes": 112
+    },
+    {
+      "id": "nin_fury",
+      "hash": "b828d6f676c9ae822e6b9f94e1949e7fde8b2a3ed955c469f963d1bdd7621986",
+      "maxStrokes": 308
+    },
+    {
+      "id": "nin_storm",
+      "hash": "9d8e00dbd072e974fe10784fb0d44b6c997d45f3ea5e2ad14bb9cf5494af69c1",
+      "maxStrokes": 283
+    },
+    {
+      "id": "bsk_cleave",
+      "hash": "b5672bc202fe2d2e0c29c77894b6cd3562a57756747495e2fe18e0a3ef9bebaf",
+      "maxStrokes": 160
+    },
+    {
+      "id": "bsk_bash",
+      "hash": "c1dabeb675a6f544f252375972c97e112c61202248be5eaa0cffa4241918e4f6",
+      "maxStrokes": 215
+    },
+    {
+      "id": "bsk_charge",
+      "hash": "733015cee3bf242393f6f7ee38818a17a9dc8f7a0bcd84e57ecc9e25462dcbbd",
+      "maxStrokes": 105
+    },
+    {
+      "id": "bsk_stomp",
+      "hash": "48d81ab2f9f6d90ba54af6d903a962fa714c048c3122597c34b60be0211766cd",
+      "maxStrokes": 258
+    },
+    {
+      "id": "bsk_whirl",
+      "hash": "550c47c81375a1ae9316a9d8dd14f5ed738f1030d3b825dbcc96f1df6c6f16ba",
+      "maxStrokes": 592
+    },
+    {
+      "id": "bsk_execute",
+      "hash": "680161c8ea2b85f8013e882666f6483fcc090c7cb45385fe790a28fff68ccaea",
+      "maxStrokes": 145
+    },
+    {
+      "id": "bsk_berserk",
+      "hash": "22f63130ed1a55389c6ff7a33c1b6912b4902739ed4d51688c952002d0b0d937",
+      "maxStrokes": 112
+    },
+    {
+      "id": "bsk_guard",
+      "hash": "59352c57095fb0b110aab507309b4d5c4953f7db8088caee24401a330a0e59c1",
+      "maxStrokes": 268
+    },
+    {
+      "id": "pir_pierce",
+      "hash": "aba4e435fc7e03607e80028c10fd913cc9bbe3b31f247b9c4269ef447b363ec4",
+      "maxStrokes": 88
+    },
+    {
+      "id": "pir_volley",
+      "hash": "a319c9fff69b52827eee9e7563c164357b675ab34a5af25f475fb5a628cb5058",
+      "maxStrokes": 10
+    },
+    {
+      "id": "pir_shadow",
+      "hash": "1eac9a9db0eec097508013b1385f83289d11e7fa605dbfe56aed73567811bd16",
+      "maxStrokes": 196
+    },
+    {
+      "id": "pir_tumble",
+      "hash": "fdf0e582cb1aa84c604c0d9f6f5114f47a7f29a97e95f06dcd5232d95573f234",
+      "maxStrokes": 50
+    },
+    {
+      "id": "pir_smoke",
+      "hash": "3a76aa5a45e6477ae3057aa6ee3b1b4af344bf3ba4caebd0c80cd20f2b1791b2",
+      "maxStrokes": 165
+    },
+    {
+      "id": "pir_goldrush",
+      "hash": "0d99a945712cf8c1aa232128d271d77090f590d20882a9ff6ef2e84d7d0456a5",
+      "maxStrokes": 343
+    },
+    {
+      "id": "pir_deathmark",
+      "hash": "485ff7c5227f6844d1f5ea80dfb62310e3dafd1f9446a6e33e84cb870792a10a",
+      "maxStrokes": 101
+    },
+    {
+      "id": "pir_spike",
+      "hash": "60c5034e41ee8d4ce5f0939e9eece2ac0872ddd0ce58e84ff0cbd467401949c2",
+      "maxStrokes": 153
+    },
+    {
+      "id": "chr_bolt",
+      "hash": "c1a96e51af5f235677afbe99ea10c7af32d5fefc637450897b0ef8a589535bf8",
+      "maxStrokes": 294
+    },
+    {
+      "id": "chr_beam",
+      "hash": "9dedcc02d502991a793197e13a218f886858116993980fbdc056bdc8f147efd3",
+      "maxStrokes": 338
+    },
+    {
+      "id": "chr_nova",
+      "hash": "78d5fb599ed4960bd50ecaf6edd6c89d955fc327c15ef936e0b8de65054e84f9",
+      "maxStrokes": 207
+    },
+    {
+      "id": "chr_blink",
+      "hash": "078032d7c136df53f8cbd424e6f28829c41720626c27d22382550df25f05e0ac",
+      "maxStrokes": 477
+    },
+    {
+      "id": "chr_gravity",
+      "hash": "115bbf29b6679c90cd878e79d2e2d5c348252ed40ae036b99418edbcc3dbd67e",
+      "maxStrokes": 447
+    },
+    {
+      "id": "chr_barrier",
+      "hash": "a799e08880817489871fa594ea172ff0df515390d3c666af75cc037b057ddddb",
+      "maxStrokes": 235
+    },
+    {
+      "id": "chr_tempest",
+      "hash": "1276cf9da7089c34dc5713cb335c0c9ea2b8eed40891e9d992d21568a853e814",
+      "maxStrokes": 170
+    },
+    {
+      "id": "chr_overload",
+      "hash": "c984a16d17091d5533b0a26a8697eb2a5bbfda4affe1278626f61f0471741c03",
+      "maxStrokes": 310
+    },
+    {
+      "id": "mon_flurry",
+      "hash": "abad837a53f90029590fe26f02b0b74174fd2436f2baa39f06e8160fadb6e766",
+      "maxStrokes": 196
+    },
+    {
+      "id": "mon_palm",
+      "hash": "990aec237e1f25ed981c21940826b7bd3c87e3aec58af7fee653d162d5ef5c4f",
+      "maxStrokes": 52
+    },
+    {
+      "id": "mon_deflect",
+      "hash": "d185e8cf326b4e141db3d570effa986da4fb890828a9944fa8f4487547f96f18",
+      "maxStrokes": 144
+    },
+    {
+      "id": "mon_roll",
+      "hash": "d16493087cdcd139a4f96e5900802eab91410d8ac913512ac061803ae40c91bc",
+      "maxStrokes": 112
+    },
+    {
+      "id": "mon_whirl",
+      "hash": "ebe52a4647bdfab045ea1e79713f6ae0d70e65e904c738b79ef4df9ef1fdee3f",
+      "maxStrokes": 296
+    },
+    {
+      "id": "mon_stun",
+      "hash": "cdbbeab72eb79023708f086263b0b0b84fa63fb09dc14b62ae99f96f2e52d37a",
+      "maxStrokes": 145
+    },
+    {
+      "id": "mon_thousand",
+      "hash": "c96209c0ea768d1d7ed658aadc111f681738d3af56fd11893edb3483d6e28569",
+      "maxStrokes": 102
+    },
+    {
+      "id": "mon_dragon",
+      "hash": "2196addb5eae7894a0e545fb9b777967c2eee9eea1a6e7fddb8cb7091ef3eed2",
+      "maxStrokes": 160
+    },
+    {
+      "id": "st_bolt",
+      "hash": "16848bb1800c5306caf9bb28d13655b663bda71c7d68c3b140d6120c5b75fccf",
+      "maxStrokes": 68
+    },
+    {
+      "id": "st_lance",
+      "hash": "9b9663a5eff1d4b07f65a48f32d754bd032833c1f7b0447d2f1efaa22a509637",
+      "maxStrokes": 69
+    },
+    {
+      "id": "st_step",
+      "hash": "478e536cae99111a7e9ca5bfe882453960ae9283c459f863fb28a16cca170593",
+      "maxStrokes": 77
+    },
+    {
+      "id": "st_nova",
+      "hash": "71cc74c4944e4e74c54c31e7604fe21839730151221e1e620e43424382528da7",
+      "maxStrokes": 286
+    },
+    {
+      "id": "st_orb",
+      "hash": "4ccb5cb4c89a074702f625f09641f006b29b4e5db79e7be14367e37c3c026784",
+      "maxStrokes": 320
+    },
+    {
+      "id": "st_barrier",
+      "hash": "f04fe484ce16cd869585e64c026d6b9f0333b82252ce60670aee9e307c9c5765",
+      "maxStrokes": 252
+    },
+    {
+      "id": "st_storm",
+      "hash": "94b6e0647a027d412e73c1be4d3a405e6907da0971464da667b962aec245d98d",
+      "maxStrokes": 105
+    },
+    {
+      "id": "st_overload",
+      "hash": "dc0f550886001868424b990a05a9246112b2cf1a788c7a4c149fe456e422abee",
+      "maxStrokes": 341
+    },
+    {
+      "id": "war_bolt",
+      "hash": "aa3bbef9f7655d62da4ffd2eac5a052b57e7b4d8a0154bbfafdb0bf20ac20929",
+      "maxStrokes": 198
+    },
+    {
+      "id": "war_lance",
+      "hash": "f3174fa6ea885118bb20ddaf9d3b5682c51eff331c9e0a6ca0cdea003d0f7339",
+      "maxStrokes": 10
+    },
+    {
+      "id": "war_curse",
+      "hash": "5e04cb6ac1b0bbf8261500e03596dc8d36a709b160735e2ee5df63d4feef4eee",
+      "maxStrokes": 60
+    },
+    {
+      "id": "war_drain",
+      "hash": "c26569cc970b8832e3354dbee8fb9932b68db91358947ff693d8ad4f0ae4fe4f",
+      "maxStrokes": 145
+    },
+    {
+      "id": "war_step",
+      "hash": "224f040a7934805ed6bd373e87277d950ada307a943277484d5f518fa7640e4b",
+      "maxStrokes": 198
+    },
+    {
+      "id": "war_orb",
+      "hash": "a74009ed1cde61e56dad60d235e3836e1e9cc5193f87011dec77ac40bc7c96ef",
+      "maxStrokes": 534
+    },
+    {
+      "id": "war_storm",
+      "hash": "e798c144f88167479d7541720c74cc22adc980d8117de2a305327adbc0527290",
+      "maxStrokes": 481
+    },
+    {
+      "id": "war_final",
+      "hash": "63d36de19cf19f1ef6b4e021d53188b98ba5eb2b73895273f36378f949d778ae",
+      "maxStrokes": 203
+    },
+    {
+      "id": "sky_rise",
+      "hash": "65bc9b437285752f8494759bcd46126309133e2fce998b47929f06da5ec228c0",
+      "maxStrokes": 308
+    },
+    {
+      "id": "sky_gale",
+      "hash": "6b57e0d1135463c3285eb1141ff12dc2cd96645a95bae42434469834078d140a",
+      "maxStrokes": 99
+    },
+    {
+      "id": "sky_dive",
+      "hash": "c5a7ae6c85eb8b233df3deaac4158106392d79f0e607c3e037c9ebc675578bf0",
+      "maxStrokes": 244
+    },
+    {
+      "id": "sky_lift",
+      "hash": "52d72acae554a3ef3eba359a7189debec7dded9869726272f509eaabb7edcd04",
+      "maxStrokes": 144
+    },
+    {
+      "id": "sky_dash",
+      "hash": "32389ab7b1589532015d0acd5d562da4d0f4cccd7f2a3e6a5f4a492a557704e8",
+      "maxStrokes": 512
+    },
+    {
+      "id": "sky_rain",
+      "hash": "5ac8d4faa7cc4ea0a516781e67973889418d08d772683352d3253bf074951931",
+      "maxStrokes": 63
+    },
+    {
+      "id": "sky_crash",
+      "hash": "ec125ff9722d0135411baaefe707fd8cd196f5262c0a6ccb93a960748cf578f0",
+      "maxStrokes": 554
+    },
+    {
+      "id": "sky_cyclone",
+      "hash": "441e0a10d1c5237cd8d3e48f559b5bc616a9a623b9cfce897705bfa7875e6c50",
+      "maxStrokes": 340
+    },
+    {
+      "id": "bd_counter",
+      "hash": "501440026f07cb946f9069275a01825d7218491e01a1de82d65c22fbc3f95004",
+      "maxStrokes": 50
+    },
+    {
+      "id": "bd_twin",
+      "hash": "0bcc6cd6837296f7cea9aa9e2a0e09924a63387922fd5e36af4fc9f733cbd5e8",
+      "maxStrokes": 296
+    },
+    {
+      "id": "bd_riposte",
+      "hash": "60afa19b30c1e64c7d998e3311e6123db7f3c4d89c0a68bf127c719e256e713d",
+      "maxStrokes": 196
+    },
+    {
+      "id": "bd_step",
+      "hash": "6d9ed822a163f31d8c571c1d34c265466b877600feedeac8fefacca2ad29a933",
+      "maxStrokes": 160
+    },
+    {
+      "id": "bd_mirror",
+      "hash": "821d12a92d7f75611faa54321fae8e1fe3cecd24df7c58a1b5eab4fdf6e45650",
+      "maxStrokes": 144
+    },
+    {
+      "id": "bd_cross",
+      "hash": "c5b7cfaeb8f10edb7510de8d4ba1e536f70ee63fb896813b7a66f2ae00bad98c",
+      "maxStrokes": 106
+    },
+    {
+      "id": "bd_steel",
+      "hash": "bbbbdffb26f497bfbd778166edd54ae57d9c1d76349c0269a22139e8da17e089",
+      "maxStrokes": 101
+    },
+    {
+      "id": "bd_perfect",
+      "hash": "1e366ad0918a2d8aab6883c3a31f22f28bb66fc25e794ca6e21773aaf632c7f5",
+      "maxStrokes": 240
+    },
+    {
+      "id": "bst_sic",
+      "hash": "800733cc0d325f1731039ce06e6dc460d04d9a36f6078bfb05f68443e0dccd0c",
+      "maxStrokes": 150
+    },
+    {
+      "id": "bst_coordinated",
+      "hash": "c48266ff7782060fb008647b10a829958d4dc108b7f4ce58968408d9aa78ac9c",
+      "maxStrokes": 203
+    },
+    {
+      "id": "bst_guardian",
+      "hash": "4bc383496bd9688ed12fe1e0ddb59e323e712d967b4107136e3878f10a4e56fa",
+      "maxStrokes": 117
+    },
+    {
+      "id": "bst_step",
+      "hash": "19526417dfeb6bde009607ea53ffb518c17f6980212508d389049246ddee2c28",
+      "maxStrokes": 144
+    },
+    {
+      "id": "bst_mend",
+      "hash": "0ea4949165f10dfc50f71bad55d8f6e4be53ac1632288e260e843936c536e373",
+      "maxStrokes": 18
+    },
+    {
+      "id": "bst_roar",
+      "hash": "eb2970d80cec68a65cd01c98172204d652160b61a117930aeee47c75608c8528",
+      "maxStrokes": 288
+    },
+    {
+      "id": "bst_stampede",
+      "hash": "ed3bb78647dc7c8cd7a909a88a95302aa9a5b58b9b2a586cb06ecaa25e39156e",
+      "maxStrokes": 56
+    },
+    {
+      "id": "bst_apex",
+      "hash": "ee6cefdfc40433b78dc9ee398acfdcf31821c09ff3496b23ffe078b3f878640b",
+      "maxStrokes": 198
+    }
+  ]
+}

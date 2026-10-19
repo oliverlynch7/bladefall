@@ -1,0 +1,5993 @@
+{
+  "passed": true,
+  "samples": 5712,
+  "skills": 136,
+  "recoveryChecks": 136,
+  "effectChecks": 816,
+  "rows": [
+    {
+      "id": "w_cleave",
+      "model": "Warrior",
+      "effectVertices": 2652,
+      "effectPhases": [
+        {
+          "vertices": 2652,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2652,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2652,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1140,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1140,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1140,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_bash",
+      "model": "Warrior",
+      "effectVertices": 1446,
+      "effectPhases": [
+        {
+          "vertices": 1446,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1446,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1446,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 798,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 798,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 798,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_charge",
+      "model": "Warrior",
+      "effectVertices": 2880,
+      "effectPhases": [
+        {
+          "vertices": 2880,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2880,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2880,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1872,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1872,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1872,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_whirl",
+      "model": "Warrior",
+      "effectVertices": 7848,
+      "effectPhases": [
+        {
+          "vertices": 7848,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 7848,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 7848,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_guard",
+      "model": "Warrior",
+      "effectVertices": 2268,
+      "effectPhases": [
+        {
+          "vertices": 2268,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2268,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2268,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1116,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1116,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1116,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_stomp",
+      "model": "Warrior",
+      "effectVertices": 2100,
+      "effectPhases": [
+        {
+          "vertices": 2100,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2100,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2100,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1092,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1092,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1092,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_berserk",
+      "model": "Warrior",
+      "effectVertices": 2652,
+      "effectPhases": [
+        {
+          "vertices": 2652,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2652,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2652,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1140,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1140,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1140,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_execute",
+      "model": "Warrior",
+      "effectVertices": 3216,
+      "effectPhases": [
+        {
+          "vertices": 3216,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3216,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3216,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1848,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1848,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1848,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_volley",
+      "model": "Ranger",
+      "effectVertices": 5310,
+      "effectPhases": [
+        {
+          "vertices": 5310,
+          "surfaceVertices": 1080,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5310,
+          "surfaceVertices": 1080,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5310,
+          "surfaceVertices": 1080,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2790,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2790,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2790,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_pierce",
+      "model": "Ranger",
+      "effectVertices": 1932,
+      "effectPhases": [
+        {
+          "vertices": 1932,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_tumble",
+      "model": "Ranger",
+      "effectVertices": 1926,
+      "effectPhases": [
+        {
+          "vertices": 1926,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1926,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1926,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1422,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1422,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1422,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_shadow",
+      "model": "Ranger",
+      "effectVertices": 5208,
+      "effectPhases": [
+        {
+          "vertices": 5208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2184,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2184,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2184,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_spike",
+      "model": "Ranger",
+      "effectVertices": 1206,
+      "effectPhases": [
+        {
+          "vertices": 1206,
+          "surfaceVertices": 1728,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1206,
+          "surfaceVertices": 1728,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1206,
+          "surfaceVertices": 1728,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 702,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 702,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 702,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_smoke",
+      "model": "Ranger",
+      "effectVertices": 3372,
+      "effectPhases": [
+        {
+          "vertices": 3372,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3372,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3372,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3372,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3372,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3372,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_mark",
+      "model": "Ranger",
+      "effectVertices": 1146,
+      "effectPhases": [
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 642,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 642,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 642,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_deathmark",
+      "model": "Ranger",
+      "effectVertices": 1932,
+      "effectPhases": [
+        {
+          "vertices": 1932,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_bolt",
+      "model": "Wizard",
+      "effectVertices": 3522,
+      "effectPhases": [
+        {
+          "vertices": 3522,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3522,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3522,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_beam",
+      "model": "Wizard",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_blink",
+      "model": "Wizard",
+      "effectVertices": 1800,
+      "effectPhases": [
+        {
+          "vertices": 1800,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1800,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1800,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 792,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 792,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 792,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_nova",
+      "model": "Wizard",
+      "effectVertices": 2262,
+      "effectPhases": [
+        {
+          "vertices": 2262,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2262,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2262,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1254,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1254,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1254,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_gravity",
+      "model": "Wizard",
+      "effectVertices": 6054,
+      "effectPhases": [
+        {
+          "vertices": 6054,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6054,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6054,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2526,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2526,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2526,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_barrier",
+      "model": "Wizard",
+      "effectVertices": 4608,
+      "effectPhases": [
+        {
+          "vertices": 4608,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4608,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4608,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2088,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2088,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2088,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_tempest",
+      "model": "Wizard",
+      "effectVertices": 10476,
+      "effectPhases": [
+        {
+          "vertices": 10476,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 10476,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 10476,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3348,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3348,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3348,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_overload",
+      "model": "Wizard",
+      "effectVertices": 10500,
+      "effectPhases": [
+        {
+          "vertices": 10500,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 10500,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 10500,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4248,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4248,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4248,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_bolt",
+      "model": "Wizard",
+      "effectVertices": 3498,
+      "effectPhases": [
+        {
+          "vertices": 3498,
+          "surfaceVertices": 1104,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3498,
+          "surfaceVertices": 1104,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3498,
+          "surfaceVertices": 1104,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1302,
+          "surfaceVertices": 624,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1302,
+          "surfaceVertices": 624,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1302,
+          "surfaceVertices": 624,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_fan",
+      "model": "Wizard",
+      "effectVertices": 5202,
+      "effectPhases": [
+        {
+          "vertices": 5202,
+          "surfaceVertices": 2016,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5202,
+          "surfaceVertices": 2016,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5202,
+          "surfaceVertices": 2016,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_blast",
+      "model": "Wizard",
+      "effectVertices": 8244,
+      "effectPhases": [
+        {
+          "vertices": 8244,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8244,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8244,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4212,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4212,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4212,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_ward",
+      "model": "Wizard",
+      "effectVertices": 6084,
+      "effectPhases": [
+        {
+          "vertices": 6084,
+          "surfaceVertices": 4032,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6084,
+          "surfaceVertices": 4032,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6084,
+          "surfaceVertices": 4032,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_lance",
+      "model": "Wizard",
+      "effectVertices": 6096,
+      "effectPhases": [
+        {
+          "vertices": 6096,
+          "surfaceVertices": 2904,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6096,
+          "surfaceVertices": 2904,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6096,
+          "surfaceVertices": 2904,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3288,
+          "surfaceVertices": 912,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3288,
+          "surfaceVertices": 912,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3288,
+          "surfaceVertices": 912,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_nova",
+      "model": "Wizard",
+      "effectVertices": 8694,
+      "effectPhases": [
+        {
+          "vertices": 8694,
+          "surfaceVertices": 6048,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8694,
+          "surfaceVertices": 6048,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8694,
+          "surfaceVertices": 6048,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_inferno",
+      "model": "Wizard",
+      "effectVertices": 9654,
+      "effectPhases": [
+        {
+          "vertices": 9654,
+          "surfaceVertices": 6048,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9654,
+          "surfaceVertices": 6048,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9654,
+          "surfaceVertices": 6048,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3000,
+          "surfaceVertices": 768,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3000,
+          "surfaceVertices": 768,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3000,
+          "surfaceVertices": 768,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_sun",
+      "model": "Wizard",
+      "effectVertices": 12516,
+      "effectPhases": [
+        {
+          "vertices": 12516,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 12516,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 12516,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3324,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3324,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3324,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_reap",
+      "model": "Rogue",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_cleave",
+      "model": "Rogue",
+      "effectVertices": 2616,
+      "effectPhases": [
+        {
+          "vertices": 2616,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2616,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2616,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1104,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1104,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1104,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_step",
+      "model": "Rogue",
+      "effectVertices": 2484,
+      "effectPhases": [
+        {
+          "vertices": 2484,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2484,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2484,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2484,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2484,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2484,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_wraith",
+      "model": "Rogue",
+      "effectVertices": 1734,
+      "effectPhases": [
+        {
+          "vertices": 1734,
+          "surfaceVertices": 672,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1734,
+          "surfaceVertices": 672,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1734,
+          "surfaceVertices": 672,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 726,
+          "surfaceVertices": 384,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 726,
+          "surfaceVertices": 384,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 726,
+          "surfaceVertices": 384,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_pull",
+      "model": "Rogue",
+      "effectVertices": 4326,
+      "effectPhases": [
+        {
+          "vertices": 4326,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4326,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4326,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_bind",
+      "model": "Rogue",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "surfaceVertices": 4608,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 4608,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 4608,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_siphon",
+      "model": "Rogue",
+      "effectVertices": 8664,
+      "effectPhases": [
+        {
+          "vertices": 8664,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8664,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8664,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3624,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3624,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3624,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_vortex",
+      "model": "Rogue",
+      "effectVertices": 3630,
+      "effectPhases": [
+        {
+          "vertices": 3630,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3630,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3630,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_bash",
+      "model": "Cleric",
+      "effectVertices": 2808,
+      "effectPhases": [
+        {
+          "vertices": 2808,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2808,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2808,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1728,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1728,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1728,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_smite",
+      "model": "Cleric",
+      "effectVertices": 1866,
+      "effectPhases": [
+        {
+          "vertices": 1866,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1866,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1866,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 858,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 858,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 858,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_taunt",
+      "model": "Cleric",
+      "effectVertices": 1188,
+      "effectPhases": [
+        {
+          "vertices": 1188,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 756,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 756,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 756,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_ground",
+      "model": "Cleric",
+      "effectVertices": 984,
+      "effectPhases": [
+        {
+          "vertices": 984,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 984,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 984,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 480,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 480,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 480,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_guard",
+      "model": "Cleric",
+      "effectVertices": 1908,
+      "effectPhases": [
+        {
+          "vertices": 1908,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1908,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1908,
+          "surfaceVertices": 1704,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 972,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 972,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 972,
+          "surfaceVertices": 1308,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_burst",
+      "model": "Cleric",
+      "effectVertices": 4122,
+      "effectPhases": [
+        {
+          "vertices": 4122,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4122,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4122,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2610,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2610,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2610,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_laststand",
+      "model": "Cleric",
+      "effectVertices": 2970,
+      "effectPhases": [
+        {
+          "vertices": 2970,
+          "surfaceVertices": 3408,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2970,
+          "surfaceVertices": 3408,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2970,
+          "surfaceVertices": 3408,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1602,
+          "surfaceVertices": 2616,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1602,
+          "surfaceVertices": 2616,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1602,
+          "surfaceVertices": 2616,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_sky",
+      "model": "Cleric",
+      "effectVertices": 3972,
+      "effectPhases": [
+        {
+          "vertices": 3972,
+          "surfaceVertices": 336,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3972,
+          "surfaceVertices": 336,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3972,
+          "surfaceVertices": 336,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2388,
+          "surfaceVertices": 336,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2388,
+          "surfaceVertices": 336,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2388,
+          "surfaceVertices": 336,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_summon",
+      "model": "Wizard",
+      "effectVertices": 3024,
+      "effectPhases": [
+        {
+          "vertices": 3024,
+          "surfaceVertices": 3552,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3024,
+          "surfaceVertices": 3552,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3024,
+          "surfaceVertices": 3552,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 3072,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 3072,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 3072,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_bolt",
+      "model": "Wizard",
+      "effectVertices": 2664,
+      "effectPhases": [
+        {
+          "vertices": 2664,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2664,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2664,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 792,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 792,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 792,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_raise",
+      "model": "Wizard",
+      "effectVertices": 2844,
+      "effectPhases": [
+        {
+          "vertices": 2844,
+          "surfaceVertices": 1776,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2844,
+          "surfaceVertices": 1776,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2844,
+          "surfaceVertices": 1776,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1332,
+          "surfaceVertices": 1536,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1332,
+          "surfaceVertices": 1536,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1332,
+          "surfaceVertices": 1536,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_nova",
+      "model": "Wizard",
+      "effectVertices": 2196,
+      "effectPhases": [
+        {
+          "vertices": 2196,
+          "surfaceVertices": 5376,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2196,
+          "surfaceVertices": 5376,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2196,
+          "surfaceVertices": 5376,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 2688,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 2688,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 2688,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_wall",
+      "model": "Wizard",
+      "effectVertices": 1158,
+      "effectPhases": [
+        {
+          "vertices": 1158,
+          "surfaceVertices": 3360,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1158,
+          "surfaceVertices": 3360,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1158,
+          "surfaceVertices": 3360,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 654,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 654,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 654,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_grip",
+      "model": "Wizard",
+      "effectVertices": 4326,
+      "effectPhases": [
+        {
+          "vertices": 4326,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4326,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4326,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_army",
+      "model": "Wizard",
+      "effectVertices": 6264,
+      "effectPhases": [
+        {
+          "vertices": 6264,
+          "surfaceVertices": 8880,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6264,
+          "surfaceVertices": 8880,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6264,
+          "surfaceVertices": 8880,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 3072,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 3072,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 3072,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_storm",
+      "model": "Wizard",
+      "effectVertices": 2280,
+      "effectPhases": [
+        {
+          "vertices": 2280,
+          "surfaceVertices": 5760,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2280,
+          "surfaceVertices": 5760,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2280,
+          "surfaceVertices": 5760,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2070,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2070,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2070,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_strike",
+      "model": "Rogue",
+      "effectVertices": 2622,
+      "effectPhases": [
+        {
+          "vertices": 2622,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2622,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2622,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_barrage",
+      "model": "Rogue",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3456,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3456,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1944,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1944,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1944,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_step",
+      "model": "Rogue",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3456,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3456,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1944,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1944,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1944,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_smoke",
+      "model": "Rogue",
+      "effectVertices": 2910,
+      "effectPhases": [
+        {
+          "vertices": 2910,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2910,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2910,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2910,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2910,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2910,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_mark",
+      "model": "Rogue",
+      "effectVertices": 2880,
+      "effectPhases": [
+        {
+          "vertices": 2880,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2880,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2880,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1368,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1368,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1368,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_pierce",
+      "model": "Rogue",
+      "effectVertices": 2016,
+      "effectPhases": [
+        {
+          "vertices": 2016,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2016,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2016,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1008,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1008,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1008,
+          "surfaceVertices": 48,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_fury",
+      "model": "Rogue",
+      "effectVertices": 5304,
+      "effectPhases": [
+        {
+          "vertices": 5304,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5304,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5304,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2280,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2280,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2280,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_storm",
+      "model": "Rogue",
+      "effectVertices": 5010,
+      "effectPhases": [
+        {
+          "vertices": 5010,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5010,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5010,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2994,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2994,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2994,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_cleave",
+      "model": "Warrior",
+      "effectVertices": 2688,
+      "effectPhases": [
+        {
+          "vertices": 2688,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2688,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2688,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1176,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1176,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1176,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_bash",
+      "model": "Warrior",
+      "effectVertices": 3786,
+      "effectPhases": [
+        {
+          "vertices": 3786,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3786,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3786,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2022,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2022,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2022,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_charge",
+      "model": "Warrior",
+      "effectVertices": 1782,
+      "effectPhases": [
+        {
+          "vertices": 1782,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1782,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1782,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 774,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 774,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 774,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_stomp",
+      "model": "Warrior",
+      "effectVertices": 4428,
+      "effectPhases": [
+        {
+          "vertices": 4428,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4428,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4428,
+          "surfaceVertices": 576,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2448,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2448,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2448,
+          "surfaceVertices": 288,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_whirl",
+      "model": "Warrior",
+      "effectVertices": 10464,
+      "effectPhases": [
+        {
+          "vertices": 10464,
+          "surfaceVertices": 1920,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 10464,
+          "surfaceVertices": 1920,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 10464,
+          "surfaceVertices": 1920,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_execute",
+      "model": "Warrior",
+      "effectVertices": 2598,
+      "effectPhases": [
+        {
+          "vertices": 2598,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2598,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2598,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_berserk",
+      "model": "Warrior",
+      "effectVertices": 1824,
+      "effectPhases": [
+        {
+          "vertices": 1824,
+          "surfaceVertices": 1344,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1824,
+          "surfaceVertices": 1344,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1824,
+          "surfaceVertices": 1344,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1176,
+          "surfaceVertices": 384,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1176,
+          "surfaceVertices": 384,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1176,
+          "surfaceVertices": 384,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_guard",
+      "model": "Warrior",
+      "effectVertices": 4824,
+      "effectPhases": [
+        {
+          "vertices": 4824,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4824,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4824,
+          "surfaceVertices": 1956,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2160,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2160,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2160,
+          "surfaceVertices": 1362,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_pierce",
+      "model": "Warrior",
+      "effectVertices": 1488,
+      "effectPhases": [
+        {
+          "vertices": 1488,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1488,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1488,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 948,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 948,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 948,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_volley",
+      "model": "Warrior",
+      "effectVertices": 120,
+      "effectPhases": [
+        {
+          "vertices": 120,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 120,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 120,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 120,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 120,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 120,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_shadow",
+      "model": "Warrior",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_tumble",
+      "model": "Warrior",
+      "effectVertices": 888,
+      "effectPhases": [
+        {
+          "vertices": 888,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 888,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 888,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 888,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 888,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 888,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_smoke",
+      "model": "Warrior",
+      "effectVertices": 2718,
+      "effectPhases": [
+        {
+          "vertices": 2718,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2718,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_goldrush",
+      "model": "Warrior",
+      "effectVertices": 6174,
+      "effectPhases": [
+        {
+          "vertices": 6174,
+          "surfaceVertices": 3024,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6174,
+          "surfaceVertices": 3024,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6174,
+          "surfaceVertices": 3024,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1890,
+          "surfaceVertices": 2160,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1890,
+          "surfaceVertices": 2160,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1890,
+          "surfaceVertices": 2160,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_deathmark",
+      "model": "Warrior",
+      "effectVertices": 1806,
+      "effectPhases": [
+        {
+          "vertices": 1806,
+          "surfaceVertices": 672,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 672,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 672,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 978,
+          "surfaceVertices": 192,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 978,
+          "surfaceVertices": 192,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 978,
+          "surfaceVertices": 192,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_spike",
+      "model": "Warrior",
+      "effectVertices": 2742,
+      "effectPhases": [
+        {
+          "vertices": 2742,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2742,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2742,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1230,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1230,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1230,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_bolt",
+      "model": "Wizard",
+      "effectVertices": 5220,
+      "effectPhases": [
+        {
+          "vertices": 5220,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5220,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5220,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1836,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1836,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1836,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_beam",
+      "model": "Wizard",
+      "effectVertices": 6072,
+      "effectPhases": [
+        {
+          "vertices": 6072,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6072,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6072,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2544,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2544,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2544,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_nova",
+      "model": "Wizard",
+      "effectVertices": 3714,
+      "effectPhases": [
+        {
+          "vertices": 3714,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3714,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3714,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2202,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2202,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2202,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_blink",
+      "model": "Wizard",
+      "effectVertices": 8550,
+      "effectPhases": [
+        {
+          "vertices": 8550,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8550,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8550,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3684,
+          "surfaceVertices": 864,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3684,
+          "surfaceVertices": 864,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3684,
+          "surfaceVertices": 864,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_gravity",
+      "model": "Wizard",
+      "effectVertices": 8034,
+      "effectPhases": [
+        {
+          "vertices": 8034,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8034,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8034,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4002,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4002,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4002,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_barrier",
+      "model": "Wizard",
+      "effectVertices": 4218,
+      "effectPhases": [
+        {
+          "vertices": 4218,
+          "surfaceVertices": 1620,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4218,
+          "surfaceVertices": 1620,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4218,
+          "surfaceVertices": 1620,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2562,
+          "surfaceVertices": 1026,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2562,
+          "surfaceVertices": 1026,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2562,
+          "surfaceVertices": 1026,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_tempest",
+      "model": "Wizard",
+      "effectVertices": 3036,
+      "effectPhases": [
+        {
+          "vertices": 3036,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3036,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3036,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2028,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2028,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2028,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_overload",
+      "model": "Wizard",
+      "effectVertices": 5316,
+      "effectPhases": [
+        {
+          "vertices": 5316,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5316,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5316,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1932,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_flurry",
+      "model": "Monk",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_palm",
+      "model": "Monk",
+      "effectVertices": 924,
+      "effectPhases": [
+        {
+          "vertices": 924,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 924,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 420,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 420,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 420,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_deflect",
+      "model": "Monk",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_roll",
+      "model": "Monk",
+      "effectVertices": 2016,
+      "effectPhases": [
+        {
+          "vertices": 2016,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2016,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2016,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1512,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_whirl",
+      "model": "Monk",
+      "effectVertices": 5232,
+      "effectPhases": [
+        {
+          "vertices": 5232,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5232,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5232,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_stun",
+      "model": "Monk",
+      "effectVertices": 2598,
+      "effectPhases": [
+        {
+          "vertices": 2598,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2598,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2598,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_thousand",
+      "model": "Monk",
+      "effectVertices": 1764,
+      "effectPhases": [
+        {
+          "vertices": 1764,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1764,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1764,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 756,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 756,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 756,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_dragon",
+      "model": "Monk",
+      "effectVertices": 2760,
+      "effectPhases": [
+        {
+          "vertices": 2760,
+          "surfaceVertices": 1872,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2760,
+          "surfaceVertices": 1872,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2760,
+          "surfaceVertices": 1872,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1248,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1248,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1248,
+          "surfaceVertices": 1440,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_bolt",
+      "model": "Wizard",
+      "effectVertices": 1128,
+      "effectPhases": [
+        {
+          "vertices": 1128,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1128,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1128,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1128,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1128,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1128,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_lance",
+      "model": "Wizard",
+      "effectVertices": 1146,
+      "effectPhases": [
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1146,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_step",
+      "model": "Wizard",
+      "effectVertices": 1182,
+      "effectPhases": [
+        {
+          "vertices": 1182,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1182,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1182,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1182,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1182,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1182,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_nova",
+      "model": "Wizard",
+      "effectVertices": 4812,
+      "effectPhases": [
+        {
+          "vertices": 4812,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4812,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4812,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4308,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4308,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4308,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_orb",
+      "model": "Wizard",
+      "effectVertices": 5448,
+      "effectPhases": [
+        {
+          "vertices": 5448,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5448,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5448,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3576,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3576,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3576,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_barrier",
+      "model": "Wizard",
+      "effectVertices": 4248,
+      "effectPhases": [
+        {
+          "vertices": 4248,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4248,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4248,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3744,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3744,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3744,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_storm",
+      "model": "Wizard",
+      "effectVertices": 1710,
+      "effectPhases": [
+        {
+          "vertices": 1710,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1710,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1710,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1710,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1710,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1710,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_overload",
+      "model": "Wizard",
+      "effectVertices": 5646,
+      "effectPhases": [
+        {
+          "vertices": 5646,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5646,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5646,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4518,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4518,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 4518,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_bolt",
+      "model": "Wizard",
+      "effectVertices": 3492,
+      "effectPhases": [
+        {
+          "vertices": 3492,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1116,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1116,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1116,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_lance",
+      "model": "Wizard",
+      "effectVertices": 96,
+      "effectPhases": [
+        {
+          "vertices": 96,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 96,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 96,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 96,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 96,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 96,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_curse",
+      "model": "Wizard",
+      "effectVertices": 1080,
+      "effectPhases": [
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 576,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 576,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 576,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_drain",
+      "model": "Wizard",
+      "effectVertices": 2598,
+      "effectPhases": [
+        {
+          "vertices": 2598,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2598,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2598,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1086,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_step",
+      "model": "Wizard",
+      "effectVertices": 3492,
+      "effectPhases": [
+        {
+          "vertices": 3492,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1836,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1836,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1836,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_orb",
+      "model": "Wizard",
+      "effectVertices": 9540,
+      "effectPhases": [
+        {
+          "vertices": 9540,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9540,
+          "surfaceVertices": 1320,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9540,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3636,
+          "surfaceVertices": 432,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_storm",
+      "model": "Wizard",
+      "effectVertices": 8646,
+      "effectPhases": [
+        {
+          "vertices": 8646,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8646,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 8646,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3606,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3606,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3606,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_final",
+      "model": "Wizard",
+      "effectVertices": 3630,
+      "effectPhases": [
+        {
+          "vertices": 3630,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3630,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3630,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1614,
+          "surfaceVertices": 1296,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_rise",
+      "model": "Ranger",
+      "effectVertices": 5544,
+      "effectPhases": [
+        {
+          "vertices": 5544,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5544,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5544,
+          "surfaceVertices": 1680,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2520,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2520,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2520,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_gale",
+      "model": "Ranger",
+      "effectVertices": 1782,
+      "effectPhases": [
+        {
+          "vertices": 1782,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1782,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1782,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 774,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 774,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 774,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_dive",
+      "model": "Ranger",
+      "effectVertices": 4344,
+      "effectPhases": [
+        {
+          "vertices": 4344,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4344,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4344,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1824,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1824,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1824,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_lift",
+      "model": "Ranger",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_dash",
+      "model": "Ranger",
+      "effectVertices": 9216,
+      "effectPhases": [
+        {
+          "vertices": 9216,
+          "surfaceVertices": 2688,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9216,
+          "surfaceVertices": 2688,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9216,
+          "surfaceVertices": 2688,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3312,
+          "surfaceVertices": 1152,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_rain",
+      "model": "Ranger",
+      "effectVertices": 1134,
+      "effectPhases": [
+        {
+          "vertices": 1134,
+          "surfaceVertices": 1080,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1134,
+          "surfaceVertices": 1080,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1134,
+          "surfaceVertices": 1080,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 630,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 630,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 630,
+          "surfaceVertices": 720,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_crash",
+      "model": "Ranger",
+      "effectVertices": 9828,
+      "effectPhases": [
+        {
+          "vertices": 9828,
+          "surfaceVertices": 3264,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9828,
+          "surfaceVertices": 3264,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 9828,
+          "surfaceVertices": 3264,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 1248,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 1248,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 1248,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_cyclone",
+      "model": "Ranger",
+      "effectVertices": 6072,
+      "effectPhases": [
+        {
+          "vertices": 6072,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6072,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 6072,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2544,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2544,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2544,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_counter",
+      "model": "Rogue",
+      "effectVertices": 900,
+      "effectPhases": [
+        {
+          "vertices": 900,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 900,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 900,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 396,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 396,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 396,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_twin",
+      "model": "Rogue",
+      "effectVertices": 5232,
+      "effectPhases": [
+        {
+          "vertices": 5232,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5232,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5232,
+          "surfaceVertices": 960,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2208,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_riposte",
+      "model": "Rogue",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3480,
+          "surfaceVertices": 480,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1464,
+          "surfaceVertices": 240,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_step",
+      "model": "Rogue",
+      "effectVertices": 2880,
+      "effectPhases": [
+        {
+          "vertices": 2880,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2880,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2880,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1872,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1872,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1872,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_mirror",
+      "model": "Rogue",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "surfaceVertices": 504,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 504,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 504,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 108,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 108,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1080,
+          "surfaceVertices": 108,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_cross",
+      "model": "Rogue",
+      "effectVertices": 1788,
+      "effectPhases": [
+        {
+          "vertices": 1788,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1788,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1788,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 780,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 780,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 780,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_steel",
+      "model": "Rogue",
+      "effectVertices": 1806,
+      "effectPhases": [
+        {
+          "vertices": 1806,
+          "surfaceVertices": 936,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 936,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1806,
+          "surfaceVertices": 936,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 870,
+          "surfaceVertices": 540,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 870,
+          "surfaceVertices": 540,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 870,
+          "surfaceVertices": 540,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_perfect",
+      "model": "Rogue",
+      "effectVertices": 4320,
+      "effectPhases": [
+        {
+          "vertices": 4320,
+          "surfaceVertices": 504,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4320,
+          "surfaceVertices": 504,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 4320,
+          "surfaceVertices": 504,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1800,
+          "surfaceVertices": 108,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1800,
+          "surfaceVertices": 108,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1800,
+          "surfaceVertices": 108,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_sic",
+      "model": "Ranger",
+      "effectVertices": 2700,
+      "effectPhases": [
+        {
+          "vertices": 2700,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2700,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2700,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1188,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_coordinated",
+      "model": "Ranger",
+      "effectVertices": 3654,
+      "effectPhases": [
+        {
+          "vertices": 3654,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3654,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3654,
+          "surfaceVertices": 216,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1638,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1638,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1638,
+          "surfaceVertices": 144,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_guardian",
+      "model": "Ranger",
+      "effectVertices": 2046,
+      "effectPhases": [
+        {
+          "vertices": 2046,
+          "surfaceVertices": 1872,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2046,
+          "surfaceVertices": 1872,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2046,
+          "surfaceVertices": 1872,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 966,
+          "surfaceVertices": 1344,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 966,
+          "surfaceVertices": 1344,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 966,
+          "surfaceVertices": 1344,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_step",
+      "model": "Ranger",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2592,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1584,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1584,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1584,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_mend",
+      "model": "Ranger",
+      "effectVertices": 204,
+      "effectPhases": [
+        {
+          "vertices": 204,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 204,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 204,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 204,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 204,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 204,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_roar",
+      "model": "Ranger",
+      "effectVertices": 5184,
+      "effectPhases": [
+        {
+          "vertices": 5184,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5184,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 5184,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 2160,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2160,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 2160,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_stampede",
+      "model": "Ranger",
+      "effectVertices": 912,
+      "effectPhases": [
+        {
+          "vertices": 912,
+          "surfaceVertices": 11904,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 912,
+          "surfaceVertices": 11904,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 912,
+          "surfaceVertices": 11904,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 456,
+          "surfaceVertices": 4032,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 456,
+          "surfaceVertices": 4032,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 456,
+          "surfaceVertices": 4032,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_apex",
+      "model": "Ranger",
+      "effectVertices": 3492,
+      "effectPhases": [
+        {
+          "vertices": 3492,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 3492,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "high"
+        },
+        {
+          "vertices": 1476,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1476,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        },
+        {
+          "vertices": 1476,
+          "surfaceVertices": 0,
+          "finite": true,
+          "quality": "low"
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

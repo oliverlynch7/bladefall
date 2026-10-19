@@ -4,8 +4,18 @@ const VERSION=1,BASE=['warrior','ranger','mage'];
 const offers=[{id:'berserker',tier:1,cost:300,goal:8,key:'elites',name:'Break the guards',desc:'Defeat 8 optional prison elites across runs.'},{id:'ninja',tier:2,cost:600,goal:3,key:'seals',name:'Hidden routes',desc:'Recover 3 hidden seals in Tier 2 or higher.'},{id:'reaper',tier:3,cost:1000,goal:1,key:'warden',name:'Last gate',desc:'Defeat the final Tier 3 boss.'}];
 const upgrades=[{id:'health',name:'Endurance',desc:'+6 starting health',base:60,cap:10},{id:'armor',name:'Reinforced armor',desc:'+1% damage reduction',base:80,cap:10},{id:'weapon',name:'Weapon training',desc:'+4% starting weapon damage',base:90,cap:10}];
 const copy=x=>JSON.parse(JSON.stringify(x));
-function validCheckpoint(c){return !!(c&&c.version===VERSION&&typeof c.id==='string'&&Number.isFinite(c.seed)&&[1,2,3].includes(c.section)&&[1,2,3].includes(c.tier)&&[...BASE,...offers.map(o=>o.id)].includes(c.cid)&&c.p&&Number.isFinite(c.p.hp)&&c.p.hp>0&&c.p.gear&&c.p.stats&&c.p.weapon&&c.classes&&c.states&&c.safe&&Number.isFinite(c.safe.x)&&Number.isFinite(c.safe.z));}
-function profile(v={}){v=v&&typeof v==='object'?v:{};const n=(x,max)=>Math.max(0,Math.min(max,Math.floor(Number(x)||0)));return {version:VERSION,chestRecords:v.chestRecords&&typeof v.chestRecords==='object'?Object.fromEntries(Object.entries(v.chestRecords).slice(-2048)): {},gold:n(v.gold,1e9),tier:Math.max(1,n(v.tier,3)),classes:[...new Set([...BASE,...(Array.isArray(v.classes)?v.classes:[]).filter(x=>offers.some(o=>o.id===x))])],upgrades:Object.fromEntries(upgrades.map(u=>[u.id,n(v.upgrades?.[u.id],u.cap)])),progress:{elites:n(v.progress?.elites,1e6),seals:n(v.progress?.seals,1e6),warden:n(v.progress?.warden,1e6)},receipts:Array.isArray(v.receipts)?v.receipts.filter(x=>typeof x==='string').slice(-1500):[],checkpoint:validCheckpoint(v.checkpoint)?copy(v.checkpoint):null};}
+const record=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+function validCheckpoint(c){
+ if(!record(c)||c.version!==VERSION||typeof c.id!=='string'||!c.id||!Number.isSafeInteger(c.seed)||c.seed<0||c.seed>0xffffffff||![1,2,3].includes(c.section)||![1,2,3].includes(c.tier)||![...BASE,...offers.map(o=>o.id)].includes(c.cid))return false;
+ if(c.layoutVersion!=null&&(!Number.isInteger(c.layoutVersion)||c.layoutVersion<1||c.layoutVersion>12))return false;
+ const p=c.p;if(!record(p)||!Number.isFinite(p.hp)||p.hp<=0||!record(p.gear)||!record(p.stats)||!record(p.weapon)||typeof (p.weapon.arche||p.weapon.art)!=='string'||!Number.isFinite(p.weapon.dmg)||p.weapon.dmg<=0)return false;
+ if(!record(c.classes)||!record(c.states)||!record(c.safe)||![c.safe.x,c.safe.z,c.safe.y??0].every(Number.isFinite))return false;
+ if(Object.values(p.stats).some(v=>typeof v==='number'&&!Number.isFinite(v)))return false;
+ if(c.pickups!=null&&!Array.isArray(c.pickups)||c.chests!=null&&!Array.isArray(c.chests)||c.events!=null&&!Array.isArray(c.events)||c.stash!=null&&!Array.isArray(c.stash))return false;
+ return Object.values(c.states).every(v=>typeof v==='boolean'||record(v));
+}
+
+function profile(v={}){v=v&&typeof v==='object'?v:{};const n=(x,max)=>Math.max(0,Math.min(max,Math.floor(Number(x)||0)));return {version:VERSION,checkpointIssue:!!(v.checkpoint&&!validCheckpoint(v.checkpoint)||v.checkpointIssue&&!v.checkpoint),chestRecords:v.chestRecords&&typeof v.chestRecords==='object'?Object.fromEntries(Object.entries(v.chestRecords).slice(-2048)): {},gold:n(v.gold,1e9),tier:Math.max(1,n(v.tier,3)),classes:[...new Set([...BASE,...(Array.isArray(v.classes)?v.classes:[]).filter(x=>offers.some(o=>o.id===x))])],upgrades:Object.fromEntries(upgrades.map(u=>[u.id,n(v.upgrades?.[u.id],u.cap)])),progress:{elites:n(v.progress?.elites,1e6),seals:n(v.progress?.seals,1e6),warden:n(v.progress?.warden,1e6)},receipts:Array.isArray(v.receipts)?v.receipts.filter(x=>typeof x==='string').slice(-1500):[],checkpoint:validCheckpoint(v.checkpoint)?copy(v.checkpoint):null};}
 function saves(v,legacy){
  if(v&&v.version===1&&Array.isArray(v.slots))return {version:1,active:[0,1,2].includes(v.active)?v.active:0,slots:Array.from({length:3},(_,i)=>v.slots[i]&&typeof v.slots[i]==='object'?profile(v.slots[i]):null)};
  return {version:1,active:0,slots:[legacy&&typeof legacy==='object'?profile(legacy):null,null,null]};
@@ -76,6 +86,7 @@ function layout(seed,section,tier,revision=6){
   rooms[11].mechanic='wards';rooms[11].wardSockets=[[-95,-140],[95,-140]];
   rooms[13].mechanic='hold';rooms[13].holdRadius=145;rooms[13].holdSeconds=18;
  }
+ if(revision>=12){for(const room of rooms)room.campaignRoster=true;rooms[4].name=['Warden’s court','Frozen checkpoint','Furnace gate'][section-1];}
  const links=[[0,1],[1,2],[2,3],...(revision>=5?[[3,7],...(revision>=6?[[7,9],[9,8]]:[[7,8]]),...(revision>=9?[[8,11],[11,12],[12,13],[13,4]]:[[8,4]])]:[[3,4]]),[1,5],...(revision>=2?[[3,6]]:[]),...(revision>=8?[[7,10]]:[]),...(revision>=9?[[11,14],[13,15]]:[])],walls=[],floors=[],plats=[],roofs=[],decor=[];
  const box=(x,z,w,d,y0,h,extra={})=>({x,z,w,d,y0,h,...extra});
  for(const r of rooms){
@@ -224,6 +235,9 @@ function layout(seed,section,tier,revision=6){
  }):null;
  return {version:VERSION,revision,exit,bounds,seed,section,tier,rooms,links,walls,floors,plats,roofs,decor,side,...(revision>=9?{mainRoute:[1,3,7,8,11,13,4]}:{}),...(barriers?{barriers}:{}),title:['Prison cells','The underworks','Escape gate'][section-1]||'Prison'};
 }
+function scaledStats(base,section,tier,party=1){return {hp:Math.round(base.hp*(1.45+(section-1)*.22+(tier-1)*.28)*party),dmg:Math.round(base.dmg*(1+(section-1)*.12+(tier-1)*.13))};}
+function boss(section){return [{type:'warden',name:'CELL WARDEN'},{type:'sorcerer',name:'UNDERWORKS SORCERER'},{type:'colossus',name:'GATE COLOSSUS'}][section-1];}
+function campaignEnemy(type,section=1){return ({prison_guard:section===3?'siegeknight':'sentinel',prison_pike:section===3?'blinkstalker':'revenant',prison_hound:section===2?'magmaskit':'dustjackal',prison_vessel:section===2?'frostlobber':'caster'})[type]||type;}
 function encounter(room,tier,wave=0){
  if(room.dungeonSection){
   // Familiar campaign enemies keep their normal AI and silhouettes. The
@@ -235,7 +249,7 @@ function encounter(room,tier,wave=0){
   };
   const groups=sections[room.dungeonSection],pack=(groups[room.template]||groups.default)[(wave+(room.encounterVariant||0))%2];
   const count=room.kind==='vault'?2:2+tier,positions=room.spawnPoints?.length>=count?room.spawnPoints:[[-245,-185],[245,-185],[-235,115],[235,115],[0,-210],[0,115]];
-  return Array.from({length:count},(_,i)=>({type:pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
+  return Array.from({length:count},(_,i)=>({type:room.campaignRoster?campaignEnemy(pack[i%pack.length],room.dungeonSection):pack[i%pack.length],x:positions[i][0],z:positions[i][1]}));
  }
  const packs={gallery:[['prison_guard','prison_vessel','prison_pike'],['prison_vessel','prison_hound','prison_pike']],kennels:[['prison_hound','prison_hound','prison_pike'],['prison_guard','prison_hound','prison_hound']],barricades:[['prison_guard','prison_pike','prison_vessel'],['prison_hound','prison_vessel','prison_guard']]};
  packs.refectory=packs.barricades;packs.cistern=[['prison_vessel','prison_pike','prison_hound'],['prison_hound','prison_guard','prison_vessel']];
@@ -250,5 +264,5 @@ function encounter(room,tier,wave=0){
 function chestRarity(room,revision){if(room.kind==='boss')return 'uncommon';if(revision>=5)return room.id===3?'common':null;return ['fight','waves'].includes(room.kind)?'common':null;}
 function roomAdvice(room){if(room.mechanic==='wards')return 'Destroy both glowing wards to stop the guards arriving.';if(room.mechanic==='hold')return 'Stand in the marked circle to charge the gate. Guard waves will interrupt you.';return {registry:'Use the record desks as cover from casters.',pumps:'The pumps split the room into two lanes.',beacon:'Arcane guards and fast stalkers share this room.',yard:'Sidestep chargers and use the low barriers.',depot:'The supply racks make cover between waves.',muster:'The heavy guard is slow; circle around it.',stores:'An optional elite guards the supplies.',armory:'Shield racks break the guards’ line of attack.',liftbay:'Use the loading platforms to flank the guards.',watchpost:'Pike guards watch the long lane. Use the side cover.',infirmary:'Vessels set the floor alight. Keep moving.',cistern:'The islands interrupt a straight charge.',refectory:'Tables divide the room into two fighting lanes.',kennels:'Hounds rush in a straight line. Step aside.',gallery:'The split gallery has more than one approach.',barricades:'Use the barricades to break line of sight.'}[room.template]||'Watch each enemy before you commit.';}
 function roomAt(plan,p){return plan.rooms.find(r=>Math.abs(p.x-r.x)<r.w/2&&Math.abs(p.z-r.z)<r.d/2);}
-window.BFPrisonDungeon={VERSION,BASE,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAdvice,roomAt,copy};
+window.BFPrisonDungeon={VERSION,BASE,boss,scaledStats,campaignEnemy,offers,upgrades,profile,saves,validCheckpoint,credit,price,buy,layout,encounter,chestRarity,roomAdvice,roomAt,copy};
 })();

@@ -3,7 +3,7 @@ import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
 import {buildBriarBetaArt} from './briar-beta-art.js?v=2236';
 window.__briarAssetsPreload=loadBriarTrees;
-import {buildPrisonArt} from './prison-art3d.js?v=2139';
+import {buildPrisonArt} from './prison-art3d.js?v=2306';
 import {claimSurface} from './surface-regions.js?v=1972';
 import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2239';
 import {buildLongAscent} from './long-ascent-art.js?v=2239';

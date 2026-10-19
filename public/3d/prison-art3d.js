@@ -1,18 +1,23 @@
 import * as T from './three.module.js';
+import {campaignMaterial} from './campaign-materials.js?v=2187a';
+import {craftModel} from './campaign-craft-models.js?v=2187a';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 // Static prison architecture uses the exact collision plan. Merge by material, not by prop.
 export function buildPrisonArt(plan){
  const group=new T.Group();group.name='Prison stonework';const buckets=new Map(),geometries=[],textures=[];
- function stoneTexture(floor=false){
-  const c=document.createElement('canvas');c.width=c.height=256;const a=c.getContext('2d');a.fillStyle='#353439';a.fillRect(0,0,256,256);
-  let seed=floor?331:917;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-  const row=floor?64:32,col=floor?64:96;
-  for(let y=0;y<256;y+=row)for(let x=-col;x<256;x+=col){const xx=x+((y/row)%2)*col/2,v=(plan.revision>=9?158:112)+Math.floor(rand()*(plan.revision>=9?52:38));a.fillStyle=`rgb(${v+8},${v+5},${v})`;a.fillRect(xx+2,y+2,col-4,row-4);a.fillStyle='rgba(240,230,205,.15)';a.fillRect(xx+3,y+3,col-6,2);a.fillStyle='rgba(5,10,20,.18)';a.fillRect(xx+col-5,y+3,2,row-6);}
-  for(let i=0;i<9000;i++){const v=rand()>.5?255:0;a.fillStyle=`rgba(${v},${v},${v},.045)`;a.fillRect(rand()*256,rand()*256,1+rand()*3,1);}
-  const tex=new T.CanvasTexture(c);tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;textures.push(tex);return tex;
+ const palette=(plan.revision>=9?[['#e8cda7','#c9b995','#c9785e'],['#a6ddda','#94c7c0','#e4a65c'],['#ceb8ec','#b5a8d8','#f0c273']]:[['#c5b4a2','#9a9290','#83604c'],['#9fb7b3','#819a99','#568986'],['#b3a7c5','#9690ab','#8d739f']])[plan.section-1];
+ const mats={wall:new T.MeshStandardMaterial({color:palette[0],roughness:.94}),floor:new T.MeshStandardMaterial({color:palette[1],roughness:.9}),trim:new T.MeshStandardMaterial({color:plan.revision>=9?'#ebcb8e':'#b4a18b',roughness:.8}),iron:new T.MeshStandardMaterial({color:plan.revision>=9?'#516875':'#39424b',metalness:.72,roughness:.48}),wood:new T.MeshStandardMaterial({color:plan.revision>=9?'#9a6744':'#69513a',roughness:.85}),cloth:new T.MeshStandardMaterial({color:palette[2],roughness:1}),glow:new T.MeshStandardMaterial({color:'#ffe3a8',emissive:plan.section===2?'#56d9db':plan.section===3?'#c49cff':'#ffb04e',emissiveIntensity:1.5}),water:new T.MeshStandardMaterial({color:plan.revision>=9?'#4ba7ad':'#285b60',metalness:.45,roughness:.23}),route:new T.MeshStandardMaterial({color:'#a9b8c5',emissive:'#607e97',emissiveIntensity:.48,roughness:.7}),optional:new T.MeshStandardMaterial({color:'#dfb265',emissive:'#8e5c21',emissiveIntensity:.55,roughness:.62})};
+ // Shared painted campaign stone/wood has world-sized grain and weathering;
+ // reuse cached meshes, merge per material and leave their cache ownership intact.
+ for(const [key,surface] of [['wall','masonry'],['floor','flagstone'],['wood','wood'],['iron','metal']]){
+  const old=mats[key];mats[key]=campaignMaterial(surface,{color:old.color.clone(),detailStrength:.66,bumpStrength:.045});old.dispose();
  }
- const wallMap=stoneTexture(),floorMap=stoneTexture(true),palette=(plan.revision>=9?[['#e8cda7','#c9b995','#c9785e'],['#a6ddda','#94c7c0','#e4a65c'],['#ceb8ec','#b5a8d8','#f0c273']]:[['#c5b4a2','#9a9290','#83604c'],['#9fb7b3','#819a99','#568986'],['#b3a7c5','#9690ab','#8d739f']])[plan.section-1];
- const mats={wall:new T.MeshStandardMaterial({color:palette[0],map:wallMap,bumpMap:wallMap,bumpScale:1.8,roughness:.94}),floor:new T.MeshStandardMaterial({color:palette[1],map:floorMap,bumpMap:floorMap,bumpScale:1.1,roughness:.9}),trim:new T.MeshStandardMaterial({color:plan.revision>=9?'#ebcb8e':'#b4a18b',roughness:.8}),iron:new T.MeshStandardMaterial({color:plan.revision>=9?'#516875':'#39424b',metalness:.72,roughness:.48}),wood:new T.MeshStandardMaterial({color:plan.revision>=9?'#9a6744':'#69513a',roughness:.85}),cloth:new T.MeshStandardMaterial({color:palette[2],roughness:1}),glow:new T.MeshStandardMaterial({color:'#ffe3a8',emissive:plan.section===2?'#56d9db':plan.section===3?'#c49cff':'#ffb04e',emissiveIntensity:1.5}),water:new T.MeshStandardMaterial({color:plan.revision>=9?'#4ba7ad':'#285b60',metalness:.45,roughness:.23}),route:new T.MeshStandardMaterial({color:'#a9b8c5',emissive:'#607e97',emissiveIntensity:.48,roughness:.7}),optional:new T.MeshStandardMaterial({color:'#dfb265',emissive:'#8e5c21',emissiveIntensity:.55,roughness:.62})};
+ const crafts=new Map();let reusedAssets=0;
+ function craft(name,theme,x,y,z,w,h,d,ry=0){
+  const transform=new T.Matrix4().makeRotationY(ry);transform.setPosition(x,y,z);
+  for(const part of craftModel(name,theme,{w,h,d})){const geo=part.geo.clone();geo.applyMatrix4(transform);if(!crafts.has(part.material))crafts.set(part.material,[]);crafts.get(part.material).push(geo);}
+  reusedAssets++;
+ }
  const matrix=new T.Matrix4(),q=new T.Quaternion(),euler=new T.Euler();
  function add(geo,mat,x,y,z,rx=0,ry=0,rz=0){
   if(geo.index){const source=geo;geo=source.toNonIndexed();source.dispose();}
@@ -24,10 +29,15 @@ export function buildPrisonArt(plan){
  function box(o,mat){add(new T.BoxGeometry(o.w,o.h-o.y0,o.d),mat,o.x,(o.h+o.y0)/2,o.z);}
  function block(x,y,z,w,h,d,mat='trim'){add(new T.BoxGeometry(w,h,d),mat,x,y,z);}
  for(const o of plan.floors)box(o,'floor');
- for(const o of plan.walls){box(o,'wall');if(o.collisionOnly)continue;block(o.x,7,o.z,o.w+3,14,o.d+3,'trim');block(o.x,o.h-12,o.z,o.w+5,16,o.d+5,'trim');}
+ for(const o of plan.walls){if(o.collisionOnly)continue;box(o,'wall');block(o.x,7,o.z,o.w+3,14,o.d+3,'trim');block(o.x,o.h-12,o.z,o.w+5,16,o.d+5,'trim');}
  for(const o of plan.roofs)box(o,'wall');
  for(const o of plan.plats){
   const room=plan.rooms.find(r=>r.id===o.room);
+  if(plan.revision>=12&&room&&o.y0===0&&!o.cacheStep&&!o.raisedCrossing&&o.h<=85){
+   const theme=plan.section===2?'coast':plan.section===3?'palace':'keep';
+   const furniture={refectory:'bench',registry:'bench',stores:'supplies',armory:'supplies',watchpost:'barricade',infirmary:'supplies',liftbay:'supplies',depot:'supplies',muster:'barricade',yard:'barricade'}[room.template];
+   if(furniture){craft(furniture,theme,o.x,0,o.z,o.w*.94,o.h,o.d*.94);continue;}
+  }
   if(room?.template==='refectory'){
    // Furniture stays inside the authored solid obstacle, with a readable tabletop and legs.
    block(o.x,o.h-5,o.z,o.w,10,o.d,'wood');
@@ -50,6 +60,11 @@ export function buildPrisonArt(plan){
    add(new T.CylinderGeometry(14,19,9,10),'iron',lx,room.h-74,lz);
    add(new T.SphereGeometry(8,10,6),'glow',lx,room.h-62,lz);
    for(let i=0;i<4;i++){const a=i*Math.PI/2;add(new T.CylinderGeometry(1.7,1.7,24,6),'iron',lx+Math.cos(a)*12,room.h-62,lz+Math.sin(a)*12);}
+  }
+  if(plan.revision>=12){
+   const theme=plan.section===2?'coast':plan.section===3?'palace':'keep';
+   for(const side of [-1,1])craft('sconce',theme,room.x+side*(room.w/2-18),70,room.z+110,16,68,18,side>0?-Math.PI/2:Math.PI/2);
+   if(room.kind==='start')for(const side of [-1,1])craft('cell-front',theme,room.x+side*(room.w/2-10),0,room.z-100,160,180,12,side>0?-Math.PI/2:Math.PI/2);
   }
   if(room.kind==='start')for(const sx of [-1,1]){block(room.x+sx*285,26,room.z-140,70,12,110,'wood');block(room.x+sx*285,34,room.z-140,65,5,100,'cloth');}
   if(room.template==='cistern'){for(const sx of [-1,1])block(room.x+sx*245,.7,room.z+80,100,1,260,'water');}
@@ -286,6 +301,7 @@ export function buildPrisonArt(plan){
  }
  let triangles=0;
  for(const [name,parts]of buckets){const merged=mergeGeometries(parts,false);parts.forEach(g=>g.dispose());if(!merged)throw Error('Prison geometry merge: '+name);geometries.push(merged);triangles+=(merged.index?.count||merged.attributes.position.count)/3;const mesh=new T.Mesh(merged,mats[name]);mesh.name='Prison '+name;group.add(mesh);}
+ for(const [material,parts]of crafts){const geo=mergeGeometries(parts,false);parts.forEach(p=>p.dispose());if(!geo)continue;geometries.push(geo);triangles+=(geo.index?.count||geo.attributes.position.count)/3;const mesh=new T.Mesh(geo,material);mesh.name='Reused campaign furnishing';group.add(mesh);}
  group.userData.dispose=()=>{geometries.forEach(g=>g.dispose());Object.values(mats).forEach(m=>m.dispose());textures.forEach(t=>t.dispose());};
- return {group,counts:{prison:true,rooms:plan.rooms.length,triangles,drawCalls:group.children.length}};
+ return {group,counts:{prison:true,reusedAssets,rooms:plan.rooms.length,triangles,drawCalls:group.children.length}};
 }

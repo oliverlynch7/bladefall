@@ -1,0 +1,36 @@
+{
+  "mode": "play",
+  "zone": 2,
+  "floor": 1,
+  "escape": true,
+  "plan": 16,
+  "health": 110,
+  "gold": 0,
+  "bank": true,
+  "code": "",
+  "host": false,
+  "active": false,
+  "remote": false,
+  "run": "mvesch6j-590827399",
+  "layout": 12,
+  "peers": [],
+  "room": "Prison refectory",
+  "art": {
+    "on": true,
+    "ready": true,
+    "built": "escape:mvesch6j-590827399:1:12",
+    "counts": {
+      "prison": true,
+      "reusedAssets": 54,
+      "rooms": 16,
+      "triangles": 84584,
+      "drawCalls": 14
+    },
+    "err": null
+  },
+  "types": [
+    "sentinel",
+    "revenant",
+    "revenant"
+  ]
+}

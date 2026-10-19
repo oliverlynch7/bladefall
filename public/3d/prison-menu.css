@@ -12,3 +12,8 @@ body:has(#overlay:not(.hide) .prison-menu) #toast{top:auto;bottom:8px}
 .pr-run-head,.pr-run-foot{display:flex;justify-content:space-between;gap:8px;color:#c7c3b9;font-size:11px}.pr-run-head b{color:#efc576;letter-spacing:.1em}.pr-room{display:block;margin:7px 0 4px;color:#fff;font-size:16px}.pr-objective{color:#f5dda8}.pr-run-foot{margin-top:9px;padding-top:7px;border-top:1px solid #786b594f;flex-wrap:wrap}.pr-combat-hint{margin-top:7px;color:#9fe4df;font-weight:700}
 .pr-side{margin-top:5px;color:#e8bb69;font-size:11px}
 @media(max-width:720px){#prisonhud{right:8px;top:196px;width:min(216px,calc(100vw - 16px));padding:8px 10px;font-size:11px}.pr-room{font-size:13px}.pr-run-head,.pr-run-foot{font-size:10px}}
+
+/* Dungeon objective stays below the player card, clear of the minimap. */
+@media(min-width:840px){#prisonhud{top:185px;right:auto;left:20px;width:285px}}
+
+.pr-upgrade-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.pr-upgrade-grid>section{border:1px solid #667889;border-radius:12px;padding:16px;background:linear-gradient(145deg,#223445,#172331)}.pr-upgrade-grid h3{margin:0 0 12px;color:#ffd38a}.pr-upgrade-grid .bigbtn{width:100%;text-align:left;padding:13px;margin:6px 0}.pr-upgrade-grid small{font-weight:400;color:#e3e9f0}.pr-upgrade-grid button:disabled{opacity:.65}@media(max-width:720px){.pr-upgrade-grid{grid-template-columns:1fr}}

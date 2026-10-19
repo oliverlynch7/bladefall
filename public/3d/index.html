@@ -1112,9 +1112,9 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./prison-dungeon.js?v=2140"></script>
+<script src="./prison-dungeon.js?v=2306"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
-<link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
+<link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
@@ -1220,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.305.0-shared-chess-table';
+const VERSION3D='2.306.0-dungeon-recovery';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5508,7 +5508,7 @@ function openBag(back,keepOpen=false){
     const entry=meta.stash[+b.dataset.eq];
     b.onclick=()=>{if(equipBagItem(entry,bagWorld))openBag(back,true);};
   });
-  document.querySelectorAll('[data-sl]').forEach(b=>{const entry=meta.stash[+b.dataset.sl];b.onclick=()=>{const i=meta.stash.indexOf(entry);if(G!==bagWorld||i<0)return;const item=BFBagBrowser.item(entry);if(!item)return;const g=sellItem(item);meta.stash.splice(i,1);persist();toast('Sold · +'+g+'g');openBag(back,true);};});
+  document.querySelectorAll('[data-sl]').forEach(b=>{const entry=meta.stash[+b.dataset.sl];b.onclick=()=>{const i=meta.stash.indexOf(entry);if(G!==bagWorld||i<0)return;const item=BFBagBrowser.item(entry);if(!item)return;const g=sellItem(item);meta.stash.splice(i,1);persist();if(G?.escape)BFPrisonRun.checkpoint();toast('Sold · +'+g+'g');openBag(back,true);};});
   { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(G!==bagWorld)return;const HR=bagEquipmentActor();if(!HR)return;
       const old=HR.weapon;
       if(old&&!isIntrinsicLoot(old)&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
@@ -13768,7 +13768,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.hp<=0) killEnemy(e,weaponManaHit);
 }
 function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGoldMul)||1))); meta.gold=(meta.gold||0)+n; return n; }
-function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
+function sellItem(it){ if(G?.escape){const g=BFPrisonRun.overflow(it);playFx('sell');return g;} const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
 function killEnemy(e,weaponKill){
  if(e?.finalKing){if(!MP.guest()){BFFinalKing.lethal(e);G.projectiles=[];for(const q of G.enemies)if(q.kingAdd)q.dead=true;}else e.hp=Math.max(1,e.hp);return;}
  if(e?.hydraChain){if(e.dead)return;e.dead=true;e.hp=0;G.hydraArena.broken=[...new Set([...(G.hydraArena.broken||[]),e.hydraIndex])];playFx('wallbreak');addText(e.x,e.y+110,e.z,'CHAIN BROKEN','#dceec9');return;}
@@ -14109,7 +14109,7 @@ function checkStageClear(){ if(G?.kingFinal||G?.escape)return;
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if(e?.prisonFoe)return e.label;if((e?.briarRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
+function foeName(e){ if(G?.escape?.layoutVersion>=12&&e?.boss)return BFPrisonDungeon.boss(G.floor)?.name||e.label;if(e?.prisonFoe)return e.label;if((e?.briarRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -17078,6 +17078,7 @@ function onBossActivate(e){ SFX.boss();
     }
   } }
 function updateBossBar(e){
+ if(G?.escape?.layoutVersion>=12)document.getElementById('bossnametx').textContent=BFPrisonDungeon.boss(G.floor)?.name||e.label;
  updateBossTactic(e);
  const cueNode=document.getElementById('bosscue'),cue=e.bruteOrchard?BFBruteEncounter.cue(e,{jump:controlHint('jump'),dodge:controlHint('dodge')}):null;
  if(cueNode){cueNode.hidden=!cue;if(cue){if(cueNode.textContent!==cue.text)cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}}
@@ -23824,7 +23825,7 @@ function frame(ts){
   const mapCaption=document.getElementById('mapCaption');mapCaption.classList.toggle('hide',mode!=='play'||!G||!!G.bonusActive);if(G&&mode==='play')document.getElementById('mapPlace').textContent=G.hub?'THE WAYSTATION':G.areaName||curZone().name;
   requestAnimationFrame(frame);
 }
-requestAnimationFrame(frame);
+requestAnimationFrame(ts=>frame(ts));
 let _updating=false;
 function checkUpdate(){
   if(_updating) return;
@@ -24497,7 +24498,7 @@ function editSaves(change){
  const before=clone(library());change(library());syncProfiles();window.__saveStatus={ok:false};persist();
  if(!window.__saveStatus?.ok){meta.prisonSaves=before;syncProfiles();toast('Save failed. Nothing was changed. Free browser storage and try again.');return false;}return true;
 }
-function checkpoint(){if(!G?.escape||G.escape.finished||G.escape.remote||G.p.dead||G.p.hp<=0)return;const r=G.escape;profile().checkpoint={version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,cid:meta.classId,p:snapOf(G.p),classes:clone(meta.classes),stash:clone(meta.stash),states:clone(r.states),events:clone(r.events),lootSerial:r.lootSerial||0,safe:clone(r.safe),pickups:clone(G.pickups.filter(pk=>!pk.taken)),chests:clone(G.chests),revives:r.revives||0};persist();}
+function checkpoint(){if(!G?.escape||G.escape.finished||G.escape.remote||G.p.dead||G.p.hp<=0)return;const r=G.escape;const candidate={version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,cid:meta.classId,p:snapOf(G.p),classes:clone(meta.classes),stash:clone(meta.stash),states:clone(r.states),events:clone(r.events),lootSerial:r.lootSerial||0,safe:clone(r.safe),pickups:clone(G.pickups.filter(pk=>!pk.taken)),chests:clone(G.chests),revives:r.revives||0};if(!D.validCheckpoint(candidate)){console.warn('[Endless Dungeon] Incomplete checkpoint skipped');return false;}profile().checkpoint=candidate;profile().checkpointIssue=false;persist();return true;}
 autosaveRun=function(){if(G?.escape){checkpoint();return;}old.autosaveRun();};
 openHub=function(){document.getElementById('bosshpwrap').classList.remove('prison-boss');if(G?.escape){checkpoint();restoreBank();G.escape=null;document.getElementById('prisonhud')?.remove();}return old.openHub();};
 awardGold=function(n){return G?.escape?0:old.awardGold(n);}; // room receipts, never replayable kill/sale farming
@@ -24506,7 +24507,7 @@ function reward(key,gold,kind){const r=G.escape,id=r.id+':'+G.floor+':'+key;if(r
 function packet(){const r=G?.escape;return r?{version:D.VERSION,layoutVersion:r.layoutVersion,id:r.id,seed:G.runSeed,tier:r.tier,section:G.floor,stamp:G.time,states:r.states,events:r.events,safe:r.safe,finished:r.finished||null}:null;}
 function syncBarriers(){if(!G?.escape?.plan?.barriers)return;for(const gate of G.doors)if(gate.prisonGate)gate.open=!!G.escape.states[gate.from]?.cleared;}
 function receive(s){if(!s||s.version!==D.VERSION)return;if(G?.escape?.id===s.id&&(G.escape.finished||s.section<G.floor||(s.section===G.floor&&(s.stamp||0)<(G.escape.lastStamp||0))))return;if(!G?.escape||G.escape.id!==s.id)startDelve(profile().classes.includes(meta.classId)?meta.classId:'warrior',{remote:true,state:s});else if(G.floor!==s.section){loadDelveFloor(s.section,s);}
- const r=G.escape;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);syncBarriers();receipts(r.events);for(const q of r.plan.rooms)if(r.states[q.id]?.cleared)addRoomChest(q);openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
+ const r=G.escape;if(!r)return;r.lastStamp=s.stamp||0;r.states=clone(s.states);r.events=clone(s.events);r.safe=clone(s.safe);syncBarriers();receipts(r.events);for(const q of r.plan.rooms)if(r.states[q.id]?.cleared)addRoomChest(q);openExit();if(s.finished&&!r.finished)finish(s.finished,true);}
 function addRoomChest(q){
  const r=G.escape,rarity=D.chestRarity(q,r.layoutVersion);
  if(!rarity||r.chestRooms[q.id])return;
@@ -24514,6 +24515,9 @@ function addRoomChest(q){
 }
 function openExit(){const r=G.escape;if(r.plan.rooms.filter(q=>!q.optional&&['fight','waves','boss'].includes(q.kind)).every(q=>r.states[q.id]?.cleared)&&!G.portal){G.portal={...r.plan.exit,t:0};G.floorCleared=true;}}
 function start(cid,opts={}){
+ try{return startAttempt(cid,opts);}catch(error){recover(error);return false;}
+}
+function startAttempt(cid,opts={}){
  const pr=profile(),saved=opts.resume?pr.checkpoint:null,state=opts.state||saved;
  if(opts.resume&&!D.validCheckpoint(saved)){toast('No valid saved escape. Your gold and upgrades are safe.');openDelveGate();return;}
  if(MP.active&&!MP.isHost&&!opts.remote){toast('The host starts the prison expedition.');return;}
@@ -24525,7 +24529,7 @@ function start(cid,opts={}){
  if(saved){meta.classes=clone(saved.classes);meta.stash=clone(saved.stash);p=freshFromSnapshot(saved.p);p.hp=Math.min(effMaxHp(p),saved.p.hp);}
  else p.hp=effMaxHp(p);
  G=newG(p,{delve:true,floor:0,zone:2,area:0,zoneTier:1});G.runSeed=state?.seed??Math.floor(Math.random()*1e9);
- G.escape={layoutVersion:state?(state.layoutVersion||1):11,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
+ G.escape={layoutVersion:state?(state.layoutVersion||1):12,saveSlot:library().active,id:state?.id||Date.now().toString(36)+'-'+G.runSeed,tier:state?.tier||Math.max(1,Math.min(pr.tier,opts.tier||1)),remote:!!opts.remote,lootSerial:saved?.lootSerial||0,states:{},events:clone(state?.events||[]),safe:{x:0,z:180,y:0},revives:saved?.revives||0};
  MP._wiped=false;G.delveKills=0;queueLevelUp=0;queueSubclass=false;loadDelveFloor(state?.section||1,state);mode='play';showOverlay(false);showGameUI(true);skillbarUpdate();hudUpdate();musicForScene();persist();
  if(MP.active&&!opts.remote)MP.enterSpecial('prison');
 }
@@ -24540,12 +24544,13 @@ loadDelveFloor=function(n,saved){
  G.startPos={x:0,z:180,y:0};G.goalPos=G.portalPos;G.lastSafe=clone(r.safe);Object.assign(G.p,{x:r.safe.x,y:r.safe.y||0,z:r.safe.z,vx:0,vy:0,vz:0,onGround:true,yaw:Math.PI});G.cam={x:G.p.x,y:G.p.y,z:G.p.z};G.camYaw=Math.PI;G.camPitch=.22;delete G._cameraBoom;
  if(n===2&&!r.states.healed)G.springs.push({x:plan.rooms[5].x+100,z:plan.rooms[5].z+160,y:0});
  if(saved&&!r.remote){G.pickups=clone(saved.pickups||[]);G.chests=clone(saved.chests||[]);for(const q of plan.rooms)if(r.states[q.id]?.cleared&&D.chestRarity(q,r.layoutVersion))r.chestRooms[q.id]=true;}G.kills=0;G.killGoal=999;G.stageBanner=2;G.areaName=plan.title;document.getElementById('stagetag').textContent='PRISON BREAK · TIER '+r.tier+' · '+n+'/3';document.getElementById('bosshpwrap').classList.remove('on');
+ const preload=new Set([r.layoutVersion>=12?D.boss(n).type:['prison_bell','prison_maw','prison_unbound'][n-1],'bosscrystal']);for(const q of plan.rooms.filter(q=>['fight','waves','vault'].includes(q.kind)))for(const wave of [0,1,2])for(const e of D.encounter(q,r.tier,wave))preload.add(e.type);window.__preloadMobTypes?.([...preload]);
  openExit();checkpoint();questUpdate();window.__world3dRebuild?.();
 };
 function finish(result,remote=false){const r=G.escape;if(!r||r.finished)return;r.finished=result;
  if(result==='escaped'){profile().tier=Math.min(3,Math.max(profile().tier,r.tier+1));if(!remote)reward('escape',200*r.tier,r.tier===3?'warden':null);}
  if(!r.remote)profile().checkpoint=null;if(MP.active&&MP.isHost&&!remote)MP.enterSpecial('prison');
- const tier=r.tier,gold=profile().gold;restoreBank();mode='menu';showGameUI(false);showOverlayHTML(`<div class="card"><h2 class="ovh">${result==='escaped'?'You escaped!':'The escape ends'}</h2><p class="ovsub">Prison Break · Tier ${tier}</p><p class="ovsub">${gold} dungeon gold saved. Temporary gear resets.</p><button class="bigbtn" id="prisonAgain">Prepare another attempt</button><button class="bigbtn ghost" id="prisonHome">Return to hub</button></div>`);
+ const tier=r.tier,gold=profile().gold;document.getElementById('prisonhud')?.remove();restoreBank();mode='menu';showGameUI(false);showOverlayHTML(`<div class="card"><h2 class="ovh">${result==='escaped'?'You escaped!':'The escape ends'}</h2><p class="ovsub">Prison Break · Tier ${tier}</p><p class="ovsub">${gold} dungeon gold saved. Temporary gear resets.</p><button class="bigbtn" id="prisonAgain">Prepare another attempt</button><button class="bigbtn ghost" id="prisonHome">Return to hub</button></div>`);
  document.getElementById('prisonAgain').onclick=()=>{G.escape=null;document.getElementById('prisonhud')?.remove();openDelveGate();};document.getElementById('prisonHome').onclick=()=>{G.escape=null;document.getElementById('prisonhud')?.remove();openHub();};persist();
 }
 delveDie=function(){if(G?.escape)return finish('defeated');return old.delveDie();};
@@ -24573,7 +24578,7 @@ function openPreparation(){
  const choices=p.classes.map(c=>`<option value="${c}">${CLASSES[c].disp}</option>`).join('');
  const shop=D.upgrades.map(u=>`<button class="bigbtn ghost" data-prbuy="${u.id}" ${p.gold<D.price(p,u.id)||p.upgrades[u.id]>=u.cap?'disabled':''}>${u.name} ${p.upgrades[u.id]}/${u.cap} · ${D.price(p,u.id)}g<br><small>${u.desc}</small></button>`).join('');
  const classes=D.offers.map(o=>`<button class="bigbtn ghost" data-prbuy="${o.id}" ${p.classes.includes(o.id)||p.tier<o.tier||p.progress[o.key]<o.goal||p.gold<o.cost?'disabled':''}>${CLASSES[o.id].disp} · Tier ${o.tier} · ${p.classes.includes(o.id)?'Owned':o.cost+'g'}<br><small>${o.desc} (${Math.min(o.goal,p.progress[o.key])}/${o.goal})</small></button>`).join('');
- showOverlayHTML(`<div class="card prison-menu" data-menu-wallet="dungeon"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2><div class="pr-itinerary"><span>1 · Prison cells</span><span>2 · Underworks</span><span>3 · Escape gate</span></div><p class="hint pr-wallet">Dungeon gold is kept after death. Spend it between runs.</p><label>Starting class <select id="prclass">${choices}</select></label> <label>Difficulty tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Your health carries between rooms. Side paths offer gold and class progress, but risk your run. A new escape replaces the unfinished one.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
+ showOverlayHTML(`<div class="card prison-menu" data-menu-wallet="dungeon"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2>${p.checkpointIssue?'<p class="pr-callout">An older unfinished escape could not be resumed. Your dungeon gold, upgrades and classes are safe. Start a new escape with this save.</p>':''}<div class="pr-itinerary"><span>1 · Prison cells</span><span>2 · Underworks</span><span>3 · Escape gate</span></div><p class="hint pr-wallet">Dungeon gold is kept after death. Spend it between runs.</p><label>Starting class <select id="prclass">${choices}</select></label> <label>Difficulty tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<div class="pr-upgrade-grid"><section><h3>Permanent upgrades</h3>${shop}</section><section><h3>Classes to earn</h3>${classes}</section></div><p class="ovsub">Your health carries between rooms. Side paths offer gold and class progress, but risk your run. A new escape replaces the unfinished one.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
  document.getElementById('prstart').onclick=()=>{const cid=document.getElementById('prclass').value,tier=+document.getElementById('prtier').value;const go=()=>portalTraverse(()=>startDelve(cid,{tier}),{name:'Endless Dungeon'});if(p.checkpoint)confirmAction('Replace this escape?', 'Only the unfinished run in Save '+(library().active+1)+' will be replaced. Keep your gold, upgrades and unlocked classes.',go,openPreparation);else go();};document.getElementById('prresume')?.addEventListener('click',()=>startDelve(p.checkpoint.cid,{resume:true}));document.getElementById('prback').onclick=openHub;document.getElementById('prsaves').onclick=openDelveGate;
  document.querySelectorAll('[data-prbuy]').forEach(el=>el.onclick=()=>{editSaves(book=>D.buy(book.slots[book.active],el.dataset.prbuy));openPreparation();});
 };
@@ -24583,13 +24588,13 @@ function spawnRoom(room,state){
  state.members=[];state.party=1+.6*(Math.max(1,partySize())-1);
  for(let i=0;i<(schedule?schedule.length:n);i++){const a=i*2.399,formation=room.formation||(r.layoutVersion>=2&&room.kind==='vault'?'patrol':null);
   const roster=formation==='charge'?['prison_hound','prison_pike','prison_hound','prison_vessel']:formation==='crossfire'?['prison_pike','prison_vessel','prison_pike','prison_vessel']:['prison_pike','prison_hound','prison_vessel','prison_pike'];
-  const type=schedule?schedule[i].type:room.kind==='boss'?['prison_bell','prison_maw','prison_unbound'][G.floor-1]:room.kind==='vault'&&i===0?'prison_pike':roster[(i+wave)%roster.length];
+  const type=schedule?schedule[i].type:room.kind==='boss'?(r.layoutVersion>=12?['warden','sorcerer','colossus']:['prison_bell','prison_maw','prison_unbound'])[G.floor-1]:room.kind==='vault'&&i===0?'prison_pike':roster[(i+wave)%roster.length];
   // Spawn in clear lanes, away from pillars and the elevated optional reward.
   const sx=schedule?schedule[i].x:room.kind==='boss'?0:formation?(i%2?-1:1)*(80+(i%3)*20):Math.cos(a)*160,sz=schedule?schedule[i].z:formation?(type==='prison_vessel'?-180:40+wave*30):Math.sin(a)*100-70;
-  const e=spawnEnemy(type,room.x+sx,room.z+sz);e.active=true;e.dropT=1.3;e.prisonRoom=room.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*state.party);e.partyHealthMul=state.party;
+  const e=spawnEnemy(type,room.x+sx,room.z+sz);e.active=true;e.dropT=1.3;e.prisonRoom=room.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*state.party);e.partyHealthMul=state.party;if(r.layoutVersion>=12){const stats=D.scaledStats(ENEMY[type],G.floor,tier,state.party);e.hp=e.maxHp=stats.hp;e.dmg=stats.dmg;}
  if(room.kind==='vault'&&i===0){makeElite(e);e.label='Elite '+(BFPrisonCombat.roster[type]?.label||ENEMY[type]?.label||type.replaceAll('_',' '));}
   if(r.layoutVersion>=7&&room.id===8&&wave===1&&i===0&&r.tier>=2){makeElite(e);e.label='Watch Captain';}
-  state.members.push(e.mid);if(room.kind==='boss'){e.hp=e.maxHp=Math.round((250+G.floor*75)*G.ngHp*state.party);e.dmg=BFPrisonCombat.roster[type].dmg*G.ngDmg*DIFFICULTY;G.boss=e;document.getElementById('bosshpwrap').classList.add('on');}
+  if(r.layoutVersion>=12&&e.spec==='shell')e.shellHp=Math.round(e.maxHp*.55);state.members.push(e.mid);if(room.kind==='boss'){if(r.layoutVersion>=12)e.label=D.boss(G.floor).name;e.hp=e.maxHp=Math.round((250+G.floor*75)*G.ngHp*state.party);e.dmg=(BFPrisonCombat.roster[type]||ENEMY[type]).dmg*G.ngDmg*DIFFICULTY;G.boss=e;onBossActivate(e);}
  }
  if(room.mechanic==='wards'&&wave===0){
   state.anchors=[];for(const [dx,dz] of room.wardSockets){const e=spawnEnemy('bosscrystal',room.x+dx,room.z+dz);e.active=true;e.dropT=0;e.prisonRoom=room.id;e.prisonAnchor=true;e.label='Guard ward';e.hp=e.maxHp=Math.round((45+10*(tier-1))*state.party);state.anchors.push(e.mid);state.members.push(e.mid);}
@@ -24610,7 +24615,7 @@ function tick(dt){
     if(st.wardsLeft!==anchors.length){st.wardsLeft=anchors.length;toast(anchors.length?'One ward broken. Destroy the other!':'Both wards broken. Clear the guards!');}
     if(anchors.length&&G.time>=st.nextReinforce){
      const living=G.enemies.filter(e=>e.prisonRoom===q.id&&!e.dead&&e.hp>0).length;
-     if(living<6){const [dx,dz]=q.spawnPoints[(Math.floor(G.time/6)+q.id)%q.spawnPoints.length],e=spawnEnemy(['prison_guard','prison_pike','prison_hound'][(q.dungeonSection+Math.floor(G.time/6))%3],q.x+dx,q.z+dz);e.active=true;e.dropT=1.3;e.prisonRoom=q.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*st.party);e.partyHealthMul=st.party;st.members.push(e.mid);toast('The wards called another guard!');}
+     if(living<6){const [dx,dz]=q.spawnPoints[(Math.floor(G.time/6)+q.id)%q.spawnPoints.length],e=spawnEnemy(r.layoutVersion>=12?D.campaignEnemy(['prison_guard','prison_pike','prison_hound'][(q.dungeonSection+Math.floor(G.time/6))%3],G.floor):['prison_guard','prison_pike','prison_hound'][(q.dungeonSection+Math.floor(G.time/6))%3],q.x+dx,q.z+dz);e.active=true;e.dropT=1.3;e.prisonRoom=q.id;e.hp=e.maxHp=Math.round(e.maxHp/(e.partyHealthMul||1)*st.party);e.partyHealthMul=st.party;if(r.layoutVersion>=12){const stats=D.scaledStats(ENEMY[e.type],G.floor,r.tier,st.party);e.hp=e.maxHp=stats.hp;e.dmg=stats.dmg;if(e.spec==='shell')e.shellHp=Math.round(e.maxHp*.55);}st.members.push(e.mid);toast('The wards called another guard!');}
      st.nextReinforce=G.time+6;
     }
    }
@@ -24709,7 +24714,18 @@ const rev=MP.reviveSelf;MP.reviveSelf=function(msg,completed=false){if(G?.escape
 const leave=MP.leave;MP.leave=function(msg){const remote=G?.escape?.remote,waiting=!!pendingJoin;pendingJoin=null;leave.call(this,msg);if(remote||waiting)openHub();};
 const wipe=wipeMode;wipeMode=function(m){wipe(m);meta.prisonSaves=D.saves();syncProfiles();pendingJoin=null;};
 const previousWorld=window.__BF_WORLD;window.__BF_WORLD=()=>({...previousWorld(),escape:G?.escape?.id||null,prisonPlan:G?.escape?.plan||null});
-window.BFPrisonRun={overflow(item){const key=item.prisonLootKey||(item.prisonLootKey='loot-'+(++G.escape.lootSerial));const gold=itemGold(item),id=G.escape.id+':'+G.floor+':overflow:'+(MP.active?MP.myId:'solo')+':'+key;const credited=D.credit(profile(),id,gold);meta.gold=profile().gold;persist();return credited?gold:0;},tick,packet,receive,profile,library,selectSlot,checkpoint,finish,prepare:openDelveGate};
+function recover(error){
+ console.error('[Endless Dungeon]',error);
+ const detail={message:String(error?.message||error),stack:String(error?.stack||'').slice(0,3000),floor:G?.floor,layout:G?.escape?.layoutVersion,at:Date.now()};
+ try{sessionStorage.setItem('bf3_dungeon_error',JSON.stringify(detail));}catch(_){}
+ BFPortalTravel.reset();BF_LOADING.reset();releaseKeyboard();stopAllLoops();queueLevelUp=0;queueSubclass=false;
+ // Preserve the last valid checkpoint. A failing frame must not serialize partial state over it.
+ if(MP.active)MP.leave();restoreBank();if(G)G.escape=null;document.getElementById('prisonhud')?.remove();old.openHub();
+ mode='menu';showGameUI(false);showOverlayHTML('<div class="card prison-menu pr-confirm"><p class="pr-eyebrow">ENDLESS DUNGEON</p><h2 class="ovh">The dungeon could not start</h2><p>Your character, dungeon gold and upgrades are safe. You do not need to delete any saves.</p><p class="hint">Retry the dungeon or return to the Waystation.</p><button class="bigbtn" id="prrecover">Dungeon saves</button><button class="bigbtn ghost" id="prrecoverhub">Return to hub</button></div>');
+ document.getElementById('prrecover').onclick=openDelveGate;document.getElementById('prrecoverhub').onclick=openHub;
+}
+const dungeonFrame=frame;frame=function(ts){try{return dungeonFrame(ts);}catch(error){if(!G?.escape)throw error;recover(error);lastT=ts;acc=0;requestAnimationFrame(frame);}};
+window.BFPrisonRun={recover,overflow(item){const key=item.prisonLootKey||(item.prisonLootKey='loot-'+(++G.escape.lootSerial));const gold=itemGold(item),id=G.escape.id+':'+G.floor+':overflow:'+(MP.active?MP.myId:'solo')+':'+key;const credited=D.credit(profile(),id,gold);meta.gold=profile().gold;persist();checkpoint();return credited?gold:0;},tick,packet,receive,profile,library,selectSlot,checkpoint,finish,prepare:openDelveGate};
 Object.assign(window.__BF3,{startDelve,loadDelveFloor,delveDescend,delveDie,delveExit,openDelveGate,openHub,persist,loadMode,restoreBank,autosaveRun,awardGold});
 })();
 
@@ -24775,7 +24791,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2305"></script>
+<script type="module" src="./hero3d.js?v=2306"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2305"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

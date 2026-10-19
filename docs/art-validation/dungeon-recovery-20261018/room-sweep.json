@@ -1,0 +1,893 @@
+{
+  "mode": "play",
+  "zone": 2,
+  "floor": 3,
+  "escape": true,
+  "plan": 16,
+  "health": 110,
+  "gold": 3060,
+  "bank": true,
+  "code": "",
+  "host": false,
+  "active": false,
+  "remote": false,
+  "run": "mvesahs2-563811571",
+  "layout": 12,
+  "peers": [],
+  "rows": [
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 1,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 3,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 4,
+      "types": [
+        "warden"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 5,
+      "types": [
+        "sentinel",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 6,
+      "types": [
+        "sentinel",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 7,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 8,
+      "types": [
+        "sentinel",
+        "dustjackal",
+        "bones"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 11,
+      "types": [
+        "sentinel",
+        "sentinel",
+        "caster",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 13,
+      "types": [
+        "dustjackal",
+        "dustjackal",
+        "sentinel"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 1,
+      "room": 14,
+      "types": [
+        "sentinel",
+        "sentinel"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 1,
+      "types": [
+        "magmaskit",
+        "sentinel",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 3,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 4,
+      "types": [
+        "sorcerer"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 5,
+      "types": [
+        "frostlobber",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 6,
+      "types": [
+        "frostlobber",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 7,
+      "types": [
+        "magmaskit",
+        "sentinel",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 8,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 11,
+      "types": [
+        "magmaskit",
+        "revenant",
+        "frostlobber",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 13,
+      "types": [
+        "frostlobber",
+        "sentinel",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 2,
+      "room": 14,
+      "types": [
+        "revenant",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 1,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 3,
+      "types": [
+        "royalarcanist",
+        "dustjackal",
+        "caster"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 4,
+      "types": [
+        "colossus"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 5,
+      "types": [
+        "siegeknight",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 6,
+      "types": [
+        "royalarcanist",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 7,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 8,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 11,
+      "types": [
+        "sunpriest",
+        "blinkstalker",
+        "blinkstalker",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 13,
+      "types": [
+        "siegeknight",
+        "caster",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "warrior",
+      "floor": 3,
+      "room": 14,
+      "types": [
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 1,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 3,
+      "types": [
+        "sentinel",
+        "dustjackal",
+        "bones"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 4,
+      "types": [
+        "warden"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 5,
+      "types": [
+        "sentinel",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 6,
+      "types": [
+        "sentinel",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 7,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 8,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 11,
+      "types": [
+        "caster",
+        "revenant",
+        "revenant",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 13,
+      "types": [
+        "dustjackal",
+        "dustjackal",
+        "sentinel"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 1,
+      "room": 14,
+      "types": [
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 1,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 3,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 4,
+      "types": [
+        "sorcerer"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 5,
+      "types": [
+        "magmaskit",
+        "sentinel"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 6,
+      "types": [
+        "frostlobber",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 7,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 8,
+      "types": [
+        "magmaskit",
+        "sentinel",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 11,
+      "types": [
+        "sentinel",
+        "frostshell",
+        "frostlobber",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 13,
+      "types": [
+        "magmaskit",
+        "magmaskit",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 2,
+      "room": 14,
+      "types": [
+        "magmaskit",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 1,
+      "types": [
+        "royalarcanist",
+        "dustjackal",
+        "caster"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 3,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 4,
+      "types": [
+        "colossus"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 5,
+      "types": [
+        "siegeknight",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 6,
+      "types": [
+        "siegeknight",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 7,
+      "types": [
+        "royalarcanist",
+        "dustjackal",
+        "caster"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 8,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 11,
+      "types": [
+        "sunpriest",
+        "blinkstalker",
+        "blinkstalker",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 13,
+      "types": [
+        "royalarcanist",
+        "blinkstalker",
+        "siegeknight"
+      ]
+    },
+    {
+      "cid": "ranger",
+      "floor": 3,
+      "room": 14,
+      "types": [
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 1,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 3,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 4,
+      "types": [
+        "warden"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 5,
+      "types": [
+        "sentinel",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 6,
+      "types": [
+        "sentinel",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 7,
+      "types": [
+        "sentinel",
+        "revenant",
+        "revenant"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 8,
+      "types": [
+        "sentinel",
+        "dustjackal",
+        "bones"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 11,
+      "types": [
+        "sentinel",
+        "sentinel",
+        "caster",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 13,
+      "types": [
+        "dustjackal",
+        "dustjackal",
+        "sentinel"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 1,
+      "room": 14,
+      "types": [
+        "sentinel",
+        "sentinel"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 1,
+      "types": [
+        "magmaskit",
+        "sentinel",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 3,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 4,
+      "types": [
+        "sorcerer"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 5,
+      "types": [
+        "frostlobber",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 6,
+      "types": [
+        "frostlobber",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 7,
+      "types": [
+        "magmaskit",
+        "sentinel",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 8,
+      "types": [
+        "frostlobber",
+        "frostlobber",
+        "magmaskit"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 11,
+      "types": [
+        "magmaskit",
+        "revenant",
+        "frostlobber",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 13,
+      "types": [
+        "frostlobber",
+        "sentinel",
+        "frostlobber"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 2,
+      "room": 14,
+      "types": [
+        "revenant",
+        "frostshell"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 1,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 3,
+      "types": [
+        "royalarcanist",
+        "dustjackal",
+        "caster"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 4,
+      "types": [
+        "colossus"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 5,
+      "types": [
+        "siegeknight",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 6,
+      "types": [
+        "royalarcanist",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 7,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 8,
+      "types": [
+        "siegeknight",
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 11,
+      "types": [
+        "sunpriest",
+        "blinkstalker",
+        "blinkstalker",
+        "bosscrystal",
+        "bosscrystal"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 13,
+      "types": [
+        "siegeknight",
+        "caster",
+        "dustjackal"
+      ]
+    },
+    {
+      "cid": "mage",
+      "floor": 3,
+      "room": 14,
+      "types": [
+        "blinkstalker",
+        "blinkstalker"
+      ]
+    }
+  ],
+  "complete": true
+}

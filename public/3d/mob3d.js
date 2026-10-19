@@ -131,6 +131,8 @@ function requestModel(file){
     const p=loadKitModel(file);_pending.set(file,p);p.finally(()=>_pending.delete(file));
   }
 }
+// Dungeon loading can fetch this floor's existing roster behind the loading curtain.
+window.__preloadMobTypes=types=>{if(!MOB3D.on)return;for(const type of new Set(types||[])){const file=MOB_CAST[type]?.file;if(file)requestModel(file);}};
 function acquireMob(type,e){
   const cast=MOB_CAST[type],src=cast&&kitModel(cast.file);if(!src)return null;
   let rec=_mobPool.find(r=>!r.enemy && r.type===type);

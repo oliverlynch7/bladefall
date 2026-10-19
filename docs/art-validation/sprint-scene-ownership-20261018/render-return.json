@@ -1,0 +1,66 @@
+[
+  {
+    "render": {
+      "hero": {
+        "on": true,
+        "ready": true,
+        "error": null
+      },
+      "world": {
+        "on": true,
+        "ready": false,
+        "built": null,
+        "counts": {},
+        "err": null
+      },
+      "loading": false,
+      "resources": false
+    }
+  },
+  {
+    "legacy": {
+      "level": 100,
+      "gold": 1145
+    }
+  },
+  {
+    "entered": true,
+    "sourceIntact": true,
+    "trial": null
+  },
+  {
+    "successReturn": true,
+    "stage": true,
+    "position": true,
+    "objects": true,
+    "npcs": true,
+    "enemies": true,
+    "quests": true,
+    "portal": false
+  },
+  {
+    "timeoutReturn": true,
+    "sameStory": true,
+    "duplicateInert": true,
+    "level": 100,
+    "gold": 1145
+  },
+  {
+    "render": {
+      "hero": {
+        "on": true,
+        "ready": true,
+        "error": null
+      },
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||0|plains|0|false|||||||||1193|outskirts|-250,-1302;-666,700;2481,-2070",
+        "err": null
+      },
+      "loadingAtProbe": true,
+      "resources": true
+    },
+    "loadingCurtainSubsequentlyHidden": true
+  }
+]

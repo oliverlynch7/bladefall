@@ -1,0 +1,83 @@
+{
+  "inlineScripts": 2,
+  "suites": [
+    {
+      "suite": "test-sprint-ownership.cjs",
+      "pass": true,
+      "output": "{\"checks\":71,\"passed\":true}",
+      "error": ""
+    },
+    {
+      "suite": "test-sprint-finish.cjs",
+      "pass": true,
+      "output": "{\"checks\":24148,\"seeds\":500,\"hops\":10806,\"families\":[\"switchback\",\"elevator\",\"beams\",\"shaft\",\"crumble\",\"cascade\",\"springs\",\"spiral\",\"arches\",\"phase\"],\"physicalSeeds\":[13,21,68,165,204,219,305,360,390,400,445],\"physicalCrownSeed\":68,\"maxGap\":62.4}",
+      "error": ""
+    },
+    {
+      "suite": "test-sprint-loading.cjs",
+      "pass": true,
+      "output": "Sprint loading regression: stale hub state, warmup, same-seed retry, new seed, explicit reset and real hub readiness passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-party-transitions.cjs",
+      "pass": true,
+      "output": "58 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-portal-travel.cjs",
+      "pass": true,
+      "output": "39 portal theme, single-entry, cancellation, stale scene, nested callback, character pose, reduced motion, input and actual loading-barrier checks passed.\n7 special-mode navigation/exit regression checks passed.\n4 departure destination checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-save-safety.cjs",
+      "pass": true,
+      "output": "24 save normalization and isolated recovery checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-campaign-compatibility.cjs",
+      "pass": true,
+      "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-coop-chests.cjs",
+      "pass": true,
+      "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\nMimic personal co-op reward identity, guest persistence and one-time collection pass.",
+      "error": ""
+    },
+    {
+      "suite": "test-chest-reveal.cjs",
+      "pass": true,
+      "output": "125 chest motion preference, real reel lifecycle, sound, skip, hidden-tab and queue checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-shard-counter.cjs",
+      "pass": true,
+      "output": "20 single-count, deduplication, region, ready, hide and real HUD integration checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-esc-pause.cjs",
+      "pass": true,
+      "output": "42 pause regression checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-dungeon-recovery.cjs",
+      "pass": true,
+      "output": "{\"checks\":80,\"plans\":810,\"safeExistingEnemySpawns\":72900,\"enemyTypes\":[\"blinkstalker\",\"bones\",\"caster\",\"dustjackal\",\"frostlobber\",\"frostshell\",\"magmaskit\",\"revenant\",\"royalarcanist\",\"sentinel\",\"siegeknight\",\"sunpriest\"]}",
+      "error": ""
+    },
+    {
+      "suite": "test-arena-class-weapons.cjs",
+      "pass": true,
+      "output": "250 Arena class weapon, Fair Mode, intrinsic, manual choice and bag preservation checks passed.",
+      "error": ""
+    }
+  ]
+}

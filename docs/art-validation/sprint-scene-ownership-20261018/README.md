@@ -1,0 +1,9 @@
+# Treasure Sprint scene ownership · v2.313.0
+
+The original generator excluded only beginner trials; earned trials could generate a sprint portal. The old sprint erased trial identity in place, then loaded `stageIndex+1` rather than returning to an owned area.
+
+All trials and other special modes now reject campaign sprint portals. Solo campaign detours preserve the original world and physical landing while the sprint owns a new world. Success and timeout return to that exact source; invalid legacy returns recover to hub. Party sprint uses the synchronized hub gate. Practice retries own fresh worlds too. Stale result callbacks, double completion, late special/Arena messages during party trials and stale Prison joins are covered.
+
+Verification: tests.json records13 passing suites. trials.json: all11 actual trials, no sprint/boss, injected portal rejected/removed. campaign-return.json: preserved source world, NPC/enemy/object/quest references and landing, success/timeout/duplicate. other-modes.json: side/Descent/Gauntlet/Arena/Sparring to hub, no hazards/hostiles/mode leakage; original warrior/100/1145 and empty escrow. practice.json: clean course and checkpoint preserved. practice-retry-exit.json: actual Retry/Return buttons, ready course and ready hub, original100/1145 retained, no mode leakage. render-return.json: actual renderer rebuilt original Briar scene, no errors; loading curtain subsequently cleared. Screenshot is a test scene, not a promotional art comparison.
+
+Muted browser tests use an isolated synthetic legacy save and visible diagnostic controls. Sprint completion/timeout and portal injection are deliberate fixture actions, not full physical course runs. No real saves, full campaign playthrough, new two-client co-op test, or human fun/performance assessment claimed.

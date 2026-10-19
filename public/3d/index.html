@@ -1220,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.312.0-clear-shards-and-loot';
+const VERSION3D='2.313.0-sprint-scene-ownership';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5295,7 +5295,7 @@ function campaignCheckpoint(){
   return c?.version===1&&c.state?.hero?.gear&&r.p?.gear&&ZONES[r.campaign?.zone]&&
     (r.campaign.area===-1||ZONES[r.campaign.zone].areas[r.campaign.area])?c:null;
 }
-function isCampaignAdventure(){ return !!(G&&!G.devKeep&&!G.hub&&!G.side&&!G.trial&&!G.arena&&!IN_ARENA&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive&&ZONES[G.zone]); }
+function isCampaignAdventure(){ return !!(G&&!G.devKeep&&!G.devBriar&&!G.escape&&!G.hub&&!G.side&&!G.trial&&!G.arena&&!IN_ARENA&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive&&ZONES[G.zone]); }
 function captureCampaignCheckpoint(){
   if(!isCampaignAdventure())return false;
   meta.hero=snapOf(G.p);
@@ -9853,7 +9853,7 @@ function loadStageRaw(i){
   // spring + goblin
   if(!isBoss && rnd2()<0.22){ const r=G.rooms[1+Math.floor(rnd2()*Math.max(1,G.rooms.length-1))]||entryRoom; G.springs.push({x:r.x,z:r.z,used:false}); }
   if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.15)){ const r=G.rooms[Math.floor(rnd2()*G.rooms.length)]||entryRoom; const gb=spawnEnemy('goblin',r.x,r.z); gb.despawnT=9; gb.dropT=0.2; }
-  if(!inBeginnerTrial() && (i===1||i===5||i===9) && !isBoss && !isMini && leaves.length){ const lr=leaves[leaves.length-1]; G.bonusPortal={x:lr.x,z:lr.z,t:0}; }
+  if(canEnterCampaignSprint() && (i===1||i===5||i===9) && !isBoss && !isMini && leaves.length){ const lr=leaves[leaves.length-1]; G.bonusPortal={x:lr.x,z:lr.z,t:0}; }
   // bounds (deco + culling)
   let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
   for(const sg of G.segments){ mnX=Math.min(mnX,sg.x-sg.w/2); mxX=Math.max(mxX,sg.x+sg.w/2); mnZ=Math.min(mnZ,sg.z-sg.d/2); mxZ=Math.max(mxZ,sg.z+sg.d/2); }
@@ -9875,11 +9875,20 @@ function loadStageRaw(i){
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
+// Legacy campaign detours are solo-only; party courses use the synchronized hub gate.
+function canEnterCampaignSprint(){
+ return !!(isCampaignAdventure()&&G.area>=0&&!G.sprintFun&&!G.riftHall&&!G.sparringRoom&&!MP.active);
+}
+function sprintPlayerReset(p){
+ Object.assign(p,{vx:0,vy:0,vz:0,dodgeTimer:0,dodgeCdT:0,chargeDash:0,castPlantT:0,recoverT:0,attackHeld:false,charging:false,chargeAmt:0,holdT:0,varJump:false,jumps:0,atkTimer:0,runAnim:0,sitting:false,emote:null});
+}
 function startBonus(){
-  G.sprintFun=false; G.sprintReturnHub=false;   // an in-zone sprint keeps its loot + returns to the zone
-  const ret=G.stageIndex+1;
-  if(!campaignCheckpoint())meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
-  loadBonus(ret);
+ if(mode!=='play'||!canEnterCampaignSprint()||!G.bonusPortal)return false;
+ const world=G,p=G.p,position={x:p.x,y:p.y,z:p.z,yaw:p.yaw,onGround:p.onGround};
+ autosaveRun();
+ // Never mutate the source room: its quest machinery, enemies and trial escrow own that world.
+ G=newG(p,{zone:world.zone,area:world.area,zoneTier:world.zoneTier,stageIndex:world.stageIndex,runSeed:world.runSeed,ngHp:world.ngHp,ngDmg:world.ngDmg,baseLoadout:world.baseLoadout,sprintOrigin:{world,position},bonusVisits:(world.bonusVisits||0)});
+ loadBonus(world.stageIndex);return true;
 }
 function loadBonus(returnIdx,forcedSeed){
   BFDragonRiding.stop(G,true);BFChestReveal.clear();BFGuidedTutorial.stop();releaseKeyboard();window.BFAdventureHud?.clear();window.BFJournalNotice?.queue?.reset('sprint',{});G.lootCard=null;G.lootQueue=[];
@@ -9950,24 +9959,33 @@ function sprintHud(){
  el.classList.toggle('sprint-urgent',G.bonusStarted&&G.bonusTime<15);el.querySelector('.sprint-meter i').style.width=(100*Math.min(1,(G.bonusGuideIndex||0)/Math.max(1,G.bonusPath.length-1)))+'%';
 }
 function endBonus(msg){
+ if(!G?.bonusActive||G._sprintEnded)return false;G._sprintEnded=true;
  document.getElementById('bonustimer').style.display='none';if(msg)toast(msg);
  if(G.sprintReturnHub){
   if(G.sprintRace)G.sprintRace.finished=true;
-  const result=G.sprintFinish||{failed:true,...BFSprintRace.result(G.sprintRace)},seed=G.bonusCourse.seed,host=!MP.active||MP.isHost;
+  const resultWorld=G;const result=G.sprintFinish||{failed:true,...BFSprintRace.result(G.sprintRace)},seed=G.bonusCourse.seed,host=!MP.active||MP.isHost;
   G.sprintFinish=result;beginPause();mode='menu';showGameUI(false);
   const head=result.failed?'Time ran out':result.best?'New course best!':'Sprint complete',best=BFSprintRace.records(meta.sprintBests)[BFSprintRace.key(seed)],detail=result.failed?'Your next attempt starts on this same course.':result.time.toFixed(1)+' seconds'+(best?' · Course best '+best.toFixed(1)+'s':'');
   showOverlayHTML(`<div class="card sprint-results" data-dialogue-menu><p class="ovkicker">TREASURE SPRINT · COURSE ${seed.toString(36).toUpperCase()}</p><h2>${head}</h2><p>${detail}</p><div class="sprint-result-stats"><span><b>${(result.running||0).toFixed(1)}s</b>Running time</span><span><b>${result.falls||0}</b>Falls</span><span><b>+${result.penalty||0}s</b>Fall penalty</span></div><p class="hint">Falls cost time, never health. No gold or gear is spent.</p>${MP.active?'<p class="hint">Your friends can finish their run. The host restarts or returns the party together.</p>':''}<div class="sprint-result-actions"><button class="bigbtn" id="sprintAgain" ${host?'':'disabled'}>${MP.active?'Restart party course':'Retry this course'} · ${htmlSafe(controlHint('interact'))}</button><button class="bigbtn ghost" id="sprintNew" ${host?'':'disabled'}>New course</button><button class="bigbtn ghost" id="sprintHub" data-menu-back>Return to Hub · Q</button></div></div>`);
-  document.getElementById('sprintAgain').onclick=()=>startHubSprint({seed});document.getElementById('sprintNew').onclick=()=>startHubSprint();document.getElementById('sprintHub').onclick=()=>{G.bonusActive=false;G.sprintFun=false;G.sprintReturnHub=false;enterWaystation();};document.getElementById(host?'sprintAgain':'sprintHub').focus();return;
+  document.getElementById('sprintAgain').onclick=()=>{if(G===resultWorld)startHubSprint({seed});};document.getElementById('sprintNew').onclick=()=>{if(G===resultWorld)startHubSprint();};document.getElementById('sprintHub').onclick=()=>{if(G!==resultWorld)return;G.bonusActive=false;G.sprintFun=false;G.sprintReturnHub=false;enterWaystation();};document.getElementById(host?'sprintAgain':'sprintHub').focus();return;
  }
- G.bonusActive=false;loadStage(G.bonusReturn);SFX.pickup();
+ const source=G.sprintOrigin;G.bonusActive=false;G.sprintOrigin=null;
+ // Old/stale sprint worlds do not contain enough information to infer a trial or campaign room.
+ if(!source?.world?.p||source.world===G||source.world.p!==G.p||!ZONES[source.world.zone]?.areas[source.world.area]||!['x','y','z'].every(k=>Number.isFinite(source.position?.[k]))||source.world.trial||source.world.side||source.world.hub||source.world.arena||source.world.endless||source.world.delve||source.world.escape||source.world.bossRush||source.world.devKeep||source.world.devBriar){openHub();return false;}
+ BFChestReveal.clear();releaseKeyboard();G=source.world;
+ G.bonusPortal=null;G.bonusActive=false;G.bonusVisits=(G.bonusVisits||0)+1;
+ sprintPlayerReset(G.p);Object.assign(G.p,source.position);
+ G.cam={x:G.p.x,y:G.p.y,z:G.p.z};delete G._cameraBoom;G._obsIdx=null;G._obsDirty=true;
+ BF_LOADING.reset();window.__world3dRebuild?.();mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();questUpdate();hudUpdate();autosaveRun();SFX.pickup();return true;
 }
 /* The hub course is practice: never replace a character's campaign checkpoint or grant loot. */
 function startHubSprint(opts){
- opts=opts||{};if(MP.guest()&&!opts.remote){toast('Your host starts Treasure Sprint for the party.');return;}
+ opts=opts||{};if(!opts.remote&&!(G?.hub&&!G.riftHall&&!G.sparringRoom||G?.sprintFun&&G.bonusActive&&G.sprintReturnHub))return false;if(MP.guest()&&!opts.remote){toast('Your host starts Treasure Sprint for the party.');return;}
  initAudio();if(!G)enterZone(0);if(!G)return;
  if(G.hub){meta.hero=snapOf(G.p);persist();}
- G.sprintAttempt=Number.isSafeInteger(opts.attempt)?opts.attempt:(G.sprintAttempt||0)+1;
- G.sprintFun=true;G.sprintReturnHub=true;loadBonus(0,opts.seed);
+ const attempt=Number.isSafeInteger(opts.attempt)?opts.attempt:(G.sprintAttempt||0)+1,p=G.p,runSeed=opts.remote?MP.rseed:G.runSeed;
+ G=newG(p,{runSeed,sprintAttempt:attempt,sprintFun:true,sprintReturnHub:true});
+ loadBonus(0,opts.seed);
  mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();questUpdate();
  toast('Treasure Sprint · reach the chest. Falls cost 3 seconds.');if(MP.active&&!opts.remote)MP.enterSpecial('sprint');
 }
@@ -15273,6 +15291,7 @@ const MP={
       try{ persist(); }catch(e){}
     } },
   onGuestData(d){
+    if(G?.trialSession&&(d.t==='special'||d.t==='arena'))return; // only a receipted hub/zone exit may end a party trial
     if(d.t==='zone'||d.t==='arena'||d.t==='special'||d.t==='trial') this.ensureGuestReady();
     if(d.hydra&&G?.hydraArena)BFHydra.apply(G,d.hydra,briarEpoch());
     if(d.voyage&&inShipwreck())applyVoyage(d.voyage);
@@ -16783,6 +16802,7 @@ function updateWorld(dt){
   if(G.hasKey) for(const dr of G.doors){ if(dr.type==='key'&&!dr.open&&dXZ(p.x,p.z,dr.x,dr.z)<74){
     dr.open=true; G.hasKey=false; toast('The lock yields!',null,'item-key'); SFX.god(); break; } }
   // golden bonus portal
+  if(G.bonusPortal&&!canEnterCampaignSprint())G.bonusPortal=null;
   if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48 && Math.abs(p.y-(G.bonusPortal.y||0))<70){ portalTraverse(startBonus,{name:'Treasure Sprint',color:'#ffdf80'});return; }
   // bonus sprint clock
   if(G.bonusActive&&!G.sprintFinish){updateSprintGuide();const moved=Math.abs(p.z)>12||Math.abs(p.x)>12;
@@ -24725,9 +24745,10 @@ const spec=MP.specialMsg,enter=MP.enterSpecial,guestData=MP.onGuestData;
 MP.specialMsg=function(kind){return G?.escape?{t:'special',kind:'prison',prison:packet()}:spec.call(this,kind);};
 MP.enterSpecial=function(kind){if(kind!=='prison')return enter.call(this,kind);this.zone=-304;this.pvp=false;this._wiped=false;this._gotEn=false;if(this.isHost)for(const c of this.conns)if(c.open)c.send(this.specialMsg(kind));};
 MP.onGuestData=function(d){
+ if(G?.trialSession&&(d.t==='special'||d.t==='arena'))return;
  if(d.t==='special'&&d.kind==='prison'){if(G?.escape?.id===d.prison?.id){receive(d.prison);return;}this.ensureGuestReady();pendingJoin=d.prison;openDelveGate();return;}
  if(d.t==='state'&&d.prison){if(pendingJoin){if(pendingJoin.id===d.prison.id)pendingJoin=d.prison;return;}if(G?.escape?.id!==d.prison.id)return;}
- if(d.t==='zone')pendingJoin=null;guestData.call(this,d);if(d.t==='state'&&d.prison&&G?.escape?.id===d.prison.id)receive(d.prison);};
+ if(d.t==='zone'||d.t==='trial')pendingJoin=null;guestData.call(this,d);if(d.t==='state'&&d.prison&&G?.escape?.id===d.prison.id)receive(d.prison);};
 const self=MP.selfState,snap=MP.snap;MP.selfState=function(){return {...self.call(this),prisonRevives:G?.escape?.revives||0};};MP.snap=function(q){return {...snap.call(this,q),prisonRevives:q.prisonRevives||0};};
 const rev=MP.reviveSelf;MP.reviveSelf=function(msg,completed=false){if(G?.escape&&!completed){if(!G.p.downed||G.p.spectating||G.p.downT<=0||G.escape.revives>=1)return false;G.escape.revives++;const result=rev.call(this,msg,completed);if(result)G.p.hp=Math.round(effMaxHp(G.p)*.25);return result;}return rev.call(this,msg,completed);};
 const leave=MP.leave;MP.leave=function(msg){const remote=G?.escape?.remote,waiting=!!pendingJoin;pendingJoin=null;leave.call(this,msg);if(remote||waiting)openHub();};

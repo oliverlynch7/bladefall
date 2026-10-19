@@ -1,0 +1,12 @@
+{
+  "preview": [
+    {
+      "level": "error",
+      "message": "Error: Incomplete restoration\n    at $.onclick (http://127.0.0.1:4373/3d/reaper-combo-preview.js?v=2332a:16:821)",
+      "timestamp": "2026-10-19T19:27:36.715Z",
+      "url": "http://127.0.0.1:4373/3d/reaper-combo-preview.js?v=2332a"
+    }
+  ],
+  "game": [],
+  "note": "Logs retain one resolved early prototype verification failure (quaternion angle precision). Final component-exact restore run, 738 poses and 21 cancellation checks all pass; fresh production console checked separately."
+}

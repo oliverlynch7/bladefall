@@ -1203,8 +1203,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./bag-browser.js?v=2238"></script>
 <link rel="stylesheet" href="./party-feedback.css?v=2297"><script src="./party-feedback.js?v=2297"></script>
 <script src="./party-navigation.js?v=2318"></script>
-<script src="./skill-motion.js?v=2328"></script>
-<script src="./combat-art.js?v=2330f"></script>
+<script src="./skill-motion.js?v=2328"></script><script src="./reaper-combo.js?v=2332b"></script>
+<script src="./combat-art.js?v=2332b"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2312">
 <script src="./chest-rules.js?v=2311"></script>
@@ -1232,7 +1232,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.331.1-npc-auditions';
+const VERSION3D='2.332.0-reaper-combo';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13490,8 +13490,8 @@ function resolveSwing(){
       if(d>R+e.r) continue; if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; e.lastHit=p.swingId; hitEnemy(e,mdmg,p,(w.kb||260)+90,ls2,els); }
     G._desig=false; G._crit=false;
     if(p._burstId!==p.swingId){ p._burstId=p.swingId;                 // one-shot burst VFX (skillRing carries no damage — dmg:0)
-      skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+30); G.shake=Math.min(G.shake+7,15);
-      for(let i=0;i<22;i++){ const a=i/22*6.283; G.particles.push({x:p.x+Math.cos(a)*24,y:p.y+22,z:p.z+Math.sin(a)*24,vx:Math.cos(a)*150,vy:70,vz:Math.sin(a)*150,life:0.5,color:ec,sz:3.2}); } }
+      G.shake=Math.min(G.shake+7,15); if(!window.BFReaperCombo)skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+30);
+      if(!window.BFReaperCombo)for(let i=0;i<22;i++){ const a=i/22*6.283; G.particles.push({x:p.x+Math.cos(a)*24,y:p.y+22,z:p.z+Math.sin(a)*24,vx:Math.cos(a)*150,vy:70,vz:Math.sin(a)*150,life:0.5,color:ec,sz:3.2}); } }
     return;
   }
   const crit=Math.random()<0.18+effCrit(p);
@@ -15493,7 +15493,7 @@ const MP={
     if(this.isHost&&fromConn?._pid)d={...d,by:fromConn._pid};
     if(d.by===this.myId||(d.scene&&d.scene!==this.combatScene()))return;
     if(d.by&&Number.isSafeInteger(d.seq)){const key=d.by+':'+d.seq,seen=G._combatSeen||(G._combatSeen=new Set());if(seen.has(key))return;seen.add(key);if(seen.size>256)seen.delete(seen.values().next().value);}
-    BF_COMBAT_ART.receive(G,d.art);
+    BF_COMBAT_ART.receive(G,d.art,d.by);
     if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0,spin:a[14]||0,fxClass:typeof a[15]==='string'?a[15].slice(0,24):null,fxSkill:typeof a[16]==='string'?a[16].slice(0,32):null,weapon:a[17]&&typeof a[17]==='object'?this.wsnap(a[17]):null}); }
     if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0,y:a[10]||0,delay:a[11]||0,fxType:a[12]||undefined}); }
     // host relays a guest's combat FX to the OTHER guests so everyone sees it
@@ -21724,6 +21724,7 @@ function drawSwing3(p,t){
     const hx=p.x+Math.sin(p.yaw)*fwd, hz=p.z+Math.cos(p.yaw)*fwd;
     bx(hx,p.y+up,hz, s,s,s, col, col, 0.55+0.3*Math.sin(t*20)); }   // growing charge orb
   const w=p.weapon; if(!w||w.cls!=='melee'||p.atkTimer<=0) return;
+  if(w.art==='scythe'&&window.BFReaperCombo&&p.swingCombo>=0)return;
   const M=MELEE[w.art]||MELEE.sword, prog=1-(p.atkTimer/0.26), fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const col=w.blade||'#dfe5ec', y=p.y+22, a=Math.max(0,0.5*(1-prog*0.8));
   if(M.shape==='slam'){
@@ -24880,7 +24881,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2330f"></script>
+<script type="module" src="./hero3d.js?v=2332b"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2322"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

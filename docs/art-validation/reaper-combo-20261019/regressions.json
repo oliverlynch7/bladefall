@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "suites": [
+    {
+      "script": "test-reaper-combo.cjs",
+      "passed": true,
+      "poseSamples": 303,
+      "effectSamples": 606,
+      "coOpVariants": 3,
+      "actualBufferFrames": 24,
+      "maxStrokes": 223
+    },
+    {
+      "script": "test-skill-motion.cjs",
+      "passed": true,
+      "checks": 42045,
+      "skills": 136
+    },
+    {
+      "script": "test-distinct-skill-effects.cjs",
+      "passed": true,
+      "checks": 217300,
+      "skills": 136
+    },
+    {
+      "script": "test-skill-surfaces.cjs",
+      "passed": true,
+      "checks": 6146,
+      "skills": 136
+    },
+    {
+      "script": "test-render-motion.cjs",
+      "passed": true,
+      "checks": 1624
+    },
+    {
+      "script": "test-crisp-motion.cjs",
+      "passed": true,
+      "checks": 15
+    },
+    {
+      "script": "check-3d-inline.cjs",
+      "passed": true,
+      "inlineScripts": 1
+    }
+  ]
+}

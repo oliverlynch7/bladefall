@@ -1,0 +1,62 @@
+[
+  {
+    "script": "test-optional-clues.cjs",
+    "code": 0,
+    "output": "{\"checks\":553,\"books\":20,\"controls\":18,\"actors\":[\"host\",\"guest\"],\"passed\":true}"
+  },
+  {
+    "script": "test-prison-story.cjs",
+    "code": 0,
+    "output": "Prison story passed: Sly routes, rescue winch, retired lower weights, press brake, old partial data, shards, rewards, voice graph and lift bounds."
+  },
+  {
+    "script": "test-story-state.cjs",
+    "code": 0,
+    "output": "Story state passed: single Thomas path and legacy cursors, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links."
+  },
+  {
+    "script": "test-story-authority.cjs",
+    "code": 0,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility."
+  },
+  {
+    "script": "test-campaign-interaction.cjs",
+    "code": 0,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed."
+  },
+  {
+    "script": "test-campaign-journey.cjs",
+    "code": 0,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\nIn-world signage policy and removal contracts passed."
+  },
+  {
+    "script": "test-campaign-refinement.cjs",
+    "code": 0,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed."
+  },
+  {
+    "script": "test-campaign-compatibility.cjs",
+    "code": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed."
+  },
+  {
+    "script": "test-save-safety.cjs",
+    "code": 0,
+    "output": "24 save normalization and isolated recovery checks passed."
+  },
+  {
+    "script": "test-trial-mentor-map.cjs",
+    "code": 0,
+    "output": "{\"checks\":54,\"passed\":true}"
+  },
+  {
+    "script": "test-return-visits.cjs",
+    "code": 0,
+    "output": "Return quests: eligibility, decline/rejoin, puzzle gates, collection/delivery idempotency, graph and save normalization passed."
+  },
+  {
+    "script": "test-story-topics.cjs",
+    "code": 0,
+    "output": "29 topic menus: legacy cursor recovery, effect-free navigation, Simon side quest after core dialogue, refusal guard and forged navigation passed."
+  }
+]

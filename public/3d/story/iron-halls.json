@@ -621,7 +621,7 @@
       }
     },
     "ih.jack.controls": {
-      "text": "Read the plate by the track. Push the scrap sled from behind. When the hammer warns, stop and let it strike, then push on. The sled jams the drive gear.",
+      "text": "Push the scrap sled from behind. When the hammer warns, stop and let it strike, then push on. The sled jams the drive gear.",
       "choices": [
         {
           "id": "back",
@@ -771,10 +771,6 @@
         },
         {
           "flag": "ih.cart",
-          "is": true
-        },
-        {
-          "flag": "ih.plate",
           "is": true
         },
         {

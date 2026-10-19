@@ -97,7 +97,7 @@
               "id": "sl.access",
               "region": "palace",
               "title": "Knowledge under guard",
-              "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
+              "text": "The reading halls are open. Defeat the patrol and release the seal at the far end. The guardian still stands between you and the orb."
             }
           ],
           "when": [],
@@ -242,7 +242,7 @@
               "id": "sl.access",
               "region": "palace",
               "title": "Knowledge under guard",
-              "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
+              "text": "The reading halls are open. Defeat the patrol and release the seal at the far end. The guardian still stands between you and the orb."
             }
           ],
           "when": [
@@ -724,7 +724,7 @@
           "id": "sl.access",
           "region": "palace",
           "title": "Knowledge under guard",
-          "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
+          "text": "The reading halls are open. Defeat the patrol and release the seal at the far end. The guardian still stands between you and the orb."
         },
         {
           "type": "note",
@@ -780,7 +780,7 @@
       "once": true,
       "when": [
         {
-          "flag": "sl.orders",
+          "flag": "sl.access",
           "is": true
         }
       ],

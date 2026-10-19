@@ -20,19 +20,10 @@
       "choices": [
         {
           "id": "fault",
-          "text": "A pipe is leaking. Your schedule says that needs a patrol.",
+          "text": "A pipe is leaking in the west bay. Send a patrol to check it.",
           "next": "gf.pike.proof",
           "effects": [],
-          "when": [
-            {
-              "flag": "gf.fault",
-              "is": true
-            },
-            {
-              "flag": "gf.schedule",
-              "is": true
-            }
-          ],
+          "when": [],
           "category": "main",
           "retired": false,
           "priority": 0
@@ -427,12 +418,7 @@
           "text": "There is something alive in that work cage.",
           "next": "gf.martin.cage",
           "effects": [],
-          "when": [
-            {
-              "flag": "gf.cage",
-              "is": true
-            }
-          ],
+          "when": [],
           "category": "side",
           "retired": false,
           "priority": 5
@@ -898,10 +884,6 @@
       "once": true,
       "when": [
         {
-          "flag": "gf.cage",
-          "is": true
-        },
-        {
           "flag": "gf.pet.open",
           "is": false
         }
@@ -916,10 +898,6 @@
     "gf.pet.release": {
       "once": true,
       "when": [
-        {
-          "flag": "gf.cage",
-          "is": true
-        },
         {
           "flag": "gf.pet.feed.closed",
           "is": true

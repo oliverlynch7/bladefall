@@ -13,8 +13,8 @@ function pressState(clock,i,open=false){
  return {bottom,warning:phase>=2&&phase<2.45,down:bottom<54};
 }
 const flag=(s,k)=>!!s.flags[k],live=(G,g)=>(G.enemies||[]).filter(e=>e.prisonGuard===g&&!e.dead&&e.hp>0).length;
-function ready(s){return ['kd.free','kd.papers','kd.transfer'].every(k=>flag(s,k));}
-function quest(s,k){const owner=k?.winchOwner??k?.winch?.owner,progress=k?.winchProgress??k?.winch?.progress??0;return !flag(s,'kd.roster')?'Read the cell list at the entrance':!flag(s,'kd.hidden')?'Follow the service marks behind the empty west cells':!flag(s,'kd.free')?(k?.guards>0?'Clear the holding-room guards · '+k.guards+' remain':'Release the prisoners at the cell lock'):!flag(s,'kd.papers')?'Read the papers taken from the prisoners':!flag(s,'kd.lift.open')?(k?.rescueT<8?'Meet the prisoners at the central lift':owner?'Walk around the winch drum · '+Math.round(progress*100)+'% raised':'Board the lift and grip its winch handle'):!flag(s,'kd.transfer')?'Follow the group onto the upper shelter':'Follow the upper hall to The Fallen';}
+function ready(s){return ['kd.free','kd.transfer'].every(k=>flag(s,k));}
+function quest(s,k){const owner=k?.winchOwner??k?.winch?.owner,progress=k?.winchProgress??k?.winch?.progress??0;return !flag(s,'kd.hidden')?'Follow the service marks behind the empty west cells':!flag(s,'kd.free')?(k?.guards>0?'Clear the holding-room guards · '+k.guards+' remain':'Release the prisoners at the cell lock'):!flag(s,'kd.lift.open')?(k?.rescueT<8?'Meet the prisoners at the central lift':owner?'Walk around the winch drum · '+Math.round(progress*100)+'% raised':'Board the lift and grip its winch handle'):!flag(s,'kd.transfer')?'Follow the group onto the upper shelter':'Follow the upper hall to The Fallen';}
 function status(G){const k=G.prison||{},w=k.winch||{};return {rescueT:k.rescueT||0,guards:live(G,'cells'),winchProgress:w.progress||0,winchOwner:w.owner||null,winchDirection:w.direction||0,winchAngle:w.angle||0,pressClock:k.pressClock||0};}
 function destination(G){
  const f=G.storyState?.flags||{},p=G.p,k=G.prison?.remote||status(G),ob=key=>(G.storyObjects||[]).find(o=>o.key===key),at=(x,z,y,navLabel)=>({x,z,y,navLabel});
@@ -24,14 +24,12 @@ function destination(G){
  if(p.x<1510&&p.x>1200&&p.z<-3900)return back('deadDrain2','Service ledge · back to the drain');
  if(p.x>1230&&p.z<-1750)return back('drain','Dry ledges · back to the cells');
  if(p.y<135||p.x>760&&p.z<-3000)return back('lower','Service stair · back to the lift');
- if(!f['kd.roster'])return ob('kd.roster');
  if(!f['kd.hidden']){if(p.x>-640&&p.z<-1300)return at(0,-1100,180,'Return through the cell block');if(p.x>-930)return at(-1000,-1200,180,'West cells · old service marks');return ob('kd.hidden');}
- if(!f['kd.free']||!f['kd.papers']){
+ if(!f['kd.free']){
   if(!f['kd.free']&&p.x>-640)return p.z<-1300?at(0,-1100,180,'Return through the cell block'):at(-1000,-1200,180,'West cells · service entrance');
   if(p.z>-1510)return at(-1300,-1630,180,'Through the service door');
   if(p.x>-640)return at(-760,-1850,180,'Holding-room doorway');
   if(!f['kd.free']){const e=(G.enemies||[]).filter(e=>e.prisonGuard==='cells'&&!e.dead&&e.hp>0).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0];return e?at(e.x,e.z,e.y,'Clear the holding-room guards'):ob('kd.free');}
-  return ob('kd.papers');
  }
  if(p.y>=315&&f['kd.lift.open']){if(p.z>-2910)return at(0,-2910,360,'Upper landing');if(!f['kd.transfer'])return at(0,-3410,360,'Follow the prisoners to shelter');return p.z>-4030?at(0,-3960,360,'Release hall'):G.portal||G.goalPos;}
  if(p.x<-640)return at(-760,-1850,180,'Leave through the holding-room doorway');
@@ -40,7 +38,7 @@ function destination(G){
  if(p.z>-2310||Math.abs(p.x)>160)return at(0,-2270,180,f['kd.lift.open']?'Wait at the lower dock for the returning lift':'Board the prisoner lift');
  return f['kd.lift.open']?at(0,-2270,180,'Wait for the lift at the lower dock'):ob('kd.lift.winch');
 }
-function available(key,G,remote){if(key==='kd.free')return !(remote||status(G)).guards;if(key==='kd.lift.winch')return flag(G.storyState,'kd.free')&&flag(G.storyState,'kd.papers')&&!flag(G.storyState,'kd.lift.open')&&(remote||status(G)).rescueT>=7.99;if(key==='kd.press.brake')return flag(G.storyState,'kd.lift.open')&&!flag(G.storyState,'kd.deep.open');return true;}
+function available(key,G,remote){if(key==='kd.free')return !(remote||status(G)).guards;if(key==='kd.lift.winch')return flag(G.storyState,'kd.free')&&!flag(G.storyState,'kd.lift.open')&&(remote||status(G)).rescueT>=7.99;if(key==='kd.press.brake')return flag(G.storyState,'kd.lift.open')&&!flag(G.storyState,'kd.deep.open');return true;}
 // After the rescue the freight lift cycles, so a late player or co-op partner can still ascend.
 const liftHeight=t=>{
  if(t<=24)return 180+180*Math.max(0,Math.min(1,(t-8)/8));
@@ -89,9 +87,16 @@ G.bounds={minX:-1800,maxX:2800,minZ:-5150,maxZ:700};G.progressEnd=-4900;G.startP
 }
 function sync(a){const {G,state:s,openWay}=a,f=s.flags;
  if(G.prison)for(const [flag,ids]of [['kd.hidden',['kd.roster','kd.marks','inspect.kd.hidden']],['kd.free',['inspect.kd.free']],['kd.lift.open',['kd.rescue','kd.lift','inspect.kd.lift.winch']],['kd.deep.open',['kd.depth','inspect.kd.press.brake']]])if(f[flag]&&!G.prison['notice.'+flag]){G.prison['notice.'+flag]=true;for(const id of ids)root.BFJournalNotice?.queue.dismiss(id);}
- if(s.notes['kd.rescue'])s.notes['kd.rescue'].text='The hidden prisoners are free. The old stair has collapsed. Meet them on the central lift, grip its winch handle, and walk around the drum to raise everyone to shelter. Read their confiscated papers before leaving.';
- if(s.notes['kd.lift'])Object.assign(s.notes['kd.lift'],{title:'Lift winch plate',text:'Grip the handle on the lift. Walk around the drum while holding it; one full turn raises the platform. Letting go lowers it for another try. The lift cycles after the group reaches shelter.'});
- if(s.notes['kd.depth'])Object.assign(s.notes['kd.depth'],{title:'Counterweight press warning',text:'The old presses drop in turns. Watch each warning lamp, cross when its plate rises, and wait in the clear floor between them. The emergency brake past the third press stops the machine and opens the shard gate.'});
+ const feedback=(key,text)=>{const o=G.storyObjects.find(o=>o.key===key);if(o)o.blockedText=text;},k=G.prison?.remote||status(G);
+ feedback('kd.hidden','Follow the service marks behind the empty west cells.');
+ feedback('kd.free',k.guards?'Defeat the holding-room guards before releasing the prisoners.':'Open the hidden service entrance behind the west cells first.');
+ feedback('kd.papers','Release the hidden prisoners first, then read their confiscated papers here.');
+ feedback('kd.lift.winch',!f['kd.free']?'Free the hidden prisoners before using the lift.':k.rescueT<8?'Wait for the prisoners to board the central lift, then grip its winch handle.':'Board the central lift, grip the handle, and walk around its drum.');
+ feedback('kd.press.brake','Raise the prisoner lift first. The lower works are an optional route to a Rift Shard.');
+ feedback('kd.return',!f['kd.keepsake']?"Speak to Sly about the missing locket first.":'Free the hidden prisoners before returning the locket to its owner\'s bundle.');
+ if(s.notes['kd.rescue'])s.notes['kd.rescue'].text=f['kd.transfer']?'The prisoners reached the upper shelter. Follow the upper hall to The Fallen. The lift keeps cycling if you need to return.':f['kd.lift.open']?'The lift is raised. Follow the prisoners onto the upper shelter; the lift will keep cycling afterward.':'The hidden prisoners are free. Meet them on the central lift, grip its winch handle, and walk around the drum to raise everyone to shelter.';
+ if(s.notes['kd.lift'])Object.assign(s.notes['kd.lift'],{title:'Lift winch plate',text:f['kd.lift.open']?'The lift is raised. It cycles between the lower dock and upper shelter after the group arrives, so you can return or bring a late companion up.':'Grip the handle on the lift and walk around its drum; one full turn raises the platform. Letting go lowers it for another try.'});
+ if(s.notes['kd.depth'])Object.assign(s.notes['kd.depth'],{title:f['kd.deep.open']?'Counterweight presses stopped':'Counterweight press warning',text:f['kd.deep.open']?'The presses are locked overhead. The lower gate is open; a Rift Shard lies beyond it.':'The old presses drop in turns. Watch each warning lamp, cross when its plate rises, and wait in the clear floor between them. The emergency brake past the third press stops the machine and opens the shard gate.'});
  if(s.notes['kd.drain'])s.notes['kd.drain'].text='Pairs of scratches follow the old dry route. Three scratches mark unused turns. Jump between the raised stones where the walkway is broken. If you fall, the current returns you to the drain entrance.';
  G.obstacles=G.obstacles.filter(o=>!o.prisonBlock||!({hidden:f['kd.hidden'],holdingExit:f['kd.free'],release:ready(s),depth:f['kd.deep.open']}[o.prisonBlock]));
  if(f['kd.transfer']){G.prison.rescueT=Math.max(24,G.prison.rescueT);Object.assign(G.storyNpcs.find(n=>n.id==='walter'),{x:-230,z:-3410,y:360});if(f['kd.returned'])Object.assign(G.storyNpcs.find(n=>n.id==='sly'),{x:230,z:-3410,y:360});}

@@ -2,7 +2,7 @@
 (function(root){'use strict';
 const startZ=-3780, targetZ=-4380, hammerZ=-4100, gearZ=-4470, speed=118;
 function phase(clock){let t=clock%5.5;if(t<0)t+=5.5;return {t,warn:t>=2.6&&t<4,hit:t>=4&&t<4.35,cycle:Math.floor(clock/5.5)};}
-function task(G,s){if(!s.flags['ih.plate'])return 'Read the machine plate beside the weapon line';return 'Push the scrap sled up the track to jam the drive gear. Watch the hammer.';}
+function task(G,s){return 'Push the scrap sled up the track to jam the drive gear. Watch the hammer.';}
 function place(G){const k=G.iron,o=k.sledCollider;if(!o)return;const a=Math.floor((o.z-o.d/2)/220),b=Math.floor((o.z+o.d/2)/220);o.z=k.sledZ;if(a!==Math.floor((o.z-o.d/2)/220)||b!==Math.floor((o.z+o.d/2)/220))G._obsDirty=true;}
 function sync(G,s){const k=G.iron;if(s.flags['ih.line.open'])k.sledZ=targetZ;place(G);}
 function shoveBack(G,k,hurt){const p=G.p;if(Math.abs(p.x)>130||Math.abs(p.z-hammerZ)>260||Math.abs(p.y-100)>55)return;
@@ -16,7 +16,7 @@ function tick({G,state:s,host,players,complete,toast,hurt},dt){
    else k.sledZ+=(k.remote.sledZ-k.sledZ)*Math.min(1,dt*12);
   }place(G);return;}
  if(done){k.sledZ=targetZ;place(G);return;}
- if(!s.flags['ih.workers.safe']||!s.flags['ih.cart']||!s.flags['ih.plate'])return;
+ if(!s.flags['ih.workers.safe']||!s.flags['ih.cart'])return;
  const pushing=(players||[]).some(q=>q&&q.hp>0&&!q.downed&&Math.abs(q.x)<90&&q.z>=k.sledZ+48&&q.z<=k.sledZ+120&&Math.abs((q.y||0)-100)<48&&(q.vz||0)<-35);
  if(pushing)k.sledZ=Math.max(targetZ,k.sledZ-speed*dt);
  if(p.hit&&Math.abs(k.sledZ-hammerZ)<105&&k.sledHitCycle!==p.cycle){
@@ -37,7 +37,7 @@ function draw(G,s,bx,ring){
  for(const x of [-70,70])bx(x,165,z+30,12,46,10,'#b29b71');bx(0,179,z+30,155,11,12,'#d3b16b');
  for(const x of [-47,-16,15,45])bx(x,144,z+45,12,16,5,x%2?'#e9bb62':'#393c3d');
  for(const [x,dz,w]of [[-35,-16,37],[17,5,31],[39,-24,26]]){bx(x,175,z+dz,w,22,26,'#4a4e4d');bx(x,189,z+dz,w-8,5,20,'#be9b64');}
- if(!done&&s.flags['ih.plate'])ring?.(0,107,z+92,39,'#e8c579',.65);
+ if(!done)ring?.(0,107,z+92,39,'#e8c579',.65);
  // The floor warns before the hammer falls. It can hit the sled, but is never a hidden reset.
  const hy=done?575:p.hit?165:p.warn?360:575;
  for(const x of [-164,164]){bx(x,383,hammerZ,25,565,40,'#454c50');bx(x,425,hammerZ,41,30,72,'#a09071');}

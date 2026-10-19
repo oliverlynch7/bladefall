@@ -526,10 +526,6 @@
       "once": true,
       "when": [
         {
-          "flag": "hp.orders",
-          "is": true
-        },
-        {
           "flag": "hp.bridge",
           "is": false
         },
@@ -644,10 +640,6 @@
       ],
       "once": true,
       "when": [
-        {
-          "flag": "hp.orders",
-          "is": true
-        },
         {
           "flag": "hp.weight.open",
           "is": true

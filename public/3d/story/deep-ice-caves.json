@@ -476,7 +476,7 @@
               "id": "ic.hugo.lead",
               "region": "frost",
               "title": "A second channel",
-              "text": "Hugo saw a sealed side chamber below the waterworks. Its old water must be drained before fresh water can be frozen. Read the lower controls for the full order."
+              "text": "Hugo saw a sealed side chamber below the waterworks. Climb the west service ledges and release the hanging spill plug to divert water into its chiller."
             }
           ],
           "when": [
@@ -655,12 +655,7 @@
           "id": "ic.free"
         }
       ],
-      "when": [
-        {
-          "flag": "ic.pages",
-          "is": true
-        }
-      ]
+      "when": []
     },
     "ic.notes": {
       "once": true,
@@ -732,10 +727,6 @@
       ],
       "when": [
         {
-          "flag": "ic.lock.clue",
-          "is": true
-        },
-        {
           "flag": "ic.lock.open",
           "is": false
         }
@@ -752,10 +743,6 @@
         }
       ],
       "when": [
-        {
-          "flag": "ic.lock.clue",
-          "is": true
-        },
         {
           "flag": "ic.lock.open",
           "is": false
@@ -774,10 +761,6 @@
       ],
       "when": [
         {
-          "flag": "ic.lock.clue",
-          "is": true
-        },
-        {
           "flag": "ic.lock.open",
           "is": false
         }
@@ -795,10 +778,6 @@
       ],
       "when": [
         {
-          "flag": "ic.lock.clue",
-          "is": true
-        },
-        {
           "flag": "ic.lock.open",
           "is": false
         }
@@ -814,10 +793,6 @@
         }
       ],
       "when": [
-        {
-          "flag": "ic.channel.clue",
-          "is": true
-        },
         {
           "flag": "ic.channel.open",
           "is": false

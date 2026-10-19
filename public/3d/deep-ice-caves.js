@@ -19,13 +19,11 @@ const paths={
 const serviceLedges=[[-1600,-4290,95,190],[-1760,-4405,125,132],[-1680,-4530,155,118],[-1540,-4620,185,138],[-1360,-4555,215,160]];
 const flag=(s,k)=>!!s.flags[k],ready=s=>flag(s,'ic.ellis.lead')&&flag(s,'ic.lock.open');
 function quest(s){
- if(!flag(s,'ic.pages'))return 'Follow the dropped pages into the caves';
  if(!flag(s,'ic.free'))return 'Reach the hidden laboratory and release Ellis';
  if(!flag(s,'ic.ellis.met'))return 'Speak to Professor Ellis in the laboratory';
  if(!flag(s,'ic.notes'))return 'Recover Ellis’s sealed notes from the fallen research pack';
  if(!flag(s,'ic.ellis.lead'))return 'Bring the sealed notes back to Ellis';
  if(flag(s,'ic.lock.open'))return 'Reach the north cavern — three Legion officers guard the exit';
- if(!flag(s,'event.ic.lock.clue'))return 'Read the waterworks plate and open the ice crossing';
  const level=s.items['ic.lock.level']||0,frozen=flag(s,'ic.lock.frozen');
  if(level>=3||frozen&&level!==2)return 'Release excess water at the near sluice';
  if(frozen)return 'Cross the frozen sheet and open the far drain';
@@ -59,7 +57,7 @@ function build({G,seg,plat,solid,spawn}){
  const obj=(key,label,x,z,y,kind='lever')=>({key,label,x,z,y,kind});
  G.storyNpcs=[{id:'ellis',name:'Professor Ellis',x:-1330,z:-2230,y:300},{id:'hugo',name:'Hugo',x:1450,z:-2680,y:100}];
  G.storyObjects=[obj('ic.pages','Read the dropped research page',-80,-1020,240,'paper'),obj('ic.free','Release Professor Ellis',-1210,-2210,300,'lock'),obj('ic.notes','Recover the sealed notes',-2250,-2820,210,'pack'),obj('ic.lock.clue','Read the waterworks plate',-170,-3670,180,'plate'),obj('ic.hugo.find','Call into the broken ice shelf',1450,-2490,100,'call'),obj('ic.hugo.brace','Secure the rescue frame',1330,-2540,100,'brace'),obj('ic.rope','Take the spare rope',1450,-3260,140,'rope'),obj('ic.hugo.rope','Lower the rescue rope',1500,-2580,100,'rope'),obj('ic.channel.clue','Read the lower channel marks',-1430,-4210,80,'plate'),obj('ic.channel.plug','Release the hanging spill plug',-1292,-4560,215,'plugPin')];
- for(const [i,name,x,z]of [[1,'Pump water into the float',-160,-3850],[2,'Freeze the channel from the float',85,-4110],[3,'Open the far drain gate',120,-4500]])G.storyObjects.push({...obj('ic.lock.'+i,name,x,z,180,['fill','freeze','drain'][i-1]),blockedText:i===1?'The channel is frozen. Open the far drain to clear it.':i===2?'Raise the float to the middle bank marks before freezing.':'Read the waterworks plate first.'});
+ for(const [i,name,x,z]of [[1,'Pump water into the float',-160,-3850],[2,'Freeze the channel from the float',85,-4110],[3,'Open the far drain gate',120,-4500]])G.storyObjects.push({...obj('ic.lock.'+i,name,x,z,180,['fill','freeze','drain'][i-1]),blockedText:i===1?'The channel is frozen. Open the far drain to clear it.':i===2?'Raise the float to the middle bank marks before freezing.':'Cross the ice sheet to reach the far drain.'});
  G.storyObjects.push({...obj('ic.lock.reset','Release excess water',130,-3840,180,'drain'),blockedText:'Use this sluice if the float rises above the middle marks.'});
  // A real floating work platform and temporary sheet turn the water puzzle into a crossing.
  G.iceCaves.float={iceFloat:true,x:0,x0:0,z:-4095,w:210,d:210,h:0,px:0,py:0,amp:0,sp:0,ph:0};

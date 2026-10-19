@@ -438,10 +438,6 @@
       ],
       "when": [
         {
-          "flag": "ff.reflect.clue",
-          "is": true
-        },
-        {
           "flag": "ff.reflect.open",
           "is": false
         }
@@ -491,10 +487,6 @@
         }
       ],
       "when": [
-        {
-          "flag": "ff.camp.found",
-          "is": true
-        },
         {
           "flag": "ff.camp.open",
           "is": false

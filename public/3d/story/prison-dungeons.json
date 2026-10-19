@@ -16,7 +16,7 @@
   },
   "nodes": {
     "kd.walter.first": {
-      "text": "Read the prisoner list at the stairs, then search the west cells. The guard count doesn't match the beds.",
+      "text": "Search the west cells. The beds are empty, but the guards are still here. Look behind those rooms.",
       "choices": [
         {
           "id": "help",
@@ -669,12 +669,7 @@
           "value": true
         }
       ],
-      "when": [
-        {
-          "flag": "kd.roster",
-          "is": true
-        }
-      ]
+      "when": []
     },
     "kd.free": {
       "once": true,
@@ -689,7 +684,7 @@
           "id": "kd.rescue",
           "region": "keep",
           "title": "Get them to the lift",
-          "text": "The hidden prisoners are free. The old stair has collapsed, so they need the central lift. Meet them there, grip the winch handle, and walk around its drum to raise everyone. Read their confiscated papers before leaving."
+          "text": "The hidden prisoners are free. The old stair has collapsed. Meet them on the central lift, grip its winch handle, and walk around the drum to raise everyone to shelter. Their confiscated papers offer a clue about Ellis."
         }
       ],
       "when": [
@@ -743,10 +738,6 @@
           "is": true
         },
         {
-          "flag": "kd.papers",
-          "is": true
-        },
-        {
           "flag": "kd.lift.open",
           "is": false
         }
@@ -764,10 +755,6 @@
       "when": [
         {
           "flag": "kd.free",
-          "is": true
-        },
-        {
-          "flag": "kd.papers",
           "is": true
         }
       ]

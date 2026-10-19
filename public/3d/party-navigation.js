@@ -22,24 +22,23 @@ function target(g){
  else switch(g.zone+':'+g.area){
  case '0:0':t=!f['thomas.ready']?npc('thomas'):!f['mara.healing']?(q['briar.supplies']!=='active'?npc('mara'):(i.tangle_root||0)<3||(i.dressings||0)<1?nearest((g.storyObjects||[]).filter(o=>!f['event.'+o.key]&&(/root/.test(o.key)&&(i.tangle_root||0)<3||/dressing/.test(o.key)&&(i.dressings||0)<1))):npc('mara')):q['briar.escape']!=='active'&&!f['briar.depart']?npc('mara'):first([['briar.water','briar.water'],['briar.jam','briar.jam'],['briar.bridge','briar.bridge'],['briar.depart','briar.depart']]);break;
  case '0:1':t=!f['woods.ready']?npc('lewis'):!f['woods.signal']?nearest([obj('woods.signal.crank'),obj('woods.signal.cable')]):exit();break;
- case '1:0':t=first([['hp.trail','@caleb'],['hp.orders','hp.orders'],['hp.bridge','hp.bridge.clue'],['hp.descent','hp.lift']]);break;
+ case '1:0':t=first([['hp.trail','@caleb'],['hp.bridge','hp.bridge.clue'],['hp.descent','hp.lift']]);break;
  case '1:1':t=root.BFLostCanyon?.destination(g);break;
  case '2:0':t=root.BFBrokenWalls?.destination(g);break;
  case '2:1':t=root.BFPrison?.destination(g);break;
- case '3:0':t=first([['ff.trail','ff.trail'],['ff.part','ff.part'],['ff.heater','ff.heater'],['ff.reflect.open','ff.reflect.clue'],['ff.cave','ff.cave']]);break;
- case '3:1':t=first([['ic.pages','ic.pages'],['ic.free','ic.free'],['ic.ellis.met','@ellis'],['ic.notes','ic.notes'],['ic.ellis.lead','@ellis'],['ic.lock.open','ic.lock.clue']]);break;
+ case '3:0':t=first([['ff.part','ff.part'],['ff.heater','ff.heater'],['ff.reflect.open','ff.reflect.clue'],['ff.cave','ff.cave']]);break;
+ case '3:1':t=first([['ic.free','ic.free'],['ic.ellis.met','@ellis'],['ic.notes','ic.notes'],['ic.ellis.lead','@ellis'],['ic.lock.open','ic.lock.clue']]);break;
  case '4:0':t=first([['ih.flint.met','@flint'],['ih.workers.safe','ih.workers'],['ih.handles','ih.handles'],['ih.cart','ih.cart'],['ih.line.open','ih.plate']]);break;
  case '4:1':t=!f['gf.access']?(f['gf.alarm']?obj('gf.gate'):npc('pike')):!f['gf.martin.met']?npc('martin'):!f['gf.evacuated']?(!f['gf.passage']?obj('gf.passage'):f['gf.quiet']&&!f['gf.transport']?obj('gf.transport'):(g.furnace?.remote||g.furnace)?.escortActive?nearest((g.ironWorkers||[]).filter(n=>n.hp>0))||obj('gf.evac.call'):obj('gf.evac.call')):!f['gf.cool.open']?{x:0,z:-5150,y:120,navLabel:'Hold the cooling pedal'}:first([['gf.writings','gf.writings'],['gf.route','@martin']]);break;
  case '5:0':t=!f['sc.met']?npc('otto'):!f['sc.boat.ready']?(['rudder','sail','rope'].some(k=>i['sc.'+k]>0&&!f['sc.installed.'+k])?obj('sc.fit'):nearest(['rudder','sail','rope'].filter(k=>!f['sc.installed.'+k]).map(k=>k==='rope'&&!f['sc.drain']?obj('sc.drain'):k==='rope'&&!f['sc.latch']?obj('sc.latch'):obj('sc.'+k)))):obj('sc.board');break;
- case '5:1':t=first([['tc.shackle','tc.shackle'],['tc.approach','tc.approach']]);break;
+ case '5:1':t=first([['tc.approach','tc.approach']]);break;
  case '6:0':t=!f['pc.met']?npc('grace'):!f['pc.clamp']?obj('pc.clamp'):!f['pc.court']?obj('pc.water'):!f['pc.west']&&!f['pc.east']?nearest(['west','east'].flatMap(k=>['lower','upper'].map(route=>obj('pc.'+k+'.'+route)))):first([['pc.light.open','pc.mirror.note'],['pc.ready','pc.enter']]);break;
- case '6:1':t=first([['sl.access','@hugh'],['sl.orders','sl.orders'],['sl.ready','sl.release']]);break;
- case '7:0':t=f['cg.entry']?exit():f['cg.alarm']?obj('cg.release'):!f['cg.met']?npc('roland'):!f['cg.bridge.open']?obj(f['cg.catch.west']?'cg.bridge':'cg.catch.west'):!f['cg.disguise']?nearest(['coat','helmet','papers'].filter(k=>!(i['cg.'+k]>0)).map(k=>obj('cg.'+k)))||npc('roland'):first([['cg.orders','cg.orders'],['cg.bells','cg.bells']])||npc('cross');if(f['cg.disguise']&&f['cg.orders']&&f['cg.bells']&&!f['cg.entry']&&!f['cg.alarm'])t=npc('cross');break;
+ case '6:1':t=first([['sl.access','@hugh'],['sl.ready','sl.release']]);break;
+ case '7:0':t=f['cg.entry']?exit():f['cg.alarm']?obj('cg.release'):!f['cg.met']?npc('roland'):!f['cg.bridge.open']?obj(f['cg.catch.west']?'cg.bridge':'cg.catch.west'):!f['cg.disguise']?nearest(['coat','helmet','papers'].filter(k=>!(i['cg.'+k]>0)).map(k=>obj('cg.'+k)))||npc('roland'):npc('cross');break;
  case '7:1':t=first([['la.lower','la.lower'],['la.upper','la.upper'],['la.summit','la.summit']]);break;
  }
- // A read clue is no longer the task. Point at the whole control bank, never
+ // Clues are optional. Point at the whole control bank, never
  // at the correct answer (or the next input of an authored solution).
- const read=k=>!!f['event.'+k];
  const bank=(pattern,label)=>{
   const a=(g.storyObjects||[]).filter(o=>pattern.test(o.key));
   return a.length?{x:a.reduce((n,o)=>n+o.x,0)/a.length,z:a.reduce((n,o)=>n+o.z,0)/a.length,y:a.reduce((n,o)=>n+(o.y||0),0)/a.length,navLabel:label}:null;
@@ -51,14 +50,14 @@ function target(g){
   'ih.plate':[/^ih\.line\.\d+$/,'Machine controls'],
   'pc.mirror.note':[/^pc\.mirror\.\d+$/,'Sun mirrors']
  };
- const puzzle=t&&puzzles[t.key];if(puzzle&&read(t.key)){const key=t.key;t=bank(...puzzle)||t;t={...t,clueId:({'hp.bridge.clue':'hp.bridge','kd.lift.note':'kd.lift','ff.reflect.clue':'ff.reflect','ic.lock.clue':'ic.lock','ih.plate':'ih.order','pc.mirror.note':'pc.mirrors'})[key]};}
+ const puzzle=t&&puzzles[t.key];if(puzzle){const key=t.key;t=bank(...puzzle)||t;t={...t,clueId:({'hp.bridge.clue':'hp.bridge','kd.lift.note':'kd.lift','ff.reflect.clue':'ff.reflect','ic.lock.clue':'ic.lock','ih.plate':'ih.order','pc.mirror.note':'pc.mirrors'})[key]};}
  if(g.zone===0&&g.area===0&&g.briarMill?.owner&&!f['briar.water'])t={...BFBriarJourney.PLATE,y:0,navLabel:'Mill pressure plate'};
- if(g.zone===1&&g.area===0&&f['hp.orders']&&!f['hp.bridge']&&f['hp.weight.open'])t=obj('hp.brake.right')||t;
- if(g.zone===3&&g.area===1&&f['ic.ellis.lead']&&read('ic.lock.clue')&&!f['ic.lock.open']){
+ if(g.zone===1&&g.area===0&&!f['hp.bridge']&&f['hp.weight.open'])t=obj('hp.brake.right')||t;
+ if(g.zone===3&&g.area===1&&f['ic.ellis.lead']&&!f['ic.lock.open']){
   const level=i['ic.lock.level']||0,key=level>=3||f['ic.lock.frozen']&&level!==2?'ic.lock.reset':f['ic.lock.frozen']?'ic.lock.3':level<2?'ic.lock.1':'ic.lock.2',o=obj(key);
   if(o)t={...o,clueId:'ic.lock',navLabel:key==='ic.lock.1'?'Spring pump':key==='ic.lock.2'?'Floating platform':key==='ic.lock.reset'?'Overflow sluice':'Far drain'};
  }
- if(g.zone===4&&g.area===0&&f['ih.cart']&&read('ih.plate')&&!f['ih.line.open']){
+ if(g.zone===4&&g.area===0&&f['ih.cart']&&!f['ih.line.open']){
   const z=g.iron?.sledZ??-3780;t={x:0,z:z+105,y:100,clueId:'ih.order',navLabel:'Push the scrap sled'};
  }
  // Only point to guards that actually block this required interaction.

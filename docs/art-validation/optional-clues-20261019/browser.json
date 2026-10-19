@@ -1,0 +1,61 @@
+{
+  "checks": [
+    {
+      "scene": "hp.cart.push",
+      "acted": true,
+      "flags": {
+        "hp.weight.open": true,
+        "event.hp.cart.push": true
+      },
+      "items": {},
+      "notes": [
+        "hp.cart"
+      ],
+      "level": 100,
+      "gold": 1145,
+      "signs": 0
+    },
+    {
+      "scene": "kd.hidden",
+      "acted": true,
+      "flags": {
+        "kd.hidden": true,
+        "event.kd.hidden": true
+      },
+      "items": {},
+      "notes": [],
+      "level": 100,
+      "gold": 1145,
+      "signs": 0
+    },
+    {
+      "scene": "ic.lock.1",
+      "acted": true,
+      "flags": {
+        "ic.free": true,
+        "ic.ellis.met": true,
+        "ic.notes": true,
+        "ic.ellis.lead": true,
+        "combat.3.1.camp": true,
+        "combat.3.1.known": true,
+        "ic.lock.frozen": false
+      },
+      "items": {
+        "ic.lock.level": 2,
+        "ic.lock": 2
+      },
+      "notes": [],
+      "level": 100,
+      "gold": 1145,
+      "signs": 0
+    },
+    {
+      "hub": true,
+      "level": 100,
+      "gold": 1145,
+      "bank": false
+    }
+  ],
+  "console": [],
+  "note": "Muted isolated legacy save; actual rendered controls, actual prompt interactions for door/pump, no real user storage."
+}

@@ -138,7 +138,7 @@
   }
   G.storyNpcs=[{id:'ward',name:'Captain Ward',x:-90,z:-750,y:140},{id:'ruth',name:'Ruth',x:-440,z:-1450,y:0}];
   const o=(key,label,x,z,y=0,kind='lever')=>({key,label,x,z,y,kind});
-  G.storyObjects=[o('lc.orders','Read the shift orders',-650,-650,150,'orders'),o('lc.force','Pull the locked gate chain',50,-860,90,'chain'),o('lc.gate','Open the front gate',80,-880,85),o('lc.side','Lower the side ladder',820,-1520,80,'rope'),
+  G.storyObjects=[o('lc.orders','Take the shift orders',-650,-650,150,'orders'),o('lc.force','Pull the locked gate chain',50,-860,90,'chain'),o('lc.gate','Open the front gate',80,-880,85),o('lc.side','Lower the side ladder',820,-1520,80,'rope'),
    ...Object.entries(cages).map(([id,c])=>({...o('lc.cage.'+id,'Release the '+(id==='extra'?'old':id)+' cage',c.x,c.z+135,c.y,'lock'),guardGroup:id,blockedLabel:'Drive off the cage guards first',blockedText:'The guards are too close to the cage door.'})),
    o('lc.alarm','Cut the alarm cable',0,-2500,180,'winch'),o('lc.escape','Open the escape gate',90,-4520,0,'chain'),o('lc.wagon','Unload the blocking wagon',1350,-2460,0,'wagon'),o('lc.water','Fill a clean water flask',2200,-3040,0,'water'),
    o('lc.rail.clue','Inspect the loaded cart',-2280,-3770,0,'cart'),o('lc.rail.release','Release the high freight brake',-2350,-3580,230,'brake'),o('lc.cache','Open the cave supply chest',2350,-3310,0,'chest')];

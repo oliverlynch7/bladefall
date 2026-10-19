@@ -567,12 +567,7 @@
           "text": "The barrier is open. The hydra blocks the last climb toward Sunspire. Finish exploring these cliffs before entering its ledges."
         }
       ],
-      "when": [
-        {
-          "flag": "tc.shackle",
-          "is": true
-        }
-      ],
+      "when": [],
       "once": true
     },
     "tc.brace": {

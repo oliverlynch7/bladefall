@@ -1,0 +1,58 @@
+{
+  "scope": "All20 authored story books,16 campaign sections and return visits; actual reading-label inventory and recursive precondition audit.",
+  "removedReadingGates": {
+    "deep-ice-caves": [
+      "ic.free",
+      "ic.lock.1",
+      "ic.lock.2",
+      "ic.lock.3",
+      "ic.lock.reset",
+      "ic.channel.plug"
+    ],
+    "hollow-cliffs": [
+      "hp.cart.push",
+      "hp.brake.right"
+    ],
+    "prison-dungeons": [
+      "kd.hidden",
+      "kd.lift.winch",
+      "kd.lift.wound"
+    ],
+    "iron-halls": [
+      "ih.line.complete"
+    ],
+    "great-furnace": [
+      "gf.pet.feed",
+      "gf.pet.release"
+    ],
+    "snowbound-peaks": [
+      "ff.reflect.3",
+      "ff.camp.release"
+    ],
+    "sky-library": [
+      "sl.release"
+    ],
+    "thunder-cliffs": [
+      "tc.approach"
+    ]
+  },
+  "additionalRuntimeFixes": [
+    "Prison lift availability, rescue completion and route no longer require roster/papers",
+    "Iron sled push and rear marker no longer require machine plate",
+    "Main quest and navigation skip optional clues, including waterworks, mirrors and cornice",
+    "Pike can accept a visible pipe fault without inspecting it or reading a schedule",
+    "Cage information dialogue available without inspecting cage",
+    "Stale read-first directions updated in6 story books"
+  ],
+  "removedSigns": [
+    "MOUNTAIN TRAIL",
+    "IRON HALLS",
+    "WORKER STATION",
+    "INSPECTION GATE",
+    "FOUNTAIN COURT",
+    "SKY LIBRARY",
+    "READING HALLS"
+  ],
+  "retained": "Briartown district wayfinding; optional contextual papers, diagrams and trail clues; quest document recoveries. No grants of read flags or changes to save schema.",
+  "limits": "Automated authoritative host/guest checks, physical sled/waterworks checks and representative real-browser interactions; not a full fresh campaign or two-human co-op playtest."
+}

@@ -120,3 +120,8 @@ The eight menu explanations now live in `public/3d/menu-tour.js`; use those entr
 ## Narrator audition ready
 
 Three original Voice Design candidates A/B/C read the same279-character control, jumping and lore sample. Their stable voice identities are saved in the ElevenLabs library; no existing voice was removed. The public comparison page supports one active player, Stop, volume, a page-only personal pick and MP3 downloads. This is not narration integration or approval of the full script. Generation records and original takes: audio-source/voice/narrator-audition-20261018/. Settled balance changed36564→36285 (279 credits).
+
+
+## [Codex | 2026-10-18] Narrator B selected
+
+Oliver chose audition B: "B is best." Lock the already saved ElevenLabs identity Bladefall Narrator B for tutorial and lore narration; do not regenerate a substitute voice. Exact voice ID is preserved in audio-source/voice/narrator-audition-20261018/manifest.json under selection. This approves the voice, not every draft line. Full-script recording/integration remains pending finalized wording. No new credits spent or game audio changed.

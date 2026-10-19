@@ -2392,3 +2392,7 @@ User additionally requests player level next to the co-op friend name and class 
 
 ## [Codex | 2026-10-18] Campaign character XP +12.5%
 User requests10–15% faster character leveling in campaign. Existing gainXp uses1.5x campaign character XP and3.2x class XP. Increase only the campaign character multiplier to1.6875(1.5*1.125), using one shared rounded award helper for gains and combat/task reward text. Preserve class XP, XP thresholds, saves, gold, trials and other mode rates. Verify actual gainXp in campaign, co-op credit route and excluded modes; no retroactive save changes.
+
+
+## [Codex | 2026-10-18] Boat controls and post-combat delay
+User should not need Escape/unfullscreen to reach boat options, and reports long delay after deck enemies die. Inspected voyageHud: repair/ready mouse-only while pointer locked. Ship-crossing fight waits for180distance at7speed even after wave clear. Add context actions using existing rebindable interact(Repair, then Ready) and skill1(Ready) with visible live hints and controller dispatch; consume repeats and guard mode/dead/downed/failed/rest/ready. Keep click options, no fullscreen calls. End fight on host-confirmed waveClear on next fixed tick without residual travel gate; retain actual enemy authority, co-op crew ready gate, steering and collision rules. Verify short/long fights, both waves, action guards, rebinding and browser keyboard shelter flow.

@@ -1175,7 +1175,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./marble-guardian.js?v=2276"></script>
 <script src="./hydra.js?v=2276"></script>
 <script src="./shipwreck-shore.js?v=2190"></script>
-<script src="./ship-crossing.js?v=2015"></script>
+<script src="./ship-crossing.js?v=2299"></script>
 <script src="./great-furnace.js?v=2186c"></script>
 <script src="./furnace-colossus.js?v=2276"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2201">
@@ -1219,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.298.0-campaign-xp';
+const VERSION3D='2.299.0-boat-controls';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3498,11 +3498,19 @@ function applyVoyage(packet){if(!inShipwreck()||packet.epoch!==briarEpoch())retu
  if(!G.voyage){buildVoyageDeck();musicCue('ship_crossing');}G.voyage=accepted;voyageHud();}
 function voyageReceive(actor,command){if(!inShipwreck()||!G.voyage||mode!=='play'||(MP.active&&!MP.isHost))return false;BFShipCrossing.reconcileCrew(G.voyage,voyageCrew());return BFShipCrossing.command(G.voyage,actor,command);}
 function voyageSend(type,extra={}){if(!G?.voyage)return;const command={type,epoch:briarEpoch(),...extra};if(MP.active&&!MP.isHost)MP.hostConn?.send({t:'shipCommand',command});else voyageReceive(briarId(),command);}
+function voyageAction(act,repeat=false){
+ const v=G?.voyage;if(mode!=='play'||!v||BFShipCrossing.current(v).kind!=='rest'||!['interact','skill1'].includes(act))return false;
+ if(repeat||G.p.dead||G.p.downed||G.p.hp<=0||v.failed||v.paused||!v.crew.includes(briarId())||v.ready.includes(briarId()))return true;
+ voyageSend(act==='interact'&&BFShipCrossing.view(v).canRepair?'repair':'ready');voyageHud();return true;
+}
 function voyageHud(){let el=document.getElementById('voyagehud');if(!G?.voyage||!inShipwreck()){el?.remove();return;}
- if(!el){el=document.createElement('section');el.id='voyagehud';el.style.cssText='position:fixed;z-index:65;left:50%;transform:translateX(-50%);bottom:135px;max-width:calc(100vw - 24px);width:340px;padding:10px;border:1px solid #90aca8;border-radius:10px;background:#172f38ee;color:#f1deb6;font:14px system-ui;text-align:center';el.innerHTML=uiIcon('voyage-hull')+'<strong data-ship-title></strong><div>'+uiIcon('voyage-helm')+'<span data-ship-role></span></div><div>'+uiIcon('voyage-boarders')+uiIcon('voyage-swap-roles')+'<span data-ship-help></span></div><div data-ship-buttons><button data-ship-repair>'+uiIcon('voyage-repair')+'Repair hull</button> <button data-ship-ready>'+uiIcon('voyage-ready')+'Ready to sail</button></div>';document.body.appendChild(el);el.querySelector('[data-ship-repair]').onclick=()=>voyageSend('repair');el.querySelector('[data-ship-ready]').onclick=()=>voyageSend('ready');}
+ if(!el){el=document.createElement('section');el.id='voyagehud';el.style.cssText='position:fixed;z-index:65;left:50%;transform:translateX(-50%);bottom:170px;max-width:calc(100vw - 24px);width:340px;padding:10px;border:1px solid #90aca8;border-radius:10px;background:#172f38ee;color:#f1deb6;font:14px system-ui;text-align:center';el.innerHTML=uiIcon('voyage-hull')+'<strong data-ship-title></strong><div>'+uiIcon('voyage-helm')+'<span data-ship-role></span></div><div>'+uiIcon('voyage-boarders')+uiIcon('voyage-swap-roles')+'<span data-ship-help></span></div><div data-ship-buttons><button data-ship-repair>'+uiIcon('voyage-repair')+'Repair hull</button> <button data-ship-ready>'+uiIcon('voyage-ready')+'Ready to sail</button></div>';document.body.appendChild(el);el.querySelector('[data-ship-repair]').onclick=()=>voyageSend('repair');el.querySelector('[data-ship-ready]').onclick=()=>voyageSend('ready');}
  el.style.display=mode==='play'?'block':'none';const v=BFShipCrossing.view(G.voyage),helm=v.helm===briarId();el.querySelector('[data-ship-title]').textContent=v.title+' - Hull '+Math.ceil(v.hull)+'%';el.querySelector('[data-ship-role]').textContent=helm?'You have the helm':'Your ally has the helm';
- el.querySelector('[data-ship-help]').textContent=v.kind==='steer'?(helm?'A / D or left stick: steer toward open water.':'Stay on deck. Your turn at the helm comes after the shelter.'):v.kind==='fight'?'Use your usual weapon and skills. The boat holds a safe course.':v.kind==='rest'?'Repair once. Everyone must be ready to continue.':'';
- el.querySelector('[data-icon="voyage-boarders"]').hidden=v.kind!=='fight';el.querySelector('[data-icon="voyage-swap-roles"]').hidden=v.kind!=='rest';el.querySelector('[data-ship-buttons]').hidden=v.kind!=='rest';el.querySelector('[data-ship-repair]').disabled=!v.canRepair;el.querySelector('[data-ship-ready]').disabled=G.voyage.ready.includes(briarId());}
+ el.querySelector('[data-ship-help]').textContent=v.kind==='steer'?(helm?'A / D or left stick: steer toward open water.':'Stay on deck. Your turn at the helm comes after the shelter.'):v.kind==='fight'?'Use your usual weapon and skills. The boat holds a safe course.':v.kind==='rest'?'Repair the hull, then ready up. Everyone must be ready to sail.':'';
+ el.querySelector('[data-icon="voyage-boarders"]').hidden=v.kind!=='fight';el.querySelector('[data-icon="voyage-swap-roles"]').hidden=v.kind!=='rest';el.querySelector('[data-ship-buttons]').hidden=v.kind!=='rest';el.querySelector('[data-ship-repair]').disabled=!v.canRepair;const ready=G.voyage.ready.includes(briarId()),repair=el.querySelector('[data-ship-repair]'),sail=el.querySelector('[data-ship-ready]');
+ repair.disabled=!v.canRepair||ready;repair.innerHTML=uiIcon('voyage-repair')+'Repair hull · '+controlHint('interact');
+ sail.disabled=ready;sail.innerHTML=uiIcon('voyage-ready')+(ready?'Ready — waiting for crew':'Ready to sail · '+controlHint('skill1')+(!v.canRepair?' / '+controlHint('interact'):''));
+ for(const b of [repair,sail])b.style.cssText='background:#294853;color:#fff0c4;border:1px solid #d7b977;border-radius:6px;padding:9px;margin:4px;font:700 14px system-ui;opacity:'+(b.disabled?'.55':'1');}
 function voyageTick(dt){if(!G.voyage)return;const C=BFShipCrossing,v=G.voyage;
  if(v.helm===briarId()&&C.current(v).kind==='steer'){Object.assign(G.p,{x:0,z:170,y:16,vx:0,vz:0,vy:0});G._shipSend=(G._shipSend||0)+dt;if(G._shipSend>.06){G._shipSend=0;voyageSend('steer',{value:moveX(),seq:(G._shipSeq=(G._shipSeq||0)+1)});}}
  if(!MP.active||MP.isHost){C.reconcileCrew(v,voyageCrew());if(C.current(v).kind==='fight')C.clearWave(v,C.current(v).wave,G.enemies.filter(e=>e.shipBoarder===C.current(v).wave&&!e.dead&&e.hp>0).length);C.advance(v,dt);
@@ -10229,6 +10237,7 @@ window.addEventListener('keydown',e=>{
       return; }
   }
   const code=BFPartyNavigation.keyCode(e),act=keyAction(code); if(!act) return;
+  if(voyageAction(act,e.repeat)){e.preventDefault();return;}
   if(act==='partyTeleport'){e.preventDefault();if(mode==='play'&&!e.repeat){partyHeld=true;partyNeedsRelease=false;}return;}
   if(act==='partyNext'){e.preventDefault();if(mode==='play'&&!e.repeat){partyCancel();const a=partyFriends(),q=partySelected();partyChoice=a[(a.indexOf(q)+1)%a.length]?.id||null;}return;}
   if(act==='bag'){if(!e.repeat&&mode==='play'){e.preventDefault();releaseKeyboard();openBag(resumePlay);}return;}
@@ -10266,8 +10275,8 @@ function pollGamepad(dt){
  input.jz=Math.max(-1,Math.min(1,p.z+(p.buttons[13]?1:0)-(p.buttons[12]?1:0)));
  for(const a of ['attack','jump','dodge']){if(p.edge(a)&&a!=='attack')input[a+'Edge']=true;input[a]=p.on(a)||[...heldKeyboard.values()].includes(a);}
  partyHeld=p.on('partyTeleport');if(!partyHeld)partyNeedsRelease=false;
- if(p.edge('interact'))doInteract();
- for(let i=1;i<=4;i++)if(p.edge('skill'+i))useSkill(i-1);
+ if(p.edge('interact')&&!voyageAction('interact'))doInteract();
+ for(let i=1;i<=4;i++)if(p.edge('skill'+i)&&!voyageAction('skill'+i))useSkill(i-1);
  if(meta.camMode!=='far'&&G){const c=BFController.config,v=c.sensitivity||1;const yawInput=p.rx*(c.invertX?-1:1);G.camYaw=(G.camYaw??Math.PI)+yawInput*2.7*dt*v;const pitchInput=p.ry*(c.invertY===false?-1:1);G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)+pitchInput*2*dt*v));}
 }
 // Mouse buttons share the same two-slot binding map as keyboard keys.

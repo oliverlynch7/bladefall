@@ -114,9 +114,9 @@
     }
     if(!s.failed&&s.distance>=p.length)transition(s);
    }else if(p.kind==='fight'){
-    // Broad safe water: the boat keeps travelling but never outruns the fight.
+    // Host-confirmed deck clearance ends combat immediately; travel never adds dead time.
     s.distance=Math.min(p.length,s.distance+p.speed*STEP);
-    if(s.distance>=p.length&&s.waveCleared)transition(s);
+    if(s.waveCleared)transition(s);
    }
    if(s.failed||current(s).kind==='done'){s.accumulator=0;break;}
   }

@@ -35,12 +35,18 @@
               "title": "The prisoner trail",
               "text": "Caleb escaped from a broken wagon. Follow the wheel tracks past the split trail. Look for scraps of pale cloth."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "blame",
           "text": "You left them behind?",
-          "next": "hp.caleb.blame"
+          "next": "hp.caleb.blame",
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -73,7 +79,10 @@
               "title": "The prisoner trail",
               "text": "Follow the broken wagon tracks beyond the split trail. Pale cloth marks the bend."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -93,13 +102,19 @@
         {
           "id": "timing",
           "text": "How far ahead are they?",
-          "next": "hp.caleb.timing"
+          "next": "hp.caleb.timing",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "help",
           "text": "Can anyone down there help us?",
           "next": "hp.caleb.ruth",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 3
         },
         {
           "id": "orders",
@@ -110,7 +125,10 @@
               "flag": "hp.orders",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -130,12 +148,18 @@
           "id": "back",
           "text": "Tell me about the others.",
           "next": "hp.caleb.ruth",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "trail",
           "text": "The wagon first. Understood.",
-          "next": "hp.caleb.trail"
+          "next": "hp.caleb.trail",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -154,7 +178,10 @@
         {
           "id": "back",
           "text": "I'll look for her.",
-          "next": "hp.caleb.trail"
+          "next": "hp.caleb.trail",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -173,7 +200,10 @@
         {
           "id": "back",
           "text": "I'll open the way down.",
-          "next": "hp.caleb.trail"
+          "next": "hp.caleb.trail",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -207,12 +237,18 @@
               "title": "Skip’s rope",
               "text": "Skip dropped his rope below the broken platform east of his rest spot. Bring it back to open his ridge route."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "path",
           "text": "Is there another way past the patrol?",
-          "next": "hp.skip.advice"
+          "next": "hp.skip.advice",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -263,17 +299,26 @@
               "flag": "hp.skip.returned",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "advice",
           "text": "How should I cross the ridge?",
-          "next": "hp.skip.advice"
+          "next": "hp.skip.advice",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "joke",
           "text": "Does the spear come with a no-falling promise?",
-          "next": "hp.skip.joke"
+          "next": "hp.skip.joke",
+          "category": "side",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -292,7 +337,10 @@
         {
           "id": "back",
           "text": "I'll find the rope.",
-          "next": "hp.skip.rope"
+          "next": "hp.skip.rope",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -318,7 +366,10 @@
               "id": "hp.skip.quest",
               "value": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -337,7 +388,10 @@
         {
           "id": "route",
           "text": "Any last advice?",
-          "next": "hp.skip.ready"
+          "next": "hp.skip.ready",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -356,12 +410,18 @@
         {
           "id": "joke",
           "text": "How did you learn that?",
-          "next": "hp.skip.brake"
+          "next": "hp.skip.brake",
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "thanks",
           "text": "Thanks, Skip.",
-          "next": "hp.skip.ready"
+          "next": "hp.skip.ready",
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -380,7 +440,10 @@
         {
           "id": "back",
           "text": "I'll try the cart.",
-          "next": "hp.skip.ready"
+          "next": "hp.skip.ready",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -697,5 +760,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

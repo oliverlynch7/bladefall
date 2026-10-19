@@ -41,7 +41,10 @@
               "text": "Find a rudder in the tilted wreck, sailcloth at the lookout, and dry rope in the storage cave. Fit each part at Otto’s workbench, or ask him to help."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -62,7 +65,10 @@
           "text": "I will find them.",
           "next": "sc.otto.work",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -99,13 +105,30 @@
               "type": "conditional",
               "id": "sc.otto.rudder.complete",
               "when": [
-                { "flag": "sc.installed.rudder", "is": true },
-                { "flag": "sc.installed.sail", "is": true },
-                { "flag": "sc.installed.rope", "is": true }
+                {
+                  "flag": "sc.installed.rudder",
+                  "is": true
+                },
+                {
+                  "flag": "sc.installed.sail",
+                  "is": true
+                },
+                {
+                  "flag": "sc.installed.rope",
+                  "is": true
+                }
               ],
               "effects": [
-                { "type": "flag", "id": "sc.boat.ready", "value": true },
-                { "type": "quest", "id": "sc.boat", "value": "complete" }
+                {
+                  "type": "flag",
+                  "id": "sc.boat.ready",
+                  "value": true
+                },
+                {
+                  "type": "quest",
+                  "id": "sc.boat",
+                  "value": "complete"
+                }
               ]
             }
           ],
@@ -118,7 +141,10 @@
               "flag": "sc.installed.rudder",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "deliver.sail",
@@ -140,13 +166,30 @@
               "type": "conditional",
               "id": "sc.otto.sail.complete",
               "when": [
-                { "flag": "sc.installed.rudder", "is": true },
-                { "flag": "sc.installed.sail", "is": true },
-                { "flag": "sc.installed.rope", "is": true }
+                {
+                  "flag": "sc.installed.rudder",
+                  "is": true
+                },
+                {
+                  "flag": "sc.installed.sail",
+                  "is": true
+                },
+                {
+                  "flag": "sc.installed.rope",
+                  "is": true
+                }
               ],
               "effects": [
-                { "type": "flag", "id": "sc.boat.ready", "value": true },
-                { "type": "quest", "id": "sc.boat", "value": "complete" }
+                {
+                  "type": "flag",
+                  "id": "sc.boat.ready",
+                  "value": true
+                },
+                {
+                  "type": "quest",
+                  "id": "sc.boat",
+                  "value": "complete"
+                }
               ]
             }
           ],
@@ -159,7 +202,10 @@
               "flag": "sc.installed.sail",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "deliver.rope",
@@ -181,13 +227,30 @@
               "type": "conditional",
               "id": "sc.otto.rope.complete",
               "when": [
-                { "flag": "sc.installed.rudder", "is": true },
-                { "flag": "sc.installed.sail", "is": true },
-                { "flag": "sc.installed.rope", "is": true }
+                {
+                  "flag": "sc.installed.rudder",
+                  "is": true
+                },
+                {
+                  "flag": "sc.installed.sail",
+                  "is": true
+                },
+                {
+                  "flag": "sc.installed.rope",
+                  "is": true
+                }
               ],
               "effects": [
-                { "type": "flag", "id": "sc.boat.ready", "value": true },
-                { "type": "quest", "id": "sc.boat", "value": "complete" }
+                {
+                  "type": "flag",
+                  "id": "sc.boat.ready",
+                  "value": true
+                },
+                {
+                  "type": "quest",
+                  "id": "sc.boat",
+                  "value": "complete"
+                }
               ]
             }
           ],
@@ -200,7 +263,10 @@
               "flag": "sc.installed.rope",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "ready",
@@ -232,14 +298,20 @@
               "flag": "sc.installed.rope",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 3
         },
         {
           "id": "routes",
           "text": "Remind me where to look.",
           "next": "sc.otto.routes",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 4
         }
       ],
       "voice": {
@@ -260,7 +332,10 @@
           "text": "About the other supplies...",
           "next": "sc.otto.work",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -281,7 +356,10 @@
           "text": "About the other supplies...",
           "next": "sc.otto.work",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -302,7 +380,10 @@
           "text": "About the other supplies...",
           "next": "sc.otto.work",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -323,7 +404,10 @@
           "text": "I have what I need.",
           "next": "sc.otto.work",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -352,7 +436,10 @@
               "text": "Board beside Otto when you are ready. Shore secrets cannot be collected during the voyage. Steer around rocks; fight boarders on the safe stretches. Repair once in sheltered water. Reach the far shore to keep this half's rewards."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -373,7 +460,10 @@
           "text": "Let me check the shore.",
           "next": "sc.otto.farewell",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -412,14 +502,20 @@
               "text": "Captain Rose wants the bell from his old wreck north-west of the work beach. There may be a record of what happened inside."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "ask",
           "text": "What happened to your crew?",
           "next": "sc.rose.memory",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -458,7 +554,10 @@
               "text": "Find the bell and the crew record inside Rose's wreck."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -512,7 +611,10 @@
               "flag": "sc.record",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "kind",
@@ -550,7 +652,10 @@
               "flag": "sc.record",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "mock",
@@ -568,14 +673,20 @@
               "item": "sc.bell",
               "count": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": true,
+          "priority": 2
         },
         {
           "id": "looking",
           "text": "I am still looking.",
           "next": "sc.rose.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 3
         }
       ],
       "voice": {
@@ -595,7 +706,10 @@
           "text": "Any advice for the crossing?",
           "next": "sc.rose.advice",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -616,7 +730,10 @@
           "text": "What should I watch for?",
           "next": "sc.rose.advice",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -637,7 +754,10 @@
           "text": "I will remember that.",
           "next": "sc.rose.advice",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -664,7 +784,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "again",
@@ -682,7 +805,10 @@
               "value": "closed"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -739,14 +865,20 @@
               "item": "sc.bell",
               "count": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "leave",
           "text": "I will give you some space.",
           "next": "sc.rose.repair",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -766,7 +898,10 @@
           "text": "I will go.",
           "next": "sc.rose.closed",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -985,52 +1120,118 @@
     },
     "sc.fit": {
       "when": [
-        { "flag": "sc.met", "is": true }
+        {
+          "flag": "sc.met",
+          "is": true
+        }
       ],
       "effects": [
         {
-          "type": "conditional", "id": "sc.fit.rudder",
+          "type": "conditional",
+          "id": "sc.fit.rudder",
           "when": [
-            { "item": "sc.rudder", "count": 1 },
-            { "flag": "sc.installed.rudder", "is": false }
+            {
+              "item": "sc.rudder",
+              "count": 1
+            },
+            {
+              "flag": "sc.installed.rudder",
+              "is": false
+            }
           ],
           "effects": [
-            { "type": "item", "id": "sc.rudder", "amount": -1 },
-            { "type": "flag", "id": "sc.installed.rudder", "value": true }
+            {
+              "type": "item",
+              "id": "sc.rudder",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.installed.rudder",
+              "value": true
+            }
           ]
         },
         {
-          "type": "conditional", "id": "sc.fit.sail",
+          "type": "conditional",
+          "id": "sc.fit.sail",
           "when": [
-            { "item": "sc.sail", "count": 1 },
-            { "flag": "sc.installed.sail", "is": false }
+            {
+              "item": "sc.sail",
+              "count": 1
+            },
+            {
+              "flag": "sc.installed.sail",
+              "is": false
+            }
           ],
           "effects": [
-            { "type": "item", "id": "sc.sail", "amount": -1 },
-            { "type": "flag", "id": "sc.installed.sail", "value": true }
+            {
+              "type": "item",
+              "id": "sc.sail",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.installed.sail",
+              "value": true
+            }
           ]
         },
         {
-          "type": "conditional", "id": "sc.fit.rope",
+          "type": "conditional",
+          "id": "sc.fit.rope",
           "when": [
-            { "item": "sc.rope", "count": 1 },
-            { "flag": "sc.installed.rope", "is": false }
+            {
+              "item": "sc.rope",
+              "count": 1
+            },
+            {
+              "flag": "sc.installed.rope",
+              "is": false
+            }
           ],
           "effects": [
-            { "type": "item", "id": "sc.rope", "amount": -1 },
-            { "type": "flag", "id": "sc.installed.rope", "value": true }
+            {
+              "type": "item",
+              "id": "sc.rope",
+              "amount": -1
+            },
+            {
+              "type": "flag",
+              "id": "sc.installed.rope",
+              "value": true
+            }
           ]
         },
         {
-          "type": "conditional", "id": "sc.fit.complete",
+          "type": "conditional",
+          "id": "sc.fit.complete",
           "when": [
-            { "flag": "sc.installed.rudder", "is": true },
-            { "flag": "sc.installed.sail", "is": true },
-            { "flag": "sc.installed.rope", "is": true }
+            {
+              "flag": "sc.installed.rudder",
+              "is": true
+            },
+            {
+              "flag": "sc.installed.sail",
+              "is": true
+            },
+            {
+              "flag": "sc.installed.rope",
+              "is": true
+            }
           ],
           "effects": [
-            { "type": "flag", "id": "sc.boat.ready", "value": true },
-            { "type": "quest", "id": "sc.boat", "value": "complete" }
+            {
+              "type": "flag",
+              "id": "sc.boat.ready",
+              "value": true
+            },
+            {
+              "type": "quest",
+              "id": "sc.boat",
+              "value": "complete"
+            }
           ]
         }
       ]
@@ -1051,5 +1252,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

@@ -41,7 +41,10 @@
               "text": "Grace is sheltering palace workers near the dry fountain. Remove the iron clamp at the west waterworks, then open its wheel. This will restore the court and its large healing pad."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "orb",
@@ -54,7 +57,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -88,7 +94,10 @@
               "text": "Remove the Legion clamp at the west waterworks, then open the wheel. The restored court gives the survivors a safe place and reopens its large healing pad."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -109,7 +118,10 @@
           "text": "I will get the water running.",
           "next": "pc.grace.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "demand",
@@ -122,7 +134,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -149,14 +164,20 @@
               "value": false
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "leave",
           "text": "Fine. The west steps.",
           "next": "pc.grace.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -194,7 +215,10 @@
               "flag": "pc.court",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "ready",
@@ -206,7 +230,10 @@
               "flag": "pc.court",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -228,7 +255,10 @@
           "text": "How do I reach the library?",
           "next": "pc.grace.route",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "garden",
@@ -246,7 +276,10 @@
               "value": "active"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -278,14 +311,20 @@
               "value": "active"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "go",
           "text": "I will find him.",
           "next": "pc.grace.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -324,7 +363,10 @@
               "text": "Open the garden channel beside the east greenhouse. Find the seed tin inside, then bring it back to Grace. Seeds can restore this garden and a small garden at the Refuge."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "mock",
@@ -337,7 +379,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "deliver",
@@ -387,7 +432,10 @@
               "flag": "pc.garden.done",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -424,14 +472,20 @@
               "value": "active"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "leave",
           "text": "I have other things to do.",
           "next": "pc.grace.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -495,14 +549,20 @@
               "flag": "pc.garden.done",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "remind",
           "text": "Where should I look?",
           "next": "pc.grace.garden",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -554,7 +614,10 @@
               "text": "Open either balcony to reach the mirror terrace. Fight its patrol and pull the upper release, or drain its lock from the lower garden. The other balcony is an optional route."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "people",
@@ -567,7 +630,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -601,7 +667,10 @@
               "text": "Choose either balcony: clear its patrol and pull the upper release, or drain its lock from the lower garden. One open route reaches the mirrors."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -628,21 +697,30 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "doubt",
           "text": "You are letting a stranger do this?",
           "next": "pc.victor.stranger",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 3
         },
         {
           "id": "go",
           "text": "I will open the way.",
           "next": "pc.victor.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -663,7 +741,10 @@
           "text": "Then watch my back.",
           "next": "pc.victor.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -692,7 +773,10 @@
               "text": "On the mirror terrace, compare each beam with its carved sun receiver. Turn the mirrors until all three beams reach their marked receivers. An incorrect turn is harmless."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -714,14 +798,20 @@
           "text": "Explain the routes again.",
           "next": "pc.victor.route",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "mirror",
           "text": "What do the mirror marks mean?",
           "next": "pc.victor.mirrors",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "done",
@@ -733,7 +823,10 @@
               "flag": "pc.light.open",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1143,5 +1236,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

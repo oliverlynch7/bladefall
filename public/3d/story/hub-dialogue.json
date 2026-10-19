@@ -126,7 +126,10 @@
         {
           "id": "learn",
           "text": "How can you help me?",
-          "next": "hub.quartermaster.guide"
+          "next": "hub.quartermaster.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -156,7 +159,10 @@
         {
           "id": "thanks",
           "text": "Thanks. Show me what you do.",
-          "next": "hub.quartermaster.guide"
+          "next": "hub.quartermaster.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -186,7 +192,10 @@
         {
           "id": "learn",
           "text": "How can you help me?",
-          "next": "hub.anvil.guide"
+          "next": "hub.anvil.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -216,7 +225,10 @@
         {
           "id": "thanks",
           "text": "Thanks. Show me what you do.",
-          "next": "hub.anvil.guide"
+          "next": "hub.anvil.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -246,7 +258,10 @@
         {
           "id": "learn",
           "text": "How can you help me?",
-          "next": "hub.keeper.guide"
+          "next": "hub.keeper.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -276,7 +291,10 @@
         {
           "id": "thanks",
           "text": "Thanks. Show me what you do.",
-          "next": "hub.keeper.guide"
+          "next": "hub.keeper.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -306,7 +324,10 @@
         {
           "id": "learn",
           "text": "How can you help me?",
-          "next": "hub.drillmaster.guide"
+          "next": "hub.drillmaster.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -336,7 +357,10 @@
         {
           "id": "thanks",
           "text": "Thanks. Show me what you do.",
-          "next": "hub.drillmaster.guide"
+          "next": "hub.drillmaster.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -366,7 +390,10 @@
         {
           "id": "learn",
           "text": "How can you help me?",
-          "next": "hub.beastkeeper.guide"
+          "next": "hub.beastkeeper.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -396,7 +423,10 @@
         {
           "id": "thanks",
           "text": "Thanks. Show me what you do.",
-          "next": "hub.beastkeeper.guide"
+          "next": "hub.beastkeeper.guide",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -600,5 +630,6 @@
         "context": "Optional hub news. Only available after the named region is completed. The player can always open your service instead."
       }
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

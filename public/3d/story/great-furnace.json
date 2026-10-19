@@ -32,14 +32,20 @@
               "flag": "gf.schedule",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "look",
           "text": "Where are the maintenance records?",
           "next": "gf.pike.records",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "force",
@@ -51,14 +57,20 @@
               "id": "gf.alarm"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 5
         },
         {
           "id": "back",
           "text": "I will check my work order.",
           "next": "gf.pike.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -78,7 +90,10 @@
           "text": "I will check it.",
           "next": "gf.pike.first",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -98,7 +113,10 @@
           "text": "About my work order...",
           "next": "gf.pike.first",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -130,7 +148,10 @@
               "text": "Pike sent the gate patrol to inspect the leaking pipe. Martin is in the break room beyond the gate."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -158,7 +179,10 @@
               "text": "Clear the gate patrol, then use the handle beside the gate. Martin is in the break room beyond it."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -195,7 +219,10 @@
               "id": "gf.martin.met"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "rush",
@@ -211,7 +238,10 @@
               "id": "gf.early"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -244,7 +274,10 @@
               "text": "Open the worker passage, then ring the work bell to start the escape. Stay near the workers and keep the guards off them. If someone falls, ring the bell to try again."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "quiet",
@@ -263,7 +296,10 @@
               "text": "Open the worker passage and stop the transport chain on the western route. Then ring the work bell and defend the workers to the break room. Fewer patrols will find you."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -292,7 +328,10 @@
               "text": "Open the worker passage, ring the work bell, and guard the group on the way to the break room. If someone falls, ring again to retry."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -313,7 +352,10 @@
           "text": "Stay ready.",
           "next": "gf.martin.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -348,7 +390,10 @@
               "flag": "gf.evacuated",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "pages",
@@ -372,7 +417,10 @@
               "flag": "gf.writings",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "cage",
@@ -384,14 +432,20 @@
               "flag": "gf.cage",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 5
         },
         {
           "id": "leave",
           "text": "Keep them together. I will be back.",
           "next": "gf.martin.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -411,14 +465,20 @@
           "text": "What is in the high office?",
           "next": "gf.martin.office",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
           "text": "I will follow the pipes.",
           "next": "gf.martin.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -447,7 +507,10 @@
               "text": "The command office stands above the eastern gallery. Search its desk. The guards have been locking seized papers there."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -468,14 +531,20 @@
           "text": "One question. We had better make it count.",
           "next": "gf.martin.hope",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "thanks",
           "text": "Thank you. I could use the help.",
           "next": "gf.martin.hope",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -496,7 +565,10 @@
           "text": "I will deal with the Colossus.",
           "next": "gf.martin.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -517,7 +589,10 @@
           "text": "I will try.",
           "next": "gf.martin.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -643,12 +718,27 @@
     "gf.cool.complete": {
       "once": true,
       "when": [
-        { "flag": "gf.evacuated", "is": true },
-        { "flag": "gf.cool.open", "is": false }
+        {
+          "flag": "gf.evacuated",
+          "is": true
+        },
+        {
+          "flag": "gf.cool.open",
+          "is": false
+        }
       ],
       "effects": [
-        { "type": "flag", "id": "gf.cool.open" },
-        { "type": "note", "id": "gf.cool.safe", "region": "ember", "title": "The crossing is cool", "text": "The cold water raised the crossing. Jump its two broken sections to reach the Colossus." }
+        {
+          "type": "flag",
+          "id": "gf.cool.open"
+        },
+        {
+          "type": "note",
+          "id": "gf.cool.safe",
+          "region": "ember",
+          "title": "The crossing is cool",
+          "text": "The cold water raised the crossing. Jump its two broken sections to reach the Colossus."
+        }
       ]
     },
     "gf.writings": {
@@ -720,22 +810,47 @@
     "gf.evac.call": {
       "once": false,
       "when": [
-        { "flag": "gf.passage", "is": true },
-        { "flag": "gf.evacuated", "is": false }
+        {
+          "flag": "gf.passage",
+          "is": true
+        },
+        {
+          "flag": "gf.evacuated",
+          "is": false
+        }
       ],
       "effects": [
-        { "type": "item", "id": "gf.evac.calls", "amount": 1 }
+        {
+          "type": "item",
+          "id": "gf.evac.calls",
+          "amount": 1
+        }
       ]
     },
     "gf.evac.complete": {
       "once": true,
       "when": [
-        { "flag": "gf.passage", "is": true },
-        { "flag": "gf.evacuated", "is": false }
+        {
+          "flag": "gf.passage",
+          "is": true
+        },
+        {
+          "flag": "gf.evacuated",
+          "is": false
+        }
       ],
       "effects": [
-        { "type": "flag", "id": "gf.evacuated" },
-        { "type": "note", "id": "gf.safe", "region": "ember", "title": "The workers are safe", "text": "All three workers reached the break room. They opened the service crossing toward the cooling controls." }
+        {
+          "type": "flag",
+          "id": "gf.evacuated"
+        },
+        {
+          "type": "note",
+          "id": "gf.safe",
+          "region": "ember",
+          "title": "The workers are safe",
+          "text": "All three workers reached the break room. They opened the service crossing toward the cooling controls."
+        }
       ]
     },
     "gf.cache.release": {
@@ -864,5 +979,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

@@ -22,7 +22,10 @@
           "id": "next",
           "text": "Your answer took their freedom.",
           "next": "ak.king.price",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -48,7 +51,10 @@
               "id": "ak.start",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -68,7 +74,10 @@
           "id": "next",
           "text": "And yet I am still here.",
           "next": "ak.king.plunge",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -94,7 +103,10 @@
               "id": "ak.plunge",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -114,7 +126,10 @@
           "id": "next",
           "text": "Ian?",
           "next": "ak.ian.name",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -134,7 +149,10 @@
           "id": "next",
           "text": "Then where did this power come from?",
           "next": "ak.ian.family",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -154,7 +172,10 @@
           "id": "next",
           "text": "Thomas is still my father.",
           "next": "ak.ian.father",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -174,7 +195,10 @@
           "id": "next",
           "text": "Can we save these people?",
           "next": "ak.ian.souls",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -194,7 +218,10 @@
           "id": "next",
           "text": "Tell me how.",
           "next": "ak.ian.blade",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -220,7 +247,10 @@
               "id": "ak.charge",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -240,7 +270,10 @@
           "id": "next",
           "text": "Will I see you again?",
           "next": "ak.ian.legacy",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -266,7 +299,10 @@
               "id": "ak.home",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -280,5 +316,6 @@
       }
     }
   },
-  "events": {}
+  "events": {},
+  "dialoguePolicy": 1
 }

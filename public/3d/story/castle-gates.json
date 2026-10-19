@@ -55,7 +55,10 @@
               "text": "Roland can fit a supply crew disguise. Find the coat in the supply yard, a repaired helmet by the armor wash, and papers on the wagon. Learn the crew orders at the bell post. Actual equipment stays unchanged. A direct assault is also possible."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "blunt",
@@ -80,7 +83,10 @@
               "text": "Roland can fit a supply crew disguise. Find the coat in the supply yard, a repaired helmet by the armor wash, and papers on the wagon. Learn the crew orders at the bell post. Actual equipment stays unchanged. A direct assault is also possible."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -135,7 +141,10 @@
             {
               "item": "cg.papers"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "personal",
@@ -166,7 +175,10 @@
               "flag": "cg.refused",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "orders",
@@ -181,7 +193,10 @@
               "text": "The drain floor is broken below the bell post. Follow the offset stone ledges to the brake. It lowers a return walkway. The bridge wheel is beside the bell post."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -202,7 +217,10 @@
           "text": "I will check the orders.",
           "next": "cg.roland.menu",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -223,7 +241,10 @@
           "text": "I will find them.",
           "next": "cg.roland.menu",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -252,7 +273,10 @@
               "text": "Roland’s old chest piece is in the seized goods room east of the supply yard. His name is stamped inside. He offered something unusual in exchange."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "return",
@@ -296,7 +320,10 @@
               "flag": "cg.return",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "keep",
@@ -333,14 +360,20 @@
               "flag": "cg.kept",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "threat",
           "text": "Just hand over what you have.",
           "next": "cg.roland.warning",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 6
         }
       ],
       "voice": {
@@ -361,7 +394,10 @@
           "text": "You are right. I am sorry.",
           "next": "cg.roland.personal",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "insist",
@@ -386,7 +422,10 @@
               "text": "Roland withdrew his personal offer after I threatened him. He will still fit the disguise. The castle can also be entered by force."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -406,7 +445,10 @@
           "text": "About getting inside...",
           "next": "cg.roland.menu",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -427,7 +469,10 @@
           "text": "About the uniform...",
           "next": "cg.roland.menu",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -448,7 +493,10 @@
           "text": "Thank you, Roland.",
           "next": "cg.roland.menu",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -474,7 +522,10 @@
               "flag": "cg.disguise",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "royal",
@@ -486,14 +537,20 @@
               "flag": "cg.disguise",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": true,
+          "priority": 3
         },
         {
           "id": "visitor",
           "text": "I have an urgent message for the King.",
           "next": "cg.cross.check",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "fight",
@@ -518,7 +575,10 @@
               "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 5
         }
       ],
       "voice": {
@@ -546,7 +606,10 @@
             {
               "item": "cg.papers"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "bluff",
@@ -571,7 +634,10 @@
               "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 3
         },
         {
           "id": "fight",
@@ -596,7 +662,10 @@
               "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -645,7 +714,10 @@
               "flag": "cg.disguise",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "first",
@@ -670,7 +742,10 @@
               "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "anytime",
@@ -695,7 +770,10 @@
               "text": "Cross has called the guard. Survive three waves in the gate court, then turn the inner gate wheel. The stone barriers provide cover. The supply yard and its small healing pads remain reachable."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -715,7 +793,10 @@
           "text": "Understood.",
           "next": "cg.cross.done",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -735,7 +816,10 @@
           "text": "Moving.",
           "next": "cg.cross.done",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -755,7 +839,10 @@
           "text": "Then I will break through.",
           "next": "cg.cross.end",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -775,7 +862,10 @@
           "text": "I am ready.",
           "next": "cg.cross.end",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1065,5 +1155,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

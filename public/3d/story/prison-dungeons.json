@@ -28,7 +28,10 @@
               "id": "kd.walter.met",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "lift",
@@ -40,7 +43,10 @@
               "id": "kd.walter.met",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -60,7 +66,10 @@
         {
           "id": "lift",
           "text": "What about the lift?",
-          "next": "kd.walter.lift"
+          "next": "kd.walter.lift",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "papers",
@@ -71,7 +80,10 @@
               "flag": "kd.papers",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -90,7 +102,10 @@
         {
           "id": "back",
           "text": "I will find the missing prisoners.",
-          "next": "kd.walter.marks"
+          "next": "kd.walter.marks",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "papers",
@@ -101,7 +116,10 @@
               "flag": "kd.papers",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -120,12 +138,18 @@
         {
           "id": "king",
           "text": "Does he know where the King is?",
-          "next": "kd.walter.unknown"
+          "next": "kd.walter.unknown",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "hall",
           "text": "What is beyond the upper shelter?",
-          "next": "kd.walter.fallen"
+          "next": "kd.walter.fallen",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -144,7 +168,10 @@
         {
           "id": "hall",
           "text": "Then I need the way out.",
-          "next": "kd.walter.fallen"
+          "next": "kd.walter.fallen",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -163,7 +190,10 @@
         {
           "id": "back",
           "text": "Stay together.",
-          "next": "kd.walter.lift"
+          "next": "kd.walter.lift",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -182,12 +212,18 @@
         {
           "id": "ask",
           "text": "Whose is it?",
-          "next": "kd.sly.truth"
+          "next": "kd.sly.truth",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "busy",
           "text": "I am looking for the hidden prisoners.",
-          "next": "kd.sly.busy"
+          "next": "kd.sly.busy",
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -206,7 +242,10 @@
         {
           "id": "back",
           "text": "About that chain...",
-          "next": "kd.sly.truth"
+          "next": "kd.sly.truth",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -244,7 +283,10 @@
               "title": "A picture on a chain",
               "text": "Return the stolen keepsake to its owner in the hidden holding room. Sly has agreed to make amends. Then speak to him again."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "open",
@@ -268,7 +310,10 @@
               "title": "An honest return",
               "text": "Return the family keepsake in the hidden holding room. Sly has agreed to admit what he did. Speak to him afterward."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "keep",
@@ -292,7 +337,10 @@
               "title": "An empty collar",
               "text": "Sly says the owner keeps reaching for the chain he lost. The keepsake can still be returned in the hidden holding room."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -339,12 +387,18 @@
               "flag": "kd.transfer",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "wait",
           "text": "I will return it.",
-          "next": "kd.sly.quiet"
+          "next": "kd.sly.quiet",
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -391,12 +445,18 @@
               "flag": "kd.transfer",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "wait",
           "text": "I will find his bundle.",
-          "next": "kd.sly.open"
+          "next": "kd.sly.open",
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -437,12 +497,18 @@
               "flag": "kd.transfer",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "leave",
           "text": "I will think about it.",
-          "next": "kd.sly.angry"
+          "next": "kd.sly.angry",
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -481,7 +547,10 @@
               "flag": "kd.sly.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -500,7 +569,10 @@
         {
           "id": "back",
           "text": "Keep helping him.",
-          "next": "kd.sly.done"
+          "next": "kd.sly.done",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -519,7 +591,10 @@
         {
           "id": "back",
           "text": "That sounds like a start.",
-          "next": "kd.sly.done"
+          "next": "kd.sly.done",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -538,7 +613,10 @@
         {
           "id": "back",
           "text": "Carry the pack, Sly.",
-          "next": "kd.sly.done"
+          "next": "kd.sly.done",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -660,19 +738,38 @@
       "once": false,
       "effects": [],
       "when": [
-        { "flag": "kd.free", "is": true },
-        { "flag": "kd.papers", "is": true },
-        { "flag": "kd.lift.open", "is": false }
+        {
+          "flag": "kd.free",
+          "is": true
+        },
+        {
+          "flag": "kd.papers",
+          "is": true
+        },
+        {
+          "flag": "kd.lift.open",
+          "is": false
+        }
       ]
     },
     "kd.lift.wound": {
       "once": true,
       "effects": [
-        { "type": "flag", "id": "kd.lift.open", "value": true }
+        {
+          "type": "flag",
+          "id": "kd.lift.open",
+          "value": true
+        }
       ],
       "when": [
-        { "flag": "kd.free", "is": true },
-        { "flag": "kd.papers", "is": true }
+        {
+          "flag": "kd.free",
+          "is": true
+        },
+        {
+          "flag": "kd.papers",
+          "is": true
+        }
       ]
     },
     "kd.transfer": {
@@ -717,12 +814,28 @@
     "kd.press.brake": {
       "once": true,
       "effects": [
-        { "type": "flag", "id": "kd.deep.open", "value": true },
-        { "type": "note", "id": "kd.press.stopped", "region": "keep", "title": "The presses stopped", "text": "The emergency brake locked the presses overhead. The lower gate is open; a rift shard lies beyond it." }
+        {
+          "type": "flag",
+          "id": "kd.deep.open",
+          "value": true
+        },
+        {
+          "type": "note",
+          "id": "kd.press.stopped",
+          "region": "keep",
+          "title": "The presses stopped",
+          "text": "The emergency brake locked the presses overhead. The lower gate is open; a rift shard lies beyond it."
+        }
       ],
       "when": [
-        { "flag": "kd.lift.open", "is": true },
-        { "flag": "kd.deep.open", "is": false }
+        {
+          "flag": "kd.lift.open",
+          "is": true
+        },
+        {
+          "flag": "kd.deep.open",
+          "is": false
+        }
       ]
     },
     "kd.return": {
@@ -782,5 +895,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

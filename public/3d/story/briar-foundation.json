@@ -57,21 +57,30 @@
           "text": "Someone has to keep them away from home.",
           "next": "briar.thomas.protect",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "afraid",
           "text": "I'm scared too. But hiding won't stop them.",
           "next": "briar.thomas.afraid",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "joke",
           "text": "Then I'd better look dangerous from a distance.",
           "next": "briar.thomas.joke",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -108,7 +117,10 @@
               "text": "Mara needs help treating our neighbors. Find her near the village beds."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -145,7 +157,10 @@
               "text": "Mara needs help treating our neighbors. Find her near the village beds."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -182,7 +197,10 @@
               "text": "Mara needs help treating our neighbors. Find her near the village beds."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -214,7 +232,10 @@
           "text": "Tell me where to look.",
           "next": "briar.mara.supplies",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "why",
@@ -222,14 +243,20 @@
           "next": "briar.mara.why",
           "effects": [],
           "when": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "joke",
           "text": "I'm better at finding trouble. Will that do?",
           "next": "briar.mara.joke",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -249,7 +276,10 @@
           "text": "All right. What do you need?",
           "next": "briar.mara.supplies",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -269,7 +299,10 @@
           "text": "Roots and dressings. Where are they?",
           "next": "briar.mara.supplies",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -302,7 +335,10 @@
               "text": "Gather 3 tangle roots in the garden. Walk through the store’s open front door for clean dressings. Bring both to Mara."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -393,7 +429,10 @@
               "quest": "briar.supplies",
               "is": "active"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -414,7 +453,10 @@
           "next": "briar.mara.next",
           "effects": [],
           "when": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -446,7 +488,10 @@
           "text": "What do you need?",
           "next": "briar.gus.request",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "why",
@@ -454,7 +499,10 @@
           "next": "briar.gus.home",
           "effects": [],
           "when": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "mock",
@@ -466,7 +514,10 @@
               "id": "gus.upset"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -486,7 +537,10 @@
           "text": "Then let's give them somewhere safe.",
           "next": "briar.gus.request",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "mock",
@@ -498,7 +552,10 @@
               "id": "gus.upset"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -531,7 +588,10 @@
               "text": "Gus left his tool roll in the workshop loft. Bring it back so he can open a safer way through the workshop."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -589,7 +649,10 @@
               "quest": "briar.gus.tools",
               "is": "active"
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -609,7 +672,10 @@
           "text": "Keep yourself safe, Gus.",
           "next": "briar.gus.done",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -650,14 +716,20 @@
               "flag": "gus.closed",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "sorry",
           "text": "I'm sorry. That was unfair.",
           "next": "briar.gus.sorry",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "cruel",
@@ -681,7 +753,10 @@
               "text": "I pushed Gus too far. He will not offer his tools job this time. The mill crossing is still open to us once it is repaired."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -710,7 +785,10 @@
               "flag": "gus.closed",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -736,7 +814,10 @@
               "value": false
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -769,7 +850,10 @@
           "text": "How do I get past them?",
           "next": "briar.lewis.routes",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "prisoners",
@@ -777,7 +861,10 @@
           "next": "briar.lewis.prisoners",
           "effects": [],
           "when": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -809,7 +896,10 @@
               "text": "Lewis is keeping the neighbors back. I can stop the signal at its ground crank or climb the eastern roots to cut its upper cable. The northern clearing leads onward."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -829,7 +919,10 @@
           "text": "Show me the way to the signal.",
           "next": "briar.lewis.routes",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -854,7 +947,10 @@
               "flag": "woods.signal",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -911,7 +1007,10 @@
               "flag": "beth.rescued",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "sheep",
@@ -923,7 +1022,10 @@
               "is": false
             }
           ],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "safe",
@@ -934,7 +1036,10 @@
               "flag": "beth.rescued",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -979,7 +1084,10 @@
               "flag": "beth.rescued",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "safe",
@@ -990,7 +1098,10 @@
               "flag": "beth.rescued",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -1016,7 +1127,10 @@
               "flag": "beth.rescued",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1050,7 +1164,10 @@
         {
           "id": "ready",
           "text": "I’ll clear a path to the rope.",
-          "next": "briar.bethBrother.wait"
+          "next": "briar.bethBrother.wait",
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "safe",
@@ -1061,7 +1178,10 @@
               "flag": "beth.rescued",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1087,7 +1207,10 @@
               "flag": "beth.rescued",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1723,5 +1846,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

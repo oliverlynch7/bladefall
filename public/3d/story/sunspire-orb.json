@@ -29,19 +29,28 @@
               "id": "mc.asked",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "steady",
           "text": "Give me a moment. People are depending on this.",
           "next": "mc.orb.steady",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "wry",
           "text": "I had a speech ready. That was most of it.",
           "next": "mc.orb.wry",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -63,7 +72,10 @@
               "id": "mc.asked",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -85,7 +97,10 @@
               "id": "mc.asked",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -109,7 +124,10 @@
               "title": "The people are still there",
               "text": "The orb showed souls imprisoned in the Abyssal Void. The Hollowed are not willing servants. Their bodies are controlled while their souls remain trapped."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -134,7 +152,10 @@
               "title": "The King’s hold",
               "text": "The King’s own soul anchors his control of the Hollow Gate. Defeating him is necessary to break that control and give the trapped souls a chance at freedom. The orb has not promised that his death alone restores them."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -164,7 +185,10 @@
               "title": "The way to Castle Duskmoor",
               "text": "The orb revealed Castle Duskmoor and a route to its shore. A narrow landing leads to the climb below the western wall. Bring this knowledge to the people helping you prepare; the King can now be reached."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -181,7 +205,10 @@
           "id": "leave",
           "text": "That is why I started.",
           "next": "mc.orb.quiet",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -198,7 +225,10 @@
           "id": "remember",
           "text": "I will carry it with me.",
           "next": "mc.orb.quiet",
-          "effects": []
+          "effects": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -268,5 +298,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

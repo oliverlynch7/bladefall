@@ -46,12 +46,18 @@
               "title": "What Ellis left behind",
               "text": "Find the red-sealed notes in the pack on the low western shelf. Read them there for a lead on the Legion’s weapons. Ellis can tell you more if you return."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "press",
           "text": "Why does the Legion want a scientist?",
-          "next": "ic.ellis.press"
+          "next": "ic.ellis.press",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -83,7 +89,10 @@
               "title": "What Ellis left behind",
               "text": "Find the red-sealed notes in the pack on the low western shelf. Read them there for a lead on the Legion’s weapons. Ellis can tell you more if you return."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "kind",
@@ -101,7 +110,10 @@
               "title": "What Ellis left behind",
               "text": "Find the red-sealed notes in the pack on the low western shelf. Read them there for a lead on the Legion’s weapons. Ellis can tell you more if you return."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -137,13 +149,19 @@
               "flag": "ic.ellis.returned",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "work",
           "text": "What were you trying to build?",
           "next": "ic.ellis.motive",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -162,7 +180,10 @@
         {
           "id": "back",
           "text": "I’ll bring the notes.",
-          "next": "ic.ellis.wait"
+          "next": "ic.ellis.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -182,7 +203,10 @@
           "id": "judge",
           "text": "But you kept working.",
           "next": "ic.ellis.guilt",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "hope",
@@ -200,7 +224,10 @@
               "title": "The next target: Emberdeep",
               "text": "Ellis’s notes trace the Legion’s weapon shipments to Emberdeep. Stop the forge supplying its hunting parties. Three Hollowed officers guard the north exit from these caves."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -232,7 +259,10 @@
               "title": "The next target: Emberdeep",
               "text": "Ellis’s notes trace the Legion’s weapon shipments to Emberdeep. Stop the forge supplying its hunting parties. Three Hollowed officers guard the north exit from these caves."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -252,13 +282,19 @@
         {
           "id": "path",
           "text": "How do I reach them?",
-          "next": "ic.ellis.water"
+          "next": "ic.ellis.water",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "people",
           "text": "What about the people who went through?",
           "next": "ic.ellis.unknown",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -277,7 +313,10 @@
         {
           "id": "path",
           "text": "First, we stop the weapon shipments.",
-          "next": "ic.ellis.water"
+          "next": "ic.ellis.water",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -296,7 +335,10 @@
         {
           "id": "leave",
           "text": "Stay here until the way is clear.",
-          "next": "ic.ellis.ready"
+          "next": "ic.ellis.ready",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -315,7 +357,10 @@
         {
           "id": "remind",
           "text": "Remind me about the forge.",
-          "next": "ic.ellis.lead"
+          "next": "ic.ellis.lead",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -347,12 +392,18 @@
               "title": "Hugo’s brilliant mistake",
               "text": "Secure the rescue frame beside the broken shelf. Find the spare rope on the lower eastern path, then return and lower it. The frame must be secured first."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "tease",
           "text": "That was not your best idea.",
-          "next": "ic.hugo.tease"
+          "next": "ic.hugo.tease",
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -384,7 +435,10 @@
               "title": "Hugo’s brilliant mistake",
               "text": "Secure the rescue frame beside the broken shelf. Find spare rope on the lower eastern path and lower it from the secured frame."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -434,12 +488,18 @@
               "flag": "ic.hugo.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "hint",
           "text": "See anything useful down there?",
-          "next": "ic.hugo.ice"
+          "next": "ic.hugo.ice",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -458,7 +518,10 @@
         {
           "id": "back",
           "text": "First, the rope.",
-          "next": "ic.hugo.wait"
+          "next": "ic.hugo.wait",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -477,12 +540,18 @@
         {
           "id": "good",
           "text": "Try the safe path this time.",
-          "next": "ic.hugo.safe"
+          "next": "ic.hugo.safe",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "kind",
           "text": "Come back with us when this is over.",
-          "next": "ic.hugo.home"
+          "next": "ic.hugo.home",
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -501,7 +570,10 @@
         {
           "id": "done",
           "text": "We’ll find you there.",
-          "next": "ic.hugo.safe"
+          "next": "ic.hugo.safe",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -520,7 +592,10 @@
         {
           "id": "clue",
           "text": "Which way was the side chamber?",
-          "next": "ic.hugo.remind"
+          "next": "ic.hugo.remind",
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -538,7 +613,10 @@
         {
           "id": "done",
           "text": "Stay on the dry path.",
-          "next": "ic.hugo.safe"
+          "next": "ic.hugo.safe",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -708,11 +786,22 @@
     "ic.lock.reset": {
       "once": false,
       "effects": [
-        { "type": "waterworks", "id": "ic.lock", "action": "drain", "target": 2 }
+        {
+          "type": "waterworks",
+          "id": "ic.lock",
+          "action": "drain",
+          "target": 2
+        }
       ],
       "when": [
-        { "flag": "ic.lock.clue", "is": true },
-        { "flag": "ic.lock.open", "is": false }
+        {
+          "flag": "ic.lock.clue",
+          "is": true
+        },
+        {
+          "flag": "ic.lock.open",
+          "is": false
+        }
       ]
     },
     "ic.channel.plug": {
@@ -794,5 +883,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

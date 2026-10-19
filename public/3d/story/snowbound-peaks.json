@@ -29,12 +29,18 @@
               "title": "Shelter before the storm",
               "text": "The heater coil has fallen loose beside the frozen crossing. Fit it into the winch by Heath’s shelter. The western lift-house ridge is an optional sheltered route."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "blunt",
           "text": "Skip the weather report. Where is he?",
-          "next": "ff.heath.blunt"
+          "next": "ff.heath.blunt",
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -66,7 +72,10 @@
               "title": "Shelter before the storm",
               "text": "The heater coil has fallen loose beside the frozen crossing. Fit it into the winch by Heath’s shelter. The western lift-house ridge is an optional sheltered route."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -102,23 +111,35 @@
               "flag": "ff.heater",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "ellis",
           "text": "Why was Ellis hiding up here?",
           "next": "ff.heath.ellis",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "wind",
           "text": "How do I cross in this wind?",
-          "next": "ff.heath.wind"
+          "next": "ff.heath.wind",
+          "category": "lore",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "camp",
           "text": "What is above the old camp?",
-          "next": "ff.heath.camp"
+          "next": "ff.heath.camp",
+          "category": "side",
+          "retired": false,
+          "priority": 3
         }
       ],
       "voice": {
@@ -137,7 +158,10 @@
         {
           "id": "back",
           "text": "About the shelter…",
-          "next": "ff.heath.prepare"
+          "next": "ff.heath.prepare",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -156,7 +180,10 @@
         {
           "id": "back",
           "text": "About the shelter…",
-          "next": "ff.heath.prepare"
+          "next": "ff.heath.prepare",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -175,7 +202,10 @@
         {
           "id": "back",
           "text": "About the shelter…",
-          "next": "ff.heath.prepare"
+          "next": "ff.heath.prepare",
+          "category": "side",
+          "retired": true,
+          "priority": 0
         },
         {
           "id": "track",
@@ -193,7 +223,10 @@
               "title": "The buried camp",
               "text": "Heath mentioned an explorer’s camp west of the upper trail. An old survey rig sits above it. Its broken ledges may still be climbable."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -221,12 +254,18 @@
               "title": "Find the cave mouth",
               "text": "The repaired crossing leads to the shelf above the cave. Find the stone marker there, climb the broken ledges, and release the anchor holding the snow."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "warm",
           "text": "You should come down when this is over.",
-          "next": "ff.heath.home"
+          "next": "ff.heath.home",
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -245,7 +284,10 @@
         {
           "id": "next",
           "text": "Keep it warm for him.",
-          "next": "ff.heath.waiting"
+          "next": "ff.heath.waiting",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -264,7 +306,10 @@
         {
           "id": "camp",
           "text": "Tell me about the buried camp.",
-          "next": "ff.heath.aftercamp"
+          "next": "ff.heath.aftercamp",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -283,7 +328,10 @@
         {
           "id": "back",
           "text": "I’ll keep an eye out.",
-          "next": "ff.heath.waiting"
+          "next": "ff.heath.waiting",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -475,5 +523,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

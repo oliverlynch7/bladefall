@@ -1,0 +1,67 @@
+[
+  {
+    "suite": "test-dialogue-categories.cjs",
+    "pass": true,
+    "output": "1431 category, single-path, retired-choice authority, side/lore access and sequential delivery checks passed.\n"
+  },
+  {
+    "suite": "test-dialogue-endings.cjs",
+    "pass": true,
+    "output": "94 ordinary NPC/preset paths end; primary Leave, legacy replay, optional quest, legitimate retry, final trigger, note preservation and speaker authority pass.\n"
+  },
+  {
+    "suite": "test-story-state.cjs",
+    "pass": true,
+    "output": "Story state passed: single Thomas path and legacy cursors, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links.\n"
+  },
+  {
+    "suite": "test-story-topics.cjs",
+    "pass": true,
+    "output": "29 topic menus: legacy cursor recovery, effect-free navigation, Simon side quest after core dialogue, refusal guard and forged navigation passed.\n"
+  },
+  {
+    "suite": "test-story-authority.cjs",
+    "pass": true,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.\n"
+  },
+  {
+    "suite": "test-gus-story.cjs",
+    "pass": true,
+    "output": "Gus passed: delivery gating, once-only reward, shortcut, resume, rollback, apology/repair, legacy refusal, main-path independence, fresh attempt.\n"
+  },
+  {
+    "suite": "test-prison-story.cjs",
+    "pass": true,
+    "output": "Prison story passed: Sly routes, rescue winch, retired lower weights, press brake, old partial data, shards, rewards, voice graph and lift bounds.\n"
+  },
+  {
+    "suite": "test-ready-turnins.cjs",
+    "pass": true,
+    "output": "28 explicitly authored hand-ins; 154 ready-only, unmet-requirement, stale-request, atomic/once-only and legacy-cursor checks pass\n"
+  },
+  {
+    "suite": "test-rift-hall.cjs",
+    "pass": true,
+    "output": "Rift Hall passed: personal five-shard assembly, no duplicate counts/unlocks, legacy class mapping, ending gate, absent class guard, dialogue resume and graph links.\n"
+  },
+  {
+    "suite": "test-rift-shards.cjs",
+    "pass": true,
+    "output": "Rift shard ledger passed: stable IDs, sanitization, individual collection, once-only echo, provisional/banked distinction, rollback, 5/5 gating and approved class mapping.\n"
+  },
+  {
+    "suite": "test-voice-content.cjs",
+    "pass": true,
+    "output": "Voice manifest: shared fetch, current-text filtering and failure recovery passed.\n"
+  },
+  {
+    "suite": "test-onboarding-narration.cjs",
+    "pass": true,
+    "output": "264 narration transcript/hash, binding, mute, cancellation, late load/play and recovery checks passed.\n"
+  },
+  {
+    "suite": "test-menu-shortcuts.cjs",
+    "pass": true,
+    "output": "22 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\nNarration button E safety checks passed.\n"
+  }
+]

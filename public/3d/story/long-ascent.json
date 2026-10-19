@@ -23,7 +23,10 @@
               "id": "la.met",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -42,7 +45,10 @@
         {
           "id": "stairs",
           "text": "How do I get upstairs?",
-          "next": "la.miles.stairs"
+          "next": "la.miles.stairs",
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "workers",
@@ -53,7 +59,10 @@
               "flag": "la.cells",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "safe",
@@ -64,17 +73,26 @@
               "flag": "la.cells",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "vault",
           "text": "What is behind the service door?",
-          "next": "la.miles.vault"
+          "next": "la.miles.vault",
+          "category": "side",
+          "retired": false,
+          "priority": 3
         },
         {
           "id": "joke",
           "text": "Do the guards ever take a break?",
-          "next": "la.miles.joke"
+          "next": "la.miles.joke",
+          "category": "main",
+          "retired": true,
+          "priority": 4
         },
         {
           "id": "refuse",
@@ -92,7 +110,10 @@
               "flag": "la.cells",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": true,
+          "priority": 5
         }
       ],
       "voice": {
@@ -111,7 +132,10 @@
         {
           "id": "back",
           "text": "Then I can do them one at a time.",
-          "next": "la.miles.menu"
+          "next": "la.miles.menu",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -149,12 +173,18 @@
               "title": "No One Left Below",
               "text": "Workers are locked on the next stair turn. Defeat the cell guards and use the release wheel. Miles knows a safe way out."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "later",
           "text": "I need to look around first.",
-          "next": "la.miles.menu"
+          "next": "la.miles.menu",
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -173,12 +203,18 @@
         {
           "id": "refuge",
           "text": "There is a place where they can help rebuild.",
-          "next": "la.miles.refuge"
+          "next": "la.miles.refuge",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
           "text": "Keep them safe.",
-          "next": "la.miles.menu"
+          "next": "la.miles.menu",
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -197,7 +233,10 @@
         {
           "id": "back",
           "text": "I will see you there.",
-          "next": "la.miles.menu"
+          "next": "la.miles.menu",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -223,7 +262,10 @@
               "id": "la.vault.known",
               "value": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -242,7 +284,10 @@
         {
           "id": "back",
           "text": "That sounds like a complaint worth keeping.",
-          "next": "la.miles.menu"
+          "next": "la.miles.menu",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -267,12 +312,18 @@
               "id": "la.curt",
               "value": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "leave",
           "text": "I understand.",
-          "next": "la.miles.menu"
+          "next": "la.miles.menu",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -448,5 +499,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

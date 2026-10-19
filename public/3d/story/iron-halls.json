@@ -34,12 +34,18 @@
               "title": "Stop the weapon line",
               "text": "Flint says the workers must leave their station before the machines stop. Clear the guards at the station ahead, then open the western shelter. Jack works farther north beside the broken service cart."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "smash",
           "text": "I was going to break the machines.",
-          "next": "ih.flint.careful"
+          "next": "ih.flint.careful",
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -71,7 +77,10 @@
               "title": "Stop the weapon line",
               "text": "Flint says the workers must leave their station before the machines stop. Clear the guards at the station ahead, then open the western shelter. Jack works farther north beside the broken service cart."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -96,12 +105,18 @@
               "type": "flag",
               "id": "ih.flint.work"
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "ready",
           "text": "I’ll get them clear.",
-          "next": "ih.flint.wait"
+          "next": "ih.flint.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -120,12 +135,18 @@
         {
           "id": "promise",
           "text": "I’ll look for it.",
-          "next": "ih.flint.wait"
+          "next": "ih.flint.wait",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "prize",
           "text": "What would you give me for it?",
-          "next": "ih.flint.price"
+          "next": "ih.flint.price",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -144,7 +165,10 @@
         {
           "id": "deal",
           "text": "Fair enough.",
-          "next": "ih.flint.wait"
+          "next": "ih.flint.wait",
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -180,7 +204,10 @@
               "flag": "ih.flint.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "optional",
@@ -197,12 +224,18 @@
               "flag": "ih.flint.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "directions",
           "text": "Remind me how to stop the line.",
-          "next": "ih.flint.remind"
+          "next": "ih.flint.remind",
+          "category": "lore",
+          "retired": false,
+          "priority": 3
         },
         {
           "id": "done",
@@ -213,7 +246,10 @@
               "flag": "ih.line.open",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -232,7 +268,10 @@
         {
           "id": "back",
           "text": "Got it.",
-          "next": "ih.flint.wait"
+          "next": "ih.flint.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -274,7 +313,10 @@
               "flag": "ih.flint.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "ranged",
@@ -302,7 +344,10 @@
               "flag": "ih.flint.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "magic",
@@ -330,7 +375,10 @@
               "flag": "ih.flint.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "armor",
@@ -358,7 +406,10 @@
               "flag": "ih.flint.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 3
         }
       ],
       "voice": {
@@ -377,7 +428,10 @@
         {
           "id": "back",
           "text": "I’ll remember.",
-          "next": "ih.flint.wait"
+          "next": "ih.flint.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -396,7 +450,10 @@
         {
           "id": "back",
           "text": "I’ll find Martin.",
-          "next": "ih.flint.wait"
+          "next": "ih.flint.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -428,12 +485,18 @@
               "title": "A cart that stays put",
               "text": "Recover insulated handles in the western stores. Fit them at the service cart ahead, or ask Jack to do it. The cart will span the gap to the Great Furnace."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "joke",
           "text": "So it’s more of a falling machine?",
-          "next": "ih.jack.joke"
+          "next": "ih.jack.joke",
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -465,7 +528,10 @@
               "title": "A cart that stays put",
               "text": "Get insulated handles from the western stores. Fit them to the cart or ask Jack for help."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -500,17 +566,26 @@
               "flag": "ih.cart",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "route",
           "text": "What is on the high walkway?",
-          "next": "ih.jack.route"
+          "next": "ih.jack.route",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "next",
           "text": "How do I shut the line down?",
-          "next": "ih.jack.controls"
+          "next": "ih.jack.controls",
+          "category": "lore",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -529,7 +604,10 @@
         {
           "id": "back",
           "text": "I’ll watch the lights.",
-          "next": "ih.jack.wait"
+          "next": "ih.jack.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -548,7 +626,10 @@
         {
           "id": "back",
           "text": "I’ll follow the plate.",
-          "next": "ih.jack.wait"
+          "next": "ih.jack.wait",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -567,7 +648,10 @@
         {
           "id": "thanks",
           "text": "Nice work, Jack.",
-          "next": "ih.jack.after"
+          "next": "ih.jack.after",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -586,7 +670,10 @@
         {
           "id": "controls",
           "text": "Remind me about the machine room.",
-          "next": "ih.jack.controls"
+          "next": "ih.jack.controls",
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -720,5 +807,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

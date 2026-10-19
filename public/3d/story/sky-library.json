@@ -29,7 +29,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "rules",
@@ -47,7 +50,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "work",
@@ -60,7 +66,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -91,14 +100,20 @@
               "text": "The reading halls are open. Find the Legion orders, then release the seal at the far end. The guardian still stands between you and the orb."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "records",
           "text": "Are any records in danger?",
           "next": "sl.hugh.records",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -115,14 +130,20 @@
           "text": "I am afraid for the people back home. That came out badly.",
           "next": "sl.hugh.need",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "work",
           "text": "Let me prove I will take care of this place.",
           "next": "sl.hugh.records",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "leave",
@@ -137,7 +158,10 @@
               "text": "A service passage runs below the west side of Hugh’s desk. Its latch can be opened from below. Hugh can also be approached again."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -155,14 +179,20 @@
           "text": "Can we start again?",
           "next": "sl.hugh.need",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "work",
           "text": "Tell me about the damaged records.",
           "next": "sl.hugh.records",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -192,7 +222,10 @@
               "text": "Use the rising east walkway. Lift the fallen records onto the dry desk, then tell Hugh they are safe."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "done",
@@ -217,7 +250,10 @@
               "flag": "sl.records",
               "is": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -234,14 +270,20 @@
           "text": "What should I ask the orb?",
           "next": "sl.hugh.orb",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "done",
           "text": "I will find those orders.",
           "next": "sl.hugh.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -266,7 +308,10 @@
               "text": "You came to Sunspire to learn how to stop the Abyss King. Reach the orb beyond the guardian. Hugh warns that it answers one clear question."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -290,7 +335,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "legion",
@@ -298,7 +346,10 @@
           "next": "sl.simon.legion",
           "effects": [],
           "when": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "stands",
@@ -311,7 +362,10 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "dragon",
@@ -329,7 +383,10 @@
               "title": "Wings Above the Clouds",
               "text": "A dragon is trapped on the western nesting terraces beyond the empty displays. Find the supply ledge below its winch. The main path can wait, but the rescue is optional."
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 3
         },
         {
           "id": "rescued",
@@ -341,7 +398,10 @@
               "flag": "dr.bond",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 4
         }
       ],
       "voice": {
@@ -366,14 +426,20 @@
               "text": "The first crank extends two shelf bridges. Cross them to reach a second crank, then follow the next shelves to the Rift Shard. A lower row catches missed jumps."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "hint",
           "text": "Give me a hint.",
           "next": "sl.simon.hint",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -398,7 +464,10 @@
               "text": "Look for the gold edges. The first crank opens a way to the second. If you miss a jump, the lower shelves will catch you."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -416,14 +485,20 @@
           "next": "sl.simon.frames",
           "effects": [],
           "when": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
           "text": "I should keep looking.",
           "next": "sl.simon.hello",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -448,7 +523,10 @@
               "text": "A scholar threw the crystalline training rifts from Sunspire to keep them from the Legion. Their pieces scattered across Aerth. The Rift Hall can restore their training paths."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -473,14 +551,20 @@
               "text": "Activate an archive stand, defeat its three guards within forty seconds, then secure the stand. Repeat for the other two. Failed stands can be retried; completed stands stay safe during this attempt."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "reward",
           "text": "Is that a shard behind the last stand?",
           "next": "sl.simon.reward",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -497,7 +581,10 @@
           "text": "I will try to be more specific.",
           "next": "sl.simon.hello",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -513,19 +600,28 @@
           "id": "safe",
           "text": "How do I get it out safely?",
           "next": "dr.simon.safe",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "joke",
           "text": "Does the library allow dragons?",
           "next": "dr.simon.joke",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         },
         {
           "id": "back",
           "text": "I will take a look.",
           "next": "sl.simon.hello",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": true,
+          "priority": 2
         }
       ],
       "voice": {
@@ -544,7 +640,10 @@
           "id": "back",
           "text": "That gives me a plan.",
           "next": "sl.simon.hello",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -563,13 +662,19 @@
           "id": "safe",
           "text": "About that net...",
           "next": "dr.simon.safe",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
           "text": "I think we will get along.",
           "next": "sl.simon.hello",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -588,7 +693,10 @@
           "id": "back",
           "text": "I will look after it.",
           "next": "sl.simon.hello",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1113,5 +1221,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

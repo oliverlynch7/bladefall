@@ -16,3 +16,14 @@
 /* Every selectable dialogue control carries the same visible keyboard cursor. */
 #hubDialogue button.dialogue-selected,#hubDialogue summary.dialogue-selected,#hubDialogue button:focus-visible,#hubDialogue summary:focus-visible,[data-dialogue-menu] button:focus-visible,[data-dialogue-menu] .dialogue-selected{outline:3px solid #ffe35b!important;outline-offset:2px;box-shadow:0 0 0 5px #ffe35b22!important;background-color:#4a4225!important;color:#fff4c7!important}
 #hubDialogue .dialogue-key-hint,[data-dialogue-menu] .dialogue-key-hint{color:#eedb89;font:600 12px/1.5 system-ui;margin:14px 0 8px}
+
+/* Three visible paths: no optional quest is hidden in a disclosure. */
+#hubDialogue .dialogue-group{display:grid;gap:8px;border:1px solid #b1c2bc55;border-left:4px solid var(--dialogue-accent);border-radius:10px;padding:12px;background:#142427}
+#hubDialogue .dialogue-group h3{margin:0 0 3px;color:var(--dialogue-accent);font:750 12px/1.4 system-ui;letter-spacing:.6px;text-transform:uppercase}
+#hubDialogue .dialogue-group-main{--dialogue-accent:#ffda74;background:linear-gradient(120deg,#453a20,#1c2929)}
+#hubDialogue .dialogue-group-side{--dialogue-accent:#8fe4c2;background:linear-gradient(120deg,#193d36,#17292c)}
+#hubDialogue .dialogue-group-lore{--dialogue-accent:#b8caff;background:linear-gradient(120deg,#232d45,#19262e)}
+#hubDialogue .dialogue-group button{width:100%;border-color:color-mix(in srgb,var(--dialogue-accent) 55%,transparent);background:#122027;color:#f6f4e9;display:flex;gap:10px;align-items:center}
+#hubDialogue .dialogue-choice-icon{font-weight:900;color:var(--dialogue-accent);min-width:17px;flex-shrink:0}
+#hubDialogue .dialogue-group button.hub-service-primary{margin:0;background:linear-gradient(135deg,#51462c,#303c30)}
+@media(max-width:650px){#hubDialogue .dialogue-group{padding:10px;gap:7px}#hubDialogue .dialogue-group h3{font-size:11px}}

@@ -2,7 +2,7 @@
 (function(){
  'use strict';
  let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,voiceTimer=0,speaking=false;
- const ready=fetch('./story/hub-dialogue.json?v=2079').then(r=>{if(!r.ok)throw Error('Dialogue unavailable');return r.json()}).then(async b=>{book=await BFVoiceContent.apply(b);return book}).catch(()=>null);
+ const ready=fetch('./story/hub-dialogue.json?v=2288').then(r=>{if(!r.ok)throw Error('Dialogue unavailable');return r.json()}).then(async b=>{book=await BFVoiceContent.apply(b);return book}).catch(()=>null);
  const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function state(a,id){const all=a.meta.hubDialogue||(a.meta.hubDialogue={});return all[id]||(all[id]={introduced:false,newsSeen:false,cursor:null})}
  function news(n,a){const d=book?.npcs[n.id];if(!d)return null;const latest=(d.newsStages||[]).filter(q=>a.meta.zoneDone?.[q.zone]).at(-1);if(latest)return state(a,n.id).newsSeenId===latest.id?null:latest.id;return Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=d.newsAfterCompletedRegions&&!state(a,n.id).newsSeen?d.news:null}
@@ -14,14 +14,24 @@
  const questBadge='<span class="hub-quest-badge" aria-hidden="true">!</span>';
  function questProgress(choice){return choice.turnIn===true||(choice.effects||[]).some(e=>e.type==='reward'&&['return_accept','return_finish'].includes(e.kind));}
  function markQuestButton(btn,text){btn.classList.add('hub-quest-choice');btn.setAttribute('aria-label','Quest: '+text);btn.innerHTML=questBadge+'<span>'+esc(text)+'</span>';}
+ const categories={main:{label:'Main action',icon:'!'},side:{label:'Side quests',icon:'◇'},lore:{label:'Lore & questions',icon:'▤'}};
+ function choiceGroups(container,entries){
+  for(const category of ['main','side','lore']){
+   const rows=entries.filter(row=>!row.choice.end&&(row.choice.category|| (row.choice.optional?'lore':'main'))===category);if(!rows.length)continue;
+   const group=document.createElement('section');group.className='dialogue-group dialogue-group-'+category;group.setAttribute('aria-label',category==='main'&&active.external?'Main quest':categories[category].label);
+   const heading=document.createElement('h3');heading.textContent=categories[category].icon+' '+(category==='main'&&active.external?'Main quest':categories[category].label);group.append(heading);
+   for(const {choice,button} of rows){button.dataset.dialogueCategory=category;const badge=document.createElement('span');badge.className='dialogue-choice-icon';badge.setAttribute('aria-hidden','true');badge.textContent=categories[category].icon;if(!button.querySelector('.hub-quest-badge'))button.prepend(badge);group.append(button);}container.append(group);
+  }
+  for(const row of entries.filter(row=>row.choice.end||row.choice.category==='topics'))container.append(row.button);
+ }
  function landing(){
   if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book.npcs[n.id];s.cursor=null;commit();
-  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options">${serviceButton('hubService',n)}${a.returnInfo?.(n)?'<button id="hubReturnQuest">◆ '+esc(a.returnInfo(n).label)+'</button>':''}${hasNews(n,a)?'<button id="hubNews">◆ What has changed?</button>':''}<details class="hub-optional"><summary>More questions · optional</summary><button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></details></div>`);
-  if(el('hubReturnQuest')){const info=a.returnInfo(n),btn=el('hubReturnQuest');btn.textContent=info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}
+  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options" id="hubLanding"><section class="dialogue-group dialogue-group-main" aria-label="Main action"><h3>! Main action</h3>${serviceButton('hubService',n)}</section>${a.returnInfo?.(n)?'<section class="dialogue-group dialogue-group-side" aria-label="Side quests"><h3>◇ Side quests</h3><button id="hubReturnQuest"></button></section>':''}<section class="dialogue-group dialogue-group-lore" aria-label="Lore and questions"><h3>▤ Lore & questions</h3>${hasNews(n,a)?'<button id="hubNews">What has changed?</button>':''}<button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></section></div>`);
+  if(el('hubReturnQuest')){const info=a.returnInfo(n),btn=el('hubReturnQuest');btn.textContent='◇ '+info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}
   el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
- function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
+ function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
  document.addEventListener('focusin',e=>{const root=e.target.closest?.('#hubDialogue,[data-dialogue-menu]');if(!root)return;root.querySelectorAll('.dialogue-selected').forEach(b=>b.classList.remove('dialogue-selected'));if(e.target.matches('button,summary'))e.target.classList.add('dialogue-selected');});
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
@@ -35,16 +45,16 @@
   const {n,a}=active,s=state(a,n.id),node=book.nodes[id];if(!node){landing();return}
   s.cursor={id,lastChoice,topic};commit();
   const finish=()=>{if(topic==='intro')s.introduced=true;if(topic==='news'){s.newsSeen=true;s.newsSeenId=id;}s.cursor=null;commit();close();};
-  showLine(id,{...node,choices:node.choices.map(c=>active.visited.includes(c.next)?{...c,text:'Leave conversation',end:true,optional:false}:c)},lastChoice,choice=>choice.end?finish():line(choice.next,choice.text,topic),finish,'Leave conversation');
+  showLine(id,{...node,choices:node.choices.filter(c=>!c.retired).map(c=>active.visited.includes(c.next)?{...c,text:'Leave conversation',end:true,optional:false}:c)},lastChoice,choice=>choice.end?finish():line(choice.next,choice.text,topic),finish,'Leave conversation');
  }
  function showLine(id,node,lastChoice,choose,finish,finishLabel,canChoose=true){
   stopVoice();const token=++generation,{a}=active;active.lineId=id;active.started=performance.now();
   shell(`<p id="hubLine" class="hub-dialogue-line"></p><button id="hubReveal">Show full line</button><p id="hubVoiceStatus" class="hub-dialogue-label"></p>${!canChoose?'<p class="hub-dialogue-label">Your teammate is choosing. You can both leave at any time.</p>':''}<div id="hubChoices" class="hub-dialogue-options"></div>`);
   const choices=el('hubChoices');let revealed=false;
   function unlock(){if(token!==generation||!active||revealed)return;revealed=true;cancelAnimationFrame(frame);el('hubLine').textContent=node.text;el('hubReveal').hidden=true;
-   const optional=document.createElement('details');optional.className='hub-optional';optional.innerHTML='<summary>More questions · optional</summary>';
-   for(const choice of node.choices){if(!canChoose&&choice.end)continue;const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};(choice.optional?optional:choices).append(btn)}
-   if(optional.querySelector('button'))choices.append(optional);
+   const entries=[];
+   for(const choice of node.choices){if(!canChoose&&choice.end)continue;const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};entries.push({choice,button:btn})}
+   choiceGroups(choices,entries);
    if(!node.choices.length){const btn=document.createElement('button');btn.textContent=finishLabel;btn.onclick=finish;choices.append(btn)}
    if(!node.choices.length||canChoose&&node.choices.some(c=>c.end)){el('hubLeave').hidden=true;const ending=[...choices.querySelectorAll('button')].find(b=>b.textContent===finishLabel||b.textContent==='Leave conversation');if(ending)ending.dataset.dialogueEnd='true';}
    // A text-skip click cannot become a response click; all choices have a short arming window.

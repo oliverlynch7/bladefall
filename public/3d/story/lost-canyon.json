@@ -50,7 +50,10 @@
               "flag": "lc.gate.fight",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "bluff",
@@ -68,12 +71,18 @@
               "flag": "lc.entry",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": true,
+          "priority": 3
         },
         {
           "id": "ask",
           "text": "What work details are allowed?",
-          "next": "lc.ward.rules"
+          "next": "lc.ward.rules",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -91,12 +100,18 @@
         {
           "id": "back",
           "text": "I'll check the desk.",
-          "next": "lc.ward.first"
+          "next": "lc.ward.first",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "moral",
           "text": "These people have families.",
-          "next": "lc.ward.families"
+          "next": "lc.ward.families",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -115,7 +130,10 @@
         {
           "id": "back",
           "text": "That is not what I meant.",
-          "next": "lc.ward.first"
+          "next": "lc.ward.first",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -133,7 +151,10 @@
         {
           "id": "back",
           "text": "Understood.",
-          "next": "lc.ward.done"
+          "next": "lc.ward.done",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -151,7 +172,10 @@
         {
           "id": "back",
           "text": "I heard you.",
-          "next": "lc.ward.done"
+          "next": "lc.ward.done",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -169,7 +193,10 @@
         {
           "id": "back",
           "text": "Then I'll open the gate myself.",
-          "next": "lc.ward.locked"
+          "next": "lc.ward.locked",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -187,7 +214,10 @@
         {
           "id": "back",
           "text": "We will see about that.",
-          "next": "lc.ward.locked"
+          "next": "lc.ward.locked",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -224,7 +254,10 @@
               "title": "Get the prisoners out",
               "text": "Free the south cage group. Protect both north prisoners on their walk to shelter. Cut the alarm cable on the east scaffold, then open the escape gate. Cutting the cable first prevents alarm patrols."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "curt",
@@ -253,7 +286,10 @@
               "id": "lc.ruth.curt",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -272,7 +308,10 @@
         {
           "id": "back",
           "text": "Where are the locks?",
-          "next": "lc.ruth.plan"
+          "next": "lc.ruth.plan",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -316,7 +355,10 @@
               "flag": "lc.extra",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "repair",
@@ -327,7 +369,10 @@
               "flag": "lc.ruth.curt",
               "is": true
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "reward",
@@ -360,12 +405,18 @@
               "flag": "lc.reward",
               "is": false
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         },
         {
           "id": "crossing",
           "text": "What is waiting at the crossing?",
-          "next": "lc.ruth.marksman"
+          "next": "lc.ruth.marksman",
+          "category": "lore",
+          "retired": false,
+          "priority": 3
         }
       ],
       "voice": {
@@ -384,7 +435,10 @@
         {
           "id": "back",
           "text": "I'll look for them.",
-          "next": "lc.ruth.plan"
+          "next": "lc.ruth.plan",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -425,7 +479,10 @@
               "flag": "lc.water.given",
               "is": false
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
@@ -439,7 +496,10 @@
               "title": "An empty flask",
               "text": "Ruth is worried about a boy who needs water. A clean spring lies beyond the loaded wagon on the east side."
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -465,7 +525,10 @@
               "id": "lc.extra.quest",
               "value": true
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -484,7 +547,10 @@
         {
           "id": "back",
           "text": "Keep everyone together.",
-          "next": "lc.ruth.safe"
+          "next": "lc.ruth.safe",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -503,7 +569,10 @@
         {
           "id": "back",
           "text": "About that crossing...",
-          "next": "lc.ruth.marksman"
+          "next": "lc.ruth.marksman",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -522,7 +591,10 @@
         {
           "id": "back",
           "text": "Stay under cover. I'll find a way.",
-          "next": "lc.ruth.plan"
+          "next": "lc.ruth.plan",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -712,8 +784,14 @@
       ],
       "once": true,
       "when": [
-        { "flag": "lc.north.open", "is": true },
-        { "flag": "lc.north", "is": false }
+        {
+          "flag": "lc.north.open",
+          "is": true
+        },
+        {
+          "flag": "lc.north",
+          "is": false
+        }
       ]
     },
     "lc.cage.extra": {
@@ -860,5 +938,6 @@
       ],
       "once": true
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

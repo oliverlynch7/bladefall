@@ -4,7 +4,7 @@ let state=engine.create(),n=0;
 function act(type,fields={}){const r=engine.transact(state,book,{type,id:'test-'+(++n),...fields});state=r.state;return r.changed}
 function choose(choice){return act('choose',{line:state.conversation.node,choice})}
 assert.equal(act('open',{npc:'mara'}),false,'Mara unlocks after Thomas');
-assert(act('open',{npc:'thomas'}));assert(choose('afraid'));assert(choose('prepare'));assert(state.flags['thomas.ready']);assert(act('close'));
+assert(act('open',{npc:'thomas'}));assert.equal(choose('afraid'),false,'retired reaction rejected');assert(choose('protect'));assert(choose('prepare'));assert(state.flags['thomas.ready']);assert(act('close'));
 assert(act('open',{npc:'mara'}));assert(choose('why'));assert(choose('help'));assert(choose('accept'));
 const waiting=state.conversation.node;assert.equal(choose('deliver'),false,'no turn-in without supplies');assert(act('close'));assert(act('open',{npc:'mara'}));assert.equal(state.conversation.node,waiting,'exit resumes');assert(act('close'));
 const baseline=engine.restore(state);
@@ -17,5 +17,5 @@ assert.equal(engine.transact(state,book,{id:'stale',type:'open',npc:'thomas',rev
 const first=engine.transact(engine.create(),book,{id:'same',type:'open',npc:'thomas'});assert.equal(engine.transact(first.state,book,{id:'same',type:'open',npc:'thomas'}).changed,false);
 const broken=structuredClone(book);broken.events.bad={effects:[{type:'flag',id:'leak'},{type:'item',id:'absent',amount:-1}]};assert.equal(engine.transact(state,broken,{id:'bad',type:'world',key:'bad'}).changed,false);assert(!state.flags.leak,'failed transaction must not partly apply');
 for(const [id,node]of Object.entries(book.nodes)){for(const c of node.choices){assert(book.nodes[c.next],id+' missing target');assert(c.text.length>0)}}
-for(const answer of ['protect','afraid','joke']){state=engine.create();act('open',{npc:'thomas'});assert(choose(answer));assert(choose('prepare'));assert(state.flags['thomas.ready'],'all father replies preserve main path')}
-console.log('Story state passed: all Thomas branches, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links.');
+for(const answer of ['afraid','joke']){state=engine.create();act('open',{npc:'thomas'});assert.equal(choose(answer),false,'retired response cannot execute');state=engine.create();state.cursors.thomas={node:'briar.thomas.'+answer};assert(act('open',{npc:'thomas'}));assert(choose('prepare'));assert(state.flags['thomas.ready'],'old branch cursor still reaches main quest')}
+console.log('Story state passed: single Thomas path and legacy cursors, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links.');

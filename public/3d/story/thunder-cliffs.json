@@ -41,7 +41,10 @@
               "text": "Sunspire stands beyond the upper cliffs. Climb the eastern steps to the middle ledge and inspect the old hydra shackle. The broken cargo lift is an optional shortcut for the return trip."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -68,14 +71,20 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "go",
           "text": "I’ll take the steps.",
           "next": "tc.abe.wait",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -103,14 +112,20 @@
               "value": true
             }
           ],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "path",
           "text": "Which way up?",
           "next": "tc.abe.path",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -144,14 +159,20 @@
               "text": "The hydra is trapped, not Hollowed. Inspect the discarded shackle on the middle ledge. Its worn joints may show how to break the neck restraints safely."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "danger",
           "text": "Three heads sound hard to reason with.",
           "next": "tc.abe.reason",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": true,
+          "priority": 1
         }
       ],
       "voice": {
@@ -185,7 +206,10 @@
               "text": "Find the discarded shackle beside the middle ledge. Look for worn joints. The Legion uses the trapped hydra to block the path to Sunspire."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -206,7 +230,10 @@
           "text": "I will look for the weak joints.",
           "next": "tc.abe.farewell",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -227,7 +254,10 @@
           "text": "Remind me about the chains.",
           "next": "tc.abe.chains",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -266,7 +296,10 @@
               "text": "Dash found a sealed wreck cave beyond the western rock arch. Help him open its two catches, or follow his marked route challenge. The cave may contain a Rift Shard."
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -299,7 +332,10 @@
               "value": false
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "race",
@@ -326,14 +362,20 @@
               "id": "tc.route"
             }
           ],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "leave",
           "text": "I will look around first.",
           "next": "tc.dash.offer",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -354,7 +396,10 @@
           "text": "About our deal...",
           "next": "tc.dash.offer",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -386,14 +431,20 @@
             }
           ],
           "when": [],
-          "repeatable": true
+          "repeatable": true,
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "deal",
           "text": "Maybe we should just work together.",
           "next": "tc.dash.offer",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -414,7 +465,10 @@
           "text": "Keep the stick. It suits you.",
           "next": "tc.dash.done",
           "effects": [],
-          "when": []
+          "when": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -806,5 +860,6 @@
       "when": [],
       "once": true
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

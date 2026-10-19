@@ -56,13 +56,19 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "later",
           "text": "I have other work first.",
           "next": "rv.pattern.later",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -92,7 +98,10 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -157,7 +166,10 @@
               "kind": "return_finish",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -199,13 +211,19 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "later",
           "text": "I have other work first.",
           "next": "rv.supplies.later",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -235,7 +253,10 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -300,7 +321,10 @@
               "kind": "return_finish",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -342,13 +366,19 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "later",
           "text": "I have other work first.",
           "next": "rv.tracks.later",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -378,7 +408,10 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -443,7 +476,10 @@
               "kind": "return_finish",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -485,20 +521,29 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "worry",
           "text": "Are you still worried about me?",
           "next": "rv.keepsake.worry",
           "effects": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "later",
           "text": "I have other work first.",
           "next": "rv.keepsake.later",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -528,7 +573,10 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -593,7 +641,10 @@
               "kind": "return_finish",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -613,14 +664,20 @@
           "text": "What will you do now?",
           "next": "rv.keepsake.home",
           "effects": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "reports",
           "text": "What have people been saying?",
           "next": "rv.keepsake.reports",
           "effects": [],
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -650,13 +707,19 @@
               "kind": "return_accept",
               "amount": 1
             }
-          ]
+          ],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "later",
           "text": "Let us talk later.",
           "next": "rv.keepsake.later",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -675,7 +738,10 @@
           "id": "back",
           "text": "I learned from the best.",
           "next": "rv.keepsake.thanks",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -694,7 +760,10 @@
           "id": "back",
           "text": "They needed someone.",
           "next": "rv.keepsake.thanks",
-          "effects": []
+          "effects": [],
+          "category": "side",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -1095,5 +1164,6 @@
         }
       ]
     }
-  }
+  },
+  "dialoguePolicy": 1
 }

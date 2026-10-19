@@ -62,7 +62,10 @@
               "type": "flag",
               "id": "hall.introduced"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -82,18 +85,27 @@
         {
           "id": "assemble",
           "text": "How do the portals open?",
-          "next": "hall.keeper.assemble"
+          "next": "hall.keeper.assemble",
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "origin",
           "text": "Where did these rifts come from?",
           "next": "hall.keeper.origin",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         },
         {
           "id": "training",
           "text": "What is waiting on the other side?",
-          "next": "hall.keeper.training"
+          "next": "hall.keeper.training",
+          "category": "lore",
+          "retired": false,
+          "priority": 2
         }
       ],
       "voice": {
@@ -112,12 +124,18 @@
         {
           "id": "back",
           "text": "What else should I know?",
-          "next": "hall.keeper.welcome"
+          "next": "hall.keeper.welcome",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "save",
           "text": "What counts as a saved piece?",
-          "next": "hall.keeper.saving"
+          "next": "hall.keeper.saving",
+          "category": "lore",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -137,12 +155,18 @@
           "id": "guard",
           "text": "So the scholar saved them by breaking them?",
           "next": "hall.keeper.scholar",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
           "text": "Then we should put them back together.",
-          "next": "hall.keeper.welcome"
+          "next": "hall.keeper.welcome",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -161,7 +185,10 @@
         {
           "id": "back",
           "text": "Good. Let us annoy them.",
-          "next": "hall.keeper.welcome"
+          "next": "hall.keeper.welcome",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -181,12 +208,18 @@
           "id": "danger",
           "text": "Are these like the Hollow Gate?",
           "next": "hall.keeper.difference",
-          "optional": true
+          "optional": true,
+          "category": "lore",
+          "retired": false,
+          "priority": 0
         },
         {
           "id": "back",
           "text": "Let us check my pieces.",
-          "next": "hall.keeper.welcome"
+          "next": "hall.keeper.welcome",
+          "category": "main",
+          "retired": false,
+          "priority": 1
         }
       ],
       "voice": {
@@ -205,7 +238,10 @@
         {
           "id": "back",
           "text": "I will remember that.",
-          "next": "hall.keeper.welcome"
+          "next": "hall.keeper.welcome",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -224,7 +260,10 @@
         {
           "id": "back",
           "text": "Understood.",
-          "next": "hall.keeper.welcome"
+          "next": "hall.keeper.welcome",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -243,7 +282,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.berserker.lesson"
+          "next": "trial.berserker.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -262,7 +304,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.berserker.intro"
+          "next": "trial.berserker.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -287,7 +332,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -319,7 +367,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.ninja.lesson"
+          "next": "trial.ninja.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -338,7 +389,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.ninja.intro"
+          "next": "trial.ninja.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -363,7 +417,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -395,7 +452,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.reaper.lesson"
+          "next": "trial.reaper.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -414,7 +474,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.reaper.intro"
+          "next": "trial.reaper.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -439,7 +502,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -471,7 +537,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.chronomancer.lesson"
+          "next": "trial.chronomancer.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -490,7 +559,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.chronomancer.intro"
+          "next": "trial.chronomancer.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -515,7 +587,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -547,7 +622,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.pirate.lesson"
+          "next": "trial.pirate.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -566,7 +644,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.pirate.intro"
+          "next": "trial.pirate.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -591,7 +672,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -623,7 +707,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.paladin.lesson"
+          "next": "trial.paladin.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -642,7 +729,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.paladin.intro"
+          "next": "trial.paladin.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -667,7 +757,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -699,7 +792,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.necromancer.lesson"
+          "next": "trial.necromancer.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -718,7 +814,10 @@
         {
           "id": "back",
           "text": "Tell me about your approach again.",
-          "next": "trial.necromancer.intro"
+          "next": "trial.necromancer.intro",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -743,7 +842,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -775,7 +877,10 @@
         {
           "id": "lesson",
           "text": "What should I focus on?",
-          "next": "trial.pyromancer.lesson"
+          "next": "trial.pyromancer.lesson",
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -813,7 +918,10 @@
               "type": "flag",
               "id": "trial.taught"
             }
-          ]
+          ],
+          "category": "main",
+          "retired": false,
+          "priority": 0
         }
       ],
       "voice": {
@@ -840,5 +948,6 @@
       }
     }
   },
-  "events": {}
+  "events": {},
+  "dialoguePolicy": 1
 }

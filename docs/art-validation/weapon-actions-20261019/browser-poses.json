@@ -1,0 +1,6256 @@
+{
+  "passed": true,
+  "poses": 18732,
+  "restoreChecks": 18732,
+  "cancelChecks": 665,
+  "frozenChecks": 88,
+  "noReplayChecks": 88,
+  "freshActionChecks": 88,
+  "maxSupportErrorMetres": 2.3011644414595192e-7,
+  "rows": [
+    {
+      "cls": "warrior",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warrior",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warrior",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ranger",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ranger",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "mage",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "mage",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "berserker",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "reaper",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "paladin",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "paladin",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "ninja",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "ninja",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "pyromancer",
+      "art": "pyromancer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "beastmaster",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "skylancer",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "pirate",
+      "art": "pirate",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "bladedancer",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "bladedancer",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "bladedancer",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "bladedancer",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "sword",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "sword",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "spellblade",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "dagger",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "great",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "axe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "hammer",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "scythe",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "bow",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "cross",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "cross",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "javelin",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "flintlock",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "wand",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "wand",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "fist",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "monk",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "monk",
+      "art": "fist",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "warlock",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "necromancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "stormcaller",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "basic",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "hold",
+      "moving": true,
+      "alt": 1
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 0
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": false,
+      "alt": 1
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 0
+    },
+    {
+      "cls": "chronomancer",
+      "art": "staff",
+      "mode": "release",
+      "moving": true,
+      "alt": 1
+    }
+  ]
+}

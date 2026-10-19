@@ -1,3 +1,4 @@
+import {applyWeaponAction,restoreWeaponAction} from './weapon-actions3d.js?v=2333d';
 import {applyReaperPose,restoreReaperPose} from './reaper-combo3d.js?v=2332c';
 import {applySkillPose,restoreSkillPose} from './skill-motion3d.js?v=2328';
 import {syncInspectionMirror} from './hub-mirror3d.js?v=2308';
@@ -1043,7 +1044,7 @@ async function equipWeapon(actor, opts){
   clearWeapon(actor);
   const pw = (opts && 'weapon' in opts) ? opts.weapon
     : window.__BF3?.G?.p?.weapon;
-  if(pw?.intrinsic==='pirate'){
+  if(pw?.intrinsic==='pirate'||pw?.art==='flintlock'){
     const rig=weaponRig(actor);if(!rig)return null;
     let hand=null;actor.root.traverse(o=>{if(o.isBone&&o.name===rig.bone.parent.name.replace(/r$/i,'L'))hand=o;});
     if(!hand)return null;
@@ -1061,6 +1062,7 @@ async function equipWeapon(actor, opts){
     const muzzle=makePart(gun,new THREE.CylinderGeometry(.037,.037,.007,12),'#161c23',.531,.20,0);muzzle.rotation.z=-Math.PI/2;muzzle.name='PirateMuzzle';
     makePart(gun,new THREE.TorusGeometry(.064,.012,5,10),'#be9b52',.105,-.01,0);
     makePart(gun,new THREE.BoxGeometry(.035,.08,.035),'#be9b52',-.065,.245,0).rotation.z=-.4;
+    if(pw.intrinsic==='pirate'){
     const saber=new THREE.Group();saber.name='PirateSaber';saber.userData._weap=true;saber.userData.pirateSaber=true;
     // The left fist has its own origin; mirroring WeaponR puts the handle against its outside face.
     saber.position.set(.065,.006,-.045);hand.add(saber);
@@ -1071,10 +1073,10 @@ async function equipWeapon(actor, opts){
     makePart(saber,new THREE.BoxGeometry(.25,.035,.07),'#c2a15d',0,.125,0);
     const blade=new THREE.Shape();blade.moveTo(-.047,.14);blade.lineTo(.06,.14);blade.lineTo(.108,.72);blade.quadraticCurveTo(.12,1.06,.018,1.27);blade.lineTo(-.018,.98);blade.lineTo(-.047,.14);
     const bladeMesh=makePart(saber,new THREE.ExtrudeGeometry(blade,{depth:.025,bevelEnabled:false,curveSegments:5}),'#c1d2de',0,0,-.0125);
-    bladeMesh.material.emissive.set('#111820');
+    bladeMesh.material.emissive.set('#111820');}
     if(rig.stock)rig.stock.visible=false;
     actor._weap=gun;actor._weapGrip=null;
-    return {name:'Flintlock & Saber',intrinsic:'pirate',paired:true,grip:'palm-local'};
+    return {name:pw.intrinsic==='pirate'?'Flintlock & Saber':'Flintlock',intrinsic:pw.intrinsic,paired:pw.intrinsic==='pirate',grip:'palm-local'};
   }
   if(pw?.art==='cross'){
     const rig=weaponRig(actor);if(!rig)return null;
@@ -1629,7 +1631,7 @@ export async function createClassDisplay(classId,tier=0){
  const defaultArt=({ranger:'bow',beastmaster:'bow',skylancer:'javelin',mage:'staff',pyromancer:'fist',necromancer:'staff',warlock:'staff',stormcaller:'staff',chronomancer:'staff',reaper:'scythe',monk:'fist',ninja:'dagger',berserker:'axe',pirate:'flintlock'})[classId]||'sword';
  let weapon,disposed=false,time=0,action,clipName;
  async function equip(art='class'){
-  const a=art==='class'?defaultArt:art;weapon={art:a,rar:'common',name:'Preview weapon',...(classId==='pirate'&&art==='class'?{intrinsic:'pirate'}:{})};
+  const a=art==='class'?defaultArt:art;weapon={art:a,rar:'common',name:'Preview weapon',...(classId==='pirate'&&art==='class'?{intrinsic:'pirate'}:classId==='pyromancer'&&art==='class'?{intrinsic:'pyromancer'}:{})};
   await queueEquip(()=>disposed?null:equipWeapon(holder,{model,weapon:a==='none'?{art:'fist'}:weapon}));
   if(disposed)return;if(a==='none')clearWeapon(holder);colorWeapon(holder,weapon);
  }
@@ -1637,19 +1639,19 @@ export async function createClassDisplay(classId,tier=0){
  const rec={wrap,node,model,classId,tier,equip,get stats(){return classLookStats(node)},get weapon(){return weapon},
   update(dt,options={}){
    if(disposed)return;time+=dt;const skill=window.BFSkillMotion?.profiles[options.skill],phase=Number.isFinite(options.phase)?Math.max(0,Math.min(1,options.phase)):(time%(skill?.duration+0.65||1))/(skill?.duration||1);const motion=skill?'Idle':options.animation||'Idle';
-   restoreEmotePose(A);restoreReaperPose(A);restoreSkillPose(A);restoreGripPose(A);
+   restoreEmotePose(A);restoreWeaponAction(A);restoreReaperPose(A);restoreSkillPose(A);restoreGripPose(A);
    const attack=({bow:'Bow_Shoot',staff:'Staff_Attack',wand:'Spell1',fist:'Punch',dagger:'Dagger_Attack',axe:'Attack',hammer:'Attack',scythe:'Attack'})[weapon?.art]||'Sword_Attack';
    const name=motion==='Attack'?attack:motion==='RunAttack'?attack:motion==='Charge'?(weapon?.art==='bow'?'Bow_Draw':'Attacking_Idle'):motion==='Skill'?'Spell1':motion==='Jump'?'Roll':motion==='Dodge'?'Run':['wave','point','cheer','bow','dance'].includes(motion)?'Idle':motion;
-   const reap=Number.isInteger(options.reaperHit)&&weapon?.art==='scythe',carrier=reap?(options.moving?'Run':'Idle'):name;const actual=clips[carrier]?carrier:'Idle';if(actual!==clipName){action?.stop();action=mixer.clipAction(clips[actual]);action.reset().play();clipName=actual;}
+   const weaponPreview=options.weaponAction;const reap=Number.isInteger(options.reaperHit)&&weapon?.art==='scythe',carrier=reap||weaponPreview?(options.moving?'Run':'Idle'):name;const actual=clips[carrier]?carrier:'Idle';if(actual!==clipName){action?.stop();action=mixer.clipAction(clips[actual]);action.reset().play();clipName=actual;}
    mixer.update(dt);const p={swingCombo:options.reaperHit??-1,swingId:1,x:0,y:0,z:0,yaw:0,vx:0,vz:options.moving||['Run','RunAttack','Dodge'].includes(motion)?90:0,onGround:!options.airborne&&motion!=='Jump',weapon,atkTimer:['Attack','RunAttack'].includes(motion)?.4:0,chargeAmt:motion==='Charge'?.7:0,dodgeTimer:motion==='Dodge'?.12:0,combatPose:skill&&phase<=1?{skill:skill.id,clip:'Idle',serial:1,duration:skill.duration,remaining:skill.duration*(1-phase)}:motion==='Skill'?{remaining:.5,clip:'Spell1'}:null,emote:['wave','point','cheer','bow','dance'].includes(motion)?{id:motion,t:time%4}:null};
    movingCombatLegs(p,A,dt);captureGripPose(wrap,A);
    if(!p.emote||p.emote.id==='bow'){pirateWeaponPose(p,wrap,A,dt);poseWeaponGrip(p,wrap,A,model,dt);}
-   applySkillPose(p,wrap,A);applyReaperPose(p,wrap,A,model,dt,reap?options.phase:undefined);applyEmotePose(p,wrap,A);syncClassLook(node,classId,tier,headMetrics(holder),time,options.motion!==false);
+   applySkillPose(p,wrap,A);applyReaperPose(p,wrap,A,model,dt,reap?options.phase:undefined);applyWeaponAction(p,wrap,A,model,dt,weaponPreview?{...weaponPreview,phase:options.phase}:undefined);applyEmotePose(p,wrap,A);syncClassLook(node,classId,tier,headMetrics(holder),time,options.motion!==false);
    syncCosmetics(wrap,p,dt,{cape:options.cape||null,model,accent:window.BFClassLooks.palette(classId,tier)?.metal||CLASS_SKINS[classId].metal,particles:false});
    wrap.position.y=motion==='Jump'?Math.abs(Math.sin(time*2))* .32:0;
    wrap.updateMatrixWorld(true);node.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.update();});
   },
-  dispose(){if(disposed)return;disposed=true;holder._weapSeq=(holder._weapSeq||0)+1;restoreEmotePose(A);restoreReaperPose(A);restoreSkillPose(A);restoreGripPose(A);clearWeapon(holder);clearClassLook(node);disposeCosmetics(wrap);face.dispose();mixer.stopAllAction();mixer.uncacheRoot(node);disposePreviewMaterials(node);node.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});wrap.removeFromParent();}
+  dispose(){if(disposed)return;disposed=true;holder._weapSeq=(holder._weapSeq||0)+1;restoreEmotePose(A);restoreWeaponAction(A);restoreReaperPose(A);restoreSkillPose(A);restoreGripPose(A);clearWeapon(holder);clearClassLook(node);disposeCosmetics(wrap);face.dispose();mixer.stopAllAction();mixer.uncacheRoot(node);disposePreviewMaterials(node);node.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});wrap.removeFromParent();}
  };rec.update(.01);return rec;
 }
 
@@ -1814,7 +1816,8 @@ function playFor(p, A){
   const want = p.dead ? 'Death'
              : p.downed ? 'Idle'
              : p.dragonRide || p.sitting || p.emote && p.emote.t<4 ? 'Idle'
-             : cast ? p.combatPose.clip
+             : cast&&(!window.BFWeaponActions||p.combatPose.skill||!p.weaponAction?.remaining) ? p.combatPose.clip
+             : window.BFWeaponActions&&(charging||p.weaponAction?.remaining>0)&&!p.dead&&!p.downed&&!p.dodgeTimer ? (moving?'Run':airborne?'Roll':'Idle')
              : charging ? CHG
              /* p.atkTimer, NOT p.attackTimer. The picker has tested `p.attackTimer > 0 ||
                 p.swingT > 0` since the 3D hero shipped and NEITHER FIELD EXISTS - the game has
@@ -2131,6 +2134,7 @@ export function drawHero3D(p, t, firstPass=true){
     if(_isLocal&&window.BFHubDialogue?.active)wrap.visible=false;
 
     restoreEmotePose(anim);
+    restoreWeaponAction(anim);
     restoreReaperPose(anim);
     restoreSkillPose(anim);
     restoreGripPose(anim);
@@ -2152,6 +2156,7 @@ export function drawHero3D(p, t, firstPass=true){
     if(anim.local)HERO3D.skillAction=null;
     applySkillPose(p,wrap,anim);
     applyReaperPose(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
+    applyWeaponAction(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     applyEmotePose(p,wrap,anim);
     downedPose(p,wrap,anim,dt);
     if(p.sitting&&window.BFSocial?.seatHeight){wrap.updateMatrixWorld(true);const hip=wrap.getObjectByName('UpperLegL');if(hip){wrap.position.y+=window.BFSocial.seatHeight-hip.getWorldPosition(new THREE.Vector3()).y;wrap.updateMatrixWorld(true);}}

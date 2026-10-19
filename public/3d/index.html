@@ -1203,8 +1203,9 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./bag-browser.js?v=2238"></script>
 <link rel="stylesheet" href="./party-feedback.css?v=2297"><script src="./party-feedback.js?v=2297"></script>
 <script src="./party-navigation.js?v=2318"></script>
-<script src="./skill-motion.js?v=2328"></script><script src="./reaper-combo.js?v=2332c"></script>
-<script src="./combat-art.js?v=2332c"></script>
+<script src="./skill-motion.js?v=2328"></script><script src="./weapon-actions.js?v=2333d"></script>
+<script src="./reaper-combo.js?v=2332c"></script>
+<script src="./combat-art.js?v=2333d"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2312">
 <script src="./chest-rules.js?v=2311"></script>
@@ -1232,7 +1233,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.332.1-reaper-combo';
+const VERSION3D='2.333.0-weapon-actions';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -12282,6 +12283,7 @@ function playerAttack(cdMul){
   if(partyChannel||G?.p?.dragonRide||G?.p?.dead||G?.p?.downed||G?.p?.hp<=0)return;
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   const audio=typeof window!=='undefined'&&window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;try{
+  p.basicActionKind=null;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
   // Swift Steel's fourth-hit bonus is applied on impact, not as a second attack-speed multiplier.
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
@@ -12315,7 +12317,7 @@ function playerAttack(cdMul){
   // Ranger is a MIXED-STYLE attacker: with a ranged weapon and an enemy in your face,
   // the basic attack becomes a knife swipe (weaker than a Warrior's blade) instead of a shot.
   if(meta.classId==='ranger' && w.cls==='ranged' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+58 && vOverlap(t,p)){
-    p.atkTimer=0.24; SFX.slash();
+    p.basicActionKind='bash';p.atkTimer=0.24; SFX.slash();
     const dmg=w.dmg*effPower(p)*0.7*offclassMul(p);
     if(!losBlocked(p.x,p.z,t.x,t.z)) hitEnemy(t,dmg,p,260,effLifesteal(p),null);
     burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
@@ -15217,16 +15219,17 @@ const MP={
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     face:BFFaceOptions.appearance(meta), hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
     spec:p?.spectating?1:0,w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0, downLeft:p?.downed?BFPartyFeedback.clamp(p.downT,0,60):undefined, rescue:BFPartyFeedback.rescue(this.rescue),
+    wa:window.BFWeaponActions?.valid(p?.weaponAction),
     am:p?this.motion({ground:p.onGround,vx:p.vx,vy:p.vy,vz:p.vz,pose:p.combatPose,emote:p.emote}):null,
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3),G.pet.mounted?1:0,G.pet.flying?1:0,G.pet.sitting?1:0,+(G.pet.atkT||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {travelTo:BFPartyFeedback.rescue({id:s.travelTo})?.id||null,face:BFFaceOptions.appearance(s.face),riding:!!s.riding,sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {travelTo:BFPartyFeedback.rescue({id:s.travelTo})?.id||null,face:BFFaceOptions.appearance(s.face),riding:!!s.riding,sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),weaponAction:window.BFWeaponActions?.valid(s.wa),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', rank:Number.isFinite(s.rank)?Math.max(1,Math.min(10,Math.floor(s.rank))):null,spectating:!!s.dn&&(s.spec===1||s.spec===true),downed:!!s.dn, downLeft:s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null,rescue:BFPartyFeedback.rescue(s.rescue), prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.travelTo=BFPartyFeedback.rescue({id:s.travelTo})?.id||null;q.face=BFFaceOptions.appearance(s.face);q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.rank=Number.isFinite(s.rank)?Math.max(1,Math.min(10,Math.floor(s.rank))):null;q.spectating=!!s.dn&&(s.spec===1||s.spec===true);q.downed=!!s.dn;q.downLeft=s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null;q.rescue=BFPartyFeedback.rescue(s.rescue);q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {travelTo:q.travelTo||null,face:BFFaceOptions.appearance(q.face),riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,rank:q.rank,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,spec:q.spectating?1:0,dn:q.downed?1:0,downLeft:q.downLeft,rescue:BFPartyFeedback.rescue(q.rescue),at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){q.travelTo=BFPartyFeedback.rescue({id:s.travelTo})?.id||null;q.face=BFFaceOptions.appearance(s.face);q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.weaponAction=window.BFWeaponActions?.valid(s.wa);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.rank=Number.isFinite(s.rank)?Math.max(1,Math.min(10,Math.floor(s.rank))):null;q.spectating=!!s.dn&&(s.spec===1||s.spec===true);q.downed=!!s.dn;q.downLeft=s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null;q.rescue=BFPartyFeedback.rescue(s.rescue);q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {travelTo:q.travelTo||null,face:BFFaceOptions.appearance(q.face),riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),wa:window.BFWeaponActions?.valid(q.weaponAction),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,rank:q.rank,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,spec:q.spectating?1:0,dn:q.downed?1:0,downLeft:q.downLeft,rescue:BFPartyFeedback.rescue(q.rescue),at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -15555,10 +15558,10 @@ const MP={
          anonymous plain object and the only rig available was yours. */
       const pausedSafe=q.busy==='Paused'&&!this.pvp;
       const pp={ ...BFFaceOptions.appearance(q.face),pausedSafe,dragonRide:q.riding?{}:null,sitting:!!q.sitting,lookTier:q.lookTier, cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:q.motion?q.motion.vx:(mv2>0.2?60:0), vz:q.motion?.vz||0, vy:q.motion?.vy||0, onGround:q.motion?.ground!==false, combatPose:q.motion?.pose||null, emote:q.motion?.emote?{...q.motion.emote,t:q.motion.emote.t+(performance.now()-q.motion.emote.stamp)/1000}:null,
-        skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
+        weaponAction:q.weaponAction,skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
         dead:false, downed:!!q.downed, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       const chessPose=window.BFSocial?.peerPose?.(q);if(chessPose)Object.assign(pp,chessPose);
-      if(pausedSafe||q.downed)Object.assign(pp,{vx:0,vy:0,vz:0,combatPose:null,emote:null,atkTimer:0,dodgeTimer:0,saberSwingT:0,chargeAmt:0,throwHideT:0});
+      if(pausedSafe||q.downed)Object.assign(pp,{weaponAction:null,vx:0,vy:0,vz:0,combatPose:null,emote:null,atkTimer:0,dodgeTimer:0,saberSwingT:0,chargeAmt:0,throwHideT:0});
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,pausedSafe?'#777777':'#6f86c9'); bx(0,38,0,12,12,12,pausedSafe?'#999999':'#d9b08c'); popM(); }
       if(window.BFSocial?.camera())return; // Keep player labels and beacons off the chessboard.
@@ -21712,18 +21715,19 @@ function drawFPWeapon(p,t){
     // everything below shares ONE frame (forearm → wrist → fist → weapon) so the hand physically holds the blade
     rotY(-0.26+ryA); rotZ(-0.28+rzA); rotX(rxA);
     pushM(); mv(0,3,2.5); if(!thrownWeaponHidden(p,w)) weaponMesh(w); popM();                  // thrown charge weapons visibly leave the fist
-    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; const ty=(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?34:(w.art==='hammer'||w.art==='great'||w.art==='axe')?30:24; bx(0,ty,8, s,s,s, col,col,0.7); }   // orb rides the weapon's tip, not the grip
+    if(p.charging&&!(window.BFWeaponActions&&three3DLive())){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; const ty=(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?34:(w.art==='hammer'||w.art==='great'||w.art==='axe')?30:24; bx(0,ty,8, s,s,s, col,col,0.7); }   // orb rides the weapon's tip, not the grip
   popM();
 }
 /* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */
 function drawSwing3(p,t){
-  if(p.charging && p.weapon){ const w=p.weapon, col=elementColor(w.el)||'#c9a6ff', s=6+p.chargeAmt*13;
+  if(p.charging && p.weapon&&!(window.BFWeaponActions&&three3DLive())){ const w=p.weapon, col=elementColor(w.el)||'#c9a6ff', s=6+p.chargeAmt*13;
     // Phase 10: the charge orb sits on the weapon's BUSINESS END (blade/tip/head), not the hand
     const reach=(w.cls==='melee')?((MELEE[w.art]&&MELEE[w.art].reach)||46):40;
     const fwd=reach*0.6+16, up=(w.art==='hammer'||w.art==='great'||w.art==='axe')?50:(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?46:36;
     const hx=p.x+Math.sin(p.yaw)*fwd, hz=p.z+Math.cos(p.yaw)*fwd;
     bx(hx,p.y+up,hz, s,s,s, col, col, 0.55+0.3*Math.sin(t*20)); }   // growing charge orb
   const w=p.weapon; if(!w||w.cls!=='melee'||p.atkTimer<=0) return;
+  if(window.BFWeaponActions&&three3DLive()&&p.weaponAction?.remaining>0)return;
   if(w.art==='scythe'&&window.BFReaperCombo&&p.swingCombo>=0)return;
   const M=MELEE[w.art]||MELEE.sword, prog=1-(p.atkTimer/0.26), fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const col=w.blade||'#dfe5ec', y=p.y+22, a=Math.max(0,0.5*(1-prog*0.8));
@@ -24438,7 +24442,7 @@ if(window.BF_COMBAT_ART){
   const attack=playerAttack;
   playerAttack=function(...args){ const p=G.p,serial=p.swingId; const result=attack(...args);if(p.swingId!==serial)art.weapon(G,p,meta.classId,false);return result; };
   const charge=chargeRelease;
-  chargeRelease=function(p,w,amt){const shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok)art.weapon(G,p,meta.classId,true);return result;};
+  chargeRelease=function(p,w,amt){const serial=p.swingId,shots=new Set(G.projectiles),ok=classFamilyOk(w),result=charge(p,w,amt);for(const pr of G.projectiles)if(!shots.has(pr)&&['axe','javelin','dagger','scythespin'].includes(pr.shape))pr.weapon=MP.wsnap(w);if(ok&&p.swingId!==serial)art.weapon(G,p,meta.classId,true,amt);return result;};
 }
 
 window.BFCompanionSfx?.configure({world:()=>G,allowed:()=>mode==='play'&&!document.hidden&&!window.BF_LOADING?.active&&!G?.p?.dead&&!G?.p?.downed&&!pauseState().active&&!G?._tutorialSafe,play:playFx,queue:queueSkillFx,relay:(id,gain)=>{if(MP.active)MP.sendSound([['file',id,gain]]);}});
@@ -24881,7 +24885,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2332c"></script>
+<script type="module" src="./hero3d.js?v=2333d"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2322"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "suite": "test-weapon-actions.cjs",
+      "passed": true,
+      "output": "{\"passed\":true,\"profiles\":17,\"distinctPaths\":17,\"poses\":10302,\"chargeSamples\":170,\"maxChargeStrokes\":89,\"packetVariants\":34,\"bufferFrames\":34}",
+      "error": ""
+    },
+    {
+      "suite": "test-reaper-combo.cjs",
+      "passed": true,
+      "output": "{\"passed\":true,\"poseSamples\":303,\"effectSamples\":606,\"maxStroke\":223,\"distinctPaths\":3,\"coOpVariants\":3,\"chargedThrowPreserved\":true,\"actualBufferFrames\":24}",
+      "error": ""
+    },
+    {
+      "suite": "test-skill-motion.cjs",
+      "passed": true,
+      "output": "{\"passed\":true,\"checks\":42045,\"skills\":136}",
+      "error": ""
+    },
+    {
+      "suite": "test-distinct-skill-effects.cjs",
+      "passed": true,
+      "output": "{\"passed\":true,\"skills\":136,\"checks\":217300,\"uniqueGeometrySignatures\":136,\"maxStrokes\":710,\"projectileShapes\":[{\"round\":5,\"shaft\":0,\"gem\":3,\"seed\":0,\"tip\":0,\"bar\":0,\"ring\":0},{\"round\":0,\"shaft\":1,\"gem\":3,\"seed\":0,\"tip\":0,\"bar\":0,\"ring\":2}]}",
+      "error": ""
+    },
+    {
+      "suite": "test-skill-surfaces.cjs",
+      "passed": true,
+      "output": "{\"passed\":true,\"checks\":6146,\"skills\":136,\"maxFullEffectCostLow\":290,\"maxFullEffectCostHigh\":895,\"withSurfaces\":90,\"maxSurfaceVertices\":11904,\"maxRibbonVertices\":12516,\"shieldCpu250TicksMs\":40.83}",
+      "error": ""
+    },
+    {
+      "suite": "test-render-motion.cjs",
+      "passed": true,
+      "output": "1624 render interpolation, authority restoration, warp/menu/life exclusions and camera refresh checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-crisp-motion.cjs",
+      "passed": true,
+      "output": "15 character motion clarity checks passed: no sampling/drawing/toggle/warmup echo rigs, current-frame clear, normal peer compositing and loading warmup retained.",
+      "error": ""
+    },
+    {
+      "suite": "check-3d-inline.cjs",
+      "passed": true,
+      "output": "Parsed 1 inline game script.",
+      "error": ""
+    }
+  ]
+}

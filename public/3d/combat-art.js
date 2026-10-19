@@ -31,7 +31,7 @@ function packet(e){return {id:e.profile.id,profile:e.profile.weapon?e.profile:nu
 function receive(g,rows,owner){for(const a of (Array.isArray(rows)?rows:[]).slice(0,48)){
  if(!a||![a.x,a.y,a.z,a.yaw,a.life,a.t].every(Number.isFinite)||Math.abs(a.x)>1e7||Math.abs(a.z)>1e7)continue;
  let profile=profiles[a.id];
- if(a.profile?.weapon){const p=a.profile;if(!themes[p.cls]||!['slash','cross','execute','spiral','bash','lance','fan','bolt','quake','palmflame','reapcombo'].includes(p.form))continue;profile={id:String(p.id||'').slice(0,64),cls:p.cls,form:p.form,slot:p.slot===2?2:-1,weapon:true,element:p.element,combo:p.form==='reapcombo'?Math.max(0,Math.min(2,p.combo|0)):undefined};}
+ if(a.profile?.weapon){const p=a.profile;if(!themes[p.cls]||!['slash','cross','execute','spiral','bash','lance','fan','bolt','quake','palmflame','reapcombo'].includes(p.form))continue;profile={id:String(p.id||'').slice(0,64),cls:p.cls,form:p.form,slot:p.slot===2?2:-1,weapon:true,element:p.element,actionKey:root.BFWeaponActions?.rows[p.actionKey]?p.actionKey:undefined,actionSerial:Number.isFinite(p.actionSerial)?Math.max(0,Math.min(1e12,p.actionSerial)):undefined,combo:p.form==='reapcombo'?Math.max(0,Math.min(2,p.combo|0)):undefined};}
  if(!profile)continue;const life=Math.min(3,Math.max(.05,a.life)),t=Math.max(0,a.t);if(t>=life)continue;
  const origin=a.origin&&[a.origin.x,a.origin.y,a.origin.z].every(Number.isFinite)?{x:a.origin.x,y:a.origin.y,z:a.origin.z}:undefined;
  (g.combatArt||(g.combatArt=[])).push({profile,x:a.x,y:a.y,z:a.z,yaw:a.yaw,origin,radius:Number.isFinite(a.radius)?Math.max(0,Math.min(2000,a.radius)):undefined,t,life,serial:a.serial,visual:true,_mp:1,actorId:owner?String(owner).slice(0,80):null});
@@ -43,20 +43,26 @@ function pose(p,id){
  const clips={slash:'Sword_Attack',cross:'Sword_Attack2',spiral:'Attack2',execute:'Attack',flurry:'Punch',bash:'Punch',claw:'Sword_Attack',lance:profiles[id].cls==='ranger'||profiles[id].cls==='pirate'?'Bow_Shoot':'Staff_Attack',fan:'Bow_Shoot',quake:'Attack',roar:'Attacking_Idle',trap:'PickUp'};
  p.combatPose={serial:++serial,clip:clips[f]||(['ward','wall','heal','summon'].includes(f)?'Spell2':'Spell1'),remaining:.42};
 }
-function weapon(g,p,cls,charged){
- if(p.combatPose)p.combatPose.remaining=0;
- const w=p.weapon,art=w.art,forms={sword:'slash',spellblade:'slash',dagger:'cross',great:'slash',hammer:'execute',axe:'execute',scythe:'spiral',fist:'bash',bow:'lance',cross:'fan',javelin:'lance',flintlock:'bash',staff:'bolt',wand:'bolt'};
- const chargeForms={quake:'quake',spin:'spiral',spellsweep:'slash',hurl:'execute',daggerthrow:'lance',javelin:'lance',powershot:'lance',scythethrow:'spiral',bolt:'bolt'};
- if(w.intrinsic==='pyromancer'){p.combatPose={serial:++serial,clip:charged?'Spell2':'Spell1',remaining:charged?.4:.28};}
- else if(charged&&art!=='cross')p.combatPose={serial:++serial,clip:({bow:'Bow_Shoot',dagger:'Staff_Attack',javelin:'Staff_Attack',staff:'Staff_Attack',wand:'Spell2',spellblade:'Sword_Attack2'})[art]||'Attack2',remaining:.45};
+function weaponProfile(w,cls,charged,combo=0){
+ const art=w.art,forms={sword:'slash',spellblade:'slash',dagger:'cross',great:'slash',hammer:'execute',axe:'execute',scythe:'spiral',fist:'bash',bow:'lance',cross:'fan',javelin:'lance',flintlock:'bash',staff:'bolt',wand:'bolt'};
+ const chargeForms={sabersweep:'slash',quake:'quake',spin:'spiral',spellsweep:'slash',hurl:'execute',daggerthrow:'lance',javelin:'lance',powershot:'lance',scythethrow:'spiral',bolt:'bolt'};
  const profile={id:w.arche,cls:cls||'warrior',form:w.intrinsic==='pyromancer'?'palmflame':charged?(chargeForms[w.chg]||'bolt'):(forms[art]||'slash'),slot:charged?2:-1,weapon:true,element:w.el};
- if(!charged&&art==='scythe'&&cls==='reaper'&&root.BFReaperCombo){profile.form='reapcombo';profile.combo=Math.max(0,Math.min(2,p.swingCombo|0));}
+ if(!charged&&art==='scythe'&&cls==='reaper'&&root.BFReaperCombo){profile.form='reapcombo';profile.combo=Math.max(0,Math.min(2,combo|0));}
+ return profile;
+}
+function weapon(g,p,cls,charged,amount=0){
+ const action=root.BFWeaponActions?.start(p,charged,amount);
+ if(p.combatPose)p.combatPose.remaining=0;
+ const w=p.weapon,art=w.art;
+ if(!action&&w.intrinsic==='pyromancer'){p.combatPose={serial:++serial,clip:charged?'Spell2':'Spell1',remaining:charged?.4:.28};}
+ else if(!action&&charged&&art!=='cross')p.combatPose={serial:++serial,clip:({bow:'Bow_Shoot',dagger:'Staff_Attack',javelin:'Staff_Attack',staff:'Staff_Attack',wand:'Spell2',spellblade:'Sword_Attack2'})[art]||'Attack2',remaining:.45};
+ const profile=weaponProfile(w,cls,charged,p.swingCombo);profile.actionKey=action?.key;profile.actionSerial=action?.serial;
  const list=g.combatArt||(g.combatArt=[]);
- list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:profile.form==='reapcombo'?root.BFReaperCombo.durations[profile.combo]:charged?.55:Math.max(.16,p.atkTimer||.24),actorId:p.peerId||'local',radius:w.intrinsic==='pyromancer'?(p.flameReach||(charged?220:130)):w.range||48,serial:++serial});
+ list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:profile.form==='reapcombo'?root.BFReaperCombo.durations[profile.combo]:action?.duration|| (charged?.55:Math.max(.16,p.atkTimer||.24)),actorId:p.peerId||'local',radius:w.intrinsic==='pyromancer'?(p.flameReach||(charged?220:130)):w.range||48,serial:++serial});
  if(list.length>48)list.splice(0,list.length-48);
 }
-function tick(g,dt){if(g.p?.combatPose?.skill&&(g.p.dead||g.p.downed||(g.p.dodgeTimer>0&&!g.p.combatPose.duringDodge)||g.p.dragonRide||g.p.sitting||g.p.emote?.t<4))g.p.combatPose.remaining=0;if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
-function prAlpha(e,q){if(e.profile.form==='reapcombo')return Math.pow(Math.max(0,Math.sin(Math.PI*q)),.6)*(1-q*.25);return e.profile.weapon?Math.sin(Math.PI*Math.min(1,q*1.4))*(1-q*.6):Math.sin(Math.PI*Math.max(0,Math.min(1,q)))*(1-q*.35);}
+function tick(g,dt){if(g.p?.weaponAction)g.p.weaponAction.remaining=Math.max(0,g.p.weaponAction.remaining-dt);if(g.p?.combatPose?.skill&&(g.p.dead||g.p.downed||(g.p.dodgeTimer>0&&!g.p.combatPose.duringDodge)||g.p.dragonRide||g.p.sitting||g.p.emote?.t<4))g.p.combatPose.remaining=0;if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
+function prAlpha(e,q){if(e.profile.form==='reapcombo'||e.profile.actionKey)return Math.pow(Math.max(0,Math.sin(Math.PI*q)),.6)*(1-q*.25);return e.profile.weapon?Math.sin(Math.PI*Math.min(1,q*1.4))*(1-q*.6):Math.sin(Math.PI*Math.max(0,Math.min(1,q)))*(1-q*.35);}
 function render(g,d){
  const {pushM,popM,mv,rotY,rotX,box}=d;
  let budget=d.strokeBudget??(d.quality==='low'?300:900);
@@ -79,6 +85,7 @@ function render(g,d){
   shapes.flame=[[-6,-6,0],[-7,1,0],[-2,6,0],[0,14,0],[5,5,0],[7,-1,0],[5,-6,0],[0,-9,0],[-6,-6,0]];
   const points=shapes[kind]||shapes.rune;for(let i=1;i<points.length;i++)line(points[i-1],points[i],1.7,col,alpha);popM();
  }
+ root.BFWeaponActions?.chargeRender({line,arc,trail,glow,pushM,popM,mv,rotY,detail:d.quality==='low'?24:48});
  // Rising rings and an inward spiral telegraph the vulnerable party-travel charge.
  for(const p of [g.p,...(g.peerDefenses||[])])if(p?.warp>0){
   const t=p.warp/3;pushM();mv(p.x,p.y+3,p.z);
@@ -95,16 +102,17 @@ function render(g,d){
  for(const e of (g.combatArt||[]).slice().reverse()){
   const q=e.t/e.life,a=prAlpha(e,q),v=1-Math.pow(1-q,3);
   const pr=e.profile,theme=themes[pr.cls],kind=theme[2],hot=theme[1],col=({fire:'#ff8845',ice:'#87ddff',arcane:'#cd9bff',poison:'#a9df69',void:'#b48be8',holy:'#ffe6a1'})[pr.element]||theme[0],ultimate=pr.slot===3,scale=ultimate?1.35:1,r=e.radius?(12+v*(e.radius-12)):(24+v*48)*scale;
-  pushM();mv(e.x,e.y+(pr.form==='reapcombo'?0:4),e.z);rotY(e.yaw);
+  pushM();mv(e.x,e.y+(pr.form==='reapcombo'||pr.actionKey?0:4),e.z);rotY(e.yaw);
   const f=pr.form;
+  const weaponTrail=pr.weapon&&pr.form!=='reapcombo'&&(pr.slot!==2||['bow','cross','flintlock','staff','wand'].includes(pr.actionKey))&&root.BFWeaponActions?.render(e,q,{trail,line,glow,arc,hot,col,a,pushM,popM,mv,rotY});
   const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,trail,glow,surface,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot,event:e,detail:d.quality==='low'?24:48});
-  if(custom){}else if(f==='reapcombo'&&root.BFReaperCombo){root.BFReaperCombo.render(pr.combo,q,{trail,glow,arc,line,col,hot,a,frame:root.BFReaperCombo.frame(e.actorId,pr.combo),event:e,detail:d.quality==='low'?24:48});}else if(f==='palmflame'){
+  if(custom||weaponTrail){}else if(f==='reapcombo'&&root.BFReaperCombo){root.BFReaperCombo.render(pr.combo,q,{trail,glow,arc,line,col,hot,a,frame:root.BFReaperCombo.frame(e.actorId,pr.combo),event:e,detail:d.quality==='low'?24:48});}else if(f==='palmflame'){
    const wide=pr.slot===2,count=wide?9:5,spread=wide?.78:.36;
    // Layered tapering tongues start at the palms, never a staff projectile.
    for(let j=0;j<count;j++){const ang=(j/(count-1)*2-1)*spread,side=j%2?10:-10,len=r*(.82+.18*Math.sin(j*2+1));
     let prev=[side,26,18];
-    for(let k=1;k<=5;k++){const t=k/5,next=[side+Math.sin(ang)*len*t,26+Math.sin(t*8+q*15+j)*5*t+8*t,18+Math.cos(ang)*len*t];
-     line(prev,next,(wide?9:7)*(1-t*.8),j%2?'#ff6525':'#ff9c32',a*.82);if(k<4)line([prev[0],prev[1]+1,prev[2]],next,2,hot,a*.8);prev=next;}
+    const steps=d.quality==='low'?7:12;for(let k=1;k<=steps;k++){const t=k/steps,next=[side+Math.sin(ang)*len*t,26+Math.sin(t*5.5+q*9+j)*3.5*t+8*t,18+Math.cos(ang)*len*t];
+     line(prev,next,(wide?9:7)*(1-t*.8),j%2?'#ff6525':'#ff9c32',a*.82);if(k<steps-1)line([prev[0],prev[1]+.7,prev[2]],next,1.3,hot,a*.7);prev=next;}
    }
   }else if(['slash','cross','spiral','execute','claw','flurry'].includes(f)){
    const count=f==='flurry'?5:f==='cross'?2:f==='spiral'?3:1;
@@ -203,5 +211,5 @@ function render(g,d){
  }
 
 }
-root.BF_COMBAT_ART={configure,profiles,emit,pose,weapon,tick,render,themes,packet,receive};
+root.BF_COMBAT_ART={configure,profiles,emit,pose,weapon,weaponProfile,tick,render,themes,packet,receive};
 })(window);

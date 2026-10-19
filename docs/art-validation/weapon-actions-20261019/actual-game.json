@@ -1,0 +1,574 @@
+{
+  "passed": true,
+  "level": 100,
+  "gold": 1145,
+  "actions": 48,
+  "rows": [
+    {
+      "arche": "sword",
+      "cls": "warrior",
+      "charged": false,
+      "key": "sword",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "sword",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "saber",
+      "cls": "warrior",
+      "charged": false,
+      "key": "saber",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "saber",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "dagger",
+      "cls": "warrior",
+      "charged": false,
+      "key": "dagger",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "dagger",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "axe",
+      "cls": "warrior",
+      "charged": false,
+      "key": "axe",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "axe",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "axe",
+      "cls": "warrior",
+      "charged": true,
+      "key": "axe",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "axe",
+      "projectileShapes": [
+        "axe"
+      ],
+      "maxVfx": 594
+    },
+    {
+      "arche": "great",
+      "cls": "warrior",
+      "charged": false,
+      "key": "great",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "great",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "great",
+      "cls": "warrior",
+      "charged": true,
+      "key": "great",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "great",
+      "projectileShapes": [],
+      "maxVfx": 1728
+    },
+    {
+      "arche": "hammer",
+      "cls": "warrior",
+      "charged": false,
+      "key": "hammer",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "hammer",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "hammer",
+      "cls": "warrior",
+      "charged": true,
+      "key": "hammer",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "hammer",
+      "projectileShapes": [],
+      "maxVfx": 864
+    },
+    {
+      "arche": "scythe",
+      "cls": "reaper",
+      "charged": false,
+      "key": "scythe",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "scythe",
+      "projectileShapes": [],
+      "maxVfx": 1770
+    },
+    {
+      "arche": "scythe",
+      "cls": "reaper",
+      "charged": true,
+      "key": "scythe",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "scythe",
+      "projectileShapes": [
+        "scythespin"
+      ],
+      "maxVfx": 1746
+    },
+    {
+      "arche": "fist",
+      "cls": "monk",
+      "charged": false,
+      "key": "fist",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "fist",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "flameblade",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "flameblade",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "frostbrand",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "frostbrand",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "runeblade",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "runeblade",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "venomedge",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "venomedge",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "umbrablade",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "umbrablade",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "sunblade",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "sunblade",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "lightbringer",
+      "cls": "mage",
+      "charged": false,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 432
+    },
+    {
+      "arche": "lightbringer",
+      "cls": "mage",
+      "charged": true,
+      "key": "spellblade",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "spellblade",
+      "projectileShapes": [],
+      "maxVfx": 576
+    },
+    {
+      "arche": "voidscythe",
+      "cls": "reaper",
+      "charged": false,
+      "key": "scythe",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "scythe",
+      "projectileShapes": [],
+      "maxVfx": 1770
+    },
+    {
+      "arche": "voidscythe",
+      "cls": "reaper",
+      "charged": true,
+      "key": "scythe",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "scythe",
+      "projectileShapes": [
+        "scythespin"
+      ],
+      "maxVfx": 1746
+    },
+    {
+      "arche": "bow",
+      "cls": "ranger",
+      "charged": false,
+      "key": "bow",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "bow",
+      "projectileShapes": [
+        "arrow"
+      ],
+      "maxVfx": 432
+    },
+    {
+      "arche": "bow",
+      "cls": "ranger",
+      "charged": true,
+      "key": "bow",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "bow",
+      "projectileShapes": [
+        "lance"
+      ],
+      "maxVfx": 432
+    },
+    {
+      "arche": "crossbow",
+      "cls": "ranger",
+      "charged": false,
+      "key": "cross",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "cross",
+      "projectileShapes": [
+        "arrow",
+        "arrow",
+        "arrow"
+      ],
+      "maxVfx": 72
+    },
+    {
+      "arche": "knives",
+      "cls": "ranger",
+      "charged": false,
+      "key": "dagger",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "dagger",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "knives",
+      "cls": "ranger",
+      "charged": true,
+      "key": "dagger",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "dagger",
+      "projectileShapes": [
+        "dagger"
+      ],
+      "maxVfx": 126
+    },
+    {
+      "arche": "javelin",
+      "cls": "ranger",
+      "charged": false,
+      "key": "javelin",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "javelin",
+      "projectileShapes": [],
+      "maxVfx": 288
+    },
+    {
+      "arche": "javelin",
+      "cls": "ranger",
+      "charged": true,
+      "key": "javelin",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "javelin",
+      "projectileShapes": [
+        "javelin"
+      ],
+      "maxVfx": 126
+    },
+    {
+      "arche": "flintlock",
+      "cls": "pirate",
+      "charged": false,
+      "key": "flintlock",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "flintlock",
+      "projectileShapes": [
+        "cannonball"
+      ],
+      "maxVfx": 132
+    },
+    {
+      "arche": "firestaff",
+      "cls": "mage",
+      "charged": false,
+      "key": "staff",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "staff",
+      "projectileShapes": [
+        "fireball"
+      ],
+      "maxVfx": 762
+    },
+    {
+      "arche": "firestaff",
+      "cls": "mage",
+      "charged": true,
+      "key": "staff",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "staff",
+      "projectileShapes": [
+        "fireball"
+      ],
+      "maxVfx": 762
+    },
+    {
+      "arche": "frostwand",
+      "cls": "mage",
+      "charged": false,
+      "key": "wand",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "wand",
+      "projectileShapes": [
+        "shard"
+      ],
+      "maxVfx": 510
+    },
+    {
+      "arche": "arcaneorb",
+      "cls": "mage",
+      "charged": false,
+      "key": "wand",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "wand",
+      "projectileShapes": [
+        "orb"
+      ],
+      "maxVfx": 510
+    },
+    {
+      "arche": "stormrod",
+      "cls": "mage",
+      "charged": false,
+      "key": "wand",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "wand",
+      "projectileShapes": [
+        "spark"
+      ],
+      "maxVfx": 510
+    },
+    {
+      "arche": "plaguestaff",
+      "cls": "mage",
+      "charged": false,
+      "key": "staff",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "staff",
+      "projectileShapes": [
+        "glob"
+      ],
+      "maxVfx": 762
+    },
+    {
+      "arche": "plaguestaff",
+      "cls": "mage",
+      "charged": true,
+      "key": "staff",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "staff",
+      "projectileShapes": [
+        "glob"
+      ],
+      "maxVfx": 762
+    },
+    {
+      "arche": "holyscepter",
+      "cls": "mage",
+      "charged": false,
+      "key": "wand",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "wand",
+      "projectileShapes": [
+        "light"
+      ],
+      "maxVfx": 510
+    },
+    {
+      "arche": "class",
+      "cls": "pyromancer",
+      "charged": false,
+      "key": "palm",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "palm",
+      "projectileShapes": [],
+      "maxVfx": 1980
+    },
+    {
+      "arche": "class",
+      "cls": "pyromancer",
+      "charged": true,
+      "key": "palm",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "palm",
+      "projectileShapes": [],
+      "maxVfx": 3564
+    },
+    {
+      "arche": "class",
+      "cls": "pirate",
+      "charged": false,
+      "key": "flintlock",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "flintlock",
+      "projectileShapes": [
+        "cannonball"
+      ],
+      "maxVfx": 132
+    },
+    {
+      "arche": "class",
+      "cls": "pirate",
+      "charged": true,
+      "key": "saber",
+      "body": true,
+      "remoteBody": true,
+      "coOpAction": "saber",
+      "projectileShapes": [],
+      "maxVfx": 576
+    }
+  ]
+}

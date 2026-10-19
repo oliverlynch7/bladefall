@@ -1,0 +1,122 @@
+[
+  {
+    "suite": "portal-travel",
+    "passed": true,
+    "output": "39 portal theme, single-entry, cancellation, stale scene, nested callback, character pose, reduced motion, input and actual loading-barrier checks passed.\n7 special-mode navigation/exit regression checks passed.\n4 departure destination checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "sprint-loading",
+    "passed": true,
+    "output": "Sprint loading regression: stale hub state, warmup, same-seed retry, new seed, explicit reset and real hub readiness passed.",
+    "error": ""
+  },
+  {
+    "suite": "first-arrival",
+    "passed": true,
+    "output": "24 first-arrival regression checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "hub-transition",
+    "passed": true,
+    "output": "33 portal ownership and world snapshot regression checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "party-transitions",
+    "passed": true,
+    "output": "56 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "campaign-replay",
+    "passed": true,
+    "output": "103 replay start, unlock, invalid input, checkpoint, earnings and guest sync checks passed",
+    "error": ""
+  },
+  {
+    "suite": "onboarding-coop",
+    "passed": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "esc-pause",
+    "passed": true,
+    "output": "42 pause regression checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "party-feedback",
+    "passed": true,
+    "output": "36 rescue reachability, timing, relay, duplicates, menu, legacy and presentation checks passed.\n6 downed rig selection/clamping/recovery checks passed.\n3 fallen-body grounding and get-up transition checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "coop-chests",
+    "passed": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}",
+    "error": ""
+  },
+  {
+    "suite": "coop-companions",
+    "passed": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}",
+    "error": ""
+  },
+  {
+    "suite": "coop-audio",
+    "passed": true,
+    "output": "52 capture, fallback, mute-independent dispatch, safe relay, rate/scene/duplicate and actual gain checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "menu-shortcuts",
+    "passed": true,
+    "output": "22 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\nNarration button E safety checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "onboarding-narration",
+    "passed": true,
+    "output": "264 narration transcript/hash, binding, mute, cancellation, late load/play and recovery checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "onboarding-controls",
+    "passed": true,
+    "output": "26 onboarding migration, action pacing, hidden/menu timing and routing checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "class-trial-music",
+    "passed": true,
+    "output": "Trial score passed: all11 actual trial classes, nine unique assets, play/dialogue/pause routing, originals, stereo/durations/hashes/size and fallback.",
+    "error": ""
+  },
+  {
+    "suite": "music-score",
+    "passed": true,
+    "output": "Score passed: 40 original hashes, stereo/size, all halves/bosses, hub/hall/trials, final phases, dialogue, future scene cues.",
+    "error": ""
+  },
+  {
+    "suite": "briar-combat",
+    "passed": true,
+    "output": "75 Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.\nBrute phase 2/3 ground-wave variation and first-phase charge preserved.",
+    "error": ""
+  },
+  {
+    "suite": "sprint-finish",
+    "passed": true,
+    "output": "{\"checks\":24148,\"seeds\":500,\"hops\":10806,\"families\":[\"switchback\",\"elevator\",\"beams\",\"shaft\",\"crumble\",\"cascade\",\"springs\",\"spiral\",\"arches\",\"phase\"],\"physicalSeeds\":[13,21,68,165,204,219,305,360,390,400,445],\"physicalCrownSeed\":68,\"maxGap\":62.4}",
+    "error": ""
+  },
+  {
+    "suite": "rift-hall",
+    "passed": true,
+    "output": "Rift Hall passed: personal five-shard assembly, no duplicate counts/unlocks, legacy class mapping, ending gate, absent class guard, dialogue resume and graph links.",
+    "error": ""
+  }
+]

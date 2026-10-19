@@ -1,0 +1,93 @@
+{
+ "results": [
+  {
+   "name": "Reaper Trial",
+   "out": true,
+   "departureScale": 0.9999990027700534,
+   "phases": [
+    "out",
+    "hold",
+    "in"
+   ],
+   "ms": 3595,
+   "scene": {
+    "name": "Reaper Trial",
+    "color": "#c39aff"
+   },
+   "loading": false
+  },
+  {
+   "name": "Waystation",
+   "out": true,
+   "departureScale": 0.9999997506925133,
+   "phases": [
+    "out",
+    "hold",
+    "in"
+   ],
+   "ms": 1474,
+   "scene": {
+    "name": "The Waystation",
+    "color": "#8ee3e0"
+   },
+   "loading": false
+  },
+  {
+   "name": "The Gauntlet",
+   "out": true,
+   "departureScale": 0.9999997506925133,
+   "phases": [
+    "out",
+    "hold",
+    "in"
+   ],
+   "ms": 1042,
+   "scene": {
+    "name": "The Gauntlet",
+    "color": "#f4b184"
+   },
+   "loading": false
+  },
+  {
+   "name": "Waystation",
+   "out": true,
+   "departureScale": 1,
+   "phases": [
+    "out",
+    "hold",
+    "in"
+   ],
+   "ms": 1049,
+   "scene": {
+    "name": "The Waystation",
+    "color": "#8ee3e0"
+   },
+   "loading": false
+  }
+ ],
+ "version": "2.292.0-portal-journeys",
+ "mode": "play",
+ "level": 100,
+ "gold": 1145,
+ "scene": {
+  "name": "The Waystation",
+  "color": "#8ee3e0"
+ },
+ "phase": null,
+ "loading": false,
+ "pose": null,
+ "opacity": true,
+ "rig": {
+  "model": "Warrior",
+  "clip": "Idle",
+  "fallen": false,
+  "wrap": true,
+  "visible": true,
+  "weapon": {
+   "name": "Sword",
+   "anatomical": true,
+   "length": 1.2,
+   "body": "Warrior"
+  }
+ }
+}

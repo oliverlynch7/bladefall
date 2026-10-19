@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><link rel="stylesheet" href="./arena-setup.css?v=2274"><script src="./save-safety.js?v=2229"></script>
+<head><link rel="stylesheet" href="./portal-travel.css?v=2292"><script src="./portal-travel.js?v=2292"></script><link rel="stylesheet" href="./arena-setup.css?v=2274"><script src="./save-safety.js?v=2229"></script>
 <script src="./skill-sfx.js?v=2277"></script>
 <script src="./world-signature-sfx.js?v=2279"></script>
 <script src="./combat-detail-sfx.js?v=2281"></script>
@@ -1118,7 +1118,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./prison-dungeon.js?v=2140"></script>
 <script src="./prison-combat.js?v=2105-2099"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2133"><script src="./prison-menu.js?v=2097"></script>
-<script src="./loading.js?v=2255"></script>
+<script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
 <link rel="stylesheet" href="./hub-dialogue.css?v=2288">
@@ -1193,7 +1193,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-journey.js?v=2236"></script>
 <script src="./bag-browser.js?v=2238"></script>
 <link rel="stylesheet" href="./party-feedback.css?v=2291"><script src="./party-feedback.js?v=2291"></script>
-<script src="./party-navigation.js?v=2197"></script>
+<script src="./party-navigation.js?v=2292"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2266">
@@ -1222,7 +1222,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.291.0-party-rescue';
+const VERSION3D='2.292.0-portal-journeys';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5661,7 +5661,7 @@ function newG(p,extra){
 }
 function openCampaignEntry(zi,back=wsResume){
  const Z=ZONES[zi];if(!Z||zi>(meta.zoneMax||0))return;
- if(!meta.zoneDone?.[Z.id]){enterZone(zi);return;}
+ if(!meta.zoneDone?.[Z.id]){portalTraverse(()=>enterZone(zi),{name:Z.name,color:ZONE_ACCENT[Z.id]});return;}
  const world=G;let used=false;releaseKeyboard();mode='menu';showGameUI(false);
  const entries=[...Z.areas.map((a,area)=>({area,title:a.name,detail:'Part '+(area+1)+' · Explore and complete quests'})),{area:-1,title:Z.boss.name,detail:'Boss fight · Start at the boss arena'}];
  showOverlayHTML(`<div class="card narrow" data-dialogue-menu><p class="ovkicker">Completed campaign level</p><h2 class="ovh">${Z.name}</h2><p class="ovsub">Where would you like to start?</p><div class="replay-destinations">${entries.map(e=>`<button class="bigbtn ghost" data-replay-area="${e.area}" style="text-align:left;margin:10px 0"><strong>${e.area<0?'⚔':'◇'} ${e.title}</strong><small style="display:block;font-size:13px;margin-top:6px;color:#d8dfdb">${e.detail}</small></button>`).join('')}</div><p class="dialogue-key-hint">W / S or ↑ / ↓ · ${controlHint('interact')} choose</p><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
@@ -16750,7 +16750,7 @@ function updateWorld(dt){
   if(G.hasKey) for(const dr of G.doors){ if(dr.type==='key'&&!dr.open&&dXZ(p.x,p.z,dr.x,dr.z)<74){
     dr.open=true; G.hasKey=false; toast('The lock yields!',null,'item-key'); SFX.god(); break; } }
   // golden bonus portal
-  if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48 && Math.abs(p.y-(G.bonusPortal.y||0))<70){ startBonus(); return; }
+  if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48 && Math.abs(p.y-(G.bonusPortal.y||0))<70){ portalTraverse(startBonus,{name:'Treasure Sprint',color:'#ffdf80'});return; }
   // bonus sprint clock
   if(G.bonusActive&&!G.sprintFinish){updateSprintGuide();const moved=Math.abs(p.z)>12||Math.abs(p.x)>12;
     if(BFSprintRace.step(G.sprintRace,dt,moved,pauseState().protected)){G.bonusStarted=true;toast('Clock running · reach the treasure!','#ffd24a');}
@@ -17013,7 +17013,7 @@ function updateWorld(dt){
   if(G.trial){ const T=TRIALS[G.trial];
     if(!meta.tutOff&&!G._guidedUsed&&T.earned&&T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
   // portal
-  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72){ if(G.portal.win) winFinale(); else nextStage(); } }
+  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72){ if(G.portal.win)portalTraverse(winFinale,{name:'The Waystation'});else nextStage(); } }
   // particles
   if(meta.particles===false){ if(G.particles.length) G.particles.length=0; }   // particles-off: drop any spawned by other systems so nothing accumulates
   else { for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
@@ -17395,13 +17395,14 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
 }
 // a quick fade-warp instead of an instant snap: black out, load the next area at the dark midpoint, fade back in
 function cancelPortalWarp(){
+  if(window.BFPortalTravel?.phase==='out')BFPortalTravel.reset();
   clearTimeout(warpTo._timer);warpTo._timer=null;warpTo._ticket=null;warpTo._busy=false;
   document.getElementById('fadeveil')?.classList.remove('on');
 }
-function warpTo(fn){ if(warpTo._busy||!G||G.hub) return;
+function warpTo(fn){ if(warpTo._busy||!G||G.hub||window.BFPortalTravel?.cooling) return;
   const ticket={world:G,portal:G.portal,area:G.area,stage:G.stageIndex};
   warpTo._ticket=ticket;warpTo._busy=true;
-  const v=document.getElementById('fadeveil'); try{ SFX.magic('void'); }catch(e){}
+  const v=document.getElementById('fadeveil');window.BFPortalTravel?.depart(G,{cued:true,...BFPortalTravel.destination(G)});try{ SFX.magic('void'); }catch(e){}
   if(v) v.classList.add('on');
   const mid=()=>{
     if(warpTo._ticket!==ticket)return;
@@ -19420,7 +19421,8 @@ function updateInteract(){
   if(!it&&BFDragonRiding.allowed(G)&&meta.petActive==='sunwing'&&G.pet?.id==='sunwing'&&G.p.onGround&&!G.pet.dead&&Math.hypot(G.pet.x-p.x,G.pet.z-p.z)<180)it={x:G.pet.x,y:G.pet.y+80,z:G.pet.z,label:'Mount Sunspire Dragon',act:toggleDragonRide};
   G.interact=it; updateInteractPrompt();
 }
-function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
+function portalTraverse(fn,options={}){if(!window.BFPortalTravel)return fn();releaseKeyboard();return BFPortalTravel.run(G,fn,options);}
+function doInteract(){ if(mode!=='play'||!G||!G.interact||window.BFPortalTravel?.blocking) return; SFX.pickup();const it=G.interact;if(['rifthall','riftexit','sparring','sparringexit','arena','arenaexit'].includes(it.anchorNpc?.id)&&!hubGateLocked(it.anchorNpc))portalTraverse(it.act,{name:it.anchorNpc.name});else it.act(); }
 // Phase 19: the SECRET STASH — free money, zero shame. Press E behind the Pet Yard crates.
 const STASH_LINES=[
   '💰 +1000g — shh. The Quartermaster doesn’t audit this corner.',
@@ -24340,6 +24342,7 @@ if(window.BFCombatDetailSfx){
   SKILL_FX[id]=function(...args){return detail.run(G,id,()=>original.apply(this,args));};
  }
 }
+window.BFPortalTravel?.configure({world:()=>G,zones:()=>ZONES,mode:()=>mode,reduced:()=>!!meta.reduceMotion,release:releaseKeyboard,cancelOut:cancelPortalWarp,cue:()=>SFX.magic('void')});
 window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPANION_WHISTLE_COST,pauseState,openStylistMakeover,openCharacterStats,openCharCreate,autoLevelGrow,freshFromSnapshot,recomputeArmor,defenseR,effMagPower,hubTutorial,unseenLanding,classAudit:{heal:classHeal,lifesteal:effLifesteal,basic:CLASS_BASIC,onKill:c2OnKill,tick:class2Innate,attackSpeed:effAtkSpeed,gold:effGoldFind,cdr:effCdr},releaseKeyboard,input,campaignEnemyDamageMul,syncCampaignPartyHealth,partySaveChoices,choosePartySave,startPartySave,openMPLobby,petShopUnlocked,petBuy,openBeastkeeper,moveX,moveZ,cosmeticAppearance,validCosmeticAppearance,partyHpMul,requestPartyTrial,applyPartyTrial,applyTrialProgress,finishPartyTrial,partyTrialPacket,abandonTrial,openReturnRequest,applyReturnReward,setupReturnHub,returnHubInfo,secureReturnItems,syncReturnField,finalKingTick,finalCommand,sendFinalCommand,prepareFinalScene,updateMarbleGuardian,inSkyLibrary,buildSkyLibrary,inPalaceCourtyard,buildPalaceCourtyard,updateHydra,buildThunderCliffs,inThunderCliffs,startVoyage,applyVoyage,voyageReceive,voyageSend,voyageTick, journalNoticeSync,discoveredOptionalTasks,questUpdate,enemyPartyTarget,syncedMelee,enemySupport,enemyRouteEdge,moveGroundEnemy,enemyMeleeClear,resolveObstacles,SKILL_FX, trialMentorProved,riftHallFrames,travelRiftHall,openRiftFrame,syncRiftHall,worldRiftShards,takeWorldRiftShard,riftShardInteract,riftShardJournal,collectRiftShard,secureRiftShards,campaignCheckpoint,captureCampaignCheckpoint,restartCampaignCheckpoint,isCampaignAdventure,snapOf,startNewGamePlus,canNewGamePlus,openQuestBoard,ensureClassWeapon,classStartWeapon,classFamilyOk,trainerEquipClass,autosaveRun,resumeSavedAdventure, resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
@@ -24549,7 +24552,7 @@ function openPreparation(){
  const shop=D.upgrades.map(u=>`<button class="bigbtn ghost" data-prbuy="${u.id}" ${p.gold<D.price(p,u.id)||p.upgrades[u.id]>=u.cap?'disabled':''}>${u.name} ${p.upgrades[u.id]}/${u.cap} · ${D.price(p,u.id)}g<br><small>${u.desc}</small></button>`).join('');
  const classes=D.offers.map(o=>`<button class="bigbtn ghost" data-prbuy="${o.id}" ${p.classes.includes(o.id)||p.tier<o.tier||p.progress[o.key]<o.goal||p.gold<o.cost?'disabled':''}>${CLASSES[o.id].disp} · Tier ${o.tier} · ${p.classes.includes(o.id)?'Owned':o.cost+'g'}<br><small>${o.desc} (${Math.min(o.goal,p.progress[o.key])}/${o.goal})</small></button>`).join('');
  showOverlayHTML(`<div class="card prison-menu" data-menu-wallet="dungeon"><p class="pr-eyebrow">DUNGEON SAVE ${library().active+1}</p><h2 class="ovh">Prepare your escape</h2><div class="pr-itinerary"><span>1 · Prison cells</span><span>2 · Underworks</span><span>3 · Escape gate</span></div><p class="hint pr-wallet">Dungeon gold is kept after death. Spend it between runs.</p><label>Starting class <select id="prclass">${choices}</select></label> <label>Difficulty tier <select id="prtier">${Array.from({length:p.tier},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label><button class="bigbtn" id="prstart">Start escape</button>${p.checkpoint?'<button class="bigbtn" id="prresume">Continue saved escape</button>':''}<details><summary>Permanent upgrades</summary>${shop}</details><details><summary>Earn new classes</summary>${classes}</details><p class="ovsub">Your health carries between rooms. Side paths offer gold and class progress, but risk your run. A new escape replaces the unfinished one.</p><button class="bigbtn ghost" id="prsaves">Change save</button><button class="bigbtn ghost" id="prback">Back to hub</button></div>`);
- document.getElementById('prstart').onclick=()=>{const cid=document.getElementById('prclass').value,tier=+document.getElementById('prtier').value;const go=()=>startDelve(cid,{tier});if(p.checkpoint)confirmAction('Replace this escape?', 'Only the unfinished run in Save '+(library().active+1)+' will be replaced. Keep your gold, upgrades and unlocked classes.',go,openPreparation);else go();};document.getElementById('prresume')?.addEventListener('click',()=>startDelve(p.checkpoint.cid,{resume:true}));document.getElementById('prback').onclick=openHub;document.getElementById('prsaves').onclick=openDelveGate;
+ document.getElementById('prstart').onclick=()=>{const cid=document.getElementById('prclass').value,tier=+document.getElementById('prtier').value;const go=()=>portalTraverse(()=>startDelve(cid,{tier}),{name:'Endless Dungeon'});if(p.checkpoint)confirmAction('Replace this escape?', 'Only the unfinished run in Save '+(library().active+1)+' will be replaced. Keep your gold, upgrades and unlocked classes.',go,openPreparation);else go();};document.getElementById('prresume')?.addEventListener('click',()=>startDelve(p.checkpoint.cid,{resume:true}));document.getElementById('prback').onclick=openHub;document.getElementById('prsaves').onclick=openDelveGate;
  document.querySelectorAll('[data-prbuy]').forEach(el=>el.onclick=()=>{editSaves(book=>D.buy(book.slots[book.active],el.dataset.prbuy));openPreparation();});
 };
 function spawnRoom(room,state){
@@ -24750,7 +24753,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2291"></script>
+<script type="module" src="./hero3d.js?v=2292"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

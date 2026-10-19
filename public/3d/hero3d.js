@@ -2124,6 +2124,7 @@ export function drawHero3D(p, t, firstPass=true){
     wrap.scale.setScalar(S);
     wrap.position.set(p.x, (p.y || 0) + HERO3D.yOff + (p.dragonRide?24:0), p.z);
     wrap.rotation.set(0,(p.yaw || 0) + HERO3D.yawOff,0);
+    const portalPose=window.BFPortalTravel?.pose(p);if(portalPose){wrap.scale.multiplyScalar(portalPose.scale);wrap.position.y+=portalPose.lift;wrap.rotation.y+=portalPose.turn;}
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
 

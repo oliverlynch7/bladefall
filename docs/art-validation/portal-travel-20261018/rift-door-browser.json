@@ -1,0 +1,43 @@
+{
+ "results": [
+  {
+   "name": "Actual Rift Hall door",
+   "phases": [
+    "out",
+    "hold",
+    "in"
+   ],
+   "ms": 1041,
+   "hall": true,
+   "scene": {
+    "name": "Rift Hall",
+    "color": "#bc9aff"
+   }
+  }
+ ],
+ "version": "2.292.0-portal-journeys",
+ "mode": "play",
+ "level": 100,
+ "gold": 1145,
+ "scene": {
+  "name": "Rift Hall",
+  "color": "#bc9aff"
+ },
+ "phase": null,
+ "loading": false,
+ "pose": null,
+ "opacity": true,
+ "rig": {
+  "model": "Warrior",
+  "clip": "Idle",
+  "fallen": false,
+  "wrap": true,
+  "visible": true,
+  "weapon": {
+   "name": "Sword",
+   "anatomical": true,
+   "length": 1.2,
+   "body": "Warrior"
+  }
+ }
+}

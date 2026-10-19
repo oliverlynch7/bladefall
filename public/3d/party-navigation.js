@@ -3,6 +3,8 @@
 function target(g){
  if(g?.devBriar)return window.BFBriarBeta?.navigation()||null;
  if(!g||g.hub||g.trial||g.side||g.voyage)return null;
+ if(g.escape||g.delve||g.endless||g.bossRush)return g.portal?{...g.portal,navLabel:'Exit portal'}:null;
+ if(g.arena||g.bonusActive)return null;
  const s=g.storyState||{},f=s.flags||{},i=s.items||{},q=s.quests||{};
  const obj=k=>(g.storyObjects||[]).find(o=>o.key===k),npc=k=>(g.storyNpcs||[]).find(o=>o.id===k);
  const nearest=a=>a.filter(Boolean).sort((a,b)=>Math.hypot(a.x-g.p.x,a.z-g.p.z)-Math.hypot(b.x-g.p.x,b.z-g.p.z))[0];

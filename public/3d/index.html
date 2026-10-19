@@ -1219,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.300.0-shard-heart';
+const VERSION3D='2.301.0-pad-mana';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5950,7 +5950,7 @@ function openHelp(back){
  {cat:'Combat',title:'Skills and passives',body:'Class ranks unlock choices. Skills are actions you trigger; passives work automatically. Read both options, select one, then confirm. The Drillmaster can help you change your choices later.'},
  {cat:'Exploration',title:'Find your next objective',body:'The quest tracker shows your current task. Gold direction markers guide you to main objectives. Turn them on or off in Pause → Settings. Optional secrets are left for you to discover.'},
  {cat:'Exploration',title:'Find a clue again',get body(){return 'New clues stay on paper notices until dismissed. '+controlHint('journal')+' opens the journal: check current tasks, filter clues or search a word. Open journal on a notice goes straight to that clue.';}},
- {cat:'Exploration',title:'Healing pads',body:'Small healing pads have limited healing. Large healing pads are rare and can restore your health repeatedly. Watch your health before starting another fight.'},
+ {cat:'Exploration',title:'Healing pads',body:'Healing pads restore health and mana while you stand on them. Small pads have limited energy; large pads refill you repeatedly. They also heal living companions.'},
  {cat:'Controls',title:'Change the camera or controls',body:'Open Settings to change your camera or rebind controls. Controller Setup supports Xbox and PlayStation labels, button rebinding and separate camera inversion for each stick axis. On touch screens, use the movement stick and action buttons.'}
  ]);
  const next=G?.trial?'Practice: defeat the enemies, then enter the exit portal.':G?.hub?'To start the campaign, use the Briar Town entrance. You can visit the shops later.':'Follow the current main task in the quest tracker. Open your journal if you need the clue again.';
@@ -14677,17 +14677,21 @@ function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G
   const p=G.p, ang=p.yaw+2.5, P=PETS[id], grounded=(P.grounded||(P.arch==='attacker'&&P.style==='melee'));
   const mh=petMaxHp(id); G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:p.y+(grounded?0:15),bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28,hp:mh,maxHp:mh,hurtT:0}; }
 function healPadOccupants(pad,player,pet,dt){
+ if(pad)pad._lastMana=0;
  if(!pad||pad.locked||!Number.isFinite(dt)||dt<=0||(!pad.infinite&&pad.charge<=0))return 0;
  const plans=[];let need=0;
  for(const actor of [player,pet]){
   if(!actor||actor.dead||actor.downed||!Number.isFinite(actor.hp)||actor.hp<=0||Math.abs((actor.y||0)-(pad.y||0))>=30||Math.hypot(actor.x-pad.x,actor.z-pad.z)>=pad.r+(actor.r||14)*.6)continue;
-  const max=actor===player?effMaxHp(actor):actor.maxHp;if(!Number.isFinite(max)||max<=0||actor.hp>=max)continue;
-  const budget=max*.4,amount=Math.min(budget/1.2*dt,max-actor.hp);if(amount<=0)continue;
-  plans.push({actor,max,budget,amount});need+=amount/budget;
+  const max=actor===player?effMaxHp(actor):actor.maxHp;if(!Number.isFinite(max)||max<=0)continue;
+  const budget=max*.4,amount=Math.max(0,Math.min(budget/1.2*dt,max-actor.hp));
+  const manaMax=actor===player&&Number.isFinite(actor.maxMana)&&actor.maxMana>0?actor.maxMana:0,manaBudget=manaMax*.4;
+  const manaAmount=manaMax&&Number.isFinite(actor.mana)?Math.max(0,Math.min(manaBudget/1.2*dt,manaMax-actor.mana)):0;
+  if(!amount&&!manaAmount)continue;
+  plans.push({actor,max,budget,amount,manaMax,manaAmount});need+=Math.max(amount/budget,manaBudget?manaAmount/manaBudget:0);
  }
  if(!need)return 0;
  const charge=pad.charge==null?1:Math.max(0,pad.charge),scale=pad.infinite?1:Math.min(1,charge/need);let healed=0;
- for(const plan of plans){const amount=plan.amount*scale;plan.actor.hp=Math.min(plan.max,plan.actor.hp+amount);healed+=amount;}
+ for(const plan of plans){const amount=plan.amount*scale,mana=plan.manaAmount*scale;plan.actor.hp=Math.min(plan.max,plan.actor.hp+amount);if(mana)plan.actor.mana=Math.min(plan.manaMax,plan.actor.mana+mana);pad._lastMana+=mana;healed+=amount+mana;}
  if(!pad.infinite)pad.charge=Math.max(0,charge-need*scale);
  return healed;
 }
@@ -16665,11 +16669,12 @@ function updateWorld(dt){
   if(!G.bonusActive&&p.onGround&&!p.dragonRide) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; if(!mv.betaMover&&!mv.prisonLift&&!mv.furnaceLift)p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
   // jump pads launch you
   if(p.onGround&&!p.dragonRide) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
-  // Pads heal their owner's living player and companion occupants, sharing finite charge.
+  // Pads restore owner health and mana; living companions share the finite healing charge.
   if(G.healpads) for(const hp of G.healpads){
     const healed=healPadOccupants(hp,p,G.pet,dt);
-    if(healed>0){hp._acc=(hp._acc||0)+healed;
-      if(hp._acc>=8){addText(hp.x,(hp.y||0)+36,hp.z,'+'+Math.round(hp._acc),'#8fe8a0');hp._acc=0;}
+    if(healed>0){hp._acc=(hp._acc||0)+healed-(hp._lastMana||0);hp._manaAcc=(hp._manaAcc||0)+(hp._lastMana||0);
+      if(hp._acc>=8){addText(hp.x,(hp.y||0)+36,hp.z,'+'+Math.round(hp._acc)+' HP','#8fe8a0');hp._acc=0;}
+      if(hp._manaAcc>=8){addText(hp.x,(hp.y||0)+58,hp.z,'+'+Math.round(hp._manaAcc)+' Mana','#89c9ff');hp._manaAcc=0;}
       if(meta.particles!==false&&Math.random()<0.5)G.particles.push({x:hp.x+(Math.random()-0.5)*46,y:(hp.y||0)+4,z:hp.z+(Math.random()-0.5)*46,vx:0,vy:56+Math.random()*40,vz:0,life:0.6,color:'#8fe8a0',sz:2.6});
       if(!hp._sfxT||(G.time-hp._sfxT)>0.45){hp._sfxT=G.time;try{SFX.pickup&&SFX.pickup();}catch(e){}}
       hudUpdate();

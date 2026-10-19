@@ -1,0 +1,42 @@
+[
+  {
+    "suite": "pad-mana",
+    "passed": true,
+    "output": "Healing pad mana: simultaneous HP/mana, mana-only, finite/shared budget, full pools, infinite pads and invalid occupants passed.\n"
+  },
+  {
+    "suite": "companion-health",
+    "passed": true,
+    "output": "36 companion pad healing, death HUD and peer-state checks passed.\n"
+  },
+  {
+    "suite": "mana-economy",
+    "passed": true,
+    "output": "537 mana coverage,34 class paths, recovery, reserve, area-hit and co-op/PvP receipt checks passed.\n"
+  },
+  {
+    "suite": "save-safety",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "onboarding-controls",
+    "passed": true,
+    "output": "26 onboarding migration, action pacing, hidden/menu timing and routing checks passed.\nTutorial previous-page, boundary, timer reset and menu ownership checks passed.\n"
+  },
+  {
+    "suite": "onboarding-coop",
+    "passed": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.\n5 co-op rank/spectator serialization, update and legacy checks passed.\n"
+  },
+  {
+    "suite": "party-survival",
+    "passed": true,
+    "output": "50 fall landing, rescue deadline, late packets, whole-level recovery, single wipe, guest wait, real die routing and nameplate checks passed.\n4 real fall/solo/duplicate hazard and attack-lock checks passed.\n"
+  },
+  {
+    "suite": "abyssal-heart",
+    "passed": true,
+    "output": "Abyssal Heart: all40 authored shard IDs across8regions, sealed placements, NPC/event rewards,3D proximity, saved/carried filters, local co-op independence and no story mutations pass.\n"
+  }
+]

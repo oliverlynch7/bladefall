@@ -7,7 +7,9 @@
     "duration": 0.4,
     "form": "bolt",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Fire a fast bolt for 2.2 times flame damage.",
+    "targeted": false
   },
   {
     "id": "py_fan",
@@ -17,7 +19,9 @@
     "duration": 0.56,
     "form": "fan",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Fire three flames, each dealing 1.1 times flame damage.",
+    "targeted": false
   },
   {
     "id": "py_blast",
@@ -27,7 +31,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Blast nearby enemies for 1.3 times damage and push them back.",
+    "targeted": false
   },
   {
     "id": "py_ward",
@@ -37,7 +43,9 @@
     "duration": 0.6,
     "form": "ward",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Gain a shield worth 25% of maximum health for 5 seconds.",
+    "targeted": false
   },
   {
     "id": "py_lance",
@@ -47,7 +55,9 @@
     "duration": 0.62,
     "form": "beam",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Fire a piercing flame for 3 times flame damage.",
+    "targeted": false
   },
   {
     "id": "py_nova",
@@ -57,7 +67,9 @@
     "duration": 0.62,
     "form": "nova",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Strike nearby enemies for 2.4 times flame damage.",
+    "targeted": false
   },
   {
     "id": "py_inferno",
@@ -67,7 +79,9 @@
     "duration": 0.7,
     "form": "storm",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Burn nearby foes once per second for 4 seconds. Each pulse deals flame damage.",
+    "targeted": false
   },
   {
     "id": "py_sun",
@@ -77,7 +91,9 @@
     "duration": 0.68,
     "form": "nova",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Strike your aimed enemy and nearby foes for 4 times flame damage.",
+    "targeted": true
   },
   {
     "id": "w_cleave",
@@ -87,7 +103,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "A quick sweep hits nearby enemies. Short cooldown and low damage per cast.",
+    "targeted": false
   },
   {
     "id": "w_bash",
@@ -97,7 +115,9 @@
     "duration": 0.42,
     "form": "bash",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Drive forward for 1.7x damage, stun the first target, and briefly brace.",
+    "targeted": false
   },
   {
     "id": "w_charge",
@@ -107,7 +127,9 @@
     "duration": 0.48,
     "form": "dash",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Rush through enemies for 1.6x damage and stun them.",
+    "targeted": false
   },
   {
     "id": "w_whirl",
@@ -117,7 +139,9 @@
     "duration": 0.64,
     "form": "spiral",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "A full-circle sweep deals 2.2 times weapon damage to nearby enemies.",
+    "targeted": false
   },
   {
     "id": "w_guard",
@@ -127,7 +151,9 @@
     "duration": 0.58,
     "form": "ward",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Brace for 3s, reducing incoming damage by 60%.",
+    "targeted": false
   },
   {
     "id": "w_stomp",
@@ -137,7 +163,9 @@
     "duration": 0.64,
     "form": "quake",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Slam the ground for 1.5x damage and heavy knockback all around.",
+    "targeted": false
   },
   {
     "id": "w_berserk",
@@ -147,7 +175,9 @@
     "duration": 0.62,
     "form": "roar",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Draw nearby enemies toward you for 6 seconds, helping protect your allies.",
+    "targeted": false
   },
   {
     "id": "w_execute",
@@ -157,7 +187,9 @@
     "duration": 0.62,
     "form": "execute",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "A crushing 4x strike that executes normal enemies below 20% HP.",
+    "targeted": false
   },
   {
     "id": "r_volley",
@@ -167,7 +199,9 @@
     "duration": 0.48,
     "form": "fan",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.",
+    "targeted": false
   },
   {
     "id": "r_pierce",
@@ -177,7 +211,9 @@
     "duration": 0.48,
     "form": "lance",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "One shot through a line — 2.2x first (−10% its armor), 1.5x rest.",
+    "targeted": false
   },
   {
     "id": "r_tumble",
@@ -187,7 +223,9 @@
     "duration": 0.5,
     "form": "dash",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Roll backward with brief invulnerability and fire a parting shot for 75% weapon damage.",
+    "targeted": false
   },
   {
     "id": "r_shadow",
@@ -197,7 +235,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Dash through a target (2.0x) and appear behind it; tap again within 1s to return.",
+    "targeted": false
   },
   {
     "id": "r_spike",
@@ -207,7 +247,9 @@
     "duration": 0.6,
     "form": "trap",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Place a trap for 5 seconds that repeatedly damages and slows enemies inside.",
+    "targeted": false
   },
   {
     "id": "r_smoke",
@@ -217,7 +259,9 @@
     "duration": 0.44,
     "form": "smoke",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Become briefly invulnerable and slow nearby enemies with smoke.",
+    "targeted": false
   },
   {
     "id": "r_mark",
@@ -227,7 +271,9 @@
     "duration": 0.42,
     "form": "mark",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Mark one enemy: you deal +18% and +10% crit to it for 8s.",
+    "targeted": true
   },
   {
     "id": "r_deathmark",
@@ -237,7 +283,9 @@
     "duration": 0.42,
     "form": "mark",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Mark up to 5 enemies — they explode for 1.8x on death.",
+    "targeted": true
   },
   {
     "id": "m_bolt",
@@ -247,7 +295,9 @@
     "duration": 0.42,
     "form": "bolt",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Fire a quick elemental bolt. Short cooldown and low damage per cast.",
+    "targeted": false
   },
   {
     "id": "m_beam",
@@ -257,7 +307,9 @@
     "duration": 0.62,
     "form": "beam",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Fire a piercing elemental lance for 2x damage through every target.",
+    "targeted": false
   },
   {
     "id": "m_blink",
@@ -267,7 +319,9 @@
     "duration": 0.32,
     "form": "blink",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Teleport forward and become untouchable during the displacement.",
+    "targeted": false
   },
   {
     "id": "m_nova",
@@ -277,7 +331,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Detonate a 1.4x freezing burst that slows nearby enemies.",
+    "targeted": false
   },
   {
     "id": "m_gravity",
@@ -287,7 +343,9 @@
     "duration": 0.62,
     "form": "vortex",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Create an implosion that pulls enemies inward and deals 1.3x damage.",
+    "targeted": true
   },
   {
     "id": "m_barrier",
@@ -297,7 +355,9 @@
     "duration": 0.6,
     "form": "ward",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Create a shield that absorbs 35% of max HP.",
+    "targeted": false
   },
   {
     "id": "m_tempest",
@@ -307,7 +367,9 @@
     "duration": 0.7,
     "form": "crown",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Create a damaging storm for 4 seconds. For 10 seconds, your skills cycle through different elements. Your equipped weapon stays unchanged.",
+    "targeted": false
   },
   {
     "id": "m_overload",
@@ -317,7 +379,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Release a massive 3.4x elemental explosion around your target.",
+    "targeted": true
   },
   {
     "id": "x_reap",
@@ -327,7 +391,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "A quick scythe sweep damages nearby enemies and restores health when it hits.",
+    "targeted": false
   },
   {
     "id": "x_cleave",
@@ -337,7 +403,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Send a spectral scythe wave outward for 2.1x damage.",
+    "targeted": false
   },
   {
     "id": "x_step",
@@ -347,7 +415,9 @@
     "duration": 0.32,
     "form": "blink",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Dash through shadow and become briefly untouchable.",
+    "targeted": false
   },
   {
     "id": "x_wraith",
@@ -357,7 +427,9 @@
     "duration": 0.58,
     "form": "ghost",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Become spectral for 3s: faster movement and 65% damage reduction.",
+    "targeted": false
   },
   {
     "id": "x_pull",
@@ -367,7 +439,9 @@
     "duration": 0.62,
     "form": "vortex",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Implode nearby enemies toward a central point and stagger them.",
+    "targeted": false
   },
   {
     "id": "x_bind",
@@ -377,7 +451,9 @@
     "duration": 0.55,
     "form": "tether",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Bind enemies in front of you, rooting them for 2.5s.",
+    "targeted": false
   },
   {
     "id": "x_siphon",
@@ -387,7 +463,9 @@
     "duration": 0.48,
     "form": "siphon",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "A powerful draining sweep damages nearby enemies and heals 5% of your maximum health per enemy damaged. Healing is halved against players.",
+    "targeted": false
   },
   {
     "id": "x_vortex",
@@ -397,7 +475,9 @@
     "duration": 0.7,
     "form": "vortex",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Create a persistent soul storm that damages and corrupts enemies.",
+    "targeted": false
   },
   {
     "id": "pal_bash",
@@ -407,7 +487,9 @@
     "duration": 0.42,
     "form": "bash",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.",
+    "targeted": false
   },
   {
     "id": "pal_smite",
@@ -417,7 +499,9 @@
     "duration": 0.68,
     "form": "execute",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.",
+    "targeted": true
   },
   {
     "id": "pal_taunt",
@@ -427,7 +511,9 @@
     "duration": 0.58,
     "form": "roar",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Pull nearby foes to you and brace behind a shield.",
+    "targeted": false
   },
   {
     "id": "pal_ground",
@@ -437,7 +523,9 @@
     "duration": 0.62,
     "form": "heal",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Scorch every foe around you with holy light for 2.2x damage.",
+    "targeted": false
   },
   {
     "id": "pal_guard",
@@ -447,7 +535,9 @@
     "duration": 0.6,
     "form": "ward",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Raise a holy shield that absorbs up to 50% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+    "targeted": false
   },
   {
     "id": "pal_burst",
@@ -457,7 +547,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A radiant burst: damage and slow every nearby foe.",
+    "targeted": false
   },
   {
     "id": "pal_laststand",
@@ -467,7 +559,9 @@
     "duration": 0.58,
     "form": "ward",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Brace for 4 seconds, reducing incoming damage and reflecting nearby hits. Immediately restore 15% of your maximum health.",
+    "targeted": false
   },
   {
     "id": "pal_sky",
@@ -477,7 +571,9 @@
     "duration": 0.68,
     "form": "execute",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Call a pillar of light down: heavy damage and knockback all around you.",
+    "targeted": false
   },
   {
     "id": "necro_summon",
@@ -487,7 +583,9 @@
     "duration": 0.7,
     "form": "summon",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Raise a pack of skeletons that hunt down nearby enemies.",
+    "targeted": false
   },
   {
     "id": "necro_bolt",
@@ -497,7 +595,9 @@
     "duration": 0.42,
     "form": "bolt",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Rapid-fire bolts of necrotic plague (~2s, softer each).",
+    "targeted": false
   },
   {
     "id": "necro_raise",
@@ -507,7 +607,9 @@
     "duration": 0.7,
     "form": "summon",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Raise your most recently slain nearby enemy as an undead ally.",
+    "targeted": false
   },
   {
     "id": "necro_nova",
@@ -517,7 +619,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Detonate a burst of bone shards that slows nearby enemies.",
+    "targeted": false
   },
   {
     "id": "necro_wall",
@@ -527,7 +631,9 @@
     "duration": 0.7,
     "form": "wall",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Raise a shield of bone that absorbs up to 35% of your max HP. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+    "targeted": false
   },
   {
     "id": "necro_grip",
@@ -537,7 +643,9 @@
     "duration": 0.62,
     "form": "tether",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A skeletal grip implodes enemies inward and deals damage.",
+    "targeted": false
   },
   {
     "id": "necro_army",
@@ -547,7 +655,9 @@
     "duration": 0.7,
     "form": "summon",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Raise a whole undead host at once to overwhelm the field. Briefly plant your feet (0.3s); dodge to cancel the stance.",
+    "targeted": false
   },
   {
     "id": "necro_storm",
@@ -557,7 +667,9 @@
     "duration": 0.7,
     "form": "storm",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "A storm of decay rages around you for 4s.",
+    "targeted": false
   },
   {
     "id": "nin_strike",
@@ -567,7 +679,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Blink to the nearest enemy and strike for heavy damage.",
+    "targeted": false
   },
   {
     "id": "nin_barrage",
@@ -577,7 +691,9 @@
     "duration": 0.64,
     "form": "fan",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Fire three back-to-back shotgun bursts of stars — shreds packs of enemies.",
+    "targeted": false
   },
   {
     "id": "nin_step",
@@ -587,7 +703,9 @@
     "duration": 0.32,
     "form": "blink",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Dash through shadow and become briefly untouchable.",
+    "targeted": false
   },
   {
     "id": "nin_smoke",
@@ -597,7 +715,9 @@
     "duration": 0.44,
     "form": "smoke",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Vanish in smoke (briefly invulnerable) and slow nearby foes.",
+    "targeted": false
   },
   {
     "id": "nin_mark",
@@ -607,7 +727,9 @@
     "duration": 0.42,
     "form": "mark",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Mark a target: it takes extra damage from you.",
+    "targeted": true
   },
   {
     "id": "nin_pierce",
@@ -617,7 +739,9 @@
     "duration": 0.44,
     "form": "lance",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses.",
+    "targeted": false
   },
   {
     "id": "nin_fury",
@@ -627,7 +751,9 @@
     "duration": 0.56,
     "form": "spiral",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Deal 35% more damage and attack 30% faster for 6 seconds.",
+    "targeted": false
   },
   {
     "id": "nin_storm",
@@ -637,7 +763,9 @@
     "duration": 0.42,
     "form": "ghost",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Become invulnerable for 4 seconds and prepare your next teleporting basic hit immediately.",
+    "targeted": false
   },
   {
     "id": "bsk_cleave",
@@ -647,7 +775,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Spend 10% of your maximum health to sweep nearby enemies for 2.6 times weapon damage. Cannot be used if the cost would leave you below 2 HP.",
+    "targeted": false
   },
   {
     "id": "bsk_bash",
@@ -657,7 +787,9 @@
     "duration": 0.52,
     "form": "bash",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Strike nearby enemies for 2.2 times weapon damage and stun them for 2.2 seconds. On a hit, spend 6% maximum health and pause for 0.5 seconds.",
+    "targeted": false
   },
   {
     "id": "bsk_charge",
@@ -667,7 +799,9 @@
     "duration": 0.48,
     "form": "dash",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Rush forward, damaging and stunning in your path.",
+    "targeted": false
   },
   {
     "id": "bsk_stomp",
@@ -677,7 +811,9 @@
     "duration": 0.64,
     "form": "quake",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Slam the ground for damage and heavy knockback.",
+    "targeted": false
   },
   {
     "id": "bsk_whirl",
@@ -687,7 +823,9 @@
     "duration": 0.64,
     "form": "spiral",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Sweep all nearby enemies for 2.2 times weapon damage.",
+    "targeted": false
   },
   {
     "id": "bsk_execute",
@@ -697,7 +835,9 @@
     "duration": 0.62,
     "form": "execute",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A brutal strike that finishes low-HP foes.",
+    "targeted": false
   },
   {
     "id": "bsk_berserk",
@@ -707,7 +847,9 @@
     "duration": 0.62,
     "form": "roar",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Deal 35% more damage and attack 30% faster for 6 seconds.",
+    "targeted": false
   },
   {
     "id": "bsk_guard",
@@ -717,7 +859,9 @@
     "duration": 0.58,
     "form": "ward",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Raise a guard: heavy damage reduction and pull foes in.",
+    "targeted": false
   },
   {
     "id": "pir_pierce",
@@ -727,7 +871,9 @@
     "duration": 0.38,
     "form": "lance",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Rapid piercing pistol shots (~2s, softer each) — a gunslinger's rhythm.",
+    "targeted": false
   },
   {
     "id": "pir_volley",
@@ -737,7 +883,9 @@
     "duration": 0.58,
     "form": "fan",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "A spread of shots across your front.",
+    "targeted": false
   },
   {
     "id": "pir_shadow",
@@ -747,7 +895,9 @@
     "duration": 0.52,
     "form": "slash",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Dash to a foe and strike hard.",
+    "targeted": false
   },
   {
     "id": "pir_tumble",
@@ -757,7 +907,9 @@
     "duration": 0.5,
     "form": "dash",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Roll back with a parting shot and snare.",
+    "targeted": false
   },
   {
     "id": "pir_smoke",
@@ -767,7 +919,9 @@
     "duration": 0.44,
     "form": "smoke",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Vanish in smoke and slow nearby foes.",
+    "targeted": false
   },
   {
     "id": "pir_goldrush",
@@ -777,7 +931,9 @@
     "duration": 0.56,
     "form": "crown",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "For 12s, every kill drops gold straight into your purse — and a killstreak stacks the payout higher and higher. The pirate's farming tool.",
+    "targeted": false
   },
   {
     "id": "pir_deathmark",
@@ -787,7 +943,9 @@
     "duration": 0.68,
     "form": "storm",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Mark foes — they explode on death.",
+    "targeted": true
   },
   {
     "id": "pir_spike",
@@ -797,7 +955,9 @@
     "duration": 0.6,
     "form": "trap",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Drop a trap that damages and snares.",
+    "targeted": false
   },
   {
     "id": "chr_bolt",
@@ -807,7 +967,9 @@
     "duration": 0.42,
     "form": "bolt",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Rapid-fire bolts of temporal energy (~2s, softer each).",
+    "targeted": false
   },
   {
     "id": "chr_beam",
@@ -817,7 +979,9 @@
     "duration": 0.62,
     "form": "beam",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "A piercing lance through every foe.",
+    "targeted": false
   },
   {
     "id": "chr_nova",
@@ -827,7 +991,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "A burst that slows nearby foes.",
+    "targeted": false
   },
   {
     "id": "chr_blink",
@@ -837,7 +1003,9 @@
     "duration": 0.32,
     "form": "blink",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Teleport forward with brief invulnerability. Your automatic death-saving rewind is a separate class ability.",
+    "targeted": false
   },
   {
     "id": "chr_gravity",
@@ -847,7 +1015,9 @@
     "duration": 0.62,
     "form": "vortex",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Implode foes inward and deal damage.",
+    "targeted": false
   },
   {
     "id": "chr_barrier",
@@ -857,7 +1027,9 @@
     "duration": 0.6,
     "form": "ward",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A shield that absorbs up to 35% of your max HP.",
+    "targeted": false
   },
   {
     "id": "chr_tempest",
@@ -867,7 +1039,9 @@
     "duration": 0.62,
     "form": "storm",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Stop enemies for 3 seconds. In PvP, slow opponents by 25% for up to 1.5 seconds instead of freezing their controls.",
+    "targeted": false
   },
   {
     "id": "chr_overload",
@@ -877,7 +1051,9 @@
     "duration": 0.55,
     "form": "vortex",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "A massive temporal explosion.",
+    "targeted": true
   },
   {
     "id": "mon_flurry",
@@ -887,7 +1063,9 @@
     "duration": 0.58,
     "form": "flurry",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Deliver rapid punches. Each connecting hit builds your temporary damage bonus.",
+    "targeted": false
   },
   {
     "id": "mon_palm",
@@ -897,7 +1075,9 @@
     "duration": 0.45,
     "form": "bash",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Dash in with a heavy palm that staggers the first foe.",
+    "targeted": false
   },
   {
     "id": "mon_deflect",
@@ -907,7 +1087,9 @@
     "duration": 0.56,
     "form": "ward",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "A parry stance: for a moment take almost nothing and throw blows straight back.",
+    "targeted": false
   },
   {
     "id": "mon_roll",
@@ -917,7 +1099,9 @@
     "duration": 0.42,
     "form": "dash",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Roll aside with brief i-frames and a parting strike.",
+    "targeted": false
   },
   {
     "id": "mon_whirl",
@@ -927,7 +1111,9 @@
     "duration": 0.65,
     "form": "spiral",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "A spinning kick that strikes everything around you.",
+    "targeted": false
   },
   {
     "id": "mon_stun",
@@ -937,7 +1123,9 @@
     "duration": 0.45,
     "form": "bash",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A shockwave palm that dazes and slows nearby foes.",
+    "targeted": false
   },
   {
     "id": "mon_thousand",
@@ -947,7 +1135,9 @@
     "duration": 0.64,
     "form": "flurry",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "For 6 seconds, standing still reflects double incoming damage back to attackers. You still take damage.",
+    "targeted": false
   },
   {
     "id": "mon_dragon",
@@ -957,7 +1147,9 @@
     "duration": 0.6,
     "form": "dash",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "A soaring kick that erupts on impact, blasting everything around.",
+    "targeted": false
   },
   {
     "id": "st_bolt",
@@ -967,7 +1159,9 @@
     "duration": 0.42,
     "form": "bolt",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Fire a quick lightning bolt with a short cooldown.",
+    "targeted": false
   },
   {
     "id": "st_lance",
@@ -977,7 +1171,9 @@
     "duration": 0.62,
     "form": "beam",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "A piercing bolt through every foe in a line.",
+    "targeted": false
   },
   {
     "id": "st_step",
@@ -987,7 +1183,9 @@
     "duration": 0.32,
     "form": "blink",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Blink in a crack of lightning, briefly untouchable.",
+    "targeted": false
   },
   {
     "id": "st_nova",
@@ -997,7 +1195,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "A shock burst that slows nearby foes.",
+    "targeted": false
   },
   {
     "id": "st_orb",
@@ -1007,7 +1207,9 @@
     "duration": 0.62,
     "form": "orb",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "A crackling orb that pulls foes in and zaps them.",
+    "targeted": true
   },
   {
     "id": "st_barrier",
@@ -1017,7 +1219,9 @@
     "duration": 0.6,
     "form": "ward",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A shield that absorbs up to 35% of your max HP.",
+    "targeted": false
   },
   {
     "id": "st_storm",
@@ -1027,7 +1231,9 @@
     "duration": 0.55,
     "form": "storm",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Link nearby enemies for 8 seconds. Hitting one also damages the others.",
+    "targeted": false
   },
   {
     "id": "st_overload",
@@ -1037,7 +1243,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "A massive electric explosion around your target.",
+    "targeted": true
   },
   {
     "id": "war_bolt",
@@ -1047,7 +1255,9 @@
     "duration": 0.42,
     "form": "bolt",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Fire a fast void bolt that pierces one extra foe.",
+    "targeted": false
   },
   {
     "id": "war_lance",
@@ -1057,7 +1267,9 @@
     "duration": 0.44,
     "form": "beam",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Hurl a heavy crimson lance through every foe in a line.",
+    "targeted": false
   },
   {
     "id": "war_curse",
@@ -1067,7 +1279,9 @@
     "duration": 0.55,
     "form": "nova",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Mark nearby foes for 7 seconds. Your damage against them is increased.",
+    "targeted": false
   },
   {
     "id": "war_drain",
@@ -1077,7 +1291,9 @@
     "duration": 0.64,
     "form": "siphon",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Damage the strongest nearby foe. Heal for 22% of health removed, or 11% against players. Blocked hits do not heal.",
+    "targeted": true
   },
   {
     "id": "war_step",
@@ -1087,7 +1303,9 @@
     "duration": 0.32,
     "form": "blink",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Blink forward and detonate shadow at your starting point and destination.",
+    "targeted": false
   },
   {
     "id": "war_orb",
@@ -1097,7 +1315,9 @@
     "duration": 0.62,
     "form": "orb",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Collapse a slow void orb on your target, damaging and pulling nearby foes.",
+    "targeted": true
   },
   {
     "id": "war_storm",
@@ -1107,7 +1327,9 @@
     "duration": 0.66,
     "form": "storm",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Spend half your current health to deal that much damage to every nearby enemy. Normal skill health cost also applies.",
+    "targeted": false
   },
   {
     "id": "war_final",
@@ -1117,7 +1339,9 @@
     "duration": 0.66,
     "form": "mark",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Condemn the strongest nearby foe with a massive delayed shadow blast.",
+    "targeted": true
   },
   {
     "id": "sky_rise",
@@ -1127,7 +1351,9 @@
     "duration": 0.52,
     "form": "rise",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Sweep nearby enemies and launch high into the air.",
+    "targeted": false
   },
   {
     "id": "sky_gale",
@@ -1137,7 +1363,9 @@
     "duration": 0.44,
     "form": "lance",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Fire a fast wind spear that grows stronger while airborne.",
+    "targeted": false
   },
   {
     "id": "sky_dive",
@@ -1147,7 +1375,9 @@
     "duration": 0.54,
     "form": "dive",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Dive forward. Your next landing damages nearby enemies.",
+    "targeted": false
   },
   {
     "id": "sky_lift",
@@ -1157,7 +1387,9 @@
     "duration": 0.58,
     "form": "rise",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Create a rising wind that damages foes and launches you upward.",
+    "targeted": false
   },
   {
     "id": "sky_dash",
@@ -1167,7 +1399,9 @@
     "duration": 0.48,
     "form": "dash",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Dash through the air, damaging every enemy in your path.",
+    "targeted": false
   },
   {
     "id": "sky_rain",
@@ -1177,7 +1411,9 @@
     "duration": 0.68,
     "form": "storm",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Call down five wind spears around your target.",
+    "targeted": true
   },
   {
     "id": "sky_crash",
@@ -1187,7 +1423,9 @@
     "duration": 0.54,
     "form": "dive",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Drop like lightning. Your next landing creates a large shockwave.",
+    "targeted": false
   },
   {
     "id": "sky_cyclone",
@@ -1197,7 +1435,9 @@
     "duration": 0.62,
     "form": "vortex",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Lift nearby normal enemies for 3.2 seconds and strike with a ring of wind blades.",
+    "targeted": false
   },
   {
     "id": "bd_counter",
@@ -1207,7 +1447,9 @@
     "duration": 0.56,
     "form": "ward",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Open a short parry window. A hit during it deals no damage and stores a Riposte.",
+    "targeted": false
   },
   {
     "id": "bd_twin",
@@ -1217,7 +1459,9 @@
     "duration": 0.56,
     "form": "cross",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "Cut twice in a wide arc. The second cut pushes enemies back.",
+    "targeted": false
   },
   {
     "id": "bd_riposte",
@@ -1227,7 +1471,9 @@
     "duration": 0.48,
     "form": "slash",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "Lunge and slash. A stored Riposte greatly increases its damage and reach.",
+    "targeted": false
   },
   {
     "id": "bd_step",
@@ -1237,7 +1483,9 @@
     "duration": 0.42,
     "form": "dash",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "Dash through enemies and turn to face them for your next attack.",
+    "targeted": false
   },
   {
     "id": "bd_mirror",
@@ -1247,7 +1495,9 @@
     "duration": 0.56,
     "form": "ward",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Open a parry window that releases a shockwave when it catches an attack.",
+    "targeted": false
   },
   {
     "id": "bd_cross",
@@ -1257,7 +1507,9 @@
     "duration": 0.58,
     "form": "cross",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "Cut an X ahead of you and leave enemies briefly stunned.",
+    "targeted": false
   },
   {
     "id": "bd_steel",
@@ -1267,7 +1519,9 @@
     "duration": 0.56,
     "form": "spiral",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Prepare a parry for up to 3 seconds. The first incoming hit is blocked and prepares an empowered Riposte.",
+    "targeted": false
   },
   {
     "id": "bd_perfect",
@@ -1277,7 +1531,9 @@
     "duration": 0.56,
     "form": "ward",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "Hold a long parry stance. Catching a hit unleashes a massive counterattack.",
+    "targeted": false
   },
   {
     "id": "bst_sic",
@@ -1287,7 +1543,9 @@
     "duration": 0.46,
     "form": "claw",
     "slot": 0,
-    "side": "a"
+    "side": "a",
+    "description": "Your companion lunges for 1.6x damage and briefly stuns.",
+    "targeted": false
   },
   {
     "id": "bst_coordinated",
@@ -1297,7 +1555,9 @@
     "duration": 0.48,
     "form": "cross",
     "slot": 0,
-    "side": "b"
+    "side": "b",
+    "description": "You and your companion strike together; the target is marked for increased companion damage.",
+    "targeted": false
   },
   {
     "id": "bst_guardian",
@@ -1307,7 +1567,9 @@
     "duration": 0.58,
     "form": "ward",
     "slot": 1,
-    "side": "a"
+    "side": "a",
+    "description": "For 4s your companion intercepts part of incoming damage and gains a shield.",
+    "targeted": false
   },
   {
     "id": "bst_step",
@@ -1317,7 +1579,9 @@
     "duration": 0.42,
     "form": "dash",
     "slot": 1,
-    "side": "b"
+    "side": "b",
+    "description": "You and your companion dash to opposite sides of the target with brief dodge protection.",
+    "targeted": false
   },
   {
     "id": "bst_mend",
@@ -1327,7 +1591,9 @@
     "duration": 0.64,
     "form": "heal",
     "slot": 2,
-    "side": "a"
+    "side": "a",
+    "description": "Restore 30% companion HP and 10% player HP over time.",
+    "targeted": false
   },
   {
     "id": "bst_roar",
@@ -1337,7 +1603,9 @@
     "duration": 0.62,
     "form": "roar",
     "slot": 2,
-    "side": "b"
+    "side": "b",
+    "description": "A damaging roar slows nearby foes and turns their attention toward your companion.",
+    "targeted": false
   },
   {
     "id": "bst_stampede",
@@ -1347,7 +1615,9 @@
     "duration": 0.46,
     "form": "storm",
     "slot": 3,
-    "side": "a"
+    "side": "a",
+    "description": "Call a spectral herd through a wide lane, striking and knocking enemies aside.",
+    "targeted": false
   },
   {
     "id": "bst_apex",
@@ -1357,6 +1627,8 @@
     "duration": 0.56,
     "form": "crown",
     "slot": 3,
-    "side": "b"
+    "side": "b",
+    "description": "For 8s your companion gains +35% damage/healing, +30% speed, and relentless pursuit.",
+    "targeted": false
   }
 ]

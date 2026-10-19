@@ -3,7 +3,8 @@ import * as T from './three.module.js';
 const CAP=768,root=new T.Group(),pose=new T.Object3D(),tint=new T.Color(),forward=new T.Vector3(0,0,1),direction=new T.Vector3();
 root.name='Projectile art';
 const cone=new T.ConeGeometry(1,2,6);cone.rotateX(Math.PI/2);
-const geometries={gem:new T.OctahedronGeometry(1),seed:new T.IcosahedronGeometry(1,0),tip:cone,bar:new T.BoxGeometry(1,1,1),ring:new T.TorusGeometry(1,.065,4,16)};
+const shaft=new T.CylinderGeometry(.32,.65,2,12);shaft.rotateX(Math.PI/2);
+const geometries={round:new T.SphereGeometry(1,16,12),shaft,gem:new T.OctahedronGeometry(1),seed:new T.IcosahedronGeometry(1,0),tip:cone,bar:new T.BoxGeometry(1,1,1),ring:new T.TorusGeometry(1,.065,4,16)};
 const batches={};
 for(const [name,geometry] of Object.entries(geometries)){
  const material=new T.MeshBasicMaterial({color:0xffffff,transparent:name==='ring',opacity:name==='ring'?.65:1,depthWrite:name!=='ring',toneMapped:false});
@@ -49,8 +50,8 @@ export function syncProjectiles(scene){
   else if(isArrow){part('bar',pr,0,0,-3,1.2,1.2,20,skill?c:'#8d7254');part('tip',pr,0,0,9,3,3,5,bright);for(let k=0;k<2;k++)part('bar',pr,0,0,-11,5,.65,5,c,k*Math.PI/2);}
   else if(shape==='cannonball'){part('seed',pr,0,0,0,s,s,s,'#333e4c');part('bar',pr,0,s*.6,-s*.5,s*.16,s*.16,s*.8,'#f4b85c');}
   else if(skill&&cls==='mage'){
-   part('gem',pr,0,0,0,s*.58,s*.58,s*(shape==='lance'?2.7:1.65),c);part('gem',pr,0,0,s*.65,s*.28,s*.28,s*.95,bright);
-   for(let k=0;k<3;k++){const a=time*4+k*Math.PI*2/3;part('gem',pr,Math.cos(a)*s,Math.sin(a)*s,-s*.55,s*.16,s*.16,s*.75,c);}
+   if(pr.fxSkill==='m_beam'){part('shaft',pr,0,0,-s*.5,s*.45,s*.45,s*4.8,bright);for(let k=0;k<2;k++)part('ring',pr,0,0,-s*(1+k),s*.5,s*.5,s*.3,c);}
+   else{part('round',pr,0,0,0,s*.72,s*.72,s*.92,c);part('round',pr,0,0,s*.5,s*.36,s*.36,s*.6,bright);for(let k=0;k<3;k++){const a=time*5+k*2.094;part('round',pr,Math.cos(a)*s*.85,Math.sin(a)*s*.85,-s*.45,s*.16,s*.16,s*.23,bright);}}
   }else if(skill&&cls==='chronomancer'){
    part('gem',pr,0,0,0,s*.35,s*.35,s*1.7,bright);
    for(let k=0;k<2;k++){part('ring',pr,0,0,-k*s*.8,s*(.85+k*.3),s*(.85+k*.3),s*.7,c);const a=time*3+k*Math.PI;part('gem',pr,Math.cos(a)*s,Math.sin(a)*s,-k*s*.8,s*.18,s*.18,s*.35,bright);}

@@ -55,6 +55,7 @@ function weapon(g,p,cls,charged){
  if(list.length>48)list.splice(0,list.length-48);
 }
 function tick(g,dt){if(g.p?.combatPose?.skill&&(g.p.dead||g.p.downed||(g.p.dodgeTimer>0&&!g.p.combatPose.duringDodge)||g.p.dragonRide||g.p.sitting||g.p.emote?.t<4))g.p.combatPose.remaining=0;if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
+function prAlpha(e,q){return e.profile.weapon?Math.sin(Math.PI*Math.min(1,q*1.4))*(1-q*.6):Math.sin(Math.PI*Math.max(0,Math.min(1,q)))*(1-q*.35);}
 function render(g,d){
  const {pushM,popM,mv,rotY,rotX,box}=d;
  let budget=d.strokeBudget??(d.quality==='low'?300:900);
@@ -64,6 +65,8 @@ function render(g,d){
   const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],len=Math.hypot(dx,dy,dz);if(len<.01)return;
   pushM();mv((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);rotY(Math.atan2(dx,dz));rotX(-Math.atan2(dy,Math.hypot(dx,dz)));box(width,width,len,col,col,alpha);popM();
  }
+ function trail(points,widths,color,alpha){const count=Math.min(points.length-1,Math.max(0,budget));if(count<1)return;if(d.trail){budget-=count;d.trail(points.slice(0,count+1),widths.slice(0,count+1),color,alpha);}else for(let i=0;i<count;i++)line(points[i],points[i+1],widths[i],color,alpha);}
+ function glow(point,radius,color,alpha){if(--budget<0)return;if(d.glow)d.glow(point,radius,color,alpha);else{const [x,y,z]=point;line([x-radius*.3,y,z],[x+radius*.3,y,z],radius*.45,color,alpha*.5);}}
  function arc(r,y,start,end,col,alpha,width=2,segments=16){
   for(let i=0;i<segments;i++){let a=start+(end-start)*i/segments,b=start+(end-start)*(i+1)/segments;line([Math.sin(a)*r,y,Math.cos(a)*r],[Math.sin(b)*r,y,Math.cos(b)*r],width,col,alpha);}
  }
@@ -88,11 +91,11 @@ function render(g,d){
   arc(31,7,0,Math.PI*2,hot,.4,1.3,24);popM();
  }
  for(const e of (g.combatArt||[]).slice().reverse()){
-  const q=e.t/e.life,a=Math.sin(Math.PI*Math.min(1,q*1.4))*(1-q*.6),v=1-Math.pow(1-q,3);
+  const q=e.t/e.life,a=prAlpha(e,q),v=1-Math.pow(1-q,3);
   const pr=e.profile,theme=themes[pr.cls],kind=theme[2],hot=theme[1],col=({fire:'#ff8845',ice:'#87ddff',arcane:'#cd9bff',poison:'#a9df69',void:'#b48be8',holy:'#ffe6a1'})[pr.element]||theme[0],ultimate=pr.slot===3,scale=ultimate?1.35:1,r=e.radius?(12+v*(e.radius-12)):(24+v*48)*scale;
   pushM();mv(e.x,e.y+4,e.z);rotY(e.yaw);
   const f=pr.form;
-  const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot});
+  const custom=!pr.weapon&&root.BF_SKILL_IDENTITY?.(pr,{line,arc,trail,glow,pushM,popM,mv,rotY,rotX,q,v,a,r,col,hot,event:e,detail:d.quality==='low'?24:48});
   if(custom){}else if(f==='palmflame'){
    const wide=pr.slot===2,count=wide?9:5,spread=wide?.78:.36;
    // Layered tapering tongues start at the palms, never a staff projectile.

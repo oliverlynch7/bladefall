@@ -17,7 +17,7 @@ import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=22
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
 import {syncNpcs} from './npc3d.js?v=2309';
-import {syncProjectiles} from './projectile3d.js?v=2094';
+import {syncProjectiles} from './projectile3d.js?v=2329b';
 import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2259';
 /* ─────────────────────────────────────────────────────────────────────────────
    BLADEFALL — 3D HERO LAYER  (proof that the renderer can be swapped)
@@ -40,7 +40,7 @@ import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.j
    around every draw — without it the game's own rendering corrupts.
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
-import { syncCombatArt } from './combat-art-three.js?v=1978';
+import { syncCombatArt } from './combat-art-three.js?v=2329b';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { WORLD3D, syncWorld } from './world3d.js?v=2315';

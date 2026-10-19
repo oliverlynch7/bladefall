@@ -1,0 +1,2729 @@
+{
+  "passed": true,
+  "samples": 5712,
+  "skills": 136,
+  "recoveryChecks": 136,
+  "effectChecks": 408,
+  "rows": [
+    {
+      "id": "w_cleave",
+      "model": "Warrior",
+      "effectVertices": 2628,
+      "effectPhases": [
+        {
+          "vertices": 2628,
+          "finite": true
+        },
+        {
+          "vertices": 2628,
+          "finite": true
+        },
+        {
+          "vertices": 2628,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_bash",
+      "model": "Warrior",
+      "effectVertices": 2040,
+      "effectPhases": [
+        {
+          "vertices": 2040,
+          "finite": true
+        },
+        {
+          "vertices": 2040,
+          "finite": true
+        },
+        {
+          "vertices": 2040,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_charge",
+      "model": "Warrior",
+      "effectVertices": 2880,
+      "effectPhases": [
+        {
+          "vertices": 2880,
+          "finite": true
+        },
+        {
+          "vertices": 2880,
+          "finite": true
+        },
+        {
+          "vertices": 2880,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_whirl",
+      "model": "Warrior",
+      "effectVertices": 7776,
+      "effectPhases": [
+        {
+          "vertices": 7776,
+          "finite": true
+        },
+        {
+          "vertices": 7776,
+          "finite": true
+        },
+        {
+          "vertices": 7776,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_guard",
+      "model": "Warrior",
+      "effectVertices": 2862,
+      "effectPhases": [
+        {
+          "vertices": 2862,
+          "finite": true
+        },
+        {
+          "vertices": 2862,
+          "finite": true
+        },
+        {
+          "vertices": 2862,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_stomp",
+      "model": "Warrior",
+      "effectVertices": 2052,
+      "effectPhases": [
+        {
+          "vertices": 2052,
+          "finite": true
+        },
+        {
+          "vertices": 2052,
+          "finite": true
+        },
+        {
+          "vertices": 2052,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_berserk",
+      "model": "Warrior",
+      "effectVertices": 2652,
+      "effectPhases": [
+        {
+          "vertices": 2652,
+          "finite": true
+        },
+        {
+          "vertices": 2652,
+          "finite": true
+        },
+        {
+          "vertices": 2652,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "w_execute",
+      "model": "Warrior",
+      "effectVertices": 3216,
+      "effectPhases": [
+        {
+          "vertices": 3216,
+          "finite": true
+        },
+        {
+          "vertices": 3216,
+          "finite": true
+        },
+        {
+          "vertices": 3216,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_volley",
+      "model": "Ranger",
+      "effectVertices": 4770,
+      "effectPhases": [
+        {
+          "vertices": 4770,
+          "finite": true
+        },
+        {
+          "vertices": 4770,
+          "finite": true
+        },
+        {
+          "vertices": 4770,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_pierce",
+      "model": "Ranger",
+      "effectVertices": 1824,
+      "effectPhases": [
+        {
+          "vertices": 1824,
+          "finite": true
+        },
+        {
+          "vertices": 1824,
+          "finite": true
+        },
+        {
+          "vertices": 1824,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_tumble",
+      "model": "Ranger",
+      "effectVertices": 1818,
+      "effectPhases": [
+        {
+          "vertices": 1818,
+          "finite": true
+        },
+        {
+          "vertices": 1818,
+          "finite": true
+        },
+        {
+          "vertices": 1818,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_shadow",
+      "model": "Ranger",
+      "effectVertices": 5184,
+      "effectPhases": [
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_spike",
+      "model": "Ranger",
+      "effectVertices": 1206,
+      "effectPhases": [
+        {
+          "vertices": 1206,
+          "finite": true
+        },
+        {
+          "vertices": 1206,
+          "finite": true
+        },
+        {
+          "vertices": 1206,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_smoke",
+      "model": "Ranger",
+      "effectVertices": 3372,
+      "effectPhases": [
+        {
+          "vertices": 3372,
+          "finite": true
+        },
+        {
+          "vertices": 3372,
+          "finite": true
+        },
+        {
+          "vertices": 3372,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_mark",
+      "model": "Ranger",
+      "effectVertices": 978,
+      "effectPhases": [
+        {
+          "vertices": 978,
+          "finite": true
+        },
+        {
+          "vertices": 978,
+          "finite": true
+        },
+        {
+          "vertices": 978,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "r_deathmark",
+      "model": "Ranger",
+      "effectVertices": 1842,
+      "effectPhases": [
+        {
+          "vertices": 1842,
+          "finite": true
+        },
+        {
+          "vertices": 1842,
+          "finite": true
+        },
+        {
+          "vertices": 1842,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_bolt",
+      "model": "Wizard",
+      "effectVertices": 3498,
+      "effectPhases": [
+        {
+          "vertices": 3498,
+          "finite": true
+        },
+        {
+          "vertices": 3498,
+          "finite": true
+        },
+        {
+          "vertices": 3498,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_beam",
+      "model": "Wizard",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "finite": true
+        },
+        {
+          "vertices": 3480,
+          "finite": true
+        },
+        {
+          "vertices": 3480,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_blink",
+      "model": "Wizard",
+      "effectVertices": 1800,
+      "effectPhases": [
+        {
+          "vertices": 1800,
+          "finite": true
+        },
+        {
+          "vertices": 1800,
+          "finite": true
+        },
+        {
+          "vertices": 1800,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_nova",
+      "model": "Wizard",
+      "effectVertices": 2214,
+      "effectPhases": [
+        {
+          "vertices": 2214,
+          "finite": true
+        },
+        {
+          "vertices": 2214,
+          "finite": true
+        },
+        {
+          "vertices": 2214,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_gravity",
+      "model": "Wizard",
+      "effectVertices": 6054,
+      "effectPhases": [
+        {
+          "vertices": 6054,
+          "finite": true
+        },
+        {
+          "vertices": 6054,
+          "finite": true
+        },
+        {
+          "vertices": 6054,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_barrier",
+      "model": "Wizard",
+      "effectVertices": 5472,
+      "effectPhases": [
+        {
+          "vertices": 5472,
+          "finite": true
+        },
+        {
+          "vertices": 5472,
+          "finite": true
+        },
+        {
+          "vertices": 5472,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_tempest",
+      "model": "Wizard",
+      "effectVertices": 10404,
+      "effectPhases": [
+        {
+          "vertices": 10404,
+          "finite": true
+        },
+        {
+          "vertices": 10404,
+          "finite": true
+        },
+        {
+          "vertices": 10404,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "m_overload",
+      "model": "Wizard",
+      "effectVertices": 10428,
+      "effectPhases": [
+        {
+          "vertices": 10428,
+          "finite": true
+        },
+        {
+          "vertices": 10428,
+          "finite": true
+        },
+        {
+          "vertices": 10428,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_bolt",
+      "model": "Wizard",
+      "effectVertices": 3906,
+      "effectPhases": [
+        {
+          "vertices": 3906,
+          "finite": true
+        },
+        {
+          "vertices": 3906,
+          "finite": true
+        },
+        {
+          "vertices": 3906,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_fan",
+      "model": "Wizard",
+      "effectVertices": 6498,
+      "effectPhases": [
+        {
+          "vertices": 6498,
+          "finite": true
+        },
+        {
+          "vertices": 6498,
+          "finite": true
+        },
+        {
+          "vertices": 6498,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_blast",
+      "model": "Wizard",
+      "effectVertices": 8244,
+      "effectPhases": [
+        {
+          "vertices": 8244,
+          "finite": true
+        },
+        {
+          "vertices": 8244,
+          "finite": true
+        },
+        {
+          "vertices": 8244,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_ward",
+      "model": "Wizard",
+      "effectVertices": 8676,
+      "effectPhases": [
+        {
+          "vertices": 8676,
+          "finite": true
+        },
+        {
+          "vertices": 8676,
+          "finite": true
+        },
+        {
+          "vertices": 8676,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_lance",
+      "model": "Wizard",
+      "effectVertices": 7824,
+      "effectPhases": [
+        {
+          "vertices": 7824,
+          "finite": true
+        },
+        {
+          "vertices": 7824,
+          "finite": true
+        },
+        {
+          "vertices": 7824,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_nova",
+      "model": "Wizard",
+      "effectVertices": 13884,
+      "effectPhases": [
+        {
+          "vertices": 13884,
+          "finite": true
+        },
+        {
+          "vertices": 13884,
+          "finite": true
+        },
+        {
+          "vertices": 13884,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_inferno",
+      "model": "Wizard",
+      "effectVertices": 13542,
+      "effectPhases": [
+        {
+          "vertices": 13542,
+          "finite": true
+        },
+        {
+          "vertices": 13542,
+          "finite": true
+        },
+        {
+          "vertices": 13542,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "py_sun",
+      "model": "Wizard",
+      "effectVertices": 12492,
+      "effectPhases": [
+        {
+          "vertices": 12492,
+          "finite": true
+        },
+        {
+          "vertices": 12492,
+          "finite": true
+        },
+        {
+          "vertices": 12492,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_reap",
+      "model": "Rogue",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_cleave",
+      "model": "Rogue",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_step",
+      "model": "Rogue",
+      "effectVertices": 2484,
+      "effectPhases": [
+        {
+          "vertices": 2484,
+          "finite": true
+        },
+        {
+          "vertices": 2484,
+          "finite": true
+        },
+        {
+          "vertices": 2484,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_wraith",
+      "model": "Rogue",
+      "effectVertices": 1734,
+      "effectPhases": [
+        {
+          "vertices": 1734,
+          "finite": true
+        },
+        {
+          "vertices": 1734,
+          "finite": true
+        },
+        {
+          "vertices": 1734,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_pull",
+      "model": "Rogue",
+      "effectVertices": 4326,
+      "effectPhases": [
+        {
+          "vertices": 4326,
+          "finite": true
+        },
+        {
+          "vertices": 4326,
+          "finite": true
+        },
+        {
+          "vertices": 4326,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_bind",
+      "model": "Rogue",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_siphon",
+      "model": "Rogue",
+      "effectVertices": 8640,
+      "effectPhases": [
+        {
+          "vertices": 8640,
+          "finite": true
+        },
+        {
+          "vertices": 8640,
+          "finite": true
+        },
+        {
+          "vertices": 8640,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "x_vortex",
+      "model": "Rogue",
+      "effectVertices": 3540,
+      "effectPhases": [
+        {
+          "vertices": 3540,
+          "finite": true
+        },
+        {
+          "vertices": 3540,
+          "finite": true
+        },
+        {
+          "vertices": 3540,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_bash",
+      "model": "Cleric",
+      "effectVertices": 3726,
+      "effectPhases": [
+        {
+          "vertices": 3726,
+          "finite": true
+        },
+        {
+          "vertices": 3726,
+          "finite": true
+        },
+        {
+          "vertices": 3726,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_smite",
+      "model": "Cleric",
+      "effectVertices": 1818,
+      "effectPhases": [
+        {
+          "vertices": 1818,
+          "finite": true
+        },
+        {
+          "vertices": 1818,
+          "finite": true
+        },
+        {
+          "vertices": 1818,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_taunt",
+      "model": "Cleric",
+      "effectVertices": 2106,
+      "effectPhases": [
+        {
+          "vertices": 2106,
+          "finite": true
+        },
+        {
+          "vertices": 2106,
+          "finite": true
+        },
+        {
+          "vertices": 2106,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_ground",
+      "model": "Cleric",
+      "effectVertices": 984,
+      "effectPhases": [
+        {
+          "vertices": 984,
+          "finite": true
+        },
+        {
+          "vertices": 984,
+          "finite": true
+        },
+        {
+          "vertices": 984,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_guard",
+      "model": "Cleric",
+      "effectVertices": 2826,
+      "effectPhases": [
+        {
+          "vertices": 2826,
+          "finite": true
+        },
+        {
+          "vertices": 2826,
+          "finite": true
+        },
+        {
+          "vertices": 2826,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_burst",
+      "model": "Cleric",
+      "effectVertices": 4122,
+      "effectPhases": [
+        {
+          "vertices": 4122,
+          "finite": true
+        },
+        {
+          "vertices": 4122,
+          "finite": true
+        },
+        {
+          "vertices": 4122,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_laststand",
+      "model": "Cleric",
+      "effectVertices": 4806,
+      "effectPhases": [
+        {
+          "vertices": 4806,
+          "finite": true
+        },
+        {
+          "vertices": 4806,
+          "finite": true
+        },
+        {
+          "vertices": 4806,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pal_sky",
+      "model": "Cleric",
+      "effectVertices": 3036,
+      "effectPhases": [
+        {
+          "vertices": 3036,
+          "finite": true
+        },
+        {
+          "vertices": 3036,
+          "finite": true
+        },
+        {
+          "vertices": 3036,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_summon",
+      "model": "Wizard",
+      "effectVertices": 2844,
+      "effectPhases": [
+        {
+          "vertices": 2844,
+          "finite": true
+        },
+        {
+          "vertices": 2844,
+          "finite": true
+        },
+        {
+          "vertices": 2844,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_bolt",
+      "model": "Wizard",
+      "effectVertices": 2640,
+      "effectPhases": [
+        {
+          "vertices": 2640,
+          "finite": true
+        },
+        {
+          "vertices": 2640,
+          "finite": true
+        },
+        {
+          "vertices": 2640,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_raise",
+      "model": "Wizard",
+      "effectVertices": 2754,
+      "effectPhases": [
+        {
+          "vertices": 2754,
+          "finite": true
+        },
+        {
+          "vertices": 2754,
+          "finite": true
+        },
+        {
+          "vertices": 2754,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_nova",
+      "model": "Wizard",
+      "effectVertices": 2148,
+      "effectPhases": [
+        {
+          "vertices": 2148,
+          "finite": true
+        },
+        {
+          "vertices": 2148,
+          "finite": true
+        },
+        {
+          "vertices": 2148,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_wall",
+      "model": "Wizard",
+      "effectVertices": 1158,
+      "effectPhases": [
+        {
+          "vertices": 1158,
+          "finite": true
+        },
+        {
+          "vertices": 1158,
+          "finite": true
+        },
+        {
+          "vertices": 1158,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_grip",
+      "model": "Wizard",
+      "effectVertices": 4326,
+      "effectPhases": [
+        {
+          "vertices": 4326,
+          "finite": true
+        },
+        {
+          "vertices": 4326,
+          "finite": true
+        },
+        {
+          "vertices": 4326,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_army",
+      "model": "Wizard",
+      "effectVertices": 5814,
+      "effectPhases": [
+        {
+          "vertices": 5814,
+          "finite": true
+        },
+        {
+          "vertices": 5814,
+          "finite": true
+        },
+        {
+          "vertices": 5814,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "necro_storm",
+      "model": "Wizard",
+      "effectVertices": 2280,
+      "effectPhases": [
+        {
+          "vertices": 2280,
+          "finite": true
+        },
+        {
+          "vertices": 2280,
+          "finite": true
+        },
+        {
+          "vertices": 2280,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_strike",
+      "model": "Rogue",
+      "effectVertices": 2622,
+      "effectPhases": [
+        {
+          "vertices": 2622,
+          "finite": true
+        },
+        {
+          "vertices": 2622,
+          "finite": true
+        },
+        {
+          "vertices": 2622,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_barrage",
+      "model": "Rogue",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_step",
+      "model": "Rogue",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_smoke",
+      "model": "Rogue",
+      "effectVertices": 2910,
+      "effectPhases": [
+        {
+          "vertices": 2910,
+          "finite": true
+        },
+        {
+          "vertices": 2910,
+          "finite": true
+        },
+        {
+          "vertices": 2910,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_mark",
+      "model": "Rogue",
+      "effectVertices": 2880,
+      "effectPhases": [
+        {
+          "vertices": 2880,
+          "finite": true
+        },
+        {
+          "vertices": 2880,
+          "finite": true
+        },
+        {
+          "vertices": 2880,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_pierce",
+      "model": "Rogue",
+      "effectVertices": 2016,
+      "effectPhases": [
+        {
+          "vertices": 2016,
+          "finite": true
+        },
+        {
+          "vertices": 2016,
+          "finite": true
+        },
+        {
+          "vertices": 2016,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_fury",
+      "model": "Rogue",
+      "effectVertices": 5256,
+      "effectPhases": [
+        {
+          "vertices": 5256,
+          "finite": true
+        },
+        {
+          "vertices": 5256,
+          "finite": true
+        },
+        {
+          "vertices": 5256,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "nin_storm",
+      "model": "Rogue",
+      "effectVertices": 5010,
+      "effectPhases": [
+        {
+          "vertices": 5010,
+          "finite": true
+        },
+        {
+          "vertices": 5010,
+          "finite": true
+        },
+        {
+          "vertices": 5010,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_cleave",
+      "model": "Warrior",
+      "effectVertices": 2664,
+      "effectPhases": [
+        {
+          "vertices": 2664,
+          "finite": true
+        },
+        {
+          "vertices": 2664,
+          "finite": true
+        },
+        {
+          "vertices": 2664,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_bash",
+      "model": "Warrior",
+      "effectVertices": 3786,
+      "effectPhases": [
+        {
+          "vertices": 3786,
+          "finite": true
+        },
+        {
+          "vertices": 3786,
+          "finite": true
+        },
+        {
+          "vertices": 3786,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_charge",
+      "model": "Warrior",
+      "effectVertices": 1782,
+      "effectPhases": [
+        {
+          "vertices": 1782,
+          "finite": true
+        },
+        {
+          "vertices": 1782,
+          "finite": true
+        },
+        {
+          "vertices": 1782,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_stomp",
+      "model": "Warrior",
+      "effectVertices": 4380,
+      "effectPhases": [
+        {
+          "vertices": 4380,
+          "finite": true
+        },
+        {
+          "vertices": 4380,
+          "finite": true
+        },
+        {
+          "vertices": 4380,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_whirl",
+      "model": "Warrior",
+      "effectVertices": 10368,
+      "effectPhases": [
+        {
+          "vertices": 10368,
+          "finite": true
+        },
+        {
+          "vertices": 10368,
+          "finite": true
+        },
+        {
+          "vertices": 10368,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_execute",
+      "model": "Warrior",
+      "effectVertices": 2598,
+      "effectPhases": [
+        {
+          "vertices": 2598,
+          "finite": true
+        },
+        {
+          "vertices": 2598,
+          "finite": true
+        },
+        {
+          "vertices": 2598,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_berserk",
+      "model": "Warrior",
+      "effectVertices": 2688,
+      "effectPhases": [
+        {
+          "vertices": 2688,
+          "finite": true
+        },
+        {
+          "vertices": 2688,
+          "finite": true
+        },
+        {
+          "vertices": 2688,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bsk_guard",
+      "model": "Warrior",
+      "effectVertices": 5418,
+      "effectPhases": [
+        {
+          "vertices": 5418,
+          "finite": true
+        },
+        {
+          "vertices": 5418,
+          "finite": true
+        },
+        {
+          "vertices": 5418,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_pierce",
+      "model": "Warrior",
+      "effectVertices": 1488,
+      "effectPhases": [
+        {
+          "vertices": 1488,
+          "finite": true
+        },
+        {
+          "vertices": 1488,
+          "finite": true
+        },
+        {
+          "vertices": 1488,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_volley",
+      "model": "Warrior",
+      "effectVertices": 120,
+      "effectPhases": [
+        {
+          "vertices": 120,
+          "finite": true
+        },
+        {
+          "vertices": 120,
+          "finite": true
+        },
+        {
+          "vertices": 120,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_shadow",
+      "model": "Warrior",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_tumble",
+      "model": "Warrior",
+      "effectVertices": 888,
+      "effectPhases": [
+        {
+          "vertices": 888,
+          "finite": true
+        },
+        {
+          "vertices": 888,
+          "finite": true
+        },
+        {
+          "vertices": 888,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_smoke",
+      "model": "Warrior",
+      "effectVertices": 2718,
+      "effectPhases": [
+        {
+          "vertices": 2718,
+          "finite": true
+        },
+        {
+          "vertices": 2718,
+          "finite": true
+        },
+        {
+          "vertices": 2718,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_goldrush",
+      "model": "Warrior",
+      "effectVertices": 6174,
+      "effectPhases": [
+        {
+          "vertices": 6174,
+          "finite": true
+        },
+        {
+          "vertices": 6174,
+          "finite": true
+        },
+        {
+          "vertices": 6174,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_deathmark",
+      "model": "Warrior",
+      "effectVertices": 2238,
+      "effectPhases": [
+        {
+          "vertices": 2238,
+          "finite": true
+        },
+        {
+          "vertices": 2238,
+          "finite": true
+        },
+        {
+          "vertices": 2238,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "pir_spike",
+      "model": "Warrior",
+      "effectVertices": 2742,
+      "effectPhases": [
+        {
+          "vertices": 2742,
+          "finite": true
+        },
+        {
+          "vertices": 2742,
+          "finite": true
+        },
+        {
+          "vertices": 2742,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_bolt",
+      "model": "Wizard",
+      "effectVertices": 5196,
+      "effectPhases": [
+        {
+          "vertices": 5196,
+          "finite": true
+        },
+        {
+          "vertices": 5196,
+          "finite": true
+        },
+        {
+          "vertices": 5196,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_beam",
+      "model": "Wizard",
+      "effectVertices": 6072,
+      "effectPhases": [
+        {
+          "vertices": 6072,
+          "finite": true
+        },
+        {
+          "vertices": 6072,
+          "finite": true
+        },
+        {
+          "vertices": 6072,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_nova",
+      "model": "Wizard",
+      "effectVertices": 1980,
+      "effectPhases": [
+        {
+          "vertices": 1980,
+          "finite": true
+        },
+        {
+          "vertices": 1980,
+          "finite": true
+        },
+        {
+          "vertices": 1980,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_blink",
+      "model": "Wizard",
+      "effectVertices": 3348,
+      "effectPhases": [
+        {
+          "vertices": 3348,
+          "finite": true
+        },
+        {
+          "vertices": 3348,
+          "finite": true
+        },
+        {
+          "vertices": 3348,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_gravity",
+      "model": "Wizard",
+      "effectVertices": 6300,
+      "effectPhases": [
+        {
+          "vertices": 6300,
+          "finite": true
+        },
+        {
+          "vertices": 6300,
+          "finite": true
+        },
+        {
+          "vertices": 6300,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_barrier",
+      "model": "Wizard",
+      "effectVertices": 3078,
+      "effectPhases": [
+        {
+          "vertices": 3078,
+          "finite": true
+        },
+        {
+          "vertices": 3078,
+          "finite": true
+        },
+        {
+          "vertices": 3078,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_tempest",
+      "model": "Wizard",
+      "effectVertices": 1302,
+      "effectPhases": [
+        {
+          "vertices": 1302,
+          "finite": true
+        },
+        {
+          "vertices": 1302,
+          "finite": true
+        },
+        {
+          "vertices": 1302,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "chr_overload",
+      "model": "Wizard",
+      "effectVertices": 5292,
+      "effectPhases": [
+        {
+          "vertices": 5292,
+          "finite": true
+        },
+        {
+          "vertices": 5292,
+          "finite": true
+        },
+        {
+          "vertices": 5292,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_flurry",
+      "model": "Monk",
+      "effectVertices": 3480,
+      "effectPhases": [
+        {
+          "vertices": 3480,
+          "finite": true
+        },
+        {
+          "vertices": 3480,
+          "finite": true
+        },
+        {
+          "vertices": 3480,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_palm",
+      "model": "Monk",
+      "effectVertices": 924,
+      "effectPhases": [
+        {
+          "vertices": 924,
+          "finite": true
+        },
+        {
+          "vertices": 924,
+          "finite": true
+        },
+        {
+          "vertices": 924,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_deflect",
+      "model": "Monk",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_roll",
+      "model": "Monk",
+      "effectVertices": 2016,
+      "effectPhases": [
+        {
+          "vertices": 2016,
+          "finite": true
+        },
+        {
+          "vertices": 2016,
+          "finite": true
+        },
+        {
+          "vertices": 2016,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_whirl",
+      "model": "Monk",
+      "effectVertices": 5184,
+      "effectPhases": [
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_stun",
+      "model": "Monk",
+      "effectVertices": 2598,
+      "effectPhases": [
+        {
+          "vertices": 2598,
+          "finite": true
+        },
+        {
+          "vertices": 2598,
+          "finite": true
+        },
+        {
+          "vertices": 2598,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_thousand",
+      "model": "Monk",
+      "effectVertices": 1764,
+      "effectPhases": [
+        {
+          "vertices": 1764,
+          "finite": true
+        },
+        {
+          "vertices": 1764,
+          "finite": true
+        },
+        {
+          "vertices": 1764,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "mon_dragon",
+      "model": "Monk",
+      "effectVertices": 2700,
+      "effectPhases": [
+        {
+          "vertices": 2700,
+          "finite": true
+        },
+        {
+          "vertices": 2700,
+          "finite": true
+        },
+        {
+          "vertices": 2700,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_bolt",
+      "model": "Wizard",
+      "effectVertices": 540,
+      "effectPhases": [
+        {
+          "vertices": 540,
+          "finite": true
+        },
+        {
+          "vertices": 540,
+          "finite": true
+        },
+        {
+          "vertices": 540,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_lance",
+      "model": "Wizard",
+      "effectVertices": 558,
+      "effectPhases": [
+        {
+          "vertices": 558,
+          "finite": true
+        },
+        {
+          "vertices": 558,
+          "finite": true
+        },
+        {
+          "vertices": 558,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_step",
+      "model": "Wizard",
+      "effectVertices": 594,
+      "effectPhases": [
+        {
+          "vertices": 594,
+          "finite": true
+        },
+        {
+          "vertices": 594,
+          "finite": true
+        },
+        {
+          "vertices": 594,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_nova",
+      "model": "Wizard",
+      "effectVertices": 2754,
+      "effectPhases": [
+        {
+          "vertices": 2754,
+          "finite": true
+        },
+        {
+          "vertices": 2754,
+          "finite": true
+        },
+        {
+          "vertices": 2754,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_orb",
+      "model": "Wizard",
+      "effectVertices": 3954,
+      "effectPhases": [
+        {
+          "vertices": 3954,
+          "finite": true
+        },
+        {
+          "vertices": 3954,
+          "finite": true
+        },
+        {
+          "vertices": 3954,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_barrier",
+      "model": "Wizard",
+      "effectVertices": 2484,
+      "effectPhases": [
+        {
+          "vertices": 2484,
+          "finite": true
+        },
+        {
+          "vertices": 2484,
+          "finite": true
+        },
+        {
+          "vertices": 2484,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_storm",
+      "model": "Wizard",
+      "effectVertices": 828,
+      "effectPhases": [
+        {
+          "vertices": 828,
+          "finite": true
+        },
+        {
+          "vertices": 828,
+          "finite": true
+        },
+        {
+          "vertices": 828,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "st_overload",
+      "model": "Wizard",
+      "effectVertices": 2706,
+      "effectPhases": [
+        {
+          "vertices": 2706,
+          "finite": true
+        },
+        {
+          "vertices": 2706,
+          "finite": true
+        },
+        {
+          "vertices": 2706,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_bolt",
+      "model": "Wizard",
+      "effectVertices": 3468,
+      "effectPhases": [
+        {
+          "vertices": 3468,
+          "finite": true
+        },
+        {
+          "vertices": 3468,
+          "finite": true
+        },
+        {
+          "vertices": 3468,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_lance",
+      "model": "Wizard",
+      "effectVertices": 96,
+      "effectPhases": [
+        {
+          "vertices": 96,
+          "finite": true
+        },
+        {
+          "vertices": 96,
+          "finite": true
+        },
+        {
+          "vertices": 96,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_curse",
+      "model": "Wizard",
+      "effectVertices": 1080,
+      "effectPhases": [
+        {
+          "vertices": 1080,
+          "finite": true
+        },
+        {
+          "vertices": 1080,
+          "finite": true
+        },
+        {
+          "vertices": 1080,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_drain",
+      "model": "Wizard",
+      "effectVertices": 2598,
+      "effectPhases": [
+        {
+          "vertices": 2598,
+          "finite": true
+        },
+        {
+          "vertices": 2598,
+          "finite": true
+        },
+        {
+          "vertices": 2598,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_step",
+      "model": "Wizard",
+      "effectVertices": 3492,
+      "effectPhases": [
+        {
+          "vertices": 3492,
+          "finite": true
+        },
+        {
+          "vertices": 3492,
+          "finite": true
+        },
+        {
+          "vertices": 3492,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_orb",
+      "model": "Wizard",
+      "effectVertices": 9516,
+      "effectPhases": [
+        {
+          "vertices": 9516,
+          "finite": true
+        },
+        {
+          "vertices": 9516,
+          "finite": true
+        },
+        {
+          "vertices": 9516,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_storm",
+      "model": "Wizard",
+      "effectVertices": 8646,
+      "effectPhases": [
+        {
+          "vertices": 8646,
+          "finite": true
+        },
+        {
+          "vertices": 8646,
+          "finite": true
+        },
+        {
+          "vertices": 8646,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "war_final",
+      "model": "Wizard",
+      "effectVertices": 3540,
+      "effectPhases": [
+        {
+          "vertices": 3540,
+          "finite": true
+        },
+        {
+          "vertices": 3540,
+          "finite": true
+        },
+        {
+          "vertices": 3540,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_rise",
+      "model": "Ranger",
+      "effectVertices": 5184,
+      "effectPhases": [
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_gale",
+      "model": "Ranger",
+      "effectVertices": 1818,
+      "effectPhases": [
+        {
+          "vertices": 1818,
+          "finite": true
+        },
+        {
+          "vertices": 1818,
+          "finite": true
+        },
+        {
+          "vertices": 1818,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_dive",
+      "model": "Ranger",
+      "effectVertices": 4320,
+      "effectPhases": [
+        {
+          "vertices": 4320,
+          "finite": true
+        },
+        {
+          "vertices": 4320,
+          "finite": true
+        },
+        {
+          "vertices": 4320,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_lift",
+      "model": "Ranger",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_dash",
+      "model": "Ranger",
+      "effectVertices": 8640,
+      "effectPhases": [
+        {
+          "vertices": 8640,
+          "finite": true
+        },
+        {
+          "vertices": 8640,
+          "finite": true
+        },
+        {
+          "vertices": 8640,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_rain",
+      "model": "Ranger",
+      "effectVertices": 1314,
+      "effectPhases": [
+        {
+          "vertices": 1314,
+          "finite": true
+        },
+        {
+          "vertices": 1314,
+          "finite": true
+        },
+        {
+          "vertices": 1314,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_crash",
+      "model": "Ranger",
+      "effectVertices": 8910,
+      "effectPhases": [
+        {
+          "vertices": 8910,
+          "finite": true
+        },
+        {
+          "vertices": 8910,
+          "finite": true
+        },
+        {
+          "vertices": 8910,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "sky_cyclone",
+      "model": "Ranger",
+      "effectVertices": 6048,
+      "effectPhases": [
+        {
+          "vertices": 6048,
+          "finite": true
+        },
+        {
+          "vertices": 6048,
+          "finite": true
+        },
+        {
+          "vertices": 6048,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_counter",
+      "model": "Rogue",
+      "effectVertices": 900,
+      "effectPhases": [
+        {
+          "vertices": 900,
+          "finite": true
+        },
+        {
+          "vertices": 900,
+          "finite": true
+        },
+        {
+          "vertices": 900,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_twin",
+      "model": "Rogue",
+      "effectVertices": 5184,
+      "effectPhases": [
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_riposte",
+      "model": "Rogue",
+      "effectVertices": 3456,
+      "effectPhases": [
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        },
+        {
+          "vertices": 3456,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_step",
+      "model": "Rogue",
+      "effectVertices": 2880,
+      "effectPhases": [
+        {
+          "vertices": 2880,
+          "finite": true
+        },
+        {
+          "vertices": 2880,
+          "finite": true
+        },
+        {
+          "vertices": 2880,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_mirror",
+      "model": "Rogue",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_cross",
+      "model": "Rogue",
+      "effectVertices": 1788,
+      "effectPhases": [
+        {
+          "vertices": 1788,
+          "finite": true
+        },
+        {
+          "vertices": 1788,
+          "finite": true
+        },
+        {
+          "vertices": 1788,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_steel",
+      "model": "Rogue",
+      "effectVertices": 2832,
+      "effectPhases": [
+        {
+          "vertices": 2832,
+          "finite": true
+        },
+        {
+          "vertices": 2832,
+          "finite": true
+        },
+        {
+          "vertices": 2832,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bd_perfect",
+      "model": "Rogue",
+      "effectVertices": 4320,
+      "effectPhases": [
+        {
+          "vertices": 4320,
+          "finite": true
+        },
+        {
+          "vertices": 4320,
+          "finite": true
+        },
+        {
+          "vertices": 4320,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_sic",
+      "model": "Ranger",
+      "effectVertices": 2700,
+      "effectPhases": [
+        {
+          "vertices": 2700,
+          "finite": true
+        },
+        {
+          "vertices": 2700,
+          "finite": true
+        },
+        {
+          "vertices": 2700,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_coordinated",
+      "model": "Ranger",
+      "effectVertices": 3546,
+      "effectPhases": [
+        {
+          "vertices": 3546,
+          "finite": true
+        },
+        {
+          "vertices": 3546,
+          "finite": true
+        },
+        {
+          "vertices": 3546,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_guardian",
+      "model": "Ranger",
+      "effectVertices": 2832,
+      "effectPhases": [
+        {
+          "vertices": 2832,
+          "finite": true
+        },
+        {
+          "vertices": 2832,
+          "finite": true
+        },
+        {
+          "vertices": 2832,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_step",
+      "model": "Ranger",
+      "effectVertices": 2592,
+      "effectPhases": [
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        },
+        {
+          "vertices": 2592,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_mend",
+      "model": "Ranger",
+      "effectVertices": 204,
+      "effectPhases": [
+        {
+          "vertices": 204,
+          "finite": true
+        },
+        {
+          "vertices": 204,
+          "finite": true
+        },
+        {
+          "vertices": 204,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_roar",
+      "model": "Ranger",
+      "effectVertices": 5184,
+      "effectPhases": [
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        },
+        {
+          "vertices": 5184,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_stampede",
+      "model": "Ranger",
+      "effectVertices": 7200,
+      "effectPhases": [
+        {
+          "vertices": 7200,
+          "finite": true
+        },
+        {
+          "vertices": 7200,
+          "finite": true
+        },
+        {
+          "vertices": 7200,
+          "finite": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "bst_apex",
+      "model": "Ranger",
+      "effectVertices": 3492,
+      "effectPhases": [
+        {
+          "vertices": 3492,
+          "finite": true
+        },
+        {
+          "vertices": 3492,
+          "finite": true
+        },
+        {
+          "vertices": 3492,
+          "finite": true
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

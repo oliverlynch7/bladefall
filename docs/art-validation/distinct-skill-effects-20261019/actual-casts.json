@@ -1,0 +1,4001 @@
+{
+  "checks": 828,
+  "rows": [
+    {
+      "name": "Pre-change100 save loads",
+      "passed": true
+    },
+    {
+      "name": "Old1145 gold retained",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_bolt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_bolt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_bolt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_bolt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_fan",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_fan",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_fan",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_fan",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_fan",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_fan",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_blast",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_blast",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_blast",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_blast",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_blast",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_blast",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_ward",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_ward",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_ward",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_ward",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_ward",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_ward",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_lance",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_lance",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_lance",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_lance",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_lance",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_lance",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_nova",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_nova",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_nova",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_nova",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_inferno",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_inferno",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_inferno",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_inferno",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_inferno",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_inferno",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action py_sun",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement py_sun",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill py_sun",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration py_sun",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once py_sun",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes py_sun",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_cleave",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_cleave",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_cleave",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_cleave",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_cleave",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_cleave",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_bash",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_bash",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_bash",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_bash",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_bash",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_bash",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_charge",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_charge",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_charge",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_charge",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_charge",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_charge",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_whirl",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_whirl",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_whirl",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_whirl",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_whirl",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_whirl",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_guard",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_guard",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_guard",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_guard",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_guard",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_guard",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_stomp",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_stomp",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_stomp",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_stomp",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_stomp",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_stomp",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_berserk",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_berserk",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_berserk",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_berserk",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_berserk",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_berserk",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action w_execute",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement w_execute",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill w_execute",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration w_execute",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once w_execute",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes w_execute",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_volley",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_volley",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_volley",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_volley",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_volley",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_volley",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_pierce",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_pierce",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_pierce",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_pierce",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_pierce",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_pierce",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_tumble",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_tumble",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_tumble",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_tumble",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_tumble",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_tumble",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_shadow",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_shadow",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_shadow",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_shadow",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_shadow",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_shadow",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_spike",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_spike",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_spike",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_spike",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_spike",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_spike",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_smoke",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_smoke",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_smoke",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_smoke",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_smoke",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_smoke",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_mark",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_mark",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_mark",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_mark",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_mark",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_mark",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action r_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement r_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill r_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration r_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once r_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes r_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_bolt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_bolt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_bolt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_bolt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_beam",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_beam",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_beam",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_beam",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_beam",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_beam",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_blink",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_blink",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_blink",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_blink",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_blink",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_blink",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_nova",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_nova",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_nova",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_nova",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_gravity",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_gravity",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_gravity",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_gravity",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_gravity",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_gravity",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_barrier",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_barrier",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_barrier",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_barrier",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_barrier",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_barrier",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_tempest",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_tempest",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_tempest",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_tempest",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_tempest",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_tempest",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action m_overload",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement m_overload",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill m_overload",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration m_overload",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once m_overload",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes m_overload",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_reap",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_reap",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_reap",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_reap",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_reap",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_reap",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_cleave",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_cleave",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_cleave",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_cleave",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_cleave",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_cleave",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_step",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_step",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_step",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_step",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_step",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_step",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_wraith",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_wraith",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_wraith",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_wraith",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_wraith",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_wraith",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_pull",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_pull",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_pull",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_pull",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_pull",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_pull",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_bind",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_bind",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_bind",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_bind",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_bind",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_bind",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_siphon",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_siphon",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_siphon",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_siphon",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_siphon",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_siphon",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action x_vortex",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement x_vortex",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill x_vortex",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration x_vortex",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once x_vortex",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes x_vortex",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_bash",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_bash",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_bash",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_bash",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_bash",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_bash",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_smite",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_smite",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_smite",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_smite",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_smite",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_smite",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_taunt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_taunt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_taunt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_taunt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_taunt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_taunt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_ground",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_ground",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_ground",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_ground",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_ground",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_ground",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_guard",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_guard",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_guard",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_guard",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_guard",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_guard",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_burst",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_burst",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_burst",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_burst",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_burst",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_burst",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_laststand",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_laststand",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_laststand",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_laststand",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_laststand",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_laststand",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pal_sky",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pal_sky",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pal_sky",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pal_sky",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pal_sky",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pal_sky",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_summon",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_summon",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_summon",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_summon",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_summon",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_summon",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_bolt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_bolt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_bolt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_bolt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_raise",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_raise",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_raise",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_raise",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_raise",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_raise",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_nova",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_nova",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_nova",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_nova",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_wall",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_wall",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_wall",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_wall",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_wall",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_wall",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_grip",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_grip",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_grip",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_grip",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_grip",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_grip",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_army",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_army",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_army",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_army",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_army",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_army",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action necro_storm",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement necro_storm",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill necro_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration necro_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once necro_storm",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes necro_storm",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_strike",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_strike",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_strike",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_strike",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_strike",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_strike",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_barrage",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_barrage",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_barrage",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_barrage",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_barrage",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_barrage",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_step",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_step",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_step",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_step",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_step",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_step",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_smoke",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_smoke",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_smoke",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_smoke",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_smoke",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_smoke",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_mark",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_mark",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_mark",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_mark",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_mark",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_mark",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_pierce",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_pierce",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_pierce",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_pierce",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_pierce",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_pierce",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_fury",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_fury",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_fury",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_fury",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_fury",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_fury",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action nin_storm",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement nin_storm",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill nin_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration nin_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once nin_storm",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes nin_storm",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_cleave",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_cleave",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_cleave",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_cleave",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_cleave",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_cleave",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_bash",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_bash",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_bash",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_bash",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_bash",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_bash",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_charge",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_charge",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_charge",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_charge",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_charge",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_charge",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_stomp",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_stomp",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_stomp",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_stomp",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_stomp",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_stomp",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_whirl",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_whirl",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_whirl",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_whirl",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_whirl",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_whirl",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_execute",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_execute",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_execute",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_execute",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_execute",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_execute",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_berserk",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_berserk",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_berserk",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_berserk",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_berserk",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_berserk",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bsk_guard",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bsk_guard",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bsk_guard",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bsk_guard",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bsk_guard",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bsk_guard",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_pierce",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_pierce",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_pierce",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_pierce",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_pierce",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_pierce",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_volley",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_volley",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_volley",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_volley",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_volley",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_volley",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_shadow",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_shadow",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_shadow",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_shadow",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_shadow",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_shadow",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_tumble",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_tumble",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_tumble",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_tumble",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_tumble",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_tumble",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_smoke",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_smoke",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_smoke",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_smoke",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_smoke",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_smoke",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_goldrush",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_goldrush",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_goldrush",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_goldrush",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_goldrush",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_goldrush",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_deathmark",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action pir_spike",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement pir_spike",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill pir_spike",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration pir_spike",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once pir_spike",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes pir_spike",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_bolt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_bolt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_bolt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_bolt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_beam",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_beam",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_beam",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_beam",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_beam",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_beam",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_nova",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_nova",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_nova",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_nova",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_blink",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_blink",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_blink",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_blink",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_blink",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_blink",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_gravity",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_gravity",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_gravity",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_gravity",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_gravity",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_gravity",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_barrier",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_barrier",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_barrier",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_barrier",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_barrier",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_barrier",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_tempest",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_tempest",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_tempest",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_tempest",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_tempest",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_tempest",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action chr_overload",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement chr_overload",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill chr_overload",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration chr_overload",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once chr_overload",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes chr_overload",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_flurry",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_flurry",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_flurry",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_flurry",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_flurry",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_flurry",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_palm",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_palm",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_palm",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_palm",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_palm",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_palm",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_deflect",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_deflect",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_deflect",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_deflect",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_deflect",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_deflect",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_roll",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_roll",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_roll",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_roll",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_roll",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_roll",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_whirl",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_whirl",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_whirl",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_whirl",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_whirl",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_whirl",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_stun",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_stun",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_stun",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_stun",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_stun",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_stun",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_thousand",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_thousand",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_thousand",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_thousand",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_thousand",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_thousand",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action mon_dragon",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement mon_dragon",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill mon_dragon",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration mon_dragon",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once mon_dragon",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes mon_dragon",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_bolt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_bolt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_bolt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_bolt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_lance",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_lance",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_lance",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_lance",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_lance",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_lance",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_step",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_step",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_step",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_step",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_step",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_step",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_nova",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_nova",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_nova",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_nova",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_nova",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_orb",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_orb",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_orb",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_orb",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_orb",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_orb",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_barrier",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_barrier",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_barrier",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_barrier",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_barrier",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_barrier",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_storm",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_storm",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_storm",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_storm",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action st_overload",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement st_overload",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill st_overload",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration st_overload",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once st_overload",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes st_overload",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_bolt",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_bolt",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_bolt",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_bolt",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_bolt",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_lance",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_lance",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_lance",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_lance",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_lance",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_lance",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_curse",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_curse",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_curse",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_curse",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_curse",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_curse",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_drain",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_drain",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_drain",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_drain",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_drain",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_drain",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_step",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_step",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_step",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_step",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_step",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_step",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_orb",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_orb",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_orb",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_orb",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_orb",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_orb",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_storm",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_storm",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_storm",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_storm",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_storm",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action war_final",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement war_final",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill war_final",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration war_final",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once war_final",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes war_final",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_rise",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_rise",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_rise",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_rise",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_rise",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_rise",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_gale",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_gale",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_gale",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_gale",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_gale",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_gale",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_dive",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_dive",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_dive",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_dive",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_dive",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_dive",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_lift",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_lift",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_lift",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_lift",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_lift",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_lift",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_dash",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_dash",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_dash",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_dash",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_dash",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_dash",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_rain",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_rain",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_rain",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_rain",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_rain",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_rain",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_crash",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_crash",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_crash",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_crash",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_crash",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_crash",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action sky_cyclone",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement sky_cyclone",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill sky_cyclone",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration sky_cyclone",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once sky_cyclone",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes sky_cyclone",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_counter",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_counter",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_counter",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_counter",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_counter",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_counter",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_twin",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_twin",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_twin",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_twin",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_twin",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_twin",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_riposte",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_riposte",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_riposte",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_riposte",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_riposte",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_riposte",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_step",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_step",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_step",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_step",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_step",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_step",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_mirror",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_mirror",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_mirror",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_mirror",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_mirror",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_mirror",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_cross",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_cross",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_cross",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_cross",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_cross",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_cross",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_steel",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_steel",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_steel",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_steel",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_steel",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_steel",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bd_perfect",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bd_perfect",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bd_perfect",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bd_perfect",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bd_perfect",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bd_perfect",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_sic",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_sic",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_sic",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_sic",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_sic",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_sic",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_coordinated",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_coordinated",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_coordinated",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_coordinated",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_coordinated",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_coordinated",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_guardian",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_guardian",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_guardian",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_guardian",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_guardian",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_guardian",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_step",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_step",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_step",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_step",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_step",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_step",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_mend",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_mend",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_mend",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_mend",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_mend",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_mend",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_roar",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_roar",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_roar",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_roar",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_roar",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_roar",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_stampede",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_stampede",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_stampede",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_stampede",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_stampede",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_stampede",
+      "passed": true
+    },
+    {
+      "name": "Accepted cast has correct action bst_apex",
+      "passed": true
+    },
+    {
+      "name": "Skill does not cancel its own movement bst_apex",
+      "passed": true
+    },
+    {
+      "name": "Co-op snapshot retains skill bst_apex",
+      "passed": true
+    },
+    {
+      "name": "Peer relay retains duration bst_apex",
+      "passed": true
+    },
+    {
+      "name": "Peer tick expires action once bst_apex",
+      "passed": true
+    },
+    {
+      "name": "Animation finishes bst_apex",
+      "passed": true
+    },
+    {
+      "name": "Dodge cancels semantic action",
+      "passed": true
+    },
+    {
+      "name": "Animation tick does not move/hurt player",
+      "passed": true
+    },
+    {
+      "name": "New action replaces previous serial",
+      "passed": true
+    },
+    {
+      "name": "Rejected actual dispatch creates no animation/cooldown and refunds mana",
+      "passed": true
+    },
+    {
+      "name": "Unknown skill packet rejected",
+      "passed": true
+    },
+    {
+      "name": "Pause/travel legacy clip retained",
+      "passed": true
+    },
+    {
+      "name": "Isolated saved gold retained",
+      "passed": true
+    },
+    {
+      "name": "Actual automatic attack yields to requested skill",
+      "passed": true
+    },
+    {
+      "name": "Manual attack still cancels skill action",
+      "passed": true
+    },
+    {
+      "name": "Actual dodge input cancels even skill-owned dash",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "accepted": 136,
+  "results": [
+    {
+      "id": "py_bolt",
+      "cast": true,
+      "pose": "py_bolt"
+    },
+    {
+      "id": "py_fan",
+      "cast": true,
+      "pose": "py_fan"
+    },
+    {
+      "id": "py_blast",
+      "cast": true,
+      "pose": "py_blast"
+    },
+    {
+      "id": "py_ward",
+      "cast": true,
+      "pose": "py_ward"
+    },
+    {
+      "id": "py_lance",
+      "cast": true,
+      "pose": "py_lance"
+    },
+    {
+      "id": "py_nova",
+      "cast": true,
+      "pose": "py_nova"
+    },
+    {
+      "id": "py_inferno",
+      "cast": true,
+      "pose": "py_inferno"
+    },
+    {
+      "id": "py_sun",
+      "cast": true,
+      "pose": "py_sun"
+    },
+    {
+      "id": "w_cleave",
+      "cast": true,
+      "pose": "w_cleave"
+    },
+    {
+      "id": "w_bash",
+      "cast": true,
+      "pose": "w_bash"
+    },
+    {
+      "id": "w_charge",
+      "cast": true,
+      "pose": "w_charge"
+    },
+    {
+      "id": "w_whirl",
+      "cast": true,
+      "pose": "w_whirl"
+    },
+    {
+      "id": "w_guard",
+      "cast": true,
+      "pose": "w_guard"
+    },
+    {
+      "id": "w_stomp",
+      "cast": true,
+      "pose": "w_stomp"
+    },
+    {
+      "id": "w_berserk",
+      "cast": true,
+      "pose": "w_berserk"
+    },
+    {
+      "id": "w_execute",
+      "cast": true,
+      "pose": "w_execute"
+    },
+    {
+      "id": "r_volley",
+      "cast": true,
+      "pose": "r_volley"
+    },
+    {
+      "id": "r_pierce",
+      "cast": true,
+      "pose": "r_pierce"
+    },
+    {
+      "id": "r_tumble",
+      "cast": true,
+      "pose": "r_tumble"
+    },
+    {
+      "id": "r_shadow",
+      "cast": true,
+      "pose": "r_shadow"
+    },
+    {
+      "id": "r_spike",
+      "cast": true,
+      "pose": "r_spike"
+    },
+    {
+      "id": "r_smoke",
+      "cast": true,
+      "pose": "r_smoke"
+    },
+    {
+      "id": "r_mark",
+      "cast": true,
+      "pose": "r_mark"
+    },
+    {
+      "id": "r_deathmark",
+      "cast": true,
+      "pose": "r_deathmark"
+    },
+    {
+      "id": "m_bolt",
+      "cast": true,
+      "pose": "m_bolt"
+    },
+    {
+      "id": "m_beam",
+      "cast": true,
+      "pose": "m_beam"
+    },
+    {
+      "id": "m_blink",
+      "cast": true,
+      "pose": "m_blink"
+    },
+    {
+      "id": "m_nova",
+      "cast": true,
+      "pose": "m_nova"
+    },
+    {
+      "id": "m_gravity",
+      "cast": true,
+      "pose": "m_gravity"
+    },
+    {
+      "id": "m_barrier",
+      "cast": true,
+      "pose": "m_barrier"
+    },
+    {
+      "id": "m_tempest",
+      "cast": true,
+      "pose": "m_tempest"
+    },
+    {
+      "id": "m_overload",
+      "cast": true,
+      "pose": "m_overload"
+    },
+    {
+      "id": "x_reap",
+      "cast": true,
+      "pose": "x_reap"
+    },
+    {
+      "id": "x_cleave",
+      "cast": true,
+      "pose": "x_cleave"
+    },
+    {
+      "id": "x_step",
+      "cast": true,
+      "pose": "x_step"
+    },
+    {
+      "id": "x_wraith",
+      "cast": true,
+      "pose": "x_wraith"
+    },
+    {
+      "id": "x_pull",
+      "cast": true,
+      "pose": "x_pull"
+    },
+    {
+      "id": "x_bind",
+      "cast": true,
+      "pose": "x_bind"
+    },
+    {
+      "id": "x_siphon",
+      "cast": true,
+      "pose": "x_siphon"
+    },
+    {
+      "id": "x_vortex",
+      "cast": true,
+      "pose": "x_vortex"
+    },
+    {
+      "id": "pal_bash",
+      "cast": true,
+      "pose": "pal_bash"
+    },
+    {
+      "id": "pal_smite",
+      "cast": true,
+      "pose": "pal_smite"
+    },
+    {
+      "id": "pal_taunt",
+      "cast": true,
+      "pose": "pal_taunt"
+    },
+    {
+      "id": "pal_ground",
+      "cast": true,
+      "pose": "pal_ground"
+    },
+    {
+      "id": "pal_guard",
+      "cast": true,
+      "pose": "pal_guard"
+    },
+    {
+      "id": "pal_burst",
+      "cast": true,
+      "pose": "pal_burst"
+    },
+    {
+      "id": "pal_laststand",
+      "cast": true,
+      "pose": "pal_laststand"
+    },
+    {
+      "id": "pal_sky",
+      "cast": true,
+      "pose": "pal_sky"
+    },
+    {
+      "id": "necro_summon",
+      "cast": true,
+      "pose": "necro_summon"
+    },
+    {
+      "id": "necro_bolt",
+      "cast": true,
+      "pose": "necro_bolt"
+    },
+    {
+      "id": "necro_raise",
+      "cast": true,
+      "pose": "necro_raise"
+    },
+    {
+      "id": "necro_nova",
+      "cast": true,
+      "pose": "necro_nova"
+    },
+    {
+      "id": "necro_wall",
+      "cast": true,
+      "pose": "necro_wall"
+    },
+    {
+      "id": "necro_grip",
+      "cast": true,
+      "pose": "necro_grip"
+    },
+    {
+      "id": "necro_army",
+      "cast": true,
+      "pose": "necro_army"
+    },
+    {
+      "id": "necro_storm",
+      "cast": true,
+      "pose": "necro_storm"
+    },
+    {
+      "id": "nin_strike",
+      "cast": true,
+      "pose": "nin_strike"
+    },
+    {
+      "id": "nin_barrage",
+      "cast": true,
+      "pose": "nin_barrage"
+    },
+    {
+      "id": "nin_step",
+      "cast": true,
+      "pose": "nin_step"
+    },
+    {
+      "id": "nin_smoke",
+      "cast": true,
+      "pose": "nin_smoke"
+    },
+    {
+      "id": "nin_mark",
+      "cast": true,
+      "pose": "nin_mark"
+    },
+    {
+      "id": "nin_pierce",
+      "cast": true,
+      "pose": "nin_pierce"
+    },
+    {
+      "id": "nin_fury",
+      "cast": true,
+      "pose": "nin_fury"
+    },
+    {
+      "id": "nin_storm",
+      "cast": true,
+      "pose": "nin_storm"
+    },
+    {
+      "id": "bsk_cleave",
+      "cast": true,
+      "pose": "bsk_cleave"
+    },
+    {
+      "id": "bsk_bash",
+      "cast": true,
+      "pose": "bsk_bash"
+    },
+    {
+      "id": "bsk_charge",
+      "cast": true,
+      "pose": "bsk_charge"
+    },
+    {
+      "id": "bsk_stomp",
+      "cast": true,
+      "pose": "bsk_stomp"
+    },
+    {
+      "id": "bsk_whirl",
+      "cast": true,
+      "pose": "bsk_whirl"
+    },
+    {
+      "id": "bsk_execute",
+      "cast": true,
+      "pose": "bsk_execute"
+    },
+    {
+      "id": "bsk_berserk",
+      "cast": true,
+      "pose": "bsk_berserk"
+    },
+    {
+      "id": "bsk_guard",
+      "cast": true,
+      "pose": "bsk_guard"
+    },
+    {
+      "id": "pir_pierce",
+      "cast": true,
+      "pose": "pir_pierce"
+    },
+    {
+      "id": "pir_volley",
+      "cast": true,
+      "pose": "pir_volley"
+    },
+    {
+      "id": "pir_shadow",
+      "cast": true,
+      "pose": "pir_shadow"
+    },
+    {
+      "id": "pir_tumble",
+      "cast": true,
+      "pose": "pir_tumble"
+    },
+    {
+      "id": "pir_smoke",
+      "cast": true,
+      "pose": "pir_smoke"
+    },
+    {
+      "id": "pir_goldrush",
+      "cast": true,
+      "pose": "pir_goldrush"
+    },
+    {
+      "id": "pir_deathmark",
+      "cast": true,
+      "pose": "pir_deathmark"
+    },
+    {
+      "id": "pir_spike",
+      "cast": true,
+      "pose": "pir_spike"
+    },
+    {
+      "id": "chr_bolt",
+      "cast": true,
+      "pose": "chr_bolt"
+    },
+    {
+      "id": "chr_beam",
+      "cast": true,
+      "pose": "chr_beam"
+    },
+    {
+      "id": "chr_nova",
+      "cast": true,
+      "pose": "chr_nova"
+    },
+    {
+      "id": "chr_blink",
+      "cast": true,
+      "pose": "chr_blink"
+    },
+    {
+      "id": "chr_gravity",
+      "cast": true,
+      "pose": "chr_gravity"
+    },
+    {
+      "id": "chr_barrier",
+      "cast": true,
+      "pose": "chr_barrier"
+    },
+    {
+      "id": "chr_tempest",
+      "cast": true,
+      "pose": "chr_tempest"
+    },
+    {
+      "id": "chr_overload",
+      "cast": true,
+      "pose": "chr_overload"
+    },
+    {
+      "id": "mon_flurry",
+      "cast": true,
+      "pose": "mon_flurry"
+    },
+    {
+      "id": "mon_palm",
+      "cast": true,
+      "pose": "mon_palm"
+    },
+    {
+      "id": "mon_deflect",
+      "cast": true,
+      "pose": "mon_deflect"
+    },
+    {
+      "id": "mon_roll",
+      "cast": true,
+      "pose": "mon_roll"
+    },
+    {
+      "id": "mon_whirl",
+      "cast": true,
+      "pose": "mon_whirl"
+    },
+    {
+      "id": "mon_stun",
+      "cast": true,
+      "pose": "mon_stun"
+    },
+    {
+      "id": "mon_thousand",
+      "cast": true,
+      "pose": "mon_thousand"
+    },
+    {
+      "id": "mon_dragon",
+      "cast": true,
+      "pose": "mon_dragon"
+    },
+    {
+      "id": "st_bolt",
+      "cast": true,
+      "pose": "st_bolt"
+    },
+    {
+      "id": "st_lance",
+      "cast": true,
+      "pose": "st_lance"
+    },
+    {
+      "id": "st_step",
+      "cast": true,
+      "pose": "st_step"
+    },
+    {
+      "id": "st_nova",
+      "cast": true,
+      "pose": "st_nova"
+    },
+    {
+      "id": "st_orb",
+      "cast": true,
+      "pose": "st_orb"
+    },
+    {
+      "id": "st_barrier",
+      "cast": true,
+      "pose": "st_barrier"
+    },
+    {
+      "id": "st_storm",
+      "cast": true,
+      "pose": "st_storm"
+    },
+    {
+      "id": "st_overload",
+      "cast": true,
+      "pose": "st_overload"
+    },
+    {
+      "id": "war_bolt",
+      "cast": true,
+      "pose": "war_bolt"
+    },
+    {
+      "id": "war_lance",
+      "cast": true,
+      "pose": "war_lance"
+    },
+    {
+      "id": "war_curse",
+      "cast": true,
+      "pose": "war_curse"
+    },
+    {
+      "id": "war_drain",
+      "cast": true,
+      "pose": "war_drain"
+    },
+    {
+      "id": "war_step",
+      "cast": true,
+      "pose": "war_step"
+    },
+    {
+      "id": "war_orb",
+      "cast": true,
+      "pose": "war_orb"
+    },
+    {
+      "id": "war_storm",
+      "cast": true,
+      "pose": "war_storm"
+    },
+    {
+      "id": "war_final",
+      "cast": true,
+      "pose": "war_final"
+    },
+    {
+      "id": "sky_rise",
+      "cast": true,
+      "pose": "sky_rise"
+    },
+    {
+      "id": "sky_gale",
+      "cast": true,
+      "pose": "sky_gale"
+    },
+    {
+      "id": "sky_dive",
+      "cast": true,
+      "pose": "sky_dive"
+    },
+    {
+      "id": "sky_lift",
+      "cast": true,
+      "pose": "sky_lift"
+    },
+    {
+      "id": "sky_dash",
+      "cast": true,
+      "pose": "sky_dash"
+    },
+    {
+      "id": "sky_rain",
+      "cast": true,
+      "pose": "sky_rain"
+    },
+    {
+      "id": "sky_crash",
+      "cast": true,
+      "pose": "sky_crash"
+    },
+    {
+      "id": "sky_cyclone",
+      "cast": true,
+      "pose": "sky_cyclone"
+    },
+    {
+      "id": "bd_counter",
+      "cast": true,
+      "pose": "bd_counter"
+    },
+    {
+      "id": "bd_twin",
+      "cast": true,
+      "pose": "bd_twin"
+    },
+    {
+      "id": "bd_riposte",
+      "cast": true,
+      "pose": "bd_riposte"
+    },
+    {
+      "id": "bd_step",
+      "cast": true,
+      "pose": "bd_step"
+    },
+    {
+      "id": "bd_mirror",
+      "cast": true,
+      "pose": "bd_mirror"
+    },
+    {
+      "id": "bd_cross",
+      "cast": true,
+      "pose": "bd_cross"
+    },
+    {
+      "id": "bd_steel",
+      "cast": true,
+      "pose": "bd_steel"
+    },
+    {
+      "id": "bd_perfect",
+      "cast": true,
+      "pose": "bd_perfect"
+    },
+    {
+      "id": "bst_sic",
+      "cast": true,
+      "pose": "bst_sic"
+    },
+    {
+      "id": "bst_coordinated",
+      "cast": true,
+      "pose": "bst_coordinated"
+    },
+    {
+      "id": "bst_guardian",
+      "cast": true,
+      "pose": "bst_guardian"
+    },
+    {
+      "id": "bst_step",
+      "cast": true,
+      "pose": "bst_step"
+    },
+    {
+      "id": "bst_mend",
+      "cast": true,
+      "pose": "bst_mend"
+    },
+    {
+      "id": "bst_roar",
+      "cast": true,
+      "pose": "bst_roar"
+    },
+    {
+      "id": "bst_stampede",
+      "cast": true,
+      "pose": "bst_stampede"
+    },
+    {
+      "id": "bst_apex",
+      "cast": true,
+      "pose": "bst_apex"
+    }
+  ]
+}

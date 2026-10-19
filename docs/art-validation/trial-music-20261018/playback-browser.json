@@ -1,0 +1,61 @@
+{
+ "rows": [
+  {
+   "legacyLevel": 100,
+   "gold": 1145
+  },
+  {
+   "playback": {
+    "stable": true,
+    "wrapped": true,
+    "npcVolume": 0.135,
+    "normalVolume": 0.3,
+    "paused": true,
+    "resumed": true,
+    "muteStopped": true,
+    "restored": true,
+    "halfVolume": 0.15,
+    "forceMuted": true
+   }
+  }
+ ],
+ "version": "2.290.0-class-trial-score",
+ "mode": "play",
+ "level": 100,
+ "gold": 1145,
+ "trial": "mage",
+ "track": "trial_starter",
+ "media": [
+  {
+   "key": "village_vigil",
+   "paused": true,
+   "muted": true,
+   "loop": true,
+   "ready": 0,
+   "time": 0,
+   "vol": 0,
+   "duration": null
+  },
+  {
+   "key": "wayfarers_hearth_loop",
+   "paused": true,
+   "muted": true,
+   "loop": true,
+   "ready": 4,
+   "time": 0,
+   "vol": 0,
+   "duration": 141.177354
+  },
+  {
+   "key": "trial_starter",
+   "paused": false,
+   "muted": true,
+   "loop": true,
+   "ready": 4,
+   "time": 0.95925,
+   "vol": 0.15,
+   "duration": 120.032653
+  }
+ ],
+ "legacy": 100
+}

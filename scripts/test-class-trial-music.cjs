@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto'),cp=require('node:child_process'),score=require('../public/3d/music-score.js');
+const cat=JSON.parse(fs.readFileSync('docs/audio/class-trial-music-20261018.json','utf8')),manifest=JSON.parse(fs.readFileSync('public/music/class-trials/manifest.json','utf8'));
+assert.equal(cat.tracks.length,9);assert.equal(Object.keys(manifest.tracks).length,9);
+for(const [cls,key]of Object.entries(score.trialTracks)){assert.ok(score.tracks[key]);for(const mode of ['play','npc','pause','gear'])assert.equal(score.scene({trial:cls,mode}),key);}
+for(const cls of ['warrior','ranger','mage'])assert.equal(score.trialTracks[cls],'trial_starter');
+assert.equal(new Set(Object.values(score.trialTracks)).size,9);
+for(const t of cat.tracks){const m=manifest.tracks[t.id],p='public'+m.url,data=fs.readFileSync(p);assert.equal(score.tracks['trial_'+t.id].url,m.url);assert.equal(crypto.createHash('sha256').update(data).digest('hex'),m.sha256);assert.ok(data.length<3e6);assert.ok(Math.abs(m.seconds-t.seconds)<.2);const probe=JSON.parse(cp.execFileSync('ffprobe',['-v','error','-show_entries','format=duration:stream=channels,sample_rate','-of','json',p]));assert.equal(probe.streams[0].channels,2);assert.equal(probe.streams[0].sample_rate,'44100');assert.ok(t.prompt.includes('No vocals'));}
+assert.equal(score.scene({trial:'unrecognized',mode:'play'}),'crystalline_trials');assert.equal(score.scene({trial:true,mode:'npc'}),'hall_of_the_violet_discipline');assert.equal(score.scene({hub:true}),'wayfarers_hearth_loop');
+const game=fs.readFileSync('public/3d/index.html','utf8'),trials=game.split('const TRIALS={')[1].split('\n};')[0],ids=[...trials.matchAll(/^\s*(\w+):\{cls:/gm)].map(m=>m[1]);assert.deepEqual(ids.sort(),Object.keys(score.trialTracks).sort());assert.ok(game.includes('trial:G?.trial'));assert.ok(game.includes('music-score.js?v=2290'));
+console.log('Trial score passed: all11 actual trial classes, nine unique assets, play/dialogue/pause routing, originals, stereo/durations/hashes/size and fallback.');

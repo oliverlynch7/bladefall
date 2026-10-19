@@ -1,6 +1,15 @@
 /* Supplied original score. Scene names are cues, not additions to game canon. */
 (function(root){'use strict';
 const tracks={
+  "trial_starter": {"title": "First Steps, Great Heroes", "url": "/music/class-trials/starter.mp3"},
+  "trial_berserker": {"title": "Heart of the War Drum", "url": "/music/class-trials/berserker.mp3"},
+  "trial_ninja": {"title": "Crimson Silence", "url": "/music/class-trials/ninja.mp3"},
+  "trial_pirate": {"title": "Trial of the Red Wake", "url": "/music/class-trials/pirate.mp3"},
+  "trial_chronomancer": {"title": "Between the Seconds", "url": "/music/class-trials/chronomancer.mp3"},
+  "trial_paladin": {"title": "Oath of the Dawn", "url": "/music/class-trials/paladin.mp3"},
+  "trial_pyromancer": {"title": "Dance of the Living Flame", "url": "/music/class-trials/pyromancer.mp3"},
+  "trial_reaper": {"title": "Edge of the Veil", "url": "/music/class-trials/reaper.mp3"},
+  "trial_necromancer": {"title": "The Bone Sovereign", "url": "/music/class-trials/necromancer.mp3"},
   "archives_of_the_archmage": {
     "title": "Archives of the Archmage",
     "url": "/music/bladefall/Archives_of_the_Archmage.mp3"
@@ -179,12 +188,13 @@ const regions={
 };
 const aliases={hub:'wayfarers_hearth_loop',outskirts:'village_vigil',hollow:'canyon_updrafts',keep:'the_iron_causeway',frost:'hearthfire_in_the_frost',ember:'the_eternal_furnace',abyss:'the_black_procession',apex_darkdescent:'the_black_procession',secret:'hall_of_the_violet_discipline',trial_chamber:'crystalline_trials',boss_brute:'iron_juggernaut',boss_marksman:'crosshairs_in_the_dark',boss_warden:'the_fallen_champion_duel',boss_sorcerer:'paradox_void_assault',boss_colossus:'forge_of_the_molten_colossus',boss_king:'paradox_void_assault'};
 const cues={ship_crossing:{track:'navigating_the_red_wake'},ship_arrival:{track:'safe_harbor',once:true},hydra_battle:{track:'chains_of_the_deep'},hydra_release:{track:'unburdening_the_colossus',once:true},void_arrival:{track:'through_the_void_breach'},ian_spirit:{track:'passing_the_flame'},void_charge:{track:'the_last_spark_of_darrow'},void_cut:{track:'the_breaking_of_the_keeps',once:true},restoration:{track:'watchful_greenwood'},confiscated_writings:{track:'stony_whispers_of_the_keep'},rescue_relief:{track:'glaciated_court_of_glass'},legion_procession:{track:'the_black_procession'}};
+const trialTracks=Object.freeze({warrior:'trial_starter',ranger:'trial_starter',mage:'trial_starter',berserker:'trial_berserker',ninja:'trial_ninja',pirate:'trial_pirate',chronomancer:'trial_chronomancer',paladin:'trial_paladin',pyromancer:'trial_pyromancer',reaper:'trial_reaper',necromancer:'trial_necromancer'});
 const canonical=key=>aliases[key]||key;
 function scene(c={}){
  if(c.victory)return 'watchful_greenwood';
  if(c.riftHall)return 'the_archive_of_violet_portals';
  if(c.hub)return c.sparring?'iron_gavel_descent':'wayfarers_hearth_loop';
- if(c.trial)return c.mode==='npc'?'hall_of_the_violet_discipline':'crystalline_trials';
+ if(c.trial)return trialTracks[c.trial]||(c.mode==='npc'?'hall_of_the_violet_discipline':'crystalline_trials');
  if(c.side)return 'hall_of_the_violet_discipline';
  if(c.mode==='npc'&&c.npc==='ellis')return ['ic.ellis.truth','ic.ellis.guilt','ic.ellis.lead','ic.ellis.unknown'].includes(c.line)?'stony_whispers_of_the_keep':'glaciated_court_of_glass';
  if(c.arena)return 'iron_gavel_descent';
@@ -195,5 +205,5 @@ function scene(c={}){
  if(c.area<0)return zone==='castle'&&c.phase>=2?'iron_oath_of_the_night_attack':r[2];
  return r[c.area===1?1:0];
 }
-const api={tracks,regions,aliases,cues,canonical,scene};root.BFMusicScore=api;if(typeof module!=='undefined')module.exports=api;
+const api={tracks,regions,aliases,cues,trialTracks,canonical,scene};root.BFMusicScore=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -1,6 +1,13 @@
 /* Main-story destinations only: never reveal optional shards or puzzle answers. */
 (function(root){'use strict';
+function trialMentor(g){
+ const f=g?.storyState?.flags;
+ if(!g?.trial||!g.riftMentor||!f?.['trial.proved']||f['trial.taught'])return null;
+ const n=(g.storyNpcs||[]).find(n=>n.id===g.riftMentor&&!n.hidden&&!n.dead&&Number.isFinite(n.x)&&Number.isFinite(n.z));
+ return n?{...n,navLabel:'Speak to your mentor'}:null;
+}
 function target(g){
+ if(g?.trial)return trialMentor(g);
  if(g?.devBriar)return window.BFBriarBeta?.navigation()||null;
  if(!g||g.hub||g.trial||g.side||g.voyage)return null;
  if(g.escape||g.delve||g.endless||g.bossRush)return g.portal?{...g.portal,navLabel:'Exit portal'}:null;
@@ -67,5 +74,5 @@ function target(g){
  return t&&Number.isFinite(t.x)&&Number.isFinite(t.z)?t:null;
 }
 function keyCode(e){if(e.code&&e.code!=='Unidentified')return e.code;const k=e.key||'';return /^[a-z]$/i.test(k)?'Key'+k.toUpperCase():/^\d$/.test(k)?'Digit'+k:k===' '?'Space':k;}
-root.BFPartyNavigation={target,keyCode};
+root.BFPartyNavigation={target,keyCode,trialMentor};
 })(window);

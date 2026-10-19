@@ -1,0 +1,27 @@
+[
+  {
+    "script": "scripts/test-trial-mentor-map.cjs",
+    "exit": 0,
+    "output": "{\"checks\":54,\"passed\":true}"
+  },
+  {
+    "script": "scripts/qa-party-navigation.cjs",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/qa-navigation-progress.cjs",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/test-sprint-ownership.cjs",
+    "exit": 0,
+    "output": "{\"checks\":71,\"passed\":true}"
+  },
+  {
+    "script": "scripts/test-save-safety.cjs",
+    "exit": 0,
+    "output": "24 save normalization and isolated recovery checks passed."
+  }
+]

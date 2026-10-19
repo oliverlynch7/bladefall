@@ -1,0 +1,47 @@
+[
+ {
+  "legacy": {
+   "level": 100,
+   "gold": 1145
+  }
+ },
+ {
+  "view": "berserker",
+  "theme": "The Crimson War Hall",
+  "ready": true,
+  "hero": true,
+  "art": {
+   "trial": "berserker",
+   "trialRoomTheme": "The Crimson War Hall",
+   "trialWalls": 54,
+   "trialEmblems": 9,
+   "floorTiles": 26,
+   "drawCalls": 5,
+   "triangles": 5054
+  },
+  "boss": false,
+  "sprint": false,
+  "legacy": {
+   "level": 100,
+   "gold": 1145
+  }
+ },
+ {
+  "proved": true,
+  "mentor": {
+   "id": "mentor_berserker",
+   "name": "Berserker Mentor",
+   "x": -1180,
+   "z": -562.5,
+   "y": 0,
+   "navLabel": "Speak to your mentor"
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "taught": true,
+  "mentor": null,
+  "portal": true
+ }
+]

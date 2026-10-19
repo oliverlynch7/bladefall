@@ -2495,3 +2495,7 @@ User wants every class trial room palette/textures/theme to fit its class; share
 
 
 U-TRIAL-THEMES-20261019: Implemented in v2.315.0. All11 existing trials have class-specific textured room palettes, trim, torch accents and wall emblems; unrelated campaign acid/weather/decorations removed. Shared routes/objectives/enemy difficulty preserved. See class-trial-themes-20261019 evidence and decision log.
+
+
+## [Codex | 2026-10-19] Trial mentor minimap guidance
+User requests a colored minimap marker once the required trial enemies are defeated. Actual earned trials set trial.proved and relocate their mentor to the exit; party story packets replicate that state. BFPartyNavigation currently excludes all trials, so minimap has no target. Plan: derive a finite matching mentor from proved/not-taught state, use it for objective guidance and a mint colored labeled minimap dot (edge-clamped when distant). Clear after mentor teaching, allowing existing exit portal marker to take over. Preserve tutorial trials without mentors, kills, unlock authority and saves. Verify before/after, all8 earned trials, guest-synced state, missing/malformed NPCs and actual muted browser on isolated old save before ship.

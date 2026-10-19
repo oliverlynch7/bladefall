@@ -1,0 +1,57 @@
+[
+  {
+    "suite": "test-campaign-combat-progression.cjs",
+    "passed": true,
+    "output": "134 fixed level scaling, boss durability bounds, attack warning/recovery, host snapshot, knockback and stagger fairness checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-threat.cjs",
+    "passed": true,
+    "output": "60 campaign threat and health visibility checks passed.\n"
+  },
+  {
+    "suite": "test-boss-combat-scope.cjs",
+    "passed": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed.\n"
+  },
+  {
+    "suite": "test-briar-combat.cjs",
+    "passed": true,
+    "output": "75 Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.\nBrute phase 2/3 ground-wave variation and first-phase charge preserved.\n"
+  },
+  {
+    "suite": "test-campaign-elites.cjs",
+    "passed": true,
+    "output": "{\"checks\":[\"raid replaces random role and preserves original body stats\",\"raid full harmless warning and locked aim\",\"raid snapshot carries complete phase geometry\",\"raid recovery leaves an attack opening\",\"forge replaces random role and preserves original body stats\",\"forge full harmless warning and locked aim\",\"forge snapshot carries complete phase geometry\",\"forge recovery leaves an attack opening\",\"shore replaces random role and preserves original body stats\",\"shore full harmless warning and locked aim\",\"shore snapshot carries complete phase geometry\",\"shore recovery leaves an attack opening\",\"tower replaces random role and preserves original body stats\",\"tower full harmless warning and locked aim\",\"tower snapshot carries complete phase geometry\",\"tower recovery leaves an attack opening\",\"raid hits front, misses rear/outside/above\",\"forge expands outward and jumping clears it\",\"shore hits three lanes, gaps and cover range stay safe\",\"tower cardinal lanes hit, diagonal gaps stay safe\",\"dead enemy or target cannot damage\",\"tall solid cover blocks, ground and overhead props do not\"]}\n"
+  },
+  {
+    "suite": "test-boss-tactics.cjs",
+    "passed": true,
+    "output": "59 campaign boss armor, phase, status, cover, flank, co-op authority and isolation checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-compatibility.cjs",
+    "passed": true,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.\n"
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-xp.cjs",
+    "passed": true,
+    "output": "Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass.\n"
+  },
+  {
+    "suite": "test-npc-scene-ownership.mjs",
+    "passed": true,
+    "output": "59 NPC scene ownership, legitimate Thomas, mode exclusion, lifecycle, immutable roster and stage cleanup checks passed.\n"
+  },
+  {
+    "suite": "test-esc-pause.cjs",
+    "passed": true,
+    "output": "42 pause regression checks passed.\n"
+  }
+]

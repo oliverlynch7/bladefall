@@ -1,0 +1,392 @@
+[
+  {
+    "oldLevel": 100,
+    "oldGold": 1145
+  },
+  {
+    "cid": "warrior",
+    "weapon": "Rusty Sword",
+    "base": 10.6,
+    "power": 1.09,
+    "singleAttack": 15,
+    "targetHP": 99,
+    "scaledGruntHP": 71,
+    "playerHP": 110
+  },
+  {
+    "cid": "ranger",
+    "weapon": "Cracked Shortbow",
+    "base": 7.9,
+    "power": 1.308,
+    "singleAttack": 6,
+    "targetHP": 99,
+    "scaledGruntHP": 71,
+    "playerHP": 100
+  },
+  {
+    "cid": "mage",
+    "weapon": "Splintered Staff",
+    "base": 17.6,
+    "power": 1.09,
+    "singleAttack": 51,
+    "targetHP": 99,
+    "scaledGruntHP": 71,
+    "playerHP": 100
+  },
+  {
+    "zone": 0,
+    "area": 0,
+    "level": 1,
+    "hp": 71,
+    "damage": 11.4696,
+    "speed": 77.004,
+    "recovery": 0.9,
+    "bosses": []
+  },
+  {
+    "zone": 0,
+    "area": 1,
+    "level": 3,
+    "hp": 78,
+    "damage": 13.08384,
+    "speed": 66.96000000000001,
+    "recovery": 0.9,
+    "bosses": []
+  },
+  {
+    "zone": 0,
+    "area": -1,
+    "level": 1,
+    "hp": 71,
+    "damage": 11.4696,
+    "speed": 66.96000000000001,
+    "recovery": 0.9,
+    "bosses": [
+      {
+        "type": "brute",
+        "level": 4,
+        "hp": 1949,
+        "damage": 46.9183104
+      }
+    ]
+  },
+  {
+    "zone": 1,
+    "area": 0,
+    "level": 7,
+    "hp": 97,
+    "damage": 16.31232,
+    "speed": 67.828,
+    "recovery": 0.888,
+    "bosses": []
+  },
+  {
+    "zone": 1,
+    "area": 1,
+    "level": 9,
+    "hp": 104,
+    "damage": 17.926560000000002,
+    "speed": 67.828,
+    "recovery": 0.888,
+    "bosses": []
+  },
+  {
+    "zone": 1,
+    "area": -1,
+    "level": 7,
+    "hp": 97,
+    "damage": 16.31232,
+    "speed": 78.0022,
+    "recovery": 0.888,
+    "bosses": [
+      {
+        "type": "archer",
+        "level": 10,
+        "hp": 3800,
+        "damage": 51.785797939199995
+      }
+    ]
+  },
+  {
+    "zone": 2,
+    "area": 0,
+    "level": 13,
+    "hp": 127,
+    "damage": 21.155040000000003,
+    "speed": 87.93088000000002,
+    "recovery": 0.876,
+    "bosses": []
+  },
+  {
+    "zone": 2,
+    "area": 1,
+    "level": 15,
+    "hp": 136,
+    "damage": 22.76928,
+    "speed": 68.69600000000001,
+    "recovery": 0.876,
+    "bosses": []
+  },
+  {
+    "zone": 2,
+    "area": -1,
+    "level": 13,
+    "hp": 127,
+    "damage": 21.155040000000003,
+    "speed": 68.69600000000001,
+    "recovery": 0.876,
+    "bosses": [
+      {
+        "type": "warden",
+        "level": 16,
+        "hp": 4086,
+        "damage": 85.5153801216
+      }
+    ]
+  },
+  {
+    "zone": 3,
+    "area": 0,
+    "level": 19,
+    "hp": 163,
+    "damage": 25.99776,
+    "speed": 69.56400000000001,
+    "recovery": 0.864,
+    "bosses": []
+  },
+  {
+    "zone": 3,
+    "area": 1,
+    "level": 21,
+    "hp": 174,
+    "damage": 27.612000000000002,
+    "speed": 69.56400000000001,
+    "recovery": 0.864,
+    "bosses": []
+  },
+  {
+    "zone": 3,
+    "area": -1,
+    "level": 19,
+    "hp": 163,
+    "damage": 25.99776,
+    "speed": 79.9986,
+    "recovery": 0.864,
+    "bosses": [
+      {
+        "type": "sorcerer",
+        "level": 22,
+        "hp": 2913,
+        "damage": 73.83836693376003
+      },
+      {
+        "type": "warden",
+        "level": 22,
+        "hp": 3495.6,
+        "damage": 73.83836693376003
+      },
+      {
+        "type": "sentinel",
+        "level": 22,
+        "hp": 2621.7000000000003,
+        "damage": 65.63410394112002
+      }
+    ]
+  },
+  {
+    "zone": 4,
+    "area": 0,
+    "level": 25,
+    "hp": 206,
+    "damage": 30.840480000000003,
+    "speed": 70.432,
+    "recovery": 0.852,
+    "bosses": []
+  },
+  {
+    "zone": 4,
+    "area": 1,
+    "level": 27,
+    "hp": 219,
+    "damage": 32.45472,
+    "speed": 70.432,
+    "recovery": 0.852,
+    "bosses": []
+  },
+  {
+    "zone": 4,
+    "area": -1,
+    "level": 25,
+    "hp": 206,
+    "damage": 30.840480000000003,
+    "speed": 90.15296000000001,
+    "recovery": 0.852,
+    "bosses": [
+      {
+        "type": "colossus",
+        "level": 28,
+        "hp": 11332,
+        "damage": 125.9806998528
+      }
+    ]
+  },
+  {
+    "zone": 5,
+    "area": 0,
+    "level": 31,
+    "hp": 256,
+    "damage": 35.6832,
+    "speed": 71.30000000000001,
+    "recovery": 0.8400000000000001,
+    "bosses": []
+  },
+  {
+    "zone": 5,
+    "area": 1,
+    "level": 33,
+    "hp": 271,
+    "damage": 37.29744,
+    "speed": 71.30000000000001,
+    "recovery": 0.8400000000000001,
+    "bosses": []
+  },
+  {
+    "zone": 5,
+    "area": -1,
+    "level": 31,
+    "hp": 256,
+    "damage": 35.6832,
+    "speed": 71.30000000000001,
+    "recovery": 0.8400000000000001,
+    "bosses": [
+      {
+        "type": "grunt",
+        "level": 31,
+        "hp": 896,
+        "damage": 35.6832
+      },
+      {
+        "type": "grunt",
+        "level": 31,
+        "hp": 896,
+        "damage": 35.6832
+      },
+      {
+        "type": "grunt",
+        "level": 31,
+        "hp": 896,
+        "damage": 35.6832
+      }
+    ],
+    "hydraDamage": 85.83665126400001
+  },
+  {
+    "zone": 6,
+    "area": 0,
+    "level": 37,
+    "hp": 314,
+    "damage": 40.52592,
+    "speed": 72.168,
+    "recovery": 0.8280000000000001,
+    "bosses": []
+  },
+  {
+    "zone": 6,
+    "area": 1,
+    "level": 39,
+    "hp": 333,
+    "damage": 42.140159999999995,
+    "speed": 72.168,
+    "recovery": 0.8280000000000001,
+    "bosses": []
+  },
+  {
+    "zone": 6,
+    "area": -1,
+    "level": 37,
+    "hp": 314,
+    "damage": 40.52592,
+    "speed": 72.168,
+    "recovery": 0.8280000000000001,
+    "bosses": [
+      {
+        "type": "colossus",
+        "level": 40,
+        "hp": 14324,
+        "damage": 160.63132999680002
+      }
+    ]
+  },
+  {
+    "zone": 7,
+    "area": 0,
+    "level": 43,
+    "hp": 383,
+    "damage": 45.36864,
+    "speed": 73.03600000000002,
+    "recovery": 0.8160000000000001,
+    "bosses": []
+  },
+  {
+    "zone": 7,
+    "area": 1,
+    "level": 45,
+    "hp": 405,
+    "damage": 46.98287999999999,
+    "speed": 73.03600000000002,
+    "recovery": 0.8160000000000001,
+    "bosses": []
+  },
+  {
+    "zone": 7,
+    "area": -1,
+    "level": 43,
+    "hp": 383,
+    "damage": 45.36864,
+    "speed": 73.03600000000002,
+    "recovery": 0.8160000000000001,
+    "bosses": [
+      {
+        "type": "tyrant",
+        "level": 46,
+        "hp": 25507,
+        "damage": 208.47333911040002
+      }
+    ]
+  },
+  {
+    "done": true
+  },
+  {
+    "party": {
+      "base": 206,
+      "damage": 30.840480000000003,
+      "results": [
+        {
+          "n": 2,
+          "hp": 330,
+          "fraction": 0.37,
+          "damage": 30.840480000000003
+        },
+        {
+          "n": 1,
+          "hp": 206,
+          "fraction": 0.37,
+          "damage": 30.840480000000003
+        },
+        {
+          "n": 2,
+          "hp": 330,
+          "fraction": 0.37,
+          "damage": 30.840480000000003
+        },
+        {
+          "n": 1,
+          "hp": 206,
+          "fraction": 0.37,
+          "damage": 30.840480000000003
+        }
+      ]
+    }
+  }
+]

@@ -11,8 +11,8 @@ for(let z=0;z<8;z++){
  ctx.G.area=1;const b=ctx.spawnEnemy('grunt',0,0);ok(b.maxHp>=a.maxHp,'second half progresses');ok(b.dmg>=a.dmg,'damage progresses');
  party=1.6;const c=ctx.spawnEnemy('grunt',0,0);ok(c.maxHp===Math.round(22*.9*(1+z*.22)*threat.hp(z,1,false)*1.6),'party multiplier applied once');party=1;
 }
-ctx.G.zone=0;ctx.G.area=-1;const boss=ctx.spawnEnemy('brute',0,0);ok(boss.maxHp===Math.round(190*.9*5*.8*1.9),'Briar boss health increased separately');
-ok(ctx.campaignEnemyDamageMul()===1,'boss damage remains on existing boss curve');
+ctx.G.zone=0;ctx.G.area=-1;const boss=ctx.spawnEnemy('brute',0,0);ok(boss.maxHp===Math.round(190*.9*5*.8*threat.hp(0,-1,true)),'Briar boss health increased separately');
+ok(ctx.campaignEnemyDamageMul()===threat.damage(0,-1),'boss arena reinforcements retain level scaling');
 campaign=false;ctx.G.area=0;ok(ctx.spawnEnemy('grunt',0,0).maxHp===20,'separate modes retain original HP');ok(ctx.campaignEnemyDamageMul()===1,'separate modes retain damage');
 campaign=true;ctx.G.briarBeta=true;ok(ctx.spawnEnemy('grunt',0,0).maxHp===20,'isolated beta remains isolated');ctx.G.briarBeta=false;
 ok(ctx.spawnEnemy('dummy',0,0).maxHp===400,'training dummy HP unchanged');

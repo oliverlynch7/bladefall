@@ -31,7 +31,7 @@ function step(e,dt,target,speed,canAttack=true){const k=kits[e.ceKind];if(!k||e.
   if(canAttack&&e.ceClock===0&&d<k.reach+35&&Math.abs(target.y-e.y)<65){Object.assign(e,{ceState:'wind',ceClock:k.wind,ceSerial:e.ceSerial+1,ceX:e.x,ceZ:e.z,ceY:e.y,ceDX:dx/d,ceDZ:dz/d});if(e.briarRole==='hex'){e.ceX=target.x;e.ceZ=target.z;e.ceY=e.y;}}
  }else{e.yaw=Math.atan2(e.ceDX,e.ceDZ);
   if(e.briarRole==='runner'&&e.ceState==='strike'){const travel=Math.min(k.reach-30,(1-e.ceClock/k.strike)*(k.reach-30)),last=e.ceTravel||0;e.x+=e.ceDX*Math.max(0,travel-last);e.z+=e.ceDZ*Math.max(0,travel-last);e.ceTravel=travel;}
-  if(e.ceClock===0){if(e.ceState==='wind'){e.ceState='strike';e.ceClock=k.strike;e.ceTravel=0;}else if(e.ceState==='strike'){e.ceState='recover';e.ceClock=k.recover;}else{e.ceState='hunt';e.ceClock=0;}}
+  if(e.ceClock===0){if(e.ceState==='wind'){e.ceState='strike';e.ceClock=k.strike;e.ceTravel=0;}else if(e.ceState==='strike'){e.ceState='recover';e.ceClock=k.recover*(e.combatRecovery||1);}else{e.ceState='hunt';e.ceClock=0;}}
  }
 }
 function local(e,p){const dx=p.x-e.ceX,dz=p.z-e.ceZ;return {forward:dx*e.ceDX+dz*e.ceDZ,side:dx*e.ceDZ-dz*e.ceDX,d:Math.hypot(dx,dz)};}
@@ -52,6 +52,6 @@ function blocked(e,p,obstacles){return obstacles.some(o=>{
   let a=(center-half-start)/delta,b=(center+half-start)/delta;if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(lo>=hi)return false;
  }return hi>0&&lo<1;
 });}
-function snapshot(e){const out={role:null,spec:null,shot:null,kind:'walk'};for(const key of ['briarRole','homeRaid','patrolGroup','patrolStyle','patrolReturn','color','speed','campaignElite','elite','label','y','h','r','dmg','ceKind','ceState','ceClock','ceSerial','ceX','ceY','ceZ','ceDX','ceDZ'])if(e[key]!=null)out[key]=e[key];return out;}
+function snapshot(e){const out={role:null,spec:null,shot:null,kind:'walk'};for(const key of ['combatRecovery','briarRole','homeRaid','patrolGroup','patrolStyle','patrolReturn','color','speed','campaignElite','elite','label','y','h','r','dmg','ceKind','ceState','ceClock','ceSerial','ceX','ceY','ceZ','ceDX','ceDZ'])if(e[key]!=null)out[key]=e[key];return out;}
 const api={kits,setup,briar,step,contains,blocked,snapshot};root.BFCampaignElites=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

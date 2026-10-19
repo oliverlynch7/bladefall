@@ -2,7 +2,8 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('public/3d/index.html','utf8');
 const functionSource=name=>{const start=source.indexOf('function '+name+'(');assert(start>=0,name);const end=source.indexOf('\n}',start);assert(end>start,name);return source.slice(start,end+2);};
-const ctx={G:{zone:0,area:-1,ngDmg:1},MP:{active:true,peers:{}},isCampaignAdventure:()=>true,dXZ:(a,b,c,d)=>Math.hypot(c-a,d-b),DIFFICULTY:1,stageScale:()=>1+ctx.G.zone*.22,campaignEnemyDamageMul:()=>1,tEnemyDmg:()=>1,dtune:()=>({boss:1})};
+const threat=require('../public/3d/campaign-threat.js');
+const ctx={BFCampaignThreat:threat,G:{zone:0,area:-1,ngDmg:1},MP:{active:true,peers:{}},isCampaignAdventure:()=>true,dXZ:(a,b,c,d)=>Math.hypot(c-a,d-b),DIFFICULTY:1,stageScale:()=>1+ctx.G.zone*.22,campaignEnemyDamageMul:()=>1,tEnemyDmg:()=>1,dtune:()=>({boss:1})};
 vm.createContext(ctx);vm.runInContext(functionSource('bossPartyTarget')+'\n'+functionSource('scaledEnemyDamage'),ctx);
 const origin={x:0,z:0},p={x:500,z:0,y:0,hp:100},peer={x:40,z:0,y:0,hp:100,zone:0,area:-1};
 let cases=0;
@@ -18,7 +19,7 @@ ctx.MP.active=false;assert.equal(ctx.bossPartyTarget(origin,p),p);assert.equal(c
 // The restraint's ordinary 8-point base is preserved; the animal receives the
 // same regional boss scaling as other bosses, without a co-op damage multiplier.
 ctx.G.zone=5;const solo=ctx.scaledEnemyDamage(8,true)*1.8;
-assert(Math.abs(solo-92.77632*1.18)<1e-6);ctx.MP.active=true;assert.equal(ctx.scaledEnemyDamage(8,true)*1.8,solo);
+assert(Math.abs(solo-92.77632*threat.bossDamage(5,-1))<1e-6);ctx.MP.active=true;assert.equal(ctx.scaledEnemyDamage(8,true)*1.8,solo);
 ctx.G.ngDmg=1.4;assert(Math.abs(ctx.scaledEnemyDamage(8,true)*1.8-solo*1.4)<1e-6);
 ctx.G.ngDmg=1;ctx.dtune=()=>({boss:.7});assert(Math.abs(ctx.scaledEnemyDamage(8,true)*1.8-solo*.7)<1e-6);
 // Factoring the existing enemy formula must not change ordinary soldiers or trials.

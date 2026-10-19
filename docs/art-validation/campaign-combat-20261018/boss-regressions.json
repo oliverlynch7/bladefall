@@ -1,0 +1,43 @@
+[
+  {
+    "suite": "test-brute-encounter.cjs",
+    "passed": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed.\n"
+  },
+  {
+    "suite": "test-fallen.cjs",
+    "passed": true,
+    "output": "Fallen: aim lock, delayed feint follow-up, swept thrust motion, pillar collision/recovery, directional damage, vertical/downed/dead safety, bounded pursuit and snapshots passed.\n"
+  },
+  {
+    "suite": "test-final-king.cjs",
+    "passed": true,
+    "output": "Final King: locked telegraphs, safe regions/height/cover, two lethal gates, finite summons, validated charge/retry/fifth-failure skip and complete voice/story graph passed.\n"
+  },
+  {
+    "suite": "test-frost-officers.cjs",
+    "passed": true,
+    "output": "Officers passed: all three roles, single major attack cap across 256 seconds, locked warnings, no early hits, height dodges, death cancellation and survivor tactic.\nAll three officers pursue players onto both shelves and the high northern exit.\n"
+  },
+  {
+    "suite": "test-furnace-colossus.cjs",
+    "passed": true,
+    "output": "Colossus passed: locked warnings, exact attack geometry, high-route sweep protection, cooling, limited repair budget, pressure benefit and snapshot fields.\n"
+  },
+  {
+    "suite": "test-marble-guardian.cjs",
+    "passed": true,
+    "output": "Marble passed: locked warnings, screen interception/rearming, hit geometry and safe responses, three dialogue approaches, leave/resume, death gate, no finale spoilers.\n",
+    "note": "Pre-existing stale test expected retired reactions to be selectable. Updated it to test rejection for new conversations and valid legacy cursor resume. Production dialogue unchanged."
+  },
+  {
+    "suite": "test-marksman.cjs",
+    "passed": true,
+    "output": "Marksman aim lock, recovery, single relocation/wave, protected glide, safe landing, snapshot and dead-state tests passed.\nRounded55percent relocation boundary passed.\n"
+  },
+  {
+    "suite": "test-thunder-hydra.cjs",
+    "passed": true,
+    "output": "Thunder/Hydra passed: both Dash routes, main independence, race retry/deadline, three shard gates, graph, wind cycle, all warnings/hit shapes, cover, exposure, mercy and stale packets.\n"
+  }
+]

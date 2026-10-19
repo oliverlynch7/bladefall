@@ -24,7 +24,7 @@ const lessons=[
  {id:'autosell',title:'Choose what happens to loot',body:'Auto-sell OFF keeps new gear. Turn it ON to sell new equipment pickups for gold—even with free slots. Check this label before collecting.',target:['#hudAutoSell'],anchor:'#inventoryDock'},
  {id:'journal',title:'Keep your clues close',body:(g,hint)=>'New clues appear on paper notices. Open Journal ('+hint('journal')+') to reread clues or check quests at any time.',target:['#hudJournal'],anchor:'#inventoryDock'},
  {id:'navigation',title:'Follow your map',body:()=> 'Gold marks your objective or exit. Blue marks friends; cyan marks pings; red marks enemies. '+(window.__BF3?.meta?.camMode==='far'?'Overhead view keeps the map aligned with the camera.':'The map turns with your camera.'),target:['#localMap']},
- {id:'menu',title:'Ready to explore',body:(g,hint)=>'Open the main menu with '+hint('pause')+' for Settings or Help. You can rebind keys and set up a controller in Settings → Controls & camera. Q closes menus; '+hint('interact')+' selects or continues.',target:['#pausebtn','#eschint']}
+ {id:'menu',title:'Ready to explore',body:(g,hint)=>'Open the main menu with '+hint('pause')+' for Settings or Help. You can rebind keys and set up a controller in Settings → Controls & camera. Q closes menus; '+hint('interact')+' selects or continues.',target:['#pausebtn']}
 ];
 const skillLesson={id:'skill-use',title:'Try your new skill',body:(g,hint)=>'Skill 1 is a powerful part of combat, not just an extra button. Face an enemy in range and press '+hint('skill1')+' to try it. Watch your mana and its recharge countdown.',action:'skill1',target:['#bSk0']};
 const pauseHint=()=>guide?.hint?.('pause')||'Tab';

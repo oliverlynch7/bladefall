@@ -1,0 +1,41 @@
+{
+  "inlineScripts": 2,
+  "suites": [
+    {
+      "suite": "test-trainer-order.cjs",
+      "pass": true,
+      "output": "{\"checks\":35,\"groups\":[{\"id\":\"starters\",\"ids\":[\"warrior\",\"ranger\",\"mage\"]},{\"id\":\"campaign\",\"ids\":[\"berserker\",\"ninja\",\"reaper\",\"chronomancer\",\"pyromancer\",\"pirate\",\"paladin\",\"necromancer\"]},{\"id\":\"charters\",\"ids\":[\"monk\",\"stormcaller\",\"beastmaster\",\"warlock\",\"skylancer\",\"bladedancer\"]}],\"passed\":true}",
+      "error": ""
+    },
+    {
+      "suite": "test-save-safety.cjs",
+      "pass": true,
+      "output": "24 save normalization and isolated recovery checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-campaign-compatibility.cjs",
+      "pass": true,
+      "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-arena-class-weapons.cjs",
+      "pass": true,
+      "output": "250 Arena class weapon, Fair Mode, intrinsic, manual choice and bag preservation checks passed.",
+      "error": ""
+    },
+    {
+      "suite": "test-sprint-ownership.cjs",
+      "pass": true,
+      "output": "{\"checks\":71,\"passed\":true}",
+      "error": ""
+    },
+    {
+      "suite": "test-class-trial-music.cjs",
+      "pass": true,
+      "output": "Trial score passed: all11 actual trial classes, nine unique assets, play/dialogue/pause routing, originals, stereo/durations/hashes/size and fallback.",
+      "error": ""
+    }
+  ]
+}

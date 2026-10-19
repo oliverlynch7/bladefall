@@ -1,0 +1,824 @@
+{
+  "passed": true,
+  "samples": 5712,
+  "skills": 136,
+  "recoveryChecks": 136,
+  "rows": [
+    {
+      "id": "w_cleave",
+      "model": "Warrior",
+      "effectVertices": 90,
+      "passed": true
+    },
+    {
+      "id": "w_bash",
+      "model": "Warrior",
+      "effectVertices": 90,
+      "passed": true
+    },
+    {
+      "id": "w_charge",
+      "model": "Warrior",
+      "effectVertices": 270,
+      "passed": true
+    },
+    {
+      "id": "w_whirl",
+      "model": "Warrior",
+      "effectVertices": 540,
+      "passed": true
+    },
+    {
+      "id": "w_guard",
+      "model": "Warrior",
+      "effectVertices": 540,
+      "passed": true
+    },
+    {
+      "id": "w_stomp",
+      "model": "Warrior",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "w_berserk",
+      "model": "Warrior",
+      "effectVertices": 540,
+      "passed": true
+    },
+    {
+      "id": "w_execute",
+      "model": "Warrior",
+      "effectVertices": 90,
+      "passed": true
+    },
+    {
+      "id": "r_volley",
+      "model": "Ranger",
+      "effectVertices": 450,
+      "passed": true
+    },
+    {
+      "id": "r_pierce",
+      "model": "Ranger",
+      "effectVertices": 90,
+      "passed": true
+    },
+    {
+      "id": "r_tumble",
+      "model": "Ranger",
+      "effectVertices": 270,
+      "passed": true
+    },
+    {
+      "id": "r_shadow",
+      "model": "Ranger",
+      "effectVertices": 90,
+      "passed": true
+    },
+    {
+      "id": "r_spike",
+      "model": "Ranger",
+      "effectVertices": 144,
+      "passed": true
+    },
+    {
+      "id": "r_smoke",
+      "model": "Ranger",
+      "effectVertices": 90,
+      "passed": true
+    },
+    {
+      "id": "r_mark",
+      "model": "Ranger",
+      "effectVertices": 144,
+      "passed": true
+    },
+    {
+      "id": "r_deathmark",
+      "model": "Ranger",
+      "effectVertices": 144,
+      "passed": true
+    },
+    {
+      "id": "m_bolt",
+      "model": "Wizard",
+      "effectVertices": 216,
+      "passed": true
+    },
+    {
+      "id": "m_beam",
+      "model": "Wizard",
+      "effectVertices": 216,
+      "passed": true
+    },
+    {
+      "id": "m_blink",
+      "model": "Wizard",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "m_nova",
+      "model": "Wizard",
+      "effectVertices": 1296,
+      "passed": true
+    },
+    {
+      "id": "m_gravity",
+      "model": "Wizard",
+      "effectVertices": 1296,
+      "passed": true
+    },
+    {
+      "id": "m_barrier",
+      "model": "Wizard",
+      "effectVertices": 1080,
+      "passed": true
+    },
+    {
+      "id": "m_tempest",
+      "model": "Wizard",
+      "effectVertices": 1080,
+      "passed": true
+    },
+    {
+      "id": "m_overload",
+      "model": "Wizard",
+      "effectVertices": 1944,
+      "passed": true
+    },
+    {
+      "id": "py_bolt",
+      "model": "Wizard",
+      "effectVertices": 180,
+      "passed": true
+    },
+    {
+      "id": "py_fan",
+      "model": "Wizard",
+      "effectVertices": 900,
+      "passed": true
+    },
+    {
+      "id": "py_blast",
+      "model": "Wizard",
+      "effectVertices": 1512,
+      "passed": true
+    },
+    {
+      "id": "py_ward",
+      "model": "Wizard",
+      "effectVertices": 2448,
+      "passed": true
+    },
+    {
+      "id": "py_lance",
+      "model": "Wizard",
+      "effectVertices": 180,
+      "passed": true
+    },
+    {
+      "id": "py_nova",
+      "model": "Wizard",
+      "effectVertices": 1512,
+      "passed": true
+    },
+    {
+      "id": "py_inferno",
+      "model": "Wizard",
+      "effectVertices": 3528,
+      "passed": true
+    },
+    {
+      "id": "py_sun",
+      "model": "Wizard",
+      "effectVertices": 3528,
+      "passed": true
+    },
+    {
+      "id": "x_reap",
+      "model": "Rogue",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "x_cleave",
+      "model": "Rogue",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "x_step",
+      "model": "Rogue",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "x_wraith",
+      "model": "Rogue",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "x_pull",
+      "model": "Rogue",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "x_bind",
+      "model": "Rogue",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "x_siphon",
+      "model": "Rogue",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "x_vortex",
+      "model": "Rogue",
+      "effectVertices": 972,
+      "passed": true
+    },
+    {
+      "id": "pal_bash",
+      "model": "Cleric",
+      "effectVertices": 126,
+      "passed": true
+    },
+    {
+      "id": "pal_smite",
+      "model": "Cleric",
+      "effectVertices": 792,
+      "passed": true
+    },
+    {
+      "id": "pal_taunt",
+      "model": "Cleric",
+      "effectVertices": 396,
+      "passed": true
+    },
+    {
+      "id": "pal_ground",
+      "model": "Cleric",
+      "effectVertices": 864,
+      "passed": true
+    },
+    {
+      "id": "pal_guard",
+      "model": "Cleric",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "pal_burst",
+      "model": "Cleric",
+      "effectVertices": 288,
+      "passed": true
+    },
+    {
+      "id": "pal_laststand",
+      "model": "Cleric",
+      "effectVertices": 1080,
+      "passed": true
+    },
+    {
+      "id": "pal_sky",
+      "model": "Cleric",
+      "effectVertices": 738,
+      "passed": true
+    },
+    {
+      "id": "necro_summon",
+      "model": "Wizard",
+      "effectVertices": 756,
+      "passed": true
+    },
+    {
+      "id": "necro_bolt",
+      "model": "Wizard",
+      "effectVertices": 306,
+      "passed": true
+    },
+    {
+      "id": "necro_raise",
+      "model": "Wizard",
+      "effectVertices": 756,
+      "passed": true
+    },
+    {
+      "id": "necro_nova",
+      "model": "Wizard",
+      "effectVertices": 1836,
+      "passed": true
+    },
+    {
+      "id": "necro_wall",
+      "model": "Wizard",
+      "effectVertices": 1530,
+      "passed": true
+    },
+    {
+      "id": "necro_grip",
+      "model": "Wizard",
+      "effectVertices": 306,
+      "passed": true
+    },
+    {
+      "id": "necro_army",
+      "model": "Wizard",
+      "effectVertices": 1134,
+      "passed": true
+    },
+    {
+      "id": "necro_storm",
+      "model": "Wizard",
+      "effectVertices": 2754,
+      "passed": true
+    },
+    {
+      "id": "nin_strike",
+      "model": "Rogue",
+      "effectVertices": 288,
+      "passed": true
+    },
+    {
+      "id": "nin_barrage",
+      "model": "Rogue",
+      "effectVertices": 1440,
+      "passed": true
+    },
+    {
+      "id": "nin_step",
+      "model": "Rogue",
+      "effectVertices": 1944,
+      "passed": true
+    },
+    {
+      "id": "nin_smoke",
+      "model": "Rogue",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "nin_mark",
+      "model": "Rogue",
+      "effectVertices": 288,
+      "passed": true
+    },
+    {
+      "id": "nin_pierce",
+      "model": "Rogue",
+      "effectVertices": 288,
+      "passed": true
+    },
+    {
+      "id": "nin_fury",
+      "model": "Rogue",
+      "effectVertices": 2592,
+      "passed": true
+    },
+    {
+      "id": "nin_storm",
+      "model": "Rogue",
+      "effectVertices": 1944,
+      "passed": true
+    },
+    {
+      "id": "bsk_cleave",
+      "model": "Warrior",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "bsk_bash",
+      "model": "Warrior",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "bsk_charge",
+      "model": "Warrior",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "bsk_stomp",
+      "model": "Warrior",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "bsk_whirl",
+      "model": "Warrior",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "bsk_execute",
+      "model": "Warrior",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "bsk_berserk",
+      "model": "Warrior",
+      "effectVertices": 720,
+      "passed": true
+    },
+    {
+      "id": "bsk_guard",
+      "model": "Warrior",
+      "effectVertices": 720,
+      "passed": true
+    },
+    {
+      "id": "pir_pierce",
+      "model": "Warrior",
+      "effectVertices": 738,
+      "passed": true
+    },
+    {
+      "id": "pir_volley",
+      "model": "Warrior",
+      "effectVertices": 3690,
+      "passed": true
+    },
+    {
+      "id": "pir_shadow",
+      "model": "Warrior",
+      "effectVertices": 738,
+      "passed": true
+    },
+    {
+      "id": "pir_tumble",
+      "model": "Warrior",
+      "effectVertices": 2214,
+      "passed": true
+    },
+    {
+      "id": "pir_smoke",
+      "model": "Warrior",
+      "effectVertices": 738,
+      "passed": true
+    },
+    {
+      "id": "pir_goldrush",
+      "model": "Warrior",
+      "effectVertices": 2250,
+      "passed": true
+    },
+    {
+      "id": "pir_deathmark",
+      "model": "Warrior",
+      "effectVertices": 6642,
+      "passed": true
+    },
+    {
+      "id": "pir_spike",
+      "model": "Warrior",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "chr_bolt",
+      "model": "Wizard",
+      "effectVertices": 666,
+      "passed": true
+    },
+    {
+      "id": "chr_beam",
+      "model": "Wizard",
+      "effectVertices": 666,
+      "passed": true
+    },
+    {
+      "id": "chr_nova",
+      "model": "Wizard",
+      "effectVertices": 3996,
+      "passed": true
+    },
+    {
+      "id": "chr_blink",
+      "model": "Wizard",
+      "effectVertices": 1998,
+      "passed": true
+    },
+    {
+      "id": "chr_gravity",
+      "model": "Wizard",
+      "effectVertices": 3996,
+      "passed": true
+    },
+    {
+      "id": "chr_barrier",
+      "model": "Wizard",
+      "effectVertices": 3330,
+      "passed": true
+    },
+    {
+      "id": "chr_tempest",
+      "model": "Wizard",
+      "effectVertices": 6642,
+      "passed": true
+    },
+    {
+      "id": "chr_overload",
+      "model": "Wizard",
+      "effectVertices": 6642,
+      "passed": true
+    },
+    {
+      "id": "mon_flurry",
+      "model": "Monk",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "mon_palm",
+      "model": "Monk",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "mon_deflect",
+      "model": "Monk",
+      "effectVertices": 3510,
+      "passed": true
+    },
+    {
+      "id": "mon_roll",
+      "model": "Monk",
+      "effectVertices": 1944,
+      "passed": true
+    },
+    {
+      "id": "mon_whirl",
+      "model": "Monk",
+      "effectVertices": 3888,
+      "passed": true
+    },
+    {
+      "id": "mon_stun",
+      "model": "Monk",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "mon_thousand",
+      "model": "Monk",
+      "effectVertices": 648,
+      "passed": true
+    },
+    {
+      "id": "mon_dragon",
+      "model": "Monk",
+      "effectVertices": 1944,
+      "passed": true
+    },
+    {
+      "id": "st_bolt",
+      "model": "Wizard",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "st_lance",
+      "model": "Wizard",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "st_step",
+      "model": "Wizard",
+      "effectVertices": 972,
+      "passed": true
+    },
+    {
+      "id": "st_nova",
+      "model": "Wizard",
+      "effectVertices": 1944,
+      "passed": true
+    },
+    {
+      "id": "st_orb",
+      "model": "Wizard",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "st_barrier",
+      "model": "Wizard",
+      "effectVertices": 1620,
+      "passed": true
+    },
+    {
+      "id": "st_storm",
+      "model": "Wizard",
+      "effectVertices": 2916,
+      "passed": true
+    },
+    {
+      "id": "st_overload",
+      "model": "Wizard",
+      "effectVertices": 2916,
+      "passed": true
+    },
+    {
+      "id": "war_bolt",
+      "model": "Wizard",
+      "effectVertices": 162,
+      "passed": true
+    },
+    {
+      "id": "war_lance",
+      "model": "Wizard",
+      "effectVertices": 162,
+      "passed": true
+    },
+    {
+      "id": "war_curse",
+      "model": "Wizard",
+      "effectVertices": 972,
+      "passed": true
+    },
+    {
+      "id": "war_drain",
+      "model": "Wizard",
+      "effectVertices": 162,
+      "passed": true
+    },
+    {
+      "id": "war_step",
+      "model": "Wizard",
+      "effectVertices": 486,
+      "passed": true
+    },
+    {
+      "id": "war_orb",
+      "model": "Wizard",
+      "effectVertices": 162,
+      "passed": true
+    },
+    {
+      "id": "war_storm",
+      "model": "Wizard",
+      "effectVertices": 1458,
+      "passed": true
+    },
+    {
+      "id": "war_final",
+      "model": "Wizard",
+      "effectVertices": 162,
+      "passed": true
+    },
+    {
+      "id": "sky_rise",
+      "model": "Ranger",
+      "effectVertices": 594,
+      "passed": true
+    },
+    {
+      "id": "sky_gale",
+      "model": "Ranger",
+      "effectVertices": 198,
+      "passed": true
+    },
+    {
+      "id": "sky_dive",
+      "model": "Ranger",
+      "effectVertices": 594,
+      "passed": true
+    },
+    {
+      "id": "sky_lift",
+      "model": "Ranger",
+      "effectVertices": 594,
+      "passed": true
+    },
+    {
+      "id": "sky_dash",
+      "model": "Ranger",
+      "effectVertices": 594,
+      "passed": true
+    },
+    {
+      "id": "sky_rain",
+      "model": "Ranger",
+      "effectVertices": 1188,
+      "passed": true
+    },
+    {
+      "id": "sky_crash",
+      "model": "Ranger",
+      "effectVertices": 594,
+      "passed": true
+    },
+    {
+      "id": "sky_cyclone",
+      "model": "Ranger",
+      "effectVertices": 1782,
+      "passed": true
+    },
+    {
+      "id": "bd_counter",
+      "model": "Rogue",
+      "effectVertices": 3060,
+      "passed": true
+    },
+    {
+      "id": "bd_twin",
+      "model": "Rogue",
+      "effectVertices": 612,
+      "passed": true
+    },
+    {
+      "id": "bd_riposte",
+      "model": "Rogue",
+      "effectVertices": 612,
+      "passed": true
+    },
+    {
+      "id": "bd_step",
+      "model": "Rogue",
+      "effectVertices": 1836,
+      "passed": true
+    },
+    {
+      "id": "bd_mirror",
+      "model": "Rogue",
+      "effectVertices": 3060,
+      "passed": true
+    },
+    {
+      "id": "bd_cross",
+      "model": "Rogue",
+      "effectVertices": 612,
+      "passed": true
+    },
+    {
+      "id": "bd_steel",
+      "model": "Rogue",
+      "effectVertices": 5508,
+      "passed": true
+    },
+    {
+      "id": "bd_perfect",
+      "model": "Rogue",
+      "effectVertices": 3060,
+      "passed": true
+    },
+    {
+      "id": "bst_sic",
+      "model": "Ranger",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "bst_coordinated",
+      "model": "Ranger",
+      "effectVertices": 108,
+      "passed": true
+    },
+    {
+      "id": "bst_guardian",
+      "model": "Ranger",
+      "effectVertices": 1170,
+      "passed": true
+    },
+    {
+      "id": "bst_step",
+      "model": "Ranger",
+      "effectVertices": 324,
+      "passed": true
+    },
+    {
+      "id": "bst_mend",
+      "model": "Ranger",
+      "effectVertices": 1170,
+      "passed": true
+    },
+    {
+      "id": "bst_roar",
+      "model": "Ranger",
+      "effectVertices": 1170,
+      "passed": true
+    },
+    {
+      "id": "bst_stampede",
+      "model": "Ranger",
+      "effectVertices": 2106,
+      "passed": true
+    },
+    {
+      "id": "bst_apex",
+      "model": "Ranger",
+      "effectVertices": 1170,
+      "passed": true
+    }
+  ]
+}

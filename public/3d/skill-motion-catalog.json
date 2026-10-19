@@ -4,951 +4,1359 @@
     "name": "Firebolt",
     "cls": "pyromancer",
     "action": "firepalm",
-    "duration": 0.4
+    "duration": 0.4,
+    "form": "bolt",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "py_fan",
     "name": "Cinder Fan",
     "cls": "pyromancer",
     "action": "firefan",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "fan",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "py_blast",
     "name": "Backdraft",
     "cls": "pyromancer",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "py_ward",
     "name": "Ember Shield",
     "cls": "pyromancer",
     "action": "ward",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "ward",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "py_lance",
     "name": "Flame Lance",
     "cls": "pyromancer",
     "action": "beam",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "beam",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "py_nova",
     "name": "Flame Ring",
     "cls": "pyromancer",
     "action": "firecircle",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "nova",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "py_inferno",
     "name": "Inferno",
     "cls": "pyromancer",
     "action": "channel",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "storm",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "py_sun",
     "name": "Sunburst",
     "cls": "pyromancer",
     "action": "call",
-    "duration": 0.68
+    "duration": 0.68,
+    "form": "nova",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "w_cleave",
     "name": "Cleave",
     "cls": "warrior",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "w_bash",
     "name": "Shield Bash",
     "cls": "warrior",
     "action": "bash",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bash",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "w_charge",
     "name": "Charge",
     "cls": "warrior",
     "action": "rush",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "dash",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "w_whirl",
     "name": "Whirlwind",
     "cls": "warrior",
     "action": "spin",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "spiral",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "w_guard",
     "name": "Iron Guard",
     "cls": "warrior",
     "action": "guard",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "ward",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "w_stomp",
     "name": "Shockwave Stomp",
     "cls": "warrior",
     "action": "slam",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "quake",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "w_berserk",
     "name": "Warcry",
     "cls": "warrior",
     "action": "roar",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "roar",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "w_execute",
     "name": "Execution",
     "cls": "warrior",
     "action": "execute",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "execute",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "r_volley",
     "name": "Volley",
     "cls": "ranger",
     "action": "bow",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "fan",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "r_pierce",
     "name": "Piercing Shot",
     "cls": "ranger",
     "action": "bow",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "lance",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "r_tumble",
     "name": "Tumble",
     "cls": "ranger",
     "action": "retreat",
-    "duration": 0.5
+    "duration": 0.5,
+    "form": "dash",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "r_shadow",
     "name": "Shadowstrike",
     "cls": "ranger",
     "action": "bow",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "r_spike",
     "name": "Spike Trap",
     "cls": "ranger",
     "action": "place",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "trap",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "r_smoke",
     "name": "Smoke Bomb",
     "cls": "ranger",
     "action": "toss",
-    "duration": 0.44
+    "duration": 0.44,
+    "form": "smoke",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "r_mark",
     "name": "Hunter's Mark",
     "cls": "ranger",
     "action": "point",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "mark",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "r_deathmark",
     "name": "Death Mark",
     "cls": "ranger",
     "action": "point",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "mark",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "m_bolt",
     "name": "Elemental Bolt",
     "cls": "mage",
     "action": "cast",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bolt",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "m_beam",
     "name": "Elemental Beam",
     "cls": "mage",
     "action": "beam",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "beam",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "m_blink",
     "name": "Blink",
     "cls": "mage",
     "action": "blink",
-    "duration": 0.32
+    "duration": 0.32,
+    "form": "blink",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "m_nova",
     "name": "Nova",
     "cls": "mage",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "m_gravity",
     "name": "Gravity Well",
     "cls": "mage",
     "action": "pull",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "vortex",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "m_barrier",
     "name": "Rune Barrier",
     "cls": "mage",
     "action": "ward",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "ward",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "m_tempest",
     "name": "Attunement",
     "cls": "mage",
     "action": "channel",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "crown",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "m_overload",
     "name": "Elemental Overload",
     "cls": "mage",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "x_reap",
     "name": "Reap",
     "cls": "reaper",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "x_cleave",
     "name": "Soul Cleave",
     "cls": "reaper",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "x_step",
     "name": "Shadow Step",
     "cls": "reaper",
     "action": "blink",
-    "duration": 0.32
+    "duration": 0.32,
+    "form": "blink",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "x_wraith",
     "name": "Wraith Form",
     "cls": "reaper",
     "action": "ascend",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "ghost",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "x_pull",
     "name": "Void Pull",
     "cls": "reaper",
     "action": "pull",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "vortex",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "x_bind",
     "name": "Soul Tether",
     "cls": "reaper",
     "action": "bind",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "tether",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "x_siphon",
     "name": "Soul Siphon",
     "cls": "reaper",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "siphon",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "x_vortex",
     "name": "Death Vortex",
     "cls": "reaper",
     "action": "channel",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "vortex",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "pal_bash",
     "name": "Shield Bash",
     "cls": "paladin",
     "action": "bash",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bash",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "pal_smite",
     "name": "Smite",
     "cls": "paladin",
     "action": "call",
-    "duration": 0.68
+    "duration": 0.68,
+    "form": "execute",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "pal_taunt",
     "name": "Taunt",
     "cls": "paladin",
     "action": "guard",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "roar",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "pal_ground",
     "name": "Holy Ground",
     "cls": "paladin",
     "action": "consecrate",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "heal",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "pal_guard",
     "name": "Guard Up",
     "cls": "paladin",
     "action": "ward",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "ward",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "pal_burst",
     "name": "Light Burst",
     "cls": "paladin",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "pal_laststand",
     "name": "Last Stand",
     "cls": "paladin",
     "action": "guard",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "ward",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "pal_sky",
     "name": "Sky Hammer",
     "cls": "paladin",
     "action": "call",
-    "duration": 0.68
+    "duration": 0.68,
+    "form": "execute",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "necro_summon",
     "name": "Summon Skeletons",
     "cls": "necromancer",
     "action": "raise",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "summon",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "necro_bolt",
     "name": "Plague Bolt",
     "cls": "necromancer",
     "action": "cast",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bolt",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "necro_raise",
     "name": "Raise the Dead",
     "cls": "necromancer",
     "action": "raise",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "summon",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "necro_nova",
     "name": "Corpse Nova",
     "cls": "necromancer",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "necro_wall",
     "name": "Bone Wall",
     "cls": "necromancer",
     "action": "raise",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "wall",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "necro_grip",
     "name": "Death Grip",
     "cls": "necromancer",
     "action": "pull",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "tether",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "necro_army",
     "name": "Army of the Dead",
     "cls": "necromancer",
     "action": "raise",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "summon",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "necro_storm",
     "name": "Death Storm",
     "cls": "necromancer",
     "action": "channel",
-    "duration": 0.7
+    "duration": 0.7,
+    "form": "storm",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "nin_strike",
     "name": "Shadow Strike",
     "cls": "ninja",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "nin_barrage",
     "name": "Shuriken Barrage",
     "cls": "ninja",
     "action": "stars",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "fan",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "nin_step",
     "name": "Shadow Step",
     "cls": "ninja",
     "action": "blink",
-    "duration": 0.32
+    "duration": 0.32,
+    "form": "blink",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "nin_smoke",
     "name": "Smoke Bomb",
     "cls": "ninja",
     "action": "toss",
-    "duration": 0.44
+    "duration": 0.44,
+    "form": "smoke",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "nin_mark",
     "name": "Death Mark",
     "cls": "ninja",
     "action": "point",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "mark",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "nin_pierce",
     "name": "Piercing Star",
     "cls": "ninja",
     "action": "throw",
-    "duration": 0.44
+    "duration": 0.44,
+    "form": "lance",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "nin_fury",
     "name": "Blade Fury",
     "cls": "ninja",
     "action": "empower",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "spiral",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "nin_storm",
     "name": "Vanish",
     "cls": "ninja",
     "action": "vanish",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "ghost",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "bsk_cleave",
     "name": "Blood Sweep",
     "cls": "berserker",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "bsk_bash",
     "name": "Headbutt",
     "cls": "berserker",
     "action": "headbutt",
-    "duration": 0.52
+    "duration": 0.52,
+    "form": "bash",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "bsk_charge",
     "name": "Charge",
     "cls": "berserker",
     "action": "rush",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "dash",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "bsk_stomp",
     "name": "Shockwave",
     "cls": "berserker",
     "action": "slam",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "quake",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "bsk_whirl",
     "name": "Whirlwind",
     "cls": "berserker",
     "action": "spin",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "spiral",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "bsk_execute",
     "name": "Execute",
     "cls": "berserker",
     "action": "execute",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "execute",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "bsk_berserk",
     "name": "Berserk",
     "cls": "berserker",
     "action": "roar",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "roar",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "bsk_guard",
     "name": "Bloodguard",
     "cls": "berserker",
     "action": "guard",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "ward",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "pir_pierce",
     "name": "Aimed Shot",
     "cls": "pirate",
     "action": "pistol",
-    "duration": 0.38
+    "duration": 0.38,
+    "form": "lance",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "pir_volley",
     "name": "Broadside",
     "cls": "pirate",
     "action": "broadside",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "fan",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "pir_shadow",
     "name": "Boarding Strike",
     "cls": "pirate",
     "action": "boarding",
-    "duration": 0.52
+    "duration": 0.52,
+    "form": "slash",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "pir_tumble",
     "name": "Roll",
     "cls": "pirate",
     "action": "retreat",
-    "duration": 0.5
+    "duration": 0.5,
+    "form": "dash",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "pir_smoke",
     "name": "Powder Smoke",
     "cls": "pirate",
     "action": "toss",
-    "duration": 0.44
+    "duration": 0.44,
+    "form": "smoke",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "pir_goldrush",
     "name": "Gold Rush",
     "cls": "pirate",
     "action": "empower",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "crown",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "pir_deathmark",
     "name": "Cannonade",
     "cls": "pirate",
     "action": "call",
-    "duration": 0.68
+    "duration": 0.68,
+    "form": "storm",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "pir_spike",
     "name": "Powder Keg",
     "cls": "pirate",
     "action": "place",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "trap",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "chr_bolt",
     "name": "Time Bolt",
     "cls": "chronomancer",
     "action": "cast",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bolt",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "chr_beam",
     "name": "Time Lance",
     "cls": "chronomancer",
     "action": "beam",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "beam",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "chr_nova",
     "name": "Slow Field",
     "cls": "chronomancer",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "chr_blink",
     "name": "Time Step",
     "cls": "chronomancer",
     "action": "blink",
-    "duration": 0.32
+    "duration": 0.32,
+    "form": "blink",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "chr_gravity",
     "name": "Time Warp",
     "cls": "chronomancer",
     "action": "pull",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "vortex",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "chr_barrier",
     "name": "Aegis",
     "cls": "chronomancer",
     "action": "ward",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "ward",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "chr_tempest",
     "name": "Stop Time",
     "cls": "chronomancer",
     "action": "stop",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "storm",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "chr_overload",
     "name": "Singularity",
     "cls": "chronomancer",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "vortex",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "mon_flurry",
     "name": "Flurry",
     "cls": "monk",
     "action": "flurry",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "flurry",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "mon_palm",
     "name": "Palm Strike",
     "cls": "monk",
     "action": "palm",
-    "duration": 0.45
+    "duration": 0.45,
+    "form": "bash",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "mon_deflect",
     "name": "Deflect",
     "cls": "monk",
     "action": "parry",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "ward",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "mon_roll",
     "name": "Roll",
     "cls": "monk",
     "action": "evade",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "dash",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "mon_whirl",
     "name": "Whirl Kick",
     "cls": "monk",
     "action": "spinkick",
-    "duration": 0.65
+    "duration": 0.65,
+    "form": "spiral",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "mon_stun",
     "name": "Stunning Palm",
     "cls": "monk",
     "action": "palm",
-    "duration": 0.45
+    "duration": 0.45,
+    "form": "bash",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "mon_thousand",
     "name": "Stillness",
     "cls": "monk",
     "action": "meditate",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "flurry",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "mon_dragon",
     "name": "Dragon Kick",
     "cls": "monk",
     "action": "kick",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "dash",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "st_bolt",
     "name": "Chain Bolt",
     "cls": "stormcaller",
     "action": "cast",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bolt",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "st_lance",
     "name": "Lightning Lance",
     "cls": "stormcaller",
     "action": "beam",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "beam",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "st_step",
     "name": "Thunder Step",
     "cls": "stormcaller",
     "action": "blink",
-    "duration": 0.32
+    "duration": 0.32,
+    "form": "blink",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "st_nova",
     "name": "Static Field",
     "cls": "stormcaller",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "st_orb",
     "name": "Ball Lightning",
     "cls": "stormcaller",
     "action": "orb",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "orb",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "st_barrier",
     "name": "Storm Barrier",
     "cls": "stormcaller",
     "action": "ward",
-    "duration": 0.6
+    "duration": 0.6,
+    "form": "ward",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "st_storm",
     "name": "Linked Lightning",
     "cls": "stormcaller",
     "action": "bind",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "storm",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "st_overload",
     "name": "Chain Reaction",
     "cls": "stormcaller",
     "action": "burst",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "war_bolt",
     "name": "Shadow Bolt",
     "cls": "warlock",
     "action": "cast",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "bolt",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "war_lance",
     "name": "Blood Lance",
     "cls": "warlock",
     "action": "throw",
-    "duration": 0.44
+    "duration": 0.44,
+    "form": "beam",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "war_curse",
     "name": "Curse Circle",
     "cls": "warlock",
     "action": "bind",
-    "duration": 0.55
+    "duration": 0.55,
+    "form": "nova",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "war_drain",
     "name": "Life Drain",
     "cls": "warlock",
     "action": "drain",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "siphon",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "war_step",
     "name": "Rift Step",
     "cls": "warlock",
     "action": "blink",
-    "duration": 0.32
+    "duration": 0.32,
+    "form": "blink",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "war_orb",
     "name": "Doom Orb",
     "cls": "warlock",
     "action": "orb",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "orb",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "war_storm",
     "name": "Blood Offering",
     "cls": "warlock",
     "action": "offering",
-    "duration": 0.66
+    "duration": 0.66,
+    "form": "storm",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "war_final",
     "name": "Final Curse",
     "cls": "warlock",
     "action": "condemn",
-    "duration": 0.66
+    "duration": 0.66,
+    "form": "mark",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "sky_rise",
     "name": "Rising Spear",
     "cls": "skylancer",
     "action": "uppercut",
-    "duration": 0.52
+    "duration": 0.52,
+    "form": "rise",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "sky_gale",
     "name": "Gale Shot",
     "cls": "skylancer",
     "action": "thrust",
-    "duration": 0.44
+    "duration": 0.44,
+    "form": "lance",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "sky_dive",
     "name": "Dive Strike",
     "cls": "skylancer",
     "action": "dive",
-    "duration": 0.54
+    "duration": 0.54,
+    "form": "dive",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "sky_lift",
     "name": "Wind Lift",
     "cls": "skylancer",
     "action": "ascend",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "rise",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "sky_dash",
     "name": "Sky Dash",
     "cls": "skylancer",
     "action": "rush",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "dash",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "sky_rain",
     "name": "Spear Rain",
     "cls": "skylancer",
     "action": "call",
-    "duration": 0.68
+    "duration": 0.68,
+    "form": "storm",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "sky_crash",
     "name": "Thunder Dive",
     "cls": "skylancer",
     "action": "dive",
-    "duration": 0.54
+    "duration": 0.54,
+    "form": "dive",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "sky_cyclone",
     "name": "Updraft",
     "cls": "skylancer",
     "action": "pull",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "vortex",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "bd_counter",
     "name": "Counter Stance",
     "cls": "bladedancer",
     "action": "parry",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "ward",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "bd_twin",
     "name": "Twin Cut",
     "cls": "bladedancer",
     "action": "twin",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "cross",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "bd_riposte",
     "name": "Riposte",
     "cls": "bladedancer",
     "action": "cleave",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "slash",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "bd_step",
     "name": "Dance Step",
     "cls": "bladedancer",
     "action": "evade",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "dash",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "bd_mirror",
     "name": "Mirror Guard",
     "cls": "bladedancer",
     "action": "parry",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "ward",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "bd_cross",
     "name": "Cross Slash",
     "cls": "bladedancer",
     "action": "cross",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "cross",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "bd_steel",
     "name": "Perfect Guard",
     "cls": "bladedancer",
     "action": "parry",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "spiral",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "bd_perfect",
     "name": "Perfect Counter",
     "cls": "bladedancer",
     "action": "parry",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "ward",
+    "slot": 3,
+    "side": "b"
   },
   {
     "id": "bst_sic",
     "name": "Sic 'Em",
     "cls": "beastmaster",
     "action": "command",
-    "duration": 0.46
+    "duration": 0.46,
+    "form": "claw",
+    "slot": 0,
+    "side": "a"
   },
   {
     "id": "bst_coordinated",
     "name": "Coordinated Strike",
     "cls": "beastmaster",
     "action": "bow",
-    "duration": 0.48
+    "duration": 0.48,
+    "form": "cross",
+    "slot": 0,
+    "side": "b"
   },
   {
     "id": "bst_guardian",
     "name": "Guardian Bond",
     "cls": "beastmaster",
     "action": "bond",
-    "duration": 0.58
+    "duration": 0.58,
+    "form": "ward",
+    "slot": 1,
+    "side": "a"
   },
   {
     "id": "bst_step",
     "name": "Pack Step",
     "cls": "beastmaster",
     "action": "evade",
-    "duration": 0.42
+    "duration": 0.42,
+    "form": "dash",
+    "slot": 1,
+    "side": "b"
   },
   {
     "id": "bst_mend",
     "name": "Mend the Pack",
     "cls": "beastmaster",
     "action": "mend",
-    "duration": 0.64
+    "duration": 0.64,
+    "form": "heal",
+    "slot": 2,
+    "side": "a"
   },
   {
     "id": "bst_roar",
     "name": "Alpha Roar",
     "cls": "beastmaster",
     "action": "roar",
-    "duration": 0.62
+    "duration": 0.62,
+    "form": "roar",
+    "slot": 2,
+    "side": "b"
   },
   {
     "id": "bst_stampede",
     "name": "Stampede",
     "cls": "beastmaster",
     "action": "command",
-    "duration": 0.46
+    "duration": 0.46,
+    "form": "storm",
+    "slot": 3,
+    "side": "a"
   },
   {
     "id": "bst_apex",
     "name": "Apex Unleashed",
     "cls": "beastmaster",
     "action": "empower",
-    "duration": 0.56
+    "duration": 0.56,
+    "form": "crown",
+    "slot": 3,
+    "side": "b"
   }
 ]

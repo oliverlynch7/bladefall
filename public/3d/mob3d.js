@@ -1,3 +1,4 @@
+import {makeMimic} from './mimic3d.js?v=2311';
 import {makeStrawDummy} from './training-dummy3d.js?v=2233';
 import {officerClips} from './officer-motion.js?v=2010';
 import * as THREE from './three.module.js';
@@ -29,6 +30,7 @@ for(const type of Object.keys(MOB_CAST))if(type!=='colossus'&&type!=='marblecolo
     ['king','tyrant','brute','warden','archer','sorcerer','prison_bell','prison_unbound'].includes(type)?1.22:1.10;
   MOB_CAST[type]={file:'enemy-assets/upgraded/'+type+'-v2142',fitHeight};
 }
+MOB_CAST.mimic={file:'enemy-assets/mimic-lanky'};
 MOB_CAST.dummy={file:'enemy-assets/dummy',fitHeight:.88};
 MOB_CAST.colossus={file:'enemy-assets/articulated/forge-colossus-v2125'};
 MOB_CAST.marblecolossus={file:'enemy-assets/articulated/marblecolossus-v2126'};
@@ -84,6 +86,7 @@ function demetalise(root, label){
    body, two callers. The cache is shared too, so a chest and a mimic are one download. */
 export async function loadKitModel(file){
   if(_mobModels.has(file)) return _mobModels.get(file);
+  if(file==='enemy-assets/mimic-lanky'){const model=makeMimic();_mobModels.set(file,model);return model;}
   if(file==='enemy-assets/dummy'){const model=makeStrawDummy();_mobModels.set(file,model);return model;}
   try {
     /* A bare name is a creature in monsters/; a name with a slash carries its own kit folder.

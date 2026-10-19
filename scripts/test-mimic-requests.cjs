@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');const html=fs.readFileSync('public/3d/index.html','utf8');let checks=0;const start=html.indexOf("else if(d.t==='mimicReveal')"),end=html.indexOf("else if(d.t==='socialRequest')",start),body=html.slice(start,end).replace("else if(d.t==='mimicReveal')",'if(true)');
+const c={G:{chests:[{rewardKey:'reward',mimic:true,x:40,z:50,y:0}],zone:0,area:0},chestRewardKey:x=>x.rewardKey,enemyChestScene:()=>{assert(c.G);return 'scene'},mimicReveal:()=>c.calls++,calls:0};vm.createContext(c);vm.runInContext('function receive(d,c){'+body+'}',c);const peer={zone:0,area:0,hp:100,tx:40,tz:50,ty:0,last:0},mp={zone:0,peers:{friend:peer}};
+function run(d={t:'mimicReveal',scene:'scene',key:'reward'}){c.receive.call(mp,d,{_pid:'friend'})}
+run();assert.equal(c.calls,1);checks++;
+for(const patch of [{zone:1},{area:1},{hp:0},{dead:true},{downed:true},{tx:1000},{ty:500},{last:5}]){const original={...peer};Object.assign(peer,patch);run();assert.equal(c.calls,1);checks++;Object.assign(peer,original);for(const k of Object.keys(patch))if(!(k in original))delete peer[k];}
+run({scene:'oldscene',key:'reward'});run({scene:'scene',key:'missing'});assert.equal(c.calls,1);checks++;
+c.G=null;run();assert.equal(c.calls,1);checks++;console.log(checks+' real host mimic request validation checks pass (including late packet after world cleanup).');

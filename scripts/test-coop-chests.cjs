@@ -5,7 +5,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));let checks=0;
 const ok=(v,m)=>{assert(v,m);checks++;};
 function fn(n){const a=source.indexOf('function '+n+'('),b=source.indexOf('\nfunction ',a+12);assert(a>=0);return source.slice(a,b);}
 function player(host){
- let serial=0;const c={window:{},console,Math,Set,Map,Number,Object,Array,
+ let serial=0;const c={MIMIC_RATE:0,isCampaignAdventure:()=>false,campaignChestLoot:r=>c.randomLoot(r),window:{},console,Math,Set,Map,Number,Object,Array,
   G:{zone:0,area:0,runSeed:123,stageIndex:0,floor:0,time:10,shake:0,chests:[],p:{x:-500,y:0,z:500,gear:{}}},
   meta:{classId:'warrior',chestRecords:{},stash:[],gold:0},STASH_CAP:3,RORDER:['common','uncommon','rare','epic','legendary'],
   MP:{active:true,isHost:host,guest:()=>!host},persist(){},floorAt:()=>0,enemyEncounterLevel:()=>2,
@@ -74,3 +74,13 @@ ok(source.includes('if(d.chests)applyCoopChests(d.chests)'),'accepted host state
 ok(source.includes('const chests=coopChestSnapshot();if(chests)msg.chests=chests'),'host broadcast wired to manifest');
 for(const m of source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g))if(!/\bsrc\s*=|type=["'](?:module|importmap)/.test(m[1])&&m[2].trim())new vm.Script(m[2]);
 console.log(JSON.stringify({checks,passed:true,scope:'Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.'}));
+// A revealed mimic keeps its original chest ID and both players' personal item rolls.
+{
+ const h=player(true),g=player(false);h.rollDrop({type:'grunt',mid:93,x:80,z:80,y:0});let hc=h.G.chests[0],rec=h.meta.chestRecords[hc.rewardKey];hc.mimic=true;rec.mimic=true;share(h,g);const gc=g.G.chests[0],hItem=JSON.stringify(rec.item),gItem=JSON.stringify(gc._rewardRecord.item),key=hc.rewardKey;
+ ok(gc.mimic&&g.meta.chestRecords[key].mimic,'guest persists shared mimic encounter');
+ h.G.chests=[];rec.mimic=false;rec.mimicDefeated=true;h.rollDrop({type:'mimic',mimicE:true,mimicOrigin:key,mimicRarity:'common',mid:94,x:80,z:80});
+ share(h,g);hc=h.G.chests[0];ok(hc.rewardKey===key&&!hc.mimic&&!gc.mimic,'defeat replaces shared mimic with safe original chest');ok(JSON.stringify(rec.item)===hItem&&JSON.stringify(gc._rewardRecord.item)===gItem,'neither personal item rerolls after mimic');
+ h.G.time=g.G.time=20;h.openChest(hc);g.openChest(gc);ok(h.meta.stash.length===1&&g.meta.stash.length===1,'each player can collect one independent mimic prize');
+ h.openChest(hc);g.openChest(gc);ok(h.meta.stash.length===1&&g.meta.stash.length===1,'replayed mimic collection cannot duplicate');
+ console.log('Mimic personal co-op reward identity, guest persistence and one-time collection pass.');
+}

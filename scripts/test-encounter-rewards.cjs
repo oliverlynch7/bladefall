@@ -2,8 +2,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const rules=require('../public/3d/encounter-rewards.js');let checks=0;function ok(v,m){assert(v,m);checks++;}
 for(let l=1;l<=100;l++){
  const ordinary=rules.chance({},l),elite=rules.chance({elite:true},l);
- ok(ordinary>=.01875&&ordinary<=.0375,'ordinary rate bounded');ok(elite>=.1&&elite<=.15,'elite rate bounded');ok(elite>ordinary,'stronger foe has better odds');
- const t=Math.min(1,(l-1)/50);ok(Math.abs(ordinary/(.015+.015*t)-1.25)<1e-12&&Math.abs(elite/(.08+.04*t)-1.25)<1e-12,'modest25percent increase at every encounter level');
+ ok(ordinary>=.12&&ordinary<=.18,'ordinary rate bounded');ok(elite>=.35&&elite<=.45,'elite rate bounded');ok(elite>ordinary,'stronger foe has better odds');
+ const t=Math.min(1,(l-1)/50);ok(Math.abs(ordinary-(.12+.06*t))<1e-12&&Math.abs(elite-(.35+.10*t))<1e-12,'steady enemy-level reward growth');
  for(const e of [{},{elite:true},{boss:true}]){let total=0;for(let i=0;i<1000;i++){const r=rules.grade(e,l,i/1000);ok(['common','uncommon','rare','epic','legendary'].includes(r),'valid chest');total+=['common','uncommon','rare','epic','legendary'].indexOf(r);}e.mean=total/1000;}
 }
 ok(rules.chance({practice:true,boss:true},30)===0,'practice never rewards');ok(rules.chance({boss:true},1)===1,'boss chest guaranteed');
@@ -12,7 +12,7 @@ ok(rules.level({zone:0,area:0,p:{level:100}}, {})===1,'player level cannot raise
 ok(rules.gold(1234)==='1,234'&&rules.gold(999999999999).length<9,'large gold remains compact');
 const html=fs.readFileSync('public/3d/index.html','utf8');
 const start=html.indexOf('function enemyEncounterLevel('),end=html.indexOf('// Phase 9: no more roguelite',start),source=html.slice(start,end);
-const mock={MP:{guest:()=>false},G:{zone:0,area:0,stageIndex:0,runSeed:123,time:10,chests:[]},meta:{},BFEncounterRewards:rules,Math,randomLoot:r=>({armor:{name:r+' Armor',rarity:r}}),makeWeapon:(a,r,n)=>({arche:a,rarity:r,name:n}),makeArmor:r=>({rarity:r,name:'armor'}),floorAt:()=>0,prepareChest:c=>{c._record=mock.meta.chestRecords[c.rewardKey];c.rarity=c._record.rarity;},SFX:{drop(){}},RARITY:Object.fromEntries(['common','uncommon','rare','epic','legendary'].map((r,i)=>[r,{tier:i,color:'#fff'}])),burst(){},persist(){},BFChestRules:{reward:r=>r}};
+const mock={MIMIC_RATE:.1,isCampaignAdventure:()=>false,campaignChestLoot:r=>mock.randomLoot(r),MP:{guest:()=>false},G:{zone:0,area:0,stageIndex:0,runSeed:123,time:10,chests:[]},meta:{},BFEncounterRewards:rules,Math,randomLoot:r=>({armor:{name:r+' Armor',rarity:r}}),makeWeapon:(a,r,n)=>({arche:a,rarity:r,name:n}),makeArmor:r=>({rarity:r,name:'armor'}),floorAt:()=>0,prepareChest:c=>{c._record=mock.meta.chestRecords[c.rewardKey];c.rarity=c._record.rarity;},SFX:{drop(){}},RARITY:Object.fromEntries(['common','uncommon','rare','epic','legendary'].map((r,i)=>[r,{tier:i,color:'#fff'}])),burst(){},persist(){},BFChestRules:{reward:r=>r}};
 vm.createContext(mock);vm.runInContext(source,mock);
 mock.rollDrop({mid:10,type:'grunt',x:40,z:60,y:0});ok(mock.G.chests.length===1,'drop is chest');ok(!mock.G.pickups,'never creates loose gear');const first=mock.G.chests[0],key=first.rewardKey;ok(first.enemyReward&&first.dropReadyAt===10.8,'distinct chest presentation before auto-open');
 mock.rollDrop({mid:10,type:'grunt',x:40,z:60});ok(mock.G.chests.length===1,'same enemy cannot duplicate');
@@ -22,7 +22,7 @@ mock.rollDrop({mid:11,type:'king',boss:true,x:200,z:60});ok(mock.G.chests.length
 for(const flags of [{hub:true},{trial:'warrior'},{arena:true}]){const old=mock.G.chests.length;Object.assign(mock.G,flags);mock.rollDrop({mid:12,type:'grunt',x:0,z:0});ok(mock.G.chests.length===old,'no combat loot in safe/training/PvP');for(const k of Object.keys(flags))delete mock.G[k];}
 ok(!html.includes('classChoiceLater'),'no choose later button');ok(html.includes("mode==='upgrade'&&document.querySelector('.classpick')"),'Escape cannot dismiss unmade choice');
 const kill=html.slice(html.indexOf('function killEnemy('),html.indexOf('function prepareChest('));ok(!kill.includes('pushLoot('),'all enemy kill gear uses chests');
-console.log(JSON.stringify({checks,normalRate:[.01875,.0375],eliteRate:[.1,.15],personalChests:true,saveRestoration:true,requiredChoice:true}));
+console.log(JSON.stringify({checks,normalRate:[.12,.18],eliteRate:[.35,.45],personalChests:true,saveRestoration:true,requiredChoice:true}));
 // Actual guest kill-packet handler: replayed authoritative kills are credited once;
 // chest rolls are exclusively host-owned even without a local enemy model.
 {

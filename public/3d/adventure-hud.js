@@ -36,15 +36,22 @@
   panel.querySelector('.loot-rarity').textContent=(rar.name||o.rarity)+' · '+d.type;
   panel.querySelector('.loot-outcome').textContent=d.sold?'Auto-sold · +'+d.gold+' gold':d.blocked?'Bag full · still on the ground':'Added to bag';
   panel.dataset.outcome=d.sold?'sold':d.blocked?'blocked':'kept';
+  const rows=comparison(d);
+  panel.querySelector('.loot-comparison').innerHTML=rows;
+  panel.querySelector('.loot-usability').textContent=d.sold?'Change Auto-sell below to keep future gear.':d.blocked?'Free a bag slot, then walk over this item.':d.usability||'';
+  panel.querySelector('[data-loot-bag]').textContent=api.hint('bag')+' · Bag';
+ }
+ function comparison(d){const o=d.item,old=d.equipped;
   const row=(label,before,after,lower=false)=>{before=Number(before)||0;after=Number(after)||0;const delta=after-before,good=lower?delta<0:delta>0;return '<div class="loot-stat"><span>'+esc(label)+'</span><span>'+before+' → <b class="'+(delta===0?'equal':good?'gain':'loss')+'">'+after+' '+(delta===0?'=':delta>0?'▲':'▼')+'</b></span></div>';};
   let rows='';
   if(d.kind==='weapon')rows=row('Damage',old?.dmg,o.dmg)+row('Delay · lower is faster',old?.cd,o.cd,true);
   else if(d.kind==='armor')rows=row('Defense',old?.defense,o.defense);
+  const names={hp:'Max HP',def:'Bonus defense',powerMul:'Damage %',magPowerMul:'Magic damage %',speedMul:'Move speed %',atkSpeedMul:'Attack speed %',crit:'Crit chance %',lifesteal:'Lifesteal %',dodgeMul:'Dodge recovery %',cdr:'Skill recovery %',goldFind:'Gold found %'};
+  const totals=it=>{const out={};for(const af of it?.affixes||[])out[af.stat]=(out[af.stat]||0)+(Number(af.val)||0);return out;},before=totals(old),after=totals(o);
+  for(const stat of new Set([...Object.keys(before),...Object.keys(after)])){const n=['hp','def'].includes(stat)?1:100;rows+=row(names[stat]||stat,Math.round((before[stat]||0)*n*10)/10,Math.round((after[stat]||0)*n*10)/10);}
   const effects=it=>[...(it?.affixes||[]).map(x=>x.label),it?.el?it.el+' element':'',it?.lifesteal?Math.round(it.lifesteal*100)+'% lifesteal':''].filter(Boolean).join(' · ')||'None';
   rows+='<div class="loot-effects"><span>Found: '+esc(effects(o))+'</span><span>Equipped: '+esc(effects(old))+'</span></div>';
-  panel.querySelector('.loot-comparison').innerHTML=rows;
-  panel.querySelector('.loot-usability').textContent=d.sold?'Change Auto-sell below to keep future gear.':d.blocked?'Free a bag slot, then walk over this item.':d.usability||'';
-  panel.querySelector('[data-loot-bag]').textContent=api.hint('bag')+' · Bag';
+return rows;
  }
  function tick(dt,visible,g){
   if(!panel)return;reset(g);panel.hidden=!visible||!current;
@@ -66,5 +73,5 @@
   if(fpsStart===null||fpsLast!==null&&ts-fpsLast>1000){fpsStart=ts;fpsFrames=0;el.textContent='FPS …';}else fpsFrames++;
   fpsLast=ts;const elapsed=ts-fpsStart;if(elapsed>=500){el.textContent=Math.round(fpsFrames*1000/elapsed)+' FPS';fpsStart=ts;fpsFrames=0;}
  }
- window.BFAdventureHud={mount,show,tick,fps,clear(){queue=[];current=null;left=0;if(panel)panel.hidden=true;}};
+ window.BFAdventureHud={mount,show,tick,fps,comparison,remember(data,g){reset(g);last=data;},clear(){queue=[];current=null;left=0;if(panel)panel.hidden=true;}};
 })();

@@ -1048,7 +1048,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 </style>
 <link rel="stylesheet" href="./bag-menu.css?v=2238">
 <link rel="stylesheet" href="./adventure-hud.css?v=2296">
-<script src="./adventure-hud.js?v=2255"></script>
+<script src="./adventure-hud.js?v=2311"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
@@ -1138,7 +1138,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./boss-tactics.js?v=2289"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
-<script src="./currency-feedback.js?v=2234"></script>
+<script src="./currency-feedback.js?v=2311"></script>
 <script src="./rift-shards.js?v=2300"></script>
 <script src="./rift-hall.js?v=2076"></script>
 <script src="./brute-encounter.js?v=2289"></script>
@@ -1194,14 +1194,14 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./party-navigation.js?v=2292"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
-<link rel="stylesheet" href="./chest-reveal.css?v=2266">
-<script src="./chest-rules.js?v=2122"></script>
-<script src="./chest-reveal.js?v=2266"></script>
+<link rel="stylesheet" href="./chest-reveal.css?v=2311">
+<script src="./chest-rules.js?v=2311"></script>
+<script src="./chest-reveal.js?v=2311"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2297"></script>
+<script src="./guided-tutorial.js?v=2311"></script>
 <script src="./menu-tour.js?v=2294"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
@@ -1209,7 +1209,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./inspection-lab.js?v=2261"></script>
 <script src="./priority-sfx.js?v=2210"></script>
 <link rel="stylesheet" href="./progression-celebration.css?v=2284">
-<script src="encounter-rewards.js?v=2270"></script><script src="./progression-celebration.js?v=2284"></script>
+<script src="encounter-rewards.js?v=2311"></script><script src="./progression-celebration.js?v=2284"></script>
 <script>
 (function(){
 "use strict";
@@ -1220,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.310.0-campaign-combat-progression';
+const VERSION3D='2.311.0-usable-loot-progression';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1282,7 +1282,7 @@ const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol','progressPlayerSound','progressClassSound','combatDetailAudio',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','sprintBests','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
+const MODE_FIELDS=['campaignLootDeals','riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
@@ -1338,6 +1338,7 @@ function autosaveRun(){ try{
     persist();
   }catch(e){} }
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
+  meta.campaignLootDeals=Math.max(0,Math.floor(Number(mv.campaignLootDeals)||0));
   meta.chestRecords=mv.chestRecords&&typeof mv.chestRecords==='object'?mv.chestRecords:{};
   meta.hubDialogue=checkpointClone(mv.hubDialogue||(Object.keys(mv).length?(meta.legacyHubDialogue||loadJSON(GKEY)?.hubDialogue||{}):{}));meta.returnVisits=BFReturnVisits.normalize(mv.returnVisits);
   // Preview migration: early arcade prototypes stored ownership per save. Promote any
@@ -1381,7 +1382,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]){meta.classId='warrior';meta.classUnlocked.warrior=true;}
   migrateClassEquipment();
 }
-function wipeMode(m){ meta.riftWelcomeSeen=false;meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
+function wipeMode(m){ meta.campaignLootDeals=0;meta.riftWelcomeSeen=false;meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -1992,10 +1993,10 @@ window.BFCoopAudio?.bind(SFX);
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
   common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
-  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:5},
-  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:12},
-  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:20},
-  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:30},
+  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:3},
+  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:6},
+  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:9},
+  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:12},
   none:{name:'',color:'#9aa4ad',base:0,mul:1.00,tier:0,req:1}   // the Monk's Bare Fists — a rarity-less weapon (never rolled; not in RORDER)
 };
 const RORDER=['common','uncommon','rare','epic','legendary'];
@@ -3891,8 +3892,7 @@ function buildHomefieldsGranary(){
  for(const z of [-130,305]){detail(1150,z,210,530,14,20,'#635035',{granaryRoof:true});for(let k=0;k<5;k++)detail(1150,z,224+k*12,450-k*85,13,24,'#786545',{granaryRoof:true});}
  // Roof strips stay over the side walls; the aisle is open to the camera and sky.
  for(const x of [925,1375])detail(x,85,220,80,12,440,'#6b583b',{granaryRoof:true});
- vplat(960,250,22,110,125,{checkpoint:true});vplat(960,150,48,110,125,{checkpoint:true});vplat(960,50,74,110,125,{checkpoint:true});
- vplat(960,-55,100,110,125,{checkpoint:true});vplat(1100,-55,100,170,90,{slab:12,checkpoint:true});
+ for(let i=1;i<=20;i++)vplat(960,345-i*20,i*5,110,22,{checkpoint:true,granaryStair:true,interior:true});vplat(1100,-55,100,170,90,{slab:12,checkpoint:true});
  G.chests.push({x:1040,z:-55,y:100,opened:false,bob:0});
  for(const z of [-95,-15])detail(1100,z,112,150,7,7,'#9b8252');
  // Grain bags and crates sit in bays; the middle remains clear for combat and co-op.
@@ -3959,7 +3959,7 @@ function buildHomefieldsExploration(){
  const paths=[[[-550,-400],[-1400,-550],[-2300,-850]],[[-2300,-850],[-2380,-1760],[-1700,-1820],[-900,-1710]],[[440,-410],[1150,-480],[2030,-760]],[[2030,-760],[2220,-1740],[1640,-1850],[1110,-1840]]];
  const tiles=[];
  for(const path of paths)for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/140);for(let j=0;j<=n;j++){const t=j/n;tiles.push({x:a[0]+(b[0]-a[0])*t,z:a[1]+(b[1]-a[1])*t,w:350,d:350});}}
- const clear=o=>Math.abs(o.x)<650||!tiles.some(t=>Math.abs(o.x-t.x)<t.w/2+(o.w||0)/2+30&&Math.abs(o.z-t.z)<t.d/2+(o.d||0)/2+30);
+ const clear=o=>o.watchStair||Math.abs(o.x)<650||!tiles.some(t=>Math.abs(o.x-t.x)<t.w/2+(o.w||0)/2+30&&Math.abs(o.z-t.z)<t.d/2+(o.d||0)/2+30);
  G.obstacles=G.obstacles.filter(clear);G.deco=G.deco.filter(clear);
  for(const t of tiles)vseg(t.x,t.z,t.w,t.d,{meadow:true});
  for(const r of districts){vseg(r.x,r.z,r.w,r.d,{meadow:true});G.rooms.push({...r,monsters:[],encounter:false,cleared:true});}
@@ -4303,8 +4303,8 @@ function qrow(done,tick,text,num){ return `<div class="qrow ${done?'qdone':''}">
 // Beats faster as you approach in3D; ownership and collection are save-local.
 function secretSenseUpdate(){const el=document.getElementById('secretsense');if(!el)return;
  const active=meta.secretSense&&mode==='play'&&isCampaignAdventure()&&!G.voyage&&!G.p.dead&&!G.p.downed;
- let target=null;
- if(active){const region=BFRiftShards.regions[G.zone],all=worldRiftShards(true),targets=BFRiftShards.senseTargets(meta.riftShards,G.pendingRiftShards,all,worldRiftShards(),G.storyNpcs||[],G.storyObjects||[],briarBook,region?.prefix||'');target=BFRiftShards.nearestShard(G.p,targets);
+ let target=null;if(G)G.shardSenseTargets=[];
+ if(active){const region=BFRiftShards.regions[G.zone],all=worldRiftShards(true),targets=BFRiftShards.senseTargets(meta.riftShards,G.pendingRiftShards,all,worldRiftShards(),G.storyNpcs||[],G.storyObjects||[],briarBook,region?.prefix||'');G.shardSenseTargets=targets;target=BFRiftShards.nearestShard(G.p,targets);
   // Old optional portals survive only in scenes without authored shard sources.
   if(!target&&!all.length&&!BFRiftShards.shardRewards(briarBook).some(r=>r.id.startsWith((region?.prefix||'?')+'-'))){const z=curZone(),o=G.secret;if(o&&!o.spent&&z.side&&!meta.sideFound[z.side.id])target={...o,kind:'Hidden rift',distance:Math.hypot(G.p.x-o.x,(G.p.y||0)-(o.y||0),G.p.z-o.z)};}
  }
@@ -4381,7 +4381,7 @@ const ENEMY={
   slimelet:{hp:8,dmg:4,speed:72,r:9,h:14,xp:5,color:'#8ef0bc',kind:'walk',look:'slime',noSplit:true},
   caster:{hp:20,dmg:10,speed:52,r:13,h:42,xp:22,color:'#8a6ab0',kind:'caster',shot:{count:1,spread:0,speed:430,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.5},
   charger:{hp:34,dmg:12,speed:58,r:17,h:30,xp:20,color:'#a84a2a',kind:'charger'},   // rust-red (Phase 18: moved OFF the chest's brown-gold so mimics own that palette)
-  mimic:{hp:70,dmg:16,speed:74,r:16,h:30,xp:60,color:'#6b4a2a',kind:'charger',look:'mimic',noSplit:true},   // Phase 18: the chest that bites — 2-3x a zone mob's HP, charger lunge AI, scales per tier like everyone
+  mimic:{hp:110,dmg:16,speed:74,r:29,h:86,xp:60,color:'#6b4a2a',kind:'charger',look:'mimic',noSplit:true},   // Phase 18: the chest that bites — 2-3x a zone mob's HP, charger lunge AI, scales per tier like everyone
   // ── Hollow Pass canyon bestiary (Phase 14) — distinct silhouettes + behaviours, not palette swaps ──
   dustjackal:{hp:24,dmg:11,speed:82,r:14,h:26,xp:19,color:'#caa46a',kind:'charger',look:'jackal'},   // lean pack hunter: fast, low HP, telegraphed POUNCE (charger ram) — space it or it bleeds you in numbers
   cragspitter:{hp:46,dmg:13,speed:26,r:18,h:42,xp:28,color:'#9a8a6a',kind:'caster',look:'spitter',   // squat boulder-lobber: hurls ARCING rocks you sidestep; slow, tanky, kill-priority
@@ -5312,7 +5312,7 @@ function retainCampaignEarnings(){
  // A retry restores the protected loadout's full effective health, including armor,
  // class and allocated stats. Newly found, unsecured gear must not raise this cap.
  hero.hp=effMaxHp(freshFromSnapshot(hero));hero.mana=hero.maxMana;
- for(const key of ['chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','petActive','companionWhistle','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
+ for(const key of ['campaignLootDeals','chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','petActive','companionWhistle','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
  meta.run.p=checkpointClone(hero);return true;
 }
 function restoreCampaignState(){
@@ -5827,7 +5827,7 @@ const HELP_ENTRIES=[
  {cat:'Gear',title:'Bag capacity and auto-sell',get body(){return 'Chests reveal one equipment item and fill free bag slots automatically. Enemies rarely drop a chest, never loose gear. With Auto-sell OFF, a full bag leaves chests unopened. ON sells new equipment pickups for gold, even with empty slots. Check the bottom-left label. Open your bag with '+controlHint('bag')+'. Buy Magic Packs at the Quartermaster for more space.';}},
  {cat:'Gear',title:'Pickup comparisons',body:'The bottom-left pickup card compares new gear with your equipped item. It says Added to bag, Auto-sold, or Bag full. Use Loot beside the bag to reopen the latest card. New gear is not automatically equipped: choose it in your bag.'},
  {cat:'Gear',title:'Rarity and equipment requirements',body:'Common is grey, Uncommon green, Rare blue, Epic purple, Legendary gold. The same character-level requirements apply to weapons, armor, rings and amulets. Class rank does not meet a gear level requirement; your class must also support the weapon.'},
- {cat:'Gear',title:'Chests and mimics',get body(){return 'Better chests offer better chances of rare gear. Each chest gives one equipment item. Use '+controlHint('interact')+' to finish its reveal faster. Some chests are mimics: be ready for a fight.';}},
+ {cat:'Gear',title:'Chests and mimics',get body(){return 'Better chests offer better chances of rare gear. Each chest gives one equipment item. The reveal plays automatically, then compares your reward with equipped gear. Enemy-dropped chests can be mimics: be ready for a fight.';}},
  {cat:'Gear',title:'The Forge (Smith)',body:'Fuse two unequipped pieces of the same category and rarity into one random item of the next rarity. There is no gold fee. Your character must meet the new rarity’s level requirement. The Forge shows a color-coded level guide.'},
  {cat:'Classes & Skills',title:'Player levels and stat points',get body(){return 'Character XP raises your player level and gives stat points until the allocation cap. Press '+controlHint('stats')+', or open Bag → Character Stats, to improve health, attack, defense, speed or mana.';}},
  {cat:'Classes & Skills',title:'Class ranks, skills and mana',body:'Class XP ranks up your equipped class. Rank 2 unlocks your first skill; later ranks offer more skills and passive choices. Hotbar padlocks show locked skills. The top-left number is mana cost; the countdown shows recharge time.'},
@@ -8155,6 +8155,14 @@ function buildCampaignRoute(ctx){
   });
   const routeTiles=[];
   for(const [ai,bi,width=220,bend=0] of plan.edges){
+    if(zone==='outskirts'&&G.area===0&&((ai===2&&bi===3)||(ai===3&&bi===5))){
+      const east=ai===2,points=[];
+      // Distinct treads: previous wide, almost coincident slabs formed a vertical wall.
+      for(let k=0;k<=20;k++){const x=east?100-k*28:-800,z=east?-1060:-1290-k*28,y=east?k*7:140-k*7;
+       const o=y?vplat(x,z,y,east?30:128,east?128:30,{path:true,stairs:true,watchStair:true,checkpoint:true,earth:true,pdx:east?-1:0,pdz:east?0:-1,pstep:28}):vseg(x,z,128,128,{path:true});routeTiles.push(o);points.push({x,z,y});
+      }
+      G.campaignLayout.edges.push({a:ai,b:bi,width:128,points});continue;
+    }
     const a=rooms[ai],b=rooms[bi],L=Math.hypot(b.x-a.x,b.z-a.z),ux=(b.x-a.x)/L,uz=(b.z-a.z)/L;
     const rim=r=>Math.max(0,Math.min(Math.abs(ux)>.001?r.w/2/Math.abs(ux):Infinity,Math.abs(uz)>.001?r.d/2/Math.abs(uz):Infinity)-50);
     const ra=rim(a),rb=rim(b),ax=a.x+ux*ra,az=a.z+uz*ra,bx2=b.x-ux*rb,bz2=b.z-uz*rb;
@@ -13903,6 +13911,7 @@ function killEnemy(e,weaponKill){
   } else if(e.kind==='goblin'){
     SFX.god();toast('Treasure goblin slain!');rollDrop(e);
   } else if(e.mimicE){
+    const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta,rec=owner.chestRecords?.[e.mimicOrigin];if(rec){rec.mimic=false;rec.mimicDefeated=true;}
     SFX.enemyDie();playFx('wallbreak');SFX.god();toast('The mimic drops a treasure chest');
     const mg=awardGold(150+zoneTier()*50);addText(e.x,e.y+e.h+8,e.z,'+'+mg+'g','#ffd24a');rollDrop(e);checkAchievements();
   } else {
@@ -13911,8 +13920,7 @@ function killEnemy(e,weaponKill){
     else mobDie(e);   // curated per-mob death voice (die1-4 / shatter / undead / squelch, by type)
     { const w=G.p.weapon; if(!e.deathpuff&&w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
     checkAchievements();
-    // FEWER, MEANINGFUL drops: even elites are no longer guaranteed loot, so long runs cannot flood the bag.
-    // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
+    // Enemy-level chest rates keep common gear and forge duplicates flowing.
     // Bosses, chests, mimics, and goblins remain the reliable gear sources.
     if(!e.frostOfficer&&Math.random()<BFEncounterRewards.chance(e,enemyEncounterLevel(e)))rollDrop(e);
     if(e.look==='slime' && !e.noSplit && !(MP.active&&!MP.isHost)){ // slimes split into two slimelets (host-authoritative in co-op)
@@ -13921,17 +13929,16 @@ function killEnemy(e,weaponKill){
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
   checkStageClear();
 }
-/* ---------------- MIMIC CHESTS (Phase 18) ----------------
-   A random subset of chests are lying. Mimic-ness is decided AT SPAWN from the level's
-   seeded rnd, so the same chest is the mimic across reloads of the same run (the seed is
-   the save — no new fields; resolved mimics regenerate exactly as normal chests regenerate
-   closed, the existing behavior). The bonus-vault sprint chest is never a mimic. */
+/* Authored chests are safe. Ten percent of enemy-dropped chests become a shared
+   mimic encounter. The persisted personal reward survives the fight and reloads. */
 const MIMIC_RATE=0.10;                                   // exactly 1 in 10 eligible chests are mimics
-function chestMaybeMimic(ch,r){ if(!ch.bonus && (r?r():Math.random())<MIMIC_RATE) ch.mimic=true; return ch; }
+function chestMaybeMimic(ch,r){ if(!ch.bonus)(r||Math.random)();ch.mimic=false;return ch; } // Keep authored seed consumption stable; only enemy drops roll mimics.
 function mimicReveal(ch){
-  if(MP.active && !MP.isHost) return;   // co-op: the host reveals mimics; guests receive them via the enemy mirror
+  if(!ch||!ch.mimic||ch.opened||(ch.dropReadyAt||0)>G.time)return;
+  if(MP.guest()){if((ch._revealRequestAt??-99)<G.time-.5){ch._revealRequestAt=G.time;try{MP.hostConn?.send({t:'mimicReveal',scene:enemyChestScene(),key:chestRewardKey(ch)});}catch{}}return;}
+  if(ch._revealed)return;ch._revealed=true;
   const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);
-  const m=spawnEnemy('mimic',ch.x,ch.z); m.mimicE=true;
+  const m=spawnEnemy('mimic',ch.x,ch.z);m.y=ch.y||0;m.mimicE=true;m.mimicOrigin=chestRewardKey(ch);m.mimicRarity=ch.rarity;
   m.active=false; m.dropT=1.0; m.emergeMax=1.0;   // ~1s emerge: it heaves up out of the ground FROZEN, then springs — time to back off
   playFx('chestthunk'); playFx('mimicroar',0.85);   // the chest lurches, then roars
   burst(ch.x,18,ch.z,'#caa23a',20); burst(ch.x,10,ch.z,'#6b4a2a',12);
@@ -13966,7 +13973,7 @@ function applyCoopChests(packet){
   if(!ch){ch={x:a.x,y:a.y,z:a.z,rewardKey:a.key,opened:false,bob:0,dropReadyAt:G.time+Math.max(0,Math.min(2,a.readyIn))};G.chests.push(ch);changed=true;}
   Object.assign(ch,{rarity:a.rarity,challenge:!!a.challenge,mimic:!!a.mimic,enemyReward:!!a.enemyReward,bonus:!!a.bonus,descentReward:!!a.descentReward,prisonRoom:a.prisonRoom||null,fixedReward:a.fixedReward||null,_coopChest:true});
   const rec=prepareChest(ch); // Own record determines opened; host opening never consumes this claim.
-  if(a.enemyReward&&rec.source!=='enemy'){Object.assign(rec,{source:'enemy',scene:packet.scene,x:a.x,y:a.y,z:a.z});changed=true;}
+  if(a.enemyReward&&(rec.source!=='enemy'||rec.mimic!==!!a.mimic)){Object.assign(rec,{source:'enemy',scene:packet.scene,x:a.x,y:a.y,z:a.z,mimic:!!a.mimic});changed=true;}
  }
  // A revealed mimic is a shared enemy, not a second reward chest on the guest.
  const retained=new Set();G.chests=G.chests.filter(ch=>{const key=chestRewardKey(ch);if((ch.enemyReward||ch.mimic||ch._coopChest)&&!seen.has(key)||retained.has(key))return false;retained.add(key);return true;});
@@ -13974,13 +13981,13 @@ function applyCoopChests(packet){
 }
 function prepareChest(ch){
  if(!ch)return null;if(ch.bonus&&G.sprintFun&&G.bonusActive){ch.rarity='rare';ch.mimic=false;return ch._sprintRecord||(ch._sprintRecord={claimed:!!ch.opened});}if(ch._rewardRecord)return ch._rewardRecord;
- const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=layout.rarity;ch.challenge=ch.enemyReward?false:layout.challenge;
+ const layout=BFChestRules.campaign(ch,G.zone||0,G.area||0);ch.rarity=isCampaignAdventure()?layout.rarity:(ch.rarity||layout.rarity);ch.challenge=ch.enemyReward?false:layout.challenge;
  if(ch.challenge)ch.mimic=false;
  const key=chestRewardKey(ch);
  const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
  const records=owner.chestRecords||(owner.chestRecords={});
  let rec=records[key];
- if(!rec){const rid=BFChestRules.reward(ch.rarity,ch.challenge,BFChestRules.hash(key+':reward'));rec=records[key]={rarity:ch.rarity,challenge:ch.challenge,item:ch.fixedReward==='abyssblade'?{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')}:ch.fixedReward==='kingarmor'?{armor:makeArmor('legendary','chest')}:randomLoot(rid),fixedReward:ch.fixedReward||null,claimed:!!ch.opened};
+ if(!rec){const rid=BFChestRules.reward(ch.rarity,ch.challenge,BFChestRules.hash(key+':reward'),isCampaignAdventure()?G.zone:null);rec=records[key]={rarity:ch.rarity,challenge:ch.challenge,item:ch.fixedReward==='abyssblade'?{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')}:ch.fixedReward==='kingarmor'?{armor:makeArmor('legendary','chest')}:campaignChestLoot(rid,owner),fixedReward:ch.fixedReward||null,claimed:!!ch.opened};
   // Keep recent expeditions bounded; an old discarded run is not resumable through normal saves.
   const keys=Object.keys(records);if(keys.length>2048)for(const k of keys.slice(0,keys.length-2048))delete records[k];
   persist();
@@ -13988,10 +13995,12 @@ function prepareChest(ch){
  ch.rarity=rec.rarity;ch.challenge=rec.challenge;ch.opened=!!rec.claimed;
  Object.defineProperty(ch,'_rewardRecord',{value:rec,writable:true,configurable:true,enumerable:false});return rec;
 }
-function revealChestReward(ch,item,result,gold=0){
+function revealChestReward(ch,item,result,gold=0,soldGold=0){
  const describe=box=>{const o=box.weapon||box.armor||box.trinket;return {name:o.name,rarity:o.rarity,color:RARITY[o.rarity].color,icon:itemStaticAv(o)};};
- const cards=[];for(let i=0;i<24;i++)cards.push(describe(i===20?item:randomLoot(BFChestRules.reward(ch.rarity,ch.challenge,Math.random()))));
- BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,result:result+(gold>0?' · Chest +'+gold+'g':''),cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>SFX.achieve(),reduceMotion:BFChestReveal.motionReduced(meta.reduceMotion,matchMedia('(prefers-reduced-motion: reduce)').matches)});
+ const rewardWorld=G,kind=item.weapon?'weapon':item.armor?'armor':'trinket',gear=item[kind],equipped=checkpointClone((kind==='weapon'?G.p.weapon:G.p.gear?.[gear.slot])||null);
+  const summary=BFAdventureHud.comparison({kind,item:gear,equipped});
+  const cards=[];for(let i=0;i<24;i++)cards.push(describe(i===20?item:randomLoot(BFChestRules.reward(ch.rarity,ch.challenge,Math.random()))));
+ BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,summary,rarity:RARITY[gear.rarity].name,color:RARITY[gear.rarity].color,icon:itemStaticAv(gear),usability:!canWield(gear)?'Requires character level '+rarityReq(gear.rarity):kind==='weapon'&&!classFamilyOk(gear)?'For another class':'Ready to equip · '+controlKey('bag')+' Bag',result:result+(gold>0?' · Chest +'+gold+'g':''),cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>{SFX.achieve();if(G===rewardWorld)equipmentNotice(kind,gear,result.startsWith('Auto-sold'),soldGold,false,true);},reduceMotion:BFChestReveal.motionReduced(meta.reduceMotion,matchMedia('(prefers-reduced-motion: reduce)').matches)});
 }
 function descentRewardChest(){
  if(!G.endless||G.chests.some(c=>c.descentReward))return;
@@ -14036,7 +14045,7 @@ function openChest(ch){
     const cp=campaignCheckpoint();if(cp&&G._earningsCheckpoint===cp)cp.state.stash.push(checkpointClone(item));
   }else{const gold=G.escape?BFPrisonRun.overflow(gear):sellItem(gear);soldGold=gold;result='Auto-sold · +'+gold+' gold';}
   if(gear.rarity==='legendary')meta.legendaryFound=(meta.legendaryFound||0)+1;
-  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();equipmentNotice(kind,gear,meta.autoSellEquipment===true,soldGold);revealChestReward(ch,item,result,cg);
+  persist();if(G.escape)BFPrisonRun.checkpoint();hudUpdate();revealChestReward(ch,item,result,cg,soldGold);
 
 }
 // every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
@@ -14058,7 +14067,7 @@ function restoreEnemyChests(){
  const scene=enemyChestScene();if(MP.guest()||G._enemyChestScene===scene)return;G._enemyChestScene=scene;
  const owner=G.devBriar||G.devKeep?G:G.escape?BFPrisonRun.profile():meta;
  for(const [key,r]of Object.entries(owner.chestRecords||{}))if(r.source==='enemy'&&r.scene===scene&&!G.chests.some(c=>c.rewardKey===key)){
-  G.chests.push({x:r.x,z:r.z,y:r.y||0,rarity:r.rarity,challenge:false,enemyReward:true,rewardKey:key,fixedReward:r.fixedReward||(r.item?.weapon?.name==='Abyss Blade'?'abyssblade':key.endsWith(':1')&&owner.chestRecords[key.slice(0,-1)+'0']?.item?.weapon?.name==='Abyss Blade'?'kingarmor':null),opened:!!r.claimed,bob:0});
+  G.chests.push({x:r.x,z:r.z,y:r.y||0,rarity:r.rarity,mimic:!!r.mimic,challenge:false,enemyReward:true,rewardKey:key,fixedReward:r.fixedReward||(r.item?.weapon?.name==='Abyss Blade'?'abyssblade':key.endsWith(':1')&&owner.chestRecords[key.slice(0,-1)+'0']?.item?.weapon?.name==='Abyss Blade'?'kingarmor':null),opened:!!r.claimed,bob:0});
  }
 }
 function rollDrop(e){
@@ -14071,12 +14080,13 @@ function rollDrop(e){
   {armor:makeArmor('legendary','chest')}
  ]:[null];
  drops.forEach((fixed,i)=>{
-  const key=scene+':enemy:'+(e.mid??(e.sx??e.x)+','+(e.sz??e.z))+':'+i;
+  const key=e.mimicOrigin||scene+':enemy:'+(e.mid??(e.sx??e.x)+','+(e.sz??e.z))+':'+i;
   if(records[key]?.claimed||G.chests.some(c=>c.rewardKey===key))return;
-  const rarity=fixed?'legendary':BFEncounterRewards.grade(e,enemyEncounterLevel(e),Math.random());
+  const rolled=fixed?'legendary':(records[key]?.rarity||e.mimicRarity||BFEncounterRewards.grade(e,enemyEncounterLevel(e),Math.random())),rarity=isCampaignAdventure()&&!fixed?BFChestRules.cap(rolled,G.zone):rolled;
   const x=e.x+i*76,z=e.z+18,y=Math.max(0,floorAt(x,z,10,(e.y||0)+30));
-  const ch={x,z,y,rarity,challenge:false,enemyReward:true,rewardKey:key,fixedReward:fixed?(i===0?'abyssblade':'kingarmor'):null,opened:false,bob:0,dropReadyAt:G.time+.8};
-  if(!records[key])records[key]={source:'enemy',scene,x,z,y,rarity,challenge:false,item:fixed||randomLoot(BFChestRules.reward(rarity,false,Math.random())),fixedReward:ch.fixedReward,claimed:false};
+  const mimic=!fixed&&!e.mimicE&&Math.random()<MIMIC_RATE;
+   const ch={x,z,y,rarity,mimic:records[key]?!!records[key].mimic:mimic,challenge:false,enemyReward:true,rewardKey:key,fixedReward:fixed?(i===0?'abyssblade':'kingarmor'):null,opened:false,bob:0,dropReadyAt:G.time+.8};
+  if(!records[key])records[key]={source:'enemy',scene,x,z,y,rarity,mimic:ch.mimic,challenge:false,item:fixed||campaignChestLoot(BFChestRules.reward(rarity,false,Math.random(),isCampaignAdventure()?G.zone:null),owner),fixedReward:ch.fixedReward,claimed:false};
   G.chests.push(ch);prepareChest(ch);SFX.drop(RARITY[ch.rarity].tier);burst(x,y+16,z,RARITY[ch.rarity].color,10);
  });
  persist();if(G.escape)BFPrisonRun.checkpoint();
@@ -15201,6 +15211,7 @@ const MP={
       else if(d.t==='trialExit'){if(G?.trialSession===d.session)abandonTrial();}
       else if(d.t==='endingCommand'){finalCommand(c._pid,d.command);}
       else if(d.t==='shipCommand'){voyageReceive(c._pid,d.command);}
+      else if(d.t==='mimicReveal'){const q=this.peers[c._pid],ch=G?.chests?.find(ch=>chestRewardKey(ch)===d.key);if(G&&!G.hub&&!G.trial&&!G.arena&&ch?.mimic&&d.scene===enemyChestScene()&&q&&(q.last??0)<2&&q.zone===this.zone&&q.area===G.area&&!q.dead&&!q.downed&&q.hp>0&&ch?.mimic&&Math.hypot(q.tx-ch.x,q.tz-ch.z)<85&&Math.abs((q.ty||0)-(ch.y||0))<65)mimicReveal(ch);}
       else if(d.t==='socialRequest'){window.BFSocial?.receive(c._pid,d.command);}
       else if(d.t==='storyRequest'){const q=this.peers[c._pid];briarReceive(d.request,c._pid,q?{...q,x:q.tx,y:q.ty,z:q.tz}:null);}
       else if(d.t==='sparringRoom'){
@@ -17564,9 +17575,9 @@ function fullBagNotice(kind,item,source='ground'){if(!G)return;if((G._fullBagWar
  if(kind&&item)equipmentNotice(kind,item,false,0,true);
  else toast('Bag full · make space in '+controlHint('bag')+' Bag. '+(source==='chest'?'Chest stays closed.':'Gear stays here.'));
 }
-function equipmentNotice(kind,item,sold=false,gold=0,blocked=false){
+function equipmentNotice(kind,item,sold=false,gold=0,blocked=false,historyOnly=false){
  const p=G.p,old=kind==='weapon'?p.weapon:p.gear?.[item.slot];
- BFAdventureHud.show({kind,item,equipped:old,rarity:RARITY[item.rarity],icon:itemAv(item),type:kind==='weapon'?weapFamily(item):slotLabel(item.slot),sold,gold,blocked,
+ BFAdventureHud[historyOnly?'remember':'show']({kind,item,equipped:old,rarity:RARITY[item.rarity],icon:itemAv(item),type:kind==='weapon'?weapFamily(item):slotLabel(item.slot),sold,gold,blocked,
   usability:!canWield(item)?'Requires character level '+rarityReq(item.rarity):kind==='weapon'&&(!classFamilyOk(item)||monkBlocksWeapons(item))?'For another class':'Ready to equip from your bag'},G);
 }
 function bagGroundEquipment(kind,item){
@@ -17579,6 +17590,15 @@ function offerWeapon(item){return bagGroundEquipment('weapon',item);}
 function offerArmor(item){return bagGroundEquipment('armor',item);}
 function offerTrinket(item){return bagGroundEquipment('trinket',item);}
 /* one random loot item (weapon / armor / trinket) at a given rarity */
+function campaignChestLoot(rid,owner){
+ if(!isCampaignAdventure())return randomLoot(rid);
+ const deal=Math.max(0,Math.floor(Number(owner.campaignLootDeals)||0));owner.campaignLootDeals=deal+1;
+ const slot=['weapon','helmet','amulet','weapon','chest','ring','legs','weapon'][deal%8];
+ if(TRINKETIDS.includes(slot))return {trinket:makeTrinket(rid,slot)};
+ if(SLOTIDS.includes(slot))return {armor:makeArmor(rid,slot)};
+ const compatible=DROP_ARCHES.filter(a=>classFamilyOk({art:ARCHES[a].art})),pool=deal%8===7||!compatible.length?DROP_ARCHES:compatible;
+ return {weapon:makeWeapon(pool[Math.floor(Math.random()*pool.length)],rid)};
+}
 function randomLoot(rid){ const r=Math.random();
   if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
   if(r<0.56) return {armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])};
@@ -24737,7 +24757,7 @@ function awardChessCape(){
 window.__BF_SOCIAL_API={awardChessCape,g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,project:(x,y,z)=>{const p=project(x,y,z);return p?{x:p[0],y:p[1]}:null;},openTalk:n=>openNpcTalk(n,true),
  enter:m=>{releaseKeyboard();mode=m;showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:resumePlay,
  listen:(n,line)=>BFHubDialogue.listen(n,{meta,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line)};
-window.__BF_MAP_PARTY=()=>({heading:meta.camMode==='far'?Math.atan2(VIEW[2],VIEW[10])+Math.PI:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
+window.__BF_MAP_PARTY=()=>({shards:meta.secretSense&&isCampaignAdventure()?G?.shardSenseTargets||[]:[],heading:meta.camMode==='far'?Math.atan2(VIEW[2],VIEW[10])+Math.PI:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
 function devBeta(){return G?.devBriar?BFBriarBeta:BFKeepBeta;}
 const betaApi={
   g:()=>G,classes:CLASSES,box:bx,spawn:spawnEnemy,spawnClassBot:(cls,x,z)=>{const old=ARENA_LOADOUT.botClass;ARENA_LOADOUT.botClass=cls;const b=spawnBot('normal');ARENA_LOADOUT.botClass=old;if(b){Object.assign(b,{x,z,y:G.devBriar?.terrain.height(x,z)||0,betaClassOpponent:true,betaId:'duel:challenger',betaOrigin:{x,z},hp:Math.round(b.hp*.78),maxHp:Math.round(b.hp*.78)});}return b;},toast,maxHp:()=>effMaxHp(G.p),
@@ -24786,7 +24806,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2309"></script>
+<script type="module" src="./hero3d.js?v=2311"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2309"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

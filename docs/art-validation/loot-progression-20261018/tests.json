@@ -1,0 +1,104 @@
+[
+  {
+    "suite": "test-loot-progression.cjs",
+    "exit": 0,
+    "output": "{\"checks\":21615,\"earlyRarities\":[\"common\",\"uncommon\"],\"gates\":[1,3,6,9,12],\"gearDeck\":[\"weapon\",\"helmet\",\"amulet\",\"weapon\",\"chest\",\"ring\",\"legs\",\"weapon\"],\"chestsPer100EarlyKills\":12,\"mimicsPer100Chests\":10}",
+    "error": ""
+  },
+  {
+    "suite": "test-mimic-requests.cjs",
+    "exit": 0,
+    "output": "11 real host mimic request validation checks pass (including late packet after world cleanup).",
+    "error": ""
+  },
+  {
+    "suite": "test-mimic-model.mjs",
+    "exit": 0,
+    "output": "{\"meshes\":18,\"nativeHeight\":1.9851627324201269,\"ground\":-0.004999971389770375,\"clips\":[\"Idle\",\"Move\",\"Windup\",\"Attack\",\"Recover\",\"Hit\",\"Death\"],\"articulated\":true}",
+    "error": ""
+  },
+  {
+    "suite": "test-gold-feedback.cjs",
+    "exit": 0,
+    "output": "Gold feedback: center axis, upper-screen anchor, amount, animation and3.2-second dismissal pass.",
+    "error": ""
+  },
+  {
+    "suite": "test-chest-rules.cjs",
+    "exit": 0,
+    "output": "Chest tables: 200,000 interval samples pass; challenge minimum and all depth boundaries pass.",
+    "error": ""
+  },
+  {
+    "suite": "test-chest-reveal.cjs",
+    "exit": 0,
+    "output": "117 chest motion preference, real reel lifecycle, sound, skip, hidden-tab and queue checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-encounter-rewards.cjs",
+    "exit": 0,
+    "output": "{\"checks\":300427,\"normalRate\":[0.12,0.18],\"eliteRate\":[0.35,0.45],\"personalChests\":true,\"saveRestoration\":true,\"requiredChoice\":true}\n3 actual co-op kill-packet authority checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-coop-chests.cjs",
+    "exit": 0,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\nMimic personal co-op reward identity, guest persistence and one-time collection pass.",
+    "error": ""
+  },
+  {
+    "suite": "test-shop-chests.cjs",
+    "exit": 0,
+    "output": "38 chest purchase conservation and gate checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-abyssal-heart.cjs",
+    "exit": 0,
+    "output": "Abyssal Heart: all40 authored shard IDs across8regions, sealed placements, NPC/event rewards,3D proximity, saved/carried filters, local co-op independence and no story mutations pass.",
+    "error": ""
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "exit": 0,
+    "output": "24 save normalization and isolated recovery checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-campaign-compatibility.cjs",
+    "exit": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-briar-journey.cjs",
+    "exit": 0,
+    "output": "Briar mill: pressure/release, real obstacle blocking, owner arbitration, reset, disconnect/jump, weight completion, stale snapshot, delayed bridge collision, legacy states and lane bounds passed.\nMill sketch appears as a related clue only after discovery.\nSuperseded mill notices clear; discovered clues and permanent journal entries remain.\nMill fallback follows the active renderer, including a mid-level graphics switch.",
+    "error": ""
+  },
+  {
+    "suite": "test-campaign-combat-progression.cjs",
+    "exit": 0,
+    "output": "134 fixed level scaling, boss durability bounds, attack warning/recovery, host snapshot, knockback and stagger fairness checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-premium-progression.cjs",
+    "exit": 0,
+    "output": "514 premium award coordination, rollover, class choice, model, accessibility and sound-candidate checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-progression-celebrations.cjs",
+    "exit": 0,
+    "output": "{\"checks\":44,\"introMs\":900,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\nActual nonblocking rank-banner / menu suspension / cancellation checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-hud-progression-layout.cjs",
+    "exit": 0,
+    "output": "11 render-FPS / gold-move / saved-setting integration checks passed.",
+    "error": ""
+  }
+]

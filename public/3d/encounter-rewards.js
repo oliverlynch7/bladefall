@@ -9,14 +9,14 @@
    1+Math.max(0,g?.zone||0)*6+Math.max(0,g?.area||0)*2;
   return Math.round(base+(e.boss?3:e.elite||e.campaignElite?2:0));
  }
- // Weak foes yield ~one chest/53 kills, late foes ~one/27. Elites ~one/10 to one/7.
+ // A usable trickle: ordinary foes12–18%, elites35–45%; bosses guarantee a chest.
  function dropChance(e,lv){if(e.dummy||e.practice||e.bot||e.duel)return 0;if(e.boss||e.mimicE||e.kind==='goblin')return 1;
-  const t=Math.min(1,Math.max(0,(lv-1)/50));return 1.25*((e.elite||e.campaignElite)?(.08+.04*t):(.015+.015*t));}
+  const t=Math.min(1,Math.max(0,(lv-1)/50));return (e.elite||e.campaignElite)?(.35+.10*t):(.12+.06*t);}
  function grade(e,lv,r){const strong=!!(e.boss||e.mimicE||e.kind==='goblin'),elite=!!(e.elite||e.campaignElite);
-  const band=lv<7?0:lv<15?1:lv<25?2:3;
-  const weights=strong?[[12,66,22,0,0],[0,42,55,3,0],[0,5,69,25,1],[0,0,49,47,4]][band]:elite?
-   [[68,30,2,0,0],[25,65,10,0,0],[5,44,48,3,0],[0,24,65,10,1]][band]:
-   [[94,6,0,0,0],[75,24,1,0,0],[45,48,7,0,0],[25,55,19,1,0]][band];
+  const band=lv<13?0:lv<25?1:lv<37?2:3;
+  const weights=strong?[[20,80,0,0,0],[0,42,55,3,0],[0,5,69,25,1],[0,0,49,47,4]][band]:elite?
+   [[55,45,0,0,0],[25,65,10,0,0],[5,44,48,3,0],[0,24,65,10,1]][band]:
+   [[72,28,0,0,0],[75,24,1,0,0],[45,48,7,0,0],[25,55,19,1,0]][band];
   let n=Math.max(0,Math.min(.999999999,Number(r)||0))*100;for(let i=0;i<5;i++){n-=weights[i];if(n<0)return order[i];}return order[4];
  }
  function gold(n){n=Math.max(0,Number(n)||0);return n<1000000?Math.floor(n).toLocaleString('en-US'):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n);}

@@ -158,7 +158,7 @@ function tick(g,mode,dt,input,api){
  return false;
 }
 function map(g,mode){
- if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map follows your camera orientation.');document.body.append(mapCanvas);}
+ if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: gold objective, blue teammates, cyan pings, red enemies; purple search areas from the Abyssal Heart. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map follows your camera orientation.');document.body.append(mapCanvas);}
  mapCanvas.hidden=!g||mode!=='play'||g.bonusActive;if(mapCanvas.hidden)return;
  // Draw the same heading as this frame's world; smoothing here makes navigation lag.
  const nav=window.__BF_MAP_PARTY?.()||{},heading=nav.heading;
@@ -168,6 +168,14 @@ function map(g,mode){
  const xy=o=>[(o.x-p.x)*scale,(o.z-p.z)*scale];c.fillStyle='#435747';for(const o of g.segments||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
  for(const o of g.obstacles||[]){c.fillStyle=o.kind==='plat'?'#819488':'#56636a';const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
  c.fillStyle='#26302d';for(const o of g.walls||[]){const [x,y]=xy(o);c.fillRect(x-o.w*scale/2,y-o.d*scale/2,o.w*scale,o.d*scale);}
+ // Approximate search areas deliberately avoid revealing the exact shard position.
+ c.fillStyle='#b26ef52d';c.strokeStyle='#ce9aff88';c.lineWidth=2;
+ for(const o of nav.shards||[]){if(!Number.isFinite(o.x)||!Number.isFinite(o.z))continue;
+  const area={x:Math.round(o.x/300)*300,z:Math.round(o.z/300)*300},[x,y]=xy(area);
+  c.beginPath();c.arc(x,y,240*scale,0,Math.PI*2);c.fill();c.stroke();
+  const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),extent=Math.max(Math.abs(rx),Math.abs(ry));
+  if(extent>130){const k=130/extent,angle=Math.atan2(y,x);c.save();c.translate(x*k,y*k);c.rotate(angle);c.fillStyle='#cc92f5';c.beginPath();c.moveTo(9,0);c.lineTo(-6,-6);c.lineTo(-3,0);c.lineTo(-6,6);c.closePath();c.fill();c.restore();c.fillStyle='#b26ef52d';}
+ }
  const marker=(o,color,r,edge=false)=>{if(!o||!Number.isFinite(o.x)||!Number.isFinite(o.z))return;let [x,y]=xy(o);const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),d=Math.max(Math.abs(rx),Math.abs(ry));if(d>138){if(!edge)return;x*=138/d;y*=138/d;}c.fillStyle=color;c.strokeStyle='#101923';c.lineWidth=2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.stroke();};
  if(g.hub&&!g.hubArt?.riftHall){
    const landmark=(o,color,glyph)=>{if(!o)return;let [x,y]=xy(o);const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),d=Math.max(Math.abs(rx),Math.abs(ry));if(d>136){x*=136/d;y*=136/d;}c.fillStyle='#111c24';c.beginPath();c.arc(x,y,11,0,Math.PI*2);c.fill();c.fillStyle=color;c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();c.fillStyle='#182126';c.font='bold 12px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(glyph,x,y+.5);};

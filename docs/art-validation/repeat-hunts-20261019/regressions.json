@@ -1,0 +1,126 @@
+{
+  "suites": [
+    {
+      "suite": "test-campaign-hunts.cjs",
+      "passed": true,
+      "output": "2567 repeatable hunt source,3-round lifecycle,group kill,save,reward and shared authority checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-story-authority.cjs",
+      "passed": true,
+      "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.",
+      "error": null
+    },
+    {
+      "suite": "test-save-safety.cjs",
+      "passed": true,
+      "output": "24 save normalization and isolated recovery checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-campaign-compatibility.cjs",
+      "passed": true,
+      "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-briar-refinement.cjs",
+      "passed": true,
+      "output": "Briar: specific hunt, one-time reward, three-slot cap, respawn identity, discovered-only related clues pass.",
+      "error": null
+    },
+    {
+      "suite": "test-patrol-retirement.cjs",
+      "passed": true,
+      "output": "900 patrol respawns: bounded bodies, death fade retained, authored bodies retained, guest cleanup without spawning.",
+      "error": null
+    },
+    {
+      "suite": "test-playtest-feedback.cjs",
+      "passed": true,
+      "output": "Combat quota/reward dedupe, delayed bounded respawn, proximity safety, host authority, conversation exit/resume passed.",
+      "error": null
+    },
+    {
+      "suite": "test-campaign-refinement.cjs",
+      "passed": true,
+      "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed.",
+      "error": null
+    },
+    {
+      "suite": "test-campaign-combat-progression.cjs",
+      "passed": true,
+      "output": "134 fixed level scaling, boss durability bounds, attack warning/recovery, host snapshot, knockback and stagger fairness checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-dialogue-categories.cjs",
+      "passed": true,
+      "output": "1431 category, single-path, retired-choice authority, side/lore access and sequential delivery checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-dialogue-endings.cjs",
+      "passed": true,
+      "output": "94 ordinary NPC/preset paths end; primary Leave, legacy replay, optional quest, legitimate retry, final trigger, note preservation and speaker authority pass.",
+      "error": null
+    },
+    {
+      "suite": "test-story-topics.cjs",
+      "passed": true,
+      "output": "29 topic menus: legacy cursor recovery, effect-free navigation, Simon side quest after core dialogue, refusal guard and forged navigation passed.",
+      "error": null
+    },
+    {
+      "suite": "test-npc-labels.cjs",
+      "passed": true,
+      "output": "{\"checks\":117,\"passed\":true,\"renderDpr\":[0.5,0.66,1,1.25,1.5,2],\"roles\":[\"host\",\"guest\"]}",
+      "error": null
+    },
+    {
+      "suite": "test-npc-names.cjs",
+      "passed": true,
+      "output": "17 NPC identity, occlusion, crowding and lifecycle checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-trial-mentor-map.cjs",
+      "passed": true,
+      "output": "{\"checks\":54,\"passed\":true}",
+      "error": null
+    },
+    {
+      "suite": "test-guidance-sound-signatures.cjs",
+      "passed": true,
+      "output": "219 stat/tutorial, reward preference, boss/physical state, charge, fallback, lifecycle and asset checks passed.",
+      "error": null
+    },
+    {
+      "suite": "test-optional-clues.cjs",
+      "passed": true,
+      "output": "{\"checks\":553,\"books\":20,\"controls\":18,\"actors\":[\"host\",\"guest\"],\"passed\":true}",
+      "error": null
+    },
+    {
+      "suite": "test-menu-experience.cjs",
+      "passed": true,
+      "output": "{\"checks\":16,\"passed\":true}",
+      "error": null
+    },
+    {
+      "suite": "test-menu-routing.cjs",
+      "passed": true,
+      "output": "{\"checks\":15,\"passed\":true}",
+      "error": null
+    },
+    {
+      "suite": "test-hub-recovery.cjs",
+      "passed": true,
+      "output": "{\"checks\":257,\"passed\":true}",
+      "error": null
+    }
+  ],
+  "passed": true,
+  "limitations": "Controlled engine/DOM checks, not a fresh two-human network session or human pacing playtest."
+}

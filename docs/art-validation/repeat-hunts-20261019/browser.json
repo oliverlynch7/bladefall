@@ -1,0 +1,1024 @@
+{
+ "rows": [
+  {
+   "id": "hunt.0.0",
+   "npc": "Gus",
+   "contract": {
+    "zone": 0,
+    "area": 0,
+    "id": "hunt.0.0",
+    "npc": "gus",
+    "name": "Gus",
+    "title": "Supplies for Briar",
+    "reason": "Raiders keep stealing from the farm wagons.",
+    "collect": "stolen supply bundles",
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 10,
+    "gold": 120,
+    "xp": 160,
+    "payoutXp": 270,
+    "when": [
+     {
+      "flag": "thomas.ready",
+      "is": true
+     }
+    ],
+    "place": "western supply wagon",
+    "target": "Farm raider / Legion hex caster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -2430,
+     "z": -800,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -2190,
+     "z": -930,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -2380,
+     "z": -1060,
+     "y": 22,
+     "support": 22,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 120,
+     "xp": 160,
+     "round": 1
+    },
+    {
+     "gold": 120,
+     "xp": 160,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.0.1",
+   "npc": "Lewis",
+   "contract": {
+    "zone": 0,
+    "area": 1,
+    "id": "hunt.0.1",
+    "npc": "lewis",
+    "name": "Lewis",
+    "title": "Keep the escape route clear",
+    "reason": "Search parties keep coming through the woods.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 10,
+    "gold": 150,
+    "xp": 190,
+    "payoutXp": 321,
+    "when": [],
+    "place": "forest signal path",
+    "target": "Legion shield guard / Legion runner / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -570,
+     "z": -1360,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -820,
+     "z": -1800,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -400,
+     "z": -1870,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 150,
+     "xp": 190,
+     "round": 1
+    },
+    {
+     "gold": 150,
+     "xp": 190,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.1.0",
+   "npc": "Caleb",
+   "contract": {
+    "zone": 1,
+    "area": 0,
+    "id": "hunt.1.0",
+    "npc": "caleb",
+    "name": "Caleb",
+    "title": "Safe passage",
+    "reason": "Travelers need a clear path through these hunting grounds.",
+    "collect": null,
+    "fallback": [
+     "dustjackal",
+     "cragspitter"
+    ],
+    "total": 10,
+    "gold": 190,
+    "xp": 225,
+    "payoutXp": 380,
+    "when": [],
+    "place": "lower cliff paths",
+    "target": "Dust jackal / Crag spitter"
+   },
+   "slots": [
+    {
+     "type": "dustjackal",
+     "x": -630,
+     "z": -920,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "dustjackal",
+     "x": -800,
+     "z": -1030,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "cragspitter",
+     "x": -900,
+     "z": -1780,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 190,
+     "xp": 225,
+     "round": 1
+    },
+    {
+     "gold": 190,
+     "xp": 225,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.1.1",
+   "npc": "Ruth",
+   "contract": {
+    "zone": 1,
+    "area": 1,
+    "id": "hunt.1.1",
+    "npc": "ruth",
+    "name": "Ruth",
+    "title": "A safer shelter",
+    "reason": "The freed prisoners need room to recover.",
+    "collect": null,
+    "fallback": [
+     "dustjackal",
+     "cragspitter"
+    ],
+    "total": 10,
+    "gold": 220,
+    "xp": 255,
+    "payoutXp": 430,
+    "when": [],
+    "place": "hidden canyon floor",
+    "target": "Dust jackal / Crag spitter"
+   },
+   "slots": [
+    {
+     "type": "dustjackal",
+     "x": 2320,
+     "z": -3180,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "cragspitter",
+     "x": 2450,
+     "z": -3660,
+     "y": 67,
+     "support": 67,
+     "clear": true
+    },
+    {
+     "type": "dustjackal",
+     "x": 2350,
+     "z": -3310,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 220,
+     "xp": 255,
+     "round": 1
+    },
+    {
+     "gold": 220,
+     "xp": 255,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.2.0",
+   "npc": "Grant",
+   "contract": {
+    "zone": 2,
+    "area": 0,
+    "id": "hunt.2.0",
+    "npc": "grant",
+    "name": "Grant",
+    "title": "Break the siege patrol",
+    "reason": "The siege troops keep returning to the old bell tower yard.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 12,
+    "gold": 260,
+    "xp": 290,
+    "payoutXp": 489,
+    "when": [],
+    "place": "old bell tower yard",
+    "target": "Legion shield guard / Legion spellcaster / Legion runner"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -1630,
+     "z": -1800,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -1930,
+     "z": -1660,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -1650,
+     "z": -2010,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 260,
+     "xp": 290,
+     "round": 1
+    },
+    {
+     "gold": 260,
+     "xp": 290,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.2.1",
+   "npc": "Walter",
+   "contract": {
+    "zone": 2,
+    "area": 1,
+    "id": "hunt.2.1",
+    "npc": "walter",
+    "name": "Walter",
+    "title": "Keep the works clear",
+    "reason": "Search troops are using the lower works to reach the prisoners.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 12,
+    "gold": 290,
+    "xp": 320,
+    "payoutXp": 540,
+    "when": [],
+    "place": "lower prison works",
+    "target": "Legion shield guard / Legion spellcaster / Legion runner"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -180,
+     "z": -2940,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": 180,
+     "z": -3060,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -120,
+     "z": -3200,
+     "y": 0,
+     "support": 0,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 290,
+     "xp": 320,
+     "round": 1
+    },
+    {
+     "gold": 290,
+     "xp": 320,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.3.0",
+   "npc": "Heath",
+   "contract": {
+    "zone": 3,
+    "area": 0,
+    "id": "hunt.3.0",
+    "npc": "heath",
+    "name": "Heath",
+    "title": "Keep the shelter route open",
+    "reason": "Mountain threats keep gathering near the lift house.",
+    "collect": null,
+    "fallback": [
+     "frostling",
+     "frostlobber"
+    ],
+    "total": 12,
+    "gold": 330,
+    "xp": 355,
+    "payoutXp": 599,
+    "when": [],
+    "place": "mountain lift house",
+    "target": "Legion shield guard / Legion runner / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -2200,
+     "z": -1210,
+     "y": 220,
+     "support": 220,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -1960,
+     "z": -1160,
+     "y": 220,
+     "support": 220,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -2150,
+     "z": -1470,
+     "y": 254,
+     "support": 254,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 330,
+     "xp": 355,
+     "round": 1
+    },
+    {
+     "gold": 330,
+     "xp": 355,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.3.1",
+   "npc": "Professor Ellis",
+   "contract": {
+    "zone": 3,
+    "area": 1,
+    "id": "hunt.3.1",
+    "npc": "ellis",
+    "name": "Professor Ellis",
+    "title": "Recover the samples",
+    "reason": "The search troops took my sealed field samples.",
+    "collect": "sealed sample packets",
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 12,
+    "gold": 360,
+    "xp": 385,
+    "payoutXp": 650,
+    "when": [
+     {
+      "flag": "ic.free",
+      "is": true
+     }
+    ],
+    "place": "cave waterworks",
+    "target": "Legion shield guard / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -100,
+     "z": -3500,
+     "y": 180,
+     "support": 180,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": 140,
+     "z": -3680,
+     "y": 180,
+     "support": 180,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": 0,
+     "z": -3600,
+     "y": 180,
+     "support": 180,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 360,
+     "xp": 385,
+     "round": 1
+    },
+    {
+     "gold": 360,
+     "xp": 385,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.4.0",
+   "npc": "Flint",
+   "contract": {
+    "zone": 4,
+    "area": 0,
+    "id": "hunt.4.0",
+    "npc": "flint",
+    "name": "Flint",
+    "title": "Metal worth saving",
+    "reason": "The weapon-line guards carry scraps I can use for repairs.",
+    "collect": "usable metal scraps",
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 12,
+    "gold": 400,
+    "xp": 420,
+    "payoutXp": 709,
+    "when": [],
+    "place": "weapon-line drive floor",
+    "target": "Legion shield guard / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -160,
+     "z": -3780,
+     "y": 100,
+     "support": 100,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": 170,
+     "z": -4050,
+     "y": 100,
+     "support": 100,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": 0,
+     "z": -3950,
+     "y": 100,
+     "support": 100,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 400,
+     "xp": 420,
+     "round": 1
+    },
+    {
+     "gold": 400,
+     "xp": 420,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.4.1",
+   "npc": "Martin",
+   "contract": {
+    "zone": 4,
+    "area": 1,
+    "id": "hunt.4.1",
+    "npc": "martin",
+    "name": "Martin",
+    "title": "Keep the worker floor clear",
+    "reason": "Furnace patrols keep returning to the worker floor.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 12,
+    "gold": 430,
+    "xp": 450,
+    "payoutXp": 759,
+    "when": [],
+    "place": "furnace worker floor",
+    "target": "Legion shield guard / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -1000,
+     "z": -3370,
+     "y": 120,
+     "support": 120,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -980,
+     "z": -3910,
+     "y": 120,
+     "support": 120,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -1000,
+     "z": -3650,
+     "y": 120,
+     "support": 120,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 430,
+     "xp": 450,
+     "round": 1
+    },
+    {
+     "gold": 430,
+     "xp": 450,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.5.0",
+   "npc": "Otto",
+   "contract": {
+    "zone": 5,
+    "area": 0,
+    "id": "hunt.5.0",
+    "npc": "otto",
+    "name": "Otto",
+    "title": "Protect the salvage",
+    "reason": "Wreck raiders keep taking the supplies we need for repairs.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 15,
+    "gold": 470,
+    "xp": 485,
+    "payoutXp": 818,
+    "when": [],
+    "place": "upper shipwreck",
+    "target": "Legion shield guard / Legion spellcaster / Legion runner"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": 1390,
+     "z": -1700,
+     "y": 350,
+     "support": 350,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": 1210,
+     "z": -1840,
+     "y": 350,
+     "support": 350,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": 1550,
+     "z": -2040,
+     "y": 350,
+     "support": 350,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 470,
+     "xp": 485,
+     "round": 1
+    },
+    {
+     "gold": 470,
+     "xp": 485,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.5.1",
+   "npc": "Abe",
+   "contract": {
+    "zone": 5,
+    "area": 1,
+    "id": "hunt.5.1",
+    "npc": "abe",
+    "name": "Abe",
+    "title": "Clear the tide pools",
+    "reason": "The tide slimes are spreading across the fishing pools.",
+    "collect": null,
+    "fallback": [
+     "slime"
+    ],
+    "total": 15,
+    "gold": 500,
+    "xp": 515,
+    "payoutXp": 869,
+    "when": [],
+    "place": "lower tide pools",
+    "target": "Tide slime"
+   },
+   "slots": [
+    {
+     "type": "slime",
+     "x": -719.1844023767621,
+     "z": -4237.826891219729,
+     "y": 330,
+     "support": 330,
+     "clear": true
+    },
+    {
+     "type": "slime",
+     "x": -50,
+     "z": -4090,
+     "y": 360,
+     "support": 360,
+     "clear": true
+    },
+    {
+     "type": "slime",
+     "x": -400,
+     "z": -4200,
+     "y": 330,
+     "support": 330,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 500,
+     "xp": 515,
+     "round": 1
+    },
+    {
+     "gold": 500,
+     "xp": 515,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.6.0",
+   "npc": "Sister Grace",
+   "contract": {
+    "zone": 6,
+    "area": 0,
+    "id": "hunt.6.0",
+    "npc": "grace",
+    "name": "Sister Grace",
+    "title": "Room to recover",
+    "reason": "The wounded need the western garden kept clear.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 15,
+    "gold": 540,
+    "xp": 550,
+    "payoutXp": 928,
+    "when": [],
+    "place": "western palace garden",
+    "target": "Legion shield guard / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -1330,
+     "z": -2100,
+     "y": 190,
+     "support": 190,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -1490,
+     "z": -1930,
+     "y": 210,
+     "support": 210,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -1400,
+     "z": -1900,
+     "y": 190,
+     "support": 190,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 540,
+     "xp": 550,
+     "round": 1
+    },
+    {
+     "gold": 540,
+     "xp": 550,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.6.1",
+   "npc": "Master Hugh",
+   "contract": {
+    "zone": 6,
+    "area": 1,
+    "id": "hunt.6.1",
+    "npc": "hugh",
+    "name": "Master Hugh",
+    "title": "Protect the collection",
+    "reason": "The patrols in the display hall threaten the books.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 15,
+    "gold": 570,
+    "xp": 580,
+    "payoutXp": 979,
+    "when": [],
+    "place": "sealed display hall",
+    "target": "Legion shield guard / Legion spellcaster"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -925,
+     "z": -3690,
+     "y": 440,
+     "support": 440,
+     "clear": true
+    },
+    {
+     "type": "caster",
+     "x": -1100,
+     "z": -3800,
+     "y": 440,
+     "support": 440,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -990,
+     "z": -3740,
+     "y": 440,
+     "support": 440,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 570,
+     "xp": 580,
+     "round": 1
+    },
+    {
+     "gold": 570,
+     "xp": 580,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.7.0",
+   "npc": "Roland",
+   "contract": {
+    "zone": 7,
+    "area": 0,
+    "id": "hunt.7.0",
+    "npc": "roland",
+    "name": "Roland",
+    "title": "Thin the castle patrol",
+    "reason": "The west approach is watched by a returning patrol.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 15,
+    "gold": 610,
+    "xp": 615,
+    "payoutXp": 1038,
+    "when": [],
+    "place": "western castle approach",
+    "target": "Legion shield guard / Legion arcanist"
+   },
+   "slots": [
+    {
+     "type": "grunt",
+     "x": -1360,
+     "z": -1700,
+     "y": 140,
+     "support": 140,
+     "clear": true
+    },
+    {
+     "type": "royalarcanist",
+     "x": -1060,
+     "z": -2260,
+     "y": 180,
+     "support": 180,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": -1230,
+     "z": -1970,
+     "y": 160,
+     "support": 160,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 610,
+     "xp": 615,
+     "round": 1
+    },
+    {
+     "gold": 610,
+     "xp": 615,
+     "round": 2
+    }
+   ]
+  },
+  {
+   "id": "hunt.7.1",
+   "npc": "Miles",
+   "contract": {
+    "zone": 7,
+    "area": 1,
+    "id": "hunt.7.1",
+    "npc": "miles",
+    "name": "Miles",
+    "title": "Keep the landing clear",
+    "reason": "Reinforcements keep arriving on the first high landing.",
+    "collect": null,
+    "fallback": [
+     "grunt",
+     "caster"
+    ],
+    "total": 15,
+    "gold": 640,
+    "xp": 645,
+    "payoutXp": 1088,
+    "when": [],
+    "place": "first high tower landing",
+    "target": "Legion siege knight / Legion arcanist / Legion shield guard"
+   },
+   "slots": [
+    {
+     "type": "siegeknight",
+     "x": 215,
+     "z": -894,
+     "y": 500,
+     "support": 500,
+     "clear": true
+    },
+    {
+     "type": "royalarcanist",
+     "x": 290,
+     "z": -894,
+     "y": 500,
+     "support": 500,
+     "clear": true
+    },
+    {
+     "type": "grunt",
+     "x": 160,
+     "z": -854,
+     "y": 500,
+     "support": 500,
+     "clear": true
+    }
+   ],
+   "cycles": [
+    {
+     "gold": 640,
+     "xp": 645,
+     "round": 1
+    },
+    {
+     "gold": 640,
+     "xp": 645,
+     "round": 2
+    }
+   ]
+  }
+ ],
+ "checks": 258,
+ "passed": true,
+ "level": 100
+}

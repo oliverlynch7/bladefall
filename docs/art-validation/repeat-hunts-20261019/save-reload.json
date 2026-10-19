@@ -1,0 +1,38 @@
+{
+ "save": true,
+ "passed": true,
+ "checks": [
+  {
+   "name": "Actual three kills recorded",
+   "ok": true
+  },
+  {
+   "name": "Actual loadMode and continueRun retain3/10 hunt",
+   "ok": true
+  },
+  {
+   "name": "NPC access follows actual replayed intro",
+   "ok": true
+  },
+  {
+   "name": "Actual claim pays120g once",
+   "ok": true
+  },
+  {
+   "name": "Claimed round and receipt reload",
+   "ok": true
+  },
+  {
+   "name": "Reload cannot pay twice",
+   "ok": true
+  },
+  {
+   "name": "Repeated story sync cannot pay twice",
+   "ok": true
+  },
+  {
+   "name": "Hub return retains earned gold",
+   "ok": true
+  }
+ ]
+}

@@ -63,18 +63,18 @@ function setup(G,api={}){const d=definition(G.zone,G.area);if(!d)return;const sa
  G.patrolWork={...d,total:members.length?d.total:Math.min(d.total,G.enemies.filter(e=>!e.boss&&!e.dummy&&!e.practice).length),slots:members.map(e=>({type:e.type,x:e.x,y:e.y||0,z:e.z,mid:e.mid,readyAt:null})),anchor:anchor?{x:anchor.x,y:anchor.y||0,z:anchor.z}:null};
  return {work:G.patrolWork,elite: G.area===0&&[0,2,4,5,7].includes(G.zone)?candidates.find(e=>!members.includes(e)):null};
 }
-function task(G,s){const d=G.patrolWork||definition(G.zone,G.area);if(!d||!s.flags[d.id+'.known'])return null;const n=Math.min(d.total,s.items[d.id]||0);return {title:d.title,progress:n+'/'+d.total+(d.group?' '+d.target+' defeated · '+d.place:d.targeted?' farm raiders defeated · western supply wagon':' defeated'),done:!!s.flags[d.id+'.done']};}
+function task(G,s){if(G.patrolWork?.contract)return root.BFCampaignHunts.task(G,s);const d=G.patrolWork||definition(G.zone,G.area);if(!d||!s.flags[d.id+'.known'])return null;const n=Math.min(d.total,s.items[d.id]||0);return {title:d.title,progress:n+'/'+d.total+(d.group?' '+d.target+' defeated · '+d.place:d.targeted?' farm raiders defeated · western supply wagon':' defeated'),done:!!s.flags[d.id+'.done']};}
 function tick(G,s,dt,api){const w=G.patrolWork;if(!w)return;
  // Keep authored bodies (quest references), but don't retain unlimited refill corpses.
  if(G.enemies.some(e=>e.patrolReturn&&e.dead&&Number.isFinite(e.defeatedAt)&&G.time-e.defeatedAt>2))G.enemies=G.enemies.filter(e=>!e.patrolReturn||!e.dead||!Number.isFinite(e.defeatedAt)||G.time-e.defeatedAt<=2);
  if(!api.host||G.voyage)return;
- if(w.anchor&&Math.hypot(G.p.x-w.anchor.x,G.p.z-w.anchor.z)<450&&Math.abs((G.p.y||0)-w.anchor.y)<130&&!s.flags[w.id+'.camp']){s.flags[w.id+'.camp']=true;s.flags[w.id+'.known']=true;s.revision++;api.notice(w.title,w.text+' More enemies return here after a short break. You can train here, or continue your journey.');}
+ if(!w.contract&&w.anchor&&Math.hypot(G.p.x-w.anchor.x,G.p.z-w.anchor.z)<450&&Math.abs((G.p.y||0)-w.anchor.y)<130&&!s.flags[w.id+'.camp']){s.flags[w.id+'.camp']=true;s.flags[w.id+'.known']=true;s.revision++;api.notice(w.title,w.text+' More enemies return here after a short break. You can train here, or continue your journey.');}
  for(const slot of w.slots){if(G.enemies.some(e=>(e.mid===slot.mid||e.patrolParent===slot.mid)&&!e.dead&&e.hp>0)){slot.readyAt=null;continue;}if(slot.readyAt==null)slot.readyAt=G.time+25;
-  const near=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<1100&&Math.abs((p.y||0)-slot.y)<180),crowded=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<220&&Math.abs((p.y||0)-slot.y)<100);
+  const near=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<1100&&Math.abs((p.y||0)-slot.y)<180),crowded=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<(w.contract?110:220)&&Math.abs((p.y||0)-slot.y)<100);
   if(G.time<slot.readyAt||!near||crowded)continue;const e=api.spawn(slot.type,slot.x,slot.z);if(!e)continue;if(slot.role)dressRaider(e,slot.role);if(slot.group){e.patrolStyle=slot.style;dressPatrol(e,slot.group);}Object.assign(e,{y:slot.y,sy:slot.y,patrolReturn:true,stunT:1.2,active:false});slot.mid=e.mid;slot.readyAt=null;
  }
 }
-function killed(G,s,e,api){const d=G.patrolWork||definition(G.zone,G.area);if(!d||!api.host||e.boss||e.practice||e.dummy||e.bot||s.flags[d.id+'.done'])return false;
+function killed(G,s,e,api){if(G.patrolWork?.contract)return root.BFCampaignHunts.killed(G,s,e,api);const d=G.patrolWork||definition(G.zone,G.area);if(!d||!api.host||e.boss||e.practice||e.dummy||e.bot||s.flags[d.id+'.done'])return false;
  if(d.group?e.patrolGroup!==d.group:d.targeted&&!e.homeRaid)return false;
  if(!s.flags[d.id+'.known'])api.notice('New combat task',d.title+' — '+d.text+' Defeat '+d.total+(d.group?' '+d.target+' at the '+d.place+'.':d.targeted?' raiders at the western supply wagon.':' enemies in this part.'));
  s.flags[d.id+'.known']=true;s.items[d.id]=Math.min(d.total,(s.items[d.id]||0)+1);s.revision++;

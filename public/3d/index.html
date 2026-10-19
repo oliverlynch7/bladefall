@@ -1111,7 +1111,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="titlebg"><div class="tbimg"></div><div class="tembers" id="tembers"></div><div class="tvign"></div></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
 <link rel="stylesheet" href="./npc-names.css?v=2262">
-<script src="./npc-names.js?v=2309"></script>
+<script src="./npc-names.js?v=2325"></script>
 <div id="npcNames" hidden></div>
 <button id="interactprompt" type="button" class="hide" aria-label="Interact"></button>
 <div id="petlabel" class="hide"></div>
@@ -1128,7 +1128,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
-<script src="./hub-dialogue.js?v=2303"></script>
+<script src="./hub-dialogue.js?v=2325"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1153,7 +1153,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./story-state.js?v=2288"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
 <script src="./campaign-geography.js?v=2196"></script>
-<script src="./campaign-patrols.js?v=2183a"></script>
+<script src="./campaign-patrols.js?v=2325"></script>
+<script src="./campaign-hunts.js?v=2325"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2289"></script>
 <script src="./campaign-elites.js?v=2310"></script>
@@ -1193,7 +1194,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./music-score.js?v=2293"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
 <script src="./frost-officers.js?v=2276"></script>
-<script src="./story-authority.js?v=2185"></script>
+<script src="./story-authority.js?v=2325"></script>
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./campaign-journey.js?v=2318"></script>
 <script src="./bag-browser.js?v=2238"></script>
@@ -1208,7 +1209,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2316"></script>
+<script src="./guided-tutorial.js?v=2325"></script>
 <script src="./menu-tour.js?v=2294"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
@@ -1227,7 +1228,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.324.0-mechanism-audio';
+const VERSION3D='2.325.0-repeatable-campaign-hunts';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3387,8 +3388,8 @@ function briarReceive(request,actor,position){
  const gripBusy=inSkyLibrary()&&request?.event?.type==='world'&&request.event.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==actor;
  const winchBusy=inPrison()&&request?.event?.type==='world'&&request.event.key==='kd.lift.winch'&&G.prison.winch.owner&&G.prison.winch.owner!==actor;
  const millBusy=inBriar()&&['briar.water','briar.mill.reset'].includes(request?.event?.key)&&G.briarMill?.owner&&G.briarMill.owner!==actor;
- const r=gripBusy||winchBusy||millBusy?{changed:false,state:s}:BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:actor!==briarId()||mode==='play'||!!backgroundMenuMode||mode==='inspection'&&request?.event?.key==='sc.code.fire'&&BFShipwreckShore.aiming(),npcs:G.storyNpcs||[],objects:briarObjects(),party,canReach:(p,o)=>BFCampaignInteraction.reachable(G,p,o)});
-  if(r.changed){if(inShipwreck()&&request.event.type==='world'&&request.event.key==='sc.hull.release')G.shore.releaseAt=G.shore.clock;if(MP.active&&JSON.stringify(s.quests)!==JSON.stringify(r.state.quests))toast('Shared quest progress updated');journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;if(inBriar()&&request.event.type==='world'){if(request.event.key==='briar.water'){BFBriarJourney.grip(G,actor,position);if(actor===briarId())toast(G.briarMill.owner?'Walk to move the crate. '+controlHint('interact')+' releases it.':'Crate released.');}if(request.event.key==='briar.mill.reset')BFBriarJourney.reset(G,actor);}if(inSkyLibrary()&&request.event.type==='world'&&request.event.key==='sl.display.grip')BFSkyLibrary.grip(G,actor);if(inPrison()&&request.event.type==='world'&&request.event.key==='kd.lift.winch')BFPrison.grip(G,actor,position);briarSync();if(request.event.type==='world'&&['home.bell.alarm','home.bell.cache'].includes(request.event.key))secureHomeBellProgress();
+ const r=gripBusy||winchBusy||millBusy?{changed:false,state:s}:BFStoryAuthority.apply(s,briarBook,request,{epoch:briarEpoch(),world:G,actor,position,alive:!!position&&!position.dead&&!position.downed&&(position.hp==null||position.hp>0),canInteract:actor!==briarId()||mode==='play'||!!backgroundMenuMode||mode==='inspection'&&request?.event?.key==='sc.code.fire'&&BFShipwreckShore.aiming(),npcs:G.storyNpcs||[],objects:briarObjects(),party,canReach:(p,o)=>BFCampaignInteraction.reachable(G,p,o)});
+  if(r.changed){if(inShipwreck()&&request.event.type==='world'&&request.event.key==='sc.hull.release')G.shore.releaseAt=G.shore.clock;if(MP.active&&JSON.stringify(s.quests)!==JSON.stringify(r.state.quests))toast('Shared quest progress updated');journalNoticeSync();for(const [id,n]of Object.entries(r.state.notes))if(JSON.stringify(n)!==JSON.stringify(s.notes[id])){n.part=G.area;n.order=Math.max(r.state.revision,...Object.values(s.notes).map(n=>Number(n.order)||0))+1;}G.storyState=r.state;if(inBriar()&&request.event.type==='world'){if(request.event.key==='briar.water'){BFBriarJourney.grip(G,actor,position);if(actor===briarId())toast(G.briarMill.owner?'Walk to move the crate. '+controlHint('interact')+' releases it.':'Crate released.');}if(request.event.key==='briar.mill.reset')BFBriarJourney.reset(G,actor);}if(inSkyLibrary()&&request.event.type==='world'&&request.event.key==='sl.display.grip')BFSkyLibrary.grip(G,actor);if(inPrison()&&request.event.type==='world'&&request.event.key==='kd.lift.winch')BFPrison.grip(G,actor,position);briarSync();if(request.event.type==='hunt'){autosaveRun();persist();}if(request.event.type==='world'&&['home.bell.alarm','home.bell.cache'].includes(request.event.key))secureHomeBellProgress();
   if(request.event.type==='world'&&!['sl.display.grip','kd.lift.winch','briar.water','briar.mill.reset'].includes(request.event.key)){
    const key=request.event.key,event=briarBook.events[key],notesChanged=JSON.stringify(s.notes)!==JSON.stringify(r.state.notes);
    if(notesChanged){const note=Object.entries(r.state.notes).filter(([id,n])=>JSON.stringify(n)!==JSON.stringify(s.notes[id])).at(-1)?.[1];if(note)toast('Journal updated · '+note.title);}
@@ -3450,6 +3451,7 @@ function briarSync(){
  const s=adventureStoryState();if(inBriar()&&G.homefieldsExploration)BFHomeBellDefense.sync(G,s);journalNoticeSync();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
   if(reward.kind.startsWith('return_')){if(applyReturnReward(id,reward))G.storyClaims[id]=true;}
+  else if(reward.kind==='campaign_hunt'){G.storyClaims[id]=true;gainXp(reward.amount);const gold=awardGold(reward.gold);toast(reward.title+' · +'+gold+' gold +'+characterXpAward(reward.amount)+' XP. Talk to the quest giver to repeat it.');}
   else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+characterXpAward(reward.amount)+' XP');}
   else if(reward.kind==='gold'){const gold=awardGold(reward.amount);if(['home.bells.cache','home.grain.cache','home.orchard.cache','lc.cave.supplies'].includes(id)){BFCurrencyFeedback.show(gold,'Savings coffer opened · coins only');playFx('chestthunk');playFx('gamblecoins');}else toast('Quest complete · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(reward.kind==='cliff_cache')claimAuthoredChestItem(item);else{if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Cliff Runner earned — an uncommon javelin.');}G.storyClaims[id]=true;}
@@ -3479,13 +3481,13 @@ function briarSync(){
  if(inGreatFurnace()&&s.flags['gf.cache']&&!G._cacheNoticeCleared&&G.p.x>630&&G.p.z<-5120&&G.p.z>-5680){G._cacheNoticeCleared=true;BFJournalNotice.queue.dismiss('gf.cache');}
  syncReturnField();syncReturnHubNpcs();
  if(window.BFRiftWelcome?.active){questUpdate();hudUpdate();return;}
- const v=briarBook&&BFStoryState.view(s,briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
+ const v=briarBook&&BFCampaignHunts.decorate(G,s,BFStoryState.view(s,briarBook),briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(v)v.revision=s.revision;
  if(n&&(G.kingFinal||s.conversation.owner===briarId()||G._storyViewing===n.id)){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
   BFHubDialogue.present(n,{meta,location:inReturnHub()?'WAYSTATION':G.kingFinal?(G.kingFinal.void?'THE ABYSSAL VOID':'THE KING’S HALL'):inLongAscent()?'LONG ASCENT':inCastleGates()?'CASTLE GATES':G.marbleArena?'THE ORB CHAMBER':inSkyLibrary()?'SKY LIBRARY':inPalaceCourtyard()?'PALACE COURTYARD':inThunderCliffs()?'THUNDER CLIFFS':inShipwreck()?'SHIPWRECK SHORE':inGreatFurnace()?'THE GREAT FURNACE':inIronHalls()?'IRON HALLS':inIceCaves()?'DEEP ICE CAVES':inSnowbound()?'SNOWBOUND PEAKS':inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:'Leave conversation',eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
    enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
-   leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>{G._storyViewing=null;briarRequest('close');},choose:(line,choice)=>briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
+   leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>{G._storyViewing=null;briarRequest('close');},choose:(line,choice)=>choice.startsWith('__hunt_')?briarRequest('hunt',{line,npc:v.npc,action:choice==='__hunt_claim'?'claim':'accept'}):briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
  if(mode==='npc')musicForScene();
  questUpdate();hudUpdate();
@@ -5324,6 +5326,7 @@ function retainCampaignEarnings(){
  // class and allocated stats. Newly found, unsecured gear must not raise this cap.
  hero.hp=effMaxHp(freshFromSnapshot(hero));hero.mana=hero.maxMana;
  for(const key of ['campaignLootDeals','chestRecords','gold','classes','classUnlocked','returnVisits','petOwned','petActive','companionWhistle','hubUpgrades','hubDialogue'])if(meta[key]!==undefined)cp.state[key]=checkpointClone(meta[key]);
+ window.BFCampaignHunts?.retain(G,meta.run.campaign);
  meta.run.p=checkpointClone(hero);return true;
 }
 function restoreCampaignState(){
@@ -5751,7 +5754,7 @@ function loadArea(){
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
   if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignJourney.install(G);}
-  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
+  G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});BFCampaignHunts.setup(G,{host:!MP.guest(),book:briarBook,xp:characterXpAward,spawn:spawnEnemy,support:enemySupport,label:e=>e?foeName(e):null,clear:p=>{const q={...p};resolveObstacles(q,q.r,null,0);return Math.hypot(q.x-p.x,q.z-p.z)<2;}});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
   if(isCampaignAdventure()&&G.area>=0)BFBriarCombat.build(G,{spawn:spawnEnemy,support:enemySupport});
   if(isCampaignAdventure()&&G.area>=0)BFCampaignPlacement.settle(G,{floor:floorAt,resolve:resolveObstacles});
 }

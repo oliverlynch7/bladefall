@@ -158,7 +158,7 @@ function tick(g,mode,dt,input,api){
  return false;
 }
 function map(g,mode){
- if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: mint mentor after clearing a class trial, gold objective, blue teammates, cyan pings, red enemies; purple search areas from the Abyssal Heart. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map follows your camera orientation.');document.body.append(mapCanvas);}
+ if(!mapCanvas){mapCanvas=document.createElement('canvas');mapCanvas.id='localMap';mapCanvas.width=320;mapCanvas.height=320;mapCanvas.setAttribute('aria-label','Map: mint mentor after clearing a class trial, gold objective, blue teammates, cyan pings, red enemies; orange Hunt or green Turn-in markers for active repeatable quests; purple search areas from the Abyssal Heart. In the Waystation, 1 marks the first campaign gate, $ the shops, star training, C challenges, R the Rift Hall. The map follows your camera orientation.');document.body.append(mapCanvas);}
  mapCanvas.hidden=!g||mode!=='play'||g.bonusActive;if(mapCanvas.hidden)return;
  // Draw the same heading as this frame's world; smoothing here makes navigation lag.
  const nav=window.__BF_MAP_PARTY?.()||{},heading=nav.heading;
@@ -188,6 +188,7 @@ function map(g,mode){
  }
  for(const e of g.enemies||[])if(!e.dead&&e.hp>0&&!e.dummy)marker(e,'#ff7470',e.boss?7:3);
  for(const q of nav.peers||[])marker(q,'#67baff',6,true);for(const m of g.marks||[])marker(m,'#72fff0',6,true);
+ const hunt=window.BFCampaignHunts?.navigation(g,g.storyState);if(hunt){marker(hunt,hunt.color,8,true);let [x,y]=xy(hunt);const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),d=Math.max(Math.abs(rx),Math.abs(ry));if(d>138){x*=138/d;y*=138/d;}c.save();c.translate(x,y);c.rotate(-turn);c.font='bold 12px system-ui';c.textAlign='center';c.lineWidth=4;c.strokeStyle='#101923';c.fillStyle=hunt.color;const ly=ry< -115?18:-13;c.strokeText(hunt.label,0,ly);c.fillText(hunt.label,0,ly);c.restore();}
  const mentor=window.BFPartyNavigation?.trialMentor?.(g);
  marker(mentor||window.BFPartyNavigation?.target?.(g)||g.portal,mentor?'#6ff1c8':'#ffe047',mentor?9:7,true);
  if(mentor){let [x,y]=xy(mentor);const rx=x*Math.cos(turn)-y*Math.sin(turn),ry=x*Math.sin(turn)+y*Math.cos(turn),d=Math.max(Math.abs(rx),Math.abs(ry));if(d>138){x*=138/d;y*=138/d;}c.save();c.translate(x,y);c.rotate(-turn);c.font='bold 13px system-ui';const k=Math.min(1,138/Math.max(1,d)),labelY=ry*k< -115?19:-14;c.textAlign=rx*k< -110?'left':rx*k>110?'right':'center';c.lineWidth=4;c.strokeStyle='#101923';c.fillStyle='#6ff1c8';c.strokeText('Mentor',0,labelY);c.fillText('Mentor',0,labelY);c.restore();}

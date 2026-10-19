@@ -106,7 +106,7 @@
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
   const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;active.signature=signature;
-  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&!!original&&questProgress(original)}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose);
+  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose);
  }
  function listen(n,a,lineId){
  if(!book)return;const same=active?.spectator&&active.n.id===n.id;

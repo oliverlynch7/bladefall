@@ -1,3 +1,4 @@
+import {buildTrialArt} from './trial-art3d.js?v=2315';
 import {attachGeographyArt,updateGeographyArt} from './campaign-geography-art.js?v=2187a';
 import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2197';
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
@@ -1787,6 +1788,10 @@ function buildWoodsSignalCanopy(world){
 
 export function buildWorld(scene,world){const result=buildWorldBase(scene,world);if(group){attachCampaignCraft(group,world,WORLD3D.counts||{});attachGeographyArt(group,world);}return result;}
 function buildWorldBase(scene,world){
+  if(world.trialLook){
+    clearWorld(scene);for(const key of ['__OUTSKIRTS_ACTIVE','__HUB_ART_ACTIVE','__HOLLOW_ART_ACTIVE','__KEEP_ART_ACTIVE','__FROST_ART_ACTIVE','__DEEP_ART_ACTIVE','__PRISON_ART_ACTIVE'])window[key]=false;
+    const art=buildTrialArt(world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;
+  }
  if(world.finalStage&&deepReady(world)){clearWorld(scene);const art=buildFinalKing(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.castleScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.castleScene).startsWith('ascent:')?buildLongAscent(scene,world):buildCastleGates(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
  if(world.palaceScene!=null&&deepReady(world)){clearWorld(scene);const art=String(world.palaceScene).startsWith('guardian:')?buildMarbleGuardian(scene,world):String(world.palaceScene).startsWith('library:')?buildSkyLibrary(scene,world):buildPalaceCourt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -2010,6 +2015,7 @@ export function clearWorld(scene){
    that strips deco near the player), so the same array object can hold a different level. */
 function signature(world){
   if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
+  if(world.trialLook)return 'class-trial|'+world.trialArtKey+'|'+world.trialLook.id;
   const d = world.deco || [];
   const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
   const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava,world.cliffScene,world.keepScene,world.frostScene,world.ironScene,world.shipScene,world.palaceScene,world.castleScene,world.finalStage].join('|')+'|';
@@ -2067,7 +2073,7 @@ export function syncWorld(scene){
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!world.shipScene && !customPortal && !custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !_propsReady){
+  if(!world.shipScene && !customPortal && !custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !world.trialLook && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }

@@ -1,0 +1,111 @@
+[
+  {
+    "script": "scripts/test-class-trial-music.cjs",
+    "exit": 0,
+    "output": "Trial score passed: all11 actual trial classes, nine unique assets, play/dialogue/pause routing, originals, stereo/durations/hashes/size and fallback.",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-sprint-ownership.cjs",
+    "exit": 0,
+    "output": "{\"checks\":71,\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-npc-scene-ownership.mjs",
+    "exit": 0,
+    "output": "59 NPC scene ownership, legitimate Thomas, mode exclusion, lifecycle, immutable roster and stage cleanup checks passed.",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-portal-travel.cjs",
+    "exit": 0,
+    "output": "39 portal theme, single-entry, cancellation, stale scene, nested callback, character pose, reduced motion, input and actual loading-barrier checks passed.\n7 special-mode navigation/exit regression checks passed.\n4 departure destination checks passed.",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-trainer-order.cjs",
+    "exit": 0,
+    "output": "{\"checks\":35,\"groups\":[{\"id\":\"starters\",\"ids\":[\"warrior\",\"ranger\",\"mage\"]},{\"id\":\"campaign\",\"ids\":[\"berserker\",\"ninja\",\"reaper\",\"chronomancer\",\"pyromancer\",\"pirate\",\"paladin\",\"necromancer\"]},{\"id\":\"charters\",\"ids\":[\"monk\",\"stormcaller\",\"beastmaster\",\"warlock\",\"skylancer\",\"bladedancer\"]}],\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-sprint-finish.cjs",
+    "exit": 0,
+    "output": "{\"checks\":24148,\"seeds\":500,\"hops\":10806,\"families\":[\"switchback\",\"elevator\",\"beams\",\"shaft\",\"crumble\",\"cascade\",\"springs\",\"spiral\",\"arches\",\"phase\"],\"physicalSeeds\":[13,21,68,165,204,219,305,360,390,400,445],\"physicalCrownSeed\":68,\"maxGap\":62.4}",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-campaign-compatibility.cjs",
+    "exit": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-loot-transactions.cjs",
+    "exit": 0,
+    "output": "PASS Comparison purchase bags gear without replacing equipped weapon\nPASS Full bag purchase preserves gold, inventory and equipped weapon\nPASS Successful comparison confirmation cannot spend twice\nPASS Last free slot accepts exactly one purchased item\nPASS Purchase validates level before spending\nPASS Purchase validates gold before spending\nPASS Purchase validates class before spending\nPASS Paid relic uses existing claim flow and preserves replaced gear capacity\nPASS weapon stays unclaimed with a full bag\nPASS weapon auto-sells only when explicitly enabled\nPASS weapon bags immediately in last free slot\nPASS armor stays unclaimed with a full bag\nPASS armor auto-sells only when explicitly enabled\nPASS armor bags immediately in last free slot\nPASS trinket stays unclaimed with a full bag\nPASS trinket auto-sells only when explicitly enabled\nPASS trinket bags immediately in last free slot\nPASS Repeated full-bag proximity does not flood comparison notices\nPASS Chest capacity warning does not expose its unopened reward\nPASS Full chest stays unclaimed and its fixed reward survives until space is available\nPASS Same-frame pickups fill only the last slot while quest items still collect\nPASS Auto-sell consumes each ground pickup once across repeated updates\n{\"cases\":22,\"passed\":true,\"scope\":\"Actual transaction functions under a DOM adapter; browser, render and integration checks still required.\"}",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-loot-progression.cjs",
+    "exit": 0,
+    "output": "{\"checks\":21615,\"earlyRarities\":[\"common\",\"uncommon\"],\"gates\":[1,3,6,9,12],\"gearDeck\":[\"weapon\",\"helmet\",\"amulet\",\"weapon\",\"chest\",\"ring\",\"legs\",\"weapon\"],\"chestsPer100EarlyKills\":12,\"mimicsPer100Chests\":10}",
+    "error": ""
+  },
+  {
+    "script": "scripts/test-rift-portal-icons.cjs",
+    "exit": 0,
+    "output": "24 portal icon billboard, orientation, depth and lifecycle checks passed.",
+    "error": ""
+  },
+  {
+    "syntax": "public/3d/hero3d.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "syntax": "public/3d/world3d.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "syntax": "public/3d/trial-art3d.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "syntax": "public/3d/trial-themes.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "inline": 109,
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "inline": 111,
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "importmap": "valid JSON",
+    "exit": 0
+  },
+  {
+    "script": "scripts/test-trial-art.mjs",
+    "exit": 0,
+    "output": "{\"checks\":2463,\"themes\":[{\"trial\":\"warrior\",\"trialRoomTheme\":\"Hall of the Blade\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":5,\"triangles\":274},{\"trial\":\"ranger\",\"trialRoomTheme\":\"The Archer\u2019s Lodge\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":510},{\"trial\":\"mage\",\"trialRoomTheme\":\"The Arcane Academy\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":846},{\"trial\":\"berserker\",\"trialRoomTheme\":\"The Crimson War Hall\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":5,\"triangles\":286},{\"trial\":\"ninja\",\"trialRoomTheme\":\"The Scarlet Dojo\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":7,\"triangles\":286},{\"trial\":\"reaper\",\"trialRoomTheme\":\"The Veiled Sepulchre\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":526},{\"trial\":\"pyromancer\",\"trialRoomTheme\":\"The Ember Crucible\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":5,\"triangles\":742},{\"trial\":\"paladin\",\"trialRoomTheme\":\"The Dawn Sanctuary\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":590},{\"trial\":\"pirate\",\"trialRoomTheme\":\"The Brasswake Quarters\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":566},{\"trial\":\"chronomancer\",\"trialRoomTheme\":\"The Hourglass Vault\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":918},{\"trial\":\"necromancer\",\"trialRoomTheme\":\"The Bone Archive\",\"trialWalls\":4,\"trialEmblems\":1,\"floorTiles\":1,\"drawCalls\":6,\"triangles\":686}],\"passed\":true}"
+  },
+  {
+    "script": "scripts/test-save-safety.cjs",
+    "exit": 0,
+    "output": "24 save normalization and isolated recovery checks passed."
+  },
+  {
+    "script": "scripts/test-esc-pause.cjs",
+    "exit": 0,
+    "output": "42 pause regression checks passed."
+  }
+]

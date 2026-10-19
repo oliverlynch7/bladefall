@@ -1145,6 +1145,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2311"></script>
 <script src="./rift-shards.js?v=2300"></script>
+<script src="./trial-themes.js?v=2315"></script>
 <script src="./rift-hall.js?v=2076"></script>
 <script src="./brute-encounter.js?v=2289"></script>
 <script src="./marksman-encounter.js?v=2276"></script>
@@ -1225,7 +1226,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.314.0-trainer-progression-order';
+const VERSION3D='2.315.0-class-trial-interiors';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4491,8 +4492,8 @@ const HUB_STONE={x:0,y:0,z:30};
    whole read of it — stay on the islands — was gone. Rendered both ways before and after.
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
-window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {geography:G?.geography||null,briarBeta:G?.devBriar||null,devKeep:!!G?.devKeep,finalStage:G?.kingFinal?(G.kingFinal.void?(['restored','home'].includes(G.boss.akStage)?'restored':'void'):'hall'):null,castleScene:inLongAscent()?'ascent:'+BFLongAscent.visualKey(adventureStoryState()):inCastleGates()?BFCastleGates.visualKey(adventureStoryState()):null,palaceScene:G.marbleArena?'guardian:'+!!G.boss?.dead:inSkyLibrary()?BFSkyLibrary.visualKey(adventureStoryState()):inPalaceCourtyard()?BFPalaceCourtyard.visualKey(adventureStoryState()):null,shipScene:G.hydraArena?'hydra':inThunderCliffs()?'cliffs:'+!!G.thunder?.lift+':'+!!G.thunder?.['cave.open']+':'+!!G.thunder?.['tide.open']+':'+!!G.thunder?.approach:inShipwreck()?(G.voyage?'voyage':'shore:'+!!G.shore?.hatchOpen+':'+!!G.shore?.rudderreturn+':'+!!G.shore?.sailreturn+':'+!!G.shore?.ropereturn):null,ironScene:inGreatFurnace()?'furnace:'+!!G.furnace?.access+':'+!!G.furnace?.cooled+':'+!!G.furnace?.evacuated+':'+!!G.furnace?.pressure:inIronHalls()?String(!!G.iron?.cart)+String(!!G.iron?.return):null,frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,prison:G.prison||null,storyState:G.storyState||null,movers:G.movers,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridgeWalkable)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,sprintSections:G.bonusActive?G.bonusSections:null,endless:!!G.endless,endlessLayout:G.endless?G.endLayout?.id:null,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies.filter(e=>!e.hydraChain),gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+window.__BF_WORLD=()=>{const st=BFTrialThemes.stage((G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{},G.trial);
+  return {trialLook:G.trialLook||null,trialArtKey:G.trial?[G.trial,G.runSeed,G.areaSeed,G.stageIndex].join(':'):null,geography:G?.geography||null,briarBeta:G?.devBriar||null,devKeep:!!G?.devKeep,finalStage:G?.kingFinal?(G.kingFinal.void?(['restored','home'].includes(G.boss.akStage)?'restored':'void'):'hall'):null,castleScene:inLongAscent()?'ascent:'+BFLongAscent.visualKey(adventureStoryState()):inCastleGates()?BFCastleGates.visualKey(adventureStoryState()):null,palaceScene:G.marbleArena?'guardian:'+!!G.boss?.dead:inSkyLibrary()?BFSkyLibrary.visualKey(adventureStoryState()):inPalaceCourtyard()?BFPalaceCourtyard.visualKey(adventureStoryState()):null,shipScene:G.hydraArena?'hydra':inThunderCliffs()?'cliffs:'+!!G.thunder?.lift+':'+!!G.thunder?.['cave.open']+':'+!!G.thunder?.['tide.open']+':'+!!G.thunder?.approach:inShipwreck()?(G.voyage?'voyage':'shore:'+!!G.shore?.hatchOpen+':'+!!G.shore?.rudderreturn+':'+!!G.shore?.sailreturn+':'+!!G.shore?.ropereturn):null,ironScene:inGreatFurnace()?'furnace:'+!!G.furnace?.access+':'+!!G.furnace?.cooled+':'+!!G.furnace?.evacuated+':'+!!G.furnace?.pressure:inIronHalls()?String(!!G.iron?.cart)+String(!!G.iron?.return):null,frostScene:G.frostOfficers?'officers':inIceCaves()?'caves:'+!!G.iceCaves?.['ic.lock.open']+':'+!!G.iceCaves?.['ic.channel.open']:inSnowbound()?'peaks:'+!!G.peaks?.crossing+':'+!!G.peaks?.lift:null,keepScene:G.fallenArena?'fallen':inPrison()?'dungeons':inBrokenWalls()?'broken-walls':null,prison:G.prison||null,storyState:G.storyState||null,movers:G.movers,marksmanCrossing:!!G.marksmanArena,cliffScene:G.marksmanArena?'marksman':inLostCanyon()?'canyon:'+BFLostCanyon.visualKey(adventureStoryState()):inWindingCliffs()?String(!!G.cliffs?.bridgeWalkable)+String(!!G.cliffs?.ridge):null,bruteOrchard:!!G.bruteArena,canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,sprintSections:G.bonusActive?G.bonusSections:null,endless:!!G.endless,endlessLayout:G.endless?G.endLayout?.id:null,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,frames:G.riftHall?riftHallFrames():undefined,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies.filter(e=>!e.hydraChain),gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -9570,6 +9571,7 @@ function applyEditsNow(){
 function loadStageRaw(i){
   // Story actors and props belong to this stage, never the previous area or hub.
   G.storyNpcs=[];G.storyObjects=[];G.riftSpirit=null;
+  G.trialLook=BFTrialThemes.get(G.trial);
   const s=G.trial?{...STAGES[i],type:'normal',boss:null}:STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
@@ -9865,6 +9867,7 @@ function loadStageRaw(i){
   G.bounds={minX:mnX,maxX:mxX,minZ:mnZ,maxZ:mxZ};
   for(let k2=0;k2<34;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);
     G.deco.push({x: rnd()<0.5? mnX-40-rnd()*220 : mxX+40+rnd()*220, z:zz, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
+  if(G.trialLook)G.deco=[]; // Borrowed forest/campaign scenery does not belong in a class interior.
   G.startPos={x:entryRoom.x,z:entryRoom.z}; G.goalPos={x:goalRoom.x,z:goalRoom.z};
   G.progressEnd=goalRoom.z; G._dbg={maze:true,rooms:G.rooms.length,edges:edges.length,goalD};
   hazSetup(rnd2);
@@ -12020,7 +12023,7 @@ function teachTick(dt){
 function hazardName(th){ return (th==='dungeon')?'THE DROP':(th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble'||th==='canyon')?'THE FALL':'LAVA'; }
 function hazardCols(th){ return (th==='dungeon')?['#344957','#9edbd9']:(th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
   :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='canyon')?['#182f2e','#8ca79d']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
-function hazardCause(th){ return (th==='dungeon')?{name:'the prison shaft',attack:'a long fall'}:(th==='frost')?{name:'the Freezing Deep',attack:'the killing cold'}
+function hazardCause(th){ return th==='trial'?{name:'the trial pit',attack:'a long fall'}:(th==='dungeon')?{name:'the prison shaft',attack:'a long fall'}:(th==='frost')?{name:'the Freezing Deep',attack:'the killing cold'}
   :(th==='void'||th==='apex')?{name:'the Void',attack:'an endless fall'}
   :(th==='plains'||th==='forest')?{name:'the Wilds',attack:'a fatal fall'}
   :(th==='marble'||th==='canyon')?{name:'the Fall',attack:'a long drop'}:{name:'the Lava',attack:'molten rock'}; }
@@ -12028,7 +12031,7 @@ function lavaHit(){
   if(pauseDamageBlocked()||G?.p?.downed)return;
   const p=G.p;
   if(G.hub&&!G.sparringRoom){const safe=BFPartyFeedback.safePoint(G,p,MP.active?MP.currentParty():[],floorAt);if(safe){Object.assign(p,safe,{vx:0,vy:0,vz:0,onGround:true,invuln:1.2});p.warpSerial=(p.warpSerial||0)+1;G.cam={...safe};return;}}
-  const fallTheme=G.escape?'dungeon':STAGES[G.stageIndex].theme;
+  const fallTheme=G.trial?'trial':G.escape?'dungeon':STAGES[G.stageIndex].theme;
   if(G.bonusActive){if(G.sprintFinish)return;BFSprintRace.fall(G.sprintRace);G.bonusStarted=true;G.bonusTime=BFSprintRace.remaining(G.sprintRace);p.x=G.lastSafe.x;p.z=G.lastSafe.z;p.y=(G.lastSafe.y||0)+60;p.vx=0;p.vy=0;p.vz=0;p.onGround=false;p.warpSerial=(p.warpSerial||0)+1;p.invuln=1.2;p.recoverT=.7;G.cam={x:p.x,y:p.y,z:p.z};delete G._cameraBoom;toast('Fall recovered · 3 seconds lost','#ffd24a');return;}
   // Ordinary country/fortress ground is not a supernatural damage hazard.
   if(isCampaignAdventure()&&!isHitless()&&G.geography?.fall==='recover'){Object.assign(p,{x:G.lastSafe.x,z:G.lastSafe.z,y:(G.lastSafe.y||0)+24,vx:0,vy:0,vz:0,onGround:false,recoverT:.7,invuln:1.2});toast('Back on the path.');return;}
@@ -17104,7 +17107,7 @@ const AMBIENT={
   hub:{c:'#ffd98a',vy:8,n:1.0,e:1}                 // warm hearth fireflies
 };
 function updateAmbient(dt,s){
-  if(inBriar()||inBlackWoods()){G.ambient.length=0;return;}
+  if(G.trial||inBriar()||inBlackWoods()){G.ambient.length=0;return;}
   const cfg=AMBIENT[s.theme]; if(!cfg) return;
   if(!G.devBriar && meta.particles!==false && G.ambient.length<80 && Math.random()<cfg.n*0.6){
     G.ambient.push({x:G.p.x+(Math.random()-0.5)*760, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*760,
@@ -20903,12 +20906,13 @@ function drawCourse(s,t){
   if(keepArt)s={...s,ground:'#4c534b'};
   if(outskirtsArt)s={...s,ground:G.area===1||G.side?'#454638':'#675a43'};
   if(hollowArt)s={...s,ground:'#4e5b51'};
-  const hz=deepArt?window.__DEEP_ART_LOOK.hazard:frostArt?['#152c40','#407997']:keepArt?['#252b28','#5c4d39']:hollowArt?['#182f2e','#44746e']:outskirtsArt?(G.area===1||G.side?['#18261d','#425333']:['#252721','#4c5137']):hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
+  const hz=G.trialLook?[G.trialLook.void,G.trialLook.trim]:deepArt?window.__DEEP_ART_LOOK.hazard:frostArt?['#152c40','#407997']:keepArt?['#252b28','#5c4d39']:hollowArt?['#182f2e','#44746e']:outskirtsArt?(G.area===1||G.side?['#18261d','#425333']:['#252721','#4c5137']):hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
   /* Is world3d laying real ground tiles this frame? Checked once, not per segment. */
   const _w3dGround = (() => { const w = window.__world3d && window.__world3d();
     return !!(three3DLive() && w && w.on && w.ready && w.counts && w.counts.floorTiles > 0); })();
   // the hazard lake below everything
-  if(!G?.kingFinal&&!inLongAscent()&&!inCastleGates()&&!inStormCampaign()&&!inPalaceCourtyard()&&!inSkyLibrary()&&!G.marbleArena){bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
+  if(G.trialLook){const b=G.bounds;bx((b.minX+b.maxX)/2,-160,(b.minZ+b.maxZ)/2,b.maxX-b.minX+1000,10,b.maxZ-b.minZ+1000,G.trialLook.void);}
+  else if(!G?.kingFinal&&!inLongAscent()&&!inCastleGates()&&!inStormCampaign()&&!inPalaceCourtyard()&&!inSkyLibrary()&&!G.marbleArena){bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
   bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film
   }
   // floating course islands
@@ -21143,6 +21147,7 @@ function drawCourse(s,t){
     if(three3DLive()&&_w3d?.on&&_w3d?.ready&&window.__keepWallDrawn?.(wl))continue;
     if(three3DLive()&&_w3d?.on&&_w3d?.ready&&window.__frostWallDrawn?.(wl))continue;
     if(three3DLive()&&_w3d?.on&&_w3d?.ready&&(inStormCampaign()||window.__deepWallDrawn?.(wl)))continue;
+    if(G.trialLook&&three3DLive()&&_w3d?.on&&_w3d?.ready&&_w3d?.counts?.trial===G.trial)continue;
     if(wl.invisible) continue;                                                               // collision-only blockers (e.g. hub fixtures) — no mesh
     if(standingOn(wl)) wallBox(wl);                                                       // rim you're standing on: keep it solid underfoot
     else if(!noFade && !shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
@@ -21171,12 +21176,12 @@ function drawCourse(s,t){
      beside the hero; with the 3D world on (b-torch-3d.png) there is nothing but lit cobbles. */
   deferOn();
   // torches: flickering flames along the halls
-  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph), fk=Math.sin(t*11+tc.ph);
+  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const flame=G.trialLook?.accent;const fl=0.72+0.18*Math.sin(t*9+tc.ph), fk=Math.sin(t*11+tc.ph);
     voxDraw('torch.post',{x:tc.x,z:tc.z,seed:Math.round((tc.ph||0)*100)});
-    bx(tc.x,56,tc.z, 7,9,7,'#c9783b','#713418',fl*0.84);
-    bx(tc.x+fk*1.2,63,tc.z, 4,6,4,'#f0bd68','#a65e22',fl*0.82); bx(tc.x-fk*1,68,tc.z, 2.6,5,2.6,'#ffe39a','#f0bd68',fl*0.9);  // flickering flame tongues
-    bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,'#ffe39a','#ffd24a',0.7*fl);                                          // rising spark
-    glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
+    bx(tc.x,56,tc.z, 7,9,7,(flame||'#c9783b'),(flame||'#713418'),fl*0.84);
+    bx(tc.x+fk*1.2,63,tc.z, 4,6,4,(flame||'#f0bd68'),(flame||'#a65e22'),fl*0.82); bx(tc.x-fk*1,68,tc.z, 2.6,5,2.6,(flame||'#ffe39a'),(flame||'#f0bd68'),fl*0.9);  // flickering flame tongues
+    bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,(flame||'#ffe39a'),(flame||'#ffd24a'),0.7*fl);                                          // rising spark
+    glowFX(tc.x,60,tc.z, 10, (flame||'#d36a28'), 0.10*fl); }                // restrained firelight bloom
   /* Plates, keys and chests live inside drawCourse but they are OBJECTS, not architecture — the
      things you step on, pick up and open. A pressure plate is 2 units proud of the floor and a
      chest sits on it, so the 3D ground buried all three. Deferred like the rest of the entities. */
@@ -23156,7 +23161,7 @@ function render(t){
   _poseKeep = [];
   if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
-  const s=(G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette; the Arena its own map palette
+  const s=BFTrialThemes.stage((G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0],G?.trial);   // Phase 20: hub wears its own warm palette; the Arena its own map palette
   const artSky=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   const hubArtSky=G?.hubArt&&window.__HUB_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const hollowArtSky=window.__HOLLOW_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
@@ -23169,7 +23174,7 @@ function render(t){
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
-  if(G){ const sc=G.sparringRoom?{z:1,p:[.72,.22],c:[0,0,0]}:G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:inPalaceCourtyard()?{z:.78,p:[.50,.80],c:[.30,.25,.16]}:deepArtSky?{z:G.zone===6?.76:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:inSnowbound()?.75:.6,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:G.area===0?.74:.55,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.76,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:artSky?(G.area===1?.68:.76):.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
+  if(G){ const sc=G.trialLook?{z:.72,p:[.72,.22],c:[0,0,0]}:G.sparringRoom?{z:1,p:[.72,.22],c:[0,0,0]}:G.devBriar?{z:.60,p:[.72,.22],c:[.06,.045,.015]}:inPalaceCourtyard()?{z:.78,p:[.50,.80],c:[.30,.25,.16]}:deepArtSky?{z:G.zone===6?.76:.46,p:[.72,.22],c:window.__DEEP_ART_LOOK.sunGlow}:frostArtSky?{z:inSnowbound()?.75:.6,p:[.72,.22],c:[.025,.055,.09]}:keepArtSky?{z:G.area===0?.74:.55,p:[.72,.22],c:[.065,.05,.025]}:hollowArtSky?{z:.76,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:artSky?(G.area===1?.68:.76):.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // STATIC skybox sun: the sun holds one fixed spot in the sky no matter how the camera turns, so the
     // scene's key light and ambience stay consistent (the world-space light direction uL is already fixed).
@@ -24849,7 +24854,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2311"></script>
+<script type="module" src="./hero3d.js?v=2315"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2309"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

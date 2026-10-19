@@ -1121,6 +1121,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <link rel="stylesheet" href="./hub-dialogue.css?v=2288">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
+<script src="./render-motion.js?v=2304"></script>
 <script src="./hub-dialogue.js?v=2303"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
@@ -1219,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.303.0-beastkeeper-quests';
+const VERSION3D='2.304.0-smooth-character-motion';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -23087,7 +23088,7 @@ const SKYSUN={
    The mirror pose had the same fate the moment you walked away from the glass.
    Swept at the START of the frame using the previous frame's list, which needs no cooperation from
    the end of a 300-line render function and is one frame late, i.e. invisible. */
-let _poseKeep = [];
+let _poseKeep = [],renderDelta=1/60;
 function render(t){
   if(mode!=='play')window.BFNpcNames?.clear();
   document.body.classList.toggle('sprint-racing',!!G?.bonusActive&&mode==='play');
@@ -23105,6 +23106,8 @@ function render(t){
   const frostArtSky=window.__FROST_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const deepArtSky=window.__DEEP_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
   const sky=G?.sparringRoom?[.075,.105,.12]:G?.devBriar?(G.devBriar.part?[.16,.25,.23]:[.38,.53,.62]):deepArtSky?window.__DEEP_ART_LOOK.sky:frostArtSky?(inSnowbound()?[.51,.70,.86]:[.145,.28,.36]):keepArtSky?(G.area===1||G.side?[.188,.239,.243]:[.42,.55,.63]):hollowArtSky?[.46,.65,.73]:hubArtSky?[.31,.42,.48]:artSky?(G.area===1||G.side?[.247,.396,.376]:[.48,.67,.80]):s.sky;
+  // Shared Three/raw-WebGL state must never leave old pixels behind.
+  gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
@@ -23116,7 +23119,7 @@ function render(t){
     PostFX.sky(top,bot,sun,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   const cameraSubject=G?.p?.spectating&&MP.active?(MP.spectateTarget()||p):p;
-  if(G){ G.cam.x+=(cameraSubject.x-G.cam.x)*0.10; G.cam.z+=(cameraSubject.z-G.cam.z)*0.10; G.cam.y+=((cameraSubject.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
+  if(G){ const follow=BFRenderMotion.follow(.10,renderDelta),rise=BFRenderMotion.follow(.08,renderDelta);G.cam.x+=(cameraSubject.x-G.cam.x)*follow; G.cam.z+=(cameraSubject.z-G.cam.z)*follow; G.cam.y+=((cameraSubject.y||0)-(G.cam.y||0))*rise;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
   const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0)+(p.dragonRide?24:0):0;
   const _noShake=meta.shakeOff||meta.reduceMotion;   // accessibility: hold the camera steady
@@ -23801,8 +23804,10 @@ function frame(ts){
   window.BFNarration?.tick();musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);BFAdventureHud.tick(dt,mode==='play'&&!window.BF_LOADING?.active,G);
   if(mode!=='play'||!window.HERO3D?.on){const restHint=document.getElementById('campaignRestHint');if(restHint)restHint.hidden=true;}
   window.BF_LOADING?.tick(G,mode);
-   if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
+   if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ BFRenderMotion.capture(G);update(DT); acc-=DT; }}
    updateSparringHud();
+  renderDelta=dt;const restoreMotion=BFRenderMotion.begin(G,acc/DT,mode==='play'&&!backgroundMenuMode&&!BF_LOADING.active&&!BFPortalTravel.blocking);
+  try{
   PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
   render((G?G.time:ts/1000));
   deferOff();                         // belt and braces: an early return inside render must never leave the batch globals swapped
@@ -23810,6 +23815,7 @@ function frame(ts){
   PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
   flushHero3D();                      // 3D hero/world/mobs go on top of the COMPOSITED frame
   flushDeferred();                    // ...then the entities, depth-tested against what it just drew
+  }finally{restoreMotion();}
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   window.BFWorldSfx?.tick(G,mode,{queue:queueSkillFx,play:playFx},performance.now()/1000,document.hidden||!!window.BF_LOADING?.active);
   window.BFCombatDetailSfx?.tick(G,backgroundMenuMode||mode,document.hidden||!!window.BF_LOADING?.active,performance.now()/1000,meta.combatDetailAudio!==false);

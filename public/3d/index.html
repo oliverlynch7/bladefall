@@ -1105,7 +1105,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="titlebg"><div class="tbimg"></div><div class="tembers" id="tembers"></div><div class="tvign"></div></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
 <link rel="stylesheet" href="./npc-names.css?v=2262">
-<script src="./npc-names.js?v=2262"></script>
+<script src="./npc-names.js?v=2309"></script>
 <div id="npcNames" hidden></div>
 <button id="interactprompt" type="button" class="hide" aria-label="Interact"></button>
 <div id="petlabel" class="hide"></div>
@@ -1220,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.308.0-live-inspection-mirror';
+const VERSION3D='2.309.0-npc-scene-ownership';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3488,7 +3488,7 @@ function briarInteract(){
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65||!BFCampaignInteraction.reachable(G,p,o))return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={anchorNpc:(G.storyNpcs||[]).includes(o)?o:null,x:o.x,z:o.z,y:(o.y||0)+BFCampaignObjects.anchor(o),label,act};}};
  if(inLongAscent()&&G.ascent.lift)for(const y of [250,1250])consider({x:1420,z:-170,y,range:110},y===250?'Ride service lift up':'Ride service lift down',()=>BFLongAscent.ride(G,y===250));
  if(inThunderCliffs()&&G.thunder.lift)for(const y of [40,340])consider({x:-300,z:-650,y,range:115},y===40?'Ride lift up':'Ride lift down',()=>BFThunderCliffs.ride(G,y===40));
- for(const n of G.storyNpcs||[])if(!(n.id==='thomas'&&window.BFSocial?.npcPose('thomas'))&&(G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>inReturnHub()&&n.open&&!n.direct?openNpcTalk(n):briarRequest('open',{npc:n.id}));
+ for(const n of G.storyNpcs||[])if((n.id!=='thomas'||inBriar()||inReturnHub())&&!(n.id==='thomas'&&window.BFSocial?.npcPose('thomas'))&&(G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||briarBook.npcs[n.id]&&BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>inReturnHub()&&n.open&&!n.direct?openNpcTalk(n):briarRequest('open',{npc:n.id}));
  if(inShipwreck()&&!s.flags['sc.code.open']){const ballista=G.storyObjects.find(o=>o.key==='sc.ballista');if(ballista)consider(ballista,ballista.label,()=>BFShipwreckShore.openAim(G,{getState:adventureStoryState,enter:()=>{releaseKeyboard();mode='inspection';showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:()=>{if(mode==='inspection')resumePlay();},fire:()=>briarRequest('world',{key:'sc.code.fire'})}));}
  if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&!['sc.ballista','sc.code.fire'].includes(o.key)){const ready=o.available&&BFStoryState.matches(s,briarBook.events[o.key]?.when),gripBusy=o.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==briarId(),winchBusy=o.key==='kd.lift.winch'&&(G.prison?.remote?.winchOwner||G.prison?.winch?.owner)&&(G.prison?.remote?.winchOwner||G.prison?.winch?.owner)!==briarId(),millBusy=['briar.water','briar.mill.reset'].includes(o.key)&&G.briarMill?.owner&&G.briarMill.owner!==briarId();consider(o,millBusy?'Crate in use by ally':gripBusy?'Reflector in use by ally':winchBusy?'Winch in use by ally':ready?o.label:o.key==='sc.hull.release'?'Wait for the gold mark':'Inspect · '+o.label,()=>{if(millBusy){toast('Your ally is moving the crate.');return;}if(gripBusy){toast('Your ally is moving the reflector.');return;}if(winchBusy){toast('Your ally is turning the winch.');return;}if(ready)briarRequest('world',{key:o.key});else{if(o.key==='sc.hull.release'){BFShipwreckShore.hullMiss(G);toast(o.blockedText);return;}const text=o.blockedText||(o.available?'This may be useful later. Follow your current task, then return here.':'This needs another step first. Check the current task in your journal.');BFJournalNotice.push({id:'inspect.'+o.key,kind:'Not ready yet',title:o.label,text});toast(text);}});}
  return best;
@@ -9552,6 +9552,8 @@ function applyEditsNow(){
   } catch(e){ console.warn('[editor] apply failed, level left as generated:', e.message); }
 }
 function loadStageRaw(i){
+  // Story actors and props belong to this stage, never the previous area or hub.
+  G.storyNpcs=[];G.storyObjects=[];G.riftSpirit=null;
   const s=G.trial?{...STAGES[i],type:'normal',boss:null}:STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[]; G.lastSlainEnemy=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
@@ -24783,9 +24785,9 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2308"></script>
+<script type="module" src="./hero3d.js?v=2309"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
-<script type="module" src="./social-hub.js?v=2305"></script>
+<script type="module" src="./social-hub.js?v=2309"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

@@ -1,0 +1,47 @@
+[
+  {
+    "suite": "scripts/test-npc-scene-ownership.mjs",
+    "passed": true,
+    "output": "59 NPC scene ownership, legitimate Thomas, mode exclusion, lifecycle, immutable roster and stage cleanup checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-npc-names.cjs",
+    "passed": true,
+    "output": "17 NPC identity, occlusion, crowding and lifecycle checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-npc-labels.cjs",
+    "passed": true,
+    "output": "{\"checks\":117,\"passed\":true,\"renderDpr\":[0.5,0.66,1,1.25,1.5,2],\"roles\":[\"host\",\"guest\"]}\n"
+  },
+  {
+    "suite": "scripts/test-chess-room.mjs",
+    "passed": true,
+    "output": "389 chess room, authority, shared table, clocks and history checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-campaign-compatibility.cjs",
+    "passed": true,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-save-safety.cjs",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-crisp-motion.cjs",
+    "passed": true,
+    "output": "15 character motion clarity checks passed: no sampling/drawing/toggle/warmup echo rigs, current-frame clear, normal peer compositing and loading warmup retained.\n"
+  },
+  {
+    "suite": "scripts/test-esc-pause.cjs",
+    "passed": true,
+    "output": "42 pause regression checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-live-mirror.mjs",
+    "passed": true,
+    "output": "Live mirror resolution, scene isolation, orbit visibility, resource disposal/reopen, shared frame preservation and slab/duplicate removal passed.\n"
+  }
+]

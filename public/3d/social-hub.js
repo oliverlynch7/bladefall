@@ -1,3 +1,4 @@
+import {waystationScene} from './npc-roster.js?v=2309';
 import {thomasHardVictory} from './chess-rewards.js?v=2227a';
 import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation.js?v=2226e';
 import './chess-pieces.js?v=2119';
@@ -7,7 +8,7 @@ import {createChessTable} from './chess-table.js?v=2305';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000,botId='chess-thomas';
 let opened=false,origin=null,parkedPet=null,remote=null,remoteAt=0,talks={},pendingTalk=null,lastTalk='',talkRev=0,wasCoop=false,lastView='',lastDisplay='',lastLobby='',ambientGame='duel',nextRewardAttempt=0;
 const id=()=>A.mp().active?A.mp().myId:'solo',host=()=>!A.mp().active||A.mp().isHost;
-const isHub=()=>A.g()?.hub&&!A.g().riftHall&&!A.g().sparringRoom;
+const isHub=()=>waystationScene(A.g());
 const owned=()=>host()?!!A.meta().hubUpgrades?.chess:!!remote?.owned;
 const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const name=pid=>pid===id()?'You':A.mp().peers[pid]?.name||'Friend';
@@ -72,7 +73,7 @@ function peerVisible(q){const st=current();return !opened||!st||!q.sitting||Obje
 function peerPose(q){const st=current();if(!opened||!st||!q.sitting||!Object.values(st.seats).includes(q.id))return null;return {...chessSeat(table,st.seats.w===q.id?'w':'b'),sitting:true,vx:0,vy:0,vz:0};}
 let visitor=null;
 function thomasPose(n){
- if(n!=='thomas'||!isHub())return null;if(visitor?.world&&visitor.world!==A.g())visitor=null;
+ if(n!=='thomas')return null;if(!isHub()||!owned()){visitor=null;return null;}if(visitor?.world&&visitor.world!==A.g())visitor=null;
  const st=tableState(),homeNpc=A.g().hubNpcs?.find(n=>n.id==='thomas'),home={x:(homeNpc?.x??300)+13,y:homeNpc?.y||0,z:homeNpc?.z??350},now=performance.now();
  const key=st?.kind==='thomas'?st.gameId+':'+st.round:null;
  if(key){const seat=chessSeat(table,st.seats.w===botId?'w':'b',true),a=arrival(),t=Math.min(1,(a?.gameId===st.gameId?a.elapsed/a.duration:1));visitor={key,home,seat,world:A.g(),last:walkPose(home,seat,t)};return {...visitor.last,peerId:botId};}

@@ -1,0 +1,9 @@
+# Thomas / NPC scene ownership · v2.309.0
+
+User reports Thomas's model in unrelated levels. Ordinary baseline sweep after a Thomas chess visit did not reproduce that exact report; do not describe it as a confirmed reproduction. Source inspection found real lifecycle gaps: stage rebuild retained story actor/object/spirit lists, renderer rigs cached across worlds/areas, no-world early return retained bodies, and chess injection could mutate beta authored actors.
+
+Stage rebuild now clears transient story lists. Visual rigs are bound to world identity and scene key, stale bodies are disposed, missing world hides/clears the group and labels. Copied, deduplicated roster filters hidden/dead actors; Thomas only belongs to the Briar opening/beta or Waystation. Chess pose/injection restricted to actual owned hub and visitor state cleared outside hub. Thomas nameplates and interactions have matching location checks; malformed NPC not in the story book no longer dereferences a missing dialogue definition. Quest/saved progression unchanged.
+
+Muted real Chrome/WebGL: all16 campaign parts and8 boss scenes swept after hub chess visit. Thomas rendered only in Briar opening. Legitimate hub Thomas chess invitation/arrival UI worked. Injected stale Thomas near player in Hollow stayed in the synthetic source list but was absent from rendered actors, nameplates and interactions, with no console errors. Direct same-world Briar opening -> boss transition cleared all prior story NPCs. Isolated old level100/gold1145 retained. Actual user storage untouched. See JSON visible reports. No two-client co-op run or human gameplay quality claim for this fix.
+
+59 new actual roster/lifecycle/stage cleanup/visitor tests; existing names17, labels117 including host/guest projection, chess389, campaign33, saves24, crisp15, pause42 and mirror regression suites pass. Module and inline script parse checks pass.

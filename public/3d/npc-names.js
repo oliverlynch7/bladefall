@@ -4,7 +4,7 @@ function entries(g){
  if(!g||g.hub)return [];
  const list=g.devKeep?[...(g.devKeep.actors||[])]:g.storyNpcs?.length?[...g.storyNpcs,...g.canyonPrisoners||[],...g.keepPrisoners||[],...g.ironWorkers||[],...(g.ascentWorkers||[]).map(n=>n.name?n:{...n,name:'Worker'})]:g.npc&&!g.npc.dummy?[{...g.npc,id:'shade',name:g.npc.name||'The Shade'}]:[];
  if(g.riftSpirit)list.push(g.riftSpirit);
- return list.filter(n=>n&&n.id&&n.name&&!n.hidden&&!n.dead&&!['sunspire_orb','abyss_king'].includes(n.id));
+ return list.filter(n=>n&&n.id&&n.name&&!n.hidden&&!n.dead&&!['sunspire_orb','abyss_king'].includes(n.id)&&(n.id!=='thomas'||!root.BFNpcRoster||root.BFNpcRoster.thomasScene(g,!!root.__BF3?.isCampaignAdventure?.())));
 }
 function occluded(g,eye,a,intersects){
  if(!eye||!intersects)return false;

@@ -48,6 +48,12 @@ function next(){
  guide.g._tutorialSafe=!!guide.steps[guide.i].safe;
  placedAt=0;
 }
+function back(){
+ if(!canReceive())return false;
+ if(guide.i===0)return true;
+ window.BFNarration?.hide(guide);guide.i--;guide.success=null;guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;guide.practiceOpened=false;
+ panel?.classList?.remove('lesson-success');guide.g._tutorialSafe=!!guide.steps[guide.i].safe;placedAt=0;return true;
+}
 function position(force=false){
  if(!guide||!panel||panel.hidden)return;
  if(!force&&performance.now()-placedAt<120)return;placedAt=performance.now();
@@ -95,6 +101,7 @@ function draw(hint){
  if(keys.length){const k=document.createElement('div');k.className='lesson-control';for(const key of keys){const el=document.createElement('kbd');el.textContent=key; k.append(el);}const l=document.createElement('span');l.className='lesson-controls-label';l.textContent=label;k.append(l);copy.append(k);}
  panel.append(copy);
  const buttons=document.createElement('div');buttons.className='lesson-actions';
+ const previous=document.createElement('button');previous.type='button';previous.textContent='Back · Q';previous.disabled=guide.i===0;previous.onclick=back;buttons.append(previous);
  if(!core){const b=document.createElement('button');b.type='button';b.textContent=(guide.i===guide.steps.length-1&&!guide.resume?'Finish':'Continue')+' · '+hint('interact');b.onclick=next;buttons.append(b);}
  const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=step.safe?'Skip lessons':'Close tips';skip.onclick=stop;buttons.append(skip);panel.append(buttons);
  const status=document.createElement('p');status.className='lesson-status';status.textContent=step.safe?'Enemies wait during control practice.':'Optional tip · movement and combat stay active.';panel.append(status);
@@ -104,6 +111,7 @@ function draw(hint){
 function canReceive(){return guide&&panel&&!panel.hidden&&window.__BF3?.mode==='play';}
 window.addEventListener('keydown',e=>{
  if(!canReceive()||e.repeat||e.target.closest?.('input,textarea,select,[contenteditable=true]'))return;
+ if(e.code==='KeyQ'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();e.stopImmediatePropagation();back();return;}
  const action=window.__BF3?.keyAction(window.BFPartyNavigation?.keyCode(e)||e.code);
  if(guide.steps[guide.i].practice&&(action===guide.steps[guide.i].practice||guide.steps[guide.i].practice==='pause'&&e.code==='Escape'))return;
  if(action==='interact'&&!coreActions.includes(guide.steps[guide.i].action)){
@@ -179,5 +187,5 @@ function map(g,mode){
 
 const mapStyle=document.createElement('style');mapStyle.textContent='#localMap{width:216px!important;height:216px!important}@media(max-width:650px){#localMap{width:140px!important;height:140px!important}}';document.head.append(mapStyle);
 function control(p){if(!canReceive())return false;if(guide.steps[guide.i].practice&&p.edge(guide.steps[guide.i].practice))return false;if(p.edge('pause'))return false;if(p.edge('interact')&&!coreActions.includes(guide.steps[guide.i].action)){if(guide.success==null)next();return true;}return false;}
-window.BFGuidedTutorial={start,skill,tick,map,stop,suspend,practice,control,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,id:guide.steps[guide.i]?.id,title:guide.steps[guide.i]?.title,success:guide.success!=null}:null}};
+window.BFGuidedTutorial={start,skill,tick,map,stop,suspend,practice,control,back,get blocksPointerLock(){return !!guide?.g?._tutorialSafe;},get state(){return guide?{step:guide.i,id:guide.steps[guide.i]?.id,title:guide.steps[guide.i]?.title,success:guide.success!=null}:null}};
 })();

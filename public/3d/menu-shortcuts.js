@@ -22,6 +22,7 @@ function onKey(e){
  }
  if(e.code!=='KeyQ'||e.ctrlKey||e.metaKey||e.altKey||e.isComposing||typing(e.target)||!root.__BF3||root.__bfEd?.EDITOR?.on)return;
  e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;
+ if(root.BFGuidedTutorial?.back?.()||root.BFHubTour?.back?.())return;
  if(root.BFChestReveal?.active){root.BFChestReveal.skip();return;}
  // Back never opens a menu or skips a lesson during live play. Tab/Esc opens the menu.
  if(game?.mode==='play'&&!root.document?.getElementById('emoteWheel')&&!root.BFSocial?.camera?.())return;

@@ -8,7 +8,7 @@
 <script src="./enemy-warning-sfx.js?v=2277"></script>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./narration.css?v=2287"><script src="./onboarding-script.js?v=2287"></script><script src="./narration.js?v=2287"></script>
-<script src="./menu-shortcuts.js?v=2287"></script>
+<script src="./menu-shortcuts.js?v=2294"></script>
 <script src="./menu-close.js?v=2261f"></script>
 <script src="./menu-gold.js?v=2268"></script>
 <link rel="stylesheet" href="./menu-gold.css?v=2268">
@@ -1126,7 +1126,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2288"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
-<script src="./hub-tour.js?v=2287"></script>
+<script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2254"></script>
@@ -1203,8 +1203,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2287"></script>
-<script src="./menu-tour.js?v=2287"></script>
+<script src="./guided-tutorial.js?v=2294"></script>
+<script src="./menu-tour.js?v=2294"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1222,7 +1222,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.293.0-title-theme';
+const VERSION3D='2.294.0-tutorial-back-slots';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1253,10 +1253,10 @@ function continueSlot(sl){
   try{ sessionStorage.setItem('bf3_continue_after_slot','1'); localStorage.setItem('bf3_slot',sl); }catch(e){}
   location.reload();
 }
-function createCharacterSlot(sl){
+function createCharacterSlot(sl,forceReload=false){
   if(!Number.isInteger(sl)||sl<0||sl>2)return;
   if(!slotSummary(sl).empty){openSlots();return;}
-  if(sl===SLOT){beginCharacterCreation();return;}
+  if(sl===SLOT&&!forceReload){beginCharacterCreation();return;}
   try{sessionStorage.removeItem('bf3_continue_after_slot');sessionStorage.setItem('bf3_create_after_slot',String(sl));localStorage.setItem('bf3_slot',String(sl));}
   catch(e){toast('Could not switch save slots. Please check browser storage.');return;}
   location.reload();
@@ -18325,7 +18325,8 @@ function toast(msg,color,icon){ const t=document.getElementById('toast'); t.text
   if(icon){ const i=document.createElement('span'); i.className='ico ico-event ico-'+icon; i.setAttribute('aria-hidden','true'); t.append(i,document.createTextNode(' '+msg)); }
   else t.textContent=msg;
   t.style.color=color||''; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
-function openSlots(){
+function openSlots(newCharacter=false){
+  newCharacter=newCharacter===true;const allFull=[0,1,2].every(sl=>!slotSummary(sl).empty);
   mode='menu';
   const rows=[0,1,2].map(sl=>{ const su=slotSummary(sl), on=sl===SLOT;
     if(su.empty) return `<div class="wowslot empty"><div class="wowport empty">＋</div>
@@ -18340,8 +18341,8 @@ function openSlots(){
         <div class="wowstats"><span>${su.beatN?'⚔ Realm cleared':'⚑ Zone '+su.zone+'/'+ZONES.length}</span><span style="color:#ffd24a">◆ ${su.gold}g</span></div>
         <div class="wowzbar"><i style="width:${su.beatN?100:zbar}%"></i></div>
       </div>
-      <div class="wowbtns">${on?`<button class="bigbtn buybtn" data-play="1" style="width:auto;margin:0;padding:8px 13px;font-size:12px">▶ Play</button>`:`<button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:8px 13px;font-size:12px">Play</button>`}
-        <button class="bigbtn buybtn ghost" data-del="${sl}" style="width:auto;margin:0;padding:8px 10px;font-size:12px;color:var(--danger)">✕</button></div></div>`; }).join('');
+      <div class="wowbtns">${newCharacter?'':on?`<button class="bigbtn buybtn" data-play="1" style="width:auto;margin:0;padding:8px 13px;font-size:12px">▶ Play</button>`:`<button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:8px 13px;font-size:12px">Play</button>`}
+        <button class="bigbtn buybtn ghost" data-del="${sl}" aria-label="Delete ${htmlSafe(su.name)} from slot ${sl+1}" style="width:auto;margin:0;padding:8px 10px;font-size:12px;color:var(--danger)">Delete</button></div></div>`; }).join('');
   showOverlayHTML(`<style>
     .wowslot{display:flex;align-items:center;gap:12px;padding:11px;margin-bottom:10px;border:1px solid #2d3342;border-radius:14px;background:linear-gradient(150deg,rgba(30,26,40,.72),rgba(12,12,18,.86));box-shadow:0 6px 16px rgba(0,0,0,.3)}
     .wowslot.on{border-color:var(--amber);box-shadow:0 6px 20px rgba(232,163,61,.2)}
@@ -18355,20 +18356,20 @@ function openSlots(){
     .wowzbar{height:4px;border-radius:3px;background:#22242e;margin-top:5px;overflow:hidden}.wowzbar i{display:block;height:100%;background:linear-gradient(90deg,#7a5cff,#b69aff)}
     .wowbtns{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
   </style>
-  <div class="card"><p class="ovkicker">Your Wardens</p><h2 class="ovh">Load Character</h2>
-    <p class="ovsub">Three independent Wardens — choose one to play. Switching reloads the realm.</p>
+  <div class="card"><p class="ovkicker">Your Wardens</p><h2 class="ovh">${newCharacter?(allFull?'All save slots are full':'Choose a slot for your new Warden'):'Load Character'}</h2>
+    <p class="ovsub">${newCharacter?(allFull?'You have three saved characters. Delete one to make room for a new Warden, or cancel to keep them all.':'Choose an empty slot, or delete a character to make room.'):'Three independent Wardens — choose one to play. Switching reloads the realm.'}</p>
     <div class="achlist">${rows}</div>
-    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <button class="bigbtn ghost" id="backBtn">${newCharacter?'Cancel':'Back'}</button></div>`);
   { const pb=document.querySelector('[data-play]'); if(pb) pb.onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} modeSelect(); }; }
   document.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>{const sl=+b.dataset.sel;if(slotSummary(sl).empty)createCharacterSlot(sl);else continueSlot(sl);});
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const sl=+b.dataset.del;
     const su=slotSummary(sl);
     showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--danger)">Delete Slot ${sl+1}?</p>
-      <h2 class="ovh">Erase this character?</h2><p class="ovsub">${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].disp:su.cls)+' · Lv '+su.lvl:'this save'} will be gone for good.</p>
+      <h2 class="ovh">Erase ${htmlSafe(su.name)}?</h2><p class="ovsub">${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].disp:su.cls)+' · Lv '+su.lvl:'this save'} will be gone for good.</p>
       <button class="bigbtn" id="delYes" style="background:linear-gradient(180deg,#e8635a,#c33)">Erase it</button>
-      <button class="bigbtn ghost" id="delNo">Keep it</button></div>`);
-    document.getElementById('delYes').onclick=()=>{ if(!deleteSlot(sl))return; if(sl===SLOT) selectSlot(sl); else openSlots(); };
-    document.getElementById('delNo').onclick=openSlots; });
+      <button class="bigbtn ghost" id="delNo" data-menu-back>Keep it</button></div>`);
+    document.getElementById('delYes').onclick=()=>{ if(!deleteSlot(sl))return; if(newCharacter)createCharacterSlot(sl,true);else if(sl===SLOT) selectSlot(sl); else openSlots(); };
+    document.getElementById('delNo').onclick=()=>openSlots(newCharacter); });
   document.getElementById('backBtn').onclick=titleScreen;
 }
 function titleScreen(){
@@ -18425,8 +18426,9 @@ function titleScreen(){
   window.addEventListener('keydown',revealMenu);
   window.addEventListener('pointerdown',revealMenu);
   document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){}
-    if(currentSlot.empty)beginCharacterCreation();   // first time: the opening cutscene sets up the world, then class select
-    else openSlots(); };   // else pick/free a slot
+    if([0,1,2].every(sl=>!slotSummary(sl).empty))openSlots(true);
+    else if(currentSlot.empty)beginCharacterCreation();   // first time: the opening cutscene sets up the world, then class select
+    else openSlots(true); };   // choose a free slot without loading an existing hero
   const cont=document.getElementById('mmCont'), contSave=document.getElementById('mmContSave'), contWrap=document.getElementById('mmContinueWrap');
   const paintPreview=dir=>{ const su=slotSummary(previewSlot), C=su.cls&&CLASSES[su.cls]?CLASSES[su.cls]:null;
     contSave.innerHTML=`Slot ${previewSlot+1} · ${htmlSafe(su.name)} · Level ${su.lvl} · ${C?C.icon+' '+C.disp:htmlSafe(su.cls||'No class equipped')}`;

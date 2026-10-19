@@ -1750,6 +1750,14 @@ function pirateWeaponPose(p,wrap,A,dt){
   if(fingers)fingers.quaternion.slerp(new THREE.Quaternion(),weight);
   wrap.updateMatrixWorld(true);
 }
+// Use the neutral idle carrier for downed players; Death clips vary between rigs. Ease onto the side,
+// with a small ground lift, while preserving its own class body and animated limbs.
+function downedPose(p,wrap,A,dt){
+ const step=Math.max(0,Math.min(.1,dt||0));A.downedBlend=p.downed?Math.min(1,(A.downedBlend||0)+step/.45):Math.max(0,(A.downedBlend||0)-step/.28);
+ if(!A.downedBlend)return;const u=A.downedBlend,k=u*u*(3-2*u);
+ wrap.rotation.z=-Math.PI*.47*k;wrap.position.y+=12*k;wrap.updateMatrixWorld(true);
+}
+
 function playFor(p, A){
   // Bind every local animation while the loading curtain is up, rather than on its first dash.
   if(A.local&&A.mixer&&A.preparedMixer!==A.mixer&&window.BF_LOADING?.active){
@@ -1800,6 +1808,7 @@ function playFor(p, A){
 
   const cast = p.combatPose?.remaining > 0 && !(p.dodgeTimer > 0) && !airborne;
   const want = p.dead ? 'Death'
+             : p.downed ? 'Idle'
              : p.dragonRide || p.sitting || p.emote && p.emote.t<4 ? 'Idle'
              : cast ? p.combatPose.clip
              : charging ? CHG
@@ -1858,7 +1867,10 @@ function playFor(p, A){
   if(!name || !A.mixer || (A.cur === name && !restart)) return;
 
   const next = A.mixer.clipAction(clips[name]);
-  if(name === 'Roll' && rolling){
+  if(name === 'Death'){
+    next.reset();next.timeScale=1;next.setLoop(THREE.LoopOnce,1);next.clampWhenFinished=true;
+    next.fadeIn(.12).play();if(A.cur&&A.cur!==name&&clips[A.cur])A.mixer.clipAction(clips[A.cur]).fadeOut(.12);
+  } else if(name === 'Roll' && rolling){
     const dur = (clips.Roll && clips.Roll.duration) || 1;
     const window = Math.max(0.12, p.dodgeTimer);
     next.reset();
@@ -1890,7 +1902,7 @@ function playFor(p, A){
   /* Exposed so which clip is playing can be CHECKED rather than assumed - three animation bugs in
      a row were invisible because nothing reported this. Local only: HERO3D.clip means "what the
      player's own character is doing", and an ally overwriting it would make that export lie. */
-  if(A.local){ HERO3D.clip = name; HERO3D.clipArt = art; HERO3D.playback={clip:name,swingId:p.swingId,castSerial:casting?p.combatPose.serial:null,timeScale:next.timeScale,oneShot:attacking||casting,window:casting?p.combatPose.remaining:p.atkTimer}; }
+  if(A.local){ HERO3D.clip = name; HERO3D.clipArt = art; HERO3D.playback={clip:name,swingId:p.swingId,castSerial:casting?p.combatPose.serial:null,timeScale:next.timeScale,oneShot:name==='Death'||attacking||casting,window:casting?p.combatPose.remaining:p.atkTimer}; }
 }
 
 /* ── ONE RIG PER ALLY ──────────────────────────────────────────────────────────────────────────
@@ -2111,7 +2123,7 @@ export function drawHero3D(p, t, firstPass=true){
     const S = HERO3D.scale;
     wrap.scale.setScalar(S);
     wrap.position.set(p.x, (p.y || 0) + HERO3D.yOff + (p.dragonRide?24:0), p.z);
-    wrap.rotation.y = (p.yaw || 0) + HERO3D.yawOff;
+    wrap.rotation.set(0,(p.yaw || 0) + HERO3D.yawOff,0);
     wrap.updateMatrixWorld(true);
     showOnly(wrap);
 
@@ -2131,11 +2143,12 @@ export function drawHero3D(p, t, firstPass=true){
         const q=l.quaternion.clone();l.quaternion.set(r.quaternion.x,-r.quaternion.y,-r.quaternion.z,r.quaternion.w);r.quaternion.set(q.x,-q.y,-q.z,q.w);
       }
     }
-    if(!p.dragonRide&&!p.sitting&&(!p.emote||p.emote.id==='bow'||p.emote.t>=4)){
+    if(!p.dead&&!p.downed&&!p.dragonRide&&!p.sitting&&(!p.emote||p.emote.id==='bow'||p.emote.t>=4)){
       pirateWeaponPose(p,wrap,anim,dt);
       poseWeaponGrip(p,wrap,anim,rec?rec.model:HERO3D.model,dt);
     }
     applyEmotePose(p,wrap,anim);
+    downedPose(p,wrap,anim,dt);
     if(p.sitting&&window.BFSocial?.seatHeight){wrap.updateMatrixWorld(true);const hip=wrap.getObjectByName('UpperLegL');if(hip){wrap.position.y+=window.BFSocial.seatHeight-hip.getWorldPosition(new THREE.Vector3()).y;wrap.updateMatrixWorld(true);}}
     if(p.dragonRide){wrap.updateMatrixWorld(true);const hip=wrap.getObjectByName('UpperLegL');if(hip){const at=hip.getWorldPosition(new THREE.Vector3());wrap.position.y+=(p.y||0)+46-at.y;wrap.updateMatrixWorld(true);}}
     if(_isLocal||(!rec&&window.__BF3?.mode==='mirror'))colorWeapon(localWeaponHolder(),p.weapon);
@@ -2226,10 +2239,10 @@ window.__hero3dRigs = () => {
   const wof = n => { let w = null; n && n.traverse(o => { if(!w && o.userData && o.userData._weap) w = o; }); return !!w; };
   return {
     frame: _frameNo, cap: peerCap(),
-    local: { model: HERO3D.model, clip: _localAnim.cur, wrap: !!HERO3D._wrap,
+    local: { model: HERO3D.model, clip: _localAnim.cur,fallen:Math.abs(HERO3D._wrap?.rotation.z||0)>.8, wrap: !!HERO3D._wrap,
              visible: !!(HERO3D._wrap && HERO3D._wrap.visible), weapon: HERO3D.weapon || null },
     peers: [..._peerRigs.entries()].map(([id, r]) => ({
-      id, model: r.model, face:r.face?.state, appearance:r.faceKey, classPalette:r.palette, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
+      id, model: r.model,fallen:Math.abs(r.wrap.rotation.z)>.8, face:r.face?.state, appearance:r.faceKey, classPalette:r.palette, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
       armed: wof(r.node), seen: r.seen, visible: !!r.wrap.visible,
       at: { x: Math.round(r.wrap.position.x), z: Math.round(r.wrap.position.z) },
     })),

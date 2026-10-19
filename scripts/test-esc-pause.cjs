@@ -3,7 +3,7 @@ const src=fs.readFileSync('public/3d/index.html','utf8').replace(/\r\n/g,'\n');l
 const ok=(x,m)=>{assert(x,m);checks++;};
 // Exercise the actual pause wrapper with a minimal world, not a reimplemented policy.
 const part=src.slice(src.indexOf('let liveMenuWorld=null'),src.indexOf('function updateWorld(dt)'));
-const ctx={G:{p:{hp:100,x:1,y:2,z:3,yaw:0,vx:4,vy:5,vz:6,onGround:true},time:0},mode:'play',MP:{active:false,pvp:false,tick(){ctx.network++;}},meta:{autoAttack:true},input:{},network:0,social:0,polls:0,document:{body:{classList:{contains:()=>false}},getElementById:()=>null},window:{BFSocial:{tick(){ctx.social++;}}},BFGuidedTutorial:{suspend(){}},BFShipwreckShore:{aiming:()=>false},releaseKeyboard(){},pollGamepad(){ctx.polls++;},updateWorld(dt){ctx.G.time+=dt;ctx.G.p.x+=50;ctx.hurtPlayer(9);},briarBook:null};
+const ctx={G:{p:{hp:100,x:1,y:2,z:3,yaw:0,vx:4,vy:5,vz:6,onGround:true},time:0},mode:'play',MP:{active:false,pvp:false,tick(){ctx.network++;}},meta:{autoAttack:true},input:{},network:0,social:0,polls:0,document:{body:{classList:{contains:()=>false}},getElementById:()=>null},window:{BFSocial:{tick(){ctx.social++;}}},BFGuidedTutorial:{suspend(){}},partyHud(){},BFShipwreckShore:{aiming:()=>false},releaseKeyboard(){},pollGamepad(){ctx.polls++;},updateWorld(dt){ctx.G.time+=dt;ctx.G.p.x+=50;ctx.hurtPlayer(9);},briarBook:null};
 vm.createContext(ctx);vm.runInContext(part+`\nmenuDamageWarning=()=>{}; function hurtPlayer(){if(pauseDamageBlocked())return;G.p.hp-=9;} function lavaHit(){if(pauseDamageBlocked())return;G.p.hp-=22;} function pause(){beginPause();mode='pause';}`,ctx);
 const run=s=>vm.runInContext(s,ctx);
 // Execute the real bag entry until inventory rendering; no menu policy duplicate.

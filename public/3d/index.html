@@ -1192,6 +1192,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./campaign-journey.js?v=2236"></script>
 <script src="./bag-browser.js?v=2238"></script>
+<link rel="stylesheet" href="./party-feedback.css?v=2291"><script src="./party-feedback.js?v=2291"></script>
 <script src="./party-navigation.js?v=2197"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
@@ -1221,7 +1222,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.290.0-class-trial-score';
+const VERSION3D='2.291.0-party-rescue';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15149,7 +15150,7 @@ const MP={
     return {ground:raw.ground!==false,vx:velocity(raw.vx),vy:velocity(raw.vy),vz:velocity(raw.vz),pose,emote:BFEmotes.valid(raw.emote)};
   },
   selfState(){ const p=G&&G.p; return {riding:!!p?.dragonRide,sitting:!!p?.sitting,busy:playerActivity(), id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
-    tw:p?.warpSerial||0,area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0,warp:p.warp||0}:null,
+    travelTo:partyChannel?.id||null,tw:p?.warpSerial||0,area:G?.area,def:p?{shield:p.shieldHp>0,guard:p.guardT>0,warp:p.warp||0}:null,
     cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petNameplate(G.pet.id):undefined, zone:this.zone,
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
        is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
@@ -15158,17 +15159,17 @@ const MP={
     x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight',
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     face:BFFaceOptions.appearance(meta), hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
-    w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0,
+    w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0, downLeft:p?.downed?BFPartyFeedback.clamp(p.downT,0,60):undefined, rescue:BFPartyFeedback.rescue(this.rescue),
     am:p?this.motion({ground:p.onGround,vx:p.vx,vy:p.vy,vz:p.vz,pose:p.combatPose,emote:p.emote}):null,
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3),G.pet.mounted?1:0,G.pet.flying?1:0,G.pet.sitting?1:0,+(G.pet.atkT||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {face:BFFaceOptions.appearance(s.face),riding:!!s.riding,sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
-    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
+  mkPeer(s){ return {travelTo:BFPartyFeedback.rescue({id:s.travelTo})?.id||null,face:BFFaceOptions.appearance(s.face),riding:!!s.riding,sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, downLeft:s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null,rescue:BFPartyFeedback.rescue(s.rescue), prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.face=BFFaceOptions.appearance(s.face);q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn;q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {face:BFFaceOptions.appearance(q.face),riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){q.travelTo=BFPartyFeedback.rescue({id:s.travelTo})?.id||null;q.face=BFFaceOptions.appearance(s.face);q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn;q.downLeft=s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null;q.rescue=BFPartyFeedback.rescue(s.rescue);q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {travelTo:q.travelTo||null,face:BFFaceOptions.appearance(q.face),riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,downLeft:q.downLeft,rescue:BFPartyFeedback.rescue(q.rescue),at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -15209,7 +15210,7 @@ const MP={
         if(G?.hub&&!G.riftHall&&!!G.sparringRoom!==enter&&mode==='play'&&q&&q.zone===this.zone&&n&&!q.dead&&!q.downed&&q.hp>0&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130){if(enter)enterSparringRoom();else enterWaystation();}
       }
       else if(d.t==='riftRoom'){const q=this.peers[c._pid],n=G?.hubNpcs?.find(n=>n.id===(d.hall?'rifthall':'riftexit'));if(G?.hub&&mode==='play'&&q&&n&&!q.dead&&!q.downed&&(q.hp==null||q.hp>0)&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130)travelRiftHall(!!d.hall);}
-      else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
+      else if(d.t==='revive'){ if(!d.scene||d.scene===this.combatScene())this.routeRevive(d.id,c._pid); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pcontrol'){this.routeCombatMessage({...d,by:c._pid});}
       else if(d.t==='presult'){this.routeCombatMessage({...d,by:c._pid});}
       else if(d.t==='pdmg'){ this.routePvp({...d,by:c._pid}); }           // host relays PvP damage to the target
@@ -15318,7 +15319,7 @@ const MP={
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
       if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.chests)applyCoopChests(d.chests);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
-    else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
+    else if(d.t==='revive'){ if(d.id===this.myId&&(!d.scene||d.scene===this.combatScene())) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pcontrol'){if(d.id===this.myId)this.takePvpControl(d);}
     else if(d.t==='hitResult'){this.takeHitResult(d);}
@@ -15481,7 +15482,7 @@ const MP={
     if(window.BFSocial?.peerVisible?.(q)===false)return;
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
     const tint=this.teams?(this.teamOf(q.id)===0?'#4aa3ff':'#ff5555'):'hsl('+(h%360)+',70%,60%)';   // team colour in 2v2
-    if(q.downed){   // The downed nameplate identifies allies who need reviving.
+    if(q.downed&&!window.HERO3D?.on){   // Fallback only; modern rigs keep the actual downed character.
       const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null, skinc=sk&&sk.skin?sk.skin:'#d9b08c';
       pushM(); mv(q.x,4,q.z); rotY(q.yaw||0);
       bx(0,6,0, 20,8,12, '#7a2b2b'); bx(0,6,10, 10,8,10, skinc);   // slumped body + head
@@ -15496,9 +15497,9 @@ const MP={
       const pausedSafe=q.busy==='Paused'&&!this.pvp;
       const pp={ ...BFFaceOptions.appearance(q.face),pausedSafe,dragonRide:q.riding?{}:null,sitting:!!q.sitting,lookTier:q.lookTier, cosmetics:q.cosmetics, peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:q.motion?q.motion.vx:(mv2>0.2?60:0), vz:q.motion?.vz||0, vy:q.motion?.vy||0, onGround:q.motion?.ground!==false, combatPose:q.motion?.pose||null, emote:q.motion?.emote?{...q.motion.emote,t:q.motion.emote.t+(performance.now()-q.motion.emote.stamp)/1000}:null,
         skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
-        dead:false, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
+        dead:false, downed:!!q.downed, swingCombo:q.sc||0, saberSwingT:q.sb||0, swingId:q.si||0, chargeAmt:q.ca||0, throwHideT:q.th||0, throwHideArche:q.ta||null, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       const chessPose=window.BFSocial?.peerPose?.(q);if(chessPose)Object.assign(pp,chessPose);
-      if(pausedSafe)Object.assign(pp,{vx:0,vy:0,vz:0,combatPose:null,emote:null,atkTimer:0,dodgeTimer:0,saberSwingT:0,chargeAmt:0,throwHideT:0});
+      if(pausedSafe||q.downed)Object.assign(pp,{vx:0,vy:0,vz:0,combatPose:null,emote:null,atkTimer:0,dodgeTimer:0,saberSwingT:0,chargeAmt:0,throwHideT:0});
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,pausedSafe?'#777777':'#6f86c9'); bx(0,38,0,12,12,12,pausedSafe?'#999999':'#d9b08c'); popM(); }
       if(window.BFSocial?.camera())return; // Keep player labels and beacons off the chessboard.
@@ -15512,7 +15513,7 @@ const MP={
     // floating name + HP bar (uses the 2D overlay, like enemy/pet bars) + link ping
     const s=project(q.x,(q.y||0)+72+(q.riding?24:0),q.z);
     if(s){ const hpm=q.hpm||100, f=Math.max(0,Math.min(1,(q.hp==null?hpm:q.hp)/hpm));
-      hpBars.push({x:s[0],y:s[1],f:f,peer:true,name:(q.name||'Ally')+(q.busy?' · '+q.busy:''),cls:q.cls||'',lvl:q.lvl||0,col:tint,downed:!!q.downed,ping:this.ping||null}); } },
+      hpBars.push({x:s[0],y:s[1],f:f,peer:true,name:(q.name||'Ally')+(q.downed?' · DOWN':q.busy?' · '+q.busy:''),cls:q.cls||'',lvl:q.lvl||0,col:tint,downed:!!q.downed,ping:this.ping||null}); } },
   // ================= P1.2 SHARED ENEMIES (host-authoritative existence/HP/death) =================
   guest(){ return this.active && !this.isHost; },
   host_(){ return this.active && this.isHost; },
@@ -15654,26 +15655,36 @@ const MP={
   anyAllyUp(){ for(const id in this.peers){ const q=this.peers[id]; if(q.zone===this.zone && !q.downed && (q.hp==null||q.hp>0)) return true; } return false; },
   goDown(){ if(!G||!G.p) return; const p=G.p; if(p.downed) return; p.downed=true; p.hp=0; p.vx=0; p.vz=0; p.dead=false;
     p.downT=60;   // ~60s to be revived before you bleed out to the hub
-    try{ toast('💀 You are DOWN — stay alive, an ally can revive you!'); }catch(e){} try{ burst(p.x,p.y+20,p.z,'#ff5e54',16); }catch(e){} try{ hudUpdate(); }catch(e){} },
+    this.rescue=null;for(const q of Object.values(this.peers)){q._rev=0;q._revPending=0;} try{ burst(p.x,p.y+20,p.z,'#ff5e54',16); }catch(e){} try{ hudUpdate(); }catch(e){} },
   reviveSelf(msg){ if(!G||!G.p||!G.p.downed) return; const p=G.p; p.downed=false; p.dead=false;
+    this.rescue=null;partyFeedbackNotice('success','Back on your feet','Your teammate revived you.');
     p.hp=Math.max(1,Math.round(effMaxHp(p)*0.5)); p.invuln=Math.max(p.invuln||0,1.6);
     try{ burst(p.x,p.y+30,p.z,'#7de08a',18); }catch(e){} try{ toast(msg||'You are back on your feet!'); }catch(e){} try{ hudUpdate(); }catch(e){} },
-  doRevive(targetId){ if(this.isHost) this.routeRevive(targetId);
-    else if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'revive',id:targetId}); }catch(e){} } },
-  routeRevive(id){ if(id===this.myId){ this.reviveSelf('An ally pulled you up!'); return; }   // host: apply or relay to the target guest
-    const c=this.conns.find(x=>x._pid===id); if(c){ try{ c.send({t:'revive',id}); }catch(e){} } },
+  doRevive(targetId){ if(this.isHost) return this.routeRevive(targetId,this.myId);
+    if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'revive',id:targetId,scene:this.combatScene()});return true; }catch(e){} } return false; },
+  routeRevive(id,helperId){
+    if(!G||!this.active||this.pvp||G.hub)return false;
+    const helper=helperId===this.myId?G.p:this.peers[helperId],target=id===this.myId?{...G.p,id,zone:this.zone,area:G.area,hall:!!G.riftHall,last:0}:this.peers[id];
+    if(!helper||helperId!==this.myId&&(helper.zone!==this.zone||helper.area!==G.area||!!helper.hall!==!!G.riftHall||helper.last>=1||helper.busy))return false;
+    if(helperId===this.myId&&(mode!=='play'||backgroundMenuMode))return false;
+    if(!BFPartyFeedback.eligible(helper,target,{zone:this.zone,area:G.area,hall:G.riftHall,hub:G.hub,pvp:this.pvp,exhausted:!!G.escape&&target?.prisonRevives>=1},enemyMeleeClear))return false;
+    if(id===this.myId){this.reviveSelf('An ally pulled you up!');return true;}
+    const c=this.conns.find(x=>x._pid===id&&x.open);if(c){try{c.send({t:'revive',id,scene:this.combatScene()});return true;}catch(e){}}return false; },
   doWipe(){ if(this._wiped) return; this._wiped=true; if(G&&G.p){ G.p.downed=false; G.p.dead=true; } try{ toast('The party has fallen…'); }catch(e){} try{ die(); }catch(e){} },
   // per-frame co-op survival logic (called from tick while in a zone)
   survivalTick(dt){ if(!G||!G.p||G.hub) return;
     // bleed out if not revived in time (only matters once you're actually down)
     if(G.p.downed){ G.p.downT=(G.p.downT||0)-dt; if(G.p.downT<=0){ G.p.downed=false; G.p.dead=true; try{ die(); }catch(e){} return; } }
-    // revive a nearby downed ally by standing close for ~2.5s
-    if(!G.p.downed && !G.p.dead && this.hasZone()){
-      for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone){ q._rev=0; continue; }
-        if(q.downed){ if(G.escape&&q.prisonRevives>=1){q._rev=0;continue;}const d=Math.hypot((q.x||0)-G.p.x,(q.z||0)-G.p.z);
-          if(d<72){ q._rev=(q._rev||0)+dt; if(q._rev>=2.5){ q._rev=0; this.doRevive(q.id); try{ toast('🤝 You revived '+(q.name||'an ally')+'!'); }catch(e){} } }
-          else q._rev=0; }
-        else q._rev=0; } }
+    // One reachable ally at a time. Presence carries progress to the person being rescued.
+    this.rescue=null;
+    const canHelp=mode==='play'&&!backgroundMenuMode&&!this.pvp&&!G.p.downed&&!G.p.dead&&G.p.hp>0&&this.hasZone();
+    const candidate=canHelp?Object.values(this.peers).filter(q=>BFPartyFeedback.eligible(G.p,q,{zone:this.zone,area:G.area,hall:G.riftHall,exhausted:!!G.escape&&q.prisonRevives>=1},enemyMeleeClear)).sort((a,b)=>dXZ(a.x,a.z,G.p.x,G.p.z)-dXZ(b.x,b.z,G.p.x,G.p.z))[0]:null;
+    for(const q of Object.values(this.peers)){
+      if(q!==candidate){q._rev=0;q._revPending=0;continue;}
+      q._rev=Math.min(2.5,(q._rev||0)+Math.min(.1,Math.max(0,dt)));q._revPending=Math.max(0,(q._revPending||0)-dt);
+      this.rescue={id:q.id,progress:q._rev/2.5};
+      if(q._rev>=2.5&&!q._revPending){q._revPending=1.5;this.doRevive(q.id);}
+    }
     // host: if every player in the zone is down, it's a wipe
     if(this.isHost && !this.pvp){ const ids=Object.keys(this.peers).filter(id=>this.peers[id].zone===this.zone);
       if(ids.length){ const meDown=G.p.downed||G.p.dead, allDown=ids.every(id=>this.peers[id].downed);
@@ -16327,7 +16338,7 @@ function menuDamageWarning(){let e=document.getElementById('menuDamage');if(!e){
 function update(dt){
  if((mode==='play'&&!backgroundMenuMode)||(pausedMenuWorld&&pausedMenuWorld!==G))pausedMenuWorld=null;
  if(pauseState().frozen){BFGuidedTutorial.suspend();pollGamepad(dt);return;}
- if(mode!=='play')BFGuidedTutorial.suspend();
+ if(mode!=='play'){BFGuidedTutorial.suspend();partyHud();}
  if(BFShipwreckShore.aiming()&&(!G?.shore||!inShipwreck()||G.p?.dead))BFShipwreckShore.closeAim();
  const conv=G?.storyState?.conversation;
  if(conv&&briarBook&&(!MP.active||MP.isHost)&&!G.kingFinal){const owner=conv.owner===briarId()?G.p:MP.peers[conv.owner];if(!owner||owner.dead||owner.hp<=0||conv.owner!==briarId()&&(owner.zone!==G.zone||owner.area!==G.area)){const r=BFStoryState.transact(G.storyState,briarBook,{id:'owner-left:'+G.storyState.revision,type:'close',revision:G.storyState.revision});if(r.changed){G.storyState=r.state;briarSync();if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket()});}catch{}}}}
@@ -22940,10 +22951,11 @@ function drawHpBars(){
 }
 // Party travel is presentation plus a local safe relocation, never quest progression.
 let partyChoice=null,partyHeld=false,partyNeedsRelease=false,partyChannel=null;
-function partyPeers(){return !MP.active||MP.pvp||!G?[]:Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.last<3).sort((a,b)=>a.id.localeCompare(b.id));}
+function partyPeers(){return !MP.active||MP.pvp||!G?[]:Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&!!q.hall===!!G.riftHall&&q.last<3).sort((a,b)=>a.id.localeCompare(b.id));}
 function partyFriends(){return partyPeers().filter(q=>q.hp>0&&!q.downed);}
 function partySelected(){const a=partyFriends();return a.find(q=>q.id===partyChoice)||a[0];}
-function partyCancel(message){if(partyChannel&&message)toast(message,'#c3b0ff');partyChannel=null;if(G?.p){G.p.warp=0;if(G.p.combatPose?.partyWarp)G.p.combatPose.remaining=0;}if(partyHeld)partyNeedsRelease=true;}
+function partyFeedbackNotice(kind,title,text){BFPartyFeedback.notice(kind,title,text,G);}
+function partyCancel(message){if(partyChannel){partyFeedbackNotice('cancel','Teleport cancelled',message||'Keep holding '+controlKey('partyTeleport')+' until the bar fills.');}partyChannel=null;if(G?.p){G.p.warp=0;if(G.p.combatPose?.partyWarp)G.p.combatPose.remaining=0;}if(partyHeld)partyNeedsRelease=true;}
 function partyLanding(q){
  if(!q||q.motion?.ground===false)return null;
  const p=G.p,r=p.r||13;
@@ -22965,27 +22977,25 @@ function partyTravelTick(dt){
   partyChannel.t+=Math.min(dt,.1);p.warp=partyChannel.t;p.combatPose={serial:partyChannel.serial,clip:'Spell2',remaining:.3,partyWarp:true};
   if(partyChannel.t>=3){const dest=partyLanding(q);if(!dest){partyCancel('No safe landing beside your friend yet');return;}
    const profile=Object.keys(BF_COMBAT_ART.profiles).find(id=>BF_COMBAT_ART.profiles[id].cls==='mage'&&BF_COMBAT_ART.profiles[id].form==='blink');
-   if(profile)BF_COMBAT_ART.emit(G,profile,p);Object.assign(p,dest,{vx:0,vy:0,vz:0,onGround:true,charging:false,chargeAmt:0});G.lastSafe={...dest};p.warpSerial=(p.warpSerial||0)+1;if(profile)BF_COMBAT_ART.emit(G,profile,p);SFX.magic('arcane');partyCancel();toast('Arrived beside '+q.name,'#79ddff');
+   if(profile)BF_COMBAT_ART.emit(G,profile,p);Object.assign(p,dest,{vx:0,vy:0,vz:0,onGround:true,charging:false,chargeAmt:0});G.lastSafe={...dest};p.warpSerial=(p.warpSerial||0)+1;if(profile)BF_COMBAT_ART.emit(G,profile,p);SFX.magic('arcane');partyCancel();partyFeedbackNotice('arrived','Arrived beside '+(q.name||'your teammate'),'You are ready to move.');
   }
  }else if(partyHeld&&!partyNeedsRelease&&q){
-  if(!p.onGround||Math.abs(moveX())+Math.abs(moveZ())>.1||input.jump||input.dodge){partyNeedsRelease=true;toast('Stand still on solid ground to teleport');return;}
+  if(!p.onGround||Math.abs(moveX())+Math.abs(moveZ())>.1||input.jump||input.dodge){partyNeedsRelease=true;partyFeedbackNotice('cancel','Not ready to teleport','Stand still on solid ground, then hold '+controlKey('partyTeleport')+'.');return;}
   partyChoice=q.id;partyChannel={id:q.id,scene:MP.combatScene(),x:p.x,y:p.y,z:p.z,t:.01,serial:Date.now()};p.warp=.01;p.charging=false;p.chargeAmt=0;SFX.magic('arcane');
  }
 }
 function partyHud(){
- let el=document.getElementById('partyTravel');if(!el){el=document.createElement('div');el.id='partyTravel';el.innerHTML=uiIcon('action-party-teleport')+'<span data-party-text></span>';el.style.cssText='position:fixed;left:14px;top:43%;max-width:min(240px,42vw);padding:10px 13px;border:1px solid #697697;border-radius:10px;background:#111827de;color:#daefff;font:13px system-ui;pointer-events:none;z-index:8';document.body.appendChild(el);}
- const q=partySelected(),a=partyFriends(),far=q&&Math.hypot(q.x-G.p.x,q.z-G.p.z)>850;
- el.hidden=mode!=='play'||!q||G.voyage||G.kingFinal||(!far&&!partyChannel);if(el.hidden)return;
- const key=controlKey;
- el.querySelector('[data-party-text]').textContent=partyChannel?'Teleporting to '+q.name+' · '+Math.ceil((3-partyChannel.t)*10)/10+'s — keep holding '+key('partyTeleport'):'Far from '+q.name+' · Hold '+key('partyTeleport')+' for 3 seconds'+(a.length>1?' · '+key('partyNext')+' next friend ('+(a.indexOf(q)+1)+'/'+a.length+')':'')+' · Hits cancel teleport';
+ document.getElementById('partyTravel')?.remove();
+ BFPartyFeedback.render({world:G,active:MP.active,pvp:MP.pvp,mode,background:backgroundMenuMode,hidden:!G||!!G.voyage||!!G.kingFinal,p:G?.p,myId:MP.myId,peers:partyPeers(),friend:partySelected(),channel:partyChannel,key:controlKey('partyTeleport'),nextKey:controlKey('partyNext'),count:partyFriends().length,escape:!!G?.escape,revives:G?.escape?.revives||0});
 }
+
 function drawNavigation(c){
  if(!G||mode!=='play')return;
  let main=meta.objectiveArrows!==false?(G.bonusActive?sprintGuideTarget():BFPartyNavigation.target(G)):null;
  // The nearby action dock replaces the direction marker once you reach this target.
  if(main&&G.interact&&Math.hypot(main.x-G.interact.x,main.z-G.interact.z)<45&&Math.hypot(main.x-G.p.x,main.z-G.p.z)<140)main=null;
  const friends=meta.friendArrows!==false?partyPeers():[];
- const markers=[...(main?[{o:main,color:'#ffe07a',label:main.navLabel||'Main objective'}]:[]),...friends.map(q=>({o:q,friend:true,color:'#75ddff',label:q.name+(q.downed?' · Needs help':'')}))];
+ const markers=[...(main?[{o:main,color:'#ffe07a',label:main.navLabel||'Main objective'}]:[]),...friends.map(q=>({o:q,friend:true,color:q.downed?'#ffb58b':'#75ddff',label:q.name+(q.downed?' · REVIVE':'')}))];
  for(const {o,color,label,friend}of markers){
   const sp=project(o.x,(o.y??o.y0??0)+65,o.z),cx=VW/2,cy=VH/2,mx=Math.max(50,cx-150*DPR),my=Math.max(50,cy-175*DPR);
   let dx,dy;if(sp){dx=sp[0]-cx;dy=sp[1]-cy;}else{const rel=Math.atan2(o.x-G.p.x,o.z-G.p.z)-(G.camYaw??Math.PI);dx=Math.sin(rel);dy=Math.cos(rel)>0?-1:1;}
@@ -24740,7 +24750,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2274"></script>
+<script type="module" src="./hero3d.js?v=2291"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

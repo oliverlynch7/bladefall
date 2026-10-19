@@ -1,0 +1,65 @@
+{
+ "mode": "play",
+ "legacyLevel": 100,
+ "gold": 1145,
+ "downed": false,
+ "help": {
+  "id": "ally",
+  "progress": 0.56
+ },
+ "peer": {
+  "downed": true,
+  "progress": 1.4000000000000001
+ },
+ "channel": null,
+ "card": "✚\nReviving Rowan\nStay beside them until the bar fills.\n1.1s remaining",
+ "rigs": {
+  "frame": 919,
+  "cap": 6,
+  "local": {
+   "model": "Warrior",
+   "clip": "Idle",
+   "fallen": false,
+   "wrap": true,
+   "visible": false,
+   "weapon": {
+    "name": "Sword",
+    "anatomical": true,
+    "length": 1.2,
+    "body": "Warrior"
+   }
+  },
+  "peers": [
+   {
+    "id": "ally",
+    "model": "Warrior",
+    "fallen": true,
+    "face": {
+     "eyes": true,
+     "mouth": true,
+     "scale": 0.26000883999999996,
+     "neutral": 0.26000883999999996
+    },
+    "appearance": "{\"eyeColor\":\"#4be08a\",\"mouthStyle\":\"smile\",\"browStyle\":\"natural\",\"faceAdjust\":{\"eyeX\":0,\"eyeY\":0,\"eyeTilt\":0,\"mouthX\":0,\"mouthY\":0,\"mouthTilt\":0}}",
+    "classPalette": "warrior",
+    "clip": "Idle",
+    "art": "sword",
+    "arming": false,
+    "armed": true,
+    "seen": 919,
+    "visible": true,
+    "at": {
+     "x": 40,
+     "z": -465
+    }
+   }
+  ]
+ },
+ "sent": [
+  {
+   "t": "revive",
+   "id": "ally",
+   "scene": "[0,0,603428819,null,0,0]"
+  }
+ ]
+}

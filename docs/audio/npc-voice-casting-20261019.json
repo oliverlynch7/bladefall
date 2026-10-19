@@ -1,0 +1,1232 @@
+{
+  "schema": 1,
+  "revision": "npc-auditions-20261019-a",
+  "scope": "50 speaking identities: 49 authored speakers plus the legacy Warden’s Shade. Three provider candidates per character; no full dialogue generation or in-game replacement.",
+  "dialogueQA": "Prior passes verified flow, turn-ins and main/side/lore separation. Wording remains subject to final editorial review; legacy Shade lore includes outdated material. These auditions do not approve a full script.",
+  "characters": [
+    {
+      "id": "thomas",
+      "name": "Thomas",
+      "role": "Your father",
+      "group": "Waystation",
+      "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare.",
+      "text": "The Legion has reached our fields. You're going to fight, aren't you? Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
+      "sourceLines": [
+        {
+          "id": "briar.thomas.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The Legion has reached our fields. You're going to fight, aren't you?",
+          "sha256": "de3f35bb7618a27c77afe5c75e7b530af5884a4cf14b11043001ad61919876a1"
+        },
+        {
+          "id": "briar.thomas.afraid",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
+          "sha256": "34f53ab213235959651bf02999a1881226a867053baefba434864995975e8e4d"
+        }
+      ],
+      "direction": "Male, early fifties. Warm weathered baritone, soft northern English vowels, slightly rough edges. An adoptive father masking worry with practical affection. Intimate, protective, never a narrator or commanding officer.",
+      "seed": 190026,
+      "voice_description": "Original fantasy adventure game character. Male, early fifties. Warm weathered baritone, soft northern English vowels, slightly rough edges. An adoptive father masking worry with practical affection. Intimate, protective, never a narrator or commanding officer. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "role": "Village medic",
+      "group": "Briar Town",
+      "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad.",
+      "text": "I need tangle roots for fevers and clean dressings for wounds. Help me get these people ready to leave. The wounded need treatment before they can fight or escape.",
+      "sourceLines": [
+        {
+          "id": "briar.mara.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "I need tangle roots for fevers and clean dressings for wounds. Help me get these people ready to leave.",
+          "sha256": "536d117c948fe131ddbaf5c1762bea7598c75795a231625fc91e26b4f65eb82a"
+        },
+        {
+          "id": "briar.mara.why",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The wounded need treatment before they can fight or escape.",
+          "sha256": "921808df50942a2e6ebb86793aeea1d985794b5539219b690497610fa955d412"
+        }
+      ],
+      "direction": "Female, early forties. Clear warm alto with a light west-country English accent. A village medic moving briskly between patients, capable and compassionate. Firm practical requests, a tired smile, no panic or breathy fragility.",
+      "seed": 190745,
+      "voice_description": "Original fantasy adventure game character. Female, early forties. Clear warm alto with a light west-country English accent. A village medic moving briskly between patients, capable and compassionate. Firm practical requests, a tired smile, no panic or breathy fragility. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "gus",
+      "name": "Gus",
+      "role": "Village carpenter",
+      "group": "Briar Town",
+      "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape.",
+      "text": "My tools are in the loft. I can't climb up while the Legion is outside. These are my neighbors. I'm staying to help.",
+      "sourceLines": [
+        {
+          "id": "briar.gus.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "My tools are in the loft. I can't climb up while the Legion is outside.",
+          "sha256": "67e509beff7c8e5decc5a1c53dfedf0e13b77b79bf1e316ef8a5727ed4a88ab5"
+        },
+        {
+          "id": "briar.gus.home",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "These are my neighbors. I'm staying to help.",
+          "sha256": "44dd74754c082e0432d450cd44fd41d49ba4796be93439989ededfd8305ecd61"
+        }
+      ],
+      "direction": "Male, late forties. Round mid register, gently nasal west-country English voice. A frightened but dependable carpenter. Hesitant first words then steady resolve; kind working-person humour, not comic buffoonery.",
+      "seed": 191464,
+      "voice_description": "Original fantasy adventure game character. Male, late forties. Round mid register, gently nasal west-country English voice. A frightened but dependable carpenter. Hesitant first words then steady resolve; kind working-person humour, not comic buffoonery. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "lewis",
+      "name": "Lewis",
+      "role": "Village scout",
+      "group": "Briar Town",
+      "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely.",
+      "text": "Their signal post is ahead. Silence the horn before it brings patrols to our neighbors. Go through the camp or climb the roots on the right. Stop the crank below the horn, or cut its cable from above.",
+      "sourceLines": [
+        {
+          "id": "briar.lewis.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Their signal post is ahead. Silence the horn before it brings patrols to our neighbors.",
+          "sha256": "0b273377470b19b3e71c6553fc0b4b74c666e41b0b8a2eca790154c48f2607e3"
+        },
+        {
+          "id": "briar.lewis.routes",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Go through the camp or climb the roots on the right. Stop the crank below the horn, or cut its cable from above.",
+          "sha256": "baa2b8887e21d57051a0fd0e37318b8ada110f26e3a897de02196c8603009299"
+        }
+      ],
+      "direction": "Male, early thirties. Lean bright tenor with lightly Scottish vowels, concise consonants. An alert village scout protecting fleeing neighbours. Quiet urgency and focused confidence; no military shouting.",
+      "seed": 192183,
+      "voice_description": "Original fantasy adventure game character. Male, early thirties. Lean bright tenor with lightly Scottish vowels, concise consonants. An alert village scout protecting fleeing neighbours. Quiet urgency and focused confidence; no military shouting. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "beth",
+      "name": "Beth",
+      "role": "Village shepherd",
+      "group": "Briar Town",
+      "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+      "text": "My brother followed our sheep across the bridge. It broke. He's trapped beyond those beasts. Those sheep are our food and wool. He was trying to save them.",
+      "sourceLines": [
+        {
+          "id": "briar.beth.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "My brother followed our sheep across the bridge. It broke. He's trapped beyond those beasts.",
+          "sha256": "88b1dd7db8bb934e4973dfe73d91c2df4a68eb065f1b8189fbc7643c0925d2da"
+        },
+        {
+          "id": "briar.beth.sheep",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Those sheep are our food and wool. He was trying to save them.",
+          "sha256": "82a3899749d96a1f589cb9079c9cf492fe182ae9a0e4ac152f7290bd66b487b2"
+        }
+      ],
+      "direction": "Female, late twenties. Clear grounded mezzo, soft rural English accent. A shepherd worried about her brother and flock. Earnest and resourceful, a little breathless from searching, never helpless.",
+      "seed": 192902,
+      "voice_description": "Original fantasy adventure game character. Female, late twenties. Clear grounded mezzo, soft rural English accent. A shepherd worried about her brother and flock. Earnest and resourceful, a little breathless from searching, never helpless. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "bethBrother",
+      "name": "Beth’s brother",
+      "role": "A missing neighbor",
+      "group": "Briar Town",
+      "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+      "text": "The fallen tree could roll. Clear the beasts, then use the rope lift to raise it. The tree's up and the crossing is fixed. I'm heading back. Thank you.",
+      "sourceLines": [
+        {
+          "id": "briar.bethBrother.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The fallen tree could roll. Clear the beasts, then use the rope lift to raise it.",
+          "sha256": "adbcb4c43051585e89c22be2eb98beb8b697fcd43b83ec8084571e03da82d27a"
+        },
+        {
+          "id": "briar.bethBrother.safe",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The tree's up and the crossing is fixed. I'm heading back. Thank you.",
+          "sha256": "1a953a8ff127b15e4256787abcadfab15876d64db3cb69309b8d6cb23af74487"
+        }
+      ],
+      "direction": "Male, early twenties. Youthful open mid register with a mild rural English accent, related in sound to a village shepherd. Trapped but practical; nervous relief, straightforward gratitude, no childish voice.",
+      "seed": 193621,
+      "voice_description": "Original fantasy adventure game character. Male, early twenties. Youthful open mid register with a mild rural English accent, related in sound to a village shepherd. Trapped but practical; nervous relief, straightforward gratitude, no childish voice. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "grant",
+      "name": "Grant",
+      "role": "Captured guard trying to get his people home",
+      "group": "Ruined Keep",
+      "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. A guard speaks through a damaged wall",
+      "text": "Clear the arrow post, cut its bow cord, then raise the gate. People are trapped beyond it and in the cells below. The Legion seized ordinary workers. Help me get them out.",
+      "sourceLines": [
+        {
+          "id": "rk.grant.first",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "Clear the arrow post, cut its bow cord, then raise the gate. People are trapped beyond it and in the cells below.",
+          "sha256": "986479bd1dba93ee2c6e8983827e610799b7570361357cc6abc394b5f43bb1a0"
+        },
+        {
+          "id": "rk.grant.people",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "The Legion seized ordinary workers. Help me get them out.",
+          "sha256": "4b7b57bf48ae4e73e9f1fcdd2f9734aea262e98f11602a942430e55611c36399"
+        }
+      ],
+      "direction": "Male, early forties. Worn chesty baritone with clipped northern English consonants. A captured guard putting civilian lives first. Quiet urgency, economical instructions, fatigue underneath strong control.",
+      "seed": 194340,
+      "voice_description": "Original fantasy adventure game character. Male, early forties. Worn chesty baritone with clipped northern English consonants. A captured guard putting civilian lives first. Quiet urgency, economical instructions, fatigue underneath strong control. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "felix",
+      "name": "Felix",
+      "role": "Nervous locksmith with steady hands",
+      "group": "Ruined Keep",
+      "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. An optional trade, not a required rescue",
+      "text": "Recover my tools from the east workshop. I'll open the west chamber and give you a dagger. Watch the latch's notch. Press when it turns green.",
+      "sourceLines": [
+        {
+          "id": "rk.felix.first",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "Recover my tools from the east workshop. I'll open the west chamber and give you a dagger.",
+          "sha256": "83e754520443a621ad682cf159f27c0c6fa45a8edd50d28bd7ec0786fbfabdee"
+        },
+        {
+          "id": "rk.felix.plan",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "Watch the latch's notch. Press when it turns green.",
+          "sha256": "22590a4fc8cc29385272050777f6c723b9b56a0a58c5468020c5b704fee206a7"
+        }
+      ],
+      "direction": "Male, early thirties. Light tenor with a slightly pinched English city accent, quick starts and tiny self-conscious pauses. A nervous locksmith whose hands remain reliable. Precise directions and embarrassed dry wit, no stammer caricature.",
+      "seed": 195059,
+      "voice_description": "Original fantasy adventure game character. Male, early thirties. Light tenor with a slightly pinched English city accent, quick starts and tiny self-conscious pauses. A nervous locksmith whose hands remain reliable. Precise directions and embarrassed dry wit, no stammer caricature. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "roland",
+      "name": "Roland",
+      "role": "Living armor maker; careful, proud, quietly angry, dry humor",
+      "group": "Castle Duskmoor",
+      "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+      "text": "Stop. You need a disguise to get through that guarded door. Bring a supply coat, a sound helmet and crew papers. I'll fit the disguise. You'll still need convincing answers.",
+      "sourceLines": [
+        {
+          "id": "cg.roland.hello",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "Stop. You need a disguise to get through that guarded door.",
+          "sha256": "a9d48f899928ded6c99544ea5daf94114621b46eb5f49f5f8e62832970766232"
+        },
+        {
+          "id": "cg.roland.menu",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "Bring a supply coat, a sound helmet and crew papers. I'll fit the disguise. You'll still need convincing answers.",
+          "sha256": "179e7d1c600eea46dc1a8cb6220a30bf3f25ba5172aa20dc35fe01aa75081280"
+        }
+      ],
+      "direction": "Male, mid fifties. Resonant low-mid voice, measured English Midlands accent, a little gravel. A proud armour maker speaking carefully near enemy guards. Restrained anger, craft expertise and understated humour.",
+      "seed": 195778,
+      "voice_description": "Original fantasy adventure game character. Male, mid fifties. Resonant low-mid voice, measured English Midlands accent, a little gravel. A proud armour maker speaking carefully near enemy guards. Restrained anger, craft expertise and understated humour. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "cross",
+      "name": "Captain Cross",
+      "role": "Hollowed gate captain; precise, flat, controlled. Never a willing villain.",
+      "group": "Castle Duskmoor",
+      "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+      "text": "State your crew. That does not match this delivery. Present the crew papers. One more answer. When does this crew enter?",
+      "sourceLines": [
+        {
+          "id": "cg.cross.hello",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "State your crew.",
+          "sha256": "acd02e1a09ce46299aecb2977b5f6a64985829530c095ca27a3a2b14e6ec5ea1"
+        },
+        {
+          "id": "cg.cross.check",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "That does not match this delivery. Present the crew papers. One more answer.",
+          "sha256": "67166f40483b3f7fd7efa59d49da3f01a4e42028991eccd85096840869141473"
+        },
+        {
+          "id": "cg.cross.order",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "When does this crew enter?",
+          "sha256": "5600a64a4b8587c356fd76c7a202547f9b8f10c63c384908c3fda8a0d5a53c89"
+        }
+      ],
+      "direction": "Male, late thirties. Clean narrow mid register, precise formal southern English articulation. A living Hollowed captain following standing orders, almost normal but missing warmth. Flat controlled questions, not a zombie, robot or willing sadist.",
+      "seed": 196497,
+      "voice_description": "Original fantasy adventure game character. Male, late thirties. Clean narrow mid register, precise formal southern English articulation. A living Hollowed captain following standing orders, almost normal but missing warmth. Flat controlled questions, not a zombie, robot or willing sadist. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "ellis",
+      "name": "Professor Ellis",
+      "role": "Former Gate researcher rescued before the Legion can take him away",
+      "group": "Frostfell",
+      "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis has just been freed in his laboratory",
+      "text": "They caught me and were taking me to the Gate. My sealed notes fell near the west tunnel. Read them when you find the pack. I helped with the King's research. My notes show where the Legion gets its weapons.",
+      "sourceLines": [
+        {
+          "id": "ic.ellis.first",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "They caught me and were taking me to the Gate. My sealed notes fell near the west tunnel. Read them when you find the pack.",
+          "sha256": "f67a40a1b58efabd24dc318a9230225fd25955fe3fa5dd929bbe05eaf062531e"
+        },
+        {
+          "id": "ic.ellis.press",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "I helped with the King's research. My notes show where the Legion gets its weapons.",
+          "sha256": "12c3622bd23f4ded148285e7b9ffc4f45044b7f96f0eb867fd7cafcbcd64434d"
+        }
+      ],
+      "direction": "Male, late sixties. Thin textured upper baritone, educated English accent. A recently rescued professor trying to regain composure through useful facts. Shaken breaths, thoughtful clarity, guilt without melodramatic sobbing.",
+      "seed": 197216,
+      "voice_description": "Original fantasy adventure game character. Male, late sixties. Thin textured upper baritone, educated English accent. A recently rescued professor trying to regain composure through useful facts. Shaken breaths, thoughtful clarity, guilt without melodramatic sobbing. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "hugo",
+      "name": "Hugo",
+      "role": "An explorer whose confidence outlasted the ice under his boots",
+      "group": "Frostfell",
+      "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Calling across a broken ice shelf",
+      "text": "I fell through the ice. Can you help me out? Yes, I saw the warning sign. You can laugh once I'm out.",
+      "sourceLines": [
+        {
+          "id": "ic.hugo.first",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "I fell through the ice. Can you help me out?",
+          "sha256": "8dc2f183df50eb33d43440e89ac84a60ee0ebec562c3007f37ecba833cf498ec"
+        },
+        {
+          "id": "ic.hugo.tease",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "Yes, I saw the warning sign. You can laugh once I'm out.",
+          "sha256": "57845ffbfde771e670dc1b88b89d02d787767eb0b9778c48e3bfd69b99ebc885"
+        }
+      ],
+      "direction": "Male, mid thirties. Bright rounded tenor with mild Welsh musicality. An explorer whose confidence survived a fall through ice. Embarrassed humour conceals real fear; human, clear and conversational.",
+      "seed": 197935,
+      "voice_description": "Original fantasy adventure game character. Male, mid thirties. Bright rounded tenor with mild Welsh musicality. An explorer whose confidence survived a fall through ice. Embarrassed humour conceals real fear; human, clear and conversational. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "abyss_king",
+      "name": "The Abyss King",
+      "role": "Former lord, now tyrant. Certain of his cure; fear appears only at recognition.",
+      "group": "Finale",
+      "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected.",
+      "text": "Every healer fights death. I found an answer. You came to destroy it. They will never grow old. You offer them death and call it mercy.",
+      "sourceLines": [
+        {
+          "id": "ak.king.offer",
+          "file": "public/3d/story/final-king.json",
+          "text": "Every healer fights death. I found an answer. You came to destroy it.",
+          "sha256": "6064a48341fb408bbb15a5404fde25085dabbf7bd4fdb73350597c4f665e1fe6"
+        },
+        {
+          "id": "ak.king.price",
+          "file": "public/3d/story/final-king.json",
+          "text": "They will never grow old. You offer them death and call it mercy.",
+          "sha256": "3227220d3d8db79e9206f9242e8cf064fe12001ef345e3b73de0de97c77d6613"
+        }
+      ],
+      "direction": "Male, late fifties. Cultivated deep baritone, precise aristocratic English vowels and persuasive unhurried phrasing. A former lord convinced his immortality research justified everything. Cold certainty, controlled wounded pride, no growl, demon filter or trailer boom.",
+      "seed": 198654,
+      "voice_description": "Original fantasy adventure game character. Male, late fifties. Cultivated deep baritone, precise aristocratic English vowels and persuasive unhurried phrasing. A former lord convinced his immortality research justified everything. Cold certainty, controlled wounded pride, no growl, demon filter or trailer boom. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "ian",
+      "name": "Ian",
+      "role": "The previous Bladeborn, present only as a spirit. Warm, grounded, proud without grand speeches.",
+      "group": "Finale",
+      "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected.",
+      "text": "You fought before you knew you could win. I've been waiting to meet you. Of course Thomas is your father. He raised you, loved you, and helped you become yourself.",
+      "sourceLines": [
+        {
+          "id": "ak.ian.welcome",
+          "file": "public/3d/story/final-king.json",
+          "text": "You fought before you knew you could win. I've been waiting to meet you.",
+          "sha256": "7cc0f79ac2960cc0b9eae519cf7f5d8972d5e8f817a7ed30f7b03da6ef525ee9"
+        },
+        {
+          "id": "ak.ian.father",
+          "file": "public/3d/story/final-king.json",
+          "text": "Of course Thomas is your father. He raised you, loved you, and helped you become yourself.",
+          "sha256": "7dea177481e6d7148cf70a18863128edd4076e41a72c6ac66956600f6bf3437f"
+        }
+      ],
+      "direction": "Male, late sixties. Warm full mid-low register, softly textured English voice. A successful old protector meeting a brave successor as a spirit. Grounded affection and quiet pride; calm human presence, no echo or booming prophecy.",
+      "seed": 199373,
+      "voice_description": "Original fantasy adventure game character. Male, late sixties. Warm full mid-low register, softly textured English voice. A successful old protector meeting a brave successor as a spirit. Grounded affection and quiet pride; calm human presence, no echo or booming prophecy. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "pike",
+      "name": "Foreman Pike",
+      "role": "A Hollowed overseer following strict production and safety orders",
+      "group": "Emberdeep",
+      "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Inspection gate",
+      "text": "Production is interrupted. State your work station and reason for entry. Workers without a task return to the line.",
+      "sourceLines": [
+        {
+          "id": "gf.pike.first",
+          "file": "public/3d/story/great-furnace.json",
+          "text": "Production is interrupted. State your work station and reason for entry. Workers without a task return to the line.",
+          "sha256": "fa02e6f1df575567bedf3ca3aca8709b3e2c08b975463bba919f65610d00b43c"
+        }
+      ],
+      "direction": "Male, mid fifties. Dry low-mid register with an English industrial-town accent. A Hollowed factory overseer reciting work procedures, retained intelligence but emotionally vacant. Even bureaucratic cadence, not angry, mechanical or monstrous.",
+      "seed": 200092,
+      "voice_description": "Original fantasy adventure game character. Male, mid fifties. Dry low-mid register with an English industrial-town accent. A Hollowed factory overseer reciting work procedures, retained intelligence but emotionally vacant. Even bureaucratic cadence, not angry, mechanical or monstrous. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "martin",
+      "name": "Martin",
+      "role": "A worker organizer with a dry sense of humor and a plan for every friend",
+      "group": "Emberdeep",
+      "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Worker break room",
+      "text": "The weapon line has stopped. Help me get the workers out. Open the worker passage. I can lead everyone to the break room, but guards will come. Stop the transport chain first if you want fewer patrols on the route.",
+      "sourceLines": [
+        {
+          "id": "gf.martin.first",
+          "file": "public/3d/story/great-furnace.json",
+          "text": "The weapon line has stopped. Help me get the workers out.",
+          "sha256": "06eb70f3040a07fe588d232181ad1b9a79b5eb9156463a82a7ba218ac10d923d"
+        },
+        {
+          "id": "gf.martin.plan",
+          "file": "public/3d/story/great-furnace.json",
+          "text": "Open the worker passage. I can lead everyone to the break room, but guards will come. Stop the transport chain first if you want fewer patrols on the route.",
+          "sha256": "d9add95a1f1a83dce25625f1289db8e57317c5df7ad7ccd00b065e032d57dc4a"
+        }
+      ],
+      "direction": "Male, early forties. Warm slightly hoarse tenor with northern English vowels. An exhausted worker organiser thinking about every friend. Quick practical instructions, solidarity and a small dry smile under pressure.",
+      "seed": 200811,
+      "voice_description": "Original fantasy adventure game character. Male, early forties. Warm slightly hoarse tenor with northern English vowels. An exhausted worker organiser thinking about every friend. Quick practical instructions, solidarity and a small dry smile under pressure. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "caleb",
+      "name": "Caleb",
+      "role": "Escaped prisoner who helps you follow the transport trail",
+      "group": "Hollow Pass",
+      "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. An escaped prisoner at the refuge",
+      "text": "I escaped a prisoner wagon. Ruth stayed with the others. Please help me get them out. I ran. Now I want to help. I can show you the wagon.",
+      "sourceLines": [
+        {
+          "id": "hp.caleb.first",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "I escaped a prisoner wagon. Ruth stayed with the others. Please help me get them out.",
+          "sha256": "08660a6e42d88552897f6ef5ed9a182ac4c55a411cdd5ba3053bf5e5c51d1536"
+        },
+        {
+          "id": "hp.caleb.blame",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "I ran. Now I want to help. I can show you the wagon.",
+          "sha256": "11ba029a4516b51dcaa2a81eb1637c69c87b1f8f6fb1193f2564bc16a499edb2"
+        }
+      ],
+      "direction": "Male, late twenties. Soft breath-worn mid register with lightly Welsh vowels. An escaped prisoner ashamed he ran, now determined to help others. Tired relief and resolve, never whiny or helpless.",
+      "seed": 201530,
+      "voice_description": "Original fantasy adventure game character. Male, late twenties. Soft breath-worn mid register with lightly Welsh vowels. An escaped prisoner ashamed he ran, now determined to help others. Tired relief and resolve, never whiny or helpless. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "skip",
+      "name": "Skip",
+      "role": "Climber who trades a useful ridge route for his missing rope",
+      "group": "Hollow Pass",
+      "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Meeting the local climber",
+      "text": "I'm Skip. I climb these cliffs. Watch the edge. Recover my rope below the broken eastern platform. Use the lower shelf. I'll fix the ridge crossing and give you a spear.",
+      "sourceLines": [
+        {
+          "id": "hp.skip.first",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "I'm Skip. I climb these cliffs. Watch the edge.",
+          "sha256": "f73e278d4a9ea63e87f3dffc9573a5eea2a1ba7b927ec4c5028f89e98fa5cc5d"
+        },
+        {
+          "id": "hp.skip.rope",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "Recover my rope below the broken eastern platform. Use the lower shelf. I'll fix the ridge crossing and give you a spear.",
+          "sha256": "f6599f504d36bf6635dee31b5fc39d0d9e8f0285f0feeffe196e4332b26d61c2"
+        }
+      ],
+      "direction": "Male, early thirties. Light agile tenor, easy northern English accent. A friendly local climber with wonderfully dry humour about his own mistakes. Nimble phrasing, confident safety advice, no mocking the player.",
+      "seed": 202249,
+      "voice_description": "Original fantasy adventure game character. Male, early thirties. Light agile tenor, easy northern English accent. A friendly local climber with wonderfully dry humour about his own mistakes. Nimble phrasing, confident safety advice, no mocking the player. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "quartermaster",
+      "name": "Quartermaster",
+      "role": "Supplies and equipment",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "I sell equipment and buy spare gear. What do you need? Compare gear before buying. Check class and level requirements. Sell spares you no longer need.",
+      "sourceLines": [
+        {
+          "id": "hub.quartermaster.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "I sell equipment and buy spare gear. What do you need?",
+          "sha256": "90ba9485cef1bed045563b8ba85b96e47513bb52917f7dfe802d02909f71f4c7"
+        },
+        {
+          "id": "hub.quartermaster.guide",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Compare gear before buying. Check class and level requirements. Sell spares you no longer need.",
+          "sha256": "4d8ad53ab88cae3c8e54ff3cfcb910da50d60a67dc22f2844b2158f50c9ec538"
+        }
+      ],
+      "direction": "Male, mid forties. Clear full mid register, friendly English market-town accent. A practical supply merchant equipping the resistance. Welcoming and matter-of-fact, shrewd but honest; not a carnival salesman.",
+      "seed": 202968,
+      "voice_description": "Original fantasy adventure game character. Male, mid forties. Clear full mid register, friendly English market-town accent. A practical supply merchant equipping the resistance. Welcoming and matter-of-fact, shrewd but honest; not a carnival salesman. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "anvil",
+      "name": "The Smith",
+      "role": "Combine matching gear",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Bring spare gear. I'll forge something stronger. Fuse two matching items of the same rarity. Check the result first: both original items are consumed.",
+      "sourceLines": [
+        {
+          "id": "hub.anvil.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Bring spare gear. I'll forge something stronger.",
+          "sha256": "738b92f68c76c9ab225bdab6a241d00344fbfbfa6e968a7edc2dc3cb8844264e"
+        },
+        {
+          "id": "hub.anvil.guide",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Fuse two matching items of the same rarity. Check the result first: both original items are consumed.",
+          "sha256": "2098320441818191abbeb7d83fe2282c42c5f37515607233e22d09a293b9747c"
+        }
+      ],
+      "direction": "Male, late fifties. Deep rounded bass-baritone with a weathered Yorkshire-like accent. A patient smith who would rather be making hinges. Weighty quiet delivery, craftsmanship and understated hope, no constant gruff growling.",
+      "seed": 203687,
+      "voice_description": "Original fantasy adventure game character. Male, late fifties. Deep rounded bass-baritone with a weathered Yorkshire-like accent. A patient smith who would rather be making hinges. Weighty quiet delivery, craftsmanship and understated hope, no constant gruff growling. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "keeper",
+      "name": "The Stylist",
+      "role": "Appearance and cosmetics",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Choose how you want to look. The wardrobe is ready. Looking like yourself can help you feel like yourself again.",
+      "sourceLines": [
+        {
+          "id": "hub.keeper.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Choose how you want to look. The wardrobe is ready.",
+          "sha256": "631d181949ab35da606bcb008f119d7b8e7da534231efde937ae1803612ad6a7"
+        },
+        {
+          "id": "hub.keeper.about",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Looking like yourself can help you feel like yourself again.",
+          "sha256": "27088ffbb7e2e4a8ec6723e197361bed27d232c03dbaaf2e061b0a4c411ad821"
+        }
+      ],
+      "direction": "Male, early forties. Smooth light baritone, polished but approachable English accent. A stylist who understands looking like yourself matters after hardship. Warm taste and gentle playfulness, no camp caricature or sales pitch.",
+      "seed": 204406,
+      "voice_description": "Original fantasy adventure game character. Male, early forties. Smooth light baritone, polished but approachable English accent. A stylist who understands looking like yourself matters after hardship. Warm taste and gentle playfulness, no camp caricature or sales pitch. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "drillmaster",
+      "name": "Drillmaster",
+      "role": "Classes and training",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Choose a class, learn its skills, then practice. Equip unlocked classes here. New disciplines may require trials. Test your skills in the Sparring Room.",
+      "sourceLines": [
+        {
+          "id": "hub.drillmaster.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Choose a class, learn its skills, then practice.",
+          "sha256": "f15e17ed9c9c58ed89189dee61bf9371d12f8fce069d451b355fb2017a26172d"
+        },
+        {
+          "id": "hub.drillmaster.guide",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Equip unlocked classes here. New disciplines may require trials. Test your skills in the Sparring Room.",
+          "sha256": "8a9dfe1a6305580170216ab3002e877fc99020a33dd7f15c7447bcd82cecf3f4"
+        }
+      ],
+      "direction": "Male, late forties. Forward clear baritone with crisp Scottish consonants. An experienced trainer, firm and encouraging, focused on practice rather than fearlessness. Compact instructions, no barking drill-sergeant shouting.",
+      "seed": 205125,
+      "voice_description": "Original fantasy adventure game character. Male, late forties. Forward clear baritone with crisp Scottish consonants. An experienced trainer, firm and encouraging, focused on practice rather than fearlessness. Compact instructions, no barking drill-sergeant shouting. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "beastkeeper",
+      "name": "Beastkeeper",
+      "role": "Companions and training",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Looking for a companion? Mind your fingers around the hungry ones. Even a small companion can make a big difference.",
+      "sourceLines": [
+        {
+          "id": "hub.beastkeeper.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Looking for a companion? Mind your fingers around the hungry ones.",
+          "sha256": "cdafd7eae584d8009da66818e49129fc54f37094035d6ca351980d6c27c3bef2"
+        },
+        {
+          "id": "hub.beastkeeper.about",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Even a small companion can make a big difference.",
+          "sha256": "aa89286dc2930ab3013867fb62ae4d61bc54879385ecdb42f137c8f7fec78136"
+        }
+      ],
+      "direction": "Male, early fifties. Low warm lightly husky voice, relaxed west-country English lilt. A patient animal keeper, affectionate with dangerous creatures, gently teasing new owners. Easy reassuring rhythm, no cartoon rustic accent.",
+      "seed": 205844,
+      "voice_description": "Original fantasy adventure game character. Male, early fifties. Low warm lightly husky voice, relaxed west-country English lilt. A patient animal keeper, affectionate with dangerous creatures, gently teasing new owners. Easy reassuring rhythm, no cartoon rustic accent. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "flint",
+      "name": "Flint",
+      "role": "A captive smith who refuses to waste good work or good people",
+      "group": "Emberdeep",
+      "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. First meeting in the receiving yard",
+      "text": "This forge arms the Legion. Free the workers beside the hammer before touching any valves. Clear the guards and open the shelter first. Sabotaging loaded machinery could hurt the workers.",
+      "sourceLines": [
+        {
+          "id": "ih.flint.first",
+          "file": "public/3d/story/iron-halls.json",
+          "text": "This forge arms the Legion. Free the workers beside the hammer before touching any valves.",
+          "sha256": "c04112852c453834333c87c9e10d9fdbce6356bb8e892f3020fafd4180fb14ee"
+        },
+        {
+          "id": "ih.flint.careful",
+          "file": "public/3d/story/iron-halls.json",
+          "text": "Clear the guards and open the shelter first. Sabotaging loaded machinery could hurt the workers.",
+          "sha256": "a53c82c05326522850a9770dc497613d0f84b0fd360f05d72636aea8ccea1d6c"
+        }
+      ],
+      "direction": "Male, early fifties. Dark dry bass, rough northern English accent, restrained breath. A captive smith protecting workers before sabotaging machinery. Exhausted, protective and exact; quiet moral authority distinct from the hub smith.",
+      "seed": 206563,
+      "voice_description": "Original fantasy adventure game character. Male, early fifties. Dark dry bass, rough northern English accent, restrained breath. A captive smith protecting workers before sabotaging machinery. Exhausted, protective and exact; quiet moral authority distinct from the hub smith. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "jack",
+      "name": "Jack",
+      "role": "A furnace worker keeping his crew alive with practical repairs",
+      "group": "Emberdeep",
+      "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Meeting beside the broken cart",
+      "text": "The western stores have insulated brake handles. Fit them to this cart, or bring them to me. Then its deck can bridge the gap.",
+      "sourceLines": [
+        {
+          "id": "ih.jack.first",
+          "file": "public/3d/story/iron-halls.json",
+          "text": "The western stores have insulated brake handles. Fit them to this cart, or bring them to me. Then its deck can bridge the gap.",
+          "sha256": "fdae78a4c75650777f0b404dd2833f722c60f3af4d26a408f55b47a0dc6c93af"
+        }
+      ],
+      "direction": "Male, late twenties. Quick bright mid register, clear English Midlands vowels. A resourceful furnace mechanic improvising repairs under pressure. Practical energy with understated humour, not manic or squeaky.",
+      "seed": 207282,
+      "voice_description": "Original fantasy adventure game character. Male, late twenties. Quick bright mid register, clear English Midlands vowels. A resourceful furnace mechanic improvising repairs under pressure. Practical energy with understated humour, not manic or squeaky. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "miles",
+      "name": "Miles",
+      "role": "Living castle servant. Tired, dry humor, careful with strangers; warmth shows when workers are safe.",
+      "group": "Castle Duskmoor",
+      "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+      "text": "Quiet. The guards count footsteps now. I told them the stairs would win. The King is above. My friends are in the cells below him. Please free them.",
+      "sourceLines": [
+        {
+          "id": "la.miles.hello",
+          "file": "public/3d/story/long-ascent.json",
+          "text": "Quiet. The guards count footsteps now. I told them the stairs would win.",
+          "sha256": "cdf74ef34c2a1e1e456416ca7b7bf7e12d074eac87ba9e579d64abefd57f1914"
+        },
+        {
+          "id": "la.miles.menu",
+          "file": "public/3d/story/long-ascent.json",
+          "text": "The King is above. My friends are in the cells below him. Please free them.",
+          "sha256": "d4f67424c00608d5ee17b4a86cb022016de106c353747166faf5bd17af3faacc"
+        }
+      ],
+      "direction": "Male, late fifties. Hushed papery mid register, careful formal English articulation softened by years of service. A living castle servant keeping workers alive near guards. Tired dry wit and private warmth, never sinister.",
+      "seed": 208001,
+      "voice_description": "Original fantasy adventure game character. Male, late fifties. Hushed papery mid register, careful formal English articulation softened by years of service. A living castle servant keeping workers alive near guards. Tired dry wit and private warmth, never sinister. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "ward",
+      "name": "Captain Ward",
+      "role": "Hollowed officer following the holding-yard orders",
+      "group": "Hollow Pass",
+      "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. At the front gate",
+      "text": "Holding yard. No visitors. State your work detail. Orders decide who passes. Check the records desk west of here.",
+      "sourceLines": [
+        {
+          "id": "lc.ward.first",
+          "file": "public/3d/story/lost-canyon.json",
+          "text": "Holding yard. No visitors. State your work detail.",
+          "sha256": "e8004dfaecb4d38629bc1b80e91e84b9c42c460d36b098e26b466d85a18928ea"
+        },
+        {
+          "id": "lc.ward.rules",
+          "file": "public/3d/story/lost-canyon.json",
+          "text": "Orders decide who passes. Check the records desk west of here.",
+          "sha256": "562c39f9820029a84aa170825224f435c672b99cab0d85af3ab114e9f7500ba2"
+        }
+      ],
+      "direction": "Male, mid forties. Smooth firm baritone, plain English military consonants. A Hollowed holding-yard officer checking orders. Calm and chillingly unemotional but recognisably human, not snarling or enjoying cruelty.",
+      "seed": 208720,
+      "voice_description": "Original fantasy adventure game character. Male, mid forties. Smooth firm baritone, plain English military consonants. A Hollowed holding-yard officer checking orders. Calm and chillingly unemotional but recognisably human, not snarling or enjoying cruelty. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "ruth",
+      "name": "Ruth",
+      "role": "Prisoner organizer who keeps people together",
+      "group": "Hollow Pass",
+      "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A rescue with people behind it",
+      "text": "Caleb escaped? Good. Free both cage groups and cut the alarm cable above the east yard. We need both done to escape.",
+      "sourceLines": [
+        {
+          "id": "lc.ruth.first",
+          "file": "public/3d/story/lost-canyon.json",
+          "text": "Caleb escaped? Good. Free both cage groups and cut the alarm cable above the east yard. We need both done to escape.",
+          "sha256": "3b552c1dcb5f11271184eba931d959cbc590d5259f53e08de2a053339f461a35"
+        }
+      ],
+      "direction": "Female, early forties. Strong low mezzo with a lightly northern English accent. A tired prisoner organiser holding people together. Firm practical warmth, dry affection for Caleb, composed under fear, never helpless.",
+      "seed": 209439,
+      "voice_description": "Original fantasy adventure game character. Female, early forties. Strong low mezzo with a lightly northern English accent. A tired prisoner organiser holding people together. Firm practical warmth, dry affection for Caleb, composed under fear, never helpless. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "grace",
+      "name": "Sister Grace",
+      "role": "Palace caretaker; warm, firm, tired, quietly funny",
+      "group": "Sunspire",
+      "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+      "text": "The Legion holds the palace. Watch the broken tiles. The orb is beyond the Sky Library's locked doors. Help secure the courtyard first.",
+      "sourceLines": [
+        {
+          "id": "pc.grace.hello",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "The Legion holds the palace. Watch the broken tiles.",
+          "sha256": "636e53c9027516fcb720e0650ae7a5a53529f16f312e33404639ff0de2dfe2e7"
+        },
+        {
+          "id": "pc.grace.orb",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "The orb is beyond the Sky Library's locked doors. Help secure the courtyard first.",
+          "sha256": "ecbc7f34d509e7a771f91cbf3ec665860c0d778a833c6fb2582031049ea4a7b6"
+        }
+      ],
+      "direction": "Female, early sixties. Warm slightly grainy alto, gentle English accent and firm consonants. A palace caretaker treating wounded people. Kind but no-nonsense, tired and quietly funny, no preachy religious delivery.",
+      "seed": 210158,
+      "voice_description": "Original fantasy adventure game character. Female, early sixties. Warm slightly grainy alto, gentle English accent and firm consonants. A palace caretaker treating wounded people. Kind but no-nonsense, tired and quietly funny, no preachy religious delivery. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "victor",
+      "name": "Sergeant Victor",
+      "role": "Surviving palace defender; precise, practical, dry humor",
+      "group": "Sunspire",
+      "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+      "text": "Sergeant Victor. I'm holding what's left of the courtyard watch. The workers are safe. The Legion seized the palace for its knowledge.",
+      "sourceLines": [
+        {
+          "id": "pc.victor.hello",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "Sergeant Victor. I'm holding what's left of the courtyard watch.",
+          "sha256": "17aa06556391819d61aa76fb6727868c33434c6f54c22c46a4c0452a79c32c48"
+        },
+        {
+          "id": "pc.victor.people",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "The workers are safe. The Legion seized the palace for its knowledge.",
+          "sha256": "ac9d97abea06e5b2075a03a682483ca20bfabd8cf8630d3326139fd04da94186"
+        }
+      ],
+      "direction": "Male, late thirties. Clear upright mid-low register, clipped but natural English accent. A surviving palace sergeant with precise practical advice. Steady discipline, dry humour and human respect, no pompous bluster.",
+      "seed": 210877,
+      "voice_description": "Original fantasy adventure game character. Male, late thirties. Clear upright mid-low register, clipped but natural English accent. A surviving palace sergeant with precise practical advice. Steady discipline, dry humour and human respect, no pompous bluster. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "walter",
+      "name": "Walter",
+      "role": "Stoneworker who knows how the prison was rebuilt",
+      "group": "Ruined Keep",
+      "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A builder notices what the guards tried to hide",
+      "text": "Search the west cells. The beds are empty, but the guards are still here. Look behind those rooms. Follow the old service marks behind the empty cells. They lead through a false wall.",
+      "sourceLines": [
+        {
+          "id": "kd.walter.first",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "Search the west cells. The beds are empty, but the guards are still here. Look behind those rooms.",
+          "sha256": "5754c5d519bb0a14f9ded19e16329a5f74a40c028fb1707e2d3691d36c9ea5ff"
+        },
+        {
+          "id": "kd.walter.marks",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "Follow the old service marks behind the empty cells. They lead through a false wall.",
+          "sha256": "84b93d074e970d5da486e5199616ff7880c3d1bcf48c39e6392bbc8a90646298"
+        }
+      ],
+      "direction": "Male, late sixties. Low sandy baritone, deliberate northern English phrasing. A stoneworker noticing the prison structure others miss. Steady observational wit, reliable and grounded, not a cryptic old wizard.",
+      "seed": 211596,
+      "voice_description": "Original fantasy adventure game character. Male, late sixties. Low sandy baritone, deliberate northern English phrasing. A stoneworker noticing the prison structure others miss. Steady observational wit, reliable and grounded, not a cryptic old wizard. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "sly",
+      "name": "Sly",
+      "role": "A prisoner who stole from someone worse off",
+      "group": "Ruined Keep",
+      "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A thief tests the waters",
+      "text": "I'm Sly. Before we leave, help me return something I stole. Walter knows the way out. Speak to him first.",
+      "sourceLines": [
+        {
+          "id": "kd.sly.first",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "I'm Sly. Before we leave, help me return something I stole.",
+          "sha256": "595779effe759b55b2301db0760b260ed6c65e5890f1258a3021d0d99bcd8730"
+        },
+        {
+          "id": "kd.sly.busy",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "Walter knows the way out. Speak to him first.",
+          "sha256": "3fa0e7b63108be7b24e5d93fd7f4c26d1382e809d4c00731da906fce2723f118"
+        }
+      ],
+      "direction": "Male, late twenties. Quick soft tenor, lightly London-influenced English accent. A charming prisoner ashamed of stealing from another captive. Small evasive hesitations giving way to sincerity, not a cartoon thief or villain.",
+      "seed": 212315,
+      "voice_description": "Original fantasy adventure game character. Male, late twenties. Quick soft tenor, lightly London-influenced English accent. A charming prisoner ashamed of stealing from another captive. Small evasive hesitations giving way to sincerity, not a cartoon thief or villain. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "riftkeeper",
+      "name": "Rift Keeper",
+      "role": "Explains the training rifts and their history",
+      "group": "Rift Hall & mentors",
+      "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+      "text": "Five matching saved shards automatically open a training rift. Briar Town is first on your right; the others follow campaign order.",
+      "sourceLines": [
+        {
+          "id": "hall.keeper.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Five matching saved shards automatically open a training rift. Briar Town is first on your right; the others follow campaign order.",
+          "sha256": "e8ade450a6a0ae27812dfcd8b8be954c617e35b8346117c6c2efd8d14b27fba7"
+        }
+      ],
+      "direction": "Male, early sixties. Warm airy baritone with measured educated Welsh-tinged English. A patient keeper explaining training rifts, gently amused by practical details. Inviting curiosity and clear teaching, no prophecy or ghost effects.",
+      "seed": 213034,
+      "voice_description": "Original fantasy adventure game character. Male, early sixties. Warm airy baritone with measured educated Welsh-tinged English. A patient keeper explaining training rifts, gently amused by practical details. Inviting curiosity and clear teaching, no prophecy or ghost effects. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_berserker",
+      "name": "Berserker Mentor",
+      "role": "Teaches the Berserker discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Show me you can fight fiercely without losing control. Move between attacks. Save heavy swings for clear openings.",
+      "sourceLines": [
+        {
+          "id": "trial.berserker.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Show me you can fight fiercely without losing control.",
+          "sha256": "dfcb59886a52fca093624e4dce0d75f97dbe22c320ca4899ecefa436151bc690"
+        },
+        {
+          "id": "trial.berserker.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Move between attacks. Save heavy swings for clear openings.",
+          "sha256": "dd5c47ec0647a5cf3b3c7c26217f157c015fda3261e9c4be905d9269a3118e6c"
+        }
+      ],
+      "direction": "Male, mid fifties. Broad textured low baritone with lightly Scottish vowels. A veteran teaching fierce controlled combat. Direct warm firmness, a dry smile, strong breath support without roaring.",
+      "seed": 213753,
+      "voice_description": "Original fantasy adventure game character. Male, mid fifties. Broad textured low baritone with lightly Scottish vowels. A veteran teaching fierce controlled combat. Direct warm firmness, a dry smile, strong breath support without roaring. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_ninja",
+      "name": "Ninja Mentor",
+      "role": "Teaches the Ninja discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Good positioning wins fights. Show me yours. Leave attack warnings before they land. Strike from a clear angle, then move.",
+      "sourceLines": [
+        {
+          "id": "trial.ninja.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Good positioning wins fights. Show me yours.",
+          "sha256": "6acb2e7544effacd9c8d3077c25bf362f0aaea516871fc2bc0bf880086f1f310"
+        },
+        {
+          "id": "trial.ninja.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Leave attack warnings before they land. Strike from a clear angle, then move.",
+          "sha256": "47673e06b41d47c8451df6ca2f81832047c5081f5e340d3df5f47aded59ab5e5"
+        }
+      ],
+      "direction": "Male, late thirties. Quiet clean tenor with neutral international English, precise consonants and spacious pauses. A playful positioning teacher, alert and self-possessed. No stereotyped accent, whisper or mystical chanting.",
+      "seed": 214472,
+      "voice_description": "Original fantasy adventure game character. Male, late thirties. Quiet clean tenor with neutral international English, precise consonants and spacious pauses. A playful positioning teacher, alert and self-possessed. No stereotyped accent, whisper or mystical chanting. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_reaper",
+      "name": "Reaper Mentor",
+      "role": "Teaches the Reaper discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Your scythe has reach. Use it without ignoring enemy attacks. Fight near the edge of your reach. Strike when enemies commit to an attack.",
+      "sourceLines": [
+        {
+          "id": "trial.reaper.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Your scythe has reach. Use it without ignoring enemy attacks.",
+          "sha256": "ae64becee76298259610317b8e35b2889db020464ff625165aec83c99420bec2"
+        },
+        {
+          "id": "trial.reaper.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fight near the edge of your reach. Strike when enemies commit to an attack.",
+          "sha256": "20d69182c16ca2e97af839d95bb619f2d69372b0ac51aaeb154a5a620ac7fe08"
+        }
+      ],
+      "direction": "Male, mid fifties. Smooth very low register with clear neutral English vowels. A serious but humane teacher of scythe reach and patience. Stillness and control, no villain growl, soul-stealing glee or horror processing.",
+      "seed": 215191,
+      "voice_description": "Original fantasy adventure game character. Male, mid fifties. Smooth very low register with clear neutral English vowels. A serious but humane teacher of scythe reach and patience. Stillness and control, no villain growl, soul-stealing glee or horror processing. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_chronomancer",
+      "name": "Chronomancer Mentor",
+      "role": "Teaches the Chronomancer discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Timing matters more than rushing. Show me you can use an opening. Use enemy pauses to move or attack. Your time skills create more of those openings.",
+      "sourceLines": [
+        {
+          "id": "trial.chronomancer.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Timing matters more than rushing. Show me you can use an opening.",
+          "sha256": "b4943ea7d556ed4b414d333fa3001378ec1f78b45152a53689b7e1c1b539e74f"
+        },
+        {
+          "id": "trial.chronomancer.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Use enemy pauses to move or attack. Your time skills create more of those openings.",
+          "sha256": "bc19669e543b7566deb0fd2440dcc9ad987b574c043c1685216207bb2f4c3c0e"
+        }
+      ],
+      "direction": "Male, early seventies. Light dry upper baritone, educated English accent with thoughtful little pauses. A witty older teacher of timing. Patient, gently amused, never slow enough to drag or grand about destiny.",
+      "seed": 215910,
+      "voice_description": "Original fantasy adventure game character. Male, early seventies. Light dry upper baritone, educated English accent with thoughtful little pauses. A witty older teacher of timing. Patient, gently amused, never slow enough to drag or grand about destiny. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_pirate",
+      "name": "Pirate Mentor",
+      "role": "Teaches the Pirate discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Keep your footing when the fight gets messy. Show me. Fire your pistol from a distance. Charge your saber when enemies get close.",
+      "sourceLines": [
+        {
+          "id": "trial.pirate.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Keep your footing when the fight gets messy. Show me.",
+          "sha256": "8c872e363f3773abb0fb4ef594d8876d19e16e11e7c6731fa10dd719f0619f63"
+        },
+        {
+          "id": "trial.pirate.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fire your pistol from a distance. Charge your saber when enemies get close.",
+          "sha256": "b907672f4419ff648589f03155678dc66d81035bdce8dc9e5e9f4ebb1db3694a"
+        }
+      ],
+      "direction": "Male, mid forties. Open rough-edged tenor with a light coastal English lilt. An experienced sailor teaching footing and practical weapons. Easy confidence, good humour, no exaggerated pirate impersonation or theatrical arrr.",
+      "seed": 216629,
+      "voice_description": "Original fantasy adventure game character. Male, mid forties. Open rough-edged tenor with a light coastal English lilt. An experienced sailor teaching footing and practical weapons. Easy confidence, good humour, no exaggerated pirate impersonation or theatrical arrr. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_paladin",
+      "name": "Paladin Mentor",
+      "role": "Teaches the Paladin discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Protect yourself without becoming careless. Show me you can hold your ground. Watch enemy warnings. Leave room to dodge and use protection before a hit lands.",
+      "sourceLines": [
+        {
+          "id": "trial.paladin.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Protect yourself without becoming careless. Show me you can hold your ground.",
+          "sha256": "3050d4b7700893edb3bf93c5621ef23ff2fd579f334d4403d1be25a66555f980"
+        },
+        {
+          "id": "trial.paladin.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Watch enemy warnings. Leave room to dodge and use protection before a hit lands.",
+          "sha256": "4535c006f686bd477fdca19e877c9a354daa507d82c148e8c99ec017abd7a24a"
+        }
+      ],
+      "direction": "Male, mid forties. Warm resonant mid register, clear English accent and gentle measured pace. A protector teaching careful defence. Sincere care and light authority, no sermons or self-righteous grandiosity.",
+      "seed": 217348,
+      "voice_description": "Original fantasy adventure game character. Male, mid forties. Warm resonant mid register, clear English accent and gentle measured pace. A protector teaching careful defence. Sincere care and light authority, no sermons or self-righteous grandiosity. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_necromancer",
+      "name": "Necromancer Mentor",
+      "role": "Teaches the Necromancer discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Fight with your summons. Don't let commanding them distract you from danger. Give summons room to fight. Dodge attacks aimed at you and use the openings they create.",
+      "sourceLines": [
+        {
+          "id": "trial.necromancer.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fight with your summons. Don't let commanding them distract you from danger.",
+          "sha256": "5e9da2c1f6eead4fe6b2b0eb41f76e72993d6f605d082ff65d18a2db087c2888"
+        },
+        {
+          "id": "trial.necromancer.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Give summons room to fight. Dodge attacks aimed at you and use the openings they create.",
+          "sha256": "3528837e76ec9ca6160e5060e37bb209f145684400c19db535ee364175ccc439"
+        }
+      ],
+      "direction": "Male, late forties. Dry silky mid-low register, precise educated English articulation. A composed humane instructor discussing summons as ordinary craft. Matter-of-fact wit, not evil, whispery, demonic or gleefully morbid.",
+      "seed": 218067,
+      "voice_description": "Original fantasy adventure game character. Male, late forties. Dry silky mid-low register, precise educated English articulation. A composed humane instructor discussing summons as ordinary craft. Matter-of-fact wit, not evil, whispery, demonic or gleefully morbid. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "mentor_pyromancer",
+      "name": "Pyromancer Mentor",
+      "role": "Teaches the Pyromancer discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Fire is useful when you control where it goes. Clear this chamber and show me. Keep moving between casts. Use your shield or blast when enemies get close.",
+      "sourceLines": [
+        {
+          "id": "trial.pyromancer.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fire is useful when you control where it goes. Clear this chamber and show me.",
+          "sha256": "3d2d3f45cf0e632385ddbd1d9271af978bf3e9317e09f890668a31bbd5173438"
+        },
+        {
+          "id": "trial.pyromancer.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Keep moving between casts. Use your shield or blast when enemies get close.",
+          "sha256": "89240bccad80dedaed3c84c818717f2f8fc5bbb72a0617cec813744feedb0fdf"
+        }
+      ],
+      "direction": "Female, late thirties. Warm full mezzo with lightly Irish vowels, steady clear consonants. A practical encouraging fire instructor, contained energy and confidence. Direct lessons in control, never manic or seductive.",
+      "seed": 218786,
+      "voice_description": "Original fantasy adventure game character. Female, late thirties. Warm full mezzo with lightly Irish vowels, steady clear consonants. A practical encouraging fire instructor, contained energy and confidence. Direct lessons in control, never manic or seductive. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "otto",
+      "name": "Otto",
+      "role": "Boatbuilder; practical, dry humor, steady under pressure",
+      "group": "Storm Coast",
+      "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+      "text": "Martin sent you? Good. Let's get you to Sunspire. Sunspire lies beyond the island cliffs. Repair this boat with a rudder, sailcloth and rope.",
+      "sourceLines": [
+        {
+          "id": "sc.otto.hello",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "Martin sent you? Good. Let's get you to Sunspire.",
+          "sha256": "f1f0970a427e5887c172e2e5244718c62914465a35454174d42cdce1c7f280b2"
+        },
+        {
+          "id": "sc.otto.plan",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "Sunspire lies beyond the island cliffs. Repair this boat with a rudder, sailcloth and rope.",
+          "sha256": "583ed70547d727ccb885df719076f30d1d322ebdcabd7e24bd825d764933fb4c"
+        }
+      ],
+      "direction": "Male, early fifties. Solid rough mid-low register with a light northern coastal English accent. A reliable boatbuilder keeping people moving. Practical dry humour, unhurried confidence under pressure, not a drunken sailor.",
+      "seed": 219505,
+      "voice_description": "Original fantasy adventure game character. Male, early fifties. Solid rough mid-low register with a light northern coastal English accent. A reliable boatbuilder keeping people moving. Practical dry humour, unhurried confidence under pressure, not a drunken sailor. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "rose",
+      "name": "Captain Rose",
+      "role": "Male retired captain; proud, grieving, warm once trusted",
+      "group": "Storm Coast",
+      "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+      "text": "That wreck was my ship. Its bell should still be inside. Would you fetch it? I stayed at the wheel. The others took the small boat. I never learned where they landed.",
+      "sourceLines": [
+        {
+          "id": "sc.rose.hello",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "That wreck was my ship. Its bell should still be inside. Would you fetch it?",
+          "sha256": "cabbb8ada871ef84edc3a54c4ca57f00d6542f7c504a812bbbc70bc5d5b4ea60"
+        },
+        {
+          "id": "sc.rose.memory",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "I stayed at the wheel. The others took the small boat. I never learned where they landed.",
+          "sha256": "47f828a3d54276ca013088855fec636fb6c17ef050a6e364fd2505738954082d"
+        }
+      ],
+      "direction": "Male, early sixties. Weathered resonant baritone, gentle coastal English vowels, occasional gravel. A retired captain grieving his lost ship and worrying for his crew. Restrained pride that softens with trust, never melodramatic or female.",
+      "seed": 220224,
+      "voice_description": "Original fantasy adventure game character. Male, early sixties. Weathered resonant baritone, gentle coastal English vowels, occasional gravel. A retired captain grieving his lost ship and worrying for his crew. Restrained pride that softens with trust, never melodramatic or female. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "hugh",
+      "name": "Master Hugh",
+      "role": "Senior keeper; careful, proud, slowly learning to trust outsiders",
+      "group": "Sunspire",
+      "context": "Senior keeper; careful, proud, slowly learning to trust outsiders",
+      "text": "These halls hold dangerous knowledge. A locked door didn't keep the Legion out. You helped our people. Keeping this door shut won't protect them now.",
+      "sourceLines": [
+        {
+          "id": "sl.hugh.hello",
+          "file": "public/3d/story/sky-library.json",
+          "text": "These halls hold dangerous knowledge. A locked door didn't keep the Legion out.",
+          "sha256": "a8b39b4b5b3f745f3f1ab1b2041d1a5b4f96216edf4eea9c9c4eb5bcba2825d9"
+        },
+        {
+          "id": "sl.hugh.need",
+          "file": "public/3d/story/sky-library.json",
+          "text": "You helped our people. Keeping this door shut won't protect them now.",
+          "sha256": "d006130235e021a9816107868c80d047f611a7585f84ed32deb7ad51bc8d358d"
+        }
+      ],
+      "direction": "Male, late sixties. Narrow formal upper baritone, carefully enunciated educated English accent. A proud senior librarian slowly learning to trust outsiders. Cautious dignity softening into concern, not a sneering gatekeeper.",
+      "seed": 220943,
+      "voice_description": "Original fantasy adventure game character. Male, late sixties. Narrow formal upper baritone, carefully enunciated educated English accent. A proud senior librarian slowly learning to trust outsiders. Cautious dignity softening into concern, not a sneering gatekeeper. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "simon",
+      "name": "Simon",
+      "role": "Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it",
+      "group": "Sunspire",
+      "context": "Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it",
+      "text": "Welcome to the restricted shelves. The Legion has made a mess of our rules. A shard is across that gap. Turn the first crank, cross the shelves, then turn the second crank on the far landing.",
+      "sourceLines": [
+        {
+          "id": "sl.simon.hello",
+          "file": "public/3d/story/sky-library.json",
+          "text": "Welcome to the restricted shelves. The Legion has made a mess of our rules.",
+          "sha256": "db5676f68467ff1b2e6128d2f39e76a2f6e6dbfc997a0976ed6c5b0e795a1323"
+        },
+        {
+          "id": "sl.simon.shelf",
+          "file": "public/3d/story/sky-library.json",
+          "text": "A shard is across that gap. Turn the first crank, cross the shelves, then turn the second crank on the far landing.",
+          "sha256": "b844d104ddc9491f70ac5644492318102e01060741697778071ffe325f058859"
+        }
+      ],
+      "direction": "Male, late twenties. Bright articulate tenor, light educated English accent, quicker than his senior keeper. A kind junior librarian frustrated knowledge is hoarded. Wry understated humour, friendly intelligence, never smug.",
+      "seed": 221662,
+      "voice_description": "Original fantasy adventure game character. Male, late twenties. Bright articulate tenor, light educated English accent, quicker than his senior keeper. A kind junior librarian frustrated knowledge is hoarded. Wry understated humour, friendly intelligence, never smug. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "heath",
+      "name": "Heath",
+      "role": "Mountain guide keeping a shelter open while Ellis is missing",
+      "group": "Frostfell",
+      "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line",
+      "text": "Looking for Ellis? Follow his scratched arrows uphill. The Legion is searching for him too. The caves are uphill. Let me help you get there safely.",
+      "sourceLines": [
+        {
+          "id": "ff.heath.first",
+          "file": "public/3d/story/snowbound-peaks.json",
+          "text": "Looking for Ellis? Follow his scratched arrows uphill. The Legion is searching for him too.",
+          "sha256": "e160a73b01d87c24d525d0ba609d2e660ab6d1dd5e8141af491574d609af1225"
+        },
+        {
+          "id": "ff.heath.blunt",
+          "file": "public/3d/story/snowbound-peaks.json",
+          "text": "The caves are uphill. Let me help you get there safely.",
+          "sha256": "406a080f6edde5623e5b8c2a9986a815ec9936f3f79d132359af2d864ca1e9af"
+        }
+      ],
+      "direction": "Male, late forties. Wind-roughened mid baritone with soft Scottish vowels. A tired mountain guide maintaining a shelter. Practical warmth, calm safety instructions and dry humour, not a booming adventurer.",
+      "seed": 222381,
+      "voice_description": "Original fantasy adventure game character. Male, late forties. Wind-roughened mid baritone with soft Scottish vowels. A tired mountain guide maintaining a shelter. Practical warmth, calm safety instructions and dry humour, not a booming adventurer. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "sunspire_orb",
+      "name": "The Sunspire Orb",
+      "role": "Conscious keeper of knowledge; calm, clear, compassionate, never theatrical",
+      "group": "Sunspire",
+      "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known.",
+      "text": "You have reached me. One question, freely asked. No title is needed here. Then take that moment. Fear does not make your purpose smaller.",
+      "sourceLines": [
+        {
+          "id": "mc.orb.hello",
+          "file": "public/3d/story/sunspire-orb.json",
+          "text": "You have reached me. One question, freely asked. No title is needed here.",
+          "sha256": "f16782a0a4ae9f402e37c71511ff5c710cecdff840e56f65090a29ea58dfabd0"
+        },
+        {
+          "id": "mc.orb.steady",
+          "file": "public/3d/story/sunspire-orb.json",
+          "text": "Then take that moment. Fear does not make your purpose smaller.",
+          "sha256": "382bf2901209ba74897ed28d1e18b19d9b06cf399e4f97e7eb4004c323dcc7dd"
+        }
+      ],
+      "direction": "Androgynous adult voice. Smooth luminous mid register with clear neutral English vowels and gentle rounded resonance. A conscious compassionate keeper of knowledge. Calm attentive warmth, alive and personal, not an artificial assistant, metallic robot or grand disembodied god. No echo.",
+      "seed": 223100,
+      "voice_description": "Original fantasy adventure game character. Androgynous adult voice. Smooth luminous mid register with clear neutral English vowels and gentle rounded resonance. A conscious compassionate keeper of knowledge. Calm attentive warmth, alive and personal, not an artificial assistant, metallic robot or grand disembodied god. No echo. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "abe",
+      "name": "Abe",
+      "role": "Island fisher; calm, stubborn compassion, plain-spoken",
+      "group": "Storm Coast",
+      "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+      "text": "You crossed safely. Good. The climb to Sunspire starts here. The eastern steps reach the middle ledge. The broken cargo lift is a shortcut if you want to repair it. Look for an old hydra shackle above.",
+      "sourceLines": [
+        {
+          "id": "tc.abe.hello",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "You crossed safely. Good. The climb to Sunspire starts here.",
+          "sha256": "c720a12b79a402e672674b40c0c7a533957457d977ad1991823ee58f7036334c"
+        },
+        {
+          "id": "tc.abe.path",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "The eastern steps reach the middle ledge. The broken cargo lift is a shortcut if you want to repair it. Look for an old hydra shackle above.",
+          "sha256": "e946928432c4f5f317d965af393cf571ba8e829272bb64a73b7aa844ccbf2d74"
+        }
+      ],
+      "direction": "Male, early sixties. Low unpolished warm voice with a mild west-coast Irish lilt. A stubbornly compassionate island fisherman. Plain-spoken steadiness and patient courage, no fanciful sailor performance.",
+      "seed": 223819,
+      "voice_description": "Original fantasy adventure game character. Male, early sixties. Low unpolished warm voice with a mild west-coast Irish lilt. A stubbornly compassionate island fisherman. Plain-spoken steadiness and patient courage, no fanciful sailor performance. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "dash",
+      "name": "Dash",
+      "role": "Young scavenger; playful confidence hiding a fear of heights",
+      "group": "Storm Coast",
+      "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+      "text": "This is my treasure claim. The stick makes it official. Probably. Help open the wreck cave and split the coins. Or beat my cliff race to keep them all.",
+      "sourceLines": [
+        {
+          "id": "tc.dash.hello",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "This is my treasure claim. The stick makes it official. Probably.",
+          "sha256": "2642f2518e34f0ee51e96d4c3660e47add273f597b7e562c3f17a081ab464ffb"
+        },
+        {
+          "id": "tc.dash.offer",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "Help open the wreck cave and split the coins. Or beat my cliff race to keep them all.",
+          "sha256": "35acfc76608f42d1ab3934435c06428572edbb4f67f63c722ed79711d0bdf6db"
+        }
+      ],
+      "direction": "Male, early twenties. Youthful bright lightly raspy tenor, relaxed English city accent. A playful scavenger with too much confidence covering fear of heights. Mischievous quick timing and an audible grin, not a child or cartoon.",
+      "seed": 224538,
+      "voice_description": "Original fantasy adventure game character. Male, early twenties. Youthful bright lightly raspy tenor, relaxed English city accent. A playful scavenger with too much confidence covering fear of heights. Mischievous quick timing and an audible grin, not a child or cartoon. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    },
+    {
+      "id": "warden_shade",
+      "name": "Warden’s Shade",
+      "role": "Legacy regional guide; remaining lore needs canon review before full dubbing",
+      "group": "Other guides",
+      "context": "Existing guide presentation outside the authored dialogue books. This sample uses only its safe Briar introduction; old dream-era lines are not approved.",
+      "text": "The Legion is approaching Briar. The townspeople are doing what they can. Protect the supplies and help your neighbors prepare. Every person you help gives the town a better chance.",
+      "sourceLines": [
+        {
+          "id": "STORY.npc.outskirts.lore",
+          "file": "public/3d/index.html"
+        }
+      ],
+      "direction": "Male, early sixties. Soft low chest register with gently worn English vowels. A lingering protector offering practical help to threatened people. Quiet sorrow tempered by kindness, measured intimate delivery, no horror rasp, echo or prophecy.",
+      "seed": 225916,
+      "voice_description": "Original fantasy adventure game character. Male, early sixties. Soft low chest register with gently worn English vowels. A lingering protector offering practical help to threatened people. Quiet sorrow tempered by kindness, measured intimate delivery, no horror rasp, echo or prophecy. Natural conversational acting, clear intelligible words. Clean close studio speech, no background music, ambience or sound effects. Do not imitate any real actor."
+    }
+  ]
+}

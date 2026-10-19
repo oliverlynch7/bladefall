@@ -1,0 +1,59 @@
+{
+  "characters": 50,
+  "authored_speakers": 49,
+  "legacy_speakers": 1,
+  "clips": 150,
+  "webgl_gameplay_modified": false,
+  "game_saves_used": false,
+  "tests": [
+    "source speaker and excerpt coverage",
+    "150 matching file hashes",
+    "review schema/revision/audio-hash validation",
+    "green/red/undecided states",
+    "voice-manifest current wording and fallback",
+    "voice API existing immutable take/approval/origin checks",
+    "all 150 MP3s decoded and signal checked"
+  ],
+  "browser": {
+    "muted_playback": {
+      "readyState": 4,
+      "duration": 10.057125,
+      "error": null
+    },
+    "speaker_choices": 50,
+    "hub_filter": [
+      "Thomas",
+      "Quartermaster",
+      "The Smith",
+      "The Stylist",
+      "Drillmaster",
+      "Beastkeeper"
+    ],
+    "search": "Pyromancer Mentor found",
+    "all_red_state": "0 green-lit / 1 new voice / 49 pending",
+    "green_state": "1 green-lit retained after reload",
+    "test_decisions_cleared": true,
+    "export": "JSON downloaded to local Downloads and contents read",
+    "import": "same JSON restored through paste-backup UI",
+    "file_picker": "automation blocked by Chrome extension file URL permission; no permission changed",
+    "mobile": {
+      "viewport": 390,
+      "content_width": 390,
+      "overflow": false
+    },
+    "console_errors": []
+  },
+  "credits": {
+    "used_before": 20574,
+    "used_after": 27376,
+    "observed_delta": 6802,
+    "remaining": 12624
+  },
+  "limits": [
+    "No human casting approval implied",
+    "No full dialogue generated or game activation",
+    "Legacy Shade lore still needs canon cleanup",
+    "Starter saved voice limit 10; preview identifiers not promised permanent"
+  ],
+  "review_storage": "Separate browser-local key, audio-hash bound; copy/export/import for cross-device transfer; no secret credentials or game storage"
+}

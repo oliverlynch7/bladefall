@@ -1,0 +1,2281 @@
+{
+  "schema": 1,
+  "revision": "npc-auditions-20261019-a",
+  "dialogueQA": "Prior passes verified flow, turn-ins and main/side/lore separation. Wording remains subject to final editorial review; legacy Shade lore includes outdated material. These auditions do not approve a full script.",
+  "characters": [
+    {
+      "id": "thomas",
+      "name": "Thomas",
+      "role": "Your father",
+      "group": "Waystation",
+      "context": "The Hollowed Legion has reached Briar Town. Your child refuses to hide. You reluctantly help them prepare.",
+      "text": "The Legion has reached our fields. You're going to fight, aren't you? Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
+      "direction": "Male, early fifties. Warm weathered baritone, soft northern English vowels, slightly rough edges. An adoptive father masking worry with practical affection. Intimate, protective, never a narrator or commanding officer.",
+      "sourceLines": [
+        {
+          "id": "briar.thomas.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The Legion has reached our fields. You're going to fight, aren't you?",
+          "sha256": "de3f35bb7618a27c77afe5c75e7b530af5884a4cf14b11043001ad61919876a1"
+        },
+        {
+          "id": "briar.thomas.afraid",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
+          "sha256": "34f53ab213235959651bf02999a1881226a867053baefba434864995975e8e4d"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "thomas-a.mp3",
+          "duration": 10.059875,
+          "sha256": "510411020adb318bfb9fc6bf4bf39562407e98b1bf04adbb7abce4697962a389",
+          "bytes": 160958
+        },
+        {
+          "option": "B",
+          "file": "thomas-b.mp3",
+          "duration": 9.5113125,
+          "sha256": "8bcce4a0a46a088c3be64bac217a6927b3871e6d92056566c343a9335447a9ce",
+          "bytes": 152181
+        },
+        {
+          "option": "C",
+          "file": "thomas-c.mp3",
+          "duration": 9.4590625,
+          "sha256": "29ed2092a5014cbeaedf2f0dda169dfc974801567288dd7d7bc6e181fd2c000c",
+          "bytes": 151345
+        }
+      ]
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "role": "Village medic",
+      "group": "Briar Town",
+      "context": "Your neighbors are wounded as the Legion reaches the village. Supplies let you treat them and reopen the large healing pad.",
+      "text": "I need tangle roots for fevers and clean dressings for wounds. Help me get these people ready to leave. The wounded need treatment before they can fight or escape.",
+      "direction": "Female, early forties. Clear warm alto with a light west-country English accent. A village medic moving briskly between patients, capable and compassionate. Firm practical requests, a tired smile, no panic or breathy fragility.",
+      "sourceLines": [
+        {
+          "id": "briar.mara.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "I need tangle roots for fevers and clean dressings for wounds. Help me get these people ready to leave.",
+          "sha256": "536d117c948fe131ddbaf5c1762bea7598c75795a231625fc91e26b4f65eb82a"
+        },
+        {
+          "id": "briar.mara.why",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The wounded need treatment before they can fight or escape.",
+          "sha256": "921808df50942a2e6ebb86793aeea1d985794b5539219b690497610fa955d412"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mara-a.mp3",
+          "duration": 9.92925,
+          "sha256": "943119b3cf967f055d5f6dbf0c64885ce2fa3e3577822affe9e6d7250279bde7",
+          "bytes": 158868
+        },
+        {
+          "option": "B",
+          "file": "mara-b.mp3",
+          "duration": 9.92925,
+          "sha256": "0f9611bb91990e0ff44d09a425dd807b48858db98c6443718bfb8b5839458b39",
+          "bytes": 158868
+        },
+        {
+          "option": "C",
+          "file": "mara-c.mp3",
+          "duration": 10.2688125,
+          "sha256": "c547ed5080bd59d4f20d3c6dfc2024e9ee5e341f3cabce6a0666ac115856293b",
+          "bytes": 164301
+        }
+      ]
+    },
+    {
+      "id": "gus",
+      "name": "Gus",
+      "role": "Village carpenter",
+      "group": "Briar Town",
+      "context": "Briar Town is under attack. Gus is a frightened carpenter trying to keep his neighbors safe. This optional quest never blocks the village escape.",
+      "text": "My tools are in the loft. I can't climb up while the Legion is outside. These are my neighbors. I'm staying to help.",
+      "direction": "Male, late forties. Round mid register, gently nasal west-country English voice. A frightened but dependable carpenter. Hesitant first words then steady resolve; kind working-person humour, not comic buffoonery.",
+      "sourceLines": [
+        {
+          "id": "briar.gus.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "My tools are in the loft. I can't climb up while the Legion is outside.",
+          "sha256": "67e509beff7c8e5decc5a1c53dfedf0e13b77b79bf1e316ef8a5727ed4a88ab5"
+        },
+        {
+          "id": "briar.gus.home",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "These are my neighbors. I'm staying to help.",
+          "sha256": "44dd74754c082e0432d450cd44fd41d49ba4796be93439989ededfd8305ecd61"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "gus-a.mp3",
+          "duration": 7.7871875,
+          "sha256": "bc244aaf4d5cae205ec915b1fcbd2f9c5cb0409ae5fa000a9d5a86c439ba00ba",
+          "bytes": 124595
+        },
+        {
+          "option": "B",
+          "file": "gus-b.mp3",
+          "duration": 7.552125,
+          "sha256": "f96993367b19bf2b6e572d4d9cef80b328f94ea08af1b4e7248f9c02a81782c9",
+          "bytes": 120834
+        },
+        {
+          "option": "C",
+          "file": "gus-c.mp3",
+          "duration": 9.2761875,
+          "sha256": "d8439b33073ce08f8c38c6ed66d43da5baaad2226c74468da15a2f206f61a64b",
+          "bytes": 148419
+        }
+      ]
+    },
+    {
+      "id": "lewis",
+      "name": "Lewis",
+      "role": "Village scout",
+      "group": "Briar Town",
+      "context": "Briar’s neighbors have escaped the fields. Lewis needs the Legion signal stopped so they can cross the woods safely.",
+      "text": "Their signal post is ahead. Silence the horn before it brings patrols to our neighbors. Go through the camp or climb the roots on the right. Stop the crank below the horn, or cut its cable from above.",
+      "direction": "Male, early thirties. Lean bright tenor with lightly Scottish vowels, concise consonants. An alert village scout protecting fleeing neighbours. Quiet urgency and focused confidence; no military shouting.",
+      "sourceLines": [
+        {
+          "id": "briar.lewis.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Their signal post is ahead. Silence the horn before it brings patrols to our neighbors.",
+          "sha256": "0b273377470b19b3e71c6553fc0b4b74c666e41b0b8a2eca790154c48f2607e3"
+        },
+        {
+          "id": "briar.lewis.routes",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Go through the camp or climb the roots on the right. Stop the crank below the horn, or cut its cable from above.",
+          "sha256": "baa2b8887e21d57051a0fd0e37318b8ada110f26e3a897de02196c8603009299"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "lewis-a.mp3",
+          "duration": 12.1235625,
+          "sha256": "30741f9660fe25c51a811b2036577ee9523aee1db786654e343ade532e80093f",
+          "bytes": 193977
+        },
+        {
+          "option": "B",
+          "file": "lewis-b.mp3",
+          "duration": 13.56025,
+          "sha256": "2a509ac8bf20f7775e4a92f2954c2d37b126c00a2c609e39c24757e86c5bb799",
+          "bytes": 216964
+        },
+        {
+          "option": "C",
+          "file": "lewis-c.mp3",
+          "duration": 11.41825,
+          "sha256": "0d52c3be7bf915193b5ec6f26ecc41b4c1820f5697b84981fee41c910c488fe3",
+          "bytes": 182692
+        }
+      ]
+    },
+    {
+      "id": "beth",
+      "name": "Beth",
+      "role": "Village shepherd",
+      "group": "Briar Town",
+      "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+      "text": "My brother followed our sheep across the bridge. It broke. He's trapped beyond those beasts. Those sheep are our food and wool. He was trying to save them.",
+      "direction": "Female, late twenties. Clear grounded mezzo, soft rural English accent. A shepherd worried about her brother and flock. Earnest and resourceful, a little breathless from searching, never helpless.",
+      "sourceLines": [
+        {
+          "id": "briar.beth.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "My brother followed our sheep across the bridge. It broke. He's trapped beyond those beasts.",
+          "sha256": "88b1dd7db8bb934e4973dfe73d91c2df4a68eb065f1b8189fbc7643c0925d2da"
+        },
+        {
+          "id": "briar.beth.sheep",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "Those sheep are our food and wool. He was trying to save them.",
+          "sha256": "82a3899749d96a1f589cb9079c9cf492fe182ae9a0e4ac152f7290bd66b487b2"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "beth-a.mp3",
+          "duration": 9.5635625,
+          "sha256": "4a99dc6be137a344d8cde831dabce1e199a6bc79070484a27a60d9aeb6fb4bd3",
+          "bytes": 153017
+        },
+        {
+          "option": "B",
+          "file": "beth-b.mp3",
+          "duration": 8.623125,
+          "sha256": "ebf7ae9d061861872f648ab9312bcdb7b78c8012dcabda27b122a72e06b2f090",
+          "bytes": 137970
+        },
+        {
+          "option": "C",
+          "file": "beth-c.mp3",
+          "duration": 9.3806875,
+          "sha256": "3557e9f8daa91e680b1ce3df3bb18ddf002d22c48e006826e91a55c502569740",
+          "bytes": 150091
+        }
+      ]
+    },
+    {
+      "id": "bethBrother",
+      "name": "Beth’s brother",
+      "role": "A missing neighbor",
+      "group": "Briar Town",
+      "context": "Optional Black Woods rescue. Beth’s brother crossed a broken bridge to save their sheep and was trapped by a fallen tree. Wild beasts block his escape.",
+      "text": "The fallen tree could roll. Clear the beasts, then use the rope lift to raise it. The tree's up and the crossing is fixed. I'm heading back. Thank you.",
+      "direction": "Male, early twenties. Youthful open mid register with a mild rural English accent, related in sound to a village shepherd. Trapped but practical; nervous relief, straightforward gratitude, no childish voice.",
+      "sourceLines": [
+        {
+          "id": "briar.bethBrother.first",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The fallen tree could roll. Clear the beasts, then use the rope lift to raise it.",
+          "sha256": "adbcb4c43051585e89c22be2eb98beb8b697fcd43b83ec8084571e03da82d27a"
+        },
+        {
+          "id": "briar.bethBrother.safe",
+          "file": "public/3d/story/briar-foundation.json",
+          "text": "The tree's up and the crossing is fixed. I'm heading back. Thank you.",
+          "sha256": "1a953a8ff127b15e4256787abcadfab15876d64db3cb69309b8d6cb23af74487"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "bethBrother-a.mp3",
+          "duration": 8.0745625,
+          "sha256": "96cda9e25c1421298809faba070ae69171af977f46f112925484dafdb77607a5",
+          "bytes": 129193
+        },
+        {
+          "option": "B",
+          "file": "bethBrother-b.mp3",
+          "duration": 9.694125,
+          "sha256": "5731c75152cf34cd2c4e1797c23532583ce9732beac5403f60c9f5c4785214a4",
+          "bytes": 155106
+        },
+        {
+          "option": "C",
+          "file": "bethBrother-c.mp3",
+          "duration": 7.7871875,
+          "sha256": "e561a0e4ad0460521ec93a57f8f2210dcab2e50172f0c7c9c37e5e5244842ee3",
+          "bytes": 124595
+        }
+      ]
+    },
+    {
+      "id": "grant",
+      "name": "Grant",
+      "role": "Captured guard trying to get his people home",
+      "group": "Ruined Keep",
+      "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. A guard speaks through a damaged wall",
+      "text": "Clear the arrow post, cut its bow cord, then raise the gate. People are trapped beyond it and in the cells below. The Legion seized ordinary workers. Help me get them out.",
+      "direction": "Male, early forties. Worn chesty baritone with clipped northern English consonants. A captured guard putting civilian lives first. Quiet urgency, economical instructions, fatigue underneath strong control.",
+      "sourceLines": [
+        {
+          "id": "rk.grant.first",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "Clear the arrow post, cut its bow cord, then raise the gate. People are trapped beyond it and in the cells below.",
+          "sha256": "986479bd1dba93ee2c6e8983827e610799b7570361357cc6abc394b5f43bb1a0"
+        },
+        {
+          "id": "rk.grant.people",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "The Legion seized ordinary workers. Help me get them out.",
+          "sha256": "4b7b57bf48ae4e73e9f1fcdd2f9734aea262e98f11602a942430e55611c36399"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "grant-a.mp3",
+          "duration": 12.1235625,
+          "sha256": "df39afd684178f9cef595938fe891ebca9eba8fb92a2f67130e4e660df1d4b8e",
+          "bytes": 193977
+        },
+        {
+          "option": "B",
+          "file": "grant-b.mp3",
+          "duration": 12.38475,
+          "sha256": "b02453f802bfd447fe5459691c2190bcc0bf6d8b2269f6485656c35e5848247d",
+          "bytes": 198156
+        },
+        {
+          "option": "C",
+          "file": "grant-c.mp3",
+          "duration": 15.7806875,
+          "sha256": "5276bd9250da57ef2882ac1d98ba988b88da1e26002cfc1a2a519e458fa8a048",
+          "bytes": 252491
+        }
+      ]
+    },
+    {
+      "id": "felix",
+      "name": "Felix",
+      "role": "Nervous locksmith with steady hands",
+      "group": "Ruined Keep",
+      "context": "Ruined Keep, Broken Walls. The Legion holds people here before transport. Grant and Felix do not know the player is Bladeborn. An optional trade, not a required rescue",
+      "text": "Recover my tools from the east workshop. I'll open the west chamber and give you a dagger. Watch the latch's notch. Press when it turns green.",
+      "direction": "Male, early thirties. Light tenor with a slightly pinched English city accent, quick starts and tiny self-conscious pauses. A nervous locksmith whose hands remain reliable. Precise directions and embarrassed dry wit, no stammer caricature.",
+      "sourceLines": [
+        {
+          "id": "rk.felix.first",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "Recover my tools from the east workshop. I'll open the west chamber and give you a dagger.",
+          "sha256": "83e754520443a621ad682cf159f27c0c6fa45a8edd50d28bd7ec0786fbfabdee"
+        },
+        {
+          "id": "rk.felix.plan",
+          "file": "public/3d/story/broken-walls.json",
+          "text": "Watch the latch's notch. Press when it turns green.",
+          "sha256": "22590a4fc8cc29385272050777f6c723b9b56a0a58c5468020c5b704fee206a7"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "felix-a.mp3",
+          "duration": 8.2051875,
+          "sha256": "530976cc744e06e3e47283e6f503aa09569286ea472bb103b5e1242ceb387a32",
+          "bytes": 131283
+        },
+        {
+          "option": "B",
+          "file": "felix-b.mp3",
+          "duration": 9.5113125,
+          "sha256": "8345cad6f21bb9cc1b775b67d64ef810933f6926e09623eefd4526b77785dff8",
+          "bytes": 152181
+        },
+        {
+          "option": "C",
+          "file": "felix-c.mp3",
+          "duration": 8.0223125,
+          "sha256": "7b90034f3f350b5039e4da33bb4839d130cb11076e6805118c5326655b26b030",
+          "bytes": 128357
+        }
+      ]
+    },
+    {
+      "id": "roland",
+      "name": "Roland",
+      "role": "Living armor maker; careful, proud, quietly angry, dry humor",
+      "group": "Castle Duskmoor",
+      "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+      "text": "Stop. You need a disguise to get through that guarded door. Bring a supply coat, a sound helmet and crew papers. I'll fit the disguise. You'll still need convincing answers.",
+      "direction": "Male, mid fifties. Resonant low-mid voice, measured English Midlands accent, a little gravel. A proud armour maker speaking carefully near enemy guards. Restrained anger, craft expertise and understated humour.",
+      "sourceLines": [
+        {
+          "id": "cg.roland.hello",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "Stop. You need a disguise to get through that guarded door.",
+          "sha256": "a9d48f899928ded6c99544ea5daf94114621b46eb5f49f5f8e62832970766232"
+        },
+        {
+          "id": "cg.roland.menu",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "Bring a supply coat, a sound helmet and crew papers. I'll fit the disguise. You'll still need convincing answers.",
+          "sha256": "179e7d1c600eea46dc1a8cb6220a30bf3f25ba5172aa20dc35fe01aa75081280"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "roland-a.mp3",
+          "duration": 11.9406875,
+          "sha256": "ef9cafed51f8a411e9948480760452e32f4c0bb0655f694129560f3abf35b1d5",
+          "bytes": 191051
+        },
+        {
+          "option": "B",
+          "file": "roland-b.mp3",
+          "duration": 10.8174375,
+          "sha256": "a27a5fbec25c4c465c33704a410984250876296bee6a06857fb045df5e69af9d",
+          "bytes": 173079
+        },
+        {
+          "option": "C",
+          "file": "roland-c.mp3",
+          "duration": 13.638625,
+          "sha256": "c414b3f330651f8a10e35ab1671b319d0fcaa44406b6b1486758447901109b92",
+          "bytes": 218218
+        }
+      ]
+    },
+    {
+      "id": "cross",
+      "name": "Captain Cross",
+      "role": "Hollowed gate captain; precise, flat, controlled. Never a willing villain.",
+      "group": "Castle Duskmoor",
+      "context": "After consulting the Sunspire orb, the player has reached the hidden castle by its western shore. The Abyss King is above. The player is not yet known to be Bladeborn. Roland is alive; Cross is Hollowed.",
+      "text": "State your crew. That does not match this delivery. Present the crew papers. One more answer. When does this crew enter?",
+      "direction": "Male, late thirties. Clean narrow mid register, precise formal southern English articulation. A living Hollowed captain following standing orders, almost normal but missing warmth. Flat controlled questions, not a zombie, robot or willing sadist.",
+      "sourceLines": [
+        {
+          "id": "cg.cross.hello",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "State your crew.",
+          "sha256": "acd02e1a09ce46299aecb2977b5f6a64985829530c095ca27a3a2b14e6ec5ea1"
+        },
+        {
+          "id": "cg.cross.check",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "That does not match this delivery. Present the crew papers. One more answer.",
+          "sha256": "67166f40483b3f7fd7efa59d49da3f01a4e42028991eccd85096840869141473"
+        },
+        {
+          "id": "cg.cross.order",
+          "file": "public/3d/story/castle-gates.json",
+          "text": "When does this crew enter?",
+          "sha256": "5600a64a4b8587c356fd76c7a202547f9b8f10c63c384908c3fda8a0d5a53c89"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "cross-a.mp3",
+          "duration": 9.3284375,
+          "sha256": "a09e4948059c6ac318d97e3798d492365b3d1bfe201293dcf43b675faac75292",
+          "bytes": 149255
+        },
+        {
+          "option": "B",
+          "file": "cross-b.mp3",
+          "duration": 8.675375,
+          "sha256": "8108912041d6f3a748e22d8fbe5528ebe61a624fa6fc543e8cc0cd5bbf6d5482",
+          "bytes": 138806
+        },
+        {
+          "option": "C",
+          "file": "cross-c.mp3",
+          "duration": 9.6158125,
+          "sha256": "f4062396e5daddc0e58665a89d8d9ce0b3c9a2542001c1411c0320ec215ca775",
+          "bytes": 153853
+        }
+      ]
+    },
+    {
+      "id": "ellis",
+      "name": "Professor Ellis",
+      "role": "Former Gate researcher rescued before the Legion can take him away",
+      "group": "Frostfell",
+      "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Ellis has just been freed in his laboratory",
+      "text": "They caught me and were taking me to the Gate. My sealed notes fell near the west tunnel. Read them when you find the pack. I helped with the King's research. My notes show where the Legion gets its weapons.",
+      "direction": "Male, late sixties. Thin textured upper baritone, educated English accent. A recently rescued professor trying to regain composure through useful facts. Shaken breaths, thoughtful clarity, guilt without melodramatic sobbing.",
+      "sourceLines": [
+        {
+          "id": "ic.ellis.first",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "They caught me and were taking me to the Gate. My sealed notes fell near the west tunnel. Read them when you find the pack.",
+          "sha256": "f67a40a1b58efabd24dc318a9230225fd25955fe3fa5dd929bbe05eaf062531e"
+        },
+        {
+          "id": "ic.ellis.press",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "I helped with the King's research. My notes show where the Legion gets its weapons.",
+          "sha256": "12c3622bd23f4ded148285e7b9ffc4f45044b7f96f0eb867fd7cafcbcd64434d"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "ellis-a.mp3",
+          "duration": 18.3929375,
+          "sha256": "d6d91e1b6781530a6116f62dcb13b4161fce5e7758f3817cf3efb5c74f92dd2f",
+          "bytes": 294287
+        },
+        {
+          "option": "B",
+          "file": "ellis-b.mp3",
+          "duration": 15.127625,
+          "sha256": "90ad834c04bb40ce5d5c4d681e42e10a08abb469a69e103ed4d058f6cb3f5f29",
+          "bytes": 242042
+        },
+        {
+          "option": "C",
+          "file": "ellis-c.mp3",
+          "duration": 17.1390625,
+          "sha256": "269166eb2bb8a061a920e39a330cf4babad1a8b87d8e9c8f0d424ab5a5c51c6c",
+          "bytes": 274225
+        }
+      ]
+    },
+    {
+      "id": "hugo",
+      "name": "Hugo",
+      "role": "An explorer whose confidence outlasted the ice under his boots",
+      "group": "Frostfell",
+      "context": "Deep Ice Caves. Ellis has just been captured and is rescued before transport. The player is not known to be Bladeborn. No Sunspire, soul-prison proof, or final-cut revelation. Calling across a broken ice shelf",
+      "text": "I fell through the ice. Can you help me out? Yes, I saw the warning sign. You can laugh once I'm out.",
+      "direction": "Male, mid thirties. Bright rounded tenor with mild Welsh musicality. An explorer whose confidence survived a fall through ice. Embarrassed humour conceals real fear; human, clear and conversational.",
+      "sourceLines": [
+        {
+          "id": "ic.hugo.first",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "I fell through the ice. Can you help me out?",
+          "sha256": "8dc2f183df50eb33d43440e89ac84a60ee0ebec562c3007f37ecba833cf498ec"
+        },
+        {
+          "id": "ic.hugo.tease",
+          "file": "public/3d/story/deep-ice-caves.json",
+          "text": "Yes, I saw the warning sign. You can laugh once I'm out.",
+          "sha256": "57845ffbfde771e670dc1b88b89d02d787767eb0b9778c48e3bfd69b99ebc885"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "hugo-a.mp3",
+          "duration": 6.8729375,
+          "sha256": "b2c21b49d43d3e81a7203f91c0916170bfc0c187f726ac804ec594084f3b25f9",
+          "bytes": 109967
+        },
+        {
+          "option": "B",
+          "file": "hugo-b.mp3",
+          "duration": 6.5333125,
+          "sha256": "12cf73cbf8d25d1e0c472d3a57d75792effc0be1b95394c64a79c160f24cb257",
+          "bytes": 104533
+        },
+        {
+          "option": "C",
+          "file": "hugo-c.mp3",
+          "duration": 8.54475,
+          "sha256": "6f314465c9ba63f89daa1ed15fad029eb111f894de9b6777425b04c15e2c1080",
+          "bytes": 136716
+        }
+      ]
+    },
+    {
+      "id": "abyss_king",
+      "name": "The Abyss King",
+      "role": "Former lord, now tyrant. Certain of his cure; fear appears only at recognition.",
+      "group": "Finale",
+      "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected.",
+      "text": "Every healer fights death. I found an answer. You came to destroy it. They will never grow old. You offer them death and call it mercy.",
+      "direction": "Male, late fifties. Cultivated deep baritone, precise aristocratic English vowels and persuasive unhurried phrasing. A former lord convinced his immortality research justified everything. Cold certainty, controlled wounded pride, no growl, demon filter or trailer boom.",
+      "sourceLines": [
+        {
+          "id": "ak.king.offer",
+          "file": "public/3d/story/final-king.json",
+          "text": "Every healer fights death. I found an answer. You came to destroy it.",
+          "sha256": "6064a48341fb408bbb15a5404fde25085dabbf7bd4fdb73350597c4f665e1fe6"
+        },
+        {
+          "id": "ak.king.price",
+          "file": "public/3d/story/final-king.json",
+          "text": "They will never grow old. You offer them death and call it mercy.",
+          "sha256": "3227220d3d8db79e9206f9242e8cf064fe12001ef345e3b73de0de97c77d6613"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "abyss_king-a.mp3",
+          "duration": 13.508,
+          "sha256": "3f0f5ab920cf2824dffec01a7376813d903118182823d1e9ffeb575f3d3397f9",
+          "bytes": 216128
+        },
+        {
+          "option": "B",
+          "file": "abyss_king-b.mp3",
+          "duration": 11.7839375,
+          "sha256": "bacacd65788418e3eeb5d933f7ca896ef232e924193601d56043971eed996507",
+          "bytes": 188543
+        },
+        {
+          "option": "C",
+          "file": "abyss_king-c.mp3",
+          "duration": 9.2761875,
+          "sha256": "21b3759b45ce6510eca3da5a72d82d1644c9f331bb69fb3b84d1a061763efe0b",
+          "bytes": 148419
+        }
+      ]
+    },
+    {
+      "id": "ian",
+      "name": "Ian",
+      "role": "The previous Bladeborn, present only as a spirit. Warm, grounded, proud without grand speeches.",
+      "group": "Finale",
+      "context": "King phase one is partly infused. Recognition confirms Bladeborn for the first time. Ian is a spirit, never physically resurrected.",
+      "text": "You fought before you knew you could win. I've been waiting to meet you. Of course Thomas is your father. He raised you, loved you, and helped you become yourself.",
+      "direction": "Male, late sixties. Warm full mid-low register, softly textured English voice. A successful old protector meeting a brave successor as a spirit. Grounded affection and quiet pride; calm human presence, no echo or booming prophecy.",
+      "sourceLines": [
+        {
+          "id": "ak.ian.welcome",
+          "file": "public/3d/story/final-king.json",
+          "text": "You fought before you knew you could win. I've been waiting to meet you.",
+          "sha256": "7cc0f79ac2960cc0b9eae519cf7f5d8972d5e8f817a7ed30f7b03da6ef525ee9"
+        },
+        {
+          "id": "ak.ian.father",
+          "file": "public/3d/story/final-king.json",
+          "text": "Of course Thomas is your father. He raised you, loved you, and helped you become yourself.",
+          "sha256": "7dea177481e6d7148cf70a18863128edd4076e41a72c6ac66956600f6bf3437f"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "ian-a.mp3",
+          "duration": 8.779875,
+          "sha256": "f96c106098760b3b81f4376e457ca16c9a8cbcd4b9f46f3f6f2389b6d1ea9e21",
+          "bytes": 140478
+        },
+        {
+          "option": "B",
+          "file": "ian-b.mp3",
+          "duration": 9.0933125,
+          "sha256": "d0d6f57239f9c054ef8192861b9b715822bd80c7f1ba6ee9cb7e0196eded92a1",
+          "bytes": 145493
+        },
+        {
+          "option": "C",
+          "file": "ian-c.mp3",
+          "duration": 11.0525,
+          "sha256": "c6035c61634f0ff9e15c69a16c895f7f5ebaf2b318211fbe9aaf3b7e8b747d5d",
+          "bytes": 176840
+        }
+      ]
+    },
+    {
+      "id": "pike",
+      "name": "Foreman Pike",
+      "role": "A Hollowed overseer following strict production and safety orders",
+      "group": "Emberdeep",
+      "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Inspection gate",
+      "text": "Production is interrupted. State your work station and reason for entry. Workers without a task return to the line.",
+      "direction": "Male, mid fifties. Dry low-mid register with an English industrial-town accent. A Hollowed factory overseer reciting work procedures, retained intelligence but emotionally vacant. Even bureaucratic cadence, not angry, mechanical or monstrous.",
+      "sourceLines": [
+        {
+          "id": "gf.pike.first",
+          "file": "public/3d/story/great-furnace.json",
+          "text": "Production is interrupted. State your work station and reason for entry. Workers without a task return to the line.",
+          "sha256": "fa02e6f1df575567bedf3ca3aca8709b3e2c08b975463bba919f65610d00b43c"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "pike-a.mp3",
+          "duration": 7.0558125,
+          "sha256": "70b7bd046745f703a4a7e320f7d04d9efa5cdde0b94e2dd2ee534255a709de3e",
+          "bytes": 112893
+        },
+        {
+          "option": "B",
+          "file": "pike-b.mp3",
+          "duration": 8.54475,
+          "sha256": "9be1981887b8648abd16e606dde33432326ba2a73dbef03d1f9a2ba6d3f8b1fc",
+          "bytes": 136716
+        },
+        {
+          "option": "C",
+          "file": "pike-c.mp3",
+          "duration": 7.526,
+          "sha256": "9cf4cfeb2fff3f898f80362d3c8e14cc7e63c1f322cef9cc6adb9c6c662e24f4",
+          "bytes": 120416
+        }
+      ]
+    },
+    {
+      "id": "martin",
+      "name": "Martin",
+      "role": "A worker organizer with a dry sense of humor and a plan for every friend",
+      "group": "Emberdeep",
+      "context": "Great Furnace. Stop the Legion weapon supply and rescue workers. No Bladeborn confirmation or final-cut knowledge. Worker break room",
+      "text": "The weapon line has stopped. Help me get the workers out. Open the worker passage. I can lead everyone to the break room, but guards will come. Stop the transport chain first if you want fewer patrols on the route.",
+      "direction": "Male, early forties. Warm slightly hoarse tenor with northern English vowels. An exhausted worker organiser thinking about every friend. Quick practical instructions, solidarity and a small dry smile under pressure.",
+      "sourceLines": [
+        {
+          "id": "gf.martin.first",
+          "file": "public/3d/story/great-furnace.json",
+          "text": "The weapon line has stopped. Help me get the workers out.",
+          "sha256": "06eb70f3040a07fe588d232181ad1b9a79b5eb9156463a82a7ba218ac10d923d"
+        },
+        {
+          "id": "gf.martin.plan",
+          "file": "public/3d/story/great-furnace.json",
+          "text": "Open the worker passage. I can lead everyone to the break room, but guards will come. Stop the transport chain first if you want fewer patrols on the route.",
+          "sha256": "d9add95a1f1a83dce25625f1289db8e57317c5df7ad7ccd00b065e032d57dc4a"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "martin-a.mp3",
+          "duration": 15.5978125,
+          "sha256": "14c5160da1347a37dc981ad02730f0e9a6f823dff4ec352783ee85931a448a3b",
+          "bytes": 249565
+        },
+        {
+          "option": "B",
+          "file": "martin-b.mp3",
+          "duration": 12.80275,
+          "sha256": "d303fab67d1eb0b187d9d8ca58b54c25ee1c8a6efe2ac5c9341d4c4b36c5f5ba",
+          "bytes": 204844
+        },
+        {
+          "option": "C",
+          "file": "martin-c.mp3",
+          "duration": 14.3961875,
+          "sha256": "c2430f488ed2a08cf889f8be2e3ef4da9fe10208dfcc1c151a7bf8189884e093",
+          "bytes": 230339
+        }
+      ]
+    },
+    {
+      "id": "caleb",
+      "name": "Caleb",
+      "role": "Escaped prisoner who helps you follow the transport trail",
+      "group": "Hollow Pass",
+      "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. An escaped prisoner at the refuge",
+      "text": "I escaped a prisoner wagon. Ruth stayed with the others. Please help me get them out. I ran. Now I want to help. I can show you the wagon.",
+      "direction": "Male, late twenties. Soft breath-worn mid register with lightly Welsh vowels. An escaped prisoner ashamed he ran, now determined to help others. Tired relief and resolve, never whiny or helpless.",
+      "sourceLines": [
+        {
+          "id": "hp.caleb.first",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "I escaped a prisoner wagon. Ruth stayed with the others. Please help me get them out.",
+          "sha256": "08660a6e42d88552897f6ef5ed9a182ac4c55a411cdd5ba3053bf5e5c51d1536"
+        },
+        {
+          "id": "hp.caleb.blame",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "I ran. Now I want to help. I can show you the wagon.",
+          "sha256": "11ba029a4516b51dcaa2a81eb1637c69c87b1f8f6fb1193f2564bc16a499edb2"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "caleb-a.mp3",
+          "duration": 9.9815,
+          "sha256": "c7b6815d6b4cd89d8f72a5d9801c9b888aadcfb22b6515f8b0a583d5dae54b12",
+          "bytes": 159704
+        },
+        {
+          "option": "B",
+          "file": "caleb-b.mp3",
+          "duration": 8.4925,
+          "sha256": "b14415a3f951e61185f4f0f99a04c3656b54a81aaf4fc7821dc19e5be777a64e",
+          "bytes": 135880
+        },
+        {
+          "option": "C",
+          "file": "caleb-c.mp3",
+          "duration": 11.0525,
+          "sha256": "bea717745a5b8a370151ed5ce7f850f82c8a127ea9033f3635fb1f56d83a8a67",
+          "bytes": 176840
+        }
+      ]
+    },
+    {
+      "id": "skip",
+      "name": "Skip",
+      "role": "Climber who trades a useful ridge route for his missing rope",
+      "group": "Hollow Pass",
+      "context": "Winding Cliffs. Prisoners are being taken to Ruined Keep. The player is a brave local, not a known Bladeborn. Meeting the local climber",
+      "text": "I'm Skip. I climb these cliffs. Watch the edge. Recover my rope below the broken eastern platform. Use the lower shelf. I'll fix the ridge crossing and give you a spear.",
+      "direction": "Male, early thirties. Light agile tenor, easy northern English accent. A friendly local climber with wonderfully dry humour about his own mistakes. Nimble phrasing, confident safety advice, no mocking the player.",
+      "sourceLines": [
+        {
+          "id": "hp.skip.first",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "I'm Skip. I climb these cliffs. Watch the edge.",
+          "sha256": "f73e278d4a9ea63e87f3dffc9573a5eea2a1ba7b927ec4c5028f89e98fa5cc5d"
+        },
+        {
+          "id": "hp.skip.rope",
+          "file": "public/3d/story/hollow-cliffs.json",
+          "text": "Recover my rope below the broken eastern platform. Use the lower shelf. I'll fix the ridge crossing and give you a spear.",
+          "sha256": "f6599f504d36bf6635dee31b5fc39d0d9e8f0285f0feeffe196e4332b26d61c2"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "skip-a.mp3",
+          "duration": 11.6533125,
+          "sha256": "f8802d6625a284d63b611fbaf2a8821ea89d3adba614b4fc7da64307a1db76a8",
+          "bytes": 186453
+        },
+        {
+          "option": "B",
+          "file": "skip-b.mp3",
+          "duration": 11.7316875,
+          "sha256": "64b28636b1aadc2892439fe03b4996e42f85cfe1035cf0611083e2bd6ca6e003",
+          "bytes": 187707
+        },
+        {
+          "option": "C",
+          "file": "skip-c.mp3",
+          "duration": 8.779875,
+          "sha256": "b656f3a64249779d19c1c83794a8027e7e142fdfd1623fffa42633c5d95aba44",
+          "bytes": 140478
+        }
+      ]
+    },
+    {
+      "id": "quartermaster",
+      "name": "Quartermaster",
+      "role": "Supplies and equipment",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "I sell equipment and buy spare gear. What do you need? Compare gear before buying. Check class and level requirements. Sell spares you no longer need.",
+      "direction": "Male, mid forties. Clear full mid register, friendly English market-town accent. A practical supply merchant equipping the resistance. Welcoming and matter-of-fact, shrewd but honest; not a carnival salesman.",
+      "sourceLines": [
+        {
+          "id": "hub.quartermaster.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "I sell equipment and buy spare gear. What do you need?",
+          "sha256": "90ba9485cef1bed045563b8ba85b96e47513bb52917f7dfe802d02909f71f4c7"
+        },
+        {
+          "id": "hub.quartermaster.guide",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Compare gear before buying. Check class and level requirements. Sell spares you no longer need.",
+          "sha256": "4d8ad53ab88cae3c8e54ff3cfcb910da50d60a67dc22f2844b2158f50c9ec538"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "quartermaster-a.mp3",
+          "duration": 9.798625,
+          "sha256": "e2ad302d40b212dd638138746e04855fd076e8efe88db6e7872b018e4ebfb717",
+          "bytes": 156778
+        },
+        {
+          "option": "B",
+          "file": "quartermaster-b.mp3",
+          "duration": 9.1978125,
+          "sha256": "2dfbe21d06c5e0ad5f184919e7f52a1684547087ad01c281388da576f880a138",
+          "bytes": 147165
+        },
+        {
+          "option": "C",
+          "file": "quartermaster-c.mp3",
+          "duration": 9.5113125,
+          "sha256": "29b529e97307b8a512e3887a75e1bcdb9a3f933cdba7ab198b2027d8cea1eed6",
+          "bytes": 152181
+        }
+      ]
+    },
+    {
+      "id": "anvil",
+      "name": "The Smith",
+      "role": "Combine matching gear",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Bring spare gear. I'll forge something stronger. Fuse two matching items of the same rarity. Check the result first: both original items are consumed.",
+      "direction": "Male, late fifties. Deep rounded bass-baritone with a weathered Yorkshire-like accent. A patient smith who would rather be making hinges. Weighty quiet delivery, craftsmanship and understated hope, no constant gruff growling.",
+      "sourceLines": [
+        {
+          "id": "hub.anvil.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Bring spare gear. I'll forge something stronger.",
+          "sha256": "738b92f68c76c9ab225bdab6a241d00344fbfbfa6e968a7edc2dc3cb8844264e"
+        },
+        {
+          "id": "hub.anvil.guide",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Fuse two matching items of the same rarity. Check the result first: both original items are consumed.",
+          "sha256": "2098320441818191abbeb7d83fe2282c42c5f37515607233e22d09a293b9747c"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "anvil-a.mp3",
+          "duration": 9.850875,
+          "sha256": "6b999f412559b758a7e2441c93b26fec7048187361fb1c1be7ddffe2f7e4135b",
+          "bytes": 157614
+        },
+        {
+          "option": "B",
+          "file": "anvil-b.mp3",
+          "duration": 11.235375,
+          "sha256": "853c471816a0011d63f3a0e5790630ecfe03a05486c9e81facf48faa82d9f577",
+          "bytes": 179766
+        },
+        {
+          "option": "C",
+          "file": "anvil-c.mp3",
+          "duration": 9.877,
+          "sha256": "342663bb2da174987ba40bdb37ebe15f9b3084ca90d186ce7ad06be01d02a7dc",
+          "bytes": 158032
+        }
+      ]
+    },
+    {
+      "id": "keeper",
+      "name": "The Stylist",
+      "role": "Appearance and cosmetics",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Choose how you want to look. The wardrobe is ready. Looking like yourself can help you feel like yourself again.",
+      "direction": "Male, early forties. Smooth light baritone, polished but approachable English accent. A stylist who understands looking like yourself matters after hardship. Warm taste and gentle playfulness, no camp caricature or sales pitch.",
+      "sourceLines": [
+        {
+          "id": "hub.keeper.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Choose how you want to look. The wardrobe is ready.",
+          "sha256": "631d181949ab35da606bcb008f119d7b8e7da534231efde937ae1803612ad6a7"
+        },
+        {
+          "id": "hub.keeper.about",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Looking like yourself can help you feel like yourself again.",
+          "sha256": "27088ffbb7e2e4a8ec6723e197361bed27d232c03dbaaf2e061b0a4c411ad821"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "keeper-a.mp3",
+          "duration": 7.526,
+          "sha256": "2e9cbc45ce98847f2588f9e1be92fce2cfe5621012902e1f8890be20b8f7f5fd",
+          "bytes": 120416
+        },
+        {
+          "option": "B",
+          "file": "keeper-b.mp3",
+          "duration": 6.6900625,
+          "sha256": "1d49fb4516dfcd9ed863f2b2ae52debeaf521b433a92ee991c8cce0a6e401bdc",
+          "bytes": 107041
+        },
+        {
+          "option": "C",
+          "file": "keeper-c.mp3",
+          "duration": 7.0035625,
+          "sha256": "91498eba2861028e5c099a076382d2189279db24b7133a8429810774c8985837",
+          "bytes": 112057
+        }
+      ]
+    },
+    {
+      "id": "drillmaster",
+      "name": "Drillmaster",
+      "role": "Classes and training",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Choose a class, learn its skills, then practice. Equip unlocked classes here. New disciplines may require trials. Test your skills in the Sparring Room.",
+      "direction": "Male, late forties. Forward clear baritone with crisp Scottish consonants. An experienced trainer, firm and encouraging, focused on practice rather than fearlessness. Compact instructions, no barking drill-sergeant shouting.",
+      "sourceLines": [
+        {
+          "id": "hub.drillmaster.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Choose a class, learn its skills, then practice.",
+          "sha256": "f15e17ed9c9c58ed89189dee61bf9371d12f8fce069d451b355fb2017a26172d"
+        },
+        {
+          "id": "hub.drillmaster.guide",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Equip unlocked classes here. New disciplines may require trials. Test your skills in the Sparring Room.",
+          "sha256": "8a9dfe1a6305580170216ab3002e877fc99020a33dd7f15c7447bcd82cecf3f4"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "drillmaster-a.mp3",
+          "duration": 11.10475,
+          "sha256": "51b7655aed1c799dbc726b6d4b5dd5d4e433df16f7f59aac2f3fa33c5a119ff2",
+          "bytes": 177676
+        },
+        {
+          "option": "B",
+          "file": "drillmaster-b.mp3",
+          "duration": 10.059875,
+          "sha256": "bcc25edd1f6a035a9c51f2f8d419ec73137942d6b1ada3bbe939c8399d6d25b6",
+          "bytes": 160958
+        },
+        {
+          "option": "C",
+          "file": "drillmaster-c.mp3",
+          "duration": 10.7651875,
+          "sha256": "176577c8e460998c1bdf7aa92b1e7de44433623076274de64f090925e7f3b89f",
+          "bytes": 172243
+        }
+      ]
+    },
+    {
+      "id": "beastkeeper",
+      "name": "Beastkeeper",
+      "role": "Companions and training",
+      "group": "Waystation",
+      "context": "A local fighter visits your service in the Waystation. Explain only the service that exists today; no Bladeborn identity reveal.",
+      "text": "Looking for a companion? Mind your fingers around the hungry ones. Even a small companion can make a big difference.",
+      "direction": "Male, early fifties. Low warm lightly husky voice, relaxed west-country English lilt. A patient animal keeper, affectionate with dangerous creatures, gently teasing new owners. Easy reassuring rhythm, no cartoon rustic accent.",
+      "sourceLines": [
+        {
+          "id": "hub.beastkeeper.intro",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Looking for a companion? Mind your fingers around the hungry ones.",
+          "sha256": "cdafd7eae584d8009da66818e49129fc54f37094035d6ca351980d6c27c3bef2"
+        },
+        {
+          "id": "hub.beastkeeper.about",
+          "file": "public/3d/story/hub-dialogue.json",
+          "text": "Even a small companion can make a big difference.",
+          "sha256": "aa89286dc2930ab3013867fb62ae4d61bc54879385ecdb42f137c8f7fec78136"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "beastkeeper-a.mp3",
+          "duration": 7.47375,
+          "sha256": "01b810a4d31a42dabd9afb485dc6597e67b1b8493c54af1a29e7ff0f3e5ef64b",
+          "bytes": 119580
+        },
+        {
+          "option": "B",
+          "file": "beastkeeper-b.mp3",
+          "duration": 5.9325,
+          "sha256": "9e9a87df92ee3a5843a13b8ea39781de12d4094768adbb36e17df1cae9f10d6a",
+          "bytes": 94920
+        },
+        {
+          "option": "C",
+          "file": "beastkeeper-c.mp3",
+          "duration": 5.88025,
+          "sha256": "ddba3450c122bcd39d92c4a359beab7489ce3ba8c738b33c24ae33e89ec1b8a8",
+          "bytes": 94084
+        }
+      ]
+    },
+    {
+      "id": "flint",
+      "name": "Flint",
+      "role": "A captive smith who refuses to waste good work or good people",
+      "group": "Emberdeep",
+      "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. First meeting in the receiving yard",
+      "text": "This forge arms the Legion. Free the workers beside the hammer before touching any valves. Clear the guards and open the shelter first. Sabotaging loaded machinery could hurt the workers.",
+      "direction": "Male, early fifties. Dark dry bass, rough northern English accent, restrained breath. A captive smith protecting workers before sabotaging machinery. Exhausted, protective and exact; quiet moral authority distinct from the hub smith.",
+      "sourceLines": [
+        {
+          "id": "ih.flint.first",
+          "file": "public/3d/story/iron-halls.json",
+          "text": "This forge arms the Legion. Free the workers beside the hammer before touching any valves.",
+          "sha256": "c04112852c453834333c87c9e10d9fdbce6356bb8e892f3020fafd4180fb14ee"
+        },
+        {
+          "id": "ih.flint.careful",
+          "file": "public/3d/story/iron-halls.json",
+          "text": "Clear the guards and open the shelter first. Sabotaging loaded machinery could hurt the workers.",
+          "sha256": "a53c82c05326522850a9770dc497613d0f84b0fd360f05d72636aea8ccea1d6c"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "flint-a.mp3",
+          "duration": 11.287625,
+          "sha256": "15fcf0a90d9da5996d110c3747655f9471bbbc68a1fab7b88b2840754243926e",
+          "bytes": 180602
+        },
+        {
+          "option": "B",
+          "file": "flint-b.mp3",
+          "duration": 12.358625,
+          "sha256": "3cfd8e9906d4261938a1d041e29677c2c278ddf8ff2d098b079d1fb1a4eb65d9",
+          "bytes": 197738
+        },
+        {
+          "option": "C",
+          "file": "flint-c.mp3",
+          "duration": 12.724375,
+          "sha256": "813717ebf1cec7a21e5b38c2f03aadfba29784a8e946a25ae1e6fb5cf0aea0a3",
+          "bytes": 203590
+        }
+      ]
+    },
+    {
+      "id": "jack",
+      "name": "Jack",
+      "role": "A furnace worker keeping his crew alive with practical repairs",
+      "group": "Emberdeep",
+      "context": "Iron Halls. The player follows Ellis’s notes to stop the Legion’s weapon supply. Captive workers must be protected. No Sunspire/orb knowledge yet. Meeting beside the broken cart",
+      "text": "The western stores have insulated brake handles. Fit them to this cart, or bring them to me. Then its deck can bridge the gap.",
+      "direction": "Male, late twenties. Quick bright mid register, clear English Midlands vowels. A resourceful furnace mechanic improvising repairs under pressure. Practical energy with understated humour, not manic or squeaky.",
+      "sourceLines": [
+        {
+          "id": "ih.jack.first",
+          "file": "public/3d/story/iron-halls.json",
+          "text": "The western stores have insulated brake handles. Fit them to this cart, or bring them to me. Then its deck can bridge the gap.",
+          "sha256": "fdae78a4c75650777f0b404dd2833f722c60f3af4d26a408f55b47a0dc6c93af"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "jack-a.mp3",
+          "duration": 7.656625,
+          "sha256": "39f089c07e529b63dbd1ad2b0a332fe420da2c656b45b3076b1c3a1d7c9cf076",
+          "bytes": 122506
+        },
+        {
+          "option": "B",
+          "file": "jack-b.mp3",
+          "duration": 5.5668125,
+          "sha256": "d70766e266324163d1f52e18e805c818052f2553562e075600057f32b39e2377",
+          "bytes": 89069
+        },
+        {
+          "option": "C",
+          "file": "jack-c.mp3",
+          "duration": 6.8206875,
+          "sha256": "1f36402d8f6d7bc747143acd2099d75d4efecdddf675564b281f34e47c28f2b2",
+          "bytes": 109131
+        }
+      ]
+    },
+    {
+      "id": "miles",
+      "name": "Miles",
+      "role": "Living castle servant. Tired, dry humor, careful with strangers; warmth shows when workers are safe.",
+      "group": "Castle Duskmoor",
+      "context": "The player has entered the tower. Miles is living, not Hollowed. He does not know the player is Bladeborn.",
+      "text": "Quiet. The guards count footsteps now. I told them the stairs would win. The King is above. My friends are in the cells below him. Please free them.",
+      "direction": "Male, late fifties. Hushed papery mid register, careful formal English articulation softened by years of service. A living castle servant keeping workers alive near guards. Tired dry wit and private warmth, never sinister.",
+      "sourceLines": [
+        {
+          "id": "la.miles.hello",
+          "file": "public/3d/story/long-ascent.json",
+          "text": "Quiet. The guards count footsteps now. I told them the stairs would win.",
+          "sha256": "cdf74ef34c2a1e1e456416ca7b7bf7e12d074eac87ba9e579d64abefd57f1914"
+        },
+        {
+          "id": "la.miles.menu",
+          "file": "public/3d/story/long-ascent.json",
+          "text": "The King is above. My friends are in the cells below him. Please free them.",
+          "sha256": "d4f67424c00608d5ee17b4a86cb022016de106c353747166faf5bd17af3faacc"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "miles-a.mp3",
+          "duration": 10.059875,
+          "sha256": "f88a4bb49aa87b010f4941179a4279fb8ec929f03a670c45c0ff88644176611d",
+          "bytes": 160958
+        },
+        {
+          "option": "B",
+          "file": "miles-b.mp3",
+          "duration": 12.1496875,
+          "sha256": "6bc0739aef50011da55d8fdb8c51e54bbc159ee31ca5135f2e7a7f36cc71a981",
+          "bytes": 194395
+        },
+        {
+          "option": "C",
+          "file": "miles-c.mp3",
+          "duration": 10.03375,
+          "sha256": "ed6ec6484b922220ee0d1bd98968314bd5d1844cc180e0558b15d9382fb69b12",
+          "bytes": 160540
+        }
+      ]
+    },
+    {
+      "id": "ward",
+      "name": "Captain Ward",
+      "role": "Hollowed officer following the holding-yard orders",
+      "group": "Hollow Pass",
+      "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. At the front gate",
+      "text": "Holding yard. No visitors. State your work detail. Orders decide who passes. Check the records desk west of here.",
+      "direction": "Male, mid forties. Smooth firm baritone, plain English military consonants. A Hollowed holding-yard officer checking orders. Calm and chillingly unemotional but recognisably human, not snarling or enjoying cruelty.",
+      "sourceLines": [
+        {
+          "id": "lc.ward.first",
+          "file": "public/3d/story/lost-canyon.json",
+          "text": "Holding yard. No visitors. State your work detail.",
+          "sha256": "e8004dfaecb4d38629bc1b80e91e84b9c42c460d36b098e26b466d85a18928ea"
+        },
+        {
+          "id": "lc.ward.rules",
+          "file": "public/3d/story/lost-canyon.json",
+          "text": "Orders decide who passes. Check the records desk west of here.",
+          "sha256": "562c39f9820029a84aa170825224f435c672b99cab0d85af3ab114e9f7500ba2"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "ward-a.mp3",
+          "duration": 7.47375,
+          "sha256": "8c4a7b8c9af78432e9ad3667911fd9fab1f9a03bc82278ff5cb08f2cfccff4e6",
+          "bytes": 119580
+        },
+        {
+          "option": "B",
+          "file": "ward-b.mp3",
+          "duration": 6.4549375,
+          "sha256": "39277b7e7e8806e65c0b742098732dc01fd9cb845453fd6af0460d75f3f8a0e4",
+          "bytes": 103279
+        },
+        {
+          "option": "C",
+          "file": "ward-c.mp3",
+          "duration": 7.526,
+          "sha256": "7376a23efd52acd921868e46e4eacb54a337d13f4952f92c4a6137b7d214e7fc",
+          "bytes": 120416
+        }
+      ]
+    },
+    {
+      "id": "ruth",
+      "name": "Ruth",
+      "role": "Prisoner organizer who keeps people together",
+      "group": "Hollow Pass",
+      "context": "Lost Canyon. Prisoners await transport to Ruined Keep. No one knows the player is Bladeborn. A rescue with people behind it",
+      "text": "Caleb escaped? Good. Free both cage groups and cut the alarm cable above the east yard. We need both done to escape.",
+      "direction": "Female, early forties. Strong low mezzo with a lightly northern English accent. A tired prisoner organiser holding people together. Firm practical warmth, dry affection for Caleb, composed under fear, never helpless.",
+      "sourceLines": [
+        {
+          "id": "lc.ruth.first",
+          "file": "public/3d/story/lost-canyon.json",
+          "text": "Caleb escaped? Good. Free both cage groups and cut the alarm cable above the east yard. We need both done to escape.",
+          "sha256": "3b552c1dcb5f11271184eba931d959cbc590d5259f53e08de2a053339f461a35"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "ruth-a.mp3",
+          "duration": 8.361875,
+          "sha256": "1dca3a5c0154b15d92e8696ba85f9a3eb222e215314f781e486d675373412928",
+          "bytes": 133790
+        },
+        {
+          "option": "B",
+          "file": "ruth-b.mp3",
+          "duration": 6.7684375,
+          "sha256": "9fcd4239b0494cb32c58ff05c6df4d7082aa670cbd404601b888007fc344f36f",
+          "bytes": 108295
+        },
+        {
+          "option": "C",
+          "file": "ruth-c.mp3",
+          "duration": 9.3284375,
+          "sha256": "77aaa646336bfef4673cec03817b8c0f06ddd01a138368b1b3e4a1a8e351d257",
+          "bytes": 149255
+        }
+      ]
+    },
+    {
+      "id": "grace",
+      "name": "Sister Grace",
+      "role": "Palace caretaker; warm, firm, tired, quietly funny",
+      "group": "Sunspire",
+      "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+      "text": "The Legion holds the palace. Watch the broken tiles. The orb is beyond the Sky Library's locked doors. Help secure the courtyard first.",
+      "direction": "Female, early sixties. Warm slightly grainy alto, gentle English accent and firm consonants. A palace caretaker treating wounded people. Kind but no-nonsense, tired and quietly funny, no preachy religious delivery.",
+      "sourceLines": [
+        {
+          "id": "pc.grace.hello",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "The Legion holds the palace. Watch the broken tiles.",
+          "sha256": "636e53c9027516fcb720e0650ae7a5a53529f16f312e33404639ff0de2dfe2e7"
+        },
+        {
+          "id": "pc.grace.orb",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "The orb is beyond the Sky Library's locked doors. Help secure the courtyard first.",
+          "sha256": "ecbc7f34d509e7a771f91cbf3ec665860c0d778a833c6fb2582031049ea4a7b6"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "grace-a.mp3",
+          "duration": 10.164375,
+          "sha256": "a047511b40205cb1a08222db22c5b395cecabbe353136453bc387b7cbf0aacee",
+          "bytes": 162630
+        },
+        {
+          "option": "B",
+          "file": "grace-b.mp3",
+          "duration": 9.0410625,
+          "sha256": "4e096cf05c516c01c407fb55cfa6e8d9a274096d83f9e4c630d2af861a447cb3",
+          "bytes": 144657
+        },
+        {
+          "option": "C",
+          "file": "grace-c.mp3",
+          "duration": 9.694125,
+          "sha256": "4ab519ac2310656abcb650b87ec2d8fd14bba12afdd465243811c1ad8fe2d5eb",
+          "bytes": 155106
+        }
+      ]
+    },
+    {
+      "id": "victor",
+      "name": "Sergeant Victor",
+      "role": "Surviving palace defender; precise, practical, dry humor",
+      "group": "Sunspire",
+      "context": "Sunspire has been occupied by the Hollowed Legion. A stranger from Briar has arrived seeking the secret knowledge inside. Nobody knows the player is Bladeborn.",
+      "text": "Sergeant Victor. I'm holding what's left of the courtyard watch. The workers are safe. The Legion seized the palace for its knowledge.",
+      "direction": "Male, late thirties. Clear upright mid-low register, clipped but natural English accent. A surviving palace sergeant with precise practical advice. Steady discipline, dry humour and human respect, no pompous bluster.",
+      "sourceLines": [
+        {
+          "id": "pc.victor.hello",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "Sergeant Victor. I'm holding what's left of the courtyard watch.",
+          "sha256": "17aa06556391819d61aa76fb6727868c33434c6f54c22c46a4c0452a79c32c48"
+        },
+        {
+          "id": "pc.victor.people",
+          "file": "public/3d/story/palace-courtyard.json",
+          "text": "The workers are safe. The Legion seized the palace for its knowledge.",
+          "sha256": "ac9d97abea06e5b2075a03a682483ca20bfabd8cf8630d3326139fd04da94186"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "victor-a.mp3",
+          "duration": 7.186375,
+          "sha256": "a2dfdf48a691547b720cb04429d5ec9b6cfb8e1d6abf36a307cc700424ecc86a",
+          "bytes": 114982
+        },
+        {
+          "option": "B",
+          "file": "victor-b.mp3",
+          "duration": 9.3284375,
+          "sha256": "82a1c4fbc9bbf6550362630c9cd45b56181f48f8f7a122a331e0af009c00f6e8",
+          "bytes": 149255
+        },
+        {
+          "option": "C",
+          "file": "victor-c.mp3",
+          "duration": 8.361875,
+          "sha256": "8e61e30f1f70c700d325545b384ddd002177cdcacd8dea414e2bff7da8a64600",
+          "bytes": 133790
+        }
+      ]
+    },
+    {
+      "id": "walter",
+      "name": "Walter",
+      "role": "Stoneworker who knows how the prison was rebuilt",
+      "group": "Ruined Keep",
+      "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A builder notices what the guards tried to hide",
+      "text": "Search the west cells. The beds are empty, but the guards are still here. Look behind those rooms. Follow the old service marks behind the empty cells. They lead through a false wall.",
+      "direction": "Male, late sixties. Low sandy baritone, deliberate northern English phrasing. A stoneworker noticing the prison structure others miss. Steady observational wit, reliable and grounded, not a cryptic old wizard.",
+      "sourceLines": [
+        {
+          "id": "kd.walter.first",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "Search the west cells. The beds are empty, but the guards are still here. Look behind those rooms.",
+          "sha256": "5754c5d519bb0a14f9ded19e16329a5f74a40c028fb1707e2d3691d36c9ea5ff"
+        },
+        {
+          "id": "kd.walter.marks",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "Follow the old service marks behind the empty cells. They lead through a false wall.",
+          "sha256": "84b93d074e970d5da486e5199616ff7880c3d1bcf48c39e6392bbc8a90646298"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "walter-a.mp3",
+          "duration": 12.5415,
+          "sha256": "e72be90eb6e69fe3309fb42b23159a7347cb0f8859e4f159e14c7c96ea2886e2",
+          "bytes": 200664
+        },
+        {
+          "option": "B",
+          "file": "walter-b.mp3",
+          "duration": 13.508,
+          "sha256": "d16c484335f75c1b88f56a1d38a6a7712d6a8556944b7c773bb116fa5a045d4d",
+          "bytes": 216128
+        },
+        {
+          "option": "C",
+          "file": "walter-c.mp3",
+          "duration": 11.8884375,
+          "sha256": "8feae4bb99c6468c89f5f9e48e46ef6a301489da0375387ece6c5996e6d1c36f",
+          "bytes": 190215
+        }
+      ]
+    },
+    {
+      "id": "sly",
+      "name": "Sly",
+      "role": "A prisoner who stole from someone worse off",
+      "group": "Ruined Keep",
+      "context": "The Dungeons below Ruined Keep. The player is freeing captives and will learn Ellis escaped north. No Bladeborn or ending reveal. A thief tests the waters",
+      "text": "I'm Sly. Before we leave, help me return something I stole. Walter knows the way out. Speak to him first.",
+      "direction": "Male, late twenties. Quick soft tenor, lightly London-influenced English accent. A charming prisoner ashamed of stealing from another captive. Small evasive hesitations giving way to sincerity, not a cartoon thief or villain.",
+      "sourceLines": [
+        {
+          "id": "kd.sly.first",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "I'm Sly. Before we leave, help me return something I stole.",
+          "sha256": "595779effe759b55b2301db0760b260ed6c65e5890f1258a3021d0d99bcd8730"
+        },
+        {
+          "id": "kd.sly.busy",
+          "file": "public/3d/story/prison-dungeons.json",
+          "text": "Walter knows the way out. Speak to him first.",
+          "sha256": "3fa0e7b63108be7b24e5d93fd7f4c26d1382e809d4c00731da906fce2723f118"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "sly-a.mp3",
+          "duration": 5.5145625,
+          "sha256": "9d5f2e0cee4021b0209a45934c88c48f1dba38a396aec7713d4f620ecb5edf9b",
+          "bytes": 88233
+        },
+        {
+          "option": "B",
+          "file": "sly-b.mp3",
+          "duration": 6.6378125,
+          "sha256": "4f21e78f8093bbead33daaebd274dbc183944ae572345dca48f1751547f730dd",
+          "bytes": 106205
+        },
+        {
+          "option": "C",
+          "file": "sly-c.mp3",
+          "duration": 6.6900625,
+          "sha256": "b3d9e499ea002ea031fa5edb18ac985dad433ba047b7f4d7f0a5f6c3b719e3b8",
+          "bytes": 107041
+        }
+      ]
+    },
+    {
+      "id": "riftkeeper",
+      "name": "Rift Keeper",
+      "role": "Explains the training rifts and their history",
+      "group": "Rift Hall & mentors",
+      "context": "Rift Hall. The player is still an ordinary local fighter; do not imply they are Bladeborn.",
+      "text": "Five matching saved shards automatically open a training rift. Briar Town is first on your right; the others follow campaign order.",
+      "direction": "Male, early sixties. Warm airy baritone with measured educated Welsh-tinged English. A patient keeper explaining training rifts, gently amused by practical details. Inviting curiosity and clear teaching, no prophecy or ghost effects.",
+      "sourceLines": [
+        {
+          "id": "hall.keeper.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Five matching saved shards automatically open a training rift. Briar Town is first on your right; the others follow campaign order.",
+          "sha256": "e8ade450a6a0ae27812dfcd8b8be954c617e35b8346117c6c2efd8d14b27fba7"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "riftkeeper-a.mp3",
+          "duration": 8.779875,
+          "sha256": "f5185f2fc5d680759d1ac8fd44eae04f3e07a872c9347d1ae300cc225eaa7be3",
+          "bytes": 140478
+        },
+        {
+          "option": "B",
+          "file": "riftkeeper-b.mp3",
+          "duration": 8.675375,
+          "sha256": "3e659199f15e276d0c347dc9ed2f848b814fb2af534a1947a289b368f7f8e478",
+          "bytes": 138806
+        },
+        {
+          "option": "C",
+          "file": "riftkeeper-c.mp3",
+          "duration": 10.03375,
+          "sha256": "0645c38ce474c95d3b4cf56ddc3c640f11135b99d12bd2a2a98cf3c5d055bef0",
+          "bytes": 160540
+        }
+      ]
+    },
+    {
+      "id": "mentor_berserker",
+      "name": "Berserker Mentor",
+      "role": "Teaches the Berserker discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Show me you can fight fiercely without losing control. Move between attacks. Save heavy swings for clear openings.",
+      "direction": "Male, mid fifties. Broad textured low baritone with lightly Scottish vowels. A veteran teaching fierce controlled combat. Direct warm firmness, a dry smile, strong breath support without roaring.",
+      "sourceLines": [
+        {
+          "id": "trial.berserker.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Show me you can fight fiercely without losing control.",
+          "sha256": "dfcb59886a52fca093624e4dce0d75f97dbe22c320ca4899ecefa436151bc690"
+        },
+        {
+          "id": "trial.berserker.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Move between attacks. Save heavy swings for clear openings.",
+          "sha256": "dd5c47ec0647a5cf3b3c7c26217f157c015fda3261e9c4be905d9269a3118e6c"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_berserker-a.mp3",
+          "duration": 6.9513125,
+          "sha256": "cc7ae4d30ca0afa753e4a9cf3cfac5299104deffd2268e81ae49af08f1e21134",
+          "bytes": 111221
+        },
+        {
+          "option": "B",
+          "file": "mentor_berserker-b.mp3",
+          "duration": 8.597,
+          "sha256": "da396b5f49d25298be8aba89a644af655069e9ab19a01c103019cd3875ff712c",
+          "bytes": 137552
+        },
+        {
+          "option": "C",
+          "file": "mentor_berserker-c.mp3",
+          "duration": 7.0558125,
+          "sha256": "79cd78cfec6b1e405cf1fa96ce1292a41ace1c1cbac87beec5f62b8082369939",
+          "bytes": 112893
+        }
+      ]
+    },
+    {
+      "id": "mentor_ninja",
+      "name": "Ninja Mentor",
+      "role": "Teaches the Ninja discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Good positioning wins fights. Show me yours. Leave attack warnings before they land. Strike from a clear angle, then move.",
+      "direction": "Male, late thirties. Quiet clean tenor with neutral international English, precise consonants and spacious pauses. A playful positioning teacher, alert and self-possessed. No stereotyped accent, whisper or mystical chanting.",
+      "sourceLines": [
+        {
+          "id": "trial.ninja.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Good positioning wins fights. Show me yours.",
+          "sha256": "6acb2e7544effacd9c8d3077c25bf362f0aaea516871fc2bc0bf880086f1f310"
+        },
+        {
+          "id": "trial.ninja.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Leave attack warnings before they land. Strike from a clear angle, then move.",
+          "sha256": "47673e06b41d47c8451df6ca2f81832047c5081f5e340d3df5f47aded59ab5e5"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_ninja-a.mp3",
+          "duration": 6.5071875,
+          "sha256": "4c383f29df6c3b83761573cc55bc15714a8980c39bca711028813ca704471d02",
+          "bytes": 104115
+        },
+        {
+          "option": "B",
+          "file": "mentor_ninja-b.mp3",
+          "duration": 6.219875,
+          "sha256": "9c392a7f350d2e4e1ef15159d0e2b07d0718d91f4557c72b585128d08c76cc10",
+          "bytes": 99518
+        },
+        {
+          "option": "C",
+          "file": "mentor_ninja-c.mp3",
+          "duration": 7.656625,
+          "sha256": "051ea5f8b19b08af8ee7e45b4b87d3122a12a736a45ddb35855a7fe64d59a6d9",
+          "bytes": 122506
+        }
+      ]
+    },
+    {
+      "id": "mentor_reaper",
+      "name": "Reaper Mentor",
+      "role": "Teaches the Reaper discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Your scythe has reach. Use it without ignoring enemy attacks. Fight near the edge of your reach. Strike when enemies commit to an attack.",
+      "direction": "Male, mid fifties. Smooth very low register with clear neutral English vowels. A serious but humane teacher of scythe reach and patience. Stillness and control, no villain growl, soul-stealing glee or horror processing.",
+      "sourceLines": [
+        {
+          "id": "trial.reaper.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Your scythe has reach. Use it without ignoring enemy attacks.",
+          "sha256": "ae64becee76298259610317b8e35b2889db020464ff625165aec83c99420bec2"
+        },
+        {
+          "id": "trial.reaper.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fight near the edge of your reach. Strike when enemies commit to an attack.",
+          "sha256": "20d69182c16ca2e97af839d95bb619f2d69372b0ac51aaeb154a5a620ac7fe08"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_reaper-a.mp3",
+          "duration": 8.675375,
+          "sha256": "d792b11a8f44496ae9735d2a76ef36d932de6f44e7101d63afe79d883a7b86ca",
+          "bytes": 138806
+        },
+        {
+          "option": "B",
+          "file": "mentor_reaper-b.mp3",
+          "duration": 8.1790625,
+          "sha256": "6aa624e355f4b8c7dd61e874c6f0ea6baa3ac2eb6e5f635e78e8b05d418157ef",
+          "bytes": 130865
+        },
+        {
+          "option": "C",
+          "file": "mentor_reaper-c.mp3",
+          "duration": 7.134125,
+          "sha256": "09ca66d6b7b66b07378b43b5a074c2c480c39868a1588758447fd374c68dacca",
+          "bytes": 114146
+        }
+      ]
+    },
+    {
+      "id": "mentor_chronomancer",
+      "name": "Chronomancer Mentor",
+      "role": "Teaches the Chronomancer discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Timing matters more than rushing. Show me you can use an opening. Use enemy pauses to move or attack. Your time skills create more of those openings.",
+      "direction": "Male, early seventies. Light dry upper baritone, educated English accent with thoughtful little pauses. A witty older teacher of timing. Patient, gently amused, never slow enough to drag or grand about destiny.",
+      "sourceLines": [
+        {
+          "id": "trial.chronomancer.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Timing matters more than rushing. Show me you can use an opening.",
+          "sha256": "b4943ea7d556ed4b414d333fa3001378ec1f78b45152a53689b7e1c1b539e74f"
+        },
+        {
+          "id": "trial.chronomancer.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Use enemy pauses to move or attack. Your time skills create more of those openings.",
+          "sha256": "bc19669e543b7566deb0fd2440dcc9ad987b574c043c1685216207bb2f4c3c0e"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_chronomancer-a.mp3",
+          "duration": 11.8884375,
+          "sha256": "f1269bbb8cb9ddc6978ee668230d7ead613ee8b59d97d00bf6b642b8036c1090",
+          "bytes": 190215
+        },
+        {
+          "option": "B",
+          "file": "mentor_chronomancer-b.mp3",
+          "duration": 9.5113125,
+          "sha256": "d32b516304c5e0429128df5ed533f1bb809cdf665e6b210115ce350b4cdd130e",
+          "bytes": 152181
+        },
+        {
+          "option": "C",
+          "file": "mentor_chronomancer-c.mp3",
+          "duration": 10.4778125,
+          "sha256": "96eb5cc6332f58ce552910042acff6b1b5d8e795a4612a5ea6e0278b1d03489a",
+          "bytes": 167645
+        }
+      ]
+    },
+    {
+      "id": "mentor_pirate",
+      "name": "Pirate Mentor",
+      "role": "Teaches the Pirate discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Keep your footing when the fight gets messy. Show me. Fire your pistol from a distance. Charge your saber when enemies get close.",
+      "direction": "Male, mid forties. Open rough-edged tenor with a light coastal English lilt. An experienced sailor teaching footing and practical weapons. Easy confidence, good humour, no exaggerated pirate impersonation or theatrical arrr.",
+      "sourceLines": [
+        {
+          "id": "trial.pirate.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Keep your footing when the fight gets messy. Show me.",
+          "sha256": "8c872e363f3773abb0fb4ef594d8876d19e16e11e7c6731fa10dd719f0619f63"
+        },
+        {
+          "id": "trial.pirate.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fire your pistol from a distance. Charge your saber when enemies get close.",
+          "sha256": "b907672f4419ff648589f03155678dc66d81035bdce8dc9e5e9f4ebb1db3694a"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_pirate-a.mp3",
+          "duration": 8.44025,
+          "sha256": "5fb0375cc52a195b4298bb040d006a8f532fede3fe4c06327f2186322312e491",
+          "bytes": 135044
+        },
+        {
+          "option": "B",
+          "file": "mentor_pirate-b.mp3",
+          "duration": 7.526,
+          "sha256": "0bcd489223892ce5d6e89367dad35ec0bb2dc5e826b727a00a3de14f49478407",
+          "bytes": 120416
+        },
+        {
+          "option": "C",
+          "file": "mentor_pirate-c.mp3",
+          "duration": 9.0410625,
+          "sha256": "67fc2da28c4e77984ff3bd4544b57768d5e9b55d11327c05c9c367627812d460",
+          "bytes": 144657
+        }
+      ]
+    },
+    {
+      "id": "mentor_paladin",
+      "name": "Paladin Mentor",
+      "role": "Teaches the Paladin discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Protect yourself without becoming careless. Show me you can hold your ground. Watch enemy warnings. Leave room to dodge and use protection before a hit lands.",
+      "direction": "Male, mid forties. Warm resonant mid register, clear English accent and gentle measured pace. A protector teaching careful defence. Sincere care and light authority, no sermons or self-righteous grandiosity.",
+      "sourceLines": [
+        {
+          "id": "trial.paladin.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Protect yourself without becoming careless. Show me you can hold your ground.",
+          "sha256": "3050d4b7700893edb3bf93c5621ef23ff2fd579f334d4403d1be25a66555f980"
+        },
+        {
+          "id": "trial.paladin.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Watch enemy warnings. Leave room to dodge and use protection before a hit lands.",
+          "sha256": "4535c006f686bd477fdca19e877c9a354daa507d82c148e8c99ec017abd7a24a"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_paladin-a.mp3",
+          "duration": 8.388,
+          "sha256": "169a29cc7c146c95620f04ea11daa0b718c7a449c900d96d52198da94ec2681e",
+          "bytes": 134208
+        },
+        {
+          "option": "B",
+          "file": "mentor_paladin-b.mp3",
+          "duration": 9.1455625,
+          "sha256": "eba44700263aba7158780e08af5f99860aaa6f6f5f5801722a914679a9680237",
+          "bytes": 146329
+        },
+        {
+          "option": "C",
+          "file": "mentor_paladin-c.mp3",
+          "duration": 11.0525,
+          "sha256": "19e60225e126f73b2433cff21fe3cdac3871c65f22db07ced4dcbb9ca3cf0d6c",
+          "bytes": 176840
+        }
+      ]
+    },
+    {
+      "id": "mentor_necromancer",
+      "name": "Necromancer Mentor",
+      "role": "Teaches the Necromancer discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Fight with your summons. Don't let commanding them distract you from danger. Give summons room to fight. Dodge attacks aimed at you and use the openings they create.",
+      "direction": "Male, late forties. Dry silky mid-low register, precise educated English articulation. A composed humane instructor discussing summons as ordinary craft. Matter-of-fact wit, not evil, whispery, demonic or gleefully morbid.",
+      "sourceLines": [
+        {
+          "id": "trial.necromancer.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fight with your summons. Don't let commanding them distract you from danger.",
+          "sha256": "5e9da2c1f6eead4fe6b2b0eb41f76e72993d6f605d082ff65d18a2db087c2888"
+        },
+        {
+          "id": "trial.necromancer.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Give summons room to fight. Dodge attacks aimed at you and use the openings they create.",
+          "sha256": "3528837e76ec9ca6160e5060e37bb209f145684400c19db535ee364175ccc439"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_necromancer-a.mp3",
+          "duration": 8.54475,
+          "sha256": "d0150306d86dbbe1c885094dc28dad07343169f688b91821287a5186cc304fa7",
+          "bytes": 136716
+        },
+        {
+          "option": "B",
+          "file": "mentor_necromancer-b.mp3",
+          "duration": 11.7316875,
+          "sha256": "dbff117381f3c4df5ce4e827de1ca6062d33532fbdea4757bc1712b513074a58",
+          "bytes": 187707
+        },
+        {
+          "option": "C",
+          "file": "mentor_necromancer-c.mp3",
+          "duration": 14.6313125,
+          "sha256": "88f5edaa130fcddf136454976ff838e1562903caa6e145ac65506e7bb6f20bb1",
+          "bytes": 234101
+        }
+      ]
+    },
+    {
+      "id": "mentor_pyromancer",
+      "name": "Pyromancer Mentor",
+      "role": "Teaches the Pyromancer discipline",
+      "group": "Rift Hall & mentors",
+      "context": "A crystalline training rift. The class unlock is granted at the exit after completing the existing trial. Do not reveal Bladeborn ancestry or claim this teacher is a dead Bladeborn.",
+      "text": "Fire is useful when you control where it goes. Clear this chamber and show me. Keep moving between casts. Use your shield or blast when enemies get close.",
+      "direction": "Female, late thirties. Warm full mezzo with lightly Irish vowels, steady clear consonants. A practical encouraging fire instructor, contained energy and confidence. Direct lessons in control, never manic or seductive.",
+      "sourceLines": [
+        {
+          "id": "trial.pyromancer.intro",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Fire is useful when you control where it goes. Clear this chamber and show me.",
+          "sha256": "3d2d3f45cf0e632385ddbd1d9271af978bf3e9317e09f890668a31bbd5173438"
+        },
+        {
+          "id": "trial.pyromancer.lesson",
+          "file": "public/3d/story/rift-hall.json",
+          "text": "Keep moving between casts. Use your shield or blast when enemies get close.",
+          "sha256": "89240bccad80dedaed3c84c818717f2f8fc5bbb72a0617cec813744feedb0fdf"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "mentor_pyromancer-a.mp3",
+          "duration": 8.727625,
+          "sha256": "0b0aa999157781f16270c66317fdcf085c5fb3e1b6c9b56e0d74ddad8d8cc423",
+          "bytes": 139642
+        },
+        {
+          "option": "B",
+          "file": "mentor_pyromancer-b.mp3",
+          "duration": 9.1978125,
+          "sha256": "e755dfad2a6a9bfd8f9856d6822994ab0b73768a9ed8bbcdca1cdacef755f053",
+          "bytes": 147165
+        },
+        {
+          "option": "C",
+          "file": "mentor_pyromancer-c.mp3",
+          "duration": 9.0933125,
+          "sha256": "95f6fd016c35b578110f13e58c169cf09b6264ae8a4fddd3946f8e3014b095dc",
+          "bytes": 145493
+        }
+      ]
+    },
+    {
+      "id": "otto",
+      "name": "Otto",
+      "role": "Boatbuilder; practical, dry humor, steady under pressure",
+      "group": "Storm Coast",
+      "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+      "text": "Martin sent you? Good. Let's get you to Sunspire. Sunspire lies beyond the island cliffs. Repair this boat with a rudder, sailcloth and rope.",
+      "direction": "Male, early fifties. Solid rough mid-low register with a light northern coastal English accent. A reliable boatbuilder keeping people moving. Practical dry humour, unhurried confidence under pressure, not a drunken sailor.",
+      "sourceLines": [
+        {
+          "id": "sc.otto.hello",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "Martin sent you? Good. Let's get you to Sunspire.",
+          "sha256": "f1f0970a427e5887c172e2e5244718c62914465a35454174d42cdce1c7f280b2"
+        },
+        {
+          "id": "sc.otto.plan",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "Sunspire lies beyond the island cliffs. Repair this boat with a rudder, sailcloth and rope.",
+          "sha256": "583ed70547d727ccb885df719076f30d1d322ebdcabd7e24bd825d764933fb4c"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "otto-a.mp3",
+          "duration": 10.164375,
+          "sha256": "a5962873713b492f6fb0833a43bb4c4bfa1f14f6e6c45fb1a3a242bc2481e317",
+          "bytes": 162630
+        },
+        {
+          "option": "B",
+          "file": "otto-b.mp3",
+          "duration": 8.9105,
+          "sha256": "417857e9f4ce00a1bde3bd1f6b9cb62eef1a91ad51af0b8ffe70bfd1136ad351",
+          "bytes": 142568
+        },
+        {
+          "option": "C",
+          "file": "otto-c.mp3",
+          "duration": 9.2761875,
+          "sha256": "98cb04cb24c39c2a73ce37eca97c5fbdb889227178bdbb4ee36852ebb61527b6",
+          "bytes": 148419
+        }
+      ]
+    },
+    {
+      "id": "rose",
+      "name": "Captain Rose",
+      "role": "Male retired captain; proud, grieving, warm once trusted",
+      "group": "Storm Coast",
+      "context": "On Shipwreck Shore, preparing a boat to reach the remote Sunspire Palace.",
+      "text": "That wreck was my ship. Its bell should still be inside. Would you fetch it? I stayed at the wheel. The others took the small boat. I never learned where they landed.",
+      "direction": "Male, early sixties. Weathered resonant baritone, gentle coastal English vowels, occasional gravel. A retired captain grieving his lost ship and worrying for his crew. Restrained pride that softens with trust, never melodramatic or female.",
+      "sourceLines": [
+        {
+          "id": "sc.rose.hello",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "That wreck was my ship. Its bell should still be inside. Would you fetch it?",
+          "sha256": "cabbb8ada871ef84edc3a54c4ca57f00d6542f7c504a812bbbc70bc5d5b4ea60"
+        },
+        {
+          "id": "sc.rose.memory",
+          "file": "public/3d/story/shipwreck-shore.json",
+          "text": "I stayed at the wheel. The others took the small boat. I never learned where they landed.",
+          "sha256": "47f828a3d54276ca013088855fec636fb6c17ef050a6e364fd2505738954082d"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "rose-a.mp3",
+          "duration": 12.437,
+          "sha256": "4730763f5b1dc49fb501b8cc46759fb7e72c1d6629ad262d028bd0012a06e6bb",
+          "bytes": 198992
+        },
+        {
+          "option": "B",
+          "file": "rose-b.mp3",
+          "duration": 10.4516875,
+          "sha256": "e4e1d7bc84460e5f4e5ae32f2ce2b61858988cabfb6c9266cd2be1222ddb5237",
+          "bytes": 167227
+        },
+        {
+          "option": "C",
+          "file": "rose-c.mp3",
+          "duration": 10.164375,
+          "sha256": "648995099f0f5dc3f24902ee2f4ca19b63c79e8a8b9aa4e63882c0d2420a1e4c",
+          "bytes": 162630
+        }
+      ]
+    },
+    {
+      "id": "hugh",
+      "name": "Master Hugh",
+      "role": "Senior keeper; careful, proud, slowly learning to trust outsiders",
+      "group": "Sunspire",
+      "context": "Senior keeper; careful, proud, slowly learning to trust outsiders",
+      "text": "These halls hold dangerous knowledge. A locked door didn't keep the Legion out. You helped our people. Keeping this door shut won't protect them now.",
+      "direction": "Male, late sixties. Narrow formal upper baritone, carefully enunciated educated English accent. A proud senior librarian slowly learning to trust outsiders. Cautious dignity softening into concern, not a sneering gatekeeper.",
+      "sourceLines": [
+        {
+          "id": "sl.hugh.hello",
+          "file": "public/3d/story/sky-library.json",
+          "text": "These halls hold dangerous knowledge. A locked door didn't keep the Legion out.",
+          "sha256": "a8b39b4b5b3f745f3f1ab1b2041d1a5b4f96216edf4eea9c9c4eb5bcba2825d9"
+        },
+        {
+          "id": "sl.hugh.need",
+          "file": "public/3d/story/sky-library.json",
+          "text": "You helped our people. Keeping this door shut won't protect them now.",
+          "sha256": "d006130235e021a9816107868c80d047f611a7585f84ed32deb7ad51bc8d358d"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "hugh-a.mp3",
+          "duration": 10.164375,
+          "sha256": "a4f408fd14829de3c2923ab5c6ab4dbeffd3c4c0153c558d08ce3d9b899100a9",
+          "bytes": 162630
+        },
+        {
+          "option": "B",
+          "file": "hugh-b.mp3",
+          "duration": 13.2729375,
+          "sha256": "7c03c1b3409ccfbe16d407bf76f68bee0da060b2efbf3763b59367ef135618cd",
+          "bytes": 212367
+        },
+        {
+          "option": "C",
+          "file": "hugh-c.mp3",
+          "duration": 9.5113125,
+          "sha256": "42a3171293d17dd3ad7c7417cd8dae6f73c918d2ddc43b82e600fd62fb624360",
+          "bytes": 152181
+        }
+      ]
+    },
+    {
+      "id": "simon",
+      "name": "Simon",
+      "role": "Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it",
+      "group": "Sunspire",
+      "context": "Junior keeper; dry humor, kind, annoyed that knowledge is kept from people who need it",
+      "text": "Welcome to the restricted shelves. The Legion has made a mess of our rules. A shard is across that gap. Turn the first crank, cross the shelves, then turn the second crank on the far landing.",
+      "direction": "Male, late twenties. Bright articulate tenor, light educated English accent, quicker than his senior keeper. A kind junior librarian frustrated knowledge is hoarded. Wry understated humour, friendly intelligence, never smug.",
+      "sourceLines": [
+        {
+          "id": "sl.simon.hello",
+          "file": "public/3d/story/sky-library.json",
+          "text": "Welcome to the restricted shelves. The Legion has made a mess of our rules.",
+          "sha256": "db5676f68467ff1b2e6128d2f39e76a2f6e6dbfc997a0976ed6c5b0e795a1323"
+        },
+        {
+          "id": "sl.simon.shelf",
+          "file": "public/3d/story/sky-library.json",
+          "text": "A shard is across that gap. Turn the first crank, cross the shelves, then turn the second crank on the far landing.",
+          "sha256": "b844d104ddc9491f70ac5644492318102e01060741697778071ffe325f058859"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "simon-a.mp3",
+          "duration": 11.5488125,
+          "sha256": "f2d53399e5e5edc7c0671526da820979db372aaa9cb5d67827ee1e55c3be388b",
+          "bytes": 184781
+        },
+        {
+          "option": "B",
+          "file": "simon-b.mp3",
+          "duration": 11.287625,
+          "sha256": "3b02b944bb25d61508014b31c2d0e1d1f8a0116f05eb96a38a1c211093e5edf8",
+          "bytes": 180602
+        },
+        {
+          "option": "C",
+          "file": "simon-c.mp3",
+          "duration": 12.38475,
+          "sha256": "1d43c2318c5a4acee197f677a355abb9a975dc7c6c357c327599b9cd9bde1bb2",
+          "bytes": 198156
+        }
+      ]
+    },
+    {
+      "id": "heath",
+      "name": "Heath",
+      "role": "Mountain guide keeping a shelter open while Ellis is missing",
+      "group": "Frostfell",
+      "context": "Snowbound Peaks. The player seeks Professor Ellis after freeing the prisoners at Ruined Keep. Heath knows his mountain trail, not what has happened inside the caves. No Bladeborn reveal. A shelter above the snow line",
+      "text": "Looking for Ellis? Follow his scratched arrows uphill. The Legion is searching for him too. The caves are uphill. Let me help you get there safely.",
+      "direction": "Male, late forties. Wind-roughened mid baritone with soft Scottish vowels. A tired mountain guide maintaining a shelter. Practical warmth, calm safety instructions and dry humour, not a booming adventurer.",
+      "sourceLines": [
+        {
+          "id": "ff.heath.first",
+          "file": "public/3d/story/snowbound-peaks.json",
+          "text": "Looking for Ellis? Follow his scratched arrows uphill. The Legion is searching for him too.",
+          "sha256": "e160a73b01d87c24d525d0ba609d2e660ab6d1dd5e8141af491574d609af1225"
+        },
+        {
+          "id": "ff.heath.blunt",
+          "file": "public/3d/story/snowbound-peaks.json",
+          "text": "The caves are uphill. Let me help you get there safely.",
+          "sha256": "406a080f6edde5623e5b8c2a9986a815ec9936f3f79d132359af2d864ca1e9af"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "heath-a.mp3",
+          "duration": 9.877,
+          "sha256": "42c6c000fdf7b2bd2373c75417030befa8114287496e5377036c6a7e4fa5a875",
+          "bytes": 158032
+        },
+        {
+          "option": "B",
+          "file": "heath-b.mp3",
+          "duration": 10.7129375,
+          "sha256": "bad0683a16fee92157970745d888f6e1691bbb3c51777038d8bcd9d7556299f7",
+          "bytes": 171407
+        },
+        {
+          "option": "C",
+          "file": "heath-c.mp3",
+          "duration": 11.7055625,
+          "sha256": "4f874e42ded6eb7fefb768732223cb677ada37357be11b8282b166b327e4dcb0",
+          "bytes": 187289
+        }
+      ]
+    },
+    {
+      "id": "sunspire_orb",
+      "name": "The Sunspire Orb",
+      "role": "Conscious keeper of knowledge; calm, clear, compassionate, never theatrical",
+      "group": "Sunspire",
+      "context": "After the Marble Colossus. The player seeks a way to stop the King; their Bladeborn identity is not known.",
+      "text": "You have reached me. One question, freely asked. No title is needed here. Then take that moment. Fear does not make your purpose smaller.",
+      "direction": "Androgynous adult voice. Smooth luminous mid register with clear neutral English vowels and gentle rounded resonance. A conscious compassionate keeper of knowledge. Calm attentive warmth, alive and personal, not an artificial assistant, metallic robot or grand disembodied god. No echo.",
+      "sourceLines": [
+        {
+          "id": "mc.orb.hello",
+          "file": "public/3d/story/sunspire-orb.json",
+          "text": "You have reached me. One question, freely asked. No title is needed here.",
+          "sha256": "f16782a0a4ae9f402e37c71511ff5c710cecdff840e56f65090a29ea58dfabd0"
+        },
+        {
+          "id": "mc.orb.steady",
+          "file": "public/3d/story/sunspire-orb.json",
+          "text": "Then take that moment. Fear does not make your purpose smaller.",
+          "sha256": "382bf2901209ba74897ed28d1e18b19d9b06cf399e4f97e7eb4004c323dcc7dd"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "sunspire_orb-a.mp3",
+          "duration": 12.1235625,
+          "sha256": "10ec26e2d063cbf6dfd17e0f2e06729a97c855d06dbc9c6bb29c0c628169db7a",
+          "bytes": 193977
+        },
+        {
+          "option": "B",
+          "file": "sunspire_orb-b.mp3",
+          "duration": 10.8696875,
+          "sha256": "ba1e9ffe27c7c6745d58290c9188a0cd70be3aabc26a5c026290cd64e0f8d2b4",
+          "bytes": 173915
+        },
+        {
+          "option": "C",
+          "file": "sunspire_orb-c.mp3",
+          "duration": 13.4035625,
+          "sha256": "979fa9429dee5cf4b13ba4f95b13b0761c45bc6ce49bb1ae210a40dafb37e1a4",
+          "bytes": 214457
+        }
+      ]
+    },
+    {
+      "id": "abe",
+      "name": "Abe",
+      "role": "Island fisher; calm, stubborn compassion, plain-spoken",
+      "group": "Storm Coast",
+      "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+      "text": "You crossed safely. Good. The climb to Sunspire starts here. The eastern steps reach the middle ledge. The broken cargo lift is a shortcut if you want to repair it. Look for an old hydra shackle above.",
+      "direction": "Male, early sixties. Low unpolished warm voice with a mild west-coast Irish lilt. A stubbornly compassionate island fisherman. Plain-spoken steadiness and patient courage, no fanciful sailor performance.",
+      "sourceLines": [
+        {
+          "id": "tc.abe.hello",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "You crossed safely. Good. The climb to Sunspire starts here.",
+          "sha256": "c720a12b79a402e672674b40c0c7a533957457d977ad1991823ee58f7036334c"
+        },
+        {
+          "id": "tc.abe.path",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "The eastern steps reach the middle ledge. The broken cargo lift is a shortcut if you want to repair it. Look for an old hydra shackle above.",
+          "sha256": "e946928432c4f5f317d965af393cf571ba8e829272bb64a73b7aa844ccbf2d74"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "abe-a.mp3",
+          "duration": 15.8329375,
+          "sha256": "cf73506e2cf4dd2ff49d9ff9fe8999275aeaf1e026d2dfb52cb3720ecbc09cf4",
+          "bytes": 253327
+        },
+        {
+          "option": "B",
+          "file": "abe-b.mp3",
+          "duration": 15.8329375,
+          "sha256": "7847ac2de1d75ae7b009132a1f21bd36d2531b67a6f5e0334dcfc8fe48e8e7d6",
+          "bytes": 253327
+        },
+        {
+          "option": "C",
+          "file": "abe-c.mp3",
+          "duration": 14.1088125,
+          "sha256": "aea9aa76f556ceb31bc0d91637c32763518921cff4bf932e08242c6fbe249506",
+          "bytes": 225741
+        }
+      ]
+    },
+    {
+      "id": "dash",
+      "name": "Dash",
+      "role": "Young scavenger; playful confidence hiding a fear of heights",
+      "group": "Storm Coast",
+      "context": "On the island below Sunspire, helping a traveler reach the palace and free a chained sea creature.",
+      "text": "This is my treasure claim. The stick makes it official. Probably. Help open the wreck cave and split the coins. Or beat my cliff race to keep them all.",
+      "direction": "Male, early twenties. Youthful bright lightly raspy tenor, relaxed English city accent. A playful scavenger with too much confidence covering fear of heights. Mischievous quick timing and an audible grin, not a child or cartoon.",
+      "sourceLines": [
+        {
+          "id": "tc.dash.hello",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "This is my treasure claim. The stick makes it official. Probably.",
+          "sha256": "2642f2518e34f0ee51e96d4c3660e47add273f597b7e562c3f17a081ab464ffb"
+        },
+        {
+          "id": "tc.dash.offer",
+          "file": "public/3d/story/thunder-cliffs.json",
+          "text": "Help open the wreck cave and split the coins. Or beat my cliff race to keep them all.",
+          "sha256": "35acfc76608f42d1ab3934435c06428572edbb4f67f63c722ed79711d0bdf6db"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "dash-a.mp3",
+          "duration": 9.1978125,
+          "sha256": "f5fc34df5af1bcee4059f9ee0aba056f097103fc79876d6e36aba89fee1a1545",
+          "bytes": 147165
+        },
+        {
+          "option": "B",
+          "file": "dash-b.mp3",
+          "duration": 9.1978125,
+          "sha256": "8d7e6db75a5947857db4689725c45ec5f386354de41eed5943584a09efbd6829",
+          "bytes": 147165
+        },
+        {
+          "option": "C",
+          "file": "dash-c.mp3",
+          "duration": 9.4329375,
+          "sha256": "65ef6472da9d6438bd338f5b53b3dc9eb4921d060831c1bc5d2cb761ca54a809",
+          "bytes": 150927
+        }
+      ]
+    },
+    {
+      "id": "warden_shade",
+      "name": "Warden’s Shade",
+      "role": "Legacy regional guide; remaining lore needs canon review before full dubbing",
+      "group": "Other guides",
+      "context": "Existing guide presentation outside the authored dialogue books. This sample uses only its safe Briar introduction; old dream-era lines are not approved.",
+      "text": "The Legion is approaching Briar. The townspeople are doing what they can. Protect the supplies and help your neighbors prepare. Every person you help gives the town a better chance.",
+      "direction": "Male, early sixties. Soft low chest register with gently worn English vowels. A lingering protector offering practical help to threatened people. Quiet sorrow tempered by kindness, measured intimate delivery, no horror rasp, echo or prophecy.",
+      "sourceLines": [
+        {
+          "id": "STORY.npc.outskirts.lore",
+          "file": "public/3d/index.html"
+        }
+      ],
+      "options": [
+        {
+          "option": "A",
+          "file": "warden_shade-a.mp3",
+          "duration": 12.437,
+          "sha256": "676cf34e9d8439d4ebeea4f92cc25c7eac05c026e218a45071e854cb091ac0f1",
+          "bytes": 198992
+        },
+        {
+          "option": "B",
+          "file": "warden_shade-b.mp3",
+          "duration": 13.795375,
+          "sha256": "1a5b44691118f44a4bb617caa9933296bad017b003e23be82232edd314a17c84",
+          "bytes": 220726
+        },
+        {
+          "option": "C",
+          "file": "warden_shade-c.mp3",
+          "duration": 12.672125,
+          "sha256": "a968aea920d1b2496877bcbe67affb1cf0c9998e86922d4b42bc56323705dd07",
+          "bytes": 202754
+        }
+      ]
+    }
+  ]
+}

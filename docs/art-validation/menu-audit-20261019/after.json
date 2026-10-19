@@ -1,0 +1,1863 @@
+[
+  {
+    "name": "Pause",
+    "title": "Game menu",
+    "controls": 12,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "gearBtn",
+        "text": "GearInspect equipment",
+        "disabled": false
+      },
+      {
+        "id": "bagBtnP",
+        "text": "Bag0/30 slots used",
+        "disabled": false
+      },
+      {
+        "id": "classesBtn",
+        "text": "ClassesSkills, ranks, and paths",
+        "disabled": false
+      },
+      {
+        "id": "achBtn",
+        "text": "AchievementsReview your feats",
+        "disabled": false
+      },
+      {
+        "id": "optBtn",
+        "text": "SettingsAudio, view, and controls",
+        "disabled": false
+      },
+      {
+        "id": "multiplayerBtnP",
+        "text": "MultiplayerHost or join with friends",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Settings",
+    "title": "Settings",
+    "controls": 38,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "keybindsBtn",
+        "text": "⌨️ Key Bindings",
+        "disabled": false
+      },
+      {
+        "id": "padBtn",
+        "text": "🎮 Controller setup",
+        "disabled": false
+      },
+      {
+        "id": "fsBtn",
+        "text": "Fullscreen: Off · 0 / Num0 / Middle-click",
+        "disabled": false
+      },
+      {
+        "id": "particlesBtn",
+        "text": "✨ Particles: On",
+        "disabled": false
+      },
+      {
+        "id": "armFxBtn",
+        "text": "🩻 Armor shown: On",
+        "disabled": false
+      },
+      {
+        "id": "resolutionBtn",
+        "text": "3D resolution: Auto · smoother play",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Key bindings",
+    "title": "⌨️ Key Bindings",
+    "controls": 85,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "W",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "↑",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "↺",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "S",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "↓",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "↺",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Help",
+    "title": "Help for your adventure",
+    "controls": 28,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Replay the Waystation tour",
+        "disabled": false
+      },
+      {
+        "id": "helpBack",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Save files",
+    "title": "Load Character",
+    "controls": 6,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "▶ Play",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Delete",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Classes",
+    "title": " Warrior Build",
+    "controls": 20,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Warrior",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "🔒Pyromancer",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "🔒Ranger",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "🔒Mage",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "🔒Reaper",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "🔒Paladin",
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "name": "Trainer",
+    "title": "Class Trainer",
+    "controls": 17,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "statRespec",
+        "text": "Reassign character stats · Free",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "All classes",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Unlocked",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Campaign unlocks",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Buy classes",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Respec",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Respec",
+    "title": " Warrior Skill Tree",
+    "controls": 20,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "CleaveSkill 1 · 2s · 9 mana · Rapid · GroupA quick sweep hits nea",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Shield BashSkill 1 · 6s · 12 mana · ControlDrive forward for 1.7x",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Heavy HandPassive · CommitmentBasic attacks deal 20% more damage.",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Swift SteelPassive · RhythmAttack 10% faster. Every fourth basic ",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "ChargeSkill 2 · 9s · 14 mana · MovementRush through enemies for 1",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "WhirlwindSkill 2 · 10s · 16 mana · Group DamageA full-circle swee",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Shop",
+    "title": "Shop",
+    "controls": 17,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Equipment",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Travel & bags",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Stat upgrades",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Hub upgrades",
+        "disabled": false
+      },
+      {
+        "id": "shopChests",
+        "text": "Browse equipment chests",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Buy · 60g",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Chest shop",
+    "title": "Equipment Chests",
+    "controls": 8,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Buy & open",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Buy & open",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Need gold",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "Need gold",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "Need gold",
+        "disabled": true
+      },
+      {
+        "id": "chestShopBag",
+        "text": "Manage bag",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Forge",
+    "title": "The Forge",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Wardrobe",
+    "title": "Wardrobe",
+    "controls": 15,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "makeoverBtn",
+        "text": "Face & name · 25 gold",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Cape",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Trail",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Weapon Glow",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "🔒 Hidden Reward\n          Defeat Thomas on Hard in chessLocked",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "🔒 Hidden Reward\n          Explore Dash’s cave and finish Thunder",
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "name": "Class skins",
+    "title": " Class appearances",
+    "controls": 6,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Vanguard Recruit · Default · EquippedCobalt steel, leather straps",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Cobalt Knight · Rank 5Layered cobalt plate, gold borders and a fi",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Royal Vanguard · Rank 10Royal gold crown, heraldic armor and lumi",
+        "disabled": false
+      },
+      {
+        "id": "wearLook",
+        "text": "Equipped",
+        "disabled": false
+      },
+      {
+        "id": "lookBack",
+        "text": "Back to Stylist",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Beastkeeper",
+    "title": "Pet Yard",
+    "controls": 9,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "beastQuest",
+        "text": "! Ask about the rescue",
+        "disabled": false
+      },
+      {
+        "id": "buyWhistle",
+        "text": "7,500g",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "Your companions",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Adopt a companion",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Equip",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Sell · +88g",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Field companions",
+    "title": "Choose your companion",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Equip",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back to bag",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Pet rename",
+    "title": "Name your companion",
+    "controls": 5,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "nameSave",
+        "text": "Save",
+        "disabled": false
+      },
+      {
+        "id": "nameReset",
+        "text": "Reset to default",
+        "disabled": false
+      },
+      {
+        "id": "nameBack",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Gear",
+    "title": "Equipped Gear",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Bag",
+    "title": "Bag & Equipment",
+    "controls": 18,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "WeaponRusty SwordChoose replacement →",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "HelmetEmptyChoose replacement →",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "ChestplateChestplate equippedChoose replacement →",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "LeggingsEmptyChoose replacement →",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "AmuletEmptyChoose replacement →",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "RingEmptyChoose replacement →",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Character stats",
+    "title": "Character Stats",
+    "controls": 13,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "−",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "+",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "−",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "+",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "−",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "+",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Achievements",
+    "title": " Achievements",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Records",
+    "title": "Records",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "recBack",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Journal",
+    "title": "Your notes",
+    "controls": 7,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "journalClose",
+        "text": "Close journal",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Waystone",
+    "title": " The Waystation",
+    "controls": 13,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Briar TownDefend your home and help your neighbors escape.Level 1",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Hollow PassDry canyons that swallow the careless.Level 2",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "LockedClear Hollow Pass to openLevel 3",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "LockedClear Ruined Keep to openLevel 4",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "LockedClear Frostfell to openLevel 5",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "LockedClear Emberdeep to openLevel 6",
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "name": "Campaign entry",
+    "title": "Briar Town",
+    "controls": 5,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "◇ HomefieldsPart 1 · Explore and complete quests",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "◇ Black WoodsPart 2 · Explore and complete quests",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "⚔ The BruteBoss fight · Start at the boss arena",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Portal entry",
+    "title": "Briar Town",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "leBack",
+        "text": "Not yet",
+        "disabled": false
+      },
+      {
+        "id": "leGo",
+        "text": "Enter Level",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Locked portal",
+    "title": "Locked trial",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "leBack",
+        "text": "Not yet",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Rift frame",
+    "title": "Berserker",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "hallBack",
+        "text": "Return to the hall",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Arena setup",
+    "title": "Arena setup",
+    "controls": 40,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "arena-tab-fighter",
+        "text": "FighterClass & equipment",
+        "disabled": false
+      },
+      {
+        "id": "arena-tab-arena",
+        "text": "Arena & rulesMap & match options",
+        "disabled": false
+      },
+      {
+        "id": "arena-tab-bots",
+        "text": "Practice botsSolo opponents",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Warrior",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Ranger",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Mage",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Boss Rush",
+    "title": "Boss Rush",
+    "controls": 4,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "brNormal",
+        "text": "Enter · Normal",
+        "disabled": false
+      },
+      {
+        "id": "brBrutal",
+        "text": "Enter · Brutal (+60% boss HP)",
+        "disabled": false
+      },
+      {
+        "id": "brBack",
+        "text": "Not yet",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Treasure Sprint",
+    "title": "Treasure Sprint",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "leBack",
+        "text": "Not yet",
+        "disabled": false
+      },
+      {
+        "id": "leGo",
+        "text": "Enter Level",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Dungeon preparation",
+    "title": "Choose a dungeon save",
+    "controls": 6,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create save",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create save",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create save",
+        "disabled": false
+      },
+      {
+        "id": "prhelp",
+        "text": "How it works",
+        "disabled": false
+      },
+      {
+        "id": "prback",
+        "text": "Back to hub",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Dungeon saves",
+    "title": "The Endless Below",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "descBtn",
+        "text": "Descend",
+        "disabled": false
+      },
+      {
+        "id": "descBack",
+        "text": "Not yet",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Multiplayer",
+    "title": "Multiplayer",
+    "controls": 6,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "mpHost",
+        "text": "🤝 Host Co-op",
+        "disabled": false
+      },
+      {
+        "id": "mpHostPvp",
+        "text": "⚔️ Host PvP Duel",
+        "disabled": false
+      },
+      {
+        "id": "mpJoin",
+        "text": "Join",
+        "disabled": false
+      },
+      {
+        "id": "mpBack",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Credits",
+    "title": "Credits",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Skill choice",
+    "title": "Choose Your Skill",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": false,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "CleaveRapid · Group2s cooldown9 manaSkill slot 1A quick sweep hit",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Shield BashControl6s cooldown12 manaSkill slot 1Drive forward for",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Character creator",
+    "title": "Choose your class",
+    "controls": 8,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "ccFull",
+        "text": "Full character",
+        "disabled": false
+      },
+      {
+        "id": "ccFace",
+        "text": "Face close-up",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Warrior",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Ranger",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Mage",
+        "disabled": false
+      },
+      {
+        "id": "ccBack",
+        "text": "Back to title",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Controller",
+    "title": "Controller setup",
+    "controls": 28,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": null,
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "A",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "B",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "X",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Y",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "LB",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "RB",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Inspection",
+    "title": "A painted clue",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": null,
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "inspectZoom",
+        "text": "Magnify / whole painting",
+        "disabled": false
+      },
+      {
+        "id": "inspectClose",
+        "text": "Back · Esc",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Hub dialogue",
+    "title": "Quartermaster",
+    "controls": 6,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "hubService",
+        "text": "🛒Browse wares›",
+        "disabled": false
+      },
+      {
+        "id": "hubNews",
+        "text": "What has changed?",
+        "disabled": false
+      },
+      {
+        "id": "hubHelp",
+        "text": "How does this work?",
+        "disabled": false
+      },
+      {
+        "id": "hubAbout",
+        "text": "About you",
+        "disabled": false
+      },
+      {
+        "id": "hubLeave",
+        "text": "Leave conversation Q / Esc",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Dungeon help",
+    "title": "Escape. Earn. Try again.",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "prclosehelp",
+        "text": "Back to saves",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Delete confirmation",
+    "title": "Delete dungeon save?",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "prcancel",
+        "text": "Cancel",
+        "disabled": false
+      },
+      {
+        "id": "prconfirm",
+        "text": "Confirm",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Difficulty",
+    "title": "Choose Your Difficulty",
+    "controls": 6,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "CasualFor the story and the exploring. Enemies hit softer and fal",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "NormalEach completed part saves your progress. Die or quit, and r",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "LockedBeat Normal to unlock",
+        "disabled": true
+      },
+      {
+        "id": "",
+        "text": "LockedBeat Hardcore to unlock",
+        "disabled": true
+      },
+      {
+        "id": "backBtn",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Bestiary",
+    "title": "Bestiary",
+    "controls": 59,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "bestExit",
+        "text": "Back",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "All",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Regular",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Bosses",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Prison Break",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Hollowed SoldierBriar Town",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Enemy entry",
+    "title": null,
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "bestBack",
+        "text": "Back",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Practice setup",
+    "title": "Choose a practice bout",
+    "controls": 24,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "All",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Close",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Air/Range",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Bosses",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "●ThornboarClose combat",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "●SporebackClose combat",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Weapon comparison",
+    "title": "Plain Sword",
+    "controls": 4,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "buyC",
+        "text": "Buy to bag · 60g",
+        "disabled": false
+      },
+      {
+        "id": "compareBag",
+        "text": "Manage bag",
+        "disabled": false
+      },
+      {
+        "id": "backC",
+        "text": "Back to shop",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Off-class explanation",
+    "title": " Warrior cannot use bow",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "ocOk",
+        "text": "Understood",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Trainer mastery",
+    "title": "Nothing Left to Teach You",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "sealGo",
+        "text": "To the yard →",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Shrine choice",
+    "title": "A SHRINE IN THE DARK",
+    "controls": 3,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": false,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": true
+      },
+      {
+        "id": "shrA",
+        "text": "🛡 Warden's Vow+45% max HP, but −20% damage",
+        "disabled": false
+      },
+      {
+        "id": "shrB",
+        "text": "🔥 Frenzied Abyss+30% damage, but enemies move +20% faster",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Bag full choice",
+    "title": "No room",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": false,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": true
+      },
+      {
+        "id": "skipNew",
+        "text": "Leave Common Sword behind",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "New character saves",
+    "title": "Choose a slot for your new Warden",
+    "controls": 5,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Delete",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create",
+        "disabled": false
+      },
+      {
+        "id": "",
+        "text": "Create",
+        "disabled": false
+      },
+      {
+        "id": "backBtn",
+        "text": "Cancel",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Title screen",
+    "title": "Bladefall main menu",
+    "controls": 8,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": false,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "mmNew",
+        "text": "New GameForge a new Warden",
+        "disabled": false
+      },
+      {
+        "id": "mmCont",
+        "text": "ContinueSlot 1 · First Journey QA · Level 100 ·  Warrior",
+        "disabled": false
+      },
+      {
+        "id": "mmLoad",
+        "text": "Load CharacterView & choose your saved Wardens",
+        "disabled": false
+      },
+      {
+        "id": "mmMP",
+        "text": "Multiplayer BETAPlay a zone co-op with a friend",
+        "disabled": false
+      },
+      {
+        "id": "mmSet",
+        "text": "SettingsAudio, controls & display",
+        "disabled": false
+      },
+      {
+        "id": "mmStudio",
+        "text": "Design StudioPreview every voxel model & weapon",
+        "disabled": false
+      },
+      {
+        "id": "mmDev",
+        "text": "Dev PreviewsDesign plans & beta proposals",
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "name": "Dev previews",
+    "title": "Design Previews",
+    "controls": 2,
+    "unnamed": [],
+    "overflowX": 0,
+    "outside": false,
+    "close": true,
+    "role": "dialog",
+    "buttons": [
+      {
+        "id": "",
+        "text": "×",
+        "disabled": false
+      },
+      {
+        "id": "devBack",
+        "text": "Back to title",
+        "disabled": false
+      }
+    ]
+  }
+]

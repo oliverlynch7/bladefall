@@ -1,0 +1,92 @@
+[
+  {
+    "script": "test-menu-experience.cjs",
+    "code": 0,
+    "output": "{\"checks\":16,\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "test-menu-routing.cjs",
+    "code": 0,
+    "output": "{\"checks\":15,\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "test-menu-shortcuts.cjs",
+    "code": 0,
+    "output": "22 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\nNarration button E safety checks passed.\nTutorial Q priority regression checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-menu-close.cjs",
+    "code": 0,
+    "output": "10 safe menu exit routing checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-menu-gold.cjs",
+    "code": 0,
+    "output": "28 wallet formatting, updates, ownership, currency and spending-screen coverage checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-trainer-order.cjs",
+    "code": 0,
+    "output": "{\"checks\":35,\"groups\":[{\"id\":\"starters\",\"ids\":[\"warrior\",\"ranger\",\"mage\"]},{\"id\":\"campaign\",\"ids\":[\"berserker\",\"ninja\",\"reaper\",\"chronomancer\",\"pyromancer\",\"pirate\",\"paladin\",\"necromancer\"]},{\"id\":\"charters\",\"ids\":[\"monk\",\"stormcaller\",\"beastmaster\",\"warlock\",\"skylancer\",\"bladedancer\"]}],\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "test-bag-equip.cjs",
+    "code": 0,
+    "output": "100 equipment conservation and autosave race regression checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-bag-browser.cjs",
+    "code": 0,
+    "output": "Bag filters, rarity sorting, item identity, empty slots, whistle purchase/gates, stale world, field vitals and save schema passed.",
+    "error": ""
+  },
+  {
+    "script": "test-controller-invert.cjs",
+    "code": 0,
+    "output": "PASS controller invert: independent X/Y toggles, legacy Y migration, both axis signs verified",
+    "error": ""
+  },
+  {
+    "script": "test-save-safety.cjs",
+    "code": 0,
+    "output": "24 save normalization and isolated recovery checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-campaign-compatibility.cjs",
+    "code": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-story-authority.cjs",
+    "code": 0,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.",
+    "error": ""
+  },
+  {
+    "script": "test-chess-input-window.mjs",
+    "code": 0,
+    "output": "{\"checks\":72,\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "test-hub-recovery.cjs",
+    "code": 0,
+    "output": "{\"checks\":257,\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "test-ninja-facing.cjs",
+    "code": 0,
+    "output": "{\"passed\":true,\"checks\":92}",
+    "error": ""
+  }
+]

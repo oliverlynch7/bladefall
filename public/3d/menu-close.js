@@ -17,9 +17,9 @@ function mount(host,resolve){
  button.onclick=e=>{e.preventDefault();e.stopPropagation();const next=get();if(typeof next==='function')next();else if(next&&next.isConnected&&!next.disabled)next.click();};
  return button;
 }
-function overlay(){const host=document.querySelector('#ovcard > .card');if(!host||root.__BF3?.mode==='title')return;mount(host);}
+function overlay(){const host=document.querySelector('#ovcard > .card');if(!host||root.__BF3?.mode==='title')return;mount(host);root.BFMenuExperience?.refresh(host);}
 root.BFMenuClose={mount,target,refresh:overlay};
-function init(){const ov=document.getElementById('ovcard');if(!ov)return;let queued=false;new MutationObserver(records=>{if(!records.some(r=>r.type==='attributes'||[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1)))return;if(queued)return;queued=true;queueMicrotask(()=>{queued=false;overlay();});}).observe(ov,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled']});overlay();}
+function init(){const ov=document.getElementById('ovcard');if(!ov)return;let queued=false;new MutationObserver(records=>{if(!records.some(r=>r.type==='attributes'||[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1)))return;if(queued)return;queued=true;queueMicrotask(()=>{queued=false;overlay();});}).observe(ov,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','class']});overlay();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 if(typeof module!=='undefined')module.exports={target,mount};
 })(typeof window!=='undefined'?window:globalThis);

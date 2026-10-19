@@ -62,7 +62,8 @@ def main():
             previews.append({'option':label,'file':name,'generated_voice_id':p['generated_voice_id'],'duration':p.get('duration_secs'),'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw)})
         entry.update(status='saved',previews=previews);write(mp,ledger)
         if completed:print(json.dumps({'character':c['id'],'status':'saved','options':3}),flush=True)
-    sub=balance();ledger.update(used_after=sub['character_count'],credits_remaining=sub['character_limit']-sub['character_count'],observed_credit_delta=sub['character_count']-ledger['used_before']);write(mp,ledger)
+    sub=balance();expected=sum(len(c['text']) for c in rows if ledger['characters'].get(c['id'],{}).get('status')=='saved')
+    ledger.update(used_after=sub['character_count'],credits_remaining=sub['character_limit']-sub['character_count'],observed_credit_delta=sub['character_count']-ledger['used_before'],expected_text_credits=expected,billing_snapshot_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),billing_matches_text_cost=sub['character_count']-ledger['used_before']==expected);write(mp,ledger)
     public=[]
     for c in rows:
         entry=ledger['characters'].get(c['id'],{})

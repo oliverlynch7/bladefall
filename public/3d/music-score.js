@@ -1,6 +1,7 @@
 /* Supplied original score. Scene names are cues, not additions to game canon. */
 (function(root){'use strict';
 const tracks={
+  title_theme:{title:"The Blade That Calls",url:"/music/title/title.mp3",fallback:"village_vigil"},
   "trial_starter": {"title": "First Steps, Great Heroes", "url": "/music/class-trials/starter.mp3"},
   "trial_berserker": {"title": "Heart of the War Drum", "url": "/music/class-trials/berserker.mp3"},
   "trial_ninja": {"title": "Crimson Silence", "url": "/music/class-trials/ninja.mp3"},
@@ -191,6 +192,7 @@ const cues={ship_crossing:{track:'navigating_the_red_wake'},ship_arrival:{track:
 const trialTracks=Object.freeze({warrior:'trial_starter',ranger:'trial_starter',mage:'trial_starter',berserker:'trial_berserker',ninja:'trial_ninja',pirate:'trial_pirate',chronomancer:'trial_chronomancer',paladin:'trial_paladin',pyromancer:'trial_pyromancer',reaper:'trial_reaper',necromancer:'trial_necromancer'});
 const canonical=key=>aliases[key]||key;
 function scene(c={}){
+ if(c.mode==='title')return 'title_theme';
  if(c.victory)return 'watchful_greenwood';
  if(c.riftHall)return 'the_archive_of_violet_portals';
  if(c.hub)return c.sparring?'iron_gavel_descent':'wayfarers_hearth_loop';

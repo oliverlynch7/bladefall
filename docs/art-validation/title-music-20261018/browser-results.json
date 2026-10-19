@@ -1,0 +1,62 @@
+{
+ "rows": [
+  {
+   "title": "title_theme",
+   "playing": true
+  },
+  {
+   "stable": true,
+   "looped": true,
+   "muted": true,
+   "settingsTrack": "title_theme",
+   "halfVolume": 0.15,
+   "restored": true
+  },
+  {
+   "legacyLevel": 100,
+   "gold": 1145,
+   "hub": "wayfarers_hearth_loop"
+  },
+  {
+   "fallback": "village_vigil",
+   "persisted": "village_vigil",
+   "playing": true
+  }
+ ],
+ "mode": "title",
+ "track": "village_vigil",
+ "level": 100,
+ "gold": 1145,
+ "media": [
+  {
+   "k": "title_theme",
+   "muted": true,
+   "time": 0,
+   "paused": true,
+   "loop": true,
+   "volume": 0,
+   "ready": 4,
+   "duration": 150.047347
+  },
+  {
+   "k": "wayfarers_hearth_loop",
+   "muted": true,
+   "time": 0,
+   "paused": true,
+   "loop": true,
+   "volume": 0,
+   "ready": 4,
+   "duration": 141.177354
+  },
+  {
+   "k": "village_vigil",
+   "muted": true,
+   "time": 1.127602,
+   "paused": false,
+   "loop": true,
+   "volume": 0.3,
+   "ready": 4,
+   "duration": 210.050583
+  }
+ ]
+}

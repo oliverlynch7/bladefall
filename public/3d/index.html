@@ -1185,7 +1185,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./journal-notice.js?v=2254"></script>
 <script src="./puzzle-feedback.js?v=2197"></script>
 <script src="./journal-clues.js?v=2203"></script>
-<script src="./music-score.js?v=2290"></script>
+<script src="./music-score.js?v=2293"></script>
 <script src="./fallen-encounter.js?v=2007"></script>
 <script src="./frost-officers.js?v=2276"></script>
 <script src="./story-authority.js?v=2185"></script>
@@ -1222,7 +1222,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.292.0-portal-journeys';
+const VERSION3D='2.293.0-title-theme';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1601,7 +1601,8 @@ function claimIansBlade(then){
    Tracks load lazily the first time a slot is asked for.
    Supplied Bladefall tracks stream from /music/bladefall/. Legacy cues retain their credits. */
 const MUSCREDITS=[
-  {who:'Bladefall original soundtrack',url:'bladefall.pages.dev',lic:'Custom music supplied by Oliver',licUrl:'/music/bladefall/manifest.json',tracks:Object.entries(BFMusicScore.tracks).filter(([key])=>!key.startsWith('trial_')).map(([,t])=>t.title)},
+  {who:'Bladefall original soundtrack',url:'bladefall.pages.dev',lic:'Custom music supplied by Oliver',licUrl:'/music/bladefall/manifest.json',tracks:Object.entries(BFMusicScore.tracks).filter(([key])=>!key.startsWith('trial_')&&key!=='title_theme').map(([,t])=>t.title)},
+  {who:'Bladefall title theme',url:'elevenlabs.io/music',lic:'Custom instrumental score generated with ElevenLabs on a paid plan',licUrl:'/music/title/manifest.json',tracks:['The Blade That Calls']},
   {who:'Bladefall class trials',url:'elevenlabs.io/music',lic:'Custom instrumental score generated with ElevenLabs on a paid plan',licUrl:'/music/class-trials/manifest.json',tracks:Object.values(BFMusicScore.trialTracks).filter((key,i,all)=>all.indexOf(key)===i).map(key=>BFMusicScore.tracks[key].title)},
   {who:'Matthew Pablo', url:'matthewpablo.com', lic:'CC BY 3.0', licUrl:'https://creativecommons.org/licenses/by/3.0/',
    tracks:['Dark Descent','Pleasant Creek','Woodland Fantasy','Tactical Pursuit','Defying Commodus','The Dark Amulet','Colossal Boss Battle Theme','The Fall of Arcana','Lively Meadow (Victory Fanfare)']},
@@ -1612,6 +1613,7 @@ const MUSDIR='/music/';
 const MUSVOL={hub:0.36,fanfare:0.5};                  // per-track trims where a mix sits hot
 const MUS_DEFAULT=0.30;                               // Phase 20: music sits UNDER the SFX now (was 0.42) — Oliver: "music way louder than sfx"
 let musEls={}, musCur=null, musCurKey=null, musFadeT=null;
+const musicFailed=new Set();
 let gameAudioPaused=false, pausedHtmlAudio=[];
 const musicStings=new Set();
 function musicVolume(key){return (MUSVOL[key]??(key==='wayfarers_hearth_loop'?.36:MUS_DEFAULT))*(meta.musicVol??1)*(mode==='npc'?.45:window.BFNarration?.speaking?.55:1);}
@@ -1623,7 +1625,7 @@ function musEl(key){
   let a=musEls[key];
   if(!a){ try{ a=new Audio();a.preload='none';const track=BFMusicScore.tracks[key];a.src=track?track.url:MUSDIR+key+'.mp3'; }catch(e){ return null; }
     a.loop=true; a.preload='none'; a.volume=0;
-    a.addEventListener('error',()=>{ /* a missing track must never break the game */ });
+    a.addEventListener('error',()=>{ const fallback=BFMusicScore.tracks[key]?.fallback;if(!fallback)return;musicFailed.add(key);if(musCur===a&&musCurKey===key)musicPlay(fallback); });
     musEls[key]=a; }
   return a;
 }
@@ -1640,6 +1642,7 @@ function musFade(el,to,ms,stopAt){                    // volume ramp; el is park
 function musicPlay(key,opts){
   if(!key) return musicStop();
   key=BFMusicScore.canonical(key);
+  if(musicFailed.has(key)&&BFMusicScore.tracks[key]?.fallback)key=BFMusicScore.tracks[key].fallback;
   opts=opts||{};
   if(musCurKey===key && musCur && !musCur.paused) return;   // already on it — never restart a looping track
   const prev=musCur;
@@ -1664,6 +1667,7 @@ function musicSting(key){                             // one-shot over the top o
   if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,musicVolume(musCurKey),900); },2600); }
 }
 function musicForScene(){
+ if(mode==='title'||(mode==='menu'&&openPauseSettingsV2.fromTitle===true&&document.querySelector('.game-options')))return musicPlay('title_theme');
  if(G?.kingFinal){const k={ian:'ian_spirit',charge:'void_charge',cut:'void_cut',restored:'restoration',home:'restoration',collapse:'void_arrival'}[G.boss.akStage];if(k)return musicPlay(BFMusicScore.cues[k].track);}
  if(G?.marbleArena&&G.storyState?.flags['mc.defeated'])return musicPlay('stony_whispers_of_the_keep');
  const c=G?.storyState?.conversation;
@@ -18369,7 +18373,7 @@ function openSlots(){
 }
 function titleScreen(){
   clearWorldTexts();
-  BFChestReveal.clear();window.BFSocial?.reset();liveMenuWorld=null;pausedMenuWorld=null; musicPlay('village_vigil');   // the home theme introduces the ordinary person at the story's center
+  BFChestReveal.clear();window.BFSocial?.reset();liveMenuWorld=null;pausedMenuWorld=null; musicPlay('title_theme');   // the golden sword and fortress have their own original title score
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   const currentSlot=slotSummary(SLOT);
   const savedSlots=[0,1,2].filter(sl=>!slotSummary(sl).empty), hasSave=savedSlots.length>0;

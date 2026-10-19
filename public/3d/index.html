@@ -1226,7 +1226,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.320.0-hub-full-recovery';
+const VERSION3D='2.321.0-ninja-arrival-facing';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -14395,6 +14395,7 @@ const CLASS_BASIC = {
     const landing=unseenLanding(p,e);
     if(landing){Object.assign(p,landing,{vx:0,vy:0,vz:0,onGround:true});G.lastSafe={...landing};p.warpSerial=(p.warpSerial||0)+1;}
     p.yaw = Math.atan2(e.x - p.x, e.z - p.z);
+    if(landing)p._unseenFacing={yaw:p.yaw,remaining:.35};
     addText(e.x, e.y + e.h + 18, e.z, 'UNSEEN', '#9fe0ff');
     try { burst(p.x, p.y + 16, p.z, '#9fe0ff', 10); } catch(err){}
     return dmg * 1.5;
@@ -16603,6 +16604,11 @@ function updateWorld(dt){
     const sp=Math.hypot(p.vx,p.vz); if(sp>moveSpd){ p.vx*=moveSpd/sp; p.vz*=moveSpd/sp; }
     if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
+  }
+  // Keep the blink strike facing its victim through recovery; movement must not undo it next frame.
+  if(p._unseenFacing){
+    p._unseenFacing.remaining-=dt;
+    if(p._unseenFacing.remaining>0)p.yaw=p._unseenFacing.yaw;else delete p._unseenFacing;
   }
   hazUpdate(dt); questMarkTick(dt); teachTick(dt); hubTeachTick(dt); teachQueueTick(dt);
   /* KEEP THE TRACKER LIVE.

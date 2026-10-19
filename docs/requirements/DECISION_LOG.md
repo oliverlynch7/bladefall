@@ -2324,3 +2324,12 @@ User: returning to hub at any point must fully restore every player’s HP and m
 ## [Codex | 2026-10-19] Hub arrival recovery - v2.320.0
 Returning to the Waystation now restores full player HP and mana using the destination caps, then saves the restored snapshot before party arrival broadcast. Covers solo, host and guest arrivals, Rift Hall, Sparring Hall and trial exits. Prevents departing dungeon HP multipliers from changing the restored hub cap. No per-frame regeneration or changes to combat, difficulty or saves.
 Validation:257 focused checks plus save safety, campaign compatibility and story authority suites pass; inline scripts parse. Muted real Chrome isolated pre-change level100/gold1145 save passed9 actual handler routes: direct, downed, Rift Hall arrival/exit, sparring arrival/exit, host campaign return, guest hub packet and borrowed-trial abandonment. All restored/saved full HP and mana, retaining level/gold/own class; loading completed and no warnings/errors. Network sends were stubbed, so this is not a two-human co-op playtest. Evidence docs/art-validation/hub-recovery-20261019/.
+
+
+## [Codex | 2026-10-19] Ninja arrival facing
+User requests character-only turn toward the enemy after Unseen teleport; do not rotate camera. Actual Ninja hook sets yaw once, but movement steering can overwrite it on the next update. Plan: preserve target-facing yaw through a short 0.35-second strike recovery using transient actor state applied after movement steering. Keep safe landing checks, camera yaw/pitch and existing damage/passive behavior unchanged. Verify all approach directions, held movement, expiry, camera preservation and old-save browser load.
+
+
+## [Codex | 2026-10-19] Ninja blink facing - v2.321.0
+Unseen now retains its post-teleport target-facing yaw for0.35 seconds through strike recovery, applied after movement steering. Camera yaw/pitch are untouched. Normal steering resumes when the transient actor state expires. Safe landing, damage, execution/passives and saves unchanged.
+Validation:92 focused four-direction facing, held-steering, expiry and camera-preservation checks plus hub recovery/save safety/campaign compatibility suites pass; inline scripts parse. Muted real Chrome isolated legacy level100/gold1145 save: actual Ninja hook blinks behind target,12 actual world updates with movement held preserve target-facing yaw while camera yaw0/pitch0.23 remain unchanged; no browser warnings/errors. Evidence docs/art-validation/ninja-facing-20261019/.

@@ -1,0 +1,22 @@
+[
+  {
+    "script": "test-ninja-facing.cjs",
+    "code": 0,
+    "output": "{\"passed\":true,\"checks\":92}"
+  },
+  {
+    "script": "test-hub-recovery.cjs",
+    "code": 0,
+    "output": "{\"checks\":257,\"passed\":true}"
+  },
+  {
+    "script": "test-save-safety.cjs",
+    "code": 0,
+    "output": "24 save normalization and isolated recovery checks passed."
+  },
+  {
+    "script": "test-campaign-compatibility.cjs",
+    "code": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed."
+  }
+]

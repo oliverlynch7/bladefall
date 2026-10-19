@@ -1,0 +1,102 @@
+[
+  {
+    "suite": "party-survival",
+    "passed": true,
+    "output": "50 fall landing, rescue deadline, late packets, whole-level recovery, single wipe, guest wait, real die routing and nameplate checks passed.\n4 real fall/solo/duplicate hazard and attack-lock checks passed.\n"
+  },
+  {
+    "suite": "party-feedback",
+    "passed": true,
+    "output": "36 rescue reachability, timing, relay, duplicates, menu, legacy and presentation checks passed.\n6 downed rig selection/clamping/recovery checks passed.\n3 fallen-body grounding and get-up transition checks passed.\n"
+  },
+  {
+    "suite": "party-transitions",
+    "passed": true,
+    "output": "56 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed.\n"
+  },
+  {
+    "suite": "onboarding-coop",
+    "passed": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.\n5 co-op rank/spectator serialization, update and legacy checks passed.\n"
+  },
+  {
+    "suite": "esc-pause",
+    "passed": true,
+    "output": "42 pause regression checks passed.\n"
+  },
+  {
+    "suite": "camera-controls",
+    "passed": true,
+    "output": "23 camera and local appearance regression checks passed.\n"
+  },
+  {
+    "suite": "coop-chests",
+    "passed": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\n"
+  },
+  {
+    "suite": "coop-companions",
+    "passed": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}\n"
+  },
+  {
+    "suite": "coop-audio",
+    "passed": true,
+    "output": "52 capture, fallback, mute-independent dispatch, safe relay, rate/scene/duplicate and actual gain checks passed.\n"
+  },
+  {
+    "suite": "save-safety",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "new-game-slots",
+    "passed": true,
+    "output": "37 full-save cancellation, deletion, per-slot isolation, storage failure and creation intent checks passed.\n"
+  },
+  {
+    "suite": "onboarding-controls",
+    "passed": true,
+    "output": "26 onboarding migration, action pacing, hidden/menu timing and routing checks passed.\nTutorial previous-page, boundary, timer reset and menu ownership checks passed.\n"
+  },
+  {
+    "suite": "onboarding-narration",
+    "passed": true,
+    "output": "264 narration transcript/hash, binding, mute, cancellation, late load/play and recovery checks passed.\n"
+  },
+  {
+    "suite": "menu-shortcuts",
+    "passed": true,
+    "output": "22 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\nNarration button E safety checks passed.\nTutorial Q priority regression checks passed.\n"
+  },
+  {
+    "suite": "portal-travel",
+    "passed": true,
+    "output": "39 portal theme, single-entry, cancellation, stale scene, nested callback, character pose, reduced motion, input and actual loading-barrier checks passed.\n7 special-mode navigation/exit regression checks passed.\n4 departure destination checks passed.\n"
+  },
+  {
+    "suite": "overhead-controls",
+    "passed": true,
+    "output": "Overhead input, key aliases, map and removed character afterimages pass\n"
+  },
+  {
+    "suite": "title-settings",
+    "passed": true,
+    "output": "29 title/current settings parity and return-context checks passed.\n"
+  },
+  {
+    "suite": "crisp-motion",
+    "passed": true,
+    "output": "15 character motion clarity checks passed: no sampling/drawing/toggle/warmup echo rigs, current-frame clear, normal peer compositing and loading warmup retained.\n"
+  },
+  {
+    "suite": "title-music",
+    "passed": true,
+    "output": "Title music: routing, fallback, lazy preview, SHA256, stereo, sample rate, duration and payload passed.\n"
+  },
+  {
+    "suite": "render-warmup",
+    "passed": true,
+    "output": "Off-camera preparation restores visibility, culling, viewport and shadow state after success or failure.\n"
+  }
+]

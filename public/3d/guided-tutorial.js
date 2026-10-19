@@ -128,7 +128,7 @@ window.addEventListener('pointerdown',e=>{
 },true);
 window.addEventListener('resize',()=>position(true));
 function tick(g,mode,dt,input,api){
- if(!guide&&mode==='play'&&g?._guidedUsed&&g.portal&&!g._guideExitSeen){
+ if(!guide&&mode==='play'&&!g?.p?.downed&&!g?.p?.dead&&g?._guidedUsed&&g.portal&&!g._guideExitSeen){
   g._guideExitSeen=true;guide={g,i:0,steps:[{id:'exit',title:'The exit is open',body:'Walk into the exit portal to reach the Waystation. Its gold marker appears at the edge of your map when it is far away.',target:['#localMap']}],hold:0,run:0};
  }
  if(!guide)return false;

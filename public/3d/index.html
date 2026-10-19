@@ -1189,7 +1189,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./skill-identity.js?v=1981s"></script>
 <script src="./campaign-journey.js?v=2236"></script>
 <script src="./bag-browser.js?v=2238"></script>
-<link rel="stylesheet" href="./party-feedback.css?v=2291"><script src="./party-feedback.js?v=2291"></script>
+<link rel="stylesheet" href="./party-feedback.css?v=2297"><script src="./party-feedback.js?v=2297"></script>
 <script src="./party-navigation.js?v=2292"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
@@ -1200,7 +1200,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2296"></script>
+<script src="./guided-tutorial.js?v=2297"></script>
 <script src="./menu-tour.js?v=2294"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
@@ -1219,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.296.0-single-pause-button';
+const VERSION3D='2.297.0-party-survival';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4258,7 +4258,6 @@ function openWay(){ if(G?.kingFinal)return; if(inLongAscent()&&!BFLongAscent.rea
  if(inCastleGates()&&!BFCastleGates.ready(adventureStoryState()))return; if(G?.marbleArena&&!adventureStoryState().flags['mc.answer'])return; if(inSkyLibrary()&&!BFSkyLibrary.ready(adventureStoryState()))return; if(inPalaceCourtyard()&&!BFPalaceCourtyard.ready(adventureStoryState()))return;if(inThunderCliffs()&&!BFThunderCliffs.ready(adventureStoryState()))return;if(G?.hydraArena&&!G.hydraArena.freed)return; if(inShipwreck()&&!G.voyageLanded)return;if(inGreatFurnace()&&!BFGreatFurnace.ready(adventureStoryState()))return;if(inIronHalls()&&!BFIronHalls.ready(adventureStoryState()))return;if(inIceCaves()&&!BFIceCaves.ready(adventureStoryState()))return;if(inSnowbound()&&!BFSnowbound.ready(adventureStoryState()))return;if(inPrison()&&!BFPrison.ready(adventureStoryState()))return;if(inBrokenWalls()&&!BFBrokenWalls.ready(adventureStoryState()))return;if(inLostCanyon()&&!BFLostCanyon.ready(adventureStoryState()))return;if(inWindingCliffs()&&!G.storyState?.flags['hp.descent'])return;if(G.riftMentor&&!G.storyState?.flags['trial.taught'])return;if(G.bruteArena&&G.enemies.some(e=>!e.dead&&e.hp>0))return;if(inBlackWoods()&&!G.storyState?.flags['woods.signal'])return;if(inBriar()&&!G.storyState?.flags['briar.depart'])return;if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
-  if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
 }
 // render only when the content changes; pulse once on a progress change, hold a stronger state on completion
 function questTrackerAllowed(){
@@ -5733,6 +5732,7 @@ function enterSide(zi){
 function hazToast(){ if(G?.kingFinal||inLongAscent()||inCastleGates()||G.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inBrokenWalls()||inPrison())return;const Z=curZone(); if(!Z.haz||G.side||G.trial) return;
   const H=HAZARDS[Z.haz]; toast('⚠ '+H.name+' — '+H.blurb); }
 function sideClear(){
+  if(MP.active)MP.completeSurvival();
   const Z=curZone(), S=Z.side;
   meta.hero=snapOf(G.p); meta.bank=null; meta.sideDone[S.id]=true;
   const bonus=awardGold(120+G.zoneTier*70); persist(); checkAchievements();
@@ -5952,7 +5952,7 @@ function trialComplete(remote=false){
   if(!G?.trial||G.trialCompleted)return;
   if(MP.active&&!remote){finishPartyTrial();return;}
   if(MP.active&&(!G.storyState?.flags['trial.taught']||G.trialKills<TRIALS[G.trial].kills))return;
-  G.trialCompleted=true;
+  G.trialCompleted=true;if(MP.active)MP.completeSurvival();
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
   const protectedHero=G.trialReturnHero||((meta.bank&&meta.bank.hero)||null);
@@ -6094,7 +6094,7 @@ function securePendingSecret(){
     if(!meta.sideFound[ps.id]){ meta.sideFound[ps.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; grantIansShard(ps.id); checkCosmetics(); persist();
       toast('✦ '+ps.name+' secured — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
 }
-function nextArea(){ if(!G||G.hub||G.kingFinal)return;
+function nextArea(partyActor=false){ if(!G||G.hub||G.kingFinal||G.p?.downed&&!partyActor)return;
  if(inLongAscent()&&!BFLongAscent.ready(adventureStoryState()))return;
  if(inCastleGates()&&!BFCastleGates.ready(adventureStoryState()))return;
   if(G?.marbleArena&&!adventureStoryState().flags['mc.answer'])return;
@@ -6115,7 +6115,7 @@ function nextArea(){ if(!G||G.hub||G.kingFinal)return;
   if(MP.active) MP.onEnter(G.zone);                           // co-op: synchronize the exact district, including area -1 (boss room)
 }
 function zoneClear(){
-  if(G._checkpointCleared)return;G._checkpointCleared=true;
+  if(G._checkpointCleared)return;G._checkpointCleared=true;if(MP.active)MP.completeSurvival();
   if(MP.active&&MP.isHost)for(const c of MP.conns)try{c.send({t:'campaignClear',zone:G.zone,rseed:G.runSeed});}catch(e){}
   const Z=curZone();
   meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;        // everything banks — new save point
@@ -8495,7 +8495,7 @@ function finalChargeHud(){let el=document.getElementById('finalCharge');if(!G?.k
  const start=el.querySelector('[data-charge-start]');start.hidden=c.state==='charging'||c.state==='won';start.disabled=MP.guest();start.textContent=c.state==='failed'?'Retry charge':'Begin charge';el.querySelector('[data-charge-press]').disabled=c.state!=='charging';el.querySelector('[data-charge-skip]').hidden=!(c.state==='failed'&&c.failures>=5);el.querySelector('[data-charge-skip]').disabled=MP.guest();
 }
 document.addEventListener('keydown',ev=>{if(G?.kingFinal&&G.boss.akStage==='charge'&&ev.code==='Space'){ev.preventDefault();ev.stopImmediatePropagation();if(!ev.repeat)sendFinalCommand('press');}},true);
-function completeFinalKing(){if(G.kingFinal.rewarded)return;G.kingFinal.rewarded=true;G._winPending=true;const D=curDiff();meta.zoneDone.castle=true;meta.zoneMax=ZONES.length-1;meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;meta.bossKills=(meta.bossKills||0)+1;meta.tyrantKills=(meta.tyrantKills||0)+1;meta.totalKills=(meta.totalKills||0)+1;if(G.p.weapon.sch==='mag')meta.magicBossKills=(meta.magicBossKills||0)+1;if(G.p.weapon.cls==='ranged')meta.rangedBossKills=(meta.rangedBossKills||0)+1;gainXp(Math.max(1,Math.round(G.boss.xp)));const bonus=awardGold(500+Math.max(1,Math.round(G.boss.xp*3.5)));meta.hero=snapOf(G.p);meta.bank=null;meta.run=null;persist();checkAchievements();checkCosmetics();SFX.win();showGameUI(false);winScreen(bonus,D);}
+function completeFinalKing(){if(G.kingFinal.rewarded)return;if(MP.active)MP.completeSurvival();G.kingFinal.rewarded=true;G._winPending=true;const D=curDiff();meta.zoneDone.castle=true;meta.zoneMax=ZONES.length-1;meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;meta.bossKills=(meta.bossKills||0)+1;meta.tyrantKills=(meta.tyrantKills||0)+1;meta.totalKills=(meta.totalKills||0)+1;if(G.p.weapon.sch==='mag')meta.magicBossKills=(meta.magicBossKills||0)+1;if(G.p.weapon.cls==='ranged')meta.rangedBossKills=(meta.rangedBossKills||0)+1;gainXp(Math.max(1,Math.round(G.boss.xp)));const bonus=awardGold(500+Math.max(1,Math.round(G.boss.xp*3.5)));meta.hero=snapOf(G.p);meta.bank=null;meta.run=null;persist();checkAchievements();checkCosmetics();SFX.win();showGameUI(false);winScreen(bonus,D);}
 function finalKingTick(dt){if(!G?.kingFinal){document.getElementById('finalCharge')?.remove();return false;}const e=G.boss;prepareFinalScene();finalChargeHud();
  if(e.akStage==='home'){completeFinalKing();return true;}
  const dialogue={intro:['abyss_king','ak.king.offer'],recognition:['abyss_king','ak.king.recognize'],ian:['ian','ak.ian.welcome'],restored:['ian','ak.ian.restored']}[e.akStage];
@@ -11942,8 +11942,9 @@ function hazardCause(th){ return (th==='dungeon')?{name:'the prison shaft',attac
   :(th==='plains'||th==='forest')?{name:'the Wilds',attack:'a fatal fall'}
   :(th==='marble'||th==='canyon')?{name:'the Fall',attack:'a long drop'}:{name:'the Lava',attack:'molten rock'}; }
 function lavaHit(){
-  if(pauseDamageBlocked())return;
+  if(pauseDamageBlocked()||G?.p?.downed)return;
   const p=G.p;
+  if(G.hub&&!G.sparringRoom){const safe=BFPartyFeedback.safePoint(G,p,MP.active?MP.currentParty():[],floorAt);if(safe){Object.assign(p,safe,{vx:0,vy:0,vz:0,onGround:true,invuln:1.2});p.warpSerial=(p.warpSerial||0)+1;G.cam={...safe};return;}}
   const fallTheme=G.escape?'dungeon':STAGES[G.stageIndex].theme;
   if(G.bonusActive){if(G.sprintFinish)return;BFSprintRace.fall(G.sprintRace);G.bonusStarted=true;G.bonusTime=BFSprintRace.remaining(G.sprintRace);p.x=G.lastSafe.x;p.z=G.lastSafe.z;p.y=(G.lastSafe.y||0)+60;p.vx=0;p.vy=0;p.vz=0;p.onGround=false;p.warpSerial=(p.warpSerial||0)+1;p.invuln=1.2;p.recoverT=.7;G.cam={x:p.x,y:p.y,z:p.z};delete G._cameraBoom;toast('Fall recovered · 3 seconds lost','#ffd24a');return;}
   // Ordinary country/fortress ground is not a supernatural damage hazard.
@@ -12181,7 +12182,7 @@ function autoAtkTarget(p,w){
   return t;
 }
 function playerAttack(cdMul){
-  if(partyChannel||G?.p?.dragonRide)return;
+  if(partyChannel||G?.p?.dragonRide||G?.p?.dead||G?.p?.downed||G?.p?.hp<=0)return;
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   const audio=typeof window!=='undefined'&&window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;try{
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
@@ -12251,7 +12252,7 @@ function beginThrownWeapon(p,w,returns){
   p.throwHideT=returns?2.25:0.36; return p.throwToken;
 }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
-function chargeRelease(p,w,amt){ if(partyChannel)return; if(!classFamilyOk(w)) return;
+function chargeRelease(p,w,amt){ if(partyChannel||p.dead||p.downed||p.hp<=0)return; if(!classFamilyOk(w)) return;
   const audio=typeof window!=='undefined'&&window.BFCoopAudio&&MP.active?window.BFCoopAudio.begin():null;try{
   const previousSwing=p.swingId||0;p._chargeSound=!!window.BFWorldSfx?.charge(w,playFx);
   if(!p._chargeSound&&w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
@@ -14645,7 +14646,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(p.hp<=0){
     if(G.sparringRoom){p.hp=0;p.dead=true;die();return;}
     if(by?.pvp){p.hp=0;return;}
-    if(MP.active && !MP.pvp && MP.anyAllyUp()){ MP.goDown(); return; }   // co-op: go DOWN (revivable) instead of dying while an ally still stands
+    if(MP.active && !MP.pvp && !G.arena&&MP.hasZone()&&!MP._wiped){ MP.goDown(); return; }   // co-op: go DOWN (revivable) instead of dying while an ally still stands
     p.hp=0; p.dead=true; die();
   }
 }
@@ -14687,12 +14688,12 @@ function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead||(pet.invuln|
 function petUpdate(dt){
   const pet=G.pet,p=G.p; if(!pet) return; const chessPark=window.BFSocial?.companionPose(p);if(chessPark){Object.assign(pet,chessPark);pet.t+=dt;pet.breathT=0;return;} if(p.dragonRide&&pet.id==='sunwing'){pet.t+=dt;pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);BFDragonRiding.sync(G);return;} const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
   if(pet.id==='sunwing'&&p.onGround)G.dragonFuel=Math.min(BFDragonRiding.duration,(G.dragonFuel??BFDragonRiding.duration)+dt*2);
-  if(pet.id==='sunwing')BFDragonCombat.tick(pet,dt,combatTargets(),(e,d)=>{hitEnemy(e,d,{x:pet.x,z:pet.z,pet:true},70,0,'fire');burst(e.x,e.y+20,e.z,'#f3ba65',5);},G.walls||[]);
+  if(!p.downed&&!p.dead&&pet.id==='sunwing')BFDragonCombat.tick(pet,dt,combatTargets(),(e,d)=>{hitEnemy(e,d,{x:pet.x,z:pet.z,pet:true},70,0,'fire');burst(e.x,e.y+20,e.z,'#f3ba65',5);},G.walls||[]);
   pet.t+=dt; pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);
   if((pet.orderT||0)>0) pet.orderT=Math.max(0,pet.orderT-dt);   // the Beastmaster's standing order (useSkill)
   const grounded=(P.grounded||(P.arch==='attacker'&&P.style==='melee'));
   pet.bob=grounded?Math.abs(Math.sin(pet.t*7))*2 : Math.sin(pet.t*3)*3;       // grounded: a little gait hop; ethereal: gentle hover bob
-  const floatY=p.y+(grounded?0:15), playing=(mode==='play'&&!isHitless());
+  const floatY=p.y+(grounded?0:15), playing=(mode==='play'&&!isHitless()&&!p.downed&&!p.dead);
   // ---- pick a target: break off to engage a nearby enemy on its own, else follow the hero LOOSELY ----
   let tx=pet.x, tz=pet.z, engaging=false, tgt=null;
   if(playing && P.arch==='attacker'){
@@ -14995,7 +14996,7 @@ function addMark(x, z, y, by, name, mid){
   return m;
 }
 function dropPing(){
-  if(mode !== 'play' || !G || !G.p) return null;
+  if(mode !== 'play' || !G || !G.p||G.p.downed) return null;
   const now = G.time || 0;
   if(now - _pingT < PING_COOL) return null;
   _pingT = now;
@@ -15098,21 +15099,21 @@ const MP={
     /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
        is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
        an older build simply sends no cid and hero3d falls back to your model as before. */
-    lookTier:BFClassLooks.tier(meta,meta.classId), cosmetics:cosmeticAppearance(), trialAccess:G?.hub?riftHallFrames().filter(f=>f.open).map(f=>f.classId):undefined, hall:!!G?.riftHall, cid:meta.classId||'', disguise:!!(G?.castleGates&&G.storyState?.flags['cg.disguise']&&!G.storyState?.flags['cg.alarm']),
+    rank:Math.max(1,Math.min(10,Number(meta.classes?.[meta.classId]?.rank)||1)),lookTier:BFClassLooks.tier(meta,meta.classId), cosmetics:cosmeticAppearance(), trialAccess:G?.hub?riftHallFrames().filter(f=>f.open).map(f=>f.classId):undefined, hall:!!G?.riftHall, cid:meta.classId||'', disguise:!!(G?.castleGates&&G.storyState?.flags['cg.disguise']&&!G.storyState?.flags['cg.alarm']),
     x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight',
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     face:BFFaceOptions.appearance(meta), hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
-    w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0, downLeft:p?.downed?BFPartyFeedback.clamp(p.downT,0,60):undefined, rescue:BFPartyFeedback.rescue(this.rescue),
+    spec:p?.spectating?1:0,w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0, downLeft:p?.downed?BFPartyFeedback.clamp(p.downT,0,60):undefined, rescue:BFPartyFeedback.rescue(this.rescue),
     am:p?this.motion({ground:p.onGround,vx:p.vx,vy:p.vy,vz:p.vz,pose:p.combatPose,emote:p.emote}):null,
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, sb:p?.saberSwingT||0, si:p?.swingId||0, ca:p?.chargeAmt||0, th:p?.throwHideT||0, ta:p?.throwHideArche||null, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0,+(G.pet.breathT||0).toFixed(2),+(G.pet.breathYaw||0).toFixed(3),G.pet.mounted?1:0,G.pet.flying?1:0,G.pet.sitting?1:0,+(G.pet.atkT||0).toFixed(3)]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
   mkPeer(s){ return {travelTo:BFPartyFeedback.rescue({id:s.travelTo})?.id||null,face:BFFaceOptions.appearance(s.face),riding:!!s.riding,sitting:!!s.sitting,busy:validActivity(s.busy),lookTier:BFClassLooks.valid(s.lookTier),tw:Number.isSafeInteger(s.tw)?s.tw:0,area:s.area,def:{shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))},motion:this.motion(s.am),cosmetics:validCosmeticAppearance(s.cosmetics),trialAccess:s.trialAccess||[],hall:!!s.hall,id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',disguise:!!s.disguise,lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
-    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, downLeft:s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null,rescue:BFPartyFeedback.rescue(s.rescue), prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
+    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', rank:Number.isFinite(s.rank)?Math.max(1,Math.min(10,Math.floor(s.rank))):null,spectating:!!s.dn&&(s.spec===1||s.spec===true),downed:!!s.dn, downLeft:s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null,rescue:BFPartyFeedback.rescue(s.rescue), prisonRevives:s.prisonRevives?1:0, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, sb:s.sb||0, si:s.si||0, ca:s.ca||0, th:s.th||0, ta:s.ta||null, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){q.travelTo=BFPartyFeedback.rescue({id:s.travelTo})?.id||null;q.face=BFFaceOptions.appearance(s.face);q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn;q.downLeft=s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null;q.rescue=BFPartyFeedback.rescue(s.rescue);q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {travelTo:q.travelTo||null,face:BFFaceOptions.appearance(q.face),riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,downLeft:q.downLeft,rescue:BFPartyFeedback.rescue(q.rescue),at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){q.travelTo=BFPartyFeedback.rescue({id:s.travelTo})?.id||null;q.face=BFFaceOptions.appearance(s.face);q.riding=!!s.riding;q.sitting=!!s.sitting;q.busy=validActivity(s.busy);q.lookTier=BFClassLooks.valid(s.lookTier);if(Number.isSafeInteger(s.tw)&&s.tw>0&&s.tw!==q.tw){q.x=s.x;q.y=s.y;q.z=s.z;}q.tw=Number.isSafeInteger(s.tw)?s.tw:0;q.area=s.area;q.def={shield:!!s.def?.shield,guard:!!s.def?.guard,warp:Math.max(0,Math.min(3,Number(s.def?.warp)||0))};q.motion=this.motion(s.am);q.cosmetics=validCosmeticAppearance(s.cosmetics);if(Array.isArray(s.trialAccess))q.trialAccess=s.trialAccess;q.hall=!!s.hall; q.disguise=!!s.disguise; q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.rank=Number.isFinite(s.rank)?Math.max(1,Math.min(10,Math.floor(s.rank))):null;q.spectating=!!s.dn&&(s.spec===1||s.spec===true);q.downed=!!s.dn;q.downLeft=s.dn&&Number.isFinite(s.downLeft)?BFPartyFeedback.clamp(s.downLeft,0,60):null;q.rescue=BFPartyFeedback.rescue(s.rescue);q.prisonRevives=s.prisonRevives?1:0; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.sb=s.sb||0; q.si=s.si||0; q.ca=s.ca||0; q.th=s.th||0; q.ta=s.ta||null; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {travelTo:q.travelTo||null,face:BFFaceOptions.appearance(q.face),riding:!!q.riding,sitting:!!q.sitting,busy:validActivity(q.busy),lookTier:BFClassLooks.valid(q.lookTier),tw:q.tw||0,area:q.area,def:q.def,am:this.motion(q.motion),cosmetics:validCosmeticAppearance(q.cosmetics),trialAccess:q.trialAccess,hall:q.hall,id:q.id,name:q.name,cls:q.cls,cid:q.cid,rank:q.rank,disguise:!!q.disguise,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,spec:q.spectating?1:0,dn:q.downed?1:0,downLeft:q.downLeft,rescue:BFPartyFeedback.rescue(q.rescue),at:q.at||0,sc:q.sc||0,sb:q.sb||0,si:q.si||0,ca:q.ca||0,th:q.th||0,ta:q.ta||null,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -15162,7 +15163,7 @@ const MP={
       else if(d.t==='sound'){this.recvSound(d,c);}
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
       else if(d.t==='mark'){ this.recvMark(d,c); }          // a guest's world ping — draw + relay to the rest of the party
-      else if(d.t==='campaignAdvance'&&isCampaignAdventure()&&G.portal&&d.zone===G.zone&&d.area===G.area){nextArea();}
+      else if(d.t==='campaignAdvance'&&isCampaignAdventure()&&G.portal&&d.zone===G.zone&&d.area===G.area){const q=this.peers[c._pid];if(BFPartyFeedback.alive(q)&&q.zone===this.zone&&q.area===G.area&&q.last<1&&Math.hypot(q.x-G.portal.x,q.z-G.portal.z)<170)nextArea(true);}
       else if(d.t==='campaignRetry'&&isCampaignAdventure()&&d.zone===G.zone&&d.area===G.area&&(mode==='dead'||mode==='dying'||this._wiped)){restartCampaignCheckpoint();}
       else if(d.t==='specialAdvance'&&d.kind==='prison'&&G?.escape&&G.floorCleared&&this.peers[c._pid]?.zone===this.zone){const q=this.peers[c._pid];if(G.portal&&dXZ(q.x,q.z,G.portal.x,G.portal.z)<120)delveDescend();}
       else if(d.t==='specialAdvance'&&d.kind==='endless'&&G&&G.endless&&G.floorCleared){ endlessDescend(); }
@@ -15263,7 +15264,7 @@ const MP={
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
       if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.chests)applyCoopChests(d.chests);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
     else if(d.t==='revive'){ if(d.id===this.myId&&(!d.scene||d.scene===this.combatScene())) this.reviveSelf('An ally pulled you up!'); }
-    else if(d.t==='wipe'){ this.doWipe(); }
+    else if(d.t==='wipe'){ if(!d.scene||d.scene===this.combatScene())this.doWipe(); }
     else if(d.t==='pcontrol'){if(d.id===this.myId)this.takePvpControl(d);}
     else if(d.t==='hitResult'){this.takeHitResult(d);}
     else if(d.t==='presult'){if(d.id===this.myId)this.takePvpResult(d);}
@@ -15276,7 +15277,7 @@ const MP={
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
-  onEnter(zi,restart=false){if(G?.trialSession){this.zone=this.TRIAL;if(this.isHost)for(const c of this.conns)try{c.send(partyTrialPacket());}catch(e){}return;} this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
+  onEnter(zi,restart=false){if(G?.trialSession){this.zone=this.TRIAL;if(this.isHost)for(const c of this.conns)try{c.send(partyTrialPacket());}catch(e){}return;} this._wiped=false;this._killed={};this.kills=[];this._gotEn=false;this.zone=zi;if(G?.p?.downed){G.p.hp=0;this.anchorDowned();}delete G?._spectatorCam; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
     if(zi!==this.HUB)this.trialReceipt=null;
     if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',trialEnd:this.trialReceipt,zone:zi,hall:!!G?.riftHall,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0,restart,qs:isCampaignAdventure()?G.qs:undefined,story:briarPacket()});}catch(e){}}); },
   specialMsg(kind){
@@ -15456,7 +15457,7 @@ const MP={
     // floating name + HP bar (uses the 2D overlay, like enemy/pet bars) + link ping
     const s=project(q.x,(q.y||0)+72+(q.riding?24:0),q.z);
     if(s){ const hpm=q.hpm||100, f=Math.max(0,Math.min(1,(q.hp==null?hpm:q.hp)/hpm));
-      hpBars.push({x:s[0],y:s[1],f:f,peer:true,name:(q.name||'Ally')+(q.downed?' · DOWN':q.busy?' · '+q.busy:''),cls:q.cls||'',lvl:q.lvl||0,col:tint,downed:!!q.downed,ping:this.ping||null}); } },
+      hpBars.push({x:s[0],y:s[1],f:f,peer:true,name:(q.name||'Ally')+(q.spectating?' · SPECTATING':q.downed?' · DOWN':q.busy?' · '+q.busy:''),cls:q.cls||'',rank:q.rank,lvl:q.lvl||0,col:tint,downed:!!q.downed,ping:this.ping||null}); } },
   // ================= P1.2 SHARED ENEMIES (host-authoritative existence/HP/death) =================
   guest(){ return this.active && !this.isHost; },
   host_(){ return this.active && this.isHost; },
@@ -15595,14 +15596,29 @@ const MP={
     // Chest drops arrive at the host's kill position through the shared manifest.
   },
   // ================= P1.3 DOWNED / REVIVE (co-op death is not the end) =================
-  anyAllyUp(){ for(const id in this.peers){ const q=this.peers[id]; if(q.zone===this.zone && !q.downed && (q.hp==null||q.hp>0)) return true; } return false; },
-  goDown(){ if(!G||!G.p) return; const p=G.p; if(p.downed) return; p.downed=true; p.hp=0; p.vx=0; p.vz=0; p.dead=false;
-    p.downT=60;   // ~60s to be revived before you bleed out to the hub
-    this.rescue=null;for(const q of Object.values(this.peers)){q._rev=0;q._revPending=0;} try{ burst(p.x,p.y+20,p.z,'#ff5e54',16); }catch(e){} try{ hudUpdate(); }catch(e){} },
-  reviveSelf(msg){ if(!G||!G.p||!G.p.downed) return; const p=G.p; p.downed=false; p.dead=false;
-    this.rescue=null;partyFeedbackNotice('success','Back on your feet','Your teammate revived you.');
-    p.hp=Math.max(1,Math.round(effMaxHp(p)*0.5)); p.invuln=Math.max(p.invuln||0,1.6);
-    try{ burst(p.x,p.y+30,p.z,'#7de08a',18); }catch(e){} try{ toast(msg||'You are back on your feet!'); }catch(e){} try{ hudUpdate(); }catch(e){} },
+  currentParty(){return Object.values(this.peers).filter(q=>q.zone===this.zone&&(q.area==null||q.area===G?.area)&&!!q.hall===!!G?.riftHall&&(q.last??0)<3);},
+  anyAllyUp(){return this.currentParty().some(BFPartyFeedback.alive);},
+  spectateTarget(){return this.currentParty().filter(q=>BFPartyFeedback.alive(q)&&[q.x,q.y,q.z].every(Number.isFinite)).sort((a,b)=>String(a.id).localeCompare(String(b.id)))[0]||null;},
+  anchorDowned(){
+    if(!G?.p)return false;const p=G.p,dest=BFPartyFeedback.safePoint(G,p,this.currentParty(),floorAt);
+    if(!dest)return false;Object.assign(p,dest,{vx:0,vy:0,vz:0,onGround:true});p.warpSerial=(p.warpSerial||0)+1;G.cam={...dest};delete G._cameraBoom;return true;
+  },
+  goDown(){
+    if(!G?.p||G.p.downed||this._wiped)return;const p=G.p;
+    cancelDeathTransition();partyCancel();BFGuidedTutorial.stop();releaseKeyboard();
+    Object.assign(p,{downed:true,spectating:false,hp:0,dead:false,vx:0,vy:0,vz:0,dodgeTimer:0,atkTimer:0,charging:false,chargeAmt:0,attackHeld:false,holdT:0,combatPose:null,emote:null,downT:BFPartyFeedback.WINDOW});
+    this.rescue=null;for(const q of Object.values(this.peers)){q._rev=0;q._revPending=0;}
+    const anchored=this.anchorDowned();if(!anchored||G.escape?.revives>=1){p.spectating=true;p.downT=0;}
+    mode='play';showOverlay(false);showGameUI(true);try{burst(p.x,p.y+20,p.z,'#ff5e54',16);hudUpdate();}catch(e){}
+  },
+  reviveSelf(msg,completed=false){
+    if(!G?.p?.downed||(!completed&&(G.p.spectating||G.p.downT<=0)))return false;const p=G.p;
+    Object.assign(p,{downed:false,spectating:false,dead:false,downT:0});delete G._spectatorCam;this.rescue=null;
+    partyFeedbackNotice('success',completed?'Ready for the next adventure':'Back on your feet',completed?'The party cleared the level.':'Your teammate revived you.');
+    p.hp=Math.max(1,Math.round(effMaxHp(p)*(completed?1:.5)));p.invuln=Math.max(p.invuln||0,1.6);
+    try{burst(p.x,p.y+30,p.z,'#7de08a',18);toast(msg||'You are back on your feet!');hudUpdate();}catch(e){}return true;
+  },
+  completeSurvival(){if(G?.p?.downed)this.reviveSelf('Level cleared — you are back!',true);},
   doRevive(targetId){ if(this.isHost) return this.routeRevive(targetId,this.myId);
     if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'revive',id:targetId,scene:this.combatScene()});return true; }catch(e){} } return false; },
   routeRevive(id,helperId){
@@ -15611,13 +15627,17 @@ const MP={
     if(!helper||helperId!==this.myId&&(helper.zone!==this.zone||helper.area!==G.area||!!helper.hall!==!!G.riftHall||helper.last>=1||helper.busy))return false;
     if(helperId===this.myId&&(mode!=='play'||backgroundMenuMode))return false;
     if(!BFPartyFeedback.eligible(helper,target,{zone:this.zone,area:G.area,hall:G.riftHall,hub:G.hub,pvp:this.pvp,exhausted:!!G.escape&&target?.prisonRevives>=1},enemyMeleeClear))return false;
-    if(id===this.myId){this.reviveSelf('An ally pulled you up!');return true;}
+    if(id===this.myId)return this.reviveSelf('An ally pulled you up!')===true;
     const c=this.conns.find(x=>x._pid===id&&x.open);if(c){try{c.send({t:'revive',id,scene:this.combatScene()});return true;}catch(e){}}return false; },
-  doWipe(){ if(this._wiped) return; this._wiped=true; if(G&&G.p){ G.p.downed=false; G.p.dead=true; } try{ toast('The party has fallen…'); }catch(e){} try{ die(); }catch(e){} },
-  // per-frame co-op survival logic (called from tick while in a zone)
-  survivalTick(dt){ if(!G||!G.p||G.hub) return;
-    // bleed out if not revived in time (only matters once you're actually down)
-    if(G.p.downed){ G.p.downT=(G.p.downT||0)-dt; if(G.p.downT<=0){ G.p.downed=false; G.p.dead=true; try{ die(); }catch(e){} return; } }
+  doWipe(){
+    if(this._wiped)return;this._wiped=true;this.rescue=null;
+    if(this.isHost)for(const c of this.conns)if(c.open)try{c.send({t:'wipe',scene:this.combatScene()});}catch(e){}
+    if(G?.p){Object.assign(G.p,{downed:false,spectating:false,dead:true,hp:0,downT:0});delete G._spectatorCam;}
+    try{toast('The party has fallen — retry together.');die();}catch(e){}
+  },
+  survivalTick(dt){if(!G?.p||G.hub||this.pvp||this._wiped)return;
+    const p=G.p;
+    if(p.downed){if(p.y<-24)this.anchorDowned();p.hp=0;p.invuln=Math.max(p.invuln||0,1);if(!p.spectating){p.downT=Math.max(0,(p.downT||0)-Math.max(0,dt));if(p.downT<=0){p.spectating=true;this.rescue=null;delete G._spectatorCam;partyFeedbackNotice('spectate','Revive window ended','Watch your teammate until the level is cleared or the party retries.');}}}
     // One reachable ally at a time. Presence carries progress to the person being rescued.
     this.rescue=null;
     const canHelp=mode==='play'&&!backgroundMenuMode&&!this.pvp&&!G.p.downed&&!G.p.dead&&G.p.hp>0&&this.hasZone();
@@ -15628,10 +15648,9 @@ const MP={
       this.rescue={id:q.id,progress:q._rev/2.5};
       if(q._rev>=2.5&&!q._revPending){q._revPending=1.5;this.doRevive(q.id);}
     }
-    // host: if every player in the zone is down, it's a wipe
-    if(this.isHost && !this.pvp){ const ids=Object.keys(this.peers).filter(id=>this.peers[id].zone===this.zone);
-      if(ids.length){ const meDown=G.p.downed||G.p.dead, allDown=ids.every(id=>this.peers[id].downed);
-        if(meDown && allDown){ this.conns.forEach(c=>{try{c.send({t:'wipe'});}catch(e){}}); this.doWipe(); } } } },
+    // Spectators and zero-HP peers count as fallen. A stale/wrong-room peer cannot prevent a wipe.
+    if(this.isHost&&!BFPartyFeedback.alive(G.p)&&!this.anyAllyUp())this.doWipe();
+  },
   // ================= PHASE 3 PvP (melee duel — friendly fire, first to 5) =================
   pvpMelee(p,w,dmg){ if(!this.pvp||!G||!p) return;
     const reach=((typeof MELEE!=='undefined'&&MELEE[w.art]&&MELEE[w.art].reach)||90)+22, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
@@ -15717,7 +15736,7 @@ const MP={
     window.BFSocial?.reset();this.active=false; this.isHost=false; this.peer=null; this.conns=[]; this.hostConn=null; this.peers={}; this.zone=-1;
     try{ syncPingBtn(); }catch(e){}      // tick() stops running when the party ends, so hide it here
     this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={}; this.arenaMsg=null;
-    if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
+    if(G&&G.p){const unavailable=G.p.downed;G.p.downed=false;G.p.spectating=false;G.p.downT=0;G.p._pvpDead=false;if(unavailable&&!rollback&&!leavingTrial){G.p.dead=false;G.p.hp=Math.max(1,Math.round(effMaxHp(G.p)*.5));}}   // never leave a lingering downed/pvp state when co-op ends
     if(leavingTrial){closedPartyTrials.add(G.trialSession);if(!G.trialCompleted)restoreTrialExit();openHub();}
     if(rollback)restartCampaignCheckpoint(true);
     if(msg){ try{ toast(msg+(rollback?' Route reset to this part’s start; earned XP, upgrades, gold and hub requests kept.':'')); }catch(e){} } }
@@ -16417,7 +16436,8 @@ function updateWorld(dt){
   p.castPlantT=Math.max(0,(p.castPlantT||0)-dt);
   if(p.castPlantT>0&&p.dodgeTimer<=0){mx=0;mz=0;p.vx=0;p.vz=0;}
   if(p.downed){ mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false; input.attack=false; p.charging=false; p.attackHeld=false;   // co-op: a downed player is locked out until revived
-    if(Math.floor(G.time*1.5)%2===0) addText(p.x,p.y+70,p.z,'DOWNED','#ff5e54'); }
+    // The rescue card and fallen pose describe this state without per-frame floating text.
+  }
   if(p.recoverT>0){ p.recoverT-=dt; mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false;   // regain your feet first
     if(Math.random()<0.25) G.particles.push({x:p.x+(Math.random()-0.5)*16,y:p.y+8,z:p.z+(Math.random()-0.5)*16,vx:0,vy:50,vz:0,life:0.3,color:'#cfd6df',sz:2}); }
   if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
@@ -16907,10 +16927,10 @@ function updateWorld(dt){
   }
   // chests
   for(const ch of G.chests){ prepareChest(ch); if(ch.opened) continue; ch.bob+=dt*3;
-    if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36){ if(ch.mimic){ mimicReveal(ch); break; } openChest(ch); } }   // a mimic SNAPS the moment you reach for it (break: reveal splices the list)
+    if(!p.downed&&dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36){ if(ch.mimic){ mimicReveal(ch); break; } openChest(ch); } }   // a mimic SNAPS the moment you reach for it (break: reveal splices the list)
   // pickups
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
-    if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
+    if(!p.downed&&dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
       if(pk.questItem){ SFX.pickup(); addText(pk.x,26,pk.z,'+ '+pk.questItem.name,'var(--amber)'); questBump(pk.questItem.id,1); }
       else if(pk.localItem && String(pk.localItem.id).indexOf('delveClass:')===0){
         /* A CLASS FOUND IN THE DUNGEON. Swapping mid-run is the reward, so it takes effect at once -
@@ -16931,14 +16951,14 @@ function updateWorld(dt){
   G.pickups=G.pickups.filter(pk=>!pk.taken);
   if(collectedLoot&&G.escape)BFPrisonRun.checkpoint();
   // quest waystone: touch it to complete a "find" objective
-  if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
+  if(!p.downed&&G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
     if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ const q=areaQuests().find(q=>q.id===w.q);const waiting=(q?.requires||[]).some(id=>!questDone(areaQuests().find(q=>q.id===id)));if(waiting){if(!w.warned){w.warned=true;toast('The Waystone sleeps. Survey the Watchpost and break both thorn nests first.');}}else {w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } } }
   // the Warden's Shade: auto-greets you once per zone per save; after that, step close to hear him again
   if(G.npc && !G.npc.talked){ G.npc.t+=dt;
     const d2=dXZ(G.npc.x,G.npc.z,p.x,p.z), seen=meta.shadeSeen&&meta.shadeSeen[curZone().id];
     if(d2<(seen?44:62)) openShade(); }   // only greet within a sensible range (was 110 — popped from way too far in the bigger levels)
   // an unusual-interaction rift: a dim floor rune tucked in a dead end — step on it and the rift grinds open
-  if(G.secretTrigger && !G.secretTrigger.done){ const tr=G.secretTrigger;
+  if(!p.downed&&G.secretTrigger && !G.secretTrigger.done){ const tr=G.secretTrigger;
     if(dXZ(tr.x,tr.z,p.x,p.z)<(tr.r||34) && Math.abs(p.y-(tr.y||0))<60){ tr.done=true;
       if(G.secret){ G.secret.hidden=false; G.secret.t=0; burst(G.secret.x,G.secret.y+30,G.secret.z,'#c47bff',24); addText(G.secret.x,G.secret.y+82,G.secret.z,'A RIFT TEARS OPEN','#c47bff',true); }
       SFX.god(); playFx('lever'); playFx('wallslide',1); G.shake=Math.min(G.shake+11,17); toast('⚙ Stone grinds somewhere in the dark — something has opened'); } }
@@ -17528,6 +17548,7 @@ function die(){
   }
   if(G?.devKeep){devBeta().death();return;}
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
+  if(MP.active&&!MP.pvp&&!G.hub&&!MP._wiped&&MP.hasZone()){MP.goDown();return;}
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
   if(G.delve){ delveDie(); return; }                          // The Endless Dungeon: the run ends and the escrow comes back
   if(G.bossRush){ bossRushDie(); return; }                    // The Gauntlet: its own results screen, banks the run
@@ -19367,7 +19388,7 @@ function updateInteract(){
   G.interact=it; updateInteractPrompt();
 }
 function portalTraverse(fn,options={}){if(!window.BFPortalTravel)return fn();releaseKeyboard();return BFPortalTravel.run(G,fn,options);}
-function doInteract(){ if(mode!=='play'||!G||!G.interact||window.BFPortalTravel?.blocking) return; SFX.pickup();const it=G.interact;if(['rifthall','riftexit','sparring','sparringexit','arena','arenaexit'].includes(it.anchorNpc?.id)&&!hubGateLocked(it.anchorNpc))portalTraverse(it.act,{name:it.anchorNpc.name});else it.act(); }
+function doInteract(){ if(mode!=='play'||!G||G.p?.dead||G.p?.downed||!G.interact||window.BFPortalTravel?.blocking) return; SFX.pickup();const it=G.interact;if(['rifthall','riftexit','sparring','sparringexit','arena','arenaexit'].includes(it.anchorNpc?.id)&&!hubGateLocked(it.anchorNpc))portalTraverse(it.act,{name:it.anchorNpc.name});else it.act(); }
 // Phase 19: the SECRET STASH — free money, zero shame. Press E behind the Pet Yard crates.
 const STASH_LINES=[
   '💰 +1000g — shh. The Quartermaster doesn’t audit this corner.',
@@ -22856,10 +22877,10 @@ function drawHpBars(){
     }
     if(b.peer){
       c.save();c.translate(b.x,b.y);c.scale(DPR,DPR);c.textAlign='center';c.textBaseline='alphabetic';
-      const tag=(b.cls?b.cls.toUpperCase():'')+(b.lvl?(b.cls?' · ':'')+'LV '+b.lvl:'');
+      const plate=BFPartyFeedback.nameplate(b),tag=plate.className;
       c.strokeStyle='#101521';c.lineWidth=3;c.lineJoin='round';
-      if(tag){c.font='bold 9px system-ui';c.strokeText(tag,0,-27);c.fillStyle='#d7b8ff';c.fillText(tag,0,-27);}
-      c.font='bold 12px system-ui';c.strokeText(b.name,0,-12);c.fillStyle=b.col||'#cfe3ff';c.fillText(b.name,0,-12);
+      if(tag){c.font='bold 9px system-ui';c.strokeText(tag,0,-13,200);c.fillStyle='#d7b8ff';c.fillText(tag,0,-13,200);}
+      c.font='bold 12px system-ui';c.strokeText(plate.name,0,-28,200);c.fillStyle=b.col||'#cfe3ff';c.fillText(plate.name,0,-28,200);
       c.fillStyle='#101521';c.fillRect(-29,-2,58,10);
       c.fillStyle='#343c46';c.fillRect(-27,0,54,6);
       c.fillStyle=b.downed?'#8a8f9a':'#54d06a';c.fillRect(-27,0,54*b.f,6);
@@ -22929,7 +22950,7 @@ function partyTravelTick(dt){
 }
 function partyHud(){
  document.getElementById('partyTravel')?.remove();
- BFPartyFeedback.render({world:G,active:MP.active,pvp:MP.pvp,mode,background:backgroundMenuMode,hidden:!G||!!G.voyage||!!G.kingFinal,p:G?.p,myId:MP.myId,peers:partyPeers(),friend:partySelected(),channel:partyChannel,key:controlKey('partyTeleport'),nextKey:controlKey('partyNext'),count:partyFriends().length,escape:!!G?.escape,revives:G?.escape?.revives||0});
+ BFPartyFeedback.render({world:G,active:MP.active,pvp:MP.pvp,mode,background:backgroundMenuMode,hidden:!G||(!G.p?.downed&&(!!G.voyage||!!G.kingFinal)),p:G?.p,myId:MP.myId,peers:partyPeers(),friend:partySelected(),channel:partyChannel,key:controlKey('partyTeleport'),nextKey:controlKey('partyNext'),count:partyFriends().length,escape:!!G?.escape,revives:G?.escape?.revives||0});
 }
 
 function drawNavigation(c){
@@ -23046,7 +23067,8 @@ function render(t){
     const sun=[sc.p[0], sc.p[1]];
     PostFX.sky(top,bot,sun,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
-  if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
+  const cameraSubject=G?.p?.spectating&&MP.active?(MP.spectateTarget()||p):p;
+  if(G){ G.cam.x+=(cameraSubject.x-G.cam.x)*0.10; G.cam.z+=(cameraSubject.z-G.cam.z)*0.10; G.cam.y+=((cameraSubject.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
   const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0)+(p.dragonRide?24:0):0;
   const _noShake=meta.shakeOff||meta.reduceMotion;   // accessibility: hold the camera steady
@@ -23199,6 +23221,12 @@ function render(t){
   const shoreSight=G?.shore&&BFShipwreckShore.camera(G);
   if(shoreSight){const c=shoreSight;PROJ=mPersp(42*Math.PI/180,VW/VH,4,3100);VIEW=mLookAt([c.eye.x,c.eye.y,c.eye.z],[c.look.x,c.look.y,c.look.z],[0,1,0]);G.eye=c.eye;gl.uniform2f(U.uFogNF,1600,3100);}
   if(G&&meta.camMode!=='fps'&&!_ed?.on&&!talkFocus&&!tourCamera&&!chessCamera&&!shoreSight&&!(G.kingFinal&&['charge','cut'].includes(G.boss?.akStage))){const zoom=BFCameraControls.zoom(meta);PROJ[0]*=zoom;PROJ[5]*=zoom;}
+  if(G?.p?.spectating&&MP.active&&!MP.pvp){
+    const q=MP.spectateTarget();if(q){const yaw=G.camYaw??q.yaw??0,target={x:q.x,y:(q.y||0)+38,z:q.z},desired={x:q.x-Math.sin(yaw)*230,y:(q.y||0)+145,z:q.z-Math.cos(yaw)*230};
+      const limit=BFCameraOcclusion.constrain(G,target,desired),eye={x:target.x+(desired.x-target.x)*limit.fraction,y:target.y+(desired.y-target.y)*limit.fraction,z:target.z+(desired.z-target.z)*limit.fraction};
+      G.eye=eye;VIEW=mLookAt([eye.x,eye.y,eye.z],[target.x,target.y,target.z],[0,1,0]);PROJ=mPersp(62*Math.PI/180,VW/VH,3,4600);
+    }
+  }
   // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
   // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and
   // whole walls of deco could hide the hero (the Hollow spawn bug). Every ray test uses G.eye now.
@@ -24623,7 +24651,7 @@ MP.onGuestData=function(d){
  if(d.t==='state'&&d.prison){if(pendingJoin){if(pendingJoin.id===d.prison.id)pendingJoin=d.prison;return;}if(G?.escape?.id!==d.prison.id)return;}
  if(d.t==='zone')pendingJoin=null;guestData.call(this,d);if(d.t==='state'&&d.prison&&G?.escape?.id===d.prison.id)receive(d.prison);};
 const self=MP.selfState,snap=MP.snap;MP.selfState=function(){return {...self.call(this),prisonRevives:G?.escape?.revives||0};};MP.snap=function(q){return {...snap.call(this,q),prisonRevives:q.prisonRevives||0};};
-const rev=MP.reviveSelf;MP.reviveSelf=function(msg){if(G?.escape){if(!G.p.downed||G.escape.revives>=1)return;G.escape.revives++;rev.call(this,msg);G.p.hp=Math.round(effMaxHp(G.p)*.25);return;}rev.call(this,msg);};
+const rev=MP.reviveSelf;MP.reviveSelf=function(msg,completed=false){if(G?.escape&&!completed){if(!G.p.downed||G.p.spectating||G.p.downT<=0||G.escape.revives>=1)return false;G.escape.revives++;const result=rev.call(this,msg,completed);if(result)G.p.hp=Math.round(effMaxHp(G.p)*.25);return result;}return rev.call(this,msg,completed);};
 const leave=MP.leave;MP.leave=function(msg){const remote=G?.escape?.remote,waiting=!!pendingJoin;pendingJoin=null;leave.call(this,msg);if(remote||waiting)openHub();};
 const wipe=wipeMode;wipeMode=function(m){wipe(m);meta.prisonSaves=D.saves();syncProfiles();pendingJoin=null;};
 const previousWorld=window.__BF_WORLD;window.__BF_WORLD=()=>({...previousWorld(),escape:G?.escape?.id||null,prisonPlan:G?.escape?.plan||null});

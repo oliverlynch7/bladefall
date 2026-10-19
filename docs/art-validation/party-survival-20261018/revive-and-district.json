@@ -1,0 +1,104 @@
+{
+ "rows": [
+  {
+   "fall": {
+    "downed": true,
+    "spectating": false,
+    "dead": false,
+    "downT": 30,
+    "y": 0,
+    "finiteFloor": true,
+    "mode": "play"
+   }
+  },
+  {
+   "revive": true,
+   "hp": 72,
+   "downed": false
+  },
+  {
+   "rescueMessages": 1,
+   "peerRankAfterPacket": 7,
+   "peerLevel": 12,
+   "peerUp": true
+  },
+  {
+   "fall": {
+    "downed": true,
+    "spectating": false,
+    "dead": false,
+    "downT": 30,
+    "y": 0,
+    "finiteFloor": true,
+    "mode": "play"
+   }
+  },
+  {
+   "expired": true,
+   "mode": "play",
+   "wiped": false
+  },
+  {
+   "lateAccepted": false,
+   "hpUnchanged": true
+  },
+  {
+   "districtBefore": {
+    "spectating": true,
+    "downed": true,
+    "downT": 0
+   },
+   "after": {
+    "spectating": true,
+    "downed": true,
+    "downT": 0
+   }
+  },
+  {
+   "complete": {
+    "downed": false,
+    "spectating": false,
+    "hp": 144
+   }
+  }
+ ],
+ "mode": "play",
+ "version": "2.297.0-party-survival",
+ "host": true,
+ "area": 1,
+ "level": 100,
+ "gold": 1145,
+ "hp": 144,
+ "downed": false,
+ "spectating": false,
+ "downT": 0,
+ "position": {
+  "x": 0,
+  "y": 0,
+  "z": 300
+ },
+ "eye": {
+  "x": 231.90713145884743,
+  "y": 145,
+  "z": 225.45210490265833
+ },
+ "peer": {
+  "x": 231.90713145884746,
+  "y": 0,
+  "z": -4.547895097341666,
+  "name": "Teammate",
+  "lvl": 12,
+  "rank": 7,
+  "hp": 100,
+  "downed": false,
+  "spectating": false
+ },
+ "wiped": false,
+ "packets": [
+  {
+   "t": "revive",
+   "id": "g",
+   "scene": "[-303,0,223771444,null,0,0]"
+  }
+ ]
+}

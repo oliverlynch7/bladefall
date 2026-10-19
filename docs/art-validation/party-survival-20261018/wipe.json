@@ -1,0 +1,65 @@
+{
+ "rows": [
+  {
+   "fall": {
+    "downed": true,
+    "spectating": false,
+    "dead": false,
+    "downT": 30,
+    "y": 0,
+    "finiteFloor": true,
+    "mode": "play"
+   }
+  },
+  {
+   "expired": true,
+   "mode": "play",
+   "wiped": false
+  },
+  {
+   "wipe": {
+    "mode": "dying",
+    "wiped": true,
+    "dead": true
+   }
+  }
+ ],
+ "mode": "dying",
+ "version": "2.297.0-party-survival",
+ "host": true,
+ "area": 0,
+ "level": 100,
+ "gold": 1145,
+ "hp": 0,
+ "downed": false,
+ "spectating": false,
+ "downT": 0,
+ "position": {
+  "x": 0,
+  "y": 0,
+  "z": 0
+ },
+ "eye": {
+  "x": 240,
+  "y": 89.42978260869566,
+  "z": -69.45
+ },
+ "peer": {
+  "x": 240,
+  "y": 0,
+  "z": -180,
+  "name": "Teammate",
+  "lvl": 12,
+  "rank": 7,
+  "hp": 0,
+  "downed": true,
+  "spectating": true
+ },
+ "wiped": true,
+ "packets": [
+  {
+   "t": "wipe",
+   "scene": "[-303,0,664971420,null,0,0]"
+  }
+ ]
+}

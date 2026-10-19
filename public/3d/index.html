@@ -1157,7 +1157,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./briar-combat.js?v=2289"></script>
 <script src="./campaign-elites.js?v=2310"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
-<script src="./campaign-objects.js?v=2234"></script>
+<script src="./campaign-objects.js?v=2317"></script>
 <script src="./briar-journey.js?v=2302"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2236"></script>
@@ -1173,8 +1173,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./long-ascent.js?v=2185"></script>
 <script src="./final-king.js?v=2022"></script>
 <script src="./return-adventures.js?v=2038"></script>
-<script src="./return-visits.js?v=2171"></script>
-<script src="./palace-courtyard.js?v=2187a"></script>
+<script src="./return-visits.js?v=2317"></script>
+<script src="./palace-courtyard.js?v=2317"></script>
 <script src="./dragon-rescue.js?v=2183b"></script>
 <script src="./dragon-combat.js?v=2024"></script>
 <script src="./dragon-riding.js?v=2225"></script>
@@ -1226,7 +1226,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.316.0-trial-mentor-map';
+const VERSION3D='2.317.0-authored-quest-mechanisms';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3714,7 +3714,7 @@ function drawBethRescue(t){
  for(const [x,z]of G.bethRescue.trail){bx(x-16,3,z,9,3,18,'#413f32');bx(x+16,3,z-23,9,3,18,'#413f32');bx(x+19,3,z-13,8,3,5,'#413f32');}
  for(const x of [2470,2660])bx(x,99,-1770,15,198,15,'#796047');bx(2565,200,-1770,230,14,22,'#937951');bx(2565,done?155:125,-1770,3,done?82:145,3,'#d0ba8d');
  const ly=done?155:33;bx(2620,ly,-1770,240,46,58,'#64503a');bx(2620,ly+25,-1770,236,16,36,'#796047');bx(2620,ly-25,-1770,236,16,36,'#51422f');for(const x of [2499,2741]){bx(x,ly,-1770,2,39,40,'#b29463');bx(x,ly,-1770,3,20,23,'#78603f');}
- bx(2480,35,-1790,16,70,16,'#715237');bx(2480,65,-1790,48,8,10,'#b99b68');
+ if(!BFCampaignObjects.drawn(G.storyObjects.find(o=>o.key==='woods.rescue.release'))){bx(2480,35,-1790,16,70,16,'#715237');bx(2480,65,-1790,48,8,10,'#b99b68');}
  for(const n of G.storyNpcs.filter(n=>n.id==='beth'||n.id==='bethBrother'))if(!window.__npc3dDrawn?.(n.id)){bx(n.x,28,n.z,22,38,16,n.id==='beth'?'#788d9d':'#957750');bx(n.x,55,n.z,16,16,16,'#cbb38f');}
  if(!done){const n=G.storyNpcs.find(n=>n.id==='beth');bx(n.x,78,n.z,5,12,5,'#d8c383');bx(n.x,68,n.z,5,4,5,'#d8c383');}
 }
@@ -3738,8 +3738,8 @@ function drawBlackWoods(t){
   for(const x of [-67,67])bx(x,312,-3175,16,184,16,'#76543b');bx(0,396,-3175,164,18,28,'#9c784e');
   for(const x of [-37,37]){bx(x,347,-3149,29,31,44,'#aa8958');bx(x,347,-3126,49,9,10,'#4c504c');}
  }
- if(!f['woods.signal']){bx(0,306,-3070,3,170,3,'#d7c18d');bx(0,397,-3070,18,9,18,'#dbbc77');bx(80,26,-3060,18,52,18,'#69543a');pushM();mv(80,50,-3060);rotY(t*1.7);box(62,7,9,'#a68c5b');popM();}
- else {bx(0,233,-3070,4,25,4,'#a39878');bx(80,34,-3060,62,8,12,'#766e59');}
+ if(!f['woods.signal']){bx(0,306,-3070,3,170,3,'#d7c18d');bx(0,397,-3070,18,9,18,'#dbbc77');if(!BFCampaignObjects.drawn(G.storyObjects.find(o=>o.key==='woods.signal.crank'))){bx(80,26,-3060,18,52,18,'#69543a');pushM();mv(80,50,-3060);rotY(t*1.7);box(62,7,9,'#a68c5b');popM();}}
+ else {bx(0,233,-3070,4,25,4,'#a39878');if(!BFCampaignObjects.drawn(G.storyObjects.find(o=>o.key==='woods.signal.crank')))bx(80,34,-3060,62,8,12,'#766e59');}
  for(const o of G.storyObjects)if(o.kind==='trackclue'&&!BFCampaignObjects.drawn(o)){
   bx(o.x,8,o.z,70,16,60,'#676d59');bx(o.x,25,o.z,58,18,30,'#93917a');for(let j=0;j<3;j++)bx(o.x,27+j*4,o.z+16,40-j*5,2,2,'#4c5145');}
  // Distinct animal shapes tell a spatial story; they are no longer a code to enter.
@@ -4046,7 +4046,7 @@ function drawHomefieldsFarmDiscovery(s,t){
  bx(-2510,35,-630,140,12,110,'#84623e');for(const dx of [-68,68]){for(const dz of [-50,50])bx(-2510+dx,55,-630+dz,8,38,8,'#85643f');for(const y of [48,67])bx(-2510+dx,y,-630,8,7,112,'#ad8853');}for(const dx of [-38,38])bx(-2510+dx,30,-535,8,8,85,'#84623e');
  for(let k=0;k<3;k++){bx(-2550+k*42,53,-630,35,25,74,'#84694a');if(!saved)bx(-2550+k*42,73,-630,36,20,70,k===1?'#d3c7a5':'#a49b68');}
  if(!BFCampaignObjects.drawn(G.storyObjects.find(o=>o.key==='home.orchard.clue'))){bx(-2580,24,-1440,14,48,14,'#786044');bx(-2580,47,-1440,48,8,32,'#d4c69d');}
- bx(-2490,163,-1840,14,54,14,'#705035');for(let k=0;k<8;k++){const a=k*Math.PI/4;bx(-2490+Math.cos(a)*22,174+Math.sin(a)*22,-1827,9,9,7,'#b79758');}bx(-2490,174,-1827,48,5,7,'#8c6c3b');
+ if(!BFCampaignObjects.drawn(G.storyObjects.find(o=>o.key==='home.orchard.wheel'))){bx(-2490,163,-1840,14,54,14,'#705035');for(let k=0;k<8;k++){const a=k*Math.PI/4;bx(-2490+Math.cos(a)*22,174+Math.sin(a)*22,-1827,9,9,7,'#b79758');}bx(-2490,174,-1827,48,5,7,'#8c6c3b');}
  if(open){for(let k=0;k<19;k++)bx(-2490,138,-1850-k*23,116,4,18,k%2?'#a18455':'#b59968');for(const x of [-2547,-2433]){bx(x,176,-2060,4,4,456,'#b09b6c');for(const z of [-1850,-2060,-2270])bx(x,155,z,7,40,7,'#735737');}}
  else {for(let k=0;k<7;k++)bx(-2490,143+k*20,-1910,116,16,8,'#a18455');}
  drawCoinCoffer(G.storyObjects.find(o=>o.key==='home.orchard.cache'),claimed);
@@ -24854,7 +24854,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2315"></script>
+<script type="module" src="./hero3d.js?v=2317"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2309"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

@@ -63,11 +63,13 @@ function drawSupplyHoist({G,bx,ring}){
     for(const dx of [-46,40]){beam(cx+dx,ky+4,cz,66,44,70,'#c9b387');beam(cx+dx,ky+29,cz,70,6,73,'#e0cf9c');}
   }
   // Brake handle stays visible before acceptance as environmental context.
+  if(!root.BFCampaignObjects?.drawn(G.storyObjects.find(o=>o.key==='rv.supplies.release'))){
   beam(-1735,265,-3815,52,38,48,'#5d5549');
   beam(-1735,288,-3815,44,9,40,rig.open?'#b7c89e':'#b19b73');
   beam(-1715,298,-3815,8,41,9,'#dac290');
+  }
 }
-function draw({G,bx,ring},t){if(!G?.storyObjects)return;drawSupplyHoist({G,bx,ring});const s=G.storyState;for(const o of G.storyObjects.filter(o=>o.returnObject)){
+function draw({G,bx,ring},t){if(!G?.storyObjects)return;drawSupplyHoist({G,bx,ring});const s=G.storyState;for(const o of G.storyObjects.filter(o=>o.returnObject)){if(root.BFCampaignObjects?.drawn(o))continue;
   if(o.returnAdventure){root.BFReturnAdventures.draw(o,{G,bx,ring},t);continue;}
   const taken=s?.flags['event.'+o.key],c=taken?'#615d55':'#dfb771',y=o.y+8;
   if(o.kind==='supplies'||o.kind==='brake')continue;

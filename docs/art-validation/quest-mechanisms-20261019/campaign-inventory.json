@@ -1,0 +1,2134 @@
+[
+  {
+    "zone": 0,
+    "area": 0,
+    "objects": [
+      {
+        "key": "briar.root.1",
+        "label": "Gather tangle root",
+        "kind": "root",
+        "x": -410,
+        "y": 0,
+        "z": -130,
+        "spec": {
+          "model": "herbs",
+          "pickup": true
+        }
+      },
+      {
+        "key": "briar.root.2",
+        "label": "Gather tangle root",
+        "kind": "root",
+        "x": -505,
+        "y": 0,
+        "z": -245,
+        "spec": {
+          "model": "herbs",
+          "pickup": true
+        }
+      },
+      {
+        "key": "briar.root.3",
+        "label": "Gather tangle root",
+        "kind": "root",
+        "x": -370,
+        "y": 0,
+        "z": -335,
+        "spec": {
+          "model": "herbs",
+          "pickup": true
+        }
+      },
+      {
+        "key": "briar.dressings",
+        "label": "Take the clean dressings",
+        "kind": "dressings",
+        "x": 440,
+        "y": 30,
+        "z": -262,
+        "spec": {
+          "model": "bandages",
+          "pickup": true
+        }
+      },
+      {
+        "key": "briar.water",
+        "label": "Move the grain crate, then walk",
+        "kind": "millcrate",
+        "x": 130,
+        "y": 0,
+        "z": -1600,
+        "spec": null
+      },
+      {
+        "key": "briar.jam",
+        "label": "Free the wheel and latch the sluice",
+        "kind": "jam",
+        "x": 300,
+        "y": 0,
+        "z": -1740,
+        "spec": null
+      },
+      {
+        "key": "briar.bridge",
+        "label": "Lower the mill crossing",
+        "kind": "handle",
+        "x": 80,
+        "y": 0,
+        "z": -2030,
+        "spec": null
+      },
+      {
+        "key": "briar.depart",
+        "label": "Open the wagon gate",
+        "kind": "gate",
+        "x": -210,
+        "y": 160,
+        "z": -4240,
+        "spec": null
+      },
+      {
+        "key": "home.bell.clue",
+        "label": "Read the watchtower notice",
+        "kind": "bellstone",
+        "x": 2180,
+        "y": 168,
+        "z": -1750,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "home.bell.alarm",
+        "label": "Ring the warning bell",
+        "kind": "bell",
+        "x": 2350,
+        "y": 168,
+        "z": -1940,
+        "spec": null
+      },
+      {
+        "key": "home.bell.cache",
+        "label": "Open the tower coin coffer",
+        "kind": "bellcache",
+        "x": 2500,
+        "y": 168,
+        "z": -1830,
+        "spec": {
+          "model": "coin-coffer",
+          "currencyOnly": true
+        }
+      },
+      {
+        "key": "briar.gus.tools",
+        "label": "Take Gus\u00e2\u20ac\u2122s tool roll",
+        "kind": "tools",
+        "x": -1460,
+        "y": 104,
+        "z": -1270,
+        "spec": {
+          "model": "tools",
+          "pickup": true
+        }
+      },
+      {
+        "key": "briar.gus.sign",
+        "label": "Repair the village sign",
+        "kind": "villagesign",
+        "x": -1170,
+        "y": 0,
+        "z": -750,
+        "spec": null
+      },
+      {
+        "key": "home.farm.supplies",
+        "label": "Recover the wagon supplies",
+        "kind": "farmcart",
+        "x": -2510,
+        "y": 0,
+        "z": -630,
+        "spec": null
+      },
+      {
+        "key": "home.orchard.clue",
+        "label": "Read the fruit pickers\u00e2\u20ac\u2122 note",
+        "kind": "orchardnote",
+        "x": -2580,
+        "y": 0,
+        "z": -1440,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "home.orchard.wheel",
+        "label": "Lower the orchard walkway",
+        "kind": "orchardwheel",
+        "x": -2490,
+        "y": 136,
+        "z": -1840,
+        "spec": null
+      },
+      {
+        "key": "home.orchard.cache",
+        "label": "Open the lookout coin coffer",
+        "kind": "orchardcache",
+        "x": -2490,
+        "y": 136,
+        "z": -2370,
+        "spec": {
+          "model": "coin-coffer",
+          "currencyOnly": true
+        }
+      },
+      {
+        "key": "home.grain.clue",
+        "label": "Read the grain keeper\u00e2\u20ac\u2122s note",
+        "kind": "grainnote",
+        "x": 1260,
+        "y": 0,
+        "z": 255,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "home.grain.spout",
+        "label": "Swing the grain trough toward the basket",
+        "kind": "grainspout",
+        "x": 1310,
+        "y": 0,
+        "z": 100,
+        "spec": null
+      },
+      {
+        "key": "home.grain.hopper",
+        "label": "Release grain from the loft hopper",
+        "kind": "grainhopper",
+        "x": 1160,
+        "y": 100,
+        "z": -55,
+        "spec": null
+      },
+      {
+        "key": "home.grain.cache",
+        "label": "Open the grain keeper\u00e2\u20ac\u2122s coin coffer",
+        "kind": "graincache",
+        "x": 1150,
+        "y": 0,
+        "z": -260,
+        "spec": {
+          "model": "coin-coffer",
+          "currencyOnly": true
+        }
+      },
+      {
+        "key": "briar.mill.note",
+        "label": "Read the millwright\u00e2\u20ac\u2122s sketch",
+        "kind": "millnote",
+        "x": 5,
+        "y": 0,
+        "z": -1570,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "briar.mill.reset",
+        "label": "Return the grain crate to its starting place",
+        "kind": "millreset",
+        "x": 5,
+        "y": 0,
+        "z": -1780,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 0,
+    "area": 1,
+    "objects": [
+      {
+        "key": "woods.signal.crank",
+        "label": "Stop the signal crank",
+        "kind": "signalcrank",
+        "x": 80,
+        "y": 0,
+        "z": -3060,
+        "spec": null
+      },
+      {
+        "key": "woods.signal.cable",
+        "label": "Cut the horn cable",
+        "kind": "signalcable",
+        "x": 0,
+        "y": 220,
+        "z": -3070,
+        "spec": null
+      },
+      {
+        "key": "woods.tracks.clue",
+        "label": "Read the old grove stone",
+        "kind": "trackclue",
+        "x": -1770,
+        "y": 0,
+        "z": -2050,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "woods.tracks.release",
+        "label": "Release the root binding",
+        "kind": "trackrelease",
+        "x": -2140,
+        "y": 138,
+        "z": -2650,
+        "spec": null
+      },
+      {
+        "key": "woods.rescue.tracks",
+        "label": "Inspect the crooked boot prints",
+        "kind": "bootprints",
+        "x": 1440,
+        "y": 0,
+        "z": -1030,
+        "spec": null
+      },
+      {
+        "key": "woods.rescue.release",
+        "label": "Pull the rescue rope",
+        "kind": "rescuerope",
+        "x": 2480,
+        "y": 0,
+        "z": -1790,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 1,
+    "area": 0,
+    "objects": [
+      {
+        "key": "hp.orders",
+        "label": "Read the transport orders",
+        "kind": "orders",
+        "x": -1060,
+        "y": 0,
+        "z": -1510,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "hp.rope",
+        "label": "Take the lost rope",
+        "kind": "rope",
+        "x": 1510,
+        "y": 6,
+        "z": -1300,
+        "spec": {
+          "model": "rope",
+          "pickup": true
+        }
+      },
+      {
+        "key": "hp.bridge.clue",
+        "label": "Read the freight plate",
+        "kind": "plate",
+        "x": -110,
+        "y": 0,
+        "z": -2400,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "hp.cart.push",
+        "label": "Push the loaded cart onto the plate",
+        "kind": "cartpush",
+        "x": -530,
+        "y": 0,
+        "z": -2610,
+        "spec": null
+      },
+      {
+        "key": "hp.brake.right",
+        "label": "Release the bridge winch",
+        "kind": "bridgebrake",
+        "x": 230,
+        "y": 0,
+        "z": -2680,
+        "spec": null
+      },
+      {
+        "key": "hp.windbreak",
+        "label": "Tie the windbreak shut",
+        "kind": "lever",
+        "x": 570,
+        "y": 90,
+        "z": -880,
+        "spec": null
+      },
+      {
+        "key": "hp.quiet",
+        "label": "Tie the lookout rope",
+        "kind": "rope",
+        "x": 790,
+        "y": 180,
+        "z": -3900,
+        "spec": null
+      },
+      {
+        "key": "hp.lift",
+        "label": "Release the canyon lift",
+        "kind": "lever",
+        "x": 40,
+        "y": 0,
+        "z": -4600,
+        "spec": null
+      },
+      {
+        "key": "hp.code.clue",
+        "label": "Read the cargo plate",
+        "kind": "plate",
+        "x": -1610,
+        "y": 0,
+        "z": -2110,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "hp.code.release",
+        "label": "Pull the cargo release",
+        "kind": "release",
+        "x": -1770,
+        "y": 186,
+        "z": -2390,
+        "spec": null
+      },
+      {
+        "key": "hp.code.claim",
+        "label": "Open the cliff chest",
+        "kind": "chest",
+        "x": -1550,
+        "y": 0,
+        "z": -2160,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 1,
+    "area": 1,
+    "objects": [
+      {
+        "key": "lc.orders",
+        "label": "Read the shift orders",
+        "kind": "orders",
+        "x": -650,
+        "y": 150,
+        "z": -650,
+        "spec": {
+          "model": "papers"
+        }
+      },
+      {
+        "key": "lc.force",
+        "label": "Pull the locked gate chain",
+        "kind": "chain",
+        "x": 50,
+        "y": 90,
+        "z": -860,
+        "spec": null
+      },
+      {
+        "key": "lc.gate",
+        "label": "Open the front gate",
+        "kind": "lever",
+        "x": 80,
+        "y": 85,
+        "z": -880,
+        "spec": null
+      },
+      {
+        "key": "lc.side",
+        "label": "Lower the side ladder",
+        "kind": "rope",
+        "x": 820,
+        "y": 80,
+        "z": -1520,
+        "spec": null
+      },
+      {
+        "key": "lc.cage.south",
+        "label": "Release the south cage",
+        "kind": "lock",
+        "x": -780,
+        "y": 0,
+        "z": -1985,
+        "spec": null
+      },
+      {
+        "key": "lc.cage.north",
+        "label": "Release the north cage",
+        "kind": "lock",
+        "x": 640,
+        "y": 0,
+        "z": -3415,
+        "spec": null
+      },
+      {
+        "key": "lc.cage.extra",
+        "label": "Release the old cage",
+        "kind": "lock",
+        "x": -2200,
+        "y": 90,
+        "z": -2165,
+        "spec": null
+      },
+      {
+        "key": "lc.alarm",
+        "label": "Cut the alarm cable",
+        "kind": "winch",
+        "x": 0,
+        "y": 180,
+        "z": -2500,
+        "spec": null
+      },
+      {
+        "key": "lc.escape",
+        "label": "Open the escape gate",
+        "kind": "chain",
+        "x": 90,
+        "y": 0,
+        "z": -4520,
+        "spec": null
+      },
+      {
+        "key": "lc.wagon",
+        "label": "Unload the blocking wagon",
+        "kind": "wagon",
+        "x": 1350,
+        "y": 0,
+        "z": -2460,
+        "spec": null
+      },
+      {
+        "key": "lc.water",
+        "label": "Fill a clean water flask",
+        "kind": "water",
+        "x": 2200,
+        "y": 0,
+        "z": -3040,
+        "spec": null
+      },
+      {
+        "key": "lc.rail.clue",
+        "label": "Inspect the loaded cart",
+        "kind": "cart",
+        "x": -2280,
+        "y": 0,
+        "z": -3770,
+        "spec": null
+      },
+      {
+        "key": "lc.rail.release",
+        "label": "Release the high freight brake",
+        "kind": "brake",
+        "x": -2350,
+        "y": 230,
+        "z": -3580,
+        "spec": null
+      },
+      {
+        "key": "lc.cache",
+        "label": "Open the cave supply chest",
+        "kind": "chest",
+        "x": 2350,
+        "y": 0,
+        "z": -3310,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 2,
+    "area": 0,
+    "objects": [
+      {
+        "key": "rk.arrow",
+        "label": "Cut the arrow-post bow cord",
+        "kind": "bow",
+        "x": 730,
+        "y": 150,
+        "z": -1030,
+        "spec": null
+      },
+      {
+        "key": "rk.gate",
+        "label": "Open Grant\u00e2\u20ac\u2122s side gate",
+        "kind": "gate",
+        "x": 0,
+        "y": 0,
+        "z": -830,
+        "spec": null
+      },
+      {
+        "key": "rk.breach",
+        "label": "Ring the breach bell",
+        "kind": "bell",
+        "x": -210,
+        "y": 0,
+        "z": -1850,
+        "spec": null
+      },
+      {
+        "key": "rk.key",
+        "label": "Take the jail key",
+        "kind": "key",
+        "x": -320,
+        "y": 0,
+        "z": -3650,
+        "spec": null
+      },
+      {
+        "key": "rk.wheel",
+        "label": "Turn the dungeon gate wheel",
+        "kind": "wheel",
+        "x": 650,
+        "y": 200,
+        "z": -3650,
+        "spec": null
+      },
+      {
+        "key": "rk.timing",
+        "label": "Release the latch while the notch is green",
+        "kind": "timing",
+        "x": 1450,
+        "y": 0,
+        "z": -2680,
+        "spec": null
+      },
+      {
+        "key": "rk.tools",
+        "label": "Take Felix\u00e2\u20ac\u2122s tools",
+        "kind": "tools",
+        "x": 1500,
+        "y": 0,
+        "z": -3020,
+        "spec": {
+          "model": "tools",
+          "pickup": true,
+          "support": "crate",
+          "taken": "rk.tools"
+        }
+      },
+      {
+        "key": "rk.wall",
+        "label": "Unbar the chamber from the old wall",
+        "kind": "bar",
+        "x": -1730,
+        "y": 80,
+        "z": -3310,
+        "spec": null
+      },
+      {
+        "key": "rk.trial",
+        "label": "Lift the sealed chamber\u00e2\u20ac\u2122s shield",
+        "kind": "shield",
+        "x": -1440,
+        "y": 80,
+        "z": -3520,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 2,
+    "area": 1,
+    "objects": [
+      {
+        "key": "kd.roster",
+        "label": "Read the cell list",
+        "kind": "paper",
+        "x": 240,
+        "y": 180,
+        "z": -750,
+        "spec": {
+          "model": "papers"
+        }
+      },
+      {
+        "key": "kd.marks",
+        "label": "Read the old service marks",
+        "kind": "mark",
+        "x": -1020,
+        "y": 180,
+        "z": -1190,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "kd.hidden",
+        "label": "Push the loose service door",
+        "kind": "door",
+        "x": -1300,
+        "y": 180,
+        "z": -1370,
+        "spec": null
+      },
+      {
+        "key": "kd.free",
+        "label": "Free the hidden prisoners",
+        "kind": "key",
+        "x": -1050,
+        "y": 180,
+        "z": -1930,
+        "spec": null
+      },
+      {
+        "key": "kd.papers",
+        "label": "Read the confiscated papers",
+        "kind": "paper",
+        "x": -1120,
+        "y": 180,
+        "z": -2110,
+        "spec": {
+          "model": "papers"
+        }
+      },
+      {
+        "key": "kd.lift.note",
+        "label": "Read the lift\u00e2\u20ac\u2122s winch plate",
+        "kind": "paper",
+        "x": -175,
+        "y": 180,
+        "z": -2150,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "kd.lift.winch",
+        "label": "Grip the winch handle \u00c2\u00b7 walk around the drum",
+        "kind": "winch",
+        "x": 88,
+        "y": 180,
+        "z": -2500,
+        "spec": null
+      },
+      {
+        "key": "kd.depth.note",
+        "label": "Read the press warning plate",
+        "kind": "paper",
+        "x": 210,
+        "y": 0,
+        "z": -3220,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "kd.press.brake",
+        "label": "Pull the emergency brake",
+        "kind": "brake",
+        "x": -205,
+        "y": 0,
+        "z": -2760,
+        "spec": null
+      },
+      {
+        "key": "kd.return",
+        "label": "Return the family keepsake",
+        "kind": "keepsake",
+        "x": -920,
+        "y": 180,
+        "z": -2010,
+        "spec": null
+      },
+      {
+        "key": "kd.drain.note",
+        "label": "Read the marks beside the drain",
+        "kind": "mark",
+        "x": 1540,
+        "y": 80,
+        "z": -3340,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "kd.cache",
+        "label": "Open the dry store chest",
+        "kind": "chest",
+        "x": 2420,
+        "y": 80,
+        "z": -3620,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 3,
+    "area": 0,
+    "objects": [
+      {
+        "key": "ff.trail",
+        "label": "Read the scratched trail sign",
+        "kind": "sign",
+        "x": -790,
+        "y": 133,
+        "z": -640,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "ff.part",
+        "label": "Take the loose heater coil",
+        "kind": "part",
+        "x": -150,
+        "y": 380,
+        "z": -2110,
+        "spec": {
+          "model": "coil",
+          "pickup": true,
+          "support": "crate",
+          "taken": "ff.part"
+        }
+      },
+      {
+        "key": "ff.heater",
+        "label": "Fit the coil to the crossing winch",
+        "kind": "heater",
+        "x": 115,
+        "y": 380,
+        "z": -2120,
+        "spec": null
+      },
+      {
+        "key": "ff.lift",
+        "label": "Lower the return steps",
+        "kind": "lever",
+        "x": -1470,
+        "y": 380,
+        "z": -2190,
+        "spec": null
+      },
+      {
+        "key": "ff.reflect.clue",
+        "label": "Read the cornice marker",
+        "kind": "sign",
+        "x": 0,
+        "y": 740,
+        "z": -4570,
+        "spec": {
+          "model": "trail"
+        }
+      },
+      {
+        "key": "ff.reflect.3",
+        "label": "Release the cornice anchor",
+        "kind": "anchor",
+        "x": -185,
+        "y": 965,
+        "z": -5200,
+        "spec": null
+      },
+      {
+        "key": "ff.cave",
+        "label": "Enter the exposed ice cave",
+        "kind": "entrance",
+        "x": -260,
+        "y": 740,
+        "z": -5280,
+        "spec": null
+      },
+      {
+        "key": "ff.camp",
+        "label": "Read the explorer\u00e2\u20ac\u2122s notebook",
+        "kind": "sign",
+        "x": -930,
+        "y": 580,
+        "z": -3800,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "ff.camp.release",
+        "label": "Release the survey rig above the camp",
+        "kind": "lever",
+        "x": -500,
+        "y": 810,
+        "z": -3530,
+        "spec": null
+      },
+      {
+        "key": "ff.cache",
+        "label": "Open the explorer\u00e2\u20ac\u2122s exposed chest",
+        "kind": "chest",
+        "x": -680,
+        "y": 810,
+        "z": -3530,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 3,
+    "area": 1,
+    "objects": [
+      {
+        "key": "ic.pages",
+        "label": "Read the dropped research page",
+        "kind": "paper",
+        "x": -80,
+        "y": 240,
+        "z": -1020,
+        "spec": {
+          "model": "papers"
+        }
+      },
+      {
+        "key": "ic.free",
+        "label": "Release Professor Ellis",
+        "kind": "lock",
+        "x": -1210,
+        "y": 300,
+        "z": -2210,
+        "spec": null
+      },
+      {
+        "key": "ic.notes",
+        "label": "Recover the sealed notes",
+        "kind": "pack",
+        "x": -2250,
+        "y": 210,
+        "z": -2820,
+        "spec": {
+          "model": "pack",
+          "pickup": true,
+          "taken": "ic.notes"
+        }
+      },
+      {
+        "key": "ic.lock.clue",
+        "label": "Read the waterworks plate",
+        "kind": "plate",
+        "x": -170,
+        "y": 180,
+        "z": -3670,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "ic.hugo.find",
+        "label": "Call into the broken ice shelf",
+        "kind": "call",
+        "x": 1450,
+        "y": 100,
+        "z": -2490,
+        "spec": null
+      },
+      {
+        "key": "ic.hugo.brace",
+        "label": "Secure the rescue frame",
+        "kind": "brace",
+        "x": 1330,
+        "y": 100,
+        "z": -2540,
+        "spec": null
+      },
+      {
+        "key": "ic.rope",
+        "label": "Take the spare rope",
+        "kind": "rope",
+        "x": 1450,
+        "y": 140,
+        "z": -3260,
+        "spec": {
+          "model": "rope",
+          "pickup": true
+        }
+      },
+      {
+        "key": "ic.hugo.rope",
+        "label": "Lower the rescue rope",
+        "kind": "rope",
+        "x": 1500,
+        "y": 100,
+        "z": -2580,
+        "spec": null
+      },
+      {
+        "key": "ic.channel.clue",
+        "label": "Read the lower channel marks",
+        "kind": "plate",
+        "x": -1430,
+        "y": 80,
+        "z": -4210,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "ic.channel.plug",
+        "label": "Release the hanging spill plug",
+        "kind": "plugPin",
+        "x": -1292,
+        "y": 215,
+        "z": -4560,
+        "spec": null
+      },
+      {
+        "key": "ic.lock.1",
+        "label": "Pump water into the float",
+        "kind": "fill",
+        "x": -160,
+        "y": 180,
+        "z": -3850,
+        "spec": null
+      },
+      {
+        "key": "ic.lock.2",
+        "label": "Freeze the channel from the float",
+        "kind": "freeze",
+        "x": 85,
+        "y": 180,
+        "z": -4110,
+        "spec": null
+      },
+      {
+        "key": "ic.lock.3",
+        "label": "Open the far drain gate",
+        "kind": "drain",
+        "x": 120,
+        "y": 180,
+        "z": -4500,
+        "spec": null
+      },
+      {
+        "key": "ic.lock.reset",
+        "label": "Release excess water",
+        "kind": "drain",
+        "x": 130,
+        "y": 180,
+        "z": -3840,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 4,
+    "area": 0,
+    "objects": [
+      {
+        "key": "ih.workers",
+        "label": "Open the worker shelter",
+        "kind": "shelter",
+        "x": -300,
+        "y": 100,
+        "z": -1480,
+        "spec": null
+      },
+      {
+        "key": "ih.handles",
+        "label": "Take the insulated handles",
+        "kind": "handles",
+        "x": -1730,
+        "y": 160,
+        "z": -2770,
+        "spec": {
+          "model": "handles",
+          "pickup": true,
+          "support": "crate",
+          "taken": "ih.handles"
+        }
+      },
+      {
+        "key": "ih.cart",
+        "label": "Fit the insulated handles to the cart brake",
+        "kind": "cart",
+        "x": 150,
+        "y": 100,
+        "z": -3510,
+        "spec": null
+      },
+      {
+        "key": "ih.blank",
+        "label": "Recover Flint\u00e2\u20ac\u2122s blade blank",
+        "kind": "blade",
+        "x": 1870,
+        "y": 400,
+        "z": -3200,
+        "spec": {
+          "model": "blade",
+          "pickup": true,
+          "support": "bench",
+          "taken": "ih.blank"
+        }
+      },
+      {
+        "key": "ih.plate",
+        "label": "Read the machine plate",
+        "kind": "plate",
+        "x": 225,
+        "y": 100,
+        "z": -4020,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "ih.mold",
+        "label": "Open the cooled casting mold",
+        "kind": "mold",
+        "x": -1310,
+        "y": 100,
+        "z": -4710,
+        "spec": null
+      },
+      {
+        "key": "ih.return",
+        "label": "Lower the return steps",
+        "kind": "steps",
+        "x": 1110,
+        "y": 80,
+        "z": -3740,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 4,
+    "area": 1,
+    "objects": [
+      {
+        "key": "gf.fault",
+        "label": "Inspect the leaking pressure pipe",
+        "kind": "fault",
+        "x": -1090,
+        "y": 160,
+        "z": -1150,
+        "spec": null
+      },
+      {
+        "key": "gf.schedule",
+        "label": "Read the maintenance schedule",
+        "kind": "paper",
+        "x": -870,
+        "y": 150,
+        "z": -730,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "gf.gate",
+        "label": "Raise the worker gate",
+        "kind": "gate",
+        "x": 230,
+        "y": 120,
+        "z": -1580,
+        "spec": null
+      },
+      {
+        "key": "gf.passage",
+        "label": "Open the worker passage",
+        "kind": "lever",
+        "x": -1190,
+        "y": 120,
+        "z": -2880,
+        "spec": null
+      },
+      {
+        "key": "gf.transport",
+        "label": "Stop the transport chain",
+        "kind": "brake",
+        "x": -2040,
+        "y": 220,
+        "z": -3510,
+        "spec": null
+      },
+      {
+        "key": "gf.evac.call",
+        "label": "Ring the work bell to lead the workers out",
+        "kind": "bell",
+        "x": -1130,
+        "y": 120,
+        "z": -3740,
+        "spec": null
+      },
+      {
+        "key": "gf.pipes",
+        "label": "Read the cooling diagram",
+        "kind": "paper",
+        "x": 260,
+        "y": 120,
+        "z": -4750,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "gf.writings",
+        "label": "Read the confiscated Sunspire writings",
+        "kind": "book",
+        "x": 2290,
+        "y": 400,
+        "z": -5080,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "gf.pressure",
+        "label": "Release the upper pressure valve",
+        "kind": "valve",
+        "x": -1150,
+        "y": 480,
+        "z": -5310,
+        "spec": null
+      },
+      {
+        "key": "gf.cache",
+        "label": "Read the sealed cooling-box plate",
+        "kind": "paper",
+        "x": 420,
+        "y": 120,
+        "z": -5040,
+        "spec": {
+          "model": "diagram"
+        }
+      },
+      {
+        "key": "gf.cage",
+        "label": "Inspect the shaking work cage",
+        "kind": "cage",
+        "x": 2300,
+        "y": 140,
+        "z": -3650,
+        "spec": null
+      },
+      {
+        "key": "gf.cache.release",
+        "label": "Open the cooling box",
+        "kind": "cachebox",
+        "x": 850,
+        "y": 305,
+        "z": -5580,
+        "spec": null
+      },
+      {
+        "key": "gf.pet.feed",
+        "label": "Shut the cage heat feed",
+        "kind": "petfeed",
+        "x": 2050,
+        "y": 140,
+        "z": -3410,
+        "spec": null
+      },
+      {
+        "key": "gf.pet.release",
+        "label": "Open Cinder\u00e2\u20ac\u2122s cage lock",
+        "kind": "petlock",
+        "x": 2375,
+        "y": 140,
+        "z": -3690,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 5,
+    "area": 0,
+    "objects": [
+      {
+        "key": "sc.rudder",
+        "label": "Take the rudder",
+        "kind": "rudder",
+        "x": -1390,
+        "y": 300,
+        "z": -2420,
+        "spec": {
+          "model": "rudder",
+          "pickup": true
+        }
+      },
+      {
+        "key": "sc.sail",
+        "label": "Take the sailcloth",
+        "kind": "sail",
+        "x": 1480,
+        "y": 350,
+        "z": -1900,
+        "spec": {
+          "model": "sail",
+          "pickup": true
+        }
+      },
+      {
+        "key": "sc.drain",
+        "label": "Open the outside drain",
+        "kind": "lever",
+        "x": 2230,
+        "y": 0,
+        "z": -690,
+        "spec": null
+      },
+      {
+        "key": "sc.latch",
+        "label": "Lift the dry-room latch",
+        "kind": "lever",
+        "x": 2390,
+        "y": 0,
+        "z": -1190,
+        "spec": null
+      },
+      {
+        "key": "sc.rope",
+        "label": "Take the dry rope",
+        "kind": "rope",
+        "x": 2370,
+        "y": 0,
+        "z": -1640,
+        "spec": {
+          "model": "rope",
+          "pickup": true
+        }
+      },
+      {
+        "key": "sc.fit",
+        "label": "Fit recovered parts at Otto\u00e2\u20ac\u2122s workbench",
+        "kind": "workbench",
+        "x": 300,
+        "y": 30,
+        "z": -320,
+        "spec": null
+      },
+      {
+        "key": "sc.bell",
+        "label": "Take the ship bell",
+        "kind": "bell",
+        "x": -1290,
+        "y": 130,
+        "z": -3430,
+        "spec": {
+          "model": "bell",
+          "pickup": true
+        }
+      },
+      {
+        "key": "sc.record",
+        "label": "Read the last crew entry",
+        "kind": "book",
+        "x": -1120,
+        "y": 130,
+        "z": -3600,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "sc.memorial",
+        "label": "Set the crew board upright",
+        "kind": "memorial",
+        "x": 100,
+        "y": 30,
+        "z": -4100,
+        "spec": null
+      },
+      {
+        "key": "sc.hull.note",
+        "label": "Read the hull repair marks",
+        "kind": "book",
+        "x": -1270,
+        "y": 300,
+        "z": -2110,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "sc.hull.release",
+        "label": "Pull the cargo release at the gold mark",
+        "kind": "hullLever",
+        "x": -1540,
+        "y": 300,
+        "z": -2090,
+        "spec": null
+      },
+      {
+        "key": "sc.code.note",
+        "label": "Inspect the iron-bound chest",
+        "kind": "chest",
+        "x": -2140,
+        "y": 200,
+        "z": -3400,
+        "spec": null
+      },
+      {
+        "key": "sc.code.claim",
+        "label": "Take Stormshot from the opened chest",
+        "kind": "chestclaim",
+        "x": -2140,
+        "y": 200,
+        "z": -3400,
+        "spec": null
+      },
+      {
+        "key": "sc.ballista",
+        "label": "Aim the wreck ballista",
+        "kind": "ballista",
+        "x": -1510,
+        "y": 130,
+        "z": -3310,
+        "spec": null
+      },
+      {
+        "key": "sc.code.fire",
+        "label": "Release the chest binding",
+        "kind": "ballistafire",
+        "x": -1510,
+        "y": 130,
+        "z": -3310,
+        "spec": null
+      },
+      {
+        "key": "sc.board",
+        "label": "Board the repaired boat",
+        "kind": "board",
+        "x": -180,
+        "y": 30,
+        "z": -210,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 5,
+    "area": 1,
+    "objects": [
+      {
+        "key": "tc.brake",
+        "label": "Fit the spare brake wheel",
+        "kind": "lever",
+        "x": -230,
+        "y": 40,
+        "z": -640,
+        "spec": null
+      },
+      {
+        "key": "tc.lift",
+        "label": "Release the upper lift catch",
+        "kind": "lever",
+        "x": -240,
+        "y": 340,
+        "z": -760,
+        "spec": null
+      },
+      {
+        "key": "tc.shackle",
+        "label": "Inspect the worn shackle",
+        "kind": "shackle",
+        "x": -420,
+        "y": 340,
+        "z": -1660,
+        "spec": null
+      },
+      {
+        "key": "tc.approach",
+        "label": "Open the upper barrier",
+        "kind": "lever",
+        "x": 300,
+        "y": 850,
+        "z": -4750,
+        "spec": null
+      },
+      {
+        "key": "tc.brace",
+        "label": "Brace the lower cave catch",
+        "kind": "lever",
+        "x": -2200,
+        "y": 420,
+        "z": -3020,
+        "spec": null
+      },
+      {
+        "key": "tc.cave.help",
+        "label": "Turn the upper cave wheel",
+        "kind": "lever",
+        "x": -2300,
+        "y": 390,
+        "z": -3400,
+        "spec": null
+      },
+      {
+        "key": "tc.race.finish",
+        "label": "Ring Dash\u00e2\u20ac\u2122s route bell",
+        "kind": "bell",
+        "x": -2240,
+        "y": 390,
+        "z": -3320,
+        "spec": null
+      },
+      {
+        "key": "tc.sail",
+        "label": "Take the sailcloth cape",
+        "kind": "cape",
+        "x": -2180,
+        "y": 340,
+        "z": -3980,
+        "spec": {
+          "model": "cape",
+          "pickup": true,
+          "support": "crate",
+          "taken": "tc.sail"
+        }
+      },
+      {
+        "key": "tc.tide.note",
+        "label": "Read the tide carving",
+        "kind": "book",
+        "x": -580,
+        "y": 300,
+        "z": -4500,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "tc.tide.release",
+        "label": "Release the inland door at low tide",
+        "kind": "tideRelease",
+        "x": -1230,
+        "y": 300,
+        "z": -4800,
+        "spec": null
+      },
+      {
+        "key": "tc.wind.note",
+        "label": "Read the wind shelter sign",
+        "kind": "book",
+        "x": 1360,
+        "y": 720,
+        "z": -3090,
+        "spec": {
+          "model": "trail"
+        }
+      },
+      {
+        "key": "tc.race.1",
+        "label": "Touch route flag 1",
+        "kind": "flag1",
+        "x": -1430,
+        "y": 360,
+        "z": -1890,
+        "spec": null
+      },
+      {
+        "key": "tc.race.2",
+        "label": "Touch route flag 2",
+        "kind": "flag2",
+        "x": -1000,
+        "y": 460,
+        "z": -2520,
+        "spec": null
+      },
+      {
+        "key": "tc.race.3",
+        "label": "Touch route flag 3",
+        "kind": "flag3",
+        "x": -1850,
+        "y": 450,
+        "z": -2830,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 6,
+    "area": 0,
+    "objects": [
+      {
+        "key": "pc.clamp",
+        "label": "Remove the iron clamp",
+        "kind": "clamp",
+        "x": -1320,
+        "y": 80,
+        "z": -720,
+        "spec": null
+      },
+      {
+        "key": "pc.water",
+        "label": "Open the court water wheel",
+        "kind": "wheel",
+        "x": -1200,
+        "y": 80,
+        "z": -1070,
+        "spec": null
+      },
+      {
+        "key": "pc.west.lower",
+        "label": "Drain the west lock",
+        "kind": "wheel",
+        "x": -1390,
+        "y": 200,
+        "z": -2370,
+        "spec": null
+      },
+      {
+        "key": "pc.east.lower",
+        "label": "Drain the east lock",
+        "kind": "wheel",
+        "x": 770,
+        "y": 200,
+        "z": -2280,
+        "spec": null
+      },
+      {
+        "key": "pc.west.upper",
+        "label": "Release the west balcony",
+        "kind": "lever",
+        "x": -1000,
+        "y": 340,
+        "z": -2530,
+        "spec": null
+      },
+      {
+        "key": "pc.east.upper",
+        "label": "Release the east balcony",
+        "kind": "lever",
+        "x": 1090,
+        "y": 340,
+        "z": -2150,
+        "spec": null
+      },
+      {
+        "key": "pc.garden.water",
+        "label": "Open the garden channel",
+        "kind": "wheel",
+        "x": 1320,
+        "y": 160,
+        "z": -1000,
+        "spec": null
+      },
+      {
+        "key": "pc.seeds",
+        "label": "Take the dry seed tin",
+        "kind": "seeds",
+        "x": 1770,
+        "y": 160,
+        "z": -1420,
+        "spec": {
+          "model": "seeds",
+          "pickup": true
+        }
+      },
+      {
+        "key": "pc.memorial",
+        "label": "Read the garden keeper\u00e2\u20ac\u2122s stone",
+        "kind": "book",
+        "x": -1965,
+        "y": 300,
+        "z": -1730,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "pc.mirror.note",
+        "label": "Read the sun marks",
+        "kind": "book",
+        "x": -420,
+        "y": 420,
+        "z": -3650,
+        "spec": {
+          "model": "sunstone"
+        }
+      },
+      {
+        "key": "pc.enter",
+        "label": "Open the library door",
+        "kind": "door",
+        "x": 0,
+        "y": 440,
+        "z": -4240,
+        "spec": null
+      },
+      {
+        "key": "pc.mirror.0",
+        "label": "Turn left mirror",
+        "kind": "mirror0",
+        "x": -330,
+        "y": 420,
+        "z": -3890,
+        "spec": null
+      },
+      {
+        "key": "pc.mirror.1",
+        "label": "Turn middle mirror",
+        "kind": "mirror1",
+        "x": 330,
+        "y": 420,
+        "z": -3890,
+        "spec": null
+      },
+      {
+        "key": "pc.mirror.2",
+        "label": "Turn right mirror",
+        "kind": "mirror2",
+        "x": 330,
+        "y": 420,
+        "z": -4120,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 6,
+    "area": 1,
+    "objects": [
+      {
+        "key": "sl.maintenance",
+        "label": "Open the service latch",
+        "kind": "lever",
+        "x": -1110,
+        "y": 60,
+        "z": -1600,
+        "spec": null
+      },
+      {
+        "key": "sl.records",
+        "label": "Lift the fallen records onto a dry desk",
+        "kind": "book",
+        "x": 1130,
+        "y": 320,
+        "z": -1850,
+        "spec": null
+      },
+      {
+        "key": "sl.orders",
+        "label": "Read the Legion orders",
+        "kind": "book",
+        "x": -220,
+        "y": 300,
+        "z": -2930,
+        "spec": {
+          "model": "papers"
+        }
+      },
+      {
+        "key": "sl.release",
+        "label": "Release the reading hall seal",
+        "kind": "lever",
+        "x": 0,
+        "y": 400,
+        "z": -4870,
+        "spec": null
+      },
+      {
+        "key": "sl.history",
+        "label": "Read the scholar\u00e2\u20ac\u2122s last note",
+        "kind": "book",
+        "x": -1300,
+        "y": 440,
+        "z": -3860,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "sl.display.clue",
+        "label": "Inspect the scholar\u00e2\u20ac\u2122s light fixture",
+        "kind": "book",
+        "x": -950,
+        "y": 440,
+        "z": -3900,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "sl.display.grip",
+        "label": "Grip the reflector \u00c2\u00b7 walk sideways to aim",
+        "kind": "reflector",
+        "x": -1110,
+        "y": 440,
+        "z": -4080,
+        "spec": null
+      },
+      {
+        "key": "sl.shelf.clue",
+        "label": "Read the folding shelf guide",
+        "kind": "book",
+        "x": 1480,
+        "y": 360,
+        "z": -3750,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "sl.shelf.0",
+        "label": "Unfold the first shelves",
+        "kind": "shelf0",
+        "x": 1580,
+        "y": 360,
+        "z": -3780,
+        "spec": null
+      },
+      {
+        "key": "sl.shelf.1",
+        "label": "Unfold the far shelves",
+        "kind": "shelf1",
+        "x": 1910,
+        "y": 390,
+        "z": -4040,
+        "spec": null
+      },
+      {
+        "key": "sl.vow.0",
+        "label": "Defend archive stand 1",
+        "kind": "stand0",
+        "x": 1000,
+        "y": 400,
+        "z": -4610,
+        "spec": null
+      },
+      {
+        "key": "sl.seal.0",
+        "label": "Secure archive stand 1",
+        "kind": "seal0",
+        "x": 1000,
+        "y": 400,
+        "z": -4610,
+        "spec": null
+      },
+      {
+        "key": "sl.vow.1",
+        "label": "Defend archive stand 2",
+        "kind": "stand1",
+        "x": 1300,
+        "y": 400,
+        "z": -4610,
+        "spec": null
+      },
+      {
+        "key": "sl.seal.1",
+        "label": "Secure archive stand 2",
+        "kind": "seal1",
+        "x": 1300,
+        "y": 400,
+        "z": -4610,
+        "spec": null
+      },
+      {
+        "key": "sl.vow.2",
+        "label": "Defend archive stand 3",
+        "kind": "stand2",
+        "x": 1600,
+        "y": 400,
+        "z": -4610,
+        "spec": null
+      },
+      {
+        "key": "sl.seal.2",
+        "label": "Secure archive stand 3",
+        "kind": "seal2",
+        "x": 1600,
+        "y": 400,
+        "z": -4610,
+        "spec": null
+      },
+      {
+        "key": "dr.clue",
+        "label": "Read the torn keeper notice",
+        "kind": "notice",
+        "x": -1950,
+        "y": 460,
+        "z": -3830,
+        "spec": null
+      },
+      {
+        "key": "dr.tools",
+        "label": "Take the spare beam",
+        "kind": "beam",
+        "x": -2790,
+        "y": 540,
+        "z": -2910,
+        "spec": null
+      },
+      {
+        "key": "dr.food",
+        "label": "Take the dried meat",
+        "kind": "food",
+        "x": -2700,
+        "y": 540,
+        "z": -2790,
+        "spec": null
+      },
+      {
+        "key": "dr.brace",
+        "label": "Brace the cracked net frame",
+        "kind": "brace",
+        "x": -3090,
+        "y": 600,
+        "z": -3450,
+        "spec": null
+      },
+      {
+        "key": "dr.winch",
+        "label": "Lower the net slowly",
+        "kind": "winch",
+        "x": -3310,
+        "y": 600,
+        "z": -3290,
+        "spec": null
+      },
+      {
+        "key": "dr.release",
+        "label": "Unfasten the loose net",
+        "kind": "release",
+        "x": -3630,
+        "y": 690,
+        "z": -3440,
+        "spec": null
+      },
+      {
+        "key": "dr.feed",
+        "label": "Offer food and step back",
+        "kind": "feed",
+        "x": -3500,
+        "y": 690,
+        "z": -3610,
+        "spec": null
+      }
+    ]
+  },
+  {
+    "zone": 7,
+    "area": 0,
+    "objects": [
+      {
+        "key": "cg.coat",
+        "label": "Take the matching coat",
+        "kind": "armor",
+        "x": 980,
+        "y": 120,
+        "z": -2080,
+        "spec": null
+      },
+      {
+        "key": "cg.helmet",
+        "label": "Take the repaired helmet",
+        "kind": "helmet",
+        "x": -1290,
+        "y": 140,
+        "z": -1930,
+        "spec": null
+      },
+      {
+        "key": "cg.papers",
+        "label": "Read and take the supply papers",
+        "kind": "book",
+        "x": 1040,
+        "y": 120,
+        "z": -1810,
+        "spec": {
+          "model": "papers"
+        }
+      },
+      {
+        "key": "cg.orders",
+        "label": "Read the gate roster",
+        "kind": "book",
+        "x": -300,
+        "y": 200,
+        "z": -2650,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "cg.bells",
+        "label": "Read the bell notice",
+        "kind": "book",
+        "x": 275,
+        "y": 200,
+        "z": -2710,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "cg.catch.west",
+        "label": "Release the bridge brake",
+        "kind": "brake",
+        "x": -1050,
+        "y": 100,
+        "z": -3390,
+        "spec": null
+      },
+      {
+        "key": "cg.bridge",
+        "label": "Lower the crossing bridge",
+        "kind": "wheel",
+        "x": -120,
+        "y": 200,
+        "z": -2850,
+        "spec": null
+      },
+      {
+        "key": "cg.personal",
+        "label": "Recover Roland\u00e2\u20ac\u2122s old armor",
+        "kind": "armor",
+        "x": 1970,
+        "y": 220,
+        "z": -2670,
+        "spec": null
+      },
+      {
+        "key": "cg.store.note",
+        "label": "Read the seized goods list",
+        "kind": "book",
+        "x": 1620,
+        "y": 220,
+        "z": -2310,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "cg.break",
+        "label": "Sound the challenge \u00e2\u20ac\u201d fight the gate guard",
+        "kind": "bell",
+        "x": -270,
+        "y": 280,
+        "z": -4890,
+        "spec": null
+      },
+      {
+        "key": "cg.release",
+        "label": "Raise the inner gate",
+        "kind": "wheel",
+        "x": -350,
+        "y": 280,
+        "z": -5150,
+        "spec": null
+      },
+      {
+        "key": "cg.balcony.note",
+        "label": "Read the loose supply tag",
+        "kind": "book",
+        "x": -1590,
+        "y": 250,
+        "z": -2240,
+        "spec": {
+          "model": "notice"
+        }
+      }
+    ]
+  },
+  {
+    "zone": 7,
+    "area": 1,
+    "objects": [
+      {
+        "key": "la.notice",
+        "label": "Read the stair notice",
+        "kind": "book",
+        "x": 110,
+        "y": 0,
+        "z": 900,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "la.lower",
+        "label": "Release the lower stair catch",
+        "kind": "wheel",
+        "x": -350,
+        "y": 500,
+        "z": -1190,
+        "spec": null
+      },
+      {
+        "key": "la.upper",
+        "label": "Release the upper stair catch",
+        "kind": "wheel",
+        "x": 350,
+        "y": 1500,
+        "z": -1190,
+        "spec": null
+      },
+      {
+        "key": "la.cells",
+        "label": "Open the worker cells",
+        "kind": "wheel",
+        "x": -1400,
+        "y": 750,
+        "z": -250,
+        "spec": null
+      },
+      {
+        "key": "la.vault.note",
+        "label": "Read the service-vault note",
+        "kind": "book",
+        "x": 1250,
+        "y": 250,
+        "z": -355,
+        "spec": {
+          "model": "book"
+        }
+      },
+      {
+        "key": "la.vault.brake",
+        "label": "Pull the high service brake",
+        "kind": "brake",
+        "x": 1910,
+        "y": 460,
+        "z": -345,
+        "spec": null
+      },
+      {
+        "key": "la.orders",
+        "label": "Read the King\u00e2\u20ac\u2122s urgent order",
+        "kind": "book",
+        "x": -120,
+        "y": 1500,
+        "z": -970,
+        "spec": {
+          "model": "notice"
+        }
+      },
+      {
+        "key": "la.memorial.note",
+        "label": "Read the old workers\u00e2\u20ac\u2122 names",
+        "kind": "book",
+        "x": -1630,
+        "y": 1800,
+        "z": 440,
+        "spec": {
+          "model": "stone"
+        }
+      },
+      {
+        "key": "la.summit",
+        "label": "Open the throne doors",
+        "kind": "wheel",
+        "x": 0,
+        "y": 2000,
+        "z": 1090,
+        "spec": null
+      }
+    ]
+  }
+]

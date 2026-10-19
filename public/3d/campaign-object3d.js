@@ -1,3 +1,4 @@
+import {createQuestMechanism,poseQuestMechanism,questMechanismMetrics} from './quest-mechanisms3d.js?v=2317';
 import {createCoinCoffer,animateCoinCoffer} from './coin-coffer3d.js?v=2234';
 import * as T from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
@@ -160,8 +161,8 @@ function build(name){
  const lift=-bounds.min.y;if(Math.abs(lift)>.001){for(const m of meshes){m.geometry.translate(0,lift,0);m.geometry.computeBoundingBox();m.geometry.computeBoundingSphere();}bounds.translate(new T.Vector3(0,lift,0));}
  const rec={meshes,triangles,bounds};templates.set(name,rec);return rec;
 }
-function model(name){const group=new T.Group(),spec=build(name);for(const item of spec.meshes){const m=new T.Mesh(item.geometry,item.material);m.receiveShadow=true;m.castShadow=true;group.add(m);}group.userData.triangles=spec.triangles;return group;}
-export function campaignObjectMetrics(){return [...templates].map(([name,t])=>({name,triangles:t.triangles,meshes:t.meshes.length,min:t.bounds.min.toArray(),max:t.bounds.max.toArray(),finite:t.meshes.every(m=>[...m.geometry.attributes.position.array,...m.geometry.attributes.normal.array].every(Number.isFinite))}));}
+function model(name){if(name.startsWith('mechanism-'))return createQuestMechanism(name);const group=new T.Group(),spec=build(name);for(const item of spec.meshes){const m=new T.Mesh(item.geometry,item.material);m.receiveShadow=true;m.castShadow=true;group.add(m);}group.userData.triangles=spec.triangles;return group;}
+export function campaignObjectMetrics(){return questMechanismMetrics().concat([...templates].map(([name,t])=>({name,triangles:t.triangles,meshes:t.meshes.length,min:t.bounds.min.toArray(),max:t.bounds.max.toArray(),finite:t.meshes.every(m=>[...m.geometry.attributes.position.array,...m.geometry.attributes.normal.array].every(Number.isFinite))})));}
 let group,world,objects,actors=[],drawn=new WeakSet();
 export function syncCampaignObjects(scene,dt=1/60){
  const b=window.__BF3,g=b?.G,defs=window.BFCampaignObjects;
@@ -177,10 +178,10 @@ export function syncCampaignObjects(scene,dt=1/60){
  if(group.parent!==scene)scene.add(group);group.visible=true;let visible=0,triangles=0,meshes=0;
  for(const a of actors){
   const {o,node,item,spec}=a;node.position.set(o.x,o.y||0,o.z);node.rotation.y=o.artYaw||0;
-  node.visible=Math.hypot(o.x-g.p.x,o.z-g.p.z)<1050&&Math.abs((o.y||0)-g.p.y)<650;
-  if(!node.visible){drawn.delete(o);continue;}
+  node.visible=!(spec.owner&&window.BFCampaignCraft?.has(spec.owner))&&Math.hypot(o.x-g.p.x,o.z-g.p.z)<1050&&Math.abs((o.y||0)-g.p.y)<650;
+  if(!node.visible){drawn.add(o);continue;} // A culled owned model must not resurrect its old placeholder.
   if(a.coffer)animateCoinCoffer(a.coffer,!!g.storyState?.flags?.['event.'+o.key],dt);
-  item.visible=!defs.taken(o,g.storyState);drawn.add(o);visible++;
+  item.visible=!defs.taken(o,g.storyState);if(spec.mechanism)poseQuestMechanism(item,!!(g.storyState?.flags?.['event.'+o.key]||g.storyState?.flags?.[o.key]),dt);drawn.add(o);visible++;
   node.traverseVisible(n=>{if(n.isMesh){meshes++;triangles+=(n.geometry.index?.count||n.geometry.attributes.position.count)/3;}});
  }
  window.__campaignObjectDrawn=drawn;window.__CAMPAIGN_OBJECT_STATS={total:actors.length,visible,triangles,meshes,templates:templates.size,items:actors.filter(a=>a.node.visible).map(a=>({key:a.o.key,model:a.spec.model,collected:!a.item.visible,meshes:a.item.children.length,triangles:a.item.userData.triangles}))};

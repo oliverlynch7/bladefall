@@ -1,0 +1,608 @@
+[
+ {
+  "legacy": {
+   "level": 100,
+   "gold": 1145
+  }
+ },
+ {
+  "object": "home.orchard.wheel",
+  "kind": "orchardwheel",
+  "spec": {
+   "model": "mechanism-winch",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 13,
+   "visible": 4,
+   "triangles": 5394,
+   "meshes": 16,
+   "templates": 6,
+   "items": [
+    {
+     "key": "briar.gus.tools",
+     "model": "tools",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 696
+    },
+    {
+     "key": "home.orchard.clue",
+     "model": "notice",
+     "collected": false,
+     "meshes": 4,
+     "triangles": 698
+    },
+    {
+     "key": "home.orchard.wheel",
+     "model": "mechanism-winch",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2648
+    },
+    {
+     "key": "home.orchard.cache",
+     "model": "coin-coffer",
+     "collected": false,
+     "meshes": 5,
+     "triangles": 1352
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "woods.signal.crank",
+  "kind": "signalcrank",
+  "spec": {
+   "model": "mechanism-winch",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 3,
+   "visible": 1,
+   "triangles": 2648,
+   "meshes": 3,
+   "templates": 6,
+   "items": [
+    {
+     "key": "woods.signal.crank",
+     "model": "mechanism-winch",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2648
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "hp.windbreak",
+  "kind": "lever",
+  "spec": {
+   "model": "mechanism-rope-cleat",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 9,
+   "visible": 2,
+   "triangles": 3612,
+   "meshes": 3,
+   "templates": 7,
+   "items": [
+    {
+     "key": "hp.rope",
+     "model": "rope",
+     "collected": false,
+     "meshes": 1,
+     "triangles": 2148
+    },
+    {
+     "key": "hp.windbreak",
+     "model": "mechanism-rope-cleat",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1464
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "lc.force",
+  "kind": "chain",
+  "spec": {
+   "model": "mechanism-chain",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 6,
+   "visible": 4,
+   "triangles": 5244,
+   "meshes": 10,
+   "templates": 8,
+   "items": [
+    {
+     "key": "lc.orders",
+     "model": "papers",
+     "collected": false,
+     "meshes": 4,
+     "triangles": 964
+    },
+    {
+     "key": "lc.force",
+     "model": "mechanism-chain",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 2052
+    },
+    {
+     "key": "lc.gate",
+     "model": "mechanism-latch",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 764
+    },
+    {
+     "key": "lc.side",
+     "model": "mechanism-rope-cleat",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1464
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "rk.gate",
+  "kind": "gate",
+  "spec": {
+   "model": "mechanism-latch",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 4,
+   "visible": 1,
+   "triangles": 764,
+   "meshes": 2,
+   "templates": 9,
+   "items": [
+    {
+     "key": "rk.gate",
+     "model": "mechanism-latch",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 764
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "kd.press.brake",
+  "kind": "brake",
+  "spec": {
+   "model": "mechanism-brake",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 10,
+   "visible": 3,
+   "triangles": 4464,
+   "meshes": 10,
+   "templates": 9,
+   "items": [
+    {
+     "key": "kd.lift.note",
+     "model": "diagram",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 800
+    },
+    {
+     "key": "kd.depth.note",
+     "model": "diagram",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 800
+    },
+    {
+     "key": "kd.press.brake",
+     "model": "mechanism-brake",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2864
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "ff.camp.release",
+  "kind": "lever",
+  "spec": {
+   "model": "mechanism-brake",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 7,
+   "visible": 2,
+   "triangles": 4068,
+   "meshes": 8,
+   "templates": 12,
+   "items": [
+    {
+     "key": "ff.camp",
+     "model": "book",
+     "collected": false,
+     "meshes": 4,
+     "triangles": 1204
+    },
+    {
+     "key": "ff.camp.release",
+     "model": "mechanism-brake",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2864
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "ic.hugo.brace",
+  "kind": "brace",
+  "spec": {
+   "model": "mechanism-brace",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 10,
+   "visible": 4,
+   "triangles": 6180,
+   "meshes": 7,
+   "templates": 13,
+   "items": [
+    {
+     "key": "ic.hugo.find",
+     "model": "mechanism-rescue-horn",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 692
+    },
+    {
+     "key": "ic.hugo.brace",
+     "model": "mechanism-brace",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1876
+    },
+    {
+     "key": "ic.rope",
+     "model": "rope",
+     "collected": false,
+     "meshes": 1,
+     "triangles": 2148
+    },
+    {
+     "key": "ic.hugo.rope",
+     "model": "mechanism-rope-cleat",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1464
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "ih.workers",
+  "kind": "shelter",
+  "spec": {
+   "model": "mechanism-latch",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 5,
+   "visible": 1,
+   "triangles": 764,
+   "meshes": 2,
+   "templates": 16,
+   "items": [
+    {
+     "key": "ih.workers",
+     "model": "mechanism-latch",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 764
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "gf.pressure",
+  "kind": "valve",
+  "spec": {
+   "model": "mechanism-valve",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 11,
+   "visible": 1,
+   "triangles": 1752,
+   "meshes": 2,
+   "templates": 16,
+   "items": [
+    {
+     "key": "gf.pressure",
+     "model": "mechanism-valve",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 1752
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "sc.drain",
+  "kind": "lever",
+  "spec": {
+   "model": "mechanism-valve",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 8,
+   "visible": 3,
+   "triangles": 4664,
+   "meshes": 5,
+   "templates": 19,
+   "items": [
+    {
+     "key": "sc.drain",
+     "model": "mechanism-valve",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 1752
+    },
+    {
+     "key": "sc.latch",
+     "model": "mechanism-latch",
+     "collected": false,
+     "meshes": 2,
+     "triangles": 764
+    },
+    {
+     "key": "sc.rope",
+     "model": "rope",
+     "collected": false,
+     "meshes": 1,
+     "triangles": 2148
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "tc.shackle",
+  "kind": "shackle",
+  "spec": {
+   "model": "mechanism-shackle",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 9,
+   "visible": 3,
+   "triangles": 6300,
+   "meshes": 8,
+   "templates": 20,
+   "items": [
+    {
+     "key": "tc.brake",
+     "model": "mechanism-winch",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2648
+    },
+    {
+     "key": "tc.lift",
+     "model": "mechanism-winch",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2648
+    },
+    {
+     "key": "tc.shackle",
+     "model": "mechanism-shackle",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1004
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "pc.west.upper",
+  "kind": "lever",
+  "spec": {
+   "model": "mechanism-brake",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 11,
+   "visible": 2,
+   "triangles": 4608,
+   "meshes": 7,
+   "templates": 22,
+   "items": [
+    {
+     "key": "pc.west.lower",
+     "model": "mechanism-sluice",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1744
+    },
+    {
+     "key": "pc.west.upper",
+     "model": "mechanism-brake",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2864
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "sl.shelf.0",
+  "kind": "shelf0",
+  "spec": {
+   "model": "mechanism-shelf-crank",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 13,
+   "visible": 5,
+   "triangles": 7860,
+   "meshes": 20,
+   "templates": 22,
+   "items": [
+    {
+     "key": "sl.shelf.clue",
+     "model": "book",
+     "collected": false,
+     "meshes": 4,
+     "triangles": 1204
+    },
+    {
+     "key": "sl.shelf.0",
+     "model": "mechanism-shelf-crank",
+     "collected": false,
+     "meshes": 5,
+     "triangles": 2792
+    },
+    {
+     "key": "sl.shelf.1",
+     "model": "mechanism-shelf-crank",
+     "collected": false,
+     "meshes": 5,
+     "triangles": 2792
+    },
+    {
+     "key": "sl.vow.1",
+     "model": "mechanism-archive",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 536
+    },
+    {
+     "key": "sl.vow.2",
+     "model": "mechanism-archive",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 536
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "cg.release",
+  "kind": "wheel",
+  "spec": {
+   "model": "mechanism-winch",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 6,
+   "visible": 1,
+   "triangles": 2648,
+   "meshes": 3,
+   "templates": 22,
+   "items": [
+    {
+     "key": "cg.release",
+     "model": "mechanism-winch",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2648
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "object": "la.summit",
+  "kind": "wheel",
+  "spec": {
+   "model": "mechanism-sun-seal",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 9,
+   "visible": 1,
+   "triangles": 736,
+   "meshes": 4,
+   "templates": 22,
+   "items": [
+    {
+     "key": "la.summit",
+     "model": "mechanism-sun-seal",
+     "collected": false,
+     "meshes": 4,
+     "triangles": 736
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ },
+ {
+  "allScenesComplete": true
+ },
+ {
+  "returned": {
+   "hub": true,
+   "trial": null,
+   "trialLook": null,
+   "level": 100,
+   "gold": 1145,
+   "bank": false
+  },
+  "art": null
+ }
+]

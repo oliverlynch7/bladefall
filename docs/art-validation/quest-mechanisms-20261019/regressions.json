@@ -1,0 +1,79 @@
+[
+  {
+    "script": "scripts/test-quest-mechanisms.mjs",
+    "exit": 0,
+    "output": "{\"checks\":547,\"assigned\":69,\"metrics\":[{\"name\":\"mechanism-cart-grip\",\"triangles\":2388,\"meshes\":2,\"min\":[-29.5,0,-13.5],\"max\":[29.5,46.411468505859375,15],\"finite\":true},{\"name\":\"mechanism-keepsake\",\"triangles\":452,\"meshes\":3,\"min\":[-19.5,0,-15],\"max\":[19.5,17.90211296081543,15],\"finite\":true},{\"name\":\"mechanism-rope-cleat\",\"triangles\":1464,\"meshes\":2,\"min\":[-31.47979736328125,0,-17.5],\"max\":[29.399999618530273,16.299999237060547,39.400001525878906],\"finite\":true},{\"name\":\"mechanism-latch\",\"triangles\":764,\"meshes\":2,\"min\":[-25,0,-17],\"max\":[25,51,19],\"finite\":true},{\"name\":\"mechanism-chain\",\"triangles\":2052,\"meshes\":2,\"min\":[-25,0,-20],\"max\":[25,79.39999961853027,22],\"finite\":true},{\"name\":\"mechanism-winch\",\"triangles\":2648,\"meshes\":3,\"min\":[-32.5,0,-45.63799285888672],\"max\":[32.5,55.79999923706055,33],\"finite\":true},{\"name\":\"mechanism-brake\",\"triangles\":2864,\"meshes\":4,\"min\":[-32.5,0,-45.63799285888672],\"max\":[34,59.5,38],\"finite\":true},{\"name\":\"mechanism-clamp\",\"triangles\":2632,\"meshes\":2,\"min\":[-31,0,-22],\"max\":[43.79999923706055,51.79999923706055,24],\"finite\":true},{\"name\":\"mechanism-sluice\",\"triangles\":1744,\"meshes\":3,\"min\":[-29.5,0,-32.57902145385742],\"max\":[28.799999237060547,63.79999923706055,27],\"finite\":true},{\"name\":\"mechanism-valve\",\"triangles\":1752,\"meshes\":2,\"min\":[-28,0,-23],\"max\":[32.5,57.79999923706055,27],\"finite\":true},{\"name\":\"mechanism-pipe-fault\",\"triangles\":1720,\"meshes\":2,\"min\":[-38,0,-44.41515350341797],\"max\":[38,78.55913543701172,29],\"finite\":true},{\"name\":\"mechanism-brace\",\"triangles\":1876,\"meshes\":2,\"min\":[-33,0,-20],\"max\":[33,61,20],\"finite\":true},{\"name\":\"mechanism-rescue-horn\",\"triangles\":692,\"meshes\":2,\"min\":[-21,0,-16],\"max\":[21,51.5,20.426584243774414],\"finite\":true},{\"name\":\"mechanism-anchor\",\"triangles\":2504,\"meshes\":3,\"min\":[-31,0,-42.49794387817383],\"max\":[31,66,24],\"finite\":true},{\"name\":\"mechanism-shackle\",\"triangles\":1004,\"meshes\":2,\"min\":[-39.331478118896484,0,-19.5],\"max\":[27,37.63758707046509,19.5],\"finite\":true},{\"name\":\"mechanism-sun-seal\",\"triangles\":736,\"meshes\":4,\"min\":[-30.5,0,-29],\"max\":[30.5,83.5,29],\"finite\":true},{\"name\":\"mechanism-shelf-crank\",\"triangles\":2792,\"meshes\":5,\"min\":[-32.5,0,-45.63799285888672],\"max\":[32.5,54,33],\"finite\":true},{\"name\":\"mechanism-archive\",\"triangles\":536,\"meshes\":3,\"min\":[-29,0,-29],\"max\":[29,84,29],\"finite\":true},{\"name\":\"mechanism-key\",\"triangles\":284,\"meshes\":2,\"min\":[-21.5,0,-17.5],\"max\":[22.5,12.800000190734863,17.5],\"finite\":true}],\"passed\":true}"
+  },
+  {
+    "script": "scripts/test-campaign-interaction.cjs",
+    "exit": 0,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed."
+  },
+  {
+    "script": "scripts/test-return-visits.cjs",
+    "exit": 0,
+    "output": "Return quests: eligibility, decline/rejoin, puzzle gates, collection/delivery idempotency, graph and save normalization passed."
+  },
+  {
+    "script": "scripts/test-save-safety.cjs",
+    "exit": 0,
+    "output": "24 save normalization and isolated recovery checks passed."
+  },
+  {
+    "script": "scripts/test-campaign-compatibility.cjs",
+    "exit": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed."
+  },
+  {
+    "script": "scripts/test-interaction-audit.cjs",
+    "exit": 0,
+    "output": "12 paid reward, live perk and death ownership checks passed."
+  },
+  {
+    "script": "scripts/test-npc-scene-ownership.mjs",
+    "exit": 0,
+    "output": "59 NPC scene ownership, legitimate Thomas, mode exclusion, lifecycle, immutable roster and stage cleanup checks passed."
+  },
+  {
+    "script": "scripts/test-campaign-refinement.cjs",
+    "exit": 0,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed."
+  },
+  {
+    "script": "scripts/test-trial-mentor-map.cjs",
+    "exit": 0,
+    "output": "{\"checks\":54,\"passed\":true}"
+  },
+  {
+    "syntax": "public/3d/campaign-objects.js",
+    "exit": 0
+  },
+  {
+    "syntax": "public/3d/campaign-object3d.js",
+    "exit": 0
+  },
+  {
+    "syntax": "public/3d/quest-mechanisms3d.js",
+    "exit": 0
+  },
+  {
+    "syntax": "public/3d/palace-courtyard.js",
+    "exit": 0
+  },
+  {
+    "syntax": "public/3d/return-visits.js",
+    "exit": 0
+  },
+  {
+    "syntax": "public/3d/hero3d.js",
+    "exit": 0
+  },
+  {
+    "inline": 109,
+    "exit": 0
+  },
+  {
+    "inline": 111,
+    "exit": 0
+  }
+]

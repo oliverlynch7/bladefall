@@ -1,0 +1,42 @@
+[
+ {
+  "legacy": {
+   "level": 100,
+   "gold": 1145
+  }
+ },
+ {
+  "object": "pc.west.upper",
+  "kind": "lever",
+  "spec": {
+   "model": "mechanism-brake",
+   "mechanism": true
+  },
+  "drawn": true,
+  "stats": {
+   "total": 11,
+   "visible": 2,
+   "triangles": 4608,
+   "meshes": 7,
+   "templates": 3,
+   "items": [
+    {
+     "key": "pc.west.lower",
+     "model": "mechanism-sluice",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 1744
+    },
+    {
+     "key": "pc.west.upper",
+     "model": "mechanism-brake",
+     "collected": false,
+     "meshes": 3,
+     "triangles": 2864
+    }
+   ]
+  },
+  "level": 100,
+  "gold": 1145
+ }
+]

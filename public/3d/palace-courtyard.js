@@ -48,7 +48,7 @@ function build({G,plat,spawn}){
  for(const z of [-870,-1180,-1500])part('stone',1665,370,z,610,16,22,'#b6a16c');
  for(const x of [1450,1665,1880])part('stone',x,380,-1185,14,14,650,'#c9b985');
  for(const [x,z,y]of [[-1500,-780,80],[-1500,-1010,80]])part('furnace',x,y+80,z,55,100,40,'#b4bcb0');
- for(const side of [-1,1]){const x=side*1050,z=side<0?-2450:-2070;part('stone',x,365,z-80,95,50,100,'#555963');part('stone',x,405,z-80,130,14,65,'#9b8a66');part('stone',x,438,z-80,18,85,18,'#555963');part('cap',x,435,z-78,70,70,4,'#64526d');}
+ for(const side of [-1,1]){const x=side*1050,z=side<0?-2450:-2070;const start=G.deco.length;part('stone',x,365,z-80,95,50,100,'#555963');part('stone',x,405,z-80,130,14,65,'#9b8a66');part('stone',x,438,z-80,18,85,18,'#555963');part('cap',x,435,z-78,70,70,4,'#64526d');for(const d of G.deco.slice(start)){d.craftHidden=true;d.questReplacement='pc.'+(side<0?'west':'east')+'.upper';}}
  // Hanging greenery follows the terrace edge, clear of the walking surface.
  for(const [x,z,y]of [[-520,100,120],[520,-200,120],[-1500,-2180,180],[1960,-1170,160],[-1160,-2640,340],[1190,-2320,340]])for(let j=0;j<7;j++){part('rubble',x+Math.sin(j*1.7)*15,y-j*21,z,26,30,28,j%2?'#7e9b69':'#66855e');}
  // Memorial can only be seen from the west roof, behind the library-facing wall.

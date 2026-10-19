@@ -25,6 +25,32 @@
  set('sc.bell','bell',{pickup:true});
  set('tc.sail','cape',{pickup:true,support:'crate',taken:'tc.sail'});
  set('pc.seeds','seeds',{pickup:true});
+ // Semantic assignments, reviewed against actual quest actions; never infer art from "lever".
+ const mechanism=(keys,model,extra={})=>set(keys,'mechanism-'+model,{mechanism:true,...extra});
+ mechanism('hp.cart.push','cart-grip');
+ mechanism('kd.return','keepsake');
+ mechanism('hp.windbreak hp.quiet lc.side ic.hugo.rope','rope-cleat');
+ mechanism('lc.gate rk.gate rk.wall kd.hidden kd.free ic.free ih.workers gf.gate gf.passage gf.pet.release sc.latch tc.approach sl.maintenance','latch');
+ mechanism('lc.force lc.escape','chain');
+ mechanism('woods.signal.crank woods.rescue.release home.orchard.wheel hp.lift ff.lift ih.return tc.brake tc.lift tc.cave.help cg.release la.lower la.upper la.cells','winch');
+ mechanism('hp.code.release lc.rail.release kd.press.brake ff.camp.release gf.transport la.vault.brake pc.west.upper pc.east.upper','brake');
+ mechanism('rv.pattern.clamp','clamp');
+ mechanism('pc.clamp','clamp',{pickup:true});
+ mechanism('pc.water pc.west.lower pc.east.lower pc.garden.water rv.pattern.cool','sluice');
+ mechanism('gf.pressure gf.pet.feed sc.drain','valve');
+ mechanism('gf.fault','pipe-fault');
+ mechanism('ic.hugo.brace tc.brace','brace');
+ mechanism('ic.hugo.find','rescue-horn');
+ mechanism('ff.reflect.3 ic.channel.plug','anchor');
+ mechanism('tc.shackle','shackle');
+ mechanism('pc.enter sl.release la.summit','sun-seal');
+ mechanism('pc.enter','sun-seal',{owner:'sun-receiver'});
+ mechanism('sl.shelf.0 sl.shelf.1','shelf-crank');
+ mechanism('sl.vow.0 sl.vow.1 sl.vow.2','archive');
+ set('rk.key','mechanism-key',{mechanism:true,pickup:true,taken:'rk.key'});
+ set('sl.records','papers');
+ set('dr.clue rv.pattern.note rv.supplies.note','diagram');
+ mechanism('rv.supplies.release','brake');
  function spec(o){return o&&props[o.key]||null;}
  function taken(o,state){const d=spec(o),f=state?.flags||{};return !!(d?.pickup&&(f['event.'+o.key]||f[d.taken||o.key]));}
  function drawn(o){return !!(root.HERO3D?.on&&root.__campaignObjectDrawn?.has(o));}

@@ -1,3 +1,5 @@
+import {syncInspectionMirror} from './hub-mirror3d.js?v=2308';
+const inspectionBackdrop=new THREE.Color(0x0e0d12);
 import {syncArenaArt} from './arena-art.js?v=2274';
 import {warmSceneGeometry} from './render-warmup3d.js?v=2234b';
 import {chessBlocksBoard} from './chess-visibility3d.js?v=2226e';
@@ -40,7 +42,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2306';
+import { WORLD3D, syncWorld } from './world3d.js?v=2308';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2306';
 import { PROP3D, syncProps } from './prop3d.js?v=2184';
 
@@ -2172,10 +2174,11 @@ export function drawHero3D(p, t, firstPass=true){
     if(window.__HOLLOW_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HOLLOW_SHADOW_DIRTY=false;}
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
     const inspecting=window.__BF3?.mode==='mirror',hidden=[],bg=scene.background,fog=scene.fog;
+    const inspectionMirror=syncInspectionMirror(scene,inspecting,cam);
     // A Color background forces Three to clear even with autoClear=false.
     // Later party passes must composite over the first hero, not erase it.
     if(!firstPass)scene.background=null;
-    if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child.name!=='__heroPose:mirrorInspect'&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=null;scene.fog=null;}
+    if(inspecting){for(const child of scene.children){if(child.visible&&child!==wrap&&!child.isLight&&child!==inspectionMirror&&child.name!=='Companion art'){hidden.push(child);child.visible=false;}}scene.background=inspectionBackdrop;scene.fog=null;}
     // Local draw only. Never change a peer rig, network state or a portrait.
     const fp=_isLocal&&!p._portrait&&window.__BF3?.meta.camMode==='fps'&&!p.sitting&&!window.BFHubDialogue?.active&&!window.BFInspection?.active&&!window.BFHubTour?.camera()&&!window.__bfEd?.EDITOR?.on&&!(window.__BF3?.G?.kingFinal&&['charge','cut'].includes(window.__BF3.G.boss?.akStage));
     const restoreFirstPerson=fp?weaponOnly(wrap):null;

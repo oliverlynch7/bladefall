@@ -1,0 +1,9 @@
+# Live mirror inspection · 2.308.0
+
+User requested a working high definition reflection inside mirror preview and removal of the vibrating gray plate.
+
+The old preview drew a fake second character, smoked glass and overlapping platform slabs. It now draws one actual hero and companion with a real planar reflection in an isolated scene, a reused detailed mirror frame, a consistent dark backdrop and no pedestal slabs. Reflection uses an aspect-aware target up to2048 pixels, updates each inspection frame and disposes its private target/geometry/material on exit. Hub target increases from384 to768 base resolution while retaining distance/front-facing and20Hz update safeguards. Culling reads the actual camera matrix: the shared renderer manually supplies camera matrices and leaves camera.position stale.
+
+Muted Chrome/WebGL verification, isolated synthetic old level100/gold1145 save: live reflection and equipped sword/armor, shepherd companion visible (its reflection clips naturally at the mirror edge), full frame visible, front orbit updates, rear orbit hides the mirror and stops updates, red X returns to hub with original level/gold, resources absent after exit, reopening creates a fresh reflection. Final clean browser tab had no console warnings/errors. Legacy unnamed equipment displays its slot instead of undefined. Real user saves untouched.
+
+preview.png is the actual browser capture, front-state.json and exit-state.json are visible QA reports. Node checks cover live target dimensions, manual matrix camera culling, resource disposal, cached frame reuse and no slab/duplicate draw; existing crisp-motion15, render-motion1624, pause42 and save24 checks pass. Module and inline scripts parse. No multiplayer session or physical low-end GPU performance soak was performed for this cosmetic preview change.

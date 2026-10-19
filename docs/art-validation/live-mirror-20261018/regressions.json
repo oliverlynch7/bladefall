@@ -1,0 +1,27 @@
+[
+  {
+    "suite": "scripts/test-live-mirror.mjs",
+    "passed": true,
+    "output": "Live mirror resolution, scene isolation, orbit visibility, resource disposal/reopen, shared frame preservation and slab/duplicate removal passed.\n"
+  },
+  {
+    "suite": "scripts/test-crisp-motion.cjs",
+    "passed": true,
+    "output": "15 character motion clarity checks passed: no sampling/drawing/toggle/warmup echo rigs, current-frame clear, normal peer compositing and loading warmup retained.\n"
+  },
+  {
+    "suite": "scripts/test-render-motion.cjs",
+    "passed": true,
+    "output": "1624 render interpolation, authority restoration, warp/menu/life exclusions and camera refresh checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-esc-pause.cjs",
+    "passed": true,
+    "output": "42 pause regression checks passed.\n"
+  },
+  {
+    "suite": "scripts/test-save-safety.cjs",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  }
+]

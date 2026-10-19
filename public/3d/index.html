@@ -1047,8 +1047,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
 <link rel="stylesheet" href="./bag-menu.css?v=2238">
-<link rel="stylesheet" href="./adventure-hud.css?v=2296">
-<script src="./adventure-hud.js?v=2311"></script>
+<link rel="stylesheet" href="./adventure-hud.css?v=2312">
+<script src="./adventure-hud.js?v=2312"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
@@ -1194,9 +1194,9 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./party-navigation.js?v=2292"></script>
 <script src="./combat-art.js?v=2237"></script>
 <script src="./hostile-art.js?v=1978"></script>
-<link rel="stylesheet" href="./chest-reveal.css?v=2311">
+<link rel="stylesheet" href="./chest-reveal.css?v=2312">
 <script src="./chest-rules.js?v=2311"></script>
-<script src="./chest-reveal.js?v=2311"></script>
+<script src="./chest-reveal.js?v=2312"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
@@ -1220,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.311.0-usable-loot-progression';
+const VERSION3D='2.312.0-clear-shards-and-loot';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4316,7 +4316,12 @@ function secretSenseUpdate(){const el=document.getElementById('secretsense');if(
  const q=document.getElementById('questbox'),rect=q&&!q.classList.contains('hide')?q.getBoundingClientRect():null;
  el.style.top=(rect?rect.top+10:180)+'px';el.style.left=(rect&&rect.right+100<innerWidth?rect.right+12:12)+'px';if(rect&&rect.right+100>=innerWidth)el.style.top=(rect.bottom+8)+'px';el.style.transform='none';
 }
+function riftShardHudUpdate(){
+ const region=G&&isCampaignAdventure()&&!G.bonusActive&&BFRiftShards.regions[G.zone];
+ BFAdventureHud.shards(region?BFRiftShards.progress(meta.riftShards,G.pendingRiftShards,region.id):null,mode==='play'&&questTrackerAllowed()&&!window.BF_LOADING?.active);
+}
 function questUpdate(){
+  riftShardHudUpdate();
   if(!questTrackerAllowed()){document.getElementById('questbox')?.classList.add('hide');return;}
   if(G?.bonusActive){const el=document.getElementById('questbox');if(!el)return;const guide=sprintGuideTarget(),section=G.bonusSections?.[G.bonusSectionIndex];const title='Treasure Sprint';const row=qrow(false,'◆',G.bonusSecured?'Take the exit':guide?.finish?'Open the treasure chest':section?.name||'Follow the gold path',G.bonusSecured?null:`${Math.min(G.bonusGuideIndex||0,G.bonusPath.length-1)}/${G.bonusPath.length-1}`);applyQuest(el,title,row,`sprint:${G.bonusSectionIndex}:${G.bonusGuideIndex}:${!!G.bonusSecured}`,false);return;}
   /* NO CAMPAIGN QUESTS IN THE ENDLESS DUNGEON. The floors borrow the zones' stage themes for
@@ -4356,8 +4361,7 @@ function questUpdate(){
     rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
       return qrow(done,done?'☑':'☐',q.d,(q.k==='survive'||q.k==='hunt'||q.n>1)?questProgressText(q):null); }).join('');
     if(areaClear()&&G.portal) rows+=qrow(false,eventIcon('event-secret-rift'),'The way opens — take the portal',null);
-    const shardRegion=inBriarStory()&&BFRiftShards.regions[G.zone],shards=shardRegion&&BFRiftShards.progress(meta.riftShards,G.pendingRiftShards,shardRegion.id);
-    rows+=shards&&(shards.banked+shards.pending)>0?qrow(shards.ready,eventIcon('event-secret-rift'),shards.ready?'Rift Shards ready · visit the Rift Hall':`Rift Shards · ${shards.banked}/5 saved${shards.pending?' · '+shards.pending+' carried':''}`,null):secretRow;
+    rows+=secretRow;
     sig='z'+Z.id+G.area+'|'+(inBriar()?(G.storyState?.revision||0):'')+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed')+(secret?'|secret':''); }
   const active=discoveredOptionalTasks().filter(m=>!m.done);
   if(active.length){rows+=`<section class="qoptional" aria-label="Optional objectives"><div class="qoptionalhead">Optional · ${active.length}</div>${active.map(m=>qrow(false,'◇',journalEscape(m.title)+`<br><small>${journalEscape(m.progress)}</small>`,null)).join('')}</section>`;}
@@ -6085,7 +6089,7 @@ function riftShardJournal(){
  if(!isCampaignAdventure())return '';
  const region=BFRiftShards.regions[G.zone],p=region&&BFRiftShards.progress(meta.riftShards,G.pendingRiftShards,region.id);
  if(!p||!(p.banked+p.pending))return '';
- return '<section aria-label="Rift Shards"><h3>Rift Shards</h3><p><strong>'+p.banked+' / 5 saved</strong> · '+p.pending+' carried this part</p><p>Complete this set to earn the <strong>'+htmlSafe(CLASSES[p.classId]?.disp||'new class')+'</strong> trial.</p><p style="color:#cdb5e4">'+RIFT_SHARD_HELP+'</p></section>';
+ return '<section aria-label="Rift Shards"><h3>Rift Shards</h3><p><strong>'+Math.min(5,p.banked+p.pending)+' / 5 found</strong></p><p>Complete this set to earn the <strong>'+htmlSafe(CLASSES[p.classId]?.disp||'new class')+'</strong> trial.</p><p style="color:#cdb5e4">'+RIFT_SHARD_HELP+'</p></section>';
 }
 function collectRiftShard(id){
  if(!isCampaignAdventure()||!G.p||G.p.dead)return 'invalid';
@@ -6164,7 +6168,7 @@ function zoneClear(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 function showGameUI(v){
-  if(!v){window.BFNpcNames?.clear();document.getElementById('interactprompt')?.classList.add('hide');}
+  if(!v){BFAdventureHud.shards(null,false);window.BFNpcNames?.clear();document.getElementById('interactprompt')?.classList.add('hide');}
   if(v) document.body.classList.remove('t-title');
   ['hud','hudprogress','controls','pausebtn','inventoryDock','mapCaption'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
   if(!v){ const _ss=document.getElementById('secretsense'); if(_ss) _ss.classList.add('hide'); }   // heart only shows during play, via secretSenseUpdate
@@ -16357,7 +16361,7 @@ let liveMenuWorld=null,backgroundMenuMode=null,pausedMenuWorld=null;
 function pauseMenuActive(){return !!G&&pausedMenuWorld===G&&!G.p?.dead&&['pause','menu','journal','mirror','upgrade'].includes(backgroundMenuMode||mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');}
 function pauseState(){const active=pauseMenuActive();return {active,frozen:active&&!MP.active,protected:active&&MP.active&&!MP.pvp&&!G.p?.downed};}
 function pauseDamageBlocked(){const s=pauseState();return s.frozen||s.protected;}
-function beginPause(){window.BFNarration?.stop();pausedMenuWorld=G;liveMenuWorld=G;releaseKeyboard();input.jumpEdge=false;input.dodgeEdge=false;if(G?.p){G.p.attackHeld=false;G.p.holdT=0;}document.getElementById('menuDamage')?.setAttribute('hidden','');}
+function beginPause(){window.BFAdventureHud?.shards?.(null,false);window.BFNarration?.stop();pausedMenuWorld=G;liveMenuWorld=G;releaseKeyboard();input.jumpEdge=false;input.dodgeEdge=false;if(G?.p){G.p.attackHeld=false;G.p.holdT=0;}document.getElementById('menuDamage')?.setAttribute('hidden','');}
 function pauseCaption(){return !MP.active?'Paused · Time is frozen':MP.pvp?'Live match · Time keeps moving':'Paused · You are protected · Your party keeps playing';}
 function validActivity(v){return ['Paused','In menus','Talking','Inspecting','Playing chess'].includes(v)?v:'';}
 function playerActivity(){if(pauseState().protected)return 'Paused';const m=backgroundMenuMode||mode;return m==='npc'?'Talking':m==='inspection'?'Inspecting':m==='chess'?'Playing chess':liveMenuWorld===G&&['pause','menu','journal','mirror'].includes(m)?'In menus':'';}

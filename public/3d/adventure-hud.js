@@ -5,6 +5,8 @@
  function mount(a){
   api=a;document.body.classList.add('adventure-hud');
   const gold=$('hudGold');const row=$('lvlbadge').parentElement;row.classList.add('hud-class-row');row.append(gold);row.after($('weapontag'));$('hudDetails').hidden=true;
+  const shard=document.createElement('div');shard.id='riftShardHud';shard.hidden=true;shard.setAttribute('role','status');shard.setAttribute('aria-live','polite');shard.innerHTML='<img src="icons/ui/item-rift-shard.png" alt=""><span>Rift Shards</span><b data-shard-count></b>';$('mapCaption').append(shard);
+  const captionSize=new ResizeObserver(()=>{const r=$('mapCaption').getBoundingClientRect();if(r.height)document.body.style.setProperty('--hud-map-caption-bottom',r.bottom+'px');});captionSize.observe($('mapCaption'));
   const fps=document.createElement('output');fps.id='fpsCounter';fps.hidden=true;fps.setAttribute('aria-label','Frames per second');fps.setAttribute('aria-live','off');document.body.append(fps);
   const dock=document.createElement('div');dock.id='adventureCombat';
   const skills=document.createElement('div');skills.id='adventureSkills';
@@ -28,6 +30,12 @@
   if(last?.item===data.item)last=data;
   if(current?.item===data.item){current=data;last=data;left=10;paint(data);return;}
   queue.push(data);if(queue.length>10)queue.shift();
+ }
+ function shards(progress,visible){
+  const el=$('riftShardHud');if(!el)return;el.hidden=!visible||!progress;if(el.hidden)return;
+  const count=Math.min(5,Math.max(0,(Number(progress.banked)||0)+(Number(progress.pending)||0))),text=count+' / 5';
+  const value=el.querySelector('[data-shard-count]');if(value.textContent!==text)value.textContent=text;
+  el.classList.toggle('ready',!!progress.ready);el.title=progress.ready?'Your class trial is ready in the Rift Hall.':progress.pending?'Clear this part to secure newly found shards.':'Find five matching shards to open a class trial.';
  }
  function paint(d){
   const o=d.item,old=d.equipped,rar=d.rarity||{};
@@ -54,6 +62,7 @@
 return rows;
  }
  function tick(dt,visible,g){
+  if(!visible&&$('riftShardHud'))$('riftShardHud').hidden=true;
   if(!panel)return;reset(g);panel.hidden=!visible||!current;
   const note=$('journalNotice'),reading=note&&!note.hidden;
   // On short/phone screens preserve the reading lane; keep collected gear queued.
@@ -73,5 +82,5 @@ return rows;
   if(fpsStart===null||fpsLast!==null&&ts-fpsLast>1000){fpsStart=ts;fpsFrames=0;el.textContent='FPS …';}else fpsFrames++;
   fpsLast=ts;const elapsed=ts-fpsStart;if(elapsed>=500){el.textContent=Math.round(fpsFrames*1000/elapsed)+' FPS';fpsStart=ts;fpsFrames=0;}
  }
- window.BFAdventureHud={mount,show,tick,fps,comparison,remember(data,g){reset(g);last=data;},clear(){queue=[];current=null;left=0;if(panel)panel.hidden=true;}};
+ window.BFAdventureHud={mount,show,tick,fps,shards,comparison,remember(data,g){reset(g);last=data;},clear(){queue=[];current=null;left=0;if(panel)panel.hidden=true;}};
 })();

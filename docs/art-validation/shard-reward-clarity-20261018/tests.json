@@ -1,0 +1,80 @@
+[
+  {
+    "suite": "test-chest-reveal.cjs",
+    "exit": 0,
+    "output": "125 chest motion preference, real reel lifecycle, sound, skip, hidden-tab and queue checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-shard-counter.cjs",
+    "exit": 0,
+    "output": "20 single-count, deduplication, region, ready, hide and real HUD integration checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-abyssal-heart.cjs",
+    "exit": 0,
+    "output": "Abyssal Heart: all40 authored shard IDs across8regions, sealed placements, NPC/event rewards,3D proximity, saved/carried filters, local co-op independence and no story mutations pass.",
+    "error": ""
+  },
+  {
+    "suite": "test-coop-chests.cjs",
+    "exit": 0,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\nMimic personal co-op reward identity, guest persistence and one-time collection pass.",
+    "error": ""
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "exit": 0,
+    "output": "24 save normalization and isolated recovery checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-campaign-compatibility.cjs",
+    "exit": 0,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-hud-progression-layout.cjs",
+    "exit": 0,
+    "output": "11 render-FPS / gold-move / saved-setting integration checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-loot-progression.cjs",
+    "exit": 0,
+    "output": "{\"checks\":21615,\"earlyRarities\":[\"common\",\"uncommon\"],\"gates\":[1,3,6,9,12],\"gearDeck\":[\"weapon\",\"helmet\",\"amulet\",\"weapon\",\"chest\",\"ring\",\"legs\",\"weapon\"],\"chestsPer100EarlyKills\":12,\"mimicsPer100Chests\":10}",
+    "error": ""
+  },
+  {
+    "suite": "test-shop-chests.cjs",
+    "exit": 0,
+    "output": "38 chest purchase conservation and gate checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-premium-progression.cjs",
+    "exit": 0,
+    "output": "514 premium award coordination, rollover, class choice, model, accessibility and sound-candidate checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-progression-celebrations.cjs",
+    "exit": 0,
+    "output": "{\"checks\":44,\"introMs\":900,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\nActual nonblocking rank-banner / menu suspension / cancellation checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-esc-pause.cjs",
+    "exit": 0,
+    "output": "42 pause regression checks passed.",
+    "error": ""
+  },
+  {
+    "suite": "test-journal-notice.cjs",
+    "exit": 0,
+    "output": "Journal notice passed: restore, dedupe, queued changes, scene reset, dialogue/menu pause, hover hold, dismissal, length-based reading.\nPinned revisions, latest arrivals, unread recovery, queued replacement, title changes and repeated snapshots passed.",
+    "error": ""
+  }
+]

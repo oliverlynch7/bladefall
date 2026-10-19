@@ -1,0 +1,1311 @@
+{
+  "schema": 1,
+  "voice_option": "B",
+  "revision": "20261018-v1",
+  "entries": {
+    "tutorial.welcome": {
+      "id": "tutorial.welcome",
+      "text": "Welcome. Let's try moving, jumping, attacking and dodging. The enemies will wait until you've practised these controls.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.welcome.base",
+          "text": "Welcome. Let's try moving, jumping, attacking and dodging. The enemies will wait until you've practised these controls.",
+          "text_sha256": "e5f2d1da24aa08434f67d9a2d8c99f116abe662c7357c81e56eea5ecadbb19e4"
+        }
+      }
+    },
+    "tutorial.menu-keys": {
+      "id": "tutorial.menu-keys",
+      "text": "Use the controls shown to select, continue or go back. In conversations, move the yellow selection to choose a reply.",
+      "keyboard": "Press E to select or continue. Q takes you back. Tab opens the main menu. In conversations, W and S, or the arrow keys, move the yellow selection.",
+      "requires": {
+        "interact": [
+          "KeyE"
+        ],
+        "pause": [
+          "Tab"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.menu-keys.adapted",
+          "text": "Use the controls shown to select, continue or go back. In conversations, move the yellow selection to choose a reply.",
+          "text_sha256": "00cf9479b87905dfeee4b95d3d6546da9bd370aa4ca81f0381ba477555f7d000"
+        },
+        "keyboard": {
+          "key": "tutorial.menu-keys.keyboard",
+          "text": "Press E to select or continue. Q takes you back. Tab opens the main menu. In conversations, W and S, or the arrow keys, move the yellow selection.",
+          "text_sha256": "16e6d90b813a35a26e104e3c1e1e3c222a887ed8f9b527e849579583fbf4960d"
+        }
+      }
+    },
+    "tutorial.bag-practice": {
+      "id": "tutorial.bag-practice",
+      "text": "Open your bag with the control shown. Use it again, or Back, to close the bag.",
+      "keyboard": "Press B to open your bag. Press B again, or Q, to close it.",
+      "requires": {
+        "bag": [
+          "KeyB"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.bag-practice.adapted",
+          "text": "Open your bag with the control shown. Use it again, or Back, to close the bag.",
+          "text_sha256": "0f5469430c39b532aee1d1b75e329e62986282255f82fe2d3ba8e088705123bf"
+        },
+        "keyboard": {
+          "key": "tutorial.bag-practice.keyboard",
+          "text": "Press B to open your bag. Press B again, or Q, to close it.",
+          "text_sha256": "175d9074eb8c8e0b7a3ae024caed79abc5e72094efbe9bc40ad0396db292a1c4"
+        }
+      }
+    },
+    "tutorial.pause-practice": {
+      "id": "tutorial.pause-practice",
+      "text": "Open the main menu with the control shown. Settings lets you rebind keys and set up an Xbox or PlayStation controller. Choose Resume to return.",
+      "keyboard": "Press Tab to open the main menu. Settings lets you rebind keys and set up an Xbox or PlayStation controller. Choose Resume, or press Q, to return.",
+      "requires": {
+        "pause": [
+          "Tab"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.pause-practice.adapted",
+          "text": "Open the main menu with the control shown. Settings lets you rebind keys and set up an Xbox or PlayStation controller. Choose Resume to return.",
+          "text_sha256": "44ca97ceb15e84bae69289c03a453fd1056481c4097de885434bd264da6d1f7c"
+        },
+        "keyboard": {
+          "key": "tutorial.pause-practice.keyboard",
+          "text": "Press Tab to open the main menu. Settings lets you rebind keys and set up an Xbox or PlayStation controller. Choose Resume, or press Q, to return.",
+          "text_sha256": "e3ff17f32423538abd1fc55c858c2d0e92a4f965613757b1242341c70de893fa"
+        }
+      }
+    },
+    "tutorial.move": {
+      "id": "tutorial.move",
+      "text": "Use your movement controls to move in different directions. There is no rush.",
+      "keyboard": "Use W, A, S and D to move in different directions. There is no rush.",
+      "requires": {
+        "up": [
+          "KeyW"
+        ],
+        "left": [
+          "KeyA"
+        ],
+        "down": [
+          "KeyS"
+        ],
+        "right": [
+          "KeyD"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.move.adapted",
+          "text": "Use your movement controls to move in different directions. There is no rush.",
+          "text_sha256": "90526e6ba993999307a5c6afef11474481fecf271d3bb53e27150b0432e067ca"
+        },
+        "keyboard": {
+          "key": "tutorial.move.keyboard",
+          "text": "Use W, A, S and D to move in different directions. There is no rush.",
+          "text_sha256": "7c27e3c146bd929ee2b769edcf353cff5b2f8b4240d35e30ad4173e55ccd9aaf"
+        }
+      }
+    },
+    "tutorial.jump": {
+      "id": "tutorial.jump",
+      "text": "Tap Jump for a short hop. Hold it briefly to jump higher.",
+      "keyboard": "Tap Space for a short hop. Hold Space briefly to jump higher.",
+      "requires": {
+        "jump": [
+          "Space"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.jump.adapted",
+          "text": "Tap Jump for a short hop. Hold it briefly to jump higher.",
+          "text_sha256": "d7fde5c0e88e10698fc9149c7d2245f9ff414387b41a451d87d22447277a521c"
+        },
+        "keyboard": {
+          "key": "tutorial.jump.keyboard",
+          "text": "Tap Space for a short hop. Hold Space briefly to jump higher.",
+          "text_sha256": "13128f8316959917cce7b5b37e797c160789214605bb007f0858ca0573a6acb6"
+        }
+      }
+    },
+    "tutorial.attack": {
+      "id": "tutorial.attack",
+      "text": "Red health bars mark enemies. Face one and use your basic attack.",
+      "keyboard": "Red health bars mark enemies. Face one and left-click to attack. You can also press J.",
+      "requires": {
+        "attack": [
+          "Mouse0",
+          "KeyJ"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.attack.adapted",
+          "text": "Red health bars mark enemies. Face one and use your basic attack.",
+          "text_sha256": "a51ff4262b47a2671b8faba4d575636e47410dd5559c918287ef69c31ea74870"
+        },
+        "keyboard": {
+          "key": "tutorial.attack.keyboard",
+          "text": "Red health bars mark enemies. Face one and left-click to attack. You can also press J.",
+          "text_sha256": "421f5a16d98f54dd86db78bf66200e289e15654dfa8388ffc8c5b5f917225642"
+        }
+      }
+    },
+    "tutorial.dodge": {
+      "id": "tutorial.dodge",
+      "text": "Dodge through an attack to avoid the hit. In the air, the same control makes you dash.",
+      "keyboard": "Press left Shift, or right-click, to dodge through an attack. In the air, the same control makes you dash.",
+      "requires": {
+        "dodge": [
+          "ShiftLeft",
+          "Mouse2"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.dodge.adapted",
+          "text": "Dodge through an attack to avoid the hit. In the air, the same control makes you dash.",
+          "text_sha256": "30f7271bcb226aea258c22c8307aa5533bdfc9e258b9045ba18ceaf95bec18e3"
+        },
+        "keyboard": {
+          "key": "tutorial.dodge.keyboard",
+          "text": "Press left Shift, or right-click, to dodge through an attack. In the air, the same control makes you dash.",
+          "text_sha256": "f554752e7531c29c5f3463f7eb3715aeef3e4108447101c5c960de37a819a827"
+        }
+      }
+    },
+    "tutorial.charge.available": {
+      "id": "tutorial.charge.available",
+      "text": "This weapon can charge. Hold Attack until it's ready, then release for a stronger hit. Try it if you like, or continue.",
+      "keyboard": "This weapon can charge. Hold the left mouse button until it's ready, then release for a stronger hit. Try it if you like, or continue.",
+      "requires": {
+        "attack": [
+          "Mouse0"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.charge.available.adapted",
+          "text": "This weapon can charge. Hold Attack until it's ready, then release for a stronger hit. Try it if you like, or continue.",
+          "text_sha256": "2aeaa6fc1a280f6ec7ece20262cdef41f884f6d181e08ae93a96c99f416be100"
+        },
+        "keyboard": {
+          "key": "tutorial.charge.available.keyboard",
+          "text": "This weapon can charge. Hold the left mouse button until it's ready, then release for a stronger hit. Try it if you like, or continue.",
+          "text_sha256": "b10e6efa801739a753cd72258373736b93cc71b7a764e6ce4bb8b6aee5498c03"
+        }
+      }
+    },
+    "tutorial.charge.unavailable": {
+      "id": "tutorial.charge.unavailable",
+      "text": "Your current weapon has no charged attack. Other weapons let you hold Attack and release for a stronger hit. You can continue.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.charge.unavailable.base",
+          "text": "Your current weapon has no charged attack. Other weapons let you hold Attack and release for a stronger hit. You can continue.",
+          "text_sha256": "43bd05231b9a58af43d667edf17b6c4102a2e8c975c3349d98aed3b0de290f87"
+        }
+      }
+    },
+    "tutorial.vitals": {
+      "id": "tutorial.vitals",
+      "text": "Health keeps you alive. Mana fuels your skills. Basic hits restore a little mana. A break from skills helps it recover faster. Enemies are active now, so keep moving.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.vitals.base",
+          "text": "Health keeps you alive. Mana fuels your skills. Basic hits restore a little mana. A break from skills helps it recover faster. Enemies are active now, so keep moving.",
+          "text_sha256": "6f2dc5a79bc61e8da3b257e63658a74f22125858868551279aecb50a7ff84b52"
+        }
+      }
+    },
+    "tutorial.objective": {
+      "id": "tutorial.objective",
+      "text": "Defeat six enemies. After the first three, your class ranks up and you'll choose a skill. After six, find the exit portal.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.objective.base",
+          "text": "Defeat six enemies. After the first three, your class ranks up and you'll choose a skill. After six, find the exit portal.",
+          "text_sha256": "6c6ee63fb30f629d16fbb5cd8f26ecd955d130862f77f2f63b600dc123c24fa0"
+        }
+      }
+    },
+    "tutorial.progress": {
+      "id": "tutorial.progress",
+      "text": "Your character level gives you stat points. Use the gold points button to spend them. Your class rank unlocks skills and automatic bonuses.",
+      "keyboard": "Your character level gives you stat points. Press C, or use the gold points button, to spend them. Your class rank unlocks skills and automatic bonuses.",
+      "requires": {
+        "stats": [
+          "KeyC"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.progress.adapted",
+          "text": "Your character level gives you stat points. Use the gold points button to spend them. Your class rank unlocks skills and automatic bonuses.",
+          "text_sha256": "a25250979bb005c1917d1df101998e57c630c7462b2c27b7e9f0dc249cff9cae"
+        },
+        "keyboard": {
+          "key": "tutorial.progress.keyboard",
+          "text": "Your character level gives you stat points. Press C, or use the gold points button, to spend them. Your class rank unlocks skills and automatic bonuses.",
+          "text_sha256": "c48aad572f1732c62706ccefed4392afb1fdd6031d291d28e5b29bed59f8a8a8"
+        }
+      }
+    },
+    "tutorial.skills": {
+      "id": "tutorial.skills",
+      "text": "Skills give you powerful attacks and other ways to fight. Use Skill One after class rank two. Watch its mana cost and recharge time.",
+      "keyboard": "Skills give you powerful attacks and other ways to fight. Press the number one to use your first skill after class rank two. Watch its mana cost and recharge time.",
+      "requires": {
+        "skill1": [
+          "Digit1"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.skills.adapted",
+          "text": "Skills give you powerful attacks and other ways to fight. Use Skill One after class rank two. Watch its mana cost and recharge time.",
+          "text_sha256": "d49d8a079738d463c2d1a6af0d2dcbf9a43188647d6e1b6ca38e8351a33bac61"
+        },
+        "keyboard": {
+          "key": "tutorial.skills.keyboard",
+          "text": "Skills give you powerful attacks and other ways to fight. Press the number one to use your first skill after class rank two. Watch its mana cost and recharge time.",
+          "text_sha256": "2e7609cb8e375c378bc0cc45887b2e9db13ebe6775b8816ab9a318ffa63d1eb6"
+        }
+      }
+    },
+    "tutorial.skill-use": {
+      "id": "tutorial.skill-use",
+      "text": "Your first skill is ready. Face an enemy in range and use Skill One. Watch your mana and its recharge time.",
+      "keyboard": "Your first skill is ready. Face an enemy in range and press the number one. Watch your mana and its recharge time.",
+      "requires": {
+        "skill1": [
+          "Digit1"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.skill-use.adapted",
+          "text": "Your first skill is ready. Face an enemy in range and use Skill One. Watch your mana and its recharge time.",
+          "text_sha256": "19169180a31a0daf56d67ea3f823bb86ae44350f4babede01f3733d107713257"
+        },
+        "keyboard": {
+          "key": "tutorial.skill-use.keyboard",
+          "text": "Your first skill is ready. Face an enemy in range and press the number one. Watch your mana and its recharge time.",
+          "text_sha256": "b9ebdf15274de29b6fc620469523dd697496cb9463a5f3d7413b178528b7e872"
+        }
+      }
+    },
+    "tutorial.bag": {
+      "id": "tutorial.bag",
+      "text": "Chests give equipment. If your bag is full and Auto-sell is off, the chest stays closed. Make space before opening it.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.bag.base",
+          "text": "Chests give equipment. If your bag is full and Auto-sell is off, the chest stays closed. Make space before opening it.",
+          "text_sha256": "4693c9e4981af00a2006c2e06f8038a6f7602ca524c65e06d0018d359eee8972"
+        }
+      }
+    },
+    "tutorial.autosell": {
+      "id": "tutorial.autosell",
+      "text": "Auto-sell turns new equipment into gold, even when your bag has space. Leave it off to keep your finds.",
+      "keyboard": "Press V to switch Auto-sell on or off. When on, new equipment sells for gold, even when your bag has space. Leave it off to keep your finds.",
+      "requires": {
+        "loot": [
+          "KeyV"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.autosell.adapted",
+          "text": "Auto-sell turns new equipment into gold, even when your bag has space. Leave it off to keep your finds.",
+          "text_sha256": "e8ef01d20c4cff912a9e3693e6fe3c7e5c6633ddebc45af30e137222dec00e7c"
+        },
+        "keyboard": {
+          "key": "tutorial.autosell.keyboard",
+          "text": "Press V to switch Auto-sell on or off. When on, new equipment sells for gold, even when your bag has space. Leave it off to keep your finds.",
+          "text_sha256": "114782b3acc2736b94de27edad25c9048171a24e58f87e04bee70ea553067884"
+        }
+      }
+    },
+    "tutorial.journal": {
+      "id": "tutorial.journal",
+      "text": "The journal keeps your clues and quest information. Open it whenever you need a reminder.",
+      "keyboard": "Press N to open the journal for your clues and quest information.",
+      "requires": {
+        "journal": [
+          "KeyN"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.journal.adapted",
+          "text": "The journal keeps your clues and quest information. Open it whenever you need a reminder.",
+          "text_sha256": "33108bf5fd1956bef43e36796365a88a6b06a14a9c37d549bfd5953f1fb779d5"
+        },
+        "keyboard": {
+          "key": "tutorial.journal.keyboard",
+          "text": "Press N to open the journal for your clues and quest information.",
+          "text_sha256": "eaef11ca97a6379718dc45889caa7fb890908a803a924c2173232c3f519198a0"
+        }
+      }
+    },
+    "tutorial.navigation": {
+      "id": "tutorial.navigation",
+      "text": "Gold marks your next objective. Blue marks friends, cyan marks pings, and red marks enemies.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.navigation.base",
+          "text": "Gold marks your next objective. Blue marks friends, cyan marks pings, and red marks enemies.",
+          "text_sha256": "c0a3efdb7155520facd0ea3fd4bf3a954f32248f15add0d91353c4d9f7cf568c"
+        }
+      }
+    },
+    "tutorial.menu": {
+      "id": "tutorial.menu",
+      "text": "You're ready to explore. The main menu has Settings and Help. You can change your controls or set up a controller there.",
+      "keyboard": "You're ready to explore. Press Tab for the main menu. Settings lets you change your controls or set up a controller. Q goes back, and E selects or continues.",
+      "requires": {
+        "pause": [
+          "Tab"
+        ],
+        "interact": [
+          "KeyE"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "tutorial.menu.adapted",
+          "text": "You're ready to explore. The main menu has Settings and Help. You can change your controls or set up a controller there.",
+          "text_sha256": "628cc08e1763ee71f10707c90607af4f213c9ed862b69971c98525cad5cb3348"
+        },
+        "keyboard": {
+          "key": "tutorial.menu.keyboard",
+          "text": "You're ready to explore. Press Tab for the main menu. Settings lets you change your controls or set up a controller. Q goes back, and E selects or continues.",
+          "text_sha256": "89953671a19f30ad05d713847f2f008e5900a8171faa33fab7a9cbc50655aa45"
+        }
+      }
+    },
+    "tutorial.exit": {
+      "id": "tutorial.exit",
+      "text": "The exit is open. Walk into the portal to continue your journey. Its gold marker shows the way on your map.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "tutorial.exit.base",
+          "text": "The exit is open. Walk into the portal to continue your journey. Its gold marker shows the way on your map.",
+          "text_sha256": "ca81f8b98844a90af46f21a703aeee76ebecdd5ceab1f48867714567bd650660"
+        }
+      }
+    },
+    "lore.protector": {
+      "id": "lore.protector",
+      "text": "For generations, Ian protected Aerth. He was a Bladeborn, able to face dangers that ordinary armies could not.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "lore.protector.base",
+          "text": "For generations, Ian protected Aerth. He was a Bladeborn, able to face dangers that ordinary armies could not.",
+          "text_sha256": "970aadc548a57365668b45529dea05ab711fb60cff3f90af4488a854ccc8d98b"
+        }
+      }
+    },
+    "lore.loss": {
+      "id": "lore.loss",
+      "text": "Ian died of old age, and no new protector appeared. A wealthy lord feared that same end. He hired mages and scholars to find a way to stop aging and death.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "lore.loss.base",
+          "text": "Ian died of old age, and no new protector appeared. A wealthy lord feared that same end. He hired mages and scholars to find a way to stop aging and death.",
+          "text_sha256": "5d70f2d9d6e41042f2a122eea3f77604d56ba8c12cf49051db035c85ebb86886"
+        }
+      }
+    },
+    "lore.promise": {
+      "id": "lore.promise",
+      "text": "Together, they built the Eternal Gate at Castle Duskmoor. The lord promised that anyone who passed through would never grow old. Families came, hoping to save the people they loved.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "lore.promise.base",
+          "text": "Together, they built the Eternal Gate at Castle Duskmoor. The lord promised that anyone who passed through would never grow old. Families came, hoping to save the people they loved.",
+          "text_sha256": "28b349990868fe340932d964ef161ffaae6fc3af41bd12dd9376dd5df1389fac"
+        }
+      }
+    },
+    "lore.conquest": {
+      "id": "lore.conquest",
+      "text": "The travelers returned ageless, but changed. The lord discovered they could not refuse his orders. He sent them to recruit more families, then turned his growing army against Aerth. He became the Abyss King. His army became the Hollowed Legion.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "lore.conquest.base",
+          "text": "The travelers returned ageless, but changed. The lord discovered they could not refuse his orders. He sent them to recruit more families, then turned his growing army against Aerth. He became the Abyss King. His army became the Hollowed Legion.",
+          "text_sha256": "a327d2dbc8c6140b7bcff148b33ef79ad9f493cafc61d39e93e93701d922ee4c"
+        }
+      }
+    },
+    "lore.home": {
+      "id": "lore.home",
+      "text": "Now the Legion is coming for Briar Town, your home. Your father, Thomas, helps the neighbors build barricades. You choose to help them. First, the Waystation: a safe place to prepare for the journey.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "lore.home.base",
+          "text": "Now the Legion is coming for Briar Town, your home. Your father, Thomas, helps the neighbors build barricades. You choose to help them. First, the Waystation: a safe place to prepare for the journey.",
+          "text_sha256": "d3d7f3d9799342fde9abb9704895b86f9439caf500e5784dfb2071a0b846b567"
+        }
+      }
+    },
+    "hub.overview": {
+      "id": "hub.overview",
+      "text": "This is the Waystation, your safe home base. Prepare here, then take a portal into the adventure. A portal is a magical doorway.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.overview.base",
+          "text": "This is the Waystation, your safe home base. Prepare here, then take a portal into the adventure. A portal is a magical doorway.",
+          "text_sha256": "d364412737442d0e674cd80a4185e95c4389dd2995f512cab70ed65dfcfcfba4"
+        }
+      }
+    },
+    "hub.waystone": {
+      "id": "hub.waystone",
+      "text": "The Waystone is your travel menu. Use it to return to places you've opened along the story.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.waystone.base",
+          "text": "The Waystone is your travel menu. Use it to return to places you've opened along the story.",
+          "text_sha256": "0242a44832ad77a68722ab6d14a7ffab3adb86b6354f97143628c4531ad730f0"
+        }
+      }
+    },
+    "hub.campaign": {
+      "id": "hub.campaign",
+      "text": "Start with Briar Town. This doorway leads to the first part of your adventure. Walk up and use Interact when you are ready.",
+      "keyboard": "Start with Briar Town. This doorway leads to the first part of your adventure. Walk up and press E when you are ready.",
+      "requires": {
+        "interact": [
+          "KeyE"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "hub.campaign.adapted",
+          "text": "Start with Briar Town. This doorway leads to the first part of your adventure. Walk up and use Interact when you are ready.",
+          "text_sha256": "fb9103854c84ff63f82a1fa7c8123a411d1957e5b56feade191fae36bfa941b4"
+        },
+        "keyboard": {
+          "key": "hub.campaign.keyboard",
+          "text": "Start with Briar Town. This doorway leads to the first part of your adventure. Walk up and press E when you are ready.",
+          "text_sha256": "d79f612dc5bfd7ad587c77318ca9a97afc9bf0073c7047576fd371536ef8bf36"
+        }
+      }
+    },
+    "hub.campaign-route": {
+      "id": "hub.campaign-route",
+      "text": "Finish each story region to open the next. You can return here between adventures.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.campaign-route.base",
+          "text": "Finish each story region to open the next. You can return here between adventures.",
+          "text_sha256": "9b3bfb2d71cee595424090263b51bc5b1d58eeb2d5bee4628ced82abd8bd43f9"
+        }
+      }
+    },
+    "hub.quartermaster": {
+      "id": "hub.quartermaster",
+      "text": "Buy equipment here, or sell what you don't need. Equipment changes how much damage you deal or withstand.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.quartermaster.base",
+          "text": "Buy equipment here, or sell what you don't need. Equipment changes how much damage you deal or withstand.",
+          "text_sha256": "fd58641e3f6a389f3e87726aaa5277a729579e461c79868714cca2486b8fc1f3"
+        }
+      }
+    },
+    "hub.chest": {
+      "id": "hub.chest",
+      "text": "Your bag holds your equipment. Open it to compare items and choose what to wear.",
+      "keyboard": "Your bag holds your equipment. Press B to compare items and choose what to wear, wherever you are.",
+      "requires": {
+        "bag": [
+          "KeyB"
+        ]
+      },
+      "variants": {
+        "adapted": {
+          "key": "hub.chest.adapted",
+          "text": "Your bag holds your equipment. Open it to compare items and choose what to wear.",
+          "text_sha256": "86573960a32d97d6345d50dd0be280f6b3c62094f1118061321687687a4fecb5"
+        },
+        "keyboard": {
+          "key": "hub.chest.keyboard",
+          "text": "Your bag holds your equipment. Press B to compare items and choose what to wear, wherever you are.",
+          "text_sha256": "3dc3c666cab70aaf096b7d6a4b0aceacf7eaf66c253e6d88174b59d43930810c"
+        }
+      }
+    },
+    "hub.anvil": {
+      "id": "hub.anvil",
+      "text": "The smith combines spare equipment into stronger gear. The forge shows what you can make and use.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.anvil.base",
+          "text": "The smith combines spare equipment into stronger gear. The forge shows what you can make and use.",
+          "text_sha256": "d30f6c5d896cc1ef06451a69f7606fb62e88fa0d70da0d2bbfc4cccbdd8a5bf6"
+        }
+      }
+    },
+    "hub.keeper": {
+      "id": "hub.keeper",
+      "text": "Visit the stylist to change your name, face and character's look. Outfits, capes and trails change your appearance, not your strength.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.keeper.base",
+          "text": "Visit the stylist to change your name, face and character's look. Outfits, capes and trails change your appearance, not your strength.",
+          "text_sha256": "fcfc8b4d2746aece74b5c5f89e3ee0033812f28d6bf9ac2455e2d7686ed44b4d"
+        }
+      }
+    },
+    "hub.drillmaster": {
+      "id": "hub.drillmaster",
+      "text": "Change your fighting class here, or change the skills and automatic bonuses you've chosen.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.drillmaster.base",
+          "text": "Change your fighting class here, or change the skills and automatic bonuses you've chosen.",
+          "text_sha256": "eb1a14177eb5db3a6ba8d8ef7f089dc296147aaedee29c1094057096c563b805"
+        }
+      }
+    },
+    "hub.beastkeeper": {
+      "id": "hub.beastkeeper",
+      "text": "Companions travel and fight beside you. Rescue the dogs in the Black Woods to start buying and training companions here.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.beastkeeper.base",
+          "text": "Companions travel and fight beside you. Rescue the dogs in the Black Woods to start buying and training companions here.",
+          "text_sha256": "8f6ef135aeedbcfe7d5561ea36c73d23d82b51fd2607e60c020b9d4591b11b91"
+        }
+      }
+    },
+    "hub.mirror": {
+      "id": "hub.mirror",
+      "text": "Use the mirror for a closer look at your outfit and equipment.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.mirror.base",
+          "text": "Use the mirror for a closer look at your outfit and equipment.",
+          "text_sha256": "70aaab4809f7605ab7a5b8e4b1a194e5db036143ae8bb54a853778bb6a885e33"
+        }
+      }
+    },
+    "hub.sparring": {
+      "id": "hub.sparring",
+      "text": "Practise fighting here. Inside, the bestiary is a guide to the enemies you'll meet.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.sparring.base",
+          "text": "Practise fighting here. Inside, the bestiary is a guide to the enemies you'll meet.",
+          "text_sha256": "0c9c5298259cb6908e4ce94efc834788cc37e386a43600c6e9b39fa196737e57"
+        }
+      }
+    },
+    "hub.bestiary": {
+      "id": "hub.bestiary",
+      "text": "The bestiary shows each enemy, where it lives, and how it fights.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.bestiary.base",
+          "text": "The bestiary shows each enemy, where it lives, and how it fights.",
+          "text_sha256": "e07446343ea75527c84e8bfed89b622d4928055197058d60f3d59dd0f32c46d8"
+        }
+      }
+    },
+    "hub.abyss": {
+      "id": "hub.abyss",
+      "text": "Fight waves of enemies to earn gold, experience and equipment when you want to grow stronger.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.abyss.base",
+          "text": "Fight waves of enemies to earn gold, experience and equipment when you want to grow stronger.",
+          "text_sha256": "ba586e57a8f3dd1de931ecaa42cb5f3474b6667292998c0a5d41c652efd6dd34"
+        }
+      }
+    },
+    "hub.delve": {
+      "id": "hub.delve",
+      "text": "Try to escape a prison dungeon. Between attempts, spend earned gold on permanent upgrades. This mode has separate saves from your story adventure.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.delve.base",
+          "text": "Try to escape a prison dungeon. Between attempts, spend earned gold on permanent upgrades. This mode has separate saves from your story adventure.",
+          "text_sha256": "83ea3fbb473267846a175c5ae88d4e9adf9e55a3c5c46427dd7b8e523ad8fdc8"
+        }
+      }
+    },
+    "hub.arena": {
+      "id": "hub.arena",
+      "text": "Set up a practice battle against computer opponents or friends. Your adventure equipment stays safe.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.arena.base",
+          "text": "Set up a practice battle against computer opponents or friends. Your adventure equipment stays safe.",
+          "text_sha256": "610dabaab3bd4a1797d734bda418bf29608203f0886c89f1cdd9f81c6f11d59f"
+        }
+      }
+    },
+    "hub.gauntlet": {
+      "id": "hub.gauntlet",
+      "text": "Fight powerful bosses one after another. Come here when you want a harder challenge.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.gauntlet.base",
+          "text": "Fight powerful bosses one after another. Come here when you want a harder challenge.",
+          "text_sha256": "10625b4c425f74d59eca9f68885da569b5669888abbbb6fb5c6a34655986ea86"
+        }
+      }
+    },
+    "hub.sprint": {
+      "id": "hub.sprint",
+      "text": "Race through a jumping course against the clock. This activity rewards fast times, not equipment.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.sprint.base",
+          "text": "Race through a jumping course against the clock. This activity rewards fast times, not equipment.",
+          "text_sha256": "f04fd2fd33edffe78357eef456b6577ef5d8e2e8c8d46385fc6c2b739658cfb7"
+        }
+      }
+    },
+    "hub.rifthall": {
+      "id": "hub.rifthall",
+      "text": "Each story region hides five Rift Shards. Find all five to open its challenge here. Beat that challenge to unlock another fighting class.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.rifthall.base",
+          "text": "Each story region hides five Rift Shards. Find all five to open its challenge here. Beat that challenge to unlock another fighting class.",
+          "text_sha256": "968d61c9a4fbe14a5ad12027944f79bef7bc02e2ba62b025feb9f05fd2d71def"
+        }
+      }
+    },
+    "hub.arcade": {
+      "id": "hub.arcade",
+      "text": "Take a break from the adventure with a small arcade game.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.arcade.base",
+          "text": "Take a break from the adventure with a small arcade game.",
+          "text_sha256": "c93caeef262ab188a14712553185bebff5b622607868b25527b1931ed246d650"
+        }
+      }
+    },
+    "hub.thomas": {
+      "id": "hub.thomas",
+      "text": "Thomas is your father. Talk to him when you return from your adventures.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "hub.thomas.base",
+          "text": "Thomas is your father. Talk to him when you return from your adventures.",
+          "text_sha256": "4d77a88051fb768df19ec8507c756d0fe9a7f3a15bf65253bd327ef393bc9f8b"
+        }
+      }
+    },
+    "menu.gearBtn": {
+      "id": "menu.gearBtn",
+      "text": "See what you have equipped and how it changes your stats.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.gearBtn.base",
+          "text": "See what you have equipped and how it changes your stats.",
+          "text_sha256": "2ae58e80247ace8cee79fb0a9ee62509b81cd4f8f98ab0e42c1c9e2d482764c8"
+        }
+      }
+    },
+    "menu.bagBtnP": {
+      "id": "menu.bagBtnP",
+      "text": "Compare, equip or sell the items you collect.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.bagBtnP.base",
+          "text": "Compare, equip or sell the items you collect.",
+          "text_sha256": "81574a5eb2fe6a05db2d511c04fc9665e5db52837b3ff4f58506f35b873b1ccc"
+        }
+      }
+    },
+    "menu.classesBtn": {
+      "id": "menu.classesBtn",
+      "text": "Read your class skills, chosen bonuses and future unlocks. Visit the Drillmaster to change your class.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.classesBtn.base",
+          "text": "Read your class skills, chosen bonuses and future unlocks. Visit the Drillmaster to change your class.",
+          "text_sha256": "7fb1bd19141d8292de723f63c351690679c6cfc1e01f03a3cb1990d52069f677"
+        }
+      }
+    },
+    "menu.achBtn": {
+      "id": "menu.achBtn",
+      "text": "See your achievements and records.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.achBtn.base",
+          "text": "See your achievements and records.",
+          "text_sha256": "f6e3d307145364e3b104bf2f76c0b4cbc1bcb7f7d3ca84be2524ccd6839cf775"
+        }
+      }
+    },
+    "menu.optBtn": {
+      "id": "menu.optBtn",
+      "text": "Change sound, graphics and camera settings. Under Controls and camera, rebind keys or set up an Xbox or PlayStation controller.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.optBtn.base",
+          "text": "Change sound, graphics and camera settings. Under Controls and camera, rebind keys or set up an Xbox or PlayStation controller.",
+          "text_sha256": "cf728367205d69c2e70d8b0623b309de2616f42aa7a4f9573d17208d8f6d5882"
+        }
+      }
+    },
+    "menu.multiplayerBtnP": {
+      "id": "menu.multiplayerBtnP",
+      "text": "Host a co-op room or join a friend. You keep using your current character.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.multiplayerBtnP.base",
+          "text": "Host a co-op room or join a friend. You keep using your current character.",
+          "text_sha256": "0cdc0a7a75a938956b180b6911fb68eecaa0d603116cbef0861cc785e0c9bdcf"
+        }
+      }
+    },
+    "menu.qmenu": {
+      "id": "menu.qmenu",
+      "text": "Return to the Waystation. You keep earned gold, experience and completed quest progress.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.qmenu.base",
+          "text": "Return to the Waystation. You keep earned gold, experience and completed quest progress.",
+          "text_sha256": "076fd131fa385ce7ab966e84b07ab730e437ab9900c26ced92aa64b863387ece"
+        }
+      }
+    },
+    "menu.titleBtnP": {
+      "id": "menu.titleBtnP",
+      "text": "Save your character and return to the title screen.",
+      "keyboard": null,
+      "requires": {},
+      "variants": {
+        "base": {
+          "key": "menu.titleBtnP.base",
+          "text": "Save your character and return to the title screen.",
+          "text_sha256": "c061e7a3b46464c2d800c753052e12dce4e5ae33969b0f868a19ffa07184dfcd"
+        }
+      }
+    }
+  },
+  "clips": [
+    {
+      "id": "tutorial.welcome.base",
+      "text": "Welcome. Let's try moving, jumping, attacking and dodging. The enemies will wait until you've practised these controls.",
+      "text_sha256": "e5f2d1da24aa08434f67d9a2d8c99f116abe662c7357c81e56eea5ecadbb19e4",
+      "file": "tutorial.welcome.base.e5f2d1da24aa.mp3"
+    },
+    {
+      "id": "tutorial.menu-keys.adapted",
+      "text": "Use the controls shown to select, continue or go back. In conversations, move the yellow selection to choose a reply.",
+      "text_sha256": "00cf9479b87905dfeee4b95d3d6546da9bd370aa4ca81f0381ba477555f7d000",
+      "file": "tutorial.menu-keys.adapted.00cf9479b879.mp3"
+    },
+    {
+      "id": "tutorial.menu-keys.keyboard",
+      "text": "Press E to select or continue. Q takes you back. Tab opens the main menu. In conversations, W and S, or the arrow keys, move the yellow selection.",
+      "text_sha256": "16e6d90b813a35a26e104e3c1e1e3c222a887ed8f9b527e849579583fbf4960d",
+      "file": "tutorial.menu-keys.keyboard.16e6d90b813a.mp3"
+    },
+    {
+      "id": "tutorial.bag-practice.adapted",
+      "text": "Open your bag with the control shown. Use it again, or Back, to close the bag.",
+      "text_sha256": "0f5469430c39b532aee1d1b75e329e62986282255f82fe2d3ba8e088705123bf",
+      "file": "tutorial.bag-practice.adapted.0f5469430c39.mp3"
+    },
+    {
+      "id": "tutorial.bag-practice.keyboard",
+      "text": "Press B to open your bag. Press B again, or Q, to close it.",
+      "text_sha256": "175d9074eb8c8e0b7a3ae024caed79abc5e72094efbe9bc40ad0396db292a1c4",
+      "file": "tutorial.bag-practice.keyboard.175d9074eb8c.mp3"
+    },
+    {
+      "id": "tutorial.pause-practice.adapted",
+      "text": "Open the main menu with the control shown. Settings lets you rebind keys and set up an Xbox or PlayStation controller. Choose Resume to return.",
+      "text_sha256": "44ca97ceb15e84bae69289c03a453fd1056481c4097de885434bd264da6d1f7c",
+      "file": "tutorial.pause-practice.adapted.44ca97ceb15e.mp3"
+    },
+    {
+      "id": "tutorial.pause-practice.keyboard",
+      "text": "Press Tab to open the main menu. Settings lets you rebind keys and set up an Xbox or PlayStation controller. Choose Resume, or press Q, to return.",
+      "text_sha256": "e3ff17f32423538abd1fc55c858c2d0e92a4f965613757b1242341c70de893fa",
+      "file": "tutorial.pause-practice.keyboard.e3ff17f32423.mp3"
+    },
+    {
+      "id": "tutorial.move.adapted",
+      "text": "Use your movement controls to move in different directions. There is no rush.",
+      "text_sha256": "90526e6ba993999307a5c6afef11474481fecf271d3bb53e27150b0432e067ca",
+      "file": "tutorial.move.adapted.90526e6ba993.mp3"
+    },
+    {
+      "id": "tutorial.move.keyboard",
+      "text": "Use W, A, S and D to move in different directions. There is no rush.",
+      "text_sha256": "7c27e3c146bd929ee2b769edcf353cff5b2f8b4240d35e30ad4173e55ccd9aaf",
+      "file": "tutorial.move.keyboard.7c27e3c146bd.mp3"
+    },
+    {
+      "id": "tutorial.jump.adapted",
+      "text": "Tap Jump for a short hop. Hold it briefly to jump higher.",
+      "text_sha256": "d7fde5c0e88e10698fc9149c7d2245f9ff414387b41a451d87d22447277a521c",
+      "file": "tutorial.jump.adapted.d7fde5c0e88e.mp3"
+    },
+    {
+      "id": "tutorial.jump.keyboard",
+      "text": "Tap Space for a short hop. Hold Space briefly to jump higher.",
+      "text_sha256": "13128f8316959917cce7b5b37e797c160789214605bb007f0858ca0573a6acb6",
+      "file": "tutorial.jump.keyboard.13128f831695.mp3"
+    },
+    {
+      "id": "tutorial.attack.adapted",
+      "text": "Red health bars mark enemies. Face one and use your basic attack.",
+      "text_sha256": "a51ff4262b47a2671b8faba4d575636e47410dd5559c918287ef69c31ea74870",
+      "file": "tutorial.attack.adapted.a51ff4262b47.mp3"
+    },
+    {
+      "id": "tutorial.attack.keyboard",
+      "text": "Red health bars mark enemies. Face one and left-click to attack. You can also press J.",
+      "text_sha256": "421f5a16d98f54dd86db78bf66200e289e15654dfa8388ffc8c5b5f917225642",
+      "file": "tutorial.attack.keyboard.421f5a16d98f.mp3"
+    },
+    {
+      "id": "tutorial.dodge.adapted",
+      "text": "Dodge through an attack to avoid the hit. In the air, the same control makes you dash.",
+      "text_sha256": "30f7271bcb226aea258c22c8307aa5533bdfc9e258b9045ba18ceaf95bec18e3",
+      "file": "tutorial.dodge.adapted.30f7271bcb22.mp3"
+    },
+    {
+      "id": "tutorial.dodge.keyboard",
+      "text": "Press left Shift, or right-click, to dodge through an attack. In the air, the same control makes you dash.",
+      "text_sha256": "f554752e7531c29c5f3463f7eb3715aeef3e4108447101c5c960de37a819a827",
+      "file": "tutorial.dodge.keyboard.f554752e7531.mp3"
+    },
+    {
+      "id": "tutorial.charge.available.adapted",
+      "text": "This weapon can charge. Hold Attack until it's ready, then release for a stronger hit. Try it if you like, or continue.",
+      "text_sha256": "2aeaa6fc1a280f6ec7ece20262cdef41f884f6d181e08ae93a96c99f416be100",
+      "file": "tutorial.charge.available.adapted.2aeaa6fc1a28.mp3"
+    },
+    {
+      "id": "tutorial.charge.available.keyboard",
+      "text": "This weapon can charge. Hold the left mouse button until it's ready, then release for a stronger hit. Try it if you like, or continue.",
+      "text_sha256": "b10e6efa801739a753cd72258373736b93cc71b7a764e6ce4bb8b6aee5498c03",
+      "file": "tutorial.charge.available.keyboard.b10e6efa8017.mp3"
+    },
+    {
+      "id": "tutorial.charge.unavailable.base",
+      "text": "Your current weapon has no charged attack. Other weapons let you hold Attack and release for a stronger hit. You can continue.",
+      "text_sha256": "43bd05231b9a58af43d667edf17b6c4102a2e8c975c3349d98aed3b0de290f87",
+      "file": "tutorial.charge.unavailable.base.43bd05231b9a.mp3"
+    },
+    {
+      "id": "tutorial.vitals.base",
+      "text": "Health keeps you alive. Mana fuels your skills. Basic hits restore a little mana. A break from skills helps it recover faster. Enemies are active now, so keep moving.",
+      "text_sha256": "6f2dc5a79bc61e8da3b257e63658a74f22125858868551279aecb50a7ff84b52",
+      "file": "tutorial.vitals.base.6f2dc5a79bc6.mp3"
+    },
+    {
+      "id": "tutorial.objective.base",
+      "text": "Defeat six enemies. After the first three, your class ranks up and you'll choose a skill. After six, find the exit portal.",
+      "text_sha256": "6c6ee63fb30f629d16fbb5cd8f26ecd955d130862f77f2f63b600dc123c24fa0",
+      "file": "tutorial.objective.base.6c6ee63fb30f.mp3"
+    },
+    {
+      "id": "tutorial.progress.adapted",
+      "text": "Your character level gives you stat points. Use the gold points button to spend them. Your class rank unlocks skills and automatic bonuses.",
+      "text_sha256": "a25250979bb005c1917d1df101998e57c630c7462b2c27b7e9f0dc249cff9cae",
+      "file": "tutorial.progress.adapted.a25250979bb0.mp3"
+    },
+    {
+      "id": "tutorial.progress.keyboard",
+      "text": "Your character level gives you stat points. Press C, or use the gold points button, to spend them. Your class rank unlocks skills and automatic bonuses.",
+      "text_sha256": "c48aad572f1732c62706ccefed4392afb1fdd6031d291d28e5b29bed59f8a8a8",
+      "file": "tutorial.progress.keyboard.c48aad572f17.mp3"
+    },
+    {
+      "id": "tutorial.skills.adapted",
+      "text": "Skills give you powerful attacks and other ways to fight. Use Skill One after class rank two. Watch its mana cost and recharge time.",
+      "text_sha256": "d49d8a079738d463c2d1a6af0d2dcbf9a43188647d6e1b6ca38e8351a33bac61",
+      "file": "tutorial.skills.adapted.d49d8a079738.mp3"
+    },
+    {
+      "id": "tutorial.skills.keyboard",
+      "text": "Skills give you powerful attacks and other ways to fight. Press the number one to use your first skill after class rank two. Watch its mana cost and recharge time.",
+      "text_sha256": "2e7609cb8e375c378bc0cc45887b2e9db13ebe6775b8816ab9a318ffa63d1eb6",
+      "file": "tutorial.skills.keyboard.2e7609cb8e37.mp3"
+    },
+    {
+      "id": "tutorial.skill-use.adapted",
+      "text": "Your first skill is ready. Face an enemy in range and use Skill One. Watch your mana and its recharge time.",
+      "text_sha256": "19169180a31a0daf56d67ea3f823bb86ae44350f4babede01f3733d107713257",
+      "file": "tutorial.skill-use.adapted.19169180a31a.mp3"
+    },
+    {
+      "id": "tutorial.skill-use.keyboard",
+      "text": "Your first skill is ready. Face an enemy in range and press the number one. Watch your mana and its recharge time.",
+      "text_sha256": "b9ebdf15274de29b6fc620469523dd697496cb9463a5f3d7413b178528b7e872",
+      "file": "tutorial.skill-use.keyboard.b9ebdf15274d.mp3"
+    },
+    {
+      "id": "tutorial.bag.base",
+      "text": "Chests give equipment. If your bag is full and Auto-sell is off, the chest stays closed. Make space before opening it.",
+      "text_sha256": "4693c9e4981af00a2006c2e06f8038a6f7602ca524c65e06d0018d359eee8972",
+      "file": "tutorial.bag.base.4693c9e4981a.mp3"
+    },
+    {
+      "id": "tutorial.autosell.adapted",
+      "text": "Auto-sell turns new equipment into gold, even when your bag has space. Leave it off to keep your finds.",
+      "text_sha256": "e8ef01d20c4cff912a9e3693e6fe3c7e5c6633ddebc45af30e137222dec00e7c",
+      "file": "tutorial.autosell.adapted.e8ef01d20c4c.mp3"
+    },
+    {
+      "id": "tutorial.autosell.keyboard",
+      "text": "Press V to switch Auto-sell on or off. When on, new equipment sells for gold, even when your bag has space. Leave it off to keep your finds.",
+      "text_sha256": "114782b3acc2736b94de27edad25c9048171a24e58f87e04bee70ea553067884",
+      "file": "tutorial.autosell.keyboard.114782b3acc2.mp3"
+    },
+    {
+      "id": "tutorial.journal.adapted",
+      "text": "The journal keeps your clues and quest information. Open it whenever you need a reminder.",
+      "text_sha256": "33108bf5fd1956bef43e36796365a88a6b06a14a9c37d549bfd5953f1fb779d5",
+      "file": "tutorial.journal.adapted.33108bf5fd19.mp3"
+    },
+    {
+      "id": "tutorial.journal.keyboard",
+      "text": "Press N to open the journal for your clues and quest information.",
+      "text_sha256": "eaef11ca97a6379718dc45889caa7fb890908a803a924c2173232c3f519198a0",
+      "file": "tutorial.journal.keyboard.eaef11ca97a6.mp3"
+    },
+    {
+      "id": "tutorial.navigation.base",
+      "text": "Gold marks your next objective. Blue marks friends, cyan marks pings, and red marks enemies.",
+      "text_sha256": "c0a3efdb7155520facd0ea3fd4bf3a954f32248f15add0d91353c4d9f7cf568c",
+      "file": "tutorial.navigation.base.c0a3efdb7155.mp3"
+    },
+    {
+      "id": "tutorial.menu.adapted",
+      "text": "You're ready to explore. The main menu has Settings and Help. You can change your controls or set up a controller there.",
+      "text_sha256": "628cc08e1763ee71f10707c90607af4f213c9ed862b69971c98525cad5cb3348",
+      "file": "tutorial.menu.adapted.628cc08e1763.mp3"
+    },
+    {
+      "id": "tutorial.menu.keyboard",
+      "text": "You're ready to explore. Press Tab for the main menu. Settings lets you change your controls or set up a controller. Q goes back, and E selects or continues.",
+      "text_sha256": "89953671a19f30ad05d713847f2f008e5900a8171faa33fab7a9cbc50655aa45",
+      "file": "tutorial.menu.keyboard.89953671a19f.mp3"
+    },
+    {
+      "id": "tutorial.exit.base",
+      "text": "The exit is open. Walk into the portal to continue your journey. Its gold marker shows the way on your map.",
+      "text_sha256": "ca81f8b98844a90af46f21a703aeee76ebecdd5ceab1f48867714567bd650660",
+      "file": "tutorial.exit.base.ca81f8b98844.mp3"
+    },
+    {
+      "id": "lore.protector.base",
+      "text": "For generations, Ian protected Aerth. He was a Bladeborn, able to face dangers that ordinary armies could not.",
+      "text_sha256": "970aadc548a57365668b45529dea05ab711fb60cff3f90af4488a854ccc8d98b",
+      "file": "lore.protector.base.970aadc548a5.mp3"
+    },
+    {
+      "id": "lore.loss.base",
+      "text": "Ian died of old age, and no new protector appeared. A wealthy lord feared that same end. He hired mages and scholars to find a way to stop aging and death.",
+      "text_sha256": "5d70f2d9d6e41042f2a122eea3f77604d56ba8c12cf49051db035c85ebb86886",
+      "file": "lore.loss.base.5d70f2d9d6e4.mp3"
+    },
+    {
+      "id": "lore.promise.base",
+      "text": "Together, they built the Eternal Gate at Castle Duskmoor. The lord promised that anyone who passed through would never grow old. Families came, hoping to save the people they loved.",
+      "text_sha256": "28b349990868fe340932d964ef161ffaae6fc3af41bd12dd9376dd5df1389fac",
+      "file": "lore.promise.base.28b349990868.mp3"
+    },
+    {
+      "id": "lore.conquest.base",
+      "text": "The travelers returned ageless, but changed. The lord discovered they could not refuse his orders. He sent them to recruit more families, then turned his growing army against Aerth. He became the Abyss King. His army became the Hollowed Legion.",
+      "text_sha256": "a327d2dbc8c6140b7bcff148b33ef79ad9f493cafc61d39e93e93701d922ee4c",
+      "file": "lore.conquest.base.a327d2dbc8c6.mp3"
+    },
+    {
+      "id": "lore.home.base",
+      "text": "Now the Legion is coming for Briar Town, your home. Your father, Thomas, helps the neighbors build barricades. You choose to help them. First, the Waystation: a safe place to prepare for the journey.",
+      "text_sha256": "d3d7f3d9799342fde9abb9704895b86f9439caf500e5784dfb2071a0b846b567",
+      "file": "lore.home.base.d3d7f3d97993.mp3"
+    },
+    {
+      "id": "hub.overview.base",
+      "text": "This is the Waystation, your safe home base. Prepare here, then take a portal into the adventure. A portal is a magical doorway.",
+      "text_sha256": "d364412737442d0e674cd80a4185e95c4389dd2995f512cab70ed65dfcfcfba4",
+      "file": "hub.overview.base.d36441273744.mp3"
+    },
+    {
+      "id": "hub.waystone.base",
+      "text": "The Waystone is your travel menu. Use it to return to places you've opened along the story.",
+      "text_sha256": "0242a44832ad77a68722ab6d14a7ffab3adb86b6354f97143628c4531ad730f0",
+      "file": "hub.waystone.base.0242a44832ad.mp3"
+    },
+    {
+      "id": "hub.campaign.adapted",
+      "text": "Start with Briar Town. This doorway leads to the first part of your adventure. Walk up and use Interact when you are ready.",
+      "text_sha256": "fb9103854c84ff63f82a1fa7c8123a411d1957e5b56feade191fae36bfa941b4",
+      "file": "hub.campaign.adapted.fb9103854c84.mp3"
+    },
+    {
+      "id": "hub.campaign.keyboard",
+      "text": "Start with Briar Town. This doorway leads to the first part of your adventure. Walk up and press E when you are ready.",
+      "text_sha256": "d79f612dc5bfd7ad587c77318ca9a97afc9bf0073c7047576fd371536ef8bf36",
+      "file": "hub.campaign.keyboard.d79f612dc5bf.mp3"
+    },
+    {
+      "id": "hub.campaign-route.base",
+      "text": "Finish each story region to open the next. You can return here between adventures.",
+      "text_sha256": "9b3bfb2d71cee595424090263b51bc5b1d58eeb2d5bee4628ced82abd8bd43f9",
+      "file": "hub.campaign-route.base.9b3bfb2d71ce.mp3"
+    },
+    {
+      "id": "hub.quartermaster.base",
+      "text": "Buy equipment here, or sell what you don't need. Equipment changes how much damage you deal or withstand.",
+      "text_sha256": "fd58641e3f6a389f3e87726aaa5277a729579e461c79868714cca2486b8fc1f3",
+      "file": "hub.quartermaster.base.fd58641e3f6a.mp3"
+    },
+    {
+      "id": "hub.chest.adapted",
+      "text": "Your bag holds your equipment. Open it to compare items and choose what to wear.",
+      "text_sha256": "86573960a32d97d6345d50dd0be280f6b3c62094f1118061321687687a4fecb5",
+      "file": "hub.chest.adapted.86573960a32d.mp3"
+    },
+    {
+      "id": "hub.chest.keyboard",
+      "text": "Your bag holds your equipment. Press B to compare items and choose what to wear, wherever you are.",
+      "text_sha256": "3dc3c666cab70aaf096b7d6a4b0aceacf7eaf66c253e6d88174b59d43930810c",
+      "file": "hub.chest.keyboard.3dc3c666cab7.mp3"
+    },
+    {
+      "id": "hub.anvil.base",
+      "text": "The smith combines spare equipment into stronger gear. The forge shows what you can make and use.",
+      "text_sha256": "d30f6c5d896cc1ef06451a69f7606fb62e88fa0d70da0d2bbfc4cccbdd8a5bf6",
+      "file": "hub.anvil.base.d30f6c5d896c.mp3"
+    },
+    {
+      "id": "hub.keeper.base",
+      "text": "Visit the stylist to change your name, face and character's look. Outfits, capes and trails change your appearance, not your strength.",
+      "text_sha256": "fcfc8b4d2746aece74b5c5f89e3ee0033812f28d6bf9ac2455e2d7686ed44b4d",
+      "file": "hub.keeper.base.fcfc8b4d2746.mp3"
+    },
+    {
+      "id": "hub.drillmaster.base",
+      "text": "Change your fighting class here, or change the skills and automatic bonuses you've chosen.",
+      "text_sha256": "eb1a14177eb5db3a6ba8d8ef7f089dc296147aaedee29c1094057096c563b805",
+      "file": "hub.drillmaster.base.eb1a14177eb5.mp3"
+    },
+    {
+      "id": "hub.beastkeeper.base",
+      "text": "Companions travel and fight beside you. Rescue the dogs in the Black Woods to start buying and training companions here.",
+      "text_sha256": "8f6ef135aeedbcfe7d5561ea36c73d23d82b51fd2607e60c020b9d4591b11b91",
+      "file": "hub.beastkeeper.base.8f6ef135aeed.mp3"
+    },
+    {
+      "id": "hub.mirror.base",
+      "text": "Use the mirror for a closer look at your outfit and equipment.",
+      "text_sha256": "70aaab4809f7605ab7a5b8e4b1a194e5db036143ae8bb54a853778bb6a885e33",
+      "file": "hub.mirror.base.70aaab4809f7.mp3"
+    },
+    {
+      "id": "hub.sparring.base",
+      "text": "Practise fighting here. Inside, the bestiary is a guide to the enemies you'll meet.",
+      "text_sha256": "0c9c5298259cb6908e4ce94efc834788cc37e386a43600c6e9b39fa196737e57",
+      "file": "hub.sparring.base.0c9c5298259c.mp3"
+    },
+    {
+      "id": "hub.bestiary.base",
+      "text": "The bestiary shows each enemy, where it lives, and how it fights.",
+      "text_sha256": "e07446343ea75527c84e8bfed89b622d4928055197058d60f3d59dd0f32c46d8",
+      "file": "hub.bestiary.base.e07446343ea7.mp3"
+    },
+    {
+      "id": "hub.abyss.base",
+      "text": "Fight waves of enemies to earn gold, experience and equipment when you want to grow stronger.",
+      "text_sha256": "ba586e57a8f3dd1de931ecaa42cb5f3474b6667292998c0a5d41c652efd6dd34",
+      "file": "hub.abyss.base.ba586e57a8f3.mp3"
+    },
+    {
+      "id": "hub.delve.base",
+      "text": "Try to escape a prison dungeon. Between attempts, spend earned gold on permanent upgrades. This mode has separate saves from your story adventure.",
+      "text_sha256": "83ea3fbb473267846a175c5ae88d4e9adf9e55a3c5c46427dd7b8e523ad8fdc8",
+      "file": "hub.delve.base.83ea3fbb4732.mp3"
+    },
+    {
+      "id": "hub.arena.base",
+      "text": "Set up a practice battle against computer opponents or friends. Your adventure equipment stays safe.",
+      "text_sha256": "610dabaab3bd4a1797d734bda418bf29608203f0886c89f1cdd9f81c6f11d59f",
+      "file": "hub.arena.base.610dabaab3bd.mp3"
+    },
+    {
+      "id": "hub.gauntlet.base",
+      "text": "Fight powerful bosses one after another. Come here when you want a harder challenge.",
+      "text_sha256": "10625b4c425f74d59eca9f68885da569b5669888abbbb6fb5c6a34655986ea86",
+      "file": "hub.gauntlet.base.10625b4c425f.mp3"
+    },
+    {
+      "id": "hub.sprint.base",
+      "text": "Race through a jumping course against the clock. This activity rewards fast times, not equipment.",
+      "text_sha256": "f04fd2fd33edffe78357eef456b6577ef5d8e2e8c8d46385fc6c2b739658cfb7",
+      "file": "hub.sprint.base.f04fd2fd33ed.mp3"
+    },
+    {
+      "id": "hub.rifthall.base",
+      "text": "Each story region hides five Rift Shards. Find all five to open its challenge here. Beat that challenge to unlock another fighting class.",
+      "text_sha256": "968d61c9a4fbe14a5ad12027944f79bef7bc02e2ba62b025feb9f05fd2d71def",
+      "file": "hub.rifthall.base.968d61c9a4fb.mp3"
+    },
+    {
+      "id": "hub.arcade.base",
+      "text": "Take a break from the adventure with a small arcade game.",
+      "text_sha256": "c93caeef262ab188a14712553185bebff5b622607868b25527b1931ed246d650",
+      "file": "hub.arcade.base.c93caeef262a.mp3"
+    },
+    {
+      "id": "hub.thomas.base",
+      "text": "Thomas is your father. Talk to him when you return from your adventures.",
+      "text_sha256": "4d77a88051fb768df19ec8507c756d0fe9a7f3a15bf65253bd327ef393bc9f8b",
+      "file": "hub.thomas.base.4d77a88051fb.mp3"
+    },
+    {
+      "id": "menu.gearBtn.base",
+      "text": "See what you have equipped and how it changes your stats.",
+      "text_sha256": "2ae58e80247ace8cee79fb0a9ee62509b81cd4f8f98ab0e42c1c9e2d482764c8",
+      "file": "menu.gearBtn.base.2ae58e80247a.mp3"
+    },
+    {
+      "id": "menu.bagBtnP.base",
+      "text": "Compare, equip or sell the items you collect.",
+      "text_sha256": "81574a5eb2fe6a05db2d511c04fc9665e5db52837b3ff4f58506f35b873b1ccc",
+      "file": "menu.bagBtnP.base.81574a5eb2fe.mp3"
+    },
+    {
+      "id": "menu.classesBtn.base",
+      "text": "Read your class skills, chosen bonuses and future unlocks. Visit the Drillmaster to change your class.",
+      "text_sha256": "7fb1bd19141d8292de723f63c351690679c6cfc1e01f03a3cb1990d52069f677",
+      "file": "menu.classesBtn.base.7fb1bd19141d.mp3"
+    },
+    {
+      "id": "menu.achBtn.base",
+      "text": "See your achievements and records.",
+      "text_sha256": "f6e3d307145364e3b104bf2f76c0b4cbc1bcb7f7d3ca84be2524ccd6839cf775",
+      "file": "menu.achBtn.base.f6e3d3071453.mp3"
+    },
+    {
+      "id": "menu.optBtn.base",
+      "text": "Change sound, graphics and camera settings. Under Controls and camera, rebind keys or set up an Xbox or PlayStation controller.",
+      "text_sha256": "cf728367205d69c2e70d8b0623b309de2616f42aa7a4f9573d17208d8f6d5882",
+      "file": "menu.optBtn.base.cf728367205d.mp3"
+    },
+    {
+      "id": "menu.multiplayerBtnP.base",
+      "text": "Host a co-op room or join a friend. You keep using your current character.",
+      "text_sha256": "0cdc0a7a75a938956b180b6911fb68eecaa0d603116cbef0861cc785e0c9bdcf",
+      "file": "menu.multiplayerBtnP.base.0cdc0a7a75a9.mp3"
+    },
+    {
+      "id": "menu.qmenu.base",
+      "text": "Return to the Waystation. You keep earned gold, experience and completed quest progress.",
+      "text_sha256": "076fd131fa385ce7ab966e84b07ab730e437ab9900c26ced92aa64b863387ece",
+      "file": "menu.qmenu.base.076fd131fa38.mp3"
+    },
+    {
+      "id": "menu.titleBtnP.base",
+      "text": "Save your character and return to the title screen.",
+      "text_sha256": "c061e7a3b46464c2d800c753052e12dce4e5ae33969b0f868a19ffa07184dfcd",
+      "file": "menu.titleBtnP.base.c061e7a3b464.mp3"
+    }
+  ]
+}

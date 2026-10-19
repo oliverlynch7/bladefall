@@ -29,18 +29,18 @@ const lessons=[
 const skillLesson={id:'skill-use',title:'Try your new skill',body:(g,hint)=>'Skill 1 is a powerful part of combat, not just an extra button. Face an enemy in range and press '+hint('skill1')+' to try it. Watch your mana and its recharge countdown.',action:'skill1',target:['#bSk0']};
 const pauseHint=()=>guide?.hint?.('pause')||'Tab';
 function practice(action){if(guide?.steps[guide.i]?.practice===action){guide.practiceOpened=true;suspend();}}
-function suspend(){if(guide){const practice=guide.steps[guide.i].practice;if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;}if(panel)panel.hidden=true;BFTutorialCallout.hide();}
-function stop(){if(guide)guide.g._tutorialSafe=false;guide=null;panel?.remove();panel=null;BFTutorialCallout.clear();}
+function suspend(){if(guide)window.BFNarration?.hide(guide);if(guide){const practice=guide.steps[guide.i].practice;if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;}if(panel)panel.hidden=true;BFTutorialCallout.hide();}
+function stop(){if(guide)window.BFNarration?.hide(guide);if(guide)guide.g._tutorialSafe=false;guide=null;panel?.remove();panel=null;BFTutorialCallout.clear();}
 function start(g){if(!g)return;stop();g._guidedUsed=true;g._tutorialSafe=true;document.exitPointerLock?.();guide={g,i:0,steps:lessons,hold:0,run:0};}
 function skill(g){
- if(!g)return;const resume=guide?.g===g?guide:null;
+ if(!g)return;if(guide)window.BFNarration?.hide(guide);const resume=guide?.g===g?guide:null;
  if(resume?.steps[resume.i]?.id==='skill-use')return;
  if(!resume)stop();
  guide={g,i:0,steps:[skillLesson],hold:0,run:0,resume};
  g._tutorialSafe=false;
 }
 function next(){
- if(!guide)return;guide.i++;guide.success=null;panel?.classList?.remove('lesson-success');guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;guide.practiceOpened=false;
+ if(!guide)return;window.BFNarration?.hide(guide);guide.i++;guide.success=null;panel?.classList?.remove('lesson-success');guide.hold=0;guide.run=0;guide.airborne=false;guide.qualified=false;guide.tapped=null;guide.rendered=null;guide.practiceOpened=false;
  if(guide.i>=guide.steps.length){
   if(guide.resume){guide=guide.resume;guide.rendered=null;}
   else{stop();return;}
@@ -54,12 +54,14 @@ function position(force=false){
  BFTutorialCallout.place(panel,guide.steps[guide.i].target,guide.steps[guide.i].anchor);
 }
 function movementHints(hint){return [...new Set(['up','left','down','right'].map(hint))];}
+function narrationLine(){const step=guide?.steps[guide.i];if(!step)return null;const id=step.id==='charge'?'charge.'+(window.__BF3?.isChargeWeapon(guide.g.p.weapon)?'available':'unavailable'):step.id;return window.BFNarration?.resolve('tutorial.'+id);}
+function narrate(){if(!guide||!panel||panel.hidden)return;const owner=guide,step=guide.steps[guide.i],line=narrationLine();if(line)window.BFNarration?.show(panel,line,owner,()=>guide===owner&&owner.steps[owner.i]===step&&window.__BF3?.G===owner.g&&!owner.g.p.dead&&!owner.g.p.downed&&window.__BF3?.mode==='play');}
 function draw(hint){
  guide.hint=hint;
  const step=guide.steps[guide.i],core=coreActions.includes(step.action);
- const actions=['up','left','down','right','jump','attack','dodge','skill1','bag','journal','interact','pause'];
+ const actions=['up','left','down','right','jump','attack','dodge','skill1','bag','journal','interact','pause','stats','loot'];
  const sig=step.id+actions.map(hint).join('|');
- if(guide.rendered===sig)return;guide.rendered=sig;
+ if(guide.rendered===sig){narrate();return;}guide.rendered=sig;
  if(!panel){
   panel=document.createElement('section');panel.id='guidedLesson';panel.setAttribute('aria-label','Adventure tutorial');
   document.body.append(panel);
@@ -73,19 +75,19 @@ function draw(hint){
  count.textContent=guide.steps===lessons?within+' / '+group.length:'Try it';
  meta.append(stage,count);
  const h=document.createElement('h2');h.textContent=step.title;
- const p=document.createElement('p');p.textContent=typeof step.body==='function'?step.body(guide.g,hint):step.body;copy.append(meta,h,p);
+ const p=document.createElement('p');p.textContent=narrationLine()?.text||(typeof step.body==='function'?step.body(guide.g,hint):step.body);copy.append(meta,h,p);
  let keys=[],label='';
  if(core){keys=step.action==='move'?movementHints(hint):[hint(step.action)];label=step.action==='jump'?'Hold to continue':'Try it to continue';}
  else if(step.id==='charge'){keys=[hint('attack')];label='Optional · hold, then release';}
  else if(['skills','skill-use'].includes(step.id)){keys=[hint('skill1')];label=step.id==='skills'?'Skill 1 · unlocks at class rank 2':'Skill 1';}
- else if(step.practice){keys=[hint(step.practice),'Q'];label='Open · then close to finish practice';}
+ else if(step.practice){keys=[hint(step.practice),window.BFNarration?.backHint()||'Q'];label='Open · then close to finish practice';}
  else if(step.id==='bag'){keys=[hint('bag')];label='Open bag · Loot reopens the latest pickup';}
  else if(step.id==='journal'){keys=[hint('journal')];label='Open journal';}
  else if(step.id==='menu-keys'){keys=[hint('interact'),'Q'];label='Choose / continue · Back / close';}
  else if(step.id==='menu'){keys=[pauseHint()];label='Open menu after closing tips';}
  if(step.id==='menu-keys'){
   const cards=document.createElement('div');cards.className='lesson-menu-keys';
-  for(const [key,title,description] of [[hint('interact'),'Choose / continue','Talk, interact and select'],['Q','Back / close','Leave menus and conversations'],[hint('pause'),'Main menu','Settings, controller setup and more']]){
+  for(const [key,title,description] of [[hint('interact'),'Choose / continue','Talk, interact and select'],[window.BFNarration?.backHint()||'Q','Back / close','Leave menus and conversations'],[hint('pause'),'Main menu','Settings, controller setup and more']]){
    const card=document.createElement('div'),keycap=document.createElement('kbd'),titleEl=document.createElement('strong'),text=document.createElement('small');
    keycap.textContent=key;titleEl.textContent=title;text.textContent=description;card.append(keycap,titleEl,text);cards.append(card);
   }copy.append(cards);keys=[];
@@ -97,7 +99,7 @@ function draw(hint){
  const skip=document.createElement('button');skip.type='button';skip.className='skip';skip.textContent=step.safe?'Skip lessons':'Close tips';skip.onclick=stop;buttons.append(skip);panel.append(buttons);
  const status=document.createElement('p');status.className='lesson-status';status.textContent=step.safe?'Enemies wait during control practice.':'Optional tip · movement and combat stay active.';panel.append(status);
  if(guide.success!=null)paintSuccess();
- position(true);
+ narrate();position(true);
 }
 function canReceive(){return guide&&panel&&!panel.hidden&&window.__BF3?.mode==='play';}
 window.addEventListener('keydown',e=>{

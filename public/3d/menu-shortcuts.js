@@ -12,6 +12,9 @@ function backButton(container){
 }
 function onKey(e){
  const game=root.__BF3;
+ if(game?.keyAction?.(e.code)==='interact'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!typing(e.target)&&!game.rebinding&&!root.__bfEd?.EDITOR?.on)game.hudDevice?.('keyboard');
+ const narrationButton=e.target?.closest?.('.narration-controls button');
+ if(narrationButton&&game?.keyAction?.(e.code)==='interact'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing&&!game.rebinding&&!root.__bfEd?.EDITOR?.on&&!narrationButton.disabled&&narrationButton.getClientRects().length){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)narrationButton.click();return;}
  if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&!typing(e.target)&&root.BFMenuTour?.key(e))return;
  if(game&&['menu','pause'].includes(game.mode)&&game.keyAction?.(e.code)==='interact'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.isComposing&&!typing(e.target)&&!game.rebinding&&!root.__bfEd?.EDITOR?.on){
   const button=e.target?.closest?.('button,summary');

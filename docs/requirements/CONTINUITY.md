@@ -2692,3 +2692,8 @@ Published /3d/narrator-preview/ with native accessible players, one active audit
 ## [Codex | 2026-10-18] Narrator B selected
 
 Oliver chose audition B: "B is best." Lock the already saved ElevenLabs identity Bladefall Narrator B for tutorial and lore narration; do not regenerate a substitute voice. Exact voice ID is preserved in audio-source/voice/narrator-audition-20261018/manifest.json under selection. This approves the voice, not every draft line. Full-script recording/integration remains pending finalized wording. No new credits spent or game audio changed.
+
+
+## [Codex | 2026-10-18] Voiced onboarding — v2.287.0
+
+Completed Oliver’s approved voice B integration: 71 exact-caption recordings for tutorial, five lore cards, hub tour and first-use eight-button menu guide. Default controls spoken explicitly; custom bindings/controller use adapted takes and current on-screen badges. Replay/mute/independent narrator volume, immediate scene cancellation, loading deferral and music ducking. Original SFX and NPC voice tracks preserved. 264 narration checks plus control/menu/guidance regressions pass. Muted real Chrome decoded every clip and verified actual playback, skipping/replay, settings, controller hints and legacy level-100 save without progression loss. Cost 3,045 credits; settled balance 33,240. No physical-controller or two-human audio validation claimed.

@@ -1,0 +1,8 @@
+# Voiced onboarding validation
+
+
+## [Codex | 2026-10-18] Voiced onboarding — v2.287.0
+
+Completed Oliver’s approved voice B integration: 71 exact-caption recordings for tutorial, five lore cards, hub tour and first-use eight-button menu guide. Default controls spoken explicitly; custom bindings/controller use adapted takes and current on-screen badges. Replay/mute/independent narrator volume, immediate scene cancellation, loading deferral and music ducking. Original SFX and NPC voice tracks preserved. 264 narration checks plus control/menu/guidance regressions pass. Muted real Chrome decoded every clip and verified actual playback, skipping/replay, settings, controller hints and legacy level-100 save without progression loss. Cost 3,045 credits; settled balance 33,240. No physical-controller or two-human audio validation claimed.
+
+Browser: isolated legacy-save QA fixture, Chrome, all media force-muted. 71/71 clips decoded with AudioContext; native audio readyState 4 and current clip playing. Loading initially reported waiting then played; music .36 -> .198 while narration active. Rapid story changes retained only the current source. Replay E did not advance; mute and volume controls worked. Default B and remapped I displayed correctly; simulated controller changed captions to adapted recordings and live menu buttons. Five story cards preserve final Enter Waystation without Skip. Prior QA-only missing helper error was repaired in fixture generation, not production. No later console errors observed. Source hashes and runtime audio hashes checked by automated tests. These checks verify integration, not subjective acting quality.

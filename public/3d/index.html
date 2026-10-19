@@ -7,7 +7,8 @@
 <script src="./coop-audio.js?v=2281"></script>
 <script src="./enemy-warning-sfx.js?v=2277"></script>
 <meta charset="UTF-8">
-<script src="./menu-shortcuts.js?v=2285"></script>
+<link rel="stylesheet" href="./narration.css?v=2287"><script src="./onboarding-script.js?v=2287"></script><script src="./narration.js?v=2287"></script>
+<script src="./menu-shortcuts.js?v=2287"></script>
 <script src="./menu-close.js?v=2261f"></script>
 <script src="./menu-gold.js?v=2268"></script>
 <link rel="stylesheet" href="./menu-gold.css?v=2268">
@@ -1125,7 +1126,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./hub-dialogue.js?v=2261"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
-<script src="./hub-tour.js?v=2285"></script>
+<script src="./hub-tour.js?v=2287"></script>
 <script src="./controller.js?v=2190"></script>
 <script src="./ui-icons.js?v=2087"></script>
 <script src="./face-options.js?v=2254"></script>
@@ -1200,8 +1201,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2285"></script>
-<script src="./menu-tour.js?v=2285b"></script>
+<script src="./guided-tutorial.js?v=2287"></script>
+<script src="./menu-tour.js?v=2287"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
 <script src="./briar-beta.js?v=2131"></script>
@@ -1219,7 +1220,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.286.0-narrator-auditions';
+const VERSION3D='2.287.0-voiced-onboarding';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1277,7 +1278,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}catch(e){return null;} }
-const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
+const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','narrationOn','narrationVol','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol','progressPlayerSound','progressClassSound','combatDetailAudio',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','sprintBests','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -1394,13 +1395,7 @@ function wipeMode(m){ meta.riftWelcomeSeen=false;meta.chestRecords={}; try{local
    zone, a line when a boss reveals, and endings that vary by difficulty. */
 const STORY={
   // Spoiler-safe opening. Supplied illustrations remain unchanged JPEG originals.
-  origin:[
-    "For generations, Ian protected Aerth. He was a Bladeborn: a rare warrior strong enough to face dangers that ordinary armies could not.",
-    "Ian eventually died of old age. People mourned him, and no new Bladeborn appeared. Meanwhile, a wealthy lord was searching for a way to stop aging and death.",
-    "The lord hired mages and scholars to find a cure. Together, they built the Eternal Gate at Castle Duskmoor. He promised that anyone who walked through it would never grow old. Families came, hoping to save the people they loved.",
-    "The travelers returned ageless, but changed. The lord discovered that they could not refuse his orders. He sent them home to bring more families through the Gate. With Ian gone, he turned his growing army against Aerth. The lord became the Abyss King; his army, the Hollowed Legion.",
-    "Now the Legion is coming for Briar Town, your home. Your father, Thomas, helps the neighbors build barricades, but they have no army to protect them. You choose to help. Your journey begins at the Waystation, a safe place to prepare."
-  ],
+  origin:['protector','loss','promise','conquest','home'].map(id=>BFOnboardingScript.resolve('lore.'+id).text),
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
     "Something in you straightens its back — something that was always there, waiting for its turn.",
     "You don't have a name for it. You don't need one yet.",
@@ -1496,21 +1491,21 @@ function playStory(lines, onDone, opts){
 }
 // Manual pacing keeps every opening card readable at the player's own speed.
 function playOpening(onDone){
-  clearWorldTexts();
+  window.BFNarration?.stop();clearWorldTexts();
   const root=document.createElement('section'); root.id='openingStory';
   root.setAttribute('role','dialog'); root.setAttribute('aria-modal','true'); root.setAttribute('aria-label','The story of Aerth');
-  root.innerHTML=`<img id="openingArt" alt=""><div class="openingCopy"><p id="openingCount"></p><h1 id="openingTitle"></h1><p id="openingText" aria-live="polite"></p><nav aria-label="Story controls"><button id="openingBack">Back</button><button id="openingNext">Next</button><button id="openingSkip">Skip story</button></nav><small>Read at your own pace · Arrow keys to turn pages</small></div>`;
+  root.innerHTML=`<img id="openingArt" alt=""><div class="openingCopy"><p id="openingCount"></p><h1 id="openingTitle"></h1><p id="openingText" aria-live="polite"></p><nav aria-label="Story controls"><button id="openingBack">Back</button><button id="openingNext">Next</button><button id="openingSkip">Skip story</button></nav><small>Read at your own pace · Select to continue · Arrow keys to turn pages</small></div>`;
   const names=['ian-protects-aerth','ians-memorial','eternal-gate','hollowed-return','briar-defends'];
   const titles=['Aerth’s protector','A world without its protector','A promise of eternal life','The Hollowed Legion','Your home. Your choice.'];
   const descriptions=['Ian watches over the peaceful towns of Aerth.','Families leave flowers at a memorial to Ian.','A lord welcomes families to a towering black Eternal Gate.','A woman reaches toward a returned traveler whose eyes seem empty.','Thomas builds a barricade while Mara and the villagers prepare to defend Briar.'];
   mode='story'; showGameUI(false); showOverlay(false); document.body.append(root);
   names.forEach(name=>{const im=new Image();im.src='assets/story/opening/'+name+'.jpg';});
   let page=0,done=false;
-  const finish=()=>{if(done)return;done=true;document.removeEventListener('keydown',keys,true);root.remove();story._skip=null;if(onDone)onDone();};
-  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=page===4?'Enter the Waystation':'Next';root.querySelector('#openingSkip').hidden=page===4;};
+  const finish=()=>{if(done)return;done=true;window.BFNarration?.hide(root);document.removeEventListener('keydown',keys,true);root.remove();story._skip=null;if(onDone)onDone();};
+  const render=()=>{root.querySelector('#openingArt').src='assets/story/opening/'+names[page]+'.jpg';root.querySelector('#openingArt').alt=descriptions[page];root.querySelector('#openingCount').textContent='BLADEFALL · '+(page+1)+' / 5';root.querySelector('#openingTitle').textContent=titles[page];root.querySelector('#openingText').textContent=STORY.origin[page];root.querySelector('#openingBack').disabled=page===0;root.querySelector('#openingNext').textContent=(page===4?'Enter the Waystation':'Next')+' · '+controlKey('interact');root.querySelector('#openingSkip').hidden=page===4;const currentPage=page,line=window.BFNarration?.resolve('lore.'+['protector','loss','promise','conquest','home'][page]);if(line)window.BFNarration?.show(root.querySelector('.openingCopy'),line,root,()=>!done&&root.isConnected&&page===currentPage&&mode==='story',true);};
   const next=()=>{if(page===4)finish();else{page++;render();}};
   const back=()=>{if(page>0){page--;render();}};
-  const keys=e=>{if(!['Escape','Enter','Space','ArrowRight','ArrowLeft'].includes(e.code))return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(e.code==='Escape')finish();else if(e.code==='ArrowLeft')back();else if((e.code==='Enter'||e.code==='Space')&&e.target.tagName==='BUTTON')e.target.click();else next();};
+  const keys=e=>{const choose=keyAction(e.code)==='interact';if(!choose&&!['Escape','Enter','Space','ArrowRight','ArrowLeft'].includes(e.code))return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(e.code==='Escape')finish();else if(e.code==='ArrowLeft')back();else if((choose||e.code==='Enter'||e.code==='Space')&&e.target.tagName==='BUTTON')e.target.click();else next();};
   document.addEventListener('keydown',keys,true);story._skip=finish;
   root.querySelector('#openingNext').onclick=next;root.querySelector('#openingBack').onclick=back;root.querySelector('#openingSkip').onclick=finish;
   render();root.querySelector('#openingNext').focus();
@@ -1616,9 +1611,9 @@ const MUS_DEFAULT=0.30;                               // Phase 20: music sits UN
 let musEls={}, musCur=null, musCurKey=null, musFadeT=null;
 let gameAudioPaused=false, pausedHtmlAudio=[];
 const musicStings=new Set();
-function musicVolume(key){return (MUSVOL[key]??(key==='wayfarers_hearth_loop'?.36:MUS_DEFAULT))*(meta.musicVol??1)*(mode==='npc'?.45:1);}
+function musicVolume(key){return (MUSVOL[key]??(key==='wayfarers_hearth_loop'?.36:MUS_DEFAULT))*(meta.musicVol??1)*(mode==='npc'?.45:window.BFNarration?.speaking?.55:1);}
 let musDialogueMix=false;
-function musicMixUpdate(){const duck=mode==='npc';if(duck!==musDialogueMix){musDialogueMix=duck;if(musCur&&musicOK())musFade(musCur,musicVolume(musCurKey),350);}}
+function musicMixUpdate(){const duck=mode==='npc'||!!window.BFNarration?.speaking;if(duck!==musDialogueMix){musDialogueMix=duck;if(musCur&&musicOK())musFade(musCur,musicVolume(musCurKey),350);}}
 function musicOK(){ return meta.musicOn!==false && typeof Audio!=='undefined'; }
 function musEl(key){
   if(typeof Audio==='undefined') return null;         // no audio in this environment — music is optional, never fatal
@@ -1663,7 +1658,7 @@ function musicSting(key){                             // one-shot over the top o
   musicStings.add(a); a.addEventListener('ended',()=>musicStings.delete(a),{once:true});
   a.volume=(MUSVOL[key]!=null?MUSVOL[key]:0.45)*(meta.musicVol!=null?meta.musicVol:1);
   const p=a.play(); if(p&&p.catch) p.catch(()=>{});
-  if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,back,900); },2600); }
+  if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,musicVolume(musCurKey),900); },2600); }
 }
 function musicForScene(){
  if(G?.kingFinal){const k={ian:'ian_spirit',charge:'void_charge',cut:'void_cut',restored:'restoration',home:'restoration',collapse:'void_arrival'}[G.boss.akStage];if(k)return musicPlay(BFMusicScore.cues[k].track);}
@@ -1690,6 +1685,11 @@ function setSfxVol(v){
 function rewardSound(kind,original){const selected=kind==='player'?meta.progressPlayerSound:meta.progressClassSound;if(selected==='new'&&playFx('reward_'+kind))return;original();}
 function rewardAudioSettings(){return ['player','class'].map(kind=>{const field=kind==='player'?'progressPlayerSound':'progressClassSound';return `<div class="setrow reward-sound-row" id="rewardSound${kind}"><label for="rewardSelect${kind}">${kind==='player'?'Player level-up':'Class rank-up'} sound</label><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="rewardSelect${kind}" style="min-height:40px;background:#192b37;color:#fff0cc;border:1px solid #96784e;border-radius:7px;padding:8px"><option value="original" ${meta[field]!=='new'?'selected':''}>Original</option><option value="new" ${meta[field]==='new'?'selected':''}>New ElevenLabs</option></select><button type="button" id="rewardListen${kind}" class="bigbtn ghost" style="width:auto;margin:0">Listen</button></div><small id="rewardStatus${kind}" role="status">Your original sound stays selected until you change it.</small></div>`;}).join('')+`<div class="setrow" id="combatDetailRow"><label for="combatDetailAudio">Extra combat sound detail<input id="combatDetailAudio" type="checkbox" ${meta.combatDetailAudio!==false?'checked':''}></label><small>Adds skill impact effects and creature voices. Original sounds stay intact. <a href="combat-sound-preview/" target="_blank" rel="noopener" style="color:#f3ce87">Listen to the new sounds ↗</a></small></div>`+'<p class="ovsub" id="rewardPreviewLink"><a href="progression-preview.html" target="_blank" rel="noopener" style="color:#f3ce87">Compare the full reward experiences ↗</a></p>';}
 function bindRewardAudio(){const detail=document.getElementById('combatDetailAudio');if(detail)detail.onchange=()=>{meta.combatDetailAudio=detail.checked;persistGlobal();};for(const kind of ['player','class']){const select=document.getElementById('rewardSelect'+kind),listen=document.getElementById('rewardListen'+kind),status=document.getElementById('rewardStatus'+kind);if(!select||!listen)continue;const field=kind==='player'?'progressPlayerSound':'progressClassSound';select.onchange=()=>{meta[field]=select.value==='new'?'new':'original';persistGlobal();queueSkillFx('reward_'+kind);status.textContent='Selected for future '+(kind==='player'?'level-ups.':'class ranks.');};listen.onclick=()=>{initAudio();if(!sOn()){status.textContent='Sound is muted. Raise Sound effects volume to listen.';return;}const play=()=>kind==='player'?rewardSound('player',()=>{if(!playFx('levelcheer'))SFX.levelup();}):rewardSound('class',()=>SFX.classup());if(select.value!=='new'||FXBUF['reward_'+kind]){play();status.textContent='Playing your selected sound.';return;}queueSkillFx('reward_'+kind);listen.disabled=true;status.textContent='Loading preview…';const start=Date.now();const wait=()=>{if(!listen.isConnected)return;if(document.hidden){listen.disabled=false;status.textContent='Preview stopped. Press Listen when ready.';return;}if(FXBUF['reward_'+kind]){listen.disabled=false;play();status.textContent='Playing your selected sound.';}else if(Date.now()-start<6000)setTimeout(wait,80);else{listen.disabled=false;status.textContent='Could not load. Original sound remains available.';}};setTimeout(wait,80);};}}
+function narrationForceMute(){return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname||'')||/[?&]mute=1\b/.test(location.search);}
+function narrationVolume(){if(meta.narrationVol==null)return .8;const value=Number(meta.narrationVol);return Number.isFinite(value)?Math.max(0,Math.min(1,value)):.8;}
+function narrationOptions(){return {enabled:meta.narrationOn!==false,volume:narrationVolume(),suspended:!!window.BF_LOADING?.active,muted:narrationForceMute()||gameAudioPaused||!actx};}
+function narrationContext(){return {bindings:meta.keybinds,controller:hudInputDevice==='controller'&&!meta.padOff};}
+function setNarrationEnabled(value){meta.narrationOn=value===true;persistGlobal();window.BFNarration?.tick();}
 function audioSettingsHTML(){
   const mv=meta.musicOn===false?0:Math.round((meta.musicVol!=null?meta.musicVol:1)*100);
   const sv=meta.soundOn===false?0:Math.round((meta.sfxVol!=null?meta.sfxVol:1)*100);
@@ -1698,11 +1698,16 @@ function audioSettingsHTML(){
       <input id="musSlider" type="range" min="0" max="100" step="5" value="${mv}"></div>
     <div class="setrow"><label><span><span id="sfxIcon" class="ico ico-menu ico-sound-${sv?'on':'off'}"></span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
       <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>
+    <div class="setrow"><label><span>Narrator · tutorial &amp; story</span><input id="narrationOn" type="checkbox" ${meta.narrationOn!==false?'checked':''}></label><small>Voice B guides practice, menus, the story and the hub. Replay is available on each page.</small></div>
+    <div class="setrow"><label><span>Narrator volume</span><b id="narrationVal">${Math.round(narrationVolume()*100)}%</b></label><input id="narrationSlider" type="range" min="0" max="100" step="5" value="${Math.round(narrationVolume()*100)}"><small>Independent of sound effects. Text and controls remain available when narration is off.</small></div>
     <div class="setrow"><label><span>Recorded NPC voices</span><input id="dialogueVoice" type="checkbox" ${meta.dialogueVoice!==false?'checked':''}></label></div>
     <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS!==false?'checked':''}></label><small>On by default. Character voices depend on your device. Both follow sound-effects volume.</small></div>${rewardAudioSettings()}`;
 }
 function bindAudioSettings(){
   bindRewardAudio();
+  const narrator=document.getElementById('narrationOn'),nvol=document.getElementById('narrationSlider');
+  if(narrator)narrator.onchange=()=>setNarrationEnabled(narrator.checked);
+  if(nvol)nvol.oninput=()=>{meta.narrationVol=Math.max(0,Math.min(1,+nvol.value/100));persistGlobal();document.getElementById('narrationVal').textContent=nvol.value+'%';window.BFNarration?.tick();};
   for(const id of ['dialogueVoice','dialogueTTS']){const e=document.getElementById(id);if(e)e.onchange=()=>{meta[id]=e.checked;persistGlobal();};}
   const ms=document.getElementById('musSlider'), ss=document.getElementById('sfxSlider');
   if(ms) ms.addEventListener('input',()=>{ initAudio(); setMusicVol((+ms.value)/100); const v=document.getElementById('musVal'); if(v) v.textContent=ms.value+'%'; });
@@ -5787,18 +5792,18 @@ function hubTutorial(){
 const HELP_ENTRIES=[
  {cat:'Controls',title:'Attack and charge',get body(){return 'Face your target and tap '+controlHint('attack')+' for a basic attack. Chargeable weapons power up when held; release to launch the charged attack. Other weapons can repeat while held.';}},
  {cat:'Controls',title:'Dodge and air dash',get body(){return 'Use '+controlHint('dodge')+' to dodge. It briefly protects you from hits. Jump with '+controlHint('jump')+'; hold for more height, then dash in the air to cross wider gaps.';}},
- {cat:'Controls',title:'Menus and tutorials',get body(){return controlHint('pause')+' opens the menu. In solo play, the menu pauses time. In co-op, you stay visible and protected while friends keep playing. Guided control practice is protected; later HUD tips are optional. Use '+controlHint('interact')+' to continue a tip, or '+controlHint('pause')+' to close the guide.';}},
+ {cat:'Controls',title:'Menus and tutorials',get body(){return controlHint('pause')+' opens the menu. In solo play, the menu pauses time. In co-op, you stay visible and protected while friends keep playing. Guided control practice is protected; later HUD tips are optional. Use '+controlHint('interact')+' to continue a tip. Q goes back in menus. Use the visible Skip lessons or Close tips button to end a guide. Settings lets you rebind keys or set up a controller.';}},
  {cat:'Gear',title:'Bag capacity and auto-sell',get body(){return 'Chests reveal one equipment item and fill free bag slots automatically. Enemies rarely drop a chest, never loose gear. With Auto-sell OFF, a full bag leaves chests unopened. ON sells new equipment pickups for gold, even with empty slots. Check the bottom-left label. Open your bag with '+controlHint('bag')+'. Buy Magic Packs at the Quartermaster for more space.';}},
  {cat:'Gear',title:'Pickup comparisons',body:'The bottom-left pickup card compares new gear with your equipped item. It says Added to bag, Auto-sold, or Bag full. Use Loot beside the bag to reopen the latest card. New gear is not automatically equipped: choose it in your bag.'},
  {cat:'Gear',title:'Rarity and equipment requirements',body:'Common is grey, Uncommon green, Rare blue, Epic purple, Legendary gold. The same character-level requirements apply to weapons, armor, rings and amulets. Class rank does not meet a gear level requirement; your class must also support the weapon.'},
  {cat:'Gear',title:'Chests and mimics',get body(){return 'Better chests offer better chances of rare gear. Each chest gives one equipment item. Use '+controlHint('interact')+' to finish its reveal faster. Some chests are mimics: be ready for a fight.';}},
  {cat:'Gear',title:'The Forge (Smith)',body:'Fuse two unequipped pieces of the same category and rarity into one random item of the next rarity. There is no gold fee. Your character must meet the new rarity’s level requirement. The Forge shows a color-coded level guide.'},
- {cat:'Classes & Skills',title:'Player levels and stat points',body:'Character XP raises your player level, unlocking stronger gear and one stat point per level until the allocation cap. Open Bag → Character Stats to spend points on health, attack, defense, speed or mana.'},
+ {cat:'Classes & Skills',title:'Player levels and stat points',get body(){return 'Character XP raises your player level and gives stat points until the allocation cap. Press '+controlHint('stats')+', or open Bag → Character Stats, to improve health, attack, defense, speed or mana.';}},
  {cat:'Classes & Skills',title:'Class ranks, skills and mana',body:'Class XP ranks up your equipped class. Rank 2 unlocks your first skill; later ranks offer more skills and passive choices. Hotbar padlocks show locked skills. The top-left number is mana cost; the countdown shows recharge time.'},
  {cat:'Classes & Skills',title:'Changing classes and choices',body:'Visit the Drillmaster to equip an unlocked class or reset your skill choices for gold. Each class keeps its own rank and cosmetic selection. Changing classes does not reset your character level.'},
  {cat:'Classes & Skills',title:'Earned class appearances',body:'At class ranks 5 and 10, new looks unlock at the Stylist. Equip the class you want to style first. Its selected look is remembered when you switch away. These rewards change appearance, not combat stats.'},
  {cat:'The Hub',title:'The Stylist',body:'Change your name, eye color and facial features for gold, or choose an unlocked appearance for your equipped class. Preview earned styles before choosing.'},
- {cat:'The Hub',title:'The Waystone',body:'Use the central crystal to restore health and open travel to unlocked campaign regions or the Rift Hall. Start the story at Briar Town. Shops and side activities are optional.'},
+ {cat:'The Hub',title:'The Waystone',body:'The central crystal is your fast travel menu. Visit places you have already opened along the story, or enter the Rift Hall for class challenges. Start your story adventure at Briar Town. Shops and side activities are optional.'},
  {cat:'The Hub',title:'Companions and sparring',body:'Rescue the two dogs in the Black Woods to unlock the Beastkeeper’s pet shop. Equip one companion at a time. The Sparring Room lets you practice combat and inspect enemies in the bestiary.'},
  {cat:'The Hub',title:'Abyssal Descent and Endless Dungeon',body:'Abyssal Descent earns campaign gold, XP and gear through waves of enemies. Endless Dungeon is a separate prison-escape roguelite with three save slots; spend its earned gold on permanent upgrades between runs.'},
  {cat:'Progress',title:'Leaving a campaign level',get body(){return isPermadeath()?'This difficulty erases your character save on death. Check its rules before fighting.':'Campaign XP, class upgrades, gold and completed hub requests stay saved when you die or return to the hub. Finish the current part to secure new gear and carried Rift Shards.';}},
@@ -10085,6 +10090,7 @@ function updateHudKeys(){if(!meta.keybinds)return;
  for(let i=0;i<4;i++){const b=document.getElementById('bSk'+i);if(b)b.dataset.n=controlKey('skill'+(i+1));}
  for(const [id,action]of [['bLMB','attack'],['bSpace','dodge']]){const b=document.getElementById(id);if(b){b.dataset.k=controlKey(action);b.setAttribute('aria-label',(action==='attack'?'Basic attack':'Dodge')+' · '+controlHint(action));}}
  document.querySelectorAll('[data-action-hint]').forEach(el=>el.textContent=controlKey(el.dataset.actionHint));
+ window.BFHubTour?.refreshHints?.();window.BFMenuTour?.refreshHints?.();
  hudBagUpdate();
 }
 function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
@@ -16295,7 +16301,7 @@ let liveMenuWorld=null,backgroundMenuMode=null,pausedMenuWorld=null;
 function pauseMenuActive(){return !!G&&pausedMenuWorld===G&&!G.p?.dead&&['pause','menu','journal','mirror','upgrade'].includes(backgroundMenuMode||mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');}
 function pauseState(){const active=pauseMenuActive();return {active,frozen:active&&!MP.active,protected:active&&MP.active&&!MP.pvp&&!G.p?.downed};}
 function pauseDamageBlocked(){const s=pauseState();return s.frozen||s.protected;}
-function beginPause(){pausedMenuWorld=G;liveMenuWorld=G;releaseKeyboard();input.jumpEdge=false;input.dodgeEdge=false;if(G?.p){G.p.attackHeld=false;G.p.holdT=0;}document.getElementById('menuDamage')?.setAttribute('hidden','');}
+function beginPause(){window.BFNarration?.stop();pausedMenuWorld=G;liveMenuWorld=G;releaseKeyboard();input.jumpEdge=false;input.dodgeEdge=false;if(G?.p){G.p.attackHeld=false;G.p.holdT=0;}document.getElementById('menuDamage')?.setAttribute('hidden','');}
 function pauseCaption(){return !MP.active?'Paused · Time is frozen':MP.pvp?'Live match · Time keeps moving':'Paused · You are protected · Your party keeps playing';}
 function validActivity(v){return ['Paused','In menus','Talking','Inspecting','Playing chess'].includes(v)?v:'';}
 function playerActivity(){if(pauseState().protected)return 'Paused';const m=backgroundMenuMode||mode;return m==='npc'?'Talking':m==='inspection'?'Inspecting':m==='chess'?'Playing chess':liveMenuWorld===G&&['pause','menu','journal','mirror'].includes(m)?'In menus':'';}
@@ -18226,6 +18232,7 @@ function applyReadingSize(){
  document.body.classList.toggle('reading-large',scale>1);document.documentElement.style.setProperty('--reading-size',(16*scale)+'px');
 }
 function showOverlayHTML(html){
+  window.BFNarration?.stop();
   applyReadingSize();
   if(typeof stopAllLoops==='function') stopAllLoops();   // opening any menu silences looping sfx (footsteps/heartbeat) that would otherwise hang while paused
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
@@ -20585,7 +20592,7 @@ function organizePauseSettings(){
   const groups=[
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
     ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','motionTrailsBtn','armFxBtn','resolutionBtn','fpsBtn']],
-    ['Audio & voices',['musSlider','sfxSlider','dialogueVoice','dialogueTTS','rewardSoundplayer','rewardSoundclass','rewardPreviewLink']],
+    ['Audio & voices',['musSlider','sfxSlider','narrationOn','narrationSlider','dialogueVoice','dialogueTTS','rewardSoundplayer','rewardSoundclass','rewardPreviewLink']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
   ];
@@ -23745,7 +23752,7 @@ function frame(ts){
   const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
-  musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);BFAdventureHud.tick(dt,mode==='play'&&!window.BF_LOADING?.active,G);
+  window.BFNarration?.tick();musicMixUpdate();journalNoticeSync();BFJournalNotice.tick(dt,mode==='play'&&!window.BF_LOADING?.active);BFAdventureHud.tick(dt,mode==='play'&&!window.BF_LOADING?.active,G);
   if(mode!=='play'||!window.HERO3D?.on){const restHint=document.getElementById('campaignRestHint');if(restHint)restHint.hidden=true;}
   window.BF_LOADING?.tick(G,mode);
    if(window.BF_LOADING?.active){acc=0;}else{acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }}
@@ -24357,7 +24364,7 @@ window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPAN
   openCharCreate,   /* so character creation can be photographed - its preview IS the feature */
   openDiffSelect,   /* so the difficulty menu can be PHOTOGRAPHED - its art is the thing being changed */
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */
-  controlKey,hudDevice,setAutoSell,bagGroundEquipment,offerTrinket,fullBagNotice,get rebinding(){return !!_rebindState;},resetKeyAction,controlHint,openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
+  narrationContext,narrationOptions,setNarrationEnabled,controlKey,hudDevice,setAutoSell,bagGroundEquipment,offerTrinket,fullBagNotice,get rebinding(){return !!_rebindState;},resetKeyAction,controlHint,openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatResetRanks, cheatOpenEverything, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
@@ -24691,6 +24698,7 @@ const betaApi={
   Object.assign(p,{x:0,y:0,z:240,yaw:Math.PI,vx:0,vy:0,vz:0,onGround:true});G.cam={x:0,y:0,z:240};G.camYaw=Math.PI;G.camPitch=.35;queueLevelUp=0;queueSubclass=false;document.getElementById('stagetag').textContent='RUINED KEEP · DESIGN LAB';document.getElementById('bosshpwrap').classList.remove('on');return G;
  }
 };
+window.BFNarration?.configure(narrationOptions);
 BFAdventureHud.mount({bag:()=>{releaseKeyboard();openBag(resumePlay);},journal:openJournal,toggleSell:toggleKeep,hint:controlKey});hudBagUpdate();updateHudKeys();
 BFKeepBeta.install(betaApi);BFBriarBeta.install(betaApi);
 if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).get('devbriar')==='1'?BFBriarBeta.setup():BFKeepBeta.setup(),150);

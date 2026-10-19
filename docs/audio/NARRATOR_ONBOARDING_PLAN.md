@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-Draft direction and script, October 18, 2026. No production voice selected. Three paid audition previews are now available separately at /3d/narrator-preview/. Control and teaching-text changes below are implemented in v2.285; narration remains a draft. Settle the newcomer experience first; record a short audition before producing the complete script. Existing NPC recordings and preferred sound effects remain separate.
+Voice B selected by Oliver and integrated in v2.287.0-voiced-onboarding. The final authored source is `scripts/build-onboarding-script.py`; exact recorded captions are in `docs/audio/onboarding-script-20261018.json`. Tables below preserve earlier proposals and are not the shipped transcript. 71 recorded variants cover tutorial practice/HUD tips, five lore cards, the hub tour and eight pause-menu buttons. Existing NPC recordings and preferred sound effects remain separate.
 
 Grounding: `public/3d/guided-tutorial.js`, `hub-tour.js`, `index.html` (`STORY.origin`, `playOpening`, audio settings), `voice-content.js`, `docs/STORY_CANON.md`, current requirements and Voice Studio implementation. The tutorial currently has 18 regular lessons and one inserted first-skill lesson. The hub tour builds stops from actual hub objects, so its coverage must be checked against that generated list rather than a fixed count.
 
@@ -125,3 +125,8 @@ Three original Voice Design candidates A/B/C read the same279-character control,
 ## [Codex | 2026-10-18] Narrator B selected
 
 Oliver chose audition B: "B is best." Lock the already saved ElevenLabs identity Bladefall Narrator B for tutorial and lore narration; do not regenerate a substitute voice. Exact voice ID is preserved in audio-source/voice/narrator-audition-20261018/manifest.json under selection. This approves the voice, not every draft line. Full-script recording/integration remains pending finalized wording. No new credits spent or game audio changed.
+
+
+## [Codex | 2026-10-18] Production integration
+
+Voice B uses the saved approved voice identity. Recorded defaults explicitly teach controls; changed bindings and controllers select matching adapted recordings while live badges show the actual inputs. Every take is bound to an exact text hash. Pages never wait for audio or advance because audio ended. Replay, narrator mute and independent volume are available. Late playback/loading promises cannot revive abandoned lines; loading defers the current valid line only. Backgrounding, menus, advancing or skipping stop speech; music ducks during narration. Batch cost settled at 3,045 credits, leaving 33,240. All 71 MP3s decoded in muted Chrome. Hardware-controller and two-human co-op listening remain untested.

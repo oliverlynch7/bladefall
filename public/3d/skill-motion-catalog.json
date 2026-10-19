@@ -1,0 +1,954 @@
+[
+  {
+    "id": "py_bolt",
+    "name": "Firebolt",
+    "cls": "pyromancer",
+    "action": "firepalm",
+    "duration": 0.4
+  },
+  {
+    "id": "py_fan",
+    "name": "Cinder Fan",
+    "cls": "pyromancer",
+    "action": "firefan",
+    "duration": 0.56
+  },
+  {
+    "id": "py_blast",
+    "name": "Backdraft",
+    "cls": "pyromancer",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "py_ward",
+    "name": "Ember Shield",
+    "cls": "pyromancer",
+    "action": "ward",
+    "duration": 0.6
+  },
+  {
+    "id": "py_lance",
+    "name": "Flame Lance",
+    "cls": "pyromancer",
+    "action": "beam",
+    "duration": 0.62
+  },
+  {
+    "id": "py_nova",
+    "name": "Flame Ring",
+    "cls": "pyromancer",
+    "action": "firecircle",
+    "duration": 0.62
+  },
+  {
+    "id": "py_inferno",
+    "name": "Inferno",
+    "cls": "pyromancer",
+    "action": "channel",
+    "duration": 0.7
+  },
+  {
+    "id": "py_sun",
+    "name": "Sunburst",
+    "cls": "pyromancer",
+    "action": "call",
+    "duration": 0.68
+  },
+  {
+    "id": "w_cleave",
+    "name": "Cleave",
+    "cls": "warrior",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "w_bash",
+    "name": "Shield Bash",
+    "cls": "warrior",
+    "action": "bash",
+    "duration": 0.42
+  },
+  {
+    "id": "w_charge",
+    "name": "Charge",
+    "cls": "warrior",
+    "action": "rush",
+    "duration": 0.48
+  },
+  {
+    "id": "w_whirl",
+    "name": "Whirlwind",
+    "cls": "warrior",
+    "action": "spin",
+    "duration": 0.64
+  },
+  {
+    "id": "w_guard",
+    "name": "Iron Guard",
+    "cls": "warrior",
+    "action": "guard",
+    "duration": 0.58
+  },
+  {
+    "id": "w_stomp",
+    "name": "Shockwave Stomp",
+    "cls": "warrior",
+    "action": "slam",
+    "duration": 0.64
+  },
+  {
+    "id": "w_berserk",
+    "name": "Warcry",
+    "cls": "warrior",
+    "action": "roar",
+    "duration": 0.62
+  },
+  {
+    "id": "w_execute",
+    "name": "Execution",
+    "cls": "warrior",
+    "action": "execute",
+    "duration": 0.62
+  },
+  {
+    "id": "r_volley",
+    "name": "Volley",
+    "cls": "ranger",
+    "action": "bow",
+    "duration": 0.48
+  },
+  {
+    "id": "r_pierce",
+    "name": "Piercing Shot",
+    "cls": "ranger",
+    "action": "bow",
+    "duration": 0.48
+  },
+  {
+    "id": "r_tumble",
+    "name": "Tumble",
+    "cls": "ranger",
+    "action": "retreat",
+    "duration": 0.5
+  },
+  {
+    "id": "r_shadow",
+    "name": "Shadowstrike",
+    "cls": "ranger",
+    "action": "bow",
+    "duration": 0.48
+  },
+  {
+    "id": "r_spike",
+    "name": "Spike Trap",
+    "cls": "ranger",
+    "action": "place",
+    "duration": 0.6
+  },
+  {
+    "id": "r_smoke",
+    "name": "Smoke Bomb",
+    "cls": "ranger",
+    "action": "toss",
+    "duration": 0.44
+  },
+  {
+    "id": "r_mark",
+    "name": "Hunter's Mark",
+    "cls": "ranger",
+    "action": "point",
+    "duration": 0.42
+  },
+  {
+    "id": "r_deathmark",
+    "name": "Death Mark",
+    "cls": "ranger",
+    "action": "point",
+    "duration": 0.42
+  },
+  {
+    "id": "m_bolt",
+    "name": "Elemental Bolt",
+    "cls": "mage",
+    "action": "cast",
+    "duration": 0.42
+  },
+  {
+    "id": "m_beam",
+    "name": "Elemental Beam",
+    "cls": "mage",
+    "action": "beam",
+    "duration": 0.62
+  },
+  {
+    "id": "m_blink",
+    "name": "Blink",
+    "cls": "mage",
+    "action": "blink",
+    "duration": 0.32
+  },
+  {
+    "id": "m_nova",
+    "name": "Nova",
+    "cls": "mage",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "m_gravity",
+    "name": "Gravity Well",
+    "cls": "mage",
+    "action": "pull",
+    "duration": 0.62
+  },
+  {
+    "id": "m_barrier",
+    "name": "Rune Barrier",
+    "cls": "mage",
+    "action": "ward",
+    "duration": 0.6
+  },
+  {
+    "id": "m_tempest",
+    "name": "Attunement",
+    "cls": "mage",
+    "action": "channel",
+    "duration": 0.7
+  },
+  {
+    "id": "m_overload",
+    "name": "Elemental Overload",
+    "cls": "mage",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "x_reap",
+    "name": "Reap",
+    "cls": "reaper",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "x_cleave",
+    "name": "Soul Cleave",
+    "cls": "reaper",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "x_step",
+    "name": "Shadow Step",
+    "cls": "reaper",
+    "action": "blink",
+    "duration": 0.32
+  },
+  {
+    "id": "x_wraith",
+    "name": "Wraith Form",
+    "cls": "reaper",
+    "action": "ascend",
+    "duration": 0.58
+  },
+  {
+    "id": "x_pull",
+    "name": "Void Pull",
+    "cls": "reaper",
+    "action": "pull",
+    "duration": 0.62
+  },
+  {
+    "id": "x_bind",
+    "name": "Soul Tether",
+    "cls": "reaper",
+    "action": "bind",
+    "duration": 0.55
+  },
+  {
+    "id": "x_siphon",
+    "name": "Soul Siphon",
+    "cls": "reaper",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "x_vortex",
+    "name": "Death Vortex",
+    "cls": "reaper",
+    "action": "channel",
+    "duration": 0.7
+  },
+  {
+    "id": "pal_bash",
+    "name": "Shield Bash",
+    "cls": "paladin",
+    "action": "bash",
+    "duration": 0.42
+  },
+  {
+    "id": "pal_smite",
+    "name": "Smite",
+    "cls": "paladin",
+    "action": "call",
+    "duration": 0.68
+  },
+  {
+    "id": "pal_taunt",
+    "name": "Taunt",
+    "cls": "paladin",
+    "action": "guard",
+    "duration": 0.58
+  },
+  {
+    "id": "pal_ground",
+    "name": "Holy Ground",
+    "cls": "paladin",
+    "action": "consecrate",
+    "duration": 0.62
+  },
+  {
+    "id": "pal_guard",
+    "name": "Guard Up",
+    "cls": "paladin",
+    "action": "ward",
+    "duration": 0.6
+  },
+  {
+    "id": "pal_burst",
+    "name": "Light Burst",
+    "cls": "paladin",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "pal_laststand",
+    "name": "Last Stand",
+    "cls": "paladin",
+    "action": "guard",
+    "duration": 0.58
+  },
+  {
+    "id": "pal_sky",
+    "name": "Sky Hammer",
+    "cls": "paladin",
+    "action": "call",
+    "duration": 0.68
+  },
+  {
+    "id": "necro_summon",
+    "name": "Summon Skeletons",
+    "cls": "necromancer",
+    "action": "raise",
+    "duration": 0.7
+  },
+  {
+    "id": "necro_bolt",
+    "name": "Plague Bolt",
+    "cls": "necromancer",
+    "action": "cast",
+    "duration": 0.42
+  },
+  {
+    "id": "necro_raise",
+    "name": "Raise the Dead",
+    "cls": "necromancer",
+    "action": "raise",
+    "duration": 0.7
+  },
+  {
+    "id": "necro_nova",
+    "name": "Corpse Nova",
+    "cls": "necromancer",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "necro_wall",
+    "name": "Bone Wall",
+    "cls": "necromancer",
+    "action": "raise",
+    "duration": 0.7
+  },
+  {
+    "id": "necro_grip",
+    "name": "Death Grip",
+    "cls": "necromancer",
+    "action": "pull",
+    "duration": 0.62
+  },
+  {
+    "id": "necro_army",
+    "name": "Army of the Dead",
+    "cls": "necromancer",
+    "action": "raise",
+    "duration": 0.7
+  },
+  {
+    "id": "necro_storm",
+    "name": "Death Storm",
+    "cls": "necromancer",
+    "action": "channel",
+    "duration": 0.7
+  },
+  {
+    "id": "nin_strike",
+    "name": "Shadow Strike",
+    "cls": "ninja",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "nin_barrage",
+    "name": "Shuriken Barrage",
+    "cls": "ninja",
+    "action": "stars",
+    "duration": 0.64
+  },
+  {
+    "id": "nin_step",
+    "name": "Shadow Step",
+    "cls": "ninja",
+    "action": "blink",
+    "duration": 0.32
+  },
+  {
+    "id": "nin_smoke",
+    "name": "Smoke Bomb",
+    "cls": "ninja",
+    "action": "toss",
+    "duration": 0.44
+  },
+  {
+    "id": "nin_mark",
+    "name": "Death Mark",
+    "cls": "ninja",
+    "action": "point",
+    "duration": 0.42
+  },
+  {
+    "id": "nin_pierce",
+    "name": "Piercing Star",
+    "cls": "ninja",
+    "action": "throw",
+    "duration": 0.44
+  },
+  {
+    "id": "nin_fury",
+    "name": "Blade Fury",
+    "cls": "ninja",
+    "action": "empower",
+    "duration": 0.56
+  },
+  {
+    "id": "nin_storm",
+    "name": "Vanish",
+    "cls": "ninja",
+    "action": "vanish",
+    "duration": 0.42
+  },
+  {
+    "id": "bsk_cleave",
+    "name": "Blood Sweep",
+    "cls": "berserker",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "bsk_bash",
+    "name": "Headbutt",
+    "cls": "berserker",
+    "action": "headbutt",
+    "duration": 0.52
+  },
+  {
+    "id": "bsk_charge",
+    "name": "Charge",
+    "cls": "berserker",
+    "action": "rush",
+    "duration": 0.48
+  },
+  {
+    "id": "bsk_stomp",
+    "name": "Shockwave",
+    "cls": "berserker",
+    "action": "slam",
+    "duration": 0.64
+  },
+  {
+    "id": "bsk_whirl",
+    "name": "Whirlwind",
+    "cls": "berserker",
+    "action": "spin",
+    "duration": 0.64
+  },
+  {
+    "id": "bsk_execute",
+    "name": "Execute",
+    "cls": "berserker",
+    "action": "execute",
+    "duration": 0.62
+  },
+  {
+    "id": "bsk_berserk",
+    "name": "Berserk",
+    "cls": "berserker",
+    "action": "roar",
+    "duration": 0.62
+  },
+  {
+    "id": "bsk_guard",
+    "name": "Bloodguard",
+    "cls": "berserker",
+    "action": "guard",
+    "duration": 0.58
+  },
+  {
+    "id": "pir_pierce",
+    "name": "Aimed Shot",
+    "cls": "pirate",
+    "action": "pistol",
+    "duration": 0.38
+  },
+  {
+    "id": "pir_volley",
+    "name": "Broadside",
+    "cls": "pirate",
+    "action": "broadside",
+    "duration": 0.58
+  },
+  {
+    "id": "pir_shadow",
+    "name": "Boarding Strike",
+    "cls": "pirate",
+    "action": "boarding",
+    "duration": 0.52
+  },
+  {
+    "id": "pir_tumble",
+    "name": "Roll",
+    "cls": "pirate",
+    "action": "retreat",
+    "duration": 0.5
+  },
+  {
+    "id": "pir_smoke",
+    "name": "Powder Smoke",
+    "cls": "pirate",
+    "action": "toss",
+    "duration": 0.44
+  },
+  {
+    "id": "pir_goldrush",
+    "name": "Gold Rush",
+    "cls": "pirate",
+    "action": "empower",
+    "duration": 0.56
+  },
+  {
+    "id": "pir_deathmark",
+    "name": "Cannonade",
+    "cls": "pirate",
+    "action": "call",
+    "duration": 0.68
+  },
+  {
+    "id": "pir_spike",
+    "name": "Powder Keg",
+    "cls": "pirate",
+    "action": "place",
+    "duration": 0.6
+  },
+  {
+    "id": "chr_bolt",
+    "name": "Time Bolt",
+    "cls": "chronomancer",
+    "action": "cast",
+    "duration": 0.42
+  },
+  {
+    "id": "chr_beam",
+    "name": "Time Lance",
+    "cls": "chronomancer",
+    "action": "beam",
+    "duration": 0.62
+  },
+  {
+    "id": "chr_nova",
+    "name": "Slow Field",
+    "cls": "chronomancer",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "chr_blink",
+    "name": "Time Step",
+    "cls": "chronomancer",
+    "action": "blink",
+    "duration": 0.32
+  },
+  {
+    "id": "chr_gravity",
+    "name": "Time Warp",
+    "cls": "chronomancer",
+    "action": "pull",
+    "duration": 0.62
+  },
+  {
+    "id": "chr_barrier",
+    "name": "Aegis",
+    "cls": "chronomancer",
+    "action": "ward",
+    "duration": 0.6
+  },
+  {
+    "id": "chr_tempest",
+    "name": "Stop Time",
+    "cls": "chronomancer",
+    "action": "stop",
+    "duration": 0.62
+  },
+  {
+    "id": "chr_overload",
+    "name": "Singularity",
+    "cls": "chronomancer",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "mon_flurry",
+    "name": "Flurry",
+    "cls": "monk",
+    "action": "flurry",
+    "duration": 0.58
+  },
+  {
+    "id": "mon_palm",
+    "name": "Palm Strike",
+    "cls": "monk",
+    "action": "palm",
+    "duration": 0.45
+  },
+  {
+    "id": "mon_deflect",
+    "name": "Deflect",
+    "cls": "monk",
+    "action": "parry",
+    "duration": 0.56
+  },
+  {
+    "id": "mon_roll",
+    "name": "Roll",
+    "cls": "monk",
+    "action": "evade",
+    "duration": 0.42
+  },
+  {
+    "id": "mon_whirl",
+    "name": "Whirl Kick",
+    "cls": "monk",
+    "action": "spinkick",
+    "duration": 0.65
+  },
+  {
+    "id": "mon_stun",
+    "name": "Stunning Palm",
+    "cls": "monk",
+    "action": "palm",
+    "duration": 0.45
+  },
+  {
+    "id": "mon_thousand",
+    "name": "Stillness",
+    "cls": "monk",
+    "action": "meditate",
+    "duration": 0.64
+  },
+  {
+    "id": "mon_dragon",
+    "name": "Dragon Kick",
+    "cls": "monk",
+    "action": "kick",
+    "duration": 0.6
+  },
+  {
+    "id": "st_bolt",
+    "name": "Chain Bolt",
+    "cls": "stormcaller",
+    "action": "cast",
+    "duration": 0.42
+  },
+  {
+    "id": "st_lance",
+    "name": "Lightning Lance",
+    "cls": "stormcaller",
+    "action": "beam",
+    "duration": 0.62
+  },
+  {
+    "id": "st_step",
+    "name": "Thunder Step",
+    "cls": "stormcaller",
+    "action": "blink",
+    "duration": 0.32
+  },
+  {
+    "id": "st_nova",
+    "name": "Static Field",
+    "cls": "stormcaller",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "st_orb",
+    "name": "Ball Lightning",
+    "cls": "stormcaller",
+    "action": "orb",
+    "duration": 0.62
+  },
+  {
+    "id": "st_barrier",
+    "name": "Storm Barrier",
+    "cls": "stormcaller",
+    "action": "ward",
+    "duration": 0.6
+  },
+  {
+    "id": "st_storm",
+    "name": "Linked Lightning",
+    "cls": "stormcaller",
+    "action": "bind",
+    "duration": 0.55
+  },
+  {
+    "id": "st_overload",
+    "name": "Chain Reaction",
+    "cls": "stormcaller",
+    "action": "burst",
+    "duration": 0.55
+  },
+  {
+    "id": "war_bolt",
+    "name": "Shadow Bolt",
+    "cls": "warlock",
+    "action": "cast",
+    "duration": 0.42
+  },
+  {
+    "id": "war_lance",
+    "name": "Blood Lance",
+    "cls": "warlock",
+    "action": "throw",
+    "duration": 0.44
+  },
+  {
+    "id": "war_curse",
+    "name": "Curse Circle",
+    "cls": "warlock",
+    "action": "bind",
+    "duration": 0.55
+  },
+  {
+    "id": "war_drain",
+    "name": "Life Drain",
+    "cls": "warlock",
+    "action": "drain",
+    "duration": 0.64
+  },
+  {
+    "id": "war_step",
+    "name": "Rift Step",
+    "cls": "warlock",
+    "action": "blink",
+    "duration": 0.32
+  },
+  {
+    "id": "war_orb",
+    "name": "Doom Orb",
+    "cls": "warlock",
+    "action": "orb",
+    "duration": 0.62
+  },
+  {
+    "id": "war_storm",
+    "name": "Blood Offering",
+    "cls": "warlock",
+    "action": "offering",
+    "duration": 0.66
+  },
+  {
+    "id": "war_final",
+    "name": "Final Curse",
+    "cls": "warlock",
+    "action": "condemn",
+    "duration": 0.66
+  },
+  {
+    "id": "sky_rise",
+    "name": "Rising Spear",
+    "cls": "skylancer",
+    "action": "uppercut",
+    "duration": 0.52
+  },
+  {
+    "id": "sky_gale",
+    "name": "Gale Shot",
+    "cls": "skylancer",
+    "action": "thrust",
+    "duration": 0.44
+  },
+  {
+    "id": "sky_dive",
+    "name": "Dive Strike",
+    "cls": "skylancer",
+    "action": "dive",
+    "duration": 0.54
+  },
+  {
+    "id": "sky_lift",
+    "name": "Wind Lift",
+    "cls": "skylancer",
+    "action": "ascend",
+    "duration": 0.58
+  },
+  {
+    "id": "sky_dash",
+    "name": "Sky Dash",
+    "cls": "skylancer",
+    "action": "rush",
+    "duration": 0.48
+  },
+  {
+    "id": "sky_rain",
+    "name": "Spear Rain",
+    "cls": "skylancer",
+    "action": "call",
+    "duration": 0.68
+  },
+  {
+    "id": "sky_crash",
+    "name": "Thunder Dive",
+    "cls": "skylancer",
+    "action": "dive",
+    "duration": 0.54
+  },
+  {
+    "id": "sky_cyclone",
+    "name": "Updraft",
+    "cls": "skylancer",
+    "action": "pull",
+    "duration": 0.62
+  },
+  {
+    "id": "bd_counter",
+    "name": "Counter Stance",
+    "cls": "bladedancer",
+    "action": "parry",
+    "duration": 0.56
+  },
+  {
+    "id": "bd_twin",
+    "name": "Twin Cut",
+    "cls": "bladedancer",
+    "action": "twin",
+    "duration": 0.56
+  },
+  {
+    "id": "bd_riposte",
+    "name": "Riposte",
+    "cls": "bladedancer",
+    "action": "cleave",
+    "duration": 0.48
+  },
+  {
+    "id": "bd_step",
+    "name": "Dance Step",
+    "cls": "bladedancer",
+    "action": "evade",
+    "duration": 0.42
+  },
+  {
+    "id": "bd_mirror",
+    "name": "Mirror Guard",
+    "cls": "bladedancer",
+    "action": "parry",
+    "duration": 0.56
+  },
+  {
+    "id": "bd_cross",
+    "name": "Cross Slash",
+    "cls": "bladedancer",
+    "action": "cross",
+    "duration": 0.58
+  },
+  {
+    "id": "bd_steel",
+    "name": "Perfect Guard",
+    "cls": "bladedancer",
+    "action": "parry",
+    "duration": 0.56
+  },
+  {
+    "id": "bd_perfect",
+    "name": "Perfect Counter",
+    "cls": "bladedancer",
+    "action": "parry",
+    "duration": 0.56
+  },
+  {
+    "id": "bst_sic",
+    "name": "Sic 'Em",
+    "cls": "beastmaster",
+    "action": "command",
+    "duration": 0.46
+  },
+  {
+    "id": "bst_coordinated",
+    "name": "Coordinated Strike",
+    "cls": "beastmaster",
+    "action": "bow",
+    "duration": 0.48
+  },
+  {
+    "id": "bst_guardian",
+    "name": "Guardian Bond",
+    "cls": "beastmaster",
+    "action": "bond",
+    "duration": 0.58
+  },
+  {
+    "id": "bst_step",
+    "name": "Pack Step",
+    "cls": "beastmaster",
+    "action": "evade",
+    "duration": 0.42
+  },
+  {
+    "id": "bst_mend",
+    "name": "Mend the Pack",
+    "cls": "beastmaster",
+    "action": "mend",
+    "duration": 0.64
+  },
+  {
+    "id": "bst_roar",
+    "name": "Alpha Roar",
+    "cls": "beastmaster",
+    "action": "roar",
+    "duration": 0.62
+  },
+  {
+    "id": "bst_stampede",
+    "name": "Stampede",
+    "cls": "beastmaster",
+    "action": "command",
+    "duration": 0.46
+  },
+  {
+    "id": "bst_apex",
+    "name": "Apex Unleashed",
+    "cls": "beastmaster",
+    "action": "empower",
+    "duration": 0.56
+  }
+]

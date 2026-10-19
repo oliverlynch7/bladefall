@@ -1,0 +1,29 @@
+{
+  "version": "2.328.0-skill-choreography",
+  "skills": 136,
+  "classes": 17,
+  "models": 6,
+  "poseSamples": 5712,
+  "restorationCases": 136,
+  "actualBrowserChecks": 828,
+  "suites": 20,
+  "representativeVisuals": [
+    "hammer ground slam",
+    "Berserker headbutt",
+    "Monk kick",
+    "Ranger bow/crossbow",
+    "Rank10 Reaper scythe sweep",
+    "normal gameplay slam"
+  ],
+  "limits": [
+    "Not136 unique motion-capture clips",
+    "Existing instant damage timing retained",
+    "Not every skin/weapon combination visually inspected",
+    "No fresh two-human network session"
+  ],
+  "fixtureNotes": [
+    "Initial fixture used nonexistent effMaxMana; corrected to actual actor.maxMana",
+    "Quaternion restoration assertion changed to component equality; angleTo is nonzero for identical slightly non-unit source quaternions",
+    "Existing peer simulation clock preserved after source inspection to avoid double aging"
+  ]
+}

@@ -37,6 +37,7 @@ function receive(g,rows){for(const a of (Array.isArray(rows)?rows:[]).slice(0,48
  (g.combatArt||(g.combatArt=[])).push({profile,x:a.x,y:a.y,z:a.z,yaw:a.yaw,origin,radius:Number.isFinite(a.radius)?Math.max(0,Math.min(2000,a.radius)):undefined,t,life,serial:a.serial,visual:true,_mp:1});
  }if(g.combatArt?.length>48)g.combatArt.splice(0,g.combatArt.length-48);}
 function pose(p,id){
+ if(root.BFSkillMotion?.pose(p,id))return;
  const f=profiles[id].form;
  if(["dash","blink","ghost","dive","rise"].includes(f))return;
  const clips={slash:'Sword_Attack',cross:'Sword_Attack2',spiral:'Attack2',execute:'Attack',flurry:'Punch',bash:'Punch',claw:'Sword_Attack',lance:profiles[id].cls==='ranger'||profiles[id].cls==='pirate'?'Bow_Shoot':'Staff_Attack',fan:'Bow_Shoot',quake:'Attack',roar:'Attacking_Idle',trap:'PickUp'};
@@ -53,7 +54,7 @@ function weapon(g,p,cls,charged){
  list.push({profile,x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,t:0,life:charged?.55:Math.max(.16,p.atkTimer||.24),radius:w.intrinsic==='pyromancer'?(p.flameReach||(charged?220:130)):w.range||48,serial:++serial});
  if(list.length>48)list.splice(0,list.length-48);
 }
-function tick(g,dt){if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
+function tick(g,dt){if(g.p?.combatPose?.skill&&(g.p.dead||g.p.downed||(g.p.dodgeTimer>0&&!g.p.combatPose.duringDodge)||g.p.dragonRide||g.p.sitting||g.p.emote?.t<4))g.p.combatPose.remaining=0;if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
 function render(g,d){
  const {pushM,popM,mv,rotY,rotX,box}=d;
  let budget=d.strokeBudget??(d.quality==='low'?300:900);

@@ -1203,7 +1203,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./bag-browser.js?v=2238"></script>
 <link rel="stylesheet" href="./party-feedback.css?v=2297"><script src="./party-feedback.js?v=2297"></script>
 <script src="./party-navigation.js?v=2318"></script>
-<script src="./combat-art.js?v=2237"></script>
+<script src="./skill-motion.js?v=2328"></script>
+<script src="./combat-art.js?v=2328"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2312">
 <script src="./chest-rules.js?v=2311"></script>
@@ -1231,7 +1232,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.327.0-rich-action-sounds';
+const VERSION3D='2.328.0-skill-choreography';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15201,7 +15202,8 @@ const MP={
     if(!raw||typeof raw!=='object')return null;
     const velocity=v=>Number.isFinite(v)?Math.max(-3000,Math.min(3000,v)):0;
     const p=raw.pose,allowed=['Sword_Attack','Sword_Attack2','Attack','Attack2','Punch','Bow_Shoot','Staff_Attack','Attacking_Idle','PickUp','Spell1','Spell2'];
-    const pose=p&&allowed.includes(p.clip)&&Number.isSafeInteger(p.serial)&&p.serial>=0&&Number.isFinite(p.remaining)&&p.remaining>0?{clip:p.clip,serial:p.serial,remaining:Math.min(1,p.remaining)}:null;
+    const customPose=window.BFSkillMotion?.valid(p);
+    const pose=customPose||(p&&allowed.includes(p.clip)&&Number.isSafeInteger(p.serial)&&p.serial>=0&&Number.isFinite(p.remaining)&&p.remaining>0?{clip:p.clip,serial:p.serial,remaining:Math.min(1,p.remaining)}:null);
     return {ground:raw.ground!==false,vx:velocity(raw.vx),vy:velocity(raw.vy),vz:velocity(raw.vz),pose,emote:BFEmotes.valid(raw.emote)};
   },
   selfState(){ const p=G&&G.p; return {riding:!!p?.dragonRide,sitting:!!p?.sitting,busy:playerActivity(), id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
@@ -16716,6 +16718,7 @@ function updateWorld(dt){
   const _noDodge = false;
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0&&!_noDodge){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
+    if(p.combatPose?.skill)p.combatPose.remaining=0;
     p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='ranger'&&c2Passive('r_escape'))p.escapeGuardT=2;if(meta.classId==='monk'&&c2Passive('mon_fire'))gainMana(p,5,false); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; if(meta.classId==='monk'&&c2Passive('mon_killer'))p._killerHit=1; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
   /* KILLER FOCUS arms HERE, at the dodge itself, exactly like Tactical Guard on the line above —
      that one is the same passive shape read on the taking side (hurtPlayer, 11207), this one on the
@@ -16733,7 +16736,7 @@ function updateWorld(dt){
   } else { p.charging=false; p.holdT=0; p.attackHeld=false;
     if(p.atkCd<=0 && p.dodgeTimer<=0){
       if(input.attack) playerAttack(1);                                              // manual: always swings/fires
-      else if(meta.autoAttack && autoAtkTarget(p,_w)) playerAttack(1.176); } }        // auto: only when a hittable enemy is in range + line of sight (15% slower)
+      else if(meta.autoAttack && !(p.combatPose?.skill&&p.combatPose.remaining>0) && autoAtkTarget(p,_w)) playerAttack(1.176); } }        // auto: only when a hittable enemy is in range + line of sight (15% slower)
   if(p.atkTimer>0) resolveSwing();
   } // mounted travel owns jump, descent and combat input
   updateMovers(dt);
@@ -24408,7 +24411,7 @@ Object.assign(SKILL_MANA,{py_bolt:12,py_fan:18,py_blast:18,py_ward:22,py_lance:2
 
 // Root skill dispatch stays cosmetic: original return values and gameplay state are preserved.
 if(window.BF_COMBAT_ART){
-  const art=window.BF_COMBAT_ART; art.configure(CLASS2); let depth=0;
+  const art=window.BF_COMBAT_ART; art.configure(CLASS2); window.BFSkillMotion?.configure(CLASS2); let depth=0;
   for(const id of Object.keys(art.profiles)){
     const original=SKILL_FX[id]; if(!original) continue;
     SKILL_FX[id]=function(p,...args){
@@ -24877,7 +24880,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2319"></script>
+<script type="module" src="./hero3d.js?v=2328"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2322"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

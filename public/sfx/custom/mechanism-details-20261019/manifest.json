@@ -1,0 +1,105 @@
+{
+  "version": "mechanism-details-20261019",
+  "plan_at_generation": "starter",
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "subjective_listening": "Human audition pending; signal checks cannot establish taste.",
+  "cues": [
+    {
+      "id": "world_rope_tie",
+      "file": "custom/mechanism-details-20261019/world_rope_tie_v01",
+      "duration": 0.8,
+      "channels": 2,
+      "source_seconds": 0.8,
+      "trimmed_start_seconds": 0.0,
+      "gain": 1.0068,
+      "peak": 0.76073,
+      "rms": 0.02638,
+      "sha256": "61a0d8db6300bbfa464703767ca150d145363f15582b307e720ff1e54b7ef785"
+    },
+    {
+      "id": "world_lock_release",
+      "file": "custom/mechanism-details-20261019/world_lock_release_v01",
+      "duration": 0.6802,
+      "channels": 2,
+      "source_seconds": 0.7,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.8358,
+      "peak": 0.69585,
+      "rms": 0.04838,
+      "sha256": "9772c2344eca5b9afb45ffeac05d8e2d86627d224d172b40f8e783f758964431"
+    },
+    {
+      "id": "world_rescue_brace",
+      "file": "custom/mechanism-details-20261019/world_rescue_brace_v01",
+      "duration": 0.6802,
+      "channels": 2,
+      "source_seconds": 0.7,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7399,
+      "peak": 0.73726,
+      "rms": 0.03451,
+      "sha256": "646a0b3a34c4f5d6a4b28e900f4a0fca5a90dcf91801eb1311ba51073bdcf041"
+    },
+    {
+      "id": "world_pressure_relief",
+      "file": "custom/mechanism-details-20261019/world_pressure_relief_v01",
+      "duration": 1.08,
+      "channels": 2,
+      "source_seconds": 1.1,
+      "trimmed_start_seconds": 0.0,
+      "gain": 1.1119,
+      "peak": 0.76619,
+      "rms": 0.0729,
+      "sha256": "6b7d175813d934d169f22bdde76b9fef893a37a82ad28ef80b4872614808a30c"
+    },
+    {
+      "id": "world_fountain_restore",
+      "file": "custom/mechanism-details-20261019/world_fountain_restore_v01",
+      "duration": 1.2,
+      "channels": 2,
+      "source_seconds": 1.2,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.8388,
+      "peak": 0.71082,
+      "rms": 0.07061,
+      "sha256": "33a1d66e9631b3d4e15b865827b43a715f190fda652da9ca7b356b6290594269"
+    },
+    {
+      "id": "world_gate_chain",
+      "file": "custom/mechanism-details-20261019/world_gate_chain_v01",
+      "duration": 0.8,
+      "channels": 2,
+      "source_seconds": 0.8,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.7051,
+      "peak": 0.83752,
+      "rms": 0.07132,
+      "sha256": "fa76c62ba02a65f947d1f4242e55198ae5a14d729b2e131c17e97dc74c796da8"
+    },
+    {
+      "id": "world_shelf_shift",
+      "file": "custom/mechanism-details-20261019/world_shelf_shift_v01",
+      "duration": 1.08,
+      "channels": 2,
+      "source_seconds": 1.1,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.6977,
+      "peak": 0.65833,
+      "rms": 0.08547,
+      "sha256": "86cc8678851b39515b7c85ad20f7c943c2c60ccd0493baa57eb3ed8ae929656f"
+    },
+    {
+      "id": "world_guardian_seal",
+      "file": "custom/mechanism-details-20261019/world_guardian_seal_v01",
+      "duration": 1.08,
+      "channels": 2,
+      "source_seconds": 1.1,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.9527,
+      "peak": 0.71518,
+      "rms": 0.04546,
+      "sha256": "2710fb5ae5aa3ce08aa4a5810a3c537d9d75d78f9ee1e36b6bbd4519ab737c34"
+    }
+  ]
+}

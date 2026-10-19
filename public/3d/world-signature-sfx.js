@@ -6,6 +6,9 @@ const charges=['hurl','quake','spin','daggerthrow','javelin','scythethrow','flam
 const ids=[...warnings.map(id=>'bosswarn_'+id),...worldIds,...charges.map(id=>'weaponcharge_'+id)];
 const definitions=Object.fromEntries(ids.map(id=>[id,{f:'custom/world-signatures-20261018/'+id+'_v01',v:id.startsWith('bosswarn_')?.38:.42,lazy:true}]));
 for(const [kind,file]of [['player','premium_player_level'],['class','premium_class_rank']])definitions['reward_'+kind]={f:'custom/premium-progression-20261018/'+file+'_v01',v:.6,lazy:true};
+const mechanismsExtra=[{"id":"world_rope_tie","flag":"hp.wind.safe","key":"hp.windbreak"},{"id":"world_lock_release","flag":"kd.free","key":"kd.free"},{"id":"world_rescue_brace","flag":"ic.hugo.brace","key":"ic.hugo.brace"},{"id":"world_pressure_relief","flag":"gf.pressure","key":"gf.pressure"},{"id":"world_fountain_restore","flag":"pc.court","key":"pc.water"},{"id":"world_gate_chain","flag":"lc.gate.fight","key":"lc.force"},{"id":"world_shelf_shift","flag":"sl.shelf.stage1","key":"sl.shelf.0"},{"id":"world_guardian_seal","flag":"sl.ready","key":"sl.release"},{"id":"world_lock_release","flag":"ic.free","key":"ic.free"},{"id":"world_lock_release","flag":"sc.latch","key":"sc.latch"},{"id":"world_shelf_shift","flag":"sl.shelf.open","key":"sl.shelf.1"}];
+for(const row of mechanismsExtra){if(!definitions[row.id]){ids.push(row.id);definitions[row.id]={f:'custom/mechanism-details-20261019/'+row.id+'_v01',v:.32,lazy:true};}}
+let scene=null;
 let world=null,actors=new WeakMap(),mechanisms=null,recent=[],lastMode=null;
 function apply(registry){for(const [id,def]of Object.entries(definitions))if(!Object.hasOwn(registry,id))registry[id]={...def};}
 function bossId(e){return e?.bruteOrchard?'brute':e?.marksmanCrossing?'marksman':e?.fallenDuel?'fallen':e?.frostOfficer?'officer_'+e.frostOfficer:e?.furnaceColossus?'furnace':e?.marbleGuardian?'marble':e?.finalKing?'king':null;}
@@ -14,16 +17,18 @@ function warning(e){const s=state(e);return e.bruteOrchard?['wind','slam'].inclu
 function warningReady(e,ready){const id=bossId(e);return !!id&&!!ready('bosswarn_'+id);}
 function distance(p,o){return Math.hypot((p?.x||0)-(o?.x||0),((p?.y||0)-(o?.y||0))*.6,(p?.z||0)-(o?.z||0));}
 function emit(id,o,g,api,at){if(!definitions[id]||!o||!g?.p||!Number.isFinite(at))return false;const d=distance(g.p,o);if(d>=2200)return false;recent=recent.filter(t=>at-t<.25);if(recent.length>=3)return false;const gain=Math.max(0,Math.min(1,(2200-d)/1600));if(api.play(id,gain)){recent.push(at);return true;}return false;}
-function snapshot(g){const f=g.storyState?.flags||{},i=g.storyState?.items||{};return {mill:g.briarMill?.water>.1,bridge:!!f['briar.bridge'],lift:!!f['kd.lift.open'],brake:!!f['kd.deep.open'],cart:!!f['ih.cart'],water:Number(i['ic.lock.level'])||0,frozen:!!f['ic.lock.frozen'],channel:!!f['ic.channel.open'],library:!!f['sl.display.open'],hydra:!!g.hydraArena?.freed};}
+function snapshot(g){const f=g.storyState?.flags||{},i=g.storyState?.items||{};return {...Object.fromEntries(mechanismsExtra.map(row=>[row.flag,!!f[row.flag]])),mill:g.briarMill?.water>.1,bridge:!!f['briar.bridge'],lift:!!f['kd.lift.open'],brake:!!f['kd.deep.open'],cart:!!f['ih.cart'],water:Number(i['ic.lock.level'])||0,frozen:!!f['ic.lock.frozen'],channel:!!f['ic.channel.open'],library:!!f['sl.display.open'],hydra:!!g.hydraArena?.freed};}
 function origin(g,keys){return (g.storyObjects||[]).find(o=>keys.some(k=>o.key?.startsWith(k)))||null;}
 function warm(g,api){for(const e of g.enemies||[]){const id=bossId(e);if(id&&e.hp>0&&!e.dead&&distance(g.p,e)<2400){api.queue('bosswarn_'+id);if(id==='king')api.queue('boss_king_awaken');if(id==='furnace')api.queue('boss_furnace_cool');if(id==='marble')api.queue('boss_marble_open');}}
  if(g.hydraArena){api.queue('bosswarn_hydra');api.queue('boss_hydra_free');}
  const keys=[];if(g.briarMill)keys.push('world_mill_start','world_bridge_lower');if(g.prison)keys.push('world_lift','world_press_brake');if(g.iron)keys.push('world_rail_cart');if(g.iceCaves)keys.push('world_water_fill','world_water_drain','world_water_freeze');if(g.library)keys.push('world_library_seal');for(const key of keys)api.queue(key);
+ for(const row of mechanismsExtra){const o=(g.storyObjects||[]).find(o=>o.key===row.key);if(o&&distance(g.p,o)<2400)api.queue(row.id);}
  const charge=g.p?.weapon?.chg;if(charges.includes(charge))api.queue('weaponcharge_'+charge);
 }
-function reset(){world=null;actors=new WeakMap();mechanisms=null;recent=[];lastMode=null;}
+function sceneId(g){return [g._storyEpoch||'',g.stageIndex??'',g.area??'',!!g.hub,!!g.trial].join(':');}
+function reset(){scene=null;world=null;actors=new WeakMap();mechanisms=null;recent=[];lastMode=null;}
 function tick(g,mode,api,at=performance.now()/1000,hidden=!!root.document?.hidden){
- if(!g?.p){reset();return;}const changed=world!==g;if(changed){reset();world=g;}warm(g,api);
+ if(!g?.p){reset();return;}const changed=world!==g||scene!==sceneId(g);if(changed){reset();world=g;scene=sceneId(g);}warm(g,api);
  const audible=!hidden&&mode==='play'&&!g.p.dead&&!g.p.downed&&!g._tutorialSafe;
  const resuming=lastMode!==null&&lastMode!=='play';lastMode=mode;
  for(const e of g.enemies||[]){const id=bossId(e);if(!id)continue;const s=state(e),active=!!e.active&&!e.dead&&e.hp>0,prev=actors.get(e),record={s,warning:warning(e),active,exposed:(e.fcExposed||e.mcExposed||0)>0,stage:e.akStage};actors.set(e,record);
@@ -36,8 +41,9 @@ function tick(g,mode,api,at=performance.now()/1000,hidden=!!root.document?.hidde
  const next=snapshot(g),prev=mechanisms;mechanisms=next;if(!prev||!audible||resuming)return;
  const events=[['mill','world_mill_start',['briar.water']],['bridge','world_bridge_lower',['briar.']],['lift','world_lift',['kd.lift']],['brake','world_press_brake',['kd.press']],['cart','world_rail_cart',['ih.cart']],['frozen','world_water_freeze',['ic.lock.2']],['channel','world_water_freeze',['ic.channel.plug']],['library','world_library_seal',['sl.display']],['hydra','boss_hydra_free',[]]];
  for(const [key,id,prefix]of events)if(next[key]&&!prev[key])emit(id,key==='hydra'?{x:0,y:0,z:0}:key==='mill'?g.briarMill:key==='bridge'?(g.briarBridge||g.briarMill||origin(g,prefix)):origin(g,prefix),g,api,at);
+ const emitted=new Set();for(const row of mechanismsExtra)if(next[row.flag]&&!prev[row.flag]&&!emitted.has(row.id)){const o=(g.storyObjects||[]).find(o=>o.key===row.key);if(emit(row.id,o,g,api,at))emitted.add(row.id);}
  if(next.water!==prev.water)emit(next.water>prev.water?'world_water_fill':'world_water_drain',origin(g,['ic.lock.']),g,api,at);
 }
 function charge(w,play){return charges.includes(w?.chg)&&!!play('weaponcharge_'+w.chg,1);}
-const api={ids,charges,definitions,apply,bossId,state,warning,warningReady,snapshot,tick,reset,charge};root.BFWorldSfx=api;if(typeof module!=='undefined')module.exports=api;
+const api={ids,charges,mechanismsExtra,definitions,apply,bossId,state,warning,warningReady,snapshot,tick,reset,charge};root.BFWorldSfx=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -1,0 +1,126 @@
+{
+ "passed": true,
+ "checks": 30,
+ "rows": [
+  {
+   "name": "Pre-change level100 save loads",
+   "passed": true
+  },
+  {
+   "name": "Hub ready",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_rope_tie",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_rope_tie",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_lock_release",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_lock_release",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_rescue_brace",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_rescue_brace",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_pressure_relief",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_pressure_relief",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_fountain_restore",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_fountain_restore",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_gate_chain",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_gate_chain",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_shelf_shift",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_shelf_shift",
+   "passed": true
+  },
+  {
+   "name": "Browser decodes world_guardian_seal",
+   "passed": true
+  },
+  {
+   "name": "Actual game registry preserves lazy cue world_guardian_seal",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_rope_tie",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_lock_release",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_rescue_brace",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_pressure_relief",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_fountain_restore",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_gate_chain",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_shelf_shift",
+   "passed": true
+  },
+  {
+   "name": "Game lazy loader decoded world_guardian_seal",
+   "passed": true
+  },
+  {
+   "name": "Actual authored windbreak action succeeds",
+   "passed": true
+  },
+  {
+   "name": "Actual story transaction emits exactly one correct cue",
+   "passed": true
+  },
+  {
+   "name": "Muted game never starts audible cue",
+   "passed": true
+  },
+  {
+   "name": "Old save gold retained",
+   "passed": true
+  }
+ ]
+}

@@ -1,0 +1,126 @@
+{
+  "scope": "Additive physical feedback; no voices or replacement slots",
+  "hard_credit_cap": 1000,
+  "cues": [
+    {
+      "id": "world_rope_tie",
+      "name": "Windbreak secured",
+      "flag": "hp.wind.safe",
+      "key": "hp.windbreak",
+      "book": "hollow-cliffs",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. Rough hemp rope pulls taut through a timber cleat, canvas snaps once then settles, soft wooden tension creak. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Accepted hp.windbreak action: false-to-true hp.wind.safe flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback."
+    },
+    {
+      "id": "world_lock_release",
+      "name": "Cell and hatch locks released",
+      "flag": "kd.free",
+      "key": "kd.free",
+      "book": "prison-dungeons",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. A large iron bolt slides out of a rusty lock, two solid metal clicks and a short gate hinge creak. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.7,
+      "source": "Accepted kd.free action: false-to-true kd.free flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback.",
+      "aliases": [
+        {
+          "flag": "ic.free",
+          "key": "ic.free"
+        },
+        {
+          "flag": "sc.latch",
+          "key": "sc.latch"
+        }
+      ]
+    },
+    {
+      "id": "world_rescue_brace",
+      "name": "Rescue frame secured",
+      "flag": "ic.hugo.brace",
+      "key": "ic.hugo.brace",
+      "book": "deep-ice-caves",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. A wooden rescue brace seats firmly, timber flexes and a metal pin clicks home, secure mechanical finish. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.7,
+      "source": "Accepted ic.hugo.brace action: false-to-true ic.hugo.brace flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback."
+    },
+    {
+      "id": "world_pressure_relief",
+      "name": "Furnace pressure released",
+      "flag": "gf.pressure",
+      "key": "gf.pressure",
+      "book": "great-furnace",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. An iron pressure valve turns with a compact squeak then a brief controlled steam release, no explosion. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 1.1,
+      "source": "Accepted gf.pressure action: false-to-true gf.pressure flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback."
+    },
+    {
+      "id": "world_fountain_restore",
+      "name": "Palace fountain restored",
+      "flag": "pc.court",
+      "key": "pc.water",
+      "book": "palace-courtyard",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. A stone water sluice unlocks, a small gush of clear fountain water begins with a bright restrained watery shimmer. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 1.2,
+      "source": "Accepted pc.water action: false-to-true pc.court flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback."
+    },
+    {
+      "id": "world_gate_chain",
+      "name": "Gate chain pulled",
+      "flag": "lc.gate.fight",
+      "key": "lc.force",
+      "book": "lost-canyon",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. A heavy iron gate chain is yanked once, links rattle against an iron bracket with a low gate shudder. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 0.8,
+      "source": "Accepted lc.force action: false-to-true lc.gate.fight flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback."
+    },
+    {
+      "id": "world_shelf_shift",
+      "name": "Library shelf moved",
+      "flag": "sl.shelf.stage1",
+      "key": "sl.shelf.0",
+      "book": "sky-library",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. A geared brass crank engages and a heavy wooden library shelf rolls briefly on concealed tracks, firm wooden stop. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 1.1,
+      "source": "Accepted sl.shelf.0 action: false-to-true sl.shelf.stage1 flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback.",
+      "aliases": [
+        {
+          "flag": "sl.shelf.open",
+          "key": "sl.shelf.1"
+        }
+      ]
+    },
+    {
+      "id": "world_guardian_seal",
+      "name": "Guardian door seal released",
+      "flag": "sl.ready",
+      "key": "sl.release",
+      "book": "sky-library",
+      "prompt": "Single isolated fantasy game sound effect. No speech, no voice, no music, no background ambience. A celestial stone door seal unlocks with a single clear crystalline chime, warm low resonance and a short stone latch movement. Immediate readable onset, restrained tail, no clipping.",
+      "duration_seconds": 1.1,
+      "source": "Accepted sl.release action: false-to-true sl.ready flag near its actual prop. No replay on restored state.",
+      "existing_fallback": "Existing interaction pickup sound retained; no specific mechanism cue currently registered.",
+      "reuse_decision": "Existing world cues checked: mill, bridge, lift, press, cart, waterworks, freeze and display seal have different physical action identities. Preserve those; add explicit missing action.",
+      "overlap": "One false-to-true edge, shared world density bound of3 starts per250ms; attenuated over2200 units; no delayed playback."
+    }
+  ]
+}

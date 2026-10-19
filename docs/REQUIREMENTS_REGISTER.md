@@ -2388,3 +2388,7 @@ Implement a30s downed window and retain2.5s proximity rescue. Route fatal enviro
 
 ## [Codex | 2026-10-18] Teammate progress labels
 User additionally requests player level next to the co-op friend name and class rank next to their class. Current peer packet already sends level but shows it beside class; rank is absent. Add bounded current class rank to presence/mk/apply/host relay and show two clear lines: name · LvN, class · RankN above the health bar. Missing rank on older packets stays unknown rather than invented; long names remain bounded.
+
+
+## [Codex | 2026-10-18] Campaign character XP +12.5%
+User requests10–15% faster character leveling in campaign. Existing gainXp uses1.5x campaign character XP and3.2x class XP. Increase only the campaign character multiplier to1.6875(1.5*1.125), using one shared rounded award helper for gains and combat/task reward text. Preserve class XP, XP thresholds, saves, gold, trials and other mode rates. Verify actual gainXp in campaign, co-op credit route and excluded modes; no retroactive save changes.

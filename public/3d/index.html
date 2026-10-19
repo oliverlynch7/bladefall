@@ -1219,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.297.0-party-survival';
+const VERSION3D='2.298.0-campaign-xp';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3429,7 +3429,7 @@ function briarSync(){
  const s=adventureStoryState();if(inBriar()&&G.homefieldsExploration)BFHomeBellDefense.sync(G,s);journalNoticeSync();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
   if(reward.kind.startsWith('return_')){if(applyReturnReward(id,reward))G.storyClaims[id]=true;}
-  else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+Math.round(reward.amount*1.5)+' XP');}
+  else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+characterXpAward(reward.amount)+' XP');}
   else if(reward.kind==='gold'){const gold=awardGold(reward.amount);if(['home.bells.cache','home.grain.cache','home.orchard.cache','lc.cave.supplies'].includes(id)){BFCurrencyFeedback.show(gold,'Savings coffer opened · coins only');playFx('chestthunk');playFx('gamblecoins');}else toast('Quest complete · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast(reward.kind==='cliff_runner'?'Cliff Runner earned — an uncommon javelin.':'Cliff chest opened — uncommon leggings.');G.storyClaims[id]=true;}
   else if(reward.kind.startsWith('forgeguard_')){const art=reward.kind.slice(11),item=art==='armor'?{armor:makeArmor('rare','chest')}:{weapon:makeWeapon(art,'rare','Forgeguard')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Forgeguard earned — rare '+(art==='armor'?'chest armor':art)+'. Finish Iron Halls to keep it.');G.storyClaims[id]=true;}
@@ -13835,7 +13835,7 @@ function killEnemy(e,weaponKill){
     addText(e.x,e.y+e.h+12,e.z,'SPORE BURST','#9fd84a',true); }
   const _erw=G.endless?(G.endReward||1):1;                    // Endless: XP + gold scale with floor depth so it's the best grind at any level
   if(G.endless) G.endKillsTotal=(G.endKillsTotal||0)+1;
-  const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+Math.round(_xp*(isCampaignAdventure()?1.5:1))+' XP','var(--xp)'); gainXp(_xp);
+  const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+characterXpAward(_xp)+' XP','var(--xp)'); gainXp(_xp);
   /* BOUNTY HUNTER's gold clause. A multiplier on the kill's own purse rather than a second
      awardGold call, so the payout formula stays in exactly one place and cannot drift from it. */
   const _bounty=(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&(e.markT||0)>0&&(!e.markOwner||e.markOwner===(MP.active?MP.myId:'solo')))?1.1:1;
@@ -14036,8 +14036,9 @@ function rollDrop(e){
 // upgrade pool's power in), so the game is stronger — not weaker — for losing the menu.
 function autoLevelGrow(p){ p.maxHp+=11; p.stats.power*=1.035; p.stats.atkSpeed*=1.018; p.stats.speed*=1.004; p.tunedLevels=(p.tunedLevels||0)+1; }
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
+function characterXpAward(n){return Math.round(n*(isCampaignAdventure()?1.6875:1));}
 function gainXp(n){ if(G?.devKeep)return;
-  const p=G.p,previousLevel=p.level; p.xp+=Math.round(n*(isCampaignAdventure()?1.5:1));
+  const p=G.p,previousLevel=p.level; p.xp+=characterXpAward(n);
   const classAward=n>0?Math.max(1,Math.round(n*(isCampaignAdventure()?3.2:.8))):0;
   gainClassXp(classAward); // Campaign training supports learning multiple classes; other modes retain their pace.
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);

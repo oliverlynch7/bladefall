@@ -1,0 +1,52 @@
+[
+  {
+    "suite": "abyssal-heart",
+    "passed": true,
+    "output": "Abyssal Heart: all40 authored shard IDs across8regions, sealed placements, NPC/event rewards,3D proximity, saved/carried filters, local co-op independence and no story mutations pass.\n"
+  },
+  {
+    "suite": "rift-shards",
+    "passed": true,
+    "output": "Rift shard ledger passed: stable IDs, sanitization, individual collection, once-only echo, provisional/banked distinction, rollback, 5/5 gating and approved class mapping.\n"
+  },
+  {
+    "suite": "rift-hall",
+    "passed": true,
+    "output": "Rift Hall passed: personal five-shard assembly, no duplicate counts/unlocks, legacy class mapping, ending gate, absent class guard, dialogue resume and graph links.\n"
+  },
+  {
+    "suite": "rift-party-visibility",
+    "passed": true,
+    "output": "22 party queue/background composition checks passed.\n"
+  },
+  {
+    "suite": "save-safety",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "onboarding-coop",
+    "passed": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.\n5 co-op rank/spectator serialization, update and legacy checks passed.\n"
+  },
+  {
+    "suite": "party-survival",
+    "passed": true,
+    "output": "50 fall landing, rescue deadline, late packets, whole-level recovery, single wipe, guest wait, real die routing and nameplate checks passed.\n4 real fall/solo/duplicate hazard and attack-lock checks passed.\n"
+  },
+  {
+    "suite": "boat-controls",
+    "passed": true,
+    "output": "Boat: immediate host-cleared waves, no premature progression, keyboard/controller contextual actions, repeat/life/ready/mode guards pass.\n"
+  },
+  {
+    "suite": "ship-crossing",
+    "passed": true,
+    "output": "Ship crossing passed: 80 safe course seeds, collisions, two waves, role swap, repair cap, disconnect/death, solo, pause, fixed steps, authority and stale snapshots.\n"
+  },
+  {
+    "suite": "campaign-xp",
+    "passed": true,
+    "output": "Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass.\n"
+  }
+]

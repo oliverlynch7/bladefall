@@ -27,6 +27,28 @@
   const provisional=pending(attempt).found.filter(id=>id.startsWith(r.prefix+'-')&&!permanent.includes(id));
   return {banked:permanent.length,pending:provisional.length,total:5,ready:permanent.length===5,classId:r.classId};
  }
- const api={regions,valid,normalize,pending,collect,bank,progress};root.BFRiftShards=api;
+ // Compile reward ownership once per immutable story book, not every HUD tick.
+ const rewardBooks=new WeakMap();
+ function shardRewards(book){
+  if(!book)return [];if(rewardBooks.has(book))return rewardBooks.get(book);
+  const out=[];
+  const scan=(v,anchor,kind)=>{if(!v||typeof v!=='object')return;
+   if(v.type==='reward'&&v.kind==='rift_shard'){const id=String(v.id||'').match(/(?:^|\.)([A-Z]{2}-0[1-5])$/)?.[1];if(valid(id))out.push({id,anchor,kind});}
+   for(const x of Object.values(v))if(x&&typeof x==='object')scan(x,anchor,kind);
+  };
+  for(const node of Object.values(book.nodes||{}))scan(node,node.voice?.speaker,'npc');
+  for(const [key,event]of Object.entries(book.events||{}))scan(event,key,'event');
+  rewardBooks.set(book,out);return out;
+ }
+ function senseTargets(saved,attempt,all,visible,npcs,objects,book,prefix){
+  const found=new Set([...normalize(saved),...pending(attempt).found,...pending(attempt).echoes]);
+  const shown=new Set(visible.map(o=>o.id)),targets=new Map();
+  const add=(o,kind)=>{if(valid(o.id)&&o.id.startsWith(prefix+'-')&&!found.has(o.id)&&[o.x,o.y??0,o.z].every(Number.isFinite)&&!targets.has(o.id))targets.set(o.id,{...o,y:o.y??0,kind});};
+  for(const o of all)add(o,shown.has(o.id)?'Rift Shard':'Sealed shard');
+  for(const r of shardRewards(book)){const anchor=(r.kind==='npc'?npcs:objects).find(o=>(r.kind==='npc'?o.id:o.key)===r.anchor);if(anchor)add({...anchor,id:r.id},'Quest reward');}
+  return [...targets.values()];
+ }
+ function nearestShard(p,targets){return targets.reduce((best,o)=>{const distance=Math.hypot(p.x-o.x,(p.y||0)-(o.y||0),p.z-o.z);return !best||distance<best.distance?{...o,distance}:best;},null);}
+ const api={regions,valid,normalize,pending,collect,bank,progress,shardRewards,senseTargets,nearestShard};root.BFRiftShards=api;
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

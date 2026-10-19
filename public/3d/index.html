@@ -1121,7 +1121,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <link rel="stylesheet" href="./hub-dialogue.css?v=2288">
 <script src="./voice-content.js?v=2180"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
-<script src="./hub-dialogue.js?v=2288"></script>
+<script src="./hub-dialogue.js?v=2303"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2190"></script>
@@ -1219,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.302.0-campaign-interactions';
+const VERSION3D='2.303.0-beastkeeper-quests';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3335,7 +3335,7 @@ function inReturnHub(){return !!(G?.hub&&!G.riftHall&&!G.sparringRoom&&!IN_ARENA
 function returnHubInfo(n){return BFReturnVisits.info(n,meta);}
 function syncReturnHubNpcs(){if(!inReturnHub())return;const s=adventureStoryState();if(s.flags['rv.eligible.keepsake']&&!G.hubNpcs.some(n=>n.id==='thomas'))G.hubNpcs.push({id:'thomas',name:'Thomas',role:'A piece of home',c1:'#665442',c2:'#c7aa76',x:300,z:350,y:0,direct:true,verb:'Talk to Thomas',open:()=>openReturnRequest(G.hubNpcs.find(n=>n.id==='thomas'))});G.storyNpcs=G.hubNpcs.filter(n=>Object.values(BFReturnVisits.defs).some(q=>q.npc===n.id));}
 function setupReturnHub(){if(!inReturnHub())return;G.storyState=BFStoryState.create();G.storyClaims={};G.storyObjects=[];G._storyEpoch=null;briarEpoch();BFReturnVisits.seedHub(G.storyState,meta);syncReturnHubNpcs();}
-function openReturnRequest(n){if(!inReturnHub())return;BFHubDialogue.close();briarRequest('open',{npc:n.id});}
+function openReturnRequest(n){if(!inReturnHub()||!n||!returnHubInfo(n))return;BFHubDialogue.close();if(mode==='menu'){showOverlay(false);resumePlay();}briarRequest('open',{npc:n.id});}
 function syncReturnField(){if(!isCampaignAdventure())return;const s=adventureStoryState();if(!G.returnActive)G.returnActive=BFReturnVisits.active(G,meta);if(!MP.guest())for(const id of G.returnActive)s.flags['rv.active.'+id]=true;G.storyObjects=(G.storyObjects||[]).filter(o=>!o.returnObject).concat(BFReturnVisits.fieldObjects(G.returnActive));BFReturnAdventures.sync({G,s,seg:vseg,plat:vplat});BFReturnVisits.sync({G,s,meta,plat:vplat});}
 function applyReturnReward(id,reward){const key=id.split('.').pop(),q=BFReturnVisits.defs[key];if(!q)return false;meta.returnVisits=BFReturnVisits.normalize(meta.returnVisits);
  if(reward.kind==='return_accept'){if(!meta.returnVisits[key])meta.returnVisits[key]='accepted';if(inReturnHub())persist();return true;}
@@ -19986,6 +19986,7 @@ function openBeastkeeper(back){
   mode='menu';
   menuTip('tip_beast','Equip <b>one companion</b> at a time. Check its abilities before buying: pets can help you fight or recover. Train your active companion to improve it.');
   const active=meta.petActive,beastWorld=G;
+  const beastNpc=inReturnHub()?G.hubNpcs.find(n=>n.id==='beastkeeper'):null,beastQuest=beastNpc&&returnHubInfo(beastNpc);
   const owned=meta.petOwned.filter(id=>PETS[id]);
   const unowned=PETIDS.filter(id=>!PETS[id].questOnly&&!meta.petOwned.includes(id));
   const role=id=>{ const a=PETS[id].arch; return a.charAt(0).toUpperCase()+a.slice(1); };
@@ -20007,10 +20008,12 @@ function openBeastkeeper(back){
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
   const shop=petShopUnlocked()?unowned.map(id=>petCard(id,'shop')).join(''):'';
   showOverlayHTML(`<div class="card petyard" data-menu-wallet="campaign"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub">One companion at a time. Equip, train and rename them here.</p></header>
+    ${beastQuest?`<section class="whistleOffer" aria-label="Beastkeeper quest"><div><b>◇ ${htmlSafe(beastQuest.title)}</b><p>${beastQuest.status==='ready'?'Both animals are safe. Report back to finish the rescue.':beastQuest.status==='accepted'?'Rescue both trapped animals in the Black Woods, then return here.':'Rescue two trapped animals to unlock companion purchases.'}</p></div><button class="bigbtn" id="beastQuest">${beastQuest.status==='ready'?'! Turn in quest':beastQuest.status==='accepted'?'View quest':'! Ask about the rescue'}</button></section>`:''}
     <section class="whistleOffer"><div><b>Beastkeeper’s Whistle</b><p>Change your companion from the bag, anywhere. Permanent unlock.</p></div><button class="bigbtn" id="buyWhistle" ${meta.companionWhistle||meta.gold<COMPANION_WHISTLE_COST?'disabled':''}>${meta.companionWhistle?'Owned':COMPANION_WHISTLE_COST.toLocaleString()+'g'}</button></section>
     ${!petShopUnlocked()?'<p class="ovsub">Pet purchases unlock after A Kinder Trail. Ask the Beastkeeper about rescuing both trapped animals in Black Woods. You can still manage companions you already own.</p>':''}${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
     <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
   const reopen=()=>openBeastkeeper(back);
+  document.getElementById('beastQuest')?.addEventListener('click',()=>{if(G!==beastWorld||!inReturnHub())return;showOverlay(false);openReturnRequest(beastNpc);});
   document.getElementById('buyWhistle').onclick=()=>{if(buyCompanionWhistle(beastWorld))reopen();};
   document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ petBuy(b.dataset.buy); reopen(); });
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ petEquip(b.dataset.eq); reopen(); });

@@ -2,7 +2,16 @@
 (function(){
  'use strict';
  let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,voiceTimer=0,speaking=false;
- const ready=fetch('./story/hub-dialogue.json?v=2288').then(r=>{if(!r.ok)throw Error('Dialogue unavailable');return r.json()}).then(async b=>{book=await BFVoiceContent.apply(b);return book}).catch(()=>null);
+ let loading=null;
+ async function loadBook(){
+  if(book)return book;if(loading)return loading;
+  loading=(async()=>{for(let attempt=0;attempt<3;attempt++){try{
+   const r=await fetch('./story/hub-dialogue.json?v=2303');if(!r.ok)throw Error('Dialogue unavailable');
+   const b=await r.json();if(!b?.npcs||!b?.nodes)throw Error('Invalid dialogue');book=await BFVoiceContent.apply(b);return book;
+  }catch(_){if(attempt<2)await new Promise(resolve=>setTimeout(resolve,200*(attempt+1)));}}return null;})();
+  try{return await loading;}finally{loading=null;}
+ }
+ const ready=loadBook();
  const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function state(a,id){const all=a.meta.hubDialogue||(a.meta.hubDialogue={});return all[id]||(all[id]={introduced:false,newsSeen:false,cursor:null})}
  function news(n,a){const d=book?.npcs[n.id];if(!d)return null;const latest=(d.newsStages||[]).filter(q=>a.meta.zoneDone?.[q.zone]).at(-1);if(latest)return state(a,n.id).newsSeenId===latest.id?null:latest.id;return Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=d.newsAfterCompletedRegions&&!state(a,n.id).newsSeen?d.news:null}
@@ -10,7 +19,7 @@
  function stopVoice(){generation++;clearTimeout(voiceTimer);clearTimeout(timer);cancelAnimationFrame(frame);speaking=false;if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(utterance){speechSynthesis.cancel();utterance=null}}
  function close(service=false,remote=false){if(!active)return;if(active.external&&!remote){active.a.requestClose();return;}generation++;stopVoice();const {n,a}=active;active=null;el('hubDialogue')?.remove();document.body.classList.remove('npc-conversation');a.leave(service);if(service)n.open()}
  function commit(){active.a.save()}
- function serviceButton(id,n){const icon={quartermaster:'🛒',anvil:'⚒️',keeper:'🎨',drillmaster:'⚔️',beastkeeper:'🐾'}[n.id]||'✦';return `<button id="${id}" class="hub-service-primary"><span class="hub-service-icon" aria-hidden="true">${icon}</span><span>${esc(book?.npcs[n.id]?.service||'Open services')}</span><span class="hub-service-arrow" aria-hidden="true">›</span></button>`}
+ function serviceButton(id,n){const icon={quartermaster:'🛒',anvil:'⚒️',keeper:'🎨',drillmaster:'⚔️',beastkeeper:'🐾'}[n.id]||'✦';return `<button id="${id}" class="hub-service-primary"><span class="hub-service-icon" aria-hidden="true">${icon}</span><span>${esc(book?.npcs[n.id]?.service||n.role||'Open services')}</span><span class="hub-service-arrow" aria-hidden="true">›</span></button>`}
  const questBadge='<span class="hub-quest-badge" aria-hidden="true">!</span>';
  function questProgress(choice){return choice.turnIn===true||(choice.effects||[]).some(e=>e.type==='reward'&&['return_accept','return_finish'].includes(e.kind));}
  function markQuestButton(btn,text){btn.classList.add('hub-quest-choice');btn.setAttribute('aria-label','Quest: '+text);btn.innerHTML=questBadge+'<span>'+esc(text)+'</span>';}
@@ -25,10 +34,10 @@
   for(const row of entries.filter(row=>row.choice.end||row.choice.category==='topics'))container.append(row.button);
  }
  function landing(){
-  if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book.npcs[n.id];s.cursor=null;commit();
-  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options" id="hubLanding"><section class="dialogue-group dialogue-group-main" aria-label="Main action"><h3>! Main action</h3>${serviceButton('hubService',n)}</section>${a.returnInfo?.(n)?'<section class="dialogue-group dialogue-group-side" aria-label="Side quests"><h3>◇ Side quests</h3><button id="hubReturnQuest"></button></section>':''}<section class="dialogue-group dialogue-group-lore" aria-label="Lore and questions"><h3>▤ Lore & questions</h3>${hasNews(n,a)?'<button id="hubNews">What has changed?</button>':''}<button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></section></div>`);
+  if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book?.npcs[n.id]||{role:n.role||'Services'};s.cursor=null;commit();
+  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options" id="hubLanding"><section class="dialogue-group dialogue-group-main" aria-label="Main action"><h3>! Main action</h3>${serviceButton('hubService',n)}</section>${a.returnInfo?.(n)?'<section class="dialogue-group dialogue-group-side" aria-label="Side quests"><h3>◇ Side quests</h3><button id="hubReturnQuest"></button></section>':''}${book?.npcs[n.id]?'<section class="dialogue-group dialogue-group-lore" aria-label="Lore and questions"><h3>▤ Lore & questions</h3>':''}${hasNews(n,a)?'<button id="hubNews">What has changed?</button>':''}${book?.npcs[n.id]?'<button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></section>':''}</div>`);
   if(el('hubReturnQuest')){const info=a.returnInfo(n),btn=el('hubReturnQuest');btn.textContent='◇ '+info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}
-  el('hubService').onclick=()=>close(true);el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
+  el('hubService').onclick=()=>close(true);if(el('hubAbout'))el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');if(el('hubHelp'))el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
  function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
@@ -89,9 +98,9 @@
  }
  async function open(n,a){
   if(active)close();const token=++generation;active={n,a,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');shell('<p>Opening conversation…</p>');
-  await ready;if(token!==generation||!active)return;if(!book?.npcs[n.id]){close(true);return}
+  await loadBook();if(token!==generation||!active)return;
   if(a.returnInfo?.(n)?.status==='ready'){a.returnQuest(n);return;}
-  const s=state(a,n.id);if(s.cursor&&book.nodes[s.cursor.id])line(s.cursor.id,s.cursor.lastChoice,s.cursor.topic);else landing();
+  const s=state(a,n.id);if(s.cursor&&book?.nodes[s.cursor.id])line(s.cursor.id,s.cursor.lastChoice,s.cursor.topic);else landing();
  }
  function present(n,a,source,view,canChoose){
   if(!view){if(active?.external)close(false,true);return;}
@@ -119,5 +128,5 @@ function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=
   }
  }
  if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(e=>e.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);
- window.BFHubDialogue={selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id],get active(){return active},get speaking(){return speaking}};
+ window.BFHubDialogue={selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id]||['quartermaster','anvil','keeper','drillmaster','beastkeeper'].includes(id),get active(){return active},get speaking(){return speaking}};
 })();

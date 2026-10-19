@@ -2413,3 +2413,7 @@ Implement shared current-scene participant validation for story/boat/final actio
 
 ## [Codex | 2026-10-18] Ending ownership edge case discovered during interaction review
 Finale dialogue was always owned by the host, even if that host had been downed while the guest finished a combat phase. Assign finale dialogue to the first available living participant; after final combat is won(collapse onward), restore downed party members for the ending. A disconnected dialogue owner now clears the auto-open latch and uses a fresh revision-based transaction ID so the remaining player can reopen/continue. Charge leadership is synchronized for the same availability rule. Keep normal NPC camera isolation and the established final-charge timing/skip requirements.
+
+
+## [Codex | 2026-10-18] Beastkeeper quest access repair
+User reports Beastkeeper opens Pet Yard directly with no dialogue/quest options. Inspected: normal openNpcTalk uses BFHubDialogue; its single failed book fetch permanently resolves null and silently opens services. Pet Yard locked-shop message tells player to ask about A Kinder Trail but has no quest action. Add visible new/active/ready quest access inside Pet Yard through existing authoritative openReturnRequest; retain services and completed saves. Retry failed hub dialogue loads on later interactions and keep a service/quest landing available on failure. Verify accept, reopen while accepted, ready turn-in, done/purchases and legacy-save preservation in browser.

@@ -1151,7 +1151,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-elites.js?v=2289"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2234"></script>
-<script src="./briar-journey.js?v=2236"></script>
+<script src="./briar-journey.js?v=2302"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2236"></script>
 <script src="./lost-canyon.js?v=2236"></script>
@@ -1219,7 +1219,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.301.0-pad-mana';
+const VERSION3D='2.302.0-campaign-interactions';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3360,10 +3360,21 @@ function briarObjects(){if(G?.colossusArena&&G.boss?.dead)return [];
  const waterLevel=i['ic.lock.level']||0,showWaterReset=waterLevel>=3||!!f['ic.lock.frozen']&&waterLevel!==2;
  return (G.storyObjects||[]).filter(o=>!inBriar()||!G.briarMill?.latched||!['briar.water','briar.mill.reset'].includes(o.key)).filter(o=>!(o.key==='lc.cage.north'&&(f['lc.north.open']||f['lc.north']))).filter(o=>!(o.key==='kd.lift.winch'&&f['kd.lift.open'])&&!(o.key==='kd.press.brake'&&f['kd.deep.open'])).filter(o=>o.key!=='gf.evac.call'||(!f['gf.evacuated']&&!(G.furnace?.remote||G.furnace)?.escortActive)).filter(o=>!(o.key==='hp.code.release'&&f['hp.code.open'])&&!(o.key==='hp.code.claim'&&(!f['hp.code.open']||f['hp.code.claimed']))).filter(o=>!(o.key==='gf.cache.release'&&f['gf.cache.open'])&&!(f['home.grain.open']&&['home.grain.spout','home.grain.hopper'].includes(o.key))).filter(o=>!(o.key==='rk.breach'&&f['rk.breach.start'])&&!(o.key==='lc.rail.release'&&f['lc.rail.open'])&&!(o.key==='ff.camp.release'&&f['ff.camp.open'])).filter(o=>!(o.key==='ff.heater'&&f['ff.heater'])&&!(o.key==='ih.cart'&&f['ih.cart'])&&!(o.key==='home.bell.alarm'&&f['home.bells.open'])&&!(o.key==='home.bell.cache'&&!f['home.bells.open'])&&!(o.key==='woods.tracks.release'&&f['woods.tracks.open'])&&!(o.key==='sc.code.claim'&&(!f['sc.code.open']||s.rewards['sc.stormshot']))&&!(o.key==='sc.code.note'&&f['sc.code.open'])&&!(o.key==='sc.ballista'&&f['sc.code.open'])&&!(o.key==='sc.code.fire'&&f['sc.code.open'])&&!(f['ic.lock.open']&&/^ic\.lock\.[123]$/.test(o.key))&&!(f['ic.lock.frozen']&&/^ic\.lock\.[12]$/.test(o.key))&&!(o.key==='ic.lock.3'&&!f['ic.lock.frozen'])&&!(o.key==='ic.lock.reset'&&(f['ic.lock.open']||!showWaterReset))&&(o.key!=='sc.fit'||!f['sc.boat.ready']&&['rudder','sail','rope'].some(k=>(adventureStoryState().items['sc.'+k]||0)>0&&!f['sc.installed.'+k]))).map(o=>({...o,available:(!inBriar()||BFBriarJourney.available(G,o.key))&&BFReturnVisits.available(o.key,adventureStoryState())&&(!inWindingCliffs()||BFHollowCliffs.available(o.key,s,G))&&(!inLongAscent()||BFLongAscent.available(o.key,G,G.ascent?.remote))&&(!inCastleGates()||BFCastleGates.available(o.key,G,G.castleGates?.remote))&&(!G.marbleArena||BFMarbleGuardian.available(o.key,G))&&(!inSkyLibrary()||BFSkyLibrary.available(o.key,G,G.library?.remote))&&(!inPalaceCourtyard()||BFPalaceCourtyard.available(o.key,G,G.court?.remote))&&(!inThunderCliffs()||BFThunderCliffs.available(o.key,G))&&(!inShipwreck()||BFShipwreckShore.available(o.key,G,G.shore?.remote))&&(!G.colossusArena||BFFurnaceColossus.available(G))&&(!inGreatFurnace()||BFGreatFurnace.available(o.key,G,G.furnace?.remote))&&(!inIronHalls()||BFIronHalls.available(o.key,G,G.iron?.remote))&&(!inIceCaves()||BFIceCaves.available(o.key,G,G.iceCaves?.remote))&&(!inPrison()||BFPrison.available(o.key,G,G.prison?.remote))&&(!inBrokenWalls()||BFBrokenWalls.available(o.key,G,G.keep?.remote))&&(!inLostCanyon()||BFLostCanyon.available(o.key,G,adventureStoryState(),MP.active&&!MP.isHost?G._canyonGuards:undefined))&&(o.key!=='hp.lift'||f['hp.quiet']||!(MP.active&&!MP.isHost?G._cliffGuards:G.enemies.filter(e=>e.cliffGuard&&!e.dead&&e.hp>0).length))&&(o.key!=='woods.rescue.release'||!(MP.active&&!MP.isHost?G._rescueGuards:G.enemies.filter(e=>e.bethGuard&&!e.dead&&e.hp>0).length))&&!(f['event.'+o.key])&&(o.key!=='briar.depart'||!(MP.active&&!MP.isHost?G._briarGuards:G.enemies.filter(e=>e.briarGuard&&!e.dead&&e.hp>0).length))}));
 }
+// Only present, connected players in this exact scene may operate shared controls.
+function campaignActor(actor,living=true,maxAge=1.5){
+ const local=actor===briarId();if(!G?.p||!local&&(!MP.active||!MP.conns.some(c=>c.open&&c._pid===actor)))return null;
+ const q=local?G.p:MP.peers[actor];if(!q)return null;
+ if(!local&&(q.zone!==MP.zone||!G.hub&&q.area!==G.area||!!q.hall!==!!G.riftHall||!Number.isFinite(q.last)||q.last>=maxAge))return null;
+ if(living&&(q.dead||q.downed||q.spectating||!(q.hp>0)))return null;
+ const p=local?q:{...q,x:q.tx??q.x,y:q.ty??q.y,z:q.tz??q.z};
+ return [p.x,p.y??0,p.z].every(Number.isFinite)?p:null;
+}
+function campaignParty(living=false){return (MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo']).filter((id,i,a)=>a.indexOf(id)===i&&!!campaignActor(id,living));}
+function campaignWorldLive(){return mode==='play'||MP.active&&!!liveMenuWorld&&liveMenuWorld===G&&['pause','menu','journal','mirror','upgrade','npc','inspection','chess'].includes(mode);}
 function briarReceive(request,actor,position){
  if(!inBriarStory()||!briarBook||(MP.active&&!MP.isHost))return false;
- const s=adventureStoryState(),party=MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];
- if(!party.includes(actor))return false;
+ const s=adventureStoryState(),party=campaignParty();position=campaignActor(actor);
+ if(!position||!party.includes(actor)){if(MP.active)for(const c of MP.conns)if(c.open&&c._pid===actor)try{c.send({t:'story',story:briarPacket(),ack:request?.event?.id});}catch{}return false;}
  const gripBusy=inSkyLibrary()&&request?.event?.type==='world'&&request.event.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==actor;
  const winchBusy=inPrison()&&request?.event?.type==='world'&&request.event.key==='kd.lift.winch'&&G.prison.winch.owner&&G.prison.winch.owner!==actor;
  const millBusy=inBriar()&&['briar.water','briar.mill.reset'].includes(request?.event?.key)&&G.briarMill?.owner&&G.briarMill.owner!==actor;
@@ -3410,7 +3421,7 @@ function briarApply(packet,place=false,ack){
  if(briarPending&&(ack===briarPending.request.event.id||packet.state.events[briarPending.request.event.id]||packet.state.revision>briarPending.request.event.revision))briarPending=null;
  if(G.riftMentor){G.trialKills=Math.max(0,Number(packet.trialKills)||0);if(G.storyState.flags['trial.proved']&&G.storyNpcs[0]&&G.portalPos)Object.assign(G.storyNpcs[0],trialMentorSpot(G.portalPos));}
  if(place)journalNoticeSync(true);
- briarSync();if(inBriar()){if(packet.millStatus)BFBriarJourney.apply(G,packet.millStatus);secureHomeBellProgress();}presentStoryNotice(packet.notice,place);if(!place&&inSkyLibrary()&&!displayWasOpen&&G.storyState.flags['sl.display.open'])toast('The sword seal opens the hidden display.');
+ if(inBriar()&&packet.millStatus)BFBriarJourney.apply(G,packet.millStatus);
  if(inLongAscent())G.ascent.remote=packet.ascentStatus;
  if(inCastleGates())G.castleGates.remote=packet.castleStatus;
  if(inSkyLibrary())G.library.remote=packet.libraryStatus;
@@ -3423,6 +3434,7 @@ function briarApply(packet,place=false,ack){
  if(inPrison()&&G.prison&&packet.prisonStatus)BFPrison.apply(G,packet.prisonStatus);
  if(inBrokenWalls()&&G.keep&&packet.keepStatus){G.keep.remote=packet.keepStatus;G.keep.clock=packet.keepStatus.clock;}
  if(inLostCanyon()&&G.canyon){for(const p of packet.canyonPrisoners||[]){const n=G.canyonPrisoners.find(n=>n.id===p.id);if(n)Object.assign(n,p);}G.canyon.alarmAt=packet.canyonAlarm>0?G.time+packet.canyonAlarm:0;if(packet.canyonStatus){G.canyon.remote=packet.canyonStatus;BFLostCanyon.actors(G,adventureStoryState(),packet.canyonStatus);}}
+ briarSync();if(inBriar())secureHomeBellProgress();presentStoryNotice(packet.notice,place);if(!place&&inSkyLibrary()&&!displayWasOpen&&G.storyState.flags['sl.display.open'])toast('The sword seal opens the hidden display.');
 }
 function briarSync(){
  if(!isCampaignAdventure()&&!G?.riftHall&&!G?.riftMentor&&!inReturnHub())return;
@@ -3469,7 +3481,7 @@ function briarSync(){
  if(mode==='npc')musicForScene();
  questUpdate();hudUpdate();
 }
-function briarDisconnect(actor){if(inSkyLibrary()&&G.library?.gripOwner===actor)G.library.gripOwner=null;if(inPrison())BFPrison.release(G,actor);if(inBriarStory()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;briarSync();}}
+function briarDisconnect(actor){if(inSkyLibrary()&&G.library?.gripOwner===actor)G.library.gripOwner=null;if(inPrison())BFPrison.release(G,actor);if(inBriarStory()&&G.storyState?.conversation?.owner===actor){const request={epoch:briarEpoch(),event:{id:'disconnect:'+Date.now(),type:'close'}};const r=BFStoryState.transact(G.storyState,briarBook,request.event);G.storyState=r.state;if(G.kingFinal)G.kingFinal.auto=null;briarSync();}}
 function briarInteract(){
  if(!inBriarStory())return null;const p=G.p,s=adventureStoryState(),yaw=playerAimYaw(p);let best=null,score=Infinity;
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65||!BFCampaignInteraction.reachable(G,p,o))return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={anchorNpc:(G.storyNpcs||[]).includes(o)?o:null,x:o.x,z:o.z,y:(o.y||0)+BFCampaignObjects.anchor(o),label,act};}};
@@ -3481,7 +3493,7 @@ function briarInteract(){
  return best;
 }
 
-function voyageCrew(){return [{id:briarId(),alive:!G.p.dead&&!G.p.downed},...(MP.active?MP.conns.filter(c=>c.open&&c._pid&&MP.peers[c._pid]?.zone===G.zone).map(c=>({id:c._pid,alive:!MP.peers[c._pid].downed&&MP.peers[c._pid].hp>0})):[])];}
+function voyageCrew(){return campaignParty(true).map(id=>({id,alive:true}));}
 function buildVoyageDeck(){
  BFShipwreckShore.closeAim();
  for(const key of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','pads','shockwaves','trails','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[key]=[];
@@ -3496,7 +3508,7 @@ function startVoyage(){
 }
 function applyVoyage(packet){if(!inShipwreck()||packet.epoch!==briarEpoch())return;const accepted=BFShipCrossing.acceptSnapshot(G.voyage,packet,briarEpoch());if(!accepted||accepted===G.voyage)return;
  if(!G.voyage){buildVoyageDeck();musicCue('ship_crossing');}G.voyage=accepted;voyageHud();}
-function voyageReceive(actor,command){if(!inShipwreck()||!G.voyage||mode!=='play'||(MP.active&&!MP.isHost))return false;BFShipCrossing.reconcileCrew(G.voyage,voyageCrew());return BFShipCrossing.command(G.voyage,actor,command);}
+function voyageReceive(actor,command){if(!inShipwreck()||!G.voyage||!campaignWorldLive()||!campaignActor(actor)||(MP.active&&!MP.isHost))return false;BFShipCrossing.reconcileCrew(G.voyage,voyageCrew());return BFShipCrossing.command(G.voyage,actor,command);}
 function voyageSend(type,extra={}){if(!G?.voyage)return;const command={type,epoch:briarEpoch(),...extra};if(MP.active&&!MP.isHost)MP.hostConn?.send({t:'shipCommand',command});else voyageReceive(briarId(),command);}
 function voyageAction(act,repeat=false){
  const v=G?.voyage;if(mode!=='play'||!v||BFShipCrossing.current(v).kind!=='rest'||!['interact','skill1'].includes(act))return false;
@@ -8485,8 +8497,8 @@ function updateHydra(dt){
  if(h.freed&&!G._hydraPaid){G._hydraPaid=true;gainXp(480);awardGold(700);adventureStoryState().notes['tc.hydra.free']={region:'storm',title:'The sea is its own again',text:'All three restraints are broken. The hydra returned to the sea. The stone climb beyond its ledges leads toward Sunspire.'};musicCue('hydra_release');toast('The hydra is free. The climb to Sunspire is open.');openWay();journalNoticeSync();}
  if(!G._hydraIntro){G._hydraIntro=true;toast('Free the three neck restraints. Dodge the marked attack, then strike its pale joint while that head rests. Stone blocks stop the water blast.');}questUpdate();
 }
-function finalCrew(){return MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'];}
-function finalCommand(actor,c){if(!G?.kingFinal||MP.guest()||mode!=='play'||c?.epoch!==briarEpoch()||G.boss.akStage!=='charge')return false;return BFFinalKing.command(G.boss.akCharge,actor,c,finalCrew());}
+function finalCrew(){return campaignParty(true);}
+function finalCommand(actor,c){if(!G?.kingFinal||MP.guest()||!campaignWorldLive()||!campaignActor(actor)||c?.epoch!==briarEpoch()||G.boss.akStage!=='charge')return false;return BFFinalKing.command(G.boss.akCharge,actor,c,finalCrew());}
 function sendFinalCommand(type){const c={type,epoch:briarEpoch(),seq:G.kingFinal.seq=(G.kingFinal.seq||0)+1};if(MP.guest())MP.hostConn?.send({t:'endingCommand',command:c});else finalCommand(briarId(),c);}
 function prepareFinalScene(){if(!G?.kingFinal)return;const e=G.boss;updateBossBar(e);const voidStage=['ian','charge','cut','restored','home'].includes(e.akStage);
  if(voidStage&&!G.kingFinal.void){G.kingFinal.void=true;G.segments=[];G.obstacles=[];G.walls=[];G.deco=[];G.rooms=[];G.pickups=[];G.projectiles=[];G.healpads=[];vplat(0,0,0,1200,1200,{slab:30,checkpoint:true});G.bounds={minX:-600,maxX:600,minZ:-600,maxZ:600};Object.assign(G.p,{x:0,z:180,y:0,vy:0,vx:0,vz:0});G.lastSafe={x:0,z:180,y:0};e.y=-3000;}
@@ -8495,7 +8507,7 @@ function prepareFinalScene(){if(!G?.kingFinal)return;const e=G.boss;updateBossBa
  const cue=e.akStage==='plunge'?'legion_procession':e.akStage==='collapse'?'void_arrival':e.akStage==='ian'?'ian_spirit':e.akStage==='charge'?'void_charge':e.akStage==='cut'?'void_cut':['restored','home'].includes(e.akStage)?'restoration':null;
  if(G.kingFinal.music!==e.akStage){G.kingFinal.music=e.akStage;if(cue)musicCue(cue);else musicForScene();}
 }
-function finalDialogue(npc,line){const s=adventureStoryState();if(!briarBook||s.conversation)return;s.cursors[npc]={npc,node:line,lastChoice:''};const r=BFStoryState.transact(s,briarBook,{id:briarEpoch()+':'+line,type:'open',npc});if(r.changed){G.storyState=r.state;r.state.conversation.owner=briarId();r.state.conversation.origin={x:G.p.x,y:G.p.y,z:G.p.z};briarSync();}}
+function finalDialogue(npc,line){const s=adventureStoryState();if(!briarBook||s.conversation)return;const owner=finalCrew()[0]||briarId(),p=campaignActor(owner)||G.p;s.cursors[npc]={npc,node:line,lastChoice:''};const r=BFStoryState.transact(s,briarBook,{id:briarEpoch()+':'+line+':'+s.revision,type:'open',npc});if(r.changed){G.storyState=r.state;r.state.conversation.owner=owner;r.state.conversation.origin={x:p.x,y:p.y,z:p.z};briarSync();}}
 function syncFinalKingStory(s){const e=G.boss;if(!e?.finalKing)return;let advance=false;
  if(e.akStage==='intro'&&s.flags['ak.start']){BFFinalKing.startFight(e,1);advance=true;}
  if(e.akStage==='recognition'&&s.flags['ak.plunge']){e.akStage='plunge';e.akClock=5;advance=true;}
@@ -8503,14 +8515,25 @@ function syncFinalKingStory(s){const e=G.boss;if(!e?.finalKing)return;let advanc
  if(e.akStage==='restored'&&s.flags['ak.home']){e.akStage='home';advance=true;}
  if(advance)s.conversation=null;prepareFinalScene();
 }
-function finalChargeHud(){let el=document.getElementById('finalCharge');if(!G?.kingFinal||G.boss.akStage!=='charge'){el?.remove();return;}const c=G.boss.akCharge;if(!c)return;
- if(!el){el=document.createElement('section');el.id='finalCharge';el.style.cssText='position:fixed;z-index:90;bottom:24px;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 28px);box-sizing:border-box;padding:18px;border:1px solid #d3ae70;border-radius:12px;background:#100f20ed;color:#fff0ca;text-align:center;font:16px/1.5 system-ui';el.innerHTML='<strong>Charge Ian’s Blade</strong><p data-charge-copy></p><progress aria-label="Blade charge" max="60" value="0" style="width:100%"></progress><p data-charge-count></p><button data-charge-start>Begin charge</button> <button data-charge-press>Strike · Space</button> <button data-charge-skip>Skip charge</button>';document.body.append(el);el.querySelector('[data-charge-start]').onclick=()=>sendFinalCommand('start');el.querySelector('[data-charge-skip]').onclick=()=>sendFinalCommand('skip');el.querySelector('[data-charge-press]').onpointerdown=ev=>{ev.preventDefault();sendFinalCommand('press');};if(document.pointerLockElement)document.exitPointerLock();}
- el.querySelector('progress').value=c.presses;el.querySelector('[data-charge-count]').textContent=c.presses+' / '+c.target+' · '+c.remaining.toFixed(1)+' seconds';el.querySelector('[data-charge-copy]').textContent=c.state==='failed'?'The cut was not strong enough. Retry only this charge. Attempts failed: '+c.failures:c.state==='ready'?'Press Space repeatedly or tap Strike. Holding the key does not count. Teammates can help.':'Break the binding! Keep pressing.';
- const start=el.querySelector('[data-charge-start]');start.hidden=c.state==='charging'||c.state==='won';start.disabled=MP.guest();start.textContent=c.state==='failed'?'Retry charge':'Begin charge';el.querySelector('[data-charge-press]').disabled=c.state!=='charging';el.querySelector('[data-charge-skip]').hidden=!(c.state==='failed'&&c.failures>=5);el.querySelector('[data-charge-skip]').disabled=MP.guest();
+function finalChargeAction(act,repeat=false){
+ if(mode!=='play'||!G?.kingFinal||G.boss?.akStage!=='charge'||!['interact','jump','skill1'].includes(act))return false;
+ if(repeat||!campaignActor(briarId()))return true;
+ const c=G.boss.akCharge;if(!c)return true;
+ const leader=c.leader?c.leader===briarId():!MP.guest();
+ if(act==='interact'&&leader&&['ready','failed'].includes(c.state))sendFinalCommand('start');
+ else if(act==='jump'&&c.state==='charging')sendFinalCommand('press');
+ else if(act==='skill1'&&leader&&c.state==='failed'&&c.failures>=5)sendFinalCommand('skip');
+ finalChargeHud();return true;
 }
-document.addEventListener('keydown',ev=>{if(G?.kingFinal&&G.boss.akStage==='charge'&&ev.code==='Space'){ev.preventDefault();ev.stopImmediatePropagation();if(!ev.repeat)sendFinalCommand('press');}},true);
+function finalChargeHud(){let el=document.getElementById('finalCharge');if(!G?.kingFinal||G.boss.akStage!=='charge'){el?.remove();return;}const c=G.boss.akCharge;if(!c)return;if(!MP.guest())c.leader=finalCrew()[0]||null;const leader=c.leader?c.leader===briarId():!MP.guest();
+ if(!el){el=document.createElement('section');el.id='finalCharge';el.style.cssText='position:fixed;z-index:90;bottom:170px;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 28px);box-sizing:border-box;padding:18px;border:1px solid #d3ae70;border-radius:12px;background:#100f20ed;color:#fff0ca;text-align:center;font:16px/1.5 system-ui';el.innerHTML='<strong>Charge Ian’s Blade</strong><p data-charge-copy></p><progress aria-label="Blade charge" max="60" value="0" style="width:100%"></progress><p data-charge-count></p><button data-charge-start>Begin charge</button> <button data-charge-press>Strike · Space</button> <button data-charge-skip>Skip charge</button>';document.body.append(el);el.querySelector('[data-charge-start]').onclick=()=>sendFinalCommand('start');el.querySelector('[data-charge-skip]').onclick=()=>sendFinalCommand('skip');el.querySelector('[data-charge-press]').onpointerdown=ev=>{ev.preventDefault();sendFinalCommand('press');};if(document.pointerLockElement)document.exitPointerLock();}
+ el.querySelector('progress').value=c.presses;el.querySelector('[data-charge-count]').textContent=c.presses+' / '+c.target+' · '+c.remaining.toFixed(1)+' seconds';el.querySelector('[data-charge-copy]').textContent=c.state==='failed'?'Try the charge again · '+controlHint('interact')+'. Attempts failed: '+c.failures:c.state==='ready'?'Start the charge, then tap '+controlHint('jump')+' repeatedly. Holding the button does not count. Teammates can help.':'Break the binding! Keep pressing.';
+ const start=el.querySelector('[data-charge-start]');start.hidden=c.state==='charging'||c.state==='won';start.disabled=!leader;start.textContent=(c.state==='failed'?'Retry charge':'Begin charge')+' · '+controlHint('interact');el.querySelector('[data-charge-press]').textContent='Strike · '+controlHint('jump');el.querySelector('[data-charge-skip]').textContent='Skip charge · '+controlHint('skill1');el.querySelector('[data-charge-press]').disabled=c.state!=='charging';el.querySelector('[data-charge-skip]').hidden=!(c.state==='failed'&&c.failures>=5);el.querySelector('[data-charge-skip]').disabled=!leader;
+ for(const b of el.querySelectorAll('button'))b.style.cssText='background:#2c2945;color:#fff0ca;border:1px solid #d3ae70;border-radius:6px;padding:10px;margin:3px;font:700 14px system-ui';
+}
+
 function completeFinalKing(){if(G.kingFinal.rewarded)return;if(MP.active)MP.completeSurvival();G.kingFinal.rewarded=true;G._winPending=true;const D=curDiff();meta.zoneDone.castle=true;meta.zoneMax=ZONES.length-1;meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;meta.bossKills=(meta.bossKills||0)+1;meta.tyrantKills=(meta.tyrantKills||0)+1;meta.totalKills=(meta.totalKills||0)+1;if(G.p.weapon.sch==='mag')meta.magicBossKills=(meta.magicBossKills||0)+1;if(G.p.weapon.cls==='ranged')meta.rangedBossKills=(meta.rangedBossKills||0)+1;gainXp(Math.max(1,Math.round(G.boss.xp)));const bonus=awardGold(500+Math.max(1,Math.round(G.boss.xp*3.5)));meta.hero=snapOf(G.p);meta.bank=null;meta.run=null;persist();checkAchievements();checkCosmetics();SFX.win();showGameUI(false);winScreen(bonus,D);}
-function finalKingTick(dt){if(!G?.kingFinal){document.getElementById('finalCharge')?.remove();return false;}const e=G.boss;prepareFinalScene();finalChargeHud();
+function finalKingTick(dt){if(!G?.kingFinal){document.getElementById('finalCharge')?.remove();return false;}const e=G.boss;if(['collapse','ian','charge','cut','restored','home'].includes(e.akStage)&&MP.active)MP.completeSurvival();prepareFinalScene();finalChargeHud();
  if(e.akStage==='home'){completeFinalKing();return true;}
  const dialogue={intro:['abyss_king','ak.king.offer'],recognition:['abyss_king','ak.king.recognize'],ian:['ian','ak.ian.welcome'],restored:['ian','ak.ian.restored']}[e.akStage];
  if(dialogue&&!MP.guest()&&G.kingFinal.auto!==e.akStage&&briarBook){G.kingFinal.auto=e.akStage;finalDialogue(...dialogue);return true;}
@@ -10243,7 +10266,7 @@ window.addEventListener('keydown',e=>{
       return; }
   }
   const code=BFPartyNavigation.keyCode(e),act=keyAction(code); if(!act) return;
-  if(voyageAction(act,e.repeat)){e.preventDefault();return;}
+  if(finalChargeAction(act,e.repeat)||voyageAction(act,e.repeat)){e.preventDefault();return;}
   if(act==='partyTeleport'){e.preventDefault();if(mode==='play'&&!e.repeat){partyHeld=true;partyNeedsRelease=false;}return;}
   if(act==='partyNext'){e.preventDefault();if(mode==='play'&&!e.repeat){partyCancel();const a=partyFriends(),q=partySelected();partyChoice=a[(a.indexOf(q)+1)%a.length]?.id||null;}return;}
   if(act==='bag'){if(!e.repeat&&mode==='play'){e.preventDefault();releaseKeyboard();openBag(resumePlay);}return;}
@@ -10276,13 +10299,14 @@ function pollGamepad(dt){
  if(p.edge('pause')){release();openPause();return;}
  if(p.edge('bag')){release();openBag(openPause);return;}
  if(p.edge('journal')){release();openJournal();return;}
+ if(G?.kingFinal&&G.boss?.akStage==='charge'){release();for(const act of ['interact','jump','skill1'])if(p.edge(act))finalChargeAction(act);return;}
  _padOwned=true;
  input.jx=Math.max(-1,Math.min(1,p.x+(p.buttons[15]?1:0)-(p.buttons[14]?1:0)));
  input.jz=Math.max(-1,Math.min(1,p.z+(p.buttons[13]?1:0)-(p.buttons[12]?1:0)));
  for(const a of ['attack','jump','dodge']){if(p.edge(a)&&a!=='attack')input[a+'Edge']=true;input[a]=p.on(a)||[...heldKeyboard.values()].includes(a);}
  partyHeld=p.on('partyTeleport');if(!partyHeld)partyNeedsRelease=false;
- if(p.edge('interact')&&!voyageAction('interact'))doInteract();
- for(let i=1;i<=4;i++)if(p.edge('skill'+i)&&!voyageAction('skill'+i))useSkill(i-1);
+ if(p.edge('interact')&&!finalChargeAction('interact')&&!voyageAction('interact'))doInteract();
+ for(let i=1;i<=4;i++)if(p.edge('skill'+i)&&!finalChargeAction('skill'+i)&&!voyageAction('skill'+i))useSkill(i-1);
  if(meta.camMode!=='far'&&G){const c=BFController.config,v=c.sensitivity||1;const yawInput=p.rx*(c.invertX?-1:1);G.camYaw=(G.camYaw??Math.PI)+yawInput*2.7*dt*v;const pitchInput=p.ry*(c.invertY===false?-1:1);G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)+pitchInput*2*dt*v));}
 }
 // Mouse buttons share the same two-slot binding map as keyboard keys.
@@ -13821,7 +13845,7 @@ function killEnemy(e,weaponKill){
     (G.trails=G.trails||[]).push({x:e.x,z:e.z,y:e.y,warn:0.85,warnMax:0.85,r:56,life:3.0,max:3.0,dmg:Math.max(4,Math.round(e.dmg*0.45)),hit:0,col:'#ff8a3a',cause:{name:'a dying emberling',attack:'the cinders'}});
     burst(e.x,e.y+10,e.z,'#ff8a3a',18);
   }
-  e.dead=true;e.defeatedAt=G.time; if(isCampaignAdventure()&&BFCampaignPatrols.killed(G,adventureStoryState(),e,{host:!MP.guest(),party:MP.active?[MP.myId,...MP.conns.filter(c=>c.open&&c._pid).map(c=>c._pid)]:['solo'],notice:(title,text)=>presentStoryNotice({id:(G.patrolWork?.id||'combat')+':'+adventureStoryState().revision+':'+title,title,text,kind:'Task complete'})})){briarSync();questUpdate();} G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  e.dead=true;e.defeatedAt=G.time; if(isCampaignAdventure()&&BFCampaignPatrols.killed(G,adventureStoryState(),e,{host:!MP.guest(),party:campaignParty(),notice:(title,text)=>presentStoryNotice({id:(G.patrolWork?.id||'combat')+':'+adventureStoryState().revision+':'+title,title,text,kind:'Task complete'})})){briarSync();questUpdate();} G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5,sourceType:e.type==='colossus'&&__BF_WORLD().theme==='marble'?'marblecolossus':e.type,sourceH:e.h,ranged:['archer','caster','frostlobber','sunpriest','royalarcanist','cragspitter','voidtether'].includes(e.type)}); G.lastSlainEnemy=G.corpses[G.corpses.length-1]; if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
   // Baseline kills give no mana; class-specific kill sustain remains in c2OnKill.
@@ -16323,7 +16347,7 @@ function update(dt){
  if(mode!=='play'){BFGuidedTutorial.suspend();partyHud();}
  if(BFShipwreckShore.aiming()&&(!G?.shore||!inShipwreck()||G.p?.dead))BFShipwreckShore.closeAim();
  const conv=G?.storyState?.conversation;
- if(conv&&briarBook&&(!MP.active||MP.isHost)&&!G.kingFinal){const owner=conv.owner===briarId()?G.p:MP.peers[conv.owner];if(!owner||owner.dead||owner.hp<=0||conv.owner!==briarId()&&(owner.zone!==G.zone||owner.area!==G.area)){const r=BFStoryState.transact(G.storyState,briarBook,{id:'owner-left:'+G.storyState.revision,type:'close',revision:G.storyState.revision});if(r.changed){G.storyState=r.state;briarSync();if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket()});}catch{}}}}
+ if(conv&&briarBook&&(!MP.active||MP.isHost)&&!G.kingFinal){const owner=campaignActor(conv.owner,true,3);if(!owner){const r=BFStoryState.transact(G.storyState,briarBook,{id:'owner-left:'+G.storyState.revision,type:'close',revision:G.storyState.revision});if(r.changed){G.storyState=r.state;briarSync();if(MP.active)for(const c of MP.conns)try{c.send({t:'story',story:briarPacket()});}catch{}}}}
  window.BFSocial?.tick();
  if(mode==='play')liveMenuWorld=G;
  const previous=mode,live=G&&liveMenuWorld===G&&!G.p?.dead&&['pause','menu','npc','journal','inspection','chess','upgrade'].includes(mode)&&!document.body.classList.contains('t-title')&&!document.body.classList.contains('t-attract');
@@ -16360,7 +16384,7 @@ function updateWorld(dt){
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
 
-  if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:[G.p,...Object.values(MP.peers||{}).filter(p=>p.zone===G.zone&&!p.downed)],spawn:spawnEnemy,notice:()=>{const w=G.patrolWork,home=w.id==='combat.0.0';toast('Optional hunt: '+w.total+' '+(w.target|| (home?'farm raiders':'enemies'))+' · '+(w.place|| (home?'western supply wagon':'this area')));questUpdate();}});
+  if(isCampaignAdventure()&&G.patrolWork)BFCampaignPatrols.tick(G,adventureStoryState(),dt,{host:!MP.guest(),players:campaignParty(true).map(id=>campaignActor(id)),spawn:spawnEnemy,notice:()=>{const w=G.patrolWork,home=w.id==='combat.0.0';toast('Optional hunt: '+w.total+' '+(w.target|| (home?'farm raiders':'enemies'))+' · '+(w.place|| (home?'western supply wagon':'this area')));questUpdate();}});
   G._freezeT=Math.max(0,(G._freezeT||0)-dt);
   /* Headlong drives you forward and refuses to be steered - the whole point of it.
      AND IT HAS TO LET GO. _headlongT was set to 0.9 by SKILL_FX.bsk_charge and decremented by
@@ -16415,16 +16439,16 @@ function updateWorld(dt){
   updateMarks(dt);                                                                          // world pings age out on the same clock
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
-  if(inBriar()){const players=[{...G.p,id:briarId()},...(MP.active?Object.entries(MP.peers).filter(([id,q])=>q.zone===G.zone&&q.area===G.area&&MP.conns.some(c=>c.open&&c._pid===id)).map(([id,q])=>({...q,id,x:q.tx,y:q.ty,z:q.tz})):[])];BFBriarJourney.tick(G,dt,!MP.guest(),players,finishBriarMillEvent);}
+  if(inBriar()){const players=campaignParty(true).map(id=>({...campaignActor(id),id}));BFBriarJourney.tick(G,dt,!MP.guest(),players,finishBriarMillEvent);}
   if(inWindingCliffs()&&BFHollowCliffs.tick(G,toast,vseg))questUpdate();
   if(inLongAscent())BFLongAscent.tick(G,dt);
-  if(inCastleGates())BFCastleGates.tick(G,adventureStoryState(),dt,!MP.active||MP.isHost,spawnEnemy,toast);if(inSkyLibrary()){const owner=G.library.gripOwner,peer=MP.peers[owner],operator=owner===briarId()?G.p:peer&&peer.zone===G.zone&&peer.area===G.area?{...peer,x:peer.tx,y:peer.ty,z:peer.tz}:null;if(BFSkyLibrary.tick(G,dt,!MP.active||MP.isHost,operator))finishLibraryDisplay();}if(inThunderCliffs())BFThunderCliffs.tick(G,dt,toast,(d,o)=>hurtPlayer(d,o.x,o.z,o.name));if(G.hydraArena)updateHydra(dt);
+  if(inCastleGates())BFCastleGates.tick(G,adventureStoryState(),dt,!MP.active||MP.isHost,spawnEnemy,toast);if(inSkyLibrary()){const operator=campaignActor(G.library.gripOwner);if(BFSkyLibrary.tick(G,dt,!MP.active||MP.isHost,operator))finishLibraryDisplay();}if(inThunderCliffs())BFThunderCliffs.tick(G,dt,toast,(d,o)=>hurtPlayer(d,o.x,o.z,o.name));if(G.hydraArena)updateHydra(dt);
   if(inBriar()&&G.homeBell&&BFHomeBellDefense.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,players:[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===G.zone&&q.area===G.area).map(q=>({x:q.tx,y:q.ty,z:q.tz})):[])],spawn:spawnEnemy,elite:makeElite,setupElite:BFCampaignElites.setup,toast,updateQuest:questUpdate},dt))finishHomeBellDefense();
   if(inShipwreck()){G.shore.clock+=dt;voyageTick(dt);}
   if(inGreatFurnace())BFGreatFurnace.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,spawn:spawnEnemy,complete:finishFurnaceEvent,players:[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===G.zone&&q.area===G.area).map(q=>({x:q.tx,y:q.ty,z:q.tz,hp:q.hp,downed:q.downed})):[])],toast,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,o.name)},dt);
   if(inIronHalls())BFIronHalls.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,players:[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===G.zone&&q.area===G.area).map(q=>({x:q.tx,y:q.ty,z:q.tz,vz:q.motion?.vz||0,hp:q.hp,downed:q.downed})):[])],complete:finishIronEvent,toast,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,o.name)},dt);
   if(inIceCaves())BFIceCaves.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,toast},dt);
-  if(inPrison()){const owner=G.prison.winch.owner,peer=MP.peers[owner],operator=owner===briarId()?G.p:peer&&peer.zone===G.zone&&peer.area===G.area?{...peer,x:peer.tx,y:peer.ty,z:peer.tz}:null;BFPrison.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,complete:finishPrisonEvent,toast,operator,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,{name:o.name,attack:o.attack})},dt);const w=G.prison.winch,stamp=Math.floor(w.progress*20)+':'+(w.owner||'');if(stamp!==G._prisonWinchQuestStamp){G._prisonWinchQuestStamp=stamp;questUpdate();}}
+  if(inPrison()){const operator=campaignActor(G.prison.winch.owner);BFPrison.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,complete:finishPrisonEvent,toast,operator,hurt:(d,o)=>hurtPlayer(d,o.x,o.z,{name:o.name,attack:o.attack})},dt);const w=G.prison.winch,stamp=Math.floor(w.progress*20)+':'+(w.owner||'');if(stamp!==G._prisonWinchQuestStamp){G._prisonWinchQuestStamp=stamp;questUpdate();}}
   if(inBrokenWalls()){BFBrokenWalls.tick({G,state:adventureStoryState(),host:!MP.active||MP.isHost,spawn:spawnEnemy,complete:finishKeepEvent,toast,players:[G.p,...(MP.active?Object.values(MP.peers).filter(p=>p.zone===G.zone&&p.area===G.area):[])]},dt);BFBrokenWalls.actors(G,adventureStoryState(),G.keep.remote);}
   if(inLostCanyon())BFLostCanyon.tick({G,spawn:spawnEnemy,host:!MP.active||MP.isHost,height:highestSurfaceAt,toast,complete:finishCanyonEvent,players:[G.p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area).map(q=>({x:q.tx,z:q.tz,hp:q.hp,downed:q.downed})):[])]},dt);
   /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood, how much health you had and

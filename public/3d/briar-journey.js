@@ -34,7 +34,7 @@ function build(G){
  const m=G.briarMill={x:stopped?PLATE.x:CRATE.x,z:stopped?PLATE.z:CRATE.z,owner:null,offset:null,plate:stopped?1:0,water:stopped?0:1,docked:0,wheel:0,bridge:f['briar.bridge']?1:0,latched:stopped,bridgeSeen:!!f['briar.bridge']};
  m.solid={kind:'col',x:m.x,z:m.z,y0:0,w:66,d:66,h:62,invisible:true,millCrate:true,interactionKey:'briar.water'};G.obstacles.push(m.solid);
  // Replace only the old water handle; the wheel and crossing stay where they belong.
- const o=G.storyObjects.find(o=>o.key==='briar.water');Object.assign(o,{x:m.x,z:m.z,kind:'millcrate',range:118,label:'Move the grain crate · E, then walk'});
+ const o=G.storyObjects.find(o=>o.key==='briar.water');Object.assign(o,{x:m.x,z:m.z,kind:'millcrate',range:118,label:'Move the grain crate, then walk'});
  Object.assign(G.storyObjects.find(o=>o.key==='briar.jam'),{z:-1740,label:'Free the wheel and latch the sluice',blockedText:'The water is pushing against the jam. Keep the broad pressure plate down first.'});
  Object.assign(G.storyObjects.find(o=>o.key==='briar.bridge'),{x:80,blockedText:'The wheel is still jammed. Hold the sluice closed and free the timber beside the wheel.'});
  G.storyObjects.push({key:'briar.mill.note',x:5,z:-1570,y:0,kind:'millnote',label:'Read the millwright’s sketch'},
@@ -56,7 +56,7 @@ function sync(G){const m=G.briarMill;if(!m)return;const f=G.storyState.flags;
  const flow=f['briar.bridge']?m.bridge:m.water;m.gateSolid.y0=flow*70;m.gateSolid.h=flow*70+74;
  if(m.solid.x!==m.x||m.solid.z!==m.z)G._obsDirty=true;
  Object.assign(m.solid,{x:m.x,z:m.z});
- const o=G.storyObjects.find(o=>o.key==='briar.water');if(o)Object.assign(o,{x:m.x,z:m.z,label:m.owner?'Release the grain crate · E':'Move the grain crate · E, then walk'});
+ const o=G.storyObjects.find(o=>o.key==='briar.water');if(o)Object.assign(o,{x:m.x,z:m.z,label:m.owner?'Release the grain crate':'Move the grain crate, then walk'});
  refreshNotices(G,root.BFJournalNotice?.queue);
 }
 function refreshNotices(G,q){if(!q||!G.storyState)return;const {flags:f,quests={},items={}}=G.storyState;

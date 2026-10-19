@@ -1,0 +1,48 @@
+{
+  "status": "Joined",
+  "results": [
+    {
+      "mismatchedSceneSent": true
+    },
+    {
+      "requested": "thomas"
+    }
+  ],
+  "version": "2.302.0-campaign-interactions",
+  "active": true,
+  "host": false,
+  "id": "pgg94",
+  "code": "PSUN",
+  "mode": "npc",
+  "area": 0,
+  "zone": 0,
+  "level": 100,
+  "gold": 1145,
+  "conversation": {
+    "npc": "thomas",
+    "node": "briar.thomas.first",
+    "lastChoice": "",
+    "trail": [
+      "briar.thomas.first"
+    ],
+    "topics": [],
+    "owner": "pgg94",
+    "origin": {
+      "x": 0,
+      "y": 0,
+      "z": 405
+    }
+  },
+  "peers": [
+    {
+      "id": "h",
+      "area": 0,
+      "zone": 0,
+      "last": 0.16999999999999998,
+      "hp": 154,
+      "busy": ""
+    }
+  ],
+  "lift": null,
+  "voyage": null
+}

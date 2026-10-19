@@ -1,0 +1,44 @@
+{
+  "status": "Joined",
+  "results": [
+    {
+      "mismatchedSceneSent": true
+    },
+    {
+      "requested": "thomas"
+    }
+  ],
+  "version": "2.302.0-campaign-interactions",
+  "active": true,
+  "host": false,
+  "id": "pgg94",
+  "code": "PSUN",
+  "mode": "play",
+  "area": 0,
+  "zone": 5,
+  "level": 100,
+  "gold": 1145,
+  "conversation": null,
+  "peers": [
+    {
+      "id": "h",
+      "area": 0,
+      "zone": 5,
+      "last": 0.016666666666666666,
+      "hp": 154,
+      "busy": "Paused"
+    }
+  ],
+  "lift": null,
+  "voyage": {
+    "stage": 2,
+    "hull": 85,
+    "ready": [
+      "pgg94"
+    ],
+    "crew": [
+      "h",
+      "pgg94"
+    ]
+  }
+}

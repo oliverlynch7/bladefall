@@ -1,0 +1,722 @@
+[
+  {
+    "suite": "test-abyssal-heart.cjs",
+    "passed": true,
+    "output": "Abyssal Heart: all40 authored shard IDs across8regions, sealed placements, NPC/event rewards,3D proximity, saved/carried filters, local co-op independence and no story mutations pass.\n"
+  },
+  {
+    "suite": "test-arena-class-weapons.cjs",
+    "passed": true,
+    "output": "250 Arena class weapon, Fair Mode, intrinsic, manual choice and bag preservation checks passed.\n"
+  },
+  {
+    "suite": "test-arena-polish.cjs",
+    "passed": true,
+    "output": "40 Arena station geometry, lifecycle, reduced motion and menu contract checks passed.\n"
+  },
+  {
+    "suite": "test-bag-browser.cjs",
+    "passed": true,
+    "output": "Bag filters, rarity sorting, item identity, empty slots, whistle purchase/gates, stale world, field vitals and save schema passed.\n"
+  },
+  {
+    "suite": "test-bag-equip.cjs",
+    "passed": true,
+    "output": "100 equipment conservation and autosave race regression checks passed.\n"
+  },
+  {
+    "suite": "test-boat-controls.cjs",
+    "passed": true,
+    "output": "Boat: immediate host-cleared waves, no premature progression, keyboard/controller contextual actions, repeat/life/ready/mode guards pass.\n"
+  },
+  {
+    "suite": "test-boss-combat-scope.cjs",
+    "passed": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed.\n"
+  },
+  {
+    "suite": "test-boss-tactics.cjs",
+    "passed": true,
+    "output": "59 campaign boss armor, phase, status, cover, flank, co-op authority and isolation checks passed.\n"
+  },
+  {
+    "suite": "test-briar-combat.cjs",
+    "passed": true,
+    "output": "75 Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.\nBrute phase 2/3 ground-wave variation and first-phase charge preserved.\n"
+  },
+  {
+    "suite": "test-briar-journey.cjs",
+    "passed": true,
+    "output": "Briar mill: pressure/release, real obstacle blocking, owner arbitration, reset, disconnect/jump, weight completion, stale snapshot, delayed bridge collision, legacy states and lane bounds passed.\nMill sketch appears as a related clue only after discovery.\nSuperseded mill notices clear; discovered clues and permanent journal entries remain.\nMill fallback follows the active renderer, including a mid-level graphics switch.\n"
+  },
+  {
+    "suite": "test-briar-performance.cjs",
+    "passed": true,
+    "output": "Collision behavior and bounded navigation pass; far-walkway reads 62500 -> 0. Auto pixel budget/native override/GPU-query cache pass.\nLamp proximity changes intensity, never shader light count.\n"
+  },
+  {
+    "suite": "test-briar-refinement.cjs",
+    "passed": true,
+    "output": "Briar: specific hunt, one-time reward, three-slot cap, respawn identity, discovered-only related clues pass.\n"
+  },
+  {
+    "suite": "test-broken-walls.cjs",
+    "passed": true,
+    "output": "Broken Walls content passed: 10 voiced graph nodes, independent chamber route, key route without Felix, guarded progression, once-only challenge, finite retreat notice and host-only spawns.\n"
+  },
+  {
+    "suite": "test-brute-encounter.cjs",
+    "passed": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed.\n"
+  },
+  {
+    "suite": "test-camera-controls.cjs",
+    "passed": true,
+    "output": "23 camera and local appearance regression checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-compatibility.cjs",
+    "passed": true,
+    "output": "32 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-elites.cjs",
+    "passed": true,
+    "output": "{\"checks\":[\"raid replaces random role and preserves original body stats\",\"raid full harmless warning and locked aim\",\"raid snapshot carries complete phase geometry\",\"raid recovery leaves an attack opening\",\"forge replaces random role and preserves original body stats\",\"forge full harmless warning and locked aim\",\"forge snapshot carries complete phase geometry\",\"forge recovery leaves an attack opening\",\"shore replaces random role and preserves original body stats\",\"shore full harmless warning and locked aim\",\"shore snapshot carries complete phase geometry\",\"shore recovery leaves an attack opening\",\"tower replaces random role and preserves original body stats\",\"tower full harmless warning and locked aim\",\"tower snapshot carries complete phase geometry\",\"tower recovery leaves an attack opening\",\"raid hits front, misses rear/outside/above\",\"forge expands outward and jumping clears it\",\"shore hits three lanes, gaps and cover range stay safe\",\"tower cardinal lanes hit, diagonal gaps stay safe\",\"dead enemy or target cannot damage\",\"tall solid cover blocks, ground and overhead props do not\"]}\n"
+  },
+  {
+    "suite": "test-campaign-interaction.cjs",
+    "passed": true,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed.\n"
+  },
+  {
+    "suite": "test-campaign-journey.cjs",
+    "passed": true,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\nIn-world signage policy and removal contracts passed.\n"
+  },
+  {
+    "suite": "test-campaign-placement.cjs",
+    "passed": true,
+    "output": "Campaign footing: supported feet, nearby clearance, stacked floors, unresolved preservation, exemptions and stable patrol slots passed.\n"
+  },
+  {
+    "suite": "test-campaign-readiness.cjs",
+    "passed": true,
+    "output": "{\"parityCases\":6217,\"geometryXReads\":{\"before\":1080,\"after\":360},\"syntheticMs\":{\"before\":735.3374999999999,\"after\":41.960000000000036}}\nFloating text disposal, normal lifetimes and damage-number preferences pass.\n"
+  },
+  {
+    "suite": "test-campaign-refinement.cjs",
+    "passed": true,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed.\n"
+  },
+  {
+    "suite": "test-campaign-replay.cjs",
+    "passed": true,
+    "output": "103 replay start, unlock, invalid input, checkpoint, earnings and guest sync checks passed\n"
+  },
+  {
+    "suite": "test-campaign-threat.cjs",
+    "passed": true,
+    "output": "60 campaign threat and health visibility checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-xp.cjs",
+    "passed": true,
+    "output": "Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass.\n"
+  },
+  {
+    "suite": "test-canyon-journey.cjs",
+    "passed": true,
+    "output": "Canyon journey: useful entry/guard guidance, restored completion, cage-door collision, two-prisoner clearance at every turn, paused walking, shared status and scaffold approach passed.\n"
+  },
+  {
+    "suite": "test-castle-gates.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: royal\n    at talk (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-castle-gates.cjs:2:355)\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-castle-gates.cjs:4:153)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-chess-zoom.cjs",
+    "passed": true,
+    "output": "19 chess zoom regression checks passed.\n"
+  },
+  {
+    "suite": "test-chest-reveal.cjs",
+    "passed": true,
+    "output": "18 chest motion preference, real reel lifecycle, sound, skip, hidden-tab and queue checks passed.\n"
+  },
+  {
+    "suite": "test-chest-rules.cjs",
+    "passed": true,
+    "output": "Chest tables: 200,000 interval samples pass; challenge minimum and all depth boundaries pass.\n"
+  },
+  {
+    "suite": "test-class-cast-sfx.cjs",
+    "passed": true,
+    "output": "1553 complete cast identity, actual gate, suppression, relay, lazy decode and asset checks passed.\n"
+  },
+  {
+    "suite": "test-class-progression.cjs",
+    "passed": true,
+    "output": "2873 rank, legacy-choice and ordered-choice checks passed across 17 classes.\nSkill/dash lesson persistence, legacy missing field and stale-save guard passed.\n"
+  },
+  {
+    "suite": "test-class-trial-music.cjs",
+    "passed": true,
+    "output": "Trial score passed: all11 actual trial classes, nine unique assets, play/dialogue/pause routing, originals, stereo/durations/hashes/size and fallback.\n"
+  },
+  {
+    "suite": "test-combat-detail-sfx.cjs",
+    "passed": true,
+    "output": "794 additive event, actual-hit, delayed, receipt, lifecycle, density, preservation and asset checks passed.\n"
+  },
+  {
+    "suite": "test-companion-health.cjs",
+    "passed": true,
+    "output": "36 companion pad healing, death HUD and peer-state checks passed.\n"
+  },
+  {
+    "suite": "test-companion-level.cjs",
+    "passed": true,
+    "output": "Companion Lv1\u20136, five paid upgrades, exact costs, max cap, legacy ranks, nameplates, HP continuity and purchase guards pass\n"
+  },
+  {
+    "suite": "test-controller-invert.cjs",
+    "passed": true,
+    "output": "PASS controller invert: independent X/Y toggles, legacy Y migration, both axis signs verified\n"
+  },
+  {
+    "suite": "test-coop-audio.cjs",
+    "passed": true,
+    "output": "52 capture, fallback, mute-independent dispatch, safe relay, rate/scene/duplicate and actual gain checks passed.\n"
+  },
+  {
+    "suite": "test-coop-chests.cjs",
+    "passed": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\n"
+  },
+  {
+    "suite": "test-coop-companions.cjs",
+    "passed": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}\n"
+  },
+  {
+    "suite": "test-creator-camera.cjs",
+    "passed": true,
+    "output": "{\"checks\":14,\"scope\":\"Actual creator event handlers with a small DOM harness; native pointer gestures are outside this harness.\"}\n"
+  },
+  {
+    "suite": "test-crisp-motion.cjs",
+    "passed": true,
+    "output": "15 character motion clarity checks passed: no sampling/drawing/toggle/warmup echo rigs, current-frame clear, normal peer compositing and loading warmup retained.\n"
+  },
+  {
+    "suite": "test-dialogue-categories.cjs",
+    "passed": true,
+    "output": "1431 category, single-path, retired-choice authority, side/lore access and sequential delivery checks passed.\n"
+  },
+  {
+    "suite": "test-dialogue-endings.cjs",
+    "passed": true,
+    "output": "94 ordinary NPC/preset paths end; primary Leave, legacy replay, optional quest, legitimate retry, final trigger, note preservation and speaker authority pass.\n"
+  },
+  {
+    "suite": "test-dragon-rescue.cjs",
+    "passed": true,
+    "output": "Dragon rescue prerequisites, repeat safety, optional independence and delayed directional breath passed.\n"
+  },
+  {
+    "suite": "test-dragon-riding.cjs",
+    "passed": true,
+    "output": "51 dragon eligibility, flight, collision, stamina and lifecycle checks passed.\n"
+  },
+  {
+    "suite": "test-dungeon-quality.cjs",
+    "passed": true,
+    "output": "{\n  plans: 1080,\n  legacyPlans: 6480,\n  templates: [\n    'armory',    'barricades',\n    'cistern',   'gallery',\n    'infirmary', 'kennels',\n    'liftbay',   'refectory',\n    'watchpost'\n  ],\n  safeSpawns: 43200\n}\n"
+  },
+  {
+    "suite": "test-dungeon-rafters.cjs",
+    "passed": true,
+    "output": "{\n  newPlans: 1080,\n  oldRevision7Preserved: true,\n  optionalRafterRoom: true\n}\n"
+  },
+  {
+    "suite": "test-encounter-rewards.cjs",
+    "passed": true,
+    "output": "{\"checks\":300427,\"normalRate\":[0.01875,0.0375],\"eliteRate\":[0.1,0.15],\"personalChests\":true,\"saveRestoration\":true,\"requiredChoice\":true}\n3 actual co-op kill-packet authority checks passed.\n"
+  },
+  {
+    "suite": "test-enemy-warning-sfx.cjs",
+    "passed": true,
+    "output": "206 species cue, rising-edge, distance, density, original-fallback and asset checks passed.\n"
+  },
+  {
+    "suite": "test-esc-pause.cjs",
+    "passed": true,
+    "output": "42 pause regression checks passed.\n"
+  },
+  {
+    "suite": "test-face-options.cjs",
+    "passed": true,
+    "output": "PASS face defaults, bounds and randomized offset limits\n"
+  },
+  {
+    "suite": "test-fallen.cjs",
+    "passed": true,
+    "output": "Fallen: aim lock, delayed feint follow-up, swept thrust motion, pillar collision/recovery, directional damage, vertical/downed/dead safety, bounded pursuit and snapshots passed.\n"
+  },
+  {
+    "suite": "test-final-king.cjs",
+    "passed": true,
+    "output": "Final King: locked telegraphs, safe regions/height/cover, two lethal gates, finite summons, validated charge/retry/fifth-failure skip and complete voice/story graph passed.\n"
+  },
+  {
+    "suite": "test-first-arrival.cjs",
+    "passed": true,
+    "output": "24 first-arrival regression checks passed.\n"
+  },
+  {
+    "suite": "test-first-shop-upgrade.cjs",
+    "passed": true,
+    "output": "{\"rows\":[{\"cls\":\"warrior\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"ranger\",\"starter\":7.9,\"shop\":8.6,\"loot\":9},{\"cls\":\"mage\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"pirate\",\"starter\":null,\"shop\":8.6,\"loot\":9},{\"cls\":\"ninja\",\"starter\":10.6,\"shop\":7.7,\"loot\":8},{\"cls\":\"paladin\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"berserker\",\"starter\":15.8,\"shop\":17.3,\"loot\":18},{\"cls\":\"necromancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"chronomancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"stormcaller\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"warlock\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"skylancer\",\"starter\":15,\"shop\":16.3,\"loot\":17},{\"cls\":\"bladedancer\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"beastmaster\",\"starter\":7.9,\"shop\":8.6,\"loot\":9}],\"passed\":true}\n"
+  },
+  {
+    "suite": "test-floor-surfaces.cjs",
+    "passed": true,
+    "output": "{ pieces: 3, pairs: 3, area: 11100, coverage: true }\n"
+  },
+  {
+    "suite": "test-frost-officers.cjs",
+    "passed": true,
+    "output": "Officers passed: all three roles, single major attack cap across 256 seconds, locked warnings, no early hits, height dodges, death cancellation and survivor tactic.\nAll three officers pursue players onto both shelves and the high northern exit.\n"
+  },
+  {
+    "suite": "test-furnace-colossus.cjs",
+    "passed": true,
+    "output": "Colossus passed: locked warnings, exact attack geometry, high-route sweep protection, cooling, limited repair budget, pressure benefit and snapshot fields.\n"
+  },
+  {
+    "suite": "test-great-furnace.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(C.ready(s))\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-great-furnace.cjs:39:61)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-guidance-sound-signatures.cjs",
+    "passed": true,
+    "output": "219 stat/tutorial, reward preference, boss/physical state, charge, fallback, lifecycle and asset checks passed.\n"
+  },
+  {
+    "suite": "test-gus-story.cjs",
+    "passed": true,
+    "output": "Gus passed: delivery gating, once-only reward, shortcut, resume, rollback, apology/repair, legacy refusal, main-path independence, fresh attempt.\n"
+  },
+  {
+    "suite": "test-hollow-cliffs.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(s.flags['hp.trail'])\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-hollow-cliffs.cjs:5:163)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: undefined,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-hollow-journey.cjs",
+    "passed": true,
+    "output": "Hollow journey: cart gate, delayed bridge collision, idempotence, completed save, patrol/quiet-route guidance and remote guard count passed.\n"
+  },
+  {
+    "suite": "test-hollow-readiness.cjs",
+    "passed": true,
+    "output": "31 Hollow readiness checks passed: timed cart guidance, clue discovery, legacy note repair, required rescue gates and terrain-correct falls.\n"
+  },
+  {
+    "suite": "test-home-trails.cjs",
+    "passed": true,
+    "output": "Home/track eligibility, shared recipient eligibility, puzzle prerequisites, rescue order, one-time rewards, main-story independence and voice graph passed.\n"
+  },
+  {
+    "suite": "test-homefields-granary.cjs",
+    "passed": true,
+    "output": "Granary passed: clue, both action orders, blocked early cache, one-time reward, old completed/partial saves and checkpoint rollback.\n"
+  },
+  {
+    "suite": "test-homefields-puzzle.cjs",
+    "passed": true,
+    "output": "Homefields warning bell passed: discovery, three combat waves, elite captain, chest reward, and save migration.\n"
+  },
+  {
+    "suite": "test-hub-transition.cjs",
+    "passed": true,
+    "output": "33 portal ownership and world snapshot regression checks passed.\n"
+  },
+  {
+    "suite": "test-hud-progression-layout.cjs",
+    "passed": true,
+    "output": "11 render-FPS / gold-move / saved-setting integration checks passed.\n"
+  },
+  {
+    "suite": "test-ice-caves.cjs",
+    "passed": true,
+    "output": "Ice Caves passed: both Ellis routes, delivery gate, main/optional independence, waterworks recovery, side plug and old partial state, Hugo safety order, reward deduplication, shard gates and voice graph.\n"
+  },
+  {
+    "suite": "test-interaction-audit.cjs",
+    "passed": true,
+    "output": "12 paid reward, live perk and death ownership checks passed.\n"
+  },
+  {
+    "suite": "test-iron-halls.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(world('ih.line.complete'))\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-iron-halls.cjs:8:2)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-journal-notice.cjs",
+    "passed": true,
+    "output": "Journal notice passed: restore, dedupe, queued changes, scene reset, dialogue/menu pause, hover hold, dismissal, length-based reading.\nPinned revisions, latest arrivals, unread recovery, queued replacement, title changes and repeated snapshots passed.\n"
+  },
+  {
+    "suite": "test-keep-journey.cjs",
+    "passed": true,
+    "output": "Broken Walls: lifecycle-safe status, both route choices, guard guidance, exact timing boundaries, matching wave warning/spawn, restored gates, host-owned health/retry, tower clearance and original scale passed.\n"
+  },
+  {
+    "suite": "test-keep-performance.cjs",
+    "passed": true,
+    "output": "{\"parityCases\":6000,\"timings\":{\"beforeMs\":1326.3088000000002,\"afterMs\":42.7808}}\nActive optional objectives are visible and progress-sensitive.\nKeep, Frostfell, deep regions and hub retain stable light pools, including low quality.\n60 actual enemy movement parity cases pass with bounded direct-step candidates.\n"
+  },
+  {
+    "suite": "test-long-ascent.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: refuse\n    at talk (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-long-ascent.cjs:2:337)\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-long-ascent.cjs:5:9)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-loot-notices.cjs",
+    "passed": true,
+    "output": "PASS Blocked item shows its identity and truthful outcome\nPASS Collecting the same item immediately replaces the blocked outcome\nPASS Repeated notices for a queued item collapse into its latest outcome\nPASS Journal retains priority on a short screen without consuming the pending notice\nPASS Current rebound bag key is reflected in the notice\nPASS Changing scenes clears prior loot and queued outcomes\n{\"checks\":6,\"passed\":true,\"scope\":\"Presentation logic only; visual and live browser checks required.\"}\n"
+  },
+  {
+    "suite": "test-loot-transactions.cjs",
+    "passed": true,
+    "output": "PASS Comparison purchase bags gear without replacing equipped weapon\nPASS Full bag purchase preserves gold, inventory and equipped weapon\nPASS Successful comparison confirmation cannot spend twice\nPASS Last free slot accepts exactly one purchased item\nPASS Purchase validates level before spending\nPASS Purchase validates gold before spending\nPASS Purchase validates class before spending\nPASS Paid relic uses existing claim flow and preserves replaced gear capacity\nPASS weapon stays unclaimed with a full bag\nPASS weapon auto-sells only when explicitly enabled\nPASS weapon bags immediately in last free slot\nPASS armor stays unclaimed with a full bag\nPASS armor auto-sells only when explicitly enabled\nPASS armor bags immediately in last free slot\nPASS trinket stays unclaimed with a full bag\nPASS trinket auto-sells only when explicitly enabled\nPASS trinket bags immediately in last free slot\nPASS Repeated full-bag proximity does not flood comparison notices\nPASS Chest capacity warning does not expose its unopened reward\nPASS Full chest stays unclaimed and its fixed reward survives until space is available\nPASS Same-frame pickups fill only the last slot while quest items still collect\nPASS Auto-sell consumes each ground pickup once across repeated updates\n{\"cases\":22,\"passed\":true,\"scope\":\"Actual transaction functions under a DOM adapter; browser, render and integration checks still required.\"}\n"
+  },
+  {
+    "suite": "test-lost-canyon.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(s.flags['lc.gate.fight'])\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-lost-canyon.cjs:5:56)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: undefined,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-mana-economy.cjs",
+    "passed": true,
+    "output": "537 mana coverage,34 class paths, recovery, reserve, area-hit and co-op/PvP receipt checks passed.\n"
+  },
+  {
+    "suite": "test-marble-guardian.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(act('choose',{line:s.conversation.node,choice}))\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-marble-guardian.cjs:7:350)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-marksman.cjs",
+    "passed": true,
+    "output": "Marksman aim lock, recovery, single relocation/wave, protected glide, safe landing, snapshot and dead-state tests passed.\nRounded55percent relocation boundary passed.\n"
+  },
+  {
+    "suite": "test-menu-close.cjs",
+    "passed": true,
+    "output": "10 safe menu exit routing checks passed.\n"
+  },
+  {
+    "suite": "test-menu-gold.cjs",
+    "passed": true,
+    "output": "28 wallet formatting, updates, ownership, currency and spending-screen coverage checks passed.\n"
+  },
+  {
+    "suite": "test-menu-shortcuts.cjs",
+    "passed": true,
+    "output": "22 menu shortcut regression checks passed.\nFocused menu E selection and safety checks passed.\nNarration button E safety checks passed.\nTutorial Q priority regression checks passed.\n"
+  },
+  {
+    "suite": "test-minimap-heading.cjs",
+    "passed": true,
+    "output": "38 actual minimap canvas behavior checks passed.\n"
+  },
+  {
+    "suite": "test-mob-imports.cjs",
+    "passed": true,
+    "output": "All game enemy loaders, renderers and teardown use one canonical module and asset cache.\n"
+  },
+  {
+    "suite": "test-mob-render-culling.cjs",
+    "passed": true,
+    "output": "15 enemy presentation regression checks passed.\n"
+  },
+  {
+    "suite": "test-music-score.cjs",
+    "passed": true,
+    "output": "Score passed: 40 original hashes, stereo/size, all halves/bosses, hub/hall/trials, final phases, dialogue, future scene cues.\n"
+  },
+  {
+    "suite": "test-new-game-slots.cjs",
+    "passed": true,
+    "output": "37 full-save cancellation, deletion, per-slot isolation, storage failure and creation intent checks passed.\n"
+  },
+  {
+    "suite": "test-npc-labels.cjs",
+    "passed": true,
+    "output": "{\"checks\":117,\"passed\":true,\"renderDpr\":[0.5,0.66,1,1.25,1.5,2],\"roles\":[\"host\",\"guest\"]}\n"
+  },
+  {
+    "suite": "test-npc-names.cjs",
+    "passed": true,
+    "output": "17 NPC identity, occlusion, crowding and lifecycle checks passed.\n"
+  },
+  {
+    "suite": "test-onboarding-controls.cjs",
+    "passed": true,
+    "output": "26 onboarding migration, action pacing, hidden/menu timing and routing checks passed.\nTutorial previous-page, boundary, timer reset and menu ownership checks passed.\n"
+  },
+  {
+    "suite": "test-onboarding-coop.cjs",
+    "passed": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.\n5 co-op rank/spectator serialization, update and legacy checks passed.\n"
+  },
+  {
+    "suite": "test-onboarding-narration.cjs",
+    "passed": true,
+    "output": "264 narration transcript/hash, binding, mute, cancellation, late load/play and recovery checks passed.\n"
+  },
+  {
+    "suite": "test-overhead-controls.cjs",
+    "passed": true,
+    "output": "Overhead input, key aliases, map and removed character afterimages pass\n"
+  },
+  {
+    "suite": "test-pad-mana.cjs",
+    "passed": true,
+    "output": "Healing pad mana: simultaneous HP/mana, mana-only, finite/shared budget, full pools, infinite pads and invalid occupants passed.\n"
+  },
+  {
+    "suite": "test-palace-courtyard.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: demand\n    at talk (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-palace-courtyard.cjs:2:241)\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-palace-courtyard.cjs:3:148)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-palm-flames.cjs",
+    "passed": true,
+    "output": "Palm flames: intrinsic rank scaling, full-bag switches, legacy migration, Warlock access, cone/charge/walls/height/PvP dispatch passed.\nRemote palm flame packets and bounded render passed.\n"
+  },
+  {
+    "suite": "test-party-feedback.cjs",
+    "passed": true,
+    "output": "36 rescue reachability, timing, relay, duplicates, menu, legacy and presentation checks passed.\n6 downed rig selection/clamping/recovery checks passed.\n3 fallen-body grounding and get-up transition checks passed.\n"
+  },
+  {
+    "suite": "test-party-survival.cjs",
+    "passed": true,
+    "output": "50 fall landing, rescue deadline, late packets, whole-level recovery, single wipe, guest wait, real die routing and nameplate checks passed.\n4 real fall/solo/duplicate hazard and attack-lock checks passed.\n"
+  },
+  {
+    "suite": "test-party-transitions.cjs",
+    "passed": true,
+    "output": "56 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed.\n"
+  },
+  {
+    "suite": "test-patrol-retirement.cjs",
+    "passed": true,
+    "output": "900 patrol respawns: bounded bodies, death fade retained, authored bodies retained, guest cleanup without spawning.\n"
+  },
+  {
+    "suite": "test-peer-markers.cjs",
+    "passed": true,
+    "output": "24 teammate model, no-cube, name/health, downed, mount, pause, fallback and companion checks passed.\n"
+  },
+  {
+    "suite": "test-playtest-feedback.cjs",
+    "passed": true,
+    "output": "Combat quota/reward dedupe, delayed bounded respawn, proximity safety, host authority, conversation exit/resume passed.\n"
+  },
+  {
+    "suite": "test-portal-travel.cjs",
+    "passed": true,
+    "output": "39 portal theme, single-entry, cancellation, stale scene, nested callback, character pose, reduced motion, input and actual loading-barrier checks passed.\n7 special-mode navigation/exit regression checks passed.\n4 departure destination checks passed.\n"
+  },
+  {
+    "suite": "test-premium-progression.cjs",
+    "passed": true,
+    "output": "514 premium award coordination, rollover, class choice, model, accessibility and sound-candidate checks passed.\n"
+  },
+  {
+    "suite": "test-priority-sfx.cjs",
+    "passed": true,
+    "output": "{\"checks\":255,\"candidateFilesPreserved\":64,\"originalFilesRestored\":56,\"proceduralOverrides\":0,\"unreviewedActiveReplacements\":0,\"subjectiveQuality\":\"Not inferred from technical tests\"}\n"
+  },
+  {
+    "suite": "test-prison-journey.cjs",
+    "passed": true,
+    "output": "Dungeons journey passed: lifecycle, floor-aware guidance, branch returns, restored gates, both winding directions, approach inertia, conversation independence and retry.\n"
+  },
+  {
+    "suite": "test-prison-press.cjs",
+    "passed": true,
+    "output": "Prison presses passed: distinct phases, warning, stopped save, retired inputs, once-only brake, RK-03 and nearby clue.\n"
+  },
+  {
+    "suite": "test-prison-revision10.cjs",
+    "passed": true,
+    "output": "{\n  plans: 1080,\n  oldLayoutsUnchanged: 9720,\n  sockets: 2160,\n  spawns: 25920\n}\n"
+  },
+  {
+    "suite": "test-prison-revision11.cjs",
+    "passed": true,
+    "output": "{ plans: 1080, gates: 6480, olderLayoutsUnchanged: 10800 }\n"
+  },
+  {
+    "suite": "test-prison-revision9.cjs",
+    "passed": true,
+    "output": "{\n  plans: 1080,\n  oldLayoutsUnchanged: 8640,\n  wingShapes: 9,\n  spawns: 64800,\n  campaignSpawns: 31680,\n  campaignShare: 0.49\n}\n"
+  },
+  {
+    "suite": "test-prison-routes-v6.cjs",
+    "passed": true,
+    "output": "{ tested: 1350, legacyPlans: 6750, routeShapes: 6 }\n"
+  },
+  {
+    "suite": "test-prison-story.cjs",
+    "passed": true,
+    "output": "Prison story passed: Sly routes, rescue winch, retired lower weights, press brake, old partial data, shards, rewards, voice graph and lift bounds.\n"
+  },
+  {
+    "suite": "test-progression-celebrations.cjs",
+    "passed": true,
+    "output": "{\"checks\":44,\"introMs\":900,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\nActual nonblocking rank-banner / menu suspension / cancellation checks passed.\n"
+  },
+  {
+    "suite": "test-puzzle-guidance.cjs",
+    "passed": true,
+    "output": "Puzzle notice coalescing, discovered-clue search, hammer warning boundaries and old-complete sled placement passed.\n"
+  },
+  {
+    "suite": "test-puzzle-overhaul.cjs",
+    "passed": true,
+    "output": "Puzzle overhaul passed: all water heights/retries, flow configurations, all 64 legacy shelf configurations/reset, saved solved states, feedback and atomic invalid-action rollback.\n"
+  },
+  {
+    "suite": "test-ready-turnins.cjs",
+    "passed": true,
+    "output": "28 explicitly authored hand-ins; 154 ready-only, unmet-requirement, stale-request, atomic/once-only and legacy-cursor checks pass\n"
+  },
+  {
+    "suite": "test-return-visits.cjs",
+    "passed": true,
+    "output": "Return quests: eligibility, decline/rejoin, puzzle gates, collection/delivery idempotency, graph and save normalization passed.\n"
+  },
+  {
+    "suite": "test-rift-hall.cjs",
+    "passed": true,
+    "output": "Rift Hall passed: personal five-shard assembly, no duplicate counts/unlocks, legacy class mapping, ending gate, absent class guard, dialogue resume and graph links.\n"
+  },
+  {
+    "suite": "test-rift-party-visibility.cjs",
+    "passed": true,
+    "output": "22 party queue/background composition checks passed.\n"
+  },
+  {
+    "suite": "test-rift-portal-icons.cjs",
+    "passed": true,
+    "output": "24 portal icon billboard, orientation, depth and lifecycle checks passed.\n"
+  },
+  {
+    "suite": "test-rift-shards.cjs",
+    "passed": true,
+    "output": "Rift shard ledger passed: stable IDs, sanitization, individual collection, once-only echo, provisional/banked distinction, rollback, 5/5 gating and approved class mapping.\n"
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "test-ship-crossing.cjs",
+    "passed": true,
+    "output": "Ship crossing passed: 80 safe course seeds, collisions, two waves, role swap, repair cap, disconnect/death, solo, pause, fixed steps, authority and stale snapshots.\n"
+  },
+  {
+    "suite": "test-shipwreck-shore.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: mock\n    at talk (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-shipwreck-shore.cjs:3:412)\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-shipwreck-shore.cjs:5:261)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-shop-chests.cjs",
+    "passed": true,
+    "output": "38 chest purchase conservation and gate checks passed.\n"
+  },
+  {
+    "suite": "test-skill-sfx.cjs",
+    "passed": true,
+    "output": "66 additive skill audio, actual cast gate and asset checks passed.\n"
+  },
+  {
+    "suite": "test-sky-library.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: work\n    at talk (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-sky-library.cjs:8:72)\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-sky-library.cjs:13:26)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-snowbound.cjs",
+    "passed": false,
+    "output": "node:internal/assert/utils:146\n  throw error;\n  ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(s.flags['ff.heater'])\n\n    at Object.<anonymous> (C:\\Users\\Oliver\\Documents\\Codex\\2026-09-08\\o-2\\work\\bladefall-audio-release\\scripts\\test-snowbound.cjs:3:296)\n    at Module._compile (node:internal/modules/cjs/loader:1856:14)\n    at Object..js (node:internal/modules/cjs/loader:1996:10)\n    at Module.load (node:internal/modules/cjs/loader:1579:32)\n    at Module._load (node:internal/modules/cjs/loader:1381:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: undefined,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.1.0\n"
+  },
+  {
+    "suite": "test-sprint-finish.cjs",
+    "passed": true,
+    "output": "{\"checks\":24148,\"seeds\":500,\"hops\":10806,\"families\":[\"switchback\",\"elevator\",\"beams\",\"shaft\",\"crumble\",\"cascade\",\"springs\",\"spiral\",\"arches\",\"phase\"],\"physicalSeeds\":[13,21,68,165,204,219,305,360,390,400,445],\"physicalCrownSeed\":68,\"maxGap\":62.4}\n"
+  },
+  {
+    "suite": "test-sprint-loading.cjs",
+    "passed": true,
+    "output": "Sprint loading regression: stale hub state, warmup, same-seed retry, new seed, explicit reset and real hub readiness passed.\n"
+  },
+  {
+    "suite": "test-story-authority.cjs",
+    "passed": true,
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility.\n"
+  },
+  {
+    "suite": "test-story-state.cjs",
+    "passed": true,
+    "output": "Story state passed: single Thomas path and legacy cursors, quest gating, leave/resume, atomic delivery, once-only pickups/reward, rollback, stale/duplicate input, graph links.\n"
+  },
+  {
+    "suite": "test-story-topics.cjs",
+    "passed": true,
+    "output": "29 topic menus: legacy cursor recovery, effect-free navigation, Simon side quest after core dialogue, refusal guard and forged navigation passed.\n"
+  },
+  {
+    "suite": "test-stylist.cjs",
+    "passed": true,
+    "output": "PASS invalid choices, long names, exact funds, unchanged purchase\n"
+  },
+  {
+    "suite": "test-sunspire-relay.cjs",
+    "passed": true,
+    "output": "Sunspire relay: all 8 optical states, 24 control transitions, continuous rays, receiver agreement, light feedback and old solved save pass.\n"
+  },
+  {
+    "suite": "test-thunder-hydra.cjs",
+    "passed": true,
+    "output": "Thunder/Hydra passed: both Dash routes, main independence, race retry/deadline, three shard gates, graph, wind cycle, all warnings/hit shapes, cover, exposure, mercy and stale packets.\n"
+  },
+  {
+    "suite": "test-title-music.cjs",
+    "passed": true,
+    "output": "Title music: routing, fallback, lazy preview, SHA256, stereo, sample rate, duration and payload passed.\n"
+  },
+  {
+    "suite": "test-title-settings.cjs",
+    "passed": true,
+    "output": "29 title/current settings parity and return-context checks passed.\n"
+  },
+  {
+    "suite": "test-voice-content.cjs",
+    "passed": true,
+    "output": "Voice manifest: shared fetch, current-text filtering and failure recovery passed.\n"
+  },
+  {
+    "suite": "test-weapon-presence.cjs",
+    "passed": true,
+    "output": "{\"protectedPoints\":96,\"aliases\":true,\"rearShaftsUnchanged\":true}\n"
+  }
+]

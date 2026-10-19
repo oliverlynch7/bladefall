@@ -1,0 +1,41 @@
+{
+  "status": "Hosted",
+  "results": [],
+  "version": "2.302.0-campaign-interactions",
+  "active": true,
+  "host": true,
+  "id": "h",
+  "code": "PSUN",
+  "mode": "play",
+  "area": 0,
+  "zone": 0,
+  "level": 100,
+  "gold": 1145,
+  "conversation": {
+    "npc": "thomas",
+    "node": "briar.thomas.first",
+    "lastChoice": "",
+    "trail": [
+      "briar.thomas.first"
+    ],
+    "topics": [],
+    "owner": "pgg94",
+    "origin": {
+      "x": 0,
+      "y": 0,
+      "z": 405
+    }
+  },
+  "peers": [
+    {
+      "id": "pgg94",
+      "area": 0,
+      "zone": 0,
+      "last": 0.06666666666666667,
+      "hp": 154,
+      "busy": "Talking"
+    }
+  ],
+  "lift": null,
+  "voyage": null
+}

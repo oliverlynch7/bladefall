@@ -1822,14 +1822,8 @@ function playFor(p, A){
                 HERO3D.clip is exported now so this class of failure is checkable instead of
                 invisible. */
              : (p.atkTimer > 0) ? (ATK[art] || 'Sword_Attack')
-             /* THE DODGE IS NO LONGER A ROLL.
-                Oliver: "instead of the whole roll animation, becuase it happens too fast... its
-                like i phase forward and i see a trail of my previous selves dragging behind like
-                some sort of anime speed thing."
-                A 0.2s window is too short to read a tumble even time-scaled - the eye gets one
-                blurred shape. So the dodge keeps the character UPRIGHT and sells the speed with an
-                afterimage trail instead (see the echo pass in the game's draw loop). Upright also
-                keeps the weapon and silhouette legible through the dash, which a roll destroys. */
+             /* An upright dash keeps the body and weapon readable.
+                No trailing character copies or motion smear. */
              : p.dodgeTimer > 0 ? (moving ? 'Run' : 'Idle')
              : airborne ? 'Roll'
              : moving ? (Math.hypot(p.vx||0, p.vz||0) > 120 ? 'Run' : 'Walk')
@@ -2202,12 +2196,10 @@ export function drawHero3D(p, t, firstPass=true){
       if(world&&(window.__BF_RENDER_WARMUP?.world!==world||window.__BF_RENDER_WARMUP?.sceneKey!==WORLD3D.built)){
         const state=window.__BF_RENDER_WARMUP={world,sceneKey:WORLD3D.built,ready:false,error:null};
         try{
-          for(let i=0;i<6;i++){const key='echo'+i;window.__hero3dAt?.(key,{x:p.x,y:p.y||0,z:p.z,yaw:p.yaw||0,ghost:.001});}
           const textures=new Set();scene.traverse(n=>{for(const m of Array.isArray(n.material)?n.material:[n.material]){if(!m)continue;for(const value of Object.values(m))if(value?.isTexture)textures.add(value);}});
           for(const texture of textures)renderer.initTexture(texture);
-          // Compile alone does not upload skinned geometry or bone textures. Draw the pooled
-          // afterimages once under the loading curtain, then hide them before play resumes.
-          try{warmSceneGeometry(renderer,scene,cam);}finally{for(let i=0;i<6;i++)window.__hero3dAt?.('echo'+i,null);}
+          // Upload skinned geometry and bone textures while the loading curtain is up.
+          warmSceneGeometry(renderer,scene,cam);
           state.ready=true;
         }catch(e){state.error=String(e);state.ready=true;}
       }

@@ -1222,7 +1222,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.294.0-tutorial-back-slots';
+const VERSION3D='2.295.0-crisp-character-motion';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -11934,67 +11934,8 @@ function teachTick(dt){
     teachOnce('m_rise','It got back up. Bones rise once — the first kill is never the last one.',{icon:'💀',pri:4});
 }
 
-/* -- THE DODGE AFTERIMAGE ----------------------------------------------------
-   Oliver: "its like i phase forward and i see a trail of my previous selves dragging behind like
-   some sort of anime speed thing."
-
-   A dodge is 0.20s. That is too short to read a tumble - even time-scaled to fit, the eye gets one
-   blurred shape and no information. What DOES read at that speed is a trail: several copies of you
-   strung along the path you took, each fainter than the last. The eye assembles them into motion,
-   which is the whole trick behind the anime speed-line frame.
-
-   The copies are the REAL character model, not a sprite or a smear - the pose system already clones
-   and positions the hero anywhere in the world, which is exactly this. So an echo wears your
-   armour, your weapon and your class, and it costs nothing when you are not dodging because the
-   clones are pooled and hidden by the sweep.
-
-   Samples are taken every frame of the dash and then linger AFTER it ends, fading out. Cutting them
-   the instant the dodge finishes is what makes a trail look like a bug: the echoes have to outlive
-   the movement or there is nothing left to see. */
-const ECHO_MAX = 6;          // any more and the trail reads as a crowd rather than as speed
-const ECHO_LIFE = 0.34;      // how long an echo lingers after it is dropped
-let _echoes = [];
-
-function dodgeEchoTick(dt){
-  if(meta.motionTrails!==true||meta.reduceMotion||!G||!G.p){_echoes.length=0;return;}
-  const p = G.p;
-
-  if((p.dodgeTimer || 0) > 0){
-    /* One sample per frame while dashing, spaced so a slow dodge does not stack them all in one
-       place. 26 units is roughly a body width at this scale. */
-    /* 13 units, not a body width: a dodge covers roughly 270 units in 0.20s, which at 60fps is
-       about 22 units a frame - so a wider spacing sampled once or twice for the whole dash and
-       there was no trail to see. This gives four to six copies across the dash, which is the
-       count that reads as motion rather than as a duplicate standing behind you. */
-    const last = _echoes[_echoes.length - 1];
-    if(!last || Math.hypot(p.x - last.x, p.z - last.z) > 13){
-      _echoes.push({ x: p.x, y: p.y || 0, z: p.z, yaw: p.yaw || 0, t: ECHO_LIFE });
-      if(_echoes.length > ECHO_MAX) _echoes.shift();
-    }
-  }
-  for(const e of _echoes) e.t -= dt;
-  _echoes = _echoes.filter(e => e.t > 0);
-}
-
-/* Drawn from the render pass, so the echoes are posed in the same frame they are seen. Returns the
-   pose keys it used, which the sweep needs or they would be hidden the moment the dash ends. */
-function dodgeEchoDraw(keep){
-  if(meta.motionTrails!==true||meta.reduceMotion||!_echoes.length||!window.__hero3dAt) return;
-  for(let i = 0; i < _echoes.length; i++){
-    const e = _echoes[i];
-    /* Older samples are fainter AND slightly smaller, which sells depth along the path better than
-       opacity alone. The newest echo is the strongest, so the trail points at where you are now. */
-    const age = 1 - Math.max(0, Math.min(1, e.t / ECHO_LIFE));
-    const a = (1 - age) * 0.34;   // was 0.55 - Oliver wanted them fainter
-    if(a <= 0.02) continue;
-    const key = 'echo' + i;
-    try {
-      if(window.__hero3dAt(key, { x: e.x, y: e.y, z: e.z, yaw: e.yaw,
-                                  scale: 1 - age * 0.10, ghost: a })) keep.push(key);
-    } catch(err){}
-  }
-}
-
+/* Character motion remains crisp: no trailing copies or temporal smear pass.
+   Old motionTrails preferences are inert compatibility data. */
 function hazardName(th){ return (th==='dungeon')?'THE DROP':(th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble'||th==='canyon')?'THE FALL':'LAVA'; }
 function hazardCols(th){ return (th==='dungeon')?['#344957','#9edbd9']:(th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
   :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='canyon')?['#182f2e','#8ca79d']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
@@ -16544,7 +16485,7 @@ function updateWorld(dt){
     if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
-  hazUpdate(dt); questMarkTick(dt); teachTick(dt); hubTeachTick(dt); teachQueueTick(dt); dodgeEchoTick(dt);
+  hazUpdate(dt); questMarkTick(dt); teachTick(dt); hubTeachTick(dt); teachQueueTick(dt);
   /* KEEP THE TRACKER LIVE.
      Oliver, playtesting: "I want the quest tracker to start on when I join a level... it shouldn't
      only pop on screen once I complete the first objective." It was only ever refreshed by quest
@@ -20578,7 +20519,6 @@ function openPause(){
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Controller setup</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
-      <button class="bigbtn ghost" id="motionTrailsBtn">Dash afterimages: ${meta.motionTrails===true?'On':'Off'}</button>
       <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
@@ -20610,7 +20550,6 @@ function openPause(){
   { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
   { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ BFController.open(meta,persistGlobal); }; }
   { const _sk=document.getElementById('shakeBtn'); if(_sk) _sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPause(); }; }
-  {const b=document.getElementById('motionTrailsBtn');if(b)b.onclick=()=>{meta.motionTrails=meta.motionTrails!==true;_echoes.length=0;persistGlobal();openPause();};}
   { const _rm=document.getElementById('reduceMoBtn'); if(_rm) _rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPause(); }; }
   { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
   { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
@@ -20628,7 +20567,7 @@ function organizePauseSettings(){
   const back=document.getElementById('settingsBack'),card=back.closest('.card');
   const groups=[
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
-    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','motionTrailsBtn','armFxBtn','resolutionBtn','fpsBtn']],
+    ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn','resolutionBtn','fpsBtn']],
     ['Audio & voices',['musSlider','sfxSlider','narrationOn','narrationSlider','dialogueVoice','dialogueTTS','rewardSoundplayer','rewardSoundclass','rewardPreviewLink']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
@@ -20665,7 +20604,6 @@ function openPauseSettingsV2(fromTitle){
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Controller setup</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
-      <button class="bigbtn ghost" id="motionTrailsBtn">Dash afterimages: ${meta.motionTrails===true?'On':'Off'}</button>
       <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
@@ -20696,7 +20634,6 @@ function openPauseSettingsV2(fromTitle){
   { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
   { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ BFController.open(meta,persistGlobal); }; }
   { const sk=document.getElementById('shakeBtn'); if(sk) sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPauseSettingsV2(); }; }
-  {const b=document.getElementById('motionTrailsBtn');if(b)b.onclick=()=>{meta.motionTrails=meta.motionTrails!==true;_echoes.length=0;persistGlobal();openPauseSettingsV2();};}
   { const rm=document.getElementById('reduceMoBtn'); if(rm) rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPauseSettingsV2(); }; }
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);
   document.getElementById('tutTogBtn').onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPauseSettingsV2(); };
@@ -23091,7 +23028,6 @@ function render(t){
   if(G)G.peerDefenses=MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&(q.area==null||q.area===G.area)&&q.hp>0&&!q.downed&&q.last<3).map(q=>({x:q.x,y:q.y||0,z:q.z,yaw:q.yaw||0,cid:q.cid,warp:q.def?.warp||0,shieldHp:q.def?.shield?1:0,guardT:q.def?.guard?1:0})):[];
   try{ if(window.__hero3dPoseSweep) window.__hero3dPoseSweep(_poseKeep); }catch(e){}
   _poseKeep = [];
-  try{ dodgeEchoDraw(_poseKeep); }catch(e){}
   if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
   const s=(G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette; the Arena its own map palette
@@ -24759,7 +24695,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2292"></script>
+<script type="module" src="./hero3d.js?v=2295"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2261"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

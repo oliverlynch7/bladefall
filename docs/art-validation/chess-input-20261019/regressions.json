@@ -1,0 +1,62 @@
+[
+  {
+    "script": "test-chess-input-window.mjs",
+    "code": 0,
+    "output": "{\"checks\":72,\"passed\":true}",
+    "error": ""
+  },
+  {
+    "script": "test-chess-premoves.mjs",
+    "code": 0,
+    "output": "23 premove candidate, legality, promotion and lifecycle checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-chess-zoom.cjs",
+    "code": 0,
+    "output": "19 chess zoom regression checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-chess-room.mjs",
+    "code": 0,
+    "output": "389 chess room, authority, shared table, clocks and history checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-chess-experience.mjs",
+    "code": 0,
+    "output": "33 chess layout, move review, compact replay and board-visibility checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-chess-clock.mjs",
+    "code": 0,
+    "output": "PASS clock: readiness, monotonic time, projection, animation pause, increment, flag, untimed, disconnect resume, validation",
+    "error": ""
+  },
+  {
+    "script": "test-chess-choreography.mjs",
+    "code": 0,
+    "output": "PASS choreography: castling moves both pieces; en passant removes correct pawn; promotion survives transition; no duplicate pieces or non-finite geometry",
+    "error": ""
+  },
+  {
+    "script": "test-social-chess.mjs",
+    "code": 0,
+    "output": "PASS: illegal move, checkmate, castling, en passant, underpromotion, insufficient material, stalemate, repetition, fifty-move claim",
+    "error": ""
+  },
+  {
+    "script": "test-chess-cape.mjs",
+    "code": 0,
+    "output": "20 chess reward eligibility, persistence and cosmetic checks passed.",
+    "error": ""
+  },
+  {
+    "script": "test-save-safety.cjs",
+    "code": 0,
+    "output": "24 save normalization and isolated recovery checks passed.",
+    "error": ""
+  }
+]

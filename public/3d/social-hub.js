@@ -1,10 +1,10 @@
 import {waystationScene} from './npc-roster.js?v=2309';
 import {thomasHardVictory} from './chess-rewards.js?v=2227a';
 import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation.js?v=2226e';
-import './chess-pieces.js?v=2119';
+import './chess-pieces.js?v=2322';
 import {ChessOpponent} from './chess-opponent.mjs?v=2119';
 import {ChessRoom} from './chess-room.mjs?v=2305';
-import {createChessTable} from './chess-table.js?v=2305';
+import {createChessTable} from './chess-table.js?v=2322';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000,botId='chess-thomas';
 let opened=false,origin=null,parkedPet=null,remote=null,remoteAt=0,talks={},pendingTalk=null,lastTalk='',talkRev=0,wasCoop=false,lastView='',lastDisplay='',lastLobby='',ambientGame='duel',nextRewardAttempt=0;
 const id=()=>A.mp().active?A.mp().myId:'solo',host=()=>!A.mp().active||A.mp().isHost;

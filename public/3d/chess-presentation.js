@@ -1,4 +1,6 @@
 import {Chess} from './vendor/chess-1.4.0.mjs';
+// Consistent readable hierarchy for carved pieces, fallback pieces and the moving hand.
+export const CHESS_PIECE_HEIGHTS={p:2.5,r:2.85,n:3.25,b:3.5,q:4.3,k:4.8};
 // Shared world coordinates keep chairs, both players and companions out of the table.
 export const CHESS_SEAT_DISTANCE=34;
 export function chessSeat(table,color,npc=false){return {x:table.x+(color==='w'?-CHESS_SEAT_DISTANCE:CHESS_SEAT_DISTANCE),y:npc?-4:0,z:table.z,yaw:color==='w'?Math.PI/2:-Math.PI/2};}

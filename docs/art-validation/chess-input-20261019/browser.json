@@ -1,0 +1,39 @@
+{
+  "report": {
+    "passed": true,
+    "checks": 30,
+    "rows": [
+      "legacy save level/gold retained",
+      "3D queues recapture on friendly occupied square",
+      "opponent capture accepted",
+      "latest authoritative move accepted",
+      "3D executes queued capture",
+      "opponent capture accepted",
+      "3D source survives move-start DOM update",
+      "3D source survives animation-end DOM update",
+      "latest authoritative move accepted",
+      "3D drag spanning entire opponent animation commits capture",
+      "opponent capture accepted",
+      "latest authoritative move accepted",
+      "3D click selection survives opponent animation",
+      "flat queues recapture on friendly occupied square",
+      "opponent capture accepted",
+      "latest authoritative move accepted",
+      "flat executes queued capture",
+      "opponent capture accepted",
+      "flat source survives move-start DOM update",
+      "flat source survives animation-end DOM update",
+      "latest authoritative move accepted",
+      "flat drag spanning entire opponent animation commits capture",
+      "opponent capture accepted",
+      "latest authoritative move accepted",
+      "flat click selection survives opponent animation",
+      "flat board title drag moves window",
+      "flat board corner resizes smaller",
+      "flat board corner resizes horizontally",
+      "flat geometry survives state rerender",
+      "flat reset restores default placement"
+    ]
+  },
+  "logs": []
+}

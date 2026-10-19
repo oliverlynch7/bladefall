@@ -12,6 +12,6 @@ p=new Chess(pawnFen);q.set(ps(),'w','e2','d3');p.move('Kf7');ok(q.take(ps(),'w')
 p=new Chess('4k3/8/8/8/8/3r4/3N4/4K3 b - - 0 1');q.set(ps(),'w','d2','f3');p.move('Rxd2');ok(q.take(ps(),'w').cancelled,'captured queued piece discarded');
 p=new Chess('4k3/P7/8/8/8/8/8/4K3 b - - 0 1');q.set(ps(),'w','a7','a8','n');p.move('Kf7');ok(q.take(ps(),'w').promotion==='n','underpromotion preserved');
 for(const [name,change,side]of [['result',{result:'mate'},'w'],['round',{round:99},'w'],['seat',{},'b'],['clock',{clock:{started:false}},'w'],['skipped position',{history:[1,2,3,4]},'w']]){p=new Chess();p.move('e4');q.set(ps(),'w','g1','f3');ok(q.take({...ps(),...change},side).cancelled&&!q.move,name+' clears queue');}
-ok(!premoveTargets(new Chess().fen(),'a1','w').length,'rook cannot cross own pawns');ok(!q.set(st(),null,'g1','f3'),'spectator cannot queue');
+ok(!premoveTargets(new Chess().fen(),'a1','w').includes('a3'),'rook cannot cross own pawns');ok(!q.set(st(),null,'g1','f3'),'spectator cannot queue');
 const castle='r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1';ok(premoveTargets(castle,'e1','w').includes('g1'),'castling candidate supported');ok(!premoveTargets(new Chess().fen(),'e1','w').includes('g1'),'blocked castling excluded');
 console.log(n+' premove candidate, legality, promotion and lifecycle checks passed.');

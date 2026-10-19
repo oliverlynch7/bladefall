@@ -1,0 +1,293 @@
+{
+  "checks": [
+    {
+      "scene": "hp.code.claim",
+      "acted": true,
+      "flags": {
+        "hp.code.open": true,
+        "hp.code.claimed": true,
+        "event.hp.code.claim": true
+      },
+      "items": {},
+      "notes": [],
+      "level": 100,
+      "gold": 1145,
+      "stats": {
+        "total": 10,
+        "visible": 4,
+        "triangles": 13354,
+        "meshes": 22,
+        "templates": 3,
+        "items": [
+          {
+            "key": "hp.orders",
+            "model": "notice",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "hp.orders"
+            ],
+            "meshes": 4,
+            "triangles": 698
+          },
+          {
+            "key": "hp.code.clue",
+            "model": "diagram",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "hp.code.clue"
+            ],
+            "meshes": 3,
+            "triangles": 800
+          },
+          {
+            "key": "hp.code.release",
+            "model": "mechanism-brake",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "hp.code.release"
+            ],
+            "meshes": 3,
+            "triangles": 2864
+          },
+          {
+            "key": "hp.code.claim",
+            "model": "treasure-chest",
+            "collected": false,
+            "opening": 0.20107692308150807,
+            "aliases": [
+              "hp.code.claim"
+            ],
+            "meshes": 7,
+            "triangles": 8992
+          }
+        ]
+      },
+      "stash": [
+        {
+          "name": "Uncommon Warding Leggings",
+          "rarity": "uncommon",
+          "slot": "legs"
+        }
+      ],
+      "claims": {
+        "hp.cliffcache": true
+      },
+      "reveal": true
+    },
+    {
+      "scene": "lc.cache",
+      "acted": true,
+      "flags": {
+        "combat.1.1.camp": true,
+        "combat.1.1.known": true,
+        "lc.cache": true,
+        "event.lc.cache": true
+      },
+      "items": {},
+      "notes": [],
+      "level": 100,
+      "gold": 1325,
+      "stats": {
+        "total": 7,
+        "visible": 1,
+        "triangles": 488,
+        "meshes": 5,
+        "templates": 4,
+        "items": [
+          {
+            "key": "lc.cache",
+            "model": "coin-coffer",
+            "collected": false,
+            "opening": 0.41700000000496706,
+            "aliases": [
+              "lc.cache"
+            ],
+            "meshes": 5,
+            "triangles": 1352
+          }
+        ]
+      },
+      "stash": [],
+      "claims": {
+        "lc.cave.supplies": true
+      },
+      "reveal": false
+    },
+    {
+      "scene": "ff.cache",
+      "loaded": true,
+      "level": 100,
+      "gold": 1145,
+      "signs": 0,
+      "stats": {
+        "total": 8,
+        "visible": 3,
+        "triangles": 11284,
+        "meshes": 16,
+        "templates": 5,
+        "items": [
+          {
+            "key": "ff.camp",
+            "model": "book",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "ff.camp"
+            ],
+            "meshes": 4,
+            "triangles": 1204
+          },
+          {
+            "key": "ff.camp.release",
+            "model": "mechanism-brake",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "ff.camp.release"
+            ],
+            "meshes": 3,
+            "triangles": 2864
+          },
+          {
+            "key": "ff.cache",
+            "model": "treasure-chest",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "ff.cache"
+            ],
+            "meshes": 5,
+            "triangles": 7216
+          }
+        ]
+      },
+      "flags": {
+        "ff.camp.open": true
+      },
+      "available": true
+    },
+    {
+      "scene": "sc.code.claim",
+      "acted": true,
+      "flags": {
+        "sc.code.open": true,
+        "event.sc.code.claim": true
+      },
+      "items": {},
+      "notes": [],
+      "level": 100,
+      "gold": 1145,
+      "stats": {
+        "total": 9,
+        "visible": 2,
+        "triangles": 10476,
+        "meshes": 12,
+        "templates": 9,
+        "items": [
+          {
+            "key": "sc.bell",
+            "model": "bell",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "sc.bell"
+            ],
+            "meshes": 1,
+            "triangles": 824
+          },
+          {
+            "key": "sc.code.note",
+            "model": "treasure-chest",
+            "collected": false,
+            "opening": 1,
+            "aliases": [
+              "sc.code.note",
+              "sc.code.claim"
+            ],
+            "meshes": 7,
+            "triangles": 9652
+          }
+        ]
+      },
+      "stash": [
+        {
+          "name": "Stormshot",
+          "rarity": "rare"
+        }
+      ],
+      "claims": {
+        "sc.stormshot": true
+      },
+      "reveal": false
+    },
+    {
+      "scene": "gf.cache.release",
+      "acted": true,
+      "flags": {
+        "gf.cool.open": true,
+        "gf.cache.open": true,
+        "event.gf.cache.release": true
+      },
+      "items": {},
+      "notes": [],
+      "level": 100,
+      "gold": 1145,
+      "stats": {
+        "total": 12,
+        "visible": 3,
+        "triangles": 8816,
+        "meshes": 14,
+        "templates": 10,
+        "items": [
+          {
+            "key": "gf.pipes",
+            "model": "diagram",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "gf.pipes"
+            ],
+            "meshes": 3,
+            "triangles": 800
+          },
+          {
+            "key": "gf.cache",
+            "model": "diagram",
+            "collected": false,
+            "opening": 0,
+            "aliases": [
+              "gf.cache"
+            ],
+            "meshes": 3,
+            "triangles": 800
+          },
+          {
+            "key": "gf.cache.release",
+            "model": "treasure-chest",
+            "collected": false,
+            "opening": 0.2532307692445241,
+            "aliases": [
+              "gf.cache.release"
+            ],
+            "meshes": 5,
+            "triangles": 7216
+          }
+        ]
+      },
+      "stash": [],
+      "claims": {},
+      "reveal": false
+    },
+    {
+      "hub": true,
+      "level": 100,
+      "gold": 1145,
+      "bank": false
+    }
+  ],
+  "console": [],
+  "note": "Isolated old level100/gold1145 fixture. Real prompt interactions for cliff,coin coffer,Stormshot,cooling box. Duplicate action receipts exercised. Explorer viewed after rope fix. Real user saves untouched; no two-human co-op playtest."
+}

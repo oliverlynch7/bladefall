@@ -105,14 +105,14 @@ const corniceRidge=[
  function wind(time){const t=((time%12)+12)%12;return t<5?{push:0,phase:'calm'}:t<7?{push:0,phase:'warning'}:{push:Math.sin((t-7)/5*Math.PI)*.9,phase:'gust'};}
  function draw({G,state:s,bx,pushM,mv,rotY,rotX,popM},t){if(!G.peaks)return;const f=s.flags;
   for(const [x,z,y]of G.peaks.trailMarks){for(const dx of [-17,17])for(let j=0;j<4;j++)bx(x+dx,y+3,z-j*24,7,3,14,'#557788');}
-  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o))continue;const y=o.y;
+  for(const o of G.storyObjects){if(root.BFCampaignObjects?.drawn(o)&&o.kind!=='chest')continue;const y=o.y;
    if(o.kind==='part'){if(!f['ff.part']){bx(o.x,y+18,o.z,86,30,65,'#695c50');for(let j=0;j<4;j++)bx(o.x-27+j*18,y+41,o.z,10,18,32,'#bea06b');bx(o.x,y+54,o.z,60,5,35,'#d9bd79');}}
    else if(o.kind==='heater')continue;
    else if(o.kind==='chest'){
-    bx(o.x,y+21,o.z,107,42,66,'#655b50');bx(o.x,y+(f['ff.cache']?68:47),o.z,112,11,72,'#c0c9c4');
-    for(const dx of [-37,37])bx(o.x+dx,y+23,o.z+34,7,45,4,'#9bafbd');
+    if(!root.BFCampaignObjects?.drawn(o)){bx(o.x,y+21,o.z,107,42,66,'#655b50');bx(o.x,y+(f['ff.cache']?68:47),o.z,112,11,72,'#c0c9c4');
+    for(const dx of [-37,37])bx(o.x+dx,y+23,o.z+34,7,45,4,'#9bafbd');}
     const drop=f['ff.camp.open']?(G.peaks.coverReleaseAt===undefined?1:Math.min(1,Math.max(0,(G.time-G.peaks.coverReleaseAt)/.8))):0;
-    if(drop<1){const ox=o.x+drop*96,oy=y-drop*90,oz=o.z+drop*36;bx(ox,oy+50,oz,132,13,88,'#d4e3e4');bx(ox,oy+59,oz,126,7,82,'#e8efed');for(const dx of [-51,51])bx(ox+dx,oy+50,oz+46,8,20,5,'#8ca6aa');}
+    if(drop<1){const ox=o.x+drop*96,oy=y-drop*90,oz=o.z+drop*36;bx(ox,oy+92,oz,132,13,88,'#d4e3e4');bx(ox,oy+101,oz,126,7,82,'#e8efed');for(const dx of [-51,51])bx(ox+dx,oy+92,oz+46,8,20,5,'#8ca6aa');}
    }
    else if(o.key==='ff.camp.release'){bx(o.x,y+26,o.z,26,52,22,'#73634f');bx(o.x,y+57,o.z,70,15,34,f['ff.camp.open']?'#8b9ca0':'#c7a66c');bx(o.x,y+72,o.z,16,25,14,'#d3c294');}
    else if(o.key==='ff.camp'){bx(o.x,y+15,o.z,45,30,38,'#70604d');bx(o.x,y+32,o.z,50,4,40,'#94775b');bx(o.x,y+38,o.z,28,3,25,'#e8ddbb');bx(o.x,y+40,o.z,3,2,24,'#9b6854');}
@@ -141,7 +141,12 @@ const corniceRidge=[
   // The old survey posts and one continuous rope point to the next landing.
   for(const [i,q]of campRidge.entries()){
    bx(q.x+q.w*.35,q.y+21,q.z,10,42,10,'#796853');bx(q.x+q.w*.35,q.y+43,q.z,23,8,21,'#c5aa76');
-   if(i<campRidge.length-1){const next=campRidge[i+1],dx=next.x-q.x,dz=next.z-q.z,dy=next.y-q.y,h=Math.hypot(dx,dz);pushM();mv((q.x+next.x)/2,(q.y+next.y)/2+65,(q.z+next.z)/2);rotY(Math.atan2(dx,dz));rotX(-Math.atan2(dy,h));bx(0,0,0,3,3,Math.hypot(h,dy),'#7d6c55');popM();}
+   if(i<campRidge.length-1){const next=campRidge[i+1],points=[[q.x+q.w*.35,q.y+43,q.z]];
+    // Turn around the reward chest, rather than running a rope through its lid.
+    if(i===campRidge.length-2){const x=next.x+40,z=q.z;bx(x,next.y+21,z,10,42,10,'#796853');bx(x,next.y+43,z,23,8,21,'#c5aa76');points.push([x,next.y+43,z]);}
+    points.push([next.x+next.w*.35,next.y+43,next.z]);
+    for(let j=1;j<points.length;j++){const a=points[j-1],b=points[j],dx=b[0]-a[0],dz=b[2]-a[2],dy=b[1]-a[1],h=Math.hypot(dx,dz);pushM();mv((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);rotY(Math.atan2(dx,dz));rotX(-Math.atan2(dy,h));bx(0,0,0,3,3,Math.hypot(h,dy),'#7d6c55');popM();}
+   }
   }
   // Rock lip, timber pegs and one continuous safety rope make the jump line
   // legible from the summit without laying down an invisible ground ramp.

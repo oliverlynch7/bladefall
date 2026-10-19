@@ -1157,14 +1157,14 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./briar-combat.js?v=2289"></script>
 <script src="./campaign-elites.js?v=2310"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
-<script src="./campaign-objects.js?v=2317"></script>
+<script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2318"></script>
-<script src="./lost-canyon.js?v=2318"></script>
+<script src="./lost-canyon.js?v=2319"></script>
 <script src="./broken-walls.js?v=2195"></script>
 <script src="./prison-dungeons.js?v=2318"></script>
-<script src="./snowbound-peaks.js?v=2318"></script>
+<script src="./snowbound-peaks.js?v=2319"></script>
 <script src="./deep-ice-caves.js?v=2318"></script>
 <script src="./iron-machinery.js?v=2318"></script>
 <script src="./iron-halls.js?v=2186c"></script>
@@ -1226,7 +1226,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.318.0-optional-clues';
+const VERSION3D='2.319.0-authored-chest-upgrade';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3451,11 +3451,11 @@ function briarSync(){
   if(reward.kind.startsWith('return_')){if(applyReturnReward(id,reward))G.storyClaims[id]=true;}
   else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+characterXpAward(reward.amount)+' XP');}
   else if(reward.kind==='gold'){const gold=awardGold(reward.amount);if(['home.bells.cache','home.grain.cache','home.orchard.cache','lc.cave.supplies'].includes(id)){BFCurrencyFeedback.show(gold,'Savings coffer opened · coins only');playFx('chestthunk');playFx('gamblecoins');}else toast('Quest complete · +'+gold+' gold');G.storyClaims[id]=true;}
-  else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast(reward.kind==='cliff_runner'?'Cliff Runner earned — an uncommon javelin.':'Cliff chest opened — uncommon leggings.');G.storyClaims[id]=true;}
+  else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(reward.kind==='cliff_cache')claimAuthoredChestItem(item);else{if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Cliff Runner earned — an uncommon javelin.');}G.storyClaims[id]=true;}
   else if(reward.kind.startsWith('forgeguard_')){const art=reward.kind.slice(11),item=art==='armor'?{armor:makeArmor('rare','chest')}:{weapon:makeWeapon(art,'rare','Forgeguard')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Forgeguard earned — rare '+(art==='armor'?'chest armor':art)+'. Finish Iron Halls to keep it.');G.storyClaims[id]=true;}
   else if(reward.kind==='castle_armor'){const item={armor:makeArmor('rare','chest')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Roland’s armor — rare chest armor. Reach the tower to keep it.');G.storyClaims[id]=true;}
-  else if(reward.kind==='stormshot'){const item={weapon:makeWeapon('crossbow','rare','Stormshot')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Stormshot earned - rare crossbow. Reach Thunder Cliffs to keep it.');G.storyClaims[id]=true;}
-  else if(reward.kind==='keep_armor'){const item={armor:makeArmor('rare','chest')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Dry store opened — rare chest armor.');G.storyClaims[id]=true;}
+  else if(reward.kind==='stormshot'){const item={weapon:makeWeapon('crossbow','rare','Stormshot')};claimAuthoredChestItem(item);G.storyClaims[id]=true;}
+  else if(reward.kind==='keep_armor'){const item={armor:makeArmor('rare','chest')};claimAuthoredChestItem(item);G.storyClaims[id]=true;}
   else if(reward.kind==='keep_lockpick'){const item={weapon:makeWeapon('dagger','rare','Lockpick')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Lockpick earned — a rare dagger. The west chamber is open.');G.storyClaims[id]=true;}
   else if(reward.kind==='companion'&&id==='dr.sunwing'){if(!meta.petOwned.includes('sunwing')){G.pendingCompanions=[...new Set([...(G.pendingCompanions||[]),'sunwing'])];toast('Dragon befriended — finish Sky Library to keep your companion.');}G.storyClaims[id]=true;}
   else if(reward.kind==='companion'&&id==='gf.cinder'){if(!meta.petOwned.includes('cinder')){G.pendingCompanions=[...new Set([...(G.pendingCompanions||[]),'cinder'])];toast('Cinder is free — reach the Colossus room to keep your new companion.');}G.storyClaims[id]=true;}
@@ -14024,6 +14024,11 @@ function prepareChest(ch){
  }
  ch.rarity=rec.rarity;ch.challenge=rec.challenge;ch.opened=!!rec.claimed;
  Object.defineProperty(ch,'_rewardRecord',{value:rec,writable:true,configurable:true,enumerable:false});return rec;
+}
+function claimAuthoredChestItem(item){
+ const gear=item.weapon||item.armor||item.trinket,bagged=stashItem(item);
+ if(!bagged)pushLoot(G.p.x+35,G.p.z,G.p.y,item);
+ playFx('chestthunk');revealChestReward({rarity:gear.rarity,challenge:false},item,bagged?'Added to bag':'Bag full · reward placed beside you');
 }
 function revealChestReward(ch,item,result,gold=0,soldGold=0){
  const describe=box=>{const o=box.weapon||box.armor||box.trinket;return {name:o.name,rarity:o.rarity,color:RARITY[o.rarity].color,icon:itemStaticAv(o)};};
@@ -24854,7 +24859,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2317"></script>
+<script type="module" src="./hero3d.js?v=2319"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2309"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

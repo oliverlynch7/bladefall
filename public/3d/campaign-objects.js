@@ -12,6 +12,15 @@
  set('ff.reflect.clue tc.wind.note','trail');
  set('briar.root.1 briar.root.2 briar.root.3','herbs',{pickup:true});
  set('home.bell.cache home.grain.cache home.orchard.cache','coin-coffer',{currencyOnly:true});
+ // Authored containers reflect their actual contents, not an inferred rarity from their name.
+ set('lc.cache','coin-coffer',{currencyOnly:true,size:1.55});
+ const chest=(keys,rarity,extra={})=>set(keys,'treasure-chest',{chest:true,rarity,size:3,...extra});
+ chest('hp.code.claim','uncommon',{size:2});
+ chest('kd.cache','rare',{size:2,owner:'prison-cache'});
+ chest('ff.cache','common',{contents:'Winter Cloak'});
+ chest('gf.cache.release','common',{contents:'Rift Shard',size:3.5,offsetX:'boxX'});
+ chest('sc.code.note sc.code.claim','rare',{visualKey:'stormshot-chest',openKey:'sc.code.claim',size:2.5});
+ chest('rv.pattern.take','common',{contents:'Smith’s pattern'});
  set('briar.dressings','bandages',{pickup:true});
  set('briar.gus.tools','tools',{pickup:true});
  set('rk.tools','tools',{pickup:true,support:'crate',taken:'rk.tools'});

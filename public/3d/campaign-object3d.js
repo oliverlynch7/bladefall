@@ -1,3 +1,4 @@
+import {createChestActor,animateChest} from './chest-art.js?v=2184';
 import {createQuestMechanism,poseQuestMechanism,questMechanismMetrics} from './quest-mechanisms3d.js?v=2317';
 import {createCoinCoffer,animateCoinCoffer} from './coin-coffer3d.js?v=2234';
 import * as T from './three.module.js';
@@ -170,19 +171,25 @@ export function syncCampaignObjects(scene,dt=1/60){
  if(!eligible){if(group)group.visible=false;drawn=new WeakSet();window.__campaignObjectDrawn=drawn;window.__CAMPAIGN_OBJECT_STATS={total:0,visible:0,triangles:0,meshes:0,templates:templates.size,items:[]};return;}
  if(world!==g||objects!==g.storyObjects){
   group?.removeFromParent();group=new T.Group();group.name='Campaign clues and supplies';world=g;objects=g.storyObjects;actors=[];drawn=new WeakSet();scene.add(group);
-  for(const o of objects||[]){const spec=defs.spec(o);if(!spec)continue;const node=new T.Group(),coffer=spec.currencyOnly?createCoinCoffer():null,item=coffer?.root||model(spec.model);node.name=o.key;
+  const shared=new Map();
+  for(const o of objects||[]){const spec=defs.spec(o);if(!spec)continue;
+   if(spec.visualKey&&shared.has(spec.visualKey)){shared.get(spec.visualKey).aliases.push(o);continue;}
+   const node=new T.Group(),coffer=spec.currencyOnly?createCoinCoffer():null,chest=spec.chest?createChestActor(spec.rarity):null,item=coffer?.root||chest?.root||model(spec.model);node.name=o.key;if(spec.size)item.scale.multiplyScalar(spec.size);
    if(spec.support){node.add(model(spec.support));item.position.y=spec.support==='bench'?35:33;}
-   node.add(item);group.add(node);actors.push({o,node,item,spec,coffer});
+   node.add(item);group.add(node);const actor={o,node,item,spec,coffer,chest,aliases:[o]};actors.push(actor);if(spec.visualKey)shared.set(spec.visualKey,actor);
   }
  }
  if(group.parent!==scene)scene.add(group);group.visible=true;let visible=0,triangles=0,meshes=0;
  for(const a of actors){
-  const {o,node,item,spec}=a;node.position.set(o.x,o.y||0,o.z);node.rotation.y=o.artYaw||0;
-  node.visible=!(spec.owner&&window.BFCampaignCraft?.has(spec.owner))&&Math.hypot(o.x-g.p.x,o.z-g.p.z)<1050&&Math.abs((o.y||0)-g.p.y)<650;
-  if(!node.visible){drawn.add(o);continue;} // A culled owned model must not resurrect its old placeholder.
-  if(a.coffer)animateCoinCoffer(a.coffer,!!g.storyState?.flags?.['event.'+o.key],dt);
+  const {o,node,item,spec}=a;node.position.set(spec.offsetX&&Number.isFinite(o[spec.offsetX])?o[spec.offsetX]:o.x,o.y||0,o.z);node.rotation.y=o.artYaw||0;
+  const external=spec.owner==='prison-cache'?!!(g.prison&&window.__PRISON_JOURNEY_ART?.root?.parent&&window.__PRISON_JOURNEY_ART.objects?.has('kd.cache')):!!(spec.owner&&window.BFCampaignCraft?.has(spec.owner));
+  node.visible=!external&&Math.hypot(o.x-g.p.x,o.z-g.p.z)<1050&&Math.abs((o.y||0)-g.p.y)<650;
+  for(const alias of a.aliases)drawn.add(alias);
+  if(!node.visible)continue; // A culled owned model must not resurrect its old placeholder.
+  const opened=!!g.storyState?.flags?.['event.'+(spec.openKey||o.key)];
+  if(a.coffer)animateCoinCoffer(a.coffer,opened,dt);if(a.chest)animateChest(a.chest,{x:0,y:0,z:0,opened},dt);
   item.visible=!defs.taken(o,g.storyState);if(spec.mechanism)poseQuestMechanism(item,!!(g.storyState?.flags?.['event.'+o.key]||g.storyState?.flags?.[o.key]),dt);drawn.add(o);visible++;
   node.traverseVisible(n=>{if(n.isMesh){meshes++;triangles+=(n.geometry.index?.count||n.geometry.attributes.position.count)/3;}});
  }
- window.__campaignObjectDrawn=drawn;window.__CAMPAIGN_OBJECT_STATS={total:actors.length,visible,triangles,meshes,templates:templates.size,items:actors.filter(a=>a.node.visible).map(a=>({key:a.o.key,model:a.spec.model,collected:!a.item.visible,meshes:a.item.children.length,triangles:a.item.userData.triangles}))};
+ window.__campaignObjectDrawn=drawn;window.__CAMPAIGN_OBJECT_STATS={total:actors.length,visible,triangles,meshes,templates:templates.size,items:actors.filter(a=>a.node.visible).map(a=>({key:a.o.key,model:a.spec.model,collected:!a.item.visible,opening:a.chest?.opening??a.coffer?.opening??0,aliases:a.aliases.map(o=>o.key),meshes:a.item.children.length,triangles:a.item.userData.triangles}))};
 }

@@ -1,0 +1,18 @@
+{
+  "inventory": "docs/art-validation/quest-mechanisms-20261019/campaign-inventory.json",
+  "coverage": "All16 campaign sections, authored return-visit props, existing G.chests shared renderer",
+  "chestAssignments": {
+    "home.bell.cache": "existing coin coffer",
+    "home.grain.cache": "existing coin coffer",
+    "home.orchard.cache": "existing coin coffer",
+    "lc.cache": "coin coffer,180 gold",
+    "hp.code.claim": "uncommon,leggings",
+    "kd.cache": "rare,armor; existing detailed prison owner",
+    "ff.cache": "common wood/iron,Winter Cloak keepsake",
+    "gf.cache.release": "common wood/iron,Rift Shard,boxX visual offset",
+    "sc.code.note / sc.code.claim": "one shared rare chest,Stormshot",
+    "rv.pattern.take": "common wood/iron,Smith pattern"
+  },
+  "preserved": "Reward IDs,rarities,quest requirements,puzzle motion,physics,network authority,per-player claims and save data. Molds,food baskets and ordinary cargo remain distinct.",
+  "additional": "Cliff,prison and Stormshot gear claims use existing reward reel and comparison summary after delivery. Full bag retains existing ground-drop fallback,clearly named in reveal."
+}

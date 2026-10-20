@@ -1,10 +1,15 @@
 /* Approved NPC cast plus published studio recordings.
    Attach a take only when its wording still matches the live dialogue. */
 let manifestPromise=null,manifestUntil=0;
-let castPromise=null;
+let castPromise=null,castUntil=0;
 function castManifest(){
- if(!castPromise)castPromise=fetch('./npc-voices/manifest.json?v=2335')
-  .then(r=>r.ok?r.json():null).catch(()=>{castPromise=null;return null});
+ const now=Date.now();
+ if(castPromise&&now<castUntil)return castPromise;
+ castUntil=Infinity;
+ castPromise=fetch('./npc-voices/manifest.json?v=2336',{signal:AbortSignal.timeout(3000)})
+  .then(async r=>r.ok?await r.json():null)
+  .then(data=>{if(!data)castUntil=Date.now()+5000;return data})
+  .catch(()=>{castUntil=Date.now()+5000;return null});
  return castPromise;
 }
 function manifest(){

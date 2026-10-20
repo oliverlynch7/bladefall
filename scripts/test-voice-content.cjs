@@ -28,6 +28,31 @@ async function run(){
  await window.BFVoiceContent.apply(make());assert.equal(calls,2,'failed endpoint is not hammered');
  now+=5001;reply={ok:true,json:async()=>({lines:{}})};
  await window.BFVoiceContent.apply(make());assert.equal(calls,3,'failed endpoint is retried after cooldown');
- console.log('Voice manifest: shared fetch, current-text filtering and failure recovery passed.');
+ for(const failure of ['http','network','malformed','timeout']){
+  let time=0,staticCalls=0,finish,signal;const w={};
+  const response={ok:true,json:async()=>({lines:{static:{text:'Hello.',speaker:'thomas',audio:'./npc-voices/hello.mp3'}}})};
+  const ctx={window:w,Date:{now:()=>time},AbortSignal:{timeout:ms=>{assert.equal(ms,3000);return {timeout:ms};}},fetch:(url,options)=>{
+   if(!url.includes('npc-voices/manifest'))return Promise.resolve({ok:true,json:async()=>({lines:{}})});
+   staticCalls++;signal=options.signal;
+   if(staticCalls>1)return Promise.resolve(response);
+   if(failure==='http')return Promise.resolve({ok:false});
+   if(failure==='network')return Promise.reject(Error('offline'));
+   if(failure==='malformed')return Promise.resolve({ok:true,json:async()=>{throw Error('invalid JSON')}});
+   return new Promise((resolve,reject)=>{finish=()=>reject(Error('timeout'));});
+  }};
+  vm.runInNewContext(fs.readFileSync('public/3d/voice-content.js','utf8'),ctx);
+  const first=make(),pending=w.BFVoiceContent.apply(first);
+  const concurrent=w.BFVoiceContent.apply(make());
+  if(finish)finish();await Promise.all([pending,concurrent]);
+  assert.equal(signal.timeout,3000,'cast fetch is bounded');
+  assert.equal(staticCalls,1,failure+' shares in-flight failure');
+  assert.equal(first.nodes.static.recordedAudio,undefined,'failed cast remains text-only');
+  await w.BFVoiceContent.apply(make());assert.equal(staticCalls,1,'cooldown avoids request storm');
+  time=5001;const restored=make();await w.BFVoiceContent.apply(restored);
+  assert.equal(staticCalls,2,failure+' retries after cooldown');
+  assert.equal(restored.nodes.static.recordedAudio,'./npc-voices/hello.mp3','recovered cast attaches');
+  time=100000;await w.BFVoiceContent.apply(make());assert.equal(staticCalls,2,'successful static cast stays cached');
+ }
+ console.log('Voice manifest: shared fetch, text guards, bounded loading and four failure-recovery paths passed.');
 }
 run().catch(e=>{console.error(e);process.exitCode=1});

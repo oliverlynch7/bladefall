@@ -37,4 +37,7 @@ No new human fun/discovery verdict, two-human Internet co-op session, full campa
 
 ## Publication
 
-Pending deployment verification at time of this source commit.
+Released as `141a93eeebfb0f703f138b92bdeffbff0a0eaa35`; Cloudflare Pages succeeded. `deployment.json` confirms the seven public game/model/preview files match committed Git blobs. `live-startup.json` records the muted public v2.342 title screen, loaded district helper, no renderer error and no warning/error logs. The preview was checked at390px width with both images loaded and no horizontal overflow. This public startup check is not a second full campaign run.
+
+Live game: https://bladefall.pages.dev/3d/?mute=1&verify=2342-district
+Preview: https://bladefall.pages.dev/design/campaign-geography/briar-district.html
